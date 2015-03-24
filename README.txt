@@ -1,34 +1,3 @@
-Work by Larry Fried: 2/24/2015
-
-1.  Put a variable controlling the overcoordination subtraction in splines_ls.C.
-
-2.  Changed lsq.py to output calculated forces.
-
-Work by Larry Fried: 2/20/2015
-
-The MD program in the mdcode directory was improved.  Related
-functions in the main directory were not changed.  
-
-1.  The Ewald sum calculation was greatly accelerated by
-re-implementing the k space sum.
-
-2.  The potential energy function for the force spline was
-implemented.  MD calculations with the force spline conserve energy.
-
-3.  Each term in the potential model was separated into a separate
-routine.  Terms can be selected in ZCalc.
-
-4.  Most terms in the potential were optimized to some degree.
-
-5.  The behavior of "layers" for the force evaluation was changed.
-The layers now always start from the minimum image displacement.  The
-code should now work when nlayers = 0 (for a big system), but that hasn't
-been tested.
-
-6.  There are two test problems "input.small.xyz" and "input.big.xyz" in the 
-mdcode directory.  You can select the test problem by copying these files to "input.xyz".
-
-7.  Previous versions of the MD code do not conserve energy (try input.big.xyz).  The current version should be used for all calculations.
 
 Notes from Lucas Koziol:
 
@@ -123,6 +92,37 @@ visualized with molden.
 (splines_md.C and functions.C) including commented sections on how
 to assign random initial velocities and remove velocity c.o.m.
 
+Work by Larry Fried: 2/24/2015
+
+1.  Put a variable controlling the overcoordination subtraction in splines_ls.C.
+
+2.  Changed lsq.py to output calculated forces.
+
+Work by Larry Fried: 2/20/2015
+
+The MD program in the mdcode directory was improved.  Related
+functions in the main directory were not changed.  
+
+1.  The Ewald sum calculation was greatly accelerated by
+re-implementing the k space sum.
+
+2.  The potential energy function for the force spline was
+implemented.  MD calculations with the force spline conserve energy.
+
+3.  Each term in the potential model was separated into a separate
+routine.  Terms can be selected in ZCalc.
+
+4.  Most terms in the potential were optimized to some degree.
+
+5.  The behavior of "layers" for the force evaluation was changed.
+The layers now always start from the minimum image displacement.  The
+code should now work when nlayers = 0 (for a big system), but that hasn't
+been tested.
+
+6.  There are two test problems "input.small.xyz" and "input.big.xyz" in the 
+mdcode directory.  You can select the test problem by copying these files to "input.xyz".
+
+7.  Previous versions of the MD code do not conserve energy (try input.big.xyz).  The current version should be used for all calculations.
 
 
 
