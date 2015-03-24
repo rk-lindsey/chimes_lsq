@@ -1,4 +1,4 @@
- Notes from Lucas Koziol:
+Notes from Lucas Koziol:
 
 Part A: Determining spline parameters.
 
