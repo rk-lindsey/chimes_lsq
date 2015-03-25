@@ -1,5 +1,11 @@
 Force matching codes by Lucas Koziol and Larry Fried
 
+The supplied Makefiles will automatically compile the force fitting
+program and run example calculations.  From the top-level directory,
+simply type "make all".  Typing "make clean" will remove object files,
+"make realclean" will restore the directory to only the original
+source files.
+
 Part A: Determining spline parameters.
 
 1.) Compile splines_ls using make (modify Makefile in this directory).
