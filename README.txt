@@ -1,3 +1,6 @@
+TEST - NG, 3/24/15
+Notes from Lucas Koziol:
+=======
 Force matching codes by Lucas Koziol and Larry Fried
 
 The supplied Makefiles will automatically compile the force fitting
