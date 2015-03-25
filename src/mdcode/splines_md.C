@@ -25,6 +25,12 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 static bool parse_tf(char *val, int bufsz, char *line) ;
 static double kinetic_energy(double *Mass, double **Vel, int nat) ;
 
+static double 
+numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
+		   const int nlayers, const int nat,const double smin,
+		   const double smax, const double sdelta,const int snum, 
+		   double *params, double *pot_params, bool if_cheby) ;
+
 int main(int argc, char* argv[])
 {
   ////Job parameters:
@@ -617,14 +623,14 @@ int main(int argc, char* argv[])
 
       double Ptot = Pxyz + 2.0 * Ktot / (3.0 * Vol) ;
       // Unit conversion factor to GPa.
-      Ptot *= 6.9479 ;
+      Ptot *= GPa ;
 
       press_sum += Ptot ;
 
       if ( A == 0 ) 
 	{
-	  printf("%8s %9s %15s %15s %15s %15s %15s",
-		 "Step", "Time(fs)", "Ktot (Ha)", "Vtot (Ha)", "Etot (Ha)", "T(K)", "P(GPa)") ;
+	  printf("%8s %9s %15s %15s %15s %15s %15s %15s",
+		 "Step", "Time(fs)", "Ktot (Ha)", "Vtot (Ha)", "Etot (Ha)", "T(K)", "P(GPa)", "Pnum(GPa)") ;
 	  if ( if_hoover ) {
 	    printf(" %15s\n", "Econs(Ha)\n") ;
 	  } else {
@@ -632,9 +638,17 @@ int main(int argc, char* argv[])
 	  }
 	}
       if ( (A +1) % energy_freq == 0 ) {
-	printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.3f",
+	double pnum = 0.0 ;
+
+	pnum = numerical_pressure(Coord,Lb, Q, Latcons,nlayers, nat,smin,
+				  smax, sdelta,snum, params, pot_params, if_cheby) ;
+
+	pnum += 2.0 * Ktot / (3.0 * Vol) ;
+	pnum *= GPa ;
+
+	printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.3f %15.3f",
 	       A+1, (A+1)*deltat_fs, Ktot/Hartree,Vtot/Hartree,(Ktot+Vtot)/Hartree, 
-	       temperature, Ptot) ;
+	       temperature, Ptot, pnum) ;
 	if ( if_hoover ) {
 	  double E_hoover = Ktot + Vtot + 0.5 * zeta * zeta * QHoover +
 	    ndof * Kb * TempMD * s_hoover ;
@@ -953,3 +967,74 @@ static double kinetic_energy(double *Mass, double **Vel, int nat)
   return(Ktot) ;
 }
 
+static double 
+numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
+		   const int nlayers, const int nat,const double smin,
+		   const double smax, const double sdelta,const int snum, 
+		   double *params, double *pot_params, bool if_cheby)
+// Evaluates the configurational part of the pressure numerically by -dU/dV.
+{
+  double **Coord1 ;
+  double **Accel ;
+  const double eps = 1.0e-04 ;
+  double lscale ;
+  double Latcons1[3] ;
+  double Vtot1, Vtot2 ;
+  double Vol1, Vol2 ;
+  double Pxyz ;
+
+  Coord1= new double* [nat];
+  Accel = new double* [nat] ;
+  for ( int j = 0 ; j < nat ; j++ ) {
+    Coord1[j] = new double [3] ;
+    Accel[j]  = new double [3] ;
+  }
+
+  lscale = 1.0  + eps ;
+  for ( int j = 0 ; j < nat ; j++ ) 
+    {
+      Coord1[j][0] = lscale * Coord[j][0] ;
+      Coord1[j][1] = lscale * Coord[j][1] ;
+      Coord1[j][2] = lscale * Coord[j][2] ;
+    }
+
+  Latcons1[0] = Latcons[0] * lscale ;
+  Latcons1[1] = Latcons[1] * lscale ;
+  Latcons1[2] = Latcons[2] * lscale ;
+
+  Vol1 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
+
+  ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
+	pot_params,if_cheby,Accel,Vtot1,Pxyz);
+  
+  lscale = 1.0 - eps ;
+
+  for ( int j = 0 ; j < nat ; j++ ) 
+    {
+      Coord1[j][0] = lscale * Coord[j][0] ;
+      Coord1[j][1] = lscale * Coord[j][1] ;
+      Coord1[j][2] = lscale * Coord[j][2] ;
+    }
+
+  Latcons1[0] = Latcons[0] * lscale ;
+  Latcons1[1] = Latcons[1] * lscale ;
+  Latcons1[2] = Latcons[2] * lscale ;
+
+  Vol2 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
+
+  ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
+	pot_params,if_cheby,Accel,Vtot2,Pxyz);
+
+  double result = -(Vtot2 - Vtot1)/(Vol2 - Vol1) ;
+
+  for ( int j = 0 ; j < nat ; j++ ) {
+    delete[] Coord1[j] ;
+    delete[] Accel[j]  ;
+  }
+  delete[] Coord1 ;
+  delete[] Accel ;
+
+  cout << "Numerical pressure = " << result << endl ;
+
+  return(result) ;
+}

@@ -56,10 +56,10 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlay
 #else
   // DEBUG !
   ifcalc_spline = false ;
-  if_cheby  = false ;
-  ifcalc_stillinger = true ;
+  if_cheby  = true ;
+  ifcalc_stillinger = false ;
   ifcalc_lj     = false ;
-  ifcalc_ewald  = false ;
+  ifcalc_ewald  = true ;
   ifcalc_over   = false ;
 #endif
 
@@ -411,10 +411,10 @@ static void ZCalc_SR_Analytic(double **Coord,char *Lbc, double *Latcons,const in
 				rlenpow3 *= rleninv ;
 			      }
                               
-			    Vtot += tempx * smaxpow3 ;
+			    Vtot -= tempx * smaxpow3 ;
 			  }
 		   
-			Pxyz += S_r * rlen ;
+			Pxyz -= S_r * rlen ;
 
 			//this last part just assigns the central-forces to the x,y,z components.
 			for(int c=0;c<3;c++)
@@ -660,7 +660,7 @@ static void ZCalc_Stillinger(double **Coord,char *Lbc, double *Latcons,const int
 		  
 
 		    //this last part just assigns the central-forces to the x,y,z components.
-		    Pxyz += S_r * rlen ;
+		    Pxyz -= S_r * rlen ;
 		    for(int c=0;c<3;c++)
 		      {
 			SForce[a1][c] += S_r*Rab[c]/rlen;
@@ -730,7 +730,7 @@ static void ZCalc_Spline(double **Coord,string *Lb, double *Latcons,const int nl
 			SForce[a2][c] -= S_r*Rab[c]/rlen;
 		      }
 
-		    Pxyz += S_r * rlen ;
+		    Pxyz -= S_r * rlen ;
 		    Vtot += tempx ;
 
 		  }//rlen
@@ -954,7 +954,7 @@ static void ZCalc_Cheby(double **Coord,string *Lb, double *Latcons,
 			      (fcut * Tnd[i+1] *(-exprlen/lambda)/xdiff + 
 			       fcutderiv * Tn[i+1]
 			       ) ;
-			    Pxyz += coeff * deriv * rlen ;
+			    Pxyz -= coeff * deriv * rlen ;
 			    for(int c=0;c<3;c++)
 			      {
 				SForce[a1][c] += coeff * deriv * Rab[c] / rlen ;

@@ -9,11 +9,12 @@
 #include "functions.h"
 using namespace std;
 
-static double ke=332.0637157615209;//converter between electron units and Stillinger units for Charge*Charge.
+static const double ke=332.0637157615209;//converter between electron units and Stillinger units for Charge*Charge.
 
-static double Hartree = 627.50961 ; // 1 Hartree in kcal/mol.
-static double Kb  = 0.001987 ; // Boltzmann constant in kcal/mol-K.
-static double Tfs = 48.888 ;   // Internal time unit in fs.
+static const double Hartree = 627.50961 ; // 1 Hartree in kcal/mol.
+static const double Kb  = 0.001987 ; // Boltzmann constant in kcal/mol-K.
+static const double Tfs = 48.888 ;   // Internal time unit in fs.
+static const double GPa = 6.9479 ;
 
 void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlayers,
 	   const int nat,const double smin,const double smax,
