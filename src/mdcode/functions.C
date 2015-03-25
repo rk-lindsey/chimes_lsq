@@ -10,7 +10,7 @@ static void ZCalc_SR_Analytic(double **Coord,char *Lbc, double *Latcons,const in
 static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nlayers,
 			 const int nat,double **SForce,double& Vtot,double& Pxyz, double pover) ;
 static void ZCalc_Stillinger(double **Coord, char *Lbc, double *Latcons,const int nlayers,
-			     const int nat,double smin, double smax, 
+			     const int nat, double smax, 
 			     double **SForce,double& Vtot,double& Pxyz) ;
 static void ZCalc_Spline(double **Coord,string *Lb, double *Latcons,const int nlayers,
 			 const int nat,const double smin,const double smax,
@@ -56,10 +56,10 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlay
 #else
   // DEBUG !
   ifcalc_spline = false ;
-  if_cheby  = true ;
-  ifcalc_stillinger = false ;
+  if_cheby  = false ;
+  ifcalc_stillinger = true ;
   ifcalc_lj     = false ;
-  ifcalc_ewald  = true ;
+  ifcalc_ewald  = false ;
   ifcalc_over   = false ;
 #endif
 
@@ -101,7 +101,7 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlay
   }
 
   if ( ifcalc_stillinger ) {
-    ZCalc_Stillinger(Coord,Lbc, Latcons,nlayers,nat,smin,smax, SForce,Vtot,Pxyz) ;
+    ZCalc_Stillinger(Coord,Lbc, Latcons,nlayers,nat,smax, SForce,Vtot,Pxyz) ;
   }
 
   if ( ifcalc_spline ) {
@@ -487,6 +487,9 @@ static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nl
 	temps=0.0;
 	for(int ak=0;ak<nat;ak++)
 	  {
+	    if(ai==ak)
+	      continue ;
+
 	    for(int c=0;c<3;c++)
 	      Rvec[c]=Coord[ak][c]-Coord[ai][c];
 
@@ -496,12 +499,11 @@ static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nl
 	    Rab[2] = Rvec[2] - floor(0.5+Rvec[2]/Latcons[2])*Latcons[2];
 
 	    rik=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
-	    if(ai==ak)
-	      rik=1000.0;
 
 	    temps+=exp(p1*pow(rik/r0,p2));
 	  }
 	S[ai]=temps-2.0;
+	// printf("Overcoordination of %d = %13.6e\n", ai, S[ai]) ;
 	Sexp[ai] = exp(lambda6*S[ai]) ;
 	Eover+=pover*S[ai]*1.0/(1.0+Sexp[ai]);
       }
@@ -520,8 +522,14 @@ static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nl
 	for(int ak=0;ak<nat;ak++)
 	  if(aj==ai or aj==ak)
 	    {
+	      if(ai==ak ) 
+		{
+		  continue ;
+		}
+
 	      for(int c=0;c<3;c++)
 		Rvec[c]=Coord[ak][c]-Coord[ai][c];
+
 		
 	      // Short-range interaction, so use minimum image convention.
 	      Rab[0] = Rvec[0] - floor(0.5+Rvec[0]/Latcons[0])*Latcons[0];
@@ -532,23 +540,27 @@ static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nl
 
 	      double powrik = pow(rik/r0,p2) ;
 	      double Sexp2  = (1.0 + Sexp[ai]) * (1.0 + Sexp[ai]) ;
+
 	      tempr=pover;
 	      tempr*=1.0/(1+Sexp[ai]) - lambda6*S[ai]*Sexp[ai]/Sexp2 ;
 	      tempr*=p1*powrik*p2*exp(p1*powrik)/rik;
 	      
-	      if(ai==ak ) 
+	      if(aj==ai) 
 		{
-		  tempr=0.0;
-		  rik=1000.0;
+		  Pxyz -= 0.5 * tempr * rik ;
+		  for(int c=0;c<3;c++)
+		    {
+		      dEover[aj][c]-=tempr*Rab[c]/rik;
+		    }
 		}
 
-	      for(int c=0;c<3;c++)
-		{
-		  if(aj==ai)
-		    dEover[aj][c]-=tempr*Rab[c]/rik;
-		  if(aj==ak)
+	      if(aj==ak) {
+		Pxyz -= 0.5 * tempr * rik ;
+		for(int c=0;c<3;c++)
+		  {
 		    dEover[aj][c]+=tempr*Rab[c]/rik;
-		}
+		  }
+	      }
 	    }
   for(int a1=0;a1<nat;a1++)
     for(int c=0;c<3;c++)
@@ -558,7 +570,7 @@ static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nl
 }
 
 static void ZCalc_Stillinger(double **Coord,char *Lbc, double *Latcons,const int nlayers,
-			     const int nat,double smin, double smax, 
+			     const int nat, double smax, 
 			     double **SForce,double& Vtot,double& Pxyz)
 // Calculate stillinger model forces (no charges).
 {
@@ -620,16 +632,15 @@ static void ZCalc_Stillinger(double **Coord,char *Lbc, double *Latcons,const int
 		
 		rlen=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
 
-		//spline term calculated w/cutoff:
+		// Stillinger potential calculated with cutoff.
 
-		if(rlen>smin and rlen<smax)
+		if( rlen < smax )
 		  {
 		    ifcalcsr=true;
 
 		    S_r=0.0;
 
 		    ////STILLINGER
-		    //Alternate Stillinger potential is commented out here.
 		    
 		    if(Lbc[a1]=='O' and Lbc[a2]=='O')
 		      {

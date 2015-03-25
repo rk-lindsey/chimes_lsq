@@ -157,6 +157,7 @@ static void Ewald_K_Space_New(double alpha, double **Coord, double *Q, double *L
   double Kfac;
   double rkx,rky,rkz;
   double rksq;
+  static double last_latcons[3] = {0.0,0.0,0.0} ;
 
   // printf("Value of cutoff = %13.6e\n", erfc(kappa * r_cut) ) ;
 
@@ -177,13 +178,19 @@ static void Ewald_K_Space_New(double alpha, double **Coord, double *Q, double *L
       kx_v   = new double [maxk] ;
       ky_v   = new double [maxk] ;
       kz_v   = new double [maxk] ;
-      totk = 0 ;
+
+    }
+
+  if ( Latcons[0] != last_latcons[0] || Latcons[1] != last_latcons[1] ||
+       Latcons[2] != last_latcons[2] ) 
+    {
+    // Update K factors when box dimensions change.
+    //
       double min_vfac = 1.0e8 ;
+      totk = 0 ;
       double lavg = (Latcons[0] + Latcons[1] + Latcons[2])/3.0 ;
       kappa = sqrt(alpha) ;
       int ksqmax = ceil(alpha*lavg*lavg/(2.0 * M_PI)) ;
-      cout << "Cutting off K-vectors with magnitude less than" 
-	   << ksqmax << endl ;
       ksqmax = ksqmax * ksqmax ;
 
       for(int kx=-kmax;kx<=kmax;kx++) 
@@ -215,11 +222,19 @@ static void Ewald_K_Space_New(double alpha, double **Coord, double *Q, double *L
 		      }
 		  }
 	      }
-      cout << "Number of Ewald K-vectors = " << totk << endl ;
-      cout << "K-space accuracy estimate = " << min_vfac << endl ;
+      if ( last_latcons[0] == 0.0 ) {
+	cout << "Cutting off K-vectors with magnitude less than " 
+	     << ksqmax << endl ;
+	cout << "Number of Ewald K-vectors = " << totk << endl ;
+	cout << "K-space accuracy estimate = " << min_vfac << endl ;
+      }
       //for(int a1=0;a1<nat;a1++) {
       //printf("Q[%d] = %13.7e\n",a1, Q[a1]) ;
       //}
+      for ( int i = 0 ; i < 3 ; i++ ) 
+	{
+	  last_latcons[i] = Latcons[i] ;
+	}
     }
 
   double UCoul;

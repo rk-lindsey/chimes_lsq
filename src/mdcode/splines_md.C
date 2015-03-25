@@ -1034,7 +1034,7 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
   delete[] Coord1 ;
   delete[] Accel ;
 
-  cout << "Numerical pressure = " << result << endl ;
+  // cout << "Numerical pressure = " << result << endl ;
 
   return(result) ;
 }
