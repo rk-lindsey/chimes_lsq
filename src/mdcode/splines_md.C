@@ -13,14 +13,14 @@ static void read_input(double &TempMD, double &deltat_fs, int &nsteps,
 		       bool &if_output_force, bool &if_read_force,
 		       bool &if_spline_q, bool &if_init_vel, int &rand_seed, 
 		       int &gen_freq, int &energy_freq, int &scale_freq,
-		       double &thoover_fs, bool &if_cheby) ;
+		       double &thoover_fs, Sr_pair_t &pair_type) ;
 
 static void echo_input(double TempMD, double deltat_fs, int nsteps, 
 		       int nlayers, 
 		       bool if_output_force, bool if_read_force,
 		       bool if_spline_q, bool if_init_vel, int rand_seed, 
 		       int gen_freq, int energy_freq, int scale_freq,
-		       double thoover_fs, bool if_cheby) ; 
+		       double thoover_fs, Sr_pair_t pair_type) ; 
 
 static bool parse_tf(char *val, int bufsz, char *line) ;
 static double kinetic_energy(double *Mass, double **Vel, int nat) ;
@@ -29,7 +29,7 @@ static double
 numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double smin,
 		   const double smax, const double sdelta,const int snum, 
-		   double *params, double *pot_params, bool if_cheby) ;
+		   double *params, double *pot_params, Sr_pair_t pair_type) ;
 
 int main(int argc, char* argv[])
 {
@@ -56,10 +56,7 @@ int main(int argc, char* argv[])
   bool if_read_force = false ;
 
   // If true, take charges from spline parameters.
-  bool if_spline_q = true ;
-
-  // If true, use chebyshev two body interaction.
-  bool if_cheby = false ;
+  bool if_spline_q = false ;
 
   // If true, initialize velocities.
   bool if_init_vel = false ;
@@ -84,13 +81,15 @@ int main(int argc, char* argv[])
 
   double thoover_fs = 0.0 ;
 
+  Sr_pair_t pair_type = CHEBYSHEV ;
+
   read_input(TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
 	     if_spline_q, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
-	     thoover_fs,if_cheby) ;
+	     thoover_fs,pair_type) ;
 
   echo_input(TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
 	     if_spline_q, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
-	     thoover_fs,if_cheby) ;
+	     thoover_fs,pair_type) ;
 
   if ( thoover_fs > 0.0 ) if_hoover = true ;
   if ( gen_freq > 0 ) output_gen = true ;
@@ -349,7 +348,7 @@ int main(int argc, char* argv[])
 
   // Read smin, smax, sdelta from params file instead of using built-in values.
   int snum ;
-  if ( if_cheby == false ) 
+  if ( pair_type == SPLINE ) 
     {
       paramread >> smin >> smax >> sdelta ;
       cout << "Spline minimum = " << smin << endl ;
@@ -357,37 +356,42 @@ int main(int argc, char* argv[])
       cout << "Spline step    = " << sdelta << endl ;
       snum=(1+int((smax-smin)/sdelta))*2*3;//2 is for p0/m0/p1/m1, and 3 is for oo/oh/hh.
     }
-  else {
+  else if ( pair_type == CHEBYSHEV ) {
     paramread >> smin >> smax >> snum ;
     cout << "Cheby minimum = " << smin << endl ;
     cout << "Cheby maximum = " << smax << endl ;
     cout << "Cheby order    = " << snum << endl ;
     sdelta = 0.0 ;
     snum *= 3 ;
+  } else {
+    snum = 0 ;
+    smax = Latcons[0] / 2.0 ;
+    smin = 0.0 ;
   }
 
-
   double params[snum+4];
-  double pot_params[snum/2] ;
+  double pot_params[snum/2+1] ;
   for(int i=0;i<snum+4;i++)
     params[i]=0.0;
 
-  for(int n=0;n<snum+4;n++)
-    {
-      paramread >> tempint >> params[n];
-      if ( paramread.eof() ) 
-	{
-	  cout << "Error reading params.txt\n" ;
-	  exit(1) ;
-	}
-      if ( tempint != n ) 
-	{
-	  cout << "Error reading params.txt: index mismatch\n" ;
-	  exit(1) ;
-	}
-    }
+  if ( pair_type == CHEBYSHEV or pair_type == SPLINE ) {
+    for(int n=0;n<snum+4;n++)
+      {
+	paramread >> tempint >> params[n];
+	if ( paramread.eof() ) 
+	  {
+	    cout << "Error reading params.txt\n" ;
+	    exit(1) ;
+	  }
+	if ( tempint != n ) 
+	  {
+	    cout << "Error reading params.txt: index mismatch\n" ;
+	    exit(1) ;
+	  }
+      }
+  }
 
-  if ( if_cheby == false ) 
+  if ( pair_type == SPLINE ) 
     {
       // Use a simple linear force model for positions not sampled.
       for ( int n = 0 ; n < 3 ; n++ ) {
@@ -425,18 +429,23 @@ int main(int argc, char* argv[])
     
 
   // Charges on H atom for potential models.
-  double q_oo = params[snum]  / ke ;
-  double q_oh = params[snum+1] / ke ;
-  double q_hh = params[snum+2] / ke ;
+  double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0;
+  
+  if ( if_spline_q ) {
+    q_oo = params[snum]  / ke ;
+    q_oh = params[snum+1] / ke ;
+    q_hh = params[snum+2] / ke ;
 
-  double q_spline = sqrt(q_hh) ;
-  printf("Q[H] = %12.5f\n", q_spline) ;
+    q_spline = sqrt(q_hh) ;
+    printf("Q[H] = %12.5f\n", q_spline) ;
+    printf("Charge equation 1 error = %12.5f\n", 
+	   q_oo + 4.0 * q_oh + 4.0 * q_hh) ;
+
+  }
 
   const double q_stillinger = sqrt(36.1345) ;  // stillinger units
 
 
-  printf("Charge equation 1 error = %12.5f\n", 
-	 q_oo + 4.0 * q_oh + 4.0 * q_hh) ;
 
   double qsum = 0.0 ;
   for(int a=0;a<nat;a++)
@@ -550,7 +559,7 @@ int main(int argc, char* argv[])
 
       //this function calculates the spline and electrostatic forces.
       ZCalc(Coord,Lb,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
-	    if_cheby,Accel,Vtot,Pxyz);
+	    pair_type,Accel,Vtot,Pxyz);
 
       if ( if_output_force ) 
 	{
@@ -641,7 +650,7 @@ int main(int argc, char* argv[])
 	double pnum = 0.0 ;
 
 	pnum = numerical_pressure(Coord,Lb, Q, Latcons,nlayers, nat,smin,
-				  smax, sdelta,snum, params, pot_params, if_cheby) ;
+				  smax, sdelta,snum, params, pot_params, pair_type) ;
 
 	pnum += 2.0 * Ktot / (3.0 * Vol) ;
 	pnum *= GPa ;
@@ -754,14 +763,14 @@ static void read_input(double &TempMD, double &deltat_fs, int &nsteps,
 		       bool &if_output_force, bool &if_read_force,
 		       bool &if_spline_q, bool &if_init_vel, int &rand_seed, 
 		       int &gen_freq, int &energy_freq, int &scale_freq,
-		       double &thoover_fs, bool &if_cheby) 
-// Read program input from the file "spline_md.in".
+		       double &thoover_fs, Sr_pair_t &pair_type) 
+// Read program input from the file "splines_md.in".
 {
   FILE *fin ;
   const int bufsz = 1024 ;
   char buf[bufsz] ;
 
-  fin = fopen("spline_md.in", "r") ;
+  fin = fopen("splines_md.in", "r") ;
   if ( fin == NULL ) 
     {
       cout << "Error: could not open spline_md.in\n" ; 
@@ -773,9 +782,21 @@ static void read_input(double &TempMD, double &deltat_fs, int &nsteps,
       if ( line[0] == '#' ) {
 	continue ;
       }
+      // Get rid of new line character.
+      // int iend = strlen(line) - 1 ;
+      // if ( iend > 0 && line[iend] == '\n' ) {
+      // line[iend] = 0 ;
+      // }
+
       // printf("Line = %s\n", line) ;
       char *name = strtok(line, " ") ;
       char *val = strtok(NULL, " ") ;
+
+      // Get rid of new line character.
+      int iend = strlen(val) - 1 ;
+      if ( iend > 0 && val[iend] == '\n' ) {
+	val[iend] = 0 ;
+      }
       if ( strncmp(name,"temperature",bufsz) == 0 ) 
 	{
 	  sscanf(val, "%lf", &TempMD) ;
@@ -808,7 +829,7 @@ static void read_input(double &TempMD, double &deltat_fs, int &nsteps,
 	  //	  printf("Read_force is %s\n", 
 	  //		 if_read_force?"true":"false") ;
 	}
-      else if ( strncmp(name,"spline_q",bufsz) == 0 ) 
+      else if ( strncmp(name,"params_q",bufsz) == 0 ) 
 	{
 	  if_spline_q = parse_tf(val, bufsz,line) ;
 	  //	  printf("spline_q is %s\n", 
@@ -844,9 +865,33 @@ static void read_input(double &TempMD, double &deltat_fs, int &nsteps,
 	  sscanf(val, "%lf", &thoover_fs) ;
 	  printf("Nose-Hoover thermostat time = %f fs\n", thoover_fs) ;	
 	}
-      else if ( strncmp(name, "chebyshev", bufsz) == 0 ) 
+      else if ( strncmp(name, "pair_type", bufsz) == 0 ) 
 	{
-	  if_cheby = parse_tf(val, bufsz, line) ;
+	  if ( strncmp(val, "spline", bufsz) == 0 ) 
+	    {
+	      pair_type = SPLINE ;
+	    } 
+	  else if ( strncmp(val, "chebyshev", bufsz) == 0 ) 
+	    {
+	      pair_type = CHEBYSHEV ;
+	    }
+	  else if ( strncmp(val, "inverse_r", bufsz) == 0 ) 
+	    {
+	      pair_type = INVERSE_R ;
+	    }
+	  else if ( strncmp(val, "lennard_jones", bufsz) == 0 ) 
+	    {
+	      pair_type = LJ ;
+	    }
+	  else if ( strncmp(val, "stillinger", bufsz) == 0 ) 
+	    {
+	      pair_type = STILLINGER ;
+	    }
+	  else 
+	    {
+	      printf("Error: did not recognize pair_type |%s|\n", val) ;
+	      exit(1) ;
+	    }
 	}
       else 
 	{
@@ -854,6 +899,7 @@ static void read_input(double &TempMD, double &deltat_fs, int &nsteps,
 	  exit(1) ;
 	}
     }
+
   if ( ferror(fin) ) 
     {
       printf("Error while reading spline_md.in\n") ;
@@ -866,7 +912,7 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 		       bool if_output_force, bool if_read_force,
 		       bool if_spline_q, bool if_init_vel, int rand_seed, 
 		       int gen_freq, int energy_freq, int scale_freq,
-		       double thoover_fs, bool if_cheby) 
+		       double thoover_fs, Sr_pair_t pair_type) 
 {
   printf("JOB PARAMETERS:\n\n") ;
 
@@ -875,11 +921,23 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
   printf("Number of steps is %d\n", nsteps) ;
   printf("Number of layers is %d\n", nlayers) ;
 
-  if ( if_cheby ) {
+  if ( pair_type == CHEBYSHEV ) {
       printf("Chebyshev short-range pair forces will be used\n") ;
   } 
-  else {
+  else if ( pair_type == SPLINE ) {
     printf("Spline short-range pair forces will be used\n") ;
+  }
+  else if ( pair_type == INVERSE_R ) {
+    printf("Inverse power short-range pair forces will be used\n") ;
+  }
+  else if ( pair_type == LJ ) {
+    printf("Lennard-Jones short-range pair forces will be used\n") ;
+  } 
+  else if ( pair_type == STILLINGER ) {
+    printf("Stillinger short-range pair forces will be used\n") ;
+  } else {
+    printf("Error: unknown short-range pair interactions\n") ;
+    exit(1) ;
   }
 
   if ( if_output_force ) {
@@ -938,7 +996,7 @@ static bool parse_tf(char *val, int bufsz, char *line)
 // Parse a true or false token argument.
 {
 
-  val[strlen(val)-1] = 0 ;
+  // val[strlen(val)-1] = 0 ;
   //  printf("val = :%s:\n", val) ;
   if ( strncmp(val, "true",bufsz) == 0 ) 
     {
@@ -971,7 +1029,7 @@ static double
 numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double smin,
 		   const double smax, const double sdelta,const int snum, 
-		   double *params, double *pot_params, bool if_cheby)
+		   double *params, double *pot_params, Sr_pair_t pair_type) 
 // Evaluates the configurational part of the pressure numerically by -dU/dV.
 {
   double **Coord1 ;
@@ -1005,7 +1063,7 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
   Vol1 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
   ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
-	pot_params,if_cheby,Accel,Vtot1,Pxyz);
+	pot_params,pair_type,Accel,Vtot1,Pxyz);
   
   lscale = 1.0 - eps ;
 
@@ -1023,7 +1081,7 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
   Vol2 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
   ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
-	pot_params,if_cheby,Accel,Vtot2,Pxyz);
+	pot_params,pair_type,Accel,Vtot2,Pxyz);
 
   double result = -(Vtot2 - Vtot1)/(Vol2 - Vol1) ;
 

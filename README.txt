@@ -110,33 +110,51 @@ output_force false
 read_force   false
 spline_q     true
 init_vel     false
-chebyshev    false
+pair_type    chebyshev
 rand_seed     12357
 hoover_time   10
 energy_freq  10
 scale_freq   0
 gen_freq 20
 ----------------------------------------------------
+The order of the options specified does not matter.  The code has
+default values for all of the parameters.
 
 The temperature is used for Nose-Hoover NVT dynamics, velocity scaling
-dynamics, or velocity initialization.  deltat is the MD time step in
-fs.  nsteps is the number of MD steps.  nlayers is the number of
-periodic replicas used in evaluating forces.  output_force is a flag
-controlling whether forces are written to file.  In read_force is
-true, the force.txt file created by lsq.py is read in and compared to
-the current forces.  If spline_q is true, charges are taken from the
-params.txt file.  Otherwise compiled-in defaults are used for charges.
+dynamics, or velocity initialization.  
+
+deltat is the MD time step in fs.  
+
+nsteps is the number of MD steps.  
+
+nlayers is the number of periodic replicas used in evaluating forces.  
+
+output_force is a flag controlling whether forces are written to file.  
+
+If read_force is true, the force.txt file created by lsq.py is read in and compared to
+the current forces.  
+
+If spline_q is true, charges are taken from the params.txt file.  Otherwise compiled-in defaults are used for charges.
+
 If init_vel is true, velocities will be initialized.  Otherwise,
-initial velocities are read from the input.xyz file.  If chebyshev is
-true, chebyshev polynomials are used to evaluate the forces.
-Otherwise, splines are used to evaluate the forces.  rand_seed is a
-random number seed.  hoover_time is a timescale in fs for the coupling
-between the Nose-Hoover thermostat and the system.  If hoover_time is
-<= 0, no Hoover thermostat is used.  scale_freq controls how
+initial velocities are read from the input.xyz file.  
+
+pair_type specifies the type of short-range pair interaction.  Current choices
+are chebyshev, spline, stillinger, or lennard-jones.
+
+rand_seed is a random number seed.  
+
+hoover_time is a timescale in fs for the coupling between the Nose-Hoover thermostat and the system.  If hoover_time is <= 0, no Hoover thermostat is used.  
+
+scale_freq controls how
 frequently velocity is rescaled.  If scale_freq is 0, velocities are
 not rescaled.  Velocity scaling and the Hoover thermostat should not
-be used at the same time.  energy_freq controls how often the energy
-and other thermodynamic quantities are output.  gen_freq controls how
+be used at the same time.  
+
+energy_freq controls how often the energy
+and other thermodynamic quantities are output.  
+
+gen_freq controls how
 often configurations are written into a DFTB gen file.
 
 At the end of the run, positions and velocities are written to

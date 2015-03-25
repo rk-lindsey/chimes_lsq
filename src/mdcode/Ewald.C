@@ -152,7 +152,6 @@ static void Ewald_K_Space_New(double alpha, double **Coord, double *Q, double *L
   static double kappa = 0.0 ;
   const int maxk=10000;
   const int kmax=10;
-  static int ksqmax=50;
   int ksq;
   double Kfac;
   double rkx,rky,rkz;

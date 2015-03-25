@@ -1,5 +1,5 @@
-#CXX=g++ -g -Wall
-CXX=icpc -fast -Wall
+CXX=g++ -g -Wall
+#CXX=icpc -fast -Wall
 CXX_SRC=splines_md.C functions.C Ewald.C
 CXX_INCLUDES=
 
@@ -13,7 +13,7 @@ all : splines_md makeparam
 	$(CXX) -Wno-deprecated $(CXX_INCLUDES) -c $< -o $@
 
 clean:
-	/bin/rm -f *.o a.out
+	/bin/rm -f *.o
 
 realclean: clean
 	rm -f splines_md makeparam

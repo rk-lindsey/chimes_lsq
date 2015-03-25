@@ -28,19 +28,12 @@ static void ZCalc_Cheby(double **Coord,string *Lb, double *Latcons,
 void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlayers,
 	   const int nat,const double smin,const double smax,
 	   const double sdelta,const int snum, 
-	   double *params, double *pot_params, bool if_cheby,
+	   double *params, double *pot_params, Sr_pair_t pair_type,
 	   double **SForce,double& Vtot,double& Pxyz)
+// Calculate the force, potential energy, and pressure.
 {
   bool ifcalc_ewald = true ;       // Ewald charge evaluation
   bool ifcalc_over  = true ;      // Short-range overcoordination potential
-
-  // Choose either spline, cheby, or analytic.
-  bool ifcalc_spline     = true ;  // Spline pair force model.
-  bool ifcalcsr_analytic = false ; // Short-range analytic potential evaluation.
-
-  // These are for testing purposes only.
-  bool ifcalc_lj = false ;           // Lennard-Jones potential for testing.
-  bool ifcalc_stillinger = false ;   // Stillinger central force model.
 
   double pover ;
   double volume ;
@@ -55,10 +48,6 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlay
   }
 #else
   // DEBUG !
-  ifcalc_spline = false ;
-  if_cheby  = false ;
-  ifcalc_stillinger = true ;
-  ifcalc_lj     = false ;
   ifcalc_ewald  = false ;
   ifcalc_over   = false ;
 #endif
@@ -82,42 +71,53 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlay
   Vtot = 0.0;
   Pxyz = 0.0 ;
 
-  if ( ifcalc_lj ) {
-    ZCalc_Lj(Coord, Lb, Latcons,nlayers, nat, smin, smax, sdelta,snum, 
+  if ( pair_type == LJ ) 
+    {
+      ZCalc_Lj(Coord, Lb, Latcons,nlayers, nat, smin, smax, sdelta,snum, 
 	     params, SForce, Vtot, Pxyz) ;
-  }
+    } 
+  else if ( pair_type == INVERSE_R ) 
+    {
+      ZCalc_SR_Analytic(Coord,Lbc, Latcons,nlayers,nat,smin,smax,SForce,Vtot,
+			Pxyz) ;
+    } 
+  else if ( pair_type == STILLINGER ) 
+    {
+      ZCalc_Stillinger(Coord,Lbc, Latcons,nlayers,nat,smax, SForce,Vtot,Pxyz) ;
+    } 
+  else if ( pair_type == CHEBYSHEV ) 
+    {
+      ZCalc_Cheby(Coord,Lb,Latcons,nlayers,nat,smin,smax,sdelta,snum, 
+		  params,SForce,Vtot,Pxyz) ;
+    } 
+  else if ( pair_type == SPLINE ) 
+    {
+      ZCalc_Spline(Coord,Lb,Latcons,nlayers,nat,smin,smax,sdelta,snum, 
+		   params,pot_params,SForce,Vtot,Pxyz) ;
+    } 
+  else 
+    {
+      cout << "Error: unknown pair type\n" ;
+      exit(1) ;
+    }
 
-  if ( ifcalc_ewald ) {
-    ZCalc_Ewald(Coord, Lb, Q, Latcons,nlayers, nat, smin, smax, sdelta,snum, 
-		params, SForce, Vtot, Pxyz) ;
-  }
-  if ( ifcalcsr_analytic ) {
-    ZCalc_SR_Analytic(Coord,Lbc, Latcons,nlayers,nat,smin,smax,SForce,Vtot,Pxyz) ;
-  }
-  if ( ifcalc_over ) {
-    pover = params[snum+3] ;
-    // cout << "POVER = " << pover << endl ;
-    ZCalcSR_Over(Coord,Lbc, Latcons,nlayers, nat,SForce, Vtot, Pxyz,pover) ;
-  }
+  if ( ifcalc_ewald ) 
+    {
+      ZCalc_Ewald(Coord, Lb, Q, Latcons,nlayers, nat, smin, smax, sdelta,snum, 
+		  params, SForce, Vtot, Pxyz) ;
+    }
 
-  if ( ifcalc_stillinger ) {
-    ZCalc_Stillinger(Coord,Lbc, Latcons,nlayers,nat,smax, SForce,Vtot,Pxyz) ;
-  }
-
-  if ( ifcalc_spline ) {
-    ZCalc_Spline(Coord,Lb,Latcons,nlayers,nat,smin,smax,sdelta,snum, 
-		 params,pot_params,SForce,Vtot,Pxyz) ;
-  }
-  if ( if_cheby ) {
-    ZCalc_Cheby(Coord,Lb,Latcons,nlayers,nat,smin,smax,sdelta,snum, 
-		 params,SForce,Vtot,Pxyz) ;
-  }
-  delete Lbc ;
+  if ( ifcalc_over ) 
+    {
+      pover = params[snum+3] ;
+      // cout << "POVER = " << pover << endl ;
+      ZCalcSR_Over(Coord,Lbc, Latcons,nlayers, nat,SForce, Vtot, Pxyz,pover) ;
+    }
 
   volume = Latcons[0] * Latcons[1] * Latcons[2] ;
-
   Pxyz /= 3.0 * volume ;
 
+  delete Lbc ;
   return;
 }
 
