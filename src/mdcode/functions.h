@@ -6,6 +6,7 @@
 #include<iostream>
 #include<math.h>
 #include<stdlib.h>
+#include<string.h>
 #include "functions.h"
 using namespace std;
 
@@ -31,6 +32,17 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlay
 	   double *params, double *pot_params, Sr_pair_t pair_type,
 	   double **SForce,double& Vtot,double& Pxyz) ;
 
+
+void ZCalc_Deriv(double **Coord,string *Lb, 
+		 double *Latcons,const int nlayers,
+		 const int nat,double ***A,const double smin,const double smax,
+		 const double sdelta,const int snum, double **coul_oo,
+		 double **coul_oh,double **coul_hh,Sr_pair_t pair_type) ;
+
+void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latcons,
+			 const int nlayers, const int nat, bool calc_deriv, 
+			 double **Fderiv) ;
+
 void ZCalc_Ewald(double **Coord, string *Lb, double *Q, double *Latcons,const int nlayers,
 		 const int nat,const double smin,const double smax,
 		 const double sdelta,const int snum, 
@@ -41,5 +53,6 @@ void ZCalc_Ewald_Orig(double **Coord,string *Lb, double *Latcons,
 double bondedpot(double **Coord_bonded,double ***I_bonded);
 double spline_pot(double smin, double smax, double sdelta, double rlen2, double *params, double *pot_params, int snum, int vstart, double &S_r) ;
 
+bool parse_tf(char *val, int bufsz, char *line) ;
 #endif
 

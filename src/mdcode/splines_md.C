@@ -22,7 +22,7 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 		       int gen_freq, int energy_freq, int scale_freq,
 		       double thoover_fs, Sr_pair_t pair_type) ; 
 
-static bool parse_tf(char *val, int bufsz, char *line) ;
+
 static double kinetic_energy(double *Mass, double **Vel, int nat) ;
 
 static double 
@@ -354,7 +354,7 @@ int main(int argc, char* argv[])
       cout << "Spline minimum = " << smin << endl ;
       cout << "Spline maximum = " << smax << endl ;
       cout << "Spline step    = " << sdelta << endl ;
-      snum=(1+int((smax-smin)/sdelta))*2*3;//2 is for p0/m0/p1/m1, and 3 is for oo/oh/hh.
+      snum=(2+floor((smax-smin)/sdelta))*2*3;//2 is for p0/m0/p1/m1, and 3 is for oo/oh/hh.
     }
   else if ( pair_type == CHEBYSHEV ) {
     paramread >> smin >> smax >> snum ;
@@ -829,7 +829,7 @@ static void read_input(double &TempMD, double &deltat_fs, int &nsteps,
 	  //	  printf("Read_force is %s\n", 
 	  //		 if_read_force?"true":"false") ;
 	}
-      else if ( strncmp(name,"params_q",bufsz) == 0 ) 
+      else if ( strncmp(name,"fit_coulomb",bufsz) == 0 ) 
 	{
 	  if_spline_q = parse_tf(val, bufsz,line) ;
 	  //	  printf("spline_q is %s\n", 
@@ -990,28 +990,6 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
     
   printf("\nEND OF JOB PARAMETERS\n\n") ;
 
-}
-
-static bool parse_tf(char *val, int bufsz, char *line)
-// Parse a true or false token argument.
-{
-
-  // val[strlen(val)-1] = 0 ;
-  //  printf("val = :%s:\n", val) ;
-  if ( strncmp(val, "true",bufsz) == 0 ) 
-    {
-      return(true) ;
-    }
-  else if ( strncmp(val, "false", bufsz) == 0 ) 
-    {
-      return(false) ;
-    }
-  else 
-    {
-      printf("Error: need a true or false argument: %s\n",
-	     line) ;
-    }  
-  return(false) ;
 }
 
   

@@ -4,8 +4,14 @@
 #include<math.h>
 #include<stdlib.h>
 #include<time.h>
+#include <string.h>
 #include "functions.h"
 using namespace std;
+
+static void read_lsq_input(int &nlayers, 
+			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
+			   bool &fit_pover, int &cheby_order, double &smin,
+			   double &smax, double &sdelta) ;
 
 int main(int argc, char* argv[])
 {
@@ -17,25 +23,34 @@ int main(int argc, char* argv[])
 
   ////Job parameters:
 
-  const int nlayers=1;//supercells adjacent to central cell.
+  int nlayers=1;//supercells adjacent to central cell.
   //1 is enough because of 8-Ang. limit to spline potential; 
   //electrostatic energy doesn't depend on this number.
   //setting to 2 gives identical result.
 
   // If true, subtract overcoordination forces.
-  const bool ifsubtract_coord = false ;  
+  bool ifsubtract_coord = false ;  
 
   // If true, fit coulomb parameters.
-  const bool fit_coul = true ;
+  bool fit_coul = true ;
 
   // If true, fit overcoordination parameters.
-  const bool fit_pover = true ;
+  bool fit_pover = true ;
 
-  // If true, calculate chebyshev polynomial fit
-  const bool if_cheby = true ;
+  // Short-range pair potential type.
+  Sr_pair_t pair_type ;
 
   // Order of Chebyshev polynomial if used.
-  const int cheby_order = 12 ;
+  int cheby_order = 12 ;
+
+  //define spline parameters:
+  double smin=0.75 ;
+  double smax=6.0;//spline fitting from 0-8 Angstroms.
+  // const double sdelta=0.05;//0.025; //grid spacing
+  double sdelta=0.05 ; //0.025; //grid spacing
+
+  read_lsq_input(nlayers, fit_coul, pair_type, ifsubtract_coord, fit_pover, cheby_order,
+		 smin, smax, sdelta) ;
 
   ////Read input file input.xyzf:
   ////xyz format in Angs, three box dimensions in the info line.
@@ -67,19 +82,15 @@ int main(int argc, char* argv[])
   std::vector<double**> Pover ;
   Pover.reserve(nframes);
 
-  //define spline parameters:
-  const double smin=0.75 ;
-  const double smax=6.0;//spline fitting from 0-8 Angstroms.
-  // const double sdelta=0.05;//0.025; //grid spacing
-  const double sdelta=0.05 ; //0.025; //grid spacing
   int snum ;
 
-  if ( if_cheby == false ) {
-      snum=(1+int((smax-smin)/sdelta))*2*3;//2 is for p0/m0/p1/m1, and 3 is for oo/oh/hh.
+  if ( pair_type != CHEBYSHEV ) {
+      snum=(2+floor((smax-smin)/sdelta))*2*3;//2 is for p0/m0/p1/m1, and 3 is for oo/oh/hh.
   } else {
     snum = cheby_order * 3 ;
   }
-  
+  cout << "The number of short-range parameters is " << snum << endl ;
+
   std::vector<double*> Mass;
   Mass.reserve(nframes);
 
@@ -212,7 +223,7 @@ int main(int argc, char* argv[])
     {
       ZCalc_Deriv(Coord[N],Lb[N],Latcons[N],nlayers,Nat[N],Als[N],
 		  smin,smax,sdelta,snum,Coul_oo[N],Coul_oh[N],Coul_hh[N],
-		  if_cheby);
+		  pair_type);
 
       // Subtract over-coordination forces from force to be output.
       if ( ifsubtract_coord ) 
@@ -309,7 +320,7 @@ int main(int argc, char* argv[])
 
   //cout<<endl<<endl;
   ofstream header("params.header") ;
-  if ( ! if_cheby ) {
+  if ( pair_type != CHEBYSHEV ) {
     header << smin << "\n" << smax << "\n" << sdelta << "\n" ;
   } else {
     header << smin << "\n" << smax << "\n" << snum/3 << "\n" ;
@@ -319,3 +330,119 @@ int main(int argc, char* argv[])
 }
 
 
+
+static void read_lsq_input(int &nlayers, 
+			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
+			   bool &fit_pover, int &cheby_order, double &smin,
+			   double &smax, double &sdelta) 
+// Read program input from the file "splines_ls.in".
+{
+  FILE *fin ;
+  const int bufsz = 1024 ;
+  char buf[bufsz] ;
+
+  fin = fopen("splines_ls.in", "r") ;
+  if ( fin == NULL ) 
+    {
+      cout << "Error: could not open splines_ls.in\n" ; 
+      exit(1) ;
+    }
+  
+  while ( char *line = fgets(buf, bufsz, fin ) ) 
+    {
+      if ( line[0] == '#' ) {
+	continue ;
+      }
+      // Get rid of new line character.
+      // int iend = strlen(line) - 1 ;
+      // if ( iend > 0 && line[iend] == '\n' ) {
+      // line[iend] = 0 ;
+      // }
+
+      // printf("Line = %s\n", line) ;
+      char *name = strtok(line, " ") ;
+      char *val = strtok(NULL, " ") ;
+
+      // Get rid of new line character.
+      int iend = strlen(val) - 1 ;
+      if ( iend > 0 && val[iend] == '\n' ) {
+	val[iend] = 0 ;
+      }
+      if ( strncmp(name,"nlayers",bufsz) == 0 ) 
+	{
+	  sscanf(val, "%d", &nlayers) ;
+	  //	  printf("Number of layers = %d\n", nlayers) ;
+	}
+      else if ( strncmp(name,"cheby_order",bufsz) == 0 ) 
+	{
+	  sscanf(val, "%d", &cheby_order) ;
+	  //	  printf("Number of layers = %d\n", nlayers) ;
+	}
+      else if ( strncmp(name,"smin",bufsz) == 0 ) 
+	{
+	  sscanf(val, "%lf", &smin) ;
+	}
+      else if ( strncmp(name,"smax",bufsz) == 0 ) 
+	{
+	  sscanf(val, "%lf", &smax) ;
+	}
+      else if ( strncmp(name,"sdelta",bufsz) == 0 ) 
+	{
+	  sscanf(val, "%lf", &sdelta) ;
+	}
+      else if ( strncmp(name,"fit_coulomb",bufsz) == 0 ) 
+	{
+	  fit_coul = parse_tf(val, bufsz,line) ;
+	}
+      else if ( strncmp(name,"subtract_coord",bufsz) == 0 ) 
+	{
+	  if_subtract_coord = parse_tf(val, bufsz, line) ;
+	}
+      else if ( strncmp(name,"fit_pover",bufsz) == 0 ) 
+	{
+	  fit_pover = parse_tf(val, bufsz, line) ;
+	}
+      else if ( strncmp(name, "pair_type", bufsz) == 0 ) 
+	{
+	  if ( strncmp(val, "spline", bufsz) == 0 ) 
+	    {
+	      pair_type = SPLINE ;
+	    } 
+	  else if ( strncmp(val, "chebyshev", bufsz) == 0 ) 
+	    {
+	      pair_type = CHEBYSHEV ;
+	    }
+#if(0)
+	  // NOT SUPPORTED FOR LEAST-SQUARES FITTING
+	  else if ( strncmp(val, "inverse_r", bufsz) == 0 ) 
+	    {
+	      pair_type = INVERSE_R ;
+	    }
+	  else if ( strncmp(val, "lennard_jones", bufsz) == 0 ) 
+	    {
+	      pair_type = LJ ;
+	    }
+	  else if ( strncmp(val, "stillinger", bufsz) == 0 ) 
+	    {
+	      pair_type = STILLINGER ;
+	    }
+#endif
+	  else 
+	    {
+	      printf("Error: did not recognize pair_type |%s|\n", val) ;
+	      exit(1) ;
+	    }
+	}
+      else 
+	{
+	  printf("Error: did not recognize option %s\n", name) ;
+	  exit(1) ;
+	}
+    }
+
+  if ( ferror(fin) ) 
+    {
+      printf("Error while reading splines_ls.in\n") ;
+      exit(1) ;
+    }
+}

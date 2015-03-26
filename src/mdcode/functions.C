@@ -1022,13 +1022,9 @@ void ZCalc_Deriv(double **Coord,string *Lb,
 		 double *Latcons,const int nlayers,
 		 const int nat,double ***A,const double smin,const double smax,
 		 const double sdelta,const int snum, double **coul_oo,
-		 double **coul_oh,double **coul_hh,bool if_cheby)
+		 double **coul_oh,double **coul_hh, Sr_pair_t pair_type)
 {
   bool if_ewald = true ;
-  bool if_spline = false ;
-
-  if ( if_cheby == false ) if_spline = true ;
-  else if_spline = false ;
 
   for(int a=0;a<nat;a++)
     for(int n=0;n<snum;n++)
@@ -1050,12 +1046,13 @@ void ZCalc_Deriv(double **Coord,string *Lb,
 		      coul_oo, coul_oh, coul_hh) ;
   }
 
-  if ( if_spline ) {
+  if ( pair_type == SPLINE ) {
     ZCalc_Spline_Deriv(Coord,Lb,Latcons,nlayers, nat,A,smin,smax,sdelta,snum) ;
-  }
-
-  if ( if_cheby ) {    
+  } else if ( pair_type == CHEBYSHEV ) {
     ZCalc_Cheby_Deriv(Coord,Lb,Latcons,nlayers, nat,A,smin,smax,sdelta,snum) ;
+  } else {
+    cout << "Error: bad pairtype in ZCalc_Deriv\n" ;
+    exit(1) ;
   }
 
 }
@@ -1367,6 +1364,13 @@ static void ZCalc_Spline_Deriv(double **Coord,string *Lb, double *Latcons,
 
 		    //here is the setup for Hermite cubic quadrature:
 		    k0=int(floor((rlen-smin)/sdelta));
+
+		    // Keep from overrunning table.
+		    if ( k0 >= snum/6 - 1 ) {
+		      cout << "Table overrun: rlen = " << rlen << endl ;
+		      continue ;
+		    }
+
 		    x=rlen;
 		    
 		    x0=smin+sdelta*k0;
@@ -1703,5 +1707,27 @@ void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latco
 }
 
 
+
+bool parse_tf(char *val, int bufsz, char *line)
+// Parse a true or false token argument.
+{
+
+  // val[strlen(val)-1] = 0 ;
+  //  printf("val = :%s:\n", val) ;
+  if ( strncmp(val, "true",bufsz) == 0 ) 
+    {
+      return(true) ;
+    }
+  else if ( strncmp(val, "false", bufsz) == 0 ) 
+    {
+      return(false) ;
+    }
+  else 
+    {
+      printf("Error: need a true or false argument: %s\n",
+	     line) ;
+    }  
+  return(false) ;
+}
 
 

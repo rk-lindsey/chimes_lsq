@@ -12,7 +12,7 @@ splines_ls : $(CXX_SRC:%.C=%.o)
 	cp splines_ls ../../bin/splines_ls
 
 %.o: %.C
-	$(CXX) -Wno-deprecated $(CXX_INCLUDES) -c $< -o $@
+	$(CXX) $(CXX_INCLUDES) -c $< -o $@
 
 clean:
 	/bin/rm -f *.o a.out

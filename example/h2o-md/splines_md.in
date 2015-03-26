@@ -5,9 +5,9 @@ nsteps      1000
 nlayers     1
 output_force false
 read_force   false
-spline_q     true
+fit_coulomb  true
 init_vel     false
-chebyshev    false
+pair_type    chebyshev
 rand_seed     12357
 hoover_time   10
 energy_freq  10
