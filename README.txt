@@ -9,11 +9,52 @@ simply type "make all".  Typing "make clean" will remove object files,
 "make realclean" will restore the directory to only the original
 source files.
 
-Part A: Determining spline parameters.
+Part A: Determining two-body parameters.
 
 1.) Compile splines_ls using make (modify Makefile in this directory).
 
-2.) Code takes an input file called "input.xyzf". The format is:
+2.  Prepare input options for splines_ls in the file splines_ls.in.
+Here is an example:
+------------------------------------
+nlayers 1
+fit_coulomb true
+fit_pover true
+pair_type spline
+subtract_coord false
+smin 0.75
+smax 6.0
+sdelta 0.1
+chebyshev_order 12
+------------------------------------
+nlayers is the number of x,y,z supercells used in evaluating
+interactions.  Small unit cell should have nlayers >= 1.
+
+fit_coulomb controls whether charges are determined by least
+squares fitting.  Otherwise, charges are implicitly added to the
+pair interaction but not otherwise considered.
+
+fit_pover controls whether the ReaxFF linear overcoordination
+parameter is found.
+
+pair_type is the type of short-range pair interaction to use.
+Choices are "spline" or "chebyshev".  "spline" computes the pair
+interaction in terms of a cubic spline function.  "chebyshev" uses
+polynomials of Morse functions to determine the interaction.
+
+subtract_coord controls whether the ReaxFF overcoordination force
+is subtracted from the forces before fitting.  This option should
+not be used in conjunction with fit_pover.
+
+smin is the minimum distance between atoms considered in the pair interaction.
+
+smax is the force cutoff distance used in the pair interaction.
+
+sdelta is the step size in angstroms between spline points.
+
+chebyshev_order is the number of terms in the Chebyshev force fitting.
+It is not used in the example, because pair_type is set to spline.
+
+3.) Code takes an input file called "input.xyzf". The format is:
 
 Line 1: number of atoms.
 Line 2: dimensions of box (Angs.)
@@ -27,7 +68,7 @@ Example:
 //H 4.36127 3.66403 7.07424 -0.042972843521 0.010603733297 0.000570193096
 //...
 
-3.) Run the code spline fitting code
+4.) Run the code spline fitting code
     ./splines_ls 99 
 
 99 here is the number of MD snapshots in the .xyzf file.
@@ -44,7 +85,7 @@ fitting, polynomial coefficients for the two-body force are determined.
 In should be noted that due to a historical accident, the parameter
 values describe the negative of the pairwise force dV/dr.
 
-4.) Run the SVD script, python/lsq.py A.txt b.txt params.header >
+5.) Run the SVD script, python/lsq.py A.txt b.txt params.header >
     params.txt params.header contains a header used in generating the
     spline or polynomial fit.  The params.header file is created by
     splines_ls.  For spline fitting, params.header contains the
@@ -59,7 +100,7 @@ values describe the negative of the pairwise force dV/dr.
     file can be used to test the consistency of the MD code with the reported
     forces.
 
-5.) Delete the first two lines of params.txt, this just tells you the
+6.) Delete the first two lines of params.txt, this just tells you the
 RMS force error value and the maximum difference between fitted and DFT force.
 
 Part B: calculating short-range part of the force.
