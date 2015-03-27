@@ -125,7 +125,8 @@ table or with the polynomial force representation.
 Part C: running Molecular dynamics.
 
 7.) params.txt (with top two text lines removed) from output of
-lsq.py should be in the working directory. Also the starting 
+lsq.py should be in the working directory. The filename of the force parameter file can
+be used specified in splines_md.in. Also the starting 
 geometry and velocities should be included in input.xyz. The N-3, N-2,
 and N-1 (N is the number of lines in params.txt) lines of params.txt are the squared charges and must be entered as doubles qoo, qoh, and qhh in functions.C.
 This is now done automatically by the fitting routine lsq.py.  The Nth
@@ -138,20 +139,24 @@ dimensions in Angstroms.
 Coordinates in Angs and velocities in Angs/MD-time unit 
 (conversion from fs=0.0208025).
 
-The MD program takes a configuration file splines_md.in.  This file
+The MD program takes a configuration file given on the command line.  This file
 controls various aspects of the MD calculation.  Here is an example
 file:
 ---------------------------------------------------
 # Input for the spline_md code.
 temperature 2000.0
 deltat      0.125
-nsteps      1000
+nsteps      100
 nlayers     1
 output_force false
 read_force   false
-spline_q     true
 init_vel     false
-pair_type    chebyshev
+pair_type chebyshev
+coulomb      true
+fit_coulomb false
+num_pressure false
+params_file  params.cheby.txt
+overcoord   false
 rand_seed     12357
 hoover_time   10
 energy_freq  10
@@ -183,6 +188,15 @@ initial velocities are read from the input.xyz file.
 pair_type specifies the type of short-range pair interaction.  Current choices
 are chebyshev, spline, stillinger, or lennard-jones.
 
+params_file specifies a file with force parameters.
+
+coulomb controls whether Coulombic interactions are calculated or not.
+
+fit_coulomb controls where the charges come from.  If fit_coulomb is true,
+charge products (q_i * q_j) are read from the params file.
+
+overcoord controls whether the ReaxFF overcoordination term is used.
+
 rand_seed is a random number seed.  
 
 hoover_time is a timescale in fs for the coupling between the Nose-Hoover thermostat and the system.  If hoover_time is <= 0, no Hoover thermostat is used.  
@@ -204,7 +218,7 @@ splines_md, the trajectory may be continued further in time.
 
 8.) compile splines_md using make
 
-9.) Run the code by typing ./splines_md > splines_md.out.
+9.) Run the code by typing ./splines_md splines_md.in > splines_md.out.
 The MD will print geometries and velocities at every step in
 .xyz format, with MD info in the infoline. These snapshots can
 be used as inputs for sequential run of code (put box 

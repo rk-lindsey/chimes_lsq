@@ -5,9 +5,13 @@ nsteps      1000
 nlayers     1
 output_force false
 read_force   false
-fit_coulomb  true
 init_vel     false
-pair_type    chebyshev
+pair_type chebyshev
+coulomb      true
+fit_coulomb false
+num_pressure false
+params_file  params.txt
+overcoord    true
 rand_seed     12357
 hoover_time   10
 energy_freq  10

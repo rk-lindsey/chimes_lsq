@@ -30,6 +30,7 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlay
 	   const int nat,const double smin,const double smax,
 	   const double sdelta,const int snum, 
 	   double *params, double *pot_params, Sr_pair_t pair_type,
+	   bool if_coulomb,bool if_overcoord,
 	   double **SForce,double& Vtot,double& Pxyz) ;
 
 

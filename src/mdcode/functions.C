@@ -43,32 +43,19 @@ static void ZCalc_Cheby_Deriv(double **Coord,string *Lb, double *Latcons,
 			      const double sdelta,const int snum)       ;
 
 
-void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlayers,
+void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,
+	   const int nlayers,
 	   const int nat,const double smin,const double smax,
 	   const double sdelta,const int snum, 
 	   double *params, double *pot_params, Sr_pair_t pair_type,
+	   bool if_coulomb, bool if_overcoord,
 	   double **SForce,double& Vtot,double& Pxyz)
 // Calculate the force, potential energy, and pressure.
 {
-  bool ifcalc_ewald = true ;       // Ewald charge evaluation
-  bool ifcalc_over  = true ;      // Short-range overcoordination potential
-
   double pover ;
   double volume ;
 
   char *Lbc ;
-
-#if(0)
-  if ( if_cheby ) {
-    ifcalc_spline = false ;
-  } else {
-    ifcalc_spline = true ;
-  }
-#else
-  // DEBUG !
-  ifcalc_ewald  = false ;
-  ifcalc_over   = false ;
-#endif
 
   // Pack element names into single characters for efficiency
   Lbc = new char [nat] ;
@@ -119,13 +106,13 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlay
       exit(1) ;
     }
 
-  if ( ifcalc_ewald ) 
+  if ( if_coulomb ) 
     {
       ZCalc_Ewald(Coord, Lb, Q, Latcons,nlayers, nat, smin, smax, sdelta,snum, 
 		  params, SForce, Vtot, Pxyz) ;
     }
 
-  if ( ifcalc_over ) 
+  if ( if_overcoord ) 
     {
       pover = params[snum+3] ;
       // cout << "POVER = " << pover << endl ;

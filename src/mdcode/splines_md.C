@@ -8,28 +8,35 @@
 #include "functions.h"
 using namespace std;
 
-static void read_input(double &TempMD, double &deltat_fs, int &nsteps, 
+static void read_input(const char *file_name,
+		       double &TempMD, double &deltat_fs, int &nsteps, 
 		       int &nlayers, 
 		       bool &if_output_force, bool &if_read_force,
 		       bool &if_spline_q, bool &if_init_vel, int &rand_seed, 
 		       int &gen_freq, int &energy_freq, int &scale_freq,
-		       double &thoover_fs, Sr_pair_t &pair_type) ;
+		       double &thoover_fs, Sr_pair_t &pair_type,
+		       bool &if_coulomb,bool &num_pressure, char *params_file,
+		       bool &if_overcoord) ;
 
 static void echo_input(double TempMD, double deltat_fs, int nsteps, 
 		       int nlayers, 
 		       bool if_output_force, bool if_read_force,
 		       bool if_spline_q, bool if_init_vel, int rand_seed, 
 		       int gen_freq, int energy_freq, int scale_freq,
-		       double thoover_fs, Sr_pair_t pair_type) ; 
+		       double thoover_fs, Sr_pair_t pair_type,
+		       bool if_coulomb, bool num_pressure, const char *params_file,
+		       bool if_overcoord) ; 
 
 
 static double kinetic_energy(double *Mass, double **Vel, int nat) ;
+
 
 static double 
 numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double smin,
 		   const double smax, const double sdelta,const int snum, 
-		   double *params, double *pot_params, Sr_pair_t pair_type) ;
+		   double *params, double *pot_params, Sr_pair_t pair_type,
+		   bool if_coulomb,bool if_overcoord) ;
 
 int main(int argc, char* argv[])
 {
@@ -56,7 +63,7 @@ int main(int argc, char* argv[])
   bool if_read_force = false ;
 
   // If true, take charges from spline parameters.
-  bool if_spline_q = false ;
+  bool if_spline_q = true ;
 
   // If true, initialize velocities.
   bool if_init_vel = false ;
@@ -70,6 +77,12 @@ int main(int argc, char* argv[])
   // If true, use hoover-thermostat
   bool if_hoover = false ;
 
+  // If true, calculate Coulomb forces.
+  bool if_coulomb = true ;
+
+  // If true, calculate ReaxFF-like overcoordination term.
+  bool if_overcoord = true ;
+
   // How often to output energy
   int energy_freq = 10 ;
 
@@ -79,17 +92,30 @@ int main(int argc, char* argv[])
   // How often to write the gen file.
   int gen_freq = 10 ;
 
+  // Whether to calculate pressures by finite difference.
+  bool num_pressure = false ;
+
+  char params_file[1024] = "params.txt" ;
+
   double thoover_fs = 0.0 ;
 
   Sr_pair_t pair_type = CHEBYSHEV ;
 
-  read_input(TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
+  if ( argc != 2 ) 
+    {
+      cout << "Usage:  splines_md <input_file>\n" ;
+      exit(1) ;
+    }
+
+  read_input(argv[1],TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
 	     if_spline_q, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
-	     thoover_fs,pair_type) ;
+	     thoover_fs,pair_type,if_coulomb,num_pressure,params_file,
+	     if_overcoord) ;
 
   echo_input(TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
 	     if_spline_q, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
-	     thoover_fs,pair_type) ;
+	     thoover_fs,pair_type,if_coulomb,num_pressure,params_file,
+	     if_overcoord) ;
 
   if ( thoover_fs > 0.0 ) if_hoover = true ;
   if ( gen_freq > 0 ) output_gen = true ;
@@ -340,7 +366,14 @@ int main(int argc, char* argv[])
   double smin=0.0;
   double smax=8.0;
   double sdelta=0.10;
-    ifstream paramread("params.txt");
+  ifstream paramread(params_file);
+
+  if ( paramread.fail() ) 
+    {
+      cout << "Could not open " << params_file << endl ;
+      exit(1) ;
+    }
+    
   //spline parameters are in params.txt which is outputted from spline fitting and SVD programs.
 
   string tempstring;
@@ -429,7 +462,7 @@ int main(int argc, char* argv[])
     
 
   // Charges on H atom for potential models.
-  double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0;
+  double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0, q_stillinger=0.0;
   
   if ( if_spline_q ) {
     q_oo = params[snum]  / ke ;
@@ -437,13 +470,14 @@ int main(int argc, char* argv[])
     q_hh = params[snum+2] / ke ;
 
     q_spline = sqrt(q_hh) ;
-    printf("Q[H] = %12.5f\n", q_spline) ;
+    printf("Q[H] from params file = %12.5f e\n", q_spline) ;
     printf("Charge equation 1 error = %12.5f\n", 
 	   q_oo + 4.0 * q_oh + 4.0 * q_hh) ;
 
+  } else {
+    q_stillinger = sqrt(36.1345/ke) ;  // stillinger units
+    printf("Built-in Q[H] = %12.5f e\n", q_stillinger) ;
   }
-
-  const double q_stillinger = sqrt(36.1345) ;  // stillinger units
 
 
 
@@ -503,6 +537,13 @@ int main(int argc, char* argv[])
     for(int c=0;c<3;c++)
       Accel[a1][c]=0;
 
+  double dens_mol = (nat * 1.0e24) / (6.0221e23 * Vol) ;
+  double dens_mass = tempm * dens_mol / nat ;
+
+  printf("Volume                       = %8.5f Ang.^3\n", Vol) ;
+  printf("Number density               = %8.5f mol atm/cc\n", dens_mol) ;
+  printf("Mass density                 = %8.5f g/cc\n", dens_mass) ;
+
 
   double avg_temp = 0.0 ;
   double zeta_dot0 ;
@@ -559,7 +600,7 @@ int main(int argc, char* argv[])
 
       //this function calculates the spline and electrostatic forces.
       ZCalc(Coord,Lb,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
-	    pair_type,Accel,Vtot,Pxyz);
+	    pair_type,if_coulomb,if_overcoord,Accel,Vtot,Pxyz);
 
       if ( if_output_force ) 
 	{
@@ -630,6 +671,12 @@ int main(int argc, char* argv[])
       double temperature = 2.0 * Ktot / (ndof * Kb) ;
       temp_sum += temperature ;
 
+      if ( num_pressure ) 
+	{
+	  Pxyz = numerical_pressure(Coord,Lb, Q, Latcons,nlayers, nat,smin,
+				    smax, sdelta,snum, params, pot_params, 
+				    pair_type,if_coulomb,if_overcoord) ;
+	}
       double Ptot = Pxyz + 2.0 * Ktot / (3.0 * Vol) ;
       // Unit conversion factor to GPa.
       Ptot *= GPa ;
@@ -638,30 +685,31 @@ int main(int argc, char* argv[])
 
       if ( A == 0 ) 
 	{
-	  printf("%8s %9s %15s %15s %15s %15s %15s %15s",
-		 "Step", "Time(fs)", "Ktot (Ha)", "Vtot (Ha)", "Etot (Ha)", "T(K)", "P(GPa)", "Pnum(GPa)") ;
+	  printf("%8s %9s %15s %15s %15s %15s %15s",
+		 "Step", "Time", "Ktot/N", "Vtot/N", "Etot/N", 
+		 "T", "P") ;
 	  if ( if_hoover ) {
-	    printf(" %15s\n", "Econs(Ha)\n") ;
+	    printf(" %15s\n", "Econs/N") ;
+	  } else {
+	    printf("\n") ;
+	  }
+	  printf("%8s %9s %15s %15s %15s %15s %15s",
+		 " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", 
+		 "(K)", "(GPa)") ;
+	  if ( if_hoover ) {
+	    printf(" %15s\n", "(kcal/mol)") ;
 	  } else {
 	    printf("\n") ;
 	  }
 	}
       if ( (A +1) % energy_freq == 0 ) {
-	double pnum = 0.0 ;
-
-	pnum = numerical_pressure(Coord,Lb, Q, Latcons,nlayers, nat,smin,
-				  smax, sdelta,snum, params, pot_params, pair_type) ;
-
-	pnum += 2.0 * Ktot / (3.0 * Vol) ;
-	pnum *= GPa ;
-
-	printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.3f %15.3f",
-	       A+1, (A+1)*deltat_fs, Ktot/Hartree,Vtot/Hartree,(Ktot+Vtot)/Hartree, 
-	       temperature, Ptot, pnum) ;
+	printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.3f",
+	       A+1, (A+1)*deltat_fs, Ktot/nat,Vtot/nat,(Ktot+Vtot)/nat, 
+	       temperature, Ptot) ;
 	if ( if_hoover ) {
 	  double E_hoover = Ktot + Vtot + 0.5 * zeta * zeta * QHoover +
 	    ndof * Kb * TempMD * s_hoover ;
-	  printf("%15.7f\n", E_hoover/Hartree) ;
+	  printf("%15.7f\n", E_hoover/nat) ;
 	} else {
 	  printf("\n") ;
 	}
@@ -728,12 +776,6 @@ int main(int argc, char* argv[])
       tempm += Mass[ia] ;
     }
 
-  double dens_mol = (nat * 1.0e24) / (6.0221e23 * Vol) ;
-  double dens_mass = tempm * dens_mol / nat ;
-
-  printf("Volume                       = %8.5f Ang.^3\n", Vol) ;
-  printf("Number density               = %8.5f mol atm/cc\n", dens_mol) ;
-  printf("Mass density                 = %8.5f g/cc\n", dens_mass) ;
   printf("Average temperature over run = %8.2f K\n", temp_sum / nsteps) ;
   printf("Average pressure over run    = %8.4f GPa\n", press_sum / nsteps) ;
 
@@ -758,22 +800,25 @@ int main(int argc, char* argv[])
 }       
 
 
-static void read_input(double &TempMD, double &deltat_fs, int &nsteps, 
+static void read_input(const char *file_name,
+		       double &TempMD, double &deltat_fs, int &nsteps, 
 		       int &nlayers, 
 		       bool &if_output_force, bool &if_read_force,
 		       bool &if_spline_q, bool &if_init_vel, int &rand_seed, 
 		       int &gen_freq, int &energy_freq, int &scale_freq,
-		       double &thoover_fs, Sr_pair_t &pair_type) 
+		       double &thoover_fs, Sr_pair_t &pair_type,
+		       bool &if_coulomb, bool &num_pressure, char *params_file,
+		       bool &if_overcoord) 
 // Read program input from the file "splines_md.in".
 {
   FILE *fin ;
   const int bufsz = 1024 ;
   char buf[bufsz] ;
 
-  fin = fopen("splines_md.in", "r") ;
+  fin = fopen(file_name, "r") ;
   if ( fin == NULL ) 
     {
-      cout << "Error: could not open spline_md.in\n" ; 
+      cout << "Error: could not open " << file_name << endl ;
       exit(1) ;
     }
   
@@ -823,11 +868,23 @@ static void read_input(double &TempMD, double &deltat_fs, int &nsteps,
 	  //	  printf("Output_force is %s\n", 
 	  //		 if_output_force?"true":"false") ;
 	}
+      else if ( strncmp(name,"coulomb",bufsz) == 0 ) 
+	{
+	  if_coulomb = parse_tf(val, bufsz,line) ;
+	}
+      else if ( strncmp(name,"overcoord",bufsz) == 0 ) 
+	{
+	  if_overcoord = parse_tf(val, bufsz,line) ;
+	}
       else if ( strncmp(name,"read_force",bufsz) == 0 ) 
 	{
 	  if_read_force = parse_tf(val, bufsz,line) ;
 	  //	  printf("Read_force is %s\n", 
 	  //		 if_read_force?"true":"false") ;
+	}
+      else if ( strncmp(name,"num_pressure",bufsz) == 0 ) 
+	{
+	  num_pressure = parse_tf(val, bufsz,line) ;
 	}
       else if ( strncmp(name,"fit_coulomb",bufsz) == 0 ) 
 	{
@@ -858,12 +915,14 @@ static void read_input(double &TempMD, double &deltat_fs, int &nsteps,
       else if ( strncmp(name,"scale_freq",bufsz) == 0 ) 
 	{
 	  sscanf(val, "%d", &scale_freq) ;
-	  printf("Velocity scaling frequency = %d\n", scale_freq) ;	
 	}
       else if ( strncmp(name,"hoover_time",bufsz) == 0 ) 
 	{
 	  sscanf(val, "%lf", &thoover_fs) ;
-	  printf("Nose-Hoover thermostat time = %f fs\n", thoover_fs) ;	
+	}
+      else if ( strncmp(name,"params_file",bufsz) == 0 ) 
+	{
+	  strcpy(params_file,val) ;
 	}
       else if ( strncmp(name, "pair_type", bufsz) == 0 ) 
 	{
@@ -912,7 +971,9 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 		       bool if_output_force, bool if_read_force,
 		       bool if_spline_q, bool if_init_vel, int rand_seed, 
 		       int gen_freq, int energy_freq, int scale_freq,
-		       double thoover_fs, Sr_pair_t pair_type) 
+		       double thoover_fs, Sr_pair_t pair_type,
+		       bool if_coulomb,bool num_pressure,
+		       const char* params_file, bool if_overcoord) 
 {
   printf("JOB PARAMETERS:\n\n") ;
 
@@ -940,6 +1001,21 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
     exit(1) ;
   }
 
+  printf("Force parameters will be read from %s\n", params_file) ;
+
+  if ( if_coulomb ) {
+    printf("Coulomb forces will be calculated with Ewald sums\n") ;
+  }
+  else {
+    printf("Coulomb forces will not be calculated\n") ;
+  }
+
+  if ( if_overcoord ) {
+    printf("ReaxFF overcoordination term will be calculated\n") ;
+  } else {
+    printf("ReaxFF overcoordination term will NOT be calculated\n") ;
+  }
+
   if ( if_output_force ) {
     printf("Forces will be output (testing)\n") ;
   }     
@@ -955,6 +1031,15 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
   else
     {
       printf("Built-in charges will be used\n") ;
+    }
+
+  if ( num_pressure ) 
+    {
+      printf("Pressures will be calculated by finite difference of the energy\n") ;
+    }
+  else
+    {
+      printf("Pressures will be calculated using the virial\n") ;
     }
 
   if ( if_init_vel ) 
@@ -1007,7 +1092,8 @@ static double
 numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double smin,
 		   const double smax, const double sdelta,const int snum, 
-		   double *params, double *pot_params, Sr_pair_t pair_type) 
+		   double *params, double *pot_params, Sr_pair_t pair_type,
+		   bool if_coulomb,bool if_overcoord) 
 // Evaluates the configurational part of the pressure numerically by -dU/dV.
 {
   double **Coord1 ;
@@ -1041,7 +1127,7 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
   Vol1 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
   ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
-	pot_params,pair_type,Accel,Vtot1,Pxyz);
+	pot_params,pair_type,if_coulomb,if_overcoord,Accel,Vtot1,Pxyz);
   
   lscale = 1.0 - eps ;
 
@@ -1059,7 +1145,7 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
   Vol2 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
   ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
-	pot_params,pair_type,Accel,Vtot2,Pxyz);
+	pot_params,pair_type,if_coulomb,if_overcoord,Accel,Vtot2,Pxyz);
 
   double result = -(Vtot2 - Vtot1)/(Vol2 - Vol1) ;
 
