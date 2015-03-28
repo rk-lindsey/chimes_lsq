@@ -55,5 +55,17 @@ double bondedpot(double **Coord_bonded,double ***I_bonded);
 double spline_pot(double smin, double smax, double sdelta, double rlen2, double *params, double *pot_params, int snum, int vstart, double &S_r) ;
 
 bool parse_tf(char *val, int bufsz, char *line) ;
+
+void optimal_ewald_params(double accuracy, 
+			  double V, int nat, double &alpha, 
+			  double &rc, int &kc, double &r_acc,
+			  double &k_acc) ;
+
+
+void ZCalc_Ewald_Deriv(double **Coord, string *Lb, 
+		       double *Latcons,const int nlayers,
+		       const int nat,
+		       double **coul_oo,double **coul_oh,double **coul_hh) ;
+
 #endif
 
