@@ -10,6 +10,8 @@
 #include "functions.h"
 using namespace std;
 
+#define MAXOVERP 5  // Maximum number of overcoordination parameters allowed.
+
 static const double ke=332.0637157615209;//converter between electron units and Stillinger units for Charge*Charge.
 
 static const double Hartree = 627.50961 ; // 1 Hartree in kcal/mol.
@@ -26,13 +28,14 @@ enum Sr_pair_t {
 } ;
 
 
-void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,const int nlayers,
+void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,
+	   const int nlayers,
 	   const int nat,const double smin,const double smax,
 	   const double sdelta,const int snum, 
 	   double *params, double *pot_params, Sr_pair_t pair_type,
-	   bool if_coulomb,bool if_overcoord,
+	   bool if_coulomb, bool if_overcoord, int n_pover,
+	   double *over_params,
 	   double **SForce,double& Vtot,double& Pxyz) ;
-
 
 void ZCalc_Deriv(double **Coord,string *Lb, 
 		 double *Latcons,const int nlayers,
@@ -42,7 +45,7 @@ void ZCalc_Deriv(double **Coord,string *Lb,
 
 void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latcons,
 			 const int nlayers, const int nat, bool calc_deriv, 
-			 double **Fderiv) ;
+			 double **Fderiv, int n_over, double *over_param) ;
 
 void ZCalc_Ewald(double **Coord, string *Lb, double *Q, double *Latcons,const int nlayers,
 		 const int nat,const double smin,const double smax,

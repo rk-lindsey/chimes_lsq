@@ -8,18 +8,29 @@
 #include "functions.h"
 using namespace std;
 
-static void read_lsq_input(int &nlayers, 
+static void read_lsq_input(const char *input_filename, int &nlayers, 
 			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
 			   bool &fit_pover, int &cheby_order, double &smin,
-			   double &smax, double &sdelta) ;
+			   double &smax, double &sdelta, int &n_over, double *over_param) ;
+
+static void echo_lsq_input(int nlayers, 
+			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord,
+			   bool fit_pover, int cheby_order, double smin,
+			   double smax, double sdelta, int n_over, 
+			   const double *over_params)  ;
 
 int main(int argc, char* argv[])
 {
-  if ( argc != 2 ) {
-    cout << "Usage: splines_ls <number of frames>\n" ;
+  if ( argc != 3 ) {
+    cout << "Usage: splines_ls <input filename> <number of frames>\n" ;
     exit(1) ;
   }
-  const int nframes=atoi(argv[1]);
+  const int nframes=atoi(argv[2]);
+  if ( nframes <= 0 ) 
+    {
+      cout << "Error: a positive number of frames must be specified\n" ;
+      exit(1) ;
+    }
 
   ////Job parameters:
 
@@ -43,14 +54,39 @@ int main(int argc, char* argv[])
   // Order of Chebyshev polynomial if used.
   int cheby_order = 12 ;
 
+  // Number of overcoordination parameters.
+  int n_over = 5 ;
+
+  // Values of overcoordination parameters
+
+  double over_param[MAXOVERP] =   {
+    // Lucas's parameters for overcoordination
+    // 75.0,                    // pover
+    // 9.6000387075695e-01,     // r0
+    // -2.5881042987450e-01,    // p1
+    // 3.8995379237250e+00,     // p2
+    // -8.9                     // lambda6
+    //
+    // Chenoweth values
+    50.0,      // pover
+    1.0165,    // r0
+    -0.0657,   // p1
+    5.0451,    // p2
+    -3.6141    // lambda6
+  } ;
+  
   //define spline parameters:
   double smin=0.75 ;
   double smax=6.0;//spline fitting from 0-8 Angstroms.
   // const double sdelta=0.05;//0.025; //grid spacing
   double sdelta=0.05 ; //0.025; //grid spacing
 
-  read_lsq_input(nlayers, fit_coul, pair_type, ifsubtract_coord, fit_pover, cheby_order,
-		 smin, smax, sdelta) ;
+  read_lsq_input(argv[1],nlayers, fit_coul, pair_type, ifsubtract_coord, fit_pover, cheby_order,
+		 smin, smax, sdelta, n_over, over_param) ;
+
+
+  echo_lsq_input(nlayers, fit_coul, pair_type, ifsubtract_coord, fit_pover, cheby_order,
+		 smin, smax, sdelta, n_over, over_param) ;
 
   ////Read input file input.xyzf:
   ////xyz format in Angs, three box dimensions in the info line.
@@ -229,13 +265,15 @@ int main(int argc, char* argv[])
       if ( ifsubtract_coord ) 
 	{
 	  SubtractCoordForces(Coord[N], Force[N], Lb[N], Latcons[N], 
-			      nlayers, Nat[N], false, Pover[N]) ;
+			      nlayers, Nat[N], false, Pover[N],
+			      n_over, over_param) ;
 	}
       if ( fit_pover ) 
 	// Fit the overcoordination parameter.
 	{
 	  SubtractCoordForces(Coord[N], Force[N], Lb[N], Latcons[N], 
-			      nlayers, Nat[N], true, Pover[N]) ;
+			      nlayers, Nat[N], true, Pover[N],
+			      n_over, over_param) ;
 	}
     }
 
@@ -326,22 +364,34 @@ int main(int argc, char* argv[])
     header << smin << "\n" << smax << "\n" << snum/3 << "\n" ;
   }
   
+  if ( fit_pover || ifsubtract_coord ) 
+    {
+      header << n_over << endl ;
+      for ( int k = 0 ; k < n_over ; k++ ) 
+	{
+	  header << over_param[k] << endl ;
+	}
+    }
+  else {
+    header << "0" << endl ;
+  }
+
   return 0;    
 }
 
 
 
-static void read_lsq_input(int &nlayers, 
+static void read_lsq_input(const char *input_filename, int &nlayers, 
 			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
 			   bool &fit_pover, int &cheby_order, double &smin,
-			   double &smax, double &sdelta) 
+			   double &smax, double &sdelta, int &n_over, double *over_params) 
 // Read program input from the file "splines_ls.in".
 {
   FILE *fin ;
   const int bufsz = 1024 ;
   char buf[bufsz] ;
 
-  fin = fopen("splines_ls.in", "r") ;
+  fin = fopen(input_filename, "r") ;
   if ( fin == NULL ) 
     {
       cout << "Error: could not open splines_ls.in\n" ; 
@@ -402,6 +452,33 @@ static void read_lsq_input(int &nlayers,
 	{
 	  fit_pover = parse_tf(val, bufsz, line) ;
 	}
+      else if ( strncmp(name, "over_params", bufsz) == 0 ) 
+	{
+	  sscanf(val, "%d", &n_over) ;
+	  if ( val <= 0 ) 
+	    {
+	      cout << "Error: number of overcoordination params <= 0\n" ;
+	      exit(1) ;
+	    }
+	  else if ( n_over > MAXOVERP ) 
+	    {
+	      cout << "Error: maximum number of overcoordination params exceeded\n" ;
+	      exit(1) ;
+	    }
+	  for ( int k = 0 ; k < n_over ; k++ ) 
+	    {
+	      val = strtok(NULL, " ") ;
+	      if ( val == NULL || val[0] == 0 ) 
+		{
+		  cout << "Error: overcoordination parameter " <<
+		    k << " not found\n" ;
+		}
+	      else 
+		{
+		  sscanf(val, "%lf", &over_params[k]) ;
+		}
+	    }
+	}
       else if ( strncmp(name, "pair_type", bufsz) == 0 ) 
 	{
 	  if ( strncmp(val, "spline", bufsz) == 0 ) 
@@ -444,5 +521,72 @@ static void read_lsq_input(int &nlayers,
     {
       printf("Error while reading splines_ls.in\n") ;
       exit(1) ;
+    }
+}
+
+
+
+static void echo_lsq_input(int nlayers, 
+			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord,
+			   bool fit_pover, int cheby_order, double smin,
+			   double smax, double sdelta, int n_over, 
+			   const double *over_params) 
+// Read program input from the file "splines_ls.in".
+{
+  printf("Number of layers used in force evaluation = %d\n", nlayers) ;
+
+  if ( pair_type == CHEBYSHEV ) 
+    {
+      printf("Chebyshev pair interaction used\n") ;
+      printf("Number of chebyshev terms = %d\n", cheby_order) ;
+    }
+  else if ( pair_type == SPLINE ) 
+    {
+      printf("Spline pair interaction used\n") ;
+      printf("Spline point spacing = %13.6e\n", sdelta) ;
+    }
+  else if ( pair_type == INVERSE_R ) 
+    {
+      printf("Inverse power pair interaction used\n") ;
+    }
+  else if ( pair_type == LJ ) 
+    {
+      printf("Lennard-Jones pair interaction used\n") ;
+    }
+  else if ( pair_type == STILLINGER ) 
+    {
+      printf("Stillinger pair interaction used\n") ;
+    }
+  printf("Pair interaction minimum distance = %13.6e\n", smin) ;
+  printf("Pair interaction maximum distance = %13.6e\n", smax) ;
+
+  if ( fit_coul ) 
+    {
+      printf("Coulomb parameters will be determined by fitting\n") ;
+    }
+  else 
+    {
+      printf("Coulomb interactions will not be considered\n") ;
+    }
+  
+  if ( if_subtract_coord ) 
+    {
+      printf("Overcoordination forces will be subtracted before fitting\n") ;
+    }
+  else if ( fit_pover ) 
+    {
+      printf("Overcoordination linear parameter will be fit to forces\n") ;
+    }
+
+  if ( if_subtract_coord ) 
+    {
+      printf("Linear overcoordination parameter pover = %13.6e\n", over_params[0] ) ;
+    }
+  if ( if_subtract_coord || fit_pover ) 
+    {
+      printf("Overcoordination r0 = %13.6e\n", over_params[1]) ;
+      printf("                 p1 = %13.6e\n", over_params[2]) ;
+      printf("                 p2 = %13.6e\n", over_params[3]) ;
+      printf("             lambda = %13.6e\n", over_params[4]) ;
     }
 }

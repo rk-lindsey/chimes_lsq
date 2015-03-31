@@ -30,13 +30,13 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 
 static double kinetic_energy(double *Mass, double **Vel, int nat) ;
 
-
 static double 
 numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double smin,
 		   const double smax, const double sdelta,const int snum, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
-		   bool if_coulomb,bool if_overcoord) ;
+		   bool if_coulomb,bool if_overcoord, int n_over,
+		   double *over_param) ;
 
 int main(int argc, char* argv[])
 {
@@ -96,6 +96,24 @@ int main(int argc, char* argv[])
   bool num_pressure = false ;
 
   char params_file[1024] = "params.txt" ;
+
+  double over_param[MAXOVERP] =   {
+    // Lucas's parameters for overcoordination
+    // 75.0,                    // pover
+    // 9.6000387075695e-01,     // r0
+    // -2.5881042987450e-01,    // p1
+    // 3.8995379237250e+00,     // p2
+    // -8.9                     // lambda6
+    //
+    // Chenoweth values
+    50.0,      // pover
+    1.0165,    // r0
+    -0.0657,   // p1
+    5.0451,    // p2
+    -3.6141    // lambda6
+  } ;
+
+  int n_over = 5 ;
 
   double thoover_fs = 0.0 ;
 
@@ -401,6 +419,24 @@ int main(int argc, char* argv[])
     smax = Latcons[0] / 2.0 ;
     smin = 0.0 ;
   }
+  if ( if_overcoord ) 
+    {
+      // Read overcoordination parameters from the params file.
+      int n_over_read ;
+      paramread >> n_over_read ;
+      if ( n_over_read > 0 ) 
+	{
+	  printf("Reading overcoordination parameters from %s\n",
+		 params_file) ;
+	  n_over = n_over_read ;
+	  for ( int k = 0 ; k < n_over ; k++ ) 
+	    {
+	      paramread >> over_param[k] ;
+	      printf("Overcoordination parameter %d = %13.6e\n", k,
+		     over_param[k]) ;
+	    }
+	}
+    }
 
   double params[snum+4];
   double pot_params[snum/2+1] ;
@@ -600,7 +636,7 @@ int main(int argc, char* argv[])
 
       //this function calculates the spline and electrostatic forces.
       ZCalc(Coord,Lb,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
-	    pair_type,if_coulomb,if_overcoord,Accel,Vtot,Pxyz);
+	    pair_type,if_coulomb,if_overcoord,n_over,over_param,Accel,Vtot,Pxyz);
 
       if ( if_output_force ) 
 	{
@@ -675,7 +711,8 @@ int main(int argc, char* argv[])
 	{
 	  Pxyz = numerical_pressure(Coord,Lb, Q, Latcons,nlayers, nat,smin,
 				    smax, sdelta,snum, params, pot_params, 
-				    pair_type,if_coulomb,if_overcoord) ;
+				    pair_type,if_coulomb,if_overcoord,
+				    n_over, over_param) ;
 	}
       double Ptot = Pxyz + 2.0 * Ktot / (3.0 * Vol) ;
       // Unit conversion factor to GPa.
@@ -1093,7 +1130,8 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double smin,
 		   const double smax, const double sdelta,const int snum, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
-		   bool if_coulomb,bool if_overcoord) 
+		   bool if_coulomb,bool if_overcoord, int n_over,
+		   double *over_param) 
 // Evaluates the configurational part of the pressure numerically by -dU/dV.
 {
   double **Coord1 ;
@@ -1127,7 +1165,8 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
   Vol1 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
   ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
-	pot_params,pair_type,if_coulomb,if_overcoord,Accel,Vtot1,Pxyz);
+	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
+	Accel,Vtot1,Pxyz);
   
   lscale = 1.0 - eps ;
 
@@ -1145,7 +1184,8 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
   Vol2 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
   ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
-	pot_params,pair_type,if_coulomb,if_overcoord,Accel,Vtot2,Pxyz);
+	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
+	Accel,Vtot2,Pxyz);
 
   double result = -(Vtot2 - Vtot1)/(Vol2 - Vol1) ;
 

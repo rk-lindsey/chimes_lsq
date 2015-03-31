@@ -8,7 +8,8 @@ static void ZCalc_SR_Analytic(double **Coord,char *Lbc, double *Latcons,const in
 			      const int nat,const double smin,const double smax,
 			      double **SForce,double& Vtot,double& Pxyz) ;
 static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nlayers,
-			 const int nat,double **SForce,double& Vtot,double& Pxyz, double pover) ;
+			 const int nat,double **SForce,double& Vtot,double& Pxyz, int n_over,
+			 double *over_param) ;
 static void ZCalc_Stillinger(double **Coord, char *Lbc, double *Latcons,const int nlayers,
 			     const int nat, double smax, 
 			     double **SForce,double& Vtot,double& Pxyz) ;
@@ -44,11 +45,11 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,
 	   const int nat,const double smin,const double smax,
 	   const double sdelta,const int snum, 
 	   double *params, double *pot_params, Sr_pair_t pair_type,
-	   bool if_coulomb, bool if_overcoord,
+	   bool if_coulomb, bool if_overcoord, int n_over,
+	   double *over_params,
 	   double **SForce,double& Vtot,double& Pxyz)
 // Calculate the force, potential energy, and pressure.
 {
-  double pover ;
   double volume ;
 
   char *Lbc ;
@@ -110,9 +111,12 @@ void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,
 
   if ( if_overcoord ) 
     {
-      pover = params[snum+3] ;
+      // Take the overall magnitude of the overcoordination term from the list
+      // of linear parameters in params.
+      over_params[0] = params[snum+3] ;
       // cout << "POVER = " << pover << endl ;
-      ZCalcSR_Over(Coord,Lbc, Latcons,nlayers, nat,SForce, Vtot, Pxyz,pover) ;
+      ZCalcSR_Over(Coord,Lbc, Latcons,nlayers, nat,SForce, Vtot, Pxyz,
+		   n_over, over_params) ;
     }
 
   volume = Latcons[0] * Latcons[1] * Latcons[2] ;
@@ -438,7 +442,8 @@ static void ZCalc_SR_Analytic(double **Coord,char *Lbc, double *Latcons,const in
 
 
 static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nlayers,
-			 const int nat,double **SForce,double& Vtot,double& Pxyz, double pover)
+			 const int nat,double **SForce,double& Vtot,double& Pxyz, 
+			 int n_over, double *over_param) 
 // Calculate short-range overcoordination forces.
 {
   double Rvec[3], Rab[3] ;
@@ -456,7 +461,7 @@ static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nl
 
   ////MANY-BODY POTENTIAL:
   double Eover;
-  double p1,p2,r0,lambda6;
+  double pover,p1,p2,r0,lambda6;
   double rik,tempr,temps;
 
   //ReaxFF over-coordination parameters (from non-linear fitting).
@@ -467,10 +472,16 @@ static void ZCalcSR_Over(double **Coord, char *Lbc, double *Latcons,const int nl
   // lambda6=-8.9;
 
   // Chenoweth values for p1, p2, r0, lambda6 p(ovun2)
-  p1 = -0.0657 ;
-  p2 = 5.0451 ;
-  r0 = 1.0165 ;
-  lambda6 = -3.6141 ;
+  if ( n_over != 5 ) {
+    cout << "Error: wrong number of overcoordination parameters\n" ;
+    exit(1) ;
+  }
+
+  pover   = over_param[0] ;
+  r0      = over_param[1] ;
+  p1      = over_param[2] ;
+  p2      = over_param[3] ;
+  lambda6 = over_param[4] ;
 
   Eover=0.0;
 
@@ -1316,7 +1327,7 @@ static void ZCalc_Cheby_Deriv(double **Coord,string *Lb, double *Latcons,
 // from the total forces given in force.  
 void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latcons,
 			 const int nlayers, const int nat, bool calc_deriv, 
-			 double **Fderiv)
+			 double **Fderiv, int n_over, double *over_param)
 {
 
   double Rvec[3];
@@ -1338,19 +1349,32 @@ void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latco
   double rik,tempr,temps;
 
 
-  //really good here:
+  // Lucas paper draft parameters.
   // p1=  -2.5881042987450e-01   ; 
   // r0=  9.6000387075695e-01    ;
   // p2=  3.8995379237250e+00    ;
   // lambda6=     -8.9                 ;  
  
   // Chenoweth values for p1, p2, r0, lambda6 p(ovun2)
-  pover=50.0;
-  p1 = -0.0657 ;
-  p2 = 5.0451 ;
-  r0 = 1.0165 ;
-  lambda6 = -3.6141 ;
+  // pover=50.0;
+  // p1 = -0.0657 ;
+  // p2 = 5.0451 ;
+  // r0 = 1.0165 ;
+  // lambda6 = -3.6141 ;
+  
+  if ( n_over != 5 ) 
+    {
+      cout << "Error: wrong number of overcoordination parameters\n" ;
+      exit(1) ;
+    }
+  
+  pover = over_param[0] ;
+  r0    = over_param[1] ;
+  p1    = over_param[2] ;
+  p2   =  over_param[3] ;
+  lambda6 = over_param[4] ;
 
+  
   Vtot=0.0;
   Eover=0.0;
 
