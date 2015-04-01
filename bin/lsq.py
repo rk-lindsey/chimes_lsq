@@ -3,9 +3,10 @@
 import sys
 import numpy
 from numpy import *
-sys.path.append('/g/g90/koziol3/codes/mol/')
+##sys.path.append('/g/g90/koziol3/codes/mol/')
 ##import matrix
 from numpy.linalg import lstsq
+from datetime import *
 
 if(len(sys.argv) != 4):
     print "./lsq.py A.txt b.txt params.header"
@@ -29,6 +30,9 @@ if ( nlines != nlines2 ):
     exit(1) 
 
 np=len(af[0].split())
+print "# Date ", date.today() ;
+print "# Number of columns = ", np
+print "# Number of rows    = ", nlines
 
 A=zeros((nlines,np))
 b=zeros((nlines))
@@ -81,9 +85,9 @@ for a in range(0,len(b)):
     Z=Z+(y[a]-b[a])**2.0
     yfile.write("%13.6e\n"% y[a]) 
 
-print "RMS force error = " , sqrt(Z/float(nlines))
+print "# RMS force error = " , sqrt(Z/float(nlines))
 
-print "max x = ",  max(x)
+print "# max variable = ",  max(x)
 
 for i in range(0, len(hf)):
     sys.stdout.write(hf[i])
