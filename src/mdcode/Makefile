@@ -1,5 +1,5 @@
-CXX=g++ -g -Wall
-#CXX=icpc -fast -Wall
+#CXX=g++ -g -Wall
+CXX=icpc -fast -Wall
 CXX_SRC=splines_md.C functions.C Ewald.C
 CXX_INCLUDES=
 

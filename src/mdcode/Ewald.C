@@ -8,6 +8,12 @@ static void Ewald_K_Space_New(double alphasq, int k_cut,
 
 static void Ewald_K_Space_Orig(double alphasq, double **Coord,string *Lb, double *Latcons,
 			       const int nat,double **SForce,double& Vtot) ;
+static double add_sines(int kx, int ky, int kz, const double *sinx, const double *siny, 
+			const double *sinz, const double *cosx, const double *cosy, 
+			const double *cosz) ;
+static void generate_trig(double *sinx, double *siny, double *sinz,
+			  double *cosx, double *cosy, double *cosz,
+			  double *Rvec, double *Latcons, int kmax);
 
 void ZCalc_Ewald(double **Coord, string *Lb, double *Q, double *Latcons,const int nlayers,
 	   const int nat,const double smin,const double smax,
@@ -588,7 +594,7 @@ void ZCalc_Ewald_Deriv(double **Coord, string *Lb,
   double rkx,rky,rkz;
   double rksq;
 
-  double tempd;
+  double tempd, tempd2, tempd3, tempd4;
   double alpha=sqrt(alphasq);
   static double r_cut ;
   const double accuracy = EWALD_ACCURACY ;
@@ -599,13 +605,14 @@ void ZCalc_Ewald_Deriv(double **Coord, string *Lb,
   static bool called_before = false ;
   double dx,dy,dz,rlen_mi;
   static char *Lbc ;
-
+  static double *sinx, *cosx, *siny, *cosy, *sinz, *cosz ;
 
   double ke=1.0;//332.0637157615209;//this is the unit conversion
   //to achieve charges in nice electron units. 
   //currently we apply this conversion at MD-level, not here.
 
-  static double *Kfac_v, *kx_v, *ky_v, *kz_v ;
+  static double *Kfac_v ;
+  static int *kx_v, *ky_v, *kz_v ;
 
   if ( ! called_before ) {
     double r_acc, k_acc ;
@@ -621,26 +628,34 @@ void ZCalc_Ewald_Deriv(double **Coord, string *Lb,
 
     
     Kfac_v = new double [maxk] ;
-    kx_v   = new double [maxk] ;
-    ky_v   = new double [maxk] ;
-    kz_v   = new double [maxk] ;
+    kx_v   = new int [maxk] ;
+    ky_v   = new int [maxk] ;
+    kz_v   = new int [maxk] ;
+    sinx   = new double [maxk] ;
+    cosx   = new double [maxk] ;
+    siny   = new double [maxk] ;
+    cosy   = new double [maxk] ;
+    sinz   = new double [maxk] ;
+    cosz   = new double [maxk] ;
+
     totk = 0 ;
+
     double min_vfac = 1.0e8 ;
     for(int kx=0;kx<=kmax;kx++) 
-      for(int ky=-kmax;ky<=kmax;ky++)
-	for(int kz=-kmax;kz<=kmax;kz++)
+      for(int ky=0;ky<=kmax;ky++)
+	for(int kz=0;kz<=kmax;kz++)
 	  {
 	    ksq=kx*kx+ky*ky+kz*kz;
 	    if(ksq!=0 and ksq<ksqmax)
 	      {
 		rkx=(2.0*PI/Latcons[0])*kx;
-		kx_v[totk] = rkx ;
+		kx_v[totk] = kx ;
 		
 		rky=(2.0*PI/Latcons[1])*ky;
-		ky_v[totk] = rky ;
+		ky_v[totk] = ky ;
 
 		rkz=(2.0*PI/Latcons[2])*kz;
-		kz_v[totk] = rkz ;
+		kz_v[totk] = kz ;
 
 		rksq=rkx*rkx+rky*rky+rkz*rkz;
 		// Note:  The original version of the Ewald evaluator did not work 
@@ -746,51 +761,101 @@ void ZCalc_Ewald_Deriv(double **Coord, string *Lb,
         for(int c=0;c<3;c++)
           Rvec[c]=Coord[a2][c]-Coord[a1][c];
 
+	// Evaluate sin factors for this pair of atoms.
+	generate_trig(sinx, siny, sinz, cosx, cosy, cosz, Rvec, Latcons,kmax) ;
+
 	// Sum over all k vectors.
 	for ( int ik = 0 ; ik < totk ; ik++ ) {
-	  rkx = kx_v[ik] ;
-	  rky = ky_v[ik] ;
-	  rkz = kz_v[ik] ;
+	  int kx = kx_v[ik] ;
+	  int ky = ky_v[ik] ;
+	  int kz = kz_v[ik] ;
+
+	  rkx=(2.0*PI/Latcons[0])*kx;
+	  rky=(2.0*PI/Latcons[1])*ky;
+	  rkz=(2.0*PI/Latcons[2])*kz;
+
 	  Kfac= Kfac_v[ik];//exp(-1.0*rksq/(4.0*alpha*alpha))/rksq;
 
-	  tempd=sin(rkx*Rvec[0]+rky*Rvec[1]+rkz*Rvec[2]);
+	  // tempd=sin(rkx*Rvec[0]+rky*Rvec[1]+rkz*Rvec[2]) ;
+	  tempd=add_sines(kx, ky, kz, sinx, siny, sinz, cosx, cosy, cosz) ;
+
 	  tempd*=ke;
 	  tempd*=2.0 ; // Sum a1 > a2, not all a2.
 	  tempd *= Kfac * 0.5*(4*PI/Volume);
 
-	  if ( fabs(rkx) > 1.0e-10 ) tempd*=2.0 ; // Sum kx >= 0, not all kx ;
+	  if ( ky > 0 ) 
+	    {
+	      tempd2=add_sines(kx, -ky, kz, sinx, siny, sinz, cosx, cosy, cosz) ;
+
+	      tempd2*=ke;
+	      tempd2*=2.0 ; // Sum a1 > a2, not all a2.
+	      tempd2 *= Kfac * 0.5*(4*PI/Volume);
+
+	      if ( kz > 0 ) 
+		{
+		  tempd3=add_sines(kx, -ky, -kz, sinx, siny, sinz, cosx, cosy, cosz) ;
+		  tempd3*=ke;
+		  tempd3*=2.0 ; // Sum a1 > a2, not all a2.
+		  tempd3 *= Kfac * 0.5*(4*PI/Volume);
+		}
+	      else 
+		{
+		  tempd3 = 0.0 ;
+		}
+	    } 
+	  else 
+	    {
+	      tempd2 = 0.0 ;
+	    }
+
+	  if ( kz > 0 ) {
+	    tempd4=add_sines(kx, ky, -kz, sinx, siny, sinz, cosx, cosy, cosz) ;
+	    tempd4*=ke;
+	    tempd4*=2.0 ; // Sum a1 > a2, not all a2.
+	    tempd4 *= Kfac * 0.5*(4*PI/Volume);
+	  } else {
+	    tempd4 = 0.0 ;
+	  }
+
+	  if ( kx > 0 ) 
+	    {
+	      tempd*=2.0 ; // Sum kx >= 0, not all kx ;
+	      tempd2*=2.0 ; 
+	      tempd3*=2.0 ; 
+	      tempd4*=2.0 ; 
+	    }
 
 	  if(Lbc[a1]=='O' and Lbc[a2]=='O')
 	    {
-	      coul_oo[a1][0]+=tempd*rkx;
-	      coul_oo[a1][1]+=tempd*rky;
-	      coul_oo[a1][2]+=tempd*rkz;
+	      coul_oo[a1][0]+=(tempd+tempd2+tempd3+tempd4)*rkx;
+	      coul_oo[a1][1]+=(tempd-tempd2-tempd3+tempd4)*rky;
+	      coul_oo[a1][2]+=(tempd+tempd2-tempd3-tempd4)*rkz;
 						                                 
-	      coul_oo[a2][0]-=tempd*rkx;
-	      coul_oo[a2][1]-=tempd*rky;
-	      coul_oo[a2][2]-=tempd*rkz;
+	      coul_oo[a2][0]-=(tempd+tempd2+tempd3+tempd4)*rkx;
+	      coul_oo[a2][1]-=(tempd-tempd2-tempd3+tempd4)*rky;
+	      coul_oo[a2][2]-=(tempd+tempd2-tempd3-tempd4)*rkz;
 
 	    }
 	  else if((Lbc[a1]=='O' and Lbc[a2]=='H') or (Lbc[a1]=='H' and Lbc[a2]=='O'))
 	    {
-	      coul_oh[a1][0]+=tempd*rkx;
-	      coul_oh[a1][1]+=tempd*rky;
-	      coul_oh[a1][2]+=tempd*rkz;
+	      coul_oh[a1][0]+=(tempd+tempd2+tempd3+tempd4)*rkx;
+	      coul_oh[a1][1]+=(tempd-tempd2-tempd3+tempd4)*rky;
+	      coul_oh[a1][2]+=(tempd+tempd2-tempd3-tempd4)*rkz;
 		    
-	      coul_oh[a2][0]-=tempd*rkx;
-	      coul_oh[a2][1]-=tempd*rky;
-	      coul_oh[a2][2]-=tempd*rkz;
+	      coul_oh[a2][0]-=(tempd+tempd2+tempd3+tempd4)*rkx;
+	      coul_oh[a2][1]-=(tempd-tempd2-tempd3+tempd4)*rky;
+	      coul_oh[a2][2]-=(tempd+tempd2-tempd3-tempd4)*rkz;
 
 	    }
 	  else if(Lbc[a1]=='H' and Lbc[a2]=='H')
 	    {
-	      coul_hh[a1][0]+=tempd*rkx;
-	      coul_hh[a1][1]+=tempd*rky;
-	      coul_hh[a1][2]+=tempd*rkz;
+	      coul_hh[a1][0]+=(tempd+tempd2+tempd3+tempd4)*rkx;
+	      coul_hh[a1][1]+=(tempd-tempd2-tempd3+tempd4)*rky;
+	      coul_hh[a1][2]+=(tempd+tempd2-tempd3-tempd4)*rkz;
 		    
-	      coul_hh[a2][0]-=tempd*rkx;
-	      coul_hh[a2][1]-=tempd*rky;
-	      coul_hh[a2][2]-=tempd*rkz;
+	      coul_hh[a2][0]-=(tempd+tempd2+tempd3+tempd4)*rkx;
+	      coul_hh[a2][1]-=(tempd-tempd2-tempd3+tempd4)*rky;
+	      coul_hh[a2][2]-=(tempd+tempd2-tempd3-tempd4)*rkz;
 
 	    }
 	}
@@ -806,3 +871,83 @@ void ZCalc_Ewald_Deriv(double **Coord, string *Lb,
 
   return;
 }
+
+static double add_sines(int kx, int ky, int kz, const double *sinx, const double *siny, 
+			const double *sinz, const double *cosx, const double *cosy, 
+			const double *cosz) 
+// Add precomputed sines to get overall factor.
+{
+  double sinkx, sinky, sinkz ;
+  double coskx, cosky, coskz ;
+  double sinxyz, sinyz, cosyz ;
+  
+  if ( kx >= 0 ) 
+    {
+      sinkx = sinx[kx] ;
+      coskx = cosx[kx] ;
+    }
+  else 
+    {
+      sinkx = -sinx[-kx] ;
+      coskx = cosx[-kx] ;
+    }
+  if ( ky >= 0 ) 
+    {
+      sinky = siny[ky] ;
+      cosky = cosy[ky] ;
+    }
+  else 
+    {
+      sinky = -siny[-ky] ;
+      cosky = cosy[-ky] ;
+    }
+  if ( kz >= 0 ) 
+    {
+      sinkz = sinz[kz] ;
+      coskz = cosz[kz] ;
+    }
+  else 
+    {
+      sinkz = -sinz[-kz] ;
+      coskz = cosz[-kz] ;
+    }
+
+  sinyz = sinky * coskz + cosky * sinkz ;
+  cosyz = cosky * coskz - sinky * sinkz ;
+
+  sinxyz = sinkx * cosyz + coskx * sinyz ;
+
+  return(sinxyz) ;
+}
+
+static void generate_trig(double *sinx, double *siny, double *sinz,
+			  double *cosx, double *cosy, double *cosz,
+			  double *Rvec, double *Latcons, int kmax)
+{
+  sinx[0] = siny[0] = sinz[0] = 0.0 ;
+  cosx[0] = cosy[0] = cosz[0] = 1.0 ;
+
+  sinx[1] = sin(2.0 * M_PI * Rvec[0] / Latcons[0]) ;
+  siny[1] = sin(2.0 * M_PI * Rvec[1] / Latcons[1]) ;
+  sinz[1] = sin(2.0 * M_PI * Rvec[2] / Latcons[2]) ;
+
+  cosx[1] = cos(2.0 * M_PI * Rvec[0] / Latcons[0]) ;
+  cosy[1] = cos(2.0 * M_PI * Rvec[1] / Latcons[1]) ;
+  cosz[1] = cos(2.0 * M_PI * Rvec[2] / Latcons[2]) ;
+  
+  // Use angle addition formula recursively.
+  for ( int ik = 2 ; ik <= kmax ; ik++ ) {
+    sinx[ik] = sinx[ik-1] * cosx[1] + cosx[ik-1] * sinx[1] ;
+    siny[ik] = siny[ik-1] * cosy[1] + cosy[ik-1] * siny[1] ;
+    sinz[ik] = sinz[ik-1] * cosz[1] + cosz[ik-1] * sinz[1] ;
+
+    cosx[ik] = cosx[ik-1] * cosx[1] - sinx[ik-1] * sinx[1] ;
+    cosy[ik] = cosy[ik-1] * cosy[1] - siny[ik-1] * siny[1] ;
+    cosz[ik] = cosz[ik-1] * cosz[1] - sinz[ik-1] * sinz[1] ;
+  }
+
+}
+
+
+
+
