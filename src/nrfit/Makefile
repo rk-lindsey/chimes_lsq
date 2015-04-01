@@ -1,15 +1,21 @@
 CC=gcc
 CFLAGS=-g -Wall
 
+all : nrfit
+
 nrfit : nrfit.o nrutil.o dfpmin.o amebsa.o powell.o linmin.o ran1.o mnbrak.o f1dim.o brent.o amoeba.o amotry.o
 	$(CC) nrfit.o nrutil.o dfpmin.o amebsa.o powell.o linmin.o ran1.o \
 brent.o mnbrak.o f1dim.o amoeba.o amotry.o -lm -o nrfit
+	cp nrfit ../../bin
 
 .c.o :
 	$(CC) -c  $(CFLAGS) $(DEFINES) $(INCLUDES) $*.c 
 
 clean : 
-	rm -f *.o *~ nrfit *.out
+	rm -f *.o *~ *.out
+
+realclean :
+	rm -f nrfit
 
 ## All available optimization options are tested.  In some cases
 ## Powell's method follows a global optimization method.
