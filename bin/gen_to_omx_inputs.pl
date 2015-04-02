@@ -7,36 +7,59 @@
 # These files can then be used to generate DFT forces from DFTB or force field 
 # D trajectories.
 #
-# Usage:  gen_to_omx_inputs.pl <gen file> <openmx header> <openmx footer> <basename>
+# Usage:  gen_to_omx_inputs.pl <gen file> <openmx header> <openmx footer> <msub header> <basename>
 #
 use strict ;
 use warnings ;
 
-die "Usage:  gen_to_omx_inputs.pl <gen file> <openmx header> <openmx footer> <basename>\n"
-  unless ( scalar(@ARGV) == 4 ) ;
+die "Usage:  gen_to_omx_inputs.pl <gen file> <openmx header> <openmx footer> <msub header> <basename>\n"
+  unless ( scalar(@ARGV) == 5 ) ;
 
 open(GEN,"<",$ARGV[0])    or die "Could not open $ARGV[0] for reading\n" ;
 open(HEADER,"<",$ARGV[1]) or die "Could not open $ARGV[1] for reading\n" ;
 open(FOOTER,"<",$ARGV[2]) or die "Could not open $ARGV[2] for reading\n" ;
-my $basename = $ARGV[3] ;
+open(MSUBHEADER, "<", $ARGV[3]) or die "Could not open $ARGV[3] for reading\n" ;
+my $basename = $ARGV[4] ;
 
 my %valence = ( 
+		H => 1,
+	       He => 2,
+	       Li => 1,
+	       Be => 2,
 	        B => 3,
 	        C => 4,
 		N => 5,
 		O => 6,
 		F => 7,
 		Ne => 8,
-		H => 1,
 	        Cl => 7
 	      ) ;
 
-my $header=join("", <HEADER>) ;
+
+my $header="";
 my $footer=join("", <FOOTER>) ;
+my $systemname ;
+my $msub = join("",<MSUBHEADER>) ;
+
+while ( <HEADER> ) {
+  if ( /System.Name/ ) {
+    my @f = split(" ") ;
+    $systemname = $f[1] ;
+  }
+  $header .= $_ ;
+}
+die "System name not defined\n" unless defined($systemname) ;
+
 close HEADER ;
 close FOOTER ;
+close MSUBHEADER ;
 
 my $count = 1 ;
+
+open(MSUB,">","$basename.msub") 
+  or die "Could not open $basename.msub for writing\n" ;
+print MSUB $msub ;
+
 while ( 1 ) {
   
   my (@x, @y, @z, @type) ;
@@ -107,7 +130,12 @@ SEC2
 
   print OMX $footer ;
   close(OMX) ;
+
+  my $outputname = "$basename.$count.log" ;
+  print MSUB "\$SRUN \$OPENMX $filename \$THREADS > $outputname\n" ;
+  print MSUB "mv $systemname.out $systemname.$count.out\n" ;
   $count++ ;
 }
 
 printf ("Created %d OpenMX inputs\n", $count-1) ;
+printf ("Created batch submission file $basename.msub\n") ;
