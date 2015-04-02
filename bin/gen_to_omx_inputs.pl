@@ -133,7 +133,9 @@ SEC2
 
   my $outputname = "$basename.$count.log" ;
   print MSUB "\$SRUN \$OPENMX $filename \$THREADS > $outputname\n" ;
-  print MSUB "mv $systemname.out $systemname.$count.out\n" ;
+  my $movecmd = sprintf("mv %s.out %s.%04d.out\n",
+			$systemname, $systemname, $count) ;
+  print MSUB $movecmd ;
   $count++ ;
 }
 

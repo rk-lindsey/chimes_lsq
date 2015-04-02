@@ -6,7 +6,16 @@ use strict ;
 use warnings ;
 use POSIX qw/floor/ ;
 
-my $rmin = <> ;
+while ( <> ) {
+  # Read initial comments.
+  if ( !( $_ =~ /^\#/ ) )  {
+    last ;
+  }
+  print
+  ;
+}
+$_ = <> ;
+my $rmin = $_ ;
 chomp $rmin ;
 
 my $rmax = <> ;
@@ -17,7 +26,14 @@ chomp $sdelta ;
 
 my $snum = floor(($rmax - $rmin) / $sdelta) ;
 
-print "Number of parameters = $snum\n" ;
+print "Number of spline points = $snum\n" ;
+
+# Read past overcoordination parameters.
+my $nover = <> ;
+chomp $nover ;
+for my $i ( 1 .. $nover ) {
+  $_ = <> ;
+}
 
 my (@dvdr, @pot) ;
 
