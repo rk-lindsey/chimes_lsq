@@ -394,21 +394,27 @@ int main(int argc, char* argv[])
     
   //spline parameters are in params.txt which is outputted from spline fitting and SVD programs.
 
-  string tempstring;
   int tempint;
 
   // Read smin, smax, sdelta from params file instead of using built-in values.
+  char buf[1024] ;
+  do {
+    paramread.getline(buf,1024) ;
+  } while (buf[0] == '#' ) ;
+  sscanf(buf,"%lf",&smin) ;
+  
   int snum ;
+
   if ( pair_type == SPLINE ) 
     {
-      paramread >> smin >> smax >> sdelta ;
+      paramread >> smax >> sdelta ;
       cout << "Spline minimum = " << smin << endl ;
       cout << "Spline maximum = " << smax << endl ;
       cout << "Spline step    = " << sdelta << endl ;
       snum=(2+floor((smax-smin)/sdelta))*2*3;//2 is for p0/m0/p1/m1, and 3 is for oo/oh/hh.
     }
   else if ( pair_type == CHEBYSHEV ) {
-    paramread >> smin >> smax >> snum ;
+    paramread >> smax >> snum ;
     cout << "Cheby minimum = " << smin << endl ;
     cout << "Cheby maximum = " << smax << endl ;
     cout << "Cheby order    = " << snum << endl ;
