@@ -10,13 +10,13 @@ using namespace std;
 
 static void read_lsq_input(const char *input_filename, int &nlayers, 
 			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
-			   bool &fit_pover, int &cheby_order, double &smin,
-			   double &smax, double &sdelta, int &n_over, double *over_param) ;
+			   bool &fit_pover, int &cheby_order, double *smin,
+			   double *smax, double *sdelta, int &n_over, double *over_param) ;
 
 static void echo_lsq_input(int nlayers, 
 			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord,
-			   bool fit_pover, int cheby_order, double smin,
-			   double smax, double sdelta, int n_over, 
+			   bool fit_pover, int cheby_order, const double *smin,
+			   const double *smax, const double *sdelta, int n_over, 
 			   const double *over_params)  ;
 
 int main(int argc, char* argv[])
@@ -76,10 +76,17 @@ int main(int argc, char* argv[])
   } ;
   
   //define spline parameters:
-  double smin=0.75 ;
-  double smax=6.0;//spline fitting from 0-8 Angstroms.
+  double smin[NPAIR] ;   // Beginning of spline/fit.
+  double smax[NPAIR] ;   // End of spline/fit
   // const double sdelta=0.05;//0.025; //grid spacing
-  double sdelta=0.05 ; //0.025; //grid spacing
+  double sdelta[NPAIR];  // Step size of spline.
+
+  for ( int i = 0 ; i < NPAIR ; i++ ) 
+    {
+      smax[i] =   6.0 ;
+      smin[i] =   0.5 ;
+      sdelta[i] = 0.1 ;
+    }
 
   read_lsq_input(argv[1],nlayers, fit_coul, pair_type, ifsubtract_coord, fit_pover, cheby_order,
 		 smin, smax, sdelta, n_over, over_param) ;
@@ -118,14 +125,23 @@ int main(int argc, char* argv[])
   std::vector<double**> Pover ;
   Pover.reserve(nframes);
 
-  int snum ;
+  int snum[NPAIR] ;
+  int tot_snum ;
 
-  if ( pair_type != CHEBYSHEV ) {
-      snum=(2+floor((smax-smin)/sdelta))*2*3;//2 is for p0/m0/p1/m1, and 3 is for oo/oh/hh.
-  } else {
-    snum = cheby_order * 3 ;
-  }
-  cout << "The number of short-range parameters is " << snum << endl ;
+  tot_snum = 0 ;
+  for ( int i = 0 ; i < NPAIR ; i++ ) 
+    {
+      if ( pair_type != CHEBYSHEV ) 
+	{
+	  snum[i]=(2+floor((smax[i]-smin[i])/sdelta[i]))*2;//2 is for p0/m0/p1/m1
+	}
+      else 
+	{
+	  snum[i] = cheby_order ;
+	}
+      tot_snum += snum[i] ;
+    }
+  cout << "The number of short-range parameters is " << tot_snum << endl ;
 
   std::vector<double*> Mass;
   Mass.reserve(nframes);
@@ -177,8 +193,8 @@ int main(int argc, char* argv[])
       tempA=new double **[tempnat];
       for(int a=0;a<tempnat;a++)
 	{
-	  tempA[a]=new double *[snum];
-	  for(int n=0;n<snum;n++)
+	  tempA[a]=new double *[tot_snum];
+	  for(int n=0;n<tot_snum;n++)
 	    {
 	      tempA[a][n]=new double[3];
 	      for(int c=0;c<3;c++)
@@ -257,7 +273,20 @@ int main(int argc, char* argv[])
   ////ZCalc_Deriv is the function that calculates elements of A.
   for(int N=0;N<nframes;N++) 
     {
-      ZCalc_Deriv(Coord[N],Lb[N],Latcons[N],nlayers,Nat[N],Als[N],
+      char *Lbc ;
+      
+      Lbc = new char [Nat[N]] ;
+      for(int a=0;a<Nat[N];a++) {
+	if ( Lb[N][a] == "O" ) {
+	  Lbc[a] = 'O' ;
+	} else if ( Lb[N][a] == "H" ) {
+	  Lbc[a] = 'H' ;
+	} else {
+	  cout << "Error: unknown element " << Lb[N][a] << "\n" ;
+	}
+      }
+
+      ZCalc_Deriv(Coord[N],Lbc,Latcons[N],nlayers,Nat[N],Als[N],
 		  smin,smax,sdelta,snum,Coul_oo[N],Coul_oh[N],Coul_hh[N],
 		  pair_type);
 
@@ -275,6 +304,8 @@ int main(int argc, char* argv[])
 			      nlayers, Nat[N], true, Pover[N],
 			      n_over, over_param) ;
 	}
+
+      delete[] Lbc ;
     }
 
 
@@ -296,7 +327,7 @@ int main(int argc, char* argv[])
 	for(int c=0;c<3;c++)
 	  {
 	    //Afile
-	    for(int n=0;n<snum;n++) 
+	    for(int n=0;n<tot_snum;n++) 
 	      {
 		//	    if ( n % 2 == 1 ) 
 		//{
@@ -326,7 +357,7 @@ int main(int argc, char* argv[])
 
   //Afile charge conservation (q00 + 4 qOH + qHH = 0 )
   if ( fit_coul ) {
-    for(int n=0;n<snum;n++)
+    for(int n=0;n<tot_snum;n++)
       fileA<<"0.0 ";
 
     fileA<<"1000.0 4000.0 4000.0"; // 0.0"<<endl;
@@ -341,7 +372,7 @@ int main(int argc, char* argv[])
 
 
     //Afile charge consistency (qOO - 4 qHH = 0)
-    for(int n=0;n<snum;n++)
+    for(int n=0;n<tot_snum;n++)
       fileA<<"0.0 ";
     fileA<<"1000.0 0000.0 -4000.0" ;
     ////bfile charge consistency
@@ -357,24 +388,35 @@ int main(int argc, char* argv[])
   } 
 
   //cout<<endl<<endl;
-  ofstream header("params.header") ;
-  if ( pair_type != CHEBYSHEV ) {
-    header << smin << "\n" << smax << "\n" << sdelta << "\n" ;
-  } else {
-    header << smin << "\n" << smax << "\n" << snum/3 << "\n" ;
+  FILE *header = fopen("params.header","w") ;
+  if ( header == NULL ) 
+    {
+      cout << "Error: could not write to params.header\n" ;
+      exit(1) ;
+    }
+
+  fprintf(header, "npair %d\n", NPAIR) ;
+
+  for ( int i = 0 ; i < NPAIR ; i++ ) {
+    if ( pair_type != CHEBYSHEV ) {
+      fprintf(header, "%8.5f %8.5f %8.5f\n", smin[i], smax[i], sdelta[i]) ;
+    } else {
+      fprintf(header, "%8.5f %8.5f %d\n", smin[i], smax[i], snum[i]) ;
+    }
   }
   
   if ( fit_pover || ifsubtract_coord ) 
     {
-      header << n_over << endl ;
+      fprintf(header,"%d\n",n_over) ;
       for ( int k = 0 ; k < n_over ; k++ ) 
 	{
-	  header << over_param[k] << endl ;
+	  fprintf(header,"%21.13e\n",over_param[k]) ;
 	}
     }
   else {
-    header << "0" << endl ;
+    fprintf(header,"0\n") ;
   }
+  fclose(header) ;
 
   return 0;    
 }
@@ -383,8 +425,8 @@ int main(int argc, char* argv[])
 
 static void read_lsq_input(const char *input_filename, int &nlayers, 
 			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
-			   bool &fit_pover, int &cheby_order, double &smin,
-			   double &smax, double &sdelta, int &n_over, double *over_params) 
+			   bool &fit_pover, int &cheby_order, double *smin,
+			   double *smax, double *sdelta, int &n_over, double *over_params) 
 // Read program input from the file "splines_ls.in".
 {
   FILE *fin ;
@@ -414,31 +456,34 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
       char *val = strtok(NULL, " ") ;
 
       // Get rid of new line character.
-      int iend = strlen(val) - 1 ;
-      if ( iend > 0 && val[iend] == '\n' ) {
-	val[iend] = 0 ;
+      if ( val != NULL ) {
+	int iend = strlen(val) - 1 ;
+	if ( iend > 0 && val[iend] == '\n' ) {
+	  val[iend] = 0 ;
+	}
       }
       if ( strncmp(name,"nlayers",bufsz) == 0 ) 
 	{
 	  sscanf(val, "%d", &nlayers) ;
-	  //	  printf("Number of layers = %d\n", nlayers) ;
 	}
       else if ( strncmp(name,"cheby_order",bufsz) == 0 ) 
 	{
 	  sscanf(val, "%d", &cheby_order) ;
-	  //	  printf("Number of layers = %d\n", nlayers) ;
 	}
       else if ( strncmp(name,"smin",bufsz) == 0 ) 
 	{
-	  sscanf(val, "%lf", &smin) ;
+	  sscanf(val, "%lf", &smin[0]) ;
+	  parse_param_list(&smin[1], NPAIR-1, "smin") ;
 	}
       else if ( strncmp(name,"smax",bufsz) == 0 ) 
 	{
-	  sscanf(val, "%lf", &smax) ;
+	  sscanf(val, "%lf", &smax[0]) ;
+	  parse_param_list(&smax[1], NPAIR-1, "smax") ;
 	}
       else if ( strncmp(name,"sdelta",bufsz) == 0 ) 
 	{
-	  sscanf(val, "%lf", &sdelta) ;
+	  sscanf(val, "%lf", &sdelta[0]) ;
+	  parse_param_list(&sdelta[1], NPAIR-1, "sdelta") ;
 	}
       else if ( strncmp(name,"fit_coulomb",bufsz) == 0 ) 
 	{
@@ -465,19 +510,7 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
 	      cout << "Error: maximum number of overcoordination params exceeded\n" ;
 	      exit(1) ;
 	    }
-	  for ( int k = 0 ; k < n_over ; k++ ) 
-	    {
-	      val = strtok(NULL, " ") ;
-	      if ( val == NULL || val[0] == 0 ) 
-		{
-		  cout << "Error: overcoordination parameter " <<
-		    k << " not found\n" ;
-		}
-	      else 
-		{
-		  sscanf(val, "%lf", &over_params[k]) ;
-		}
-	    }
+	  parse_param_list(over_params, n_over, "overcoordination") ;
 	}
       else if ( strncmp(name, "pair_type", bufsz) == 0 ) 
 	{
@@ -528,8 +561,8 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
 
 static void echo_lsq_input(int nlayers, 
 			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord,
-			   bool fit_pover, int cheby_order, double smin,
-			   double smax, double sdelta, int n_over, 
+			   bool fit_pover, int cheby_order, const double *smin,
+			   const double *smax, const double *sdelta, int n_over, 
 			   const double *over_params) 
 // Read program input from the file "splines_ls.in".
 {
@@ -543,7 +576,10 @@ static void echo_lsq_input(int nlayers,
   else if ( pair_type == SPLINE ) 
     {
       printf("Spline pair interaction used\n") ;
-      printf("Spline point spacing = %13.6e\n", sdelta) ;
+
+      for ( int i = 0 ; i < NPAIR ; i++ ) {
+	printf("Spline point spacing for pair %d = %13.6e\n", i, sdelta[i]) ;
+      }
     }
   else if ( pair_type == INVERSE_R ) 
     {
@@ -557,8 +593,11 @@ static void echo_lsq_input(int nlayers,
     {
       printf("Stillinger pair interaction used\n") ;
     }
-  printf("Pair interaction minimum distance = %13.6e\n", smin) ;
-  printf("Pair interaction maximum distance = %13.6e\n", smax) ;
+
+  for ( int i = 0 ; i < NPAIR ; i++ ) {
+    printf("Pair interaction minimum distance for pair %d = %13.6e\n", i, smin[i]) ;
+    printf("Pair interaction maximum distance for pair %d = %13.6e\n", i, smax[i]) ;
+  }
 
   if ( fit_coul ) 
     {

@@ -12,6 +12,9 @@ my $morse     = 1 ;
 my (@coef, @tn, @tnd) ;
 my ($x, $force) ;
 
+my $npair ;
+my (@rmin, @rmax, @order) ;
+
 my $lambda = 1.25 ;
 
 while ( <> ) {
@@ -22,18 +25,20 @@ while ( <> ) {
   print
   ;
 }
-my $rmin = $_ ;
-chomp $rmin ;
+my @f = split(" ") ;
+$npair = $f[1] ;
+chomp $npair ;
 
-my $rmax = <> ;
-chomp $rmax ;
+if ( $npair <= 0 ) {
+  die "A positive number of pairs is required\n" ;
+}
 
-my $order = <> ;
-chomp $order ;
+for my $i ( 0 .. $npair - 1 ) {
+  $_ = <> ;
+  ($rmin[$i], $rmax[$i], $order[$i]) = split(" ") ;
+  print "Rmin = $rmin[$i] Rmax = $rmax[$i] Order = $order[$i]\n" ;
+}
 
-print "Rmin = $rmin\n" ;
-print "Rmax = $rmax\n" ;
-print "Order = $order\n" ;
 
 # Read past overcoordination parameters.
 my $nover = <> ;
@@ -42,10 +47,10 @@ for my $i ( 1 .. $nover ) {
   $_ = <> ;
 }
 
-foreach my $atom (0 .. 2) {
-  open(OUT, ">cheby.$atom.out\n") ;
-  open(POT, ">chebypot.$atom.out\n") ;
-  foreach my $k (0 .. $order-1) {
+foreach my $ipr (0 .. $npair - 1) {
+  open(OUT, ">cheby.$ipr.out\n") ;
+  open(POT, ">chebypot.$ipr.out\n") ;
+  foreach my $k (0 .. $order[$ipr]-1) {
     $_ = <> ;
     die "File ended prematurely\n" unless defined($_) ;
     my @f = split(" ") ;
@@ -54,23 +59,23 @@ foreach my $atom (0 .. 2) {
   }
   
   for ( my $i = 0 ; $i < 100 ; $i++ ) {
-    my $r = $rmin + $i * ($rmax-$rmin)/99 ;
+    my $r = $rmin[$ipr] + $i * ($rmax[$ipr]-$rmin[$ipr])/99 ;
 
     my ($ravg, $rdiff, $x) ;
 
     if ( $inverse_r > 0 ) {
-      $ravg = 0.5 * ( 1.0 / $rmin + 1.0 / $rmax ) ;
-      $rdiff = 0.5 * ( 1.0 / $rmin - 1.0 / $rmax ) ;
+      $ravg = 0.5 * ( 1.0 / $rmin[$ipr] + 1.0 / $rmax[$ipr] ) ;
+      $rdiff = 0.5 * ( 1.0 / $rmin[$ipr] - 1.0 / $rmax[$ipr] ) ;
       $x = (1.0/$r - $ravg) / $rdiff ;
     } elsif ( $morse > 0 ) {
-      my $xmax = exp(-$rmin/$lambda) ;
-      my $xmin = exp(-$rmax/$lambda) ;
+      my $xmax = exp(-$rmin[$ipr]/$lambda) ;
+      my $xmin = exp(-$rmax[$ipr]/$lambda) ;
       $ravg = 0.5 * ( $xmax + $xmin ) ;
       $rdiff = 0.5 * ( $xmax - $xmin ) ;
       $x = ( exp(-$r/$lambda) - $ravg )/ $rdiff ;
     } else {
-      $ravg = 0.5 * ( $rmin + $rmax ) ;
-      $rdiff = 0.5 * ( $rmax - $rmin ) ;
+      $ravg = 0.5 * ( $rmin[$ipr] + $rmax[$ipr] ) ;
+      $rdiff = 0.5 * ( $rmax[$ipr] - $rmin[$ipr] ) ;
       $x = ($r - $ravg) / $rdiff ;
     }
     if ( $x < -1.0000001 || $x > 1.000001 ) {
@@ -81,11 +86,11 @@ foreach my $atom (0 .. 2) {
     $tn[1] = $x ;
     $tnd[0] = 1.0 ;
     $tnd[1] = 2.0 * $x ;
-    foreach my $k (2 .. $order) {
+    foreach my $k (2 .. $order[$ipr]) {
       $tn[$k] = 2.0 * $x * $tn[$k-1] - $tn[$k-2] ;
       $tnd[$k] = 2.0 * $x * $tnd[$k-1] - $tnd[$k-2] ;
     }
-    for ( my $k = $order ; $k >= 1 ; $k-- ) {
+    for ( my $k = $order[$ipr] ; $k >= 1 ; $k-- ) {
       $tnd[$k] = $k * $tnd[$k-1] ;
     }
     $tnd[0] = 0 ;
@@ -96,10 +101,10 @@ foreach my $atom (0 .. 2) {
     $force = 0.0 ;
     my $pot   = 0.0 ;
     if ( $morse > 0 ) {
-      my $fcut0 = (1.0 - $r/$rmax) ;
+      my $fcut0 = (1.0 - $r/$rmax[$ipr]) ;
       my $fcut = $fcut0 * $fcut0 * $fcut0 ;
-      my $fcutprime = -3.0 * $fcut0 * $fcut0 / $rmax ;
-      foreach my $k (0 .. $order-1) {
+      my $fcutprime = -3.0 * $fcut0 * $fcut0 / $rmax[$ipr] ;
+      foreach my $k (0 .. $order[$ipr]-1) {
 
 	die "Coef[$k] not defined\n" unless defined($coef[$k]) ;
 
@@ -109,8 +114,8 @@ foreach my $atom (0 .. 2) {
 	$pot += $fcut * $coef[$k] * $tn[$k+1] ;
       }
     } else {
-      foreach my $k (0 .. $order - 1) {
-	$force += ($rmax-$r) * $coef[$k] * $tn[$k] / ($r*$r) ;
+      foreach my $k (0 .. $order[$ipr] - 1) {
+	$force += ($rmax[$ipr]-$r) * $coef[$k] * $tn[$k] / ($r*$r) ;
       }
     }
     printf OUT ("%8.5f %8.5f\n", $r, $force) ;

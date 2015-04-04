@@ -31,9 +31,9 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 static double kinetic_energy(double *Mass, double **Vel, int nat) ;
 
 static double 
-numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
-		   const int nlayers, const int nat,const double smin,
-		   const double smax, const double sdelta,const int snum, 
+numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
+		   const int nlayers, const int nat,const double *smin,
+		   const double *smax, const double *sdelta,const int *snum, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
 		   bool if_coulomb,bool if_overcoord, int n_over,
 		   double *over_param) ;
@@ -641,7 +641,20 @@ int main(int argc, char* argv[])
 	  Accel[a1][c]=0;
 
       //this function calculates the spline and electrostatic forces.
-      ZCalc(Coord,Lb,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
+      char *Lbc ;
+
+      Lbc = new char [nat] ;
+      for(int a=0;a<nat;a++) {
+	if ( Lb[a] == "O" ) {
+	  Lbc[a] = 'O' ;
+	} else if ( Lb[a] == "H" ) {
+	  Lbc[a] = 'H' ;
+	} else {
+	  cout << "Error: unknown element " << Lbc[a] << "\n" ;
+	}
+      }
+
+      ZCalc(Coord,Lbc,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
 	    pair_type,if_coulomb,if_overcoord,n_over,over_param,Accel,Vtot,Pxyz);
 
       if ( if_output_force ) 
@@ -715,7 +728,7 @@ int main(int argc, char* argv[])
 
       if ( num_pressure ) 
 	{
-	  Pxyz = numerical_pressure(Coord,Lb, Q, Latcons,nlayers, nat,smin,
+	  Pxyz = numerical_pressure(Coord,Lbc, Q, Latcons,nlayers, nat,smin,
 				    smax, sdelta,snum, params, pot_params, 
 				    pair_type,if_coulomb,if_overcoord,
 				    n_over, over_param) ;
@@ -810,6 +823,8 @@ int main(int argc, char* argv[])
 	fprintf(fgen, "%8.5f %8.5f %8.5f\n",        0.0, Latcons[1], 0.0) ;
 	fprintf(fgen, "%8.5f %8.5f %8.5f\n",        0.0, 0.0, Latcons[2]) ;
       }
+
+      delete[] Lbc ;
       
     }//End big loop here.
 
@@ -1132,7 +1147,7 @@ static double kinetic_energy(double *Mass, double **Vel, int nat)
 }
 
 static double 
-numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
+numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double smin,
 		   const double smax, const double sdelta,const int snum, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
@@ -1170,7 +1185,7 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
 
   Vol1 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
-  ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
+  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
 	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
 	Accel,Vtot1,Pxyz);
   
@@ -1189,7 +1204,7 @@ numerical_pressure(double **Coord, string *Lb, double *Q, double *Latcons,
 
   Vol2 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
-  ZCalc(Coord1,Lb,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
+  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
 	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
 	Accel,Vtot2,Pxyz);
 

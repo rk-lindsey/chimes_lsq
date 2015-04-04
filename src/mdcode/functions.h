@@ -11,6 +11,8 @@
 using namespace std;
 
 #define MAXOVERP 5  // Maximum number of overcoordination parameters allowed.
+const int NPAIR = 3 ;
+
 
 static const double ke=332.0637157615209;//converter between electron units and Stillinger units for Charge*Charge.
 
@@ -28,29 +30,27 @@ enum Sr_pair_t {
 } ;
 
 
-void ZCalc(double **Coord, string *Lb, double *Q, double *Latcons,
+void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const int nlayers,
-	   const int nat,const double smin,const double smax,
-	   const double sdelta,const int snum, 
+	   const int nat,const double* smin,const double* smax,
+	   const double* sdelta,const int* snum, 
 	   double *params, double *pot_params, Sr_pair_t pair_type,
 	   bool if_coulomb, bool if_overcoord, int n_pover,
 	   double *over_params,
 	   double **SForce,double& Vtot,double& Pxyz) ;
 
-void ZCalc_Deriv(double **Coord,string *Lb, 
+void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double *Latcons,const int nlayers,
-		 const int nat,double ***A,const double smin,const double smax,
-		 const double sdelta,const int snum, double **coul_oo,
+		 const int nat,double ***A,const double *smin,const double *smax,
+		 const double *sdelta,const int *snum, double **coul_oo,
 		 double **coul_oh,double **coul_hh,Sr_pair_t pair_type) ;
 
 void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latcons,
 			 const int nlayers, const int nat, bool calc_deriv, 
 			 double **Fderiv, int n_over, double *over_param) ;
 
-void ZCalc_Ewald(double **Coord, string *Lb, double *Q, double *Latcons,const int nlayers,
-		 const int nat,const double smin,const double smax,
-		 const double sdelta,const int snum, 
-		 double *params,double **SForce,double& Vtot,double& Pxyz) ;
+void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,const int nlayers,
+		 const int nat, double **SForce,double& Vtot,double& Pxyz) ;
 void ZCalc_Ewald_Orig(double **Coord,string *Lb, double *Latcons,
 		      const int nat,double **SForce,double& Vtot,double& Pxyz) ;
 
@@ -65,10 +65,12 @@ void optimal_ewald_params(double accuracy,
 			  double &k_acc) ;
 
 
-void ZCalc_Ewald_Deriv(double **Coord, string *Lb, 
+void ZCalc_Ewald_Deriv(double **Coord, const char *Lbc, 
 		       double *Latcons,const int nlayers,
 		       const int nat,
 		       double **coul_oo,double **coul_oh,double **coul_hh) ;
+
+void parse_param_list(double *params, int nparams, const char* name) ;
 
 #endif
 

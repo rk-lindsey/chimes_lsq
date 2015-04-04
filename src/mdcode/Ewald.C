@@ -6,7 +6,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut,
 			      double **Coord, double *Q, double *Latcons, 
 			      int nat, double **FCoul,double& Vtot) ;
 
-static void Ewald_K_Space_Orig(double alphasq, double **Coord,string *Lb, double *Latcons,
+static void Ewald_K_Space_Orig(double alphasq, double **Coord,const char *Lbc, double *Latcons,
 			       const int nat,double **SForce,double& Vtot) ;
 static double add_sines(int kx, int ky, int kz, const double *sinx, const double *siny, 
 			const double *sinz, const double *cosx, const double *cosy, 
@@ -15,10 +15,8 @@ static void generate_trig(double *sinx, double *siny, double *sinz,
 			  double *cosx, double *cosy, double *cosz,
 			  double *Rvec, double *Latcons, int kmax);
 
-void ZCalc_Ewald(double **Coord, string *Lb, double *Q, double *Latcons,const int nlayers,
-	   const int nat,const double smin,const double smax,
-	   const double sdelta,const int snum, 
-	   double *params,double **SForce,double& Vtot,double& Pxyz)
+void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,const int nlayers,
+	   const int nat, double **SForce,double& Vtot,double& Pxyz)
 // Calculate Ewald interactions.
 {
   double Rvec[3];
@@ -130,7 +128,7 @@ void ZCalc_Ewald(double **Coord, string *Lb, double *Q, double *Latcons,const in
 
   // K-Space loop.
   if ( if_old_k_space ) {
-    Ewald_K_Space_Orig(alphasq,Coord,Lb, Latcons,nat,SForce,UCoul) ;
+    Ewald_K_Space_Orig(alphasq,Coord,Lbc, Latcons,nat,SForce,UCoul) ;
   } else {
     Ewald_K_Space_New(alphasq, k_cut, Coord, Q, Latcons, nat, FCoul, UCoul) ;
   }
@@ -306,7 +304,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut,
 
 
 
-static void Ewald_K_Space_Orig(double alphasq, double **Coord,string *Lb, double *Latcons,
+static void Ewald_K_Space_Orig(double alphasq, double **Coord, const char *Lbc, double *Latcons,
 			const int nat,double **SForce,double& Vtot)
 {
   double Rvec[3];
@@ -439,17 +437,17 @@ static void Ewald_K_Space_Orig(double alphasq, double **Coord,string *Lb, double
 	
 	rlen=sqrt(Rvec[0]*Rvec[0]+Rvec[1]*Rvec[1]+Rvec[2]*Rvec[2]);
 	
-	if(Lb[a1]=="O" and Lb[a2]=="O")
+	if(Lbc[a1]=='O' and Lbc[a2]=='O')
 	  {
 	    Q[a1]=sqrt(qoo);
 	    Q[a2]=sqrt(qoo);
 	  }
-	else if((Lb[a1]=="O" and Lb[a2]=="H") or (Lb[a1]=="H" and Lb[a2]=="O"))
+	else if((Lbc[a1]=='O' and Lbc[a2]=='H') or (Lbc[a1]=='H' and Lbc[a2]=='O'))
 	  {
 	    Q[a1]=sqrt(qoh)*-1.0;
 	    Q[a2]=sqrt(qoh);
 	  }
-	else if(Lb[a1]=="H" and Lb[a2]=="H")
+	else if(Lbc[a1]=='H' and Lbc[a2]=='H')
 	  {
 	    Q[a1]=sqrt(qhh);
 	    Q[a2]=sqrt(qhh);
@@ -571,7 +569,7 @@ void optimal_ewald_params(double accuracy,
 }
 
 
-void ZCalc_Ewald_Deriv(double **Coord, string *Lb, 
+void ZCalc_Ewald_Deriv(double **Coord, const char *Lbc, 
 		       double *Latcons,const int nlayers,
 		       const int nat,
 		       double **coul_oo,double **coul_oh,double **coul_hh)
@@ -604,7 +602,6 @@ void ZCalc_Ewald_Deriv(double **Coord, string *Lb,
   double Volume=Latcons[0]*Latcons[1]*Latcons[2];
   static bool called_before = false ;
   double dx,dy,dz,rlen_mi;
-  static char *Lbc ;
   static double *sinx, *cosx, *siny, *cosy, *sinz, *cosz ;
 
   double ke=1.0;//332.0637157615209;//this is the unit conversion
@@ -672,19 +669,6 @@ void ZCalc_Ewald_Deriv(double **Coord, string *Lb,
 	  }
       cout << "Number of Ewald K-vectors = " << totk << endl ;
 
-      Lbc = new char [nat] ;
-  }
-  
-  // Pack element names into single characters for efficiency
-  // Recalculate each step in case of atom reordering between frames.
-  for(int a=0;a<nat;a++) {
-    if ( Lb[a] == "O" ) {
-      Lbc[a] = 'O' ;
-    } else if ( Lb[a] == "H" ) {
-      Lbc[a] = 'H' ;
-    } else {
-      cout << "Error: unknown element " << Lb[a] << "\n" ;
-    }
   }
 
   for(int a1=0;a1<nat;a1++)
