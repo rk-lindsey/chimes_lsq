@@ -1,0 +1,11 @@
+nlayers 1
+fit_coulomb true
+fit_pover true
+pair_type chebyshev
+cheby_order 10
+subtract_coord false
+smin 0.6 0.6 0.6
+smax 6.0 6.0 6.0
+sdelta 0.1 0.1 0.1
+lambda 1.25 1.25 1.25
+over_params 5 50.0 1.0165 -0.0657 5.0451 -3.6141
