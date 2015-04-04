@@ -13,9 +13,7 @@ my (@coef, @tn, @tnd) ;
 my ($x, $force) ;
 
 my $npair ;
-my (@rmin, @rmax, @order) ;
-
-my $lambda = 1.25 ;
+my (@rmin, @rmax, @order, @lambda) ;
 
 while ( <> ) {
   # Read initial comments.
@@ -35,8 +33,8 @@ if ( $npair <= 0 ) {
 
 for my $i ( 0 .. $npair - 1 ) {
   $_ = <> ;
-  ($rmin[$i], $rmax[$i], $order[$i]) = split(" ") ;
-  print "Rmin = $rmin[$i] Rmax = $rmax[$i] Order = $order[$i]\n" ;
+  ($rmin[$i], $rmax[$i], $lambda[$i],$order[$i]) = split(" ") ;
+  print "Rmin = $rmin[$i] Rmax = $rmax[$i] Lambda = $lambda[$i] Order = $order[$i]\n" ;
 }
 
 
@@ -68,11 +66,11 @@ foreach my $ipr (0 .. $npair - 1) {
       $rdiff = 0.5 * ( 1.0 / $rmin[$ipr] - 1.0 / $rmax[$ipr] ) ;
       $x = (1.0/$r - $ravg) / $rdiff ;
     } elsif ( $morse > 0 ) {
-      my $xmax = exp(-$rmin[$ipr]/$lambda) ;
-      my $xmin = exp(-$rmax[$ipr]/$lambda) ;
+      my $xmax = exp(-$rmin[$ipr]/$lambda[$ipr]) ;
+      my $xmin = exp(-$rmax[$ipr]/$lambda[$ipr]) ;
       $ravg = 0.5 * ( $xmax + $xmin ) ;
       $rdiff = 0.5 * ( $xmax - $xmin ) ;
-      $x = ( exp(-$r/$lambda) - $ravg )/ $rdiff ;
+      $x = ( exp(-$r/$lambda[$ipr]) - $ravg )/ $rdiff ;
     } else {
       $ravg = 0.5 * ( $rmin[$ipr] + $rmax[$ipr] ) ;
       $rdiff = 0.5 * ( $rmax[$ipr] - $rmin[$ipr] ) ;
@@ -109,7 +107,7 @@ foreach my $ipr (0 .. $npair - 1) {
 	die "Coef[$k] not defined\n" unless defined($coef[$k]) ;
 
 	$force += $fcut * $coef[$k] * $tnd[$k+1] 
-	  * (-exp(-$r/$lambda) / $lambda) / $rdiff 
+	  * (-exp(-$r/$lambda[$ipr]) / $lambda[$ipr]) / $rdiff 
 	  + $fcutprime * $coef[$k] * $tn[$k+1] ;
 	$pot += $fcut * $coef[$k] * $tn[$k+1] ;
       }

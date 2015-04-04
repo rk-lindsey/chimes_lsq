@@ -26,17 +26,17 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 			double **SForce, double &Vtot, double &xyz);
 
 
-static void ZCalc_Spline_Deriv(double **Coord,const char *Lbc, double *Latcons,
+static void ZCalc_Spline_Deriv(double **Coord, const char *Lbc, double *Latcons,
 			       const int nlayers,
-			       const int nat,double ***A, const double *smin,
+			       const int nat,double ***A,const double *smin,
 			       const double *smax,
-			       const double *sdelta,const int *snum) ;
+			       const double *sdelta,const int *snum,double *mind) ;
 
 static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
-			      const int nlayers,
-			      const int nat,double ***A,const double *smin,
-			      const double *smax,
-			      const int *snum)       ;
+			       const int nlayers,
+			       const int nat,double ***A,const double *smin,
+			       const double *smax,
+			      const int *snum, const double *lambda, double *mind) ;
 
 static int pair_index(int a1, int a2, const char *Lbc) ;
 static int pair_table_offset(int ipair, const int *snum) ;
@@ -982,8 +982,9 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double *Latcons,const int nlayers,
 		 const int nat,double ***A,const double *smin,const double *smax,
-		 const double *sdelta,const int *snum, double **coul_oo,
-		 double **coul_oh,double **coul_hh, Sr_pair_t pair_type)
+		 const double *sdelta,const int *snum, const double *lambda,
+		 double **coul_oo, double **coul_oh,double **coul_hh, Sr_pair_t pair_type,
+		 double *mind)
 {
   bool if_ewald = true ;
   int snum_tot ;
@@ -1014,9 +1015,9 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
   }
 
   if ( pair_type == SPLINE ) {
-    ZCalc_Spline_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,sdelta,snum) ;
+    ZCalc_Spline_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,sdelta,snum,mind) ;
   } else if ( pair_type == CHEBYSHEV ) {
-    ZCalc_Cheby_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum) ;
+    ZCalc_Cheby_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,lambda,mind) ;
   } else {
     cout << "Error: bad pairtype in ZCalc_Deriv\n" ;
     exit(1) ;
@@ -1028,8 +1029,9 @@ static void ZCalc_Spline_Deriv(double **Coord, const char *Lbc, double *Latcons,
 			       const int nlayers,
 			       const int nat,double ***A,const double *smin,
 			       const double *smax,
-			       const double *sdelta,const int *snum)
+			       const double *sdelta,const int *snum,double *mind)
 // Calculate derivatives of the forces wrt the spline parameters.
+// Stores minimum distance between a pair of atoms in mind.
 {
   double Rvec[3];
   double Rab[3];
@@ -1065,6 +1067,8 @@ static void ZCalc_Spline_Deriv(double **Coord, const char *Lbc, double *Latcons,
 		
 		rlen=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
 		
+		if ( rlen < mind[ipair] ) mind[ipair] = rlen ;
+
 		//spline term calculated w/cutoff:
 		if(rlen > smin[ipair] and rlen < smax[ipair])
 		  {
@@ -1121,8 +1125,9 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const int nlayers,
 			       const int nat,double ***A,const double *smin,
 			       const double *smax,
-			       const int *snum)
+			      const int *snum, const double *lambda, double *mind)
 // Calculate derivatives of the forces wrt the Chebyshev parameters.
+// Stores minimum distance between a pair of atoms in mind.
 {
   double Rvec[3];
   double Rab[3];
@@ -1131,7 +1136,6 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
   int vstart ;
   static double *Tn, *Tnd ;
   static bool called_before = false ;
-  const double lambda = 1.25 ;
 
   if ( ! called_before ) {
     called_before = true ;
@@ -1172,6 +1176,8 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 		
 		rlen=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
 		
+		if ( rlen < mind[ipair] ) mind[ipair] = rlen ;
+
 		//spline term calculated w/cutoff:
 		bool inverse_r = false ;
 		bool morse     = true ;
@@ -1185,11 +1191,11 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 		      xdiff = 0.5 * (1.0/smin[ipair] - 1.0/smax[ipair]) ;
 		      x = (1.0/rlen-xavg) / xdiff ;
 		    } else if ( morse ) {
-		      double xmin = exp(-smax[ipair]/lambda) ;
-		      double xmax = exp(-smin[ipair]/lambda) ;
+		      double xmin = exp(-smax[ipair]/lambda[ipair]) ;
+		      double xmax = exp(-smin[ipair]/lambda[ipair]) ;
 		      xavg = 0.5 * (xmin + xmax) ;
 		      xdiff = 0.5 * (xmax - xmin) ;
-		      x = (exp(-rlen/lambda)-xavg)/xdiff ;
+		      x = (exp(-rlen/lambda[ipair])-xavg)/xdiff ;
 		    }
 		    else {
 		      xavg = 0.5 * (smin[ipair] + smax[ipair]) ;
@@ -1234,7 +1240,7 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			    for(int c=0;c<3;c++)
 			      {
 				double deriv = 
-				  (fcut * Tnd[i+1] *(-exp(-rlen/lambda)/lambda)/xdiff + 
+				  (fcut * Tnd[i+1] *(-exp(-rlen/lambda[ipair])/lambda[ipair])/xdiff + 
 				   fcutderiv * Tn[i+1]
 				   ) * Rab[c] / rlen ; 
 				A[a1][vstart+i][c] += deriv ;

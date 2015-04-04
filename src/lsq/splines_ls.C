@@ -1,4 +1,4 @@
-#include<iostream>
+ #include<iostream>
 #include<fstream>
 #include<vector>
 #include<math.h>
@@ -11,13 +11,14 @@ using namespace std;
 static void read_lsq_input(const char *input_filename, int &nlayers, 
 			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
 			   bool &fit_pover, int &cheby_order, double *smin,
-			   double *smax, double *sdelta, int &n_over, double *over_param) ;
-
+			   double *smax, double *sdelta, double *lambda,
+			   int &n_over, double *over_param) ;
 static void echo_lsq_input(int nlayers, 
 			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord,
 			   bool fit_pover, int cheby_order, const double *smin,
-			   const double *smax, const double *sdelta, int n_over, 
-			   const double *over_params)  ;
+			   const double *smax, const double *sdelta, const double *lambda,
+			   int n_over, 
+			   const double *over_params) ;
 
 int main(int argc, char* argv[])
 {
@@ -80,20 +81,25 @@ int main(int argc, char* argv[])
   double smax[NPAIR] ;   // End of spline/fit
   // const double sdelta=0.05;//0.025; //grid spacing
   double sdelta[NPAIR];  // Step size of spline.
+  double lambda[NPAIR] ; // Morse variable parameters.
+  
+  double mind[NPAIR] ;  //  Minimum distance found for the pair.
 
   for ( int i = 0 ; i < NPAIR ; i++ ) 
     {
       smax[i] =   6.0 ;
       smin[i] =   0.5 ;
       sdelta[i] = 0.1 ;
+      lambda[i] = 1.25 ;
+      mind[i]   = 1.0e10 ;
     }
 
   read_lsq_input(argv[1],nlayers, fit_coul, pair_type, ifsubtract_coord, fit_pover, cheby_order,
-		 smin, smax, sdelta, n_over, over_param) ;
+		 smin, smax, sdelta, lambda, n_over, over_param) ;
 
 
   echo_lsq_input(nlayers, fit_coul, pair_type, ifsubtract_coord, fit_pover, cheby_order,
-		 smin, smax, sdelta, n_over, over_param) ;
+		 smin, smax, sdelta, lambda, n_over, over_param) ;
 
   ////Read input file input.xyzf:
   ////xyz format in Angs, three box dimensions in the info line.
@@ -287,8 +293,8 @@ int main(int argc, char* argv[])
       }
 
       ZCalc_Deriv(Coord[N],Lbc,Latcons[N],nlayers,Nat[N],Als[N],
-		  smin,smax,sdelta,snum,Coul_oo[N],Coul_oh[N],Coul_hh[N],
-		  pair_type);
+		  smin,smax,sdelta,snum,lambda,Coul_oo[N],Coul_oh[N],Coul_hh[N],
+		  pair_type, mind);
 
       // Subtract over-coordination forces from force to be output.
       if ( ifsubtract_coord ) 
@@ -401,7 +407,8 @@ int main(int argc, char* argv[])
     if ( pair_type != CHEBYSHEV ) {
       fprintf(header, "%8.5f %8.5f %8.5f\n", smin[i], smax[i], sdelta[i]) ;
     } else {
-      fprintf(header, "%8.5f %8.5f %d\n", smin[i], smax[i], snum[i]) ;
+      fprintf(header, "%8.5f %8.5f %8.5f %d\n", smin[i], smax[i], lambda[i],
+	      snum[i]) ;
     }
   }
   
@@ -418,6 +425,11 @@ int main(int argc, char* argv[])
   }
   fclose(header) ;
 
+  printf("Minimum distances between atoms:\n") ;
+  for ( int k = 0 ; k < NPAIR ; k++ ) {
+    printf("%2d %8.5f\n", k, mind[k]) ;
+  }
+
   return 0;    
 }
 
@@ -426,7 +438,8 @@ int main(int argc, char* argv[])
 static void read_lsq_input(const char *input_filename, int &nlayers, 
 			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
 			   bool &fit_pover, int &cheby_order, double *smin,
-			   double *smax, double *sdelta, int &n_over, double *over_params) 
+			   double *smax, double *sdelta, double *lambda,
+			   int &n_over, double *over_params) 
 // Read program input from the file "splines_ls.in".
 {
   FILE *fin ;
@@ -474,6 +487,11 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
 	{
 	  sscanf(val, "%lf", &smin[0]) ;
 	  parse_param_list(&smin[1], NPAIR-1, "smin") ;
+	}
+      else if ( strncmp(name,"lambda",bufsz) == 0 ) 
+	{
+	  sscanf(val, "%lf", &lambda[0]) ;
+	  parse_param_list(&lambda[1], NPAIR-1, "lambda") ;
 	}
       else if ( strncmp(name,"smax",bufsz) == 0 ) 
 	{
@@ -562,7 +580,8 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
 static void echo_lsq_input(int nlayers, 
 			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord,
 			   bool fit_pover, int cheby_order, const double *smin,
-			   const double *smax, const double *sdelta, int n_over, 
+			   const double *smax, const double *sdelta, const double *lambda,
+			   int n_over, 
 			   const double *over_params) 
 // Read program input from the file "splines_ls.in".
 {
@@ -597,6 +616,7 @@ static void echo_lsq_input(int nlayers,
   for ( int i = 0 ; i < NPAIR ; i++ ) {
     printf("Pair interaction minimum distance for pair %d = %13.6e\n", i, smin[i]) ;
     printf("Pair interaction maximum distance for pair %d = %13.6e\n", i, smax[i]) ;
+    printf("Pair interaction Morse distance   for pair %d = %13.6e\n", i, lambda[i]) ;
   }
 
   if ( fit_coul ) 

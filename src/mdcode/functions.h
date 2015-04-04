@@ -42,8 +42,9 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double *Latcons,const int nlayers,
 		 const int nat,double ***A,const double *smin,const double *smax,
-		 const double *sdelta,const int *snum, double **coul_oo,
-		 double **coul_oh,double **coul_hh,Sr_pair_t pair_type) ;
+		 const double *sdelta,const int *snum, const double *lambda,
+		 double **coul_oo, double **coul_oh,double **coul_hh,Sr_pair_t pair_type,
+		 double *mind) ;
 
 void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latcons,
 			 const int nlayers, const int nat, bool calc_deriv, 
