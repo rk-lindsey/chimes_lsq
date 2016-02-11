@@ -425,6 +425,19 @@ int main(int argc, char* argv[])
     smax = Latcons[0] / 2.0 ;
     smin = 0.0 ;
   }
+
+  // Support future hooks for multiple smin, smax, sdelta, snum values.
+  
+  double smin_pair[3], smax_pair[3], sdelta_pair[3] ;
+  int snum_pair[3] ;
+
+  for ( int j = 0 ; j < 3 ; j++ ) {
+    smin_pair[j] = smin ;
+    smax_pair[j] = smax ;
+    sdelta_pair[j] = sdelta ;
+    snum_pair[j] = snum ;
+  }
+  
   if ( if_overcoord ) 
     {
       // Read overcoordination parameters from the params file.
@@ -566,7 +579,7 @@ int main(int argc, char* argv[])
     double r = j * sdelta / 12.0  ;
     double S_r = 0.0 ;
     if ( r < smax ) {
-      double spot = spline_pot(smin, smax, sdelta, r, params, pot_params, snum, 0, S_r) ;
+      double spot = spline_pot(smin_pair, smax_pair, sdelta_pair, r, params, pot_params, snum, 0, S_r) ;
       fprintf(fout, "%13.6e %13.6e\n", r, spot) ;
     } else {
       break ;
@@ -654,8 +667,9 @@ int main(int argc, char* argv[])
 	}
       }
 
-      ZCalc(Coord,Lbc,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
-	    pair_type,if_coulomb,if_overcoord,n_over,over_param,Accel,Vtot,Pxyz);
+      ZCalc(Coord,Lbc,Q,Latcons,nlayers,nat,smin_pair,smax_pair,sdelta_pair,snum_pair,
+	    params,pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
+	    Accel,Vtot,Pxyz);
 
       if ( if_output_force ) 
 	{
@@ -728,8 +742,8 @@ int main(int argc, char* argv[])
 
       if ( num_pressure ) 
 	{
-	  Pxyz = numerical_pressure(Coord,Lbc, Q, Latcons,nlayers, nat,smin,
-				    smax, sdelta,snum, params, pot_params, 
+	  Pxyz = numerical_pressure(Coord,Lbc, Q, Latcons,nlayers, nat,smin_pair,
+				    smax_pair,sdelta_pair,snum_pair, params, pot_params, 
 				    pair_type,if_coulomb,if_overcoord,
 				    n_over, over_param) ;
 	}
@@ -1148,8 +1162,8 @@ static double kinetic_energy(double *Mass, double **Vel, int nat)
 
 static double 
 numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
-		   const int nlayers, const int nat,const double smin,
-		   const double smax, const double sdelta,const int snum, 
+		   const int nlayers, const int nat,const double *smin_pair,
+		   const double *smax_pair, const double *sdelta_pair,const int *snum_pair, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
 		   bool if_coulomb,bool if_overcoord, int n_over,
 		   double *over_param) 
@@ -1185,7 +1199,7 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   Vol1 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
-  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
+  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin_pair,smax_pair,sdelta_pair,snum_pair,params,
 	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
 	Accel,Vtot1,Pxyz);
   
@@ -1204,7 +1218,7 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   Vol2 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
-  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
+  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin_pair,smax_pair,sdelta_pair,snum_pair,params,
 	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
 	Accel,Vtot2,Pxyz);
 
