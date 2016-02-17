@@ -1,9 +1,8 @@
 nlayers 1
-fit_coulomb false
-fit_pover false
+fit_coulomb true
+fit_pover true
 pair_type spline
-cheby_order 10
-subtract_coord true
+subtract_coord false
 smin 0.6 0.6 0.6
 smax 6.0 6.0 6.0
 sdelta 0.05 0.05 0.05
