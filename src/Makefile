@@ -1,4 +1,3 @@
-
 all:
 	cd lsq ; make all
 	cd mdcode ; make all
