@@ -1,7 +1,7 @@
 # Input for the spline_md code.
 temperature 2000.0
 deltat      0.125
-nsteps      1000
+nsteps      10000
 nlayers     1
 output_force false
 read_force   false
