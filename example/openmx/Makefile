@@ -5,6 +5,6 @@ all:
 clean:
 	rm -f *.dat h2o.msub
 
-realclean :
+realclean : clean
 	rm -f *~
 

@@ -7,4 +7,5 @@ all :
 clean :
 	rm -f A.txt b.txt params.header params.spline2.txt force.txt
 
+realclean : clean
 
