@@ -781,7 +781,7 @@ double spline_pot(double smin, double smax, double sdelta, double rlen2, double 
   h10 *= sdelta;//derivative terms have extra factor.
   h11 *= sdelta;
   kstart=k0*2;		    
-  if ( kstart > snum / 3 ) {
+  if ( kstart > snum ) {
     cout << "Error: kstart too large " << kstart << endl ;
   }
   S_r=
@@ -809,9 +809,9 @@ double spline_pot(double smin, double smax, double sdelta, double rlen2, double 
 		     i10*params[vstart+kstart+1]+
 		     i01*params[vstart+kstart+2]+
 		     i11*params[vstart+kstart+3] ) ;
-  if ( kstart/2 + 1 < snum / 2 ) {
+  // if ( kstart/2 + 1 < snum / 2 ) {
     tempx += pot_params[vstart/2+kstart/2+1] ;
-  }
+    // }
   return(tempx) ;
 }
 
