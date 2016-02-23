@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
     smin_pair[j] = smin ;
     smax_pair[j] = smax ;
     sdelta_pair[j] = sdelta ;
-    snum_pair[j] = snum ;
+    snum_pair[j] = snum / 3 ;
   }
   
   if ( if_overcoord ) 
