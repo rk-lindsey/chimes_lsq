@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
   //Generate A matrix, b vector, for least-squares:
 
   // cout.precision(10);
-  cout.precision(10);
+  cout.precision(15);
 
   ////ZCalc_Deriv is the function that calculates elements of A.
   for(int N=0;N<nframes;N++) 

@@ -149,10 +149,12 @@ int main(int argc, char* argv[])
   ifstream fileread ;
   if ( if_read_force ) 
     {
+      cout << "Reading positions from input.xyzf for force testing\n" ;
       fileread.open("input.xyzf") ;
     } 
   else 
     {
+      cout << "Reading positions from input.xyz\n" ;
       fileread.open("input.xyz");
     }
   int nat;
@@ -225,6 +227,12 @@ int main(int argc, char* argv[])
 	}
     }
 
+  ifstream forceread ;
+  if ( if_read_force ) {
+    cout << "Opening force.txt to read forces for comparison\n" ;
+    forceread.open("force.txt") ;
+  }
+
   for(int a=0;a<nat;a++)
     {
       fileread>>Lb[a];
@@ -235,7 +243,12 @@ int main(int argc, char* argv[])
 	{
 	  for(int c=0;c<3;c++) 
 	    {
-	      fileread>>Fread[a][c];
+	      double junk ;
+	      // Read past forces in the input.xyzf file
+	      fileread >> junk ;
+
+	      // Read forces from force.txt.
+	      forceread >>Fread[a][c];
 	      Vel[a][c] = 0.0 ;
 	    }
 	}
@@ -403,11 +416,17 @@ int main(int argc, char* argv[])
   int tempint;
 
   // Read smin, smax, sdelta from params file instead of using built-in values.
-//  char buf[1024] ;
-//  do {
-//    paramread.getline(buf,1024) ;
-//  } while (buf[0] == '#' ) ;
-//  sscanf(buf,"%lf",&smin[i]) ;
+  char buf[1024] ;
+  do {
+    paramread.getline(buf,1024) ;
+  } while (buf[0] == '#' ) ;
+
+  int npair_read = 0 ;
+  sscanf(buf,"npair %d",&npair_read) ;
+
+  if ( npair_read != NPAIR ) {
+    cout << "Inconsistent npair found:  compiled npair = " << NPAIR << endl ;
+  }
   
   for (i = 0; i < NPAIR; i++) {
     if ( pair_type == SPLINE ) 
@@ -466,9 +485,15 @@ int main(int argc, char* argv[])
   for(int i=0;i<tot_snum+4;i++)
     params[i]=0.0;
   if ( pair_type == CHEBYSHEV or pair_type == SPLINE or pair_type == INVERSE_R ) {
+    cout << "Potential parameters read in:\n" ;
     for(int n=0;n<tot_snum+4;n++)
       {
 	paramread >> tempint >> params[n];
+	if ( tempint != n ) {
+	  cout << "Error: parameter index mismatch\n" ;
+	  exit(1) ;
+	}
+
         cout << tempint << " " << params[n] << endl;
 	if ( paramread.eof() ) 
 	  {
@@ -707,6 +732,7 @@ int main(int argc, char* argv[])
 	  ferr /= 3.0 * nat ;
 	  ferr = sqrt(ferr) ;
 	  printf("RMS force error = %13.6e\n", ferr) ;
+	  exit(0) ;
 	}
 
       //Convert forces to acceleration:
