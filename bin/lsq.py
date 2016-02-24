@@ -63,11 +63,17 @@ U,D,VT=numpy.linalg.svd(A)
 
 
 Dmat=array((transpose(A)))
+dmax = 0.0
 for i in range(0,len(Dmat)):
+    if ( abs(D[i]) > dmax ) :
+        dmax = abs(D[i])
     for j in range(0,len(Dmat[i])):
         Dmat[i][j]=0.0
 
-eps=1.0e-5
+# Cut off singular values based on fraction of maximum value as per 
+# numerical recipes (LEF).
+eps=1.0e-5 * dmax
+
 for i in range(0,len(D)):
     if(abs(D[i])>eps):
         Dmat[i][i]=1.0/D[i]
