@@ -8,7 +8,7 @@ read_force   false
 init_vel     false
 pair_type spline
 coulomb      true
-fit_coulomb false
+fit_coulomb true
 num_pressure false
 params_file  params.spline.txt
 overcoord    true
