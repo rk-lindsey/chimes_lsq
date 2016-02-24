@@ -1,4 +1,3 @@
-TEST - NG, 3/24/15
 Notes from Lucas Koziol:
 =======
 Force matching codes by Lucas Koziol and Larry Fried
@@ -11,7 +10,7 @@ source files.
 
 Part A: Determining two-body parameters.
 
-1.) Compile splines_ls using make (modify Makefile in this directory).
+1.) Compile splines_ls using make in the src/lsq directory.
 
 2.  Prepare input options for splines_ls in the file splines_ls.in.
 Here is an example:
@@ -21,11 +20,13 @@ fit_coulomb true
 fit_pover true
 pair_type spline
 subtract_coord false
-smin 0.75
-smax 6.0
-sdelta 0.1
+smin 0.75 0.75 0.75
+smax 6.0 6.0 6.0
+sdelta 0.1 0.1 0.1 0.1
 chebyshev_order 12
 ------------------------------------
+For more examples see, example/h2o-lsq and example/lsq2.
+
 nlayers is the number of x,y,z supercells used in evaluating
 interactions.  Small unit cell should have nlayers >= 1.
 
@@ -46,10 +47,13 @@ is subtracted from the forces before fitting.  This option should
 not be used in conjunction with fit_pover.
 
 smin is the minimum distance between atoms considered in the pair interaction.
+     A parameter is given for each atom pair.
 
 smax is the force cutoff distance used in the pair interaction.
+     A parameter is given for each atom pair.
 
 sdelta is the step size in angstroms between spline points.
+     A parameter is given for each atom pair.
 
 chebyshev_order is the number of terms in the Chebyshev force fitting.
 It is not used in the example, because pair_type is set to spline.
@@ -68,8 +72,10 @@ Example:
 //H 4.36127 3.66403 7.07424 -0.042972843521 0.010603733297 0.000570193096
 //...
 
+An example input.xyzf file is located in example/h2o-lsq.
+
 4.) Run the code spline fitting code
-    ./splines_ls 99 
+    ./splines_ls splines_md.in 99 
 
 99 here is the number of MD snapshots in the .xyzf file.
 Once the code finishes (should take ~5 mins for 99 snapshots of
@@ -78,6 +84,7 @@ derivatives of the force with respect to the linear parameters, while
 b.txt contains the forces.  These are
 used for input in a python script that does the SVD solution of Ax=b
 and prints x. The x vector is a list of linear parameters.
+
 There are two types of fitting that are done by splines_ls.
 In spline fitting, grid points (two-body force values and 1st-derivatives 
 on a grid) which is then read as input into the MD code.  In polynomial
@@ -100,22 +107,20 @@ values describe the negative of the pairwise force dV/dr.
     file can be used to test the consistency of the MD code with the reported
     forces.
 
-6.) Delete the first two lines of params.txt, this just tells you the
-RMS force error value and the maximum difference between fitted and DFT force.
-
 Part B: calculating short-range part of the force.
 
-6.) If you plot the forces (plot every 2nd point in params.txt), you will
-see that they equal exactly 0 up until a certain (short) distance. 
-Then they will be oscillating for a few 0.1 Angs, then they will become very 
-well-defined. This is because the values of A are average over
-interatomic distances sampled in the DFT-MD.
+6.) If you plot the spline forces (plot every 2nd point in
+params.txt), you will see that they equal nearly 0 up until a certain
+(short) distance.  Then they will be oscillating for a few 0.1 Angs,
+then they will become very well-defined. This is because the values of
+A are average over interatomic distances sampled in the DFT-MD.
 
 The spline force and potential can be conveniently plotted with the
-code spline_vals.pl.  The negative of the force is placed in spline.[0-2].txt,
-while the potential is placed in splinepot.[0-2].txt.  spline.0.txt is the
-O-O interaction.  spline.1.txt is the O-H interaction, while spline.2.txt
-is the H-H interactions.
+code fmatch/bin/spline_vals.pl.  The negative of the force is placed
+in spline.[0-2].txt, while the potential is placed in
+splinepot.[0-2].txt.  spline.0.txt is the O-O interaction.
+spline.1.txt is the O-H interaction, while spline.2.txt is the H-H
+interactions.
 
 The MD code splines_md supplements unoccupied values of the spline table with
 a repulsive force to ensure that the MD simulation is stable.
@@ -124,14 +129,15 @@ table or with the polynomial force representation.
 
 Part C: running Molecular dynamics.
 
-7.) params.txt (with top two text lines removed) from output of
-lsq.py should be in the working directory. The filename of the force parameter file can
-be used specified in splines_md.in. Also the starting 
-geometry and velocities should be included in input.xyz. The N-3, N-2,
-and N-1 (N is the number of lines in params.txt) lines of params.txt are the squared charges and must be entered as doubles qoo, qoh, and qhh in functions.C.
-This is now done automatically by the fitting routine lsq.py.  The Nth
-line of params.txt is the magnitude of the three body overcoordination
-interaction.
+7.) params.txt (with top two text lines removed) from output of lsq.py
+should be in the working directory. The filename of the force
+parameter file can be used specified in splines_md.in. Also the
+starting geometry and velocities should be included in input.xyz. The
+N-3, N-2, and N-1 (N is the number of lines in params.txt) lines of
+params.txt are the squared charges and must be entered as doubles qoo,
+qoh, and qhh in functions.C.  This is now done automatically by the
+fitting routine lsq.py.  The Nth line of params.txt is the magnitude
+of the three body overcoordination interaction.
 
 First line of input.xyz: number of atoms. 2nd line: 3 box 
 dimensions in Angstroms.
@@ -177,16 +183,19 @@ nlayers is the number of periodic replicas used in evaluating forces.
 
 output_force is a flag controlling whether forces are written to file.  
 
-If read_force is true, the force.txt file created by lsq.py is read in and compared to
-the current forces.  
+If read_force is true, the force.txt file created by lsq.py is read in
+and compared to the current forces.  The input.xyzf file used in force
+matching must be present.  It is read, and the first configuration is used
+in the force comparison.
 
-If spline_q is true, charges are taken from the params.txt file.  Otherwise compiled-in defaults are used for charges.
+If spline_q is true, charges are taken from the params.txt file.
+Otherwise compiled-in defaults are used for charges.
 
 If init_vel is true, velocities will be initialized.  Otherwise,
 initial velocities are read from the input.xyz file.  
 
-pair_type specifies the type of short-range pair interaction.  Current choices
-are chebyshev, spline, stillinger, or lennard-jones.
+pair_type specifies the type of short-range pair interaction.  Current
+choices are chebyshev, spline, stillinger, or lennard-jones.
 
 params_file specifies a file with force parameters.
 
@@ -199,22 +208,26 @@ overcoord controls whether the ReaxFF overcoordination term is used.
 
 rand_seed is a random number seed.  
 
-hoover_time is a timescale in fs for the coupling between the Nose-Hoover thermostat and the system.  If hoover_time is <= 0, no Hoover thermostat is used.  
+hoover_time is a timescale in fs for the coupling between the
+Nose-Hoover thermostat and the system.  If hoover_time is <= 0, no
+Hoover thermostat is used.
 
-scale_freq controls how
-frequently velocity is rescaled.  If scale_freq is 0, velocities are
-not rescaled.  Velocity scaling and the Hoover thermostat should not
-be used at the same time.  
+scale_freq controls how frequently velocity is rescaled.  If
+scale_freq is 0, velocities are not rescaled.  Velocity scaling and
+the Hoover thermostat should not be used at the same time.
 
-energy_freq controls how often the energy
-and other thermodynamic quantities are output.  
+energy_freq controls how often the energy and other thermodynamic
+quantities are output.
 
-gen_freq controls how
-often configurations are written into a DFTB gen file.
+The trajectory is written to the file traj.gen, which is in DFTB gen format.
+gen_freq controls how often configurations are written into a DFTB gen
+file.
 
 At the end of the run, positions and velocities are written to
 output.xyz.  By copying output.xyz to input.xyz and running
 splines_md, the trajectory may be continued further in time.
+
+
 
 8.) compile splines_md using make
 
@@ -256,11 +269,10 @@ The layers now always start from the minimum image displacement.  The
 code should now work when nlayers = 0 (for a big system), but that hasn't
 been tested.
 
-6.  There are two test problems "input.small.xyz" and "input.big.xyz" in the 
-mdcode directory.  You can select the test problem by copying these files to "input.xyz".
+6.  Previous versions of the MD code do not conserve energy.  The
+current version should be used for all calculations.
 
-7.  Previous versions of the MD code do not conserve energy (try input.big.xyz).  The current version should be used for all calculations.
-
-
+7.  Support was put in for chebyshev polynomials of Morse functions.
+Only the Chebyshev and spline potential options are well tested.
 
 
