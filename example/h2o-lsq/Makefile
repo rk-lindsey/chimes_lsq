@@ -1,4 +1,4 @@
-all : cheby spline
+all : cheby spline spline2
 
 cheby :
 	../../bin/splines_ls cheby_ls.in 49 > cheby_ls.out
@@ -22,6 +22,23 @@ spline :
 	-diff spline.0.out output/spline.0.out
 	-diff spline.1.out output/spline.1.out
 	-diff spline.2.out output/spline.2.out
+
+spline2 :
+	../../bin/splines_ls splines_ls2.in 49 > splines_ls2.out
+	../../bin/lsq.py A.txt b.txt params.header > params.spline2.txt
+	../../bin/spline_vals.pl < params.spline2.txt
+	-mv splinepot.0.out splinepot2.0.out
+	-mv splinepot.1.out splinepot2.1.out
+	-mv splinepot.2.out splinepot2.2.out
+	-mv spline.0.out spline2.0.out
+	-mv spline.1.out spline2.1.out
+	-mv spline.2.out spline2.2.out
+	-diff splinepot2.0.out output/splinepot2.0.out
+	-diff splinepot2.1.out output/splinepot2.1.out
+	-diff splinepot2.2.out output/splinepot2.2.out
+	-diff spline2.0.out output/spline2.0.out
+	-diff spline2.1.out output/spline2.1.out
+	-diff spline2.2.out output/spline2.2.out
 
 clean :
 	rm -f A.txt b.txt params.header params.spline.txt force.txt
