@@ -3,8 +3,8 @@
 static void ZCalc_Lj(double **Coord,double *Latcons,const int nlayers,
 		     const int nat,double **SForce,double& Vtot,double& Pxyz) ;
 static void ZCalc_SR_Analytic(double **Coord,const char *Lbc, double *Latcons,const int nlayers,
-			      const int nat,const double *smin,const double *smax,
-			      double **SForce,double& Vtot,double& Pxyz) ;
+			      const int nat,const double *smin,const double *smax, const int *snum,
+			      double **SForce,double& Vtot,double& Pxyz, double *params) ;
 static void ZCalcSR_Over(double **Coord,const char *Lbc, double *Latcons,const int nlayers,
 			 const int nat,double **SForce,double& Vtot,double& Pxyz, int n_over,
 			 double *over_param) ;
@@ -31,6 +31,18 @@ static void ZCalc_Spline_Deriv(double **Coord, const char *Lbc, double *Latcons,
 			       const int nat,double ***A,const double *smin,
 			       const double *smax,
 			       const double *sdelta,const int *snum,double *mind) ;
+
+static void ZCalc_InvR_Deriv(double **Coord,const char *Lbc, double *Latcons,
+			       const int nlayers,
+			       const int nat,double ***A,const double *smin,
+			       const double *smax,
+			      const int *snum, const double *lambda, double *mind) ;
+
+static void ZCalc_Poly_Deriv(double **Coord,const char *Lbc, double *Latcons,
+			       const int nlayers,
+			       const int nat,double ***A,const double *smin,
+			       const double *smax,
+			      const int *snum, const double *lambda, double *mind) ;
 
 static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const int nlayers,
@@ -66,8 +78,8 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
     } 
   else if ( pair_type == INVERSE_R ) 
     {
-      ZCalc_SR_Analytic(Coord,Lbc, Latcons,nlayers,nat,smin,smax,SForce,Vtot,
-			Pxyz) ;
+      ZCalc_SR_Analytic(Coord,Lbc, Latcons,nlayers,nat,smin,smax,snum, SForce,Vtot,
+			Pxyz, params) ;
     } 
   else if ( pair_type == STILLINGER ) 
     {
@@ -168,8 +180,8 @@ static void ZCalc_Lj(double **Coord, double *Latcons,const int nlayers,
 
 
 static void ZCalc_SR_Analytic(double **Coord,const char *Lbc, double *Latcons,const int nlayers,
-			      const int nat,const double *smin,const double *smax,
-			      double **SForce,double& Vtot,double& Pxyz)
+			      const int nat,const double *smin,const double *smax, const int *snum,
+			      double **SForce,double& Vtot,double& Pxyz, double *params)
 // Short-range analytic forces - Optimized evaluation.
 {
   double Rvec[3];
@@ -187,97 +199,19 @@ static void ZCalc_SR_Analytic(double **Coord,const char *Lbc, double *Latcons,co
   double hh_cut=0.8;
 
   double pOO[24] ;
-  
-  pOO[0]=  -18617.280354059098    	  ;
-  pOO[1]=  692382.49446701177           ;
-  pOO[2]=  -11405958.131264212    	  ;
-  pOO[3]=  109588187.69652703           ;
-  pOO[4]=  -678681472.79666793    	  ;
-  pOO[5]=  2813120111.5392013           ;
-  pOO[6]=  -7774279189.7940693    	  ;
-  pOO[7]=  13490534921.663717           ;
-  pOO[8]=  -11633893383.8025      	  ;
-  pOO[9]=  -2281518444.80867      	  ;
-  pOO[10]= 12083725865.839197           ;
-  pOO[11]= 45862665.384337671           ;
-  pOO[12]= -11788101437.910231    	  ;
-  pOO[13]= -3101264034.3021011    	  ;
-  pOO[14]= 10798442968.405247           ;
-  pOO[15]= 8739722513.8273964           ;
-  pOO[16]= -7388244851.8771982    	  ;
-  pOO[17]= -14539511339.557861    	  ;
-  pOO[18]= 11471144515.535652           ;
-  pOO[19]= 0.0  ;
-  pOO[20]= 0.0  ;
-  pOO[21]= 0.0  ;
-  pOO[22]= 0.0  ;
-  pOO[23]= 0.0  ;
-
-  for(int n=0;n<24;n++)
-    pOO[n]*=-1.0;
-
   double pOH[24] ;
-			
-  pOH[0]=    -723.98843365906146   	 ;
-  pOH[1]=    19521.464403077367    	 ;
-  pOH[2]=    -239387.19844904722   	 ;
-  pOH[3]=    1779971.391880197     	 ;
-  pOH[4]=    -9012011.3066581544   	 ;
-  pOH[5]=    33045520.790334914    	 ;
-  pOH[6]=    -91065426.852874398   	 ;
-  pOH[7]=    193063512.18800989    	 ;
-  pOH[8]=    -319567836.69655925   	 ;
-  pOH[9]=    416549308.66748077    	 ;
-  pOH[10]=   -429085671.67467254   	 ;
-  pOH[11]=   348884311.45362383    	 ;
-  pOH[12]=   -222517723.55597138   	 ;
-  pOH[13]=   109947020.4432832     	 ;
-  pOH[14]=   -41208686.826725334   	 ;
-  pOH[15]=   11317859.397690322    	 ;
-  pOH[16]=   -2147264.8830902833   	 ;
-  pOH[17]=   251388.67261027446    	 ;
-  pOH[18]=   -13681.419073463892     ;
-  pOH[19]= 0.0 ;
-  pOH[20]= 0.0 ;
-  pOH[21]= 0.0 ;
-  pOH[22]= 0.0 ;
-  pOH[23]= 0.0 ;
-
-  for(int n=0;n<24;n++)
-    pOH[n]*=-1;
-
-
   double pHH[24] ;
-
-
-  pHH[0]=  4008.2237405234468     ;	     
-  pHH[1]=  -133312.7298043904     ;	     
-  pHH[2]=  2029736.1394321355     ;	     
-  pHH[3]=  -18810746.964217555    ;	     
-  pHH[4]=  119027276.85909875     ;	     
-  pHH[5]=  -546712328.86844385    ;	     
-  pHH[6]=  1891487808.0979228     ;	     
-  pHH[7]=  -5046788818.0488892    ;	     
-  pHH[8]=  10541569604.029257     ;	     
-  pHH[9]=  -17389390868.432339    ;	     
-  pHH[10]= 22737335322.912605     ;	     
-  pHH[11]= -23538172961.926105    ;	     
-  pHH[12]= 19171310483.05817      ;	     
-  pHH[13]= -12131668715.262671    ;	     
-  pHH[14]= 5839324812.613658       ;			     
-  pHH[15]= -2064811667.1446371     ;			     
-  pHH[16]= 505544757.04635936      ;			     
-  pHH[17]= -76541863.838855445     ;			     
-  pHH[18]= 5397474.2715492537      ;			     
-  pHH[19]=  0.0  ;			     
-  pHH[20]=  0.0  ;			     
-  pHH[21]=  0.0  ;			     
-  pHH[22]=  0.0  ;			     
-  pHH[23]=  0.0  ;                       
-
-  for(int n=0;n<24;n++)
-    pHH[n]*=-1.0;
-					     
+  for (int i = 0; i < NPAIR; i++){
+    for (int j = 0; j < snum[i]; j++) { 
+      if (i == 0) {
+        pOO[j] = -params[j];
+      } else if (i == 1) {
+        pOH[j] = -params[snum[i-1]+j];
+      } else if (i == 2) {
+        pHH[j] = -params[snum[i-1] + snum[i-2] +j];
+      }
+    }
+  }
 
   ////main loop non-Coulomb short-ranged forces:
   for(int a1=0;a1<nat-1;a1++)
@@ -756,6 +690,10 @@ double spline_pot(double smin, double smax, double sdelta, double rlen2, double 
       S_r = 0.0 ;
       return(0.0) ;
     }
+  else if ( rlen2 < smin ) 
+    {
+      rlen2 = smin ;
+    }
 
   k0=int(floor((rlen2-smin)/sdelta));
   x=rlen2;
@@ -782,7 +720,8 @@ double spline_pot(double smin, double smax, double sdelta, double rlen2, double 
   h11 *= sdelta;
   kstart=k0*2;		    
   if ( kstart > snum ) {
-    cout << "Error: kstart too large " << kstart << endl ;
+    cout << "Error: kstart too large " << kstart << " " << rlen2 << " " << smin << " " << snum << endl ;
+    exit(1) ;
   }
   S_r=
     h00*params[vstart+kstart+0]+//lookout!!!
@@ -809,9 +748,9 @@ double spline_pot(double smin, double smax, double sdelta, double rlen2, double 
 		     i10*params[vstart+kstart+1]+
 		     i01*params[vstart+kstart+2]+
 		     i11*params[vstart+kstart+3] ) ;
-  // if ( kstart/2 + 1 < snum / 2 ) {
+  if ( kstart/2 + 1 < snum / 2 ) {
     tempx += pot_params[vstart/2+kstart/2+1] ;
-    // }
+  }
   return(tempx) ;
 }
 
@@ -986,7 +925,12 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double **coul_oo, double **coul_oh,double **coul_hh, Sr_pair_t pair_type,
 		 double *mind)
 {
-  bool if_ewald = true ;
+  bool if_ewald ;
+  if (pair_type != DFTBPOLY) {
+    if_ewald = true;
+  } else {
+    if_ewald = false;
+  }
   int snum_tot ;
   
   snum_tot = 0 ;
@@ -1018,6 +962,10 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
     ZCalc_Spline_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,sdelta,snum,mind) ;
   } else if ( pair_type == CHEBYSHEV ) {
     ZCalc_Cheby_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,lambda,mind) ;
+  } else if ( pair_type == DFTBPOLY ) {
+    ZCalc_Poly_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,lambda,mind) ;
+  } else if ( pair_type == INVERSE_R ) {
+    ZCalc_InvR_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,lambda,mind) ;
   } else {
     cout << "Error: bad pairtype in ZCalc_Deriv\n" ;
     exit(1) ;
@@ -1120,6 +1068,142 @@ static void ZCalc_Spline_Deriv(double **Coord, const char *Lbc, double *Latcons,
   return;
 }
 
+static void ZCalc_Poly_Deriv(double **Coord,const char *Lbc, double *Latcons,
+			       const int nlayers,
+			       const int nat,double ***A,const double *smin,
+			       const double *smax,
+			      const int *snum, const double *lambda, double *mind)
+// Calculate derivatives of the forces wrt the Chebyshev parameters.
+// Stores minimum distance between a pair of atoms in mind.
+{
+  double Rvec[3];
+  double Rab[3];
+  double rlen;
+  double x;
+  int vstart ;
+  static bool called_before = false ;
+  const double autoang = 0.5291772488820865;
+  double rc[NPAIR];
+
+  if ( ! called_before ) {
+    called_before = true ;
+    int dim = 0 ;
+    for ( int i = 0 ; i < NPAIR ; i++ ) 
+      {
+        rc[i] = smax[i]/autoang;
+        printf("rc = %lf\n",rc[i]);
+	if ( snum[i] > dim ) 
+	  {
+	    dim = snum[i] ;
+	  }
+      }
+    dim++ ;
+  }
+
+  ////main loop for ninth order polynomial terms:
+  for(int a1=0;a1<nat-1;a1++)
+    for(int a2=a1+1;a2<nat;a2++)
+      {
+	//calculate vstart: (index for populating OO, OH, or HH column block of A).
+	int ipair = pair_index(a1, a2, Lbc) ;
+	vstart = pair_table_offset(ipair,snum) ;
+
+	// Start with minimum image convention.  Use layers to access larger distances if desired.	
+	for(int c=0;c<3;c++) {
+	  Rvec[c]=Coord[a2][c]-Coord[a1][c];
+	  Rvec[c] -= floor(0.5+Rvec[c]/Latcons[c])*Latcons[c];
+	}
+      
+	for(int n1=-1*nlayers;n1<nlayers+1;n1++)
+	  for(int n2=-1*nlayers;n2<nlayers+1;n2++)
+	    for(int n3=-1*nlayers;n3<nlayers+1;n3++)
+	      {
+		Rab[0]=Rvec[0]+n1*Latcons[0];
+		Rab[1]=Rvec[1]+n2*Latcons[1];
+		Rab[2]=Rvec[2]+n3*Latcons[2];
+		
+		rlen=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
+		
+		if ( rlen < mind[ipair] ) mind[ipair] = rlen ;
+
+		if(rlen>smin[ipair] and rlen<smax[ipair])
+		  {
+		    //calculate binning, convert all distances to au
+		    x=rlen/autoang;
+	            for ( int i = 0 ; i < snum[ipair]; i++ ) 
+		      {
+                        double rfac = -(i+2)*pow((rc[ipair]-x),i+1);
+		        for(int c=0;c<3;c++)
+		          {
+			    A[a1][vstart+i][c] += rfac*Rab[c]/rlen;
+			    A[a2][vstart+i][c] -= rfac*Rab[c]/rlen;
+		          }
+                      }
+		  }//rlen
+	      }
+      }
+  return;
+}
+
+static void ZCalc_InvR_Deriv(double **Coord,const char *Lbc, double *Latcons,
+			       const int nlayers,
+			       const int nat,double ***A,const double *smin,
+			       const double *smax,
+			      const int *snum, const double *lambda, double *mind)
+// Calculate derivatives of the forces wrt the Chebyshev parameters.
+// Stores minimum distance between a pair of atoms in mind.
+{
+  double Rvec[3];
+  double Rab[3];
+  double rlen;
+  double x;
+  int vstart ;
+
+  for(int a1=0;a1<nat-1;a1++)
+    for(int a2=a1+1;a2<nat;a2++)
+      {
+	//calculate vstart: (index for populating OO, OH, or HH column block of A).
+	int ipair = pair_index(a1, a2, Lbc) ;
+	vstart = pair_table_offset(ipair,snum) ;
+
+	// Start with minimum image convention.  Use layers to access larger distances if desired.	
+	for(int c=0;c<3;c++) {
+	  Rvec[c]=Coord[a2][c]-Coord[a1][c];
+	  Rvec[c] -= floor(0.5+Rvec[c]/Latcons[c])*Latcons[c];
+	}
+      
+	for(int n1=-1*nlayers;n1<nlayers+1;n1++)
+	  for(int n2=-1*nlayers;n2<nlayers+1;n2++)
+	    for(int n3=-1*nlayers;n3<nlayers+1;n3++)
+	      {
+		Rab[0]=Rvec[0]+n1*Latcons[0];
+		Rab[1]=Rvec[1]+n2*Latcons[1];
+		Rab[2]=Rvec[2]+n3*Latcons[2];
+		
+		rlen=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
+		
+		if ( rlen < mind[ipair] ) mind[ipair] = rlen ;
+
+		if(rlen>smin[ipair] and rlen<smax[ipair])
+		  {
+		    x=rlen;
+                    double fc = pow((rlen-smax[ipair]),3);
+                    double dfc = 3*pow((rlen-smax[ipair]),2);
+ 	            for ( int i = 0 ; i < snum[ipair]; i++ ) 
+		      {
+                        double rfac = ((i+2)/pow(rlen,i+3))*fc;
+                        rfac -= (1/pow(rlen,i+2))*dfc;
+		        for(int c=0;c<3;c++)
+		          {
+			    A[a1][vstart+i][c] += rfac*Rab[c]/rlen;
+			    A[a2][vstart+i][c] -= rfac*Rab[c]/rlen;
+		          }
+                      }
+		  }//rlen
+	      }
+      }
+  return;
+}
 
 static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const int nlayers,
@@ -1393,10 +1477,12 @@ void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latco
 
 	      for(int c=0;c<3;c++)
 		{
-		  if(aj==ai)
+		  if(aj==ai) {
 		    dEover[aj][c]-=tempr*Rab[c]/rik;
-		  if(aj==ak)
+                  }
+		  if(aj==ak) {
 		    dEover[aj][c]+=tempr*Rab[c]/rik;
+                  }
 		}
 	    }
 	}

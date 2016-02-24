@@ -137,9 +137,10 @@ void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,con
   Vtot+=UCoul;
 
   ////Add the Ewald Coulomb forces:
-  for(int a1=0;a1<nat;a1++)
-    for(int c=0;c<3;c++)
+  for(int a1=0;a1<nat;a1++) {
+    for(int c=0;c<3;c++) 
       SForce[a1][c]-=FCoul[a1][c];
+  }
 
   /// Use special relation between energy and pressure of a coulomb system.
   /// See Hummer et. al, JCP 109, 2791 (1998) eq. 15.
@@ -297,8 +298,8 @@ static void Ewald_K_Space_New(double alphasq, int k_cut,
   // printf("K-space part of Ewald Energy = %13.6e\n", UCoul) ;
   Vtot+=UCoul;
 
-  delete sin_array ;
-  delete cos_array ;
+  delete [] sin_array ;
+  delete [] cos_array ;
 }
 
 
@@ -374,13 +375,13 @@ static void Ewald_K_Space_Orig(double alphasq, double **Coord, const char *Lbc, 
   //double qhh=49.3255746617;
 
   //spline charges electron units
-  // double qoo=0.86035*0.86035;
-  // double qoh=0.86035*0.430175;
-  // double qhh=0.430175*0.430175;
+   double qoo=0.86035*0.86035*ke;
+   double qoh=0.86035*0.430175*ke;
+   double qhh=0.430175*0.430175*ke;
 
-  double qhh = 4.09174173723 / ke ;
-  double qoo = 4.0 * qhh ;
-  double qoh = sqrt(qoo * qhh) ; 
+  //double qhh = 4.09174173723 / ke ;
+  //double qoo = 4.0 * qhh ;
+  //double qoh = sqrt(qoo * qhh) ; 
 
   //set up Ewald Coulomb parameters:
   double FCoul[nat][3];
@@ -604,7 +605,7 @@ void ZCalc_Ewald_Deriv(double **Coord, const char *Lbc,
   double dx,dy,dz,rlen_mi;
   static double *sinx, *cosx, *siny, *cosy, *sinz, *cosz ;
 
-  double ke=1.0;//332.0637157615209;//this is the unit conversion
+  double ke=1.0; //332.0637157615209;//this is the unit conversion
   //to achieve charges in nice electron units. 
   //currently we apply this conversion at MD-level, not here.
 
@@ -617,6 +618,7 @@ void ZCalc_Ewald_Deriv(double **Coord, const char *Lbc,
     optimal_ewald_params(accuracy, Volume, nat, alpha, 
 			 r_cut, kmax,r_acc, k_acc) ;
     alphasq = alpha * alpha ;
+    printf("Ewald_Deriv:\n");
     printf("R-Space Ewald cutoff      = %13.6e\n", r_cut) ;
     printf("R-Space accuracy estimate = %13.6e\n", r_acc) ;
     printf("K-space accuracy estimate = %13.6e\n", k_acc) ;

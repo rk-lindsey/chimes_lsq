@@ -99,18 +99,18 @@ int main(int argc, char* argv[])
 
   double over_param[MAXOVERP] =   {
     // Lucas's parameters for overcoordination
-    // 75.0,                    // pover
-    // 9.6000387075695e-01,     // r0
-    // -2.5881042987450e-01,    // p1
-    // 3.8995379237250e+00,     // p2
-    // -8.9                     // lambda6
+     75.0,                    // pover
+     9.6000387075695e-01,     // r0
+     -2.5881042987450e-01,    // p1
+     3.8995379237250e+00,     // p2
+     -8.9                     // lambda6
     //
     // Chenoweth values
-    50.0,      // pover
-    1.0165,    // r0
-    -0.0657,   // p1
-    5.0451,    // p2
-    -3.6141    // lambda6
+    //50.0,      // pover
+    //1.0165,    // r0
+    //-0.0657,   // p1
+    //5.0451,    // p2
+    //-3.6141    // lambda6
   } ;
 
   int n_over = 5 ;
@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
 	}
       else
 	{
-	  cout<<"Atom type "<<Lb[a]<<" not supported."<<endl;
+	  cout<<"Atom type "<<Lb[a]<< a << " not supported."<<endl;
 	  exit(1);
 	}
     }
@@ -362,6 +362,7 @@ int main(int argc, char* argv[])
   tempx=0.0;
   tempy=0.0;
   tempz=0.0;
+  tempm = 0.0;
   for(int a=0;a<nat;a++)
     {
       tempx+=Mass[a]*Vel[a][0];
@@ -381,9 +382,14 @@ int main(int argc, char* argv[])
  ////define Spline parameters:
   fileread.close();
   fileread.clear();
-  double smin=0.0;
-  double smax=8.0;
-  double sdelta=0.10;
+  double smin[NPAIR];
+  double smax[NPAIR];
+  double sdelta[NPAIR];
+  double lambda[NPAIR];
+  int snum[NPAIR] ;
+  int tot_snum = 0;
+  int i;
+
   ifstream paramread(params_file);
 
   if ( paramread.fail() ) 
@@ -397,47 +403,45 @@ int main(int argc, char* argv[])
   int tempint;
 
   // Read smin, smax, sdelta from params file instead of using built-in values.
-  char buf[1024] ;
-  do {
-    paramread.getline(buf,1024) ;
-  } while (buf[0] == '#' ) ;
-  sscanf(buf,"%lf",&smin) ;
+//  char buf[1024] ;
+//  do {
+//    paramread.getline(buf,1024) ;
+//  } while (buf[0] == '#' ) ;
+//  sscanf(buf,"%lf",&smin[i]) ;
   
-  int snum ;
-
-  if ( pair_type == SPLINE ) 
-    {
-      paramread >> smax >> sdelta ;
-      cout << "Spline minimum = " << smin << endl ;
-      cout << "Spline maximum = " << smax << endl ;
-      cout << "Spline step    = " << sdelta << endl ;
-      snum=(2+floor((smax-smin)/sdelta))*2*3;//2 is for p0/m0/p1/m1, and 3 is for oo/oh/hh.
+  for (i = 0; i < NPAIR; i++) {
+    if ( pair_type == SPLINE ) 
+      {
+        paramread >> smin[i] >> smax[i] >> sdelta[i] ;
+        cout << "Spline minimum = " << smin[i] << endl ;
+        cout << "Spline maximum = " << smax[i] << endl ;
+        cout << "Spline step    = " << sdelta[i] << endl ;
+        snum[i]=(2+floor((smax[i]-smin[i])/sdelta[i]))*2;//2 is for p0/m0/p1/m1
+      }
+    else if ( pair_type == CHEBYSHEV ) {
+      cout << "pair type: " << i << endl;
+      paramread >> smin[i] >> smax[i] >> lambda[i] >> snum[i];
+      cout << "Cheby minimum = " << smin[i] << endl ;
+      cout << "Cheby maximum = " << smax[i]  << endl ;
+      cout << "Cheby order    = " << snum[i]  << endl ;
+      cout << "Morse lambda value= " << lambda[i]  << endl ;
+      sdelta[i] = 0.0 ;
+      //snum *= 3 ;
+      }
+    else if (pair_type == INVERSE_R) {
+      cout << "pair type: " << i << endl;
+      paramread >> smin[i] >> smax[i] >> snum[i];
+      cout << "Inverse R minimum = " << smin[i] << endl ;
+      cout << "Inverse R maximum = " << smax[i]  << endl ;
+      cout << "Inverse R order    = " << snum[i]  << endl ;
+    } else {
+      snum[i] = 0 ;
+      smax[i] = Latcons[0] / 2.0 ;
+      smin[i] = 0.0 ;
     }
-  else if ( pair_type == CHEBYSHEV ) {
-    paramread >> smax >> snum ;
-    cout << "Cheby minimum = " << smin << endl ;
-    cout << "Cheby maximum = " << smax << endl ;
-    cout << "Cheby order    = " << snum << endl ;
-    sdelta = 0.0 ;
-    snum *= 3 ;
-  } else {
-    snum = 0 ;
-    smax = Latcons[0] / 2.0 ;
-    smin = 0.0 ;
+    tot_snum += snum[i];
   }
-
-  // Support future hooks for multiple smin, smax, sdelta, snum values.
-  
-  double smin_pair[3], smax_pair[3], sdelta_pair[3] ;
-  int snum_pair[3] ;
-
-  for ( int j = 0 ; j < 3 ; j++ ) {
-    smin_pair[j] = smin ;
-    smax_pair[j] = smax ;
-    sdelta_pair[j] = sdelta ;
-    snum_pair[j] = snum / 3 ;
-  }
-  
+  cout << "Total potential parameters: " << tot_snum << endl;
   if ( if_overcoord ) 
     {
       // Read overcoordination parameters from the params file.
@@ -457,15 +461,15 @@ int main(int argc, char* argv[])
 	}
     }
 
-  double params[snum+4];
-  double pot_params[snum/2+1] ;
-  for(int i=0;i<snum+4;i++)
+  double params[tot_snum+4];
+  double pot_params[tot_snum/2+1] ;
+  for(int i=0;i<tot_snum+4;i++)
     params[i]=0.0;
-
-  if ( pair_type == CHEBYSHEV or pair_type == SPLINE ) {
-    for(int n=0;n<snum+4;n++)
+  if ( pair_type == CHEBYSHEV or pair_type == SPLINE or pair_type == INVERSE_R ) {
+    for(int n=0;n<tot_snum+4;n++)
       {
 	paramread >> tempint >> params[n];
+        cout << tempint << " " << params[n] << endl;
 	if ( paramread.eof() ) 
 	  {
 	    cout << "Error reading params.txt\n" ;
@@ -482,9 +486,12 @@ int main(int argc, char* argv[])
   if ( pair_type == SPLINE ) 
     {
       // Use a simple linear force model for positions not sampled.
-      for ( int n = 0 ; n < 3 ; n++ ) {
-	int ntable = snum / 3 ;     // Number of entries per atom pair.
-	int nstart = n * ntable ;   // Start of current table.
+      int nstart = 0;
+      for ( int n = 0 ; n < NPAIR ; n++ ) {
+	int ntable = snum[n];     // Number of entries per atom pair.
+        if (n > 0) {
+	  nstart += snum[n-1];   // Start of current table.
+        }
 	int nbegin = 0 ;            // Where populated table entries begin.
 
 	for ( int idx = nstart ; idx < nstart + ntable ; idx += 2 ) {
@@ -498,21 +505,21 @@ int main(int argc, char* argv[])
 	const double slope = -10.0 ;
 	for ( int idx = nstart ; idx < nbegin ; idx += 2 ) {
 	  params[idx] = slope * ( nbegin - idx) + params[nbegin] ;
-	  params[idx+1] = slope / sdelta ;
+	  params[idx+1] = slope / sdelta[n] ;
 	}    
-      }
-      for ( int j = 0 ; j < snum / 2 ; j++ ) {
-	pot_params[j] = -11111 ;
-      }
-
-      // Calculate integral of the spline for the potential.
-      for ( int j = snum / 6 - 1 ; j < snum / 2 ; j += snum / 6 ) {
-	pot_params[j] = 0.0 ;
-	for ( int n = j - 1 ; n >= j - snum / 6 + 1 ; n-- ) {
-	  pot_params[n] = pot_params[n+1] - sdelta * ( params[2*n]   /2.0 + sdelta * params[2*n+1]/12.0
-						       + params[2*n+2] /2.0 - sdelta * params[2*n+3]/12.0) ;
+	for ( int j = 0 ; j < snum[n] / 2 ; j++ ) {
+	  pot_params[j+nstart/2] = -11111 ;
 	}
-      }
+
+	// Calculate integral of the spline for the potential.
+	int j = nstart/2+snum[n]/2-1 ;
+	pot_params[j] = 0.0 ;
+	for ( int m = j - 1 ; m >= nstart/2 ; m-- ) {
+	  pot_params[m] = pot_params[m+1] - sdelta[n] * ( params[2*m]   /2.0 + sdelta[n]* params[2*m+1]/12.0
+							  + params[2*m+2] /2.0 - sdelta[n] * params[2*m+3]/12.0) ;
+	}
+      } // n < NPAIR
+
     } // if_cheby == FALSE .
     
 
@@ -520,9 +527,9 @@ int main(int argc, char* argv[])
   double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0, q_stillinger=0.0;
   
   if ( if_spline_q ) {
-    q_oo = params[snum]  / ke ;
-    q_oh = params[snum+1] / ke ;
-    q_hh = params[snum+2] / ke ;
+    q_oo = params[tot_snum]  / ke ;
+    q_oh = params[tot_snum+1] / ke ;
+    q_hh = params[tot_snum+2] / ke ;
 
     q_spline = sqrt(q_hh) ;
     printf("Q[H] from params file = %12.5f e\n", q_spline) ;
@@ -530,8 +537,8 @@ int main(int argc, char* argv[])
 	   q_oo + 4.0 * q_oh + 4.0 * q_hh) ;
 
   } else {
-    q_stillinger = sqrt(36.1345/ke) ;  // stillinger units
-    printf("Built-in Q[H] = %12.5f e\n", q_stillinger) ;
+    q_stillinger = sqrt(44.23918853232863/ke) ;  // spce charge in stillinger units
+    printf("Built-in Q[H-DFT] = %12.5f e\n", q_stillinger) ;
   }
 
 
@@ -566,35 +573,43 @@ int main(int argc, char* argv[])
 	 qsum / nat) ;
 
 
-#if(0)
-  // Output for testing the potential calculation.
-  FILE *potout = fopen("potparams.txt", "w") ;
-  for ( int j = 0 ; j < snum / 2 ; j++ ) {
-    fprintf(potout, "%13.6e %13.6e\n", j*sdelta, pot_params[j]) ;
-  }
-  fclose(potout) ;
+  if ( pair_type == SPLINE ) 
+    {
+      // Output for testing the spline potential calculation.
+      // potparams.txt contains the modified spline potential as calculated from forces.
+      FILE *potout = fopen("potparams.txt", "w") ;
+      int jstart = 0 ;
+      for (int i = 0; i < NPAIR; i++) {
+	for ( int j = 0 ; j < snum[i] / 2 ; j++ ) {
+	  fprintf(potout, "%13.6e %13.6e\n", smin[i]+j*sdelta[i], pot_params[j+jstart]) ;
+	}
+	jstart += snum[i] / 2 ;
+      }
+      fclose(potout) ;
 
-  FILE *fout = fopen("potvals.txt", "w") ;
-  for ( int j = 0 ; j < 12 * snum / 3 ; j++ ) {
-    double r = j * sdelta / 12.0  ;
-    double S_r = 0.0 ;
-    if ( r < smax ) {
-      double spot = spline_pot(smin_pair, smax_pair, sdelta_pair, r, params, pot_params, snum, 0, S_r) ;
-      fprintf(fout, "%13.6e %13.6e\n", r, spot) ;
-    } else {
-      break ;
+      // potvals.txt contains the potential as evaluated with the spline_pot function.
+      FILE *fout = fopen("potvals.txt", "w") ;
+      jstart = 0 ;
+      for (int i = 0; i < NPAIR; i++) {
+	for ( int j = 0 ; j < snum[i] ; j++ ) {
+	  // r chosen to be "off" the spline array values by starting at 0.0, and using 1/2 steps.
+	  double r = j * sdelta[i] / 2.0 ;
+	  double S_r = 0.0 ;
+	  double spot = spline_pot(smin[i], smax[i], sdelta[i], r, params, pot_params, snum[i], jstart, S_r) ;
+	  fprintf(fout, "%13.6e %13.6e\n", r, spot) ;
+	}
+	jstart += snum[i] ;
+      }
+      fclose(fout) ;
     }
-  }
-  fclose(fout) ;
-#endif
 
   for(int a1=0;a1<nat;a1++)
     for(int c=0;c<3;c++)
       Accel[a1][c]=0;
 
   double dens_mol = (nat * 1.0e24) / (6.0221e23 * Vol) ;
-  double dens_mass = tempm * dens_mol / nat ;
-
+  double dens_mass = (tempm/Vol)*(1e24/6.0221e23) ;
+  printf("Total Mass                   = %8.5f au\n",tempm);
   printf("Volume                       = %8.5f Ang.^3\n", Vol) ;
   printf("Number density               = %8.5f mol atm/cc\n", dens_mol) ;
   printf("Mass density                 = %8.5f g/cc\n", dens_mass) ;
@@ -667,9 +682,8 @@ int main(int argc, char* argv[])
 	}
       }
 
-      ZCalc(Coord,Lbc,Q,Latcons,nlayers,nat,smin_pair,smax_pair,sdelta_pair,snum_pair,
-	    params,pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
-	    Accel,Vtot,Pxyz);
+      ZCalc(Coord,Lbc,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
+	    pair_type,if_coulomb,if_overcoord,n_over,over_param,Accel,Vtot,Pxyz);
 
       if ( if_output_force ) 
 	{
@@ -742,8 +756,8 @@ int main(int argc, char* argv[])
 
       if ( num_pressure ) 
 	{
-	  Pxyz = numerical_pressure(Coord,Lbc, Q, Latcons,nlayers, nat,smin_pair,
-				    smax_pair,sdelta_pair,snum_pair, params, pot_params, 
+	  Pxyz = numerical_pressure(Coord,Lbc, Q, Latcons,nlayers, nat,smin,
+				    smax, sdelta,snum, params, pot_params, 
 				    pair_type,if_coulomb,if_overcoord,
 				    n_over, over_param) ;
 	}
@@ -1162,8 +1176,8 @@ static double kinetic_energy(double *Mass, double **Vel, int nat)
 
 static double 
 numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
-		   const int nlayers, const int nat,const double *smin_pair,
-		   const double *smax_pair, const double *sdelta_pair,const int *snum_pair, 
+		   const int nlayers, const int nat,const double *smin,
+		   const double *smax, const double *sdelta,const int *snum, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
 		   bool if_coulomb,bool if_overcoord, int n_over,
 		   double *over_param) 
@@ -1199,7 +1213,7 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   Vol1 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
-  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin_pair,smax_pair,sdelta_pair,snum_pair,params,
+  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
 	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
 	Accel,Vtot1,Pxyz);
   
@@ -1218,7 +1232,7 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   Vol2 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
-  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin_pair,smax_pair,sdelta_pair,snum_pair,params,
+  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
 	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
 	Accel,Vtot2,Pxyz);
 

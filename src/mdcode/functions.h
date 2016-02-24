@@ -23,6 +23,7 @@ static const double GPa = 6.9479 ;
 
 enum Sr_pair_t {
   CHEBYSHEV,
+  DFTBPOLY,
   SPLINE,
   INVERSE_R,
   LJ,

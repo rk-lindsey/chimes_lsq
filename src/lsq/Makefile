@@ -1,7 +1,7 @@
 # Choose g++ for debugging and icpc for fast execution.
 #
-#CXX=g++ -g -Wall #-pg
-CXX=icpc -fast
+CXX=g++ -g -Wall #-pg
+#CXX=icpc -fast
 CXX_SRC=splines_ls.C ../mdcode/functions.C ../mdcode/Ewald.C
 CXX_INCLUDES=-I ../mdcode
 
