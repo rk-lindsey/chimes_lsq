@@ -37,7 +37,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const double* sdelta,const int* snum, 
 	   double *params, double *pot_params, Sr_pair_t pair_type,
 	   bool if_coulomb, bool if_overcoord, int n_pover,
-	   double *over_params,
+	   double *over_params, const double *lambda,
 	   double **SForce,double& Vtot,double& Pxyz) ;
 
 void ZCalc_Deriv(double **Coord,const char *Lbc,
