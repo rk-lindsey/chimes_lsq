@@ -22,7 +22,7 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 			const int nat,const double *smin,
 			const double *smax,
 			const double *sdelta,const int *snum, 
-			double *params,
+			double *params, const double *lambda,
 			double **SForce, double &Vtot, double &xyz);
 
 
@@ -59,7 +59,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const double *sdelta,const int *snum, 
 	   double *params, double *pot_params, Sr_pair_t pair_type,
 	   bool if_coulomb, bool if_overcoord, int n_over,
-	   double *over_params,
+	   double *over_params, const double *lambda,
 	   double **SForce,double& Vtot,double& Pxyz)
 // Calculate the force, potential energy, and pressure.
 {
@@ -88,7 +88,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
   else if ( pair_type == CHEBYSHEV ) 
     {
       ZCalc_Cheby(Coord,Lbc,Latcons,nlayers,nat,smin,smax,sdelta,snum, 
-		  params,SForce,Vtot,Pxyz) ;
+		  params,lambda,SForce,Vtot,Pxyz) ;
     } 
   else if ( pair_type == SPLINE ) 
     {
@@ -760,7 +760,7 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 			const int nat,const double *smin,
 			const double *smax,
 			const double *sdelta,const int *snum, 
-			double *params,
+			double *params, const double *lambda,
 			double **SForce, double &Vtot, double &Pxyz)
 // Calculate short-range forces using a Chebyshev polynomial expansion.
 // Can use morse variables similar to the work of Bowman.
@@ -776,7 +776,7 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
   const bool inverse_r = false ;
   const bool morse     = true ;
   double tempx;
-  const double lambda = 1.25 ;
+  //const double lambda = 1.25 ;
   double exprlen ;
 
   if ( ! called_before ) {
@@ -830,11 +830,11 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		      xdiff = 0.5 * (1.0/smin[ipair] - 1.0/smax[ipair]) ;
 		      x = (1.0/rlen-xavg) / xdiff ;
 		    } else if ( morse ) {
-		      double xmin = exp(-smax[ipair]/lambda) ;
-		      double xmax = exp(-smin[ipair]/lambda) ;
+		      double xmin = exp(-smax[ipair]/lambda[ipair]) ;
+		      double xmax = exp(-smin[ipair]/lambda[ipair]) ;
 		      xavg = 0.5 * (xmin + xmax) ;
 		      xdiff = 0.5 * (xmax - xmin) ;
-		      exprlen = exp(-rlen/lambda) ;
+		      exprlen = exp(-rlen/lambda[ipair]) ;
 		      x = (exprlen-xavg)/xdiff ;
 		    }
 		    else {
@@ -880,7 +880,7 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 			    double coeff = params[vstart+i] ;
 			    tempx += coeff * fcut * Tn[i+1] ;
 			    double deriv = 
-			      (fcut * Tnd[i+1] *(-exprlen/lambda)/xdiff + 
+			      (fcut * Tnd[i+1] *(-exprlen/lambda[ipair])/xdiff + 
 			       fcutderiv * Tn[i+1]
 			       ) ;
 			    Pxyz -= coeff * deriv * rlen ;
@@ -1073,8 +1073,7 @@ static void ZCalc_Poly_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const int nat,double ***A,const double *smin,
 			       const double *smax,
 			      const int *snum, const double *lambda, double *mind)
-// Calculate derivatives of the forces wrt the Chebyshev parameters.
-// Stores minimum distance between a pair of atoms in mind.
+// Calculate derivatives of the forces wrt the DFTB Erep parameters.
 {
   double Rvec[3];
   double Rab[3];
@@ -1083,7 +1082,7 @@ static void ZCalc_Poly_Deriv(double **Coord,const char *Lbc, double *Latcons,
   int vstart ;
   static bool called_before = false ;
   const double autoang = 0.5291772488820865;
-  double rc[NPAIR];
+  static double rc[NPAIR];
 
   if ( ! called_before ) {
     called_before = true ;
@@ -1091,7 +1090,7 @@ static void ZCalc_Poly_Deriv(double **Coord,const char *Lbc, double *Latcons,
     for ( int i = 0 ; i < NPAIR ; i++ ) 
       {
         rc[i] = smax[i]/autoang;
-        printf("rc = %lf\n",rc[i]);
+        printf("rc[%d] = %lf\n",i,rc[i]);
 	if ( snum[i] > dim ) 
 	  {
 	    dim = snum[i] ;
