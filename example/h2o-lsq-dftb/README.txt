@@ -5,7 +5,7 @@ STEP 1: Determine needed values of forces from Erep. This is done by
 first running DFTB for a series of configurations with the 
 contribution from Erep zeroed out. These forces are then subtracted 
 from the user supplied forces from DFT to yield the fitting data set
-for force matching. In this example, the configurations and forces 
+for force matching. In this example, the configurations and DFT forces 
 are supplied in input_openmx_1.5gcc.xyzf and the forces to be 
 fit to are saved in input_dftb.xyzf.
 
