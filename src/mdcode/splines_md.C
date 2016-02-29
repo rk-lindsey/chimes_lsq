@@ -36,7 +36,7 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 		   const double *smax, const double *sdelta,const int *snum, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
 		   bool if_coulomb,bool if_overcoord, int n_over,
-		   double *over_param) ;
+		   double *over_param, const double *lambda) ;
 
 int main(int argc, char* argv[])
 {
@@ -490,7 +490,7 @@ int main(int argc, char* argv[])
       {
 	paramread >> tempint >> params[n];
 	if ( tempint != n ) {
-	  cout << "Error: parameter index mismatch\n" ;
+	  cout << "Error: parameter index mismatch " << tempint <<  " " << n << endl;
 	  exit(1) ;
 	}
 
@@ -708,7 +708,7 @@ int main(int argc, char* argv[])
       }
 
       ZCalc(Coord,Lbc,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
-	    pair_type,if_coulomb,if_overcoord,n_over,over_param,Accel,Vtot,Pxyz);
+	    pair_type,if_coulomb,if_overcoord,n_over,over_param,lambda,Accel,Vtot,Pxyz);
 
       if ( if_output_force ) 
 	{
@@ -785,7 +785,7 @@ int main(int argc, char* argv[])
 	  Pxyz = numerical_pressure(Coord,Lbc, Q, Latcons,nlayers, nat,smin,
 				    smax, sdelta,snum, params, pot_params, 
 				    pair_type,if_coulomb,if_overcoord,
-				    n_over, over_param) ;
+				    n_over, over_param, lambda) ;
 	}
       double Ptot = Pxyz + 2.0 * Ktot / (3.0 * Vol) ;
       // Unit conversion factor to GPa.
@@ -1206,7 +1206,7 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 		   const double *smax, const double *sdelta,const int *snum, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
 		   bool if_coulomb,bool if_overcoord, int n_over,
-		   double *over_param) 
+		   double *over_param, const double *lambda) 
 // Evaluates the configurational part of the pressure numerically by -dU/dV.
 {
   double **Coord1 ;
@@ -1241,7 +1241,7 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
 	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
-	Accel,Vtot1,Pxyz);
+	lambda,Accel,Vtot1,Pxyz);
   
   lscale = 1.0 - eps ;
 
@@ -1260,7 +1260,7 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
 	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
-	Accel,Vtot2,Pxyz);
+	lambda,Accel,Vtot2,Pxyz);
 
   double result = -(Vtot2 - Vtot1)/(Vol2 - Vol1) ;
 
