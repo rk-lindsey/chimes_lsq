@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
 
   for ( int i = 0 ; i < NPAIR ; i++ ) {
     if (( pair_type != CHEBYSHEV ) && ( pair_type != INVERSE_R)) {
-      fprintf(header, "%8.5f %8.5f %8.5f\n", smin[i], smax[i], sdelta[i]) ;
+      fprintf(header, "%8.5f %8.5f %8.5f %d\n", smin[i], smax[i], sdelta[i], snum[i]) ;
     } else if (pair_type == CHEBYSHEV) {
       fprintf(header, "%8.5f %8.5f %8.5f %d\n", smin[i], smax[i], lambda[i],
 	      snum[i]) ;
