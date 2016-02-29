@@ -9,13 +9,13 @@
 using namespace std;
 
 static void read_lsq_input(const char *input_filename, int &nlayers, 
-			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
-			   bool &fit_pover, int &cheby_order, double *smin,
+			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord, bool &if_subtract_coul, 
+			   bool &fit_pover, int &cheby_order, int &invr_parms, double *smin,
 			   double *smax, double *sdelta, double *lambda,
 			   int &n_over, double *over_param) ;
 static void echo_lsq_input(int nlayers, 
-			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord,
-			   bool fit_pover, int cheby_order, const double *smin,
+			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord, bool if_subtract_coul,
+			   bool fit_pover, int cheby_order, int invr_parms, const double *smin,
 			   const double *smax, const double *sdelta, const double *lambda,
 			   int n_over, 
 			   const double *over_params) ;
@@ -42,18 +42,25 @@ int main(int argc, char* argv[])
 
   // If true, subtract overcoordination forces.
   bool ifsubtract_coord = false ;  
+  
+  // If true, subtract Coulombic forces (for use with fixed charges).
+  bool ifsubtract_coul = false ;  
+  // default charges
+  double qO = -0.710;
+  double qH = 0.365;
 
   // If true, fit coulomb parameters.
-  bool fit_coul = true ;
+  bool fit_coul = false ;
 
   // If true, fit overcoordination parameters.
-  bool fit_pover = true ;
+  bool fit_pover = false ;
 
   // Short-range pair potential type.
   Sr_pair_t pair_type ;
 
   // Order of Chebyshev polynomial if used.
-  int cheby_order = 12 ;
+  int cheby_order = 8 ; // set to 8 for DFTB Erep polynomial
+  int invr_parms = 4 ; // currently uses 19 parameters per pair type
 
   // Number of overcoordination parameters.
   int n_over = 5 ;
@@ -62,18 +69,18 @@ int main(int argc, char* argv[])
 
   double over_param[MAXOVERP] =   {
     // Lucas's parameters for overcoordination
-    // 75.0,                    // pover
-    // 9.6000387075695e-01,     // r0
-    // -2.5881042987450e-01,    // p1
-    // 3.8995379237250e+00,     // p2
-    // -8.9                     // lambda6
+     75.0,                    // pover
+     9.6000387075695e-01,     // r0
+     -2.5881042987450e-01,    // p1
+     3.8995379237250e+00,     // p2
+     -8.9                     // lambda6
     //
     // Chenoweth values
-    50.0,      // pover
-    1.0165,    // r0
-    -0.0657,   // p1
-    5.0451,    // p2
-    -3.6141    // lambda6
+   // 50.0,      // pover
+   // 1.0165,    // r0
+   // -0.0657,   // p1
+   // 5.0451,    // p2
+   // -3.6141    // lambda6
   } ;
   
   //define spline parameters:
@@ -87,18 +94,18 @@ int main(int argc, char* argv[])
 
   for ( int i = 0 ; i < NPAIR ; i++ ) 
     {
-      smax[i] =   6.0 ;
+      smax[i] =   6 ;
       smin[i] =   0.5 ;
-      sdelta[i] = 0.1 ;
+      sdelta[i] = 0.05 ;
       lambda[i] = 1.25 ;
       mind[i]   = 1.0e10 ;
     }
 
-  read_lsq_input(argv[1],nlayers, fit_coul, pair_type, ifsubtract_coord, fit_pover, cheby_order,
+  read_lsq_input(argv[1],nlayers, fit_coul, pair_type, ifsubtract_coord, ifsubtract_coul, fit_pover, cheby_order, invr_parms,
 		 smin, smax, sdelta, lambda, n_over, over_param) ;
 
 
-  echo_lsq_input(nlayers, fit_coul, pair_type, ifsubtract_coord, fit_pover, cheby_order,
+  echo_lsq_input(nlayers, fit_coul, pair_type, ifsubtract_coord, ifsubtract_coul, fit_pover, cheby_order, invr_parms,
 		 smin, smax, sdelta, lambda, n_over, over_param) ;
 
   ////Read input file input.xyzf:
@@ -137,13 +144,17 @@ int main(int argc, char* argv[])
   tot_snum = 0 ;
   for ( int i = 0 ; i < NPAIR ; i++ ) 
     {
-      if ( pair_type != CHEBYSHEV ) 
-	{
-	  snum[i]=(2+floor((smax[i]-smin[i])/sdelta[i]))*2;//2 is for p0/m0/p1/m1
-	}
+      if ( (pair_type == CHEBYSHEV ) || (pair_type == DFTBPOLY) )
+        {
+          snum[i] = cheby_order ;
+        }
+      else if (pair_type == INVERSE_R) 
+        {
+          snum[i] = invr_parms;
+        }
       else 
 	{
-	  snum[i] = cheby_order ;
+	  snum[i]=(2+floor((smax[i]-smin[i])/sdelta[i]))*2;//2 is for p0/m0/p1/m1
 	}
       tot_snum += snum[i] ;
     }
@@ -268,15 +279,21 @@ int main(int argc, char* argv[])
   for(int N=0;N<nframes;N++)
     for(int a1=0;a1<Nat[N];a1++)
       for(int c=0;c<3;c++)
-	Force[N][a1][c] *= 627.50960803*1.889725989;
+        if (pair_type != DFTBPOLY) 
+	  Force[N][a1][c] *= 627.50960803*1.889725989;
 
  
   //Generate A matrix, b vector, for least-squares:
 
   // cout.precision(10);
-  cout.precision(15);
-
+  cout.precision(16);
+  
   ////ZCalc_Deriv is the function that calculates elements of A.
+  if (ifsubtract_coul) {
+    printf ("Using fixed charges from DFT (Goldman, JCP, 2009): \n");
+    printf ("  qO = %lf e\n",qO);
+    printf ("  qH = %lf e\n",qH);
+  }
   for(int N=0;N<nframes;N++) 
     {
       char *Lbc ;
@@ -303,6 +320,40 @@ int main(int argc, char* argv[])
 			      nlayers, Nat[N], false, Pover[N],
 			      n_over, over_param) ;
 	}
+      if (ifsubtract_coul) {
+        double **FCoul;
+        FCoul = new double* [Nat[N]] ;
+        for(int a=0;a<Nat[N];a++)
+          FCoul[a] = new double[3] ;
+
+        for(int a1=0;a1<Nat[N];a1++)
+          for(int c=0;c<3;c++)
+            FCoul[a1][c]=0.0 ; 
+        double Q[Nat[N]];
+        for(int a1=0;a1<Nat[N];a1++) {
+          if (Lbc[a1] == 'O') {
+            Q[a1] = qO;
+          } else if (Lbc[a1] == 'H') {
+            Q[a1] = qH;
+          } else {
+            cout << "ERROR in atom type: " << Lbc[a1] << endl;
+            exit(1);
+          }
+        }
+
+        double Vtot = 0;
+        double Pxyz = 0;
+        ZCalc_Ewald(Coord[N], Lbc, Q, tempLatcons, nlayers, Nat[N], FCoul, Vtot, Pxyz); 
+        for(int a1=0;a1<Nat[N];a1++) {
+          for(int c=0;c<3;c++) {
+            Force[N][a1][c] -= FCoul[a1][c];
+          }
+        }
+        for(int a=0;a<Nat[N];a++)
+          delete[] FCoul[a] ;
+        delete[] FCoul;
+ 
+      }       
       if ( fit_pover ) 
 	// Fit the overcoordination parameter.
 	{
@@ -323,8 +374,8 @@ int main(int argc, char* argv[])
   ofstream fileb("b.txt");
 
   //  Reduced precision to 6 for code testing.
-  fileA.precision(6);
-  fileb.precision(6);
+  fileA.precision(16);
+  fileb.precision(16);
 
   for(int N=0;N<nframes;N++)
     for(int a=0;a<Nat[N];a++)
@@ -404,11 +455,13 @@ int main(int argc, char* argv[])
   fprintf(header, "npair %d\n", NPAIR) ;
 
   for ( int i = 0 ; i < NPAIR ; i++ ) {
-    if ( pair_type != CHEBYSHEV ) {
+    if (( pair_type != CHEBYSHEV ) && ( pair_type != INVERSE_R)) {
       fprintf(header, "%8.5f %8.5f %8.5f\n", smin[i], smax[i], sdelta[i]) ;
-    } else {
+    } else if (pair_type == CHEBYSHEV) {
       fprintf(header, "%8.5f %8.5f %8.5f %d\n", smin[i], smax[i], lambda[i],
 	      snum[i]) ;
+    } else if (pair_type == INVERSE_R) {
+      fprintf(header, "%8.5f %8.5f %d\n", smin[i], smax[i], snum[i]);
     }
   }
   
@@ -436,8 +489,8 @@ int main(int argc, char* argv[])
 
 
 static void read_lsq_input(const char *input_filename, int &nlayers, 
-			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord,
-			   bool &fit_pover, int &cheby_order, double *smin,
+			   bool &fit_coul, Sr_pair_t &pair_type, bool &if_subtract_coord, bool &if_subtract_coul,
+			   bool &fit_pover, int &cheby_order, int &invr_parms, double *smin,
 			   double *smax, double *sdelta, double *lambda,
 			   int &n_over, double *over_params) 
 // Read program input from the file "splines_ls.in".
@@ -446,6 +499,8 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
   const int bufsz = 1024 ;
   char buf[bufsz] ;
 
+  static int i =0;
+  i++;
   fin = fopen(input_filename, "r") ;
   if ( fin == NULL ) 
     {
@@ -483,6 +538,10 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
 	{
 	  sscanf(val, "%d", &cheby_order) ;
 	}
+      else if ( strncmp(name,"invr_parms",bufsz) == 0 ) 
+	{
+	  sscanf(val, "%d", &invr_parms) ;
+	}
       else if ( strncmp(name,"smin",bufsz) == 0 ) 
 	{
 	  sscanf(val, "%lf", &smin[0]) ;
@@ -510,6 +569,10 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
       else if ( strncmp(name,"subtract_coord",bufsz) == 0 ) 
 	{
 	  if_subtract_coord = parse_tf(val, bufsz, line) ;
+	}
+      else if ( strncmp(name,"subtract_coul",bufsz) == 0 ) 
+	{
+	  if_subtract_coul = parse_tf(val, bufsz, line) ;
 	}
       else if ( strncmp(name,"fit_pover",bufsz) == 0 ) 
 	{
@@ -540,12 +603,16 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
 	    {
 	      pair_type = CHEBYSHEV ;
 	    }
-#if(0)
-	  // NOT SUPPORTED FOR LEAST-SQUARES FITTING
+	  else if ( strncmp(val, "dftbpoly", bufsz) == 0 ) 
+	    {
+	      pair_type = DFTBPOLY ;
+	    }
 	  else if ( strncmp(val, "inverse_r", bufsz) == 0 ) 
 	    {
 	      pair_type = INVERSE_R ;
 	    }
+#if(0)
+	  // NOT SUPPORTED FOR LEAST-SQUARES FITTING
 	  else if ( strncmp(val, "lennard_jones", bufsz) == 0 ) 
 	    {
 	      pair_type = LJ ;
@@ -578,8 +645,8 @@ static void read_lsq_input(const char *input_filename, int &nlayers,
 
 
 static void echo_lsq_input(int nlayers, 
-			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord,
-			   bool fit_pover, int cheby_order, const double *smin,
+			   bool fit_coul, Sr_pair_t pair_type, bool if_subtract_coord, bool if_subtract_coul, 
+			   bool fit_pover, int cheby_order, int invr_parms, const double *smin,
 			   const double *smax, const double *sdelta, const double *lambda,
 			   int n_over, 
 			   const double *over_params) 
@@ -591,6 +658,15 @@ static void echo_lsq_input(int nlayers,
     {
       printf("Chebyshev pair interaction used\n") ;
       printf("Number of chebyshev terms = %d\n", cheby_order) ;
+    }
+  else if ( pair_type == INVERSE_R) 
+    {
+      printf("Inverse_r pair interaction used\n") ;
+      printf("Number of terms = %d\n", invr_parms) ;
+    }
+  else if ( pair_type == DFTBPOLY ) 
+    {
+      printf("9th order DFTB Erep polynomial is used (LLSQ ONLY).\n") ;
     }
   else if ( pair_type == SPLINE ) 
     {
@@ -616,7 +692,8 @@ static void echo_lsq_input(int nlayers,
   for ( int i = 0 ; i < NPAIR ; i++ ) {
     printf("Pair interaction minimum distance for pair %d = %13.6e\n", i, smin[i]) ;
     printf("Pair interaction maximum distance for pair %d = %13.6e\n", i, smax[i]) ;
-    printf("Pair interaction Morse distance   for pair %d = %13.6e\n", i, lambda[i]) ;
+    if ( pair_type == CHEBYSHEV )
+      printf("Pair interaction Morse distance   for pair %d = %13.6e\n", i, lambda[i]) ;
   }
 
   if ( fit_coul ) 
@@ -625,14 +702,22 @@ static void echo_lsq_input(int nlayers,
     }
   else 
     {
-      printf("Coulomb interactions will not be considered\n") ;
+      printf("Coulomb interactions will not be fit.\n") ;
     }
   
   if ( if_subtract_coord ) 
     {
       printf("Overcoordination forces will be subtracted before fitting\n") ;
     }
-  else if ( fit_pover ) 
+  if ( if_subtract_coul ) 
+    {
+      printf("Coulombic forces will be subtracted before fitting\n") ;
+    }
+  else 
+    {
+      printf("Coulombic forces will NOT be subtracted before fitting\n") ;
+    }
+  if ( fit_pover ) 
     {
       printf("Overcoordination linear parameter will be fit to forces\n") ;
     }
