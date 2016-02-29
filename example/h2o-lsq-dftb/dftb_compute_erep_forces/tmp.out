@@ -1,0 +1,79 @@
+================================================================================
+==
+==   Density Functional based Tight Binding with a lot of extensions (DFTB+)    
+==
+==                              Release: 1.2 (p0)
+==
+==                            (ParserVersion = 4)
+==
+================================================================================
+
+
+********************************************************************************
+** Parsing and initializing
+********************************************************************************
+
+Interpreting input file 'dftb_in.hsd'
+--------------------------------------------------------------------------------
+***  Converting input from version  3 to version  4 ...
+***  Done.
+
+Reading SK-files:
+  /usr/gapps/polymers/dftb+_1.1_llnl/dftb+_1.1rc1_autotest/slako/mio-1-1/O-O.skf
+  /usr/gapps/polymers/dftb+_1.1_llnl/dftb+_1.1rc1_autotest/slako/mio-1-1/O-H.skf
+  /usr/gapps/polymers/dftb+_1.1_llnl/dftb+_1.1rc1_autotest/slako/mio-1-1/H-O.skf
+  /usr/gapps/polymers/dftb+_1.1_llnl/dftb+_1.1rc1_autotest/slako/mio-1-1/H-H.skf
+Done.
+
+
+Processed input in HSD format written to 'dftb_pin.hsd'
+
+Starting initialization...
+--------------------------------------------------------------------------------
+Mode:                        Static calculation
+Self consistent charges:     Yes
+SCC-tolerance:                 0.100000E-05
+Max. scc iterations:                     40
+Ewald alpha parameter:         0.146801E+00
+Spin polarisation:           No
+Nr. of up electrons:           128.000000
+Nr. of down electrons:         128.000000
+Periodic boundaries:         Yes
+Diagonalizer:                Standard
+Mixer:                       Broyden mixer
+Mixing parameter:                  0.200000
+Maximal SCC-cycles:                      40
+Nr. of chrg. vec. in memory:             40
+Electronic temperature:        0.633363E-02
+Initial charges:             Set automatically (system chrg:   0.000E+00)
+Included shells:              O:  s, p
+                              H:  s
+K-points and weights:           1:  0.000000  0.000000  0.000000     1.000000
+Extra options:
+                             Force calculation
+--------------------------------------------------------------------------------
+ 
+
+********************************************************************************
+** Geometry step: 0
+********************************************************************************
+
+  iSCC Total electronic   Diff electronic      SCC error    
+    1   -0.13134852E+03    0.00000000E+00    0.12690427E+01
+    2   -0.13142062E+03   -0.72098776E-01    0.96187073E+00
+    3   -0.13151335E+03   -0.92734508E-01    0.11353453E+00
+    4   -0.13151472E+03   -0.13734102E-02    0.20950623E-01
+    5   -0.13151476E+03   -0.40405839E-04    0.13862230E-01
+    6   -0.13151478E+03   -0.16881440E-04    0.18554451E-02
+    7   -0.13151478E+03   -0.32065290E-06    0.12719494E-02
+    8   -0.13151478E+03   -0.15710359E-06    0.14539527E-03
+    9   -0.13151478E+03   -0.43490900E-08    0.29870966E-04
+   10   -0.13151478E+03   -0.34305003E-10    0.16883976E-04
+   11   -0.13151478E+03   -0.17109869E-10    0.21782260E-05
+   12   -0.13151478E+03   -0.50874860E-11    0.24575596E-06
+>> Charges saved for restart in charges.bin
+ 
+ Total Energy:                    -131.5147810024 H
+ Total Mermin free energy:        -131.5147811702 H
+ Volume:                             0.430600E+04 au^3
+ Pressure:                          -0.108238E-02 au    -0.318446E+11 Pa

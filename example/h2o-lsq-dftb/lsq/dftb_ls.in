@@ -1,0 +1,8 @@
+nlayers  1
+fit_coulomb false
+fit_pover false
+pair_type dftbpoly
+subtract_coord false
+subtract_coul false
+smin 0.0 0.0 0.0
+smax 3.0 3.0 3.0
