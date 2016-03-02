@@ -1,4 +1,6 @@
-all : cheby spline spline2
+all : cheby cheby2 spline spline2
+
+# tests spline2 and cheby2 use separate fitting parameters for each interaction.
 
 cheby :
 	../../bin/splines_ls cheby_ls.in 49 > cheby_ls.out
@@ -11,6 +13,23 @@ cheby :
 	-diff cheby.1.out output/cheby.1.out
 	-diff cheby.2.out output/cheby.2.out
 
+
+cheby2 :
+	../../bin/splines_ls cheby_ls2.in 49 > cheby_ls2.out
+	../../bin/lsq.py A.txt b.txt params.header > params.cheby2.txt
+	../../bin/cheby_print.pl < params.cheby2.txt
+	mv chebypot.0.out chebypot2.0.out
+	mv chebypot.1.out chebypot2.1.out
+	mv chebypot.2.out chebypot2.2.out
+	mv cheby.0.out cheby2.0.out
+	mv cheby.1.out cheby2.1.out
+	mv cheby.2.out cheby2.2.out
+	-diff chebypot2.0.out output/chebypot2.0.out
+	-diff chebypot2.1.out output/chebypot2.1.out
+	-diff chebypot2.2.out output/chebypot2.2.out
+	-diff cheby2.0.out output/cheby2.0.out
+	-diff cheby2.1.out output/cheby2.1.out
+	-diff cheby2.2.out output/cheby2.2.out
 
 spline :
 	../../bin/splines_ls splines_ls.in 49 > splines_ls.out
