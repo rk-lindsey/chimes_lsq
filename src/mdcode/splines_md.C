@@ -16,7 +16,7 @@ static void read_input(const char *file_name,
 		       int &gen_freq, int &energy_freq, int &scale_freq,
 		       double &thoover_fs, Sr_pair_t &pair_type,
 		       bool &if_coulomb,bool &num_pressure, char *params_file,
-		       bool &if_overcoord) ;
+		       bool &if_overcoord, bool &if_3b_cheby) ;
 
 static void echo_input(double TempMD, double deltat_fs, int nsteps, 
 		       int nlayers, 
@@ -25,7 +25,7 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 		       int gen_freq, int energy_freq, int scale_freq,
 		       double thoover_fs, Sr_pair_t pair_type,
 		       bool if_coulomb, bool num_pressure, const char *params_file,
-		       bool if_overcoord) ; 
+		       bool if_overcoord, bool if_3b_cheby) ; 
 
 
 static double kinetic_energy(double *Mass, double **Vel, int nat) ;
@@ -35,8 +35,9 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double *smin,
 		   const double *smax, const double *sdelta,const int *snum, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
-		   bool if_coulomb,bool if_overcoord, int n_over,
-		   double *over_param, const double *lambda) ;
+		   bool if_coulomb,bool if_overcoord, bool if_3b_cheby,
+		   int n_over,
+		   double *over_param, const double *lambda)  ;
 
 int main(int argc, char* argv[])
 {
@@ -83,6 +84,9 @@ int main(int argc, char* argv[])
   // If true, calculate ReaxFF-like overcoordination term.
   bool if_overcoord = true ;
 
+  // If true, calculate 3-Body Chebyshev interaction.
+  bool if_3b_cheby = false ;
+
   // How often to output energy
   int energy_freq = 10 ;
 
@@ -128,12 +132,12 @@ int main(int argc, char* argv[])
   read_input(argv[1],TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
 	     if_spline_q, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
 	     thoover_fs,pair_type,if_coulomb,num_pressure,params_file,
-	     if_overcoord) ;
+	     if_overcoord, if_3b_cheby) ;
 
   echo_input(TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
 	     if_spline_q, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
 	     thoover_fs,pair_type,if_coulomb,num_pressure,params_file,
-	     if_overcoord) ;
+	     if_overcoord, if_3b_cheby) ;
 
   if ( thoover_fs > 0.0 ) if_hoover = true ;
   if ( gen_freq > 0 ) output_gen = true ;
@@ -150,12 +154,20 @@ int main(int argc, char* argv[])
   if ( if_read_force ) 
     {
       cout << "Reading positions from input.xyzf for force testing\n" ;
-      fileread.open("input.xyzf") ;
+      fileread.open("input.xyzf")  ;
+      //      if ( fileread.error() ) {
+      //cout << "Could not open input.xyzf\n" << endl ;
+      //exit(1) ;
+      // }
     } 
   else 
     {
       cout << "Reading positions from input.xyz\n" ;
-      fileread.open("input.xyz");
+      fileread.open("input.xyz")  ;
+      //if ( fileread.error() ) {
+      //cout << "Could not open input.xyz\n" << endl ;
+      //exit(1) ;
+      //}
     }
   int nat;
   double Latcons[3];
@@ -460,7 +472,7 @@ int main(int argc, char* argv[])
     }
     tot_snum += snum[i];
   }
-  cout << "Total potential parameters: " << tot_snum << endl;
+  cout << "Total 2-Body potential parameters: " << tot_snum << endl;
   if ( if_overcoord ) 
     {
       // Read overcoordination parameters from the params file.
@@ -480,13 +492,30 @@ int main(int argc, char* argv[])
 	}
     }
 
-  double params[tot_snum+4];
+  int num_cheby_3b = 0 ;
+  if ( if_3b_cheby ) 
+    {
+      for ( int i12 = 0 ; i12 < NPAIR ; i12++ ) {
+	for ( int i23 = i12 ; i23 < NPAIR ; i23++ ) {
+	  for ( int i13 = i23 ; i13 < NPAIR ; i13++ ) {
+	    int val = snum[i12] * snum[i23] * snum[i13] ;
+	    printf("3B Params for %d %d %d = %d\n", i12, i23, i13, val) ;
+	    num_cheby_3b += val ;
+	  }
+	}
+      }
+      cout << "Number of 3-Body Chebyshev parameter =" << num_cheby_3b << endl ;
+    }
+
+
+  double params[tot_snum+num_cheby_3b+4];
   double pot_params[tot_snum/2+1] ;
-  for(int i=0;i<tot_snum+4;i++)
+  for(int i=0;i<tot_snum+num_cheby_3b+4;i++)
     params[i]=0.0;
+
   if ( pair_type == CHEBYSHEV or pair_type == SPLINE or pair_type == INVERSE_R ) {
     cout << "Potential parameters read in:\n" ;
-    for(int n=0;n<tot_snum+4;n++)
+    for(int n=0;n<tot_snum+num_cheby_3b+4;n++)
       {
 	paramread >> tempint >> params[n];
 	if ( tempint != n ) {
@@ -548,55 +577,56 @@ int main(int argc, char* argv[])
     } // if_cheby == FALSE .
     
 
-  // Charges on H atom for potential models.
-  double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0, q_stillinger=0.0;
-  
-  if ( if_spline_q ) {
-    q_oo = params[tot_snum]  / ke ;
-    q_oh = params[tot_snum+1] / ke ;
-    q_hh = params[tot_snum+2] / ke ;
 
-    q_spline = sqrt(q_hh) ;
-    printf("Q[H] from params file = %12.5f e\n", q_spline) ;
-    printf("Charge equation 1 error = %12.5f\n", 
-	   q_oo + 4.0 * q_oh + 4.0 * q_hh) ;
-
-  } else {
-    q_stillinger = sqrt(44.23918853232863/ke) ;  // spce charge in stillinger units
-    printf("Built-in Q[H-DFT] = %12.5f e\n", q_stillinger) ;
-  }
-
-
-
-  double qsum = 0.0 ;
-  for(int a=0;a<nat;a++)
+  if ( if_coulomb ) 
     {
-      if(Lb[a]=="O") 
-	{
-	  if ( if_spline_q ) {
-	    Q[a] = -2.0 * q_spline ;
-	  } else {
-	    Q[a] = -2.0 * q_stillinger ;
-	  }
-	}
-      else if(Lb[a]=="H") 
-	{
-	  if ( if_spline_q ) {
-	    Q[a] = q_spline ;
-	  } else {
-	    Q[a] = q_stillinger ;
-	  }
-	}
-      else
-	{
-	  cout<<"Atom type "<<Lb[a]<<" not supported."<<endl;
-	  exit(1);
-	}
-      qsum += Q[a] ;
-    }
-  printf("Charge sum per atom = %13.5e\n", 
-	 qsum / nat) ;
+      // Charges on H atom for potential models.
+      double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0, q_stillinger=0.0;
+  
+      if ( if_spline_q ) {
+	q_oo = params[tot_snum+num_cheby_3b]  / ke ;
+	q_oh = params[tot_snum+num_cheby_3b+1] / ke ;
+	q_hh = params[tot_snum+num_cheby_3b+2] / ke ;
 
+	q_spline = sqrt(q_hh) ;
+	printf("Q[H] from params file = %12.5f e\n", q_spline) ;
+	printf("Charge equation 1 error = %12.5f\n", 
+	       q_oo + 4.0 * q_oh + 4.0 * q_hh) ;
+
+      } else {
+	q_stillinger = sqrt(44.23918853232863/ke) ;  // spce charge in stillinger units
+	printf("Built-in Q[H-DFT] = %12.5f e\n", q_stillinger) ;
+      }
+
+      double qsum = 0.0 ;
+      for(int a=0;a<nat;a++)
+	{
+	  if(Lb[a]=="O") 
+	    {
+	      if ( if_spline_q ) {
+		Q[a] = -2.0 * q_spline ;
+	      } else {
+		Q[a] = -2.0 * q_stillinger ;
+	      }
+	    }
+	  else if(Lb[a]=="H") 
+	    {
+	      if ( if_spline_q ) {
+		Q[a] = q_spline ;
+	      } else {
+		Q[a] = q_stillinger ;
+	      }
+	    }
+	  else
+	    {
+	      cout<<"Atom type "<<Lb[a]<<" not supported."<<endl;
+	      exit(1);
+	    }
+	  qsum += Q[a] ;
+	}
+      printf("Charge sum per atom = %13.5e\n", 
+	     qsum / nat) ;
+    }
 
   if ( pair_type == SPLINE ) 
     {
@@ -641,7 +671,7 @@ int main(int argc, char* argv[])
 
 
   double avg_temp = 0.0 ;
-  double zeta_dot0 ;
+  double zeta_dot0 = 0.0 ;
   double temp_sum = 0.0 ;
   double press_sum = 0.0 ;
 
@@ -708,7 +738,8 @@ int main(int argc, char* argv[])
       }
 
       ZCalc(Coord,Lbc,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
-	    pair_type,if_coulomb,if_overcoord,n_over,over_param,lambda,Accel,Vtot,Pxyz);
+	    pair_type,if_coulomb,if_overcoord,if_3b_cheby,
+	    n_over,over_param,lambda,Accel,Vtot,Pxyz);
 
       if ( if_output_force ) 
 	{
@@ -784,7 +815,7 @@ int main(int argc, char* argv[])
 	{
 	  Pxyz = numerical_pressure(Coord,Lbc, Q, Latcons,nlayers, nat,smin,
 				    smax, sdelta,snum, params, pot_params, 
-				    pair_type,if_coulomb,if_overcoord,
+				    pair_type,if_coulomb,if_overcoord, if_3b_cheby,
 				    n_over, over_param, lambda) ;
 	}
       double Ptot = Pxyz + 2.0 * Ktot / (3.0 * Vol) ;
@@ -821,6 +852,8 @@ int main(int argc, char* argv[])
 	    ndof * Kb * TempMD * s_hoover ;
 	  printf("%15.7f\n", E_hoover/nat) ;
 	} else {
+	  double E_tot = Ktot + Vtot ;
+	  printf("%15.7f\n", E_tot/nat) ;
 	  printf("\n") ;
 	}
       } 
@@ -920,7 +953,7 @@ static void read_input(const char *file_name,
 		       int &gen_freq, int &energy_freq, int &scale_freq,
 		       double &thoover_fs, Sr_pair_t &pair_type,
 		       bool &if_coulomb, bool &num_pressure, char *params_file,
-		       bool &if_overcoord) 
+		       bool &if_overcoord, bool &if_3b_cheby) 
 // Read program input from the file "splines_md.in".
 {
   FILE *fin ;
@@ -987,6 +1020,10 @@ static void read_input(const char *file_name,
       else if ( strncmp(name,"overcoord",bufsz) == 0 ) 
 	{
 	  if_overcoord = parse_tf(val, bufsz,line) ;
+	}
+      else if ( strncmp(name,"3b_cheby",bufsz) == 0 ) 
+	{
+	  if_3b_cheby = parse_tf(val, bufsz,line) ;
 	}
       else if ( strncmp(name,"read_force",bufsz) == 0 ) 
 	{
@@ -1085,7 +1122,7 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 		       int gen_freq, int energy_freq, int scale_freq,
 		       double thoover_fs, Sr_pair_t pair_type,
 		       bool if_coulomb,bool num_pressure,
-		       const char* params_file, bool if_overcoord) 
+		       const char* params_file, bool if_overcoord, bool if_3b_cheby) 
 {
   printf("JOB PARAMETERS:\n\n") ;
 
@@ -1126,6 +1163,12 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
     printf("ReaxFF overcoordination term will be calculated\n") ;
   } else {
     printf("ReaxFF overcoordination term will NOT be calculated\n") ;
+  }
+
+  if ( if_3b_cheby ) {
+    printf("3-Body Chebyshev polynomial will be calculated\n") ;
+  } else {
+    printf("3-Body Chebyshevy polynomial will NOT be calculated\n") ;
   }
 
   if ( if_output_force ) {
@@ -1205,7 +1248,8 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double *smin,
 		   const double *smax, const double *sdelta,const int *snum, 
 		   double *params, double *pot_params, Sr_pair_t pair_type,
-		   bool if_coulomb,bool if_overcoord, int n_over,
+		   bool if_coulomb,bool if_overcoord, bool if_3b_cheby,
+		   int n_over,
 		   double *over_param, const double *lambda) 
 // Evaluates the configurational part of the pressure numerically by -dU/dV.
 {
@@ -1240,7 +1284,8 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
   Vol1 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
   ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
-	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
+	pot_params,pair_type,if_coulomb,if_overcoord,if_3b_cheby,
+	n_over,over_param,
 	lambda,Accel,Vtot1,Pxyz);
   
   lscale = 1.0 - eps ;
@@ -1259,7 +1304,8 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
   Vol2 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
   ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
-	pot_params,pair_type,if_coulomb,if_overcoord,n_over,over_param,
+	pot_params,pair_type,if_coulomb,if_overcoord,if_3b_cheby,
+	n_over,over_param,
 	lambda,Accel,Vtot2,Pxyz);
 
   double result = -(Vtot2 - Vtot1)/(Vol2 - Vol1) ;

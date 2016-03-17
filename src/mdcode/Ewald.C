@@ -15,7 +15,7 @@ static void generate_trig(double *sinx, double *siny, double *sinz,
 			  double *cosx, double *cosy, double *cosz,
 			  double *Rvec, double *Latcons, int kmax);
 
-void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,const int nlayers,
+void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const int nat, double **SForce,double& Vtot,double& Pxyz)
 // Calculate Ewald interactions.
 {
@@ -571,7 +571,7 @@ void optimal_ewald_params(double accuracy,
 
 
 void ZCalc_Ewald_Deriv(double **Coord, const char *Lbc, 
-		       double *Latcons,const int nlayers,
+		       double *Latcons,
 		       const int nat,
 		       double **coul_oo,double **coul_oh,double **coul_hh)
 // Calculate derivatives of the force wrt the coulomb parameters.
@@ -768,6 +768,7 @@ void ZCalc_Ewald_Deriv(double **Coord, const char *Lbc,
 	  tempd*=ke;
 	  tempd*=2.0 ; // Sum a1 > a2, not all a2.
 	  tempd *= Kfac * 0.5*(4*PI/Volume);
+	  tempd3 = 0.0 ;
 
 	  if ( ky > 0 ) 
 	    {

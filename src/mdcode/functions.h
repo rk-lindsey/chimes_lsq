@@ -33,10 +33,11 @@ enum Sr_pair_t {
 
 void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const int nlayers,
-	   const int nat,const double* smin,const double* smax,
-	   const double* sdelta,const int* snum, 
+	   const int nat,const double *smin,const double *smax,
+	   const double *sdelta,const int *snum, 
 	   double *params, double *pot_params, Sr_pair_t pair_type,
-	   bool if_coulomb, bool if_overcoord, int n_pover,
+	   bool if_coulomb, bool if_overcoord, bool if_3b_cheby,
+	   int n_over,
 	   double *over_params, const double *lambda,
 	   double **SForce,double& Vtot,double& Pxyz) ;
 
@@ -48,10 +49,10 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double *mind) ;
 
 void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latcons,
-			 const int nlayers, const int nat, bool calc_deriv, 
+			 const int nat, bool calc_deriv, 
 			 double **Fderiv, int n_over, double *over_param) ;
 
-void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,const int nlayers,
+void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,
 		 const int nat, double **SForce,double& Vtot,double& Pxyz) ;
 void ZCalc_Ewald_Orig(double **Coord,string *Lb, double *Latcons,
 		      const int nat,double **SForce,double& Vtot,double& Pxyz) ;
@@ -68,11 +69,21 @@ void optimal_ewald_params(double accuracy,
 
 
 void ZCalc_Ewald_Deriv(double **Coord, const char *Lbc, 
-		       double *Latcons,const int nlayers,
+		       double *Latcons,
 		       const int nat,
 		       double **coul_oo,double **coul_oh,double **coul_hh) ;
 
 void parse_param_list(double *params, int nparams, const char* name) ;
+
+int pair_index(int a1, int a2, const char *Lbc) ; 
+int atom_index(int a1, const char *Lbc) ;
+
+void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
+		    const int nat,const double *smin,
+		    const double *smax,
+		    const int *snum, 
+		    double *params, const double *lambda,
+		    double **SForce, double &Vtot, double &Pxyz) ;
 
 #endif
 

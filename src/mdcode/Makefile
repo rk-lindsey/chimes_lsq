@@ -1,6 +1,7 @@
-CXX=g++ -g -Wall
+#CXX=g++ -g -Wall -Wextra -Wuninitialized -O1
+CXX=g++ -g -Wall -Wextra
 #CXX=icpc -fast -Wall
-CXX_SRC=splines_md.C functions.C Ewald.C
+CXX_SRC=splines_md.C functions.C Ewald.C Cheby3B.C
 CXX_INCLUDES=
 
 splines_md: $(CXX_SRC:%.C=%.o)

@@ -1,11 +1,11 @@
 #include "functions.h"
 
-static void ZCalc_Lj(double **Coord,double *Latcons,const int nlayers,
+static void ZCalc_Lj(double **Coord,double *Latcons,
 		     const int nat,double **SForce,double& Vtot,double& Pxyz) ;
 static void ZCalc_SR_Analytic(double **Coord,const char *Lbc, double *Latcons,const int nlayers,
 			      const int nat,const double *smin,const double *smax, const int *snum,
 			      double **SForce,double& Vtot,double& Pxyz, double *params) ;
-static void ZCalcSR_Over(double **Coord,const char *Lbc, double *Latcons,const int nlayers,
+static void ZCalcSR_Over(double **Coord,const char *Lbc, double *Latcons,
 			 const int nat,double **SForce,double& Vtot,double& Pxyz, int n_over,
 			 double *over_param) ;
 static void ZCalc_Stillinger(double **Coord, const char *Lbc, double *Latcons,const int nlayers,
@@ -21,7 +21,7 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 			const int nlayers,
 			const int nat,const double *smin,
 			const double *smax,
-			const double *sdelta,const int *snum, 
+			const int *snum, 
 			double *params, const double *lambda,
 			double **SForce, double &Vtot, double &xyz);
 
@@ -36,13 +36,13 @@ static void ZCalc_InvR_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const int nlayers,
 			       const int nat,double ***A,const double *smin,
 			       const double *smax,
-			      const int *snum, const double *lambda, double *mind) ;
+			      const int *snum, double *mind) ;
 
 static void ZCalc_Poly_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const int nlayers,
 			       const int nat,double ***A,const double *smin,
 			       const double *smax,
-			      const int *snum, const double *lambda, double *mind) ;
+			      const int *snum, double *mind) ;
 
 static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const int nlayers,
@@ -50,7 +50,7 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const double *smax,
 			      const int *snum, const double *lambda, double *mind) ;
 
-static int pair_index(int a1, int a2, const char *Lbc) ;
+
 static int pair_table_offset(int ipair, const int *snum) ;
 
 void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
@@ -58,7 +58,8 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const int nat,const double *smin,const double *smax,
 	   const double *sdelta,const int *snum, 
 	   double *params, double *pot_params, Sr_pair_t pair_type,
-	   bool if_coulomb, bool if_overcoord, int n_over,
+	   bool if_coulomb, bool if_overcoord, bool if_3b_cheby,
+	   int n_over,
 	   double *over_params, const double *lambda,
 	   double **SForce,double& Vtot,double& Pxyz)
 // Calculate the force, potential energy, and pressure.
@@ -74,7 +75,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   if ( pair_type == LJ ) 
     {
-      ZCalc_Lj(Coord, Latcons,nlayers, nat, SForce, Vtot, Pxyz) ;
+      ZCalc_Lj(Coord, Latcons, nat, SForce, Vtot, Pxyz) ;
     } 
   else if ( pair_type == INVERSE_R ) 
     {
@@ -87,7 +88,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
     } 
   else if ( pair_type == CHEBYSHEV ) 
     {
-      ZCalc_Cheby(Coord,Lbc,Latcons,nlayers,nat,smin,smax,sdelta,snum, 
+      ZCalc_Cheby(Coord,Lbc,Latcons,nlayers,nat,smin,smax,snum, 
 		  params,lambda,SForce,Vtot,Pxyz) ;
     } 
   else if ( pair_type == SPLINE ) 
@@ -103,7 +104,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   if ( if_coulomb ) 
     {
-      ZCalc_Ewald(Coord, Lbc, Q, Latcons,nlayers, nat, SForce, Vtot, Pxyz) ;
+      ZCalc_Ewald(Coord, Lbc, Q, Latcons, nat, SForce, Vtot, Pxyz) ;
     }
 
   if ( if_overcoord ) 
@@ -116,8 +117,15 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
       }
       over_params[0] = params[tot_snum+3] ;
       // cout << "POVER = " << pover << endl ;
-      ZCalcSR_Over(Coord,Lbc, Latcons,nlayers, nat,SForce, Vtot, Pxyz,
+      ZCalcSR_Over(Coord,Lbc, Latcons,nat,SForce, Vtot, Pxyz,
 		   n_over, over_params) ;
+    }
+
+  if ( if_3b_cheby ) 
+    {
+      // 3-body chebyshev polynomial 
+      ZCalc_3B_Cheby(Coord, Lbc, Latcons, nat, smin, smax, snum,
+		     params, lambda, SForce, Vtot, Pxyz) ;
     }
 
   volume = Latcons[0] * Latcons[1] * Latcons[2] ;
@@ -127,7 +135,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 }
 
 
-static void ZCalc_Lj(double **Coord, double *Latcons,const int nlayers,
+static void ZCalc_Lj(double **Coord, double *Latcons,
 		     const int nat,double **SForce,double& Vtot,double& Pxyz)
 // Calculate LJ interaction
 {
@@ -251,7 +259,7 @@ static void ZCalc_SR_Analytic(double **Coord,const char *Lbc, double *Latcons,co
 				rlen2=oo_cut;
 			      }
 			  }
-			if((Lbc[a1]=='O' and Lbc[a2]=='H') or (Lbc[a1]=='H' and Lbc[a2]=='O'))
+			else if((Lbc[a1]=='O' and Lbc[a2]=='H') or (Lbc[a1]=='H' and Lbc[a2]=='O'))
 			  {
 			    rlen2=rlen;
 			    if(rlen2<oh_cut)
@@ -259,13 +267,18 @@ static void ZCalc_SR_Analytic(double **Coord,const char *Lbc, double *Latcons,co
 				rlen2=oh_cut;
 			      }
 			  }
-			if(Lbc[a1]=='H' and Lbc[a2]=='H')
+			else if(Lbc[a1]=='H' and Lbc[a2]=='H')
 			  {
 			    rlen2=rlen;
 			    if(rlen2<hh_cut)
 			      {
 				rlen2=hh_cut;
 			      }
+			  }
+			else
+			  {
+			    cout << "Bad atom labels found" << endl ;
+			    exit(1) ;
 			  }
 		    
 			double smaxpow3 = pow(rlen2-smax[ipair],3) ;
@@ -349,12 +362,12 @@ static void ZCalc_SR_Analytic(double **Coord,const char *Lbc, double *Latcons,co
 
 
 
-static void ZCalcSR_Over(double **Coord, const char *Lbc, double *Latcons,const int nlayers,
+static void ZCalcSR_Over(double **Coord, const char *Lbc, double *Latcons,
 			 const int nat,double **SForce,double& Vtot,double& Pxyz, 
 			 int n_over, double *over_param) 
 // Calculate short-range overcoordination forces.
 {
-  double Rvec[3], Rab[3] ;
+  double Rvec[3] ;
   
   //these are short-ranged cutoffs for analytical potential.
   //e.g. for r<oo_cut, force(r)=force(oo_cut). The values are 
@@ -414,6 +427,8 @@ static void ZCalcSR_Over(double **Coord, const char *Lbc, double *Latcons,const 
 	      Rvec[c]=Coord[ak][c]-Coord[ai][c];
 
 	    // Short-range interaction, so use minimum image convention.
+	    double Rab[3] ;
+
 	    Rab[0] = Rvec[0] - floor(0.5+Rvec[0]/Latcons[0])*Latcons[0];
 	    Rab[1] = Rvec[1] - floor(0.5+Rvec[1]/Latcons[1])*Latcons[1];
 	    Rab[2] = Rvec[2] - floor(0.5+Rvec[2]/Latcons[2])*Latcons[2];
@@ -452,6 +467,7 @@ static void ZCalcSR_Over(double **Coord, const char *Lbc, double *Latcons,const 
 
 		
 	      // Short-range interaction, so use minimum image convention.
+	      double Rab[3] ;
 	      Rab[0] = Rvec[0] - floor(0.5+Rvec[0]/Latcons[0])*Latcons[0];
 	      Rab[1] = Rvec[1] - floor(0.5+Rvec[1]/Latcons[1])*Latcons[1];
 	      Rab[2] = Rvec[2] - floor(0.5+Rvec[2]/Latcons[2])*Latcons[2];
@@ -759,7 +775,7 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 			const int nlayers,
 			const int nat,const double *smin,
 			const double *smax,
-			const double *sdelta,const int *snum, 
+			const int *snum, 
 			double *params, const double *lambda,
 			double **SForce, double &Vtot, double &Pxyz)
 // Calculate short-range forces using a Chebyshev polynomial expansion.
@@ -778,10 +794,6 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
   double tempx;
   //const double lambda = 1.25 ;
   double exprlen ;
-
-  // A penalty function is added to the potential for r + penalty_dist < smin[ipair]
-  const double penalty_scale = 1.0e5 ;
-  const double penalty_dist = 0.01 ;
 
   if ( ! called_before ) {
     called_before = true ;
@@ -827,14 +839,8 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		
 		if( rlen < smax[ipair])
 		  {
-		    double xavg, xdiff, rpenalty ;
+		    double xavg, xdiff ;
 
-		    // Penalty for distances less than smin - penalty_dist.
-		    if ( rlen - penalty_dist < smin[ipair] ) {
-		      rpenalty = smin[ipair] + penalty_dist - rlen ;
-		    } else {
-		      rpenalty = 0.0 ;
-		    }
 		    if ( inverse_r ) {
 		      xavg = 0.5 * (1.0/smin[ipair] + 1.0/smax[ipair]) ;
 		      xdiff = 0.5 * (1.0/smin[ipair] - 1.0/smax[ipair]) ;
@@ -900,19 +906,6 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 				SForce[a2][c] -= coeff * deriv * Rab[c] / rlen ;
 			      } 
 			  }
-			// Add penalty for very short distances.
-			if ( rpenalty > 0.0 ) {
-			  double Vpenalty = 0.0 ;
-			  cout << "Warning: r < rmin " << rlen << " " << smin[ipair] << endl ;
-			  for(int c=0;c<3;c++)
-			      {
-				SForce[a1][c] -= 3.0 * rpenalty * rpenalty * penalty_scale * Rab[c] / rlen ;
-				SForce[a2][c] += 3.0 * rpenalty * rpenalty * penalty_scale * Rab[c] / rlen ;
-			      } 
-			  Vpenalty = rpenalty * rpenalty * rpenalty * penalty_scale ;
-			  tempx += Vpenalty ;
-			  cout << "Penalty potential = "<< Vpenalty << endl ;
-			}
 		      }
 		    else 
 		      {
@@ -938,6 +931,7 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
       }
   return;
 }
+
 
 
 
@@ -977,7 +971,7 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
     }
 
   if ( if_ewald ) {
-    ZCalc_Ewald_Deriv(Coord, Lbc, Latcons, nlayers, nat, 
+    ZCalc_Ewald_Deriv(Coord, Lbc, Latcons, nat, 
 		      coul_oo, coul_oh, coul_hh) ;
   }
 
@@ -986,9 +980,9 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
   } else if ( pair_type == CHEBYSHEV ) {
     ZCalc_Cheby_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,lambda,mind) ;
   } else if ( pair_type == DFTBPOLY ) {
-    ZCalc_Poly_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,lambda,mind) ;
+    ZCalc_Poly_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,mind) ;
   } else if ( pair_type == INVERSE_R ) {
-    ZCalc_InvR_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,lambda,mind) ;
+    ZCalc_InvR_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,mind) ;
   } else {
     cout << "Error: bad pairtype in ZCalc_Deriv\n" ;
     exit(1) ;
@@ -1095,7 +1089,7 @@ static void ZCalc_Poly_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const int nlayers,
 			       const int nat,double ***A,const double *smin,
 			       const double *smax,
-			      const int *snum, const double *lambda, double *mind)
+			      const int *snum, double *mind)
 // Calculate derivatives of the forces wrt the DFTB Erep parameters.
 {
   double Rvec[3];
@@ -1171,7 +1165,7 @@ static void ZCalc_InvR_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			       const int nlayers,
 			       const int nat,double ***A,const double *smin,
 			       const double *smax,
-			      const int *snum, const double *lambda, double *mind)
+			      const int *snum, double *mind)
 // Calculate derivatives of the forces wrt the Chebyshev parameters.
 // Stores minimum distance between a pair of atoms in mind.
 {
@@ -1377,7 +1371,7 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 // 3-body interaction is placed in Fderiv.  Otherwise, the 3-body force is subtracted
 // from the total forces given in force.  
 void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latcons,
-			 const int nlayers, const int nat, bool calc_deriv, 
+			 const int nat, bool calc_deriv, 
 			 double **Fderiv, int n_over, double *over_param)
 {
 
@@ -1576,7 +1570,7 @@ void parse_param_list(double *params, int nparams, const char* name)
     }
 }
 
-static int pair_index(int a1, int a2, const char *Lbc)
+int pair_index(int a1, int a2, const char *Lbc)
 // Returns the index of the pair type corresponding to atoms a1 and a2.
 {
   if ( Lbc[a1] == 'O' && Lbc[a2] == 'O' ) 
@@ -1602,6 +1596,24 @@ static int pair_index(int a1, int a2, const char *Lbc)
     }
 }
 
+int atom_index(int a1, const char *Lbc)
+// Returns the index of the pair type corresponding to atoms a1 and a2.
+{
+  if ( Lbc[a1] == 'O' ) 
+    {
+      return(0) ;
+    } 
+  else if ( Lbc[a1] == 'H' )
+    {
+      return(1) ;
+    }
+  else
+    {
+      cout << "Error: bad atom label for atom " << a1 << endl ;
+      exit(1) ;
+    }
+}
+
 static int pair_table_offset(int ipair, const int *snum)
 // Calculate the index of the parameters for the given interaction pair.
 {
@@ -1612,4 +1624,3 @@ static int pair_table_offset(int ipair, const int *snum)
   return(vstart) ;
 }
 
-  

@@ -2,7 +2,7 @@
 #
 CXX=g++ -g -Wall #-pg
 #CXX=icpc -fast
-CXX_SRC=splines_ls.C ../mdcode/functions.C ../mdcode/Ewald.C
+CXX_SRC=splines_ls.C ../mdcode/functions.C ../mdcode/Ewald.C ../mdcode/Cheby3B.C
 CXX_INCLUDES=-I ../mdcode
 
 all : splines_ls

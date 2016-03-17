@@ -317,7 +317,7 @@ int main(int argc, char* argv[])
       if ( ifsubtract_coord ) 
 	{
 	  SubtractCoordForces(Coord[N], Force[N], Lb[N], Latcons[N], 
-			      nlayers, Nat[N], false, Pover[N],
+			      Nat[N], false, Pover[N],
 			      n_over, over_param) ;
 	}
       if (ifsubtract_coul) {
@@ -343,7 +343,7 @@ int main(int argc, char* argv[])
 
         double Vtot = 0;
         double Pxyz = 0;
-        ZCalc_Ewald(Coord[N], Lbc, Q, tempLatcons, nlayers, Nat[N], FCoul, Vtot, Pxyz); 
+        ZCalc_Ewald(Coord[N], Lbc, Q, tempLatcons, Nat[N], FCoul, Vtot, Pxyz); 
         for(int a1=0;a1<Nat[N];a1++) {
           for(int c=0;c<3;c++) {
             Force[N][a1][c] -= FCoul[a1][c];
@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
 	// Fit the overcoordination parameter.
 	{
 	  SubtractCoordForces(Coord[N], Force[N], Lb[N], Latcons[N], 
-			      nlayers, Nat[N], true, Pover[N],
+			      Nat[N], true, Pover[N],
 			      n_over, over_param) ;
 	}
 
