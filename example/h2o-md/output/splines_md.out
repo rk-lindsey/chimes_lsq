@@ -8,6 +8,7 @@ Spline short-range pair forces will be used
 Force parameters will be read from params.spline.txt
 Coulomb forces will be calculated with Ewald sums
 ReaxFF overcoordination term will be calculated
+3-Body Chebyshevy polynomial will NOT be calculated
 Charges will be taken from params.txt
 Pressures will be calculated using the virial
 Velocities will be read from input.xyz
@@ -30,7 +31,7 @@ Spline step    = 0.1
 Spline minimum = 0.6
 Spline maximum = 6
 Spline step    = 0.1
-Total potential parameters: 336
+Total 2-Body potential parameters: 336
 Reading overcoordination parameters from params.spline.txt
 Overcoordination parameter 0 =  5.000000e+01
 Overcoordination parameter 1 =  1.016500e+00
