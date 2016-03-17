@@ -73,11 +73,22 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 	  {
 	    int ipair23 = pair_index(a2,a3,Lbc) ;
 	    int ipair13 = pair_index(a1,a3,Lbc) ;
+	    double fcut23, dfcut23 ;
+	    double fcut13, dfcut13 ;
 
 	    find_pair_cheby(R23, Tn23, Tnd23, rlen23, exprlen23, xdiff23,
 			    a2, a3, Lbc, Coord, Latcons, smin, smax, snum, lambda) ;
 	    find_pair_cheby(R13, Tn13, Tnd13, rlen13, exprlen13, xdiff13,
 			    a1, a3, Lbc, Coord, Latcons, smin, smax, snum, lambda) ;
+
+		    
+	    cubic_cutoff(fcut23, dfcut23, rlen23, smax[ipair23]) ;
+	    if ( fcut23 == 0.0 ) 
+	      continue ;
+
+	    cubic_cutoff(fcut13, dfcut13, rlen13, smax[ipair13]) ;
+	    if ( fcut13 == 0.0 ) 
+	      continue ;
 
 	    for ( int i = 0 ; i < snum[ipair12] ; i++ ) 
 	      for ( int j = 0 ; j < snum[ipair23] ; j++ ) 
@@ -85,17 +96,6 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		  {
 		    double coeff = Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, snum) ;
 
-		    double fcut23, dfcut23 ;
-		    double fcut13, dfcut13 ;
-
-		    
-		    cubic_cutoff(fcut23, dfcut23, rlen23, smax[ipair23]) ;
-		    if ( fcut23 == 0.0 ) 
-		      continue ;
-
-		    cubic_cutoff(fcut13, dfcut13, rlen13, smax[ipair13]) ;
-		    if ( fcut13 == 0.0 ) 
-		      continue ;
 
 		    tempx += coeff * fcut12 * fcut23 * fcut13 * Tn12[i] * Tn23[j] * Tn13[k] ;
 		    
@@ -140,7 +140,7 @@ static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen
 // Rab: The displacement vector between the atoms
 // Tn:  The Chebyshev polynomials
 // Tnd: Derivatives of the Chebyshev polynomials
-// rlen: Distance between the atos
+// rlen: Distance between the atoms
 // exprlen: Morse exponential function
 // xdiff: Chebyshev limit variable.
 // a1: Atom index 1
@@ -177,7 +177,7 @@ static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen
   xdiff = 0.5 * (xmax - xmin) ;
   exprlen = exp(-rlen/lambda[ipair]) ;
 
-  if( rlen < smax[ipair]) 
+  if( rlen < smax[ipair] && rlen > smin[ipair] ) 
     {
       // Use morse variables.
       x = (exprlen-xavg)/xdiff ;
@@ -210,7 +210,7 @@ static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen
   else 
     {
       // Cut off the interaction.
-      exprlen = exp(-smax[ipair]/lambda[ipair]) ;
+      exprlen = 1.0 ;
       xdiff = 0.5 * (xmax - xmin) ;
       for ( int i = 0 ; i <= snum[ipair] ; i++ ) {
 	Tn[i] = 0.0 ;
@@ -317,6 +317,10 @@ void sort_triple(int &ipair12, int &ipair23, int &ipair13,
 
 static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax) 
 // Calculate a cubic force cutoff function.
+// fcut is the cutoff function.
+// dfcut is the first derivative of the cutoff function.
+// rlen is the interparticle distance
+// smax is the cutoff length.
 {
   
   if ( rlen < smax ) {
