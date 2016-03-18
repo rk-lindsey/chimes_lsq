@@ -513,7 +513,7 @@ int main(int argc, char* argv[])
 
   if ( pair_type == CHEBYSHEV or pair_type == SPLINE or pair_type == INVERSE_R ) {
     cout << "Potential parameters read in:\n" ;
-    for(int n=0;n<tot_snum+num_cheby_3b;n++)
+    for(int n=0;n<tot_snum+num_cheby_3b+4;n++)
       {
 	paramread >> tempint >> params[n];
 
@@ -584,28 +584,6 @@ int main(int argc, char* argv[])
       double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0, q_stillinger=0.0;
   
       if ( if_spline_q ) {
-	for(int n=tot_snum+num_cheby_3b ;n<tot_snum+num_cheby_3b+3;n++)
-	  {
-	    paramread >> tempint >> params[n];
-
-	    if ( tempint != n ) {
-	      cout << "Error: parameter index mismatch " << tempint <<  " " 
-		   << params[n] << " " << n << endl;
-	      exit(1) ;
-	    }
-
-	    cout << tempint << " " << params[n] << endl;
-	    if ( paramread.eof() ) 
-	      {
-		cout << "Error reading params.txt\n" ;
-		exit(1) ;
-	      }
-	    if ( tempint != n ) 
-	      {
-		cout << "Error reading params.txt: index mismatch\n" ;
-		exit(1) ;
-	      }
-	  }
 	q_oo = params[tot_snum+num_cheby_3b]  / ke ;
 	q_oh = params[tot_snum+num_cheby_3b+1] / ke ;
 	q_hh = params[tot_snum+num_cheby_3b+2] / ke ;
