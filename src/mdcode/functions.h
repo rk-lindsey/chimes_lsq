@@ -35,6 +35,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const int nlayers,
 	   const int nat,const double *smin,const double *smax,
 	   const double *sdelta,const int *snum, 
+	   const int *snum_3b_cheby,
 	   double *params, double *pot_params, Sr_pair_t pair_type,
 	   bool if_coulomb, bool if_overcoord, bool if_3b_cheby,
 	   int n_over,
@@ -44,9 +45,10 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double *Latcons,const int nlayers,
 		 const int nat,double ***A,const double *smin,const double *smax,
-		 const double *sdelta,const int *snum, const double *lambda,
-		 double **coul_oo, double **coul_oh,double **coul_hh,Sr_pair_t pair_type,
-		 double *mind) ;
+		 const double *sdelta, const int *snum, const int *snum_3b_cheby,
+		 const double *lambda,
+		 double **coul_oo, double **coul_oh,double **coul_hh, Sr_pair_t pair_type,
+		 double *mind, bool if_3b_cheby) ;
 
 void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latcons,
 			 const int nat, bool calc_deriv, 
@@ -82,8 +84,18 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    const int nat,const double *smin,
 		    const double *smax,
 		    const int *snum, 
+  		    const int *snum_3b_cheby,
 		    double *params, const double *lambda,
-		    double **SForce, double &Vtot, double &Pxyz) ;
+		    double **SForce, double &Vtot, double &Pxyz);
+void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
+			  const int nat, double ***A,
+			  const double *smin,
+			  const double *smax,
+			  const int *snum, 
+			  const int *snum_3b_cheby,
+			  const double *lambda) ;
+
+int count_cheby_3b_params(const int *snum) ;
 
 #endif
 

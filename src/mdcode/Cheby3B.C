@@ -7,20 +7,23 @@ static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen
 			    double &xdiff,
 			    int a1, int a2, const char *Lbc, double **Coord, const double *Latcons, 
 			    const double *smin, const double *smax, 
-			    const int *snum, const double *lambda) ;
+			    const int *snum, const double *lambda)  ;
 static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n23, int n13,
 			     const char *Lbc, const double *params,
-			     const int *snum)  ;
+			     const int *snum, 
+			     const int *snum_3b_cheby,
+			     int &index, bool return_params) ;
 void sort_triple(int &ipair12, int &ipair23, int &ipair13, 
 		 int &n12, int &n23, int &n13) ;
 static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax) ;
 
 void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
-			   const int nat,const double *smin,
-			   const double *smax,
-			   const int *snum, 
-			   double *params, const double *lambda,
-			   double **SForce, double &Vtot, double &Pxyz)
+		    const int nat,const double *smin,
+		    const double *smax,
+		    const int *snum, 
+  		    const int *snum_3b_cheby,
+		    double *params, const double *lambda,
+		    double **SForce, double &Vtot, double &Pxyz)
 // Calculate 3-body short-range forces using a Chebyshev polynomial expansion.
 // Can use morse variables similar to the work of Bowman.
 {
@@ -35,16 +38,16 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
   //const double lambda = 1.25 ;
   double exprlen12, exprlen23, exprlen13 ;
   double xdiff12, xdiff23, xdiff13 ;
-
+  int index = 0 ;
 
   if ( ! called_before ) {
     called_before = true ;
     int dim = 0 ;
     for ( int i = 0 ; i < NPAIR ; i++ ) 
       {
-	if ( snum[i] > dim ) 
+	if ( snum_3b_cheby[i] > dim ) 
 	  {
-	    dim = snum[i] ;
+	    dim = snum_3b_cheby[i] ;
 	  }
       }
     dim++ ;
@@ -63,7 +66,8 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 	double fcut12, dfcut12 ;
 	int ipair12 = pair_index(a1,a2,Lbc) ;
 	find_pair_cheby(R12,Tn12, Tnd12, rlen12, exprlen12, xdiff12,
-			a1, a2, Lbc, Coord, Latcons, smin, smax, snum, lambda) ;
+			a1, a2, Lbc, Coord, Latcons, smin, smax, snum_3b_cheby, 
+			lambda) ;
 	
 	cubic_cutoff(fcut12, dfcut12, rlen12, smax[ipair12]) ;
 	if ( fcut12 == 0.0 ) 
@@ -77,9 +81,11 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 	    double fcut13, dfcut13 ;
 
 	    find_pair_cheby(R23, Tn23, Tnd23, rlen23, exprlen23, xdiff23,
-			    a2, a3, Lbc, Coord, Latcons, smin, smax, snum, lambda) ;
+			    a2, a3, Lbc, Coord, Latcons, smin, smax, snum_3b_cheby, 
+			    lambda) ;
 	    find_pair_cheby(R13, Tn13, Tnd13, rlen13, exprlen13, xdiff13,
-			    a1, a3, Lbc, Coord, Latcons, smin, smax, snum, lambda) ;
+			    a1, a3, Lbc, Coord, Latcons, smin, smax, snum_3b_cheby, 
+			    lambda) ;
 
 		    
 	    cubic_cutoff(fcut23, dfcut23, rlen23, smax[ipair23]) ;
@@ -90,12 +96,12 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 	    if ( fcut13 == 0.0 ) 
 	      continue ;
 
-	    for ( int i = 0 ; i < snum[ipair12] ; i++ ) 
-	      for ( int j = 0 ; j < snum[ipair23] ; j++ ) 
-		for ( int k = 0 ; k < snum[ipair13] ; k++ ) 
+	    for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
+	      for ( int j = 0 ; j < snum_3b_cheby[ipair23] ; j++ ) 
+		for ( int k = 0 ; k < snum_3b_cheby[ipair13] ; k++ ) 
 		  {
-		    double coeff = Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, snum) ;
-
+		    double coeff = Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
+						  snum, snum_3b_cheby, index, true) ;
 
 		    tempx += coeff * fcut12 * fcut23 * fcut13 * Tn12[i] * Tn23[j] * Tn13[k] ;
 		    
@@ -127,6 +133,128 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 	  }
       }
   Vtot += tempx ;
+
+  return;
+}
+
+
+
+void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
+			  const int nat, double ***A,
+			  const double *smin,
+			  const double *smax,
+			  const int *snum, 
+			  const int *snum_3b_cheby,
+			  const double *lambda)
+// Calculate derivatives of the 3-body short-range forces using a Chebyshev polynomial expansion,
+//  with respect to multiplicative parameters.
+{
+  double R12[3], R23[3], R13[3];
+  double rlen12, rlen23, rlen13 ;
+  static double *Tn12, *Tnd12 ;
+  static double *Tn23, *Tnd23 ;
+  static double *Tn13, *Tnd13 ;
+
+  static bool called_before = false ;
+
+  double exprlen12, exprlen23, exprlen13 ;
+  double xdiff12, xdiff23, xdiff13 ;
+  int index = 0 ;
+
+  if ( ! called_before ) {
+    called_before = true ;
+    int dim = 0 ;
+    for ( int i = 0 ; i < NPAIR ; i++ ) 
+      {
+	if ( snum_3b_cheby[i] > dim ) 
+	  {
+	    dim = snum_3b_cheby[i] ;
+	  }
+      }
+    dim++ ;
+    Tn12   = new double [dim] ;
+    Tnd12  = new double [dim] ;
+    Tn23   = new double [dim] ;
+    Tnd23  = new double [dim] ;
+    Tn13   = new double [dim] ;
+    Tnd13  = new double [dim] ;
+  }
+  
+  ////main loop for 3-body Chebyshev terms:
+  for(int a1=0;a1<nat-1;a1++)
+    for(int a2=a1+1;a2<nat;a2++) 
+      {
+	double fcut12, dfcut12 ;
+	int ipair12 = pair_index(a1,a2,Lbc) ;
+	find_pair_cheby(R12,Tn12, Tnd12, rlen12, exprlen12, xdiff12,
+			a1, a2, Lbc, Coord, Latcons, smin, smax, 
+			snum_3b_cheby,
+			lambda) ;
+	
+	cubic_cutoff(fcut12, dfcut12, rlen12, smax[ipair12]) ;
+	if ( fcut12 == 0.0 ) 
+	  continue ;
+
+	for(int a3=a2+1;a3<nat;a3++)
+	  {
+	    int ipair23 = pair_index(a2,a3,Lbc) ;
+	    int ipair13 = pair_index(a1,a3,Lbc) ;
+	    double fcut23, dfcut23 ;
+	    double fcut13, dfcut13 ;
+
+	    find_pair_cheby(R23, Tn23, Tnd23, rlen23, exprlen23, xdiff23,
+			    a2, a3, Lbc, Coord, Latcons, smin, smax, 
+			    snum_3b_cheby,
+			    lambda) ;
+	    find_pair_cheby(R13, Tn13, Tnd13, rlen13, exprlen13, xdiff13,
+			    a1, a3, Lbc, Coord, Latcons, smin, smax, 
+			    snum_3b_cheby,
+			    lambda) ;
+
+		    
+	    cubic_cutoff(fcut23, dfcut23, rlen23, smax[ipair23]) ;
+	    if ( fcut23 == 0.0 ) 
+	      continue ;
+
+	    cubic_cutoff(fcut13, dfcut13, rlen13, smax[ipair13]) ;
+	    if ( fcut13 == 0.0 ) 
+	      continue ;
+
+	    for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
+	      for ( int j = 0 ; j < snum_3b_cheby[ipair23] ; j++ ) 
+		for ( int k = 0 ; k < snum_3b_cheby[ipair13] ; k++ ) 
+		  {
+		    (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, NULL, snum, 
+					  snum_3b_cheby,
+					  index, false) ;
+
+
+		    double deriv12 = 
+		      fcut12 * Tnd12[i] *(-exprlen12/lambda[ipair12])/xdiff12 +
+		      dfcut12 * Tn12[i] ;
+
+		    double deriv23 =
+		      fcut23 * Tnd23[j] *(-exprlen23/lambda[ipair23])/xdiff23 +
+		      dfcut23 * Tn23[j] ;
+
+		    double deriv13 =
+		      fcut13 * Tnd13[k] *(-exprlen13/lambda[ipair13])/xdiff13 +
+		      dfcut13 * Tn13[k] ;
+
+		    for(int c=0;c<3;c++)
+		      {
+			A[a1][index][c] += deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
+			A[a2][index][c] -= deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
+
+			A[a2][index][c] += deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
+			A[a3][index][c] -= deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
+
+			A[a1][index][c] += deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
+			A[a3][index][c] -= deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
+		      } 
+		  }
+	  }
+      }
 
   return;
 }
@@ -173,13 +301,13 @@ static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen
 		
   double xmin = exp(-smax[ipair]/lambda[ipair]) ;
   double xmax = exp(-smin[ipair]/lambda[ipair]) ;
-  xavg = 0.5 * (xmin + xmax) ;
   xdiff = 0.5 * (xmax - xmin) ;
-  exprlen = exp(-rlen/lambda[ipair]) ;
 
   if( rlen < smax[ipair] && rlen > smin[ipair] ) 
     {
       // Use morse variables.
+      xavg = 0.5 * (xmin + xmax) ;
+      exprlen = exp(-rlen/lambda[ipair]) ;
       x = (exprlen-xavg)/xdiff ;
 	      
       if ( x < -1.0 ) {
@@ -223,12 +351,13 @@ static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen
   
 static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n23, int n13,
 			     const char *Lbc, const double *params,
-			     const int *snum) 
+			     const int *snum, 
+			     const int *snum_3b_cheby,
+			     int &index, bool return_params) 
 // Extract the desired 3-body chebyshev coefficient from the params array.
 {
   int ipair12, ipair23, ipair13 ;
   //int ele1, ele2, ele3 ;
-  int index ;
 
   if ( a1 == a2 || a2 == a3 || a1 == a3 ) {
     cout << "Error in Cheby_3B_Coeff: atom indices are identical" << endl ;
@@ -257,16 +386,20 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n23, int n13,
   for ( int i12 = 0 ; i12 < ipair12 ; i12++ ) {
     for ( int i23 = i12 ; i23 < ipair23 ; i23++ ) {
       for ( int i13 = i23 ; i13 < ipair13 ; i13++ ) {
-	index += snum[i12] * snum[i23] * snum[i13] ;
+	index += snum_3b_cheby[i12] * snum_3b_cheby[i23] * snum_3b_cheby[i13] ;
       }
     }
   }
 
   // Increment the index within used pair set.
-  index += n12 * snum[ipair23] * snum[ipair13] +
-    n23 * snum[ipair13] + n13 ;
+  index += n12 * snum_3b_cheby[ipair23] * snum_3b_cheby[ipair13] +
+    n23 * snum_3b_cheby[ipair13] + n13 ;
 
-  return(params[index]) ;
+  if ( return_params ) {
+    return(params[index]) ;
+  } else {
+    return(0.0) ;
+  }
 }
 
 
@@ -333,3 +466,19 @@ static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax)
   }
 }
 
+
+
+int count_cheby_3b_params(const int *snum)
+{
+  int num_cheby_3b = 0 ;
+  for ( int i12 = 0 ; i12 < NPAIR ; i12++ ) {
+    for ( int i23 = i12 ; i23 < NPAIR ; i23++ ) {
+      for ( int i13 = i23 ; i13 < NPAIR ; i13++ ) {
+	int val = snum[i12] * snum[i23] * snum[i13] ;
+	printf("3B Params for %d %d %d = %d\n", i12, i23, i13, val) ;
+	num_cheby_3b += val ;
+      }
+    }
+  }
+  return(num_cheby_3b) ;
+}

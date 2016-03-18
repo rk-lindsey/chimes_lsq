@@ -34,6 +34,7 @@ static double
 numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double *smin,
 		   const double *smax, const double *sdelta,const int *snum, 
+		   const int *snum_3b_cheby,
 		   double *params, double *pot_params, Sr_pair_t pair_type,
 		   bool if_coulomb,bool if_overcoord, bool if_3b_cheby,
 		   int n_over,
@@ -412,6 +413,7 @@ int main(int argc, char* argv[])
   double sdelta[NPAIR];
   double lambda[NPAIR];
   int snum[NPAIR] ;
+  int snum_3b_cheby[NPAIR] ;
   int tot_snum = 0;
   int i;
 
@@ -449,27 +451,33 @@ int main(int argc, char* argv[])
         cout << "Spline step    = " << sdelta[i] << endl ;
         snum[i]=(2+floor((smax[i]-smin[i])/sdelta[i]))*2;//2 is for p0/m0/p1/m1
       }
-    else if ( pair_type == CHEBYSHEV ) {
-      cout << "pair type: " << i << endl;
-      paramread >> smin[i] >> smax[i] >> lambda[i] >> snum[i];
-      cout << "Cheby minimum = " << smin[i] << endl ;
-      cout << "Cheby maximum = " << smax[i]  << endl ;
-      cout << "Cheby order    = " << snum[i]  << endl ;
-      cout << "Morse lambda value= " << lambda[i]  << endl ;
-      sdelta[i] = 0.0 ;
-      //snum *= 3 ;
+    else if ( pair_type == CHEBYSHEV ) 
+      {
+	cout << "pair type: " << i << endl;
+	paramread >> smin[i] >> smax[i] >> lambda[i] >> snum[i];
+	cout << "Cheby minimum = " << smin[i] << endl ;
+	cout << "Cheby maximum = " << smax[i]  << endl ;
+	cout << "Cheby order    = " << snum[i]  << endl ;
+	cout << "Morse lambda value= " << lambda[i]  << endl ;
+	if ( if_3b_cheby ) {
+	  paramread >> snum_3b_cheby[i] ;
+	  cout << "3 Body Cheby order = "<< snum_3b_cheby[i] << endl ;
+	}
+	sdelta[i] = 0.0 ;
       }
-    else if (pair_type == INVERSE_R) {
-      cout << "pair type: " << i << endl;
-      paramread >> smin[i] >> smax[i] >> snum[i];
-      cout << "Inverse R minimum = " << smin[i] << endl ;
-      cout << "Inverse R maximum = " << smax[i]  << endl ;
-      cout << "Inverse R order    = " << snum[i]  << endl ;
-    } else {
-      snum[i] = 0 ;
-      smax[i] = Latcons[0] / 2.0 ;
-      smin[i] = 0.0 ;
-    }
+    else if (pair_type == INVERSE_R) 
+      {
+	cout << "pair type: " << i << endl;
+	paramread >> smin[i] >> smax[i] >> snum[i];
+	cout << "Inverse R minimum = " << smin[i] << endl ;
+	cout << "Inverse R maximum = " << smax[i]  << endl ;
+	cout << "Inverse R order    = " << snum[i]  << endl ;
+      } else 
+      {
+	snum[i] = 0 ;
+	smax[i] = Latcons[0] / 2.0 ;
+	smin[i] = 0.0 ;
+      }
     tot_snum += snum[i];
   }
   cout << "Total 2-Body potential parameters: " << tot_snum << endl;
@@ -493,20 +501,10 @@ int main(int argc, char* argv[])
     }
 
   int num_cheby_3b = 0 ;
-  if ( if_3b_cheby ) 
-    {
-      for ( int i12 = 0 ; i12 < NPAIR ; i12++ ) {
-	for ( int i23 = i12 ; i23 < NPAIR ; i23++ ) {
-	  for ( int i13 = i23 ; i13 < NPAIR ; i13++ ) {
-	    int val = snum[i12] * snum[i23] * snum[i13] ;
-	    printf("3B Params for %d %d %d = %d\n", i12, i23, i13, val) ;
-	    num_cheby_3b += val ;
-	  }
-	}
-      }
-      cout << "Number of 3-Body Chebyshev parameter =" << num_cheby_3b << endl ;
-    }
-
+  if ( if_3b_cheby ) {
+    num_cheby_3b = count_cheby_3b_params(snum_3b_cheby) ;
+    cout << "Number of 3-Body Chebyshev parameter =" << num_cheby_3b << endl ;
+  }
 
   double params[tot_snum+num_cheby_3b+4];
   double pot_params[tot_snum/2+1] ;
@@ -515,11 +513,13 @@ int main(int argc, char* argv[])
 
   if ( pair_type == CHEBYSHEV or pair_type == SPLINE or pair_type == INVERSE_R ) {
     cout << "Potential parameters read in:\n" ;
-    for(int n=0;n<tot_snum+num_cheby_3b+4;n++)
+    for(int n=0;n<tot_snum+num_cheby_3b;n++)
       {
 	paramread >> tempint >> params[n];
+
 	if ( tempint != n ) {
-	  cout << "Error: parameter index mismatch " << tempint <<  " " << n << endl;
+	  cout << "Error: parameter index mismatch " << tempint <<  " " 
+	       << params[n] << " " << n << endl;
 	  exit(1) ;
 	}
 
@@ -584,6 +584,28 @@ int main(int argc, char* argv[])
       double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0, q_stillinger=0.0;
   
       if ( if_spline_q ) {
+	for(int n=tot_snum+num_cheby_3b ;n<tot_snum+num_cheby_3b+3;n++)
+	  {
+	    paramread >> tempint >> params[n];
+
+	    if ( tempint != n ) {
+	      cout << "Error: parameter index mismatch " << tempint <<  " " 
+		   << params[n] << " " << n << endl;
+	      exit(1) ;
+	    }
+
+	    cout << tempint << " " << params[n] << endl;
+	    if ( paramread.eof() ) 
+	      {
+		cout << "Error reading params.txt\n" ;
+		exit(1) ;
+	      }
+	    if ( tempint != n ) 
+	      {
+		cout << "Error reading params.txt: index mismatch\n" ;
+		exit(1) ;
+	      }
+	  }
 	q_oo = params[tot_snum+num_cheby_3b]  / ke ;
 	q_oh = params[tot_snum+num_cheby_3b+1] / ke ;
 	q_hh = params[tot_snum+num_cheby_3b+2] / ke ;
@@ -592,7 +614,6 @@ int main(int argc, char* argv[])
 	printf("Q[H] from params file = %12.5f e\n", q_spline) ;
 	printf("Charge equation 1 error = %12.5f\n", 
 	       q_oo + 4.0 * q_oh + 4.0 * q_hh) ;
-
       } else {
 	q_stillinger = sqrt(44.23918853232863/ke) ;  // spce charge in stillinger units
 	printf("Built-in Q[H-DFT] = %12.5f e\n", q_stillinger) ;
@@ -737,7 +758,8 @@ int main(int argc, char* argv[])
 	}
       }
 
-      ZCalc(Coord,Lbc,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,params,pot_params,
+      ZCalc(Coord,Lbc,Q,Latcons,nlayers,nat,smin,smax,sdelta,snum,
+	    snum_3b_cheby, params,pot_params,
 	    pair_type,if_coulomb,if_overcoord,if_3b_cheby,
 	    n_over,over_param,lambda,Accel,Vtot,Pxyz);
 
@@ -814,7 +836,9 @@ int main(int argc, char* argv[])
       if ( num_pressure ) 
 	{
 	  Pxyz = numerical_pressure(Coord,Lbc, Q, Latcons,nlayers, nat,smin,
-				    smax, sdelta,snum, params, pot_params, 
+				    smax, sdelta,snum, 
+				    snum_3b_cheby,
+				    params, pot_params, 
 				    pair_type,if_coulomb,if_overcoord, if_3b_cheby,
 				    n_over, over_param, lambda) ;
 	}
@@ -1247,6 +1271,7 @@ static double
 numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 		   const int nlayers, const int nat,const double *smin,
 		   const double *smax, const double *sdelta,const int *snum, 
+		   const int *snum_3b_cheby,
 		   double *params, double *pot_params, Sr_pair_t pair_type,
 		   bool if_coulomb,bool if_overcoord, bool if_3b_cheby,
 		   int n_over,
@@ -1283,7 +1308,8 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   Vol1 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
-  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
+  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,
+	snum_3b_cheby, params,
 	pot_params,pair_type,if_coulomb,if_overcoord,if_3b_cheby,
 	n_over,over_param,
 	lambda,Accel,Vtot1,Pxyz);
@@ -1303,7 +1329,8 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   Vol2 = Latcons1[0] * Latcons1[1] * Latcons1[2] ;
 
-  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,params,
+  ZCalc(Coord1,Lbc,Q,Latcons1,nlayers,nat,smin,smax,sdelta,snum,
+	snum_3b_cheby, params,
 	pot_params,pair_type,if_coulomb,if_overcoord,if_3b_cheby,
 	n_over,over_param,
 	lambda,Accel,Vtot2,Pxyz);

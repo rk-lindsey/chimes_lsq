@@ -57,6 +57,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const int nlayers,
 	   const int nat,const double *smin,const double *smax,
 	   const double *sdelta,const int *snum, 
+	   const int *snum_3b_cheby,
 	   double *params, double *pot_params, Sr_pair_t pair_type,
 	   bool if_coulomb, bool if_overcoord, bool if_3b_cheby,
 	   int n_over,
@@ -125,6 +126,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
     {
       // 3-body chebyshev polynomial 
       ZCalc_3B_Cheby(Coord, Lbc, Latcons, nat, smin, smax, snum,
+		     snum_3b_cheby,
 		     params, lambda, SForce, Vtot, Pxyz) ;
     }
 
@@ -938,9 +940,12 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double *Latcons,const int nlayers,
 		 const int nat,double ***A,const double *smin,const double *smax,
-		 const double *sdelta,const int *snum, const double *lambda,
+		 const double *sdelta,
+		 const int *snum, 
+		 const int *snum_3b_cheby,
+		 const double *lambda,
 		 double **coul_oo, double **coul_oh,double **coul_hh, Sr_pair_t pair_type,
-		 double *mind)
+		 double *mind, bool if_3b_cheby)
 {
   bool if_ewald ;
   if (pair_type != DFTBPOLY) {
@@ -953,6 +958,9 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
   snum_tot = 0 ;
   for (int i = 0 ; i < NPAIR ; i++ ) {
     snum_tot += snum[i] ;
+  }
+  if ( if_3b_cheby ) {
+    snum_tot += count_cheby_3b_params(snum_3b_cheby) ;
   }
 
   for(int a=0;a<nat;a++)
@@ -986,6 +994,11 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
   } else {
     cout << "Error: bad pairtype in ZCalc_Deriv\n" ;
     exit(1) ;
+  }
+  
+  if ( if_3b_cheby ) {
+    ZCalc_3B_Cheby_Deriv(Coord, Lbc, Latcons, nat, A, smin, smax, snum, 
+			 snum_3b_cheby, lambda) ;
   }
 
 }
