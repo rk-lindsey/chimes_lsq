@@ -26,6 +26,14 @@ if ( $npair <= 0 ) {
   die "A positive number of pairs is required\n" ;
 }
 
+$_ = <> ;
+$_ = <> ;
+if ( $_ =~ /pair_type spline/ ) {
+  print "Spline 2-body interaction found\n" ;
+} else {
+  die "Did not find pair_type spline\n" ;
+}
+
 my (@rmin, @rmax, @sdelta, @snum) ;
 for my $i ( 0 .. $npair - 1 ) {
   $_ = <> ;
@@ -33,17 +41,29 @@ for my $i ( 0 .. $npair - 1 ) {
   $snum[$i] = 2 + floor(($rmax[$i] - $rmin[$i]) / $sdelta[$i]) ;
   print "Rmin = $rmin[$i] Rmax = $rmax[$i] Delta = $sdelta[$i] N = $snum[$i]\n" ;
 }
-
+$_ = <> ;
+$_ = <> ;
+if ( $_ =~ /overcoord true/ ) {
 # Read past overcoordination parameters.
-my $nover = <> ;
-chomp $nover ;
-print "Number of overcoordination parameters = $nover\n" ;
-for my $i ( 1 .. $nover ) {
-  $_ = <> ;
-  print "Overcoordination parameter $i = $_" ;
+  my $nover = <> ;
+  $nover =~ s/nover // ;
+  chomp $nover ;
+  print "Number of overcoordination parameters = $nover\n" ;
+  for my $i ( 1 .. $nover ) {
+    $_ = <> ;
+    print "Overcoordination parameter $i = $_" ;
+  }
 }
 
+
 my (@dvdr, @pot) ;
+
+while ( <> ) {
+  if ( $_ =~ /least squares parameters/ )  {
+    last ;
+  }
+  print ;
+}
 
 my $offset = 0 ;
 for ( my $i = 0 ; $i < $npair ; $i++ ) {

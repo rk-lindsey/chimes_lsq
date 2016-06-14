@@ -54,15 +54,20 @@ void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latco
 			 const int nat, bool calc_deriv, 
 			 double **Fderiv, int n_over, double *over_param) ;
 
-void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,
+void ZCalc_Ewald(double **Coord, const char *Lbc, const double *Q, const double *Latcons,
 		 const int nat, double **SForce,double& Vtot,double& Pxyz) ;
-void ZCalc_Ewald_Orig(double **Coord,string *Lb, double *Latcons,
+
+void ZCalc_Ewald_Orig(double **Coord,string *Lb, const double *Latcons,
 		      const int nat,double **SForce,double& Vtot,double& Pxyz) ;
 
 double bondedpot(double **Coord_bonded,double ***I_bonded);
 double spline_pot(double smin, double smax, double sdelta, double rlen2, double *params, double *pot_params, int snum, int vstart, double &S_r) ;
 
 bool parse_tf(char *val, int bufsz, char *line) ;
+
+bool read_tf_option(ifstream *paramread, const char *option, const char *params_file) ;
+
+Sr_pair_t parse_pair_type(const char *val, int bufsz)  ;
 
 void optimal_ewald_params(double accuracy, 
 			  double V, int nat, double &alpha, 

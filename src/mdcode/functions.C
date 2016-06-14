@@ -1,3 +1,5 @@
+#include<iostream>
+#include<fstream>
 #include "functions.h"
 
 static void ZCalc_Lj(double **Coord,double *Latcons,
@@ -59,7 +61,8 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const double *sdelta,const int *snum, 
 	   const int *snum_3b_cheby,
 	   double *params, double *pot_params, Sr_pair_t pair_type,
-	   bool if_coulomb, bool if_overcoord, bool if_3b_cheby,
+	   bool if_coulomb, bool if_overcoord, 
+	   bool if_3b_cheby,
 	   int n_over,
 	   double *over_params, const double *lambda,
 	   double **SForce,double& Vtot,double& Pxyz)
@@ -112,11 +115,6 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
     {
       // Take the overall magnitude of the overcoordination term from the list
       // of linear parameters in params.
-      int tot_snum = 0 ;
-      for ( int i = 0 ; i < NPAIR ; i++ ) {
-	tot_snum += snum[i] ;
-      }
-      over_params[0] = params[tot_snum+3] ;
       // cout << "POVER = " << pover << endl ;
       ZCalcSR_Over(Coord,Lbc, Latcons,nat,SForce, Vtot, Pxyz,
 		   n_over, over_params) ;
@@ -1637,3 +1635,63 @@ static int pair_table_offset(int ipair, const int *snum)
   return(vstart) ;
 }
 
+Sr_pair_t parse_pair_type(const char *val, int bufsz) 
+// Parse the pair type from a string argument.
+{
+
+  Sr_pair_t pair_type = CHEBYSHEV ;
+
+  if ( strncmp(val, "spline", bufsz) == 0 ) 
+    {
+      pair_type = SPLINE ;
+    } 
+  else if ( strncmp(val, "chebyshev", bufsz) == 0 ) 
+    {
+      pair_type = CHEBYSHEV ;
+    }
+  else if ( strncmp(val, "inverse_r", bufsz) == 0 ) 
+    {
+      pair_type = INVERSE_R ;
+    }
+  else if ( strncmp(val, "lennard_jones", bufsz) == 0 ) 
+    {
+      pair_type = LJ ;
+    }
+  else if ( strncmp(val, "stillinger", bufsz) == 0 ) 
+    {
+      pair_type = STILLINGER ;
+    }
+  else 
+    {
+      printf("Error: did not recognize pair_type |%s|\n", val) ;
+      exit(1) ;
+    }
+  return(pair_type) ;
+}
+
+bool read_tf_option(ifstream *paramread, const char *option, const char *params_file)
+// Read a true/false option from the given file.
+{
+  const int bufsz = 1024 ;
+  char buf[bufsz] ;
+  char cmd_arg[bufsz] ;
+  bool result = false ;
+
+  int optlen = strlen(option) ;
+  paramread->getline(buf, bufsz) ;
+
+  if ( ! strncmp(buf, option, optlen ) ) {
+    sscanf(buf+optlen+1, "%s", cmd_arg) ;
+    result = parse_tf(cmd_arg, bufsz, buf) ;
+    if ( result ) {
+      printf("Option %s is set to true\n", option) ;
+    } else {
+      printf("Option %s is set to false\n", option); 
+    }
+  } else {
+    printf("Error in reading %s: %s not found\n", params_file, option) ;
+    printf("Line was: %s\n", buf) ;
+    exit(1) ;
+  }
+  return(result) ;
+}

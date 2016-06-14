@@ -6,8 +6,8 @@ nlayers     1
 output_force false
 read_force   false
 init_vel     false
-num_pressure false
-params_file  params.spline.txt
+num_pressure true
+params_file  params.3b.txt
 rand_seed     12357
 hoover_time   10
 energy_freq  10

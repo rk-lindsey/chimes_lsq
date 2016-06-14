@@ -60,6 +60,6 @@ spline2 :
 	-diff spline2.2.out output/spline2.2.out
 
 clean :
-	rm -f A.txt b.txt params.header params.spline.txt force.txt
+	rm -f A.txt b.txt params.header params.spline.txt force.txt *.out
 
 

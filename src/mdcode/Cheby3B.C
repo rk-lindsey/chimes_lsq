@@ -475,7 +475,7 @@ int count_cheby_3b_params(const int *snum)
     for ( int i23 = i12 ; i23 < NPAIR ; i23++ ) {
       for ( int i13 = i23 ; i13 < NPAIR ; i13++ ) {
 	int val = snum[i12] * snum[i23] * snum[i13] ;
-	printf("3B Params for %d %d %d = %d\n", i12, i23, i13, val) ;
+	//	printf("3B Params for %d %d %d = %d\n", i12, i23, i13, val) ;
 	num_cheby_3b += val ;
       }
     }

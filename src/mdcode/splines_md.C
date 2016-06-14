@@ -12,16 +12,15 @@ static void read_input(const char *file_name,
 		       double &TempMD, double &deltat_fs, int &nsteps, 
 		       int &nlayers, 
 		       bool &if_output_force, bool &if_read_force,
-		       bool &if_spline_q, bool &if_init_vel, int &rand_seed, 
+		       bool &if_init_vel, int &rand_seed, 
 		       int &gen_freq, int &energy_freq, int &scale_freq,
-		       double &thoover_fs, Sr_pair_t &pair_type,
-		       bool &if_coulomb,bool &num_pressure, char *params_file,
-		       bool &if_overcoord, bool &if_3b_cheby) ;
+		       double &thoover_fs, 
+		       bool &num_pressure, char *params_file) ;
 
 static void echo_input(double TempMD, double deltat_fs, int nsteps, 
 		       int nlayers, 
 		       bool if_output_force, bool if_read_force,
-		       bool if_spline_q, bool if_init_vel, int rand_seed, 
+		       bool fit_coul, bool if_init_vel, int rand_seed, 
 		       int gen_freq, int energy_freq, int scale_freq,
 		       double thoover_fs, Sr_pair_t pair_type,
 		       bool if_coulomb, bool num_pressure, const char *params_file,
@@ -39,6 +38,13 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
 		   bool if_coulomb,bool if_overcoord, bool if_3b_cheby,
 		   int n_over,
 		   double *over_param, const double *lambda)  ;
+
+static double *Parse_Params_File(char *params_file, double *smin, double *smax, double *sdelta,
+				 double *lambda, int *snum, int *snum_3b_cheby, int &n_over,
+				 double *over_param, const double *Latcons,
+				 int &tot_snum, bool &if_3b_cheby, bool &if_coulomb, bool &fit_coul,
+				 int &num_cheby_3b, bool &if_overcoord, bool &fit_pover,
+				 Sr_pair_t &pair_type) ;
 
 int main(int argc, char* argv[])
 {
@@ -65,7 +71,7 @@ int main(int argc, char* argv[])
   bool if_read_force = false ;
 
   // If true, take charges from spline parameters.
-  bool if_spline_q = true ;
+  bool fit_coul = true ;
 
   // If true, initialize velocities.
   bool if_init_vel = false ;
@@ -84,6 +90,9 @@ int main(int argc, char* argv[])
 
   // If true, calculate ReaxFF-like overcoordination term.
   bool if_overcoord = true ;
+
+  // If true, find linear overcoordination parameter from least-squares fitting.
+  bool fit_pover = true ;
 
   // If true, calculate 3-Body Chebyshev interaction.
   bool if_3b_cheby = false ;
@@ -131,14 +140,8 @@ int main(int argc, char* argv[])
     }
 
   read_input(argv[1],TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
-	     if_spline_q, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
-	     thoover_fs,pair_type,if_coulomb,num_pressure,params_file,
-	     if_overcoord, if_3b_cheby) ;
-
-  echo_input(TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
-	     if_spline_q, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
-	     thoover_fs,pair_type,if_coulomb,num_pressure,params_file,
-	     if_overcoord, if_3b_cheby) ;
+	     if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
+	     thoover_fs, num_pressure,params_file) ;
 
   if ( thoover_fs > 0.0 ) if_hoover = true ;
   if ( gen_freq > 0 ) output_gen = true ;
@@ -415,127 +418,20 @@ int main(int argc, char* argv[])
   int snum[NPAIR] ;
   int snum_3b_cheby[NPAIR] ;
   int tot_snum = 0;
-  int i;
-
-  ifstream paramread(params_file);
-
-  if ( paramread.fail() ) 
-    {
-      cout << "Could not open " << params_file << endl ;
-      exit(1) ;
-    }
-    
-  //spline parameters are in params.txt which is outputted from spline fitting and SVD programs.
-
-  int tempint;
-
-  // Read smin, smax, sdelta from params file instead of using built-in values.
-  char buf[1024] ;
-  do {
-    paramread.getline(buf,1024) ;
-  } while (buf[0] == '#' ) ;
-
-  int npair_read = 0 ;
-  sscanf(buf,"npair %d",&npair_read) ;
-
-  if ( npair_read != NPAIR ) {
-    cout << "Inconsistent npair found:  compiled npair = " << NPAIR << endl ;
-  }
-  
-  for (i = 0; i < NPAIR; i++) {
-    if ( pair_type == SPLINE ) 
-      {
-        paramread >> smin[i] >> smax[i] >> sdelta[i] ;
-        cout << "Spline minimum = " << smin[i] << endl ;
-        cout << "Spline maximum = " << smax[i] << endl ;
-        cout << "Spline step    = " << sdelta[i] << endl ;
-        snum[i]=(2+floor((smax[i]-smin[i])/sdelta[i]))*2;//2 is for p0/m0/p1/m1
-      }
-    else if ( pair_type == CHEBYSHEV ) 
-      {
-	cout << "pair type: " << i << endl;
-	paramread >> smin[i] >> smax[i] >> lambda[i] >> snum[i];
-	cout << "Cheby minimum = " << smin[i] << endl ;
-	cout << "Cheby maximum = " << smax[i]  << endl ;
-	cout << "Cheby order    = " << snum[i]  << endl ;
-	cout << "Morse lambda value= " << lambda[i]  << endl ;
-	if ( if_3b_cheby ) {
-	  paramread >> snum_3b_cheby[i] ;
-	  cout << "3 Body Cheby order = "<< snum_3b_cheby[i] << endl ;
-	}
-	sdelta[i] = 0.0 ;
-      }
-    else if (pair_type == INVERSE_R) 
-      {
-	cout << "pair type: " << i << endl;
-	paramread >> smin[i] >> smax[i] >> snum[i];
-	cout << "Inverse R minimum = " << smin[i] << endl ;
-	cout << "Inverse R maximum = " << smax[i]  << endl ;
-	cout << "Inverse R order    = " << snum[i]  << endl ;
-      } else 
-      {
-	snum[i] = 0 ;
-	smax[i] = Latcons[0] / 2.0 ;
-	smin[i] = 0.0 ;
-      }
-    tot_snum += snum[i];
-  }
-  cout << "Total 2-Body potential parameters: " << tot_snum << endl;
-  if ( if_overcoord ) 
-    {
-      // Read overcoordination parameters from the params file.
-      int n_over_read ;
-      paramread >> n_over_read ;
-      if ( n_over_read > 0 ) 
-	{
-	  printf("Reading overcoordination parameters from %s\n",
-		 params_file) ;
-	  n_over = n_over_read ;
-	  for ( int k = 0 ; k < n_over ; k++ ) 
-	    {
-	      paramread >> over_param[k] ;
-	      printf("Overcoordination parameter %d = %13.6e\n", k,
-		     over_param[k]) ;
-	    }
-	}
-    }
-
   int num_cheby_3b = 0 ;
-  if ( if_3b_cheby ) {
-    num_cheby_3b = count_cheby_3b_params(snum_3b_cheby) ;
-    cout << "Number of 3-Body Chebyshev parameter =" << num_cheby_3b << endl ;
-  }
+  double *params ;
 
-  double params[tot_snum+num_cheby_3b+4];
+  params = Parse_Params_File(params_file, smin, smax, sdelta, lambda, snum, snum_3b_cheby, n_over,
+			     over_param, Latcons, tot_snum, if_3b_cheby, if_coulomb, fit_coul,
+			     num_cheby_3b, if_overcoord, fit_pover, pair_type) ;
+
+  echo_input(TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
+	     fit_coul, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
+	     thoover_fs,pair_type,if_coulomb,num_pressure,params_file,
+	     if_overcoord, if_3b_cheby) ;
+
+
   double pot_params[tot_snum/2+1] ;
-  for(int i=0;i<tot_snum+num_cheby_3b+4;i++)
-    params[i]=0.0;
-
-  if ( pair_type == CHEBYSHEV or pair_type == SPLINE or pair_type == INVERSE_R ) {
-    cout << "Potential parameters read in:\n" ;
-    for(int n=0;n<tot_snum+num_cheby_3b+4;n++)
-      {
-	paramread >> tempint >> params[n];
-
-	if ( tempint != n ) {
-	  cout << "Error: parameter index mismatch " << tempint <<  " " 
-	       << params[n] << " " << n << endl;
-	  exit(1) ;
-	}
-
-        cout << tempint << " " << params[n] << endl;
-	if ( paramread.eof() ) 
-	  {
-	    cout << "Error reading params.txt\n" ;
-	    exit(1) ;
-	  }
-	if ( tempint != n ) 
-	  {
-	    cout << "Error reading params.txt: index mismatch\n" ;
-	    exit(1) ;
-	  }
-      }
-  }
 
   if ( pair_type == SPLINE ) 
     {
@@ -583,7 +479,7 @@ int main(int argc, char* argv[])
       // Charges on H atom for potential models.
       double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0, q_stillinger=0.0;
   
-      if ( if_spline_q ) {
+      if ( fit_coul ) {
 	q_oo = params[tot_snum+num_cheby_3b]  / ke ;
 	q_oh = params[tot_snum+num_cheby_3b+1] / ke ;
 	q_hh = params[tot_snum+num_cheby_3b+2] / ke ;
@@ -602,7 +498,7 @@ int main(int argc, char* argv[])
 	{
 	  if(Lb[a]=="O") 
 	    {
-	      if ( if_spline_q ) {
+	      if ( fit_coul ) {
 		Q[a] = -2.0 * q_spline ;
 	      } else {
 		Q[a] = -2.0 * q_stillinger ;
@@ -610,7 +506,7 @@ int main(int argc, char* argv[])
 	    }
 	  else if(Lb[a]=="H") 
 	    {
-	      if ( if_spline_q ) {
+	      if ( fit_coul ) {
 		Q[a] = q_spline ;
 	      } else {
 		Q[a] = q_stillinger ;
@@ -951,11 +847,10 @@ static void read_input(const char *file_name,
 		       double &TempMD, double &deltat_fs, int &nsteps, 
 		       int &nlayers, 
 		       bool &if_output_force, bool &if_read_force,
-		       bool &if_spline_q, bool &if_init_vel, int &rand_seed, 
+		       bool &if_init_vel, int &rand_seed, 
 		       int &gen_freq, int &energy_freq, int &scale_freq,
-		       double &thoover_fs, Sr_pair_t &pair_type,
-		       bool &if_coulomb, bool &num_pressure, char *params_file,
-		       bool &if_overcoord, bool &if_3b_cheby) 
+		       double &thoover_fs, 
+		       bool &num_pressure, char *params_file) 
 // Read program input from the file "splines_md.in".
 {
   FILE *fin ;
@@ -1015,18 +910,6 @@ static void read_input(const char *file_name,
 	  //	  printf("Output_force is %s\n", 
 	  //		 if_output_force?"true":"false") ;
 	}
-      else if ( strncmp(name,"coulomb",bufsz) == 0 ) 
-	{
-	  if_coulomb = parse_tf(val, bufsz,line) ;
-	}
-      else if ( strncmp(name,"overcoord",bufsz) == 0 ) 
-	{
-	  if_overcoord = parse_tf(val, bufsz,line) ;
-	}
-      else if ( strncmp(name,"3b_cheby",bufsz) == 0 ) 
-	{
-	  if_3b_cheby = parse_tf(val, bufsz,line) ;
-	}
       else if ( strncmp(name,"read_force",bufsz) == 0 ) 
 	{
 	  if_read_force = parse_tf(val, bufsz,line) ;
@@ -1036,12 +919,6 @@ static void read_input(const char *file_name,
       else if ( strncmp(name,"num_pressure",bufsz) == 0 ) 
 	{
 	  num_pressure = parse_tf(val, bufsz,line) ;
-	}
-      else if ( strncmp(name,"fit_coulomb",bufsz) == 0 ) 
-	{
-	  if_spline_q = parse_tf(val, bufsz,line) ;
-	  //	  printf("spline_q is %s\n", 
-	  //		 if_spline_q?"true":"false") ;
 	}
       else if ( strncmp(name,"init_vel",bufsz) == 0 ) 
 	{
@@ -1075,34 +952,6 @@ static void read_input(const char *file_name,
 	{
 	  strcpy(params_file,val) ;
 	}
-      else if ( strncmp(name, "pair_type", bufsz) == 0 ) 
-	{
-	  if ( strncmp(val, "spline", bufsz) == 0 ) 
-	    {
-	      pair_type = SPLINE ;
-	    } 
-	  else if ( strncmp(val, "chebyshev", bufsz) == 0 ) 
-	    {
-	      pair_type = CHEBYSHEV ;
-	    }
-	  else if ( strncmp(val, "inverse_r", bufsz) == 0 ) 
-	    {
-	      pair_type = INVERSE_R ;
-	    }
-	  else if ( strncmp(val, "lennard_jones", bufsz) == 0 ) 
-	    {
-	      pair_type = LJ ;
-	    }
-	  else if ( strncmp(val, "stillinger", bufsz) == 0 ) 
-	    {
-	      pair_type = STILLINGER ;
-	    }
-	  else 
-	    {
-	      printf("Error: did not recognize pair_type |%s|\n", val) ;
-	      exit(1) ;
-	    }
-	}
       else 
 	{
 	  printf("Error: did not recognize option %s\n", name) ;
@@ -1120,7 +969,7 @@ static void read_input(const char *file_name,
 static void echo_input(double TempMD, double deltat_fs, int nsteps, 
 		       int nlayers, 
 		       bool if_output_force, bool if_read_force,
-		       bool if_spline_q, bool if_init_vel, int rand_seed, 
+		       bool fit_coul, bool if_init_vel, int rand_seed, 
 		       int gen_freq, int energy_freq, int scale_freq,
 		       double thoover_fs, Sr_pair_t pair_type,
 		       bool if_coulomb,bool num_pressure,
@@ -1181,7 +1030,7 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
     printf("Forces will be read for testing\n") ;
   }
 
-  if ( if_spline_q ) 
+  if ( fit_coul ) 
     {
       printf("Charges will be taken from params.txt\n") ;
     }
@@ -1325,4 +1174,195 @@ numerical_pressure(double **Coord, const char *Lbc, double *Q, double *Latcons,
   // cout << "Numerical pressure = " << result << endl ;
 
   return(result) ;
+}
+
+static double *Parse_Params_File(char *params_file, double *smin, double *smax, double *sdelta,
+				 double *lambda, int *snum, int *snum_3b_cheby, int &n_over,
+				 double *over_param, const double *Latcons,
+				 int &tot_snum, bool &if_3b_cheby, bool &if_coulomb, bool &fit_coul,
+				 int &num_cheby_3b, bool &if_overcoord, bool &fit_pover,
+				 Sr_pair_t &pair_type)
+// Parse a file with potential interaction parameters and settings.
+{
+  int i;
+
+  ifstream paramread(params_file);
+
+  if ( paramread.fail() ) 
+    {
+      cout << "Could not open " << params_file << endl ;
+      exit(1) ;
+    }
+    
+  //spline parameters are in params.txt which is outputted from spline fitting and SVD programs.
+
+  int tempint;
+
+  // Read smin, smax, sdelta from params file instead of using built-in values.
+  const int bufsz = 1024 ;
+  char buf[bufsz] ;
+  char cmd_arg[bufsz] ;
+
+  do {
+    paramread.getline(buf,bufsz) ;
+  } while (buf[0] == '#' ) ;
+
+  int npair_read = 0 ;
+  sscanf(buf,"npair %d",&npair_read) ;
+
+  if ( npair_read != NPAIR ) {
+    cout << "Inconsistent npair found:  compiled npair = " << NPAIR << endl ;
+  }
+  if_3b_cheby = read_tf_option(&paramread, "3b_cheby", params_file) ;
+
+  paramread.getline(buf, bufsz) ;
+  if ( ! strncmp(buf, "pair_type", 9) ) {
+    sscanf(buf, "pair_type %s", cmd_arg) ;
+    pair_type = parse_pair_type(cmd_arg, bufsz) ;
+  } else {
+    printf("Error in reading %s: pair type not found\n", params_file) ;
+  }
+
+  for (i = 0; i < NPAIR; i++) {
+    if ( pair_type == SPLINE ) 
+      {
+        paramread >> smin[i] >> smax[i] >> sdelta[i] >> snum[i] ;
+        cout << "Spline minimum = " << smin[i] << endl ;
+        cout << "Spline maximum = " << smax[i] << endl ;
+        cout << "Spline step    = " << sdelta[i] << endl ;
+	cout << "Number of spline params = " << snum[i] << endl ;
+        // snum[i]=(2+floor((smax[i]-smin[i])/sdelta[i]))*2;//2 is for p0/m0/p1/m1
+      }
+    else if ( pair_type == CHEBYSHEV ) 
+      {
+	cout << "pair type: " << i << endl;
+	paramread >> smin[i] >> smax[i] >> lambda[i] >> snum[i];
+	cout << "Cheby minimum = " << smin[i] << endl ;
+	cout << "Cheby maximum = " << smax[i]  << endl ;
+	cout << "Cheby order    = " << snum[i]  << endl ;
+	cout << "Morse lambda value= " << lambda[i]  << endl ;
+	if ( if_3b_cheby ) {
+	  paramread >> snum_3b_cheby[i] ;
+	  cout << "3 Body Cheby order = "<< snum_3b_cheby[i] << endl ;
+	}
+	sdelta[i] = 0.0 ;
+      }
+    else if (pair_type == INVERSE_R) 
+      {
+	cout << "pair type: " << i << endl;
+	paramread >> smin[i] >> smax[i] >> snum[i];
+	cout << "Inverse R minimum = " << smin[i] << endl ;
+	cout << "Inverse R maximum = " << smax[i]  << endl ;
+	cout << "Inverse R order    = " << snum[i]  << endl ;
+      } else 
+      {
+	snum[i] = 0 ;
+	smax[i] = Latcons[0] / 2.0 ;
+	smin[i] = 0.0 ;
+      }
+    tot_snum += snum[i];
+  }
+  cout << "Total number of 2-Body potential parameters: " << tot_snum << endl;
+
+  paramread.getline(buf, bufsz) ;
+
+  if_coulomb = read_tf_option(&paramread, "coulomb", params_file) ;
+  fit_coul   = read_tf_option(&paramread, "fit_coulomb", params_file) ;
+
+  if_overcoord = read_tf_option(&paramread, "overcoord", params_file) ;
+
+  if ( if_overcoord ) 
+    {
+      // Read overcoordination parameters from the params file.
+      int n_over_read = 0 ;
+
+      paramread.getline(buf, bufsz) ;
+      if ( ! strncmp(buf, "nover", 5) ) {
+	sscanf(buf, "nover %d", &n_over_read) ;
+      }
+
+      if ( n_over_read > 0 ) 
+	{
+	  printf("Reading overcoordination parameters from %s\n",
+		 params_file) ;
+	  n_over = n_over_read ;
+	  for ( int k = 0 ; k < n_over ; k++ ) 
+	    {
+	      paramread >> over_param[k] ;
+	      printf("Overcoordination parameter %d = %13.6e\n", k,
+		     over_param[k]) ;
+	    }
+	  // Read final newline.
+	  paramread.getline(buf, bufsz) ;
+	}
+    }
+  fit_pover = read_tf_option(&paramread, "fit_pover", params_file) ;
+
+  num_cheby_3b = 0 ;
+  if ( if_3b_cheby ) {
+    num_cheby_3b = count_cheby_3b_params(snum_3b_cheby) ;
+    cout << "Number of 3-Body Chebyshev parameter =" << num_cheby_3b << endl ;
+  }
+
+  paramread.getline(buf, bufsz) ;
+  if ( strncmp(buf, "least squares", 12) ) {
+    printf("Error: least squares parameters not found\n") ;
+    printf("Current line = |%s|\n", buf) ;
+    exit(1) ;
+  }
+  // Number of coulomb parameters.
+  int ncoulomb ;
+  
+  // Number of linear fit overcoordination parameters.
+  int noverlin ;
+
+  if ( fit_coul == true ) {
+    ncoulomb = NPAIR ;
+  } else {
+    ncoulomb = 0 ;
+  }
+  if ( fit_pover ) {
+    noverlin = 1 ;
+  } else {
+    noverlin = 0 ;
+  }
+  double *params = new double[tot_snum+num_cheby_3b+ncoulomb+noverlin];
+  for(int i=0;i<tot_snum+num_cheby_3b+ncoulomb+noverlin;i++)
+    params[i]=0.0;
+
+  if ( pair_type == CHEBYSHEV or pair_type == SPLINE or pair_type == INVERSE_R ) {
+    cout << "Potential parameters read in:\n" ;
+    cout << "Number of 2 body parameters = " << tot_snum << endl ;
+    cout << "Number of chebyshev 3 body parameters = " << num_cheby_3b << endl ;
+    cout << "Fit coulomb parameters = " << ncoulomb << endl ;
+    cout << "Fit overcoordination parameters = " << noverlin << endl ;
+
+    for(int n=0;n<tot_snum+num_cheby_3b+ncoulomb+noverlin;n++)
+      {
+	paramread >> tempint >> params[n];
+
+	if ( tempint != n ) {
+	  cout << "Error: parameter index mismatch " << tempint <<  " " 
+	       << params[n] << " " << n << endl;
+	  exit(1) ;
+	}
+
+        cout << tempint << " " << params[n] << endl;
+	if ( paramread.eof() ) 
+	  {
+	    cout << "Error reading params.txt\n" ;
+	    exit(1) ;
+	  }
+	if ( tempint != n ) 
+	  {
+	    cout << "Error reading params.txt: index mismatch\n" ;
+	    exit(1) ;
+	  }
+      }
+  }
+  if ( fit_pover ) {
+    over_param[0] = params[tot_snum+num_cheby_3b+ncoulomb] ;
+    cout << "Linear fit overcoordination parameter re-set to " << over_param[0] << endl ;
+  }
+  return(params) ;
 }

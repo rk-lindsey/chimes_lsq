@@ -23,6 +23,16 @@ static void echo_lsq_input(int nlayers,
 			   int n_over, 
 			   const double *over_params, bool if_3b_cheby)  ;
 
+static void Subtract_Coul_Forces(double **Force, double **Coord, const char *Lbc, const double *Q,
+				 const double *Latcons, int Nat);
+
+static void Print_Header(const double *smin, const double *smax, const double *sdelta, const double *lambda,
+			 const int *snum, const int *snum_3b_cheby, Sr_pair_t pair_type, bool if_3b_cheby,
+			 bool fit_pover, bool ifsubtract_coord, bool ifsubtract_coul,
+			 bool fit_coul,
+			 int n_over, const double *over_param) ;
+
+
 int main(int argc, char* argv[])
 {
   if ( argc != 3 ) {
@@ -342,39 +352,21 @@ int main(int argc, char* argv[])
 			      n_over, over_param) ;
 	}
       if (ifsubtract_coul) {
-        double **FCoul;
-        FCoul = new double* [Nat[N]] ;
-        for(int a=0;a<Nat[N];a++)
-          FCoul[a] = new double[3] ;
-
-        for(int a1=0;a1<Nat[N];a1++)
-          for(int c=0;c<3;c++)
-            FCoul[a1][c]=0.0 ; 
-        double Q[Nat[N]];
-        for(int a1=0;a1<Nat[N];a1++) {
-          if (Lbc[a1] == 'O') {
-            Q[a1] = qO;
-          } else if (Lbc[a1] == 'H') {
-            Q[a1] = qH;
-          } else {
-            cout << "ERROR in atom type: " << Lbc[a1] << endl;
-            exit(1);
-          }
-        }
-
-        double Vtot = 0;
-        double Pxyz = 0;
-        ZCalc_Ewald(Coord[N], Lbc, Q, tempLatcons, Nat[N], FCoul, Vtot, Pxyz); 
-        for(int a1=0;a1<Nat[N];a1++) {
-          for(int c=0;c<3;c++) {
-            Force[N][a1][c] -= FCoul[a1][c];
-          }
-        }
-        for(int a=0;a<Nat[N];a++)
-          delete[] FCoul[a] ;
-        delete[] FCoul;
- 
-      }       
+	double Q[Nat[N]];
+	for(int a1=0;a1<Nat[N];a1++) {
+	  if (Lbc[a1] == 'O') {
+	    Q[a1] = qO;
+	  } else if (Lbc[a1] == 'H') {
+	    Q[a1] = qH;
+	  } else {
+	    cout << "ERROR in atom type: " << Lbc[a1] << endl;
+	    exit(1);
+	  }
+	}
+	// Calculate coulombic forces and subtract from the DFT force.
+	Subtract_Coul_Forces(Force[N], Coord[N], Lbc, Q, tempLatcons, Nat[N]) ;
+       } 
+       
       if ( fit_pover ) 
 	// Fit the overcoordination parameter.
 	{
@@ -466,40 +458,9 @@ int main(int argc, char* argv[])
   } 
 
   //cout<<endl<<endl;
-  FILE *header = fopen("params.header","w") ;
-  if ( header == NULL ) 
-    {
-      cout << "Error: could not write to params.header\n" ;
-      exit(1) ;
-    }
 
-  fprintf(header, "npair %d\n", NPAIR) ;
-
-  for ( int i = 0 ; i < NPAIR ; i++ ) {
-    if (( pair_type != CHEBYSHEV ) && ( pair_type != INVERSE_R)) {
-      fprintf(header, "%8.5f %8.5f %8.5f %d\n", smin[i], smax[i], sdelta[i], snum[i]) ;
-    } else if (pair_type == CHEBYSHEV) {
-      if ( if_3b_cheby ) {
-	fprintf(header, "%8.5f %8.5f %8.5f %d %d\n", smin[i], smax[i], lambda[i],
-		snum[i], snum_3b_cheby[i]) ;
-      } else {
-	fprintf(header, "%8.5f %8.5f %8.5f %d\n", smin[i], smax[i], lambda[i],
-		snum[i]) ;
-      }
-    } else if (pair_type == INVERSE_R) {
-      fprintf(header, "%8.5f %8.5f %d\n", smin[i], smax[i], snum[i]);
-    }
-  }
-  
-  if ( fit_pover || ifsubtract_coord ) 
-    {
-      fprintf(header,"%d\n",n_over) ;
-      for ( int k = 0 ; k < n_over ; k++ ) 
-	{
-	  fprintf(header,"%21.13e\n",over_param[k]) ;
-	}
-    }
-  fclose(header) ;
+  Print_Header(smin, smax, sdelta, lambda, snum, snum_3b_cheby, pair_type, if_3b_cheby, fit_pover,
+	       ifsubtract_coord, ifsubtract_coul, fit_coul, n_over, over_param) ;
 
   printf("Minimum distances between atoms:\n") ;
   for ( int k = 0 ; k < NPAIR ; k++ ) {
@@ -778,4 +739,110 @@ static void echo_lsq_input(int nlayers,
   } else {
     printf("3-Body Chebyshevy polynomial will NOT be calculated\n") ;
   }
+}
+
+static void Subtract_Coul_Forces(double **Force, double **Coord, const char *Lbc, const double *Q,
+				 const double *Latcons, int Nat)
+// Subtract coulombic forces from the total force.
+{
+  double **FCoul;
+  FCoul = new double* [Nat] ;
+  for(int a=0;a<Nat;a++)
+    FCoul[a] = new double[3] ;
+
+  for(int a1=0;a1<Nat;a1++)
+    for(int c=0;c<3;c++)
+      FCoul[a1][c]=0.0 ; 
+
+  double Vtot = 0;
+  double Pxyz = 0;
+  ZCalc_Ewald(Coord, Lbc, Q, Latcons, Nat, FCoul, Vtot, Pxyz); 
+  for(int a1=0;a1<Nat;a1++) {
+    for(int c=0;c<3;c++) {
+      Force[a1][c] -= FCoul[a1][c];
+    }
+  }
+  for(int a=0;a<Nat;a++)
+    delete[] FCoul[a] ;
+  delete[] FCoul;
+}
+
+
+static void Print_Header(const double *smin, const double *smax, const double *sdelta, const double *lambda,
+			 const int *snum, const int *snum_3b_cheby, Sr_pair_t pair_type, bool if_3b_cheby,
+			 bool fit_pover, bool ifsubtract_coord, bool ifsubtract_coul,
+			 bool fit_coul,
+			 int n_over, const double *over_param)
+// Print out the header of the params.txt file.
+{
+  FILE *header = fopen("params.header","w") ;
+  if ( header == NULL ) 
+    {
+      cout << "Error: could not write to params.header\n" ;
+      exit(1) ;
+    }
+
+  fprintf(header, "npair %d\n", NPAIR) ;
+
+  if ( if_3b_cheby ) {
+    fprintf(header, "3b_cheby true\n") ;
+  } else {
+    fprintf(header, "3b_cheby false\n") ;
+  }
+
+  fprintf(header, "pair_type ") ;
+  if ( pair_type == CHEBYSHEV ) {
+    fprintf(header, "chebyshev\n") ;
+  } else if ( pair_type == INVERSE_R ) {
+    fprintf(header, "inverse_r\n") ;
+  } else if ( pair_type == SPLINE ) {
+    fprintf(header, "spline\n") ;
+  }
+
+  for ( int i = 0 ; i < NPAIR ; i++ ) {
+    if (( pair_type != CHEBYSHEV ) && ( pair_type != INVERSE_R)) {
+      fprintf(header, "%8.5f %8.5f %8.5f %d\n", smin[i], smax[i], sdelta[i], snum[i]) ;
+    } else if (pair_type == CHEBYSHEV) {
+      if ( if_3b_cheby ) {
+	fprintf(header, "%8.5f %8.5f %8.5f %d %d\n", smin[i], smax[i], lambda[i],
+		snum[i], snum_3b_cheby[i]) ;
+      } else {
+	fprintf(header, "%8.5f %8.5f %8.5f %d\n", smin[i], smax[i], lambda[i],
+		snum[i]) ;
+      }
+    } else if (pair_type == INVERSE_R) {
+      fprintf(header, "%8.5f %8.5f %d\n", smin[i], smax[i], snum[i]);
+    }
+  }
+
+  if ( fit_coul or ifsubtract_coul ) {
+    fprintf(header, "coulomb true\n") ;
+  } else {
+    fprintf(header, "coulomb false\n") ;
+  }
+  if ( fit_coul ) {
+    fprintf(header, "fit_coulomb true\n") ;
+  } else {
+    fprintf(header, "fit_coulomb false\n") ;
+  }
+
+  if ( fit_pover || ifsubtract_coord ) {
+    fprintf(header, "overcoord true\n") ;
+    fprintf(header,"nover %d\n",n_over) ;
+    for ( int k = 0 ; k < n_over ; k++ ) 
+      {
+	fprintf(header,"%21.13e\n",over_param[k]) ;
+      }
+  } else {
+    fprintf(header, "overcoord false\n") ;
+  }
+  if ( fit_pover ) {
+    fprintf(header, "fit_pover true\n") ;
+  } else {
+    fprintf(header, "fit_pover false\n") ;
+  }
+  fprintf(header,"least squares parameters\n") ;
+
+  
+  fclose(header) ;
 }

@@ -3,10 +3,10 @@
 #define EWALD_ACCURACY 1.0e-07
 
 static void Ewald_K_Space_New(double alphasq, int k_cut,
-			      double **Coord, double *Q, double *Latcons, 
+			      double **Coord, const double *Q, const double *Latcons, 
 			      int nat, double **FCoul,double& Vtot) ;
 
-static void Ewald_K_Space_Orig(double alphasq, double **Coord,const char *Lbc, double *Latcons,
+static void Ewald_K_Space_Orig(double alphasq, double **Coord,const char *Lbc, const double *Latcons,
 			       const int nat,double **SForce,double& Vtot) ;
 static double add_sines(int kx, int ky, int kz, const double *sinx, const double *siny, 
 			const double *sinz, const double *cosx, const double *cosy, 
@@ -15,8 +15,8 @@ static void generate_trig(double *sinx, double *siny, double *sinz,
 			  double *cosx, double *cosy, double *cosz,
 			  double *Rvec, double *Latcons, int kmax);
 
-void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,
-	   const int nat, double **SForce,double& Vtot,double& Pxyz)
+void ZCalc_Ewald(double **Coord, const char *Lbc, const double *Q, const double *Latcons,
+		 const int nat, double **SForce,double& Vtot,double& Pxyz)
 // Calculate Ewald interactions.
 {
   double Rvec[3];
@@ -151,7 +151,7 @@ void ZCalc_Ewald(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
 
 static void Ewald_K_Space_New(double alphasq, int k_cut,
-			      double **Coord, double *Q, double *Latcons, int nat,
+			      double **Coord, const double *Q, const double *Latcons, int nat,
 			      double **FCoul,double& Vtot)
 // Calculate Ewald K-space components.  Use a rearrangement of the usual Ewald
 // expression to generate an order-N evaluation.   See A. Y. Toukmaji et. al,
@@ -305,7 +305,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut,
 
 
 
-static void Ewald_K_Space_Orig(double alphasq, double **Coord, const char *Lbc, double *Latcons,
+static void Ewald_K_Space_Orig(double alphasq, double **Coord, const char *Lbc, const double *Latcons,
 			const int nat,double **SForce,double& Vtot)
 {
   double Rvec[3];

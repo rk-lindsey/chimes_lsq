@@ -1,5 +1,3 @@
-Notes from Lucas Koziol:
-=======
 Force matching codes by Lucas Koziol and Larry Fried
 
 The supplied Makefiles will automatically compile the force fitting
@@ -20,10 +18,10 @@ fit_coulomb true
 fit_pover true
 pair_type spline
 subtract_coord false
-smin 0.75 0.75 0.75
+smin 0.6 0.6 0.6
 smax 6.0 6.0 6.0
-sdelta 0.1 0.1 0.1 0.1
-chebyshev_order 12
+sdelta 0.1 0.1 0.1
+over_params 5 50.0 1.0165 -0.0657 5.0451 -3.6141
 ------------------------------------
 For more examples see, example/h2o-lsq and example/lsq2.
 
@@ -107,6 +105,94 @@ values describe the negative of the pairwise force dV/dr.
     file can be used to test the consistency of the MD code with the reported
     forces.
 
+The format of the params.txt file is as follows:
+
+# Date  2016-06-14
+# Number of columns =  34
+# Number of rows    =  14114
+# RMS force error =  13.9161502676
+# max variable =  136.955400283
+npair 3
+3b_cheby false
+pair_type chebyshev
+ 0.75000  6.00000  1.25000 10
+ 0.75000  6.00000  1.25000 10
+ 0.75000  6.00000  1.25000 10
+coulomb true
+fit_coulomb true
+overcoord true
+nover 5
+  5.0000000000000e+01
+  1.0165000000000e+00
+ -6.5700000000000e-02
+  5.0451000000000e+00
+ -3.6141000000000e+00
+fit_pover true
+least squares parameters
+0 62.2118312075
+1 -23.0064319877
+2 25.6115981525
+3 -32.3001922969
+4 2.13594798821
+5 9.58482168479
+6 36.259156255
+7 -39.3514902706
+8 -47.3118719056
+9 -28.7304905567
+10 -1.94218125182
+11 28.490710697
+12 26.7981298576
+13 16.461114931
+14 1.21081313796
+15 4.56871613581
+16 0.0147266482222
+17 -0.808047108048
+18 1.17821172921
+19 0.875255025009
+20 -10.7273078087
+21 -17.4874987319
+22 -35.0647688716
+23 -36.6020682952
+24 -36.9698808083
+25 -27.8795218389
+26 -20.534033962
+27 -13.1578217039
+28 -6.8693881773
+29 -2.72199950168
+30 136.955400283
+31 -68.477702629
+32 34.2388508942
+33 25.2543658956
+
+The params.txt file begins with comments.  The number of columns is the number
+of fitting variables used in lsq.py programs.  The number of rows is the number
+of force components fit to.  The number of columns should be much less than the number
+of rows.  The RMS force error is given in units of kcal/mol-Ang.  The max variable
+is the maximum fitting coefficient found.  If this value is very large, the
+fit may be less reliable.
+
+npair is the number of pair interactions.  The code has only been tested for water
+(npair=3) at this time.  
+
+3b_cheby controls the evaluation of 3-body chebyshev interactions.
+
+The pair_type gives the pair interaction.  Possible values
+are chebyshev or spline.  The following numbers are the minimum interaction distance,
+maximum interaction distance, Morse distance scale, and maximum Chebyshev order.
+
+coulomb controls the evaluation of coulomb interactions.  
+If fit_coulomb is true, coulomb parameters are taken from the params.txt file.  Otherwise,
+build-in charges are used.
+
+If overcoord is true, a ReaxFF overcoordination interaction is calculated.
+nover is the number of overcoordination parameters.  It should be 5 for ReaxFF.
+
+fit_pover controls whether the specified first overcoordination parameter is used (false),
+or whether the first overcoordination parameter is taken from the last listed parameter (true).
+
+The least squares fitted parameters follow in order.  Pair parameters are given first,
+then 3-body interaction parameters, then coulomb parameters, and finally the overcoordination parameter.
+
 Part B: calculating short-range part of the force.
 
 6.) If you plot the spline forces (plot every 2nd point in
@@ -130,7 +216,12 @@ table or with the polynomial force representation.
 Part C: running Molecular dynamics.
 
 7.) params.txt (with top two text lines removed) from output of lsq.py
-should be in the working directory. The filename of the force
+should be in the working directory. 
+All parameters specifying the force evaluation are placed in params.txt. This is 
+different from earlier versions of the code, where params.txt had only least-squares
+fitting parameters.
+
+The filename of the force
 parameter file can be used specified in splines_md.in. Also the
 starting geometry and velocities should be included in input.xyz. The
 N-3, N-2, and N-1 (N is the number of lines in params.txt) lines of
@@ -157,12 +248,8 @@ nlayers     1
 output_force false
 read_force   false
 init_vel     false
-pair_type chebyshev
-coulomb      true
-fit_coulomb false
 num_pressure false
 params_file  params.cheby.txt
-overcoord   false
 rand_seed     12357
 hoover_time   10
 energy_freq  10
@@ -198,13 +285,6 @@ pair_type specifies the type of short-range pair interaction.  Current
 choices are chebyshev, spline, stillinger, or lennard-jones.
 
 params_file specifies a file with force parameters.
-
-coulomb controls whether Coulombic interactions are calculated or not.
-
-fit_coulomb controls where the charges come from.  If fit_coulomb is true,
-charge products (q_i * q_j) are read from the params file.
-
-overcoord controls whether the ReaxFF overcoordination term is used.
 
 rand_seed is a random number seed.  
 

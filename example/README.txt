@@ -12,6 +12,8 @@ h2o-md: Perform molecular dynamics using potential parameters derived
 from force matching.  Both the spline and Chebyshev potentials are
 tested.
 
+h2o-3b: Test calculation for a Chebyshev 3-body interaction.  This is experimental.
+
 h2o-nonlin: Perform nonlinear optimization of the overcoordination
 parameters used in force matching.
 

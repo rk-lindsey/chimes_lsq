@@ -16,19 +16,23 @@ my $npair ;
 my (@rmin, @rmax, @order, @lambda) ;
 
 while ( <> ) {
-  # Read initial comments.
-  if ( !( $_ =~ /^\#/ ) )  {
+  # Read to definition of pair type.
+  if ( $_ =~ /npair/ ) {
+    my @f = split(" ") ;
+    $npair = $f[1] ;
+    chomp $npair ;
+    if ( $npair <= 0 ) {
+      die "A positive number of pairs is required\n" ;
+    }
     last ;
   }
-  print
-  ;
 }
-my @f = split(" ") ;
-$npair = $f[1] ;
-chomp $npair ;
-
-if ( $npair <= 0 ) {
-  die "A positive number of pairs is required\n" ;
+$_ = <> ;
+$_ = <> ;
+if ( /pair_type chebyshev/ ) {
+  print "Chebyshev pair type found\n" ;
+} else {
+  die "Error: chebyshev pair type was not found\n" ;
 }
 
 for my $i ( 0 .. $npair - 1 ) {
@@ -37,12 +41,11 @@ for my $i ( 0 .. $npair - 1 ) {
   print "Rmin = $rmin[$i] Rmax = $rmax[$i] Lambda = $lambda[$i] Order = $order[$i]\n" ;
 }
 
-
-# Read past overcoordination parameters.
-my $nover = <> ;
-chomp $nover ;
-for my $i ( 1 .. $nover ) {
-  $_ = <> ;
+while ( <> ) {
+  if ( $_ =~ /least squares parameters/ )  {
+    last ;
+  }
+  print ;
 }
 
 foreach my $ipr (0 .. $npair - 1) {
@@ -53,7 +56,7 @@ foreach my $ipr (0 .. $npair - 1) {
     die "File ended prematurely\n" unless defined($_) ;
     my @f = split(" ") ;
     $coef[$k] = $f[1] ;
-#    printf("COEF $k $coef[$k]\n" ) ;
+    printf("COEF $k $coef[$k]\n" ) ;
   }
   
   for ( my $i = 0 ; $i < 100 ; $i++ ) {
