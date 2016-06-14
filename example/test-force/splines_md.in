@@ -7,12 +7,8 @@ output_force false
 read_force   true
 output_force true
 init_vel     false
-pair_type spline
-coulomb      true
-fit_coulomb true
 num_pressure false
 params_file  params.spline.txt
-overcoord    true
 rand_seed     12357
 hoover_time   10
 energy_freq  10
