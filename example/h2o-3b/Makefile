@@ -1,4 +1,4 @@
-all : cheby_fit cheby_md
+all : cheby_fit cheby_force cheby_md
 
 cheby_fit :
 	../../bin/splines_ls cheby_ls_3b.in 49 > cheby_ls_3b.out
@@ -15,6 +15,10 @@ cheby_fit :
 cheby_md : cheby_fit
 	../../bin/splines_md cheby_md_3b.in > cheby_md_3b.out
 	-diff cheby_md_3b.out output/cheby_md_3b.out
+
+cheby_force : cheby_fit
+	../../bin/splines_md cheby_3b_force.in > cheby_3b_force.out
+	-diff cheby_3b_force.out output/cheby_3b_force.out
 
 clean :
 	rm -f A.txt b.txt params.header params.spline.txt force.txt *.out cheby_fit

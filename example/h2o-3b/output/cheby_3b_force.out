@@ -1,0 +1,185 @@
+Reading positions from input.xyzf for force testing
+Opening force.txt to read forces for comparison
+v.c.o.m. = 0   0   0
+v.c.o.m. = 0   0   0
+Option 3b_cheby is set to true
+pair type: 0
+Cheby minimum = 0.75
+Cheby maximum = 6
+Cheby order    = 10
+Morse lambda value= 1.25
+3 Body Cheby order = 2
+pair type: 1
+Cheby minimum = 0.75
+Cheby maximum = 6
+Cheby order    = 10
+Morse lambda value= 1.25
+3 Body Cheby order = 2
+pair type: 2
+Cheby minimum = 0.75
+Cheby maximum = 6
+Cheby order    = 10
+Morse lambda value= 1.25
+3 Body Cheby order = 2
+Total number of 2-Body potential parameters: 30
+Option coulomb is set to true
+Option fit_coulomb is set to true
+Option overcoord is set to false
+Option fit_pover is set to false
+Number of 3-Body Chebyshev parameter =80
+Potential parameters read in:
+Number of 2 body parameters = 30
+Number of chebyshev 3 body parameters = 80
+Fit coulomb parameters = 3
+Fit overcoordination parameters = 0
+0 31.9413256693
+1 10.1045467273
+2 8.10082050619
+3 -11.3084576296
+4 -29.8842399742
+5 14.670116164
+6 38.3532211411
+7 2.54655399858
+8 -8.89147730595
+9 -9.52990048941
+10 1.07925610349
+11 27.6926348062
+12 25.026121491
+13 18.7299668233
+14 -0.304126651941
+15 4.62567295228
+16 -2.80038314608
+17 1.51716921901
+18 0.0908546565597
+19 0.605138144919
+20 -6.93378554266
+21 -18.3081769421
+22 -45.419374383
+23 -52.2430187574
+24 -43.0034708449
+25 -34.2318164391
+26 -25.0036208431
+27 -16.8098408823
+28 -8.62529219392
+29 -3.02469255349
+30 71.0374021872
+31 326.807485578
+32 297.045214449
+33 1291.52795983
+34 73.0499005147
+35 521.961772328
+36 474.150754251
+37 2004.05196449
+38 -1.58367149507e-12
+39 -1.43909718422e-12
+40 2.07285675415e-13
+41 4.74046277061e-13
+42 -1.3269453783e-12
+43 -7.93643722004e-13
+44 1.74968445897e-13
+45 1.2436992466e-12
+46 0.460236626406
+47 -62.2304487059
+48 35.2709737778
+49 -64.3044442088
+50 32.8500528772
+51 -74.5439465842
+52 31.015660355
+53 -253.236655636
+54 1.06694317206e-14
+55 1.87663513548e-30
+56 0
+57 0
+58 0
+59 0
+60 0
+61 0
+62 46.3233207144
+63 22.3027107138
+64 19.0896273877
+65 34.2095342674
+66 14.4698628258
+67 43.6559777814
+68 34.7658071336
+69 298.573755221
+70 0
+71 0
+72 0
+73 0
+74 0
+75 0
+76 0
+77 0
+78 0
+79 0
+80 0
+81 0
+82 0
+83 0
+84 0
+85 0
+86 0
+87 0
+88 0
+89 0
+90 0
+91 0
+92 0
+93 0
+94 0
+95 0
+96 0
+97 0
+98 0
+99 0
+100 0
+101 0
+102 0
+103 0
+104 0
+105 0
+106 0
+107 0
+108 0
+109 0
+110 146.1998811
+111 -73.0999446231
+112 36.5499720573
+JOB PARAMETERS:
+
+Temperature is 2000.00000
+Time step is  0.12500 fs
+Number of steps is 1
+Number of layers is 1
+Chebyshev short-range pair forces will be used
+Force parameters will be read from params.3b.txt
+Coulomb forces will be calculated with Ewald sums
+ReaxFF overcoordination term will NOT be calculated
+3-Body Chebyshev polynomial will be calculated
+Forces will be read for testing
+Charges will be taken from params.txt
+Pressures will be calculated by finite difference of the energy
+Velocities will be read from input.xyz
+Random number seed = 12357
+Trajectory will be written to traj.gen every 20 steps
+Energies will be written every 10 steps
+Nose-Hoover thermostat time = 10.00000 fs
+
+END OF JOB PARAMETERS
+
+Q[H] from params file =      0.33177 e
+Charge equation 1 error =     -0.00000
+Charge sum per atom =   0.00000e+00
+Total Mass                   = 576.48000 au
+Volume                       = 638.08412 Ang.^3
+Number density               =  0.24983 mol atm/cc
+Mass density                 =  1.50023 g/cc
+Requested Ewald accuracy  =  1.000000e-07
+Ewald alpha               =  5.853127e-01
+R-Space Ewald cutoff      =  6.173215e+00
+R-Space accuracy estimate =  5.220777e-08
+K-Space accuracy estimate =  5.489244e-07
+Cutting off K-vectors with magnitude less than 6
+Number of Ewald K-vectors = 894
+K-space accuracy estimate = 6.6261033015771e-08
+RMS force error =  1.248150e-05
