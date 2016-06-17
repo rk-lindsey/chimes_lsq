@@ -389,6 +389,11 @@ int main(int argc, char* argv[])
   //  Reduced precision to 6 for code testing.
   fileA.precision(16);
   fileb.precision(16);
+  
+  bool *used = new bool[tot_short_range] ;
+  for ( int n = 0 ; n < tot_short_range ; n++ ) {
+    used[n] = false ;
+  }
 
   for(int N=0;N<nframes;N++)
     for(int a=0;a<Nat[N];a++)
@@ -403,6 +408,9 @@ int main(int argc, char* argv[])
 		//{
 		//Als[N][a][n][c] *= 100.0 ;
 		//}
+		if ( fabs(Als[N][a][n][c]) > 1.0e-12 ) {
+		  used[n] = true ;
+		}
 		fileA<<Als[N][a][n][c]<<"   ";
 	      }
 	  
@@ -458,6 +466,14 @@ int main(int argc, char* argv[])
   } 
 
   //cout<<endl<<endl;
+
+  /**
+  for ( int n = 0 ; n < tot_short_range ; n++ ) {
+    if ( ! used[n] ) {
+      cout << "Warning: short-range parameter "<< n << " does not appear in the forces" << endl ;
+    }
+  }
+  **/
 
   Print_Header(smin, smax, sdelta, lambda, snum, snum_3b_cheby, pair_type, if_3b_cheby, fit_pover,
 	       ifsubtract_coord, ifsubtract_coul, fit_coul, n_over, over_param) ;
