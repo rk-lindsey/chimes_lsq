@@ -20,9 +20,8 @@ static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax) 
 void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    const int nat,const double *smin,
 		    const double *smax,
-		    const int *snum, 
   		    const int *snum_3b_cheby,
-		    double *params, const double *lambda,
+		    double ******idx_params, const double *lambda,
 		    double **SForce, double &Vtot, double &Pxyz)
 // Calculate 3-body short-range forces using a Chebyshev polynomial expansion.
 // Can use morse variables similar to the work of Bowman.
@@ -38,7 +37,6 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
   //const double lambda = 1.25 ;
   double exprlen12, exprlen23, exprlen13 ;
   double xdiff12, xdiff23, xdiff13 ;
-  int index = 0 ;
 
   if ( ! called_before ) {
     called_before = true ;
@@ -60,81 +58,155 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
   }
   
   ////main loop for 3-body Chebyshev terms:
-  for(int a1=0;a1<nat-1;a1++)
-    for(int a2=a1+1;a2<nat;a2++) 
-      {
-	double fcut12, dfcut12 ;
-	int ipair12 = pair_index(a1,a2,Lbc) ;
-	find_pair_cheby(R12,Tn12, Tnd12, rlen12, exprlen12, xdiff12,
-			a1, a2, Lbc, Coord, Latcons, smin, smax, snum_3b_cheby, 
-			lambda) ;
+  for(int a1=0;a1<nat-1;a1++) 
+    {
+      int ele1 = atom_index(a1,Lbc) ;
+      for(int a2=a1+1;a2<nat;a2++) 
+	{
+	  double fcut12, dfcut12 ;
+	  int ipair12 = pair_index(a1,a2,Lbc) ;
+	  int ele2 = atom_index(a2,Lbc) ;
+	  find_pair_cheby(R12,Tn12, Tnd12, rlen12, exprlen12, xdiff12,
+			  a1, a2, Lbc, Coord, Latcons, smin, smax, snum_3b_cheby, 
+			  lambda) ;
 	
-	cubic_cutoff(fcut12, dfcut12, rlen12, smax[ipair12]) ;
-	if ( fcut12 == 0.0 ) 
-	  continue ;
+	  cubic_cutoff(fcut12, dfcut12, rlen12, smax[ipair12]) ;
+	  if ( fcut12 == 0.0 ) 
+	    continue ;
 
-	for(int a3=a2+1;a3<nat;a3++)
-	  {
-	    int ipair23 = pair_index(a2,a3,Lbc) ;
-	    int ipair13 = pair_index(a1,a3,Lbc) ;
-	    double fcut23, dfcut23 ;
-	    double fcut13, dfcut13 ;
+	  for(int a3=a2+1;a3<nat;a3++)
+	    {
+	      int ipair23 = pair_index(a2,a3,Lbc) ;
+	      int ipair13 = pair_index(a1,a3,Lbc) ;
+	      double fcut23, dfcut23 ;
+	      double fcut13, dfcut13 ;
+	      int ele3 = atom_index(a3, Lbc) ;
 
-	    find_pair_cheby(R23, Tn23, Tnd23, rlen23, exprlen23, xdiff23,
-			    a2, a3, Lbc, Coord, Latcons, smin, smax, snum_3b_cheby, 
-			    lambda) ;
-	    find_pair_cheby(R13, Tn13, Tnd13, rlen13, exprlen13, xdiff13,
-			    a1, a3, Lbc, Coord, Latcons, smin, smax, snum_3b_cheby, 
-			    lambda) ;
+	      find_pair_cheby(R23, Tn23, Tnd23, rlen23, exprlen23, xdiff23,
+			      a2, a3, Lbc, Coord, Latcons, smin, smax, snum_3b_cheby, 
+			      lambda) ;
+	      find_pair_cheby(R13, Tn13, Tnd13, rlen13, exprlen13, xdiff13,
+			      a1, a3, Lbc, Coord, Latcons, smin, smax, snum_3b_cheby, 
+			      lambda) ;
 
 		    
-	    cubic_cutoff(fcut23, dfcut23, rlen23, smax[ipair23]) ;
-	    if ( fcut23 == 0.0 ) 
-	      continue ;
+	      cubic_cutoff(fcut23, dfcut23, rlen23, smax[ipair23]) ;
+	      if ( fcut23 == 0.0 ) 
+		continue ;
 
-	    cubic_cutoff(fcut13, dfcut13, rlen13, smax[ipair13]) ;
-	    if ( fcut13 == 0.0 ) 
-	      continue ;
+	      cubic_cutoff(fcut13, dfcut13, rlen13, smax[ipair13]) ;
+	      if ( fcut13 == 0.0 ) 
+		continue ;
 
-	    for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
-	      for ( int j = 0 ; j < snum_3b_cheby[ipair23] ; j++ ) 
-		for ( int k = 0 ; k < snum_3b_cheby[ipair13] ; k++ ) 
-		  {
-		    double coeff = Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
-						  snum, snum_3b_cheby, index, true) ;
+	      for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
+		for ( int j = 0 ; j < snum_3b_cheby[ipair23] ; j++ ) 
+		  for ( int k = 0 ; k < snum_3b_cheby[ipair13] ; k++ ) 
+		    {
+		      double coeff = idx_params[ele1][ele2][ele3][i][j][k] ;
 
-		    tempx += coeff * fcut12 * fcut23 * fcut13 * Tn12[i] * Tn23[j] * Tn13[k] ;
+		      tempx += coeff * fcut12 * fcut23 * fcut13 * Tn12[i] * Tn23[j] * Tn13[k] ;
 		    
-		    double deriv12 = 
-		      fcut12 * Tnd12[i] *(-exprlen12/lambda[ipair12])/xdiff12 +
-		      dfcut12 * Tn12[i] ;
+		      double deriv12 = 
+			fcut12 * Tnd12[i] *(-exprlen12/lambda[ipair12])/xdiff12 +
+			dfcut12 * Tn12[i] ;
 
-		    double deriv23 =
-		      fcut23 * Tnd23[j] *(-exprlen23/lambda[ipair23])/xdiff23 +
-		      dfcut23 * Tn23[j] ;
+		      double deriv23 =
+			fcut23 * Tnd23[j] *(-exprlen23/lambda[ipair23])/xdiff23 +
+			dfcut23 * Tn23[j] ;
 
-		    double deriv13 =
-		      fcut13 * Tnd13[k] *(-exprlen13/lambda[ipair13])/xdiff13 +
-		      dfcut13 * Tn13[k] ;
+		      double deriv13 =
+			fcut13 * Tnd13[k] *(-exprlen13/lambda[ipair13])/xdiff13 +
+			dfcut13 * Tn13[k] ;
 
-		    for(int c=0;c<3;c++)
-		      {
-			SForce[a1][c] += coeff * deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
-			SForce[a2][c] -= coeff * deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
+		      for(int c=0;c<3;c++)
+			{
+			  SForce[a1][c] += coeff * deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
+			  SForce[a2][c] -= coeff * deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
 
-			SForce[a2][c] += coeff * deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
-			SForce[a3][c] -= coeff * deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
+			  SForce[a2][c] += coeff * deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
+			  SForce[a3][c] -= coeff * deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
 
-			SForce[a1][c] += coeff * deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
-			SForce[a3][c] -= coeff * deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
-		      } 
-		    // TO DO:  Update pressure.
-		  }
-	  }
-      }
+			  SForce[a1][c] += coeff * deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
+			  SForce[a3][c] -= coeff * deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
+			} 
+		      // TO DO:  Update pressure.
+		    }
+	    }
+	}
+    }
   Vtot += tempx ;
 
   return;
+}
+
+
+double ******Indexed_3B_Cheby_Coeffs(const char *Lbc, 
+				  const int nat,
+				  const int *snum, 
+				  const int *snum_3b_cheby,
+				  double *params)
+
+// Generate a "flattened" list of 3-Body Chebyshev Polynomial coefficients to speed up
+// indexing in generating 3 body forces.
+{
+  //spline term calculated w/cutoff:
+  int index = 0 ;
+
+
+  int dim = 0 ;
+    for ( int i = 0 ; i < NPAIR ; i++ ) 
+      {
+	if ( snum_3b_cheby[i] > dim ) 
+	  {
+	    dim = snum_3b_cheby[i] ;
+	  }
+      }
+    dim++ ;
+
+  double ******flat_params ;
+  flat_params = new double*****[NELE] ;
+  for ( int i1 = 0 ; i1 < NELE ; i1++ ) {
+    flat_params[i1] = new double****[NELE] ;
+    for ( int i2 = 0 ; i2 < NELE ; i2++ ) {
+      flat_params[i1][i2] = new double***[NELE] ;
+      for ( int i3 = 0 ; i3 < NELE ; i3++ ) {
+	flat_params[i1][i2][i3] = new double **[dim] ;
+	for ( int i4 = 0 ; i4 < dim ; i4++ ) {
+	  flat_params[i1][i2][i3][i4] = new double *[dim] ;
+	  for ( int i5 = 0 ; i5 < dim ; i5++ ) {
+	    flat_params[i1][i2][i3][i4][i5] = new double [dim] ;
+	  }
+	}
+      }
+    }
+  }
+
+  ////main loop for 3-body Chebyshev terms:
+  for(int a1=0;a1<nat-1;a1++) 
+    {
+      int ele1 = atom_index(a1,Lbc) ;
+      for(int a2=a1+1;a2<nat;a2++) 
+	{
+	  int ele2 = atom_index(a2,Lbc) ;
+	  int ipair12 = pair_index(a1,a2,Lbc) ;
+	  for(int a3=a2+1;a3<nat;a3++)
+	    {
+	      int ipair23 = pair_index(a2,a3,Lbc) ;
+	      int ipair13 = pair_index(a1,a3,Lbc) ;
+	      int ele3 = atom_index(a3,Lbc) ;
+
+	      for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
+		for ( int j = 0 ; j < snum_3b_cheby[ipair23] ; j++ ) 
+		  for ( int k = 0 ; k < snum_3b_cheby[ipair13] ; k++ ) 
+		    {
+		      (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
+					    snum, snum_3b_cheby, index, false) ;
+		      flat_params[ele1][ele2][ele3][i][j][k] = params[index] ;
+		    }
+	    }
+	}
+    }
+  return flat_params ;
 }
 
 

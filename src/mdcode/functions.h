@@ -11,7 +11,8 @@
 using namespace std;
 
 #define MAXOVERP 5  // Maximum number of overcoordination parameters allowed.
-const int NPAIR = 3 ;
+const int NELE = 2 ;   // Number of elements.
+const int NPAIR = (NELE+1) * NELE / 2 ;  // Number of pair interactions.
 
 
 static const double ke=332.0637157615209;//converter between electron units and Stillinger units for Charge*Charge.
@@ -88,10 +89,10 @@ int atom_index(int a1, const char *Lbc) ;
 void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    const int nat,const double *smin,
 		    const double *smax,
-		    const int *snum, 
   		    const int *snum_3b_cheby,
-		    double *params, const double *lambda,
-		    double **SForce, double &Vtot, double &Pxyz);
+		    double ******idx_params, const double *lambda,
+		    double **SForce, double &Vtot, double &Pxyz) ;
+
 void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			  const int nat, double ***A,
 			  const double *smin,
@@ -99,6 +100,11 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			  const int *snum, 
 			  const int *snum_3b_cheby,
 			  const double *lambda) ;
+double ******Indexed_3B_Cheby_Coeffs(const char *Lbc, 
+				  const int nat,
+				  const int *snum, 
+				  const int *snum_3b_cheby,
+				     double *params) ;
 
 int count_cheby_3b_params(const int *snum) ;
 

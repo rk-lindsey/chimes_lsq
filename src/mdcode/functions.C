@@ -69,6 +69,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 // Calculate the force, potential energy, and pressure.
 {
   double volume ;
+  static bool called_before = false ;
 
   for(int a=0;a<nat;a++)
     for(int c=0;c<3;c++)
@@ -122,10 +123,17 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   if ( if_3b_cheby ) 
     {
+      static double ******idx_params ; 
       // 3-body chebyshev polynomial 
-      ZCalc_3B_Cheby(Coord, Lbc, Latcons, nat, smin, smax, snum,
-		     snum_3b_cheby,
-		     params, lambda, SForce, Vtot, Pxyz) ;
+      if ( ! called_before ) {
+	// Index the parameters only once.  Scan through the params array and create
+	// a new multi-dimensional array where the coefficients are readily looked up.
+	idx_params = Indexed_3B_Cheby_Coeffs(Lbc, nat, snum, snum_3b_cheby, params) ;
+      }
+      
+      ZCalc_3B_Cheby(Coord, Lbc, Latcons, nat, smin, smax, 
+		     snum_3b_cheby, idx_params, 
+		     lambda, SForce, Vtot, Pxyz) ;
     }
 
   volume = Latcons[0] * Latcons[1] * Latcons[2] ;
@@ -1695,3 +1703,5 @@ bool read_tf_option(ifstream *paramread, const char *option, const char *params_
   }
   return(result) ;
 }
+
+  
