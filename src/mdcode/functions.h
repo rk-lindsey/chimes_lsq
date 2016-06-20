@@ -7,6 +7,7 @@
 #include<math.h>
 #include<stdlib.h>
 #include<string.h>
+#include <assert.h>
 #include "functions.h"
 using namespace std;
 
@@ -107,6 +108,8 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
 				     double *params) ;
 
 int count_cheby_3b_params(const int *snum) ;
+
+int pair_index_ele(int ele1, int ele2) ;
 
 #endif
 

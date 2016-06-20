@@ -3,6 +3,8 @@
 // 3-Body Chebyshev morse interaction.
 //
 
+// #define TESTING
+
 static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen, double &exprlen,
 			    double &xdiff,
 			    int a1, int a2, const char *Lbc, double **Coord, const double *Latcons, 
@@ -99,8 +101,9 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		continue ;
 
 	      for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
-		for ( int j = 0 ; j < snum_3b_cheby[ipair23] ; j++ ) 
-		  for ( int k = 0 ; k < snum_3b_cheby[ipair13] ; k++ ) 
+		for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
+		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
+
 		    {
 		      double coeff = idx_params[ele1][ele2][ele3][i][j][k] ;
 
@@ -196,8 +199,8 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
 	      int ele3 = atom_index(a3,Lbc) ;
 
 	      for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
-		for ( int j = 0 ; j < snum_3b_cheby[ipair23] ; j++ ) 
-		  for ( int k = 0 ; k < snum_3b_cheby[ipair13] ; k++ ) 
+		for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
+		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 		    {
 		      (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
 					    snum, snum_3b_cheby, index, false) ;
@@ -293,8 +296,8 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 	      continue ;
 
 	    for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
-	      for ( int j = 0 ; j < snum_3b_cheby[ipair23] ; j++ ) 
-		for ( int k = 0 ; k < snum_3b_cheby[ipair13] ; k++ ) 
+	      for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
+		for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 		  {
 		    (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, NULL, snum, 
 					  snum_3b_cheby,
@@ -375,7 +378,7 @@ static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen
   double xmax = exp(-smin[ipair]/lambda[ipair]) ;
   xdiff = 0.5 * (xmax - xmin) ;
 
-  if( rlen < smax[ipair] && rlen > smin[ipair] ) 
+  if( rlen < smax[ipair] ) 
     {
       // Use morse variables.
       xavg = 0.5 * (xmin + xmax) ;
@@ -421,51 +424,82 @@ static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen
 
 
   
-static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n23, int n13,
+static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
 			     const char *Lbc, const double *params,
 			     const int *snum, 
-			     const int *snum_3b_cheby,
+			     const int *snum_3b_cheby, 
 			     int &index, bool return_params) 
 // Extract the desired 3-body chebyshev coefficient from the params array.
 {
   int ipair12, ipair23, ipair13 ;
-  //int ele1, ele2, ele3 ;
+  int ele1, ele2, ele3 ;
+  int tot_short_range ;
 
   if ( a1 == a2 || a2 == a3 || a1 == a3 ) {
     cout << "Error in Cheby_3B_Coeff: atom indices are identical" << endl ;
     exit(1) ;
   }
     
-  ipair12 = pair_index(a1, a2, Lbc) ;
-  ipair23 = pair_index(a2, a3, Lbc) ;
-  ipair13 = pair_index(a1, a3, Lbc) ;
+  ele1    = atom_index(a1, Lbc) ;
+  ele2    = atom_index(a2, Lbc) ;
+  ele3    = atom_index(a3, Lbc) ;
 
-  //ele1    = atom_index(a1, Lbc) ;
-  //ele2    = atom_index(a2, Lbc) ;
-  //ele3    = atom_index(a3, Lbc) ;
+  ipair12 = pair_index_ele(ele1, ele2) ;
+  ipair23 = pair_index_ele(ele2, ele3) ;
+  ipair13 = pair_index_ele(ele1, ele3) ;
 
+#ifdef TESTING  
+  printf("Input:\n  ele1 = %d ele2 = %d ele3 = %d\n  n12 = %d n13 = %d n23 = %d\n",
+	 ele1, ele2, ele3, n12, n13, n23) ;
+  printf("  ipair12 = %d ipair13 = %d ipair23 = %d\n", ipair12, ipair13, ipair23) ;
+#endif
+
+  sort_triple(ele1, ele2, ele3, n12, n23, n13) ;
 
   // Move past pair interactions.
   index = 0 ;
   for ( int j = 0 ; j < NPAIR ; j++ ) {
     index += snum[j] ;
   }
-  
+
+  tot_short_range = index ;
+  tot_short_range += count_cheby_3b_params(snum_3b_cheby) ;
+
   // Sort the pairs in ascending order.
-  sort_triple(ipair12, ipair23, ipair13, n12, n23, n13) ;
+
 
   // Move through all of the pairs sets not used.
-  for ( int i12 = 0 ; i12 < ipair12 ; i12++ ) {
-    for ( int i23 = i12 ; i23 < ipair23 ; i23++ ) {
-      for ( int i13 = i23 ; i13 < ipair13 ; i13++ ) {
+  for ( int i1 = 0 ; i1 <= ele1 ; i1++ ) {
+    for ( int i2 = i1 ; i2 <= ele2 ; i2++ ) {
+      for ( int i3 = i2 ; i3 <= ele3 ; i3++ ) {
+	int i12 = pair_index_ele(i1, i2) ;
+    	int i23 = pair_index_ele(i2, i3) ;
+	int i13 = pair_index_ele(i1, i3) ;
+	if ( i1 == ele1 && i2 == ele2 && i3 == ele3 ) break ;
+#ifdef TESTING
+	printf("Skipping over element triple %d %d %d\n", i1, i2, i3) ;
+	printf(" Pair index : %d %d %d\n", i12, i13, i23) ;
+#endif
 	index += snum_3b_cheby[i12] * snum_3b_cheby[i23] * snum_3b_cheby[i13] ;
       }
     }
   }
 
+  ipair12 = pair_index_ele(ele1, ele2) ;
+  ipair23 = pair_index_ele(ele2, ele3) ;
+  ipair13 = pair_index_ele(ele1, ele3) ;
+
+#ifdef TESTING
+  printf("Sorted:\n  ele1 = %d ele2 = %d ele3 = %d\n   n12 = %d n13 = %d n23 = %d\n",
+	 ele1, ele2, ele3, n12, n13, n23) ;
+  printf("  ipair12 = %d ipair13 = %d ipair23 = %d\n\n", ipair12, ipair13, ipair23) ;
+#endif
+
   // Increment the index within used pair set.
-  index += n12 * snum_3b_cheby[ipair23] * snum_3b_cheby[ipair13] +
-    n23 * snum_3b_cheby[ipair13] + n13 ;
+  index += n12 * snum_3b_cheby[ipair13] * snum_3b_cheby[ipair23] +
+    n13 * snum_3b_cheby[ipair23] + n23 ;
+
+  assert(index >= 0 && index < tot_short_range ) ;
 
   if ( return_params ) {
     return(params[index]) ;
@@ -543,14 +577,40 @@ static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax)
 int count_cheby_3b_params(const int *snum)
 {
   int num_cheby_3b = 0 ;
-  for ( int i12 = 0 ; i12 < NPAIR ; i12++ ) {
-    for ( int i23 = i12 ; i23 < NPAIR ; i23++ ) {
-      for ( int i13 = i23 ; i13 < NPAIR ; i13++ ) {
-	int val = snum[i12] * snum[i23] * snum[i13] ;
-	//	printf("3B Params for %d %d %d = %d\n", i12, i23, i13, val) ;
-	num_cheby_3b += val ;
+
+  for ( int i1 = 0 ; i1 < NELE ; i1++ ) {
+    for ( int i2 = 0 ; i2 <= i1 ; i2++ ) {
+      int i12 = pair_index_ele(i1, i2) ;
+      for ( int i3 = 0 ; i3 <= i2 ; i3++ ) {
+	int i23 = pair_index_ele(i2, i3) ;
+	int i13 = pair_index_ele(i1, i3) ;
+	num_cheby_3b += snum[i12] * snum[i23] * snum[i13] ;
       }
     }
   }
+
   return(num_cheby_3b) ;
 }
+
+int pair_index_ele(int ele1, int ele2)
+// Returns the index of a particular element pair. Element pairs are listed
+// in a notional ordered list:  For 3 elements, this would be 
+// 00, 01, 02, 11, 12, 22.  This routine picks out the index of a particular pair
+// in the list.  The element pairs do not depend on order of the input elements.
+{
+  if ( ele1 > ele2 ) {
+    int tmp = ele1 ;
+    ele1 = ele2 ;
+    ele2 = tmp ;
+  }
+  int idx = 0 ;
+  int i ;
+  for ( i = 0 ; i < ele1 ; i++ ) {
+    idx += (NELE-i) ;
+  }
+  idx += ele2 - ele1 ;
+  assert(idx >= 0 && idx < NELE * (NELE+1)/2) ;
+  return(idx) ;
+}
+
+  

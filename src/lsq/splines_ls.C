@@ -325,8 +325,8 @@ int main(int argc, char* argv[])
     printf ("  qH = %lf e\n",qH);
   }
   for(int N=0;N<nframes;N++) 
-    {
-      char *Lbc ;
+    { 
+     char *Lbc ;
       
       Lbc = new char [Nat[N]] ;
       for(int a=0;a<Nat[N];a++) {
@@ -467,13 +467,11 @@ int main(int argc, char* argv[])
 
   //cout<<endl<<endl;
 
-  /**
   for ( int n = 0 ; n < tot_short_range ; n++ ) {
     if ( ! used[n] ) {
       cout << "Warning: short-range parameter "<< n << " does not appear in the forces" << endl ;
     }
   }
-  **/
 
   Print_Header(smin, smax, sdelta, lambda, snum, snum_3b_cheby, pair_type, if_3b_cheby, fit_pover,
 	       ifsubtract_coord, ifsubtract_coul, fit_coul, n_over, over_param) ;
