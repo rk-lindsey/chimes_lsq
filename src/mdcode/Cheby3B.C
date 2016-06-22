@@ -3,7 +3,7 @@
 // 3-Body Chebyshev morse interaction.
 //
 
-// #define TESTING
+/* #define TESTING */
 
 static void find_pair_cheby(double Rab[3], double *Tn, double *Tnd, double &rlen, double &exprlen,
 			    double &xdiff,
@@ -18,6 +18,7 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n23, int n13,
 void sort_triple(int &ipair12, int &ipair23, int &ipair13, 
 		 int &n12, int &n23, int &n13) ;
 static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax) ;
+static int match_pair_order(int a1, int a2, int a_orig[3], int n12, int n13, int n23) ;
 
 void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    const int nat,const double *smin,
@@ -107,6 +108,11 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    {
 		      double coeff = idx_params[ele1][ele2][ele3][i][j][k] ;
 
+		      if ( coeff == EMPTY ) {
+			printf("Error: empty 3-body parameter found\n") ;
+			exit(1) ;
+		      }
+
 		      tempx += coeff * fcut12 * fcut23 * fcut13 * Tn12[i] * Tn23[j] * Tn13[k] ;
 		    
 		      double deriv12 = 
@@ -166,18 +172,21 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
       }
     dim++ ;
 
-  double ******flat_params ;
-  flat_params = new double*****[NELE] ;
+  double ******store_3b_params ;
+  store_3b_params = new double*****[NELE] ;
   for ( int i1 = 0 ; i1 < NELE ; i1++ ) {
-    flat_params[i1] = new double****[NELE] ;
+    store_3b_params[i1] = new double****[NELE] ;
     for ( int i2 = 0 ; i2 < NELE ; i2++ ) {
-      flat_params[i1][i2] = new double***[NELE] ;
+      store_3b_params[i1][i2] = new double***[NELE] ;
       for ( int i3 = 0 ; i3 < NELE ; i3++ ) {
-	flat_params[i1][i2][i3] = new double **[dim] ;
+	store_3b_params[i1][i2][i3] = new double **[dim] ;
 	for ( int i4 = 0 ; i4 < dim ; i4++ ) {
-	  flat_params[i1][i2][i3][i4] = new double *[dim] ;
+	  store_3b_params[i1][i2][i3][i4] = new double *[dim] ;
 	  for ( int i5 = 0 ; i5 < dim ; i5++ ) {
-	    flat_params[i1][i2][i3][i4][i5] = new double [dim] ;
+	    store_3b_params[i1][i2][i3][i4][i5] = new double [dim] ;
+	    for ( int i6 = 0 ; i6 < dim ; i6++ ) {
+	      store_3b_params[i1][i2][i3][i4][i5][i6] = EMPTY ;
+	    }
 	  }
 	}
       }
@@ -204,13 +213,35 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
 		    {
 		      (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
 					    snum, snum_3b_cheby, index, false) ;
-		      flat_params[ele1][ele2][ele3][i][j][k] = params[index] ;
+		      store_3b_params[ele1][ele2][ele3][i][j][k] = params[index] ;
 		    }
 	    }
 	}
     }
-  return flat_params ;
-}
+
+  // Print out the stored and indexed parameter list.
+  printf("3-B Cheby Index list\n") ;
+  for ( int ele1 = 0 ; ele1 < NELE ; ele1++ ) {
+    for ( int ele2 = ele1 ; ele2 < NELE ; ele2++ ) {
+      int ipair12 = pair_index_ele(ele1, ele2) ;
+      for ( int ele3 = ele2 ; ele3 < NELE ; ele3++ ) {
+	int ipair13 = pair_index_ele(ele1, ele3) ;
+	int ipair23 = pair_index_ele(ele2, ele3) ;
+	for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) {
+	  for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) { 
+	    for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) {
+		printf("ele %d %d %d pow %d %d %d: index %11.4e\n",
+		       ele1, ele2, ele3, i, j, k, store_3b_params[ele1][ele2][ele3][i][j][k]) ;
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+
+  return store_3b_params ;
+  }
 
 
 
@@ -432,6 +463,7 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
 // Extract the desired 3-body chebyshev coefficient from the params array.
 {
   int ipair12, ipair23, ipair13 ;
+  int ipair12_orig, ipair23_orig, ipair13_orig ;
   int ele1, ele2, ele3 ;
   int tot_short_range ;
 
@@ -444,17 +476,28 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
   ele2    = atom_index(a2, Lbc) ;
   ele3    = atom_index(a3, Lbc) ;
 
-  ipair12 = pair_index_ele(ele1, ele2) ;
-  ipair23 = pair_index_ele(ele2, ele3) ;
-  ipair13 = pair_index_ele(ele1, ele3) ;
+  ipair12_orig = pair_index_ele(ele1, ele2) ;
+  ipair23_orig = pair_index_ele(ele2, ele3) ;
+  ipair13_orig = pair_index_ele(ele1, ele3) ;
 
 #ifdef TESTING  
   printf("Input:\n  ele1 = %d ele2 = %d ele3 = %d\n  n12 = %d n13 = %d n23 = %d\n",
 	 ele1, ele2, ele3, n12, n13, n23) ;
-  printf("  ipair12 = %d ipair13 = %d ipair23 = %d\n", ipair12, ipair13, ipair23) ;
+  printf("  a1 = %d a2 = %d a3 = %d\n", a1, a2, a3) ;
+  printf("  ipair12 = %d ipair13 = %d ipair23 = %d\n", ipair12_orig, ipair13_orig, ipair23_orig) ;
 #endif
 
-  sort_triple(ele1, ele2, ele3, n12, n23, n13) ;
+  int ele1_orig, ele2_orig, ele3_orig ;
+  int j1, j2, j3 ;
+
+  j1 = j2 = j3 = 0 ;
+  ele1_orig = ele1 ;
+  ele2_orig = ele2 ;
+  ele3_orig = ele3 ;
+  
+  // Sort element indices in ascending order.
+  int a_orig[3] = {a1, a2, a3} ;
+  sort_triple(ele1, ele2, ele3, a1, a2, a3) ;
 
   // Move past pair interactions.
   index = 0 ;
@@ -489,15 +532,20 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
   ipair23 = pair_index_ele(ele2, ele3) ;
   ipair13 = pair_index_ele(ele1, ele3) ;
 
+  int n12_new = match_pair_order(a1, a2, a_orig, n12, n13, n23) ;
+  int n13_new = match_pair_order(a1, a3, a_orig, n12, n13, n23) ;
+  int n23_new = match_pair_order(a2, a3, a_orig, n12, n13, n23) ;
+
 #ifdef TESTING
   printf("Sorted:\n  ele1 = %d ele2 = %d ele3 = %d\n   n12 = %d n13 = %d n23 = %d\n",
-	 ele1, ele2, ele3, n12, n13, n23) ;
+	 ele1, ele2, ele3, n12_new, n13_new, n23_new) ;
+  printf("  a1 = %d a2 = %d a3 = %d\n", a1, a2, a3) ;
   printf("  ipair12 = %d ipair13 = %d ipair23 = %d\n\n", ipair12, ipair13, ipair23) ;
 #endif
 
   // Increment the index within used pair set.
-  index += n12 * snum_3b_cheby[ipair13] * snum_3b_cheby[ipair23] +
-    n13 * snum_3b_cheby[ipair23] + n23 ;
+  index += n12_new * snum_3b_cheby[ipair13] * snum_3b_cheby[ipair23] +
+    n13_new * snum_3b_cheby[ipair23] + n23_new ;
 
   assert(index >= 0 && index < tot_short_range ) ;
 
@@ -613,4 +661,68 @@ int pair_index_ele(int ele1, int ele2)
   return(idx) ;
 }
 
-  
+static int match_pair_order(int a1, int a2, int a_orig[3], int n12, int n13, int n23)
+// Return the Chebyshev order (n in T[n]) of the polynomial corresponding to permuted atom
+// indices a1 and a2 given original polynomial pair orders n12, n13, and n23 and original
+// atom indices a_orig
+{
+  int i1, i2 ;
+
+  if ( a1 == a_orig[0] ) {
+    i1 = 1 ;
+  } else if ( a1 == a_orig[1] ) {
+    i1 = 2 ;
+  } else if ( a1 == a_orig[2] ) {
+    i1 = 3 ;
+  } else {
+    printf("Error in match_pair_order: no match found\n") ;
+    exit(1) ;
+  }
+
+  if ( a2 == a_orig[0] ) {
+    i2 = 1 ;
+  } else if ( a2 == a_orig[1] ) {
+    i2 = 2 ;
+  } else if ( a2 == a_orig[2] ) {
+    i2 = 3 ;
+  } else {
+    printf("Error in match_pair_order: no match found\n") ;
+    exit(1) ;
+  }
+
+  if ( i1 == 1 ) {
+    if ( i2 == 2 ) {
+      return(n12) ;
+    } else if ( i2 == 3 ) {
+      return(n13) ;
+    } else {
+      printf("Error in match_pair_order\n") ;
+      exit(1) ;
+    }
+  }
+  else if ( i1 == 2 ) {
+    if ( i2 == 1 ) {
+      return(n12) ;
+    } else if ( i2 == 3 ) {
+      return(n23) ;
+    } else {
+      printf("Error in match_pair_order\n") ;
+      exit(1) ;
+    }
+  } else if ( i1 == 3 ) {
+    if ( i2 == 1 ) {
+      return(n13) ;
+    } else if ( i2 == 2 ) {
+      return(n23) ;
+    } else {
+      printf("Error in match_pair_order\n") ;
+      exit(1) ;
+    }
+  } else {
+    printf("Error in match_pair_order\n") ;
+    exit(1) ;
+  }
+
+  printf("Error in match_pair_order\n") ;
+  exit(1) ;
+}

@@ -124,11 +124,13 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
   if ( if_3b_cheby ) 
     {
       static double ******idx_params ; 
+
       // 3-body chebyshev polynomial 
       if ( ! called_before ) {
 	// Index the parameters only once.  Scan through the params array and create
 	// a new multi-dimensional array where the coefficients are readily looked up.
 	idx_params = Indexed_3B_Cheby_Coeffs(Lbc, nat, snum, snum_3b_cheby, params) ;
+	called_before = true ;
       }
       
       ZCalc_3B_Cheby(Coord, Lbc, Latcons, nat, smin, smax, 

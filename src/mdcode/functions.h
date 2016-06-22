@@ -12,9 +12,11 @@
 using namespace std;
 
 #define MAXOVERP 5  // Maximum number of overcoordination parameters allowed.
+#define EMPTY 1.234e+56  // Value to signify an empty array entry.
+
+
 const int NELE = 2 ;   // Number of elements.
 const int NPAIR = (NELE+1) * NELE / 2 ;  // Number of pair interactions.
-
 
 static const double ke=332.0637157615209;//converter between electron units and Stillinger units for Charge*Charge.
 
