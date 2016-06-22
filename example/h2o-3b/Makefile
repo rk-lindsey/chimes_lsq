@@ -20,6 +20,20 @@ cheby_force : cheby_fit
 	../../bin/splines_md cheby_3b_force.in > cheby_3b_force.out
 	-diff cheby_3b_force.out output/cheby_3b_force.out
 
+# Special check of code.
+check_sorting :
+	echo 'splines_md must be compiled with TESTING on in Cheby3B.C'
+	echo 'Need a lot of disk space'
+	../../bin/splines_md cheby_3b_force.in > cheby_3b_force.out
+	../../bin/check_sorting.pl < cheby_3b_force.out > check_sorting.out
+
+# Check of scrambling atom order.  Should be same results as cheby_md
+check_scramble:
+	mv input.xyz input.save
+	cp scramble.xyz input.xyz
+	-../../bin/splines_md cheby_md_3b.in > scramble_md_3b.out	
+	cp input.save input.xyz
+
 clean :
 	rm -f A.txt b.txt params.header params.spline.txt force.txt *.out cheby_fit
 
