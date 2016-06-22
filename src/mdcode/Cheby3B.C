@@ -19,6 +19,8 @@ void sort_triple(int &ipair12, int &ipair23, int &ipair13,
 		 int &n12, int &n23, int &n13) ;
 static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax) ;
 static int match_pair_order(int a1, int a2, int a_orig[3], int n12, int n13, int n23) ;
+static void sort_pair(int &n, int &m)  ;
+static void sort_poly_order(int ipair12, int ipair13, int ipair23, int &n12, int &n13, int &n23) ;
 
 void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    const int nat,const double *smin,
@@ -106,6 +108,10 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 
 		    {
+		      // Require 2 non-zero Cheby orders to create a 3-body interaction.
+		      if ( i + j + k < 2 ) 
+			continue ;
+
 		      double coeff = idx_params[ele1][ele2][ele3][i][j][k] ;
 
 		      if ( coeff == EMPTY ) {
@@ -211,35 +217,43 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
 		for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
 		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 		    {
-		      (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
-					    snum, snum_3b_cheby, index, false) ;
-		      store_3b_params[ele1][ele2][ele3][i][j][k] = params[index] ;
+		      if ( i + j + k < 2 ) {
+			store_3b_params[ele1][ele2][ele3][i][j][k] = 0.0 ;
+		      } else {
+			(void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
+					      snum, snum_3b_cheby, index, false) ;
+			store_3b_params[ele1][ele2][ele3][i][j][k] = params[index] ;
+		      }
 		    }
 	    }
 	}
     }
 
-  // Print out the stored and indexed parameter list.
-  printf("3-B Cheby Index list\n") ;
-  for ( int ele1 = 0 ; ele1 < NELE ; ele1++ ) {
-    for ( int ele2 = ele1 ; ele2 < NELE ; ele2++ ) {
-      int ipair12 = pair_index_ele(ele1, ele2) ;
-      for ( int ele3 = ele2 ; ele3 < NELE ; ele3++ ) {
-	int ipair13 = pair_index_ele(ele1, ele3) ;
-	int ipair23 = pair_index_ele(ele2, ele3) ;
-	for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) {
-	  for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) { 
-	    for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) {
-		printf("ele %d %d %d pow %d %d %d: index %11.4e\n",
-		       ele1, ele2, ele3, i, j, k, store_3b_params[ele1][ele2][ele3][i][j][k]) ;
+  // Print out parameters.
+  printf("3-Body Cheby Parameters\n") ;
+  for(int ele1=0; ele1 < NELE ; ele1++) 
+    {
+      for(int ele2=ele1; ele2 < NELE ; ele2++) 
+	{
+	  int ipair12 = pair_index_ele(ele1, ele2) ;
+	  for(int ele3 = ele2 ; ele3 < NELE ; ele3++)
+	    {
+	      int ipair23 = pair_index_ele(ele2,ele3) ;
+	      int ipair13 = pair_index_ele(ele1,ele3) ;
+
+	      for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
+		for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
+		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
+		    {
+		      if ( i + j + k >= 2 ) {
+			printf("ele: %d %d %d pow: %d %d %d param: %11.4e\n",
+			       ele1, ele2, ele3, i, j, k, 
+			       store_3b_params[ele1][ele2][ele3][i][j][k]) ;
+		      }
+		    }
 	    }
-	  }
 	}
-      }
     }
-  }
-
-
   return store_3b_params ;
   }
 
@@ -330,6 +344,10 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 	      for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
 		for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 		  {
+		    // Require 2 non-zero Cheby orders to create a 3-body interaction.
+		    if ( i + j + k < 2 ) 
+		      continue ;
+
 		    (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, NULL, snum, 
 					  snum_3b_cheby,
 					  index, false) ;
@@ -466,10 +484,15 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
   int ipair12_orig, ipair23_orig, ipair13_orig ;
   int ele1, ele2, ele3 ;
   int tot_short_range ;
+  int tot_2b ;
 
   if ( a1 == a2 || a2 == a3 || a1 == a3 ) {
     cout << "Error in Cheby_3B_Coeff: atom indices are identical" << endl ;
     exit(1) ;
+  }
+  if ( n12 + n13 + n23 < 2 ) {
+    // Not 3-body.
+    cout << "Error in Cheby_3B_Coeff: sum of polynomial powers are too small.\n" ;
   }
     
   ele1    = atom_index(a1, Lbc) ;
@@ -504,7 +527,7 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
   for ( int j = 0 ; j < NPAIR ; j++ ) {
     index += snum[j] ;
   }
-
+  tot_2b = index ;
   tot_short_range = index ;
   tot_short_range += count_cheby_3b_params(snum_3b_cheby) ;
 
@@ -524,6 +547,9 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
 	printf(" Pair index : %d %d %d\n", i12, i13, i23) ;
 #endif
 	index += snum_3b_cheby[i12] * snum_3b_cheby[i23] * snum_3b_cheby[i13] ;
+
+	// Decrement for cases when sum of Cheby orders < 2 : not 3 body.
+	index -= 4 ;
       }
     }
   }
@@ -543,11 +569,30 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
   printf("  ipair12 = %d ipair13 = %d ipair23 = %d\n\n", ipair12, ipair13, ipair23) ;
 #endif
 
-  // Increment the index within used pair set.
-  index += n12_new * snum_3b_cheby[ipair13] * snum_3b_cheby[ipair23] +
-    n13_new * snum_3b_cheby[ipair23] + n23_new ;
+  // If the pair index is the same, the polynomial order must be sorted.  This keeps
+  // the polynomial invariant to ordering of atoms.
+  sort_poly_order(ipair12, ipair13, ipair23, n12_new, n13_new, n23_new) ;
 
-  assert(index >= 0 && index < tot_short_range ) ;
+  // Test for special cases.
+  if ( n12_new == 0 && n13_new == 1 && n23_new == 1 ) {
+    // No additional increment to index needed.
+    ;
+  } else {
+    // Increment the index within used pair set.
+    // Decrement by 4 to account for unused indices:
+    // These indices correspond to constant or 2-body interactions.
+    // 0 0 0 (NOT USED)
+    // 0 0 1 (NOT USED)
+    // 0 1 1 (USED)
+    // 0 1 0 (NOT USED)
+    // 1 0 0 (NOT USED)
+    // All other parameters are used.
+    
+    index += n12_new * snum_3b_cheby[ipair13] * snum_3b_cheby[ipair23] +
+      n13_new * snum_3b_cheby[ipair23] + n23_new - 4 ;
+  }
+
+  assert(index >= tot_2b && index < tot_short_range ) ;
 
   if ( return_params ) {
     return(params[index]) ;
@@ -604,10 +649,12 @@ void sort_triple(int &ipair12, int &ipair23, int &ipair13,
 
 static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax) 
 // Calculate a cubic force cutoff function.
-// fcut is the cutoff function.
-// dfcut is the first derivative of the cutoff function.
-// rlen is the interparticle distance
-// smax is the cutoff length.
+// Input: 
+//   rlen is the interparticle distance
+//   smax is the cutoff length.
+// Output:
+//   fcut is the cutoff function.
+//   dfcut is the first derivative of the cutoff function.
 {
   
   if ( rlen < smax ) {
@@ -623,6 +670,7 @@ static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax)
 
 
 int count_cheby_3b_params(const int *snum)
+// Returns the total number of 3 body Chebyshev parameters.
 {
   int num_cheby_3b = 0 ;
 
@@ -632,7 +680,11 @@ int count_cheby_3b_params(const int *snum)
       for ( int i3 = 0 ; i3 <= i2 ; i3++ ) {
 	int i23 = pair_index_ele(i2, i3) ;
 	int i13 = pair_index_ele(i1, i3) ;
+
 	num_cheby_3b += snum[i12] * snum[i23] * snum[i13] ;
+
+	// Decrement for cases when sum of Cheby orders < 2 : not 3 body.
+	num_cheby_3b -= 4 ;
       }
     }
   }
@@ -726,3 +778,33 @@ static int match_pair_order(int a1, int a2, int a_orig[3], int n12, int n13, int
   printf("Error in match_pair_order\n") ;
   exit(1) ;
 }
+
+static void sort_poly_order(int ipair12, int ipair13, int ipair23, int &n12, int &n13, int &n23)
+// Sort the polynomial in increasing order if the corresponding pair indices are the same.
+// This maintains invariance of the polynomial with respect to ordering of coefficients.
+{
+  if ( ipair12 == ipair13 && ipair12 == ipair23 ) {
+    int i, j, k ;
+
+    // Dummy arg to sort_triple.
+    i = j = k = 0 ;
+    sort_triple(n12, n13, n23, i, j, k) ;
+  } else if ( ipair12 == ipair13 ) {
+    sort_pair(n12, n13) ;
+  } else if ( ipair12 == ipair23 ) {
+    sort_pair(n12, n23) ;
+  } else if ( ipair13 == ipair23 ) {
+    sort_pair(n13, n23) ;
+  }
+}
+
+static void sort_pair(int &n, int &m) 
+// Sort a pair of numbers into increasing order.
+{
+  if ( n > m ) {
+    int tmp = n ;
+    n = m ;
+    m = tmp ;
+  }
+}
+
