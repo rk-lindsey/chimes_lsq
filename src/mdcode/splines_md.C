@@ -15,7 +15,7 @@ static void read_input(const char *file_name,
 		       bool &if_init_vel, int &rand_seed, 
 		       int &gen_freq, int &energy_freq, int &scale_freq,
 		       double &thoover_fs, 
-		       bool &num_pressure, char *params_file) ;
+		       bool &num_pressure, char *params_file, char *xyz_file) ;
 
 static void echo_input(double TempMD, double deltat_fs, int nsteps, 
 		       int nlayers, 
@@ -24,7 +24,7 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 		       int gen_freq, int energy_freq, int scale_freq,
 		       double thoover_fs, Sr_pair_t pair_type,
 		       bool if_coulomb, bool num_pressure, const char *params_file,
-		       bool if_overcoord, bool if_3b_cheby) ; 
+		       bool if_overcoord, bool if_3b_cheby, const char *xyz_file) ; 
 
 
 static double kinetic_energy(double *Mass, double **Vel, int nat) ;
@@ -111,6 +111,8 @@ int main(int argc, char* argv[])
 
   char params_file[1024] = "params.txt" ;
 
+  char xyz_file[1024] = "input.xyz" ;
+
   double over_param[MAXOVERP] =   {
     // Lucas's parameters for overcoordination
      75.0,                    // pover
@@ -141,7 +143,7 @@ int main(int argc, char* argv[])
 
   read_input(argv[1],TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
 	     if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
-	     thoover_fs, num_pressure,params_file) ;
+	     thoover_fs, num_pressure,params_file,xyz_file) ;
 
   if ( thoover_fs > 0.0 ) if_hoover = true ;
   if ( gen_freq > 0 ) output_gen = true ;
@@ -166,8 +168,8 @@ int main(int argc, char* argv[])
     } 
   else 
     {
-      cout << "Reading positions from input.xyz\n" ;
-      fileread.open("input.xyz")  ;
+      cout << "Reading positions from " << xyz_file << endl  ;
+      fileread.open(xyz_file)  ;
       //if ( fileread.error() ) {
       //cout << "Could not open input.xyz\n" << endl ;
       //exit(1) ;
@@ -428,7 +430,7 @@ int main(int argc, char* argv[])
   echo_input(TempMD, deltat_fs, nsteps, nlayers, if_output_force, if_read_force,
 	     fit_coul, if_init_vel, rand_seed, gen_freq, energy_freq, scale_freq,
 	     thoover_fs,pair_type,if_coulomb,num_pressure,params_file,
-	     if_overcoord, if_3b_cheby) ;
+	     if_overcoord, if_3b_cheby,xyz_file) ;
 
 
   double pot_params[tot_snum/2+1] ;
@@ -740,6 +742,7 @@ int main(int argc, char* argv[])
 	  } else {
 	    printf("\n") ;
 	  }
+	  std::cout.flush() ;
 	}
       if ( (A +1) % energy_freq == 0 ) {
 	printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.3f",
@@ -754,6 +757,7 @@ int main(int argc, char* argv[])
 	  printf("%15.7f\n", E_tot/nat) ;
 	  printf("\n") ;
 	}
+	std::cout.flush() ;
       } 
 
       if ( scale_freq > 0 && (A+1) % scale_freq == 0 ) 
@@ -807,6 +811,7 @@ int main(int argc, char* argv[])
 	fprintf(fgen, "%8.5f %8.5f %8.5f\n", Latcons[0], 0.0, 0.0) ;
 	fprintf(fgen, "%8.5f %8.5f %8.5f\n",        0.0, Latcons[1], 0.0) ;
 	fprintf(fgen, "%8.5f %8.5f %8.5f\n",        0.0, 0.0, Latcons[2]) ;
+	fflush(fgen) ;
       }
 
       delete[] Lbc ;
@@ -850,7 +855,7 @@ static void read_input(const char *file_name,
 		       bool &if_init_vel, int &rand_seed, 
 		       int &gen_freq, int &energy_freq, int &scale_freq,
 		       double &thoover_fs, 
-		       bool &num_pressure, char *params_file) 
+		       bool &num_pressure, char *params_file, char *xyz_file) 
 // Read program input from the file "splines_md.in".
 {
   FILE *fin ;
@@ -952,6 +957,10 @@ static void read_input(const char *file_name,
 	{
 	  strcpy(params_file,val) ;
 	}
+      else if ( strncmp(name,"xyz_file",bufsz) == 0 ) 
+	{
+	  strcpy(xyz_file,val) ;
+	}
       else 
 	{
 	  printf("Error: did not recognize option %s\n", name) ;
@@ -973,7 +982,8 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
 		       int gen_freq, int energy_freq, int scale_freq,
 		       double thoover_fs, Sr_pair_t pair_type,
 		       bool if_coulomb,bool num_pressure,
-		       const char* params_file, bool if_overcoord, bool if_3b_cheby) 
+		       const char* params_file, bool if_overcoord, bool if_3b_cheby,
+		       const char *xyz_file) 
 {
   printf("JOB PARAMETERS:\n\n") ;
 
@@ -1002,6 +1012,7 @@ static void echo_input(double TempMD, double deltat_fs, int nsteps,
   }
 
   printf("Force parameters will be read from %s\n", params_file) ;
+  printf("XYZ coordinates will be read from %s\n", xyz_file) ;
 
   if ( if_coulomb ) {
     printf("Coulomb forces will be calculated with Ewald sums\n") ;

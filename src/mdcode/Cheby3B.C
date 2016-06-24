@@ -63,10 +63,10 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
   }
   
   ////main loop for 3-body Chebyshev terms:
-  for(int a1=0;a1<nat-1;a1++) 
+  for(int a1=0; a1<nat; a1++) 
     {
       int ele1 = atom_index(a1,Lbc) ;
-      for(int a2=a1+1;a2<nat;a2++) 
+      for(int a2=a1+1; a2<nat ; a2++) 
 	{
 	  double fcut12, dfcut12 ;
 	  int ipair12 = pair_index(a1,a2,Lbc) ;
@@ -79,7 +79,7 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 	  if ( fcut12 == 0.0 ) 
 	    continue ;
 
-	  for(int a3=a2+1;a3<nat;a3++)
+	  for(int a3=a2+1; a3<nat ; a3++)
 	    {
 	      int ipair23 = pair_index(a2,a3,Lbc) ;
 	      int ipair13 = pair_index(a1,a3,Lbc) ;
@@ -119,30 +119,35 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 			exit(1) ;
 		      }
 
-		      tempx += coeff * fcut12 * fcut23 * fcut13 * Tn12[i] * Tn23[j] * Tn13[k] ;
+		      tempx += coeff * fcut12 * fcut23 * fcut13 * Tn12[i] * Tn23[k] * Tn13[j] ;
 		    
 		      double deriv12 = 
 			fcut12 * Tnd12[i] *(-exprlen12/lambda[ipair12])/xdiff12 +
 			dfcut12 * Tn12[i] ;
 
-		      double deriv23 =
-			fcut23 * Tnd23[j] *(-exprlen23/lambda[ipair23])/xdiff23 +
-			dfcut23 * Tn23[j] ;
-
 		      double deriv13 =
-			fcut13 * Tnd13[k] *(-exprlen13/lambda[ipair13])/xdiff13 +
-			dfcut13 * Tn13[k] ;
+			fcut13 * Tnd13[j] *(-exprlen13/lambda[ipair13])/xdiff13 +
+			dfcut13 * Tn13[j] ;
+
+		      double deriv23 =
+			fcut23 * Tnd23[k] *(-exprlen23/lambda[ipair23])/xdiff23 +
+			dfcut23 * Tn23[k] ;
+		      
+		      double f12 = coeff * deriv12 * fcut13 * fcut23 * Tn23[k] * Tn13[j] / rlen12 ;
+		      double f23 = coeff * deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[j] / rlen23 ;
+		      double f13 = coeff * deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[k] / rlen13 ;
 
 		      for(int c=0;c<3;c++)
 			{
-			  SForce[a1][c] += coeff * deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
-			  SForce[a2][c] -= coeff * deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
+			  SForce[a1][c] += f12 * R12[c] ;
+			  SForce[a2][c] -= f12 * R12[c] ; 
 
-			  SForce[a2][c] += coeff * deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
-			  SForce[a3][c] -= coeff * deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
+			  SForce[a2][c] += f23 * R23[c] ;
+			  SForce[a3][c] -= f23 * R23[c] ;
 
-			  SForce[a1][c] += coeff * deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
-			  SForce[a3][c] -= coeff * deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
+			  SForce[a1][c] += f13 * R13[c] ;
+			  SForce[a3][c] -= f13 * R13[c] ;
+
 			} 
 		      // TO DO:  Update pressure.
 		    }
@@ -200,54 +205,72 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
   }
 
   ////main loop for 3-body Chebyshev terms:
-  for(int a1=0;a1<nat-1;a1++) 
-    {
-      int ele1 = atom_index(a1,Lbc) ;
-      for(int a2=a1+1;a2<nat;a2++) 
-	{
-	  int ele2 = atom_index(a2,Lbc) ;
-	  int ipair12 = pair_index(a1,a2,Lbc) ;
-	  for(int a3=a2+1;a3<nat;a3++)
-	    {
-	      int ipair23 = pair_index(a2,a3,Lbc) ;
-	      int ipair13 = pair_index(a1,a3,Lbc) ;
-	      int ele3 = atom_index(a3,Lbc) ;
 
-	      for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
-		for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
-		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
-		    {
-		      if ( i + j + k < 2 ) {
-			store_3b_params[ele1][ele2][ele3][i][j][k] = 0.0 ;
-		      } else {
-			(void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
-					      snum, snum_3b_cheby, index, false) ;
-			store_3b_params[ele1][ele2][ele3][i][j][k] = params[index] ;
-		      }
-		    }
-	    }
-	}
+  // Find an atom for each element type.
+  // Need at least 3 examples.
+  int *example_atm = new int [ 3 * NELE ] ;
+  for ( int j = 0 ; j < NELE ; j++ ) {
+    int a1 ;
+    int k = 0 ;
+    for( a1=0 ; a1 < nat ; a1++) {
+      if ( atom_index(a1,Lbc) == j ) {
+	example_atm[3*j+k] = a1 ;
+	k++ ;
+	if ( k == 3 ) break ;
+      }
     }
+    if ( a1 == nat ) {
+      printf("Error: 3 atoms with element index %d could not be found\n", j) ;
+    }
+  }
+
+  for ( int ele1 = 0 ; ele1 < NELE ; ele1++ ) {
+    int a1 = example_atm[3*ele1] ;
+    for ( int ele2 = 0 ; ele2 < NELE ; ele2++ ) {
+      int a2 = example_atm[3*ele2+1] ;
+      int ipair12 = pair_index(a1,a2,Lbc) ;
+      for ( int ele3 = 0 ; ele3 < NELE ; ele3++ ) {
+	int a3 = example_atm[3*ele3+2] ;
+	int ipair23 = pair_index(a2,a3,Lbc) ;
+	int ipair13 = pair_index(a1,a3,Lbc) ;
+	for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
+	  for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
+	    for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
+	      {
+		if ( i + j + k < 2 ) {
+		  store_3b_params[ele1][ele2][ele3][i][j][k] = 0.0 ;
+		} else {
+		  (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
+					snum, snum_3b_cheby, index, false) ;
+		  store_3b_params[ele1][ele2][ele3][i][j][k] = params[index] ;
+		}
+	      }
+      }
+    }
+  }
 
   // Print out parameters.
   printf("3-Body Cheby Parameters\n") ;
   for(int ele1=0; ele1 < NELE ; ele1++) 
     {
-      for(int ele2=ele1; ele2 < NELE ; ele2++) 
+      int a1 = example_atm[3*ele1] ;
+      for(int ele2=0 ; ele2 < NELE ; ele2++) 
 	{
 	  int ipair12 = pair_index_ele(ele1, ele2) ;
-	  for(int ele3 = ele2 ; ele3 < NELE ; ele3++)
+	  int a2 = example_atm[3*ele2] ;
+	  for(int ele3 = 0 ; ele3 < NELE ; ele3++)
 	    {
 	      int ipair23 = pair_index_ele(ele2,ele3) ;
 	      int ipair13 = pair_index_ele(ele1,ele3) ;
+	      int a3 = example_atm[3*ele3] ;
 
 	      for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
 		for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
 		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 		    {
 		      if ( i + j + k >= 2 ) {
-			printf("ele: %d %d %d pow: %d %d %d param: %11.4e\n",
-			       ele1, ele2, ele3, i, j, k, 
+			printf("ele: %c %c %c pow: %d %d %d param: %11.4e\n",
+			       Lbc[a1], Lbc[a2], Lbc[a3], i, j, k, 
 			       store_3b_params[ele1][ele2][ele3][i][j][k]) ;
 		      }
 		    }
@@ -301,7 +324,7 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
   }
   
   ////main loop for 3-body Chebyshev terms:
-  for(int a1=0;a1<nat-1;a1++)
+  for(int a1=0;a1<nat;a1++)
     for(int a2=a1+1;a2<nat;a2++) 
       {
 	double fcut12, dfcut12 ;
@@ -357,24 +380,24 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 		      fcut12 * Tnd12[i] *(-exprlen12/lambda[ipair12])/xdiff12 +
 		      dfcut12 * Tn12[i] ;
 
-		    double deriv23 =
-		      fcut23 * Tnd23[j] *(-exprlen23/lambda[ipair23])/xdiff23 +
-		      dfcut23 * Tn23[j] ;
-
 		    double deriv13 =
-		      fcut13 * Tnd13[k] *(-exprlen13/lambda[ipair13])/xdiff13 +
-		      dfcut13 * Tn13[k] ;
+		      fcut13 * Tnd13[j] * (-exprlen13/lambda[ipair13])/xdiff13 +
+		      dfcut13 * Tn13[j] ;
+
+		    double deriv23 =
+		      fcut23 * Tnd23[k] *(-exprlen23/lambda[ipair23])/xdiff23 +
+		      dfcut23 * Tn23[k] ;
 
 		    for(int c=0;c<3;c++)
 		      {
-			A[a1][index][c] += deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
-			A[a2][index][c] -= deriv12 * fcut13 * fcut23 * Tn23[j] * Tn13[k] * R12[c] / rlen12 ;
+			A[a1][index][c] += deriv12 * fcut13 * fcut23 * Tn23[k] * Tn13[j] * R12[c] / rlen12 ;
+			A[a2][index][c] -= deriv12 * fcut13 * fcut23 * Tn23[k] * Tn13[j] * R12[c] / rlen12 ;
 
-			A[a2][index][c] += deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
-			A[a3][index][c] -= deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[k] * R23[c] / rlen23 ;
+			A[a2][index][c] += deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[j] * R23[c] / rlen23 ;
+			A[a3][index][c] -= deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[j] * R23[c] / rlen23 ;
 
-			A[a1][index][c] += deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
-			A[a3][index][c] -= deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[j] * R13[c] / rlen13 ;
+			A[a1][index][c] += deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[k] * R13[c] / rlen13 ;
+			A[a3][index][c] -= deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[k] * R13[c] / rlen13 ;
 		      } 
 		  }
 	  }
