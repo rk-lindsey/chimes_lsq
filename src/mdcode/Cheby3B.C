@@ -21,6 +21,7 @@ static void cubic_cutoff(double &fcut, double &dfcut, double rlen, double smax) 
 static int match_pair_order(int a1, int a2, int a_orig[3], int n12, int n13, int n23) ;
 static void sort_pair(int &n, int &m)  ;
 static void sort_poly_order(int ipair12, int ipair13, int ipair23, int &n12, int &n13, int &n23) ;
+static int check_interaction_ordering(int i, int j, int k, int i12, int i13, int i23) ;
 
 void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    const int nat,const double *smin,
@@ -561,18 +562,26 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
   for ( int i1 = 0 ; i1 <= ele1 ; i1++ ) {
     for ( int i2 = i1 ; i2 <= ele2 ; i2++ ) {
       for ( int i3 = i2 ; i3 <= ele3 ; i3++ ) {
+
+	if ( i1 == ele1 && i2 == ele2 && i3 == ele3 ) break ;
+
 	int i12 = pair_index_ele(i1, i2) ;
     	int i23 = pair_index_ele(i2, i3) ;
 	int i13 = pair_index_ele(i1, i3) ;
-	if ( i1 == ele1 && i2 == ele2 && i3 == ele3 ) break ;
 #ifdef TESTING
 	printf("Skipping over element triple %d %d %d\n", i1, i2, i3) ;
 	printf(" Pair index : %d %d %d\n", i12, i13, i23) ;
 #endif
-	index += snum_3b_cheby[i12] * snum_3b_cheby[i23] * snum_3b_cheby[i13] ;
-
-	// Decrement for cases when sum of Cheby orders < 2 : not 3 body.
-	index -= 4 ;
+	for ( int i = 0 ; i < snum_3b_cheby[i12] ; i++ ) {
+	  for ( int j = 0 ; j < snum_3b_cheby[i13] ; j++ ) {
+	    for ( int k = 0 ; k < snum_3b_cheby[i23] ; k++ ) {
+	      index += check_interaction_ordering(i, j, k, i12, i13, i23) ;
+#ifdef TESTING
+	      printf("Skip offset = %d %d %d %d\n", i, j, k, index-tot_2b) ;
+#endif
+	    }
+	  }
+	}
       }
     }
   }
@@ -585,37 +594,35 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
   int n13_new = match_pair_order(a1, a3, a_orig, n12, n13, n23) ;
   int n23_new = match_pair_order(a2, a3, a_orig, n12, n13, n23) ;
 
+  // If the pair index is the same, the polynomial order must be sorted.  This keeps
+  // the polynomial invariant to ordering of atoms.
+  sort_poly_order(ipair12, ipair13, ipair23, n12_new, n13_new, n23_new) ;
+
+  for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) {
+    for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) {
+      for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) {
+	if ( i == n12_new && j == n13_new && k == n23_new ) goto DONE ;
+	index += check_interaction_ordering(i, j, k, ipair12, ipair13, ipair23) ;
+#ifdef TESTING
+	printf("Pow offset = %d %d %d %d\n", i, j, k, index-tot_2b) ;
+#endif
+      }
+    }
+  }
+ DONE: ;
+
+
+
+  assert(index >= tot_2b && index < tot_short_range ) ;
 #ifdef TESTING
   printf("Sorted:\n  ele1 = %d ele2 = %d ele3 = %d\n   n12 = %d n13 = %d n23 = %d\n",
 	 ele1, ele2, ele3, n12_new, n13_new, n23_new) ;
   printf("  a1 = %d a2 = %d a3 = %d\n", a1, a2, a3) ;
   printf("  ipair12 = %d ipair13 = %d ipair23 = %d\n\n", ipair12, ipair13, ipair23) ;
+  printf("  Index = %d 3-B Index = %d\n", index, index - tot_2b) ;
 #endif
 
-  // If the pair index is the same, the polynomial order must be sorted.  This keeps
-  // the polynomial invariant to ordering of atoms.
-  sort_poly_order(ipair12, ipair13, ipair23, n12_new, n13_new, n23_new) ;
 
-  // Test for special cases.
-  if ( n12_new == 0 && n13_new == 1 && n23_new == 1 ) {
-    // No additional increment to index needed.
-    ;
-  } else {
-    // Increment the index within used pair set.
-    // Decrement by 4 to account for unused indices:
-    // These indices correspond to constant or 2-body interactions.
-    // 0 0 0 (NOT USED)
-    // 0 0 1 (NOT USED)
-    // 0 1 1 (USED)
-    // 0 1 0 (NOT USED)
-    // 1 0 0 (NOT USED)
-    // All other parameters are used.
-    
-    index += n12_new * snum_3b_cheby[ipair13] * snum_3b_cheby[ipair23] +
-      n13_new * snum_3b_cheby[ipair23] + n23_new - 4 ;
-  }
-
-  assert(index >= tot_2b && index < tot_short_range ) ;
 
   if ( return_params ) {
     return(params[index]) ;
@@ -698,16 +705,18 @@ int count_cheby_3b_params(const int *snum)
   int num_cheby_3b = 0 ;
 
   for ( int i1 = 0 ; i1 < NELE ; i1++ ) {
-    for ( int i2 = 0 ; i2 <= i1 ; i2++ ) {
+    for ( int i2 = i1 ; i2 < NELE ; i2++ ) {
       int i12 = pair_index_ele(i1, i2) ;
-      for ( int i3 = 0 ; i3 <= i2 ; i3++ ) {
+      for ( int i3 = i2 ; i3 < NELE ; i3++ ) {
 	int i23 = pair_index_ele(i2, i3) ;
 	int i13 = pair_index_ele(i1, i3) ;
-
-	num_cheby_3b += snum[i12] * snum[i23] * snum[i13] ;
-
-	// Decrement for cases when sum of Cheby orders < 2 : not 3 body.
-	num_cheby_3b -= 4 ;
+	for ( int i = 0 ; i < snum[i12] ; i++ ) {
+	  for ( int j = 0 ; j < snum[i13] ; j++ ) {
+	    for ( int k = 0 ; k < snum[i23] ; k++ ) {
+	      num_cheby_3b += check_interaction_ordering(i, j, k, i12, i13, i23) ;
+	    }
+	  }
+	}
       }
     }
   }
@@ -831,3 +840,46 @@ static void sort_pair(int &n, int &m)
   }
 }
 
+static int check_interaction_ordering(int i, int j, int k, int i12, int i13, int i23)
+// Check to see if the polynomial powers correspond to standard order.  Return 1 if they
+// do, 0 otherwise. i, j, k, are the polynomial powers corresponding to the 12, 13, and
+// 23 interactions, respectively.  i12, i13, and i23 are the pair indices for the 
+// interactions.
+{
+  if ( i + j + k < 2 ) {
+    return(0) ;
+  }
+  if ( i12 == i13 && i12 == i23 ) {
+    // Order all coefficients in ascending order if all elements are the same.
+    if ( i <= j && j <= k ) {
+      return(1) ;
+    } else {
+      return(0) ;
+    }
+  } else if ( i12 == i13 ) {
+    // When 2 pair coefficients are identical, the corresponding polynomial 
+    // powers must be in ascending order.
+    if ( i <= j ) {
+      return(1) ;
+    } else {
+      return(0) ;
+    }
+  } else if ( i12 == i23 ) {
+    if ( i <= k ) {
+      return(1) ; ;
+    } else {
+      return(0) ;
+    }
+  } else if ( i13 == i23 ) {
+    if ( j <= k ) {
+      return(1) ; ;
+    } else {
+      return(0) ;
+    }
+  } else {
+    // All elements are different.  No preferred order of coefficients.
+    return(1) ; ;
+  }
+  // Not reached.
+  return(0) ;
+}
