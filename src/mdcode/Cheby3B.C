@@ -134,9 +134,17 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 			fcut23 * Tnd23[k] *(-exprlen23/lambda[ipair23])/xdiff23 +
 			dfcut23 * Tn23[k] ;
 		      
-		      double f12 = coeff * deriv12 * fcut13 * fcut23 * Tn23[k] * Tn13[j] / rlen12 ;
-		      double f23 = coeff * deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[j] / rlen23 ;
-		      double f13 = coeff * deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[k] / rlen13 ;
+		      double f12 = coeff * deriv12 * fcut13 * fcut23 * Tn23[k] * Tn13[j] ;
+		      Pxyz -= f12 * rlen12 ;
+		      f12 /= rlen12 ;
+
+		      double f23 = coeff * deriv23 * fcut12 * fcut13 * Tn12[i] * Tn13[j] ;
+		      Pxyz -= f23 * rlen23 ;
+		      f23 /= rlen23 ;
+
+		      double f13 = coeff * deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[k] ;
+		      Pxyz -= f13 * rlen13 ;
+		      f13 /= rlen13 ;
 
 		      for(int c=0;c<3;c++)
 			{
@@ -150,7 +158,6 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 			  SForce[a3][c] -= f13 * R13[c] ;
 
 			} 
-		      // TO DO:  Update pressure.
 		    }
 	    }
 	}

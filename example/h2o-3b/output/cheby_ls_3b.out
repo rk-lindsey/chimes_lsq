@@ -14,18 +14,12 @@ Coulomb parameters will be determined by fitting
 Coulombic forces will NOT be subtracted before fitting
 3-Body Chebyshev polynomial of order 2 will be calculated
 The number of two-body non-coulomb parameters is 30
-Number of 3-Body Chebyshev parameter =16
+Number of 3-Body Chebyshev parameter =10
 Ewald_Deriv:
 R-Space Ewald cutoff      =  6.173215e+00
 R-Space accuracy estimate =  5.220777e-08
 K-space accuracy estimate =  5.489244e-07
 Number of Ewald K-vectors = 235
-Warning: short-range parameter 31 does not appear in the forces
-Warning: short-range parameter 32 does not appear in the forces
-Warning: short-range parameter 36 does not appear in the forces
-Warning: short-range parameter 39 does not appear in the forces
-Warning: short-range parameter 43 does not appear in the forces
-Warning: short-range parameter 44 does not appear in the forces
 Minimum distances between atoms:
  0  2.03865
  1  0.81997
