@@ -1,4 +1,4 @@
-all : cheby_fit cheby_force cheby_md
+all : cheby_fit cheby_force cheby_md check_scramble
 
 cheby_fit :
 	../../bin/splines_ls cheby_ls_3b.in 49 > cheby_ls_3b.out
@@ -27,14 +27,22 @@ check_sorting :
 	../../bin/splines_md cheby_3b_force.in > cheby_3b_force.out
 	../../bin/check_sorting.pl < cheby_3b_force.out > check_sorting.out
 
-# Check of scrambling atom order.  Should be same results as cheby_md
+# Check of scrambling atom order.  The forces are compared for 2 xyz
+# files.  One that is unscrambled (input.xyz) and one that is scrambled
+# (scramble.xyz)
+# The "unscrambled" forces are places in forceout.scramble.order.txt for
+# comparison to forceout.orig.txt
 check_scramble:
-	mv input.xyz input.save
-	cp scramble.xyz input.xyz
-	-../../bin/splines_md cheby_md_3b.in > scramble_md_3b.out	
-	cp input.save input.xyz
+	../../bin/splines_md scramble_3b_force.in > scramble_3b_force.out	
+	mv forceout.txt forceout.scramble.txt
+	sort forceout.scramble.txt > scramble.sort.txt
+	../../bin/splines_md orig_3b_force.in > orig_3b_force.out	
+	mv forceout.txt forceout.orig.txt
+	../../bin/match_xyz.pl input.xyz scramble.xyz forceout.scramble.txt > forceout.scramble.order.txt
+	sort forceout.orig.txt > orig.sort.txt
+	diff scramble.sort.txt orig.sort.txt
 
 clean :
-	rm -f A.txt b.txt params.header params.spline.txt force.txt *.out cheby_fit
+	rm -f A.txt b.txt params.header params.spline.txt force.txt *.out cheby_fit forceout*.txt *.sort.txt
 
 
