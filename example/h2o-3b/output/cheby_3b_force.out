@@ -26,10 +26,10 @@ Option coulomb is set to true
 Option fit_coulomb is set to true
 Option overcoord is set to false
 Option fit_pover is set to false
-Number of 3-Body Chebyshev parameter =16
+Number of 3-Body Chebyshev parameter =10
 Potential parameters read in:
 Number of 2 body parameters = 30
-Number of chebyshev 3 body parameters = 16
+Number of chebyshev 3 body parameters = 10
 Fit coulomb parameters = 3
 Fit overcoordination parameters = 0
 0 -15.3793733239
@@ -38,7 +38,7 @@ Fit overcoordination parameters = 0
 3 1.30528488549
 4 -18.4911766934
 5 -5.26645310638
-6 30.9671205105
+6 30.9671205106
 7 -6.9274722405
 8 -18.1045242347
 9 -15.8320104996
@@ -47,7 +47,7 @@ Fit overcoordination parameters = 0
 12 31.7468411406
 13 12.7240859483
 14 3.33217408321
-15 2.1606563404
+15 2.16065634041
 16 -1.30146425686
 17 0.411983973583
 18 0.587638518147
@@ -63,24 +63,18 @@ Fit overcoordination parameters = 0
 28 -9.0316519246
 29 -3.05070210659
 30 559.744163074
-31 6.07934793642e-14
-32 4.9261198041e-14
-33 -116.785432108
-34 1137.89266282
-35 -340.545967719
-36 -2.65138311546e-13
-37 1429.33892097
-38 -87.8076884471
-39 2.30864215217e-13
-40 55.815521087
-41 -230.611643838
-42 -12.866920807
-43 0
-44 0
-45 41.4986130996
-46 80.1136663641
-47 -40.0568342264
-48 20.0284174574
+31 -116.785432108
+32 1137.89266282
+33 -340.545967719
+34 1429.33892097
+35 -87.8076884471
+36 55.815521087
+37 -230.611643838
+38 -12.866920807
+39 41.4986130996
+40 80.1136663641
+41 -40.0568342264
+42 20.0284174574
 JOB PARAMETERS:
 
 Temperature is 2000.00000
@@ -153,4 +147,4 @@ ele: H H H pow: 0 1 1 param: -1.2867e+01
 ele: H H H pow: 1 0 1 param: -1.2867e+01
 ele: H H H pow: 1 1 0 param: -1.2867e+01
 ele: H H H pow: 1 1 1 param:  4.1499e+01
-RMS force error =  9.044042e-06
+RMS force error =  9.044041e-06

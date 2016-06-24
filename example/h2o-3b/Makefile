@@ -10,6 +10,7 @@ cheby_fit :
 	-diff cheby.0.out output/cheby.0.out
 	-diff cheby.1.out output/cheby.1.out
 	-diff cheby.2.out output/cheby.2.out
+	-diff params.3b.txt output/params.3b.txt
 	touch cheby_fit
 
 cheby_md : cheby_fit
