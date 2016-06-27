@@ -956,6 +956,8 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double *mind, bool if_3b_cheby)
 {
   bool if_ewald ;
+  bool called_before = false ;
+
   if (pair_type != DFTBPOLY) {
     if_ewald = true;
   } else {
@@ -1005,8 +1007,18 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
   }
   
   if ( if_3b_cheby ) {
-    ZCalc_3B_Cheby_Deriv(Coord, Lbc, Latcons, nat, A, smin, smax, snum, 
-			 snum_3b_cheby, lambda) ;
+      static int ******params_index ; 
+
+      // 3-body chebyshev polynomial 
+      if ( ! called_before ) {
+	// Index the parameters only once.  Scan through the params array and create
+	// a new multi-dimensional array where the coefficients are readily looked up.
+	params_index = Index_3B_Cheby(Lbc, nat, snum, snum_3b_cheby) ;
+	called_before = true ;
+      }
+
+      ZCalc_3B_Cheby_Deriv(Coord, Lbc, Latcons, nat, A, smin, smax, snum, 
+			   snum_3b_cheby, lambda, params_index) ;
   }
 
 }

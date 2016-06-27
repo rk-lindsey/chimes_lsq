@@ -102,12 +102,17 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			  const double *smax,
 			  const int *snum, 
 			  const int *snum_3b_cheby,
-			  const double *lambda) ;
+			  const double *lambda, int ******index_params) ;
 double ******Indexed_3B_Cheby_Coeffs(const char *Lbc, 
 				  const int nat,
 				  const int *snum, 
 				  const int *snum_3b_cheby,
 				     double *params) ;
+int ******Index_3B_Cheby(const char *Lbc, 
+			const int nat,
+			const int *snum, 
+			const int *snum_3b_cheby
+			) ;
 
 int count_cheby_3b_params(const int *snum) ;
 

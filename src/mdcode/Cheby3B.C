@@ -169,11 +169,11 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 
 
 double ******Indexed_3B_Cheby_Coeffs(const char *Lbc, 
-				  const int nat,
-				  const int *snum, 
-				  const int *snum_3b_cheby,
-				  double *params)
-
+				     const int nat,
+				     const int *snum, 
+				     const int *snum_3b_cheby,
+				     double *params
+				     ) 
 // Generate a "flattened" list of 3-Body Chebyshev Polynomial coefficients to speed up
 // indexing in generating 3 body forces.
 {
@@ -289,6 +289,98 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
   }
 
 
+int ******Index_3B_Cheby(const char *Lbc, 
+			 const int nat,
+			 const int *snum, 
+			 const int *snum_3b_cheby)
+			 
+// Generate a precalculated list of 3-Body Chebyshev Polynomial indices to speed up
+// indexing in generating 3 body forces force derivatives.
+{
+  //spline term calculated w/cutoff:
+  int index = 0 ;
+
+
+  int dim = 0 ;
+  for ( int i = 0 ; i < NPAIR ; i++ ) 
+    {
+      if ( snum_3b_cheby[i] > dim ) 
+	{
+	  dim = snum_3b_cheby[i] ;
+	}
+    }
+  dim++ ;
+
+  int ******params_index ;
+  params_index = new int*****[NELE] ;
+  for ( int i1 = 0 ; i1 < NELE ; i1++ ) {
+    params_index[i1] = new int****[NELE] ;
+    for ( int i2 = 0 ; i2 < NELE ; i2++ ) {
+      params_index[i1][i2] = new int***[NELE] ;
+      for ( int i3 = 0 ; i3 < NELE ; i3++ ) {
+	params_index[i1][i2][i3] = new int **[dim] ;
+	for ( int i4 = 0 ; i4 < dim ; i4++ ) {
+	  params_index[i1][i2][i3][i4] = new int *[dim] ;
+	  for ( int i5 = 0 ; i5 < dim ; i5++ ) {
+	    params_index[i1][i2][i3][i4][i5] = new int [dim] ;
+	    for ( int i6 = 0 ; i6 < dim ; i6++ ) {
+	      params_index[i1][i2][i3][i4][i5][i6] = -1 ;
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  ////main loop for 3-body Chebyshev terms:
+
+  // Find an atom for each element type.
+  // Need at least 3 examples.
+  int *example_atm = new int [ 3 * NELE ] ;
+  for ( int j = 0 ; j < NELE ; j++ ) {
+    int a1 ;
+    int k = 0 ;
+    for( a1=0 ; a1 < nat ; a1++) {
+      if ( atom_index(a1,Lbc) == j ) {
+	example_atm[3*j+k] = a1 ;
+	k++ ;
+	if ( k == 3 ) break ;
+      }
+    }
+    if ( a1 == nat ) {
+      printf("Error: 3 atoms with element index %d could not be found\n", j) ;
+    }
+  }
+
+  for ( int ele1 = 0 ; ele1 < NELE ; ele1++ ) {
+    int a1 = example_atm[3*ele1] ;
+    for ( int ele2 = 0 ; ele2 < NELE ; ele2++ ) {
+      int a2 = example_atm[3*ele2+1] ;
+      int ipair12 = pair_index(a1,a2,Lbc) ;
+      for ( int ele3 = 0 ; ele3 < NELE ; ele3++ ) {
+	int a3 = example_atm[3*ele3+2] ;
+	int ipair23 = pair_index(a2,a3,Lbc) ;
+	int ipair13 = pair_index(a1,a3,Lbc) ;
+	for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
+	  for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
+	    for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
+	      {
+		if ( i + j + k < 2 ) {
+		  params_index[ele1][ele2][ele3][i][j][k] = 0.0 ;
+		} else {
+		  (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, NULL, 
+					snum, snum_3b_cheby, index, false) ;
+		  params_index[ele1][ele2][ele3][i][j][k] = index ;
+		}
+	      }
+      }
+    }
+  }
+  return params_index ;
+}
+
+
+
 
 void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			  const int nat, double ***A,
@@ -296,7 +388,7 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			  const double *smax,
 			  const int *snum, 
 			  const int *snum_3b_cheby,
-			  const double *lambda)
+			  const double *lambda, int ******param_index)
 // Calculate derivatives of the 3-body short-range forces using a Chebyshev polynomial expansion,
 //  with respect to multiplicative parameters.
 {
@@ -332,11 +424,13 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
   }
   
   ////main loop for 3-body Chebyshev terms:
-  for(int a1=0;a1<nat;a1++)
+  for(int a1=0;a1<nat;a1++) {
+    int ele1    = atom_index(a1, Lbc) ;
     for(int a2=a1+1;a2<nat;a2++) 
       {
 	double fcut12, dfcut12 ;
 	int ipair12 = pair_index(a1,a2,Lbc) ;
+	int ele2 = atom_index(a2, Lbc) ;
 	find_pair_cheby(R12,Tn12, Tnd12, rlen12, exprlen12, xdiff12,
 			a1, a2, Lbc, Coord, Latcons, smin, smax, 
 			snum_3b_cheby,
@@ -350,6 +444,7 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 	  {
 	    int ipair23 = pair_index(a2,a3,Lbc) ;
 	    int ipair13 = pair_index(a1,a3,Lbc) ;
+	    int ele3 = atom_index(a3, Lbc) ;
 	    double fcut23, dfcut23 ;
 	    double fcut13, dfcut13 ;
 
@@ -379,10 +474,10 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 		    if ( i + j + k < 2 ) 
 		      continue ;
 
-		    (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, NULL, snum, 
-					  snum_3b_cheby,
-					  index, false) ;
-
+		    index = param_index[ele1][ele2][ele3][i][j][k] ;
+		    
+		    //(void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, NULL, snum, 
+		    // snum_3b_cheby, index, false) ;
 
 		    double deriv12 = 
 		      fcut12 * Tnd12[i] *(-exprlen12/lambda[ipair12])/xdiff12 +
@@ -410,6 +505,7 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 		  }
 	  }
       }
+  }
 
   return;
 }
