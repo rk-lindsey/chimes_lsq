@@ -24,7 +24,8 @@ cheby_fit2 :
 	-diff cheby.0.out output/cheby2.0.out
 	-diff cheby.1.out output/cheby2.1.out
 	-diff cheby.2.out output/cheby2.2.out
-	-diff params.3b.txt output/params.3b2.txt
+	-grep -v Date params.3b2.txt > params.3b2.nodate.txt
+	-diff params.3b2.nodate.txt output/params.3b2.nodate.txt
 
 cheby_md : cheby_fit
 	../../bin/splines_md cheby_md_3b.in > cheby_md_3b.out
