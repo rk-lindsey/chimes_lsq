@@ -10,8 +10,21 @@ cheby_fit :
 	-diff cheby.0.out output/cheby.0.out
 	-diff cheby.1.out output/cheby.1.out
 	-diff cheby.2.out output/cheby.2.out
-	-diff params.3b.txt output/params.3b.txt
+	-grep -v Date params.3b.txt > params.3b.nodate.txt
+	-diff params.3b.nodate.txt output/params.3b.nodate.txt
 	touch cheby_fit
+
+cheby_fit2 :
+	../../bin/splines_ls cheby_ls_3b2.in 49 > cheby_ls_3b2.out
+	../../bin/lsq.py A.txt b.txt params.header > params.3b2.txt
+	../../bin/cheby_print.pl < params.3b2.txt
+	-diff chebypot.0.out output/chebypot2.0.out
+	-diff chebypot.1.out output/chebypot2.1.out
+	-diff chebypot.2.out output/chebypot2.2.out
+	-diff cheby.0.out output/cheby2.0.out
+	-diff cheby.1.out output/cheby2.1.out
+	-diff cheby.2.out output/cheby2.2.out
+	-diff params.3b.txt output/params.3b2.txt
 
 cheby_md : cheby_fit
 	../../bin/splines_md cheby_md_3b.in > cheby_md_3b.out

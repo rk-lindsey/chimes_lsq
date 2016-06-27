@@ -1,4 +1,3 @@
-# Date  2016-06-24
 # Number of columns =  43
 # Number of rows    =  14114
 # RMS force error =  11.6164000738
