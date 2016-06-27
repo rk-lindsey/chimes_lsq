@@ -77,6 +77,5 @@ check_scramble2:
 	diff scramble.sort2.txt orig.sort2.txt
 
 clean :
-	rm -f A.txt b.txt params.header params.spline.txt force.txt *.out cheby_fit forceout*.txt *.sort.txt
-
-
+	rm -f A.txt b.txt params.header params.spline.txt force.txt *.out cheby_fit cheby_fit2\
+ forceout*.txt *.sort.txt *.sort2.txt *.nodate.txt traj.gen params.*.txt
