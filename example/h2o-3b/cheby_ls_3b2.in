@@ -1,0 +1,10 @@
+nlayers 1
+fit_coulomb true
+fit_pover false
+3b_cheby true
+3b_cheby_order 5
+pair_type chebyshev
+cheby_order 10
+subtract_coord false
+smin 1.95 0.75 0.90
+smax 6.0 6.0 6.0
