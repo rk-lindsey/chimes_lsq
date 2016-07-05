@@ -805,6 +805,10 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
   //const double lambda = 1.25 ;
   double exprlen ;
 
+  // A penalty function is added to the potential for r + penalty_dist < smin[ipair]
+  const double penalty_scale = 1.0e8 ;
+  const double penalty_dist = 0.01 ;
+
   if ( ! called_before ) {
     called_before = true ;
     int dim = 0 ;
@@ -849,8 +853,14 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		
 		if( rlen < smax[ipair])
 		  {
-		    double xavg, xdiff ;
+		    double xavg, xdiff, rpenalty ;
 
+		    // Penalty for distances less than smin - penalty_dist.
+		    if ( rlen - penalty_dist < smin[ipair] ) {
+		      rpenalty = smin[ipair] + penalty_dist - rlen ;
+		    } else {
+		      rpenalty = 0.0 ;
+		    }
 		    if ( inverse_r ) {
 		      xavg = 0.5 * (1.0/smin[ipair] + 1.0/smax[ipair]) ;
 		      xdiff = 0.5 * (1.0/smin[ipair] - 1.0/smax[ipair]) ;
@@ -916,6 +926,19 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 				SForce[a2][c] -= coeff * deriv * Rab[c] / rlen ;
 			      } 
 			  }
+			// Add penalty for very short distances.
+			if ( rpenalty > 0.0 ) {
+			  double Vpenalty = 0.0 ;
+			  cout << "Warning: r < rmin " << rlen << " " << smin[ipair] << endl ;
+			  for(int c=0;c<3;c++)
+			      {
+				SForce[a1][c] -= 3.0 * rpenalty * rpenalty * penalty_scale * Rab[c] / rlen ;
+				SForce[a2][c] += 3.0 * rpenalty * rpenalty * penalty_scale * Rab[c] / rlen ;
+			      } 
+			  Vpenalty = rpenalty * rpenalty * rpenalty * penalty_scale ;
+			  tempx += Vpenalty ;
+			  cout << "Penalty potential = "<< Vpenalty << endl ;
+			}
 		      }
 		    else 
 		      {
