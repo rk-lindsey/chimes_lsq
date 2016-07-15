@@ -22,6 +22,7 @@ static int match_pair_order(int a1, int a2, int a_orig[3], int n12, int n13, int
 static void sort_pair(int &n, int &m)  ;
 static void sort_poly_order(int ipair12, int ipair13, int ipair23, int &n12, int &n13, int &n23) ;
 static int check_interaction_ordering(int i, int j, int k, int i12, int i13, int i23) ;
+static bool is_three_body(int i, int j, int k) ;
 
 void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    const int nat,const double *smin,
@@ -110,7 +111,7 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 
 		    {
 		      // Require 2 non-zero Cheby orders to create a 3-body interaction.
-		      if ( i + j + k < 2 ) 
+		      if ( ! is_three_body(i,j,k) ) 
 			continue ;
 
 		      double coeff = idx_params[ele1][ele2][ele3][i][j][k] ;
@@ -245,7 +246,7 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
 	  for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
 	    for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 	      {
-		if ( i + j + k < 2 ) {
+		if ( ! is_three_body(i,j,k) ) {
 		  store_3b_params[ele1][ele2][ele3][i][j][k] = 0.0 ;
 		} else {
 		  (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, params, 
@@ -276,7 +277,7 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
 		for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
 		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 		    {
-		      if ( i + j + k >= 2 ) {
+		      if ( is_three_body(i,j,k) ) {
 			printf("ele: %c %c %c pow: %d %d %d param: %11.4e\n",
 			       Lbc[a1], Lbc[a2], Lbc[a3], i, j, k, 
 			       store_3b_params[ele1][ele2][ele3][i][j][k]) ;
@@ -365,7 +366,7 @@ int ******Index_3B_Cheby(const char *Lbc,
 	  for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
 	    for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 	      {
-		if ( i + j + k < 2 ) {
+		if ( ! is_three_body(i,j,k) ) {
 		  params_index[ele1][ele2][ele3][i][j][k] = 0.0 ;
 		} else {
 		  (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, NULL, 
@@ -471,7 +472,7 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 		for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 		  {
 		    // Require 2 non-zero Cheby orders to create a 3-body interaction.
-		    if ( i + j + k < 2 ) 
+		    if ( ! is_three_body(i,j,k) ) 
 		      continue ;
 
 		    index = param_index[ele1][ele2][ele3][i][j][k] ;
@@ -502,6 +503,15 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			A[a1][index][c] += deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[k] * R13[c] / rlen13 ;
 			A[a3][index][c] -= deriv13 * fcut12 * fcut23 * Tn12[i] * Tn23[k] * R13[c] / rlen13 ;
 		      } 
+#if(0)
+		    cout << a1 << " " << a2 << " " << ipair12 
+			 << " " << index << " " << deriv12 << " " << R12[0] / rlen12 << endl ;
+		    cout << a1 << " " << a3 << " " << ipair13 
+			 << " " << index << " " << deriv13 << " " << R13[0] / rlen13 << endl ;
+		    cout << a2 << " " << a3 << " " << ipair23 
+			 << " " << index << " " << deriv23 << " " << R23[0] / rlen23 << endl ;
+		    cout << endl ;
+#endif
 		  }
 	  }
       }
@@ -617,9 +627,10 @@ static double Cheby_3B_Coeff(int a1, int a2, int a3, int n12, int n13, int n23,
     cout << "Error in Cheby_3B_Coeff: atom indices are identical" << endl ;
     exit(1) ;
   }
-  if ( n12 + n13 + n23 < 2 ) {
+  if ( ! is_three_body(n12,n13,n23) ) {
     // Not 3-body.
-    cout << "Error in Cheby_3B_Coeff: sum of polynomial powers are too small.\n" ;
+    cout << "Error in Cheby_3B_Coeff: polynomial powers do not correspond to a 3-body interaction\n" ;
+    exit(1) ;
   }
     
   ele1    = atom_index(a1, Lbc) ;
@@ -949,7 +960,7 @@ static int check_interaction_ordering(int i, int j, int k, int i12, int i13, int
 // 23 interactions, respectively.  i12, i13, and i23 are the pair indices for the 
 // interactions.
 {
-  if ( i + j + k < 2 ) {
+  if ( ! is_three_body(i,j,k) ) {
     return(0) ;
   }
   if ( i12 == i13 && i12 == i23 ) {
@@ -985,4 +996,25 @@ static int check_interaction_ordering(int i, int j, int k, int i12, int i13, int
   }
   // Not reached.
   return(0) ;
+}
+
+static bool is_three_body(int i, int j, int k)
+// Return TRUE if the polynomial powers i,j, and k correspond to a 3-body interaction.
+{
+  int count = 0 ;
+
+  // Count up how many polynomials of order 0 there are.
+  if ( i == 0 ) {
+    count++ ;
+  }
+  if ( j == 0 ) {
+    count++ ;
+  }
+  if ( k == 0 ) {
+    count++ ;
+  }
+  if ( count > 1 ) {
+    return false ;
+  }
+  return true ;
 }
