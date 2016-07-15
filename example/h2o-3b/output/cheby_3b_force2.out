@@ -26,255 +26,237 @@ Option coulomb is set to true
 Option fit_coulomb is set to true
 Option overcoord is set to false
 Option fit_pover is set to false
-Number of 3-Body Chebyshev parameter =210
+Number of 3-Body Chebyshev parameter =192
 Potential parameters read in:
 Number of 2 body parameters = 30
-Number of chebyshev 3 body parameters = 210
+Number of chebyshev 3 body parameters = 192
 Fit coulomb parameters = 3
 Fit overcoordination parameters = 0
-0 11.7182283073
-1 26.4800184413
-2 -39.1710702534
-3 -15.5969279869
-4 -2.94861710741
-5 -3.76623103967
-6 0.124039241993
-7 -1.31116692792
-8 0.542292599347
-9 0.197646049197
-10 -15.0488393887
-11 21.3407899645
-12 42.515504443
-13 13.5105598086
-14 1.34246799853
-15 -1.31233182994
-16 -0.611194876208
-17 1.40587550509
-18 -0.538088935548
-19 0.0983886108754
-20 -5.05549000073
-21 -14.2625766311
-22 -5.04948601751
-23 -12.2950459642
-24 -8.19840325127
-25 -4.31751327376
-26 -3.10187915442
-27 -1.83660916
-28 -1.27579994567
-29 -0.0786678045341
-30 181.754141457
-31 135.853583367
-32 174.718113636
-33 -88.3767614425
-34 299.948398694
-35 -80.4353264979
-36 102.345639372
-37 -82.5302358245
-38 151.464260518
-39 137.083288432
-40 126.337800527
-41 41.0597439277
-42 19.0362467272
-43 -73.7327907649
-44 106.156810864
-45 325.234692528
-46 -40.9195660726
-47 -80.1917332923
-48 -76.6553969479
-49 -12.2761517623
-50 -221.506457968
-51 -97.0466340529
-52 28.2290642493
-53 -11.2610344615
-54 -135.109768331
-55 40.4965478652
-56 135.150400604
-57 -89.9464518238
-58 -152.627175181
-59 -298.441770672
-60 -26.7038129118
-61 -42.2299677286
-62 -211.171808197
-63 -61.9627382066
-64 43.7132270846
-65 -84.895557974
-66 176.106444552
-67 -185.51303431
-68 -0.0780882097143
-69 -141.713341009
-70 -151.398954738
-71 -134.557105955
-72 -44.1880430663
-73 -25.6124779964
-74 29.7829114457
-75 46.7492070729
-76 -98.1013562099
-77 -239.731810902
-78 -17.3524894691
-79 52.7667245378
-80 331.71400705
-81 -135.283602847
-82 -230.040936062
-83 -51.2772247268
-84 -5.30128980647
-85 176.110338119
-86 -22.8656625898
-87 -171.256217274
-88 -136.809007186
-89 -107.309544185
-90 -11.9866122576
-91 174.571740429
-92 46.8536670017
-93 -109.30882633
-94 -122.890847279
-95 -114.528871649
-96 -21.775255764
-97 55.2107160886
-98 -134.051467234
-99 12.6863247891
-100 -127.709513748
-101 -9.57028265319
-102 233.672699978
-103 72.5349590221
-104 52.3541879894
-105 99.2035022803
-106 -44.6021447413
-107 52.2270486258
-108 33.7562351535
-109 101.562557309
-110 -248.202521964
-111 176.154698597
-112 -48.3084805927
-113 84.9205841639
-114 -64.7736738164
-115 15.2849610397
-116 -24.5840937715
-117 -170.008735532
-118 -84.7645250395
-119 -60.4849638072
-120 20.3034974223
-121 46.587197334
-122 -27.6733405523
-123 -74.9104459352
-124 -79.5324964536
-125 -130.428683089
-126 7.70677850163
-127 -29.6714300514
-128 -14.7608011437
-129 -25.7365182968
-130 -26.3882462105
-131 -61.1028655023
-132 85.7882174539
-133 20.2733619711
-134 -40.3337028313
-135 6.47897930495
-136 -21.0542827664
-137 -24.5987750534
-138 -189.5371037
-139 -179.378899577
-140 52.3682848872
-141 -73.4601565171
-142 -239.935176645
-143 391.11186532
-144 -342.462154005
-145 124.601251004
-146 -78.2071729613
-147 -262.076357229
-148 286.372031866
-149 -308.20097121
-150 136.80722991
-151 -64.3737729413
-152 -70.9801369307
-153 230.83641988
-154 -82.3634921288
-155 65.2164645128
-156 -8.0916740767
-157 228.659418813
-158 400.2328401
-159 -28.91348136
-160 398.655874565
-161 -50.2449854221
-162 -618.800958141
-163 564.177351318
-164 -804.847799156
-165 191.624117477
-166 -195.524648198
-167 -259.604570836
-168 595.40879405
-169 -339.41125621
-170 204.750471369
-171 -45.4887130446
-172 -228.470265309
-173 131.621584055
-174 -252.173480656
-175 -6.24366774298
-176 -35.5627742382
-177 -306.067758899
-178 414.794822126
-179 -429.347782084
-180 168.565700814
-181 -72.5941813517
-182 -192.020597809
-183 204.551578485
-184 -236.764041896
-185 88.9985501272
-186 -56.2095418121
-187 -25.7309955307
-188 133.353661126
-189 -37.4701821544
-190 49.8103822799
-191 -5.23040321734
-192 -17.9758367371
-193 104.876386959
-194 -48.1945791732
-195 7.82475132742
-196 4.61797428144
-197 -18.4371795554
-198 -78.1467930619
-199 -13.1594175789
-200 -29.1437333031
-201 -9.55388324543
-202 1.79447141382
-203 -17.285687588
-204 -25.0725965992
-205 9.89434315644
-206 -19.8078709669
-207 -80.4591678054
-208 67.936492334
-209 15.6606728858
-210 222.81206976
-211 38.4055853211
-212 99.258233025
-213 14.6259929274
-214 -110.349907882
-215 99.9195017558
-216 1.62857054749
-217 37.1128755872
-218 29.5141035943
-219 0.758377620923
-220 28.5614108228
-221 60.6690395981
-222 -173.477200143
-223 -28.7349830859
-224 49.1428053715
-225 57.6798698683
-226 26.4963922301
-227 -133.45625908
-228 11.2200965805
-229 -1.5881704129
-230 -97.0826928217
-231 125.077963655
-232 -8.71952407399
-233 21.0759874935
-234 40.7059188135
-235 -7.73234248728
-236 -75.1409584794
-237 9.94406550369
-238 10.3566928943
-239 -4.29487995738
-240 160.058531727
-241 -80.0292690563
-242 40.0146337071
+0 38.8986423
+1 34.6347931146
+2 -13.2411302788
+3 -17.4855136024
+4 3.15795933662
+5 -13.1683691754
+6 2.75048129213
+7 -4.24823670909
+8 1.17161304027
+9 -0.456318368981
+10 -10.3701277957
+11 21.2041044575
+12 38.0251358412
+13 13.8532926425
+14 3.11175891208
+15 -2.38744754015
+16 0.0140243305507
+17 1.07638979605
+18 -0.453318126092
+19 0.0782977385899
+20 1.15720457437
+21 -16.6870095406
+22 -1.80812481261
+23 -19.6512267311
+24 -6.21534643145
+25 -4.79267756689
+26 -1.64179448486
+27 -2.08002128154
+28 -0.927872314089
+29 -0.0534776058383
+30 -97.7628819302
+31 310.781691372
+32 21.6041035109
+33 66.8105608696
+34 -164.627317333
+35 81.1285044897
+36 24.4547097765
+37 83.6860643324
+38 54.74509044
+39 6.98931202146
+40 -51.502994471
+41 69.0768650353
+42 254.37160052
+43 11.9425141356
+44 -146.157228216
+45 -24.8080661922
+46 -47.2302971032
+47 -199.746554093
+48 -82.0716730449
+49 26.3550549798
+50 16.4813984287
+51 -6.98842928206
+52 49.032483639
+53 5.82492987586
+54 29.6902617687
+55 -49.9196582762
+56 -246.365474278
+57 -83.0090752771
+58 31.6842619763
+59 -91.7504912552
+60 284.471554845
+61 -146.62202404
+62 78.288631246
+63 -143.5532907
+64 154.456701325
+65 -125.571062125
+66 5.75444264109
+67 26.3882501346
+68 -46.4135263987
+69 95.5934087268
+70 -56.6651193821
+71 -143.052586946
+72 63.7745977821
+73 14.3550787244
+74 515.657153989
+75 -327.243473294
+76 -214.45874916
+77 -27.3382681341
+78 -18.0250036886
+79 110.692809056
+80 92.1293243302
+81 -148.734366547
+82 -25.7484333204
+83 -97.4713726159
+84 80.0953649226
+85 31.2333187454
+86 -243.982949809
+87 -45.0136653981
+88 -65.6154914548
+89 -231.461160828
+90 -18.3748961382
+91 -231.515010067
+92 152.685473321
+93 -298.495590638
+94 6.70305208297
+95 183.265092303
+96 -65.879223486
+97 127.177740711
+98 -103.789307815
+99 57.2890761778
+100 93.1671881905
+101 93.8994488293
+102 -305.108316019
+103 134.913024602
+104 20.806012545
+105 132.642256128
+106 22.0903438391
+107 85.5435052616
+108 47.2107689727
+109 -94.7399664287
+110 -19.6337641871
+111 -59.3658939567
+112 -5.60372833314
+113 -72.5011757067
+114 -133.965545443
+115 -70.1247650316
+116 -164.216318741
+117 -162.898239628
+118 -111.45942505
+119 -64.1668887463
+120 -69.5080673368
+121 -137.473050495
+122 -62.1252372429
+123 38.9798696891
+124 -21.3034759161
+125 -13.8087236308
+126 -394.224543477
+127 -163.290003668
+128 -46.4696904816
+129 -104.577003643
+130 590.005984648
+131 -29.9696042778
+132 225.841006853
+133 12.7205682413
+134 443.645631417
+135 24.8660805057
+136 186.834427604
+137 -2.47072011066
+138 319.4878369
+139 11.0768155068
+140 107.007784384
+141 15.467361031
+142 556.599710501
+143 341.386492769
+144 397.019592994
+145 396.549446512
+146 102.247879213
+147 -755.633075248
+148 -160.124672808
+149 -974.748696578
+150 -98.7726446133
+151 -262.752965648
+152 -377.512583648
+153 51.5360155217
+154 -479.889874523
+155 14.1457642437
+156 -51.2256698615
+157 -300.678276904
+158 -152.847774993
+159 -349.529013509
+160 -113.291156135
+161 -67.2583677748
+162 282.479595562
+163 924.328378941
+164 335.928092585
+165 397.565026687
+166 117.616327739
+167 35.0887025961
+168 182.829182453
+169 51.3799729762
+170 68.5105569605
+171 -5.94214327208
+172 126.287372574
+173 284.788782413
+174 160.22690252
+175 120.200035875
+176 42.7886252943
+177 -156.258333245
+178 -296.510898298
+179 -213.176267458
+180 -133.121384688
+181 -16.7920531215
+182 46.5817740092
+183 -97.2792510922
+184 66.4280722006
+185 -39.7692304728
+186 2.79016563101
+187 2.64551759034
+188 -25.0744682551
+189 -21.2988036489
+190 14.4210784087
+191 -15.5017685216
+192 313.625365568
+193 116.24205742
+194 66.2438135807
+195 -19.8569702843
+196 65.1973131329
+197 36.8861203742
+198 -18.4255261477
+199 -19.9043389622
+200 -19.5226286763
+201 -41.0000639301
+202 58.9097507102
+203 290.886583669
+204 -279.452144517
+205 -45.6724107115
+206 233.338072306
+207 52.7263726543
+208 -34.1081574881
+209 -237.71320397
+210 -33.6847128533
+211 -80.5329833618
+212 178.896740731
+213 65.2920248582
+214 -53.6367530429
+215 -39.6323305069
+216 -31.878660841
+217 -77.1183448283
+218 -148.692947635
+219 -28.4368888998
+220 -36.8018149724
+221 -44.4994549403
+222 146.971923221
+223 -73.4859622711
+224 36.7429807169
 JOB PARAMETERS:
 
 Temperature is 2000.00000
@@ -299,7 +281,7 @@ Nose-Hoover thermostat time = 10.00000 fs
 
 END OF JOB PARAMETERS
 
-Q[H] from params file =      0.34714 e
+Q[H] from params file =      0.33264 e
 Charge equation 1 error =     -0.00000
 Charge sum per atom =   0.00000e+00
 Total Mass                   = 576.48000 au
@@ -315,972 +297,900 @@ Cutting off K-vectors with magnitude less than 6
 Number of Ewald K-vectors = 894
 K-space accuracy estimate = 6.6261033015771e-08
 3-Body Cheby Parameters
-ele: O O O pow: 0 0 2 param:  1.8175e+02
-ele: O O O pow: 0 0 3 param:  1.3585e+02
-ele: O O O pow: 0 0 4 param:  1.7472e+02
-ele: O O O pow: 0 1 1 param: -8.8377e+01
-ele: O O O pow: 0 1 2 param:  2.9995e+02
-ele: O O O pow: 0 1 3 param: -8.0435e+01
-ele: O O O pow: 0 1 4 param:  1.0235e+02
-ele: O O O pow: 0 2 0 param:  1.8175e+02
-ele: O O O pow: 0 2 1 param:  2.9995e+02
-ele: O O O pow: 0 2 2 param: -8.2530e+01
-ele: O O O pow: 0 2 3 param:  1.5146e+02
-ele: O O O pow: 0 2 4 param:  1.3708e+02
-ele: O O O pow: 0 3 0 param:  1.3585e+02
-ele: O O O pow: 0 3 1 param: -8.0435e+01
-ele: O O O pow: 0 3 2 param:  1.5146e+02
-ele: O O O pow: 0 3 3 param:  1.2634e+02
-ele: O O O pow: 0 3 4 param:  4.1060e+01
-ele: O O O pow: 0 4 0 param:  1.7472e+02
-ele: O O O pow: 0 4 1 param:  1.0235e+02
-ele: O O O pow: 0 4 2 param:  1.3708e+02
-ele: O O O pow: 0 4 3 param:  4.1060e+01
-ele: O O O pow: 0 4 4 param:  1.9036e+01
-ele: O O O pow: 1 0 1 param: -8.8377e+01
-ele: O O O pow: 1 0 2 param:  2.9995e+02
-ele: O O O pow: 1 0 3 param: -8.0435e+01
-ele: O O O pow: 1 0 4 param:  1.0235e+02
-ele: O O O pow: 1 1 0 param: -8.8377e+01
-ele: O O O pow: 1 1 1 param: -7.3733e+01
-ele: O O O pow: 1 1 2 param:  1.0616e+02
-ele: O O O pow: 1 1 3 param:  3.2523e+02
-ele: O O O pow: 1 1 4 param: -4.0920e+01
-ele: O O O pow: 1 2 0 param:  2.9995e+02
-ele: O O O pow: 1 2 1 param:  1.0616e+02
-ele: O O O pow: 1 2 2 param: -8.0192e+01
-ele: O O O pow: 1 2 3 param: -7.6655e+01
-ele: O O O pow: 1 2 4 param: -1.2276e+01
-ele: O O O pow: 1 3 0 param: -8.0435e+01
-ele: O O O pow: 1 3 1 param:  3.2523e+02
-ele: O O O pow: 1 3 2 param: -7.6655e+01
-ele: O O O pow: 1 3 3 param: -2.2151e+02
-ele: O O O pow: 1 3 4 param: -9.7047e+01
-ele: O O O pow: 1 4 0 param:  1.0235e+02
-ele: O O O pow: 1 4 1 param: -4.0920e+01
-ele: O O O pow: 1 4 2 param: -1.2276e+01
-ele: O O O pow: 1 4 3 param: -9.7047e+01
-ele: O O O pow: 1 4 4 param:  2.8229e+01
-ele: O O O pow: 2 0 0 param:  1.8175e+02
-ele: O O O pow: 2 0 1 param:  2.9995e+02
-ele: O O O pow: 2 0 2 param: -8.2530e+01
-ele: O O O pow: 2 0 3 param:  1.5146e+02
-ele: O O O pow: 2 0 4 param:  1.3708e+02
-ele: O O O pow: 2 1 0 param:  2.9995e+02
-ele: O O O pow: 2 1 1 param:  1.0616e+02
-ele: O O O pow: 2 1 2 param: -8.0192e+01
-ele: O O O pow: 2 1 3 param: -7.6655e+01
-ele: O O O pow: 2 1 4 param: -1.2276e+01
-ele: O O O pow: 2 2 0 param: -8.2530e+01
-ele: O O O pow: 2 2 1 param: -8.0192e+01
-ele: O O O pow: 2 2 2 param: -1.1261e+01
-ele: O O O pow: 2 2 3 param: -1.3511e+02
-ele: O O O pow: 2 2 4 param:  4.0497e+01
-ele: O O O pow: 2 3 0 param:  1.5146e+02
-ele: O O O pow: 2 3 1 param: -7.6655e+01
-ele: O O O pow: 2 3 2 param: -1.3511e+02
-ele: O O O pow: 2 3 3 param:  1.3515e+02
-ele: O O O pow: 2 3 4 param: -8.9946e+01
-ele: O O O pow: 2 4 0 param:  1.3708e+02
-ele: O O O pow: 2 4 1 param: -1.2276e+01
-ele: O O O pow: 2 4 2 param:  4.0497e+01
-ele: O O O pow: 2 4 3 param: -8.9946e+01
-ele: O O O pow: 2 4 4 param: -1.5263e+02
-ele: O O O pow: 3 0 0 param:  1.3585e+02
-ele: O O O pow: 3 0 1 param: -8.0435e+01
-ele: O O O pow: 3 0 2 param:  1.5146e+02
-ele: O O O pow: 3 0 3 param:  1.2634e+02
-ele: O O O pow: 3 0 4 param:  4.1060e+01
-ele: O O O pow: 3 1 0 param: -8.0435e+01
-ele: O O O pow: 3 1 1 param:  3.2523e+02
-ele: O O O pow: 3 1 2 param: -7.6655e+01
-ele: O O O pow: 3 1 3 param: -2.2151e+02
-ele: O O O pow: 3 1 4 param: -9.7047e+01
-ele: O O O pow: 3 2 0 param:  1.5146e+02
-ele: O O O pow: 3 2 1 param: -7.6655e+01
-ele: O O O pow: 3 2 2 param: -1.3511e+02
-ele: O O O pow: 3 2 3 param:  1.3515e+02
-ele: O O O pow: 3 2 4 param: -8.9946e+01
-ele: O O O pow: 3 3 0 param:  1.2634e+02
-ele: O O O pow: 3 3 1 param: -2.2151e+02
-ele: O O O pow: 3 3 2 param:  1.3515e+02
-ele: O O O pow: 3 3 3 param: -2.9844e+02
-ele: O O O pow: 3 3 4 param: -2.6704e+01
-ele: O O O pow: 3 4 0 param:  4.1060e+01
-ele: O O O pow: 3 4 1 param: -9.7047e+01
-ele: O O O pow: 3 4 2 param: -8.9946e+01
-ele: O O O pow: 3 4 3 param: -2.6704e+01
-ele: O O O pow: 3 4 4 param: -4.2230e+01
-ele: O O O pow: 4 0 0 param:  1.7472e+02
-ele: O O O pow: 4 0 1 param:  1.0235e+02
-ele: O O O pow: 4 0 2 param:  1.3708e+02
-ele: O O O pow: 4 0 3 param:  4.1060e+01
-ele: O O O pow: 4 0 4 param:  1.9036e+01
-ele: O O O pow: 4 1 0 param:  1.0235e+02
-ele: O O O pow: 4 1 1 param: -4.0920e+01
-ele: O O O pow: 4 1 2 param: -1.2276e+01
-ele: O O O pow: 4 1 3 param: -9.7047e+01
-ele: O O O pow: 4 1 4 param:  2.8229e+01
-ele: O O O pow: 4 2 0 param:  1.3708e+02
-ele: O O O pow: 4 2 1 param: -1.2276e+01
-ele: O O O pow: 4 2 2 param:  4.0497e+01
-ele: O O O pow: 4 2 3 param: -8.9946e+01
-ele: O O O pow: 4 2 4 param: -1.5263e+02
-ele: O O O pow: 4 3 0 param:  4.1060e+01
-ele: O O O pow: 4 3 1 param: -9.7047e+01
-ele: O O O pow: 4 3 2 param: -8.9946e+01
-ele: O O O pow: 4 3 3 param: -2.6704e+01
-ele: O O O pow: 4 3 4 param: -4.2230e+01
-ele: O O O pow: 4 4 0 param:  1.9036e+01
-ele: O O O pow: 4 4 1 param:  2.8229e+01
-ele: O O O pow: 4 4 2 param: -1.5263e+02
-ele: O O O pow: 4 4 3 param: -4.2230e+01
-ele: O O O pow: 4 4 4 param: -2.1117e+02
-ele: O O H pow: 0 0 2 param: -6.1963e+01
-ele: O O H pow: 0 0 3 param:  4.3713e+01
-ele: O O H pow: 0 0 4 param: -8.4896e+01
-ele: O O H pow: 0 1 1 param:  1.7611e+02
-ele: O O H pow: 0 1 2 param: -1.8551e+02
-ele: O O H pow: 0 1 3 param: -7.8088e-02
-ele: O O H pow: 0 1 4 param: -1.4171e+02
-ele: O O H pow: 0 2 0 param: -6.1963e+01
-ele: O O H pow: 0 2 1 param: -1.8551e+02
-ele: O O H pow: 0 2 2 param: -1.5140e+02
-ele: O O H pow: 0 2 3 param: -1.3456e+02
-ele: O O H pow: 0 2 4 param: -4.4188e+01
-ele: O O H pow: 0 3 0 param:  4.3713e+01
-ele: O O H pow: 0 3 1 param: -7.8088e-02
-ele: O O H pow: 0 3 2 param: -1.3456e+02
-ele: O O H pow: 0 3 3 param: -2.5612e+01
-ele: O O H pow: 0 3 4 param:  2.9783e+01
-ele: O O H pow: 0 4 0 param: -8.4896e+01
-ele: O O H pow: 0 4 1 param: -1.4171e+02
-ele: O O H pow: 0 4 2 param: -4.4188e+01
-ele: O O H pow: 0 4 3 param:  2.9783e+01
-ele: O O H pow: 0 4 4 param:  4.6749e+01
-ele: O O H pow: 1 0 1 param: -9.8101e+01
-ele: O O H pow: 1 0 2 param: -2.3973e+02
-ele: O O H pow: 1 0 3 param: -1.7352e+01
-ele: O O H pow: 1 0 4 param:  5.2767e+01
-ele: O O H pow: 1 1 0 param: -9.8101e+01
-ele: O O H pow: 1 1 1 param:  3.3171e+02
-ele: O O H pow: 1 1 2 param: -1.3528e+02
-ele: O O H pow: 1 1 3 param: -2.3004e+02
-ele: O O H pow: 1 1 4 param: -5.1277e+01
-ele: O O H pow: 1 2 0 param: -2.3973e+02
-ele: O O H pow: 1 2 1 param: -1.3528e+02
-ele: O O H pow: 1 2 2 param: -5.3013e+00
-ele: O O H pow: 1 2 3 param:  1.7611e+02
-ele: O O H pow: 1 2 4 param: -2.2866e+01
-ele: O O H pow: 1 3 0 param: -1.7352e+01
-ele: O O H pow: 1 3 1 param: -2.3004e+02
-ele: O O H pow: 1 3 2 param:  1.7611e+02
-ele: O O H pow: 1 3 3 param: -1.7126e+02
-ele: O O H pow: 1 3 4 param: -1.3681e+02
-ele: O O H pow: 1 4 0 param:  5.2767e+01
-ele: O O H pow: 1 4 1 param: -5.1277e+01
-ele: O O H pow: 1 4 2 param: -2.2866e+01
-ele: O O H pow: 1 4 3 param: -1.3681e+02
-ele: O O H pow: 1 4 4 param: -1.0731e+02
-ele: O O H pow: 2 0 0 param: -1.1987e+01
-ele: O O H pow: 2 0 1 param:  1.7457e+02
-ele: O O H pow: 2 0 2 param:  4.6854e+01
-ele: O O H pow: 2 0 3 param: -1.0931e+02
-ele: O O H pow: 2 0 4 param: -1.2289e+02
-ele: O O H pow: 2 1 0 param:  1.7457e+02
-ele: O O H pow: 2 1 1 param: -1.1453e+02
-ele: O O H pow: 2 1 2 param: -2.1775e+01
-ele: O O H pow: 2 1 3 param:  5.5211e+01
-ele: O O H pow: 2 1 4 param: -1.3405e+02
-ele: O O H pow: 2 2 0 param:  4.6854e+01
-ele: O O H pow: 2 2 1 param: -2.1775e+01
-ele: O O H pow: 2 2 2 param:  1.2686e+01
-ele: O O H pow: 2 2 3 param: -1.2771e+02
-ele: O O H pow: 2 2 4 param: -9.5703e+00
-ele: O O H pow: 2 3 0 param: -1.0931e+02
-ele: O O H pow: 2 3 1 param:  5.5211e+01
-ele: O O H pow: 2 3 2 param: -1.2771e+02
-ele: O O H pow: 2 3 3 param:  2.3367e+02
-ele: O O H pow: 2 3 4 param:  7.2535e+01
-ele: O O H pow: 2 4 0 param: -1.2289e+02
-ele: O O H pow: 2 4 1 param: -1.3405e+02
-ele: O O H pow: 2 4 2 param: -9.5703e+00
-ele: O O H pow: 2 4 3 param:  7.2535e+01
-ele: O O H pow: 2 4 4 param:  5.2354e+01
-ele: O O H pow: 3 0 0 param:  9.9204e+01
-ele: O O H pow: 3 0 1 param: -4.4602e+01
-ele: O O H pow: 3 0 2 param:  5.2227e+01
-ele: O O H pow: 3 0 3 param:  3.3756e+01
-ele: O O H pow: 3 0 4 param:  1.0156e+02
-ele: O O H pow: 3 1 0 param: -4.4602e+01
-ele: O O H pow: 3 1 1 param: -2.4820e+02
-ele: O O H pow: 3 1 2 param:  1.7615e+02
-ele: O O H pow: 3 1 3 param: -4.8308e+01
-ele: O O H pow: 3 1 4 param:  8.4921e+01
-ele: O O H pow: 3 2 0 param:  5.2227e+01
-ele: O O H pow: 3 2 1 param:  1.7615e+02
-ele: O O H pow: 3 2 2 param: -6.4774e+01
-ele: O O H pow: 3 2 3 param:  1.5285e+01
-ele: O O H pow: 3 2 4 param: -2.4584e+01
-ele: O O H pow: 3 3 0 param:  3.3756e+01
-ele: O O H pow: 3 3 1 param: -4.8308e+01
-ele: O O H pow: 3 3 2 param:  1.5285e+01
-ele: O O H pow: 3 3 3 param: -1.7001e+02
-ele: O O H pow: 3 3 4 param: -8.4765e+01
-ele: O O H pow: 3 4 0 param:  1.0156e+02
-ele: O O H pow: 3 4 1 param:  8.4921e+01
-ele: O O H pow: 3 4 2 param: -2.4584e+01
-ele: O O H pow: 3 4 3 param: -8.4765e+01
-ele: O O H pow: 3 4 4 param: -6.0485e+01
-ele: O O H pow: 4 0 0 param:  2.0303e+01
-ele: O O H pow: 4 0 1 param:  4.6587e+01
-ele: O O H pow: 4 0 2 param: -2.7673e+01
-ele: O O H pow: 4 0 3 param: -7.4910e+01
-ele: O O H pow: 4 0 4 param: -7.9532e+01
-ele: O O H pow: 4 1 0 param:  4.6587e+01
-ele: O O H pow: 4 1 1 param: -1.3043e+02
-ele: O O H pow: 4 1 2 param:  7.7068e+00
-ele: O O H pow: 4 1 3 param: -2.9671e+01
-ele: O O H pow: 4 1 4 param: -1.4761e+01
-ele: O O H pow: 4 2 0 param: -2.7673e+01
-ele: O O H pow: 4 2 1 param:  7.7068e+00
-ele: O O H pow: 4 2 2 param: -2.5737e+01
-ele: O O H pow: 4 2 3 param: -2.6388e+01
-ele: O O H pow: 4 2 4 param: -6.1103e+01
-ele: O O H pow: 4 3 0 param: -7.4910e+01
-ele: O O H pow: 4 3 1 param: -2.9671e+01
-ele: O O H pow: 4 3 2 param: -2.6388e+01
-ele: O O H pow: 4 3 3 param:  8.5788e+01
-ele: O O H pow: 4 3 4 param:  2.0273e+01
-ele: O O H pow: 4 4 0 param: -7.9532e+01
-ele: O O H pow: 4 4 1 param: -1.4761e+01
-ele: O O H pow: 4 4 2 param: -6.1103e+01
-ele: O O H pow: 4 4 3 param:  2.0273e+01
-ele: O O H pow: 4 4 4 param: -4.0334e+01
-ele: O H O pow: 0 0 2 param: -6.1963e+01
-ele: O H O pow: 0 0 3 param:  4.3713e+01
-ele: O H O pow: 0 0 4 param: -8.4896e+01
-ele: O H O pow: 0 1 1 param: -9.8101e+01
-ele: O H O pow: 0 1 2 param: -2.3973e+02
-ele: O H O pow: 0 1 3 param: -1.7352e+01
-ele: O H O pow: 0 1 4 param:  5.2767e+01
-ele: O H O pow: 0 2 0 param: -1.1987e+01
-ele: O H O pow: 0 2 1 param:  1.7457e+02
-ele: O H O pow: 0 2 2 param:  4.6854e+01
-ele: O H O pow: 0 2 3 param: -1.0931e+02
-ele: O H O pow: 0 2 4 param: -1.2289e+02
-ele: O H O pow: 0 3 0 param:  9.9204e+01
-ele: O H O pow: 0 3 1 param: -4.4602e+01
-ele: O H O pow: 0 3 2 param:  5.2227e+01
-ele: O H O pow: 0 3 3 param:  3.3756e+01
-ele: O H O pow: 0 3 4 param:  1.0156e+02
-ele: O H O pow: 0 4 0 param:  2.0303e+01
-ele: O H O pow: 0 4 1 param:  4.6587e+01
-ele: O H O pow: 0 4 2 param: -2.7673e+01
-ele: O H O pow: 0 4 3 param: -7.4910e+01
-ele: O H O pow: 0 4 4 param: -7.9532e+01
-ele: O H O pow: 1 0 1 param:  1.7611e+02
-ele: O H O pow: 1 0 2 param: -1.8551e+02
-ele: O H O pow: 1 0 3 param: -7.8088e-02
-ele: O H O pow: 1 0 4 param: -1.4171e+02
-ele: O H O pow: 1 1 0 param: -9.8101e+01
-ele: O H O pow: 1 1 1 param:  3.3171e+02
-ele: O H O pow: 1 1 2 param: -1.3528e+02
-ele: O H O pow: 1 1 3 param: -2.3004e+02
-ele: O H O pow: 1 1 4 param: -5.1277e+01
-ele: O H O pow: 1 2 0 param:  1.7457e+02
-ele: O H O pow: 1 2 1 param: -1.1453e+02
-ele: O H O pow: 1 2 2 param: -2.1775e+01
-ele: O H O pow: 1 2 3 param:  5.5211e+01
-ele: O H O pow: 1 2 4 param: -1.3405e+02
-ele: O H O pow: 1 3 0 param: -4.4602e+01
-ele: O H O pow: 1 3 1 param: -2.4820e+02
-ele: O H O pow: 1 3 2 param:  1.7615e+02
-ele: O H O pow: 1 3 3 param: -4.8308e+01
-ele: O H O pow: 1 3 4 param:  8.4921e+01
-ele: O H O pow: 1 4 0 param:  4.6587e+01
-ele: O H O pow: 1 4 1 param: -1.3043e+02
-ele: O H O pow: 1 4 2 param:  7.7068e+00
-ele: O H O pow: 1 4 3 param: -2.9671e+01
-ele: O H O pow: 1 4 4 param: -1.4761e+01
-ele: O H O pow: 2 0 0 param: -6.1963e+01
-ele: O H O pow: 2 0 1 param: -1.8551e+02
-ele: O H O pow: 2 0 2 param: -1.5140e+02
-ele: O H O pow: 2 0 3 param: -1.3456e+02
-ele: O H O pow: 2 0 4 param: -4.4188e+01
-ele: O H O pow: 2 1 0 param: -2.3973e+02
-ele: O H O pow: 2 1 1 param: -1.3528e+02
-ele: O H O pow: 2 1 2 param: -5.3013e+00
-ele: O H O pow: 2 1 3 param:  1.7611e+02
-ele: O H O pow: 2 1 4 param: -2.2866e+01
-ele: O H O pow: 2 2 0 param:  4.6854e+01
-ele: O H O pow: 2 2 1 param: -2.1775e+01
-ele: O H O pow: 2 2 2 param:  1.2686e+01
-ele: O H O pow: 2 2 3 param: -1.2771e+02
-ele: O H O pow: 2 2 4 param: -9.5703e+00
-ele: O H O pow: 2 3 0 param:  5.2227e+01
-ele: O H O pow: 2 3 1 param:  1.7615e+02
-ele: O H O pow: 2 3 2 param: -6.4774e+01
-ele: O H O pow: 2 3 3 param:  1.5285e+01
-ele: O H O pow: 2 3 4 param: -2.4584e+01
-ele: O H O pow: 2 4 0 param: -2.7673e+01
-ele: O H O pow: 2 4 1 param:  7.7068e+00
-ele: O H O pow: 2 4 2 param: -2.5737e+01
-ele: O H O pow: 2 4 3 param: -2.6388e+01
-ele: O H O pow: 2 4 4 param: -6.1103e+01
-ele: O H O pow: 3 0 0 param:  4.3713e+01
-ele: O H O pow: 3 0 1 param: -7.8088e-02
-ele: O H O pow: 3 0 2 param: -1.3456e+02
-ele: O H O pow: 3 0 3 param: -2.5612e+01
-ele: O H O pow: 3 0 4 param:  2.9783e+01
-ele: O H O pow: 3 1 0 param: -1.7352e+01
-ele: O H O pow: 3 1 1 param: -2.3004e+02
-ele: O H O pow: 3 1 2 param:  1.7611e+02
-ele: O H O pow: 3 1 3 param: -1.7126e+02
-ele: O H O pow: 3 1 4 param: -1.3681e+02
-ele: O H O pow: 3 2 0 param: -1.0931e+02
-ele: O H O pow: 3 2 1 param:  5.5211e+01
-ele: O H O pow: 3 2 2 param: -1.2771e+02
-ele: O H O pow: 3 2 3 param:  2.3367e+02
-ele: O H O pow: 3 2 4 param:  7.2535e+01
-ele: O H O pow: 3 3 0 param:  3.3756e+01
-ele: O H O pow: 3 3 1 param: -4.8308e+01
-ele: O H O pow: 3 3 2 param:  1.5285e+01
-ele: O H O pow: 3 3 3 param: -1.7001e+02
-ele: O H O pow: 3 3 4 param: -8.4765e+01
-ele: O H O pow: 3 4 0 param: -7.4910e+01
-ele: O H O pow: 3 4 1 param: -2.9671e+01
-ele: O H O pow: 3 4 2 param: -2.6388e+01
-ele: O H O pow: 3 4 3 param:  8.5788e+01
-ele: O H O pow: 3 4 4 param:  2.0273e+01
-ele: O H O pow: 4 0 0 param: -8.4896e+01
-ele: O H O pow: 4 0 1 param: -1.4171e+02
-ele: O H O pow: 4 0 2 param: -4.4188e+01
-ele: O H O pow: 4 0 3 param:  2.9783e+01
-ele: O H O pow: 4 0 4 param:  4.6749e+01
-ele: O H O pow: 4 1 0 param:  5.2767e+01
-ele: O H O pow: 4 1 1 param: -5.1277e+01
-ele: O H O pow: 4 1 2 param: -2.2866e+01
-ele: O H O pow: 4 1 3 param: -1.3681e+02
-ele: O H O pow: 4 1 4 param: -1.0731e+02
-ele: O H O pow: 4 2 0 param: -1.2289e+02
-ele: O H O pow: 4 2 1 param: -1.3405e+02
-ele: O H O pow: 4 2 2 param: -9.5703e+00
-ele: O H O pow: 4 2 3 param:  7.2535e+01
-ele: O H O pow: 4 2 4 param:  5.2354e+01
-ele: O H O pow: 4 3 0 param:  1.0156e+02
-ele: O H O pow: 4 3 1 param:  8.4921e+01
-ele: O H O pow: 4 3 2 param: -2.4584e+01
-ele: O H O pow: 4 3 3 param: -8.4765e+01
-ele: O H O pow: 4 3 4 param: -6.0485e+01
-ele: O H O pow: 4 4 0 param: -7.9532e+01
-ele: O H O pow: 4 4 1 param: -1.4761e+01
-ele: O H O pow: 4 4 2 param: -6.1103e+01
-ele: O H O pow: 4 4 3 param:  2.0273e+01
-ele: O H O pow: 4 4 4 param: -4.0334e+01
-ele: O H H pow: 0 0 2 param:  6.4790e+00
-ele: O H H pow: 0 0 3 param: -2.1054e+01
-ele: O H H pow: 0 0 4 param: -2.4599e+01
-ele: O H H pow: 0 1 1 param: -1.8954e+02
-ele: O H H pow: 0 1 2 param: -1.7938e+02
-ele: O H H pow: 0 1 3 param:  5.2368e+01
-ele: O H H pow: 0 1 4 param: -7.3460e+01
-ele: O H H pow: 0 2 0 param: -2.3994e+02
-ele: O H H pow: 0 2 1 param:  3.9111e+02
-ele: O H H pow: 0 2 2 param: -3.4246e+02
-ele: O H H pow: 0 2 3 param:  1.2460e+02
-ele: O H H pow: 0 2 4 param: -7.8207e+01
-ele: O H H pow: 0 3 0 param: -2.6208e+02
-ele: O H H pow: 0 3 1 param:  2.8637e+02
-ele: O H H pow: 0 3 2 param: -3.0820e+02
-ele: O H H pow: 0 3 3 param:  1.3681e+02
-ele: O H H pow: 0 3 4 param: -6.4374e+01
-ele: O H H pow: 0 4 0 param: -7.0980e+01
-ele: O H H pow: 0 4 1 param:  2.3084e+02
-ele: O H H pow: 0 4 2 param: -8.2363e+01
-ele: O H H pow: 0 4 3 param:  6.5216e+01
-ele: O H H pow: 0 4 4 param: -8.0917e+00
-ele: O H H pow: 1 0 1 param: -1.8954e+02
-ele: O H H pow: 1 0 2 param: -1.7938e+02
-ele: O H H pow: 1 0 3 param:  5.2368e+01
-ele: O H H pow: 1 0 4 param: -7.3460e+01
-ele: O H H pow: 1 1 0 param:  2.2866e+02
-ele: O H H pow: 1 1 1 param:  4.0023e+02
-ele: O H H pow: 1 1 2 param: -2.8913e+01
-ele: O H H pow: 1 1 3 param:  3.9866e+02
-ele: O H H pow: 1 1 4 param: -5.0245e+01
-ele: O H H pow: 1 2 0 param: -6.1880e+02
-ele: O H H pow: 1 2 1 param:  5.6418e+02
-ele: O H H pow: 1 2 2 param: -8.0485e+02
-ele: O H H pow: 1 2 3 param:  1.9162e+02
-ele: O H H pow: 1 2 4 param: -1.9552e+02
-ele: O H H pow: 1 3 0 param: -2.5960e+02
-ele: O H H pow: 1 3 1 param:  5.9541e+02
-ele: O H H pow: 1 3 2 param: -3.3941e+02
-ele: O H H pow: 1 3 3 param:  2.0475e+02
-ele: O H H pow: 1 3 4 param: -4.5489e+01
-ele: O H H pow: 1 4 0 param: -2.2847e+02
-ele: O H H pow: 1 4 1 param:  1.3162e+02
-ele: O H H pow: 1 4 2 param: -2.5217e+02
-ele: O H H pow: 1 4 3 param: -6.2437e+00
-ele: O H H pow: 1 4 4 param: -3.5563e+01
-ele: O H H pow: 2 0 0 param: -2.3994e+02
-ele: O H H pow: 2 0 1 param:  3.9111e+02
-ele: O H H pow: 2 0 2 param: -3.4246e+02
-ele: O H H pow: 2 0 3 param:  1.2460e+02
-ele: O H H pow: 2 0 4 param: -7.8207e+01
-ele: O H H pow: 2 1 0 param: -6.1880e+02
-ele: O H H pow: 2 1 1 param:  5.6418e+02
-ele: O H H pow: 2 1 2 param: -8.0485e+02
-ele: O H H pow: 2 1 3 param:  1.9162e+02
-ele: O H H pow: 2 1 4 param: -1.9552e+02
-ele: O H H pow: 2 2 0 param: -3.0607e+02
-ele: O H H pow: 2 2 1 param:  4.1479e+02
-ele: O H H pow: 2 2 2 param: -4.2935e+02
-ele: O H H pow: 2 2 3 param:  1.6857e+02
-ele: O H H pow: 2 2 4 param: -7.2594e+01
-ele: O H H pow: 2 3 0 param: -1.9202e+02
-ele: O H H pow: 2 3 1 param:  2.0455e+02
-ele: O H H pow: 2 3 2 param: -2.3676e+02
-ele: O H H pow: 2 3 3 param:  8.8999e+01
-ele: O H H pow: 2 3 4 param: -5.6210e+01
-ele: O H H pow: 2 4 0 param: -2.5731e+01
-ele: O H H pow: 2 4 1 param:  1.3335e+02
-ele: O H H pow: 2 4 2 param: -3.7470e+01
-ele: O H H pow: 2 4 3 param:  4.9810e+01
-ele: O H H pow: 2 4 4 param: -5.2304e+00
-ele: O H H pow: 3 0 0 param: -2.6208e+02
-ele: O H H pow: 3 0 1 param:  2.8637e+02
-ele: O H H pow: 3 0 2 param: -3.0820e+02
-ele: O H H pow: 3 0 3 param:  1.3681e+02
-ele: O H H pow: 3 0 4 param: -6.4374e+01
-ele: O H H pow: 3 1 0 param: -2.5960e+02
-ele: O H H pow: 3 1 1 param:  5.9541e+02
-ele: O H H pow: 3 1 2 param: -3.3941e+02
-ele: O H H pow: 3 1 3 param:  2.0475e+02
-ele: O H H pow: 3 1 4 param: -4.5489e+01
-ele: O H H pow: 3 2 0 param: -1.9202e+02
-ele: O H H pow: 3 2 1 param:  2.0455e+02
-ele: O H H pow: 3 2 2 param: -2.3676e+02
-ele: O H H pow: 3 2 3 param:  8.8999e+01
-ele: O H H pow: 3 2 4 param: -5.6210e+01
-ele: O H H pow: 3 3 0 param: -1.7976e+01
-ele: O H H pow: 3 3 1 param:  1.0488e+02
-ele: O H H pow: 3 3 2 param: -4.8195e+01
-ele: O H H pow: 3 3 3 param:  7.8248e+00
-ele: O H H pow: 3 3 4 param:  4.6180e+00
-ele: O H H pow: 3 4 0 param: -1.8437e+01
-ele: O H H pow: 3 4 1 param: -7.8147e+01
-ele: O H H pow: 3 4 2 param: -1.3159e+01
-ele: O H H pow: 3 4 3 param: -2.9144e+01
-ele: O H H pow: 3 4 4 param: -9.5539e+00
-ele: O H H pow: 4 0 0 param: -7.0980e+01
-ele: O H H pow: 4 0 1 param:  2.3084e+02
-ele: O H H pow: 4 0 2 param: -8.2363e+01
-ele: O H H pow: 4 0 3 param:  6.5216e+01
-ele: O H H pow: 4 0 4 param: -8.0917e+00
-ele: O H H pow: 4 1 0 param: -2.2847e+02
-ele: O H H pow: 4 1 1 param:  1.3162e+02
-ele: O H H pow: 4 1 2 param: -2.5217e+02
-ele: O H H pow: 4 1 3 param: -6.2437e+00
-ele: O H H pow: 4 1 4 param: -3.5563e+01
-ele: O H H pow: 4 2 0 param: -2.5731e+01
-ele: O H H pow: 4 2 1 param:  1.3335e+02
-ele: O H H pow: 4 2 2 param: -3.7470e+01
-ele: O H H pow: 4 2 3 param:  4.9810e+01
-ele: O H H pow: 4 2 4 param: -5.2304e+00
-ele: O H H pow: 4 3 0 param: -1.8437e+01
-ele: O H H pow: 4 3 1 param: -7.8147e+01
-ele: O H H pow: 4 3 2 param: -1.3159e+01
-ele: O H H pow: 4 3 3 param: -2.9144e+01
-ele: O H H pow: 4 3 4 param: -9.5539e+00
-ele: O H H pow: 4 4 0 param:  1.7945e+00
-ele: O H H pow: 4 4 1 param: -1.7286e+01
-ele: O H H pow: 4 4 2 param: -2.5073e+01
-ele: O H H pow: 4 4 3 param:  9.8943e+00
-ele: O H H pow: 4 4 4 param: -1.9808e+01
-ele: H O O pow: 0 0 2 param: -1.1987e+01
-ele: H O O pow: 0 0 3 param:  9.9204e+01
-ele: H O O pow: 0 0 4 param:  2.0303e+01
-ele: H O O pow: 0 1 1 param: -9.8101e+01
-ele: H O O pow: 0 1 2 param:  1.7457e+02
-ele: H O O pow: 0 1 3 param: -4.4602e+01
-ele: H O O pow: 0 1 4 param:  4.6587e+01
-ele: H O O pow: 0 2 0 param: -6.1963e+01
-ele: H O O pow: 0 2 1 param: -2.3973e+02
-ele: H O O pow: 0 2 2 param:  4.6854e+01
-ele: H O O pow: 0 2 3 param:  5.2227e+01
-ele: H O O pow: 0 2 4 param: -2.7673e+01
-ele: H O O pow: 0 3 0 param:  4.3713e+01
-ele: H O O pow: 0 3 1 param: -1.7352e+01
-ele: H O O pow: 0 3 2 param: -1.0931e+02
-ele: H O O pow: 0 3 3 param:  3.3756e+01
-ele: H O O pow: 0 3 4 param: -7.4910e+01
-ele: H O O pow: 0 4 0 param: -8.4896e+01
-ele: H O O pow: 0 4 1 param:  5.2767e+01
-ele: H O O pow: 0 4 2 param: -1.2289e+02
-ele: H O O pow: 0 4 3 param:  1.0156e+02
-ele: H O O pow: 0 4 4 param: -7.9532e+01
-ele: H O O pow: 1 0 1 param: -9.8101e+01
-ele: H O O pow: 1 0 2 param:  1.7457e+02
-ele: H O O pow: 1 0 3 param: -4.4602e+01
-ele: H O O pow: 1 0 4 param:  4.6587e+01
-ele: H O O pow: 1 1 0 param:  1.7611e+02
-ele: H O O pow: 1 1 1 param:  3.3171e+02
-ele: H O O pow: 1 1 2 param: -1.1453e+02
-ele: H O O pow: 1 1 3 param: -2.4820e+02
-ele: H O O pow: 1 1 4 param: -1.3043e+02
-ele: H O O pow: 1 2 0 param: -1.8551e+02
-ele: H O O pow: 1 2 1 param: -1.3528e+02
-ele: H O O pow: 1 2 2 param: -2.1775e+01
-ele: H O O pow: 1 2 3 param:  1.7615e+02
-ele: H O O pow: 1 2 4 param:  7.7068e+00
-ele: H O O pow: 1 3 0 param: -7.8088e-02
-ele: H O O pow: 1 3 1 param: -2.3004e+02
-ele: H O O pow: 1 3 2 param:  5.5211e+01
-ele: H O O pow: 1 3 3 param: -4.8308e+01
-ele: H O O pow: 1 3 4 param: -2.9671e+01
-ele: H O O pow: 1 4 0 param: -1.4171e+02
-ele: H O O pow: 1 4 1 param: -5.1277e+01
-ele: H O O pow: 1 4 2 param: -1.3405e+02
-ele: H O O pow: 1 4 3 param:  8.4921e+01
-ele: H O O pow: 1 4 4 param: -1.4761e+01
-ele: H O O pow: 2 0 0 param: -6.1963e+01
-ele: H O O pow: 2 0 1 param: -2.3973e+02
-ele: H O O pow: 2 0 2 param:  4.6854e+01
-ele: H O O pow: 2 0 3 param:  5.2227e+01
-ele: H O O pow: 2 0 4 param: -2.7673e+01
-ele: H O O pow: 2 1 0 param: -1.8551e+02
-ele: H O O pow: 2 1 1 param: -1.3528e+02
-ele: H O O pow: 2 1 2 param: -2.1775e+01
-ele: H O O pow: 2 1 3 param:  1.7615e+02
-ele: H O O pow: 2 1 4 param:  7.7068e+00
-ele: H O O pow: 2 2 0 param: -1.5140e+02
-ele: H O O pow: 2 2 1 param: -5.3013e+00
-ele: H O O pow: 2 2 2 param:  1.2686e+01
-ele: H O O pow: 2 2 3 param: -6.4774e+01
-ele: H O O pow: 2 2 4 param: -2.5737e+01
-ele: H O O pow: 2 3 0 param: -1.3456e+02
-ele: H O O pow: 2 3 1 param:  1.7611e+02
-ele: H O O pow: 2 3 2 param: -1.2771e+02
-ele: H O O pow: 2 3 3 param:  1.5285e+01
-ele: H O O pow: 2 3 4 param: -2.6388e+01
-ele: H O O pow: 2 4 0 param: -4.4188e+01
-ele: H O O pow: 2 4 1 param: -2.2866e+01
-ele: H O O pow: 2 4 2 param: -9.5703e+00
-ele: H O O pow: 2 4 3 param: -2.4584e+01
-ele: H O O pow: 2 4 4 param: -6.1103e+01
-ele: H O O pow: 3 0 0 param:  4.3713e+01
-ele: H O O pow: 3 0 1 param: -1.7352e+01
-ele: H O O pow: 3 0 2 param: -1.0931e+02
-ele: H O O pow: 3 0 3 param:  3.3756e+01
-ele: H O O pow: 3 0 4 param: -7.4910e+01
-ele: H O O pow: 3 1 0 param: -7.8088e-02
-ele: H O O pow: 3 1 1 param: -2.3004e+02
-ele: H O O pow: 3 1 2 param:  5.5211e+01
-ele: H O O pow: 3 1 3 param: -4.8308e+01
-ele: H O O pow: 3 1 4 param: -2.9671e+01
-ele: H O O pow: 3 2 0 param: -1.3456e+02
-ele: H O O pow: 3 2 1 param:  1.7611e+02
-ele: H O O pow: 3 2 2 param: -1.2771e+02
-ele: H O O pow: 3 2 3 param:  1.5285e+01
-ele: H O O pow: 3 2 4 param: -2.6388e+01
-ele: H O O pow: 3 3 0 param: -2.5612e+01
-ele: H O O pow: 3 3 1 param: -1.7126e+02
-ele: H O O pow: 3 3 2 param:  2.3367e+02
-ele: H O O pow: 3 3 3 param: -1.7001e+02
-ele: H O O pow: 3 3 4 param:  8.5788e+01
-ele: H O O pow: 3 4 0 param:  2.9783e+01
-ele: H O O pow: 3 4 1 param: -1.3681e+02
-ele: H O O pow: 3 4 2 param:  7.2535e+01
-ele: H O O pow: 3 4 3 param: -8.4765e+01
-ele: H O O pow: 3 4 4 param:  2.0273e+01
-ele: H O O pow: 4 0 0 param: -8.4896e+01
-ele: H O O pow: 4 0 1 param:  5.2767e+01
-ele: H O O pow: 4 0 2 param: -1.2289e+02
-ele: H O O pow: 4 0 3 param:  1.0156e+02
-ele: H O O pow: 4 0 4 param: -7.9532e+01
-ele: H O O pow: 4 1 0 param: -1.4171e+02
-ele: H O O pow: 4 1 1 param: -5.1277e+01
-ele: H O O pow: 4 1 2 param: -1.3405e+02
-ele: H O O pow: 4 1 3 param:  8.4921e+01
-ele: H O O pow: 4 1 4 param: -1.4761e+01
-ele: H O O pow: 4 2 0 param: -4.4188e+01
-ele: H O O pow: 4 2 1 param: -2.2866e+01
-ele: H O O pow: 4 2 2 param: -9.5703e+00
-ele: H O O pow: 4 2 3 param: -2.4584e+01
-ele: H O O pow: 4 2 4 param: -6.1103e+01
-ele: H O O pow: 4 3 0 param:  2.9783e+01
-ele: H O O pow: 4 3 1 param: -1.3681e+02
-ele: H O O pow: 4 3 2 param:  7.2535e+01
-ele: H O O pow: 4 3 3 param: -8.4765e+01
-ele: H O O pow: 4 3 4 param:  2.0273e+01
-ele: H O O pow: 4 4 0 param:  4.6749e+01
-ele: H O O pow: 4 4 1 param: -1.0731e+02
-ele: H O O pow: 4 4 2 param:  5.2354e+01
-ele: H O O pow: 4 4 3 param: -6.0485e+01
-ele: H O O pow: 4 4 4 param: -4.0334e+01
-ele: H O H pow: 0 0 2 param: -2.3994e+02
-ele: H O H pow: 0 0 3 param: -2.6208e+02
-ele: H O H pow: 0 0 4 param: -7.0980e+01
-ele: H O H pow: 0 1 1 param: -1.8954e+02
-ele: H O H pow: 0 1 2 param:  3.9111e+02
-ele: H O H pow: 0 1 3 param:  2.8637e+02
-ele: H O H pow: 0 1 4 param:  2.3084e+02
-ele: H O H pow: 0 2 0 param:  6.4790e+00
-ele: H O H pow: 0 2 1 param: -1.7938e+02
-ele: H O H pow: 0 2 2 param: -3.4246e+02
-ele: H O H pow: 0 2 3 param: -3.0820e+02
-ele: H O H pow: 0 2 4 param: -8.2363e+01
-ele: H O H pow: 0 3 0 param: -2.1054e+01
-ele: H O H pow: 0 3 1 param:  5.2368e+01
-ele: H O H pow: 0 3 2 param:  1.2460e+02
-ele: H O H pow: 0 3 3 param:  1.3681e+02
-ele: H O H pow: 0 3 4 param:  6.5216e+01
-ele: H O H pow: 0 4 0 param: -2.4599e+01
-ele: H O H pow: 0 4 1 param: -7.3460e+01
-ele: H O H pow: 0 4 2 param: -7.8207e+01
-ele: H O H pow: 0 4 3 param: -6.4374e+01
-ele: H O H pow: 0 4 4 param: -8.0917e+00
-ele: H O H pow: 1 0 1 param:  2.2866e+02
-ele: H O H pow: 1 0 2 param: -6.1880e+02
-ele: H O H pow: 1 0 3 param: -2.5960e+02
-ele: H O H pow: 1 0 4 param: -2.2847e+02
-ele: H O H pow: 1 1 0 param: -1.8954e+02
-ele: H O H pow: 1 1 1 param:  4.0023e+02
-ele: H O H pow: 1 1 2 param:  5.6418e+02
-ele: H O H pow: 1 1 3 param:  5.9541e+02
-ele: H O H pow: 1 1 4 param:  1.3162e+02
-ele: H O H pow: 1 2 0 param: -1.7938e+02
-ele: H O H pow: 1 2 1 param: -2.8913e+01
-ele: H O H pow: 1 2 2 param: -8.0485e+02
-ele: H O H pow: 1 2 3 param: -3.3941e+02
-ele: H O H pow: 1 2 4 param: -2.5217e+02
-ele: H O H pow: 1 3 0 param:  5.2368e+01
-ele: H O H pow: 1 3 1 param:  3.9866e+02
-ele: H O H pow: 1 3 2 param:  1.9162e+02
-ele: H O H pow: 1 3 3 param:  2.0475e+02
-ele: H O H pow: 1 3 4 param: -6.2437e+00
-ele: H O H pow: 1 4 0 param: -7.3460e+01
-ele: H O H pow: 1 4 1 param: -5.0245e+01
-ele: H O H pow: 1 4 2 param: -1.9552e+02
-ele: H O H pow: 1 4 3 param: -4.5489e+01
-ele: H O H pow: 1 4 4 param: -3.5563e+01
-ele: H O H pow: 2 0 0 param: -2.3994e+02
-ele: H O H pow: 2 0 1 param: -6.1880e+02
-ele: H O H pow: 2 0 2 param: -3.0607e+02
-ele: H O H pow: 2 0 3 param: -1.9202e+02
-ele: H O H pow: 2 0 4 param: -2.5731e+01
-ele: H O H pow: 2 1 0 param:  3.9111e+02
-ele: H O H pow: 2 1 1 param:  5.6418e+02
-ele: H O H pow: 2 1 2 param:  4.1479e+02
-ele: H O H pow: 2 1 3 param:  2.0455e+02
-ele: H O H pow: 2 1 4 param:  1.3335e+02
-ele: H O H pow: 2 2 0 param: -3.4246e+02
-ele: H O H pow: 2 2 1 param: -8.0485e+02
-ele: H O H pow: 2 2 2 param: -4.2935e+02
-ele: H O H pow: 2 2 3 param: -2.3676e+02
-ele: H O H pow: 2 2 4 param: -3.7470e+01
-ele: H O H pow: 2 3 0 param:  1.2460e+02
-ele: H O H pow: 2 3 1 param:  1.9162e+02
-ele: H O H pow: 2 3 2 param:  1.6857e+02
-ele: H O H pow: 2 3 3 param:  8.8999e+01
-ele: H O H pow: 2 3 4 param:  4.9810e+01
-ele: H O H pow: 2 4 0 param: -7.8207e+01
-ele: H O H pow: 2 4 1 param: -1.9552e+02
-ele: H O H pow: 2 4 2 param: -7.2594e+01
-ele: H O H pow: 2 4 3 param: -5.6210e+01
-ele: H O H pow: 2 4 4 param: -5.2304e+00
-ele: H O H pow: 3 0 0 param: -2.6208e+02
-ele: H O H pow: 3 0 1 param: -2.5960e+02
-ele: H O H pow: 3 0 2 param: -1.9202e+02
-ele: H O H pow: 3 0 3 param: -1.7976e+01
-ele: H O H pow: 3 0 4 param: -1.8437e+01
-ele: H O H pow: 3 1 0 param:  2.8637e+02
-ele: H O H pow: 3 1 1 param:  5.9541e+02
-ele: H O H pow: 3 1 2 param:  2.0455e+02
-ele: H O H pow: 3 1 3 param:  1.0488e+02
-ele: H O H pow: 3 1 4 param: -7.8147e+01
-ele: H O H pow: 3 2 0 param: -3.0820e+02
-ele: H O H pow: 3 2 1 param: -3.3941e+02
-ele: H O H pow: 3 2 2 param: -2.3676e+02
-ele: H O H pow: 3 2 3 param: -4.8195e+01
-ele: H O H pow: 3 2 4 param: -1.3159e+01
-ele: H O H pow: 3 3 0 param:  1.3681e+02
-ele: H O H pow: 3 3 1 param:  2.0475e+02
-ele: H O H pow: 3 3 2 param:  8.8999e+01
-ele: H O H pow: 3 3 3 param:  7.8248e+00
-ele: H O H pow: 3 3 4 param: -2.9144e+01
-ele: H O H pow: 3 4 0 param: -6.4374e+01
-ele: H O H pow: 3 4 1 param: -4.5489e+01
-ele: H O H pow: 3 4 2 param: -5.6210e+01
-ele: H O H pow: 3 4 3 param:  4.6180e+00
-ele: H O H pow: 3 4 4 param: -9.5539e+00
-ele: H O H pow: 4 0 0 param: -7.0980e+01
-ele: H O H pow: 4 0 1 param: -2.2847e+02
-ele: H O H pow: 4 0 2 param: -2.5731e+01
-ele: H O H pow: 4 0 3 param: -1.8437e+01
-ele: H O H pow: 4 0 4 param:  1.7945e+00
-ele: H O H pow: 4 1 0 param:  2.3084e+02
-ele: H O H pow: 4 1 1 param:  1.3162e+02
-ele: H O H pow: 4 1 2 param:  1.3335e+02
-ele: H O H pow: 4 1 3 param: -7.8147e+01
-ele: H O H pow: 4 1 4 param: -1.7286e+01
-ele: H O H pow: 4 2 0 param: -8.2363e+01
-ele: H O H pow: 4 2 1 param: -2.5217e+02
-ele: H O H pow: 4 2 2 param: -3.7470e+01
-ele: H O H pow: 4 2 3 param: -1.3159e+01
-ele: H O H pow: 4 2 4 param: -2.5073e+01
-ele: H O H pow: 4 3 0 param:  6.5216e+01
-ele: H O H pow: 4 3 1 param: -6.2437e+00
-ele: H O H pow: 4 3 2 param:  4.9810e+01
-ele: H O H pow: 4 3 3 param: -2.9144e+01
-ele: H O H pow: 4 3 4 param:  9.8943e+00
-ele: H O H pow: 4 4 0 param: -8.0917e+00
-ele: H O H pow: 4 4 1 param: -3.5563e+01
-ele: H O H pow: 4 4 2 param: -5.2304e+00
-ele: H O H pow: 4 4 3 param: -9.5539e+00
-ele: H O H pow: 4 4 4 param: -1.9808e+01
-ele: H H O pow: 0 0 2 param: -2.3994e+02
-ele: H H O pow: 0 0 3 param: -2.6208e+02
-ele: H H O pow: 0 0 4 param: -7.0980e+01
-ele: H H O pow: 0 1 1 param:  2.2866e+02
-ele: H H O pow: 0 1 2 param: -6.1880e+02
-ele: H H O pow: 0 1 3 param: -2.5960e+02
-ele: H H O pow: 0 1 4 param: -2.2847e+02
-ele: H H O pow: 0 2 0 param: -2.3994e+02
-ele: H H O pow: 0 2 1 param: -6.1880e+02
-ele: H H O pow: 0 2 2 param: -3.0607e+02
-ele: H H O pow: 0 2 3 param: -1.9202e+02
-ele: H H O pow: 0 2 4 param: -2.5731e+01
-ele: H H O pow: 0 3 0 param: -2.6208e+02
-ele: H H O pow: 0 3 1 param: -2.5960e+02
-ele: H H O pow: 0 3 2 param: -1.9202e+02
-ele: H H O pow: 0 3 3 param: -1.7976e+01
-ele: H H O pow: 0 3 4 param: -1.8437e+01
-ele: H H O pow: 0 4 0 param: -7.0980e+01
-ele: H H O pow: 0 4 1 param: -2.2847e+02
-ele: H H O pow: 0 4 2 param: -2.5731e+01
-ele: H H O pow: 0 4 3 param: -1.8437e+01
-ele: H H O pow: 0 4 4 param:  1.7945e+00
-ele: H H O pow: 1 0 1 param: -1.8954e+02
-ele: H H O pow: 1 0 2 param:  3.9111e+02
-ele: H H O pow: 1 0 3 param:  2.8637e+02
-ele: H H O pow: 1 0 4 param:  2.3084e+02
-ele: H H O pow: 1 1 0 param: -1.8954e+02
-ele: H H O pow: 1 1 1 param:  4.0023e+02
-ele: H H O pow: 1 1 2 param:  5.6418e+02
-ele: H H O pow: 1 1 3 param:  5.9541e+02
-ele: H H O pow: 1 1 4 param:  1.3162e+02
-ele: H H O pow: 1 2 0 param:  3.9111e+02
-ele: H H O pow: 1 2 1 param:  5.6418e+02
-ele: H H O pow: 1 2 2 param:  4.1479e+02
-ele: H H O pow: 1 2 3 param:  2.0455e+02
-ele: H H O pow: 1 2 4 param:  1.3335e+02
-ele: H H O pow: 1 3 0 param:  2.8637e+02
-ele: H H O pow: 1 3 1 param:  5.9541e+02
-ele: H H O pow: 1 3 2 param:  2.0455e+02
-ele: H H O pow: 1 3 3 param:  1.0488e+02
-ele: H H O pow: 1 3 4 param: -7.8147e+01
-ele: H H O pow: 1 4 0 param:  2.3084e+02
-ele: H H O pow: 1 4 1 param:  1.3162e+02
-ele: H H O pow: 1 4 2 param:  1.3335e+02
-ele: H H O pow: 1 4 3 param: -7.8147e+01
-ele: H H O pow: 1 4 4 param: -1.7286e+01
-ele: H H O pow: 2 0 0 param:  6.4790e+00
-ele: H H O pow: 2 0 1 param: -1.7938e+02
-ele: H H O pow: 2 0 2 param: -3.4246e+02
-ele: H H O pow: 2 0 3 param: -3.0820e+02
-ele: H H O pow: 2 0 4 param: -8.2363e+01
-ele: H H O pow: 2 1 0 param: -1.7938e+02
-ele: H H O pow: 2 1 1 param: -2.8913e+01
-ele: H H O pow: 2 1 2 param: -8.0485e+02
-ele: H H O pow: 2 1 3 param: -3.3941e+02
-ele: H H O pow: 2 1 4 param: -2.5217e+02
-ele: H H O pow: 2 2 0 param: -3.4246e+02
-ele: H H O pow: 2 2 1 param: -8.0485e+02
-ele: H H O pow: 2 2 2 param: -4.2935e+02
-ele: H H O pow: 2 2 3 param: -2.3676e+02
-ele: H H O pow: 2 2 4 param: -3.7470e+01
-ele: H H O pow: 2 3 0 param: -3.0820e+02
-ele: H H O pow: 2 3 1 param: -3.3941e+02
-ele: H H O pow: 2 3 2 param: -2.3676e+02
-ele: H H O pow: 2 3 3 param: -4.8195e+01
-ele: H H O pow: 2 3 4 param: -1.3159e+01
-ele: H H O pow: 2 4 0 param: -8.2363e+01
-ele: H H O pow: 2 4 1 param: -2.5217e+02
-ele: H H O pow: 2 4 2 param: -3.7470e+01
-ele: H H O pow: 2 4 3 param: -1.3159e+01
-ele: H H O pow: 2 4 4 param: -2.5073e+01
-ele: H H O pow: 3 0 0 param: -2.1054e+01
-ele: H H O pow: 3 0 1 param:  5.2368e+01
-ele: H H O pow: 3 0 2 param:  1.2460e+02
-ele: H H O pow: 3 0 3 param:  1.3681e+02
-ele: H H O pow: 3 0 4 param:  6.5216e+01
-ele: H H O pow: 3 1 0 param:  5.2368e+01
-ele: H H O pow: 3 1 1 param:  3.9866e+02
-ele: H H O pow: 3 1 2 param:  1.9162e+02
-ele: H H O pow: 3 1 3 param:  2.0475e+02
-ele: H H O pow: 3 1 4 param: -6.2437e+00
-ele: H H O pow: 3 2 0 param:  1.2460e+02
-ele: H H O pow: 3 2 1 param:  1.9162e+02
-ele: H H O pow: 3 2 2 param:  1.6857e+02
-ele: H H O pow: 3 2 3 param:  8.8999e+01
-ele: H H O pow: 3 2 4 param:  4.9810e+01
-ele: H H O pow: 3 3 0 param:  1.3681e+02
-ele: H H O pow: 3 3 1 param:  2.0475e+02
-ele: H H O pow: 3 3 2 param:  8.8999e+01
-ele: H H O pow: 3 3 3 param:  7.8248e+00
-ele: H H O pow: 3 3 4 param: -2.9144e+01
-ele: H H O pow: 3 4 0 param:  6.5216e+01
-ele: H H O pow: 3 4 1 param: -6.2437e+00
-ele: H H O pow: 3 4 2 param:  4.9810e+01
-ele: H H O pow: 3 4 3 param: -2.9144e+01
-ele: H H O pow: 3 4 4 param:  9.8943e+00
-ele: H H O pow: 4 0 0 param: -2.4599e+01
-ele: H H O pow: 4 0 1 param: -7.3460e+01
-ele: H H O pow: 4 0 2 param: -7.8207e+01
-ele: H H O pow: 4 0 3 param: -6.4374e+01
-ele: H H O pow: 4 0 4 param: -8.0917e+00
-ele: H H O pow: 4 1 0 param: -7.3460e+01
-ele: H H O pow: 4 1 1 param: -5.0245e+01
-ele: H H O pow: 4 1 2 param: -1.9552e+02
-ele: H H O pow: 4 1 3 param: -4.5489e+01
-ele: H H O pow: 4 1 4 param: -3.5563e+01
-ele: H H O pow: 4 2 0 param: -7.8207e+01
-ele: H H O pow: 4 2 1 param: -1.9552e+02
-ele: H H O pow: 4 2 2 param: -7.2594e+01
-ele: H H O pow: 4 2 3 param: -5.6210e+01
-ele: H H O pow: 4 2 4 param: -5.2304e+00
-ele: H H O pow: 4 3 0 param: -6.4374e+01
-ele: H H O pow: 4 3 1 param: -4.5489e+01
-ele: H H O pow: 4 3 2 param: -5.6210e+01
-ele: H H O pow: 4 3 3 param:  4.6180e+00
-ele: H H O pow: 4 3 4 param: -9.5539e+00
-ele: H H O pow: 4 4 0 param: -8.0917e+00
-ele: H H O pow: 4 4 1 param: -3.5563e+01
-ele: H H O pow: 4 4 2 param: -5.2304e+00
-ele: H H O pow: 4 4 3 param: -9.5539e+00
-ele: H H O pow: 4 4 4 param: -1.9808e+01
-ele: H H H pow: 0 0 2 param: -8.0459e+01
-ele: H H H pow: 0 0 3 param:  6.7936e+01
-ele: H H H pow: 0 0 4 param:  1.5661e+01
-ele: H H H pow: 0 1 1 param:  2.2281e+02
-ele: H H H pow: 0 1 2 param:  3.8406e+01
-ele: H H H pow: 0 1 3 param:  9.9258e+01
-ele: H H H pow: 0 1 4 param:  1.4626e+01
-ele: H H H pow: 0 2 0 param: -8.0459e+01
-ele: H H H pow: 0 2 1 param:  3.8406e+01
-ele: H H H pow: 0 2 2 param: -1.1035e+02
-ele: H H H pow: 0 2 3 param:  9.9920e+01
-ele: H H H pow: 0 2 4 param:  1.6286e+00
-ele: H H H pow: 0 3 0 param:  6.7936e+01
-ele: H H H pow: 0 3 1 param:  9.9258e+01
-ele: H H H pow: 0 3 2 param:  9.9920e+01
-ele: H H H pow: 0 3 3 param:  3.7113e+01
-ele: H H H pow: 0 3 4 param:  2.9514e+01
-ele: H H H pow: 0 4 0 param:  1.5661e+01
-ele: H H H pow: 0 4 1 param:  1.4626e+01
-ele: H H H pow: 0 4 2 param:  1.6286e+00
-ele: H H H pow: 0 4 3 param:  2.9514e+01
-ele: H H H pow: 0 4 4 param:  7.5838e-01
-ele: H H H pow: 1 0 1 param:  2.2281e+02
-ele: H H H pow: 1 0 2 param:  3.8406e+01
-ele: H H H pow: 1 0 3 param:  9.9258e+01
-ele: H H H pow: 1 0 4 param:  1.4626e+01
-ele: H H H pow: 1 1 0 param:  2.2281e+02
-ele: H H H pow: 1 1 1 param:  2.8561e+01
-ele: H H H pow: 1 1 2 param:  6.0669e+01
-ele: H H H pow: 1 1 3 param: -1.7348e+02
-ele: H H H pow: 1 1 4 param: -2.8735e+01
-ele: H H H pow: 1 2 0 param:  3.8406e+01
-ele: H H H pow: 1 2 1 param:  6.0669e+01
-ele: H H H pow: 1 2 2 param:  4.9143e+01
-ele: H H H pow: 1 2 3 param:  5.7680e+01
-ele: H H H pow: 1 2 4 param:  2.6496e+01
-ele: H H H pow: 1 3 0 param:  9.9258e+01
-ele: H H H pow: 1 3 1 param: -1.7348e+02
-ele: H H H pow: 1 3 2 param:  5.7680e+01
-ele: H H H pow: 1 3 3 param: -1.3346e+02
-ele: H H H pow: 1 3 4 param:  1.1220e+01
-ele: H H H pow: 1 4 0 param:  1.4626e+01
-ele: H H H pow: 1 4 1 param: -2.8735e+01
-ele: H H H pow: 1 4 2 param:  2.6496e+01
-ele: H H H pow: 1 4 3 param:  1.1220e+01
-ele: H H H pow: 1 4 4 param: -1.5882e+00
-ele: H H H pow: 2 0 0 param: -8.0459e+01
-ele: H H H pow: 2 0 1 param:  3.8406e+01
-ele: H H H pow: 2 0 2 param: -1.1035e+02
-ele: H H H pow: 2 0 3 param:  9.9920e+01
-ele: H H H pow: 2 0 4 param:  1.6286e+00
-ele: H H H pow: 2 1 0 param:  3.8406e+01
-ele: H H H pow: 2 1 1 param:  6.0669e+01
-ele: H H H pow: 2 1 2 param:  4.9143e+01
-ele: H H H pow: 2 1 3 param:  5.7680e+01
-ele: H H H pow: 2 1 4 param:  2.6496e+01
-ele: H H H pow: 2 2 0 param: -1.1035e+02
-ele: H H H pow: 2 2 1 param:  4.9143e+01
-ele: H H H pow: 2 2 2 param: -9.7083e+01
-ele: H H H pow: 2 2 3 param:  1.2508e+02
-ele: H H H pow: 2 2 4 param: -8.7195e+00
-ele: H H H pow: 2 3 0 param:  9.9920e+01
-ele: H H H pow: 2 3 1 param:  5.7680e+01
-ele: H H H pow: 2 3 2 param:  1.2508e+02
-ele: H H H pow: 2 3 3 param:  2.1076e+01
-ele: H H H pow: 2 3 4 param:  4.0706e+01
-ele: H H H pow: 2 4 0 param:  1.6286e+00
-ele: H H H pow: 2 4 1 param:  2.6496e+01
-ele: H H H pow: 2 4 2 param: -8.7195e+00
-ele: H H H pow: 2 4 3 param:  4.0706e+01
-ele: H H H pow: 2 4 4 param: -7.7323e+00
-ele: H H H pow: 3 0 0 param:  6.7936e+01
-ele: H H H pow: 3 0 1 param:  9.9258e+01
-ele: H H H pow: 3 0 2 param:  9.9920e+01
-ele: H H H pow: 3 0 3 param:  3.7113e+01
-ele: H H H pow: 3 0 4 param:  2.9514e+01
-ele: H H H pow: 3 1 0 param:  9.9258e+01
-ele: H H H pow: 3 1 1 param: -1.7348e+02
-ele: H H H pow: 3 1 2 param:  5.7680e+01
-ele: H H H pow: 3 1 3 param: -1.3346e+02
-ele: H H H pow: 3 1 4 param:  1.1220e+01
-ele: H H H pow: 3 2 0 param:  9.9920e+01
-ele: H H H pow: 3 2 1 param:  5.7680e+01
-ele: H H H pow: 3 2 2 param:  1.2508e+02
-ele: H H H pow: 3 2 3 param:  2.1076e+01
-ele: H H H pow: 3 2 4 param:  4.0706e+01
-ele: H H H pow: 3 3 0 param:  3.7113e+01
-ele: H H H pow: 3 3 1 param: -1.3346e+02
-ele: H H H pow: 3 3 2 param:  2.1076e+01
-ele: H H H pow: 3 3 3 param: -7.5141e+01
-ele: H H H pow: 3 3 4 param:  9.9441e+00
-ele: H H H pow: 3 4 0 param:  2.9514e+01
-ele: H H H pow: 3 4 1 param:  1.1220e+01
-ele: H H H pow: 3 4 2 param:  4.0706e+01
-ele: H H H pow: 3 4 3 param:  9.9441e+00
-ele: H H H pow: 3 4 4 param:  1.0357e+01
-ele: H H H pow: 4 0 0 param:  1.5661e+01
-ele: H H H pow: 4 0 1 param:  1.4626e+01
-ele: H H H pow: 4 0 2 param:  1.6286e+00
-ele: H H H pow: 4 0 3 param:  2.9514e+01
-ele: H H H pow: 4 0 4 param:  7.5838e-01
-ele: H H H pow: 4 1 0 param:  1.4626e+01
-ele: H H H pow: 4 1 1 param: -2.8735e+01
-ele: H H H pow: 4 1 2 param:  2.6496e+01
-ele: H H H pow: 4 1 3 param:  1.1220e+01
-ele: H H H pow: 4 1 4 param: -1.5882e+00
-ele: H H H pow: 4 2 0 param:  1.6286e+00
-ele: H H H pow: 4 2 1 param:  2.6496e+01
-ele: H H H pow: 4 2 2 param: -8.7195e+00
-ele: H H H pow: 4 2 3 param:  4.0706e+01
-ele: H H H pow: 4 2 4 param: -7.7323e+00
-ele: H H H pow: 4 3 0 param:  2.9514e+01
-ele: H H H pow: 4 3 1 param:  1.1220e+01
-ele: H H H pow: 4 3 2 param:  4.0706e+01
-ele: H H H pow: 4 3 3 param:  9.9441e+00
-ele: H H H pow: 4 3 4 param:  1.0357e+01
-ele: H H H pow: 4 4 0 param:  7.5838e-01
-ele: H H H pow: 4 4 1 param: -1.5882e+00
-ele: H H H pow: 4 4 2 param: -7.7323e+00
-ele: H H H pow: 4 4 3 param:  1.0357e+01
-ele: H H H pow: 4 4 4 param: -4.2949e+00
-RMS force error =  1.296787e-05
+ele: O O O pow: 0 1 1 param: -9.7763e+01
+ele: O O O pow: 0 1 2 param:  3.1078e+02
+ele: O O O pow: 0 1 3 param:  2.1604e+01
+ele: O O O pow: 0 1 4 param:  6.6811e+01
+ele: O O O pow: 0 2 1 param:  3.1078e+02
+ele: O O O pow: 0 2 2 param: -1.6463e+02
+ele: O O O pow: 0 2 3 param:  8.1129e+01
+ele: O O O pow: 0 2 4 param:  2.4455e+01
+ele: O O O pow: 0 3 1 param:  2.1604e+01
+ele: O O O pow: 0 3 2 param:  8.1129e+01
+ele: O O O pow: 0 3 3 param:  8.3686e+01
+ele: O O O pow: 0 3 4 param:  5.4745e+01
+ele: O O O pow: 0 4 1 param:  6.6811e+01
+ele: O O O pow: 0 4 2 param:  2.4455e+01
+ele: O O O pow: 0 4 3 param:  5.4745e+01
+ele: O O O pow: 0 4 4 param:  6.9893e+00
+ele: O O O pow: 1 0 1 param: -9.7763e+01
+ele: O O O pow: 1 0 2 param:  3.1078e+02
+ele: O O O pow: 1 0 3 param:  2.1604e+01
+ele: O O O pow: 1 0 4 param:  6.6811e+01
+ele: O O O pow: 1 1 0 param: -9.7763e+01
+ele: O O O pow: 1 1 1 param: -5.1503e+01
+ele: O O O pow: 1 1 2 param:  6.9077e+01
+ele: O O O pow: 1 1 3 param:  2.5437e+02
+ele: O O O pow: 1 1 4 param:  1.1943e+01
+ele: O O O pow: 1 2 0 param:  3.1078e+02
+ele: O O O pow: 1 2 1 param:  6.9077e+01
+ele: O O O pow: 1 2 2 param: -1.4616e+02
+ele: O O O pow: 1 2 3 param: -2.4808e+01
+ele: O O O pow: 1 2 4 param: -4.7230e+01
+ele: O O O pow: 1 3 0 param:  2.1604e+01
+ele: O O O pow: 1 3 1 param:  2.5437e+02
+ele: O O O pow: 1 3 2 param: -2.4808e+01
+ele: O O O pow: 1 3 3 param: -1.9975e+02
+ele: O O O pow: 1 3 4 param: -8.2072e+01
+ele: O O O pow: 1 4 0 param:  6.6811e+01
+ele: O O O pow: 1 4 1 param:  1.1943e+01
+ele: O O O pow: 1 4 2 param: -4.7230e+01
+ele: O O O pow: 1 4 3 param: -8.2072e+01
+ele: O O O pow: 1 4 4 param:  2.6355e+01
+ele: O O O pow: 2 0 1 param:  3.1078e+02
+ele: O O O pow: 2 0 2 param: -1.6463e+02
+ele: O O O pow: 2 0 3 param:  8.1129e+01
+ele: O O O pow: 2 0 4 param:  2.4455e+01
+ele: O O O pow: 2 1 0 param:  3.1078e+02
+ele: O O O pow: 2 1 1 param:  6.9077e+01
+ele: O O O pow: 2 1 2 param: -1.4616e+02
+ele: O O O pow: 2 1 3 param: -2.4808e+01
+ele: O O O pow: 2 1 4 param: -4.7230e+01
+ele: O O O pow: 2 2 0 param: -1.6463e+02
+ele: O O O pow: 2 2 1 param: -1.4616e+02
+ele: O O O pow: 2 2 2 param:  1.6481e+01
+ele: O O O pow: 2 2 3 param: -6.9884e+00
+ele: O O O pow: 2 2 4 param:  4.9032e+01
+ele: O O O pow: 2 3 0 param:  8.1129e+01
+ele: O O O pow: 2 3 1 param: -2.4808e+01
+ele: O O O pow: 2 3 2 param: -6.9884e+00
+ele: O O O pow: 2 3 3 param:  5.8249e+00
+ele: O O O pow: 2 3 4 param:  2.9690e+01
+ele: O O O pow: 2 4 0 param:  2.4455e+01
+ele: O O O pow: 2 4 1 param: -4.7230e+01
+ele: O O O pow: 2 4 2 param:  4.9032e+01
+ele: O O O pow: 2 4 3 param:  2.9690e+01
+ele: O O O pow: 2 4 4 param: -4.9920e+01
+ele: O O O pow: 3 0 1 param:  2.1604e+01
+ele: O O O pow: 3 0 2 param:  8.1129e+01
+ele: O O O pow: 3 0 3 param:  8.3686e+01
+ele: O O O pow: 3 0 4 param:  5.4745e+01
+ele: O O O pow: 3 1 0 param:  2.1604e+01
+ele: O O O pow: 3 1 1 param:  2.5437e+02
+ele: O O O pow: 3 1 2 param: -2.4808e+01
+ele: O O O pow: 3 1 3 param: -1.9975e+02
+ele: O O O pow: 3 1 4 param: -8.2072e+01
+ele: O O O pow: 3 2 0 param:  8.1129e+01
+ele: O O O pow: 3 2 1 param: -2.4808e+01
+ele: O O O pow: 3 2 2 param: -6.9884e+00
+ele: O O O pow: 3 2 3 param:  5.8249e+00
+ele: O O O pow: 3 2 4 param:  2.9690e+01
+ele: O O O pow: 3 3 0 param:  8.3686e+01
+ele: O O O pow: 3 3 1 param: -1.9975e+02
+ele: O O O pow: 3 3 2 param:  5.8249e+00
+ele: O O O pow: 3 3 3 param: -2.4637e+02
+ele: O O O pow: 3 3 4 param: -8.3009e+01
+ele: O O O pow: 3 4 0 param:  5.4745e+01
+ele: O O O pow: 3 4 1 param: -8.2072e+01
+ele: O O O pow: 3 4 2 param:  2.9690e+01
+ele: O O O pow: 3 4 3 param: -8.3009e+01
+ele: O O O pow: 3 4 4 param:  3.1684e+01
+ele: O O O pow: 4 0 1 param:  6.6811e+01
+ele: O O O pow: 4 0 2 param:  2.4455e+01
+ele: O O O pow: 4 0 3 param:  5.4745e+01
+ele: O O O pow: 4 0 4 param:  6.9893e+00
+ele: O O O pow: 4 1 0 param:  6.6811e+01
+ele: O O O pow: 4 1 1 param:  1.1943e+01
+ele: O O O pow: 4 1 2 param: -4.7230e+01
+ele: O O O pow: 4 1 3 param: -8.2072e+01
+ele: O O O pow: 4 1 4 param:  2.6355e+01
+ele: O O O pow: 4 2 0 param:  2.4455e+01
+ele: O O O pow: 4 2 1 param: -4.7230e+01
+ele: O O O pow: 4 2 2 param:  4.9032e+01
+ele: O O O pow: 4 2 3 param:  2.9690e+01
+ele: O O O pow: 4 2 4 param: -4.9920e+01
+ele: O O O pow: 4 3 0 param:  5.4745e+01
+ele: O O O pow: 4 3 1 param: -8.2072e+01
+ele: O O O pow: 4 3 2 param:  2.9690e+01
+ele: O O O pow: 4 3 3 param: -8.3009e+01
+ele: O O O pow: 4 3 4 param:  3.1684e+01
+ele: O O O pow: 4 4 0 param:  6.9893e+00
+ele: O O O pow: 4 4 1 param:  2.6355e+01
+ele: O O O pow: 4 4 2 param: -4.9920e+01
+ele: O O O pow: 4 4 3 param:  3.1684e+01
+ele: O O O pow: 4 4 4 param: -9.1750e+01
+ele: O O H pow: 0 1 1 param:  2.8447e+02
+ele: O O H pow: 0 1 2 param: -1.4662e+02
+ele: O O H pow: 0 1 3 param:  7.8289e+01
+ele: O O H pow: 0 1 4 param: -1.4355e+02
+ele: O O H pow: 0 2 1 param: -1.4662e+02
+ele: O O H pow: 0 2 2 param:  1.5446e+02
+ele: O O H pow: 0 2 3 param: -1.2557e+02
+ele: O O H pow: 0 2 4 param:  5.7544e+00
+ele: O O H pow: 0 3 1 param:  7.8289e+01
+ele: O O H pow: 0 3 2 param: -1.2557e+02
+ele: O O H pow: 0 3 3 param:  2.6388e+01
+ele: O O H pow: 0 3 4 param: -4.6414e+01
+ele: O O H pow: 0 4 1 param: -1.4355e+02
+ele: O O H pow: 0 4 2 param:  5.7544e+00
+ele: O O H pow: 0 4 3 param: -4.6414e+01
+ele: O O H pow: 0 4 4 param:  9.5593e+01
+ele: O O H pow: 1 0 1 param: -5.6665e+01
+ele: O O H pow: 1 0 2 param: -1.4305e+02
+ele: O O H pow: 1 0 3 param:  6.3775e+01
+ele: O O H pow: 1 0 4 param:  1.4355e+01
+ele: O O H pow: 1 1 0 param: -5.6665e+01
+ele: O O H pow: 1 1 1 param:  5.1566e+02
+ele: O O H pow: 1 1 2 param: -3.2724e+02
+ele: O O H pow: 1 1 3 param: -2.1446e+02
+ele: O O H pow: 1 1 4 param: -2.7338e+01
+ele: O O H pow: 1 2 0 param: -1.4305e+02
+ele: O O H pow: 1 2 1 param: -3.2724e+02
+ele: O O H pow: 1 2 2 param: -1.8025e+01
+ele: O O H pow: 1 2 3 param:  1.1069e+02
+ele: O O H pow: 1 2 4 param:  9.2129e+01
+ele: O O H pow: 1 3 0 param:  6.3775e+01
+ele: O O H pow: 1 3 1 param: -2.1446e+02
+ele: O O H pow: 1 3 2 param:  1.1069e+02
+ele: O O H pow: 1 3 3 param: -1.4873e+02
+ele: O O H pow: 1 3 4 param: -2.5748e+01
+ele: O O H pow: 1 4 0 param:  1.4355e+01
+ele: O O H pow: 1 4 1 param: -2.7338e+01
+ele: O O H pow: 1 4 2 param:  9.2129e+01
+ele: O O H pow: 1 4 3 param: -2.5748e+01
+ele: O O H pow: 1 4 4 param: -9.7471e+01
+ele: O O H pow: 2 0 1 param:  8.0095e+01
+ele: O O H pow: 2 0 2 param:  3.1233e+01
+ele: O O H pow: 2 0 3 param: -2.4398e+02
+ele: O O H pow: 2 0 4 param: -4.5014e+01
+ele: O O H pow: 2 1 0 param:  8.0095e+01
+ele: O O H pow: 2 1 1 param: -6.5615e+01
+ele: O O H pow: 2 1 2 param: -2.3146e+02
+ele: O O H pow: 2 1 3 param: -1.8375e+01
+ele: O O H pow: 2 1 4 param: -2.3152e+02
+ele: O O H pow: 2 2 0 param:  3.1233e+01
+ele: O O H pow: 2 2 1 param: -2.3146e+02
+ele: O O H pow: 2 2 2 param:  1.5269e+02
+ele: O O H pow: 2 2 3 param: -2.9850e+02
+ele: O O H pow: 2 2 4 param:  6.7031e+00
+ele: O O H pow: 2 3 0 param: -2.4398e+02
+ele: O O H pow: 2 3 1 param: -1.8375e+01
+ele: O O H pow: 2 3 2 param: -2.9850e+02
+ele: O O H pow: 2 3 3 param:  1.8327e+02
+ele: O O H pow: 2 3 4 param: -6.5879e+01
+ele: O O H pow: 2 4 0 param: -4.5014e+01
+ele: O O H pow: 2 4 1 param: -2.3152e+02
+ele: O O H pow: 2 4 2 param:  6.7031e+00
+ele: O O H pow: 2 4 3 param: -6.5879e+01
+ele: O O H pow: 2 4 4 param:  1.2718e+02
+ele: O O H pow: 3 0 1 param: -1.0379e+02
+ele: O O H pow: 3 0 2 param:  5.7289e+01
+ele: O O H pow: 3 0 3 param:  9.3167e+01
+ele: O O H pow: 3 0 4 param:  9.3899e+01
+ele: O O H pow: 3 1 0 param: -1.0379e+02
+ele: O O H pow: 3 1 1 param: -3.0511e+02
+ele: O O H pow: 3 1 2 param:  1.3491e+02
+ele: O O H pow: 3 1 3 param:  2.0806e+01
+ele: O O H pow: 3 1 4 param:  1.3264e+02
+ele: O O H pow: 3 2 0 param:  5.7289e+01
+ele: O O H pow: 3 2 1 param:  1.3491e+02
+ele: O O H pow: 3 2 2 param:  2.2090e+01
+ele: O O H pow: 3 2 3 param:  8.5544e+01
+ele: O O H pow: 3 2 4 param:  4.7211e+01
+ele: O O H pow: 3 3 0 param:  9.3167e+01
+ele: O O H pow: 3 3 1 param:  2.0806e+01
+ele: O O H pow: 3 3 2 param:  8.5544e+01
+ele: O O H pow: 3 3 3 param: -9.4740e+01
+ele: O O H pow: 3 3 4 param: -1.9634e+01
+ele: O O H pow: 3 4 0 param:  9.3899e+01
+ele: O O H pow: 3 4 1 param:  1.3264e+02
+ele: O O H pow: 3 4 2 param:  4.7211e+01
+ele: O O H pow: 3 4 3 param: -1.9634e+01
+ele: O O H pow: 3 4 4 param: -5.9366e+01
+ele: O O H pow: 4 0 1 param: -5.6037e+00
+ele: O O H pow: 4 0 2 param: -7.2501e+01
+ele: O O H pow: 4 0 3 param: -1.3397e+02
+ele: O O H pow: 4 0 4 param: -7.0125e+01
+ele: O O H pow: 4 1 0 param: -5.6037e+00
+ele: O O H pow: 4 1 1 param: -1.6422e+02
+ele: O O H pow: 4 1 2 param: -1.6290e+02
+ele: O O H pow: 4 1 3 param: -1.1146e+02
+ele: O O H pow: 4 1 4 param: -6.4167e+01
+ele: O O H pow: 4 2 0 param: -7.2501e+01
+ele: O O H pow: 4 2 1 param: -1.6290e+02
+ele: O O H pow: 4 2 2 param: -6.9508e+01
+ele: O O H pow: 4 2 3 param: -1.3747e+02
+ele: O O H pow: 4 2 4 param: -6.2125e+01
+ele: O O H pow: 4 3 0 param: -1.3397e+02
+ele: O O H pow: 4 3 1 param: -1.1146e+02
+ele: O O H pow: 4 3 2 param: -1.3747e+02
+ele: O O H pow: 4 3 3 param:  3.8980e+01
+ele: O O H pow: 4 3 4 param: -2.1303e+01
+ele: O O H pow: 4 4 0 param: -7.0125e+01
+ele: O O H pow: 4 4 1 param: -6.4167e+01
+ele: O O H pow: 4 4 2 param: -6.2125e+01
+ele: O O H pow: 4 4 3 param: -2.1303e+01
+ele: O O H pow: 4 4 4 param: -1.3809e+01
+ele: O H O pow: 0 1 1 param: -5.6665e+01
+ele: O H O pow: 0 1 2 param: -1.4305e+02
+ele: O H O pow: 0 1 3 param:  6.3775e+01
+ele: O H O pow: 0 1 4 param:  1.4355e+01
+ele: O H O pow: 0 2 1 param:  8.0095e+01
+ele: O H O pow: 0 2 2 param:  3.1233e+01
+ele: O H O pow: 0 2 3 param: -2.4398e+02
+ele: O H O pow: 0 2 4 param: -4.5014e+01
+ele: O H O pow: 0 3 1 param: -1.0379e+02
+ele: O H O pow: 0 3 2 param:  5.7289e+01
+ele: O H O pow: 0 3 3 param:  9.3167e+01
+ele: O H O pow: 0 3 4 param:  9.3899e+01
+ele: O H O pow: 0 4 1 param: -5.6037e+00
+ele: O H O pow: 0 4 2 param: -7.2501e+01
+ele: O H O pow: 0 4 3 param: -1.3397e+02
+ele: O H O pow: 0 4 4 param: -7.0125e+01
+ele: O H O pow: 1 0 1 param:  2.8447e+02
+ele: O H O pow: 1 0 2 param: -1.4662e+02
+ele: O H O pow: 1 0 3 param:  7.8289e+01
+ele: O H O pow: 1 0 4 param: -1.4355e+02
+ele: O H O pow: 1 1 0 param: -5.6665e+01
+ele: O H O pow: 1 1 1 param:  5.1566e+02
+ele: O H O pow: 1 1 2 param: -3.2724e+02
+ele: O H O pow: 1 1 3 param: -2.1446e+02
+ele: O H O pow: 1 1 4 param: -2.7338e+01
+ele: O H O pow: 1 2 0 param:  8.0095e+01
+ele: O H O pow: 1 2 1 param: -6.5615e+01
+ele: O H O pow: 1 2 2 param: -2.3146e+02
+ele: O H O pow: 1 2 3 param: -1.8375e+01
+ele: O H O pow: 1 2 4 param: -2.3152e+02
+ele: O H O pow: 1 3 0 param: -1.0379e+02
+ele: O H O pow: 1 3 1 param: -3.0511e+02
+ele: O H O pow: 1 3 2 param:  1.3491e+02
+ele: O H O pow: 1 3 3 param:  2.0806e+01
+ele: O H O pow: 1 3 4 param:  1.3264e+02
+ele: O H O pow: 1 4 0 param: -5.6037e+00
+ele: O H O pow: 1 4 1 param: -1.6422e+02
+ele: O H O pow: 1 4 2 param: -1.6290e+02
+ele: O H O pow: 1 4 3 param: -1.1146e+02
+ele: O H O pow: 1 4 4 param: -6.4167e+01
+ele: O H O pow: 2 0 1 param: -1.4662e+02
+ele: O H O pow: 2 0 2 param:  1.5446e+02
+ele: O H O pow: 2 0 3 param: -1.2557e+02
+ele: O H O pow: 2 0 4 param:  5.7544e+00
+ele: O H O pow: 2 1 0 param: -1.4305e+02
+ele: O H O pow: 2 1 1 param: -3.2724e+02
+ele: O H O pow: 2 1 2 param: -1.8025e+01
+ele: O H O pow: 2 1 3 param:  1.1069e+02
+ele: O H O pow: 2 1 4 param:  9.2129e+01
+ele: O H O pow: 2 2 0 param:  3.1233e+01
+ele: O H O pow: 2 2 1 param: -2.3146e+02
+ele: O H O pow: 2 2 2 param:  1.5269e+02
+ele: O H O pow: 2 2 3 param: -2.9850e+02
+ele: O H O pow: 2 2 4 param:  6.7031e+00
+ele: O H O pow: 2 3 0 param:  5.7289e+01
+ele: O H O pow: 2 3 1 param:  1.3491e+02
+ele: O H O pow: 2 3 2 param:  2.2090e+01
+ele: O H O pow: 2 3 3 param:  8.5544e+01
+ele: O H O pow: 2 3 4 param:  4.7211e+01
+ele: O H O pow: 2 4 0 param: -7.2501e+01
+ele: O H O pow: 2 4 1 param: -1.6290e+02
+ele: O H O pow: 2 4 2 param: -6.9508e+01
+ele: O H O pow: 2 4 3 param: -1.3747e+02
+ele: O H O pow: 2 4 4 param: -6.2125e+01
+ele: O H O pow: 3 0 1 param:  7.8289e+01
+ele: O H O pow: 3 0 2 param: -1.2557e+02
+ele: O H O pow: 3 0 3 param:  2.6388e+01
+ele: O H O pow: 3 0 4 param: -4.6414e+01
+ele: O H O pow: 3 1 0 param:  6.3775e+01
+ele: O H O pow: 3 1 1 param: -2.1446e+02
+ele: O H O pow: 3 1 2 param:  1.1069e+02
+ele: O H O pow: 3 1 3 param: -1.4873e+02
+ele: O H O pow: 3 1 4 param: -2.5748e+01
+ele: O H O pow: 3 2 0 param: -2.4398e+02
+ele: O H O pow: 3 2 1 param: -1.8375e+01
+ele: O H O pow: 3 2 2 param: -2.9850e+02
+ele: O H O pow: 3 2 3 param:  1.8327e+02
+ele: O H O pow: 3 2 4 param: -6.5879e+01
+ele: O H O pow: 3 3 0 param:  9.3167e+01
+ele: O H O pow: 3 3 1 param:  2.0806e+01
+ele: O H O pow: 3 3 2 param:  8.5544e+01
+ele: O H O pow: 3 3 3 param: -9.4740e+01
+ele: O H O pow: 3 3 4 param: -1.9634e+01
+ele: O H O pow: 3 4 0 param: -1.3397e+02
+ele: O H O pow: 3 4 1 param: -1.1146e+02
+ele: O H O pow: 3 4 2 param: -1.3747e+02
+ele: O H O pow: 3 4 3 param:  3.8980e+01
+ele: O H O pow: 3 4 4 param: -2.1303e+01
+ele: O H O pow: 4 0 1 param: -1.4355e+02
+ele: O H O pow: 4 0 2 param:  5.7544e+00
+ele: O H O pow: 4 0 3 param: -4.6414e+01
+ele: O H O pow: 4 0 4 param:  9.5593e+01
+ele: O H O pow: 4 1 0 param:  1.4355e+01
+ele: O H O pow: 4 1 1 param: -2.7338e+01
+ele: O H O pow: 4 1 2 param:  9.2129e+01
+ele: O H O pow: 4 1 3 param: -2.5748e+01
+ele: O H O pow: 4 1 4 param: -9.7471e+01
+ele: O H O pow: 4 2 0 param: -4.5014e+01
+ele: O H O pow: 4 2 1 param: -2.3152e+02
+ele: O H O pow: 4 2 2 param:  6.7031e+00
+ele: O H O pow: 4 2 3 param: -6.5879e+01
+ele: O H O pow: 4 2 4 param:  1.2718e+02
+ele: O H O pow: 4 3 0 param:  9.3899e+01
+ele: O H O pow: 4 3 1 param:  1.3264e+02
+ele: O H O pow: 4 3 2 param:  4.7211e+01
+ele: O H O pow: 4 3 3 param: -1.9634e+01
+ele: O H O pow: 4 3 4 param: -5.9366e+01
+ele: O H O pow: 4 4 0 param: -7.0125e+01
+ele: O H O pow: 4 4 1 param: -6.4167e+01
+ele: O H O pow: 4 4 2 param: -6.2125e+01
+ele: O H O pow: 4 4 3 param: -2.1303e+01
+ele: O H O pow: 4 4 4 param: -1.3809e+01
+ele: O H H pow: 0 1 1 param: -3.9422e+02
+ele: O H H pow: 0 1 2 param: -1.6329e+02
+ele: O H H pow: 0 1 3 param: -4.6470e+01
+ele: O H H pow: 0 1 4 param: -1.0458e+02
+ele: O H H pow: 0 2 1 param:  5.9001e+02
+ele: O H H pow: 0 2 2 param: -2.9970e+01
+ele: O H H pow: 0 2 3 param:  2.2584e+02
+ele: O H H pow: 0 2 4 param:  1.2721e+01
+ele: O H H pow: 0 3 1 param:  4.4365e+02
+ele: O H H pow: 0 3 2 param:  2.4866e+01
+ele: O H H pow: 0 3 3 param:  1.8683e+02
+ele: O H H pow: 0 3 4 param: -2.4707e+00
+ele: O H H pow: 0 4 1 param:  3.1949e+02
+ele: O H H pow: 0 4 2 param:  1.1077e+01
+ele: O H H pow: 0 4 3 param:  1.0701e+02
+ele: O H H pow: 0 4 4 param:  1.5467e+01
+ele: O H H pow: 1 0 1 param: -3.9422e+02
+ele: O H H pow: 1 0 2 param: -1.6329e+02
+ele: O H H pow: 1 0 3 param: -4.6470e+01
+ele: O H H pow: 1 0 4 param: -1.0458e+02
+ele: O H H pow: 1 1 0 param:  5.5660e+02
+ele: O H H pow: 1 1 1 param:  3.4139e+02
+ele: O H H pow: 1 1 2 param:  3.9702e+02
+ele: O H H pow: 1 1 3 param:  3.9655e+02
+ele: O H H pow: 1 1 4 param:  1.0225e+02
+ele: O H H pow: 1 2 0 param: -7.5563e+02
+ele: O H H pow: 1 2 1 param: -1.6012e+02
+ele: O H H pow: 1 2 2 param: -9.7475e+02
+ele: O H H pow: 1 2 3 param: -9.8773e+01
+ele: O H H pow: 1 2 4 param: -2.6275e+02
+ele: O H H pow: 1 3 0 param: -3.7751e+02
+ele: O H H pow: 1 3 1 param:  5.1536e+01
+ele: O H H pow: 1 3 2 param: -4.7989e+02
+ele: O H H pow: 1 3 3 param:  1.4146e+01
+ele: O H H pow: 1 3 4 param: -5.1226e+01
+ele: O H H pow: 1 4 0 param: -3.0068e+02
+ele: O H H pow: 1 4 1 param: -1.5285e+02
+ele: O H H pow: 1 4 2 param: -3.4953e+02
+ele: O H H pow: 1 4 3 param: -1.1329e+02
+ele: O H H pow: 1 4 4 param: -6.7258e+01
+ele: O H H pow: 2 0 1 param:  5.9001e+02
+ele: O H H pow: 2 0 2 param: -2.9970e+01
+ele: O H H pow: 2 0 3 param:  2.2584e+02
+ele: O H H pow: 2 0 4 param:  1.2721e+01
+ele: O H H pow: 2 1 0 param: -7.5563e+02
+ele: O H H pow: 2 1 1 param: -1.6012e+02
+ele: O H H pow: 2 1 2 param: -9.7475e+02
+ele: O H H pow: 2 1 3 param: -9.8773e+01
+ele: O H H pow: 2 1 4 param: -2.6275e+02
+ele: O H H pow: 2 2 0 param:  2.8248e+02
+ele: O H H pow: 2 2 1 param:  9.2433e+02
+ele: O H H pow: 2 2 2 param:  3.3593e+02
+ele: O H H pow: 2 2 3 param:  3.9757e+02
+ele: O H H pow: 2 2 4 param:  1.1762e+02
+ele: O H H pow: 2 3 0 param:  3.5089e+01
+ele: O H H pow: 2 3 1 param:  1.8283e+02
+ele: O H H pow: 2 3 2 param:  5.1380e+01
+ele: O H H pow: 2 3 3 param:  6.8511e+01
+ele: O H H pow: 2 3 4 param: -5.9421e+00
+ele: O H H pow: 2 4 0 param:  1.2629e+02
+ele: O H H pow: 2 4 1 param:  2.8479e+02
+ele: O H H pow: 2 4 2 param:  1.6023e+02
+ele: O H H pow: 2 4 3 param:  1.2020e+02
+ele: O H H pow: 2 4 4 param:  4.2789e+01
+ele: O H H pow: 3 0 1 param:  4.4365e+02
+ele: O H H pow: 3 0 2 param:  2.4866e+01
+ele: O H H pow: 3 0 3 param:  1.8683e+02
+ele: O H H pow: 3 0 4 param: -2.4707e+00
+ele: O H H pow: 3 1 0 param: -3.7751e+02
+ele: O H H pow: 3 1 1 param:  5.1536e+01
+ele: O H H pow: 3 1 2 param: -4.7989e+02
+ele: O H H pow: 3 1 3 param:  1.4146e+01
+ele: O H H pow: 3 1 4 param: -5.1226e+01
+ele: O H H pow: 3 2 0 param:  3.5089e+01
+ele: O H H pow: 3 2 1 param:  1.8283e+02
+ele: O H H pow: 3 2 2 param:  5.1380e+01
+ele: O H H pow: 3 2 3 param:  6.8511e+01
+ele: O H H pow: 3 2 4 param: -5.9421e+00
+ele: O H H pow: 3 3 0 param: -1.5626e+02
+ele: O H H pow: 3 3 1 param: -2.9651e+02
+ele: O H H pow: 3 3 2 param: -2.1318e+02
+ele: O H H pow: 3 3 3 param: -1.3312e+02
+ele: O H H pow: 3 3 4 param: -1.6792e+01
+ele: O H H pow: 3 4 0 param:  4.6582e+01
+ele: O H H pow: 3 4 1 param: -9.7279e+01
+ele: O H H pow: 3 4 2 param:  6.6428e+01
+ele: O H H pow: 3 4 3 param: -3.9769e+01
+ele: O H H pow: 3 4 4 param:  2.7902e+00
+ele: O H H pow: 4 0 1 param:  3.1949e+02
+ele: O H H pow: 4 0 2 param:  1.1077e+01
+ele: O H H pow: 4 0 3 param:  1.0701e+02
+ele: O H H pow: 4 0 4 param:  1.5467e+01
+ele: O H H pow: 4 1 0 param: -3.0068e+02
+ele: O H H pow: 4 1 1 param: -1.5285e+02
+ele: O H H pow: 4 1 2 param: -3.4953e+02
+ele: O H H pow: 4 1 3 param: -1.1329e+02
+ele: O H H pow: 4 1 4 param: -6.7258e+01
+ele: O H H pow: 4 2 0 param:  1.2629e+02
+ele: O H H pow: 4 2 1 param:  2.8479e+02
+ele: O H H pow: 4 2 2 param:  1.6023e+02
+ele: O H H pow: 4 2 3 param:  1.2020e+02
+ele: O H H pow: 4 2 4 param:  4.2789e+01
+ele: O H H pow: 4 3 0 param:  4.6582e+01
+ele: O H H pow: 4 3 1 param: -9.7279e+01
+ele: O H H pow: 4 3 2 param:  6.6428e+01
+ele: O H H pow: 4 3 3 param: -3.9769e+01
+ele: O H H pow: 4 3 4 param:  2.7902e+00
+ele: O H H pow: 4 4 0 param:  2.6455e+00
+ele: O H H pow: 4 4 1 param: -2.5074e+01
+ele: O H H pow: 4 4 2 param: -2.1299e+01
+ele: O H H pow: 4 4 3 param:  1.4421e+01
+ele: O H H pow: 4 4 4 param: -1.5502e+01
+ele: H O O pow: 0 1 1 param: -5.6665e+01
+ele: H O O pow: 0 1 2 param:  8.0095e+01
+ele: H O O pow: 0 1 3 param: -1.0379e+02
+ele: H O O pow: 0 1 4 param: -5.6037e+00
+ele: H O O pow: 0 2 1 param: -1.4305e+02
+ele: H O O pow: 0 2 2 param:  3.1233e+01
+ele: H O O pow: 0 2 3 param:  5.7289e+01
+ele: H O O pow: 0 2 4 param: -7.2501e+01
+ele: H O O pow: 0 3 1 param:  6.3775e+01
+ele: H O O pow: 0 3 2 param: -2.4398e+02
+ele: H O O pow: 0 3 3 param:  9.3167e+01
+ele: H O O pow: 0 3 4 param: -1.3397e+02
+ele: H O O pow: 0 4 1 param:  1.4355e+01
+ele: H O O pow: 0 4 2 param: -4.5014e+01
+ele: H O O pow: 0 4 3 param:  9.3899e+01
+ele: H O O pow: 0 4 4 param: -7.0125e+01
+ele: H O O pow: 1 0 1 param: -5.6665e+01
+ele: H O O pow: 1 0 2 param:  8.0095e+01
+ele: H O O pow: 1 0 3 param: -1.0379e+02
+ele: H O O pow: 1 0 4 param: -5.6037e+00
+ele: H O O pow: 1 1 0 param:  2.8447e+02
+ele: H O O pow: 1 1 1 param:  5.1566e+02
+ele: H O O pow: 1 1 2 param: -6.5615e+01
+ele: H O O pow: 1 1 3 param: -3.0511e+02
+ele: H O O pow: 1 1 4 param: -1.6422e+02
+ele: H O O pow: 1 2 0 param: -1.4662e+02
+ele: H O O pow: 1 2 1 param: -3.2724e+02
+ele: H O O pow: 1 2 2 param: -2.3146e+02
+ele: H O O pow: 1 2 3 param:  1.3491e+02
+ele: H O O pow: 1 2 4 param: -1.6290e+02
+ele: H O O pow: 1 3 0 param:  7.8289e+01
+ele: H O O pow: 1 3 1 param: -2.1446e+02
+ele: H O O pow: 1 3 2 param: -1.8375e+01
+ele: H O O pow: 1 3 3 param:  2.0806e+01
+ele: H O O pow: 1 3 4 param: -1.1146e+02
+ele: H O O pow: 1 4 0 param: -1.4355e+02
+ele: H O O pow: 1 4 1 param: -2.7338e+01
+ele: H O O pow: 1 4 2 param: -2.3152e+02
+ele: H O O pow: 1 4 3 param:  1.3264e+02
+ele: H O O pow: 1 4 4 param: -6.4167e+01
+ele: H O O pow: 2 0 1 param: -1.4305e+02
+ele: H O O pow: 2 0 2 param:  3.1233e+01
+ele: H O O pow: 2 0 3 param:  5.7289e+01
+ele: H O O pow: 2 0 4 param: -7.2501e+01
+ele: H O O pow: 2 1 0 param: -1.4662e+02
+ele: H O O pow: 2 1 1 param: -3.2724e+02
+ele: H O O pow: 2 1 2 param: -2.3146e+02
+ele: H O O pow: 2 1 3 param:  1.3491e+02
+ele: H O O pow: 2 1 4 param: -1.6290e+02
+ele: H O O pow: 2 2 0 param:  1.5446e+02
+ele: H O O pow: 2 2 1 param: -1.8025e+01
+ele: H O O pow: 2 2 2 param:  1.5269e+02
+ele: H O O pow: 2 2 3 param:  2.2090e+01
+ele: H O O pow: 2 2 4 param: -6.9508e+01
+ele: H O O pow: 2 3 0 param: -1.2557e+02
+ele: H O O pow: 2 3 1 param:  1.1069e+02
+ele: H O O pow: 2 3 2 param: -2.9850e+02
+ele: H O O pow: 2 3 3 param:  8.5544e+01
+ele: H O O pow: 2 3 4 param: -1.3747e+02
+ele: H O O pow: 2 4 0 param:  5.7544e+00
+ele: H O O pow: 2 4 1 param:  9.2129e+01
+ele: H O O pow: 2 4 2 param:  6.7031e+00
+ele: H O O pow: 2 4 3 param:  4.7211e+01
+ele: H O O pow: 2 4 4 param: -6.2125e+01
+ele: H O O pow: 3 0 1 param:  6.3775e+01
+ele: H O O pow: 3 0 2 param: -2.4398e+02
+ele: H O O pow: 3 0 3 param:  9.3167e+01
+ele: H O O pow: 3 0 4 param: -1.3397e+02
+ele: H O O pow: 3 1 0 param:  7.8289e+01
+ele: H O O pow: 3 1 1 param: -2.1446e+02
+ele: H O O pow: 3 1 2 param: -1.8375e+01
+ele: H O O pow: 3 1 3 param:  2.0806e+01
+ele: H O O pow: 3 1 4 param: -1.1146e+02
+ele: H O O pow: 3 2 0 param: -1.2557e+02
+ele: H O O pow: 3 2 1 param:  1.1069e+02
+ele: H O O pow: 3 2 2 param: -2.9850e+02
+ele: H O O pow: 3 2 3 param:  8.5544e+01
+ele: H O O pow: 3 2 4 param: -1.3747e+02
+ele: H O O pow: 3 3 0 param:  2.6388e+01
+ele: H O O pow: 3 3 1 param: -1.4873e+02
+ele: H O O pow: 3 3 2 param:  1.8327e+02
+ele: H O O pow: 3 3 3 param: -9.4740e+01
+ele: H O O pow: 3 3 4 param:  3.8980e+01
+ele: H O O pow: 3 4 0 param: -4.6414e+01
+ele: H O O pow: 3 4 1 param: -2.5748e+01
+ele: H O O pow: 3 4 2 param: -6.5879e+01
+ele: H O O pow: 3 4 3 param: -1.9634e+01
+ele: H O O pow: 3 4 4 param: -2.1303e+01
+ele: H O O pow: 4 0 1 param:  1.4355e+01
+ele: H O O pow: 4 0 2 param: -4.5014e+01
+ele: H O O pow: 4 0 3 param:  9.3899e+01
+ele: H O O pow: 4 0 4 param: -7.0125e+01
+ele: H O O pow: 4 1 0 param: -1.4355e+02
+ele: H O O pow: 4 1 1 param: -2.7338e+01
+ele: H O O pow: 4 1 2 param: -2.3152e+02
+ele: H O O pow: 4 1 3 param:  1.3264e+02
+ele: H O O pow: 4 1 4 param: -6.4167e+01
+ele: H O O pow: 4 2 0 param:  5.7544e+00
+ele: H O O pow: 4 2 1 param:  9.2129e+01
+ele: H O O pow: 4 2 2 param:  6.7031e+00
+ele: H O O pow: 4 2 3 param:  4.7211e+01
+ele: H O O pow: 4 2 4 param: -6.2125e+01
+ele: H O O pow: 4 3 0 param: -4.6414e+01
+ele: H O O pow: 4 3 1 param: -2.5748e+01
+ele: H O O pow: 4 3 2 param: -6.5879e+01
+ele: H O O pow: 4 3 3 param: -1.9634e+01
+ele: H O O pow: 4 3 4 param: -2.1303e+01
+ele: H O O pow: 4 4 0 param:  9.5593e+01
+ele: H O O pow: 4 4 1 param: -9.7471e+01
+ele: H O O pow: 4 4 2 param:  1.2718e+02
+ele: H O O pow: 4 4 3 param: -5.9366e+01
+ele: H O O pow: 4 4 4 param: -1.3809e+01
+ele: H O H pow: 0 1 1 param: -3.9422e+02
+ele: H O H pow: 0 1 2 param:  5.9001e+02
+ele: H O H pow: 0 1 3 param:  4.4365e+02
+ele: H O H pow: 0 1 4 param:  3.1949e+02
+ele: H O H pow: 0 2 1 param: -1.6329e+02
+ele: H O H pow: 0 2 2 param: -2.9970e+01
+ele: H O H pow: 0 2 3 param:  2.4866e+01
+ele: H O H pow: 0 2 4 param:  1.1077e+01
+ele: H O H pow: 0 3 1 param: -4.6470e+01
+ele: H O H pow: 0 3 2 param:  2.2584e+02
+ele: H O H pow: 0 3 3 param:  1.8683e+02
+ele: H O H pow: 0 3 4 param:  1.0701e+02
+ele: H O H pow: 0 4 1 param: -1.0458e+02
+ele: H O H pow: 0 4 2 param:  1.2721e+01
+ele: H O H pow: 0 4 3 param: -2.4707e+00
+ele: H O H pow: 0 4 4 param:  1.5467e+01
+ele: H O H pow: 1 0 1 param:  5.5660e+02
+ele: H O H pow: 1 0 2 param: -7.5563e+02
+ele: H O H pow: 1 0 3 param: -3.7751e+02
+ele: H O H pow: 1 0 4 param: -3.0068e+02
+ele: H O H pow: 1 1 0 param: -3.9422e+02
+ele: H O H pow: 1 1 1 param:  3.4139e+02
+ele: H O H pow: 1 1 2 param: -1.6012e+02
+ele: H O H pow: 1 1 3 param:  5.1536e+01
+ele: H O H pow: 1 1 4 param: -1.5285e+02
+ele: H O H pow: 1 2 0 param: -1.6329e+02
+ele: H O H pow: 1 2 1 param:  3.9702e+02
+ele: H O H pow: 1 2 2 param: -9.7475e+02
+ele: H O H pow: 1 2 3 param: -4.7989e+02
+ele: H O H pow: 1 2 4 param: -3.4953e+02
+ele: H O H pow: 1 3 0 param: -4.6470e+01
+ele: H O H pow: 1 3 1 param:  3.9655e+02
+ele: H O H pow: 1 3 2 param: -9.8773e+01
+ele: H O H pow: 1 3 3 param:  1.4146e+01
+ele: H O H pow: 1 3 4 param: -1.1329e+02
+ele: H O H pow: 1 4 0 param: -1.0458e+02
+ele: H O H pow: 1 4 1 param:  1.0225e+02
+ele: H O H pow: 1 4 2 param: -2.6275e+02
+ele: H O H pow: 1 4 3 param: -5.1226e+01
+ele: H O H pow: 1 4 4 param: -6.7258e+01
+ele: H O H pow: 2 0 1 param: -7.5563e+02
+ele: H O H pow: 2 0 2 param:  2.8248e+02
+ele: H O H pow: 2 0 3 param:  3.5089e+01
+ele: H O H pow: 2 0 4 param:  1.2629e+02
+ele: H O H pow: 2 1 0 param:  5.9001e+02
+ele: H O H pow: 2 1 1 param: -1.6012e+02
+ele: H O H pow: 2 1 2 param:  9.2433e+02
+ele: H O H pow: 2 1 3 param:  1.8283e+02
+ele: H O H pow: 2 1 4 param:  2.8479e+02
+ele: H O H pow: 2 2 0 param: -2.9970e+01
+ele: H O H pow: 2 2 1 param: -9.7475e+02
+ele: H O H pow: 2 2 2 param:  3.3593e+02
+ele: H O H pow: 2 2 3 param:  5.1380e+01
+ele: H O H pow: 2 2 4 param:  1.6023e+02
+ele: H O H pow: 2 3 0 param:  2.2584e+02
+ele: H O H pow: 2 3 1 param: -9.8773e+01
+ele: H O H pow: 2 3 2 param:  3.9757e+02
+ele: H O H pow: 2 3 3 param:  6.8511e+01
+ele: H O H pow: 2 3 4 param:  1.2020e+02
+ele: H O H pow: 2 4 0 param:  1.2721e+01
+ele: H O H pow: 2 4 1 param: -2.6275e+02
+ele: H O H pow: 2 4 2 param:  1.1762e+02
+ele: H O H pow: 2 4 3 param: -5.9421e+00
+ele: H O H pow: 2 4 4 param:  4.2789e+01
+ele: H O H pow: 3 0 1 param: -3.7751e+02
+ele: H O H pow: 3 0 2 param:  3.5089e+01
+ele: H O H pow: 3 0 3 param: -1.5626e+02
+ele: H O H pow: 3 0 4 param:  4.6582e+01
+ele: H O H pow: 3 1 0 param:  4.4365e+02
+ele: H O H pow: 3 1 1 param:  5.1536e+01
+ele: H O H pow: 3 1 2 param:  1.8283e+02
+ele: H O H pow: 3 1 3 param: -2.9651e+02
+ele: H O H pow: 3 1 4 param: -9.7279e+01
+ele: H O H pow: 3 2 0 param:  2.4866e+01
+ele: H O H pow: 3 2 1 param: -4.7989e+02
+ele: H O H pow: 3 2 2 param:  5.1380e+01
+ele: H O H pow: 3 2 3 param: -2.1318e+02
+ele: H O H pow: 3 2 4 param:  6.6428e+01
+ele: H O H pow: 3 3 0 param:  1.8683e+02
+ele: H O H pow: 3 3 1 param:  1.4146e+01
+ele: H O H pow: 3 3 2 param:  6.8511e+01
+ele: H O H pow: 3 3 3 param: -1.3312e+02
+ele: H O H pow: 3 3 4 param: -3.9769e+01
+ele: H O H pow: 3 4 0 param: -2.4707e+00
+ele: H O H pow: 3 4 1 param: -5.1226e+01
+ele: H O H pow: 3 4 2 param: -5.9421e+00
+ele: H O H pow: 3 4 3 param: -1.6792e+01
+ele: H O H pow: 3 4 4 param:  2.7902e+00
+ele: H O H pow: 4 0 1 param: -3.0068e+02
+ele: H O H pow: 4 0 2 param:  1.2629e+02
+ele: H O H pow: 4 0 3 param:  4.6582e+01
+ele: H O H pow: 4 0 4 param:  2.6455e+00
+ele: H O H pow: 4 1 0 param:  3.1949e+02
+ele: H O H pow: 4 1 1 param: -1.5285e+02
+ele: H O H pow: 4 1 2 param:  2.8479e+02
+ele: H O H pow: 4 1 3 param: -9.7279e+01
+ele: H O H pow: 4 1 4 param: -2.5074e+01
+ele: H O H pow: 4 2 0 param:  1.1077e+01
+ele: H O H pow: 4 2 1 param: -3.4953e+02
+ele: H O H pow: 4 2 2 param:  1.6023e+02
+ele: H O H pow: 4 2 3 param:  6.6428e+01
+ele: H O H pow: 4 2 4 param: -2.1299e+01
+ele: H O H pow: 4 3 0 param:  1.0701e+02
+ele: H O H pow: 4 3 1 param: -1.1329e+02
+ele: H O H pow: 4 3 2 param:  1.2020e+02
+ele: H O H pow: 4 3 3 param: -3.9769e+01
+ele: H O H pow: 4 3 4 param:  1.4421e+01
+ele: H O H pow: 4 4 0 param:  1.5467e+01
+ele: H O H pow: 4 4 1 param: -6.7258e+01
+ele: H O H pow: 4 4 2 param:  4.2789e+01
+ele: H O H pow: 4 4 3 param:  2.7902e+00
+ele: H O H pow: 4 4 4 param: -1.5502e+01
+ele: H H O pow: 0 1 1 param:  5.5660e+02
+ele: H H O pow: 0 1 2 param: -7.5563e+02
+ele: H H O pow: 0 1 3 param: -3.7751e+02
+ele: H H O pow: 0 1 4 param: -3.0068e+02
+ele: H H O pow: 0 2 1 param: -7.5563e+02
+ele: H H O pow: 0 2 2 param:  2.8248e+02
+ele: H H O pow: 0 2 3 param:  3.5089e+01
+ele: H H O pow: 0 2 4 param:  1.2629e+02
+ele: H H O pow: 0 3 1 param: -3.7751e+02
+ele: H H O pow: 0 3 2 param:  3.5089e+01
+ele: H H O pow: 0 3 3 param: -1.5626e+02
+ele: H H O pow: 0 3 4 param:  4.6582e+01
+ele: H H O pow: 0 4 1 param: -3.0068e+02
+ele: H H O pow: 0 4 2 param:  1.2629e+02
+ele: H H O pow: 0 4 3 param:  4.6582e+01
+ele: H H O pow: 0 4 4 param:  2.6455e+00
+ele: H H O pow: 1 0 1 param: -3.9422e+02
+ele: H H O pow: 1 0 2 param:  5.9001e+02
+ele: H H O pow: 1 0 3 param:  4.4365e+02
+ele: H H O pow: 1 0 4 param:  3.1949e+02
+ele: H H O pow: 1 1 0 param: -3.9422e+02
+ele: H H O pow: 1 1 1 param:  3.4139e+02
+ele: H H O pow: 1 1 2 param: -1.6012e+02
+ele: H H O pow: 1 1 3 param:  5.1536e+01
+ele: H H O pow: 1 1 4 param: -1.5285e+02
+ele: H H O pow: 1 2 0 param:  5.9001e+02
+ele: H H O pow: 1 2 1 param: -1.6012e+02
+ele: H H O pow: 1 2 2 param:  9.2433e+02
+ele: H H O pow: 1 2 3 param:  1.8283e+02
+ele: H H O pow: 1 2 4 param:  2.8479e+02
+ele: H H O pow: 1 3 0 param:  4.4365e+02
+ele: H H O pow: 1 3 1 param:  5.1536e+01
+ele: H H O pow: 1 3 2 param:  1.8283e+02
+ele: H H O pow: 1 3 3 param: -2.9651e+02
+ele: H H O pow: 1 3 4 param: -9.7279e+01
+ele: H H O pow: 1 4 0 param:  3.1949e+02
+ele: H H O pow: 1 4 1 param: -1.5285e+02
+ele: H H O pow: 1 4 2 param:  2.8479e+02
+ele: H H O pow: 1 4 3 param: -9.7279e+01
+ele: H H O pow: 1 4 4 param: -2.5074e+01
+ele: H H O pow: 2 0 1 param: -1.6329e+02
+ele: H H O pow: 2 0 2 param: -2.9970e+01
+ele: H H O pow: 2 0 3 param:  2.4866e+01
+ele: H H O pow: 2 0 4 param:  1.1077e+01
+ele: H H O pow: 2 1 0 param: -1.6329e+02
+ele: H H O pow: 2 1 1 param:  3.9702e+02
+ele: H H O pow: 2 1 2 param: -9.7475e+02
+ele: H H O pow: 2 1 3 param: -4.7989e+02
+ele: H H O pow: 2 1 4 param: -3.4953e+02
+ele: H H O pow: 2 2 0 param: -2.9970e+01
+ele: H H O pow: 2 2 1 param: -9.7475e+02
+ele: H H O pow: 2 2 2 param:  3.3593e+02
+ele: H H O pow: 2 2 3 param:  5.1380e+01
+ele: H H O pow: 2 2 4 param:  1.6023e+02
+ele: H H O pow: 2 3 0 param:  2.4866e+01
+ele: H H O pow: 2 3 1 param: -4.7989e+02
+ele: H H O pow: 2 3 2 param:  5.1380e+01
+ele: H H O pow: 2 3 3 param: -2.1318e+02
+ele: H H O pow: 2 3 4 param:  6.6428e+01
+ele: H H O pow: 2 4 0 param:  1.1077e+01
+ele: H H O pow: 2 4 1 param: -3.4953e+02
+ele: H H O pow: 2 4 2 param:  1.6023e+02
+ele: H H O pow: 2 4 3 param:  6.6428e+01
+ele: H H O pow: 2 4 4 param: -2.1299e+01
+ele: H H O pow: 3 0 1 param: -4.6470e+01
+ele: H H O pow: 3 0 2 param:  2.2584e+02
+ele: H H O pow: 3 0 3 param:  1.8683e+02
+ele: H H O pow: 3 0 4 param:  1.0701e+02
+ele: H H O pow: 3 1 0 param: -4.6470e+01
+ele: H H O pow: 3 1 1 param:  3.9655e+02
+ele: H H O pow: 3 1 2 param: -9.8773e+01
+ele: H H O pow: 3 1 3 param:  1.4146e+01
+ele: H H O pow: 3 1 4 param: -1.1329e+02
+ele: H H O pow: 3 2 0 param:  2.2584e+02
+ele: H H O pow: 3 2 1 param: -9.8773e+01
+ele: H H O pow: 3 2 2 param:  3.9757e+02
+ele: H H O pow: 3 2 3 param:  6.8511e+01
+ele: H H O pow: 3 2 4 param:  1.2020e+02
+ele: H H O pow: 3 3 0 param:  1.8683e+02
+ele: H H O pow: 3 3 1 param:  1.4146e+01
+ele: H H O pow: 3 3 2 param:  6.8511e+01
+ele: H H O pow: 3 3 3 param: -1.3312e+02
+ele: H H O pow: 3 3 4 param: -3.9769e+01
+ele: H H O pow: 3 4 0 param:  1.0701e+02
+ele: H H O pow: 3 4 1 param: -1.1329e+02
+ele: H H O pow: 3 4 2 param:  1.2020e+02
+ele: H H O pow: 3 4 3 param: -3.9769e+01
+ele: H H O pow: 3 4 4 param:  1.4421e+01
+ele: H H O pow: 4 0 1 param: -1.0458e+02
+ele: H H O pow: 4 0 2 param:  1.2721e+01
+ele: H H O pow: 4 0 3 param: -2.4707e+00
+ele: H H O pow: 4 0 4 param:  1.5467e+01
+ele: H H O pow: 4 1 0 param: -1.0458e+02
+ele: H H O pow: 4 1 1 param:  1.0225e+02
+ele: H H O pow: 4 1 2 param: -2.6275e+02
+ele: H H O pow: 4 1 3 param: -5.1226e+01
+ele: H H O pow: 4 1 4 param: -6.7258e+01
+ele: H H O pow: 4 2 0 param:  1.2721e+01
+ele: H H O pow: 4 2 1 param: -2.6275e+02
+ele: H H O pow: 4 2 2 param:  1.1762e+02
+ele: H H O pow: 4 2 3 param: -5.9421e+00
+ele: H H O pow: 4 2 4 param:  4.2789e+01
+ele: H H O pow: 4 3 0 param: -2.4707e+00
+ele: H H O pow: 4 3 1 param: -5.1226e+01
+ele: H H O pow: 4 3 2 param: -5.9421e+00
+ele: H H O pow: 4 3 3 param: -1.6792e+01
+ele: H H O pow: 4 3 4 param:  2.7902e+00
+ele: H H O pow: 4 4 0 param:  1.5467e+01
+ele: H H O pow: 4 4 1 param: -6.7258e+01
+ele: H H O pow: 4 4 2 param:  4.2789e+01
+ele: H H O pow: 4 4 3 param:  2.7902e+00
+ele: H H O pow: 4 4 4 param: -1.5502e+01
+ele: H H H pow: 0 1 1 param:  3.1363e+02
+ele: H H H pow: 0 1 2 param:  1.1624e+02
+ele: H H H pow: 0 1 3 param:  6.6244e+01
+ele: H H H pow: 0 1 4 param: -1.9857e+01
+ele: H H H pow: 0 2 1 param:  1.1624e+02
+ele: H H H pow: 0 2 2 param:  6.5197e+01
+ele: H H H pow: 0 2 3 param:  3.6886e+01
+ele: H H H pow: 0 2 4 param: -1.8426e+01
+ele: H H H pow: 0 3 1 param:  6.6244e+01
+ele: H H H pow: 0 3 2 param:  3.6886e+01
+ele: H H H pow: 0 3 3 param: -1.9904e+01
+ele: H H H pow: 0 3 4 param: -1.9523e+01
+ele: H H H pow: 0 4 1 param: -1.9857e+01
+ele: H H H pow: 0 4 2 param: -1.8426e+01
+ele: H H H pow: 0 4 3 param: -1.9523e+01
+ele: H H H pow: 0 4 4 param: -4.1000e+01
+ele: H H H pow: 1 0 1 param:  3.1363e+02
+ele: H H H pow: 1 0 2 param:  1.1624e+02
+ele: H H H pow: 1 0 3 param:  6.6244e+01
+ele: H H H pow: 1 0 4 param: -1.9857e+01
+ele: H H H pow: 1 1 0 param:  3.1363e+02
+ele: H H H pow: 1 1 1 param:  5.8910e+01
+ele: H H H pow: 1 1 2 param:  2.9089e+02
+ele: H H H pow: 1 1 3 param: -2.7945e+02
+ele: H H H pow: 1 1 4 param: -4.5672e+01
+ele: H H H pow: 1 2 0 param:  1.1624e+02
+ele: H H H pow: 1 2 1 param:  2.9089e+02
+ele: H H H pow: 1 2 2 param:  2.3334e+02
+ele: H H H pow: 1 2 3 param:  5.2726e+01
+ele: H H H pow: 1 2 4 param: -3.4108e+01
+ele: H H H pow: 1 3 0 param:  6.6244e+01
+ele: H H H pow: 1 3 1 param: -2.7945e+02
+ele: H H H pow: 1 3 2 param:  5.2726e+01
+ele: H H H pow: 1 3 3 param: -2.3771e+02
+ele: H H H pow: 1 3 4 param: -3.3685e+01
+ele: H H H pow: 1 4 0 param: -1.9857e+01
+ele: H H H pow: 1 4 1 param: -4.5672e+01
+ele: H H H pow: 1 4 2 param: -3.4108e+01
+ele: H H H pow: 1 4 3 param: -3.3685e+01
+ele: H H H pow: 1 4 4 param: -8.0533e+01
+ele: H H H pow: 2 0 1 param:  1.1624e+02
+ele: H H H pow: 2 0 2 param:  6.5197e+01
+ele: H H H pow: 2 0 3 param:  3.6886e+01
+ele: H H H pow: 2 0 4 param: -1.8426e+01
+ele: H H H pow: 2 1 0 param:  1.1624e+02
+ele: H H H pow: 2 1 1 param:  2.9089e+02
+ele: H H H pow: 2 1 2 param:  2.3334e+02
+ele: H H H pow: 2 1 3 param:  5.2726e+01
+ele: H H H pow: 2 1 4 param: -3.4108e+01
+ele: H H H pow: 2 2 0 param:  6.5197e+01
+ele: H H H pow: 2 2 1 param:  2.3334e+02
+ele: H H H pow: 2 2 2 param:  1.7890e+02
+ele: H H H pow: 2 2 3 param:  6.5292e+01
+ele: H H H pow: 2 2 4 param: -5.3637e+01
+ele: H H H pow: 2 3 0 param:  3.6886e+01
+ele: H H H pow: 2 3 1 param:  5.2726e+01
+ele: H H H pow: 2 3 2 param:  6.5292e+01
+ele: H H H pow: 2 3 3 param: -3.9632e+01
+ele: H H H pow: 2 3 4 param: -3.1879e+01
+ele: H H H pow: 2 4 0 param: -1.8426e+01
+ele: H H H pow: 2 4 1 param: -3.4108e+01
+ele: H H H pow: 2 4 2 param: -5.3637e+01
+ele: H H H pow: 2 4 3 param: -3.1879e+01
+ele: H H H pow: 2 4 4 param: -7.7118e+01
+ele: H H H pow: 3 0 1 param:  6.6244e+01
+ele: H H H pow: 3 0 2 param:  3.6886e+01
+ele: H H H pow: 3 0 3 param: -1.9904e+01
+ele: H H H pow: 3 0 4 param: -1.9523e+01
+ele: H H H pow: 3 1 0 param:  6.6244e+01
+ele: H H H pow: 3 1 1 param: -2.7945e+02
+ele: H H H pow: 3 1 2 param:  5.2726e+01
+ele: H H H pow: 3 1 3 param: -2.3771e+02
+ele: H H H pow: 3 1 4 param: -3.3685e+01
+ele: H H H pow: 3 2 0 param:  3.6886e+01
+ele: H H H pow: 3 2 1 param:  5.2726e+01
+ele: H H H pow: 3 2 2 param:  6.5292e+01
+ele: H H H pow: 3 2 3 param: -3.9632e+01
+ele: H H H pow: 3 2 4 param: -3.1879e+01
+ele: H H H pow: 3 3 0 param: -1.9904e+01
+ele: H H H pow: 3 3 1 param: -2.3771e+02
+ele: H H H pow: 3 3 2 param: -3.9632e+01
+ele: H H H pow: 3 3 3 param: -1.4869e+02
+ele: H H H pow: 3 3 4 param: -2.8437e+01
+ele: H H H pow: 3 4 0 param: -1.9523e+01
+ele: H H H pow: 3 4 1 param: -3.3685e+01
+ele: H H H pow: 3 4 2 param: -3.1879e+01
+ele: H H H pow: 3 4 3 param: -2.8437e+01
+ele: H H H pow: 3 4 4 param: -3.6802e+01
+ele: H H H pow: 4 0 1 param: -1.9857e+01
+ele: H H H pow: 4 0 2 param: -1.8426e+01
+ele: H H H pow: 4 0 3 param: -1.9523e+01
+ele: H H H pow: 4 0 4 param: -4.1000e+01
+ele: H H H pow: 4 1 0 param: -1.9857e+01
+ele: H H H pow: 4 1 1 param: -4.5672e+01
+ele: H H H pow: 4 1 2 param: -3.4108e+01
+ele: H H H pow: 4 1 3 param: -3.3685e+01
+ele: H H H pow: 4 1 4 param: -8.0533e+01
+ele: H H H pow: 4 2 0 param: -1.8426e+01
+ele: H H H pow: 4 2 1 param: -3.4108e+01
+ele: H H H pow: 4 2 2 param: -5.3637e+01
+ele: H H H pow: 4 2 3 param: -3.1879e+01
+ele: H H H pow: 4 2 4 param: -7.7118e+01
+ele: H H H pow: 4 3 0 param: -1.9523e+01
+ele: H H H pow: 4 3 1 param: -3.3685e+01
+ele: H H H pow: 4 3 2 param: -3.1879e+01
+ele: H H H pow: 4 3 3 param: -2.8437e+01
+ele: H H H pow: 4 3 4 param: -3.6802e+01
+ele: H H H pow: 4 4 0 param: -4.1000e+01
+ele: H H H pow: 4 4 1 param: -8.0533e+01
+ele: H H H pow: 4 4 2 param: -7.7118e+01
+ele: H H H pow: 4 4 3 param: -3.6802e+01
+ele: H H H pow: 4 4 4 param: -4.4499e+01
+RMS force error =  1.307753e-05
