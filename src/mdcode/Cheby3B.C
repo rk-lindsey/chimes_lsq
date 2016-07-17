@@ -259,7 +259,7 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
   }
 
   // Print out parameters.
-  printf("3-Body Cheby Parameters\n") ;
+  printf("3-Body Chebyshev Polynomial Coefficients:\n") ;
   for(int ele1=0; ele1 < NELE ; ele1++) 
     {
       int a1 = example_atm[3*ele1] ;
@@ -278,8 +278,8 @@ double ******Indexed_3B_Cheby_Coeffs(const char *Lbc,
 		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 		    {
 		      if ( is_three_body(i,j,k) ) {
-			printf("ele: %c %c %c pow: %d %d %d param: %11.4e\n",
-			       Lbc[a1], Lbc[a2], Lbc[a3], i, j, k, 
+			printf("ele: %c %c %c pair index: %d %d %d: pow: %d %d %d param: %11.4e\n",
+			       Lbc[a1], Lbc[a2], Lbc[a3], ipair12, ipair13, ipair23, i, j, k,
 			       store_3b_params[ele1][ele2][ele3][i][j][k]) ;
 		      }
 		    }
@@ -367,7 +367,7 @@ int ******Index_3B_Cheby(const char *Lbc,
 	    for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
 	      {
 		if ( ! is_three_body(i,j,k) ) {
-		  params_index[ele1][ele2][ele3][i][j][k] = 0.0 ;
+		  params_index[ele1][ele2][ele3][i][j][k] = -1 ;
 		} else {
 		  (void) Cheby_3B_Coeff(a1, a2, a3, i, j, k, Lbc, NULL, 
 					snum, snum_3b_cheby, index, false) ;
@@ -377,6 +377,34 @@ int ******Index_3B_Cheby(const char *Lbc,
       }
     }
   }
+  // Print out parameters.
+  printf("3-Body Cheby Parameter Indices\n") ;
+  for(int ele1=0; ele1 < NELE ; ele1++) 
+    {
+      int a1 = example_atm[3*ele1] ;
+      for(int ele2=0 ; ele2 < NELE ; ele2++) 
+	{
+	  int ipair12 = pair_index_ele(ele1, ele2) ;
+	  int a2 = example_atm[3*ele2] ;
+	  for(int ele3 = 0 ; ele3 < NELE ; ele3++)
+	    {
+	      int ipair23 = pair_index_ele(ele2,ele3) ;
+	      int ipair13 = pair_index_ele(ele1,ele3) ;
+	      int a3 = example_atm[3*ele3] ;
+
+	      for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
+		for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
+		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
+		    {
+		      if ( is_three_body(i,j,k) ) {
+			printf("ele: %c %c %c pair index: %d %d %d pow: %d %d %d parameter index: %d\n",
+			       Lbc[a1], Lbc[a2], Lbc[a3], ipair12, ipair13, ipair23, i, j, k,
+			       params_index[ele1][ele2][ele3][i][j][k]) ;
+		      }
+		    }
+	    }
+	}
+    }
   return params_index ;
 }
 
@@ -387,7 +415,6 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 			  const int nat, double ***A,
 			  const double *smin,
 			  const double *smax,
-			  const int *snum, 
 			  const int *snum_3b_cheby,
 			  const double *lambda, int ******param_index)
 // Calculate derivatives of the 3-body short-range forces using a Chebyshev polynomial expansion,

@@ -54,6 +54,8 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 
 
 static int pair_table_offset(int ipair, const int *snum) ;
+static void Print_Cheby_Index(const int *snum, int nat, const char *Lbc) ;
+static void Print_Cheby_Params(const int *snum, int nat, const char *Lbc, double *params) ;
 
 void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	   const int nlayers,
@@ -93,6 +95,9 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
     } 
   else if ( pair_type == CHEBYSHEV ) 
     {
+      if ( ! called_before ) {
+	Print_Cheby_Params(snum, nat, Lbc, params) ;
+      }
       ZCalc_Cheby(Coord,Lbc,Latcons,nlayers,nat,smin,smax,snum, 
 		  params,lambda,SForce,Vtot,Pxyz) ;
     } 
@@ -130,9 +135,7 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 	// Index the parameters only once.  Scan through the params array and create
 	// a new multi-dimensional array where the coefficients are readily looked up.
 	idx_params = Indexed_3B_Cheby_Coeffs(Lbc, nat, snum, snum_3b_cheby, params) ;
-	called_before = true ;
       }
-      
       ZCalc_3B_Cheby(Coord, Lbc, Latcons, nat, smin, smax, 
 		     snum_3b_cheby, idx_params, 
 		     lambda, SForce, Vtot, Pxyz) ;
@@ -140,6 +143,8 @@ void ZCalc(double **Coord, const char *Lbc, double *Q, double *Latcons,
 
   volume = Latcons[0] * Latcons[1] * Latcons[2] ;
   Pxyz /= 3.0 * volume ;
+
+  called_before = true ;
 
   return;
 }
@@ -966,7 +971,83 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 }
 
 
+static void Print_Cheby_Index(const int *snum, int nat, const char *Lbc)
+// Print parameter indices used for the two-body Chebyshev potential.
+{
+  int vstart ;
 
+  int *example_atm = new int [ 2 * NELE ] ;
+  for ( int j = 0 ; j < NELE ; j++ ) {
+    int a1 ;
+    int k = 0 ;
+    for( a1=0 ; a1 < nat ; a1++) {
+      if ( atom_index(a1,Lbc) == j ) {
+	example_atm[2*j+k] = a1 ;
+	k++ ;
+	if ( k == 2 ) break ;
+      }
+    }
+    if ( a1 == nat ) {
+      printf("Error: 2 atoms with element index %d could not be found\n", j) ;
+    }
+  }
+
+  ////main loop for Chebyshev terms:
+  printf("2-Body Chebyshev Polynomial Coefficients:\n") ;
+  for(int ele1=0; ele1 < NELE ; ele1++) {
+    int a1 = example_atm[2*ele1] ;
+    for(int ele2=ele1; ele2 < NELE; ele2++)
+      {
+	//calculate vstart: (index for populating OO, OH, or HH column block of A).
+	int ipair = pair_index_ele(ele1,ele2) ;
+	vstart = pair_table_offset(ipair, snum) ;
+	int a2 = example_atm[2*ele2+1] ;
+	for ( int i = 0 ; i < snum[ipair] ; i++ ) {
+	  printf("ele: %c %c pair index: %d pow: %d parameter index: %d\n", Lbc[a1], Lbc[a2], ipair, i, vstart + i) ;
+	}
+      }
+  }
+}
+
+
+static void Print_Cheby_Params(const int *snum, int nat, const char *Lbc, double *params)
+// Print parameters used for the two-body Chebyshev potential.
+{
+  int vstart ;
+
+  int *example_atm = new int [ 2 * NELE ] ;
+  for ( int j = 0 ; j < NELE ; j++ ) {
+    int a1 ;
+    int k = 0 ;
+    for( a1=0 ; a1 < nat ; a1++) {
+      if ( atom_index(a1,Lbc) == j ) {
+	example_atm[2*j+k] = a1 ;
+	k++ ;
+	if ( k == 2 ) break ;
+      }
+    }
+    if ( a1 == nat ) {
+      printf("Error: 2 atoms with element index %d could not be found\n", j) ;
+    }
+  }
+
+  ////main loop for Chebyshev terms:
+  printf("2-Body Chebyshev Polynomial Coefficients:\n") ;
+  for(int ele1=0; ele1 < NELE ; ele1++) {
+    int a1 = example_atm[2*ele1] ;
+    for(int ele2=ele1; ele2 < NELE; ele2++)
+      {
+	//calculate vstart: (index for populating OO, OH, or HH column block of A).
+	int ipair = pair_index_ele(ele1,ele2) ;
+	vstart = pair_table_offset(ipair, snum) ;
+	int a2 = example_atm[2*ele2+1] ;
+	for ( int i = 0 ; i < snum[ipair] ; i++ ) {
+	  printf("ele: %c %c pow: %d pair index: %d parameter: %21.13e\n", Lbc[a1], Lbc[a2], i, ipair, 
+		 params[vstart+i]) ;
+	}
+      }
+  }
+}
 
 void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double *Latcons,const int nlayers,
@@ -979,7 +1060,7 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
 		 double *mind, bool if_3b_cheby)
 {
   bool if_ewald ;
-  bool called_before = false ;
+  static bool called_before = false ;
 
   if (pair_type != DFTBPOLY) {
     if_ewald = true;
@@ -1020,6 +1101,9 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
     ZCalc_Spline_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,sdelta,snum,mind) ;
   } else if ( pair_type == CHEBYSHEV ) {
     ZCalc_Cheby_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,lambda,mind) ;
+    if ( ! called_before ) {
+      Print_Cheby_Index(snum, nat, Lbc) ;
+    }
   } else if ( pair_type == DFTBPOLY ) {
     ZCalc_Poly_Deriv(Coord,Lbc,Latcons,nlayers, nat,A,smin,smax,snum,mind) ;
   } else if ( pair_type == INVERSE_R ) {
@@ -1037,13 +1121,11 @@ void ZCalc_Deriv(double **Coord,const char *Lbc,
 	// Index the parameters only once.  Scan through the params array and create
 	// a new multi-dimensional array where the coefficients are readily looked up.
 	params_index = Index_3B_Cheby(Lbc, nat, snum, snum_3b_cheby) ;
-	called_before = true ;
       }
-
-      ZCalc_3B_Cheby_Deriv(Coord, Lbc, Latcons, nat, A, smin, smax, snum, 
+      ZCalc_3B_Cheby_Deriv(Coord, Lbc, Latcons, nat, A, smin, smax, 
 			   snum_3b_cheby, lambda, params_index) ;
   }
-
+  called_before = true ;
 }
 
 static void ZCalc_Spline_Deriv(double **Coord, const char *Lbc, double *Latcons,
