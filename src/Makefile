@@ -1,15 +1,36 @@
-all:
-	cd lsq ; make all
-	cd mdcode ; make all
-	cd nrfit ; make all
+# FYI: clean removes .o files, realclean removes executable
+
+
+
+# Choose g++ for debugging and icpc for fast execution.
+#
+#CXX=g++ -Wall -pg # NOTE: pg flag is for profiling with gprof (OSX compatible)
+#CXX=g++ -g -Wall -Wextra -Wuninitialized -O1#-pg
+#CXX=g++ -g   # -Wall -Wextra 
+CXX=g++ -O2   # -Wall -Wextra 
+#CXX=g++ -O3   # -Wall -Wextra 
+#CXX=icpc -fast
+
+
+CXX_SRC=splines_ls.C functions.C Ewald.C #  ../mdcode/Cheby3B.C
+CXX_INCLUDES=-I .
+
+all : splines_ls
+
+splines_ls : $(CXX_SRC:%.C=%.o)
+	$(CXX) $^ $(CXX_INCLUDES) -o splines_ls
+#	cp splines_ls ../../bin/splines_ls
+
+%.o: %.C
+	$(CXX) $(CXX_INCLUDES) -c $< -o $@
 
 clean:
-	cd lsq ; make clean
-	cd mdcode ; make clean
-	cd nrfit ; make clean
+	/bin/rm -f *.o
 
-realclean:
-	cd lsq ; make realclean
-	cd mdcode ; make realclean
-	cd nrfit ; make realclean
-	rm -f ../bin/splines_md ../bin/splines_ls
+realclean : clean
+	rm -f splines_ls
+
+
+
+
+

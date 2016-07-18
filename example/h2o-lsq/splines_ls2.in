@@ -1,9 +1,0 @@
-nlayers 1
-fit_coulomb true
-fit_pover true
-pair_type spline
-subtract_coord false
-smin 1.0 0.75 0.75
-smax 6.0 6.0 6.0
-sdelta 0.1 0.2 0.05
-over_params 5 50.0 1.0165 -0.0657 5.0451 -3.6141

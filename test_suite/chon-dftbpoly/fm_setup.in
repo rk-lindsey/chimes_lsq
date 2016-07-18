@@ -1,0 +1,49 @@
+
+####### CONTROL VARIABLES #######
+
+# TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force
+	input.xyzf
+# WRAPTRJ # ! Does the trajectory file need wrapping? (i.e. post-run PBC)
+	true
+# NFRAMES # ! How many frames are in the .xyzf file?
+	54
+# NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
+	1
+# FITCOUL # ! Fit charges? If false, use user-specified fixed charges
+	false
+# CNSCOUL # ! Will we try to have consistent charges?
+	false	
+# FITPOVR # ! Use ReaxFF linear overcoordination parameters?
+	false
+# PAIRTYP # ! Short-range interaction type. "spline" or "cheby" accepted. Case sensitive
+	DFTBPOLY
+# SUBCRDS # ! Subtract overcoordination force before fitting? (only used if FITPOVR is false)
+	false
+# CHBTYPE # ! Are we transforming distance in terms of inverse distance(INVRSE_R), a morse-type function? (MORSE)? .. "DEFAULT" for no transformation.
+	NA
+# POLORDR # ! Number of terms in the chebyshev force fitting  
+	8	
+####### TOPOLOGY VARIABLES #######
+
+# NATMTYP # 
+	4
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+1		C		0		12.011
+2		H		0		1.0079
+3		O		0		15.9994
+4		N		0		14.007
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #	# TO_ATOM #	# P_OVERB #	# R_0_VAL #	# P_1_VAL #	# P_2_VAL #	# LAMBDA6 #
+1		C		C		0.0		5.0	       NA	       NA		       false
+2		H		H		0.0		4.5	       NA	       NA		       false
+3		O		O		0.0		5.0	       NA	       NA		       false
+4		N		N		0.0		4.5	       NA	       NA		       false
+5		C		H		0.0		4.5	       NA	       NA		       false
+6		C		O		0.0		4.5	       NA	       NA		       false
+7		C		N		0.0		4.5	       NA	       NA		       false
+8		H		O		0.0		4.5	       NA	       NA		       false
+9		H		N		0.0		4.5	       NA	       NA		       false
+10		O		N		0.0		4.5	       NA	       NA		       false
+
+# ENDFILE #

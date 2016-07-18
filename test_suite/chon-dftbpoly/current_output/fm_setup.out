@@ -1,0 +1,66 @@
+
+Reading input file...
+	# TRJFILE #: input.xyzf
+	# WRAPTRJ #: 1
+	# NFRAMES #: 54
+	# NLAYERS #: 1
+	# FITCOUL #: false
+	# CNSCOUL #: false
+	# FITPOVR #: false
+	# PAIRTYP #: DFTBPOLY ....NOTE: Forces reported in atomic units.
+	# SUBCRDS #: false
+	# POLORDR #: 8
+	# NATMTYP #: 4
+	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
+ 	1              C              0              12.011         
+ 	2              H              0              1.0079         
+ 	3              O              0              15.9994        
+ 	4              N              0              14.007         
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
+	0               C               C               0               5               0               0                0               
+	1               H               H               0               4.5             0               0                0               
+	2               O               O               0               5               0               0                0               
+	3               N               N               0               4.5             0               0                0               
+	4               C               H               0               4.5             0               0                0               
+	5               C               O               0               4.5             0               0                0               
+	6               C               N               0               4.5             0               0                0               
+	7               H               O               0               4.5             0               0                0               
+	8               H               N               0               4.5             0               0                0               
+	9               O               N               0               4.5             0               0                0               
+...input file read successful: 
+
+The number of two-body non-coulomb parameters is 80
+
+Reading in the trajectory file...
+...trajectory file read successful: 
+
+Setting up the matricies for A, Coulomb forces, and overbonding...
+...matrix setup complete: 
+
+...Populating the matricies for A, Coulomb forces, and overbonding...
+	rc[0] = 9.449 bohr (5.000 Angstr.)
+	rc[1] = 8.504 bohr (4.500 Angstr.)
+	rc[2] = 9.449 bohr (5.000 Angstr.)
+	rc[3] = 8.504 bohr (4.500 Angstr.)
+	rc[4] = 8.504 bohr (4.500 Angstr.)
+	rc[5] = 8.504 bohr (4.500 Angstr.)
+	rc[6] = 8.504 bohr (4.500 Angstr.)
+	rc[7] = 8.504 bohr (4.500 Angstr.)
+	rc[8] = 8.504 bohr (4.500 Angstr.)
+	rc[9] = 8.504 bohr (4.500 Angstr.)
+...matrix population complete: 
+
+Printing matricies...
+	Minimum distances between atoms: (Angstr.)
+		0	C C	1.244
+		1	H H	1.019
+		2	O O	1.985
+		3	N N	2.477
+		4	C H	0.949
+		5	C O	1.143
+		6	C N	1.281
+		7	H O	0.846
+		8	H N	0.870
+		9	O N	2.150
+...matrix printing complete: 
+
