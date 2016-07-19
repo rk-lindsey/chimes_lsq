@@ -8,14 +8,26 @@ Reading input file...
 	# CNSCOUL #: false
 	# FITPOVR #: false
 	# PAIRTYP #: DFTBPOLY ....NOTE: Forces reported in atomic units.
+	             Will use 2-body order: 8
 	# SUBCRDS #: false
-	# POLORDR #: 8
 	# NATMTYP #: 4
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
  	1              C              0              12.011         
  	2              H              0              1.0079         
  	3              O              0              15.9994        
  	4              N              0              14.007         
+
+	The following unique pair types have been identified:
+		0  C C
+		1  H H
+		2  O O
+		3  N N
+		4  C H
+		5  C O
+		6  C N
+		7  H O
+		8  H N
+		9  O N
 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
 	0               C               C               0               5               0               0                0               
 	1               H               H               0               4.5             0               0                0               
@@ -29,7 +41,7 @@ Reading input file...
 	9               O               N               0               4.5             0               0                0               
 ...input file read successful: 
 
-The number of two-body non-coulomb parameters is 80
+The number of two-body non-coulomb parameters is: 80
 
 Reading in the trajectory file...
 ...trajectory file read successful: 

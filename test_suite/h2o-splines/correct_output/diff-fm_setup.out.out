@@ -1,0 +1,19 @@
+18,31c18,20
+< 		0     O O
+< 		1     H H
+< 		2     O H
+< 	The following unique triplets of pair types have been identified:
+< 		0     OO OO OO
+< 		1     OO OO HH
+< 		2     OO OO OH
+< 		3     OO HH HH
+< 		4     OO HH OH
+< 		5     OO OH OH
+< 		6     HH HH HH
+< 		7     HH HH OH
+< 		8     HH OH OH
+< 		9     OH OH OH
+---
+> 		0  O O
+> 		1  H H
+> 		2  O H

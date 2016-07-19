@@ -1,4 +1,4 @@
-PATH_TO_LSQ_PY_CODE="../../../../BECKY-LSQ-PY-REG-070516/lsq.py" # Path to the python code.
+PATH_TO_LSQ_PY_CODE="/Users/lindsey11/Desktop/FORCE_MATCHING_VERSIONS/BECKY-LSQ-PY-REG-071816/lsq.py" # Path to the python code.
 
 
 SET_PASSED=true
@@ -24,13 +24,13 @@ cd ../test_suite
 echo ""
 echo "VALIDATING FOR SPLINES_LS..."
 
-for i in h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby 
+for i in h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby
 do
 
 	echo " "
 	echo "Running $i test..."
 
-	PASS=false
+	PASS=true
 
 	cd $i
 	rm -rf diff-*
@@ -49,8 +49,7 @@ do
 			echo " "
 			cat diff-$i.out
 			echo " "
-		else
-			PASS=true
+			PASS=false
 		fi
 	done
 	
@@ -60,7 +59,9 @@ do
 	else
 		SET_PASSED=false
 		ALL_PASSED=false
+		echo "		...Test failed."
 	fi
+	
 
 	cd ..
 done
@@ -75,13 +76,13 @@ echo " "
 
 echo "VALIDATING FOR SVD SCRIPT..."
 
-for i in h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby 
+for i in h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby 
 do
 
 	echo " "
 	echo "Running $i test..."
 
-	PASS=false
+	PASS=true
 
 	cd $i/current_output
 	rm -rf diff-*
@@ -108,8 +109,7 @@ do
 			echo " "
 			cat ../diff-$i.out
 			echo " "
-		else
-			PASS=true
+			PASS=false
 		fi
 		
 		if [ "$i" == params.txt ]; then
@@ -124,6 +124,7 @@ do
 	else
 		SVD_PASSED=false
 		ALL_PASSED=false
+		echo "		...Test failed."
 	fi
 
 	cd ../..
@@ -263,3 +264,4 @@ cd ../test_suite
 		
 	
 	
+

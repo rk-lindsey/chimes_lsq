@@ -126,9 +126,11 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 		
 		if ( LAST_BOXDIMS.X == 0.0 ) 
 		{
-			cout << "	Cutting off K-vectors with magnitude less than "  << k_cut << endl;
-			cout << "	Number of Ewald K-vectors = " << totk << endl;
-			cout << "	K-space accuracy estimate = " << min_vfac << endl;
+			#if VERBOSITY == 1
+				cout << "	Cutting off K-vectors with magnitude less than "  << k_cut << endl;
+				cout << "	Number of Ewald K-vectors = " << totk << endl;
+				cout << "	K-space accuracy estimate = " << min_vfac << endl;
+			#endif
 		}
 		
 		LAST_BOXDIMS.X = TRAJECTORY.BOXDIM.X;
@@ -362,11 +364,13 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, vector<PAIRS
 		(accuracy, vol, TRAJECTORY.ATOMS, alpha, r_cut, k_cut,r_acc, k_acc);	// NEEDS UPDATING!!!
 		alphasq = alpha * alpha;
       
-		printf("Requested Ewald accuracy  = %13.6e\n", accuracy);
-		printf("Ewald alpha               = %13.6e\n", alpha);
-		printf("R-Space Ewald cutoff      = %13.6e\n", r_cut);
-		printf("R-Space accuracy estimate = %13.6e\n", r_acc);
-		printf("K-Space accuracy estimate = %13.6e\n", k_acc);
+		#if VERBOSITY == 1
+			printf("Requested Ewald accuracy  = %13.6e\n", accuracy);
+			printf("Ewald alpha               = %13.6e\n", alpha);
+			printf("R-Space Ewald cutoff      = %13.6e\n", r_cut);
+			printf("R-Space accuracy estimate = %13.6e\n", r_acc);
+			printf("K-Space accuracy estimate = %13.6e\n", k_acc);
+		#endif
 
 		called_before = true;
 	}
@@ -514,11 +518,13 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, 
 		optimal_ewald_params(accuracy, Volume, FRAME_TRAJECTORY.ATOMS, alpha, r_cut, kmax,r_acc, k_acc);	// NEEDS UPDATING!!!
 		alphasq = alpha * alpha;
 		r_cut_squared = r_cut*r_cut;
-	
-	    printf("\tEwald_Deriv:\n");
-		printf("\tR-Space Ewald cutoff      = %13.6e\n", r_cut);
-	    printf("\tR-Space accuracy estimate = %13.6e\n", r_acc);
-	    printf("\tK-space accuracy estimate = %13.6e\n", k_acc);
+		
+		#if VERBOSITY == 1
+			printf("\tEwald_Deriv:\n");
+			printf("\tR-Space Ewald cutoff      = %13.6e\n", r_cut);
+	   	 	printf("\tR-Space accuracy estimate = %13.6e\n", r_acc);
+	   	 	printf("\tK-space accuracy estimate = %13.6e\n", k_acc);		
+		#endif
 
 	    called_before = true;
 
@@ -573,8 +579,9 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, 
 			}
 		}
 		
-		cout << "	Number of Ewald K-vectors = " << totk << endl;
-
+		#if VERBOSITY == 1
+			cout << "	Number of Ewald K-vectors = " << totk << endl;
+		#endif
 	}
 	
 	

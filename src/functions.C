@@ -15,6 +15,8 @@ static void ZCalc_Spline_Deriv(FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES
 
 static void ZCalc_Cheby_Deriv (FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, vector<PAIRS> & ATOM_PAIRS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP);
 
+static void ZCalc_3B_Cheby_Deriv(FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);
+
 static void ZCalc_Poly_Deriv  (FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, vector<PAIRS> & ATOM_PAIRS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP);	
 
 static void ZCalc_InvR_Deriv  (FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, vector<PAIRS> & ATOM_PAIRS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP);
@@ -26,7 +28,7 @@ static void ZCalc_InvR_Deriv  (FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES
 ////////////////////////////////////////////////////////////
 
 // FUNCTION UPDATED
-void ZCalc_Deriv(vector<PAIRS> & ATOM_PAIRS, FRAME & FRAME_TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, 	bool if_3b_cheby, map<string,int> & PAIR_MAP)
+void ZCalc_Deriv (vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> PAIR_TRIPLETS, FRAME & FRAME_TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP)
 		
 	// NEW VARIABLES TO ADD (to be passed in): snum_tot 
 	// IS P_OVER_FORCES EVEN USED HERE??? .. I don't think so.. removing from header
@@ -51,7 +53,12 @@ void ZCalc_Deriv(vector<PAIRS> & ATOM_PAIRS, FRAME & FRAME_TRAJECTORY, vector<in
 		ZCalc_Spline_Deriv(FRAME_TRAJECTORY, ATOM_PAIR_TYPES, ATOM_PAIRS, FRAME_A_MATRIX, nlayers, PAIR_MAP);
 	
 	else if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" )	// FUNCTION UPDATED
+	{
 		ZCalc_Cheby_Deriv(FRAME_TRAJECTORY, ATOM_PAIR_TYPES, ATOM_PAIRS, FRAME_A_MATRIX, nlayers, PAIR_MAP);
+	
+		if (if_3b_cheby)
+			ZCalc_3B_Cheby_Deriv(FRAME_TRAJECTORY, ATOM_PAIR_TYPES, ATOM_PAIRS, PAIR_TRIPLETS, FRAME_A_MATRIX, nlayers, PAIR_MAP, TRIAD_MAP);		
+	}			
 
     else if ( ATOM_PAIRS[0].PAIRTYP == "DFTBPOLY" )	// FUNCTION UPDATED
 		ZCalc_Poly_Deriv(FRAME_TRAJECTORY, ATOM_PAIR_TYPES, ATOM_PAIRS, FRAME_A_MATRIX, nlayers, PAIR_MAP);
@@ -66,15 +73,6 @@ void ZCalc_Deriv(vector<PAIRS> & ATOM_PAIRS, FRAME & FRAME_TRAJECTORY, vector<in
 		cout << "Error: bad pairtype in ZCalc_Deriv\n" ;
 		exit(1) ;
     }
-  
-/* Commenting out for now, because this will all be updated when Larry's edits are encorperated...  
-  
-    if (if_3b_cheby)
-		ZCalc_3B_Cheby_Deriv(FRAME_TRAJECTORY, ATOM_PAIRS, FRAME_A_MATRIX, nlayers);
-//		ZCalc_3B_Cheby_Deriv(FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector<XYZ <XYZ > > & FRAME_A_MATRIX, const int nlayers);
-*/	
- 	
-	
 		
 }	
 
@@ -266,7 +264,7 @@ static void ZCalc_Cheby_Deriv(FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES,
 		
 		for ( int i = 0; i < ATOM_PAIRS.size(); i++ ) 
 			if (ATOM_PAIRS[i].SNUM > dim ) 
-				dim = ATOM_PAIRS[i].SNUM;	 // Will probably get a complaint b/c not static...
+				dim = ATOM_PAIRS[i].SNUM;	 
 		
 		dim++;
 		Tn   = new double [dim];
@@ -290,7 +288,6 @@ static void ZCalc_Cheby_Deriv(FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES,
 			curr_pair_type_idx = PAIR_MAP[TEMP_STR];
 		  
 			//calculate vstart: (index for populating OO, OH, or HH column block of A).
-			//calculate vstart:
 		
 			vstart = curr_pair_type_idx * ATOM_PAIRS[curr_pair_type_idx].SNUM;
 
@@ -317,7 +314,7 @@ static void ZCalc_Cheby_Deriv(FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES,
 
 						rlen = sqrt( RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z );
 
-						if ( rlen < ATOM_PAIRS[curr_pair_type_idx].MIN_FOUND_DIST )	// spline term calculated w/cutoff:
+						if ( rlen < ATOM_PAIRS[curr_pair_type_idx].MIN_FOUND_DIST )	
 							ATOM_PAIRS[curr_pair_type_idx].MIN_FOUND_DIST = rlen;
 
 						if(rlen > ATOM_PAIRS[curr_pair_type_idx].S_MINIM and rlen < ATOM_PAIRS[curr_pair_type_idx].S_MAXIM)
@@ -366,7 +363,7 @@ static void ZCalc_Cheby_Deriv(FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES,
 							}
 							else if ( x > 1.0 ) // Added a warning...Do we need to turn off the interaction, because it's beyond rcut?
 							{
-								cout << "Warning:  r < rmax" << endl;								
+								cout << "Warning:  r > rmax" << endl;								
 								x = 1.0;								
 							}
 
@@ -468,6 +465,574 @@ static void ZCalc_Cheby_Deriv(FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES,
 		}
 	}
   return;
+}
+
+static void ZCalc_3B_Cheby_Deriv(FRAME & TRAJECTORY, vector<int> & ATOM_PAIR_TYPES, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP)		
+// Calculate derivatives of the forces wrt the 3-body Chebyshev parameters. 
+// This three body interaction stems from: C_n^ij *  C_n^ik * C_n^jk * T_n(x_ij) * T_n(x_ik) * T_n(x_jk)
+{
+/*
+	The logic:
+	+ Run a tripe loop over all atoms in the system.
+	+ Compute C_ij, C_ik, and C_jk coeffiecients independently as you would do for a normal 2 body 
+*/
+
+	XYZ RVEC_IJ;
+	XYZ RVEC_IK;
+	XYZ RVEC_JK;
+	 		
+	XYZ RAB_IJ;
+	XYZ RAB_IK;
+	XYZ RAB_JK; 		
+
+	double rlen_ij,  rlen_ik,  rlen_jk;
+	double rlen3_ij, rlen3_ik, rlen3_jk;
+	int vstart;
+    static int n_2b_cheby_terms, n_3b_cheby_terms;
+	static double *Tn_ij,  *Tn_ik,  *Tn_jk;
+	static double *Tnd_ij, *Tnd_ik, *Tnd_jk;
+	static bool called_before = false;
+	
+	static int pow_ij, pow_ik, pow_jk;
+
+	
+	double x, xmin, xmax, xavg, xdiff;
+	double xdiff_ij, xdiff_ik, xdiff_jk; 
+	double rlen3;				  
+	double fcut0, fcut0_ij, fcut0_ik, fcut0_jk; 
+	double fcut,  fcut_ij,  fcut_ik,  fcut_jk; 			
+	double deriv, deriv_ij, deriv_ik, deriv_jk;
+	double fcutderiv, fcutderiv_ij, fcutderiv_ik, fcutderiv_jk; 	
+	double tmp_doub; 	
+	
+	static string TEMP_STR;
+	static string PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK;
+	static int curr_triple_type_index;
+	static int curr_pair_type_idx_ij;
+	static int curr_pair_type_idx_ik;
+	static int curr_pair_type_idx_jk;
+	static int row_offset;	
+	
+	if ( ! called_before ) 
+	{
+		called_before = true;
+		int dim = 0;
+
+		
+		for ( int i = 0; i < ATOM_PAIRS.size(); i++ ) 
+		{
+			if (ATOM_PAIRS[i].SNUM_3B_CHEBY > dim ) 
+				dim = ATOM_PAIRS[i].SNUM_3B_CHEBY;	
+			
+			n_2b_cheby_terms += ATOM_PAIRS[i].SNUM;
+		}
+		for ( int i = 0; i < PAIR_TRIPLETS.size(); i++ ) 
+			n_3b_cheby_terms += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;;
+		
+		dim++;
+		
+		Tn_ij   = new double [dim];
+		Tn_ik   = new double [dim];
+		Tn_jk   = new double [dim];
+
+		Tnd_ij  = new double [dim];
+		Tnd_ik  = new double [dim];
+		Tnd_jk  = new double [dim];
+	}
+
+	// Main loop for Chebyshev terms:
+
+	for(int a1=0;a1<TRAJECTORY.ATOMS-1;a1++)		// Double sum over atom pairs
+	{
+		
+		for(int a2=a1+1;a2<TRAJECTORY.ATOMS;a2++)
+		{	
+			TEMP_STR = TRAJECTORY.ATOMTYPE[a1];
+			TEMP_STR.append(TRAJECTORY.ATOMTYPE[a2]);		
+			PAIR_TYPE_IJ = TEMP_STR;					
+			curr_pair_type_idx_ij = PAIR_MAP[TEMP_STR];
+			
+			// Start with minimum image convention.  Use layers to access larger distances if desired.	
+			// NOTE: LAYERS ARE DISABLED FOR 3B Cheby. Loops become unwieldly... 
+
+			RVEC_IJ.X = TRAJECTORY.COORDS[a2].X - TRAJECTORY.COORDS[a1].X;
+			RVEC_IJ.X -= floor( 0.5 + RVEC_IJ.X/TRAJECTORY.BOXDIM.X )  * TRAJECTORY.BOXDIM.X;
+			
+			RVEC_IJ.Y = TRAJECTORY.COORDS[a2].Y - TRAJECTORY.COORDS[a1].Y;
+			RVEC_IJ.Y -= floor( 0.5 + RVEC_IJ.Y/TRAJECTORY.BOXDIM.Y )  * TRAJECTORY.BOXDIM.Y;
+						
+			RVEC_IJ.Z = TRAJECTORY.COORDS[a2].Z - TRAJECTORY.COORDS[a1].Z;
+			RVEC_IJ.Z -= floor( 0.5 + RVEC_IJ.Z/TRAJECTORY.BOXDIM.Z )  * TRAJECTORY.BOXDIM.Z;			
+			
+			RAB_IJ.X = RVEC_IJ.X;
+			RAB_IJ.Y = RVEC_IJ.Y;
+			RAB_IJ.Z = RVEC_IJ.Z;
+
+			rlen_ij = sqrt( RAB_IJ.X*RAB_IJ.X + RAB_IJ.Y*RAB_IJ.Y + RAB_IJ.Z*RAB_IJ.Z );			
+
+			if(rlen_ij > ATOM_PAIRS[curr_pair_type_idx_ij].S_MINIM and rlen_ij < ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM)
+			{		
+				
+				////////////////////////////////////////
+				// 
+				// Take care of the T_n^ij terms .. See ZCalc_Cheby_Deriv for more details on logic	
+				// 
+				////////////////////////////////////////
+
+				// Chebyshev polynomials distance transformation. See ZCalc_Cheby_Deriv for more details	
+
+				if ( ATOM_PAIRS[curr_pair_type_idx_ij].CHEBY_TYPE == "INVRSE_R" ) 
+				{
+					xavg  =  0.5 * (1.0/ATOM_PAIRS[curr_pair_type_idx_ij].S_MINIM + 1.0/ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM); 
+					xdiff =  0.5 * (1.0/ATOM_PAIRS[curr_pair_type_idx_ij].S_MINIM - 1.0/ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM); 
+					x     = (1.0/rlen_ij-xavg) / xdiff;	
+				} 
+				else if ( ATOM_PAIRS[curr_pair_type_idx_ij].CHEBY_TYPE == "MORSE" ) 
+				{
+					xmin  = exp(-ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM/ATOM_PAIRS[curr_pair_type_idx_ij].LAMBDA); 
+					xmax  = exp(-ATOM_PAIRS[curr_pair_type_idx_ij].S_MINIM/ATOM_PAIRS[curr_pair_type_idx_ij].LAMBDA); 
+					xavg  = 0.5 * (xmin + xmax);
+					xdiff_ij = 0.5 * (xmax - xmin);
+					x = (exp(-rlen_ij/ATOM_PAIRS[curr_pair_type_idx_ij].LAMBDA)-xavg)/xdiff_ij;
+				}
+				else if (ATOM_PAIRS[curr_pair_type_idx_ij].CHEBY_TYPE == "DEFAULT")
+				{
+					xavg  = 0.5 * (ATOM_PAIRS[curr_pair_type_idx_ij].S_MINIM + ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM);
+					xdiff = 0.5 * (ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM - ATOM_PAIRS[curr_pair_type_idx_ij].S_MINIM);
+					x = (rlen_ij-xavg) / xdiff;	
+				}
+				else
+				{
+					cout << "ERROR: Undefined CHBTYPE: " << ATOM_PAIRS[curr_pair_type_idx_ij].CHEBY_TYPE << endl;
+					cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
+					exit(1);
+				}
+
+				if ( x < -1.0 ) // Why are we setting it as -1? shouldn't something else be done here instead? ...since we're outside the range of the fit??
+				{
+					cout << "Warning:  r_ij < rmin" << endl; 
+					x = -1.0;
+				}
+				else if ( x > 1.0 ) // Added a warning...Do we need to turn off the interaction, because it's beyond rcut?
+				{
+					cout << "Warning:  r_ij > rmax" << endl;								
+					x = 1.0;								
+				}
+
+				Tn_ij[0] = 1.0;
+				Tn_ij[1] = x;
+
+				Tnd_ij[0] = 1.0;
+				Tnd_ij[1] = 2.0 * x;
+
+				for ( int i = 2; i <= ATOM_PAIRS[curr_pair_type_idx_ij].SNUM_3B_CHEBY; i++ ) 
+				{
+					Tn_ij[i] =  2.0 * x * Tn_ij[i-1] - Tn_ij[i-2];
+					Tnd_ij[i] = 2.0 * x * Tnd_ij[i-1] - Tnd_ij[i-2];
+				}
+
+				for ( int i = ATOM_PAIRS[curr_pair_type_idx_ij].SNUM_3B_CHEBY; i >= 1; i-- ) 
+					Tnd_ij[i] = i * Tnd_ij[i-1];
+
+				Tnd_ij[0] = 0.0;
+
+				rlen3_ij = rlen_ij * rlen_ij * rlen_ij;
+				
+				if ( ATOM_PAIRS[curr_pair_type_idx_ij].CHEBY_TYPE == "MORSE" )
+				{	
+					fcut0_ij     = (1.0 - rlen_ij/ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM);
+					fcut_ij      = fcut0_ij * fcut0_ij * fcut0_ij;
+					fcutderiv_ij = -3.0 * fcut0_ij * fcut0_ij / ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM;										
+				}						
+
+				for(int a3=a2+1;a3<TRAJECTORY.ATOMS;a3++)
+				{
+					TEMP_STR = TRAJECTORY.ATOMTYPE[a1];
+					TEMP_STR.append(TRAJECTORY.ATOMTYPE[a3]);	
+					PAIR_TYPE_IK = TEMP_STR;							
+					curr_pair_type_idx_ik = PAIR_MAP[TEMP_STR];	
+
+					RVEC_IK.X = TRAJECTORY.COORDS[a3].X - TRAJECTORY.COORDS[a1].X;
+					RVEC_IK.X -= floor( 0.5 + RVEC_IK.X/TRAJECTORY.BOXDIM.X )  * TRAJECTORY.BOXDIM.X;	
+					
+					RVEC_IK.Y = TRAJECTORY.COORDS[a3].Y - TRAJECTORY.COORDS[a1].Y;
+					RVEC_IK.Y -= floor( 0.5 + RVEC_IK.Y/TRAJECTORY.BOXDIM.Y )  * TRAJECTORY.BOXDIM.Y;	
+					
+					RVEC_IK.Z = TRAJECTORY.COORDS[a3].Z - TRAJECTORY.COORDS[a1].Z;
+					RVEC_IK.Z -= floor( 0.5 + RVEC_IK.Z/TRAJECTORY.BOXDIM.Z )  * TRAJECTORY.BOXDIM.Z;		
+	
+					RAB_IK.X = RVEC_IK.X;
+					RAB_IK.Y = RVEC_IK.Y;
+					RAB_IK.Z = RVEC_IK.Z;										
+			
+					rlen_ik = sqrt( RAB_IK.X*RAB_IK.X + RAB_IK.Y*RAB_IK.Y + RAB_IK.Z*RAB_IK.Z );	
+
+					if(rlen_ik > ATOM_PAIRS[curr_pair_type_idx_ik].S_MINIM and rlen_ik < ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM)
+					{	
+						
+						TEMP_STR = TRAJECTORY.ATOMTYPE[a2];
+						TEMP_STR.append(TRAJECTORY.ATOMTYPE[a3]);	
+						PAIR_TYPE_JK = TEMP_STR;							
+						curr_pair_type_idx_jk = PAIR_MAP[TEMP_STR];					
+				
+						RVEC_JK.X = TRAJECTORY.COORDS[a3].X - TRAJECTORY.COORDS[a2].X;
+						RVEC_JK.X -= floor( 0.5 + RVEC_JK.X/TRAJECTORY.BOXDIM.X )  * TRAJECTORY.BOXDIM.X;
+						
+						RVEC_JK.Y = TRAJECTORY.COORDS[a3].Y - TRAJECTORY.COORDS[a2].Y;
+						RVEC_JK.Y -= floor( 0.5 + RVEC_JK.Y/TRAJECTORY.BOXDIM.Y )  * TRAJECTORY.BOXDIM.Y;
+						
+						RVEC_JK.Z = TRAJECTORY.COORDS[a3].Z - TRAJECTORY.COORDS[a2].Z;
+						RVEC_JK.Z -= floor( 0.5 + RVEC_JK.Z/TRAJECTORY.BOXDIM.Z )  * TRAJECTORY.BOXDIM.Z;	
+		
+						RAB_JK.X = RVEC_JK.X;
+						RAB_JK.Y = RVEC_JK.Y;
+						RAB_JK.Z = RVEC_JK.Z;										
+				
+						rlen_jk = sqrt( RAB_JK.X*RAB_JK.X + RAB_JK.Y*RAB_JK.Y + RAB_JK.Z*RAB_JK.Z );							
+						
+						if(rlen_jk > ATOM_PAIRS[curr_pair_type_idx_jk].S_MINIM and rlen_jk < ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM)												
+						{
+						
+
+							////////////////////////////////////////
+							// 
+							// Take care of the T_n^ik terms
+							// 
+							////////////////////////////////////////					
+			
+							// Chebyshev polynomials distance transformation. See ZCalc_Cheby_Deriv for more details	
+
+							if ( ATOM_PAIRS[curr_pair_type_idx_ik].CHEBY_TYPE == "INVRSE_R" ) 
+							{
+								xavg  =  0.5 * (1.0/ATOM_PAIRS[curr_pair_type_idx_ik].S_MINIM + 1.0/ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM);  
+								xdiff =  0.5 * (1.0/ATOM_PAIRS[curr_pair_type_idx_ik].S_MINIM - 1.0/ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM); 
+								x     = (1.0/rlen_ik-xavg) / xdiff;	
+							} 
+							else if ( ATOM_PAIRS[curr_pair_type_idx_ik].CHEBY_TYPE == "MORSE" ) 
+							{
+								xmin  = exp(-ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM/ATOM_PAIRS[curr_pair_type_idx_ik].LAMBDA); 
+								xmax  = exp(-ATOM_PAIRS[curr_pair_type_idx_ik].S_MINIM/ATOM_PAIRS[curr_pair_type_idx_ik].LAMBDA); 
+								xavg  = 0.5 * (xmin + xmax);
+								xdiff_ik = 0.5 * (xmax - xmin);
+								x = (exp(-rlen_ik/ATOM_PAIRS[curr_pair_type_idx_ik].LAMBDA)-xavg)/xdiff_ik;
+							}
+							else if (ATOM_PAIRS[curr_pair_type_idx_ik].CHEBY_TYPE == "DEFAULT")
+							{
+								xavg  = 0.5 * (ATOM_PAIRS[curr_pair_type_idx_ik].S_MINIM + ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM);
+								xdiff = 0.5 * (ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM - ATOM_PAIRS[curr_pair_type_idx_ik].S_MINIM);
+								x = (rlen_ik-xavg) / xdiff;
+							}
+							else
+							{
+								cout << "ERROR: Undefined CHBTYPE: " << ATOM_PAIRS[curr_pair_type_idx_ik].CHEBY_TYPE << endl;
+								cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
+								exit(1);
+							}
+							if ( x < -1.0 ) // Why are we setting it as -1? shouldn't something else be done here instead? ...since we're outside the range of the fit??
+							{
+								cout << "Warning:  r_ik < rmin" << endl;
+								x = -1.0;
+							}
+							else if ( x > 1.0 ) // Added a warning...Do we need to turn off the interaction, because it's beyond rcut?
+							{
+								cout << "Warning:  r_ik > rmax" << endl;								
+								x = 1.0;								
+							}
+			  
+							Tn_ik[0] = 1.0;
+							Tn_ik[1] = x;
+
+							Tnd_ik[0] = 1.0;
+							Tnd_ik[1] = 2.0 * x;
+
+							for ( int i = 2; i <= ATOM_PAIRS[curr_pair_type_idx_ik].SNUM_3B_CHEBY; i++ ) 
+							{
+								Tn_ik[i] =  2.0 * x * Tn_ik[i-1] - Tn_ik[i-2];
+								Tnd_ik[i] = 2.0 * x * Tnd_ik[i-1] - Tnd_ik[i-2];
+							}
+
+							for ( int i = ATOM_PAIRS[curr_pair_type_idx_ik].SNUM_3B_CHEBY; i >= 1; i-- ) 
+								Tnd_ik[i] = i * Tnd_ik[i-1];
+
+							Tnd_ik[0] = 0.0;
+
+							rlen3_ik = rlen_ik * rlen_ik * rlen_ik;
+				
+							if ( ATOM_PAIRS[curr_pair_type_idx_ik].CHEBY_TYPE == "MORSE" )
+							{	
+								fcut0_ik     = (1.0 - rlen_ik/ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM);
+								fcut_ik      = fcut0_ik * fcut0_ik * fcut0_ik;
+								fcutderiv_ik = -3.0 * fcut0_ik * fcut0_ik / ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM;										
+							}
+														
+							////////////////////////////////////////
+							// 
+							// Take care of the T_n^jk terms
+							// 
+							////////////////////////////////////////					
+			
+							// Chebyshev polynomials distance transformation. See ZCalc_Cheby_Deriv for more details	
+
+							if ( ATOM_PAIRS[curr_pair_type_idx_jk].CHEBY_TYPE == "INVRSE_R" ) 
+							{
+								xavg  =  0.5 * (1.0/ATOM_PAIRS[curr_pair_type_idx_jk].S_MINIM + 1.0/ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM);  
+								xdiff =  0.5 * (1.0/ATOM_PAIRS[curr_pair_type_idx_jk].S_MINIM - 1.0/ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM); 
+								x     = (1.0/rlen_jk-xavg) / xdiff;	
+							} 
+							else if ( ATOM_PAIRS[curr_pair_type_idx_jk].CHEBY_TYPE == "MORSE" ) 
+							{
+								xmin  = exp(-ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM/ATOM_PAIRS[curr_pair_type_idx_jk].LAMBDA); 
+								xmax  = exp(-ATOM_PAIRS[curr_pair_type_idx_jk].S_MINIM/ATOM_PAIRS[curr_pair_type_idx_jk].LAMBDA); 
+								xavg  = 0.5 * (xmin + xmax);
+								xdiff_jk = 0.5 * (xmax - xmin);
+								x = (exp(-rlen_jk/ATOM_PAIRS[curr_pair_type_idx_jk].LAMBDA)-xavg)/xdiff_jk;
+							}
+							else if (ATOM_PAIRS[curr_pair_type_idx_jk].CHEBY_TYPE == "DEFAULT")
+							{
+								xavg  = 0.5 * (ATOM_PAIRS[curr_pair_type_idx_jk].S_MINIM + ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM);
+								xdiff = 0.5 * (ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM - ATOM_PAIRS[curr_pair_type_idx_jk].S_MINIM);
+								x = (rlen_jk-xavg) / xdiff;
+							}
+							else
+							{
+								cout << "ERROR: Undefined CHBTYPE: " << ATOM_PAIRS[curr_pair_type_idx_jk].CHEBY_TYPE << endl;
+								cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
+								exit(1);
+							}
+							if ( x < -1.0 ) // Why are we setting it as -1? shouldn't something else be done here instead? ...since we're outside the range of the fit??
+							{
+								cout << "Warning:  r_jk < rmin" << endl; 
+								x = -1.0;
+							}
+							else if ( x > 1.0 ) // Added a warning...Do we need to turn off the interaction, because it's beyond rcut?
+							{
+								cout << "Warning:  r_jk > rmax" << endl;								
+								x = 1.0;								
+							}
+			  
+							Tn_jk[0] = 1.0;
+							Tn_jk[1] = x;
+
+							Tnd_jk[0] = 1.0;
+							Tnd_jk[1] = 2.0 * x;
+
+							for ( int i = 2; i <= ATOM_PAIRS[curr_pair_type_idx_jk].SNUM_3B_CHEBY; i++ ) 
+							{
+								Tn_jk[i] =  2.0 * x * Tn_jk[i-1] - Tn_jk[i-2];
+								Tnd_jk[i] = 2.0 * x * Tnd_jk[i-1] - Tnd_jk[i-2];
+							}
+
+							for ( int i = ATOM_PAIRS[curr_pair_type_idx_jk].SNUM_3B_CHEBY; i >= 1; i-- ) 
+								Tnd_jk[i] = i * Tnd_jk[i-1];
+
+							Tnd_jk[0] = 0.0;
+
+							rlen3_jk = rlen_jk * rlen_jk * rlen_jk;
+				
+							if ( ATOM_PAIRS[curr_pair_type_idx_jk].CHEBY_TYPE == "MORSE" )
+							{	
+								fcut0_jk     = (1.0 - rlen_jk/ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM);
+								fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;
+								fcutderiv_jk = -3.0 * fcut0_jk * fcut0_jk / ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM;											
+							}
+														
+							// At this point we've completed all pre-calculations needed to populate the A matrix. Now we need to figure out 
+							// where within the matrix to put the data, and to do so. 
+							
+							// Determine the FF type for the given triplet
+							
+							TEMP_STR =      ATOM_PAIRS[curr_pair_type_idx_ij].PRPR_NM;
+							TEMP_STR.append(ATOM_PAIRS[curr_pair_type_idx_ik].PRPR_NM);	
+							TEMP_STR.append(ATOM_PAIRS[curr_pair_type_idx_jk].PRPR_NM);	
+							
+
+							curr_triple_type_index = TRIAD_MAP[TEMP_STR];
+
+							// Note: This syntax is safe since there is only one possible SNUM_3B_CHEBY value for all interactions
+
+							vstart = n_2b_cheby_terms;
+							
+							for (int i=0; i<curr_triple_type_index; i++)
+								vstart += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;			
+
+
+							if ( ATOM_PAIRS[curr_pair_type_idx_ij].CHEBY_TYPE == "MORSE" ) 
+							{
+								/////////////////////////////////////////////////////////////////////
+								/////////////////////////////////////////////////////////////////////
+								// Consider special restrictions on allowed triplet types and powers
+								/////////////////////////////////////////////////////////////////////
+								/////////////////////////////////////////////////////////////////////
+								
+								row_offset = 0;
+								
+								// --- THE KEY HERE IS TO UNDERSTAND THAT THE IJ, IK, AND JK HERE IS BASED ON ATOM PAIRS, AND DOESN'T NECESSARILY MATCH THE TRIPLET'S EXPECTED ORDER!
+								
+								for(int i=0; i<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
+								{
+									row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICIES[i];
+		
+									
+									
+									// Brute force check.. if this works, hide it somewhere so it doesn't look so ugly...
+									
+									if    (ATOM_PAIRS[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR1)
+									{
+										if    (ATOM_PAIRS[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR2)
+										{
+											// Then jk = z
+											
+											pow_ij = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].X;
+											pow_ik = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Y;
+											pow_jk = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Z;
+										}
+										else
+										{
+											pow_ij = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].X;
+											pow_ik = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Z;
+											pow_jk = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Y;
+										}
+										
+										
+									}
+									else if(ATOM_PAIRS[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR2)
+									{
+										if    (ATOM_PAIRS[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR1)
+										{
+											// Then jk = z
+											
+											pow_ij = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Y;
+											pow_ik = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].X;
+											pow_jk = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Z;
+										}
+										else
+										{
+											pow_ij = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Y;
+											pow_ik = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Z;
+											pow_jk = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].X;
+										}										
+									}
+									else // PAIR_TYPE_IJ matches allowed.z
+									{
+										if    (ATOM_PAIRS[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR1)
+										{
+											// Then jk = z
+											
+											pow_ij = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Z;
+											pow_ik = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].X;
+											pow_jk = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Y;
+										}
+										else
+										{
+											pow_ij = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Z;
+											pow_ik = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].Y;
+											pow_jk = PAIR_TRIPLETS[curr_triple_type_index].ALLOWED_POWERS[i].X;
+										}										
+									}
+
+									deriv_ij =  fcut_ij * Tnd_ij[pow_ij]
+												* (-exp(-rlen_ij/ATOM_PAIRS[curr_pair_type_idx_ij].LAMBDA)/ATOM_PAIRS[curr_pair_type_idx_ij].LAMBDA)/xdiff_ij + fcutderiv_ij
+												* Tn_ij [pow_ij] ;
+									
+									deriv_ik =  fcut_ik * Tnd_ik[pow_ik] 
+												* (-exp(-rlen_ik/ATOM_PAIRS[curr_pair_type_idx_ik].LAMBDA)/ATOM_PAIRS[curr_pair_type_idx_ik].LAMBDA)/xdiff_ik + fcutderiv_ik
+												* Tn_ik[pow_ik] ;
+									
+									deriv_jk =  fcut_jk * Tnd_jk[pow_jk]
+												* (-exp(-rlen_jk/ATOM_PAIRS[curr_pair_type_idx_jk].LAMBDA)/ATOM_PAIRS[curr_pair_type_idx_jk].LAMBDA)/xdiff_jk + fcutderiv_jk
+												* Tn_jk[pow_jk] ;	
+									
+									// ij pairs
+									
+									FRAME_A_MATRIX[a1][vstart+row_offset].X += deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.X / rlen_ij;
+									FRAME_A_MATRIX[a2][vstart+row_offset].X -= deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.X / rlen_ij;
+							
+									FRAME_A_MATRIX[a1][vstart+row_offset].Y += deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Y / rlen_ij;
+									FRAME_A_MATRIX[a2][vstart+row_offset].Y -= deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Y / rlen_ij;
+							
+									FRAME_A_MATRIX[a1][vstart+row_offset].Z += deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Z / rlen_ij;
+									FRAME_A_MATRIX[a2][vstart+row_offset].Z -= deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Z / rlen_ij;	
+							
+							
+									// ik pairs
+							
+									FRAME_A_MATRIX[a1][vstart+row_offset].X += deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.X / rlen_ik;
+									FRAME_A_MATRIX[a3][vstart+row_offset].X -= deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.X / rlen_ik;
+							
+									FRAME_A_MATRIX[a1][vstart+row_offset].Y += deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Y / rlen_ik;
+									FRAME_A_MATRIX[a3][vstart+row_offset].Y -= deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Y / rlen_ik;
+							
+									FRAME_A_MATRIX[a1][vstart+row_offset].Z += deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Z / rlen_ik;
+									FRAME_A_MATRIX[a3][vstart+row_offset].Z -= deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Z / rlen_ik;
+									
+									// jk pairs
+									
+									FRAME_A_MATRIX[a2][vstart+row_offset].X += deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.X / rlen_jk;
+									FRAME_A_MATRIX[a3][vstart+row_offset].X -= deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.X / rlen_jk;
+							
+									FRAME_A_MATRIX[a2][vstart+row_offset].Y += deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Y / rlen_jk;
+									FRAME_A_MATRIX[a3][vstart+row_offset].Y -= deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Y / rlen_jk;
+							
+									FRAME_A_MATRIX[a2][vstart+row_offset].Z += deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Z / rlen_jk;
+									FRAME_A_MATRIX[a3][vstart+row_offset].Z -= deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Z / rlen_jk;
+									
+								}
+							}
+							else 
+							{
+								
+								for ( int i = 0; i < ATOM_PAIRS[curr_pair_type_idx_ij].SNUM_3B_CHEBY; i++ )
+								{
+									for ( int j = 0; j < ATOM_PAIRS[curr_pair_type_idx_ij].SNUM_3B_CHEBY; j++ )
+									{
+										for ( int k = 0; k < ATOM_PAIRS[curr_pair_type_idx_ij].SNUM_3B_CHEBY; k++ )
+										{
+											
+											row_offset  = ATOM_PAIRS[curr_pair_type_idx_ij].SNUM_3B_CHEBY*ATOM_PAIRS[curr_pair_type_idx_ij].SNUM_3B_CHEBY*i; 
+											row_offset += ATOM_PAIRS[curr_pair_type_idx_ij].SNUM_3B_CHEBY*j;
+											row_offset += k;											
+											
+											FRAME_A_MATRIX[a1][vstart+row_offset].X += (ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.X/rlen3_ij;
+											FRAME_A_MATRIX[a1][vstart+row_offset].Y += (ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.Y/rlen3_ij;
+											FRAME_A_MATRIX[a1][vstart+row_offset].Z += (ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.Z/rlen3_ij;
+									
+											FRAME_A_MATRIX[a2][vstart+row_offset].X -= (ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.X/rlen3_ij;
+											FRAME_A_MATRIX[a2][vstart+row_offset].Y -= (ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.Y/rlen3_ij;
+											FRAME_A_MATRIX[a2][vstart+row_offset].Z -= (ATOM_PAIRS[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.Z/rlen3_ij;		
+											
+											
+											FRAME_A_MATRIX[a1][vstart+row_offset].X += (ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.X/rlen3_ik;
+											FRAME_A_MATRIX[a1][vstart+row_offset].Y += (ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.Y/rlen3_ik;
+											FRAME_A_MATRIX[a1][vstart+row_offset].Z += (ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.Z/rlen3_ik;
+									
+											FRAME_A_MATRIX[a2][vstart+row_offset].X -= (ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.X/rlen3_ik;
+											FRAME_A_MATRIX[a2][vstart+row_offset].Y -= (ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.Y/rlen3_ik;
+											FRAME_A_MATRIX[a2][vstart+row_offset].Z -= (ATOM_PAIRS[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.Z/rlen3_ik;	
+											
+											
+											FRAME_A_MATRIX[a1][vstart+row_offset].X += (ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.X/rlen3_jk;
+											FRAME_A_MATRIX[a1][vstart+row_offset].Y += (ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.Y/rlen3_jk;
+											FRAME_A_MATRIX[a1][vstart+row_offset].Z += (ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.Z/rlen3_jk;
+									
+											FRAME_A_MATRIX[a2][vstart+row_offset].X -= (ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.X/rlen3_jk;
+											FRAME_A_MATRIX[a2][vstart+row_offset].Y -= (ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.Y/rlen3_jk;
+											FRAME_A_MATRIX[a2][vstart+row_offset].Z -= (ATOM_PAIRS[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.Z/rlen3_jk;
+											
+										}
+									}
+								}									
+
+							}
+														
+						} // end if rlen_jk within cutoffs...
+					} // end if rlen_ik within cutoffs...	
+	
+				} // end third loop over atoms			
+			} // end if rlen_ik within cutoffs...
+		}
+	}
+
+
 }
 
 // FUNCTION UPDATED

@@ -1,0 +1,31 @@
+19,32c19,21
+< 		0     O O
+< 		1     H H
+< 		2     O H
+< 	The following unique triplets of pair types have been identified:
+< 		0     OO OO OO
+< 		1     OO OO HH
+< 		2     OO OO OH
+< 		3     OO HH HH
+< 		4     OO HH OH
+< 		5     OO OH OH
+< 		6     HH HH HH
+< 		7     HH HH OH
+< 		8     HH OH OH
+< 		9     OH OH OH
+---
+> 		0  O O
+> 		1  H H
+> 		2  O H
+34c23
+< 	0               O               O               0               3               0.1             1.25             1               
+---
+> 	0               O               O               0               3               0.1             1.25             0               
+36,40c25
+< 	2               O               H               0               3               0.1             1.25             1               
+< 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # P_OVERB #     # R_0_VAL #     # P_1_VAL #     # P_2_VAL #     # LAMBDA6 #
+< 	0               O               O               50              1.0165          -0.0657         5.0451          -3.6141         
+< 	1               H               H               0               0               0               0               0               
+< 	2               O               H               50              1.0165          -0.0657         5.0451          -3.6141         
+---
+> 	2               O               H               0               3               0.1             1.25             0               

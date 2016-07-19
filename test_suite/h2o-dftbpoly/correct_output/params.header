@@ -1,4 +1,23 @@
-npair 3
- 0.00000 3.00000 0.10000 8
- 0.00000 3.00000 0.10000 8
- 0.00000 3.00000 0.10000 8
+FITCOUL: false
+USECOUL: true
+FITPOVR: false
+USE3BCH: false
+
+PAIRTYP: DFTBPOLY  8
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		-0.71		15.9994
+1		H		0.365		1.0079
+
+ATOM PAIRS: 3
+
+!# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0               3               0.1                             
+	1               H               H               0               3               0.1                             
+	2               O               H               0               3               0.1                             
+
+ATOM PAIR TRIPLETS: 0
+
+

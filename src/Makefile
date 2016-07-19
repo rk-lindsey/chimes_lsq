@@ -1,13 +1,16 @@
 # FYI: clean removes .o files, realclean removes executable
 
-
+MYFLAGS= -D VERBOSITY=1
 
 # Choose g++ for debugging and icpc for fast execution.
 #
+
+CXX=g++ -O3  $(MYFLAGS) 
+
 #CXX=g++ -Wall -pg # NOTE: pg flag is for profiling with gprof (OSX compatible)
 #CXX=g++ -g -Wall -Wextra -Wuninitialized -O1#-pg
-#CXX=g++ -g   # -Wall -Wextra 
-CXX=g++ -O2   # -Wall -Wextra 
+#CXX=g++ -g $(MYFLAGS)  # -Wall -Wextra 
+#CXX=g++ -O2   # -Wall -Wextra 
 #CXX=g++ -O3   # -Wall -Wextra 
 #CXX=icpc -fast
 

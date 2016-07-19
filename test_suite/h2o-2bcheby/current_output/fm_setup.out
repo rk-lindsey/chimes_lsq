@@ -8,13 +8,19 @@ Reading input file...
 	# CNSCOUL #: true
 	# FITPOVR #: true
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/mol.
+	             Will use 2-body order: 8
+	             Will use 3-body order: 0
 	# SUBCRDS #: false
 	# CHBTYPE #: MORSE
-	# POLORDR #: 8
 	# NATMTYP #: 2
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
  	1              O              -0.71          15.9994        
  	2              H              0.365          1.0079         
+
+	The following unique pair types have been identified:
+		0  O O
+		1  H H
+		2  O H
 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
 	0               O               O               0.6             6               0.1             1.25             1               
 	1               H               H               0.6             6               0.1             1.25             0               
@@ -25,7 +31,7 @@ Reading input file...
 	2               O               H               50              1.0165          -0.0657         5.0451          -3.6141         
 ...input file read successful: 
 
-The number of two-body non-coulomb parameters is 24
+The number of two-body non-coulomb parameters is: 24
 
 Reading in the trajectory file...
 ...trajectory file read successful: 
