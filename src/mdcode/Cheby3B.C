@@ -44,7 +44,12 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
   //const double lambda = 1.25 ;
   double exprlen12, exprlen23, exprlen13 ;
   double xdiff12, xdiff23, xdiff13 ;
+  double f3b[nat][3];
+  bool fcheck = true;
 
+  if (fcheck) {
+    memset(f3b, 0, sizeof(f3b));
+  }
   if ( ! called_before ) {
     called_before = true ;
     int dim = 0 ;
@@ -105,6 +110,11 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 	      if ( fcut13 == 0.0 ) 
 		continue ;
 
+              double r12_mag, r23_mag, r13_mag;
+              r12_mag = sqrt(R12[0]*R12[0] + R12[1]*R12[1] + R12[2]*R12[2]);
+              r23_mag = sqrt(R23[0]*R23[0] + R23[1]*R23[1] + R23[2]*R23[2]);
+              r13_mag = sqrt(R13[0]*R13[0] + R13[1]*R13[1] + R13[2]*R13[2]);
+
 	      for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
 		for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 
 		  for ( int k = 0 ; k < snum_3b_cheby[ipair23] ; k++ ) 
@@ -147,6 +157,19 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		      Pxyz -= f13 * rlen13 ;
 		      f13 /= rlen13 ;
 
+                      // zero-out force if rij < rmin
+                      if (r12_mag < smin[ipair12]) {
+                        f12 = 0;
+                        //printf("Zeroing out f12: r12 = %lf, smin = %lf\n",r12_mag,smin[ipair12]);
+                      }
+                      if (r23_mag < smin[ipair23]) {
+                        f23 = 0;
+                        //printf("Zeroing out f23: r23 = %lf, smin = %lf\n",r23_mag,smin[ipair23]);
+                      }
+                      if (r13_mag < smin[ipair13]) {
+                        f13 = 0;
+                        //printf("Zeroing out f13: r13 = %lf, smin = %lf\n",r13_mag,smin[ipair13]);
+                      }
 		      for(int c=0;c<3;c++)
 			{
 			  SForce[a1][c] += f12 * R12[c] ;
@@ -157,12 +180,35 @@ void ZCalc_3B_Cheby(double **Coord,const char *Lbc, double *Latcons,
 
 			  SForce[a1][c] += f13 * R13[c] ;
 			  SForce[a3][c] -= f13 * R13[c] ;
+                          if (fcheck) {
+			    f3b[a1][c] += f12 * R12[c] ;
+			    f3b[a2][c] -= f12 * R12[c] ; 
+			    f3b[a2][c] += f23 * R23[c] ;
+			    f3b[a3][c] -= f23 * R23[c] ;
+			    f3b[a1][c] += f13 * R13[c] ;
+			    f3b[a3][c] -= f13 * R13[c] ;
+                          }
 
 			} 
 		    }
 	    }
 	}
     }
+  if (fcheck) {
+    double e3b = tempx;
+    FILE *frs;
+    if (called_before) {
+      frs = fopen("3b_results.dat","w");
+    } else { 
+      frs = fopen("3b_results.dat","a");
+    }
+    fprintf(frs, "e3b = %16.16lf\n",e3b);
+    for (int i = 0; i < nat; i++) {
+      for (int j = 0; j < 3; j++) {
+        fprintf(frs, "%16.16lf\n",f3b[i][j]);
+      }
+    }
+  }
   Vtot += tempx ;
 
   return;
