@@ -23,7 +23,7 @@ using namespace std;
  
 
 static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool & fit_coul, bool & coul_consv, bool & if_subtract_coord, bool & if_subtract_coul, bool & fit_pover, int & cheby_order, string & cheby_type, int & cheby_3b_order, int & invr_parms,
- int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool use_partial_charges );
+ int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool & use_partial_charges );
 
 int factorial(int input)
 {
@@ -44,7 +44,7 @@ int main()
 	
 	
 	// BELOW: VARIABLES INTRODUCED BY BECKY TO ALLOW EXTENSION TO MULTIPLE ATOM TYPES
-	// 
+	
 	vector<PAIRS> ATOM_PAIRS;		// Will store relevant info regarding atom interaction pair types.. 
 	vector<TRIPLETS> PAIR_TRIPLETS;	// Will store relevant info regarding atom interaction triplet types.. i.e. { [OO,OO,OO], [OO,HH,HH], ... }
 	vector<FRAME> TRAJECTORY;		// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
@@ -57,8 +57,6 @@ int main()
 	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
 	map<string,int> TRIAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
 	map<int,string> TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
-	
-	 
 	
 	// MAJOR ASSUMPTIONS: 
 	// 1. Number of atoms does not change over frames ( should always be true for MD)
@@ -89,7 +87,7 @@ int main()
 	int invr_parms = 4;				// currently uses 19 parameters per pair type
  	int NATMTYP = 0;
 
-	bool if_3b_cheby = false; // ************* WHY ISN'T THIS ITS OWN PAIR_TYPE????!?!?!?!?!?!?!
+	bool if_3b_cheby = false; 		// ************* WHY ISN'T THIS ITS OWN PAIR_TYPE????!?!?!?!?!?!?!
 
 	//////////////////////////////////////////////////
 	//
@@ -178,31 +176,7 @@ int main()
 
 	int tot_short_range = tot_snum + num_cheby_3b;	
 	
-/*	
-	// SANITY CHECK
-	
-	
-	cout << "******" << endl;
-	
-	string TEMP_STR; 
-	
-	for (int h=0;h<PAIR_TRIPLETS.size();h++)
-	{
 
-		TEMP_STR =      ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[h].ATMPAIR1 ] ].PRPR_NM;
-		TEMP_STR.append(ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[h].ATMPAIR2 ] ].PRPR_NM);	
-		TEMP_STR.append(ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[h].ATMPAIR3 ] ].PRPR_NM);	
-		
-		cout <<  PAIR_TRIPLETS[h].ATMPAIR1 << " " << PAIR_TRIPLETS[h].ATMPAIR2 << " " << PAIR_TRIPLETS[h].ATMPAIR3 << " " << TEMP_STR << " " << TRIAD_MAP[TEMP_STR] << " " << ATOM_PAIRS[0].SNUM_3B_CHEBY << endl;
-		cout << TRIAD_MAP[TEMP_STR] * ATOM_PAIRS[0].SNUM_3B_CHEBY + 30 << endl;; 												
-		
-	}
-		
-	exit (0);	
-*/		
-	
-//	int tot_short_range = tot_snum; //	int tot_short_range = tot_snum + num_cheby_3b;	
-	
 	//////////////////////////////////////////////////
 	//
 	// Read and store MD trajectory (coords and forces)
@@ -273,72 +247,7 @@ int main()
 				TRAJECTORY[i].COORDS[j].Z -= floor(TRAJECTORY[i].COORDS[j].Z/TRAJECTORY[i].BOXDIM.Z)*TRAJECTORY[i].BOXDIM.Z;
 			} 
 		}
-/* DON'T NEED THIS ANYMORE SINCE MAPS WERE INTRODUCED!!!		
-		// Set up the data object that will define the atom 
-		// pair type for all atom pairs.. Main input fie HAS 
-		// been read in at this point
-		//
-		// IMPORTANT: LOOPING METHOD MATTERS! EXPECTS:
-		//
-		// for(int a1=0;a1<nat-1;a1++)		// Double sum over atom pairs
-		// 		for(int a2=a1+1;a2<nat;a2++)		
-		
-		if(i==0)
-		{			
-			for(int j=0; j<TRAJECTORY[i].ATOMS-1; j++)
-			{
-				for (int k=j+1; k<TRAJECTORY[i].ATOMS; k++)
-				{
-					for(int m=0; m<ATOM_PAIRS.size(); m++)
-					{						
-						if (TRAJECTORY[i].ATOMTYPE[j] == ATOM_PAIRS[m].ATM1TYP && TRAJECTORY[i].ATOMTYPE[k] == ATOM_PAIRS[m].ATM2TYP)
-						{
-							ATOM_PAIR_TYPES.push_back(m);
-							TRAJECTORY[i].CHARGES[i] = ATOM_PAIRS[m].ATM1CHG;
-							TRAJECTORY[i].CHARGES[k] = ATOM_PAIRS[m].ATM1CHG;
-						}
-
-						else if (TRAJECTORY[i].ATOMTYPE[k] == ATOM_PAIRS[m].ATM1TYP && TRAJECTORY[i].ATOMTYPE[j] == ATOM_PAIRS[m].ATM2TYP)
-						{
-							ATOM_PAIR_TYPES.push_back(m);
-							TRAJECTORY[i].CHARGES[k] = ATOM_PAIRS[m].ATM1CHG;
-							TRAJECTORY[i].CHARGES[j] = ATOM_PAIRS[m].ATM1CHG;
-						}
-					}
-				}
-			}
-			bool MET;
-			
-			for(int j=0; j<TRAJECTORY[i].ATOMS; j++)
-			{
-				for(int k=0; k<TRAJECTORY[i].ATOMS; k++)
-				{
-					MET = false;
-					
-					for(int m=0; m<ATOM_PAIRS.size(); m++)
-					{					
-						if ((TRAJECTORY[i].ATOMTYPE[j] == ATOM_PAIRS[m].ATM1TYP && TRAJECTORY[i].ATOMTYPE[k] == ATOM_PAIRS[m].ATM2TYP) ||
-							(TRAJECTORY[i].ATOMTYPE[k] == ATOM_PAIRS[m].ATM1TYP && TRAJECTORY[i].ATOMTYPE[j] == ATOM_PAIRS[m].ATM2TYP))
-						{
-							ATOM_PAIR_TYPES_ALL.push_back(m);
-							MET = true;
-							break;				
-						}
-					}
-					
-					if (!MET)
-					{
-							cout << "WARNING: No pair type found for atoms indexed " << j << " and " << k << endl;
-							cout << "         Atom types " << TRAJECTORY[i].ATOMTYPE[j] << " and " <<  TRAJECTORY[i].ATOMTYPE[k] << endl;
-							cout << "         Possible pairs are:" << endl;
-							for(int m=0; m<ATOM_PAIRS.size(); m++)
-								cout << "         " << ATOM_PAIRS[m].ATM1TYP << " " << ATOM_PAIRS[m].ATM2TYP << endl;
-					}			
-				}
-			}		
-		}		
-*/		
-		
+	
 	}
 	
 	#if VERBOSITY == 1
@@ -419,16 +328,32 @@ int main()
 
 	for(int i=0; i<nframes; i++)
 	{
-		ZCalc_Deriv(ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], ATOM_PAIR_TYPES, A_MATRIX[i], COULOMB_FORCES[i], nlayers, if_3b_cheby, PAIR_MAP, TRIAD_MAP);
-
+		// Run a few checks to make sure logic is correct
+		 
+		if(ifsubtract_coord && fit_pover)
+		{
+			cout << "LOGIC ERROR: Problem with code logic. Both fit_pover and ifsubtract_coord cannot be true." << endl;
+			cout << "             if_subtract_coord should only be true if overbonding parameters have been " << endl;
+			cout << "             specified, and FITPOVR set false." << endl;
+		}
+		
+		if(ifsubtract_coul && fit_coul)
+		{
+			cout << "LOGIC ERROR: Problem with code logic. Both fit_coul and ifsubtract_coul cannot be true." << endl;
+			cout << "             ifsubtract_coul should only be true if non-zero charges have been specified " << endl;
+			cout << "             and FITCOUL set false." << endl;
+		}
+		
+		ZCalc_Deriv(ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], nlayers, if_3b_cheby, PAIR_MAP, TRIAD_MAP);
+	
 		if ( ifsubtract_coord ) // Subtract over-coordination forces from force to be output.
-			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, ATOM_PAIR_TYPES_ALL, PAIR_MAP);	
+			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);	
 		
 		if (ifsubtract_coul) 
-			ZCalc_Ewald(TRAJECTORY[i], ATOM_PAIR_TYPES, ATOM_PAIRS, PAIR_MAP);
+			ZCalc_Ewald(TRAJECTORY[i], ATOM_PAIRS, PAIR_MAP);
 
 		if ( fit_pover )	// Fit the overcoordination parameter.
-			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, ATOM_PAIR_TYPES_ALL, PAIR_MAP);	
+			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);	
 		
 			
 	}	
@@ -512,11 +437,8 @@ int main()
 		  
 		}  	
     }
-  
-	// I DON'T UNDERSTAND THIS PART... WHAT IS IS DOING? WHY IS IT PRINTED AT THE END OF THE A FILE?
-	// WHY IS IT REPEATED INVERSELY FOR A?
-	//
-	// A and B file charge conservation (q00 + 4 qOH + qHH = 0 )
+
+	// A and B file charge conservation (q00 + 4 qOH + qHH = 0 ) .. This is specific for water systems
 	  
 	if ( fit_coul && coul_consv) 
 	{
@@ -579,15 +501,27 @@ int main()
 	// THE NEW WAY
 	//////////////////////////////////////////////////	
 	
+cout << "checks: " << 	fit_coul <<  " " << use_partial_charges << endl;
+
+	if(!fit_coul && !use_partial_charges)
+		header << "USECOUL: false" << endl;
+	else
+		header << "USECOUL: true" << endl;
+
 	if(fit_coul)	
 		header << "FITCOUL: true" << endl;
 	else
 		header << "FITCOUL: false" << endl;
 	
-	if(!fit_coul && !use_partial_charges)
-		header << "USECOUL: false" << endl;
+	bool use_pover = false;
+	for(int i=0; i<ATOM_PAIRS.size(); i++)
+		if(ATOM_PAIRS[i].USE_OVRPRMS)
+			use_pover = true;
+	
+	if(use_pover)
+		header << "USEPOVR: true" << endl;
 	else
-		header << "USECOUL: true" << endl;
+		header << "USEPOVR: false" << endl;
 	
 	if(fit_pover)
 		header << "FITPOVR: true" << endl;
@@ -644,20 +578,17 @@ int main()
 			header << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl; 
 		else
 			header << endl;
-			 
-		
-		if(ATOM_PAIRS[i].USE_OVRPRMS)
-			PRINT_OVR = true;
 	}
 	
 
-	if(PRINT_OVR)
+	if(use_pover)
 	{
 		header << endl;
  		header << "!# PAIRIDX #	";
  		header << "# ATM_TY1 #	";
  		header << "# ATM_TY1 #	";				
 		header << "# USEOVRP #	";
+		header << "# TO_ATOM #	";
 		header << "# P_OVERB #	";
  		header << "# R_0_VAL #	";
  		header << "# P_1_VAL #	";
@@ -670,7 +601,12 @@ int main()
 				 << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
 				 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
 				 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-				 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS
+				 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS;
+			if(ATOM_PAIRS[i].USE_OVRPRMS)
+				header	<< setw(16) << left << ATOM_PAIRS[i].OVER_TO_ATM;
+			else
+				header	<< setw(16) << left << "NONE";
+				header
 				 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
 				 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
 				 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
@@ -678,24 +614,16 @@ int main()
 				 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
 		}		
 			
-	 }
+	}
 	 
-	 if(!if_3b_cheby)
-	 {
-	 	header << endl << "ATOM PAIR TRIPLETS: " << 0 << endl << endl;
-	 }
-	 else
-	 {
-		  header << endl << "ATOM PAIR TRIPLETS: " << PAIR_TRIPLETS.size() << endl << endl;	
-	/*	 
-		 for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-			 header << i << " " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << endl;
-	*/	 
-	 
-	 
-	 
-	 
-	 
+	if(!if_3b_cheby)
+	{
+		header << endl << "ATOM PAIR TRIPLETS: " << 0 << endl << endl;
+	}
+	else
+	{
+		header << endl << "ATOM PAIR TRIPLETS: " << PAIR_TRIPLETS.size() << endl << endl;	
+
 		for(int i=0;i<PAIR_TRIPLETS.size(); i++)
 		{
 			header << "" << PAIR_TRIPLETS[i].TRIPINDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << ": ";
@@ -705,10 +633,6 @@ int main()
 
 			for(int j=0; j<PAIR_TRIPLETS[i].ALLOWED_POWERS.size(); j++)
 			{
-				//header << "   " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X << " " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Y << " " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Z << endl;
-	 
-	
-
 				header << "      " << setw(6) << fixed << left << j << " ";
 				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X  << " ";
 				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Y  << " ";
@@ -719,72 +643,44 @@ int main()
 			}
 
 			header << endl;
-
 		}	 
 		
-	 }
-	 
-	
-
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 header << endl;
-			
-	//////////////////////////////////////////////////	   
-	// THE OLD WAY 
-	//////////////////////////////////////////////////	   
-
-/*
-	int NPAIR =  ATOM_PAIRS.size();
-  
-	header << "npair " << NPAIR << endl;
-	
-	for (int i=0; i<NPAIR; i++) 
-	{
-		header << fixed << setw(8) << setprecision(5) << ATOM_PAIRS[i].S_MINIM << fixed << setw(8) << setprecision(5) << ATOM_PAIRS[i].S_MAXIM;
-		  
-		if (ATOM_PAIRS[i].PAIRTYP == "INVRSE_R") 
-			header << " " << ATOM_PAIRS[i].SNUM << endl;
-		else if (( ATOM_PAIRS[i].PAIRTYP != "CHEBYSHEV" ) && ( ATOM_PAIRS[i].PAIRTYP != "INVRSE_R")) 
-		{
-			header << fixed << setw(8) << setprecision(5) << ATOM_PAIRS[i].S_DELTA;
-			header << " " << ATOM_PAIRS[i].SNUM << endl;
-		}
-		else if (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV") 
-		{
-			header << fixed << setw(8) << setprecision(5) << ATOM_PAIRS[i].LAMBDA;
-			 
-			if ( if_3b_cheby ) 
-				header << " " << ATOM_PAIRS[i].SNUM << " " << ATOM_PAIRS[i].SNUM_3B_CHEBY << endl;
-			else 
-				header << " " << ATOM_PAIRS[i].SNUM << endl;	 	
-		}
 	}
 
-	if ( fit_pover || ifsubtract_coord ) 
-	{
-		header << 5 << endl;
-		  
-				for (int i=0; i<NPAIR; i++) 
-					if(ATOM_PAIRS[i].USE_OVRPRMS)
-						for ( int k=0; k<5; k++ )
-							header << scientific << setw(21) << setprecision(13) <<  ATOM_PAIRS[i].OVRPRMS[k] << endl;
-		
+	header << endl;
 
-				for ( int k=0; k<5; k++ )
-					header << scientific << setw(21) << setprecision(13) <<  ATOM_PAIRS[0].OVRPRMS[k] << endl;
-		
-	}
-*/	  
 	header.close();
+	
+	//////////////////////////////////////////////////
+	//
+	// Print out the pair/triplet type  map file
+	//
+	//////////////////////////////////////////////////	  	
+
+	ofstream MAPFILE;
+	MAPFILE.open("ff_groups.map");
+	
+	MAPFILE << "PAIRMAPS: " << PAIR_MAP.size() << endl;
+	
+	for(map<string,int>::iterator i=PAIR_MAP.begin(); i!=PAIR_MAP.end(); i++)
+		MAPFILE << i->second << " " << i->first << endl;
+
+	if(TRIAD_MAP.size() > 0)
+	{
+		MAPFILE << endl;
+		
+		MAPFILE << "TRIPMAPS: " << TRIAD_MAP.size() << endl;
+		
+		for(map<string,int>::iterator i=TRIAD_MAP.begin(); i!=TRIAD_MAP.end(); i++)
+			MAPFILE << i->second << " " << i->first << endl;
+	}
+	MAPFILE.close();
+
+	//////////////////////////////////////////////////
+	//
+	// Print out the params file header
+	//
+	//////////////////////////////////////////////////	  
 
 	#if VERBOSITY == 1
 		cout << "	Minimum distances between atoms: (Angstr.)" << endl;
@@ -812,7 +708,7 @@ return 0;
 
 // Read program input from the file "splines_ls.in".
 static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool & fit_coul, bool & coul_consv, bool & if_subtract_coord, bool & if_subtract_coul, bool & fit_pover, int & cheby_order, string & cheby_type, int & cheby_3b_order, int & invr_parms,
- int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool use_partial_charges )
+ int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool & use_partial_charges )
 {
 	bool   FOUND_END = false;
 	string LINE;
@@ -822,6 +718,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 	string TEMP_TYPE;
 	int    NPAIR;
 	int    NTRIP;
+	double SUM_OF_CHARGES = 0;
 	
 	while (FOUND_END == false)
 	{
@@ -830,8 +727,28 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 
 		if(LINE.find("# ENDFILE #") != string::npos)
 		{
+
+			#if VERBOSITY == 1
+			
+				if (if_subtract_coord)
+				{
+					cout << "Special feature: " << endl;
+					cout << " Will subtract contributions from user-specified overbonding " << endl;
+					cout << " parameters before generating A-matrix." << endl << endl;	
+				}					
+
+				if(use_partial_charges)
+				{
+					cout << "Special feature: " << endl;
+					cout << " Will subtract contributions stemming from user-specified " << endl;
+					cout << " charges before generating A-matrix" << endl << endl;	
+				}	
+			
+			#endif
+				
 			FOUND_END = true;
 			break;
+				
 		}
 		
 		else if(LINE.find("# WRAPTRJ #") != string::npos)
@@ -894,6 +811,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					cout << "true" << endl;				
 				else
 					cout << "false" << endl;
+				
 			#endif
 		}
 		else if(LINE.find("# CNSCOUL #") != string::npos)
@@ -1034,7 +952,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 
 			
 		}
-		
+/*		
 		else if(LINE.find("# SUBCRDS #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
@@ -1060,15 +978,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			#endif
 
 		}
-/*			
-		else if( ((TEMP_TYPE == "CHEBYSHEV")||(TEMP_TYPE == "DFTBPOLY")) && (LINE.find("# POLORDR #") != string::npos))
-		{
-			cin >> LINE; cin.ignore();
-
-			cheby_order = int(atof(LINE.data()));
-			cout << "	# POLORDR #: " << cheby_order << endl;	
-		}
-*/		
+*/
 		else if( (TEMP_TYPE == "CHEBYSHEV") && (LINE.find("# CHBTYPE #") != string::npos))
 		{
 			cin >> LINE; cin.ignore();
@@ -1078,7 +988,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				cout << "	# CHBTYPE #: " << cheby_type << endl;	
 			#endif
 		}		
-			
+		
 		/////////////////////////////////////////////////////////////////////
 		// Read the topology part. For now, ignoring index and atom types.. 
 		// Assuming given as OO, OH, HH, as code expects... 
@@ -1113,7 +1023,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 
 			TEMP_INT = NATMTYP*NATMTYP;
 			
-			double SUM_OF_CHARGES = 0;
+			SUM_OF_CHARGES = 0;
 			
 			for(int i=0; i<NATMTYP; i++)
 			{
@@ -1147,8 +1057,16 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				#endif
 			}
 			
-			if (SUM_OF_CHARGES != 0)
-				use_partial_charges    = true;
+			if(!fit_coul)
+			{
+				if (SUM_OF_CHARGES>0)
+				{
+					use_partial_charges = true;
+					if_subtract_coul = true;
+				}
+				else
+					use_partial_charges = false;				
+			}
 			
 			// Set up all possible unique pair types
 			
@@ -1455,23 +1373,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICIES[PAIR_TRIPLETS[i].PARAM_INDICIES.size()-1]+1;
 					PAIR_TRIPLETS[i].N_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICIES.size();
 				}
-	/*			
-				// Sanity check
-			
-				cout << "Found the following allowed pair triplet powers:" << endl;
-			
-				for(int i=0; i<NTRIP; i++)
-				{
-					cout << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << endl;
-				
-					for(int j=0; j<PAIR_TRIPLETS[i].ALLOWED_POWERS.size(); j++)
-				
-						cout << "	" << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X << " " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Y << " " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Z << endl;
-				}
-	*/			
-			
-			
-			
+
 				// Set up triplet maps... Account for cases where triplet type is meaningless by setting mapped index to -1
 					
 				bool REAL_TRIPLET = false;
@@ -1508,9 +1410,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 									TEMP_STR = TEMP_STR_A;
 									TEMP_STR.append(TEMP_STR_B);	
 									TEMP_STR.append(TEMP_STR_C);
-								
-	//								cout << " ---- Adding temp str: "	<< TEMP_STR << endl;
-								
+
 									TRIAD_MAP        .insert(make_pair(TEMP_STR,m));	
 									TRIAD_MAP_REVERSE.insert(make_pair(m,TEMP_STR));
 									REAL_TRIPLET = true;									
@@ -1518,17 +1418,16 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 								}
 								if(!REAL_TRIPLET)	// Then this is not an allowed triplet type!
 									TRIAD_MAP        .insert(make_pair(TEMP_STR,-1));	
-
 							}
 						}
 					}
 				}
 			}
 					
-				#if VERBOSITY == 1						
-					cout << endl;
-					cout << "	The following unique pair types have been identified:" << endl;
-					for(int i=0;i<NPAIR; i++)
+			#if VERBOSITY == 1						
+				cout << endl;
+				cout << "	The following unique pair types have been identified:" << endl;
+				for(int i=0;i<NPAIR; i++)
 						cout << "		" << ATOM_PAIRS[i].PAIRIDX << "  " << ATOM_PAIRS[i].ATM1TYP << " " << ATOM_PAIRS[i].ATM2TYP << endl;
 				#endif
 					
@@ -1559,67 +1458,16 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 						}
 
 					}
-				#endif			
-		
-						
-	/*	
-				// Sanity check
-				cout << "SANITY CHECK " << endl;				
-				for(int i=0; i<NPAIR; i++)
-				{
-					for(int j=0; j<NPAIR; j++)
-					{
-						for(int k=0; k<NPAIR; k++)
-						{	
-							TEMP_STR_A = ATOM_PAIRS[i].ATM1TYP;
-							TEMP_STR_A.append(ATOM_PAIRS[i].ATM2TYP);
-							
-							TEMP_STR_B = ATOM_PAIRS[j].ATM1TYP;
-							TEMP_STR_B.append(ATOM_PAIRS[j].ATM2TYP);	
-						
-							TEMP_STR_C = ATOM_PAIRS[k].ATM1TYP;
-							TEMP_STR_C.append(ATOM_PAIRS[k].ATM2TYP);
-						
-							TEMP_STR = TEMP_STR_A;
-							TEMP_STR.append(TEMP_STR_B);
-							TEMP_STR.append(TEMP_STR_C);
-						
-							cout << TEMP_STR_A << " " << TEMP_STR_B << " " << TEMP_STR_C << " " << TEMP_STR << " " << TRIAD_MAP[TEMP_STR] << endl;		
-			
-						}
-					}
-				}
-			
-				exit(0);
-*/									
-			}
-			
-
-	
-			
-/*			
-			// Sanity check
-			
-			cout << "SANITY CHECK " << endl;			
-			for(int i=0; i<NATMTYP; i++)
-			{
-				for(int j=0; j<NATMTYP; j++)
-				{
-					TEMP_STR = ATOM_PAIRS[i].ATM1TYP;
-					TEMP_STR.append(ATOM_PAIRS[j].ATM2TYP);										
-					cout << ATOM_PAIRS[i].ATM1TYP << " " << ATOM_PAIRS[j].ATM1TYP << " " << TEMP_STR << " " <<  PAIR_MAP[TEMP_STR] << endl;
-				}
-			}											
-*/											
-			
+				#endif	
+			}			
 						
 		}
+		
 		
 		else if(LINE.find("# PAIRIDX #")!= string::npos) // Read the topology part. For now, ignoring index and atom types..
 		{
 			for(int i=0; i<NPAIR; i++)
 			{
-				
 				cin >> LINE >> TEMP_PAIR.ATM1TYP >> TEMP_PAIR.ATM2TYP;
 				
 				TEMP_STR = TEMP_PAIR.ATM1TYP;
@@ -1692,6 +1540,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					 if(ATOM_PAIRS[i].USE_OVRPRMS)
 						 PRINT_OVR = true;
 			}
+			
+			if(PRINT_OVR && !fit_pover)
+				if_subtract_coord = true;
 
 			if(PRINT_OVR)
 			{
@@ -1721,5 +1572,6 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				}											
 			}
 		}		
+	
 	}	
 }

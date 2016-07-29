@@ -8,9 +8,15 @@ from numpy import *
 from numpy.linalg import lstsq
 from datetime import *
 
-if(len(sys.argv) != 4):
-    print "Usage is: ./lsq.py A.txt b.txt params.header"
+TEST_SUITE_RUN = False
+
+if(len(sys.argv) < 5):
+    print "Usage is: ./lsq.py A.txt b.txt params.header ff_groups.map"
     sys.exit()
+if(len (sys.argv) == 6): 
+	# Then this run is being used for the test suite... 
+	# print out parameters without any fanciness so tolerances can be checked  
+	TEST_SUITE_RUN = "do"
 
 #################################
 #################################
@@ -49,7 +55,6 @@ for i in range(0,nlines):
         A[i][n]=float(af[i][n])
         
     b[i]=float(bf[i])
-
 
 #################################
 # Do the SVD, process output
@@ -114,7 +119,7 @@ for i in range(0, len(hf)):
 # 1. Figure out what potential type we have
 
 
-POTENTIAL = hf[5].split()
+POTENTIAL = hf[6].split()
 POTENTIAL = POTENTIAL[1]
 
 print ""
@@ -129,7 +134,7 @@ SNUM_2B = 0
 SNUM_3B = 0
 
 if POTENTIAL == "CHEBYSHEV" or POTENTIAL == "DFTBPOLY":
-	TMP = hf[5].split()
+	TMP = hf[6].split()
 	
 	if len(TMP) == 4:
 		SNUM_3B = int(TMP[3])
@@ -137,37 +142,40 @@ if POTENTIAL == "CHEBYSHEV" or POTENTIAL == "DFTBPOLY":
 	SNUM_2B = int(TMP[2])
 	
 elif POTENTIAL == "INVRSE_R":
-	TMP = hf[5].split()
+	TMP = hf[6].split()
 	SNUM_2B = int(TMP[2])
 else:
 	CASE_BY_CASE = True # We'll need to do it per atom pair type.	
     
 # 3. Print out the parameters
 
-FIT_COUL = hf[0].split()
+FIT_COUL = hf[1].split()
 FIT_COUL = FIT_COUL[1]
 
-FIT_POVER = hf[2].split()
+FIT_POVER = hf[3].split()
 FIT_POVER = FIT_POVER[1]
 
+USE_POVER = hf[2].split()
+USE_POVER = USE_POVER[1]
 
-ATOM_TYPES_LINE=7
+ATOM_TYPES_LINE=8
 
 TOTAL_ATOM_TYPES = hf[ATOM_TYPES_LINE].split()
+
 TOTAL_ATOM_TYPES = int(TOTAL_ATOM_TYPES[2])
 
-ATOM_PAIRS_LINE=9+TOTAL_ATOM_TYPES+2
+ATOM_PAIRS_LINE=10+TOTAL_ATOM_TYPES+2
 
 TOTAL_PAIRS =  hf[ATOM_PAIRS_LINE].split()
 TOTAL_PAIRS = int(TOTAL_PAIRS[2])
 
 
 ATOM_TRIPS_LINE=0
-if FIT_POVER == "true":
+if FIT_POVER == "true" or USE_POVER == "true":
 	ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2+TOTAL_PAIRS+2
 else:
 	ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2
-
+	
 TOTAL_TRIPS =  hf[ATOM_TRIPS_LINE].split()
 TOTAL_TRIPS = int(TOTAL_TRIPS[3])
 
@@ -262,12 +270,25 @@ if TOTAL_TRIPS > 0:
 			
 if FIT_POVER == "true":
 	print "P OVER: " + `x[len(x)-1]`
+	
+mapsfile=open(sys.argv[4],"r").readlines()
+
+print ""
+
+for i in range(0,len(mapsfile)):
+	print mapsfile[i].rstrip('\n')
+	
+print ""
 			
 print "ENDFILE"		
 		
 		
-		
-	
+if TEST_SUITE_RUN == "do":
+	test_suite_params=open("test_suite_params.txt","w")		
+	for i in range(0,len(x)):
+		phrase = `i` + " " + `x[i]` + '\n'
+		test_suite_params.write(phrase)
+	test_suite_params.close()
 		
  
     

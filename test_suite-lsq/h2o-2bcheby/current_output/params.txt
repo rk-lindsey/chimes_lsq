@@ -1,0 +1,83 @@
+! Date  2016-07-29
+!
+! Number of columns =  28
+! Number of rows    =  28514
+! RMS force error =  11.3720538994
+! max variable =  98.2794181935
+!
+ 
+USECOUL: true
+FITCOUL: true
+USEPOVR: true
+FITPOVR: true
+USE3BCH: false
+
+PAIRTYP: CHEBYSHEV  8 0
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		0		15.9994
+1		H		0		1.0079
+
+ATOM PAIRS: 3
+
+!# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0.6             6               0.1             MORSE           1.25            
+	1               H               H               0.6             6               0.1             MORSE           1.25            
+	2               O               H               0.6             6               0.1             MORSE           1.25            
+
+!# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# USEOVRP #	# TO_ATOM #	# P_OVERB #	# R_0_VAL #	# P_1_VAL #	# P_2_VAL #	# LAMBDA6 #
+	0               O               O               1               O               50              1.0165          -0.0657         5.0451          -3.6141         
+	1               H               H               0               NONE            0               0               0               0               0               
+	2               O               H               1               O               50              1.0165          -0.0657         5.0451          -3.6141         
+
+ATOM PAIR TRIPLETS: 0
+
+PAIR CHEBYSHEV PARAMS 
+
+PAIRTYPE PARAMS: 0 O O
+
+0 -85.291217710268782
+1 -99.707936599972101
+2 66.193563395981627
+3 68.19982051685875
+4 -26.873090881552748
+5 -82.285466684285907
+6 -30.304980584322813
+7 -15.069913271340498
+q_O x q_O 98.279418193542938
+ 
+PAIRTYPE PARAMS: 1 H H
+
+0 -11.914111119559038
+1 -0.15476920510430972
+2 21.498744723060774
+3 40.580654255529474
+4 44.629057205334284
+5 36.861866901357743
+6 18.845403672616865
+7 6.0922956757155697
+q_H x q_H 24.569874739561104
+ 
+PAIRTYPE PARAMS: 2 O H
+
+0 2.3045512703314985
+1 39.913961233261723
+2 4.8958080801545965
+3 1.6920741190404567
+4 -24.961610909504827
+5 -7.597873837603891
+6 -10.540603000615842
+7 -0.79655627425999387
+q_O x q_H -49.139742812623197
+ 
+P OVER: 8.7183998808957952
+
+PAIRMAPS: 4
+1 HH
+2 HO
+2 OH
+0 OO
+
+ENDFILE

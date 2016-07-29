@@ -1,39 +1,58 @@
-# FYI: clean removes .o files, realclean removes executable
+##################################
+# CHOOSE COMPILATION TYPE, SET FLAGS
+##################################
 
 MYFLAGS= -D VERBOSITY=1
 
-# Choose g++ for debugging and icpc for fast execution.
-#
-
+#CXX=g++ -g  $(MYFLAGS) 
 CXX=g++ -O3  $(MYFLAGS) 
-
-#CXX=g++ -Wall -pg # NOTE: pg flag is for profiling with gprof (OSX compatible)
-#CXX=g++ -g -Wall -Wextra -Wuninitialized -O1#-pg
-#CXX=g++ -g $(MYFLAGS)  # -Wall -Wextra 
-#CXX=g++ -O2   # -Wall -Wextra 
-#CXX=g++ -O3   # -Wall -Wextra 
-#CXX=icpc -fast
+#CXX=g++ -g -Wall -Wextra -Wuninitialized -O1
+#CXX=g++ -g # -Wall -Wextra
+#CXX=icpc -fast -Wall
 
 
-CXX_SRC=splines_ls.C functions.C Ewald.C #  ../mdcode/Cheby3B.C
-CXX_INCLUDES=-I .
+##################################
+# MAKE THE LSQ CODE
+##################################
 
-all : splines_ls
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C
 
-splines_ls : $(CXX_SRC:%.C=%.o)
-	$(CXX) $^ $(CXX_INCLUDES) -o splines_ls
-#	cp splines_ls ../../bin/splines_ls
+CXX_LSQ_INCLUDES=
 
-%.o: %.C
-	$(CXX) $(CXX_INCLUDES) -c $< -o $@
+house_lsq: $(CXX_LSQ_SRC:%.C=%.o)
+	$(CXX) $^ $(CXX_LSQ_INCLUDES) -o house_lsq
+#	cp house_lsq ../../bin
 
-clean:
-	/bin/rm -f *.o
+clean_lsq:
+	/bin/rm -f splines_lsq.o functions.o Ewald.o
 
-realclean : clean
-	rm -f splines_ls
+realclean_lsq: clean_lsq
+	rm -f house_lsq 
+	
+build_tests_lsq:
+	cd ../test_suite-lsq
+	./generate_test_suite.sh
+	cd -
 
+##################################
+# MAKE THE C++ CODE
+##################################
 
+CXX_MD_SRC=splines_md.C functions.C Ewald.C
 
+CXX_MD_INCLUDES=
 
+house_md: $(CXX_MD_SRC:%.C=%.o)
+	$(CXX) $^ $(CXX_MD_INCLUDES) -o house_md
+#	cp house_md ../../bin
 
+clean_md:
+	/bin/rm -f house_md.o functions.o Ewald.o
+
+realclean_md: clean_md
+	rm -f house_md 
+
+build_tests_md:
+	cd ../test_suite-md
+	./generate_test_suite.sh
+	cd -

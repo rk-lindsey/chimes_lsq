@@ -8,10 +8,18 @@ from numpy import *
 from numpy.linalg import lstsq
 from datetime import *
 
-if(len(sys.argv) != 4):
+TEST_SUITE_RUN = False
+
+if(len(sys.argv) < 4):
     print "./lsq.py A.txt b.txt params.header"
     sys.exit()
-
+elif( (len(sys.argv) == 5) and (sys.argv[4]=="TEST_SUITE_RUN")):
+    # Then this run is being used for the test suite... 
+    # print out parameters without any fanciness so tolerances can be checked  
+    TEST_SUITE_RUN = "do"
+else:
+    print "./lsq.py A.txt b.txt params.header"
+    sys.exit()
 
 #################################
 
@@ -105,9 +113,141 @@ print "# RMS force error = " , sqrt(Z/float(nlines))
 
 print "# max variable = ",  max(x)
 
-for i in range(0, len(hf)):
-    sys.stdout.write(hf[i])
+#########################################################################################################################################################################
+# Now, instead of just printing the header file, we need to parse the info so it can be printed in a format consistent with the old version of the md cod
+
+
+#for i in range(0, len(hf)):
+#    sys.stdout.write(hf[i])
+
+# VARS WE NEED TO POPULATE:
+
+pair_type         = hf[6].split()
+pair_type         = pair_type[1]
+
+
+# 2. Figure out how many coeffs each atom type will have
+
+CASE_BY_CASE = False
+
+SNUM_2B = 0
+SNUM_3B = 0
+
+if pair_type == "CHEBYSHEV" or pair_type == "DFTBPOLY":
+	TMP = hf[6].split()
+	
+	if len(TMP) == 4:
+		SNUM_3B = int(TMP[3])
+	
+	SNUM_2B = int(TMP[2])
+	
+elif pair_type == "INVRSE_R":
+	TMP = hf[6].split()
+	SNUM_2B = int(TMP[2])
+else:
+	CASE_BY_CASE = True # We'll need to do it per atom pair type.
+	
+coulomb = hf[0].split()
+coulomb = coulomb[1]
+	
+fit_coulomb = hf[1].split()
+fit_coulomb = fit_coulomb[1]	
+
+fit_pover = hf[3].split()
+fit_pover = fit_pover[1]
+
+nover=5
+
+overcoord = hf[2].split()
+overcoord = overcoord[1]
+
+ATOM_TYPES_LINE=8
+
+TOTAL_ATOM_TYPES = hf[ATOM_TYPES_LINE].split()
+
+TOTAL_ATOM_TYPES = int(TOTAL_ATOM_TYPES[2])
+
+ATOM_PAIRS_LINE=10+TOTAL_ATOM_TYPES+2
+
+npair =  hf[ATOM_PAIRS_LINE].split()
+npair = int(npair[2])
+
+threeb_cheby = hf[4].split()
+threeb_cheby = threeb_cheby[1]	
+
+pair_type_params  = []
+overcoord_params  = []
+
+for i in range(0,npair):
+	
+	MIN = hf[ATOM_PAIRS_LINE+2+i+1].split()
+	MAX = float(MIN[4])
+	DEL = float(MIN[5])
+	MIN = float(MIN[3])	
+	
+	if CASE_BY_CASE:  
+		
+		# Figure out individual SNUM_2B
+		
+		SNUM_2B = int((2+m.floor((MAX - MIN)/DEL))*2)
+		
+		PAR_LINE = `MIN` + " "  + `MAX` + " " + `DEL` + " " + `SNUM_2B`
+	elif pair_type == "CHEBYSHEV" > 0:
+		PAR_LINE = `MIN` + " "  + `MAX` + " " + `DEL` + " " + `SNUM_2B` + " " + `SNUM_3B`
+		pair_type_params.append(PAR_LINE)
+	else: 
+		PAR_LINE = `MIN` + " "  + `MAX` + " " + `DEL` + " " + `SNUM_2B`
+	pair_type_params.append(PAR_LINE)
+
+if(overcoord == "true"):
+	for i in range(0,npair):
+		POVER = hf[ATOM_PAIRS_LINE+npair+2+2+i+1].split()
+		if(POVER[3] == "1"):
+			overcoord_params.append(POVER[5])
+			overcoord_params.append(POVER[6])
+			overcoord_params.append(POVER[7])
+			overcoord_params.append(POVER[8])
+			overcoord_params.append(POVER[9])
+			break
+		
+
+
+if pair_type == "SPLINE":
+	pair_type = spline
+elif pair_type == "CHEBYSHEV":
+	pair_type = chebyshev
+elif pair_type == "DFTBPOLY":
+	pair_type = dftbpoly
+elif pair_type == "INVRSE_R":
+	pair_type = inverse_r
+
+
+print "npair " + `npair`
+print "3b_cheby " + threeb_cheby
+print "pair_type " + pair_type.lower()
+for i in range(0,npair):
+	print pair_type_params[i]
+print "coulomb " + coulomb
+print "fit_coulomb " + fit_coulomb
+print "overcoord " + overcoord
+if(overcoord == "true"):
+	print "nover 5"
+	print overcoord_params[0]
+	print overcoord_params[1]
+	print overcoord_params[2]
+	print overcoord_params[3]
+	print overcoord_params[4]
+
+print "fit_pover " + fit_pover
+print "least squares parameters"	
+
 
 for i in range(0,len(x)):
     print i,x[i]
 
+if TEST_SUITE_RUN == "do":
+    test_suite_params=open("test_suite_params.txt","w")		
+    for i in range(0,len(x)):
+        phrase = `i` + " " + `x[i]` + '\n'
+        test_suite_params.write(phrase)
+    test_suite_params.close()
