@@ -1,0 +1,113 @@
+
+Reading the simulation control input file...
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: true... will only do 1 md step.
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 1000
+	# NLAYERS #: 1
+	# PRMFILE #: params.txt
+	# CRDFILE #: input.xyzf
+	# VELINIT #: GEN ... generating velocites via box Muller
+	# THRMOST #: HOOVER... a Hoover time of 10 will be used.
+	# PRESSUR #: ANALYTICAL
+	# FRQDFTB #: 20
+	# FRQENER #: 10
+	# PRNTFRC #: true
+   ...read complete.
+
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+Opening force.txt to read forces for comparison
+   ...read complete
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e):  0.000, mass (amu):  15.9994
+		1     H , q (e):  0.000, mass (amu):   1.0079
+   ...read complete
+
+Setting up thermostats/velocities...
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (   -0.0987,     0.0199,     0.1508) 
+	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
+	Total Mass     = 576.4864 au
+	Volume         = 638.0839 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      false
+		...Use fit charges?             false
+		...Compute ReaxFF overbonding?  false
+		...Use fit overbonding param?   false
+		...Use 3-body Cheby params?     false
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Reading all remaining force field parameters...
+	...Read 2-body FF params...
+	Reading  4 pairs for mapping
+	........Reading pair: HH with mapped index: 1
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: OO with mapped index: 0
+	...Read FF pairmaps...
+
+   ...read complete.
+
+Notes on simulation: 
+	Electrostatics will not be computed.
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		DFTBPOLY 8
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...sdelta...
+		OO 0.0000 3.0000 0.1000 
+		Parameters: 
+		0 0.0000
+		1 0.0000
+		2 0.0000
+		3 0.0000
+		4 0.0000
+		5 0.0000
+		6 0.0000
+		7 -0.0000
+
+		pair type...smin...smax...sdelta...
+		HH 0.0000 3.0000 0.1000 
+		Parameters: 
+		0 0.0000
+		1 0.0001
+		2 0.0001
+		3 0.0001
+		4 0.0000
+		5 -0.0001
+		6 0.0000
+		7 -0.0000
+
+		pair type...smin...smax...sdelta...
+		OH 0.0000 3.0000 0.1000 
+		Parameters: 
+		0 -0.0000
+		1 -0.0000
+		2 -0.0000
+		3 -0.0000
+		4 0.0000
+		5 0.0001
+		6 -0.0000
+		7 0.0000
+
+
+BEGIN SIMULATION:
+RMS force error =  1.092133e-01

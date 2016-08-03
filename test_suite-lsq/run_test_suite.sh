@@ -4,12 +4,12 @@
 
 # Run the job with the new version of the python code (Compatible with non-generalized md code)
 #
-PATH_TO_LSQ_PY_CODE="/g/g17/rlindsey/FM_COPY_072916/generalized-branch/src/lsq-new-md-fmt.py" # Path to the python code.
+PATH_TO_LSQ_PY_CODE="/g/g17/rlindsey//TEST_LATEST_COPY/generalized-branch/src/lsq-new-md-fmt.py" # Path to the python code.
 RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map TEST_SUITE_RUN"
 
 # Run the job with the old version of the python code (Compatible with non-generalized md code)
 #
-#PATH_TO_LSQ_PY_CODE="/g/g17/rlindsey/FM_COPY_072916/generalized-branch/src/src/lsq.py" # Path to the python code.
+#PATH_TO_LSQ_PY_CODE="/Users/lindsey11/Desktop/FORCE_MATCHING_VERSIONS/CURRENT_WORKING/current-merged-lsq-md/src/lsq.py" # Path to the python code.
 #RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header TEST_SUITE_RUN"
 
 
@@ -202,4 +202,3 @@ fi
 	
 	
 exit 0
-

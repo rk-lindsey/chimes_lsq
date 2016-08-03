@@ -1,0 +1,143 @@
+
+Reading the simulation control input file...
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: true... will only do 1 md step.
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 1000
+	# NLAYERS #: 1
+	# PRMFILE #: params.txt
+	# CRDFILE #: input.xyzf
+	# VELINIT #: GEN ... generating velocites via box Muller
+	# THRMOST #: HOOVER... a Hoover time of 10 will be used.
+	# PRESSUR #: ANALYTICAL
+	# FRQDFTB #: 20
+	# FRQENER #: 10
+	# PRNTFRC #: true
+   ...read complete.
+
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+Opening force.txt to read forces for comparison
+   ...read complete
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e):  0.000, mass (amu):  15.9994
+		1     H , q (e):  0.000, mass (amu):   1.0079
+   ...read complete
+
+Setting up thermostats/velocities...
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (   -0.0987,     0.0199,     0.1508) 
+	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
+	Total Mass     = 576.4864 au
+	Volume         = 638.0841 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      true
+		...Use fit charges?             true
+		...Compute ReaxFF overbonding?  true
+		...Use fit overbonding param?   true
+		...Use 3-body Cheby params?     false
+	...Read FF controls...
+
+	********************* WARNING ********************* 
+	Use FIT_COUL option only supported for H2O systems!
+	********************* WARNING ********************* 
+
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Reading all remaining force field parameters...
+	...Read 2-body FF params...
+	...Read ReaxFF overbonding FF params...
+	Reading  4 pairs for mapping
+	........Reading pair: HH with mapped index: 1
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: OO with mapped index: 0
+	...Read FF pairmaps...
+
+   ...read complete.
+
+Notes on simulation: 
+	Ewald summations will be used and charges will be taken from fit values
+	Overbonding contributions will be considered.
+		p-over will be read from fit parameters.
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		CHEBYSHEV 8
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...sdelta...cheby type...cheby lambda
+		OO 0.6000 6.0000 0.1000 MORSE 1.2500 
+		Parameters: 
+		0 -85.2912
+		1 -99.7079
+		2 66.1936
+		3 68.1998
+		4 -26.8731
+		5 -82.2855
+		6 -30.3050
+		7 -15.0699
+
+		pair type...smin...smax...sdelta...cheby type...cheby lambda
+		HH 0.6000 6.0000 0.1000 MORSE 1.2500 
+		Parameters: 
+		0 -11.9141
+		1 -0.1548
+		2 21.4987
+		3 40.5807
+		4 44.6291
+		5 36.8619
+		6 18.8454
+		7 6.0923
+
+		pair type...smin...smax...sdelta...cheby type...cheby lambda
+		OH 0.6000 6.0000 0.1000 MORSE 1.2500 
+		Parameters: 
+		0 2.3046
+		1 39.9140
+		2 4.8958
+		3 1.6921
+		4 -24.9616
+		5 -7.5979
+		6 -10.5406
+		7 -0.7966
+
+	Fitted charges read from parameter file:
+		OO 0.2960
+		HH 0.0740
+		OH -0.1480
+
+	ReaxFF over-coordination parameters: 
+		pair...pover...r0...p1...p2...lambda6
+		OO 8.7184 1.0165 -0.0657 5.0451 -3.6141
+		HH 8.7184 0.0000 0.0000 0.0000 0.0000
+		OH 8.7184 1.0165 -0.0657 5.0451 -3.6141
+
+BEGIN SIMULATION:
+
+Ewald parameters: 
+	Requested Ewald accuracy  =  1.000000e-07
+	Ewald alpha               =  5.853127e-01
+	R-Space Ewald cutoff      =  6.173215e+00
+	R-Space accuracy estimate =  5.220777e-08
+	K-Space accuracy estimate =  5.489244e-07
+
+	Cutting off K-vectors with magnitude less than 6
+	Number of Ewald K-vectors = 894
+	K-space accuracy estimate = 0.00000006626103
+
+RMS force error =  1.082287e-05

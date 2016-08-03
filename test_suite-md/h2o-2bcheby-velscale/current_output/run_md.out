@@ -1,0 +1,552 @@
+
+Reading the simulation control input file...
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: false
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 1000
+	# NLAYERS #: 1
+	# PRMFILE #: params.cheby.txt
+	# CRDFILE #: input.xyz
+	# VELINIT #: READ ... reading velocities from coordinate file
+	# THRMOST #: VELSCALE... Velocities will be scaled every 10 MD steps.
+	# PRESSUR #: ANALYTICAL
+	# FRQDFTB #: 20
+	# FRQENER #: 10
+	# PRNTFRC #: false
+   ...read complete.
+
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+   ...read complete
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e): -0.730, mass (amu):  15.9990
+		1     H , q (e):  0.365, mass (amu):   1.0080
+   ...read complete
+
+Setting up thermostats/velocities...
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+	Total Mass     = 576.4800 au
+	Volume         = 638.0841 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      true
+		...Use fit charges?             true
+		...Compute ReaxFF overbonding?  true
+		...Use fit overbonding param?   true
+		...Use 3-body Cheby params?     false
+	...Read FF controls...
+
+	********************* WARNING ********************* 
+	Use FIT_COUL option only supported for H2O systems!
+	********************* WARNING ********************* 
+
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Reading all remaining force field parameters...
+	...Read 2-body FF params...
+	...Read ReaxFF overbonding FF params...
+	Reading  4 pairs for mapping
+	........Reading pair: OO with mapped index: 0
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: HH with mapped index: 1
+	...Read FF pairmaps...
+
+   ...read complete.
+
+Notes on simulation: 
+	Ewald summations will be used and charges will be taken from fit values
+	Overbonding contributions will be considered.
+		p-over will be read from fit parameters.
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		CHEBYSHEV 10
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...sdelta...cheby type...cheby lambda
+		OO 0.7500 6.0000 0.1000 MORSE 1.2500 
+		Parameters: 
+		0 62.2118
+		1 -23.0064
+		2 25.6116
+		3 -32.3002
+		4 2.1359
+		5 9.5848
+		6 36.2592
+		7 -39.3515
+		8 -47.3119
+		9 -28.7305
+
+		pair type...smin...smax...sdelta...cheby type...cheby lambda
+		HH 0.7500 6.0000 0.1000 MORSE 1.2500 
+		Parameters: 
+		0 -10.7273
+		1 -17.4875
+		2 -35.0648
+		3 -36.6021
+		4 -36.9699
+		5 -27.8795
+		6 -20.5340
+		7 -13.1578
+		8 -6.8694
+		9 -2.7220
+
+		pair type...smin...smax...sdelta...cheby type...cheby lambda
+		OH 0.7500 6.0000 0.1000 MORSE 1.2500 
+		Parameters: 
+		0 -1.9422
+		1 28.4907
+		2 26.7981
+		3 16.4611
+		4 1.2108
+		5 4.5687
+		6 0.0147
+		7 -0.8080
+		8 1.1782
+		9 0.8753
+
+	Fitted charges read from parameter file:
+		OO 0.4124
+		HH 0.1031
+		OH -0.2062
+
+	ReaxFF over-coordination parameters: 
+		pair...pover...r0...p1...p2...lambda6
+		OO 25.2544 1.0165 -0.0657 5.0451 -3.6141
+		HH 25.2544 0.0000 0.0000 0.0000 0.0000
+		OH 25.2544 1.0165 -0.0657 5.0451 -3.6141
+
+BEGIN SIMULATION:
+
+Ewald parameters: 
+	Requested Ewald accuracy  =  1.000000e-07
+	Ewald alpha               =  5.853127e-01
+	R-Space Ewald cutoff      =  6.173215e+00
+	R-Space accuracy estimate =  5.220777e-08
+	K-Space accuracy estimate =  5.489244e-07
+
+	Cutting off K-vectors with magnitude less than 6
+	Number of Ewald K-vectors = 894
+	K-space accuracy estimate = 0.00000006626103
+
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)
+      10      1.25       3.8657341     -55.0452050     -51.1794709          1310.7          13.146    -51.1794709
+
+Average temperature     = 1336.15614227947071
+Velocity scaling factor = 1.22345046852872
+      20      2.50       5.2696388     -54.5276553     -49.2580165          1786.6          16.485    -49.2580165
+
+Average temperature     = 1870.54746127577027
+Velocity scaling factor = 1.03402403060794
+      30      3.75       5.3968033     -54.2902807     -48.8934774          1829.8          15.067    -48.8934774
+
+Average temperature     = 1851.50007138097203
+Velocity scaling factor = 1.03932920547351
+      40      5.00       5.7481657     -54.2089162     -48.4607505          1948.9          11.076    -48.4607505
+
+Average temperature     = 1966.65891671516920
+Velocity scaling factor = 1.00844095513927
+      50      6.25       5.5559941     -53.9189529     -48.3629588          1883.7           7.692    -48.3629588
+
+Average temperature     = 1931.56413506192484
+Velocity scaling factor = 1.01756094830620
+      60      7.50       5.5566474     -53.7225497     -48.1659023          1884.0           7.172    -48.1659023
+
+Average temperature     = 1904.89716710131461
+Velocity scaling factor = 1.02465869533712
+      70      8.75       5.9096805     -53.7985757     -47.8888952          2003.7           9.188    -47.8888952
+
+Average temperature     = 1989.67743018355441
+Velocity scaling factor = 1.00259067518813
+      80     10.00       5.8894627     -53.7475484     -47.8580857          1996.8          12.359    -47.8580857
+
+Average temperature     = 2010.08403487829241
+Velocity scaling factor = 0.99748848462821
+      90     11.25       5.8980133     -53.7855668     -47.8875535          1999.7          14.845    -47.8875535
+
+Average temperature     = 1984.42587106734527
+Velocity scaling factor = 1.00391642019648
+     100     12.50       6.1530523     -53.9947419     -47.8416897          2086.2          15.260    -47.8416897
+
+Average temperature     = 2058.42962127346254
+Velocity scaling factor = 0.98570506102241
+     110     13.75       5.8642032     -53.8803262     -48.0161230          1988.2          13.779    -48.0161230
+
+Average temperature     = 2015.16091646558880
+Velocity scaling factor = 0.99623118441099
+     120     15.00       5.5616343     -53.6217235     -48.0600892          1885.6          11.504    -48.0600892
+
+Average temperature     = 1924.60541437775100
+Velocity scaling factor = 1.01939886618715
+     130     16.25       5.5902552     -53.4323050     -47.8420497          1895.4           9.768    -47.8420497
+
+Average temperature     = 1919.74000259595277
+Velocity scaling factor = 1.02068983701710
+     140     17.50       5.7637936     -53.3723808     -47.6085873          1954.2           9.593    -47.6085873
+
+Average temperature     = 1963.67025781387065
+Velocity scaling factor = 1.00920807480495
+     150     18.75       5.7540922     -53.2557950     -47.5017028          1950.9          11.084    -47.5017028
+
+Average temperature     = 1966.84578328165117
+Velocity scaling factor = 1.00839304889859
+     160     20.00       5.8342553     -53.2391690     -47.4049138          1978.1          13.180    -47.4049138
+
+Average temperature     = 1981.70379519979952
+Velocity scaling factor = 1.00460567529269
+     170     21.25       5.8194052     -53.1702451     -47.3508399          1973.0          14.523    -47.3508399
+
+Average temperature     = 1982.10318841039407
+Velocity scaling factor = 1.00450445631921
+     180     22.50       5.9328018     -53.2312453     -47.2984436          2011.5          14.441    -47.2984436
+
+Average temperature     = 1998.49610561914187
+Velocity scaling factor = 1.00037618576238
+     190     23.75       5.8788373     -53.1732548     -47.2944175          1993.2          13.628    -47.2944175
+
+Average temperature     = 2015.16292896681580
+Velocity scaling factor = 0.99623068695320
+     200     25.00       5.3155966     -52.6532584     -47.3376618          1802.2          12.680    -47.3376618
+
+Average temperature     = 1883.92246141598162
+Velocity scaling factor = 1.03034694034000
+     210     26.25       5.6795814     -52.6900547     -47.0104733          1925.6          11.144    -47.0104733
+
+Average temperature     = 1895.45564179445819
+Velocity scaling factor = 1.02720750824405
+     220     27.50       6.2461164     -52.9435711     -46.6974547          2117.7           9.850    -46.6974547
+
+Average temperature     = 2090.91661063308629
+Velocity scaling factor = 0.97801753517912
+     230     28.75       6.0540599     -53.0227409     -46.9686810          2052.6          10.041    -46.9686810
+
+Average temperature     = 2034.07051688367687
+Velocity scaling factor = 0.99158967358544
+     240     30.00       6.2323530     -53.3029609     -47.0706080          2113.1          11.723    -47.0706080
+
+Average temperature     = 2071.26712152246637
+Velocity scaling factor = 0.98264566398418
+     250     31.25       6.0574574     -53.3423519     -47.2848946          2053.8          13.124    -47.2848946
+
+Average temperature     = 2055.24128273189990
+Velocity scaling factor = 0.98646933710760
+     260     32.50       5.9342550     -53.3816765     -47.4474216          2012.0          13.251    -47.4474216
+
+Average temperature     = 1997.57376361200045
+Velocity scaling factor = 1.00060711152640
+     270     33.75       6.2374397     -53.6785272     -47.4410875          2114.8          12.415    -47.4410875
+
+Average temperature     = 2072.75633763730866
+Velocity scaling factor = 0.98229259916090
+     280     35.00       5.7657458     -53.4252290     -47.6594831          1954.9          11.732    -47.6594831
+
+Average temperature     = 2010.57115599697545
+Velocity scaling factor = 0.99736764156840
+     290     36.25       5.4935128     -53.1830712     -47.6895584          1862.6          11.089    -47.6895584
+
+Average temperature     = 1884.37877366476528
+Velocity scaling factor = 1.03022218081651
+     300     37.50       5.8826669     -53.2355185     -47.3528517          1994.5          10.322    -47.3528517
+
+Average temperature     = 1989.28159788097105
+Velocity scaling factor = 1.00269041924547
+     310     38.75       5.8291640     -53.1498826     -47.3207186          1976.4           9.796    -47.3207186
+
+Average temperature     = 1989.04397192760916
+Velocity scaling factor = 1.00275031187589
+     320     40.00       5.9692418     -53.2582115     -47.2889697          2023.8          10.082    -47.2889697
+
+Average temperature     = 2002.10960770299653
+Velocity scaling factor = 0.99947301493703
+     330     41.25       5.8497863     -53.1449745     -47.2951882          1983.3          11.175    -47.2951882
+
+Average temperature     = 2014.86731187327359
+Velocity scaling factor = 0.99630376670813
+     340     42.50       5.5882120     -52.9259876     -47.3377755          1894.7          11.850    -47.3377755
+
+Average temperature     = 1916.03967901598594
+Velocity scaling factor = 1.02167495777411
+     350     43.75       6.1180584     -53.2116487     -47.0935903          2074.3          11.534    -47.0935903
+
+Average temperature     = 2023.60882880581039
+Velocity scaling factor = 0.99414953810284
+     360     45.00       6.1077657     -53.2725940     -47.1648282          2070.8          11.006    -47.1648282
+
+Average temperature     = 2075.43340201298543
+Velocity scaling factor = 0.98165887392151
+     370     46.25       5.8638244     -53.2504685     -47.3866441          1988.1          11.018    -47.3866441
+
+Average temperature     = 1981.70878316049243
+Velocity scaling factor = 1.00460441099573
+     380     47.50       6.0529405     -53.3857647     -47.3328242          2052.2          11.740    -47.3328242
+
+Average temperature     = 2036.02744252927550
+Velocity scaling factor = 0.99111302633714
+     390     48.75       5.9859273     -53.4256076     -47.4396803          2029.5          12.730    -47.4396803
+
+Average temperature     = 2020.23101576066620
+Velocity scaling factor = 0.99498029675488
+     400     50.00       6.0640766     -53.5641366     -47.5000599          2056.0          13.717    -47.5000599
+
+Average temperature     = 2037.84228829448648
+Velocity scaling factor = 0.99067159916209
+     410     51.25       5.8088404     -53.4213074     -47.6124670          1969.5          14.482    -47.6124670
+
+Average temperature     = 1999.07372043869282
+Velocity scaling factor = 1.00023165035831
+     420     52.50       5.6318376     -53.2414003     -47.6095627          1909.5          14.108    -47.6095627
+
+Average temperature     = 1931.21141112253235
+Velocity scaling factor = 1.01765386970184
+     430     53.75       5.8899369     -53.2990957     -47.4091588          1997.0          12.264    -47.4091588
+
+Average temperature     = 1983.02127914432140
+Velocity scaling factor = 1.00427189880456
+     440     55.00       5.9076588     -53.2664041     -47.3587452          2003.0          10.458    -47.3587452
+
+Average temperature     = 2017.23054171627928
+Velocity scaling factor = 0.99571999982198
+     450     56.25       5.7260869     -53.1349927     -47.4089058          1941.4          10.338    -47.4089058
+
+Average temperature     = 1954.55137284321358
+Velocity scaling factor = 1.01155954623480
+     460     57.50       5.9039610     -53.1801430     -47.2761820          2001.7          11.663    -47.2761820
+
+Average temperature     = 1997.55353255776504
+Velocity scaling factor = 1.00061217854592
+     470     58.75       5.8311622     -53.0996185     -47.2684564          1977.0          13.053    -47.2684564
+
+Average temperature     = 1987.37507687754623
+Velocity scaling factor = 1.00317125251066
+     480     60.00       6.1613675     -53.3934136     -47.2320461          2089.0          13.304    -47.2320461
+
+Average temperature     = 2033.34416339905397
+Velocity scaling factor = 0.99176676615971
+     490     61.25       6.0605571     -53.3936547     -47.3330976          2054.8          13.147    -47.3330976
+
+Average temperature     = 2076.89206154720341
+Velocity scaling factor = 0.98131409009581
+     500     62.50       5.4836832     -53.0403333     -47.5566501          1859.2          12.721    -47.5566501
+
+Average temperature     = 1905.49151511058039
+Velocity scaling factor = 1.02449888057347
+     510     63.75       5.9718849     -53.2570659     -47.2851810          2024.7          11.653    -47.2851810
+
+Average temperature     = 1975.81816743054196
+Velocity scaling factor = 1.00610083776361
+     520     65.00       6.2709159     -53.4832984     -47.2123825          2126.1          10.857    -47.2123825
+
+Average temperature     = 2105.49705719653230
+Velocity scaling factor = 0.97462529449285
+     530     66.25       5.8702028     -53.3964898     -47.5262871          1990.3          11.302    -47.5262871
+
+Average temperature     = 2002.95085169994377
+Velocity scaling factor = 0.99926310240315
+     540     67.50       5.8456508     -53.3806728     -47.5350220          1981.9          12.411    -47.5350220
+
+Average temperature     = 1983.99742431296613
+Velocity scaling factor = 1.00402481285558
+     550     68.75       5.9480007     -53.4357534     -47.4877527          2016.6          12.713    -47.4877527
+
+Average temperature     = 2002.92053947225872
+Velocity scaling factor = 0.99927066380548
+     560     70.00       6.1107937     -53.6076824     -47.4968888          2071.8          12.075    -47.4968888
+
+Average temperature     = 2048.65860800778455
+Velocity scaling factor = 0.98805290961082
+     570     71.25       5.8120291     -53.4536993     -47.6416702          1970.5          11.351    -47.6416702
+
+Average temperature     = 2003.10158157821616
+Velocity scaling factor = 0.99922550529856
+     580     72.50       5.6648034     -53.3152660     -47.6504626          1920.6          10.563    -47.6504626
+
+Average temperature     = 1933.94065145552781
+Velocity scaling factor = 1.01693554295966
+     590     73.75       6.0628753     -53.5198668     -47.4569915          2055.6           9.904    -47.4569915
+
+Average temperature     = 2013.30255352282484
+Velocity scaling factor = 0.99669086000440
+     600     75.00       6.2948171     -53.7925903     -47.4977732          2134.2          10.614    -47.4977732
+
+Average temperature     = 2105.10690601223678
+Velocity scaling factor = 0.97471560667484
+     610     76.25       5.6378333     -53.4493045     -47.8114711          1911.5          12.771    -47.8114711
+
+Average temperature     = 1976.47317140595146
+Velocity scaling factor = 1.00593411284541
+     620     77.50       5.5300253     -53.2741497     -47.7441244          1874.9          14.143    -47.7441244
+
+Average temperature     = 1882.31584624308061
+Velocity scaling factor = 1.03078656314666
+     630     78.75       6.1480990     -53.5470409     -47.3989419          2084.5          12.937    -47.3989419
+
+Average temperature     = 2043.66686880228121
+Velocity scaling factor = 0.98925885331884
+     640     80.00       6.0621718     -53.5924024     -47.5302305          2055.4          10.647    -47.5302305
+
+Average temperature     = 2055.55750945591944
+Velocity scaling factor = 0.98639345502602
+     650     81.25       5.7385466     -53.4323219     -47.6937753          1945.6           9.507    -47.6937753
+
+Average temperature     = 1972.52863573320928
+Velocity scaling factor = 1.00693941162599
+     660     82.50       5.7648157     -53.3787635     -47.6139479          1954.5           9.758    -47.6139479
+
+Average temperature     = 1957.38134786018281
+Velocity scaling factor = 1.01082802712843
+     670     83.75       5.9473884     -53.4356800     -47.4882916          2016.4          10.705    -47.4882916
+
+Average temperature     = 2004.42967377387322
+Velocity scaling factor = 0.99889441773123
+     680     85.00       6.1356464     -53.6373069     -47.5016605          2080.3          11.709    -47.5016605
+
+Average temperature     = 2048.00823558589809
+Velocity scaling factor = 0.98820978186942
+     690     86.25       6.1448801     -53.7905211     -47.6456410          2083.4          12.518    -47.6456410
+
+Average temperature     = 2063.36083859163000
+Velocity scaling factor = 0.98452649026321
+     700     87.50       5.9311065     -53.7653563     -47.8342498          2010.9          13.086    -47.8342498
+
+Average temperature     = 2018.88082755600658
+Velocity scaling factor = 0.99531295287444
+     710     88.75       5.7384819     -53.6282009     -47.8897190          1945.6          12.953    -47.8897190
+
+Average temperature     = 1970.31048161008357
+Velocity scaling factor = 1.00750605291334
+     720     90.00       5.6740644     -53.4772778     -47.8032134          1923.8          11.725    -47.8032134
+
+Average temperature     = 1943.14376484981176
+Velocity scaling factor = 1.01452448076931
+     730     91.25       5.6877734     -53.3247591     -47.6369857          1928.4           9.968    -47.6369857
+
+Average temperature     = 1954.36337438864871
+Velocity scaling factor = 1.01160819815408
+     740     92.50       5.8283189     -53.3325471     -47.5042282          1976.1           9.245    -47.5042282
+
+Average temperature     = 1964.16810089492651
+Velocity scaling factor = 1.00908016846693
+     750     93.75       5.9331524     -53.3315046     -47.3983522          2011.6          11.289    -47.3983522
+
+Average temperature     = 2025.59137465510821
+Velocity scaling factor = 0.99366290749045
+     760     95.00       5.5768054     -53.0490487     -47.4722433          1890.8          14.060    -47.4722433
+
+Average temperature     = 1924.81597934094384
+Velocity scaling factor = 1.01934310616703
+     770     96.25       6.3013144     -53.5566293     -47.2553149          2136.4          14.805    -47.2553149
+
+Average temperature     = 2039.38465144943689
+Velocity scaling factor = 0.99029691153782
+     780     97.50       6.6026544     -53.9798668     -47.3772125          2238.6          13.311    -47.3772125
+
+Average temperature     = 2192.15966938364818
+Velocity scaling factor = 0.95516611246567
+     790     98.75       5.9675342     -53.9234423     -47.9559082          2023.3          11.610    -47.9559082
+
+Average temperature     = 2039.83565837519245
+Velocity scaling factor = 0.99018742834146
+     800    100.00       5.5746244     -53.6467392     -48.0721148          1890.1          10.613    -48.0721148
+
+Average temperature     = 1933.97318772771109
+Velocity scaling factor = 1.01692698869661
+     810    101.25       5.5735939     -53.4552429     -47.8816490          1889.7           9.928    -47.8816490
+
+Average temperature     = 1914.09451157020885
+Velocity scaling factor = 1.02219395623911
+     820    102.50       5.8904091     -53.5220163     -47.6316073          1997.1           9.824    -47.6316073
+
+Average temperature     = 1978.40791853977930
+Velocity scaling factor = 1.00544212527915
+     830    103.75       6.0425280     -53.6102493     -47.5677212          2048.7          11.178    -47.5677212
+
+Average temperature     = 2044.44676860273330
+Velocity scaling factor = 0.98907014789818
+     840    105.00       5.6418578     -53.3405063     -47.6986485          1912.8          13.665    -47.6986485
+
+Average temperature     = 1958.93646736358892
+Velocity scaling factor = 1.01042671996303
+     850    106.25       5.6642504     -53.2447920     -47.5805416          1920.4          15.236    -47.5805416
+
+Average temperature     = 1925.37790478231318
+Velocity scaling factor = 1.01919434663719
+     860    107.50       5.9393179     -53.3001450     -47.3608271          2013.7          14.587    -47.3608271
+
+Average temperature     = 2003.10470893262936
+Velocity scaling factor = 0.99922472527605
+     870    108.75       6.0941283     -53.4648139     -47.3706857          2066.2          12.558    -47.3706857
+
+Average temperature     = 2044.54461183039643
+Velocity scaling factor = 0.98904648126530
+     880    110.00       5.6095001     -53.1123446     -47.5028445          1901.9          11.421    -47.5028445
+
+Average temperature     = 1971.44076856932884
+Velocity scaling factor = 1.00721719457153
+     890    111.25       5.4219924     -52.8432830     -47.4212906          1838.3          11.599    -47.4212906
+
+Average temperature     = 1860.43256509772914
+Velocity scaling factor = 1.03683113803963
+     900    112.50       5.9600665     -52.9750018     -47.0149352          2020.7          12.415    -47.0149352
+
+Average temperature     = 2001.54703455710660
+Velocity scaling factor = 0.99961346558956
+     910    113.75       5.9687529     -52.9882173     -47.0194644          2023.7          13.435    -47.0194644
+
+Average temperature     = 2024.29276810241640
+Velocity scaling factor = 0.99398157934999
+     920    115.00       5.9011624     -52.9921224     -47.0909599          2000.8          14.198    -47.0909599
+
+Average temperature     = 1997.63666372588341
+Velocity scaling factor = 1.00059135821204
+     930    116.25       6.0990485     -53.1832295     -47.0841810          2067.9          14.095    -47.0841810
+
+Average temperature     = 2034.43586394801923
+Velocity scaling factor = 0.99150063400238
+     940    117.50       6.2054738     -53.3930175     -47.1875437          2103.9          13.457    -47.1875437
+
+Average temperature     = 2073.73202704123014
+Velocity scaling factor = 0.98206148799810
+     950    118.75       6.0246783     -53.4328683     -47.4081899          2042.6          12.904    -47.4081899
+
+Average temperature     = 2042.94733256747668
+Velocity scaling factor = 0.98943304893189
+     960    120.00       5.7813538     -53.3160689     -47.5347151          1960.1          12.658    -47.5347151
+
+Average temperature     = 1979.48093142525499
+Velocity scaling factor = 1.00516957943612
+     970    121.25       5.7463309     -53.2208989     -47.4745680          1948.3          12.403    -47.4745680
+
+Average temperature     = 1959.77248335335571
+Velocity scaling factor = 1.01021117887113
+     980    122.50       6.0648821     -53.4217827     -47.3569006          2056.3          12.416    -47.3569006
+
+Average temperature     = 2014.80349197280930
+Velocity scaling factor = 0.99631954579130
+     990    123.75       6.0940202     -53.4957678     -47.4017476          2066.2          12.978    -47.4017476
+
+Average temperature     = 2073.44416355750855
+Velocity scaling factor = 0.98212965714265
+    1000    125.00       5.6022105     -53.2190510     -47.6168405          1899.4          13.576    -47.6168405
+
+Average temperature     = 1935.33935653494382
+Velocity scaling factor = 1.01656799760003
+END SIMULATION
+	Average temperature over run = 1986.6338 K
+	Average pressure    over run = 12.0648 GPa
