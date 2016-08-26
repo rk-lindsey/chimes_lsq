@@ -223,9 +223,11 @@ ADD_PARAM = 0
 if TOTAL_TRIPS > 0:
 	print "TRIPLET " + POTENTIAL + " PARAMS \n"
 	
+	TRIP_PAR_IDX = 0
+	
 	for t in xrange(0, int(TOTAL_TRIPS)):
 	
-		PREV_PARIDX = 0
+		PREV_TRIPIDX = 0
 
 		P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
         
@@ -249,23 +251,15 @@ if TOTAL_TRIPS > 0:
 			ADD_LINES += 1
 			LINE       = hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip('\n')
 			LINE_SPLIT = LINE.split()
-			
-			if i>0 and LINE_SPLIT[5] != PRE_PAIRIDX:
-				ADD_PARAM += 1
 
-			PRE_PAIRIDX = LINE_SPLIT[5]			
+#			print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + int(LINE_SPLIT[5])]`
+			print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]`
 
-			print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + ADD_PARAM]`
-
-
+		TRIP_PAR_IDX += int(UNIQ)
             
 		print ""
         
 		ADD_LINES += 2
-
-
-
-	
 
 			
 if FIT_POVER == "true":

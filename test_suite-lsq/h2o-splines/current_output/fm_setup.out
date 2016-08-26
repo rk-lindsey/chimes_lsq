@@ -7,7 +7,7 @@ Reading input file...
 	# FITCOUL #: true
 	# CNSCOUL #: true
 	# FITPOVR #: true
-	# PAIRTYP #: SPLINE ....NOTE: Forces reported in units of kcal/mol.
+	# PAIRTYP #: SPLINE ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	# NATMTYP #: 2
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
  	1              O              0              15.9994        

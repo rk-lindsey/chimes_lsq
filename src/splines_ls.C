@@ -34,6 +34,10 @@ int factorial(int input)
 	return result;
 }
 
+string FULL_FILE_3B;		// Global variables declared as externs in functions.h, and declared in functions.C
+string SCAN_FILE_3B;
+string SCAN_FILE_2B;
+
 int main()
 {
 	//////////////////////////////////////////////////
@@ -377,6 +381,7 @@ int main()
 
 	ofstream fileA("A.txt");
 	ofstream fileb("b.txt");
+	ofstream fileb_labeled("b-labeled.txt");
   
 	fileA.precision(16);	//  Reduced precision to 6 for code testing.
 	fileb.precision(16);	//  Usual precision set to 16.
@@ -434,6 +439,11 @@ int main()
 			fileb << TRAJECTORY[N].FORCES[a].X << endl;
 			fileb << TRAJECTORY[N].FORCES[a].Y << endl;
 			fileb << TRAJECTORY[N].FORCES[a].Z << endl;
+			
+			fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].X << endl;
+			fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Y << endl;
+			fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Z << endl;	 	
+			
 		  
 		}  	
     }
@@ -482,11 +492,16 @@ int main()
 		// B file...
 		  
 		fileb << "0.0" << endl;	
-		fileb << "0.0" << endl; 
+		fileb << "0.0" << endl;
+		
+//		fileb_labeled << "0.0" << endl;	
+//		fileb_labeled << "0.0" << endl;	
+		 
 	} 	
 	   
 	fileA.close();
 	fileb.close();
+	fileb_labeled.close();
 	  	  
 	//////////////////////////////////////////////////
 	//
@@ -888,7 +903,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				cout << "	# PAIRTYP #: " << LINE;
 				
 				if(TEMP_TYPE != "DFTBPOLY")
-					cout << " ....NOTE: Forces reported in units of kcal/mol." << endl;
+					cout << " ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol." << endl;
 				else
 					cout << " ....NOTE: Forces reported in atomic units." << endl;
 			#endif
@@ -1216,7 +1231,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 								
 									// Case 2: each pair in the current pair triplet is identical... multiplicity should be 3 when all three powers are not the same
 								 
-									if( (PAIR_TRIPLETS[i].ATMPAIR1 == PAIR_TRIPLETS[i].ATMPAIR2) && (PAIR_TRIPLETS[i].ATMPAIR1 == PAIR_TRIPLETS[i].ATMPAIR3))
+									else if( (PAIR_TRIPLETS[i].ATMPAIR1 == PAIR_TRIPLETS[i].ATMPAIR2) && (PAIR_TRIPLETS[i].ATMPAIR1 == PAIR_TRIPLETS[i].ATMPAIR3))
 									{
 										// Sort the powers in ascending order
 
@@ -1361,7 +1376,36 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					PAIR_TRIPLETS[i].PARAM_INDICIES.resize(PAIR_TRIPLETS[i].EQUIV_INDICIES.size());
 				
 					PAIR_TRIPLETS[i].PARAM_INDICIES[0] = 0;
-				
+					
+					bool FOUND_EQV;
+					int  USE_SET = 0;
+					int  MAX_SET = 0;
+					
+					for(int set1=1; set1<PAIR_TRIPLETS[i].EQUIV_INDICIES.size(); set1++)
+					{
+						FOUND_EQV = false;
+						
+						for(int set2=0; set2<set1; set2++)
+						{
+							if(PAIR_TRIPLETS[i].EQUIV_INDICIES[set1] == PAIR_TRIPLETS[i].EQUIV_INDICIES[set2])
+							{
+								FOUND_EQV = true;
+								USE_SET   = set2;
+								break;
+							}
+						}
+						
+						if(FOUND_EQV)
+							PAIR_TRIPLETS[i].PARAM_INDICIES[set1] = PAIR_TRIPLETS[i].PARAM_INDICIES[USE_SET];
+						else
+						{
+							MAX_SET++;
+							PAIR_TRIPLETS[i].PARAM_INDICIES[set1] = MAX_SET;	
+						}					
+
+					}
+
+/*	OLD WAY				
 					for(int set=1; set<PAIR_TRIPLETS[i].EQUIV_INDICIES.size(); set++)
 					{
 						if(PAIR_TRIPLETS[i].EQUIV_INDICIES[set] != PAIR_TRIPLETS[i].EQUIV_INDICIES[set-1])
@@ -1369,7 +1413,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 						else
 							PAIR_TRIPLETS[i].PARAM_INDICIES[set] = PAIR_TRIPLETS[i].PARAM_INDICIES[set-1];
 					}
-				
+*/				
 					PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICIES[PAIR_TRIPLETS[i].PARAM_INDICIES.size()-1]+1;
 					PAIR_TRIPLETS[i].N_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICIES.size();
 				}

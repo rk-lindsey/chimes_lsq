@@ -1,0 +1,524 @@
+152c152
+< Average temperature     = 1336.15614227947071
+---
+> Average temperature     = 1336.15614227947117
+156c156
+< Average temperature     = 1870.54746127577027
+---
+> Average temperature     = 1870.54746127577050
+160c160
+< Average temperature     = 1851.50007138097203
+---
+> Average temperature     = 1851.50007138097135
+164c164
+< Average temperature     = 1966.65891671516920
+---
+> Average temperature     = 1966.65891671517170
+168c168
+< Average temperature     = 1931.56413506192484
+---
+> Average temperature     = 1931.56413506192553
+172c172
+< Average temperature     = 1904.89716710131461
+---
+> Average temperature     = 1904.89716710131324
+176c176
+< Average temperature     = 1989.67743018355441
+---
+> Average temperature     = 1989.67743018355213
+180c180
+< Average temperature     = 2010.08403487829241
+---
+> Average temperature     = 2010.08403487829310
+188c188
+< Average temperature     = 2058.42962127346254
+---
+> Average temperature     = 2058.42962127345891
+192c192
+< Average temperature     = 2015.16091646558880
+---
+> Average temperature     = 2015.16091646558812
+196c196
+< Average temperature     = 1924.60541437775100
+---
+> Average temperature     = 1924.60541437775464
+200c200
+< Average temperature     = 1919.74000259595277
+---
+> Average temperature     = 1919.74000259595186
+208c208
+< Average temperature     = 1966.84578328165162
+---
+> Average temperature     = 1966.84578328165594
+212c212
+< Average temperature     = 1981.70379519979952
+---
+> Average temperature     = 1981.70379519979974
+216c216
+< Average temperature     = 1982.10318841039407
+---
+> Average temperature     = 1982.10318841038907
+220c220
+< Average temperature     = 1998.49610561914187
+---
+> Average temperature     = 1998.49610561914847
+224c224
+< Average temperature     = 2015.16292896681580
+---
+> Average temperature     = 2015.16292896682580
+228c228
+< Average temperature     = 1883.92246141598230
+---
+> Average temperature     = 1883.92246141598707
+232c232
+< Average temperature     = 1895.45564179445819
+---
+> Average temperature     = 1895.45564179445455
+236,237c236,237
+< Average temperature     = 2090.91661063308766
+< Velocity scaling factor = 0.97801753517912
+---
+> Average temperature     = 2090.91661063306356
+> Velocity scaling factor = 0.97801753517913
+240,241c240,241
+< Average temperature     = 2034.07051688367642
+< Velocity scaling factor = 0.99158967358544
+---
+> Average temperature     = 2034.07051688369097
+> Velocity scaling factor = 0.99158967358543
+244c244
+< Average temperature     = 2071.26712152246682
+---
+> Average temperature     = 2071.26712152246591
+248,249c248,249
+< Average temperature     = 2055.24128273190081
+< Velocity scaling factor = 0.98646933710760
+---
+> Average temperature     = 2055.24128273186352
+> Velocity scaling factor = 0.98646933710761
+252c252
+< Average temperature     = 1997.57376361200068
+---
+> Average temperature     = 1997.57376361200909
+256,257c256,257
+< Average temperature     = 2072.75633763730866
+< Velocity scaling factor = 0.98229259916090
+---
+> Average temperature     = 2072.75633763732185
+> Velocity scaling factor = 0.98229259916089
+260c260
+< Average temperature     = 2010.57115599697204
+---
+> Average temperature     = 2010.57115599697977
+264c264
+< Average temperature     = 1884.37877366476710
+---
+> Average temperature     = 1884.37877366476823
+268c268
+< Average temperature     = 1989.28159788097287
+---
+> Average temperature     = 1989.28159788097810
+272c272
+< Average temperature     = 1989.04397192760780
+---
+> Average temperature     = 1989.04397192760302
+276,277c276,277
+< Average temperature     = 2002.10960770299721
+< Velocity scaling factor = 0.99947301493703
+---
+> Average temperature     = 2002.10960770302108
+> Velocity scaling factor = 0.99947301493702
+280c280
+< Average temperature     = 2014.86731187327496
+---
+> Average temperature     = 2014.86731187328178
+284,285c284,285
+< Average temperature     = 1916.03967901598548
+< Velocity scaling factor = 1.02167495777411
+---
+> Average temperature     = 1916.03967901595070
+> Velocity scaling factor = 1.02167495777412
+288c288
+< Average temperature     = 2023.60882880580721
+---
+> Average temperature     = 2023.60882880582039
+292c292
+< Average temperature     = 2075.43340201298406
+---
+> Average temperature     = 2075.43340201298497
+296,297c296,297
+< Average temperature     = 1981.70878316049016
+< Velocity scaling factor = 1.00460441099574
+---
+> Average temperature     = 1981.70878316049379
+> Velocity scaling factor = 1.00460441099573
+300c300
+< Average temperature     = 2036.02744252927232
+---
+> Average temperature     = 2036.02744252926686
+304,305c304,305
+< Average temperature     = 2020.23101576066938
+< Velocity scaling factor = 0.99498029675488
+---
+> Average temperature     = 2020.23101576063391
+> Velocity scaling factor = 0.99498029675489
+308,309c308,309
+< Average temperature     = 2037.84228829449648
+< Velocity scaling factor = 0.99067159916209
+---
+> Average temperature     = 2037.84228829444010
+> Velocity scaling factor = 0.99067159916210
+312,313c312,313
+< Average temperature     = 1999.07372043868486
+< Velocity scaling factor = 1.00023165035831
+---
+> Average temperature     = 1999.07372043870373
+> Velocity scaling factor = 1.00023165035830
+316,317c316,317
+< Average temperature     = 1931.21141112253395
+< Velocity scaling factor = 1.01765386970184
+---
+> Average temperature     = 1931.21141112265354
+> Velocity scaling factor = 1.01765386970181
+320,321c320,321
+< Average temperature     = 1983.02127914433140
+< Velocity scaling factor = 1.00427189880456
+---
+> Average temperature     = 1983.02127914422704
+> Velocity scaling factor = 1.00427189880458
+324,325c324,325
+< Average temperature     = 2017.23054171627882
+< Velocity scaling factor = 0.99571999982198
+---
+> Average temperature     = 2017.23054171620288
+> Velocity scaling factor = 0.99571999982200
+328,329c328,329
+< Average temperature     = 1954.55137284321017
+< Velocity scaling factor = 1.01155954623480
+---
+> Average temperature     = 1954.55137284335183
+> Velocity scaling factor = 1.01155954623476
+332c332
+< Average temperature     = 1997.55353255776390
+---
+> Average temperature     = 1997.55353255778869
+336c336
+< Average temperature     = 1987.37507687754623
+---
+> Average temperature     = 1987.37507687756306
+340,341c340,341
+< Average temperature     = 2033.34416339905738
+< Velocity scaling factor = 0.99176676615971
+---
+> Average temperature     = 2033.34416339900895
+> Velocity scaling factor = 0.99176676615972
+344,345c344,345
+< Average temperature     = 2076.89206154718977
+< Velocity scaling factor = 0.98131409009582
+---
+> Average temperature     = 2076.89206154713520
+> Velocity scaling factor = 0.98131409009583
+348,349c348,349
+< Average temperature     = 1905.49151511057721
+< Velocity scaling factor = 1.02449888057347
+---
+> Average temperature     = 1905.49151511054879
+> Velocity scaling factor = 1.02449888057348
+352,353c352,353
+< Average temperature     = 1975.81816743055538
+< Velocity scaling factor = 1.00610083776361
+---
+> Average temperature     = 1975.81816743053105
+> Velocity scaling factor = 1.00610083776362
+356,357c356,357
+< Average temperature     = 2105.49705719653048
+< Velocity scaling factor = 0.97462529449285
+---
+> Average temperature     = 2105.49705719666326
+> Velocity scaling factor = 0.97462529449282
+360,361c360,361
+< Average temperature     = 2002.95085169994013
+< Velocity scaling factor = 0.99926310240315
+---
+> Average temperature     = 2002.95085169980598
+> Velocity scaling factor = 0.99926310240319
+364,365c364,365
+< Average temperature     = 1983.99742431297864
+< Velocity scaling factor = 1.00402481285557
+---
+> Average temperature     = 1983.99742431301024
+> Velocity scaling factor = 1.00402481285556
+368,369c368,369
+< Average temperature     = 2002.92053947224963
+< Velocity scaling factor = 0.99927066380549
+---
+> Average temperature     = 2002.92053947237105
+> Velocity scaling factor = 0.99927066380546
+372,373c372,373
+< Average temperature     = 2048.65860800779546
+< Velocity scaling factor = 0.98805290961081
+---
+> Average temperature     = 2048.65860800773862
+> Velocity scaling factor = 0.98805290961083
+376,377c376,377
+< Average temperature     = 2003.10158157822048
+< Velocity scaling factor = 0.99922550529856
+---
+> Average temperature     = 2003.10158157805267
+> Velocity scaling factor = 0.99922550529860
+380,381c380,381
+< Average temperature     = 1933.94065145550803
+< Velocity scaling factor = 1.01693554295967
+---
+> Average temperature     = 1933.94065145569766
+> Velocity scaling factor = 1.01693554295962
+384,385c384,385
+< Average temperature     = 2013.30255352282848
+< Velocity scaling factor = 0.99669086000440
+---
+> Average temperature     = 2013.30255352266749
+> Velocity scaling factor = 0.99669086000443
+388,389c388,389
+< Average temperature     = 2105.10690601223132
+< Velocity scaling factor = 0.97471560667484
+---
+> Average temperature     = 2105.10690601204897
+> Velocity scaling factor = 0.97471560667488
+392,393c392,393
+< Average temperature     = 1976.47317140593941
+< Velocity scaling factor = 1.00593411284541
+---
+> Average temperature     = 1976.47317140628775
+> Velocity scaling factor = 1.00593411284532
+396,397c396,397
+< Average temperature     = 1882.31584624308630
+< Velocity scaling factor = 1.03078656314666
+---
+> Average temperature     = 1882.31584624323614
+> Velocity scaling factor = 1.03078656314662
+400,401c400,401
+< Average temperature     = 2043.66686880228508
+< Velocity scaling factor = 0.98925885331884
+---
+> Average temperature     = 2043.66686880195630
+> Velocity scaling factor = 0.98925885331892
+404,405c404,405
+< Average temperature     = 2055.55750945593627
+< Velocity scaling factor = 0.98639345502601
+---
+> Average temperature     = 2055.55750945585442
+> Velocity scaling factor = 0.98639345502603
+408,409c408,409
+< Average temperature     = 1972.52863573321270
+< Velocity scaling factor = 1.00693941162599
+---
+> Average temperature     = 1972.52863573329887
+> Velocity scaling factor = 1.00693941162597
+412,413c412,413
+< Average temperature     = 1957.38134786016053
+< Velocity scaling factor = 1.01082802712844
+---
+> Average temperature     = 1957.38134786035766
+> Velocity scaling factor = 1.01082802712839
+416,417c416,417
+< Average temperature     = 2004.42967377385935
+< Velocity scaling factor = 0.99889441773124
+---
+> Average temperature     = 2004.42967377390960
+> Velocity scaling factor = 0.99889441773123
+420,421c420,421
+< Average temperature     = 2048.00823558590855
+< Velocity scaling factor = 0.98820978186942
+---
+> Average temperature     = 2048.00823558546244
+> Velocity scaling factor = 0.98820978186953
+424,425c424,425
+< Average temperature     = 2063.36083859162727
+< Velocity scaling factor = 0.98452649026321
+---
+> Average temperature     = 2063.36083859158043
+> Velocity scaling factor = 0.98452649026322
+428,429c428,429
+< Average temperature     = 2018.88082755602841
+< Velocity scaling factor = 0.99531295287443
+---
+> Average temperature     = 2018.88082755666937
+> Velocity scaling factor = 0.99531295287427
+432,433c432,433
+< Average temperature     = 1970.31048161009312
+< Velocity scaling factor = 1.00750605291334
+---
+> Average temperature     = 1970.31048161055037
+> Velocity scaling factor = 1.00750605291322
+436c436
+< Average temperature     = 1943.14376484978993
+---
+> Average temperature     = 1943.14376484978607
+440,441c440,441
+< Average temperature     = 1954.36337438865894
+< Velocity scaling factor = 1.01160819815407
+---
+> Average temperature     = 1954.36337438884948
+> Velocity scaling factor = 1.01160819815403
+444,445c444,445
+< Average temperature     = 1964.16810089496289
+< Velocity scaling factor = 1.00908016846692
+---
+> Average temperature     = 1964.16810089473552
+> Velocity scaling factor = 1.00908016846698
+448,449c448,449
+< Average temperature     = 2025.59137465513709
+< Velocity scaling factor = 0.99366290749045
+---
+> Average temperature     = 2025.59137465483809
+> Velocity scaling factor = 0.99366290749052
+452,453c452,453
+< Average temperature     = 1924.81597934094088
+< Velocity scaling factor = 1.01934310616703
+---
+> Average temperature     = 1924.81597934137244
+> Velocity scaling factor = 1.01934310616692
+456,457c456,457
+< Average temperature     = 2039.38465144942234
+< Velocity scaling factor = 0.99029691153782
+---
+> Average temperature     = 2039.38465144918769
+> Velocity scaling factor = 0.99029691153788
+460,461c460,461
+< Average temperature     = 2192.15966938364818
+< Velocity scaling factor = 0.95516611246567
+---
+> Average temperature     = 2192.15966938280962
+> Velocity scaling factor = 0.95516611246585
+464,465c464,465
+< Average temperature     = 2039.83565837516517
+< Velocity scaling factor = 0.99018742834146
+---
+> Average temperature     = 2039.83565837497736
+> Velocity scaling factor = 0.99018742834151
+468,469c468,469
+< Average temperature     = 1933.97318772762446
+< Velocity scaling factor = 1.01692698869663
+---
+> Average temperature     = 1933.97318772711378
+> Velocity scaling factor = 1.01692698869676
+472,473c472,473
+< Average temperature     = 1914.09451157025615
+< Velocity scaling factor = 1.02219395623910
+---
+> Average temperature     = 1914.09451157003491
+> Velocity scaling factor = 1.02219395623916
+476,477c476,477
+< Average temperature     = 1978.40791853984911
+< Velocity scaling factor = 1.00544212527913
+---
+> Average temperature     = 1978.40791854027657
+> Velocity scaling factor = 1.00544212527902
+480,481c480,481
+< Average temperature     = 2044.44676860265236
+< Velocity scaling factor = 0.98907014789820
+---
+> Average temperature     = 2044.44676860300069
+> Velocity scaling factor = 0.98907014789812
+484,485c484,485
+< Average temperature     = 1958.93646736347546
+< Velocity scaling factor = 1.01042671996306
+---
+> Average temperature     = 1958.93646736427399
+> Velocity scaling factor = 1.01042671996285
+488,489c488,489
+< Average temperature     = 1925.37790478225111
+< Velocity scaling factor = 1.01919434663720
+---
+> Average temperature     = 1925.37790478162719
+> Velocity scaling factor = 1.01919434663737
+492,493c492,493
+< Average temperature     = 2003.10470893275442
+< Velocity scaling factor = 0.99922472527602
+---
+> Average temperature     = 2003.10470893265733
+> Velocity scaling factor = 0.99922472527605
+496,497c496,497
+< Average temperature     = 2044.54461183056583
+< Velocity scaling factor = 0.98904648126526
+---
+> Average temperature     = 2044.54461183199828
+> Velocity scaling factor = 0.98904648126491
+500,501c500,501
+< Average temperature     = 1971.44076856924994
+< Velocity scaling factor = 1.00721719457155
+---
+> Average temperature     = 1971.44076856888387
+> Velocity scaling factor = 1.00721719457164
+504,505c504,505
+< Average temperature     = 1860.43256509770549
+< Velocity scaling factor = 1.03683113803964
+---
+> Average temperature     = 1860.43256509634193
+> Velocity scaling factor = 1.03683113804002
+508,509c508,509
+< Average temperature     = 2001.54703455731646
+< Velocity scaling factor = 0.99961346558951
+---
+> Average temperature     = 2001.54703455761296
+> Velocity scaling factor = 0.99961346558943
+512,513c512,513
+< Average temperature     = 2024.29276810234342
+< Velocity scaling factor = 0.99398157935001
+---
+> Average temperature     = 2024.29276810331748
+> Velocity scaling factor = 0.99398157934977
+516,517c516,517
+< Average temperature     = 1997.63666372580087
+< Velocity scaling factor = 1.00059135821206
+---
+> Average temperature     = 1997.63666372362650
+> Velocity scaling factor = 1.00059135821260
+520,521c520,521
+< Average temperature     = 2034.43586394792374
+< Velocity scaling factor = 0.99150063400240
+---
+> Average temperature     = 2034.43586394558542
+> Velocity scaling factor = 0.99150063400297
+524,525c524,525
+< Average temperature     = 2073.73202704118012
+< Velocity scaling factor = 0.98206148799812
+---
+> Average temperature     = 2073.73202704318828
+> Velocity scaling factor = 0.98206148799764
+528,529c528,529
+< Average temperature     = 2042.94733256746554
+< Velocity scaling factor = 0.98943304893190
+---
+> Average temperature     = 2042.94733256824725
+> Velocity scaling factor = 0.98943304893171
+532,533c532,533
+< Average temperature     = 1979.48093142524658
+< Velocity scaling factor = 1.00516957943612
+---
+> Average temperature     = 1979.48093142369726
+> Velocity scaling factor = 1.00516957943651
+536,537c536,537
+< Average temperature     = 1959.77248335350964
+< Velocity scaling factor = 1.01021117887109
+---
+> Average temperature     = 1959.77248335499826
+> Velocity scaling factor = 1.01021117887070
+540,541c540,541
+< Average temperature     = 2014.80349197289115
+< Velocity scaling factor = 0.99631954579128
+---
+> Average temperature     = 2014.80349197485111
+> Velocity scaling factor = 0.99631954579079
+544,545c544,545
+< Average temperature     = 2073.44416355744715
+< Velocity scaling factor = 0.98212965714267
+---
+> Average temperature     = 2073.44416355900285
+> Velocity scaling factor = 0.98212965714230
+548,549c548,549
+< Average temperature     = 1935.33935653497838
+< Velocity scaling factor = 1.01656799760002
+---
+> Average temperature     = 1935.33935653518051
+> Velocity scaling factor = 1.01656799759997

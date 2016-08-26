@@ -14,7 +14,22 @@
 
 
 
+#ifndef VERBOSITY
+	#define VERBOSITY 1
+#endif
 
+#ifndef FORCECHECK
+	#define FORCECHECK 0
+#endif
+
+
+#define GNUPLOT 1
+#define MATLAB  2
+#define PYTHON  3
+
+#ifndef PESFORMAT
+	#define PESFORMAT GNUPLOT
+#endif
 
 
 #ifndef _HELPERS_
@@ -38,6 +53,10 @@ static const double Kb      = 0.001987; 			// Boltzmann constant in kcal/mol-K.
 static const double Tfs     = 48.888;   			// Internal time unit in fs.
 static const double GPa     = 6.9479;				// Unit conversion factor to GPa.
 
+extern string FULL_FILE_3B;	// The 4D PES for 3B FF
+extern string SCAN_FILE_3B;	// The 2D PES scans for 3B
+extern string SCAN_FILE_2B;	// The 2D PES scans for 2B
+
 struct MD_JOB_CONTROL
 {
 	///////////////////////////////////////////////
@@ -58,6 +77,7 @@ struct MD_JOB_CONTROL
 
 	int    SEED;				// Replaces rand_seed...
 	double TEMPERATURE;			// Replaces TempMD
+	bool   PLOT_PES;			// Plot out the potential energy surfaces? IF so, nothing else will be done.
 	bool   COMPARE_FORCE;		// Replaces if_read_force... If TRUE, read in read in a set of forces from a file for comparison with those computed by this code
 	string COMPARE_FILE;		// Name of the file that holds the forces
 	double DELTA_T;				// Relaces deltat
@@ -122,6 +142,7 @@ struct FRAME
 	double	TOT_POT_ENER;		// Replaces VTOT
 	
 	vector<string> 	ATOMTYPE;
+	vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen file printing
 	vector<XYZ>		COORDS;
 	vector<double> 	CHARGES;
 	vector<double> 	MASS;
@@ -192,6 +213,44 @@ struct TRIP_FF : public TRIPLETS
 	vector<double> 	PARAMS;
 };
 
+
+struct PES_PLOTS
+{
+	int N_PLOTS;
+	vector<string> PES_TYPES;
+	vector<int> NBODY;
+	vector<int> TYPE_INDEX;
+	string TYPE_1;
+	string TYPE_2;
+	string TYPE_3;
+	bool INCLUDE_2B;
+	
+	// Variables used for scans of 3b potential
+	
+	int N_SCAN;
+	
+	vector<int>PARENT_TYPE;
+	
+	vector<int> FIX_PAIR_1;
+	vector<int> FIX_PAIR_2;
+	
+	vector<double> FIX_VAL_1;
+	vector<double> FIX_VAL_2;
+	
+	vector<int> SCAN_PAIR;
+	
+	vector<string> SCAN_TYPE;
+	
+	// Variables used to add 2b to 3b
+	
+	vector<string> 	SEARCH_STRING_2B;
+	vector<XYZ_INT>	IJ_IK_JK_TYPE;
+		
+	
+	PES_PLOTS():N_PLOTS(0), N_SCAN(0), INCLUDE_2B(0){}
+		
+};
+
 //////////////////////////////////////////
 //
 //	FUNCTION HEADERS -- DERIVATIVE CALCULATION
@@ -224,8 +283,15 @@ void ZCalc_Ewald_Deriv (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, ve
 
 void ZCalc(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP);
 
+//////////////////////////////////////////
+//
+//	FUNCTION HEADERS -- PRINTING OF POTENTIAL ENERGY SURFACE
+//
+//////////////////////////////////////////
 
-
+void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FILE_TAG);
+void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk);
+void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
 
 #endif
 

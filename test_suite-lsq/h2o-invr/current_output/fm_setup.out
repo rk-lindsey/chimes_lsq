@@ -7,7 +7,7 @@ Reading input file...
 	# FITCOUL #: false
 	# CNSCOUL #: false
 	# FITPOVR #: true
-	# PAIRTYP #: INVRSE_R ....NOTE: Forces reported in units of kcal/mol.
+	# PAIRTYP #: INVRSE_R ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use the following number of inverse-r params: 4
 	# NATMTYP #: 2
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #

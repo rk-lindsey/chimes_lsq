@@ -7,7 +7,7 @@ Reading input file...
 	# FITCOUL #: true
 	# CNSCOUL #: true
 	# FITPOVR #: false
-	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/mol.
+	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 10
 	             Will use 3-body order: 2
 	# CHBTYPE #: MORSE

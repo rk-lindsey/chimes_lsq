@@ -5,10 +5,8 @@
 ###############################################################
 
 cd ../src
-make house_md;  cp house_md  ../test_suite-md/;  make clean_md;  make realclean_md;
-make house_lsq; cp house_lsq ../test_suite-lsq/; make clean_lsq; make realclean_lsq;
+make house_md; cp house_md ../test_suite-md/; make clean_md; make realclean_md;
 cd ../test_suite-md
-
 
 ########################################
 # Define tests within the test suite

@@ -16,14 +16,18 @@
 
 using namespace std;
 
-#ifndef VERBOSITY
-	#define VERBOSITY 1
-#endif
 
-static void   read_input        (MD_JOB_CONTROL & CONTROLS);	// UPDATED
+
+static void   read_input        (MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS);	// UPDATED
 static double kinetic_energy    (FRAME & SYSTEM);				// UPDATED
 static double kinetic_energy    (FRAME & SYSTEM, string TYPE);	// UPDATED
 double        numerical_pressure(const FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP) ;
+
+
+string FULL_FILE_3B;		// Global variables declared as externs in functions.h, and declared in functions.C
+string SCAN_FILE_3B;
+string SCAN_FILE_2B;
+
 
 int main(int argc, char* argv[])
 {
@@ -32,14 +36,15 @@ int main(int argc, char* argv[])
     // Define/initialize important variables
 	////////////////////////////////////////////////////////////
 
-	MD_JOB_CONTROL CONTROLS;	// Declare the data object that will hold the main simulation control variables
-	read_input(CONTROLS);		// Populate object with user defined values
-	 
-	// Data objects to hold coefficients for different force field types.
+	MD_JOB_CONTROL CONTROLS;			// Declare the data object that will hold the main simulation control variables
+	PES_PLOTS FF_PLOTS;					// Declare the data object that will help set up PES plots
+	read_input(CONTROLS, FF_PLOTS);		// Populate object with user defined values
+	
+	// Data objects to hold coefficients for different force field types, and for FF printing (if requested)
 	 
 	vector<PAIR_FF> FF_2BODY;	// Holds all 2-body parameters
 	vector<TRIP_FF> FF_3BODY; 	// Holds all 3-body parameters
-	
+
 	// Define the mapping variables that let us figure out which FF params to use for a given pair/triplet of pairs
 	
 	map<string,int> PAIR_MAP;			// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
@@ -63,13 +68,42 @@ int main(int argc, char* argv[])
 	
 	double vscale;
 	
+	
+	bool   	FOUND_END = false;
+	string 	LINE;
+	string  TEMP_STR;
+	int		NATMTYP = 0;
+	
+	vector<string> 	TMP_ATOMTYPE;
+	vector<int> 	TMP_ATOMTYPEIDX;
+	vector<double> 	TMP_CHARGES;
+	vector<double> 	TMP_MASS;
+	stringstream	STREAM_PARSER;
+	
 	ofstream GENFILE;			// Holds dftbgen info output.. whatever that is
 	ifstream CMPR_FORCEFILE;	// Holds the forces that were read in for comparison purposes
 	ofstream OUT_FORCEFILE;		// Holds the forces that are computed and are to be printed out
+	ofstream OUT_FORCELABL;		// Holds the forces that are computed and are to be printed out.. has atom labels
+	ofstream STATISTICS;		// Holds a copy of the "Step      Time          Ktot/N          Vtot/N ..." part of the output file.. uninterrupted by warnings
+	
+	
+	ifstream PARAMFILE;
+	ifstream COORDFILE;
+	
+
 	
 	cout.precision(15);			// Set output precision
 	
+	////////////////////////////////////////////////////////////
+    // Hop to PES printing, if requested 
+	////////////////////////////////////////////////////////////
 	
+	
+	if (FF_PLOTS.N_PLOTS > 0)
+	{
+//		cout << "Going to ff setup" << endl;
+		goto FF_SETUP; 
+	}
 	
 	////////////////////////////////////////////////////////////
 	// Setup an a dftb gen output file, if user has requested it
@@ -83,13 +117,15 @@ int main(int argc, char* argv[])
 	////////////////////////////////////////////////////////////
 
     if ( CONTROLS.PRINT_FORCE ) 
+	{
 		OUT_FORCEFILE.open("forceout.txt");	
+		OUT_FORCELABL.open("forceout-labeled.txt");		
+	}
 
 	////////////////////////////////////////////////////////////
     // Read input file input.xyz, where box dims are on the info line:
 	////////////////////////////////////////////////////////////
 
-    ifstream COORDFILE;
 	COORDFILE.open(CONTROLS.COORD_FILE.data());
 	if(!COORDFILE.is_open())
 	{
@@ -116,6 +152,7 @@ int main(int argc, char* argv[])
 	SYSTEM.ACCEL       .resize(SYSTEM.ATOMS);
 	SYSTEM.VELOCITY    .resize(SYSTEM.ATOMS);
 	SYSTEM.VELOCITY_NEW.resize(SYSTEM.ATOMS);
+	SYSTEM.ATOMTYPE_IDX.resize(SYSTEM.ATOMS);
 
 	cout << "   ...setup complete" << endl << endl;
 
@@ -127,8 +164,6 @@ int main(int argc, char* argv[])
 
 	cout << "Reading initial coordinates and forces..." << endl;
 
-	string TEMP_STR;
-	
     if ( CONTROLS.COMPARE_FORCE ) 
     {
       cout << "Opening force.txt to read forces for comparison\n";
@@ -148,6 +183,22 @@ int main(int argc, char* argv[])
 		
 		// Read the coordinates
 		COORDFILE >> SYSTEM.COORDS[a].X >> SYSTEM.COORDS[a].Y >> SYSTEM.COORDS[a].Z;
+		
+		//##############################################################################
+		//##############################################################################
+		//
+		// FOR TESTING PURPOSES: DO WE RECOVER INVERTED FORCES?
+		//
+		//##############################################################################
+		//##############################################################################
+
+//		SYSTEM.COORDS[a].X *= -1;
+//		SYSTEM.COORDS[a].Y *= -1;
+//		SYSTEM.COORDS[a].Z *= -1;	
+		
+		//##############################################################################
+		//##############################################################################
+		
 		
 		// Wrap the coordinates
 		SYSTEM.COORDS[a].X -= floor(SYSTEM.COORDS[a].X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
@@ -201,7 +252,6 @@ int main(int argc, char* argv[])
 	
 	// Read in the possible atom types and thier features	
 	
-    ifstream PARAMFILE;
 	PARAMFILE.open(CONTROLS.PARAM_FILE.data());
 	if(!PARAMFILE.is_open())
 	{
@@ -209,14 +259,9 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 	
-	bool   	FOUND_END = false;
-	string 	LINE;
-	
-	int				NATMTYP = 0;
-	vector<string> 	TMP_ATOMTYPE;
-	vector<double> 	TMP_CHARGES;
-	vector<double> 	TMP_MASS;
-	stringstream	STREAM_PARSER;
+	FOUND_END = false;
+	NATMTYP = 0;
+
 	
 	while (FOUND_END == false)
 	{
@@ -243,9 +288,10 @@ int main(int argc, char* argv[])
 			STREAM_PARSER.str("");
 			STREAM_PARSER.clear();
 			
-			TMP_ATOMTYPE.resize(NATMTYP);
-			TMP_CHARGES .resize(NATMTYP);
-			TMP_MASS    .resize(NATMTYP);	
+			TMP_ATOMTYPE   .resize(NATMTYP);
+			TMP_ATOMTYPEIDX.resize(NATMTYP);
+			TMP_CHARGES    .resize(NATMTYP);
+			TMP_MASS       .resize(NATMTYP);	
 			
 			cout << "	Read " << NATMTYP << " atom types:" << endl;			
 		}			
@@ -258,6 +304,7 @@ int main(int argc, char* argv[])
 				STREAM_PARSER.str(LINE);
 				
 				STREAM_PARSER >> TEMP_STR;
+				TMP_ATOMTYPEIDX[i] = int(atof(TEMP_STR.data()));
 				STREAM_PARSER >> TMP_ATOMTYPE[i];
 				STREAM_PARSER >> TMP_CHARGES[i];
 				STREAM_PARSER >> TMP_MASS[i];
@@ -281,8 +328,9 @@ int main(int argc, char* argv[])
 		{
 			if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
 			{
-				SYSTEM.CHARGES[a] = TMP_CHARGES[i];
-				SYSTEM.MASS[a]    = TMP_MASS[i];
+				SYSTEM.CHARGES[a]      = TMP_CHARGES[i];
+				SYSTEM.MASS[a]         = TMP_MASS[i];
+				SYSTEM.ATOMTYPE_IDX[a] = TMP_ATOMTYPEIDX[i];
 				break;
 			}			
 		}		
@@ -290,7 +338,7 @@ int main(int argc, char* argv[])
 	
 	// Free up some memory.. swap the contents of currend vectors with a vector w/ no assigned mem
 	
-	vector<string>().swap(TMP_ATOMTYPE);
+//	vector<string>().swap(TMP_ATOMTYPE); -- Don't clear out this one.. we need it.
 	vector<double>().swap(TMP_CHARGES);
 	vector<double>().swap(TMP_MASS);	
 	
@@ -496,6 +544,8 @@ int main(int argc, char* argv[])
 	////////////////////////////////////////////////////////////
 	// Begin setup of force field data objects...
 	////////////////////////////////////////////////////////////  
+
+	FF_SETUP:
 
 	PARAMFILE.open(CONTROLS.PARAM_FILE.data());
 	if(!PARAMFILE.is_open())
@@ -840,13 +890,11 @@ int main(int argc, char* argv[])
 				}
 
 				
-				
-				
-				
 				// If applicable, read the charge parameter
 				
 				if(CONTROLS.FIT_COUL)
 				{
+					
 					PARAMFILE >> TEMP_STR >> TEMP_STR >> TEMP_STR >> FF_2BODY[i].PAIR_CHRG;
 					// NOTE: Fit charges are in stillinger units.. convert to e:
 					FF_2BODY[i].PAIR_CHRG /= ke;
@@ -862,23 +910,26 @@ int main(int argc, char* argv[])
 					 
 					TMP_qHH = sqrt(TMP_qHH);
 					TMP_qOO = -2.0*TMP_qHH;		
-					
+				
 					/*
 					cout << "Will use the following atom charges: " << endl;
 					cout << "O: " << TMP_qOO << endl;
 					cout << "H: " << TMP_qHH << endl;	
-					*/		
-					 
-					for(int i=0; i<SYSTEM.ATOMS; i++)
+					*/
+					
+					if(!CONTROLS.PLOT_PES)		
 					{
-						if(SYSTEM.ATOMTYPE[i] == "O")
-							SYSTEM.CHARGES[i] = TMP_qOO;
-						else if(SYSTEM.ATOMTYPE[i] == "H")
-							SYSTEM.CHARGES[i] = TMP_qHH;
-						else
+						for(int i=0; i<SYSTEM.ATOMS; i++)
 						{
-							cout << "ERROR: FIT_COUL functionality only valid for H2O-type systems." << endl;
-							exit(0);
+							if(SYSTEM.ATOMTYPE[i] == "O")
+								SYSTEM.CHARGES[i] = TMP_qOO;
+							else if(SYSTEM.ATOMTYPE[i] == "H")
+								SYSTEM.CHARGES[i] = TMP_qHH;
+							else
+							{
+								cout << "ERROR: FIT_COUL functionality only valid for H2O-type systems." << endl;
+								exit(0);
+							}
 						}
 					}
 				}
@@ -902,7 +953,12 @@ int main(int argc, char* argv[])
 				STREAM_PARSER >> FF_3BODY[i].TRIPINDX;				
 				STREAM_PARSER >> FF_3BODY[i].ATMPAIR1;
 				STREAM_PARSER >> FF_3BODY[i].ATMPAIR2;
-				STREAM_PARSER >> FF_3BODY[i].ATMPAIR3;				
+				STREAM_PARSER >> FF_3BODY[i].ATMPAIR3;	
+				
+				// Get rid of the colon at the end of the atom pair:
+				
+				FF_3BODY[i].ATMPAIR3 = FF_3BODY[i].ATMPAIR3.substr(0,FF_3BODY[i].ATMPAIR3.length()-1);
+							
 				STREAM_PARSER >> TEMP_STR;
 				STREAM_PARSER >> FF_3BODY[i].N_TRUE_ALLOWED_POWERS;
 				STREAM_PARSER >> TEMP_STR;
@@ -980,7 +1036,7 @@ int main(int argc, char* argv[])
 				PAIR_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
 				PAIR_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
 					
-			}
+			}			
 			
 			cout << "	...Read FF pairmaps..." << endl << endl;					
 		}	
@@ -1012,7 +1068,7 @@ int main(int argc, char* argv[])
 			cout << "	...Read FF triadmaps..." << endl;					
 		}						
 	
-	}
+	}	
 	
 	////////////////////////////////////////////////////////////
 	// Print a summary of the force field
@@ -1024,9 +1080,7 @@ int main(int argc, char* argv[])
 	cout << "		" << FF_2BODY[0].PAIRTYP << " " << FF_2BODY[0].SNUM << endl << endl;
 	
 	cout << "	Interaction parameters for each pair type: " << endl;
-	
 
-	
 	for(int i=0; i<FF_2BODY.size(); i++)
 	{
 		
@@ -1056,8 +1110,7 @@ int main(int argc, char* argv[])
 		
 		cout << endl; 
 	}
-	
-	
+
 	if(FF_2BODY[0].SNUM_3B_CHEBY > 0)
 	{
 		cout << "	Triplet type and polynomial order per triplet: " << endl;
@@ -1113,10 +1166,290 @@ int main(int argc, char* argv[])
 			cout << FF_2BODY[i].OVRPRMS[4] << endl;
 		}
 	}	
-	
-	
 
 	cout << endl;
+	
+	////////////////////////////////////////////////////////////
+	// If PES printing is requested, do so here and then 
+	// exit the program
+	////////////////////////////////////////////////////////////  	
+	
+	if (FF_PLOTS.N_PLOTS > 0)
+	{
+		if(FF_PLOTS.INCLUDE_2B)
+			cout << "WARNING: 2B+3B only used for 2D 3B scans, not 4D 3B scans." << endl;
+		
+		
+		int ij, ik, jk;
+		string ATM_TYP_1, ATM_TYP_2, ATM_TYP_3;
+		int ADD_2B_TO_3B_IDX = 0;
+		
+		int IJ_STEP = 0;
+		int IK_STEP = 0;
+		int JK_STEP = 0;
+		
+		ifstream FULL_INFILE_3B;
+		ifstream SCAN_INFILE_3B;
+		ifstream SCAN_INFILE_2B;
+		
+		ofstream FULL_OUTFILE_3B;
+		ofstream SCAN_OUTFILE_3B;
+		ofstream SCAN_OUTFILE_2B;			
+
+		XYZ 	TMP_DISTS;
+		double 	TMP_PES;
+		
+		vector<double> IJ_DIST_3B;
+		vector<double> IK_DIST_3B;
+		vector<double> JK_DIST_3B;
+		vector<double> PES_VAL_3B;
+		
+		vector<double> IJ_DIST_2B;
+		vector<double> IK_DIST_2B;
+		vector<double> JK_DIST_2B;
+		vector<double> PES_VAL_2B_IJ;
+		vector<double> PES_VAL_2B_IK;
+		vector<double> PES_VAL_2B_JK;
+		
+		int idx_3b = 0;
+		int scan_2b_idx = 0;
+		
+		for (int i=0; i<FF_PLOTS.N_PLOTS; i++)
+		{
+			cout << "	Printing force field PES for: " << FF_PLOTS.PES_TYPES[i] << endl;
+			
+			// Figure out whether this is a 2- or 3-body interaction
+			// Figure out the index of the interaction type
+			// If it is 3-body, figure out:
+			// 1. the individual atom types
+			// 2. the pair type indicies
+			
+		
+			IJ_DIST_3B.clear();
+			IK_DIST_3B.clear();
+			JK_DIST_3B.clear();
+			PES_VAL_3B.clear();		
+			
+			IJ_DIST_2B.clear();
+			IK_DIST_2B.clear();
+			JK_DIST_2B.clear();
+			
+			PES_VAL_2B_IJ.clear();
+			PES_VAL_2B_IK.clear();
+			PES_VAL_2B_JK.clear();
+								
+			
+			if(FF_PLOTS.NBODY[i] == 3)	// Eventually also add a check that tye 3B type is Chebyshev...
+			{
+				ij =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR1];
+				ik =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR2];
+				jk =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR3];
+			
+				ATM_TYP_1 = FF_2BODY[ij].ATM1TYP;
+				ATM_TYP_2 = FF_2BODY[jk].ATM1TYP;
+				ATM_TYP_3 = FF_2BODY[jk].ATM2TYP;
+				
+				cout << "	Will work with pair types: " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR1 << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR2 << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR3 << endl;
+				cout << "	and atom types:            " << ATM_TYP_1 << " " << ATM_TYP_2 << " " << ATM_TYP_3 << endl;
+				
+				Print_3B_Cheby(CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk);
+
+				cout << "	Now printing for n scans: " << FF_PLOTS.N_SCAN << endl;
+				
+				for(int j=0; j<FF_PLOTS.N_SCAN; j++)
+				{
+					IJ_DIST_3B.clear();
+					IK_DIST_3B.clear();
+					JK_DIST_3B.clear();
+					PES_VAL_3B.clear();	
+					
+					if(FF_PLOTS.PARENT_TYPE[j] == FF_PLOTS.TYPE_INDEX[i] )
+					{						
+						Print_3B_Cheby_Scan(CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk, FF_PLOTS, j);	
+						
+						// If 2+3b interactions requested, include them
+						if(FF_PLOTS.INCLUDE_2B)	
+						{
+							// Read in the printed 3b interactions
+							
+							SCAN_INFILE_3B.open(SCAN_FILE_3B.data());
+					
+							if(!SCAN_INFILE_3B.is_open())
+							{
+								cout << "ERROR-1: Cannot open file " << SCAN_FILE_3B << " for 2B addition." << endl;
+								exit(0);
+							}
+					
+							cout << "	Reading in 3B scans from file: "	<< SCAN_FILE_3B << endl;						
+					
+							while(!SCAN_INFILE_3B.eof())
+							{
+								SCAN_INFILE_3B >> TMP_DISTS.X;
+								SCAN_INFILE_3B >> TMP_DISTS.Y;
+								SCAN_INFILE_3B >> TMP_DISTS.Z;
+								SCAN_INFILE_3B >> TMP_PES;
+						
+								IJ_DIST_3B.push_back(TMP_DISTS.X);
+								IK_DIST_3B.push_back(TMP_DISTS.Y);
+								JK_DIST_3B.push_back(TMP_DISTS.Z);
+						
+								PES_VAL_3B.push_back(TMP_PES);						
+							}
+					
+							SCAN_INFILE_3B.close();
+
+							// Compute/save/read the corresponding 2b interactions -- IJ
+						
+							Print_Cheby(FF_2BODY, FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].X, PAIR_MAP_REVERSE[FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].X],"for_3b");						
+							cout << "		Reading in 2B scans from file (1): "	<< SCAN_FILE_2B << endl;					
+						
+							SCAN_INFILE_2B.open(SCAN_FILE_2B.data());
+
+							if(!SCAN_INFILE_2B.is_open())
+							{
+								cout << "ERROR-2: Cannot open file " << SCAN_FILE_2B << " for 2B addition." << endl;
+								exit(0);
+							}								
+							
+							while(!SCAN_INFILE_2B.eof())
+							{
+								SCAN_INFILE_2B >> TMP_DISTS.X;
+								SCAN_INFILE_2B >> TMP_PES;
+								
+								IJ_DIST_2B.push_back(TMP_DISTS.X);
+								PES_VAL_2B_IJ.push_back(TMP_PES);							
+							}
+							
+							SCAN_INFILE_2B.close();								
+							
+							// Compute/save/read the corresponding 2b interactions -- IK
+							
+							Print_Cheby(FF_2BODY,  FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Y, PAIR_MAP_REVERSE[FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Y],"for_3b");
+							
+							cout << "		Reading in 2B scans from file (2): "	<< SCAN_FILE_2B << endl;					
+						
+							SCAN_INFILE_2B.open(SCAN_FILE_2B.data());
+
+							if(!SCAN_INFILE_2B.is_open())
+							{
+								cout << "ERROR-2: Cannot open file " << SCAN_FILE_2B << " for 2B addition." << endl;
+								exit(0);
+							}								
+							
+							while(!SCAN_INFILE_2B.eof())
+							{
+								SCAN_INFILE_2B >> TMP_DISTS.X;
+								SCAN_INFILE_2B >> TMP_PES;
+								
+								IK_DIST_2B.push_back(TMP_DISTS.X);
+								PES_VAL_2B_IK.push_back(TMP_PES);							
+							}
+							
+							SCAN_INFILE_2B.close();								
+							
+							// Compute/save/read the corresponding 2b interactions -- JK
+
+							Print_Cheby(FF_2BODY,  FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Z, PAIR_MAP_REVERSE[FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Z],"for_3b");
+							
+							cout << "		Reading in 2B scans from file (3): "	<< SCAN_FILE_2B << endl;					
+						
+							SCAN_INFILE_2B.open(SCAN_FILE_2B.data());
+
+							if(!SCAN_INFILE_2B.is_open())
+							{
+								cout << "ERROR-2: Cannot open file " << SCAN_FILE_2B << " for 2B addition." << endl;
+								exit(0);
+							}								
+								
+							while(!SCAN_INFILE_2B.eof())
+							{
+								SCAN_INFILE_2B >> TMP_DISTS.X;
+								SCAN_INFILE_2B >> TMP_PES;
+								
+								JK_DIST_2B.push_back(TMP_DISTS.X);
+								PES_VAL_2B_JK.push_back(TMP_PES);						
+							}
+							
+							SCAN_INFILE_2B.close();		
+
+							// Now add the 2B values to the 3B PES
+					
+							for(int a=0; a<PES_VAL_3B.size(); a++)
+							{
+								for(int b=0; b<PES_VAL_2B_IJ.size(); b++)
+								{
+									if(IJ_DIST_2B[b] == IJ_DIST_3B[a])
+									{					
+										PES_VAL_3B[a] += PES_VAL_2B_IJ[b];
+										break;
+									}
+								}
+								for(int c=0; c<PES_VAL_2B_IK.size(); c++)
+								{
+									if(IK_DIST_2B[c] == IK_DIST_3B[a])
+									{							
+										PES_VAL_3B[a] += PES_VAL_2B_IJ[c];
+										break;
+									}
+								}	
+								for(int d=0; d<PES_VAL_2B_JK.size(); d++)
+								{
+									if(JK_DIST_2B[d] == JK_DIST_3B[a])
+									{							
+										PES_VAL_3B[a] += PES_VAL_2B_JK[d];
+										break;
+									}							
+								}												
+							}	
+
+							// Finally, re-print the 3B PES file
+					
+							SCAN_FILE_3B.append("+2b.dat");
+					
+							SCAN_OUTFILE_3B.open(SCAN_FILE_3B.data());
+					
+							if(!SCAN_OUTFILE_3B.is_open())
+							{
+								cout << "ERROR-3: Cannot open file " << SCAN_FILE_3B << " for 2B addition." << endl;
+								exit(0);
+							}					
+					
+							cout << "		...Printing 2B+3B scan to file: " << SCAN_FILE_3B << endl;
+
+							for(int a=0; a<PES_VAL_3B.size()-1; a++)
+								SCAN_OUTFILE_3B << IJ_DIST_3B[a] << " " << IK_DIST_3B[a] << " " << JK_DIST_3B[a] << " " << PES_VAL_3B[a] << endl;		
+					
+							SCAN_OUTFILE_3B.close();							
+							
+							
+						}
+					}	
+				}	
+				
+				scan_2b_idx++;				
+			}
+			else if(FF_PLOTS.NBODY[i] == 2)
+			{
+
+				cout << "	Will work with pair types: " << PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]] << endl;
+				cout << "	and atom types:            " << FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM1TYP << endl;
+					
+				Print_Cheby(FF_2BODY, FF_PLOTS.TYPE_INDEX[i], PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]],"");
+			}
+			else
+			{
+				cout << "Functionality not programmed yet." << endl;
+			}
+
+			cout << "	...Force field PES printing complete." << endl;
+		
+		idx_3b++;
+			
+		}
+		
+		exit(0);
+	}
+	
 
   	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
@@ -1125,6 +1458,8 @@ int main(int argc, char* argv[])
 	//
 	////////////////////////////////////////////////////////////  
 	////////////////////////////////////////////////////////////
+
+	STATISTICS.open("md_statistics.out");
 
 	cout << "BEGIN SIMULATION:" << endl;
 	
@@ -1217,6 +1552,10 @@ int main(int argc, char* argv[])
 				OUT_FORCEFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].X << endl;
 				OUT_FORCEFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Y << endl;
 				OUT_FORCEFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Z << endl;
+				
+				OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].X << endl;
+				OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Y << endl;
+				OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Z << endl;
 			}
 		}
 
@@ -1246,18 +1585,32 @@ int main(int argc, char* argv[])
 			if ( A == 0 ) 
 			{
 				printf("%8s %9s %15s %15s %15s %15s %15s", "Step", "Time", "Ktot/N", "Vtot/N", "Etot/N", "T", "P");
+				
+				STATISTICS << "# Step	Time	Ktot/N	Vtot/N	Etot/N	T	P";
 	  
 				if ( CONTROLS.USE_HOOVER_THRMOSTAT) 
+				{
 					printf(" %15s\n", "Econs/N");
+					STATISTICS << "	Econs/N" << endl;
+				}
 				else 
+				{
 					printf("\n");
+					STATISTICS << endl;
+				}
 			
 				printf("%8s %9s %15s %15s %15s %15s %15s", " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
-			
+				STATISTICS << "#	(fs)	(kcal/mol)	(kcal/mol)	(kcal/mol)	(K)	(GPa)";
 				if ( CONTROLS.USE_HOOVER_THRMOSTAT ) 
+				{
 					printf(" %15s\n", "(kcal/mol)");
+					STATISTICS << "	(kcal/mol)" << endl;
+				}
 				else 
+				{
 					printf("\n");
+					STATISTICS << endl;
+				}
 
 				std::cout.flush();
 			}			
@@ -1360,13 +1713,20 @@ int main(int argc, char* argv[])
 		
 		if ( (A+1) % CONTROLS.FREQ_ENER == 0 ) 
 		{
-			// Commented out b/c i need to define Ptot...
+			
 			printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.3f", A+1, (A+1)*CONTROLS.DELTA_T_FS, Ktot/SYSTEM.ATOMS,SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,SYSTEM.TEMPERATURE, SYSTEM.PRESSURE);
+			STATISTICS << A+1<< "	" << (A+1)*CONTROLS.DELTA_T_FS<< "	" << Ktot/SYSTEM.ATOMS<< "	" <<SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS<< "	" <<(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS<< "	" <<SYSTEM.TEMPERATURE<< "	" << SYSTEM.PRESSURE;
 
 			if ( CONTROLS.USE_HOOVER_THRMOSTAT ) 
+			{
 				printf("%15.7f\n", (Ktot + SYSTEM.TOT_POT_ENER + 0.5 * THERMOSTAT.VISCO * THERMOSTAT.VISCO * THERMOSTAT.CHRG + THERMOSTAT.N_DOF * Kb * CONTROLS.TEMPERATURE * THERMOSTAT.COORD) / SYSTEM.ATOMS);
+				STATISTICS << "	" << (Ktot + SYSTEM.TOT_POT_ENER + 0.5 * THERMOSTAT.VISCO * THERMOSTAT.VISCO * THERMOSTAT.CHRG + THERMOSTAT.N_DOF * Kb * CONTROLS.TEMPERATURE * THERMOSTAT.COORD) / SYSTEM.ATOMS << endl;
+			}
 			else 
+			{
 				printf("%15.7f\n\n", (Ktot + SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS);
+				STATISTICS << "	" << (Ktot + SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS << endl;
+			}
 
 			cout.flush();
 
@@ -1408,29 +1768,17 @@ int main(int argc, char* argv[])
 		{
 			GENFILE << setw(5) << right << SYSTEM.ATOMS << " S #Step " << A+1 << " Time " << (A+1) * CONTROLS.DELTA_T_FS << " (fs) Temp " << SYSTEM.TEMPERATURE << " (k)" << endl;
 
-			// This is the part that is particular to H2O... 
+			for(int i=0; i<NATMTYP; i++)				// Replaces GENFILE << "O H" << endl;
+				GENFILE << TMP_ATOMTYPE[i] << " ";
+			GENFILE << endl;
 			
-			GENFILE << "O H" << endl;
-			
-			int iele;
-
 			for (int a1=0; a1<SYSTEM.ATOMS; a1++) 
 			{
-				if      ( SYSTEM.ATOMTYPE[a1] == "O" ) 
-					iele = 1;
-				else if ( SYSTEM.ATOMTYPE[a1] == "H" ) 
-					iele = 2;
-				else    
-				{
-					cout << "Error: Option # FMTDFTB # only valid for H2O systems!" << endl; 
-					exit(1);
-				}
 				
-				GENFILE << right << setw(4) << a1+1 << " " << setw(2) << iele << " " 
+				GENFILE << right << setw(4) << a1+1 << " " << setw(2) << SYSTEM.ATOMTYPE_IDX[a1]+1 << " " 
 				       << fixed << setprecision(5) << setw(8) << SYSTEM.COORDS[a1].X << " "
 					   << fixed << setprecision(5) << setw(8) << SYSTEM.COORDS[a1].Y << " " 	
-					   << fixed << setprecision(5) << setw(8) << SYSTEM.COORDS[a1].Z << endl; 
-			   	
+					   << fixed << setprecision(5) << setw(8) << SYSTEM.COORDS[a1].Z << endl;    	
 			}
 		   
 			GENFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
@@ -1464,7 +1812,10 @@ int main(int argc, char* argv[])
 	cout << "END SIMULATION" << endl;
 
 	if(OUT_FORCEFILE.is_open())
+	{
 		OUT_FORCEFILE.close();
+		OUT_FORCELABL.close();
+	}
 	
 	// WHY ON EARTH WOULD WE NEED TO RE-COMPUTE MASS??? WHAT COULD POSSIBLY
 	// HAPPEN TO CAUSE THE MASS TO CHANGE DURING A CLOSED-SYSTEM MD SIMULATION?!?!?!?!?!?!??!?!?!?!?!??!?!?!
@@ -1501,18 +1852,24 @@ int main(int argc, char* argv[])
 	}
 	
 	fxyz.close();
+	STATISTICS.close();
   
 }       
 
 
-static void read_input(MD_JOB_CONTROL & CONTROLS) 				// UPDATED
+static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// UPDATED
 {
 	cout << endl << "Reading the simulation control input file..." << endl;
 	
 	bool   			FOUND_END = false;
 	string 			LINE;
-	string			TEMP_STR;
+	string			TEMP_STR,TEMP_STR_2;
+	double			TEMP_DOUB;
+	int				TEMP_INT;
+	int				TMP_NSCAN;
 	stringstream	LINE_PARSER;
+	int				ITEM_NO;
+	int				ADD_TO_NPLOTS = 0;
 	
 	
 	while (FOUND_END == false)
@@ -1527,6 +1884,248 @@ static void read_input(MD_JOB_CONTROL & CONTROLS) 				// UPDATED
 			cout << "   ...read complete." << endl << endl;
 			break;
 		}
+		
+		// Variables for printing out PES for a given parameter file
+		
+		else if(LINE.find("# PLOTPES #") != string::npos)
+		{
+			cout << "	# PLOTPES #: true... will only plot PES's" << endl;	
+			
+			getline(cin,LINE);
+			LINE_PARSER.str(LINE);
+			LINE_PARSER >> LINE;
+			
+			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+			{
+				CONTROLS.PLOT_PES = true;
+				
+				// Read in the number of PES plots to produce
+
+				LINE_PARSER >> FF_PLOTS.N_PLOTS;
+				
+				// Read in the parameter file
+				
+				LINE_PARSER >> CONTROLS.PARAM_FILE;				
+
+				LINE_PARSER.str("");
+				LINE_PARSER.clear();
+
+				// Read in the search string in a way that makes spacing not matter
+
+				for(int i=0; i<FF_PLOTS.N_PLOTS; i++)
+				{
+					TEMP_STR = "";
+					
+					getline(cin,LINE);
+					
+					LINE_PARSER.str("");
+					LINE_PARSER.clear();					
+					LINE_PARSER.str(LINE);	
+					
+					cout << endl << "	Processing line: " << LINE << endl;				
+					
+					for(int j=0; j<3; j++)
+					{
+						LINE_PARSER >> LINE;
+
+						if(j==0)
+						{
+							if(LINE=="PAIRTYPE")
+								FF_PLOTS.NBODY.push_back(2);
+							else if(LINE=="TRIPLETTYPE")
+								FF_PLOTS.NBODY.push_back(3);
+							else
+							{
+								cout << "ERROR: Unrecognized interaction type: " << LINE << endl;
+								cout << "       Allowed values are PAIRTYPE and TRIPLETTYPE" << endl;
+								exit(0);
+							}
+						}
+						 
+						TEMP_STR.append(LINE);
+						TEMP_STR.append(" ");							
+
+					}
+
+					FF_PLOTS.TYPE_INDEX.push_back(atoi(LINE.c_str()));
+					
+					FF_PLOTS.PES_TYPES.push_back(TEMP_STR);
+					
+					// Are we doing any 3b scans?
+					
+					LINE_PARSER >> LINE;
+
+					TMP_NSCAN = 0;
+
+					if (LINE=="scan"  || LINE=="SCAN"  || LINE=="Scan")
+					{
+						LINE_PARSER >> LINE;
+ 						
+						FF_PLOTS.N_SCAN += int(atof(LINE.c_str()));
+						TMP_NSCAN = int(atof(LINE.c_str()));
+						cout << "	Found " << TMP_NSCAN << " scans to run for FF type index " << i << endl;
+						
+					}
+					
+					LINE_PARSER >> TEMP_STR_2;
+
+					if(TEMP_STR_2 == "INCLUDE")
+					{
+						LINE_PARSER >> TEMP_STR_2;
+						
+						if(TEMP_STR_2 == "2B")
+						{
+							FF_PLOTS.INCLUDE_2B = true;
+
+							LINE_PARSER >> TEMP_STR_2;
+							TEMP_STR_2.append(" ");
+							LINE_PARSER >> LINE;
+							TEMP_STR_2.append(LINE);	// Should be "PAIRTYPE_PARAMS"
+							
+							if(TEMP_STR_2 != "PAIRTYPE PARAMS")
+							{
+								cout << "ERROR: 2B Addition specifications incorrect. Format is:" << endl;
+								cout << "PAIRTYPE PARAMS IJ <2b_type_index> IK <2b_type_index> JK <2b_type_index>" << endl;
+								exit(0);
+							}
+							
+							FF_PLOTS.SEARCH_STRING_2B.push_back(TEMP_STR_2);
+
+							XYZ_INT TMP_FF_TYPES;
+							
+							LINE_PARSER >> TEMP_STR_2  >> TEMP_STR_2;
+							TMP_FF_TYPES.X = int(atof(TEMP_STR_2.data()));
+							LINE_PARSER >> TEMP_STR_2  >> TEMP_STR_2;
+							TMP_FF_TYPES.Y = int(atof(TEMP_STR_2.data()));
+							LINE_PARSER >> TEMP_STR_2  >> TEMP_STR_2;
+							TMP_FF_TYPES.Z = int(atof(TEMP_STR_2.data()));
+							
+							FF_PLOTS.IJ_IK_JK_TYPE.push_back(TMP_FF_TYPES);	
+							
+							cout << "		...Adding contributions from ij, ik, and jk pair type indicies: " << TMP_FF_TYPES.X << " " << TMP_FF_TYPES.Y << " " << TMP_FF_TYPES.Z << endl;
+						}
+						else
+						{
+							cout << "ERROR: Expected \"2B\" " << endl;
+							exit(0);
+						}
+						
+						LINE_PARSER.str("");
+						LINE_PARSER.clear();
+					}	
+
+					LINE_PARSER.str("");
+					LINE_PARSER.clear();
+					
+					for(int j=0; j<TMP_NSCAN; j++)
+					{
+						cin >> LINE >> LINE; 
+
+						if(LINE == "ij" || LINE == "IJ")
+								TEMP_INT = 1;
+						else if(LINE == "ik" || LINE == "IK")
+							TEMP_INT = 2;
+						else if(LINE == "jk" || LINE == "JK")
+							TEMP_INT = 3;	
+						else
+						{
+							cout << "ERROR: Unrecognized pair type for fixing: " << LINE << endl;
+							cout << "       Allowed types are IJ, IK, an JK" << endl;
+							cout << "       (PES FF type index " << i << ", scan index " << j << endl;
+							exit(0);
+						}						
+						
+						cin >> TEMP_DOUB;
+						
+						FF_PLOTS.FIX_PAIR_1.push_back(TEMP_INT);
+						FF_PLOTS.FIX_VAL_1 .push_back(TEMP_DOUB);
+						
+						cin >> LINE; 
+
+						if(LINE == "ij" || LINE == "IJ")
+								TEMP_INT = 1;
+						else if(LINE == "ik" || LINE == "IK")
+							TEMP_INT = 2;
+						else if(LINE == "jk" || LINE == "JK")
+							TEMP_INT = 3;						
+						else
+						{
+							cout << "ERROR: Unrecognized pair type for fixing: " << LINE << endl;
+							cout << "       Allowed types are IJ, IK, an JK" << endl;
+							cout << "       (PES FF type index " << i << ", scan index " << j << endl;
+							exit(0);
+						}							
+						cin >> TEMP_DOUB;
+						
+						FF_PLOTS.FIX_PAIR_2.push_back(TEMP_INT);
+						FF_PLOTS.FIX_VAL_2 .push_back(TEMP_DOUB);						
+						
+						cin >> LINE >> LINE;
+						
+						if(LINE == "ij" || LINE == "IJ")
+								TEMP_INT = 1;
+						else if(LINE == "ik" || LINE == "IK")
+							TEMP_INT = 2;
+						else if(LINE == "jk" || LINE == "JK")
+							TEMP_INT = 3;	
+						else
+						{
+							cout << "ERROR: Unrecognized pair type for scanning: " << LINE << endl;
+							cout << "       Allowed types are IJ, IK, an JK" << endl;
+							cout << "       (PES FF type index " << i << ", scan index " << j << endl;
+							exit(0);
+						}	
+						
+						ITEM_NO = FF_PLOTS.FIX_PAIR_1.size() - 1;
+											
+						if(FF_PLOTS.FIX_PAIR_1[ITEM_NO] == FF_PLOTS.FIX_PAIR_2[ITEM_NO])	
+						{
+								cout << "ERROR: Fixed pair types must be unique." << endl;
+								cout << "       (PES FF type index " << i << ", scan index " << ITEM_NO << endl;
+								cout << "       (PES FF type index " << i << ", scan index " << ITEM_NO << endl;
+								cout << "      " << FF_PLOTS.FIX_PAIR_1[ITEM_NO] << endl;
+								cout << "      " << FF_PLOTS.FIX_PAIR_2[ITEM_NO] << endl;
+								cout << "      " << TEMP_INT << endl;								
+								exit(0);
+						}					
+						if((FF_PLOTS.FIX_PAIR_1[ITEM_NO] == TEMP_INT)	|| (FF_PLOTS.FIX_PAIR_2[ITEM_NO] == TEMP_INT))
+						{
+							cout << "ERROR: Fixed and scanned pair types cannot be the same." << endl;
+							cout << "       (PES FF type index " << i << ", scan index " << ITEM_NO << endl;
+							cout << "      " << FF_PLOTS.FIX_PAIR_1[ITEM_NO] << endl;
+							cout << "      " << FF_PLOTS.FIX_PAIR_2[ITEM_NO] << endl;
+							cout << "      " << TEMP_INT << endl;
+							exit(0);
+						}
+						
+						FF_PLOTS.SCAN_PAIR.push_back(TEMP_INT);
+						FF_PLOTS.PARENT_TYPE.push_back(FF_PLOTS.TYPE_INDEX[i]);
+						
+						cin.ignore();
+						
+						cout << "	Scanning triplet pair index " << TEMP_INT 
+							 << " and holding "                <<  FF_PLOTS.FIX_PAIR_1[j] 
+						     << " and "                        <<  FF_PLOTS.FIX_PAIR_2[j] 
+							 << " fixed at "                   << FF_PLOTS.FIX_VAL_1[j] 
+							 << " and "                        << FF_PLOTS.FIX_VAL_2[j] 
+							 << " respectively."               << endl;
+					}
+					
+
+
+				}
+
+				// Exit.. don't need anything else.
+				
+				FOUND_END = true;
+				cout << "   ...read complete." << endl << endl;
+				FF_PLOTS.N_PLOTS += ADD_TO_NPLOTS;
+				break;				
+			}
+			else
+				cout << "	# PLOTPES #: false" << endl;	
+		}	
+		
 		
 		// "General control variables"
 		

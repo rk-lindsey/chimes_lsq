@@ -61,14 +61,14 @@ void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double
 	}
 	else
 	{
-		cout << "ERROR: Undefined CHBTYPE: " << FF_2BODY.CHEBY_TYPE << endl;
+		cout << "ERROR: Undefined CHBTYPE: " << FF_2BODY.PRPR_NM << endl;
 		cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
 		exit(1);
 	}
 
 	if ( x < -1.0 ) // Why are we setting it as -1? shouldn't something else be done here instead? ...since we're outside the range of the fit??
 	{
-		cout << "Warning:  r < rmin" << endl; 
+		cout << "Warning: In 3B Cheby transformation, r < rmin " << FF_2BODY.CHEBY_TYPE << endl;
 		x = -1.0;
 	}
 	else if ( x > 1.0 ) // Added a warning...Do we need to turn off the interaction, because it's beyond rcut?
@@ -1755,7 +1755,7 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 
 							if ( x < -1.0 ) 
 							{
-								cout << "Warning:  r < rmin\n";
+								cout << "Warning: In 2B Cheby transformation, r < rmin " << TEMP_STR << endl;
 								x = -1.0;
 							}
 							if ( x > 1.0 ) 
@@ -1831,7 +1831,7 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 								if ( rpenalty > 0.0 ) 
 								{
 									Vpenalty = 0.0;
-									cout << "Warning: r < rmin " << rlen << " " << FF_2BODY[curr_pair_type_idx].S_MINIM << endl;
+									cout << "Warning: Adding penalty in 2B Cheby calc, r < rmin " << rlen << " " << FF_2BODY[curr_pair_type_idx].S_MINIM << " " << TEMP_STR << endl;
 									
 									SYSTEM.ACCEL[a2].X += 3.0 * rpenalty * rpenalty * penalty_scale * RAB.X / rlen;
 									SYSTEM.ACCEL[a2].Y += 3.0 * rpenalty * rpenalty * penalty_scale * RAB.Y / rlen;
@@ -1887,8 +1887,13 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 	 		
 	XYZ RAB_IJ;
 	XYZ RAB_IK;
-	XYZ RAB_JK; 	
-
+	XYZ RAB_JK;
+	
+	#if FORCECHECK == 1	
+		static vector<XYZ> FORCE_3B;	// Equivalent of f3b 	
+		static ofstream FILE_FORCE_3B;
+	#endif
+		
 	double rlen_ij,  rlen_ik,  rlen_jk;
 	double rlen3_ij, rlen3_ik, rlen3_jk;
 	
@@ -1933,6 +1938,17 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 		Tnd_ij  = new double [dim];
 		Tnd_ik  = new double [dim];
 		Tnd_jk  = new double [dim];
+		
+		#if FORCECHECK
+		
+			FORCE_3B.resize(SYSTEM.ATOMS);
+		
+			for( int i=0; i<SYSTEM.ATOMS; i++)
+				FORCE_3B[i].X = FORCE_3B[i].Y = FORCE_3B[i].Z = 0;
+		
+			FILE_FORCE_3B.open("3b_results.dat");
+		
+		#endif 
 		
 	}
 	
@@ -2129,7 +2145,43 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 									
 									SYSTEM.ACCEL[a3].X -= force_jk * RAB_JK.X;
 									SYSTEM.ACCEL[a3].Y -= force_jk * RAB_JK.Y;
-									SYSTEM.ACCEL[a3].Z -= force_jk * RAB_JK.Z;																	
+									SYSTEM.ACCEL[a3].Z -= force_jk * RAB_JK.Z;										
+									
+									#if FORCECHECK
+									
+										// Apply forces to ij pair
+									
+										FORCE_3B[a1].X += force_ij * RAB_IJ.X;
+										FORCE_3B[a1].Y += force_ij * RAB_IJ.Y;
+										FORCE_3B[a1].Z += force_ij * RAB_IJ.Z;
+									
+										FORCE_3B[a2].X -= force_ij * RAB_IJ.X;
+										FORCE_3B[a2].Y -= force_ij * RAB_IJ.Y;
+										FORCE_3B[a2].Z -= force_ij * RAB_IJ.Z;
+									
+										// Apply forces to ik pair
+									
+										FORCE_3B[a1].X += force_ik * RAB_IK.X;
+										FORCE_3B[a1].Y += force_ik * RAB_IK.Y;
+										FORCE_3B[a1].Z += force_ik * RAB_IK.Z;	
+									
+										FORCE_3B[a3].X -= force_ik * RAB_IK.X;
+										FORCE_3B[a3].Y -= force_ik * RAB_IK.Y;
+										FORCE_3B[a3].Z -= force_ik * RAB_IK.Z;	
+									
+										// Apply forces to jk pair
+									
+										FORCE_3B[a2].X += force_jk * RAB_JK.X;
+										FORCE_3B[a2].Y += force_jk * RAB_JK.Y;
+										FORCE_3B[a2].Z += force_jk * RAB_JK.Z;
+									
+										FORCE_3B[a3].X -= force_jk * RAB_JK.X;
+										FORCE_3B[a3].Y -= force_jk * RAB_JK.Y;
+										FORCE_3B[a3].Z -= force_jk * RAB_JK.Z;										
+									
+									#endif
+									
+																									
 								}	
 									
 							}
@@ -2144,6 +2196,19 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 			}
 		}
     }
+	
+	#if FORCECHECK
+	
+		FILE_FORCE_3B << "e3b = " << left << fixed << setprecision(16) << setw(16) << tempx << endl;
+	
+		for(int i=0; i<SYSTEM.ATOMS; i++)
+		{
+			FILE_FORCE_3B << left << fixed << setprecision(16) << setw(16) << FORCE_3B[i].X << endl;
+			FILE_FORCE_3B << left << fixed << setprecision(16) << setw(16) << FORCE_3B[i].Y << endl;
+			FILE_FORCE_3B << left << fixed << setprecision(16) << setw(16) << FORCE_3B[i].Z << endl;
+		}
+	
+	#endif 
 	
 	SYSTEM.TOT_POT_ENER += tempx;
 
@@ -2489,7 +2554,580 @@ static void ZCalcSR_Over(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_
 }
 
 
+////////////////////////////////////////////////////////////
+//
+// FUNCTIONS -- PRINTING OF POTENTIAL ENERGY SURFACE
+//
+////////////////////////////////////////////////////////////
+
+void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FILE_TAG)
+// Generating pair distance scans for the 2-b potential.
+// pair distances will range from smin to smax, incremented by sdelta
+{
+	
+//	string SCAN_FILE_2B;	// Declared as a global (external) variable in functions.h
+	
+	XYZ RVEC; 		// Replaces Rvec[3];
+	XYZ RAB; 		// Replaces  Rab[3];
+	double rlen;
+	double x;
+	double deriv;
+	int vstart;
+	static double *Tn, *Tnd;
+	static bool called_before = false;
+	
+	double xavg, xdiff,rpenalty;
+	double xmin; 
+	double xmax; 
+	double rlen3; 	
+	double coeff;			  
+	double fcut0; 
+	double fcut; 
+	double fcutderiv; 				
+	double tmp_doub; 
+	double Vpenalty;
+	
+	
+	string OUTFILE = "2b_Cheby_Pot-";
+	OUTFILE.append(PAIR_NAME);
+	
+	if(FILE_TAG != "")
+		OUTFILE.append("_for_3B");
+	
+	OUTFILE.append(".dat");
+	ofstream OUTFILE_2B_POT;
+	OUTFILE_2B_POT.open(OUTFILE.data());	
+	
+	SCAN_FILE_2B = OUTFILE;
+	
+
+	// A penalty function is added to the potential for r + penalty_dist < smin[ipair]
+	const double penalty_scale = 1.0e8;
+	const double penalty_dist = 0.01;
+
+	if ( ! called_before ) 
+	{
+		called_before = true;
+		int dim = 0;
+		
+		for ( int i = 0; i < FF_2BODY.size(); i++ ) 
+			if (FF_2BODY[i].SNUM > dim ) 
+				dim = FF_2BODY[i].SNUM;	 
+		
+		dim++;
+		Tn   = new double [dim];
+		Tnd  = new double [dim];
+	}
+  
+	// Main loop for Chebyshev terms:
+	
+	int n_ij = (FF_2BODY[ij].S_MAXIM - FF_2BODY[ij].S_MINIM)/FF_2BODY[ij].S_DELTA;
+	
+	double tempx;
+
+	for (int a=1; a<n_ij; a++)
+	{
+		tempx = 0;
+
+		rlen = FF_2BODY[ij].S_MINIM + a * FF_2BODY[ij].S_DELTA;
+
+		if(rlen > FF_2BODY[ij].S_MINIM and rlen < FF_2BODY[ij].S_MAXIM)
+		{
+			// Apply a penalty for distances less than smin - penalty_dist.
+			
+			rpenalty = 0.0;
+			
+			if ( rlen - penalty_dist < FF_2BODY[ij].S_MINIM ) 
+				rpenalty = FF_2BODY[ij].S_MINIM + penalty_dist - rlen;
+
+			// Chebyshev polynomials are only defined on the range [-1,1], so transorm the pair distance
+			// in a way that allows it to fall along that range. Options are:
+			//
+			// x = 1/pair_dist				// Inverse r, 
+			// x = exp(pair_dist/lambda)	// Morse-type
+			// x = pair_dist				// default type
+			// 
+			// All types are normalized by s_min to s_max range to fall along [-1,1]
+			
+			if ( FF_2BODY[ij].CHEBY_TYPE == "INVRSE_R" ) 
+			{
+				cout << "Error in Print_2B_Cheby: Functionality not yet programmed." << endl;
+				exit(0);
+												  // pair distances in r^-1 space, normalized to fit over [-1,1]
+			} 
+			else if ( FF_2BODY[ij].CHEBY_TYPE == "MORSE" ) 
+			{
+				xmin  = exp(-FF_2BODY[ij].S_MAXIM/FF_2BODY[ij].LAMBDA); 
+				xmax  = exp(-FF_2BODY[ij].S_MINIM/FF_2BODY[ij].LAMBDA); 
+				xavg  = 0.5 * (xmin + xmax);												// midpoint of possible pair distances in morse space
+				xdiff = 0.5 * (xmax - xmin);												// width of possible pair distances in morse space
+				x = (exp(-rlen/FF_2BODY[ij].LAMBDA)-xavg)/xdiff;							// pair distances in morse space, normalized to fit over [-1,1]
+			}
+			else if (FF_2BODY[ij].CHEBY_TYPE == "DEFAULT")
+			{
+				cout << "Error in Print_2B_Cheby: Functionality not yet programmed." << endl;
+				exit(0);
+												 // pair distances, normalized to fit over [-1,1]
+			}
+			else
+			{
+				cout << "ERROR: Undefined CHBTYPE: " << FF_2BODY[ij].CHEBY_TYPE << endl;
+				cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
+				cout << "       Check the parameter input file." << endl;
+				exit(1);
+			}
+
+			// Make sure our newly transformed distance falls between the bound of -1 to 1 allowed to Cheby polynomials
+
+			if ( x < -1.0 ) 
+			{
+				cout << "Warning:  r < rmin\n";
+				x = -1.0;
+			}
+			if ( x > 1.0 ) 
+			{
+				x = 1.0;
+			}
+			
+			
+			// Generate Chebyshev polynomials by recursion. 
+			// 
+			// What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
+			// We need to calculate the derivative of these polynomials.
+			// Derivatives are defined through use of Cheby polynomials of the 2nd kind "U_n(x)", as:
+			//
+			// d/dx[ T_n(x) = n * U_n-1(x)] 
+			// 
+			// So we need to first set up the 1st-kind polynomials ("Tn[]")
+			// Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
+		  
+			// First two 1st-kind Chebys:
+		  
+			Tn[0] = 1.0;
+			Tn[1] = x;
+			
+			// Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
+		  
+			Tnd[0] = 1.0;
+			Tnd[1] = 2.0 * x;
+			
+			// Use recursion to set up the higher n-value Tn and Tnd's
+		  
+			for ( int i = 2; i <= FF_2BODY[ij].SNUM; i++ ) 
+			{
+				Tn[i] =  2.0 * x * Tn[i-1] - Tn[i-2];
+				Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
+			}
+			
+			// Now multiply by n to convert Tnd's to actual derivatives of Tn
+
+			for ( int i = FF_2BODY[ij].SNUM; i >= 1; i-- ) 
+				Tnd[i] = i * Tnd[i-1];
+
+			Tnd[0] = 0.0;
+			
+			
+			// Now compute the force/potential
+
+			if ( FF_2BODY[ij].CHEBY_TYPE == "MORSE" ) 
+			{
+				fcut0 = (1.0 - rlen/FF_2BODY[ij].S_MAXIM);
+				fcut = fcut0 * fcut0 * fcut0;
+				fcutderiv = -3.0 * fcut0 * fcut0 / FF_2BODY[ij].S_MAXIM;
+				
+				
+				for ( int i = 0; i < FF_2BODY[ij].SNUM; i++ ) 
+				{
+					coeff                = FF_2BODY[ij].PARAMS[i]; // This is the Cheby FF paramfor the given power
+					tempx += coeff * fcut * Tn[i+1];
+				}
+				// Add penalty for very short distances, where the fit FF may be unphysical (preserve conservation of E).
+
+				if ( rpenalty > 0.0 ) 
+				{
+					Vpenalty = 0.0;
+					Vpenalty = rpenalty * rpenalty * rpenalty * penalty_scale;
+					tempx += Vpenalty;
+				}
+				
+				OUTFILE_2B_POT << rlen << " " << tempx << endl;
+			}
+			else 
+			{
+				cout << "Error in Print_2B_Cheby: Functionality not yet programmed." << endl;
+				exit(0);
+				rlen3 = rlen * rlen * rlen;
+			}							
+		} 
+
+	}
+	
+	OUTFILE_2B_POT.close();
+	
+	return;
+}  
+
+void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk)
+// Generating 3d heatmaps to draw a 3-b potential.
+// pair distances will range from smin to smax, incremented by sdelta
+{
+//	string FULL_FILE_3B;	// Declared as a global (external) variable in functions.h
+	
+	static double *Tn_ij,  *Tn_ik,  *Tn_jk;
+	static double *Tnd_ij, *Tnd_ik, *Tnd_jk;
+	static bool   called_before = false;
+	double        xdiff_ij, xdiff_ik, xdiff_jk;
+	double        tempx;
+
+	double fcut0, fcut0_ij, fcut0_ik, fcut0_jk; 
+	double fcut,  fcut_ij,  fcut_ik,  fcut_jk; 	
+	static string TEMP_STR;
+
+	static int curr_triple_type_index;
+	static int pow_ij, pow_ik, pow_jk;
+
+	static string PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK;
+
+	double RLEN_IJ;
+	double RLEN_IK;
+	double RLEN_JK;
+	
+	
+	
+	PAIR_TYPE_IJ = ATM_TYP_1;
+	PAIR_TYPE_IK = ATM_TYP_1;
+	PAIR_TYPE_JK = ATM_TYP_2;
+
+	PAIR_TYPE_IJ.append(ATM_TYP_2);
+	PAIR_TYPE_IK.append(ATM_TYP_3);
+	PAIR_TYPE_JK.append(ATM_TYP_3);
+	
+	// Determine the FF type for the given triplet
+
+	TEMP_STR =      FF_2BODY[ij].PRPR_NM;
+	TEMP_STR.append(FF_2BODY[ik].PRPR_NM);	
+	TEMP_STR.append(FF_2BODY[jk].PRPR_NM);	
+
+	curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
+	
+	string OUTFILE = "3b_Cheby_Pot-";
+	OUTFILE.append(TEMP_STR);
+	OUTFILE.append(".dat");
+	ofstream OUTFILE_3B_POT;
+	OUTFILE_3B_POT.open(OUTFILE.data());
+	
+	FULL_FILE_3B = OUTFILE;
+	
+	if ( ! called_before ) 
+	{
+		called_before = true;
+		int dim = 0;
+
+		for ( int i = 0; i < FF_2BODY.size(); i++ ) 
+			if (FF_2BODY[i].SNUM_3B_CHEBY > dim ) 
+				dim = FF_2BODY[i].SNUM_3B_CHEBY;	
+		dim++;
+
+		Tn_ij   = new double [dim];
+		Tn_ik   = new double [dim];
+		Tn_jk   = new double [dim];
+
+		Tnd_ij  = new double [dim];
+		Tnd_ik  = new double [dim];
+		Tnd_jk  = new double [dim];
+	
+	}
+
+	tempx = 0;
+
+	int n_ij = (FF_2BODY[ij].S_MAXIM - FF_2BODY[ij].S_MINIM)/FF_2BODY[ij].S_DELTA;
+	int n_ik = (FF_2BODY[ik].S_MAXIM - FF_2BODY[ik].S_MINIM)/FF_2BODY[ik].S_DELTA;
+	int n_jk = (FF_2BODY[jk].S_MAXIM - FF_2BODY[jk].S_MINIM)/FF_2BODY[jk].S_DELTA;
 
 
- 
+	int outer, middle, inner;
+	
+	outer  = n_ij;
+	middle = n_ik;
+	inner  = n_jk;
+	
+
+	for (int a=0; a<outer; a++)
+	{	
+		for (int b=0; b<middle; b++)
+		{
+			for (int c=0; c<inner; c++)
+			{
+
+				RLEN_IJ = FF_2BODY[ij].S_MINIM + a * FF_2BODY[ij].S_DELTA;
+				RLEN_IK = FF_2BODY[ik].S_MINIM + b * FF_2BODY[ik].S_DELTA;
+				RLEN_JK = FF_2BODY[jk].S_MINIM + c * FF_2BODY[jk].S_DELTA;
+
+			
+				SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij);
+			
+				SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik);
+			
+				SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk);		
+			
+				if ( FF_2BODY[ij].CHEBY_TYPE == "MORSE" )
+				{	
+
+					fcut0_ij     = (1.0 - RLEN_IJ/FF_2BODY[ij].S_MAXIM);
+					fcut_ij      = fcut0_ij * fcut0_ij * fcut0_ij;
+				
+					fcut0_ik     = (1.0 - RLEN_IK/FF_2BODY[ik].S_MAXIM);
+					fcut_ik      = fcut0_ik * fcut0_ik * fcut0_ik;	
+				
+					fcut0_jk     = (1.0 - RLEN_JK/FF_2BODY[ik].S_MAXIM);
+					fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;	
+				
+
+				
+					// Error check: Certain triplets are impossible...
+				
+					if(curr_triple_type_index < 0)
+					{
+						cout << "ERROR: Impossible atom triplet found: " << TEMP_STR << endl;
+						cout << "       Check the parameter file." << endl;
+						exit(0);
+					}
+				
+					// Now compute the forces for each set of allowed powers for pairs ij, ik, and jk		
+					// Keep in mind that the order in which allowed powers are stored may not match the
+					// ordering of pairs resulting from the present atom triplet. Thus, we need to order
+					// the stored powers properly before applying the FF.
+					 
+					tempx = 0;
+				
+					for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
+					{
+						SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
+					
+						tempx += FF_3BODY[curr_triple_type_index].PARAMS[i] * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];	
+					}
+					
+					#if PESFORMAT == MATLAB
+						OUTFILE_3B_POT_MATL_X  << 	RLEN_IJ << " ";
+						OUTFILE_3B_POT_MATL_Y  << 	RLEN_IK << " ";
+						OUTFILE_3B_POT_MATL_Z  << 	RLEN_JK << " ";
+						OUTFILE_3B_POT_MATL_VAL<< 	tempx   << " ";	
+						
+						if(c > inner-1)
+						{
+							OUTFILE_3B_POT_MATL_X  << 	RLEN_IJ << ", ";
+							OUTFILE_3B_POT_MATL_Y  << 	RLEN_IK << ", ";
+							OUTFILE_3B_POT_MATL_Z  << 	RLEN_JK << ", ";
+							OUTFILE_3B_POT_MATL_VAL<< 	tempx   << ", ";	
+						}
+					#else
+						OUTFILE_3B_POT << 	RLEN_IJ << " " << RLEN_IK << " " << RLEN_JK << " " << tempx << endl;
+					#endif
+					
+					
+				}
+				else
+				{
+					cout << "ERROR: Functionality not complete for non-Morse-type 3B Chebyshev potentials." << endl;
+					exit(0);
+				}			
+			}
+			
+			#if PESFORMAT == GNUPLOT
+				OUTFILE_3B_POT << endl;
+			#endif				
+		}
+	}
+
+	OUTFILE_3B_POT.close();
+}
+
+void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan)
+// Draws scans of 3-b potential when a single pair distance is perturbed.
+// Not perturbed distances are fixed at a user-specified value
+// pair distances will range from smin to smax, incremented by sdelta
+{
+	
+	//string SCAN_FILE_3B;	// Declared as a global (external) variable in functions.h
+		
+	static double *Tn_ij,  *Tn_ik,  *Tn_jk;
+	static double *Tnd_ij, *Tnd_ik, *Tnd_jk;
+	static bool   called_before = false;
+	double        xdiff_ij, xdiff_ik, xdiff_jk;
+	double        tempx;
+
+	double fcut0, fcut0_ij, fcut0_ik, fcut0_jk; 
+	double fcut,  fcut_ij,  fcut_ik,  fcut_jk; 	
+	static string TEMP_STR;
+
+	static int curr_triple_type_index;
+	static int pow_ij, pow_ik, pow_jk;
+
+	static string PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK;
+
+	double RLEN_IJ;
+	double RLEN_IK;
+	double RLEN_JK;
+
+	PAIR_TYPE_IJ = ATM_TYP_1;
+	PAIR_TYPE_IK = ATM_TYP_1;
+	PAIR_TYPE_JK = ATM_TYP_2;
+
+	PAIR_TYPE_IJ.append(ATM_TYP_2);
+	PAIR_TYPE_IK.append(ATM_TYP_3);
+	PAIR_TYPE_JK.append(ATM_TYP_3);
+	
+	// Determine the FF type for the given triplet
+
+	TEMP_STR =      FF_2BODY[ij].PRPR_NM;
+	TEMP_STR.append(FF_2BODY[ik].PRPR_NM);	
+	TEMP_STR.append(FF_2BODY[jk].PRPR_NM);	
+
+	curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
+	
+	string OUTFILE = "3b_Cheby_Pot-";
+	OUTFILE.append(TEMP_STR);
+	OUTFILE.append("_scan-");
+		
+	if      (FF_PLOTS.SCAN_PAIR[scan] == 1)
+		OUTFILE.append(PAIR_TYPE_IJ);
+	else if (FF_PLOTS.SCAN_PAIR[scan] == 2)
+		OUTFILE.append(PAIR_TYPE_IK);
+	else
+		OUTFILE.append(PAIR_TYPE_JK);
+
+	OUTFILE.append(".dat");
+	ofstream OUTFILE_3B_POT;
+	OUTFILE_3B_POT.open(OUTFILE.data());
+	
+	SCAN_FILE_3B = OUTFILE;
+	
+//	cout << "******** WRITING TO FILE:  " << SCAN_FILE_3B << endl;
+
+	if ( ! called_before ) 
+	{
+		called_before = true;
+		int dim = 0;
+
+		for ( int i = 0; i < FF_2BODY.size(); i++ ) 
+			if (FF_2BODY[i].SNUM_3B_CHEBY > dim ) 
+				dim = FF_2BODY[i].SNUM_3B_CHEBY;	
+		dim++;
+
+		Tn_ij   = new double [dim];
+		Tn_ik   = new double [dim];
+		Tn_jk   = new double [dim];
+
+		Tnd_ij  = new double [dim];
+		Tnd_ik  = new double [dim];
+		Tnd_jk  = new double [dim];
+	
+	}
+
+	tempx = 0;
+	
+	// Set the fixed distances
+	
+	if      (FF_PLOTS.FIX_PAIR_1[scan] == 1)
+		RLEN_IJ = FF_PLOTS.FIX_VAL_1[scan];
+	
+	else if (FF_PLOTS.FIX_PAIR_1[scan] == 2)
+		RLEN_IK = FF_PLOTS.FIX_VAL_1[scan];
+	
+	else
+		RLEN_JK = FF_PLOTS.FIX_VAL_1[scan];
+	
+	
+	if      (FF_PLOTS.FIX_PAIR_2[scan] == 1)
+		RLEN_IJ = FF_PLOTS.FIX_VAL_2[scan];
+	
+	else if (FF_PLOTS.FIX_PAIR_2[scan] == 2)
+		RLEN_IK = FF_PLOTS.FIX_VAL_2[scan];
+	
+	else
+		RLEN_JK = FF_PLOTS.FIX_VAL_2[scan];	
+	
+	// Set the scan pair
+	
+	int n;
+	
+	if      (FF_PLOTS.SCAN_PAIR[scan] == 1)
+		n = (FF_2BODY[ij].S_MAXIM - FF_2BODY[ij].S_MINIM)/FF_2BODY[ij].S_DELTA;
+	
+	else if (FF_PLOTS.SCAN_PAIR[scan] == 2)
+		n = (FF_2BODY[ik].S_MAXIM - FF_2BODY[ik].S_MINIM)/FF_2BODY[ik].S_DELTA;
+	
+	else
+		n = (FF_2BODY[jk].S_MAXIM - FF_2BODY[jk].S_MINIM)/FF_2BODY[jk].S_DELTA;
+	
+	// Run the scan	
+
+	for (int a=1; a<n; a++)
+	{
+
+		if      (FF_PLOTS.SCAN_PAIR[scan] == 1)
+			RLEN_IJ = FF_2BODY[ij].S_MINIM + a * FF_2BODY[ij].S_DELTA;
+		else if (FF_PLOTS.SCAN_PAIR[scan] == 2)
+			RLEN_IK = FF_2BODY[ik].S_MINIM + a * FF_2BODY[ik].S_DELTA;
+		else
+			RLEN_JK = FF_2BODY[jk].S_MINIM + a * FF_2BODY[jk].S_DELTA;		
+
+			
+		SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij);
+	
+		SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik);
+	
+		SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk);		
+	
+		if ( FF_2BODY[ij].CHEBY_TYPE == "MORSE" )
+		{	
+
+			fcut0_ij     = (1.0 - RLEN_IJ/FF_2BODY[ij].S_MAXIM);
+			fcut_ij      = fcut0_ij * fcut0_ij * fcut0_ij;
+		
+			fcut0_ik     = (1.0 - RLEN_IK/FF_2BODY[ik].S_MAXIM);
+			fcut_ik      = fcut0_ik * fcut0_ik * fcut0_ik;	
+		
+			fcut0_jk     = (1.0 - RLEN_JK/FF_2BODY[ik].S_MAXIM);
+			fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;	
+		
+
+		
+			// Error check: Certain triplets are impossible...
+		
+			if(curr_triple_type_index < 0)
+			{
+				cout << "ERROR: Impossible atom triplet found: " << TEMP_STR << endl;
+				cout << "       Check the parameter file." << endl;
+				exit(0);
+			}
+		
+			// Now compute the forces for each set of allowed powers for pairs ij, ik, and jk		
+			// Keep in mind that the order in which allowed powers are stored may not match the
+			// ordering of pairs resulting from the present atom triplet. Thus, we need to order
+			// the stored powers properly before applying the FF.
+			 
+			tempx = 0;
+			
+			// If requested, include the 2-body energy contributions
+		
+			for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
+			{
+				SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
+			
+				tempx += FF_3BODY[curr_triple_type_index].PARAMS[i] * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];	
+			}
+			
+			OUTFILE_3B_POT << 	RLEN_IJ << " " << RLEN_IK << " " << RLEN_JK << " " << tempx << endl;
+		}
+		else
+		{
+			cout << "ERROR: Functionality not complete for non-Morse-type 3B Chebyshev potentials." << endl;
+			exit(0);
+		}			
+			
+	}
+	
+	OUTFILE_3B_POT.close();
+}
  

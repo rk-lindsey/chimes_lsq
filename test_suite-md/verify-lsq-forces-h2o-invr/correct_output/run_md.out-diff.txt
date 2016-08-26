@@ -1,0 +1,6 @@
+36,37c36,37
+< 	Initial velocity center of mass: (   -0.0987,     0.0199,     0.1508) 
+< 	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
+---
+> 	Initial velocity center of mass: (   -0.0101,    -0.0880,    -0.0983) 
+> 	Final   velocity center of mass: (   -0.0000,     0.0000,     0.0000) 

@@ -1,8 +1,4 @@
 
-cd ../src
-make house_md;  cp house_md  ../test_suite-md/;  make clean_md;  make realclean_md;
-make house_lsq; cp house_lsq ../test_suite-lsq/; make clean_lsq; make realclean_lsq;
-cd ../test_suite-md
 
 ########################################
 # Define tests within the test suite
@@ -36,6 +32,8 @@ echo " "
 echo "SETTING UP FOR MD CODE..."
 echo " "
 
+ALL_PASS=true
+
 for i in "${MD_TESTS[@]}"
 do
 
@@ -63,7 +61,6 @@ cd ../test_suite-lsq
 ./generate_test_suite.sh
 cd ../test_suite-md
 
-
 echo " "
 echo " ...Now running the force comparison tests... "
 for i in "${LSQ_TESTS[@]}"
@@ -71,6 +68,8 @@ do
 
 	echo " "
 	echo "Running $i test..."
+
+	PASS=true
 	
 	cd ${TAG}${i}
 	

@@ -2,7 +2,7 @@
 #       If you want to use other versions, you'll probably need to modify the inputs that
 #       are sent to the script (way down below)
 
-PATH_TO_LSQ_PY_CODE="/g/g17/rlindsey/TEST_LATEST_COPY/generalized-branch/src/lsq-new-md-fmt.py" # Path to the python code.
+PATH_TO_LSQ_PY_CODE="/g/g17/rlindsey/TOBECOMMOTED_VERSION/src/lsq-new-md-fmt.py" # Path to the python code.
 
 
 ###############################################################
@@ -33,7 +33,7 @@ do
 	cd $i
 	
 	../house_lsq < fm_setup.in > fm_setup.out
-	
+ 	cp A.txt b.txt params.header fm_setup.out ff_groups.map correct_output	
 	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
 	
 	cd ..
@@ -63,7 +63,7 @@ do
 	for j in params.txt force.txt
 	do
 	
-		if [ "j" == params.txt ]; then
+		if [ "$j" == params.txt ]; then
 			j=params.txt-tailed
 			tail -n+2 params.txt > $j
 			tail -n+2 ../correct_output/params.txt > ../correct_output/$j
