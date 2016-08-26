@@ -89,12 +89,3 @@ travis:
 clean_travis:
 	make clean -C ../contrib/Travis
 	
-##################################
-# MAKE molanal analyzer
-##################################		
-
-molanal:
-	make -C ../contrib/molanal
-
-clean_molanal:
-	make clean -C ../contrib/molanal
