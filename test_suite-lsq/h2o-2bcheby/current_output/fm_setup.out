@@ -5,7 +5,6 @@ Reading input file...
 	# NFRAMES #: 99
 	# NLAYERS #: 1
 	# FITCOUL #: true
-	# CNSCOUL #: true
 	# FITPOVR #: true
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 8
@@ -13,8 +12,8 @@ Reading input file...
 	# CHBTYPE #: MORSE
 	# NATMTYP #: 2
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
- 	1              O              0              15.9994        
- 	2              H              0              1.0079         
+ 	1              O              -		15.9994        
+ 	2              H              +		1.0079         
 
 	The following unique pair types have been identified:
 		0  O O
@@ -28,9 +27,12 @@ Reading input file...
 	0               O               O               50              1.0165          -0.0657         5.0451          -3.6141         
 	1               H               H               0               0               0               0               0               
 	2               O               H               50              1.0165          -0.0657         5.0451          -3.6141         
-Special feature: 
- Will subtract contributions stemming from user-specified 
- charges before generating A-matrix
+
+	Attempting to read 2 charge constraints...:
+		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
+		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
+
+	Note: Will use cubic scaling of: 1
 
 ...input file read successful: 
 
@@ -51,19 +53,6 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix population complete: 
 
 Printing matricies...
-
-*********************************************************************************
-*********************************************************************************
-
-WARNING: CHARGE CONSERVATION HAS NOT BEEN GENERALIZED. 
-         RESULTS WILL BE INCORRECT IF: 
-              1. Atom type other than O and H are used
-              2. Atoms are given in order O and H in the input file, respectively
-
-*********************************************************************************
-*********************************************************************************
-
-checks: 1 1
 	Minimum distances between atoms: (Angstr.)
 		0	O O	2.039
 		1	H H	1.082

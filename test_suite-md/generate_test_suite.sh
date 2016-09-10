@@ -34,6 +34,11 @@ echo " "
 
 ALL_PASS=true
 
+cd ../src
+make house_md
+cp house_md ../test_suite-md
+cd ../test_suite-md
+
 for i in "${MD_TESTS[@]}"
 do
 

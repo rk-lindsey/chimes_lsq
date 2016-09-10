@@ -13,7 +13,7 @@ Reading the simulation control input file...
 	# PRESSUR #: ANALYTICAL
 	# FRQDFTB #: 20
 	# FRQENER #: 10
-	# PRNTFRC #: true
+	# PRNTFRC #: true ...and will be printed every 1 frames.
    ...read complete.
 
 Setting up the data objects...
@@ -21,12 +21,16 @@ Setting up the data objects...
 
 Reading initial coordinates and forces...
 Opening force.txt to read forces for comparison
+	...Read the following coordinate file extension: xyzf
+	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+	...Ignoring last three fields of atom info lines in xyzf file... 
+	...will read from specified force file instead.
    ...read complete
 
 Reading atom info from parameter file...
 	Read 2 atom types:
-		0     O , q (e):  0.000, mass (amu):  15.9994
-		1     H , q (e):  0.000, mass (amu):   1.0079
+		0     O , q (e): NEGATIVE, mass (amu):  15.9994
+		1     H , q (e): POSITIVE, mass (amu):   1.0079
    ...read complete
 
 Setting up thermostats/velocities...
@@ -49,11 +53,6 @@ Reading force field parameters...
 		...Use fit overbonding param?   true
 		...Use 3-body Cheby params?     false
 	...Read FF controls...
-
-	********************* WARNING ********************* 
-	Use FIT_COUL option only supported for H2O systems!
-	********************* WARNING ********************* 
-
 Attempting to read pairtype...
 	...Read FF interaction type...
 	...Read general FF params...
@@ -104,6 +103,9 @@ Attempting to read pairtype...
 			   -100.0000
 			   2 -306.8038
 			   -100.0000
+		Re-setting individual atom charges based on pair charges :
+		0     O , q (e): -0.263, mass (amu):  15.9994
+		1     H , q (e):  0.132, mass (amu):   1.0079
 	...Read 2-body FF params...
 	...Read ReaxFF overbonding FF params...
 	Reading  4 pairs for mapping
@@ -497,4 +499,4 @@ Ewald parameters:
 	Number of Ewald K-vectors = 894
 	K-space accuracy estimate = 0.00000006626103
 
-RMS force error =  6.880051e-06
+RMS force error =  7.682385e-06

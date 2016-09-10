@@ -5,7 +5,6 @@ Reading input file...
 	# NFRAMES #: 54
 	# NLAYERS #: 1
 	# FITCOUL #: false
-	# CNSCOUL #: false
 	# FITPOVR #: false
 	# PAIRTYP #: DFTBPOLY ....NOTE: Forces reported in atomic units.
 	             Will use 2-body order: 8
@@ -38,6 +37,8 @@ Reading input file...
 	7               H               O               0               4.5             0               0                0               
 	8               H               N               0               4.5             0               0                0               
 	9               O               N               0               4.5             0               0                0               
+	Note: Will use cubic scaling of: 1
+
 ...input file read successful: 
 
 The number of two-body non-coulomb parameters is: 80
@@ -62,7 +63,6 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix population complete: 
 
 Printing matricies...
-checks: 0 0
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.244
 		1	H H	1.019

@@ -13,7 +13,7 @@ Reading the simulation control input file...
 	# PRESSUR #: ANALYTICAL
 	# FRQDFTB #: 20
 	# FRQENER #: 10
-	# PRNTFRC #: true
+	# PRNTFRC #: true ...and will be printed every 1 frames.
    ...read complete.
 
 Setting up the data objects...
@@ -21,6 +21,10 @@ Setting up the data objects...
 
 Reading initial coordinates and forces...
 Opening force.txt to read forces for comparison
+	...Read the following coordinate file extension: xyzf
+	...Read box dimensions: 13.5192 13.5192 13.5192
+	...Ignoring last three fields of atom info lines in xyzf file... 
+	...will read from specified force file instead.
    ...read complete
 
 Reading atom info from parameter file...

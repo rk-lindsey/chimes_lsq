@@ -1,22 +1,26 @@
 # NOTE: The path below needs to point to the "lsq-new-md-fmt.py" version of the lsq code.
 #       If you want to use other versions, you'll probably need to modify the inputs that
-#       are sent to the script (way down below)
+#       are sent to the script (down below)
+
+
+###############################################################
+#
+# Determine the location of necessary files
+#
+###############################################################
+
+TESTSU_BASE=`pwd -P` #`dirname $0`
+SOURCE_BASE="${TESTSU_BASE}/../src/"
 
 # Run the job with the new version of the python code (Compatible with non-generalized md code)
 #
-PATH_TO_LSQ_PY_CODE="/g/g17/rlindsey/TOBECOMMOTED_VERSION/src/lsq-new-md-fmt.py" # Path to the python code.
+PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq-new-md-fmt.py" # Path to the python code.
 RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map TEST_SUITE_RUN"
 
 # Run the job with the old version of the python code (Compatible with non-generalized md code)
 #
-#PATH_TO_LSQ_PY_CODE="/Users/lindsey11/Desktop/FORCE_MATCHING_VERSIONS/CURRENT_WORKING/current-merged-lsq-md/src/lsq.py" # Path to the python code.
+#PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq.py" # Path to the python code.
 #RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header TEST_SUITE_RUN"
-
-
-
-SET_PASSED=true
-SVD_PASSED=true
-ALL_PASSED=true
 
 ###############################################################
 #
@@ -37,6 +41,10 @@ cd ../test_suite-lsq
 echo ""
 echo "VALIDATING FOR SPLINES_LS..."
 
+SET_PASSED=true
+SVD_PASSED=true
+ALL_PASSED=true
+
 for i in h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby
 do
 
@@ -46,28 +54,30 @@ do
 	PASS=true
 
 	cd $i
-	rm -rf diff-*
+	rm -rf *diff*
 	../house_lsq < fm_setup.in > fm_setup.out
 	
 	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
 
 	for j in A.txt b.txt params.header fm_setup.out
 	do
-		diff correct_output/$j current_output/$j > diff-$j.out
+		
+		perl ../../contrib/compare/compare.pl correct_output/$j current_output/$j > diff-$j.out
 	
 		NO_DIFF_LINES=`cat diff-$j.out | wc -l`
 	
 		if [ $NO_DIFF_LINES -gt 0 ] ; then
 			echo " "
-			echo "Differences found in $j files:"
+			echo "Differences found in $j files... "
 			echo " "
-			
+#		OLD WAY: 			
 			if [ "$j" = A.txt ] ; then
 				echo "	...differences are in file A.txt. Examine file by hand "
 				echo "     to determine whether differences are within reasonable"
-				echo "     amt (i.e. < 10**-10) "
+				echo "     amt (i.e. < 10**-10)"
+				echo "     Otherwise, see the *.diff file in ${i}/correct_output/"
 			else
-				cat diff-$j.out
+				diff correct_output/$j current_output/$j
 			fi
 			echo " "
 			PASS=false
@@ -86,7 +96,6 @@ do
 	cd ..
 done
 
-
 ###############################################################
 #
 #  Run the tests for the SVD script... 
@@ -95,7 +104,7 @@ done
 
 echo "VALIDATING FOR SVD SCRIPT..."
 
-for i in  h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby 
+for i in h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby 
 do
 
 	echo " "
@@ -144,7 +153,6 @@ do
 				
 				paste ../correct_output/test_suite_params.txt test_suite_params.txt > check_tol.dat
 				awk 'BEGIN{tol=10^-9;any=0}{val=$2-$4;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat  | tee tol_status.dat
-				echo "	Check file ../diff-$j.out for any other (non-parameter) differences."
 				rm -f check_tol.dat
 			fi
 			echo " "
@@ -187,7 +195,8 @@ echo " "
 if   [ "$ALL_PASSED" = true ] ; then
 	echo "ALL TESTS PASSED"
 elif [ "$ALL_PASSED" = false ] ; then
-	echo "AT LEAST ONE EACH OF SETUP AND SVD TEST(S) FAILED"
+	echo "AT LEAST ONE EACH OF SETUP AND SVD TEST(S) FAILED..."
+	echo "Check individual results above to confirm if test had technical pass."
 elif [ "$SVD_PASSED" = false ] ; then
 	echo "TEST(S) FAILED FOR SVD SCRIPT"
 elif [ "$SET_PASSED" = false ] ; then

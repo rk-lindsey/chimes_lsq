@@ -607,6 +607,8 @@ static void ZCalc_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<v
 	double fcutderiv; 				
 	double deriv;
 	double tmp_doub; 	
+	
+	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 
 	if ( ! called_before ) 
 	{
@@ -631,8 +633,6 @@ static void ZCalc_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<v
 	{
 		for(int a2=a1+1;a2<SYSTEM.ATOMS;a2++)
 		{
-			
-			
 			TEMP_STR = SYSTEM.ATOMTYPE[a1];
 			TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);
 							
@@ -766,6 +766,9 @@ static void ZCalc_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<v
 								fcut0     = (1.0 - rlen/FF_2BODY[curr_pair_type_idx].S_MAXIM);
 								fcut      = fcut0 * fcut0 * fcut0;
 								fcutderiv = -3.0 * fcut0 * fcut0 / FF_2BODY[curr_pair_type_idx].S_MAXIM;
+								
+								fcut      *= fpenalty_scale;
+								fcutderiv *= fpenalty_scale;
 							
 								for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 								{
@@ -810,9 +813,7 @@ static void ZCalc_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<v
 						}
 					}
 				}
-		  	}
-			
-						
+		  	}			
 		}
 	}
   return;
@@ -863,6 +864,8 @@ static void ZCalc_3B_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vecto
 	static int curr_pair_type_idx_ik;
 	static int curr_pair_type_idx_jk;
 	static int row_offset;	
+	
+	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;	
 	
 	if ( ! called_before ) 
 	{
@@ -1016,6 +1019,15 @@ static void ZCalc_3B_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vecto
 								fcut0_jk     = (1.0 - rlen_jk/FF_2BODY[curr_pair_type_idx_jk].S_MAXIM);
 								fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;
 								fcutderiv_jk = -3.0 * fcut0_jk * fcut0_jk / FF_2BODY[curr_pair_type_idx_jk].S_MAXIM;		
+								
+								fcut_ij     *= fpenalty_scale;
+								fcutderiv_ij*= fpenalty_scale;
+								
+								fcut_ik     *= fpenalty_scale;
+								fcutderiv_ik*= fpenalty_scale;
+								
+								fcut_jk     *= fpenalty_scale;
+								fcutderiv_jk*= fpenalty_scale;
 								
 								
 								/////////////////////////////////////////////////////////////////////
@@ -1589,7 +1601,6 @@ void ZCalc(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 		
 		if ( CONTROLS.USE_COULOMB ) 
 			ZCalc_Ewald(SYSTEM);
-		
 
 		if ( CONTROLS.USE_OVERCOORD ) 
 	      ZCalcSR_Over(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP);
@@ -1598,19 +1609,15 @@ void ZCalc(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 
 		/* 
 
-	
 		else if ( pair_type == INVERSE_R ) 	
 			ZCalc_SR_Analytic(Coord,Lbc, Latcons,nlayers,nat,smin,smax,snum, SForce,Vtot, Pxyz, params);
     
 		else if ( pair_type == STILLINGER )  // SAVE THIS FOR SECOND TO LAST FOR SIMILAR REASONS  
 			ZCalc_Stillinger(Coord,Lbc, Latcons,nlayers,nat,smax, SForce,Vtot,Pxyz);
-     
-	
-		// WHAT ABOUT DFTBPOLY? ... DOES THAT JUST MEAN WE WERE FITTING STUFF TO USE IN DFTB?
 
 		else 
 			EXIT_MSG("Error: Unknown pair type", pair_type)
-	*/
+		*/
 	
 		SYSTEM.PRESSURE_XYZ /= 3.0 * SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
 
@@ -1644,8 +1651,10 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 	double Vpenalty;
 
 	// A penalty function is added to the potential for r + penalty_dist < smin[ipair]
-	const double penalty_scale = 1.0e8;
-	const double penalty_dist = 0.01;
+	// All pairs have the same penalty scale and distance
+	const double penalty_scale  = FF_2BODY[0].PENALTY_SCALE;	// 1.0e8;
+	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
+	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 
 	if ( ! called_before ) 
 	{
@@ -1808,7 +1817,8 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 								fcut0 = (1.0 - rlen/FF_2BODY[curr_pair_type_idx].S_MAXIM);
 								fcut = fcut0 * fcut0 * fcut0;
 								fcutderiv = -3.0 * fcut0 * fcut0 / FF_2BODY[curr_pair_type_idx].S_MAXIM;
-								
+								fcut      *= fpenalty_scale;
+								fcutderiv *= fpenalty_scale;
 								
 								for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 								{
@@ -1920,6 +1930,8 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 	static int curr_pair_type_idx_jk;
 	
 	double coeff;
+
+	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 
 	if ( ! called_before ) 
 	{
@@ -2062,6 +2074,15 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 								fcut0_jk     = (1.0 - rlen_jk/FF_2BODY[curr_pair_type_idx_jk].S_MAXIM);
 								fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;
 								fcutderiv_jk = -3.0 * fcut0_jk * fcut0_jk / FF_2BODY[curr_pair_type_idx_jk].S_MAXIM;	
+								
+								fcut_ij     *= fpenalty_scale;
+								fcutderiv_ij*= fpenalty_scale;
+								
+								fcut_ik     *= fpenalty_scale;
+								fcutderiv_ik*= fpenalty_scale;
+								
+								fcut_jk     *= fpenalty_scale;
+								fcutderiv_jk*= fpenalty_scale;
 								
 								// Determine the FF type for the given triplet
 							
@@ -2251,10 +2272,14 @@ static void ZCalc_Lj(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> 
 			
 	  	  	rlen_mi = sqrt( RVEC.X*RVEC.X + RVEC.Y*RVEC.Y + RVEC.Z*RVEC.Z );
 			
-			if ( rlen_mi < 0.5 ) // FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2)
+			if ( rlen_mi < FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2)			
+//			if ( rlen_mi < 0.5 ) // FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2)
 				EXIT_MSG("Error: close approach", rlen_mi);
+//				cout << "WARNING: Close approach: " << rlen_mi << endl;
 
 			SYSTEM.TOT_POT_ENER += 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,12.0) - pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,6.0) );
+
+
 
 			fac = 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( 
 				    -12.0 * pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,14.0) 
@@ -2271,6 +2296,7 @@ static void ZCalc_Lj(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> 
 			SYSTEM.ACCEL[a2].X -= RVEC.X*fac;
 			SYSTEM.ACCEL[a2].Y -= RVEC.Y*fac;
 			SYSTEM.ACCEL[a2].Z -= RVEC.Z*fac;
+			
 		}
 	}
 }
@@ -2600,10 +2626,11 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FI
 	
 	SCAN_FILE_2B = OUTFILE;
 	
-
 	// A penalty function is added to the potential for r + penalty_dist < smin[ipair]
-	const double penalty_scale = 1.0e8;
-	const double penalty_dist = 0.01;
+	// All pairs have the same penalty scale and distance
+	const double penalty_scale  = FF_2BODY[0].PENALTY_SCALE;	// 1.0e8;
+	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
+	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 
 	if ( ! called_before ) 
 	{
@@ -2727,14 +2754,19 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FI
 			Tnd[0] = 0.0;
 			
 			
-			// Now compute the force/potential
+			// Now compute the force/potential... Coulomb -- Ewald sum not required for a scan-type calculation
+			// ...If charges are zero, nothing will be added to tempx
+			
+			tempx += FF_2BODY[ij].ATM1CHG * FF_2BODY[ij].ATM2CHG / rlen;
+
+			// Now compute the force/potential... Cheby
 
 			if ( FF_2BODY[ij].CHEBY_TYPE == "MORSE" ) 
 			{
 				fcut0 = (1.0 - rlen/FF_2BODY[ij].S_MAXIM);
 				fcut = fcut0 * fcut0 * fcut0;
 				fcutderiv = -3.0 * fcut0 * fcut0 / FF_2BODY[ij].S_MAXIM;
-				
+				fcut *= fpenalty_scale;
 				
 				for ( int i = 0; i < FF_2BODY[ij].SNUM; i++ ) 
 				{
@@ -2818,6 +2850,8 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 	
 	FULL_FILE_3B = OUTFILE;
 	
+	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
+	
 	if ( ! called_before ) 
 	{
 		called_before = true;
@@ -2881,9 +2915,11 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 				
 					fcut0_jk     = (1.0 - RLEN_JK/FF_2BODY[ik].S_MAXIM);
 					fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;	
-				
+					
+					fcut_ij *= fpenalty_scale;
+					fcut_ik *= fpenalty_scale;
+					fcut_jk *= fpenalty_scale;
 
-				
 					// Error check: Certain triplets are impossible...
 				
 					if(curr_triple_type_index < 0)
@@ -2899,6 +2935,13 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 					// the stored powers properly before applying the FF.
 					 
 					tempx = 0;
+					
+					// Coulombic contributions... IF THEY ARE COMPUTED HERE, THEY SHOULDN'T BE COMPUTED IN THE 2-BODY CALCULATIONS!
+					// ...Scan logic in the splines_md.C main function control this.
+					
+					tempx += FF_2BODY[ij].ATM1CHG * FF_2BODY[ij].ATM2CHG / RLEN_IJ;
+					tempx += FF_2BODY[ik].ATM1CHG * FF_2BODY[ik].ATM2CHG / RLEN_IK;
+					tempx += FF_2BODY[jk].ATM1CHG * FF_2BODY[jk].ATM2CHG / RLEN_JK;
 				
 					for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 					{
@@ -2984,6 +3027,8 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	TEMP_STR.append(FF_2BODY[jk].PRPR_NM);	
 
 	curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
+	
+	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 	
 	string OUTFILE = "3b_Cheby_Pot-";
 	OUTFILE.append(TEMP_STR);
@@ -3091,8 +3136,10 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 			fcut0_jk     = (1.0 - RLEN_JK/FF_2BODY[ik].S_MAXIM);
 			fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;	
 		
+			fcut_ij *= fpenalty_scale;
+			fcut_ik *= fpenalty_scale;
+			fcut_jk *= fpenalty_scale;
 
-		
 			// Error check: Certain triplets are impossible...
 		
 			if(curr_triple_type_index < 0)
@@ -3109,8 +3156,13 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 			 
 			tempx = 0;
 			
-			// If requested, include the 2-body energy contributions
-		
+			// Coulombic contributions...IF THEY ARE COMPUTED HERE, THEY SHOULDN'T BE COMPUTED IN THE 2-BODY CALCULATIONS!
+			// ...Scan logic in the splines_md.C main function control this.
+			
+			tempx += FF_2BODY[ij].ATM1CHG * FF_2BODY[ij].ATM2CHG / RLEN_IJ;
+			tempx += FF_2BODY[ik].ATM1CHG * FF_2BODY[ik].ATM2CHG / RLEN_IK;
+			tempx += FF_2BODY[jk].ATM1CHG * FF_2BODY[jk].ATM2CHG / RLEN_JK;			
+
 			for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 			{
 				SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);

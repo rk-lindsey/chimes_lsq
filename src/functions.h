@@ -1,19 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// 
-//  THE IDEA: ONCE THIS FILE IS FINISHED BEING UPDATED, SHOULD BE COMPATIBLE WITH THE (CURRENTLY) STAND-ALONE LSQ FITTING-SETUP CODE, ALLOWING THE TWO TO BE MERGED AGAIN.
-// 
-// 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
 #ifndef VERBOSITY
 	#define VERBOSITY 1
 #endif
@@ -98,7 +82,8 @@ struct MD_JOB_CONTROL
 
 	int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
 	int    FREQ_ENER;			// Replaces energy_freq... How often to output energy
-	bool   PRINT_FORCE;			// Replaces if_output_force... If TRUE, write out calculated forces.		
+	bool   PRINT_FORCE;			// Replaces if_output_force... If TRUE, write out calculated forces.	
+	int    FREQ_FORCE;			// How often to print the forces	
 };
 
 struct NOSE_HOOVER
@@ -164,6 +149,7 @@ struct PAIRS	// NEEDS UPDATING
 	string ATM2TYP;
 	double ATM1CHG;			// Atom partial charge... used when charges are fixed
 	double ATM2CHG;
+	string CHRGSGN;			// Should the fitted charge on a given atom be negative or positive?
 	double ATM1MAS;			// Atomic mass (i.e. 12.011 for C)
 	double ATM2MAS;	
 	double S_MINIM;			// Minimum allowed pair distance for fitting
@@ -174,6 +160,9 @@ struct PAIRS	// NEEDS UPDATING
 	int    SNUM_3B_CHEBY;	// Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
 	
 	string CHEBY_TYPE;		// Are distances transformed into inverse-r type or morse-type distances?... or not at all? (default)
+	double PENALTY_SCALE;	// For 2B Cheby potentials... "a" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 1.0e8
+	double PENALTY_DIST;	// For 2B Cheby potentials... "penalty_dist" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 0.01
+	double CUBIC_SCALE;		// Factor to multiply to the cubic penalty function, (1-rlen/smax)^3... default value is 1
 	
 	double LAMBDA;			// Morse lambda for CHEBYSHEV type pairs
 	double MIN_FOUND_DIST;	// Minimum distance between pairs
@@ -249,6 +238,14 @@ struct PES_PLOTS
 	
 	PES_PLOTS():N_PLOTS(0), N_SCAN(0), INCLUDE_2B(0){}
 		
+};
+
+struct CHARGE_CONSTRAINT
+{
+	vector<string> PAIRTYPE;		// This will be read in from the input file
+	vector<int>	   PAIRTYPE_IDX;	// This will be set using the map
+	vector<double> CONSTRAINTS;
+	double		   FORCE;
 };
 
 //////////////////////////////////////////

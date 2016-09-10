@@ -13,7 +13,7 @@ Reading the simulation control input file...
 	# PRESSUR #: ANALYTICAL
 	# FRQDFTB #: 20
 	# FRQENER #: 10
-	# PRNTFRC #: true
+	# PRNTFRC #: true ...and will be printed every 1 frames.
    ...read complete.
 
 Setting up the data objects...
@@ -21,12 +21,16 @@ Setting up the data objects...
 
 Reading initial coordinates and forces...
 Opening force.txt to read forces for comparison
+	...Read the following coordinate file extension: xyzf
+	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+	...Ignoring last three fields of atom info lines in xyzf file... 
+	...will read from specified force file instead.
    ...read complete
 
 Reading atom info from parameter file...
 	Read 2 atom types:
-		0     O , q (e):  0.000, mass (amu):  15.9994
-		1     H , q (e):  0.000, mass (amu):   1.0079
+		0     O , q (e): NEGATIVE, mass (amu):  15.9994
+		1     H , q (e): POSITIVE, mass (amu):   1.0079
    ...read complete
 
 Setting up thermostats/velocities...
@@ -49,16 +53,14 @@ Reading force field parameters...
 		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     true
 	...Read FF controls...
-
-	********************* WARNING ********************* 
-	Use FIT_COUL option only supported for H2O systems!
-	********************* WARNING ********************* 
-
 Attempting to read pairtype...
 	...Read FF interaction type...
 	...Read general FF params...
 	...Read FF triplet specifications...
 	...Reading all remaining force field parameters...
+		Re-setting individual atom charges based on pair charges :
+		0     O , q (e): -0.136, mass (amu):  15.9994
+		1     H , q (e):  0.418, mass (amu):   1.0079
 	...Read 2-body FF params...
 	...Read 3-body FF params...
 
@@ -89,47 +91,47 @@ Force field summary:
 		CHEBYSHEV 10
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda
-		OO 0.7500 6.0000 0.1000 MORSE 1.2500 
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+08 1.0000e+00
 		Parameters: 
-		0 -44.8877
-		1 -15.0791
-		2 21.2025
-		3 12.1256
-		4 -18.2689
-		5 -10.5335
-		6 24.4519
-		7 -5.1861
-		8 -13.2377
-		9 -13.0837
+		0 -4.4888e+01
+		1 -1.5079e+01
+		2 2.1203e+01
+		3 1.2126e+01
+		4 -1.8269e+01
+		5 -1.0533e+01
+		6 2.4452e+01
+		7 -5.1861e+00
+		8 -1.3238e+01
+		9 -1.3084e+01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda
-		HH 0.7500 6.0000 0.1000 MORSE 1.2500 
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+08 1.0000e+00
 		Parameters: 
-		0 -42.0391
-		1 -70.6892
-		2 -85.8836
-		3 -92.8758
-		4 -73.8662
-		5 -56.9881
-		6 -38.3798
-		7 -23.6763
-		8 -11.0679
-		9 -3.7151
+		0 -4.2039e+01
+		1 -7.0689e+01
+		2 -8.5884e+01
+		3 -9.2876e+01
+		4 -7.3866e+01
+		5 -5.6988e+01
+		6 -3.8380e+01
+		7 -2.3676e+01
+		8 -1.1068e+01
+		9 -3.7151e+00
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda
-		OH 0.7500 6.0000 0.1000 MORSE 1.2500 
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+08 1.0000e+00
 		Parameters: 
-		0 3.9085
-		1 14.0362
-		2 34.0255
-		3 11.0287
-		4 4.1699
-		5 1.2706
-		6 -0.8965
-		7 0.0087
-		8 0.7454
-		9 0.2172
+		0 3.9085e+00
+		1 1.4036e+01
+		2 3.4026e+01
+		3 1.1029e+01
+		4 4.1699e+00
+		5 1.2706e+00
+		6 -8.9645e-01
+		7 8.7471e-03
+		8 7.4545e-01
+		9 2.1722e-01
 
 	Triplet type and polynomial order per triplet: 
 		CHEBYSHEV 2
@@ -186,4 +188,4 @@ Ewald parameters:
 	Number of Ewald K-vectors = 894
 	K-space accuracy estimate = 0.00000006626103
 
-RMS force error =  3.791109e+01
+RMS force error =  1.595199e+01

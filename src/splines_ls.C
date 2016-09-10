@@ -9,6 +9,7 @@
 #include <string>
 #include <iomanip>
 #include <map>
+#include <sstream>
 
 // User-defined headers
 
@@ -23,7 +24,7 @@ using namespace std;
  
 
 static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool & fit_coul, bool & coul_consv, bool & if_subtract_coord, bool & if_subtract_coul, bool & fit_pover, int & cheby_order, string & cheby_type, int & cheby_3b_order, int & invr_parms,
- int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool & use_partial_charges );
+ int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool & use_partial_charges, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS);
 
 int factorial(int input)
 {
@@ -61,6 +62,8 @@ int main()
 	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
 	map<string,int> TRIAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
 	map<int,string> TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
+	
+	vector<CHARGE_CONSTRAINT> CHARGE_CONSTRAINTS;	// Specifies how we constrain charge fitting
 	
 	// MAJOR ASSUMPTIONS: 
 	// 1. Number of atoms does not change over frames ( should always be true for MD)
@@ -103,7 +106,7 @@ int main()
 		cout << endl << "Reading input file..." << endl;
 	#endif
 
-	read_lsq_input(INFILE, nframes, nlayers, fit_coul, coul_consv, ifsubtract_coord, ifsubtract_coul, fit_pover, cheby_order, cheby_type, cheby_3b_order, invr_parms, NATMTYP, if_3b_cheby, ATOM_PAIRS, PAIR_TRIPLETS, WRAPCOORDS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, use_partial_charges );
+	read_lsq_input(INFILE, nframes, nlayers, fit_coul, coul_consv, ifsubtract_coord, ifsubtract_coul, fit_pover, cheby_order, cheby_type, cheby_3b_order, invr_parms, NATMTYP, if_3b_cheby, ATOM_PAIRS, PAIR_TRIPLETS, WRAPCOORDS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, use_partial_charges,CHARGE_CONSTRAINTS );
 
 	#if VERBOSITY == 1
 		cout << "...input file read successful: " << endl << endl;
@@ -166,7 +169,8 @@ int main()
 
 
 
-	if ( ATOM_PAIRS[0].SNUM_3B_CHEBY > 0 ) // All atoms types must use same potential, so check if 3b order is greater than zero 
+//	if ( ATOM_PAIRS[0].SNUM_3B_CHEBY > 0 ) // All atoms types must use same potential, so check if 3b order is greater than zero 
+	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" && cheby_3b_order  > 0 ) // All atoms types must use same potential, so check if 3b order is greater than zero 
 	{
 		num_cheby_3b = 0;
 		
@@ -447,8 +451,32 @@ int main()
 		  
 		}  	
     }
+	
+	// A and B file charge constraints: generalized
 
-	// A and B file charge conservation (q00 + 4 qOH + qHH = 0 ) .. This is specific for water systems
+	if ( fit_coul && CHARGE_CONSTRAINTS.size()>0) 
+	{
+		for(int i=0; i<CHARGE_CONSTRAINTS.size(); i++)
+		{
+			for(int n=0; n < tot_short_range; n++)
+				fileA << "0.0 ";
+			
+			for(int j=0; j<CHARGE_CONSTRAINTS.size()+1; j++)
+				fileA << CHARGE_CONSTRAINTS[i].CONSTRAINTS[j] << " ";
+			
+			if ( fit_pover ) 
+				fileA  << " 0.0 ";
+			
+			fileA << endl;	
+			
+			fileb << CHARGE_CONSTRAINTS[i].FORCE << endl;
+			
+		}
+			
+	}
+
+	/*
+	// A and B file charge conservation (q00 + 4 qOH + qHH = 0 ) .. This is specific for water systems... THE OLD WAY
 	  
 	if ( fit_coul && coul_consv) 
 	{
@@ -468,6 +496,9 @@ int main()
 		#endif
 		
 		// A file...
+		
+		// Constraint 1: Require that qH = 0.5*qO... thus qH * qH = 0.25 * qO * qO, or equivalently, 4000 * qH * qH = 1000 * qO * qO
+		// Similarly, qH * qO = 0.25qO * qO, so 4000 * qO * qH = 1000 * qO * qO
 	  
 		for(int n=0; n < tot_short_range; n++)
 			fileA << "0.0 ";
@@ -478,8 +509,10 @@ int main()
 			fileA << " 0.0 ";
 
 		fileA << endl;
+		
+		// Constraint 2: Require charge consistency, i.e. qOO - 4 qHH = 0
 	  
-		for(int n=0; n < tot_short_range; n++)	//Afile charge consistency (qOO - 4 qHH = 0)
+		for(int n=0; n < tot_short_range; n++)
 			fileA << "0.0 ";
 	  
 		fileA << "1000.0 -4000.0 0000.0"; // OO, HH, OH		
@@ -491,14 +524,14 @@ int main()
 		  
 		// B file...
 		  
-		fileb << "0.0" << endl;	
-		fileb << "0.0" << endl;
+		// There is no associated force with these constraints
 		
-//		fileb_labeled << "0.0" << endl;	
-//		fileb_labeled << "0.0" << endl;	
+		fileb << "0.0" << endl;	// qOO + 4 * qHH + 4 * qOH = 0
+		fileb << "0.0" << endl;	// qOO + 4 * qHH = 0
 		 
 	} 	
-	   
+	 */ 
+	
 	fileA.close();
 	fileb.close();
 	fileb_labeled.close();
@@ -515,8 +548,6 @@ int main()
 	//////////////////////////////////////////////////	   
 	// THE NEW WAY
 	//////////////////////////////////////////////////	
-	
-cout << "checks: " << 	fit_coul <<  " " << use_partial_charges << endl;
 
 	if(!fit_coul && !use_partial_charges)
 		header << "USECOUL: false" << endl;
@@ -562,8 +593,17 @@ cout << "checks: " << 	fit_coul <<  " " << use_partial_charges << endl;
 	header << endl << "ATOM TYPES: " << NATMTYP << endl << endl;
 	header << "# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #" << endl;
 	
-	for(int i=0; i<NATMTYP; i++)
-		header << i << "		" << ATOM_PAIRS[i].ATM1TYP << "		" << ATOM_PAIRS[i].ATM1CHG << "		" << ATOM_PAIRS[i].ATM1MAS << endl;
+	
+	if(fit_coul)
+	{
+		for(int i=0; i<NATMTYP; i++)
+			header << i << "		" << ATOM_PAIRS[i].ATM1TYP << "		" << ATOM_PAIRS[i].CHRGSGN << "		" << ATOM_PAIRS[i].ATM1MAS << endl;
+	}
+	else
+	{
+		for(int i=0; i<NATMTYP; i++)
+			header << i << "		" << ATOM_PAIRS[i].ATM1TYP << "		" << ATOM_PAIRS[i].ATM1CHG << "		" << ATOM_PAIRS[i].ATM1MAS << endl;		
+	}
 	
 	bool PRINT_OVR = false;
 	int NPAIR =  ATOM_PAIRS.size();	
@@ -630,6 +670,9 @@ cout << "checks: " << 	fit_coul <<  " " << use_partial_charges << endl;
 		}		
 			
 	}
+	
+	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
+		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
 	 
 	if(!if_3b_cheby)
 	{
@@ -723,7 +766,7 @@ return 0;
 
 // Read program input from the file "splines_ls.in".
 static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool & fit_coul, bool & coul_consv, bool & if_subtract_coord, bool & if_subtract_coul, bool & fit_pover, int & cheby_order, string & cheby_type, int & cheby_3b_order, int & invr_parms,
- int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool & use_partial_charges )
+ int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool & use_partial_charges, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS )
 {
 	bool   FOUND_END = false;
 	string LINE;
@@ -734,6 +777,10 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 	int    NPAIR;
 	int    NTRIP;
 	double SUM_OF_CHARGES = 0;
+	stringstream	STREAM_PARSER;
+	
+	if_subtract_coord = false;
+	use_partial_charges = false;
 	
 	while (FOUND_END == false)
 	{
@@ -829,6 +876,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				
 			#endif
 		}
+/*		
 		else if(LINE.find("# CNSCOUL #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
@@ -839,10 +887,11 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				coul_consv = false;
 			else
 			{
-				cout << endl << "ERROR: # FITCOUL # must be specified as true or false." << endl;
+				cout << endl << "ERROR: # CNSCOUL # must be specified as true or false." << endl;
 				exit(1);	
 			}	
-			
+*/		
+/*			
 			#if VERBOSITY == 1
 						
 				cout << "	# CNSCOUL #: ";
@@ -852,7 +901,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				else
 					cout << "false" << endl;							
 			#endif
+				
 		}
+*/
 		else if(LINE.find("# FITPOVR #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
@@ -967,6 +1018,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 
 			
 		}
+
 /*		
 		else if(LINE.find("# SUBCRDS #") != string::npos)
 		{
@@ -1050,7 +1102,17 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				ATOM_PAIRS[i].CHEBY_TYPE = cheby_type;
 				
 				cin >> LINE >> ATOM_PAIRS[i].ATM1TYP >> LINE;
-				ATOM_PAIRS[i].ATM1CHG = double(atof(LINE.data()));
+				if(!fit_coul)
+				{
+					ATOM_PAIRS[i].ATM1CHG = double(atof(LINE.data()));
+				}
+				else
+				{
+					ATOM_PAIRS[i].CHRGSGN = LINE;
+					ATOM_PAIRS[i].ATM1CHG = 0.0;
+				}
+				
+				
 				
 				SUM_OF_CHARGES += ATOM_PAIRS[i].ATM1CHG;
 
@@ -1066,9 +1128,13 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				
 				#if VERBOSITY == 1
 					cout << " 	" << setw(15) << left << i+1 
-						 << setw(15) << left << ATOM_PAIRS[i].ATM1TYP 
-						 << setw(15) << left << ATOM_PAIRS[i].ATM1CHG
-						 << setw(15) << left << ATOM_PAIRS[i].ATM1MAS << endl;
+						 << setw(15) << left << ATOM_PAIRS[i].ATM1TYP;
+					if(!fit_coul) 
+						cout << setw(15) << left << ATOM_PAIRS[i].ATM1CHG;
+					else
+						cout << ATOM_PAIRS[i].CHRGSGN << "		";
+					
+					cout << setw(15) << left << ATOM_PAIRS[i].ATM1MAS << endl;
 				#endif
 			}
 			
@@ -1506,8 +1572,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			}			
 						
 		}
-		
-		
+
 		else if(LINE.find("# PAIRIDX #")!= string::npos) // Read the topology part. For now, ignoring index and atom types..
 		{
 			for(int i=0; i<NPAIR; i++)
@@ -1519,6 +1584,8 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				TEMP_INT = PAIR_MAP[TEMP_STR];
 				
 				ATOM_PAIRS[TEMP_INT].PAIRIDX = TEMP_INT;
+				
+				ATOM_PAIRS[TEMP_INT].CUBIC_SCALE = 1.0;	// Set the default value
 
 				cin >> LINE;
 				ATOM_PAIRS[TEMP_INT].S_MINIM = double(atof(LINE.data()));
@@ -1584,6 +1651,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					 if(ATOM_PAIRS[i].USE_OVRPRMS)
 						 PRINT_OVR = true;
 			}
+		
+			// If overbonding parameters are provided, and they are not requested to be fit, 
+			// subtract thier contribution before generating A matrix
 			
 			if(PRINT_OVR && !fit_pover)
 				if_subtract_coord = true;
@@ -1615,7 +1685,66 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					#endif													
 				}											
 			}
-		}		
-	
+		}
+		
+		else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING")!= string::npos)
+		{
+			STREAM_PARSER.str(LINE);
+			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+			for(int i=0; i<NPAIR; i++)
+				ATOM_PAIRS[i].CUBIC_SCALE = double(atof(TEMP_STR.data()));
+			STREAM_PARSER.str("");
+			STREAM_PARSER.clear();	
+		}	
+		
+		
+		else if(LINE.find("CHARGE CONSTRAINTS") != string::npos)
+		{
+			#if VERBOSITY == 1			
+				cout << endl << "	Attempting to read " << NPAIR-1 << " charge constraints...:" << endl; 
+			#endif	
+			
+			CHARGE_CONSTRAINTS.resize(NPAIR-1);
+			for(int i=0; i<NPAIR-1; i++)
+			{
+				// Read the atom pair types
+				
+				for(int j=0; j<NPAIR; j++)
+				{
+					cin >> LINE; 
+					CHARGE_CONSTRAINTS[i].PAIRTYPE.push_back(LINE);
+					
+					CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX.push_back(PAIR_MAP[LINE]);
+				}
+				
+				// Read the constraints 
+				
+				for(int j=0; j<NPAIR; j++)
+				{
+					cin >> LINE; 
+					CHARGE_CONSTRAINTS[i].CONSTRAINTS.push_back(double(atof(LINE.data())));
+				}
+				
+				// Read the associated force
+				cin >> CHARGE_CONSTRAINTS[i].FORCE;				
+				cin.ignore();
+
+				#if VERBOSITY == 1			
+					cout << "		" << i+1 << "	 ";
+					for(int j=0; j<NPAIR; j++)
+						cout << CHARGE_CONSTRAINTS[i].PAIRTYPE[j] << " (" << CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX[j] << ") ";
+					for(int j=0; j<NPAIR; j++)
+						cout << CHARGE_CONSTRAINTS[i].CONSTRAINTS[j] << " ";
+					cout << CHARGE_CONSTRAINTS[i].FORCE << endl;	
+				#endif	
+					
+			}
+			
+			cout << endl;
+		}				
 	}	
+	
+	#if VERBOSITY == 1			
+		cout << "	Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl;; // All types use same scaling
+	#endif	
 }

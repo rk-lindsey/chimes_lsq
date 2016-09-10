@@ -11,15 +11,17 @@ from datetime import *
 TEST_SUITE_RUN = False
 
 if(len(sys.argv) < 4):
+    print "The following args were supplied:"
+    print sys.argv
+    
+    print "usage is:"
     print "./lsq.py A.txt b.txt params.header"
     sys.exit()
 elif( (len(sys.argv) == 5) and (sys.argv[4]=="TEST_SUITE_RUN")):
     # Then this run is being used for the test suite... 
     # print out parameters without any fanciness so tolerances can be checked  
     TEST_SUITE_RUN = "do"
-else:
-    print "./lsq.py A.txt b.txt params.header"
-    sys.exit()
+
 
 #################################
 

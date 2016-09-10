@@ -3,12 +3,19 @@
 ##################################
 
 # Quick note on flag PESFORMAT:
+#
 # 1. gnuplot style
 # 2. matlab style
 # 3. python style
 # Currently, only gnuplot style is supported
 
-MYFLAGS= -D VERBOSITY=1 -D FORCECHECK=1 -D PESFORMAT=1
+# Quick note on flag FORCECHECK:
+#
+# 0. Don't print out the stuff mentioned below
+# 1. print out 3b forces on each atom at each timestep (generally for debug.)
+
+
+MYFLAGS= -D VERBOSITY=1 # -D FORCECHECK=1 -D PESFORMAT=1
 
 CXX=g++ -g  $(MYFLAGS) 
 #CXX=g++ -O3  $(MYFLAGS) 
@@ -80,7 +87,7 @@ clean:
 	 rm -f *o
 	 
 ##################################
-# MAKE Travis analyzer
+# Make Travis analyzer
 ##################################	
 
 travis:
@@ -89,3 +96,12 @@ travis:
 clean_travis:
 	make clean -C ../contrib/Travis
 	
+##################################
+# Make packmol initial configuration generator
+##################################	
+
+packmol:
+	make -C ../contrib/packmol
+	
+clean_packmol:
+	make clean -C ../contrib/packmol

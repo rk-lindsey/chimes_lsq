@@ -22,7 +22,7 @@
 # PRMFILE # ! Parameter file (i.e. params.txt)
 	params.cheby.txt
 # CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)
-	input.xyz	
+	input.xyzf	
 	
 	
 ###################################

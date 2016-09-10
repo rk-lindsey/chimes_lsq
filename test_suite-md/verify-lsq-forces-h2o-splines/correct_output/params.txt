@@ -1,4 +1,4 @@
-! Date  2016-08-26
+! Date  2016-09-09
 !
 ! Number of columns =  340
 ! Number of rows    =  28514
@@ -17,8 +17,8 @@ PAIRTYP: SPLINE
 ATOM TYPES: 2
 
 # TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
-0		O		0		15.9994
-1		H		0		1.0079
+0		O		-		15.9994
+1		H		+		1.0079
 
 ATOM PAIRS: 3
 

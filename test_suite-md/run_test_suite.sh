@@ -18,7 +18,7 @@ MD_TESTS[0]="h2o-2bcheby"
 MD_TESTS[1]="h2o-3bcheby" 
 MD_TESTS[2]="h2o-splines"
 MD_TESTS[3]="generic-lj"
-MD_TESTS[4]="h2o-2bcheby-genvel"
+MD_TESTS[4]="h2o-2bcheby-genvel" 
 MD_TESTS[5]="h2o-2bcheby-numpress"
 MD_TESTS[6]="h2o-2bcheby-velscale"
 
@@ -32,9 +32,9 @@ LSQ_TESTS[3]="h2o-splines"
 LSQ_TESTS[4]="h2o-invr"
 LSQ_TESTS[5]="h2o-dftbpoly"
 
-
-# Iterate through the tests
-
+########################################
+# Iterate through the tests -- MD CODE
+########################################
 
 echo " "
 echo "VALIDATING FOR MD CODE..."
@@ -86,6 +86,10 @@ do
 	
 	cd ..
 done
+
+########################################
+# Iterate through the tests -- MD/LSQ CODE COMPATIBILITY
+########################################
 
 
 echo " "

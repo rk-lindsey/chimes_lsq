@@ -2,8 +2,18 @@
 #       If you want to use other versions, you'll probably need to modify the inputs that
 #       are sent to the script (way down below)
 
-PATH_TO_LSQ_PY_CODE="/g/g17/rlindsey/TOBECOMMOTED_VERSION/src/lsq-new-md-fmt.py" # Path to the python code.
+###############################################################
+#
+# Determine the location of necessary files
+#
+###############################################################
 
+TESTSU_BASE=`pwd -P` #`dirname $0`
+SOURCE_BASE="${TESTSU_BASE}/../src/"
+
+# Run the job with the new version of the python code (Compatible with non-generalized md code)
+#
+PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq-new-md-fmt.py" # Path to the python code.
 
 ###############################################################
 #
@@ -56,9 +66,7 @@ do
 	cd $i/current_output
 	
 	python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map TEST_SUITE_RUN > params.txt
-
-
-#	cp params.txt force.txt current_output	
+	
 	
 	for j in params.txt force.txt
 	do

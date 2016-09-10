@@ -75,6 +75,7 @@ int main(int argc, char* argv[])
 	int		NATMTYP = 0;
 	
 	vector<string> 	TMP_ATOMTYPE;
+	vector<int>		TMP_SIGN;
 	vector<int> 	TMP_ATOMTYPEIDX;
 	vector<double> 	TMP_CHARGES;
 	vector<double> 	TMP_MASS;
@@ -86,11 +87,10 @@ int main(int argc, char* argv[])
 	ofstream OUT_FORCELABL;		// Holds the forces that are computed and are to be printed out.. has atom labels
 	ofstream STATISTICS;		// Holds a copy of the "Step      Time          Ktot/N          Vtot/N ..." part of the output file.. uninterrupted by warnings
 	
+	string EXTENSION;			// Holds the input xyz/xyzf file extension, so we know how many fields to read on each atom line
 	
 	ifstream PARAMFILE;
 	ifstream COORDFILE;
-	
-
 	
 	cout.precision(15);			// Set output precision
 	
@@ -98,12 +98,8 @@ int main(int argc, char* argv[])
     // Hop to PES printing, if requested 
 	////////////////////////////////////////////////////////////
 	
-	
 	if (FF_PLOTS.N_PLOTS > 0)
-	{
-//		cout << "Going to ff setup" << endl;
-		goto FF_SETUP; 
-	}
+		goto FF_SETUP_1; 
 	
 	////////////////////////////////////////////////////////////
 	// Setup an a dftb gen output file, if user has requested it
@@ -159,6 +155,8 @@ int main(int argc, char* argv[])
 	////////////////////////////////////////////////////////////
 	// Read in the initial system coordinates, and if requested,
 	// initial forces from separate file (i.e. not from .xyzf)
+	// ... We also need to figure out the file extension so we
+	// know how many fields to read on each atom lne
 	////////////////////////////////////////////////////////////
 
 
@@ -166,7 +164,7 @@ int main(int argc, char* argv[])
 
     if ( CONTROLS.COMPARE_FORCE ) 
     {
-      cout << "Opening force.txt to read forces for comparison\n";
+      cout << "Opening " << CONTROLS.COMPARE_FILE.data() << " to read forces for comparison\n";
       CMPR_FORCEFILE.open(CONTROLS.COMPARE_FILE.data());
 
 	  if(!CMPR_FORCEFILE.is_open())
@@ -176,29 +174,17 @@ int main(int argc, char* argv[])
 	  }
 
     }
-
+	
+	EXTENSION = CONTROLS.COORD_FILE.substr(CONTROLS.COORD_FILE.find_last_of(".")+1);
+	cout << "	...Read the following coordinate file extension: " << EXTENSION << endl;
+    cout << "	...Read box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+	
     for(int a=0; a<SYSTEM.ATOMS ;a++)
 	{
         COORDFILE >> SYSTEM.ATOMTYPE[a];
-		
+	
 		// Read the coordinates
 		COORDFILE >> SYSTEM.COORDS[a].X >> SYSTEM.COORDS[a].Y >> SYSTEM.COORDS[a].Z;
-		
-		//##############################################################################
-		//##############################################################################
-		//
-		// FOR TESTING PURPOSES: DO WE RECOVER INVERTED FORCES?
-		//
-		//##############################################################################
-		//##############################################################################
-
-//		SYSTEM.COORDS[a].X *= -1;
-//		SYSTEM.COORDS[a].Y *= -1;
-//		SYSTEM.COORDS[a].Z *= -1;	
-		
-		//##############################################################################
-		//##############################################################################
-		
 		
 		// Wrap the coordinates
 		SYSTEM.COORDS[a].X -= floor(SYSTEM.COORDS[a].X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
@@ -221,17 +207,41 @@ int main(int argc, char* argv[])
 		SYSTEM.ACCEL[a].Z = 0;		
 
         if ( CONTROLS.COMPARE_FORCE ) // Reading positions from *.xyzf for force testing
-		{
-			// Ignore forces in .xyzf file
-			COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
-			
+		{	
+			if(EXTENSION == "xyzf")	// Ignore forces in .xyzf file
+			{
+				if(a==0)
+				{
+					cout << "	...Ignoring last three fields of atom info lines in xyzf file... " << endl;
+					cout << "	...will read from specified force file instead." << endl;
+				}
+
+				COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;			
+			}
+					
 			// Read forces from separate force file
 			CMPR_FORCEFILE >> SYSTEM.FORCES[a].X >> SYSTEM.FORCES[a].Y >> SYSTEM.FORCES[a].Z;
 		}
-        else // Reading positions from *.xyz
+        else if(!CONTROLS.INIT_VEL) // Reading positions from *.xyz
 		{
+			if(EXTENSION == ".xyz")
+			{
+				cout << "ERROR: Input file requests velocities to be read in. " << endl;
+				cout << "Expected .xyzf file, was given .xyzf file." << endl;
+				exit(0);
+			}
+			
 			// Read in velocities instead of forces... I guess this is the format of .xyz files for this code? 
 			COORDFILE >> SYSTEM.VELOCITY[a].X >> SYSTEM.VELOCITY[a].Y >> SYSTEM.VELOCITY[a].Z;
+		}
+		else
+		{
+			if(EXTENSION == "xyzf")
+			{
+				if(a==0)
+					cout << "	...Ignoring last three fields of atom info lines in xyzf file... " << endl;
+				COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
+			}
 		}
 	}
 	
@@ -248,6 +258,8 @@ int main(int argc, char* argv[])
 	// file
 	////////////////////////////////////////////////////////////
 	 
+	FF_SETUP_1: 
+	 
 	cout << "Reading atom info from parameter file..." << endl; 
 	
 	// Read in the possible atom types and thier features	
@@ -261,7 +273,6 @@ int main(int argc, char* argv[])
 	
 	FOUND_END = false;
 	NATMTYP = 0;
-
 	
 	while (FOUND_END == false)
 	{
@@ -292,9 +303,30 @@ int main(int argc, char* argv[])
 			TMP_ATOMTYPEIDX.resize(NATMTYP);
 			TMP_CHARGES    .resize(NATMTYP);
 			TMP_MASS       .resize(NATMTYP);	
+			TMP_SIGN	   .resize(NATMTYP);
 			
 			cout << "	Read " << NATMTYP << " atom types:" << endl;			
-		}			
+		}	
+		
+		// Quickly figure out if we're fitting charges... note this process gets repeated more 
+		// comprehensively below.. Here it's just needed to figure out charge signs
+		
+		else if(LINE.find("USECOUL: ") != string::npos) 
+		{
+			STREAM_PARSER.str(LINE);
+			STREAM_PARSER >> TEMP_STR;
+			STREAM_PARSER >> TEMP_STR;
+			STREAM_PARSER.str(""); 
+			STREAM_PARSER.clear();
+
+			PARAMFILE >> TEMP_STR >> TEMP_STR;
+			if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
+				CONTROLS.FIT_COUL = true;
+			else
+				CONTROLS.FIT_COUL = false;
+
+			PARAMFILE.ignore();
+		}				
 		
 		else if(LINE.find("# TYPEIDX #") != string::npos)
 		{
@@ -306,21 +338,39 @@ int main(int argc, char* argv[])
 				STREAM_PARSER >> TEMP_STR;
 				TMP_ATOMTYPEIDX[i] = int(atof(TEMP_STR.data()));
 				STREAM_PARSER >> TMP_ATOMTYPE[i];
-				STREAM_PARSER >> TMP_CHARGES[i];
+				if(CONTROLS.FIT_COUL)
+					STREAM_PARSER >> TEMP_STR;
+				else
+					STREAM_PARSER >> TMP_CHARGES[i];
 				STREAM_PARSER >> TMP_MASS[i];
 				
 				STREAM_PARSER.str("");
 				STREAM_PARSER.clear();
 				
-				cout << "		" 	<< setw(5) << left << TEMP_STR << " " 
-									<< setw(2) << left << TMP_ATOMTYPE[i] << ", q (e): " 
-									<< setw(6) << fixed << setprecision(3) << right << TMP_CHARGES[i] << ", mass (amu): " 
-									<< setw(8) << fixed << setprecision(4) << right << TMP_MASS[i] << endl;
+				cout << "		" 	<< setw(5) << left << i << " " 
+									<< setw(2) << left << TMP_ATOMTYPE[i] << ", q (e): ";
+				
+				if(CONTROLS.FIT_COUL)
+				{
+					if(TEMP_STR == "+")
+					{
+						cout << "POSITIVE";
+						TMP_SIGN[i] = 1;
+					}
+					else
+					{
+						cout << "NEGATIVE";
+						TMP_SIGN[i] = -1;
+					}
+				}
+				else
+					cout << setw(6) << fixed << setprecision(3) << right << TMP_CHARGES[i];
+				cout  << ", mass (amu): " << setw(8) << fixed << setprecision(4) << right << TMP_MASS[i] << endl;
 			}
 		}	
 	}
 	
-	// Assign atom features to atoms in SYSTEM data object
+	// Assign atom features to atoms in SYSTEM data object, and the PAIR_FF object
 	
     for(int a=0; a<SYSTEM.ATOMS ;a++)
 	{
@@ -328,20 +378,20 @@ int main(int argc, char* argv[])
 		{
 			if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
 			{
+				
 				SYSTEM.CHARGES[a]      = TMP_CHARGES[i];
 				SYSTEM.MASS[a]         = TMP_MASS[i];
 				SYSTEM.ATOMTYPE_IDX[a] = TMP_ATOMTYPEIDX[i];
 				break;
 			}			
-		}		
+		}
 	}
-	
-	// Free up some memory.. swap the contents of currend vectors with a vector w/ no assigned mem
-	
-//	vector<string>().swap(TMP_ATOMTYPE); -- Don't clear out this one.. we need it.
-	vector<double>().swap(TMP_CHARGES);
-	vector<double>().swap(TMP_MASS);	
-	
+
+	if (FF_PLOTS.N_PLOTS > 0)
+
+		goto FF_SETUP_2; 
+
+
 	cout << "   ...read complete" << endl << endl;
 
 	////////////////////////////////////////////////////////////
@@ -545,7 +595,7 @@ int main(int argc, char* argv[])
 	// Begin setup of force field data objects...
 	////////////////////////////////////////////////////////////  
 
-	FF_SETUP:
+	FF_SETUP_2:
 
 	PARAMFILE.open(CONTROLS.PARAM_FILE.data());
 	if(!PARAMFILE.is_open())
@@ -645,8 +695,8 @@ int main(int argc, char* argv[])
 			else
 				CONTROLS.USE_3B_CHEBY = false;
 			
-			cout << "		...Compute electrostatics?      " << boolalpha << CONTROLS.FIT_COUL << endl;
-			cout << "		...Use fit charges?             " << boolalpha << CONTROLS.USE_COULOMB << endl;
+			cout << "		...Compute electrostatics?      " << boolalpha << CONTROLS.USE_COULOMB << endl;
+			cout << "		...Use fit charges?             " << boolalpha << CONTROLS.FIT_COUL << endl;
 			cout << "		...Compute ReaxFF overbonding?  " << boolalpha << CONTROLS.USE_OVERCOORD << endl;
 			cout << "		...Use fit overbonding param?   " << boolalpha << CONTROLS.FIT_POVER << endl;
 			cout << "		...Use 3-body Cheby params?     " << boolalpha << CONTROLS.USE_3B_CHEBY << endl;
@@ -654,7 +704,7 @@ int main(int argc, char* argv[])
 			cout << "	...Read FF controls..." << endl;
 			
 			PARAMFILE.ignore();
-			
+/*			
 			if(CONTROLS.FIT_COUL)
 			{
 				cout << endl;
@@ -663,6 +713,7 @@ int main(int argc, char* argv[])
 				cout << "	********************* WARNING ********************* " << endl;
 				cout << endl;
 			}
+*/			
 
 		}
 		
@@ -713,6 +764,20 @@ int main(int argc, char* argv[])
 			
 			FF_2BODY.resize(NO_PAIRS);		
 			
+			// Set any defaults for that pair style
+			
+			if(TEMP_TYPE == "CHEBYSHEV")
+			{
+				for(int i=0; i<NO_PAIRS; i++)
+					FF_2BODY[i].PENALTY_DIST  = 0.01;
+			
+				for(int i=0; i<NO_PAIRS; i++)
+					FF_2BODY[i].PENALTY_SCALE = 1.0e8;
+				
+				for(int i=0; i<NO_PAIRS; i++)
+					FF_2BODY[i].CUBIC_SCALE   = 1.0;
+			}
+			
 			// Read in general pair parameters
 			
 			getline(PARAMFILE,LINE);
@@ -739,7 +804,9 @@ int main(int argc, char* argv[])
 				else if(TEMP_TYPE =="CHEBYSHEV")
 				{
 					PARAMFILE >> FF_2BODY[i].CHEBY_TYPE;	// How does the user want distance transformed?
-					PARAMFILE >> FF_2BODY[i].LAMBDA;	
+
+					if(FF_2BODY[i].CHEBY_TYPE == "MORSE")
+						PARAMFILE >> FF_2BODY[i].LAMBDA;	
 					
 					FF_2BODY[i].SNUM          = TMP_TERMS1;
 					FF_2BODY[i].SNUM_3B_CHEBY = TMP_TERMS2;
@@ -779,6 +846,38 @@ int main(int argc, char* argv[])
 			
 			cout << "	...Read general FF params..." << endl;
 		}
+		
+		// Read any special controls for the pair potential
+
+		else if(LINE.find("PAIR CHEBYSHEV PENALTY DIST: ") != string::npos)
+		{
+			STREAM_PARSER.str(LINE);
+			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+			for(int i=0; i<NO_PAIRS; i++)
+				FF_2BODY[i].PENALTY_DIST = double(atof(TEMP_STR.data()));
+			STREAM_PARSER.str("");
+			STREAM_PARSER.clear();	
+		}
+		
+		else if(LINE.find("PAIR CHEBYSHEV PENALTY SCALING: ") != string::npos)
+		{
+			STREAM_PARSER.str(LINE);
+			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+			for(int i=0; i<NO_PAIRS; i++)
+				FF_2BODY[i].PENALTY_SCALE = double(atof(TEMP_STR.data()));
+			STREAM_PARSER.str("");
+			STREAM_PARSER.clear();	
+		}
+		
+		else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING: ") != string::npos)
+		{
+			STREAM_PARSER.str(LINE);
+			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+			for(int i=0; i<NO_PAIRS; i++)
+				FF_2BODY[i].CUBIC_SCALE = double(atof(TEMP_STR.data()));
+			STREAM_PARSER.str("");
+			STREAM_PARSER.clear();	
+		}		
 		
 		// Setup triplets
 		
@@ -898,15 +997,15 @@ int main(int argc, char* argv[])
 					PARAMFILE >> TEMP_STR >> TEMP_STR >> TEMP_STR >> FF_2BODY[i].PAIR_CHRG;
 					// NOTE: Fit charges are in stillinger units.. convert to e:
 					FF_2BODY[i].PAIR_CHRG /= ke;
-					 
+/*					 
 					// Now actually set the charges for all the atoms
 					
 					double TMP_qHH;
 					double TMP_qOO;
 					 
-					for(int i=0; i<FF_2BODY.size(); i++)
-						if(FF_2BODY[i].PRPR_NM == "HH")
-							TMP_qHH = FF_2BODY[i].PAIR_CHRG;
+					for(int j=0; j<FF_2BODY.size(); j++)
+						if(FF_2BODY[j].PRPR_NM == "HH")
+							TMP_qHH = FF_2BODY[j].PAIR_CHRG;
 					 
 					TMP_qHH = sqrt(TMP_qHH);
 					TMP_qOO = -2.0*TMP_qHH;		
@@ -916,7 +1015,7 @@ int main(int argc, char* argv[])
 					cout << "O: " << TMP_qOO << endl;
 					cout << "H: " << TMP_qHH << endl;	
 					*/
-					
+/*					
 					if(!CONTROLS.PLOT_PES)		
 					{
 						for(int i=0; i<SYSTEM.ATOMS; i++)
@@ -932,8 +1031,76 @@ int main(int argc, char* argv[])
 							}
 						}
 					}
+*/					
 				}
-			}		
+			}	
+			
+			// At this point we have all the info needed to set the charges...
+			//
+			// Case 1: FITCOUL is false. Take charges from the individual charges specified by the user
+			//        ("ATOM TYPES/TYPEIDX" section of the parameter file)	
+			//
+			// Case 2: FITCOUL is true. Determine individual charges from charges of type Qxx
+
+			
+			if(!CONTROLS.FIT_COUL)
+			{
+				for(int i=0; i<NO_PAIRS; i++)
+				{
+					for(int j=0; j<NATMTYP; j++)
+					{
+						if( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] )
+							FF_2BODY[i].ATM1CHG =  TMP_CHARGES [j];
+					
+						if( FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] )
+							FF_2BODY[i].ATM2CHG =  TMP_CHARGES [j];
+					}	
+				
+					FF_2BODY[i].PAIR_CHRG = FF_2BODY[i].ATM1CHG*FF_2BODY[i].ATM2CHG;
+				
+				}
+			}
+			else
+			{
+				for(int j=0; j<NATMTYP; j++)
+				{
+					for(int i=0; i<NO_PAIRS; i++)
+					{
+						if( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] || FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] )
+						{
+							TMP_CHARGES[j] = sqrt(FF_2BODY[i].PAIR_CHRG)*TMP_SIGN[j];
+							FF_2BODY[i].ATM1CHG = TMP_CHARGES[j];
+							FF_2BODY[i].ATM2CHG = TMP_CHARGES[j];
+						
+							break;
+						}
+					}
+				}
+				
+			    for(int a=0; a<SYSTEM.ATOMS ;a++)
+				{
+					for(int i=0; i<NATMTYP; i++)
+					{
+						if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
+						{
+							SYSTEM.CHARGES[a] = TMP_CHARGES[i];
+							break;
+						}			
+					}
+				}
+				
+				cout << "		Re-setting individual atom charges based on pair charges :" << endl;
+				for(int j=0; j<NATMTYP; j++)
+				{
+					cout << "		"<<	j << "     "
+									<< setw(2) << left << TMP_ATOMTYPE[j] << ", q (e): " 
+									<< setw(6) << fixed << setprecision(3) << right << TMP_CHARGES[j] << ", mass (amu): " 
+									<< setw(8) << fixed << setprecision(4) << right << TMP_MASS[j] << endl;
+				}
+				 
+			}
+			
+			
 			
 			cout << "	...Read 2-body FF params..." << endl;
 		}		
@@ -1070,6 +1237,26 @@ int main(int argc, char* argv[])
 	
 	}	
 	
+	// Set the atom charges
+	
+	for(int a=0; a<FF_2BODY.size(); a++)
+	{
+		for(int i=0; i<NATMTYP; i++)
+		{	
+			if(FF_2BODY[a].ATM1TYP == TMP_ATOMTYPE[i])
+				FF_2BODY[a].ATM1CHG = TMP_CHARGES[i];
+		
+			if(FF_2BODY[a].ATM2TYP == TMP_ATOMTYPE[i])
+				FF_2BODY[a].ATM2CHG = TMP_CHARGES[i];	
+		}	
+	}
+	
+	// Free up some memory.. swap the contents of currend vectors with a vector w/ no assigned mem
+
+//	vector<string>().swap(TMP_ATOMTYPE); 
+//	vector<double>().swap(TMP_CHARGES); 
+	vector<double>().swap(TMP_MASS);	
+	
 	////////////////////////////////////////////////////////////
 	// Print a summary of the force field
 	////////////////////////////////////////////////////////////  	
@@ -1086,7 +1273,11 @@ int main(int argc, char* argv[])
 		
 		cout << "		pair type...smin...smax...sdelta...";
 		if(FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
-			cout << "cheby type...cheby lambda";
+			cout << "cheby type";
+		if(FF_2BODY[i].CHEBY_TYPE == "MORSE")
+			cout << "...cheby lambda";
+		if(FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
+			cout << "...penalty dist...penalty scaling...cubic scaling";
 		cout << endl;
 				
 		cout << "		" << FF_2BODY[i].PRPR_NM << " ";
@@ -1098,7 +1289,11 @@ int main(int argc, char* argv[])
 		if(FF_2BODY[i].PAIRTYP == "CHEBYSHEV")
 		{
 			cout << FF_2BODY[i].CHEBY_TYPE << " ";
-			cout << FF_2BODY[i].LAMBDA << " ";
+			
+			if(FF_2BODY[i].CHEBY_TYPE == "MORSE")
+				cout << FF_2BODY[i].LAMBDA << " ";
+			cout << FF_2BODY[i].PENALTY_DIST << " " << scientific << FF_2BODY[i].PENALTY_SCALE<< " ";
+			cout << FF_2BODY[i].CUBIC_SCALE;
 		}
 		
 		cout << endl;
@@ -1270,6 +1465,14 @@ int main(int argc, char* argv[])
 						// If 2+3b interactions requested, include them
 						if(FF_PLOTS.INCLUDE_2B)	
 						{
+							// We don't want to double-count ewald interactions, so turn off charges for this part (they've already been calcuated in the 3B scan)
+							
+							for(int a=0; a<FF_2BODY.size(); a++)
+							{
+									FF_2BODY[a].ATM1CHG = 0;
+									FF_2BODY[a].ATM2CHG = 0;	
+							}
+							
 							// Read in the printed 3b interactions
 							
 							SCAN_INFILE_3B.open(SCAN_FILE_3B.data());
@@ -1421,6 +1624,19 @@ int main(int argc, char* argv[])
 					
 							SCAN_OUTFILE_3B.close();							
 							
+							// Add the charges back in for the next round of 3B calculations
+							
+							for(int a=0; a<FF_2BODY.size(); a++)
+							{
+								for(int x=0; x<NATMTYP; x++)
+								{
+									if(FF_2BODY[a].ATM1TYP == TMP_ATOMTYPE[x])
+										FF_2BODY[a].ATM1CHG = TMP_CHARGES[x];
+		
+									if(FF_2BODY[a].ATM2TYP == TMP_ATOMTYPE[x])
+										FF_2BODY[a].ATM2CHG = TMP_CHARGES[x];
+								}		
+							}
 							
 						}
 					}	
@@ -1545,7 +1761,7 @@ int main(int argc, char* argv[])
 		// requested
 		////////////////////////////////////////////////////////////
 
-	  	if ( CONTROLS.PRINT_FORCE ) 
+	  	if ( CONTROLS.PRINT_FORCE && (A+1)%CONTROLS.FREQ_FORCE == 0 ) 
 	  	{
 			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 			{
@@ -1834,8 +2050,8 @@ int main(int argc, char* argv[])
 
 	fxyz << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
 	fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.BOXDIM.X << " ";
-	fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.BOXDIM.X << " ";
-	fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.BOXDIM.X << endl;;
+	fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.BOXDIM.Y << " ";
+	fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.BOXDIM.Z << endl;;
 	
 	// Note the conversion of our string to a c-style string... printf can't handle c++ strings,
 	// since it is a C method. 
@@ -2323,7 +2539,15 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
 			{
 				CONTROLS.PRINT_FORCE = true;
-				cout << "	# PRNTFRC #: true" << endl;	
+				cin >> LINE; cin.ignore();
+				
+				if(LINE == "FRQDFTB")
+					CONTROLS.FREQ_FORCE = CONTROLS.FREQ_DFTB_GEN;
+				else
+					CONTROLS.FREQ_FORCE = int(atof(LINE.data()));
+				
+				cout << "	# PRNTFRC #: true ...and will be printed every " << CONTROLS.FREQ_FORCE << " frames."<< endl;	
+//				cout << "	# PRNTFRC #: true" << endl;	
 			}
 			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
 			{
