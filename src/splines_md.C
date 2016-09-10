@@ -704,17 +704,6 @@ int main(int argc, char* argv[])
 			cout << "	...Read FF controls..." << endl;
 			
 			PARAMFILE.ignore();
-/*			
-			if(CONTROLS.FIT_COUL)
-			{
-				cout << endl;
-				cout << "	********************* WARNING ********************* " << endl;
-				cout << "	Use FIT_COUL option only supported for H2O systems!" << endl;
-				cout << "	********************* WARNING ********************* " << endl;
-				cout << endl;
-			}
-*/			
-
 		}
 		
 		// Determine the pair type and corresponding orders, etc
@@ -744,7 +733,6 @@ int main(int argc, char* argv[])
 			cout << "	...Read FF interaction type..." << endl;	
 		}
 
-		
 		// Read in pair potential info
 
 		else if(LINE.find("ATOM PAIRS: ") != string::npos)
@@ -993,45 +981,9 @@ int main(int argc, char* argv[])
 				
 				if(CONTROLS.FIT_COUL)
 				{
-					
 					PARAMFILE >> TEMP_STR >> TEMP_STR >> TEMP_STR >> FF_2BODY[i].PAIR_CHRG;
 					// NOTE: Fit charges are in stillinger units.. convert to e:
 					FF_2BODY[i].PAIR_CHRG /= ke;
-/*					 
-					// Now actually set the charges for all the atoms
-					
-					double TMP_qHH;
-					double TMP_qOO;
-					 
-					for(int j=0; j<FF_2BODY.size(); j++)
-						if(FF_2BODY[j].PRPR_NM == "HH")
-							TMP_qHH = FF_2BODY[j].PAIR_CHRG;
-					 
-					TMP_qHH = sqrt(TMP_qHH);
-					TMP_qOO = -2.0*TMP_qHH;		
-				
-					/*
-					cout << "Will use the following atom charges: " << endl;
-					cout << "O: " << TMP_qOO << endl;
-					cout << "H: " << TMP_qHH << endl;	
-					*/
-/*					
-					if(!CONTROLS.PLOT_PES)		
-					{
-						for(int i=0; i<SYSTEM.ATOMS; i++)
-						{
-							if(SYSTEM.ATOMTYPE[i] == "O")
-								SYSTEM.CHARGES[i] = TMP_qOO;
-							else if(SYSTEM.ATOMTYPE[i] == "H")
-								SYSTEM.CHARGES[i] = TMP_qHH;
-							else
-							{
-								cout << "ERROR: FIT_COUL functionality only valid for H2O-type systems." << endl;
-								exit(0);
-							}
-						}
-					}
-*/					
 				}
 			}	
 			
@@ -1099,9 +1051,7 @@ int main(int argc, char* argv[])
 				}
 				 
 			}
-			
-			
-			
+						
 			cout << "	...Read 2-body FF params..." << endl;
 		}		
 		
@@ -1922,7 +1872,6 @@ int main(int argc, char* argv[])
 		SYSTEM.PRESSURE = (SYSTEM.PRESSURE_XYZ + 2.0 * Ktot / (3.0 * Vol)) * GPa;	// GPa = Unit conversion factor to GPa.
 		press_sum += SYSTEM.PRESSURE;
 		
-		
 	  	////////////////////////////////////////////////////////////
 		// Periodically print simulation output
 		////////////////////////////////////////////////////////////
@@ -1946,8 +1895,7 @@ int main(int argc, char* argv[])
 
 			cout.flush();
 
-		}
-		
+		}	
 		
 	  	////////////////////////////////////////////////////////////
 		// If requested, scale the velocities
@@ -1973,13 +1921,11 @@ int main(int argc, char* argv[])
 		}
 		else
 		  avg_temp += SYSTEM.TEMPERATURE;
-
-
+		
 	  	////////////////////////////////////////////////////////////
 		// If requested, write the dftbgen output file
 		////////////////////////////////////////////////////////////
 		
-
 		if ( (CONTROLS.FREQ_DFTB_GEN>0) && ((A+1) % CONTROLS.FREQ_DFTB_GEN == 0) ) 
 		{
 			GENFILE << setw(5) << right << SYSTEM.ATOMS << " S #Step " << A+1 << " Time " << (A+1) * CONTROLS.DELTA_T_FS << " (fs) Temp " << SYSTEM.TEMPERATURE << " (k)" << endl;

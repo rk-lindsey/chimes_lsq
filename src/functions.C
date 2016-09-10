@@ -823,11 +823,10 @@ static void ZCalc_3B_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vecto
 // Calculate derivatives of the forces wrt the 3-body Chebyshev parameters. 
 // This three body interaction stems from: C_n^ij *  C_n^ik * C_n^jk * T_n(x_ij) * T_n(x_ik) * T_n(x_jk)
 {
-/*
-	The logic:
-	+ Run a tripe loop over all atoms in the system.
-	+ Compute C_ij, C_ik, and C_jk coeffiecients independently as you would do for a normal 2 body 
-*/
+
+	//	The logic:
+	//	+ Run a tripe loop over all atoms in the system.
+	//	+ Compute C_ij, C_ik, and C_jk coeffiecients independently as you would do for a normal 2 body 
 
 	XYZ RVEC_IJ;
 	XYZ RVEC_IK;

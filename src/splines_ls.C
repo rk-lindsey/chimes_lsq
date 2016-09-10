@@ -361,9 +361,7 @@ int main()
 			ZCalc_Ewald(TRAJECTORY[i], ATOM_PAIRS, PAIR_MAP);
 
 		if ( fit_pover )	// Fit the overcoordination parameter.
-			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);	
-		
-			
+			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);		
 	}	
 	
 	
@@ -453,6 +451,9 @@ int main()
     }
 	
 	// A and B file charge constraints: generalized
+	// 
+	// The order that charge constraints are printed needs to match
+	// the order atom pairs are expected...
 
 	if ( fit_coul && CHARGE_CONSTRAINTS.size()>0) 
 	{
@@ -461,76 +462,19 @@ int main()
 			for(int n=0; n < tot_short_range; n++)
 				fileA << "0.0 ";
 			
-			for(int j=0; j<CHARGE_CONSTRAINTS.size()+1; j++)
-				fileA << CHARGE_CONSTRAINTS[i].CONSTRAINTS[j] << " ";
+			for(int j=0; j<ATOM_PAIRS.size(); j++)
+				for(int k=0; k<CHARGE_CONSTRAINTS.size()+1; k++) // +1 because we n_constr = npairs-1
+					if(CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX[k] == j)
+						fileA << CHARGE_CONSTRAINTS[i].CONSTRAINTS[k] << " ";
 			
 			if ( fit_pover ) 
 				fileA  << " 0.0 ";
 			
 			fileA << endl;	
 			
-			fileb << CHARGE_CONSTRAINTS[i].FORCE << endl;
-			
-		}
-			
+			fileb << CHARGE_CONSTRAINTS[i].FORCE << endl;	
+		}		
 	}
-
-	/*
-	// A and B file charge conservation (q00 + 4 qOH + qHH = 0 ) .. This is specific for water systems... THE OLD WAY
-	  
-	if ( fit_coul && coul_consv) 
-	{
-		#if VERBOSITY == 1
-			cout << endl;
-			cout << "*********************************************************************************" << endl;
-			cout << "*********************************************************************************" << endl;
-			cout << endl;
-			cout << "WARNING: CHARGE CONSERVATION HAS NOT BEEN GENERALIZED. " << endl;
-			cout << "         RESULTS WILL BE INCORRECT IF: " << endl;
-			cout << "              1. Atom type other than O and H are used" << endl;
-			cout << "              2. Atoms are given in order O and H in the input file, respectively" << endl;
-			cout << endl;
-			cout << "*********************************************************************************" << endl;
-			cout << "*********************************************************************************" << endl;
-			cout << endl;
-		#endif
-		
-		// A file...
-		
-		// Constraint 1: Require that qH = 0.5*qO... thus qH * qH = 0.25 * qO * qO, or equivalently, 4000 * qH * qH = 1000 * qO * qO
-		// Similarly, qH * qO = 0.25qO * qO, so 4000 * qO * qH = 1000 * qO * qO
-	  
-		for(int n=0; n < tot_short_range; n++)
-			fileA << "0.0 ";
-
-		fileA << "1000.0 4000.0 4000.0"; // OO, HH, OH
-	  		  
-		if ( fit_pover ) 
-			fileA << " 0.0 ";
-
-		fileA << endl;
-		
-		// Constraint 2: Require charge consistency, i.e. qOO - 4 qHH = 0
-	  
-		for(int n=0; n < tot_short_range; n++)
-			fileA << "0.0 ";
-	  
-		fileA << "1000.0 -4000.0 0000.0"; // OO, HH, OH		
-	  
-		if ( fit_pover ) 
-			fileA  << " 0.0 ";
-  
-		fileA << endl;	 
-		  
-		// B file...
-		  
-		// There is no associated force with these constraints
-		
-		fileb << "0.0" << endl;	// qOO + 4 * qHH + 4 * qOH = 0
-		fileb << "0.0" << endl;	// qOO + 4 * qHH = 0
-		 
-	} 	
-	 */ 
 	
 	fileA.close();
 	fileb.close();
@@ -675,9 +619,7 @@ int main()
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
 	 
 	if(!if_3b_cheby)
-	{
 		header << endl << "ATOM PAIR TRIPLETS: " << 0 << endl << endl;
-	}
 	else
 	{
 		header << endl << "ATOM PAIR TRIPLETS: " << PAIR_TRIPLETS.size() << endl << endl;	
@@ -876,34 +818,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				
 			#endif
 		}
-/*		
-		else if(LINE.find("# CNSCOUL #") != string::npos)
-		{
-			cin >> LINE; cin.ignore();
-			
-			if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
-				coul_consv = true;
-			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
-				coul_consv = false;
-			else
-			{
-				cout << endl << "ERROR: # CNSCOUL # must be specified as true or false." << endl;
-				exit(1);	
-			}	
-*/		
-/*			
-			#if VERBOSITY == 1
-						
-				cout << "	# CNSCOUL #: ";
-			
-				if (coul_consv)
-					cout << "true" << endl;				
-				else
-					cout << "false" << endl;							
-			#endif
-				
-		}
-*/
+
 		else if(LINE.find("# FITPOVR #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
@@ -1471,15 +1386,6 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 
 					}
 
-/*	OLD WAY				
-					for(int set=1; set<PAIR_TRIPLETS[i].EQUIV_INDICIES.size(); set++)
-					{
-						if(PAIR_TRIPLETS[i].EQUIV_INDICIES[set] != PAIR_TRIPLETS[i].EQUIV_INDICIES[set-1])
-							PAIR_TRIPLETS[i].PARAM_INDICIES[set] = PAIR_TRIPLETS[i].PARAM_INDICIES[set-1]+1;
-						else
-							PAIR_TRIPLETS[i].PARAM_INDICIES[set] = PAIR_TRIPLETS[i].PARAM_INDICIES[set-1];
-					}
-*/				
 					PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICIES[PAIR_TRIPLETS[i].PARAM_INDICIES.size()-1]+1;
 					PAIR_TRIPLETS[i].N_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICIES.size();
 				}

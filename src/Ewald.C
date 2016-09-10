@@ -998,9 +998,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 		#endif
 	}
 	
-	
-
-	
     for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++) //Ewald real-space sum.
     {
 		for(int a2=0;a2<a1;a2++)
@@ -1142,9 +1139,7 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 												
 		  	}		
 		}
-	}
-	
-	
+	}	
 	
 	for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++)
 	{
