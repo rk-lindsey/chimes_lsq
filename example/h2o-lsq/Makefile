@@ -31,6 +31,24 @@ cheby2 :
 	-diff cheby2.1.out output/cheby2.1.out
 	-diff cheby2.2.out output/cheby2.2.out
 
+
+cheby3 :
+	../../bin/splines_ls cheby_ls3.in 99 > cheby_ls3.out
+	../../bin/lsq.py A.txt b.txt params.header > params.cheby3.txt
+	../../bin/cheby_print.pl < params.cheby3.txt
+	mv chebypot.0.out chebypot3.0.out
+	mv chebypot.1.out chebypot3.1.out
+	mv chebypot.2.out chebypot3.2.out
+	mv cheby.0.out cheby3.0.out
+	mv cheby.1.out cheby3.1.out
+	mv cheby.2.out cheby3.2.out
+	-diff chebypot3.0.out output/chebypot3.0.out
+	-diff chebypot3.1.out output/chebypot3.1.out
+	-diff chebypot3.2.out output/chebypot3.2.out
+	-diff cheby3.0.out output/cheby3.0.out
+	-diff cheby3.1.out output/cheby3.1.out
+	-diff cheby3.2.out output/cheby3.2.out
+
 spline :
 	../../bin/splines_ls splines_ls.in 49 > splines_ls.out
 	../../bin/lsq.py A.txt b.txt params.header > params.spline.txt
