@@ -95,6 +95,10 @@ int main()
  	int NATMTYP = 0;
 
 	bool if_3b_cheby = false; 		// ************* WHY ISN'T THIS ITS OWN PAIR_TYPE????!?!?!?!?!?!?!
+	                                        // 3-body interaction is logically distinct from the 2-body interaction
+	                                        // in principle you could mix and match between different
+	                                        // 2-body and 3-body interactions (e.g. 2-body spline with
+	                                        // 3-body chebyshev) (LEF)
 
 	//////////////////////////////////////////////////
 	//
@@ -380,7 +384,18 @@ int main()
 	//////////////////////////////////////////////////
 	
 	// Lets recap. What does any given row of the A file look like???
-
+	// Rows of A have the following order.
+	// A's first dimension is the number of frames.  2nd dimension is the number of atoms.
+	// 3rd dimension is the number of parameters.
+        // parameters in A are ordered as follows:
+	// For x forces:
+	//	short-range 2-body and 3-body interaction
+	//      charge pair parameters (if any).
+	//      linear over-coordination parameter (if used)
+        // Same pattern repeated for y and z forces.
+        // charge constraints.
+	// (LEF)
+		
 	ofstream fileA("A.txt");
 	ofstream fileb("b.txt");
 	ofstream fileb_labeled("b-labeled.txt");

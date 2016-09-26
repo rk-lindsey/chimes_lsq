@@ -231,7 +231,9 @@ int main(int argc, char* argv[])
 				exit(0);
 			}
 			
-			// Read in velocities instead of forces... I guess this is the format of .xyz files for this code? 
+			// Read in velocities instead of forces... I guess this is the format of .xyz files for this code?
+			// Velocities must be stored so that the code can be restarted 
+			// Maybe we should use a different file extension when velocities are stored. (LEF)
 			COORDFILE >> SYSTEM.VELOCITY[a].X >> SYSTEM.VELOCITY[a].Y >> SYSTEM.VELOCITY[a].Z;
 		}
 		else
@@ -940,7 +942,7 @@ int main(int argc, char* argv[])
 										
 					for(int j=0; j<FF_2BODY[i].SNUM; j++)
 					{
-						if(abs(FF_2BODY[i].PARAMS[j])>1.0)
+						if(fabs(FF_2BODY[i].PARAMS[j])>1.0)
 						{
 							STOP_FILL_IDX = j;
 							cout << "			...Generating linear params for pair idx " << i << " for params 0 through " << STOP_FILL_IDX-1 << endl;
@@ -1981,7 +1983,9 @@ int main(int argc, char* argv[])
 	
 	// WHY ON EARTH WOULD WE NEED TO RE-COMPUTE MASS??? WHAT COULD POSSIBLY
 	// HAPPEN TO CAUSE THE MASS TO CHANGE DURING A CLOSED-SYSTEM MD SIMULATION?!?!?!?!?!?!??!?!?!?!?!??!?!?!
-	
+	// This is probably copied over from the original least squares code
+	// where the mass could vary between frames (LEF)
+	// It's probably better to store the total mass in the SYSTEM structure.
 	TEMP_MASS = 0.0;
 	
 	for ( int a = 0; a < SYSTEM.ATOMS; a++ ) 
@@ -2001,7 +2005,8 @@ int main(int argc, char* argv[])
 	
 	// Note the conversion of our string to a c-style string... printf can't handle c++ strings,
 	// since it is a C method. 
-
+	// I think there is a way to get at the underlying C char* in a C++ String if you like
+	// printf better (LEF).
 	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
 	{
 		fxyz << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";

@@ -31,19 +31,23 @@ void EXIT_MSG(string EXIT_STRING, double EXIT_VAR) // error message: var
 	exit(0);
 }
 
+static double fix_cheby_val(double x, bool inverse_order) ;
+static double cheby_var_deriv(double xdiff, double rlen, double lambda,
+			      string& cheby_type) ;
 
 void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rlen, double & xdiff)
 // Sets the value of the Chebyshev polynomials (Tn) and thier derivatives (Tnd)
 {
 	double xmin, xmax, xavg;
 	double x;
-		
+	bool inverse_order = true ;  // Inverse order determines whether x is an increasing (false) or decreasing (true) function of r (LEF).
 	
 	if ( FF_2BODY.CHEBY_TYPE == "INVRSE_R" ) 
 	{
 		xavg  =  0.5 * (1.0/FF_2BODY.S_MINIM + 1.0/FF_2BODY.S_MAXIM); 
 		xdiff =  0.5 * (1.0/FF_2BODY.S_MINIM - 1.0/FF_2BODY.S_MAXIM); 
-		x     = (1.0/rlen-xavg) / xdiff;	
+		x     = (1.0/rlen-xavg) / xdiff;
+		inverse_order = true ; // (LEF)
 	} 
 	else if ( FF_2BODY.CHEBY_TYPE == "MORSE" ) 
 	{
@@ -52,12 +56,14 @@ void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double
 		xavg  = 0.5 * (xmin + xmax);
 		xdiff = 0.5 * (xmax - xmin);
 		x = (exp(-rlen/FF_2BODY.LAMBDA)-xavg)/xdiff;
+		inverse_order = true ; // (LEF)
 	}
 	else if (FF_2BODY.CHEBY_TYPE == "DEFAULT")
 	{
 		xavg  = 0.5 * (FF_2BODY.S_MINIM + FF_2BODY.S_MAXIM);
 		xdiff = 0.5 * (FF_2BODY.S_MAXIM - FF_2BODY.S_MINIM);
-		x = (rlen-xavg) / xdiff;	
+		x = (rlen-xavg) / xdiff;
+		inverse_order = false ; // (LEF)
 	}
 	else
 	{
@@ -66,17 +72,10 @@ void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double
 		exit(1);
 	}
 
-	if ( x < -1.0 ) // Why are we setting it as -1? shouldn't something else be done here instead? ...since we're outside the range of the fit??
-	{
-		cout << "Warning: In 3B Cheby transformation, r < rmin " << FF_2BODY.CHEBY_TYPE << endl;
-		x = -1.0;
+	if ( x < -1.0 || x > 1.0 ) {
+	  x = fix_cheby_val(x, inverse_order) ;
 	}
-	else if ( x > 1.0 ) // Added a warning...Do we need to turn off the interaction, because it's beyond rcut?
-	{
-		cout << "Warning:  r > rmax" << endl;								
-		x = 1.0;								
-	}
-
+	
 	Tn[0] = 1.0;
 	Tn[1] = x;
 
@@ -85,12 +84,12 @@ void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double
 
 	for ( int i = 2; i <= FF_2BODY.SNUM_3B_CHEBY; i++ ) 
 	{
-		Tn[i] =  2.0 * x * Tn[i-1] - Tn[i-2];
-		Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
+	  Tn[i] =  2.0 * x * Tn[i-1] - Tn[i-2];
+	  Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
 	}
 
 	for ( int i = FF_2BODY.SNUM_3B_CHEBY; i >= 1; i-- ) 
-		Tnd[i] = i * Tnd[i-1];
+	  Tnd[i] = i * Tnd[i-1];
 
 	Tnd[0] = 0.0;
 }
@@ -155,7 +154,9 @@ void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<st
 	
 }
 
-void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) // MD version
+void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij,
+			 int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK,
+			 string PAIR_TYPE_JK, int POWER_SET) // MD version
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
 {
 	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATMPAIR1)
@@ -405,26 +406,24 @@ void ZCalc_Deriv (vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> PAIR_TRIPLETS, FRA
     if ( FF_2BODY[0].PAIRTYP == "SPLINE" )			// FUNCTION UPDATED
 		ZCalc_Spline_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP);
 	
-	else if ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" )	// FUNCTION UPDATED
-	{
-		ZCalc_Cheby_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP);
+    else if ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" )	// FUNCTION UPDATED
+      {
+	ZCalc_Cheby_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP);
 	
-		if (if_3b_cheby)
-			ZCalc_3B_Cheby_Deriv(FRAME_SYSTEM, FF_2BODY, PAIR_TRIPLETS, FRAME_A_MATRIX, nlayers, PAIR_MAP, TRIAD_MAP);		
-	}			
+	if (if_3b_cheby)
+	  ZCalc_3B_Cheby_Deriv(FRAME_SYSTEM, FF_2BODY, PAIR_TRIPLETS, FRAME_A_MATRIX, nlayers, PAIR_MAP, TRIAD_MAP);		
+      }			
 
     else if ( FF_2BODY[0].PAIRTYP == "DFTBPOLY" )	// FUNCTION UPDATED
-		ZCalc_Poly_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP);
+      ZCalc_Poly_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP);
 
     else if ( FF_2BODY[0].PAIRTYP == "INVRSE_R" )	// FUNCTION UPDATED
-		ZCalc_InvR_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP);
-		
-	
+      ZCalc_InvR_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP);
 		
     else 
     {
-		cout << "Error: bad pairtype in ZCalc_Deriv\n";
-		exit(1);
+      cout << "Error: bad pairtype in ZCalc_Deriv\n";
+      exit(1);
     }		
 }	
 
@@ -432,6 +431,10 @@ void ZCalc_Deriv (vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> PAIR_TRIPLETS, FRA
 static void ZCalc_Spline_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP)		   
 // Original comment: Calculate derivatives of the forces wrt the spline parameters. Stores minimum distance between a pair of atoms in minD[i].
 // New Note: This doesn't actually calcuate any derivatives.. it is just populating A with the cubic hermite basis polynomials needed for fitting
+// 3rd note:  The hermite basis polynomials stored in FRAME_A_MATRIX are equal to derivatives of the force with respect to the spline coefficients..
+//            This is what all of the ZCalc_XX_Deriv functions find.
+//            Since the force is a linear function of the spline coefficients, you are left with just the cubic hermite basis polynomials.
+//            (LEF)
 {
 	XYZ RVEC; 		// Replaces Rvec[3];
 	XYZ RAB; 		// Replaces  Rab[3];
@@ -607,8 +610,9 @@ static void ZCalc_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<v
 	double fcutderiv; 				
 	double deriv;
 	double tmp_doub; 	
-	
-	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
+
+	// See comment below about fpenalty_scale (LEF) 
+	// const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 
 	if ( ! called_before ) 
 	{
@@ -679,141 +683,141 @@ static void ZCalc_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<v
 							// 
 							// All types are normalized by s_min to s_max range to fall along [-1,1]
 														
-							
-							if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "INVRSE_R" ) 
-							{
-								xavg  =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM + 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances in r^-1 space
-								xdiff =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM - 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // width of possible pair distances in r^-1 space
-								x     = (1.0/rlen-xavg) / xdiff;																		  // pair distances in r^-1 space, normalized to fit over [-1,1]
-							} 
-							else if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "MORSE" ) 
-							{
-								xmin  = exp(-FF_2BODY[curr_pair_type_idx].S_MAXIM/FF_2BODY[curr_pair_type_idx].LAMBDA); 
-								xmax  = exp(-FF_2BODY[curr_pair_type_idx].S_MINIM/FF_2BODY[curr_pair_type_idx].LAMBDA); 
-								xavg  = 0.5 * (xmin + xmax);																// midpoint of possible pair distances in morse space
-								xdiff = 0.5 * (xmax - xmin);																// width of possible pair distances in morse space
-								x = (exp(-rlen/FF_2BODY[curr_pair_type_idx].LAMBDA)-xavg)/xdiff;							// pair distances in morse space, normalized to fit over [-1,1]
-							}
-							else if (FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "DEFAULT")
-							{
-								xavg  = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MINIM + FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances
-								xdiff = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MAXIM - FF_2BODY[curr_pair_type_idx].S_MINIM); // width of possible pair distances
-								x = (rlen-xavg) / xdiff;																		 // pair distances, normalized to fit over [-1,1]
-							}
-							else
-							{
-								cout << "ERROR: Undefined CHBTYPE: " << FF_2BODY[curr_pair_type_idx].CHEBY_TYPE << endl;
-								cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
-								exit(1);
-							}
-
-							if ( x < -1.0 ) // Why are we setting it as -1? shouldn't something else be done here instead? ...since we're outside the range of the fit??
-							{
-								cout << "Warning:  r < rmin" << endl;
-								x = -1.0;
-							}
-							else if ( x > 1.0 ) // Added a warning...Do we need to turn off the interaction, because it's beyond rcut?
-							{
-								cout << "Warning:  r > rmax" << endl;								
-								x = 1.0;								
+						  bool inverse_order ;
+						  if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "INVRSE_R" ) 
+						    {
+						      xavg  =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM + 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances in r^-1 space
+						      xdiff =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM - 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // width of possible pair distances in r^-1 space
+						      x     = (1.0/rlen-xavg) / xdiff;
+						      inverse_order = true ;
+						      // pair distances in r^-1 space, normalized to fit over [-1,1]
+						    } 
+						  else if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "MORSE" ) 
+						    {
+						      xmin  = exp(-FF_2BODY[curr_pair_type_idx].S_MAXIM/FF_2BODY[curr_pair_type_idx].LAMBDA); 
+						      xmax  = exp(-FF_2BODY[curr_pair_type_idx].S_MINIM/FF_2BODY[curr_pair_type_idx].LAMBDA); 
+						      xavg  = 0.5 * (xmin + xmax);																// midpoint of possible pair distances in morse space
+						      xdiff = 0.5 * (xmax - xmin);																// width of possible pair distances in morse space
+						      x = (exp(-rlen/FF_2BODY[curr_pair_type_idx].LAMBDA)-xavg)/xdiff;							// pair distances in morse space, normalized to fit over [-1,1]
+						      inverse_order = true ;
+						    }
+						  else if (FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "DEFAULT")
+						    {
+						      xavg  = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MINIM + FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances
+						      xdiff = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MAXIM - FF_2BODY[curr_pair_type_idx].S_MINIM); // width of possible pair distances
+						      x = (rlen-xavg) / xdiff;
+						      inverse_order = false ;
+						      // pair distances, normalized to fit over [-1,1]
+						    }
+						  else
+						    {
+						      cout << "ERROR: Undefined CHBTYPE: " << FF_2BODY[curr_pair_type_idx].CHEBY_TYPE << endl;
+						      cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
+						      exit(1);
 							}
 
-							// Generate Chebyshev polynomials by recursion. 
-							// 
-							// What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
-							// We need to calculate the derivative of these polynomials.
-							// Derivatives are defined through use of Cheby polynomials of the 2nd kind "U_n(x)", as:
-							//
-							// d/dx[ T_n(x) = n * U_n-1(x)] 
-							// 
-							// So we need to first set up the 1st-kind polynomials ("Tn[]")
-							// Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
+						  if ( x < -1.0 || x > 1.0 )
+						    // Why are we setting it as -1? shouldn't something else be done here instead? ...since we're outside the range of the fit??
+						    // This is mostly defensive programming against bad behavior of the Cheby polynomial
+						    // outside of the fitting range.  If r < rmin, the repulsive potential should take over.
+						    // If r > rmax, the cutoff function will set the total force to 0. (LEF)
+						    {
+						      x = fix_cheby_val(x, inverse_order) ;
+						    }
+
+						  // Generate Chebyshev polynomials by recursion. 
+						  // 
+						  // What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
+						  // We need to calculate the derivative of these polynomials.
+						  // Derivatives are defined through use of Cheby polynomials of the 2nd kind "U_n(x)", as:
+						  //
+						  // d/dx[ T_n(x) = n * U_n-1(x)] 
+						  // 
+						  // So we need to first set up the 1st-kind polynomials ("Tn[]")
+						  // Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
 						  
-							// First two 1st-kind Chebys:
+						  // First two 1st-kind Chebys:
 						  
-							Tn[0] = 1.0;
-							Tn[1] = x;
+						  Tn[0] = 1.0;
+						  Tn[1] = x;
 							
-							// Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
+						  // Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
 						  
-							Tnd[0] = 1.0;
-							Tnd[1] = 2.0 * x;
-							
-							// Use recursion to set up the higher n-value Tn and Tnd's
+						  Tnd[0] = 1.0;
+						  Tnd[1] = 2.0 * x;
 						  
-							for ( int i = 2; i <= FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
-							{
-								Tn[i] =  2.0 * x * Tn[i-1] - Tn[i-2];
-								Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
-							}
+						  // Use recursion to set up the higher n-value Tn and Tnd's
+						  
+						  for ( int i = 2; i <= FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
+						    {
+						      Tn[i] =  2.0 * x * Tn[i-1] - Tn[i-2];
+						      Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
+						    }
 							
-							// Now multiply by n to convert Tnd's to actual derivatives of Tn
+						  // Now multiply by n to convert Tnd's to actual derivatives of Tn
 
-							for ( int i = FF_2BODY[curr_pair_type_idx].SNUM; i >= 1; i-- ) 
-								Tnd[i] = i * Tnd[i-1];
-
-							Tnd[0] = 0.0;
+						  for ( int i = FF_2BODY[curr_pair_type_idx].SNUM; i >= 1; i-- ) 
+						    Tnd[i] = i * Tnd[i-1];
+						  
+						  Tnd[0] = 0.0;
 							
-							// Define/setup a penalty function to deal with the cases where the pair distance is close to rmin.. to discourage
-							// the SYSTEM from heading towards though poorly sampled regions of the PES.
+						  // Define/setup a penalty function to deal with the cases where the pair distance is close to rmin.. to discourage
+						  // the SYSTEM from heading towards though poorly sampled regions of the PES.
 
-							rlen3 = rlen * rlen * rlen;
+						  rlen3 = rlen * rlen * rlen;
 							
-							if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "MORSE" ) // IS THE MORSE TYPE THE ONLY ONE THAT USES DERIVATIVES?? WHY??
-							{
-								// fcut and fcutderv are the form that the penalty func and its derivative for the morse-type pair distance transformation
-								
-								fcut0     = (1.0 - rlen/FF_2BODY[curr_pair_type_idx].S_MAXIM);
-								fcut      = fcut0 * fcut0 * fcut0;
-								fcutderiv = -3.0 * fcut0 * fcut0 / FF_2BODY[curr_pair_type_idx].S_MAXIM;
-								
-								fcut      *= fpenalty_scale;
-								fcutderiv *= fpenalty_scale;
+						  // fcut and fcutderv are the cutoff functions (1-r/rcut)**3 and its
+						  // derivative -3 (1-r/rcut)**2/rcut.  This ensures that
+						  // the force goes to 0 as r goes to rcut.
+						  // This is not a penalty function in the usual sense.  
+						  // I don't see any reason to have a scaling on the cutoff.
+						  
+						  // That will simply multiply all the forces by a constant,
+						  // which will be canceled out during the force matching process.
+						  // (LEF)
+						  fcut0     = (1.0 - rlen/FF_2BODY[curr_pair_type_idx].S_MAXIM);
+						  fcut      = fcut0 * fcut0 * fcut0;
+						  fcutderiv = -3.0 * fcut0 * fcut0 / FF_2BODY[curr_pair_type_idx].S_MAXIM;
+
+						  
+						  // fcut      *= fpenalty_scale;
+						  // fcutderiv *= fpenalty_scale;
 							
-								for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
-								{
-									
-									// NOTE: All these extra terms are coming from:
-									//
-									// 1. Chain rule to account for transformation from morse-type pair distance to x
-									// 2. Product rule coming from pair distance dependence of fcut, the penalty function
-									
-									tmp_doub = (fcut * Tnd[i+1] *(-exp(-rlen/FF_2BODY[curr_pair_type_idx].LAMBDA)/FF_2BODY[curr_pair_type_idx].LAMBDA)/xdiff + fcutderiv * Tn[i+1] );
-									
-									// Finally, account for the x, y, and z unit vectors
-									
-									deriv = tmp_doub * RAB.X / rlen;
-									FRAME_A_MATRIX[a1][vstart+i].X += deriv;
-									FRAME_A_MATRIX[a2][vstart+i].X -= deriv;
-		
-									deriv = tmp_doub * RAB.Y / rlen; 
-									FRAME_A_MATRIX[a1][vstart+i].Y += deriv;
-									FRAME_A_MATRIX[a2][vstart+i].Y -= deriv;
-																		
-									deriv = tmp_doub * RAB.Z / rlen;
-									FRAME_A_MATRIX[a1][vstart+i].Z += deriv;
-									FRAME_A_MATRIX[a2][vstart+i].Z -= deriv;
+						  // Added missing code for other cheby types (LEF).
+						  double dx_dr = cheby_var_deriv(xdiff, rlen,
+										 FF_2BODY[curr_pair_type_idx].LAMBDA,
+										 FF_2BODY[curr_pair_type_idx].CHEBY_TYPE) ;
+						  
+						  for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
+						    {
+						      
+						      // NOTE: All these extra terms are coming from:
+						      //
+						      // 1. Chain rule to account for transformation from morse-type pair distance to x
+						      // 2. Product rule coming from pair distance dependence of fcut, the penalty function
+							    
 
-								}
-							}
-							else 
-							{
-								for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
-								{
-									FRAME_A_MATRIX[a1][vstart+i].X += (FF_2BODY[curr_pair_type_idx].S_MAXIM - rlen) * Tn[i] * RAB.X/rlen3;
-									FRAME_A_MATRIX[a1][vstart+i].Y += (FF_2BODY[curr_pair_type_idx].S_MAXIM - rlen) * Tn[i] * RAB.Y/rlen3;
-									FRAME_A_MATRIX[a1][vstart+i].Z += (FF_2BODY[curr_pair_type_idx].S_MAXIM - rlen) * Tn[i] * RAB.Z/rlen3;
-									
-									FRAME_A_MATRIX[a2][vstart+i].X -= (FF_2BODY[curr_pair_type_idx].S_MAXIM - rlen) * Tn[i] * RAB.X/rlen3;
-									FRAME_A_MATRIX[a2][vstart+i].Y -= (FF_2BODY[curr_pair_type_idx].S_MAXIM - rlen) * Tn[i] * RAB.Y/rlen3;
-									FRAME_A_MATRIX[a2][vstart+i].Z -= (FF_2BODY[curr_pair_type_idx].S_MAXIM - rlen) * Tn[i] * RAB.Z/rlen3;
-
-								}
-							}
+						      // Finally, account for the x, y, and z unit vectors
+							    
+						      tmp_doub = (fcut * Tnd[i+1] * dx_dr + fcutderiv * Tn[i+1] );
+						      
+						      deriv = tmp_doub * RAB.X / rlen;
+						      FRAME_A_MATRIX[a1][vstart+i].X += deriv;
+						      FRAME_A_MATRIX[a2][vstart+i].X -= deriv;
+							    
+						      deriv = tmp_doub * RAB.Y / rlen; 
+						      FRAME_A_MATRIX[a1][vstart+i].Y += deriv;
+						      FRAME_A_MATRIX[a2][vstart+i].Y -= deriv;
+						      
+						      deriv = tmp_doub * RAB.Z / rlen;
+						      FRAME_A_MATRIX[a1][vstart+i].Z += deriv;
+						      FRAME_A_MATRIX[a2][vstart+i].Z -= deriv;
+							    
+						    }
 						}
 					}
 				}
-		  	}			
+		  	}
 		}
 	}
   return;
@@ -863,8 +867,9 @@ static void ZCalc_3B_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vecto
 	static int curr_pair_type_idx_ik;
 	static int curr_pair_type_idx_jk;
 	static int row_offset;	
-	
-	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;	
+
+	// fpenalty_scale is not needed.  See comments above.
+	// const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;	
 	
 	if ( ! called_before ) 
 	{
@@ -923,6 +928,9 @@ static void ZCalc_3B_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vecto
 
 			rlen_ij = sqrt( RAB_IJ.X*RAB_IJ.X + RAB_IJ.Y*RAB_IJ.Y + RAB_IJ.Z*RAB_IJ.Z );			
 
+			// Unlike the 2-body Cheby, we only evaluate this for r > s_minim.  We
+			// might want an inner cutoff function to ensure energy conservation (LEF)
+			//
 			if(rlen_ij > FF_2BODY[curr_pair_type_idx_ij].S_MINIM and rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MAXIM)
 			{		
 				for(int a3=a2+1;a3<SYSTEM.ATOMS;a3++)
@@ -1003,141 +1011,133 @@ static void ZCalc_3B_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vecto
 								vstart += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;			
 
 
-							if ( FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE == "MORSE" ) 
-							{
-								// Set the pentaly function values
+							// Set the pentaly function values
 								
-								fcut0_ij     = (1.0 - rlen_ij/FF_2BODY[curr_pair_type_idx_ij].S_MAXIM);
-								fcut_ij      = fcut0_ij * fcut0_ij * fcut0_ij;
-								fcutderiv_ij = -3.0 * fcut0_ij * fcut0_ij / FF_2BODY[curr_pair_type_idx_ij].S_MAXIM;		
+							fcut0_ij     = (1.0 - rlen_ij/FF_2BODY[curr_pair_type_idx_ij].S_MAXIM);
+							fcut_ij      = fcut0_ij * fcut0_ij * fcut0_ij;
+							fcutderiv_ij = -3.0 * fcut0_ij * fcut0_ij / FF_2BODY[curr_pair_type_idx_ij].S_MAXIM;		
 								
-								fcut0_ik     = (1.0 - rlen_ik/FF_2BODY[curr_pair_type_idx_ik].S_MAXIM);
-								fcut_ik      = fcut0_ik * fcut0_ik * fcut0_ik;
-								fcutderiv_ik = -3.0 * fcut0_ik * fcut0_ik / FF_2BODY[curr_pair_type_idx_ik].S_MAXIM;	
+							fcut0_ik     = (1.0 - rlen_ik/FF_2BODY[curr_pair_type_idx_ik].S_MAXIM);
+							fcut_ik      = fcut0_ik * fcut0_ik * fcut0_ik;
+							fcutderiv_ik = -3.0 * fcut0_ik * fcut0_ik / FF_2BODY[curr_pair_type_idx_ik].S_MAXIM;	
 								
-								fcut0_jk     = (1.0 - rlen_jk/FF_2BODY[curr_pair_type_idx_jk].S_MAXIM);
-								fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;
-								fcutderiv_jk = -3.0 * fcut0_jk * fcut0_jk / FF_2BODY[curr_pair_type_idx_jk].S_MAXIM;		
+							fcut0_jk     = (1.0 - rlen_jk/FF_2BODY[curr_pair_type_idx_jk].S_MAXIM);
+							fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;
+							fcutderiv_jk = -3.0 * fcut0_jk * fcut0_jk / FF_2BODY[curr_pair_type_idx_jk].S_MAXIM;		
 								
-								fcut_ij     *= fpenalty_scale;
-								fcutderiv_ij*= fpenalty_scale;
+							//fcut_ij     *= fpenalty_scale;
+							//fcutderiv_ij*= fpenalty_scale;
 								
-								fcut_ik     *= fpenalty_scale;
-								fcutderiv_ik*= fpenalty_scale;
+							//fcut_ik     *= fpenalty_scale;
+							//fcutderiv_ik*= fpenalty_scale;
 								
-								fcut_jk     *= fpenalty_scale;
-								fcutderiv_jk*= fpenalty_scale;
+							//fcut_jk     *= fpenalty_scale;
+							//fcutderiv_jk*= fpenalty_scale;
 								
 								
-								/////////////////////////////////////////////////////////////////////
-								/////////////////////////////////////////////////////////////////////
-								// Consider special restrictions on allowed triplet types and powers
-								/////////////////////////////////////////////////////////////////////
-								/////////////////////////////////////////////////////////////////////
+							/////////////////////////////////////////////////////////////////////
+							/////////////////////////////////////////////////////////////////////
+							// Consider special restrictions on allowed triplet types and powers
+							/////////////////////////////////////////////////////////////////////
+							/////////////////////////////////////////////////////////////////////
 								
-								row_offset = 0;
+							row_offset = 0;
+							
+							// --- THE KEY HERE IS TO UNDERSTAND THAT THE IJ, IK, AND JK HERE IS BASED ON ATOM PAIRS,
+							// AND DOESN'T NECESSARILY MATCH THE TRIPLET'S EXPECTED ORDER!
 								
-								// --- THE KEY HERE IS TO UNDERSTAND THAT THE IJ, IK, AND JK HERE IS BASED ON ATOM PAIRS, AND DOESN'T NECESSARILY MATCH THE TRIPLET'S EXPECTED ORDER!
-								
-								for(int i=0; i<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
-								{
-									row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICIES[i];
-									
-									SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
+							double dx_dr_ij = cheby_var_deriv(xdiff_ij, rlen_ij,
+											  FF_2BODY[curr_pair_type_idx_ij].LAMBDA,
+											  FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE) ;
 
-									deriv_ij =  fcut_ij * Tnd_ij[pow_ij]
-												* (-exp(-rlen_ij/FF_2BODY[curr_pair_type_idx_ij].LAMBDA)/FF_2BODY[curr_pair_type_idx_ij].LAMBDA)/xdiff_ij + fcutderiv_ij
-												* Tn_ij [pow_ij];
+							double dx_dr_jk = cheby_var_deriv(xdiff_jk, rlen_jk,
+											  FF_2BODY[curr_pair_type_idx_jk].LAMBDA,
+											  FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE) ;
+
+							double dx_dr_ik = cheby_var_deriv(xdiff_ik, rlen_ik,
+											  FF_2BODY[curr_pair_type_idx_ik].LAMBDA,
+											  FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE) ;
+
+							
+							for(int i=0; i<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
+							  {
+							    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICIES[i];
 									
-									deriv_ik =  fcut_ik * Tnd_ik[pow_ik] 
-												* (-exp(-rlen_ik/FF_2BODY[curr_pair_type_idx_ik].LAMBDA)/FF_2BODY[curr_pair_type_idx_ik].LAMBDA)/xdiff_ik + fcutderiv_ik
-												* Tn_ik[pow_ik];
+							    SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP,
+										pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK,
+										PAIR_TYPE_JK, i);
+
+							    deriv_ij =  fcut_ij * Tnd_ij[pow_ij]
+							      * dx_dr_ij + fcutderiv_ij * Tn_ij[pow_ij];
 									
-									deriv_jk =  fcut_jk * Tnd_jk[pow_jk]
-												* (-exp(-rlen_jk/FF_2BODY[curr_pair_type_idx_jk].LAMBDA)/FF_2BODY[curr_pair_type_idx_jk].LAMBDA)/xdiff_jk + fcutderiv_jk
-												* Tn_jk[pow_jk];	
+							    deriv_ik =  fcut_ik * Tnd_ik[pow_ik] 
+							      * dx_dr_ik + fcutderiv_ik * Tn_ik[pow_ik];
+									
+							    deriv_jk =  fcut_jk * Tnd_jk[pow_jk]
+							      * dx_dr_jk + fcutderiv_jk * Tn_jk[pow_jk];	
 																		
-									// ij pairs
+							    // ij pairs
 									
-									FRAME_A_MATRIX[a1][vstart+row_offset].X += deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.X / rlen_ij;
-									FRAME_A_MATRIX[a2][vstart+row_offset].X -= deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.X / rlen_ij;
-							
-									FRAME_A_MATRIX[a1][vstart+row_offset].Y += deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Y / rlen_ij;
-									FRAME_A_MATRIX[a2][vstart+row_offset].Y -= deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Y / rlen_ij;
-							
-									FRAME_A_MATRIX[a1][vstart+row_offset].Z += deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Z / rlen_ij;
-									FRAME_A_MATRIX[a2][vstart+row_offset].Z -= deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Z / rlen_ij;	
-							
-							
-									// ik pairs
-							
-									FRAME_A_MATRIX[a1][vstart+row_offset].X += deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.X / rlen_ik;
-									FRAME_A_MATRIX[a3][vstart+row_offset].X -= deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.X / rlen_ik;
-							
-									FRAME_A_MATRIX[a1][vstart+row_offset].Y += deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Y / rlen_ik;
-									FRAME_A_MATRIX[a3][vstart+row_offset].Y -= deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Y / rlen_ik;
-							
-									FRAME_A_MATRIX[a1][vstart+row_offset].Z += deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Z / rlen_ik;
-									FRAME_A_MATRIX[a3][vstart+row_offset].Z -= deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Z / rlen_ik;
-									
-									// jk pairs
-									
-									FRAME_A_MATRIX[a2][vstart+row_offset].X += deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.X / rlen_jk;
-									FRAME_A_MATRIX[a3][vstart+row_offset].X -= deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.X / rlen_jk;
-							
-									FRAME_A_MATRIX[a2][vstart+row_offset].Y += deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Y / rlen_jk;
-									FRAME_A_MATRIX[a3][vstart+row_offset].Y -= deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Y / rlen_jk;
-							
-									FRAME_A_MATRIX[a2][vstart+row_offset].Z += deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Z / rlen_jk;
-									FRAME_A_MATRIX[a3][vstart+row_offset].Z -= deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Z / rlen_jk;
-									
-								}
-							}
-							else 
-							{
-								
-								for ( int i = 0; i < FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY; i++ )
-								{
-									for ( int j = 0; j < FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY; j++ )
-									{
-										for ( int k = 0; k < FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY; k++ )
-										{
-											
-											row_offset  = FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY*FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY*i; 
-											row_offset += FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY*j;
-											row_offset += k;											
-											
-											FRAME_A_MATRIX[a1][vstart+row_offset].X += (FF_2BODY[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.X/rlen3_ij;
-											FRAME_A_MATRIX[a1][vstart+row_offset].Y += (FF_2BODY[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.Y/rlen3_ij;
-											FRAME_A_MATRIX[a1][vstart+row_offset].Z += (FF_2BODY[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.Z/rlen3_ij;
-									
-											FRAME_A_MATRIX[a2][vstart+row_offset].X -= (FF_2BODY[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.X/rlen3_ij;
-											FRAME_A_MATRIX[a2][vstart+row_offset].Y -= (FF_2BODY[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.Y/rlen3_ij;
-											FRAME_A_MATRIX[a2][vstart+row_offset].Z -= (FF_2BODY[curr_pair_type_idx_ij].S_MAXIM - rlen_ij) * Tn_ij[i] * RAB_IJ.Z/rlen3_ij;		
-											
-											
-											FRAME_A_MATRIX[a1][vstart+row_offset].X += (FF_2BODY[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.X/rlen3_ik;
-											FRAME_A_MATRIX[a1][vstart+row_offset].Y += (FF_2BODY[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.Y/rlen3_ik;
-											FRAME_A_MATRIX[a1][vstart+row_offset].Z += (FF_2BODY[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.Z/rlen3_ik;
-									
-											FRAME_A_MATRIX[a2][vstart+row_offset].X -= (FF_2BODY[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.X/rlen3_ik;
-											FRAME_A_MATRIX[a2][vstart+row_offset].Y -= (FF_2BODY[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.Y/rlen3_ik;
-											FRAME_A_MATRIX[a2][vstart+row_offset].Z -= (FF_2BODY[curr_pair_type_idx_ik].S_MAXIM - rlen_ik) * Tn_ik[i] * RAB_IK.Z/rlen3_ik;	
-											
-											
-											FRAME_A_MATRIX[a1][vstart+row_offset].X += (FF_2BODY[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.X/rlen3_jk;
-											FRAME_A_MATRIX[a1][vstart+row_offset].Y += (FF_2BODY[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.Y/rlen3_jk;
-											FRAME_A_MATRIX[a1][vstart+row_offset].Z += (FF_2BODY[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.Z/rlen3_jk;
-									
-											FRAME_A_MATRIX[a2][vstart+row_offset].X -= (FF_2BODY[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.X/rlen3_jk;
-											FRAME_A_MATRIX[a2][vstart+row_offset].Y -= (FF_2BODY[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.Y/rlen3_jk;
-											FRAME_A_MATRIX[a2][vstart+row_offset].Z -= (FF_2BODY[curr_pair_type_idx_jk].S_MAXIM - rlen_jk) * Tn_jk[i] * RAB_JK.Z/rlen3_jk;
-											
-										}
-									}
-								}									
+							    FRAME_A_MATRIX[a1][vstart+row_offset].X += deriv_ij * fcut_ik * fcut_jk
+							      * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.X / rlen_ij;
 
-							}
+							    FRAME_A_MATRIX[a2][vstart+row_offset].X -= deriv_ij * fcut_ik * fcut_jk
+							      * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.X / rlen_ij;
+							
+							    FRAME_A_MATRIX[a1][vstart+row_offset].Y += deriv_ij * fcut_ik * fcut_jk
+							      * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Y / rlen_ij;
+
+							    FRAME_A_MATRIX[a2][vstart+row_offset].Y -= deriv_ij * fcut_ik * fcut_jk
+							      * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Y / rlen_ij;
+							
+							    FRAME_A_MATRIX[a1][vstart+row_offset].Z += deriv_ij * fcut_ik * fcut_jk
+							      * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Z / rlen_ij;
+
+							    FRAME_A_MATRIX[a2][vstart+row_offset].Z -= deriv_ij * fcut_ik * fcut_jk
+							      * Tn_ik[pow_ik] * Tn_jk[pow_jk] * RAB_IJ.Z / rlen_ij;	
+							
+							
+							    // ik pairs
+							    
+							    FRAME_A_MATRIX[a1][vstart+row_offset].X += deriv_ik * fcut_ij * fcut_jk
+							      * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.X / rlen_ik;
+
+							    FRAME_A_MATRIX[a3][vstart+row_offset].X -= deriv_ik * fcut_ij * fcut_jk
+							      * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.X / rlen_ik;
+							
+							    FRAME_A_MATRIX[a1][vstart+row_offset].Y += deriv_ik * fcut_ij * fcut_jk
+							      * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Y / rlen_ik;
+
+							    FRAME_A_MATRIX[a3][vstart+row_offset].Y -= deriv_ik * fcut_ij * fcut_jk
+							      * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Y / rlen_ik;
+							
+							    FRAME_A_MATRIX[a1][vstart+row_offset].Z += deriv_ik * fcut_ij * fcut_jk
+							      * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Z / rlen_ik;
+
+							    FRAME_A_MATRIX[a3][vstart+row_offset].Z -= deriv_ik * fcut_ij * fcut_jk
+							      * Tn_ij[pow_ij] * Tn_jk[pow_jk] * RAB_IK.Z / rlen_ik;
+									
+							    // jk pairs
+									
+							    FRAME_A_MATRIX[a2][vstart+row_offset].X += deriv_jk * fcut_ij * fcut_ik
+							      * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.X / rlen_jk;
+
+							    FRAME_A_MATRIX[a3][vstart+row_offset].X -= deriv_jk * fcut_ij * fcut_ik
+							      * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.X / rlen_jk;
+							
+							    FRAME_A_MATRIX[a2][vstart+row_offset].Y += deriv_jk * fcut_ij * fcut_ik
+							      * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Y / rlen_jk;
+
+							    FRAME_A_MATRIX[a3][vstart+row_offset].Y -= deriv_jk * fcut_ij * fcut_ik
+							      * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Y / rlen_jk;
+							
+							    FRAME_A_MATRIX[a2][vstart+row_offset].Z += deriv_jk * fcut_ij
+							      * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Z / rlen_jk;
+
+							    FRAME_A_MATRIX[a3][vstart+row_offset].Z -= deriv_jk * fcut_ij * fcut_ik
+							      * Tn_ij[pow_ij] * Tn_ik[pow_ik] * RAB_JK.Z / rlen_jk;
+									
+							  }
 														
 						} // end if rlen_jk within cutoffs...
 					} // end if rlen_ik within cutoffs...	
@@ -1375,6 +1375,8 @@ void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_F
 	double Vtot = 0;
 	
 	vector<XYZ> SForce(SYSTEM.ATOMS);	// WHAT IS THIS?
+	                                        // This is the force ( negative of dEover ) (LEF)
+	
 	vector<XYZ> dEover(SYSTEM.ATOMS);	// Over bonding energy derivative (force) w/r/t delta ("S")
 	vector<XYZ> dFover(SYSTEM.ATOMS);	// Over bonding force derivative w/r/t pover
 	
@@ -1536,18 +1538,18 @@ void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_F
 
     for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 	{
-        SForce[a1].X -= dEover[a1].X;
-		SForce[a1].Y -= dEover[a1].Y;
-		SForce[a1].Z -= dEover[a1].Z;	
+	  SForce[a1].X -= dEover[a1].X;
+	  SForce[a1].Y -= dEover[a1].Y;
+	  SForce[a1].Z -= dEover[a1].Z;	
 	}
 
     if ( !calc_deriv) // subtract CoorD[i]. force:
 	{ 
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 		{
-	        SYSTEM.FORCES[a1].X -= SForce[a1].X;
-			SYSTEM.FORCES[a1].Y -= SForce[a1].Y;
-			SYSTEM.FORCES[a1].Z -= SForce[a1].Z;	
+		  SYSTEM.FORCES[a1].X -= SForce[a1].X;
+		  SYSTEM.FORCES[a1].Y -= SForce[a1].Y;
+		  SYSTEM.FORCES[a1].Z -= SForce[a1].Z;	
 		}
     }
     else // Then we're fitting pover... Calculate derivative of 3-body force wrt pover.
@@ -1608,7 +1610,7 @@ void ZCalc(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 
 		/* 
 
-		else if ( pair_type == INVERSE_R ) 	
+		else if ( pair_type == INVRSE_R ) 	
 			ZCalc_SR_Analytic(Coord,Lbc, Latcons,nlayers,nat,smin,smax,snum, SForce,Vtot, Pxyz, params);
     
 		else if ( pair_type == STILLINGER )  // SAVE THIS FOR SECOND TO LAST FOR SIMILAR REASONS  
@@ -1653,7 +1655,8 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 	// All pairs have the same penalty scale and distance
 	const double penalty_scale  = FF_2BODY[0].PENALTY_SCALE;	// 1.0e8;
 	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
-	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
+
+	// const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 
 	if ( ! called_before ) 
 	{
@@ -1706,13 +1709,15 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 
 						rlen = sqrt( RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z );
 		
-						if(rlen > FF_2BODY[curr_pair_type_idx].S_MINIM and rlen < FF_2BODY[curr_pair_type_idx].S_MAXIM)
+						if(rlen < FF_2BODY[curr_pair_type_idx].S_MAXIM)
+					        // if(rlen > FF_2BODY[curr_pair_type_idx].S_MINIM and rlen < FF_2BODY[curr_pair_type_idx].S_MAXIM)
+						// We want to evaluate the penalty function when r < rmin (LEF)
 						{
 							double xavg, xdiff, rpenalty;
 
-							// Apply a penalty for distances less than smin - penalty_dist.
-							
-							if ( rlen - penalty_dist < FF_2BODY[curr_pair_type_idx].S_MINIM ) 
+							// Apply a penalty for distances less than smin + penalty_dist.
+							// (fixed comment error (LEF) 
+							if ( rlen < FF_2BODY[curr_pair_type_idx].S_MINIM + penalty_dist ) 
 							{
 								rpenalty = FF_2BODY[curr_pair_type_idx].S_MINIM + penalty_dist - rlen;
 							} 
@@ -1730,12 +1735,13 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 							// x = pair_dist				// default type
 							// 
 							// All types are normalized by s_min to s_max range to fall along [-1,1]
-							
+							bool inverse_order = true ;
 							if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "INVRSE_R" ) 
 							{
 								xavg  =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM + 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances in r^-1 space
 								xdiff =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM - 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // width of possible pair distances in r^-1 space
 								x     = (1.0/rlen-xavg) / xdiff;																	  // pair distances in r^-1 space, normalized to fit over [-1,1]
+								inverse_order = true ;
 							} 
 							else if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "MORSE" ) 
 							{
@@ -1744,12 +1750,16 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 								xavg  = 0.5 * (xmin + xmax);																// midpoint of possible pair distances in morse space
 								xdiff = 0.5 * (xmax - xmin);																// width of possible pair distances in morse space
 								x = (exp(-rlen/FF_2BODY[curr_pair_type_idx].LAMBDA)-xavg)/xdiff;							// pair distances in morse space, normalized to fit over [-1,1]
+								inverse_order = true ;
 							}
 							else if (FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "DEFAULT")
 							{
 								xavg  = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MINIM + FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances
 								xdiff = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MAXIM - FF_2BODY[curr_pair_type_idx].S_MINIM); // width of possible pair distances
-								x = (rlen-xavg) / xdiff;																	 // pair distances, normalized to fit over [-1,1]
+								x = (rlen-xavg) / xdiff;
+								inverse_order = false ;
+
+								// pair distances, normalized to fit over [-1,1]
 							}
 							else
 							{
@@ -1760,18 +1770,11 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 							}
 
 							// Make sure our newly transformed distance falls between the bound of -1 to 1 allowed to Cheby polynomials
-
-							if ( x < -1.0 ) 
-							{
-								cout << "Warning: In 2B Cheby transformation, r < rmin " << TEMP_STR << endl;
-								x = -1.0;
-							}
-							if ( x > 1.0 ) 
-							{
-								x = 1.0;
-							}
-							
-							
+							if ( x < -1.0 || x > 1.0 )
+							  // Keep x in defined range to maintain stability. (LEF)
+							  {
+							    x = fix_cheby_val(x, inverse_order ) ;
+							  }
 							// Generate Chebyshev polynomials by recursion. 
 							// 
 							// What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
@@ -1816,8 +1819,8 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 								fcut0 = (1.0 - rlen/FF_2BODY[curr_pair_type_idx].S_MAXIM);
 								fcut = fcut0 * fcut0 * fcut0;
 								fcutderiv = -3.0 * fcut0 * fcut0 / FF_2BODY[curr_pair_type_idx].S_MAXIM;
-								fcut      *= fpenalty_scale;
-								fcutderiv *= fpenalty_scale;
+								// fcut      *= fpenalty_scale;
+								//fcutderiv *= fpenalty_scale;
 								
 								for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 								{
@@ -1930,7 +1933,7 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 	
 	double coeff;
 
-	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
+	// const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 
 	if ( ! called_before ) 
 	{
@@ -2074,14 +2077,14 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 								fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;
 								fcutderiv_jk = -3.0 * fcut0_jk * fcut0_jk / FF_2BODY[curr_pair_type_idx_jk].S_MAXIM;	
 								
-								fcut_ij     *= fpenalty_scale;
-								fcutderiv_ij*= fpenalty_scale;
+								//fcut_ij     *= fpenalty_scale;
+								//fcutderiv_ij*= fpenalty_scale;
 								
-								fcut_ik     *= fpenalty_scale;
-								fcutderiv_ik*= fpenalty_scale;
+								//fcut_ik     *= fpenalty_scale;
+								//fcutderiv_ik*= fpenalty_scale;
 								
-								fcut_jk     *= fpenalty_scale;
-								fcutderiv_jk*= fpenalty_scale;
+								//fcut_jk     *= fpenalty_scale;
+								//fcutderiv_jk*= fpenalty_scale;
 								
 								// Determine the FF type for the given triplet
 							
@@ -2629,7 +2632,7 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FI
 	// All pairs have the same penalty scale and distance
 	const double penalty_scale  = FF_2BODY[0].PENALTY_SCALE;	// 1.0e8;
 	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
-	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
+	//const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 
 	if ( ! called_before ) 
 	{
@@ -2765,7 +2768,7 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FI
 				fcut0 = (1.0 - rlen/FF_2BODY[ij].S_MAXIM);
 				fcut = fcut0 * fcut0 * fcut0;
 				fcutderiv = -3.0 * fcut0 * fcut0 / FF_2BODY[ij].S_MAXIM;
-				fcut *= fpenalty_scale;
+				//fcut *= fpenalty_scale;
 				
 				for ( int i = 0; i < FF_2BODY[ij].SNUM; i++ ) 
 				{
@@ -2849,7 +2852,7 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 	
 	FULL_FILE_3B = OUTFILE;
 	
-	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
+	//const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 	
 	if ( ! called_before ) 
 	{
@@ -2915,9 +2918,9 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 					fcut0_jk     = (1.0 - RLEN_JK/FF_2BODY[ik].S_MAXIM);
 					fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;	
 					
-					fcut_ij *= fpenalty_scale;
-					fcut_ik *= fpenalty_scale;
-					fcut_jk *= fpenalty_scale;
+					//fcut_ij *= fpenalty_scale;
+					//fcut_ik *= fpenalty_scale;
+					//fcut_jk *= fpenalty_scale;
 
 					// Error check: Certain triplets are impossible...
 				
@@ -3027,7 +3030,7 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 
 	curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
 	
-	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
+	//const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
 	
 	string OUTFILE = "3b_Cheby_Pot-";
 	OUTFILE.append(TEMP_STR);
@@ -3135,9 +3138,9 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 			fcut0_jk     = (1.0 - RLEN_JK/FF_2BODY[ik].S_MAXIM);
 			fcut_jk      = fcut0_jk * fcut0_jk * fcut0_jk;	
 		
-			fcut_ij *= fpenalty_scale;
-			fcut_ik *= fpenalty_scale;
-			fcut_jk *= fpenalty_scale;
+			//fcut_ij *= fpenalty_scale;
+			//fcut_ik *= fpenalty_scale;
+			//fcut_jk *= fpenalty_scale;
 
 			// Error check: Certain triplets are impossible...
 		
@@ -3182,3 +3185,66 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	OUTFILE_3B_POT.close();
 }
  
+static double fix_cheby_val(double x, bool inverse_order)
+// If the chebyshev x value is out of range, set it to a limiting value (-1 or 1)
+// This is done purely to maintain numerical stability.  
+// For 2-body interactions there is an additional repulsion for r < rmin, and
+//   a cutoff r > rmax.
+// For 3-body interactions there should be an inner cutoff function for r < rmin.
+//   and an outer cutoff function for r > rmax.
+// If inverse_order is true, x is a decreasing function of r.
+{
+  if ( x < -1.0)
+    {
+    if ( inverse_order )
+      {
+	cout << "Warning: r > rmax  " << endl;
+      }
+    else
+      {
+	cout << "Warning: r < rmin " << endl;
+      }
+    x = -1.0;
+    }
+  else if ( x > 1.0 )
+    // Added a warning...Do we need to turn off the interaction, because it's beyond rcut?
+    // The cutoff function (handled elsewhere) we do that automatially (LEF)
+    {
+      if ( inverse_order )
+	{
+	  cout << "Warning: r < rmin  " << endl;
+	}
+      else
+	{
+	  cout << "Warning: r > rmax " << endl;
+	}
+      x = 1.0;								
+    }
+  return x ;
+}
+
+
+static double cheby_var_deriv(double xdiff, double rlen, double lambda,
+			      string& cheby_type)
+// Calculate the derivative of the cheby variable x with respect to rlen.
+{
+  double dx_dr ;
+  if ( cheby_type == "MORSE" ) // IS THE MORSE TYPE THE ONLY ONE THAT USES DERIVATIVES?? WHY??
+    {
+      dx_dr =  -exp(-rlen/lambda) / (lambda * xdiff) ;
+    }
+  else if ( cheby_type == "INVRSE_R" ) 
+    {
+      dx_dr = -1.0/(rlen * rlen * xdiff) ;
+    }
+  else if ( cheby_type  == "DEFAULT" )
+    {
+      dx_dr = 1.0 / xdiff ;
+    }
+  else
+    {
+      cout << "Error: bad cheby_type: " << cheby_type << endl ;
+      exit(1) ;
+    }
+  return dx_dr ;
+}
