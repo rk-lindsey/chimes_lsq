@@ -20,6 +20,70 @@ R-Space Ewald cutoff      =  6.173215e+00
 R-Space accuracy estimate =  5.220777e-08
 K-space accuracy estimate =  5.489244e-07
 Number of Ewald K-vectors = 235
+2-Body Chebyshev Polynomial Coefficients:
+ele: O O pair index: 0 pow: 0 parameter index: 0
+ele: O O pair index: 0 pow: 1 parameter index: 1
+ele: O O pair index: 0 pow: 2 parameter index: 2
+ele: O O pair index: 0 pow: 3 parameter index: 3
+ele: O O pair index: 0 pow: 4 parameter index: 4
+ele: O O pair index: 0 pow: 5 parameter index: 5
+ele: O O pair index: 0 pow: 6 parameter index: 6
+ele: O O pair index: 0 pow: 7 parameter index: 7
+ele: O O pair index: 0 pow: 8 parameter index: 8
+ele: O O pair index: 0 pow: 9 parameter index: 9
+ele: O H pair index: 1 pow: 0 parameter index: 10
+ele: O H pair index: 1 pow: 1 parameter index: 11
+ele: O H pair index: 1 pow: 2 parameter index: 12
+ele: O H pair index: 1 pow: 3 parameter index: 13
+ele: O H pair index: 1 pow: 4 parameter index: 14
+ele: O H pair index: 1 pow: 5 parameter index: 15
+ele: O H pair index: 1 pow: 6 parameter index: 16
+ele: O H pair index: 1 pow: 7 parameter index: 17
+ele: O H pair index: 1 pow: 8 parameter index: 18
+ele: O H pair index: 1 pow: 9 parameter index: 19
+ele: H H pair index: 2 pow: 0 parameter index: 20
+ele: H H pair index: 2 pow: 1 parameter index: 21
+ele: H H pair index: 2 pow: 2 parameter index: 22
+ele: H H pair index: 2 pow: 3 parameter index: 23
+ele: H H pair index: 2 pow: 4 parameter index: 24
+ele: H H pair index: 2 pow: 5 parameter index: 25
+ele: H H pair index: 2 pow: 6 parameter index: 26
+ele: H H pair index: 2 pow: 7 parameter index: 27
+ele: H H pair index: 2 pow: 8 parameter index: 28
+ele: H H pair index: 2 pow: 9 parameter index: 29
+3-Body Cheby Parameter Indices
+ele: O O O pair index: 0 0 0 pow: 0 1 1 parameter index: 30
+ele: O O O pair index: 0 0 0 pow: 1 0 1 parameter index: 30
+ele: O O O pair index: 0 0 0 pow: 1 1 0 parameter index: 30
+ele: O O O pair index: 0 0 0 pow: 1 1 1 parameter index: 31
+ele: O O H pair index: 0 1 1 pow: 0 1 1 parameter index: 32
+ele: O O H pair index: 0 1 1 pow: 1 0 1 parameter index: 33
+ele: O O H pair index: 0 1 1 pow: 1 1 0 parameter index: 33
+ele: O O H pair index: 0 1 1 pow: 1 1 1 parameter index: 34
+ele: O H O pair index: 1 0 1 pow: 0 1 1 parameter index: 33
+ele: O H O pair index: 1 0 1 pow: 1 0 1 parameter index: 32
+ele: O H O pair index: 1 0 1 pow: 1 1 0 parameter index: 33
+ele: O H O pair index: 1 0 1 pow: 1 1 1 parameter index: 34
+ele: O H H pair index: 1 1 2 pow: 0 1 1 parameter index: 35
+ele: O H H pair index: 1 1 2 pow: 1 0 1 parameter index: 35
+ele: O H H pair index: 1 1 2 pow: 1 1 0 parameter index: 36
+ele: O H H pair index: 1 1 2 pow: 1 1 1 parameter index: 37
+ele: H O O pair index: 1 1 0 pow: 0 1 1 parameter index: 33
+ele: H O O pair index: 1 1 0 pow: 1 0 1 parameter index: 33
+ele: H O O pair index: 1 1 0 pow: 1 1 0 parameter index: 32
+ele: H O O pair index: 1 1 0 pow: 1 1 1 parameter index: 34
+ele: H O H pair index: 1 2 1 pow: 0 1 1 parameter index: 35
+ele: H O H pair index: 1 2 1 pow: 1 0 1 parameter index: 36
+ele: H O H pair index: 1 2 1 pow: 1 1 0 parameter index: 35
+ele: H O H pair index: 1 2 1 pow: 1 1 1 parameter index: 37
+ele: H H O pair index: 2 1 1 pow: 0 1 1 parameter index: 36
+ele: H H O pair index: 2 1 1 pow: 1 0 1 parameter index: 35
+ele: H H O pair index: 2 1 1 pow: 1 1 0 parameter index: 35
+ele: H H O pair index: 2 1 1 pow: 1 1 1 parameter index: 37
+ele: H H H pair index: 2 2 2 pow: 0 1 1 parameter index: 38
+ele: H H H pair index: 2 2 2 pow: 1 0 1 parameter index: 38
+ele: H H H pair index: 2 2 2 pow: 1 1 0 parameter index: 38
+ele: H H H pair index: 2 2 2 pow: 1 1 1 parameter index: 39
 Minimum distances between atoms:
  0  2.03865
  1  0.81997

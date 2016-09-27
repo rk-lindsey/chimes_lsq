@@ -99,6 +99,9 @@ Nose-Hoover thermostat time = 10.00000 fs
 
 END OF JOB PARAMETERS
 
+QOO parameter is:    80.113666
+QOH parameter is:   -40.056834
+QHH parameter is:    20.028417
 Q[H] from params file =      0.24559 e
 Charge equation 1 error =     -0.00000
 Charge sum per atom =   0.00000e+00
@@ -106,6 +109,37 @@ Total Mass                   = 576.48000 au
 Volume                       = 638.08412 Ang.^3
 Number density               =  0.24983 mol atm/cc
 Mass density                 =  1.50023 g/cc
+2-Body Chebyshev Polynomial Coefficients:
+ele: O O pow: 0 pair index: 0 parameter:  -1.5379373323900e+01
+ele: O O pow: 1 pair index: 0 parameter:  -1.6756444119900e+01
+ele: O O pow: 2 pair index: 0 parameter:   2.4208884454600e+01
+ele: O O pow: 3 pair index: 0 parameter:   1.3052848854900e+00
+ele: O O pow: 4 pair index: 0 parameter:  -1.8491176693400e+01
+ele: O O pow: 5 pair index: 0 parameter:  -5.2664531063800e+00
+ele: O O pow: 6 pair index: 0 parameter:   3.0967120510600e+01
+ele: O O pow: 7 pair index: 0 parameter:  -6.9274722405000e+00
+ele: O O pow: 8 pair index: 0 parameter:  -1.8104524234700e+01
+ele: O O pow: 9 pair index: 0 parameter:  -1.5832010499600e+01
+ele: O H pow: 0 pair index: 1 parameter:   4.1453201486300e-01
+ele: O H pow: 1 pair index: 1 parameter:   1.7308165225600e+01
+ele: O H pow: 2 pair index: 1 parameter:   3.1746841140600e+01
+ele: O H pow: 3 pair index: 1 parameter:   1.2724085948300e+01
+ele: O H pow: 4 pair index: 1 parameter:   3.3321740832100e+00
+ele: O H pow: 5 pair index: 1 parameter:   2.1606563404100e+00
+ele: O H pow: 6 pair index: 1 parameter:  -1.3014642568600e+00
+ele: O H pow: 7 pair index: 1 parameter:   4.1198397358300e-01
+ele: O H pow: 8 pair index: 1 parameter:   5.8763851814700e-01
+ele: O H pow: 9 pair index: 1 parameter:   3.7916070886100e-01
+ele: H H pow: 0 pair index: 2 parameter:  -5.0062563811400e+01
+ele: H H pow: 1 pair index: 2 parameter:  -7.0398284023900e+01
+ele: H H pow: 2 pair index: 2 parameter:  -7.6866886565000e+01
+ele: H H pow: 3 pair index: 2 parameter:  -7.9348387734400e+01
+ele: H H pow: 4 pair index: 2 parameter:  -5.8654191926200e+01
+ele: H H pow: 5 pair index: 2 parameter:  -4.3572324837300e+01
+ele: H H pow: 6 pair index: 2 parameter:  -2.9135271190300e+01
+ele: H H pow: 7 pair index: 2 parameter:  -1.8405255029500e+01
+ele: H H pow: 8 pair index: 2 parameter:  -9.0316519246000e+00
+ele: H H pow: 9 pair index: 2 parameter:  -3.0507021065900e+00
 Requested Ewald accuracy  =  1.000000e-07
 Ewald alpha               =  5.853127e-01
 R-Space Ewald cutoff      =  6.173215e+00
@@ -114,37 +148,37 @@ K-Space accuracy estimate =  5.489244e-07
 Cutting off K-vectors with magnitude less than 6
 Number of Ewald K-vectors = 894
 K-space accuracy estimate = 6.6261033015771e-08
-3-Body Cheby Parameters
-ele: O O O pow: 0 1 1 param:  5.5974e+02
-ele: O O O pow: 1 0 1 param:  5.5974e+02
-ele: O O O pow: 1 1 0 param:  5.5974e+02
-ele: O O O pow: 1 1 1 param: -1.1679e+02
-ele: O O H pow: 0 1 1 param:  1.1379e+03
-ele: O O H pow: 1 0 1 param: -3.4055e+02
-ele: O O H pow: 1 1 0 param: -3.4055e+02
-ele: O O H pow: 1 1 1 param:  1.4293e+03
-ele: O H O pow: 0 1 1 param: -3.4055e+02
-ele: O H O pow: 1 0 1 param:  1.1379e+03
-ele: O H O pow: 1 1 0 param: -3.4055e+02
-ele: O H O pow: 1 1 1 param:  1.4293e+03
-ele: O H H pow: 0 1 1 param: -8.7808e+01
-ele: O H H pow: 1 0 1 param: -8.7808e+01
-ele: O H H pow: 1 1 0 param:  5.5816e+01
-ele: O H H pow: 1 1 1 param: -2.3061e+02
-ele: H O O pow: 0 1 1 param: -3.4055e+02
-ele: H O O pow: 1 0 1 param: -3.4055e+02
-ele: H O O pow: 1 1 0 param:  1.1379e+03
-ele: H O O pow: 1 1 1 param:  1.4293e+03
-ele: H O H pow: 0 1 1 param: -8.7808e+01
-ele: H O H pow: 1 0 1 param:  5.5816e+01
-ele: H O H pow: 1 1 0 param: -8.7808e+01
-ele: H O H pow: 1 1 1 param: -2.3061e+02
-ele: H H O pow: 0 1 1 param:  5.5816e+01
-ele: H H O pow: 1 0 1 param: -8.7808e+01
-ele: H H O pow: 1 1 0 param: -8.7808e+01
-ele: H H O pow: 1 1 1 param: -2.3061e+02
-ele: H H H pow: 0 1 1 param: -1.2867e+01
-ele: H H H pow: 1 0 1 param: -1.2867e+01
-ele: H H H pow: 1 1 0 param: -1.2867e+01
-ele: H H H pow: 1 1 1 param:  4.1499e+01
+3-Body Chebyshev Polynomial Coefficients:
+ele: O O O pair index: 0 0 0: pow: 0 1 1 param:  5.5974e+02
+ele: O O O pair index: 0 0 0: pow: 1 0 1 param:  5.5974e+02
+ele: O O O pair index: 0 0 0: pow: 1 1 0 param:  5.5974e+02
+ele: O O O pair index: 0 0 0: pow: 1 1 1 param: -1.1679e+02
+ele: O O H pair index: 0 1 1: pow: 0 1 1 param:  1.1379e+03
+ele: O O H pair index: 0 1 1: pow: 1 0 1 param: -3.4055e+02
+ele: O O H pair index: 0 1 1: pow: 1 1 0 param: -3.4055e+02
+ele: O O H pair index: 0 1 1: pow: 1 1 1 param:  1.4293e+03
+ele: O H O pair index: 1 0 1: pow: 0 1 1 param: -3.4055e+02
+ele: O H O pair index: 1 0 1: pow: 1 0 1 param:  1.1379e+03
+ele: O H O pair index: 1 0 1: pow: 1 1 0 param: -3.4055e+02
+ele: O H O pair index: 1 0 1: pow: 1 1 1 param:  1.4293e+03
+ele: O H H pair index: 1 1 2: pow: 0 1 1 param: -8.7808e+01
+ele: O H H pair index: 1 1 2: pow: 1 0 1 param: -8.7808e+01
+ele: O H H pair index: 1 1 2: pow: 1 1 0 param:  5.5816e+01
+ele: O H H pair index: 1 1 2: pow: 1 1 1 param: -2.3061e+02
+ele: H O O pair index: 1 1 0: pow: 0 1 1 param: -3.4055e+02
+ele: H O O pair index: 1 1 0: pow: 1 0 1 param: -3.4055e+02
+ele: H O O pair index: 1 1 0: pow: 1 1 0 param:  1.1379e+03
+ele: H O O pair index: 1 1 0: pow: 1 1 1 param:  1.4293e+03
+ele: H O H pair index: 1 2 1: pow: 0 1 1 param: -8.7808e+01
+ele: H O H pair index: 1 2 1: pow: 1 0 1 param:  5.5816e+01
+ele: H O H pair index: 1 2 1: pow: 1 1 0 param: -8.7808e+01
+ele: H O H pair index: 1 2 1: pow: 1 1 1 param: -2.3061e+02
+ele: H H O pair index: 2 1 1: pow: 0 1 1 param:  5.5816e+01
+ele: H H O pair index: 2 1 1: pow: 1 0 1 param: -8.7808e+01
+ele: H H O pair index: 2 1 1: pow: 1 1 0 param: -8.7808e+01
+ele: H H O pair index: 2 1 1: pow: 1 1 1 param: -2.3061e+02
+ele: H H H pair index: 2 2 2: pow: 0 1 1 param: -1.2867e+01
+ele: H H H pair index: 2 2 2: pow: 1 0 1 param: -1.2867e+01
+ele: H H H pair index: 2 2 2: pow: 1 1 0 param: -1.2867e+01
+ele: H H H pair index: 2 2 2: pow: 1 1 1 param:  4.1499e+01
 RMS force error =  9.044041e-06
