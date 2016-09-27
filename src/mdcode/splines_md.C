@@ -482,6 +482,9 @@ int main(int argc, char* argv[])
       double q_oo=0.0, q_oh=0.0, q_hh=0.0, q_spline = 0.0, q_stillinger=0.0;
   
       if ( fit_coul ) {
+	printf("QOO parameter is: %12.6f\n",  params[tot_snum+num_cheby_3b] ) ;
+	printf("QOH parameter is: %12.6f\n",  params[tot_snum+num_cheby_3b+1] ) ;
+	printf("QHH parameter is: %12.6f\n",  params[tot_snum+num_cheby_3b+2] ) ;
 	q_oo = params[tot_snum+num_cheby_3b]  / ke ;
 	q_oh = params[tot_snum+num_cheby_3b+1] / ke ;
 	q_hh = params[tot_snum+num_cheby_3b+2] / ke ;
