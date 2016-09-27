@@ -192,6 +192,28 @@ P3 = ""
 
 # PAIRS, AND CHARGES
 
+# Figure out how many 3B parameters there are
+
+SNUM_3B   = 0
+ADD_LINES = 0
+
+if TOTAL_TRIPS > 0:
+	for t in xrange(0, int(TOTAL_TRIPS)):
+
+		P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
+		
+		SNUM_3B +=  int(P1[4])
+
+		TOTL = P1[6]
+        
+		ADD_LINES += 4
+				
+		for i in xrange(0,int(TOTL)):
+			ADD_LINES += 1
+
+print "---> " + `SNUM_3B`	
+	
+
 for i in range(0,TOTAL_PAIRS):
 	
 	A1 = hf[ATOM_PAIRS_LINE+2+i+1].split()
@@ -215,7 +237,7 @@ for i in range(0,TOTAL_PAIRS):
 		print `j` + " " + `x[i*SNUM_2B+j]`
 	
 	if FIT_COUL == "true":
-		print "q_" + A1 + " x q_" + A2 + " " + `x[TOTAL_PAIRS*SNUM_2B + TOTAL_TRIPS*SNUM_3B + i]`
+		print "q_" + A1 + " x q_" + A2 + " " + `x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + i]`
 			
 	print " "
 	
@@ -272,6 +294,10 @@ if FIT_POVER == "true":
 mapsfile=open(sys.argv[4],"r").readlines()
 
 print ""
+
+
+for i in xrange(len(x)):
+	print x[i]
 
 for i in range(0,len(mapsfile)):
 	print mapsfile[i].rstrip('\n')
