@@ -1,0 +1,130 @@
+!
+! Number of columns =  43
+! Number of rows    =  9506
+! RMS force error =  11.5618473263
+! max variable =  1410.35908805
+!
+ 
+USECOUL: true
+FITCOUL: true
+USEPOVR: false
+FITPOVR: false
+USE3BCH: true
+
+PAIRTYP: CHEBYSHEV  10 2
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		-		15.9994
+1		H		+		1.0079
+
+ATOM PAIRS: 3
+
+!# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0.75            6               0.1             MORSE           1.25            
+	1               H               H               0.75            6               0.1             MORSE           1.25            
+	2               O               H               0.75            6               0.1             MORSE           1.25            
+
+ATOM PAIR TRIPLETS: 4
+
+PAIR CHEBYSHEV PARAMS 
+
+PAIRTYPE PARAMS: 0 O O
+
+0 -44.8877433249828
+1 -15.079051808693789
+2 21.202500382041404
+3 12.125632455507345
+4 -18.268888886831483
+5 -10.533461322828254
+6 24.451906143850671
+7 -5.186108995657384
+8 -13.237713898865966
+9 -13.083704208421004
+q_O x q_O 84.95590570752907
+ 
+PAIRTYPE PARAMS: 1 H H
+
+0 -42.039128944275021
+1 -70.689202363064084
+2 -85.883571949380951
+3 -92.875760065692234
+4 -73.86620961936579
+5 -56.98814098052901
+6 -38.379834265861035
+7 -23.676303239036592
+8 -11.06789007783121
+9 -3.7150923296790417
+q_H x q_H 21.238977492227676
+ 
+PAIRTYPE PARAMS: 2 O H
+
+0 3.908505947587936
+1 14.036243666928094
+2 34.025525225787959
+3 11.02872504915304
+4 4.1698665327061359
+5 1.2705993417053325
+6 -0.89645032892668175
+7 0.0087470987773628443
+8 0.74544607290691645
+9 0.2172204624545036
+q_O x q_H -42.477954522928599
+ 
+TRIPLET CHEBYSHEV PARAMS 
+
+TRIPLETTYPE PARAMS: 0 OO OO OO: UNIQUE: 2 TOTAL: 4
+
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0   1   1         0               0        593.30152743212227
+      1       1   0   1         0               0        593.30152743212227
+      2       1   1   0         0               0        593.30152743212227
+      3       1   1   1         3               1        -123.12006506870587
+
+TRIPLETTYPE PARAMS: 1 OO OH OH: UNIQUE: 3 TOTAL: 4
+
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0   1   1         0               0        1134.9448925396714
+      1       1   0   1         1               1        -354.53469083599424
+      2       1   1   0         1               1        -354.53469083599424
+      3       1   1   1         3               2        1410.3590880540835
+
+TRIPLETTYPE PARAMS: 2 OH OH HH: UNIQUE: 3 TOTAL: 4
+
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0   1   1         0               0        -88.530109783252257
+      1       1   0   1         0               0        -88.530109783252257
+      2       1   1   0         2               1        55.211469228190133
+      3       1   1   1         3               2        -224.96886267469571
+
+TRIPLETTYPE PARAMS: 3 HH HH HH: UNIQUE: 2 TOTAL: 4
+
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0   1   1         0               0        6.126054509544387
+      1       1   0   1         0               0        6.126054509544387
+      2       1   1   0         0               0        6.126054509544387
+      3       1   1   1         3               1        58.086244815445653
+
+
+PAIRMAPS: 4
+1 HH
+2 HO
+2 OH
+0 OO
+
+TRIPMAPS: 8
+3 HHHHHH
+2 HHOHOH
+2 OHHHOH
+2 OHOHHH
+1 OHOHOO
+1 OHOOOH
+1 OOOHOH
+0 OOOOOO
+
+ENDFILE
