@@ -1,0 +1,19 @@
+*** correct_output/fm_setup.out	Mon Sep 26 17:05:29 2016
+--- current_output/fm_setup.out	Mon Sep 26 17:16:32 2016
+***************
+*** 2,8 ****
+  Reading input file...
+  	# TRJFILE #: input.xyzf
+  	# WRAPTRJ #: 1
+! 	# NFRAMES #: 33
+  	# NLAYERS #: 1
+  	# FITCOUL #: true
+  	# FITPOVR #: false
+--- 2,8 ----
+  Reading input file...
+  	# TRJFILE #: input.xyzf
+  	# WRAPTRJ #: 1
+! 	# NFRAMES #: 49
+  	# NLAYERS #: 1
+  	# FITCOUL #: true
+  	# FITPOVR #: false
