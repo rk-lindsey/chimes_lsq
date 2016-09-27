@@ -211,9 +211,6 @@ if TOTAL_TRIPS > 0:
 		for i in xrange(0,int(TOTL)):
 			ADD_LINES += 1
 
-print "---> " + `SNUM_3B`	
-	
-
 for i in range(0,TOTAL_PAIRS):
 	
 	A1 = hf[ATOM_PAIRS_LINE+2+i+1].split()
