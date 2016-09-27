@@ -1,6 +1,17 @@
+#! /bin/sh
 # NOTE: The path below needs to point to the "lsq-new-md-fmt.py" version of the lsq code.
 #       If you want to use other versions, you'll probably need to modify the inputs that
 #       are sent to the script (way down below)
+
+# Usage:  With no arguments, all tests are generated.  Otherwise, only specified tests are 
+# generated.
+#
+if [ $# -eq 0 ] 
+then
+  JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-3bcheby2'
+else
+  JOBS=$*
+fi
 
 ###############################################################
 #
@@ -34,7 +45,7 @@ cd ../test_suite-lsq
 echo ""
 echo "SETTING UP FOR SPLINES_LS..."
 
-for i in h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby
+for i in $JOBS
 do
 
 	echo " "
@@ -58,7 +69,7 @@ done
 
 echo "SETTING UP FOR SVD SCRIPT..."
 
-for i in  h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby 
+for i in $JOBS
 do
 	echo " "
 	echo "Running $i test..."

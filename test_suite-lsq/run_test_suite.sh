@@ -1,13 +1,22 @@
+#! /bin/sh
 # NOTE: The path below needs to point to the "lsq-new-md-fmt.py" version of the lsq code.
 #       If you want to use other versions, you'll probably need to modify the inputs that
 #       are sent to the script (down below)
-
+#
+# Usage:  With no arguments, all tests are run.  Otherwise, only tests specified on the command line are run (LEF).
 
 ###############################################################
 #
 # Determine the location of necessary files
 #
 ###############################################################
+
+if [ $# -eq 0 ] 
+then
+  JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-3bcheby2'
+else
+  JOBS=$*
+fi
 
 TESTSU_BASE=`pwd -P` #`dirname $0`
 SOURCE_BASE="${TESTSU_BASE}/../src/"
@@ -45,7 +54,7 @@ SET_PASSED=true
 SVD_PASSED=true
 ALL_PASSED=true
 
-for i in h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby
+for i in $JOBS
 do
 
 	echo " "
@@ -104,7 +113,7 @@ done
 
 echo "VALIDATING FOR SVD SCRIPT..."
 
-for i in h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby 
+for i in $JOBS
 do
 
 	echo " "
