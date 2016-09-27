@@ -12,8 +12,12 @@ Reading the simulation control input file...
 	# THRMOST #: HOOVER... a Hoover time of 10 will be used.
 	# PRESSUR #: ANALYTICAL
 	# FRQDFTB #: 20
+		... printing every 2.5 fs, 
+		... printing 50 frames. 
 	# FRQENER #: 10
 	# PRNTFRC #: true ...and will be printed every 1 frames.
+		... printing every 0.125 fs, 
+		... printing 1000 frames. 
    ...read complete.
 
 Setting up the data objects...
@@ -118,6 +122,7 @@ Attempting to read pairtype...
    ...read complete.
 
 Notes on simulation: 
+	Using fpenalty power 3.0000
 	Ewald summations will be used and charges will be taken from fit values
 	Overbonding contributions will be considered.
 		p-over will be read from fit parameters.

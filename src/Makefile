@@ -7,6 +7,7 @@
 # 1. gnuplot style
 # 2. matlab style
 # 3. python style
+#
 # Currently, only gnuplot style is supported
 
 # Quick note on flag FORCECHECK:
@@ -15,7 +16,7 @@
 # 1. print out 3b forces on each atom at each timestep (generally for debug.)
 
 
-MYFLAGS= -D VERBOSITY=1 # -D FORCECHECK=1 -D PESFORMAT=1
+MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 # -D XFORMTYPE=LEFT # -D FORCECHECK=1 -D PESFORMAT=1
 
 CXX=g++ -g  $(MYFLAGS) 
 #CXX=g++ -O3  $(MYFLAGS) 

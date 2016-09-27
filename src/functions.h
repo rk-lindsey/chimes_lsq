@@ -6,6 +6,13 @@
 	#define FORCECHECK 0
 #endif
 
+#define FULL	// distance transformation such that pair dist falls on range -1 to 1 
+#define LEFT	// distance transformation such that pair dist falls on range -1 to 0
+#define RIGHT	// distance transformation such that pair dist falls on range  0 to 1 
+
+#ifndef XFORMTYPE
+	#define FULL
+#endif 
 
 #define GNUPLOT 1
 #define MATLAB  2
@@ -14,7 +21,6 @@
 #ifndef PESFORMAT
 	#define PESFORMAT GNUPLOT
 #endif
-
 
 #ifndef _HELPERS_
 #define _HELPERS_
@@ -43,6 +49,8 @@ extern string SCAN_FILE_2B;	// The 2D PES scans for 2B
 
 struct MD_JOB_CONTROL
 {
+	int STEP;					// Tracks the current md step
+	
 	///////////////////////////////////////////////
 	// Variables read in from the parameter file:
 	///////////////////////////////////////////////
@@ -52,6 +60,7 @@ struct MD_JOB_CONTROL
     bool   USE_OVERCOORD;		// Replaces if_overcoord... If true, calculate ReaxFF-like overcoordination term.
     bool   FIT_POVER;			// Replaces fit_pover... If true, find linear overcoordination parameter from least-squares fitting. -- this needs to be updated for new handling
     bool   USE_3B_CHEBY;		// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
+    
 	
 	///////////////////////////////////////////////
 	// Variables read in from main md code input file
@@ -70,6 +79,9 @@ struct MD_JOB_CONTROL
 	int    N_LAYERS;			// Replaces nlayers... Number of periodic images to use. Usually, no need to go past 1 ...(depends only on spline interaction cutoff).
     string PARAM_FILE;			// Replaces params_file...
     string COORD_FILE;			// Replaces xyz_file...
+	bool   SELF_CONSIST;		// Is this part of a self-consistent DFT MD --> FIT --> MM MD --> CYCLE type calculation?
+	double NVT_CONV_CUT;		// What is the cutoff for "conservation"... Will kill the program if the current temperature and set temperature differ by more than this fraction
+								// ie if | T_set - T_curr | >  NVT_CONV_CUT * T_set, end with error message.. defaults to 0.1 (10%)
 
 	// "Simulation options"
 	
@@ -81,9 +93,13 @@ struct MD_JOB_CONTROL
 	// "Output control" 
 
 	int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
+	bool   PRINT_VELOC;			// If true, write out the velocities 
+	int    FREQ_VELOC;
 	int    FREQ_ENER;			// Replaces energy_freq... How often to output energy
 	bool   PRINT_FORCE;			// Replaces if_output_force... If TRUE, write out calculated forces.	
 	int    FREQ_FORCE;			// How often to print the forces	
+	int    SELF_CONSIST_FREQ;	// How frequently to print POSCAR file
+	bool   WRAP_COORDS;			// Should coordinates be wrapped?
 };
 
 struct NOSE_HOOVER

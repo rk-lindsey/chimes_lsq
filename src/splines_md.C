@@ -76,6 +76,7 @@ int main(int argc, char* argv[])
 	
 	vector<string> 	TMP_ATOMTYPE;
 	vector<int>		TMP_SIGN;
+	vector<int>		TMP_NATOMTYPE;
 	vector<int> 	TMP_ATOMTYPEIDX;
 	vector<double> 	TMP_CHARGES;
 	vector<double> 	TMP_MASS;
@@ -85,6 +86,7 @@ int main(int argc, char* argv[])
 	ifstream CMPR_FORCEFILE;	// Holds the forces that were read in for comparison purposes
 	ofstream OUT_FORCEFILE;		// Holds the forces that are computed and are to be printed out
 	ofstream OUT_FORCELABL;		// Holds the forces that are computed and are to be printed out.. has atom labels
+	ofstream OUT_VELOCFILE;		// Holds the velocities that are computed and are to be printed out
 	ofstream STATISTICS;		// Holds a copy of the "Step      Time          Ktot/N          Vtot/N ..." part of the output file.. uninterrupted by warnings
 	
 	string EXTENSION;			// Holds the input xyz/xyzf file extension, so we know how many fields to read on each atom line
@@ -102,21 +104,27 @@ int main(int argc, char* argv[])
 		goto FF_SETUP_1; 
 	
 	////////////////////////////////////////////////////////////
-	// Setup an a dftb gen output file, if user has requested it
+	// Setup optional output files 
 	////////////////////////////////////////////////////////////
 
+	// dftbgen
+	
     if ( CONTROLS.FREQ_DFTB_GEN > 0 ) 
 		GENFILE.open("traj.gen");
 	
-	////////////////////////////////////////////////////////////
-	// Setup an a force output file, if user has requested it	
-	////////////////////////////////////////////////////////////
+	// force 
 
     if ( CONTROLS.PRINT_FORCE ) 
 	{
 		OUT_FORCEFILE.open("forceout.txt");	
 		OUT_FORCELABL.open("forceout-labeled.txt");		
 	}
+
+	// velocity
+
+    if ( CONTROLS.PRINT_VELOC ) 
+		OUT_VELOCFILE.open("velocout.txt");	
+
 
 	////////////////////////////////////////////////////////////
     // Read input file input.xyz, where box dims are on the info line:
@@ -231,9 +239,10 @@ int main(int argc, char* argv[])
 				exit(0);
 			}
 			
-			// Read in velocities instead of forces... I guess this is the format of .xyz files for this code?
-			// Velocities must be stored so that the code can be restarted 
-			// Maybe we should use a different file extension when velocities are stored. (LEF)
+ 			// Read in velocities instead of forces...
+ 			// Velocities must be stored so that the code can be restarted 
+ 			// Maybe we should use a different file extension when velocities are stored. (LEF)			
+
 			COORDFILE >> SYSTEM.VELOCITY[a].X >> SYSTEM.VELOCITY[a].Y >> SYSTEM.VELOCITY[a].Z;
 		}
 		else
@@ -302,10 +311,14 @@ int main(int argc, char* argv[])
 			STREAM_PARSER.clear();
 			
 			TMP_ATOMTYPE   .resize(NATMTYP);
+			TMP_NATOMTYPE  .resize(NATMTYP);
 			TMP_ATOMTYPEIDX.resize(NATMTYP);
 			TMP_CHARGES    .resize(NATMTYP);
 			TMP_MASS       .resize(NATMTYP);	
 			TMP_SIGN	   .resize(NATMTYP);
+			
+			for(int i=0; i<TMP_NATOMTYPE.size(); i++)
+				TMP_NATOMTYPE[i] = 0;
 			
 			cout << "	Read " << NATMTYP << " atom types:" << endl;			
 		}	
@@ -372,9 +385,14 @@ int main(int argc, char* argv[])
 		}	
 	}
 	
+	if (FF_PLOTS.N_PLOTS > 0)
+
+		goto FF_SETUP_2; 
+	
+
 	// Assign atom features to atoms in SYSTEM data object, and the PAIR_FF object
 	
-    for(int a=0; a<SYSTEM.ATOMS ;a++)
+	for(int a=0; a<SYSTEM.ATOMS ;a++)
 	{
 		for(int i=0; i<NATMTYP; i++)
 		{
@@ -389,9 +407,8 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if (FF_PLOTS.N_PLOTS > 0)
+	
 
-		goto FF_SETUP_2; 
 
 
 	cout << "   ...read complete" << endl << endl;
@@ -521,6 +538,9 @@ int main(int argc, char* argv[])
 	// consevation of momentum, this number should zero (or
 	// VERY close)
 	////////////////////////////////////////////////////////////  
+	// ... Also, figure out how many atoms of each type we have
+	// ... this becomes useful for printing VASP POSCAR files
+	// //////////////////////////////////////////////////////////// 
 
 	cout << "Running velocity sanity checks..." << endl; 
   
@@ -540,6 +560,10 @@ int main(int argc, char* argv[])
 		TEMP_VEL.Y += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Y;
 		TEMP_VEL.Z += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Z;
 		TEMP_MASS  += SYSTEM.MASS[a];
+		
+		for(int j=0; j<TMP_ATOMTYPE.size(); j++)
+			if (SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[j])
+					TMP_NATOMTYPE[j]++;
     }
 	
 	// Check our velocity center of mass.. hopefully this is (or is very close to) zero
@@ -629,6 +653,8 @@ int main(int argc, char* argv[])
 			cout << "   ...read complete." << endl << endl;
 			
 			cout << "Notes on simulation: " << endl;
+			
+			cout << "	Using fpenalty power " << FPENALTY_POWER << endl;
 			
 			if(CONTROLS.USE_COULOMB)
 			{
@@ -1618,7 +1644,6 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 	
-
   	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
 	//
@@ -1633,14 +1658,14 @@ int main(int argc, char* argv[])
 	
 	double ke; // A temporary variable used when updating thermostatting 
 	
-	for(int A=0;A<CONTROLS.N_MD_STEPS;A++)	//start Big Loop here.
+	for(CONTROLS.STEP=0;CONTROLS.STEP<CONTROLS.N_MD_STEPS;CONTROLS.STEP++)	//start Big Loop here.
     {
       
 	  	////////////////////////////////////////////////////////////
 		// Do first half of coordinate/velocity updating
 		////////////////////////////////////////////////////////////
 		
-		if(A>0)	
+		if(CONTROLS.STEP>0)	
 		{
 			// Update coords
 			
@@ -1670,13 +1695,16 @@ int main(int argc, char* argv[])
 
 			// Wrap the coordinates:
 			
-			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+			if(CONTROLS.WRAP_COORDS)
 			{
-				SYSTEM.COORDS[a1].X -= floor(SYSTEM.COORDS[a1].X / SYSTEM.BOXDIM.X) * SYSTEM.BOXDIM.X;
-				SYSTEM.COORDS[a1].Y -= floor(SYSTEM.COORDS[a1].Y / SYSTEM.BOXDIM.Y) * SYSTEM.BOXDIM.Y;
-				SYSTEM.COORDS[a1].Z -= floor(SYSTEM.COORDS[a1].Z / SYSTEM.BOXDIM.Z) * SYSTEM.BOXDIM.Z;
-			}	
-
+				for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+				{
+					SYSTEM.COORDS[a1].X -= floor(SYSTEM.COORDS[a1].X / SYSTEM.BOXDIM.X) * SYSTEM.BOXDIM.X;
+					SYSTEM.COORDS[a1].Y -= floor(SYSTEM.COORDS[a1].Y / SYSTEM.BOXDIM.Y) * SYSTEM.BOXDIM.Y;
+					SYSTEM.COORDS[a1].Z -= floor(SYSTEM.COORDS[a1].Z / SYSTEM.BOXDIM.Z) * SYSTEM.BOXDIM.Z;
+				}	
+			}
+			
 			// Update first half of velocity (i.e. using a(t)):
 			
 			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
@@ -1713,7 +1741,7 @@ int main(int argc, char* argv[])
 		// requested
 		////////////////////////////////////////////////////////////
 
-	  	if ( CONTROLS.PRINT_FORCE && (A+1)%CONTROLS.FREQ_FORCE == 0 ) 
+	  	if ( CONTROLS.PRINT_FORCE && (CONTROLS.STEP+1)%CONTROLS.FREQ_FORCE == 0 ) 
 	  	{
 			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 			{
@@ -1750,7 +1778,7 @@ int main(int argc, char* argv[])
 			// Print the header for mains simulation output
 			////////////////////////////////////////////////////////////		
 
-			if ( A == 0 ) 
+			if ( CONTROLS.STEP == 0 ) 
 			{
 				printf("%8s %9s %15s %15s %15s %15s %15s", "Step", "Time", "Ktot/N", "Vtot/N", "Etot/N", "T", "P");
 				
@@ -1799,7 +1827,7 @@ int main(int argc, char* argv[])
 		// Do second half of coordinate/velocity updating
 		////////////////////////////////////////////////////////////
 
-		if(A>0)
+		if(CONTROLS.STEP>0)
 		{
 			//update second half of velocity
 			
@@ -1863,6 +1891,25 @@ int main(int argc, char* argv[])
 
 		temp_sum += SYSTEM.TEMPERATURE;
 		
+		// Exit with an error if the set and block temperatures differ by more than CONTROLS.NVT_CONV_CUT
+		
+		if (SYSTEM.TEMPERATURE/CONTROLS.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
+		{
+				cout << "ERROR: System too hot!" << endl;
+				cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
+				cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
+				cout << "Step : " << CONTROLS.STEP << endl;
+				exit(10);
+		}
+		else if (CONTROLS.TEMPERATURE/SYSTEM.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
+		{
+				cout << "ERROR: System too cold!" << endl;
+				cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
+				cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
+				cout << "Step : " << CONTROLS.STEP << endl;
+				exit(-10);
+		}			
+		
 	  	////////////////////////////////////////////////////////////
 		// If requested, compute pressure numerically, and accumulate
 		// statistics
@@ -1878,11 +1925,11 @@ int main(int argc, char* argv[])
 		// Periodically print simulation output
 		////////////////////////////////////////////////////////////
 		
-		if ( (A+1) % CONTROLS.FREQ_ENER == 0 ) 
+		if ( (CONTROLS.STEP+1) % CONTROLS.FREQ_ENER == 0 ) 
 		{
 			
-			printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.3f", A+1, (A+1)*CONTROLS.DELTA_T_FS, Ktot/SYSTEM.ATOMS,SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,SYSTEM.TEMPERATURE, SYSTEM.PRESSURE);
-			STATISTICS << A+1<< "	" << (A+1)*CONTROLS.DELTA_T_FS<< "	" << Ktot/SYSTEM.ATOMS<< "	" <<SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS<< "	" <<(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS<< "	" <<SYSTEM.TEMPERATURE<< "	" << SYSTEM.PRESSURE;
+			printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.3f", CONTROLS.STEP+1, (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS, Ktot/SYSTEM.ATOMS,SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,SYSTEM.TEMPERATURE, SYSTEM.PRESSURE);
+			STATISTICS << CONTROLS.STEP+1<< "	" << (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS<< "	" << Ktot/SYSTEM.ATOMS<< "	" <<SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS<< "	" <<(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS<< "	" <<SYSTEM.TEMPERATURE<< "	" << SYSTEM.PRESSURE;
 
 			if ( CONTROLS.USE_HOOVER_THRMOSTAT ) 
 			{
@@ -1903,7 +1950,7 @@ int main(int argc, char* argv[])
 		// If requested, scale the velocities
 		////////////////////////////////////////////////////////////	
 
-		if ( (!CONTROLS.USE_HOOVER_THRMOSTAT) && ((A+1) % int(CONTROLS.FREQ_UPDATE_THERMOSTAT) == 0) )
+		if ( (!CONTROLS.USE_HOOVER_THRMOSTAT) && ((CONTROLS.STEP+1) % int(CONTROLS.FREQ_UPDATE_THERMOSTAT) == 0) )
 		{
 			avg_temp +=  SYSTEM.TEMPERATURE;
 			avg_temp /= int(CONTROLS.FREQ_UPDATE_THERMOSTAT);
@@ -1928,9 +1975,9 @@ int main(int argc, char* argv[])
 		// If requested, write the dftbgen output file
 		////////////////////////////////////////////////////////////
 		
-		if ( (CONTROLS.FREQ_DFTB_GEN>0) && ((A+1) % CONTROLS.FREQ_DFTB_GEN == 0) ) 
+		if ( (CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0) ) 
 		{
-			GENFILE << setw(5) << right << SYSTEM.ATOMS << " S #Step " << A+1 << " Time " << (A+1) * CONTROLS.DELTA_T_FS << " (fs) Temp " << SYSTEM.TEMPERATURE << " (k)" << endl;
+			GENFILE << setw(5) << right << SYSTEM.ATOMS << " S #Step " << CONTROLS.STEP+1 << " Time " << (CONTROLS.STEP+1) * CONTROLS.DELTA_T_FS << " (fs) Temp " << SYSTEM.TEMPERATURE << " (k)" << endl;
 
 			for(int i=0; i<NATMTYP; i++)				// Replaces GENFILE << "O H" << endl;
 				GENFILE << TMP_ATOMTYPE[i] << " ";
@@ -1961,6 +2008,96 @@ int main(int argc, char* argv[])
 					<< fixed << setprecision(5) << setw(8) << 0.0 << " "
 					<< fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.Z << endl;
 		}
+		
+	  	////////////////////////////////////////////////////////////
+		// If requested, write the velocities
+		////////////////////////////////////////////////////////////
+		
+		if (CONTROLS.PRINT_VELOC && ((CONTROLS.STEP+1) % CONTROLS.FREQ_VELOC == 0) ) 
+		{
+			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+			{
+				OUT_VELOCFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.VELOCITY[a1].X << endl;
+				OUT_VELOCFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.VELOCITY[a1].Y << endl;
+				OUT_VELOCFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.VELOCITY[a1].Z << endl;
+			}	
+		}		
+		
+		////////////////////////////////////////////////////////////
+		// If requested, print out the VASP POSCAR file for self-consistent fitting
+		////////////////////////////////////////////////////////////
+	
+		if(CONTROLS.SELF_CONSIST && ((CONTROLS.STEP+1) % CONTROLS.SELF_CONSIST_FREQ == 0) )
+		{
+			// Format is:
+			// Title
+			// Scaling factor (i.e. coords = boxlength * scaling_factor * scaled_cooords)
+			// Cell vectors (here we assume orthorhombic)
+			// Number of atoms of each type
+			// "Direct"
+			// Scaled coords, in the order of atoms listed above
+			// 
+			// In order to eventually set atoms back to original order, store a map
+			// ... map format is: <MD idx> <VASP idx> < atom type>
+	
+			int INSTANCE = int((CONTROLS.STEP+1) / CONTROLS.SELF_CONSIST_FREQ);
+			stringstream val_to_str;
+			
+			val_to_str << INSTANCE;
+			val_to_str >> TEMP_STR;
+			val_to_str.str("");
+			val_to_str.clear();
+			
+			string POSNAME = "POSCAR_";
+			POSNAME.append(TEMP_STR);
+			POSNAME.append(".mm_md");
+			
+			ofstream POSCAR_MAPPER;
+			static int VASP_IDX;
+			
+			if(INSTANCE == 1)	// Then this is the first time we're printing.. Need to write the map file
+			{
+				VASP_IDX = 0;
+				POSCAR_MAPPER.open("POSCAR_MAPPER.mm_md");
+			}	
+
+			ofstream POSCAR;
+			POSCAR.open(POSNAME.data());
+	
+			POSCAR << "MM MD SNAPSHOT - NATOMS: " << SYSTEM.ATOMS << endl;
+	
+			POSCAR << "1.0" << endl;
+	
+			POSCAR << SYSTEM.BOXDIM.X << " 0.0 0.0" << endl;
+			POSCAR << "0.0 " << SYSTEM.BOXDIM.Y << " 0.0" <<  endl;
+			POSCAR << "0.0 0.0 " << SYSTEM.BOXDIM.Z << endl;
+	
+			for(int i=0; i<TMP_NATOMTYPE.size(); i++)
+				POSCAR << TMP_NATOMTYPE[i] << " ";
+			POSCAR << endl;
+	
+			POSCAR << "Direct" << endl;
+	
+			for(int i=0; i<TMP_NATOMTYPE.size(); i++)
+			{
+				for(int j=0; j<SYSTEM.ATOMS; j++)
+				{
+					if(TMP_ATOMTYPE[i] == SYSTEM.ATOMTYPE[j])
+					{
+						POSCAR << SYSTEM.COORDS[j].X/SYSTEM.BOXDIM.X << " " 
+							   << SYSTEM.COORDS[j].Y/SYSTEM.BOXDIM.Y << " " 
+							   << SYSTEM.COORDS[j].Z/SYSTEM.BOXDIM.Z << endl;
+					
+						if(INSTANCE == 1)
+							POSCAR_MAPPER << j << " " << VASP_IDX++ << " " << SYSTEM.ATOMTYPE[j] << endl;
+					}
+				}
+			}
+
+			POSCAR.close();
+			if(INSTANCE == 1)
+				POSCAR_MAPPER.close();
+		}
 
 	  	////////////////////////////////////////////////////////////
 	  	////////////////////////////////////////////////////////////
@@ -1972,20 +2109,15 @@ int main(int argc, char* argv[])
    
 	   
     }//End big loop here.
-    
+    	
 	cout << "END SIMULATION" << endl;
-
-	if(OUT_FORCEFILE.is_open())
+	
+	if(OUT_FORCEFILE.is_open())	// Close the force files 
 	{
 		OUT_FORCEFILE.close();
 		OUT_FORCELABL.close();
 	}
-	
-	// WHY ON EARTH WOULD WE NEED TO RE-COMPUTE MASS??? WHAT COULD POSSIBLY
-	// HAPPEN TO CAUSE THE MASS TO CHANGE DURING A CLOSED-SYSTEM MD SIMULATION?!?!?!?!?!?!??!?!?!?!?!??!?!?!
-	// This is probably copied over from the original least squares code
-	// where the mass could vary between frames (LEF)
-	// It's probably better to store the total mass in the SYSTEM structure.
+
 	TEMP_MASS = 0.0;
 	
 	for ( int a = 0; a < SYSTEM.ATOMS; a++ ) 
@@ -2004,9 +2136,11 @@ int main(int argc, char* argv[])
 	fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.BOXDIM.Z << endl;;
 	
 	// Note the conversion of our string to a c-style string... printf can't handle c++ strings,
-	// since it is a C method. 
-	// I think there is a way to get at the underlying C char* in a C++ String if you like
-	// printf better (LEF).
+	// since it is a C method.
+	// 
+ 	// I think there is a way to get at the underlying C char* in a C++ String if you like
+ 	// printf better (LEF).	
+
 	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
 	{
 		fxyz << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
@@ -2028,6 +2162,8 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 {
 	cout << endl << "Reading the simulation control input file..." << endl;
 	
+	// Define some variable to help with reading
+	
 	bool   			FOUND_END = false;
 	string 			LINE;
 	string			TEMP_STR,TEMP_STR_2;
@@ -2038,6 +2174,15 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 	int				ITEM_NO;
 	int				ADD_TO_NPLOTS = 0;
 	
+	// Set some defaults
+	
+	CONTROLS.SELF_CONSIST = false;
+	CONTROLS.PLOT_PES     = false;
+	CONTROLS.WRAP_COORDS  = true;
+	CONTROLS.PRINT_VELOC  = false;
+	CONTROLS.NVT_CONV_CUT = 0.10;
+	
+	// Begin reading
 	
 	while (FOUND_END == false)
 	{
@@ -2291,9 +2436,23 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 			}
 			else
 				cout << "	# PLOTPES #: false" << endl;	
-		}	
+		}
 		
+		// For self-consistent fitting type runs
 		
+		else if(LINE.find("# SLFCNST #") != string::npos)
+		{
+			cin >> LINE; 
+			
+			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+			{
+				CONTROLS.SELF_CONSIST = true;
+				cin >> CONTROLS.SELF_CONSIST_FREQ;
+				cout << "	# SLFCNST #: true... will print POSCAR file every " << CONTROLS.SELF_CONSIST_FREQ << " md steps "<< endl;	
+			}
+			cin.ignore();
+		}
+
 		// "General control variables"
 		
 		else if(LINE.find("# RNDSEED #") != string::npos)
@@ -2309,7 +2468,14 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 			CONTROLS.TEMPERATURE = double(atof(LINE.data()));
 			cout << "	# TEMPERA #: " << CONTROLS.TEMPERATURE << " K" << endl;	
 		}	
-				
+		
+		else if(LINE.find("# CONVCUT #") != string::npos)
+		{
+			cin >> LINE; cin.ignore();
+			CONTROLS.NVT_CONV_CUT = double(atof(LINE.data()));
+			cout << "	# CONVCUT #: " << CONTROLS.NVT_CONV_CUT*100 << " % of set T" << endl;	
+		}	
+
 		else if(LINE.find("# CMPRFRC #") != string::npos)
 		{
 			getline(cin,LINE);
@@ -2469,11 +2635,35 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 				
 		// "Output control"
 		
+		else if(LINE.find("# WRPCRDS #") != string::npos)
+		{
+			getline(cin,LINE);
+			LINE_PARSER.str(LINE);
+			LINE_PARSER >> LINE;
+			
+			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+			{
+				CONTROLS.WRAP_COORDS = true;
+				cout << "	# WRPCRDS #: true" << endl;	
+			}
+			else
+			{
+				CONTROLS.WRAP_COORDS = false;
+				cout << "	# WRPCRDS #: false" << endl;							
+			}
+		}			
+		
 		else if(LINE.find("# FRQDFTB #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
 			CONTROLS.FREQ_DFTB_GEN = int(atof(LINE.data()));
 			cout << "	# FRQDFTB #: " << CONTROLS.FREQ_DFTB_GEN << endl;	
+			
+			if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0)
+			{
+				cout << "		... printing every " << CONTROLS.FREQ_DFTB_GEN*CONTROLS.DELTA_T_FS << " fs, " << endl;
+				cout << "		... printing " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_DFTB_GEN << " frames. " << endl; 
+			}
 		}
 
 		else if(LINE.find("# FRQENER #") != string::npos)
@@ -2498,7 +2688,12 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 					CONTROLS.FREQ_FORCE = int(atof(LINE.data()));
 				
 				cout << "	# PRNTFRC #: true ...and will be printed every " << CONTROLS.FREQ_FORCE << " frames."<< endl;	
-//				cout << "	# PRNTFRC #: true" << endl;	
+				
+				if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0)
+				{
+					cout << "		... printing every " << CONTROLS.FREQ_FORCE*CONTROLS.DELTA_T_FS << " fs, " << endl;
+					cout << "		... printing " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_FORCE << " frames. " << endl; 
+				}
 			}
 			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
 			{
@@ -2510,7 +2705,43 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 				cout << "ERROR: # PRNTFRC # must be specified as true or false." << endl;
 				exit(1);	
 			}								
-		}		
+		}	
+		
+		else if(LINE.find("# PRNTVEL #") != string::npos)
+		{
+			cin >> LINE; cin.ignore();
+			
+			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+			{
+				CONTROLS.PRINT_VELOC = true;
+				cin >> LINE; cin.ignore();
+				
+				if(LINE == "FRQDFTB")
+					CONTROLS.FREQ_VELOC = CONTROLS.FREQ_DFTB_GEN;
+				else
+					CONTROLS.FREQ_VELOC = int(atof(LINE.data()));
+				
+				cout << "	# PRNTVEL #: true ...and will be printed every " << CONTROLS.FREQ_VELOC << " frames."<< endl;	
+				
+				if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0)
+				{
+					cout << "		... printing every " << CONTROLS.FREQ_VELOC*CONTROLS.DELTA_T_FS << " fs, " << endl;
+					cout << "		... printing " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_VELOC << " frames. " << endl; 
+				}
+				
+			}
+			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
+			{
+				CONTROLS.FREQ_VELOC = false;
+				cout << "	# PRNTVEL #: false" << endl;	
+			}
+			else
+			{
+				cout << "ERROR: # PRNTVEL # must be specified as true or false." << endl;
+				exit(1);	
+			}								
+		}			
+			
 
 	}
 }
@@ -2548,7 +2779,5 @@ static double kinetic_energy(FRAME & SYSTEM, string TYPE)		// UPDATED -- Overloa
 
   return(Ktot);
 }
-
-
 
 
