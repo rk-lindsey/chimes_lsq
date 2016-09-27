@@ -379,6 +379,7 @@ Number of steps is 1000
 Number of layers is 1
 Spline short-range pair forces will be used
 Force parameters will be read from params.spline.txt
+XYZ coordinates will be read from input.xyz
 Coulomb forces will be calculated with Ewald sums
 ReaxFF overcoordination term will be calculated
 3-Body Chebyshevy polynomial will NOT be calculated
@@ -395,6 +396,9 @@ END OF JOB PARAMETERS
 Filling in table 0 for values less than 28
 Filling in table 1 for values less than 116
 Filling in table 2 for values less than 232
+QOO parameter is:    38.515164
+QOH parameter is:   -19.257583
+QHH parameter is:     9.628791
 Q[H] from params file =      0.17028 e
 Charge equation 1 error =     -0.00000
 Charge sum per atom =   0.00000e+00

@@ -76,6 +76,7 @@ Number of steps is 1000
 Number of layers is 1
 Chebyshev short-range pair forces will be used
 Force parameters will be read from params.cheby.txt
+XYZ coordinates will be read from input.xyz
 Coulomb forces will be calculated with Ewald sums
 ReaxFF overcoordination term will be calculated
 3-Body Chebyshevy polynomial will NOT be calculated
@@ -89,6 +90,9 @@ Nose-Hoover thermostat time = 10.00000 fs
 
 END OF JOB PARAMETERS
 
+QOO parameter is:   136.955400
+QOH parameter is:   -68.477703
+QHH parameter is:    34.238851
 Q[H] from params file =      0.32111 e
 Charge equation 1 error =     -0.00000
 Charge sum per atom =   0.00000e+00
@@ -96,6 +100,37 @@ Total Mass                   = 576.48000 au
 Volume                       = 638.08412 Ang.^3
 Number density               =  0.24983 mol atm/cc
 Mass density                 =  1.50023 g/cc
+2-Body Chebyshev Polynomial Coefficients:
+ele: O O pow: 0 pair index: 0 parameter:   6.2211831207500e+01
+ele: O O pow: 1 pair index: 0 parameter:  -2.3006431987700e+01
+ele: O O pow: 2 pair index: 0 parameter:   2.5611598152500e+01
+ele: O O pow: 3 pair index: 0 parameter:  -3.2300192296900e+01
+ele: O O pow: 4 pair index: 0 parameter:   2.1359479882100e+00
+ele: O O pow: 5 pair index: 0 parameter:   9.5848216847900e+00
+ele: O O pow: 6 pair index: 0 parameter:   3.6259156255000e+01
+ele: O O pow: 7 pair index: 0 parameter:  -3.9351490270600e+01
+ele: O O pow: 8 pair index: 0 parameter:  -4.7311871905600e+01
+ele: O O pow: 9 pair index: 0 parameter:  -2.8730490556700e+01
+ele: O H pow: 0 pair index: 1 parameter:  -1.9421812518200e+00
+ele: O H pow: 1 pair index: 1 parameter:   2.8490710697000e+01
+ele: O H pow: 2 pair index: 1 parameter:   2.6798129857600e+01
+ele: O H pow: 3 pair index: 1 parameter:   1.6461114931000e+01
+ele: O H pow: 4 pair index: 1 parameter:   1.2108131379600e+00
+ele: O H pow: 5 pair index: 1 parameter:   4.5687161358100e+00
+ele: O H pow: 6 pair index: 1 parameter:   1.4726648222200e-02
+ele: O H pow: 7 pair index: 1 parameter:  -8.0804710804800e-01
+ele: O H pow: 8 pair index: 1 parameter:   1.1782117292100e+00
+ele: O H pow: 9 pair index: 1 parameter:   8.7525502500900e-01
+ele: H H pow: 0 pair index: 2 parameter:  -1.0727307808700e+01
+ele: H H pow: 1 pair index: 2 parameter:  -1.7487498731900e+01
+ele: H H pow: 2 pair index: 2 parameter:  -3.5064768871600e+01
+ele: H H pow: 3 pair index: 2 parameter:  -3.6602068295200e+01
+ele: H H pow: 4 pair index: 2 parameter:  -3.6969880808300e+01
+ele: H H pow: 5 pair index: 2 parameter:  -2.7879521838900e+01
+ele: H H pow: 6 pair index: 2 parameter:  -2.0534033962000e+01
+ele: H H pow: 7 pair index: 2 parameter:  -1.3157821703900e+01
+ele: H H pow: 8 pair index: 2 parameter:  -6.8693881773000e+00
+ele: H H pow: 9 pair index: 2 parameter:  -2.7219995016800e+00
 Requested Ewald accuracy  =  1.000000e-07
 Ewald alpha               =  5.853127e-01
 R-Space Ewald cutoff      =  6.173215e+00
