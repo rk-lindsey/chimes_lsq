@@ -295,10 +295,6 @@ mapsfile=open(sys.argv[4],"r").readlines()
 
 print ""
 
-
-for i in xrange(len(x)):
-	print x[i]
-
 for i in range(0,len(mapsfile)):
 	print mapsfile[i].rstrip('\n')
 	
