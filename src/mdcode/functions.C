@@ -811,7 +811,7 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
   double exprlen ;
 
   // A penalty function is added to the potential for r + penalty_dist < smin[ipair]
-  const double penalty_scale = 1.0e8 ;
+  const double penalty_scale = 1.0e+04 ;
   const double penalty_dist = 0.01 ;
 
   if ( ! called_before ) {
@@ -885,7 +885,8 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    }
 
 		    // x = (rlen-smin) / (smax - smin) ;
-
+#if(1)
+		    // Cutting off x adversely affects energy conservation.
 		    if ( x < -1.0 ) {
 		      cout << "Warning:  r < rmin\n" ;
 		      x = -1.0 ;
@@ -893,6 +894,7 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
 		    if ( x > 1.0 ) {
 		      x = 1.0 ;
 		    }
+#endif
 		    // Generate Chebyshev polynomials by recursion.
 		    Tn[0] = 1.0 ;
 		    Tn[1] = x ;
