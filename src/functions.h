@@ -264,11 +264,16 @@ struct CHARGE_CONSTRAINT
 	double		   FORCE;
 };
 
+// For MPI calculations.  Number of processors and index of current processor.
+extern int NPROCS ;
+extern int RANK ;
+
 //////////////////////////////////////////
 //
 //	FUNCTION HEADERS -- DERIVATIVE CALCULATION
 //
 //////////////////////////////////////////
+
 
 
 // FUNCTION UPDATED
@@ -305,6 +310,8 @@ void ZCalc(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FILE_TAG);
 void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk);
 void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
+
+void divide_atoms(int &a1start, int &a1end, int atoms) ;
 
 #endif
 

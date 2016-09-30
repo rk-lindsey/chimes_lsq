@@ -218,74 +218,75 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 
 
 	if (!called_before) 
-	{
-		called_before = true;
-		LAST_BOXDIMS.X = LAST_BOXDIMS.Y = LAST_BOXDIMS.Z = 0.0;
+		{
+			called_before = true;
+			LAST_BOXDIMS.X = LAST_BOXDIMS.Y = LAST_BOXDIMS.Z = 0.0;
 		
-		string TEMP_STR;
+			string TEMP_STR;
 		
-	}
+		}
 
 	if ( TRAJECTORY.BOXDIM.X != LAST_BOXDIMS.X || TRAJECTORY.BOXDIM.Y != LAST_BOXDIMS.Y || TRAJECTORY.BOXDIM.Z != LAST_BOXDIMS.Z ) 
-	{
-		// Update K factors when box dimensions change.
+		{
+			// Update K factors when box dimensions change.
 	
-		double min_vfac = 1.0e8;
-		totk = 0;
-		alpha = sqrt(alphasq);
-		int ksqmax = k_cut * k_cut;
-		kmax = k_cut;
+			double min_vfac = 1.0e8;
+			totk = 0;
+			alpha = sqrt(alphasq);
+			int ksqmax = k_cut * k_cut;
+			kmax = k_cut;
 
-		for(int kx=-kmax; kx<=kmax; kx++) 
-		{
-			for(int ky=-kmax; ky<=kmax; ky++)
-			{
-				for(int kz=-kmax; kz<=kmax; kz++)
+			for(int kx=-kmax; kx<=kmax; kx++) 
 				{
-					ksq=kx*kx + ky*ky + kz*kz;
-					
-					if(ksq!=0 && ksq<ksqmax)
-					{						
-						K_V[totk].X = (2.0*PI/TRAJECTORY.BOXDIM.X)*kx;
-						K_V[totk].Y = (2.0*PI/TRAJECTORY.BOXDIM.Y)*ky;
-						K_V[totk].Z = (2.0*PI/TRAJECTORY.BOXDIM.Z)*kz;
-						
-						rksq = K_V[totk].X*K_V[totk].X + K_V[totk].Y*K_V[totk].Y + K_V[totk].Z*K_V[totk].Z;
-						
-						// Note:  The original version of the Ewald evaluator did not work 
-						// when the lattice constants were different.
-						
-						KFAC_V[totk] = exp(-rksq/(4.0*alphasq))/rksq;
-						
-						if ( KFAC_V[totk] < min_vfac ) 
-							min_vfac = KFAC_V[totk];
-						
-						totk++;
-						
-						if(totk>maxk)
+					for(int ky=-kmax; ky<=kmax; ky++)
 						{
-							cout << "	totk = " << totk << " greater than maxk = " << maxk << endl;
-							exit(1);
+							for(int kz=-kmax; kz<=kmax; kz++)
+								{
+									ksq=kx*kx + ky*ky + kz*kz;
+					
+									if(ksq!=0 && ksq<ksqmax)
+										{						
+											K_V[totk].X = (2.0*PI/TRAJECTORY.BOXDIM.X)*kx;
+											K_V[totk].Y = (2.0*PI/TRAJECTORY.BOXDIM.Y)*ky;
+											K_V[totk].Z = (2.0*PI/TRAJECTORY.BOXDIM.Z)*kz;
+						
+											rksq = K_V[totk].X*K_V[totk].X + K_V[totk].Y*K_V[totk].Y + K_V[totk].Z*K_V[totk].Z;
+						
+											// Note:  The original version of the Ewald evaluator did not work 
+											// when the lattice constants were different.
+						
+											KFAC_V[totk] = exp(-rksq/(4.0*alphasq))/rksq;
+						
+											if ( KFAC_V[totk] < min_vfac ) 
+												min_vfac = KFAC_V[totk];
+						
+											totk++;
+						
+											if(totk>maxk)
+												{
+													cout << "	totk = " << totk << " greater than maxk = " << maxk << endl;
+													exit(1);
+												}
+										}
+								}
 						}
-					}
 				}
-			}
-		}
 		
-		if ( LAST_BOXDIMS.X == 0.0 ) 
-		{
-			#if VERBOSITY == 1
-				cout << "	Cutting off K-vectors with magnitude less than "  << k_cut << endl;
-				cout << "	Number of Ewald K-vectors = " << totk << endl;
-				cout << "	K-space accuracy estimate = " << min_vfac << endl << endl;;
-			#endif
-
-		}
+			if ( LAST_BOXDIMS.X == 0.0 ) 
+				{
+#if VERBOSITY == 1
+					if ( RANK == 0 ) {
+						cout << "	Cutting off K-vectors with magnitude less than "  << k_cut << endl;
+						cout << "	Number of Ewald K-vectors = " << totk << endl;
+						cout << "	K-space accuracy estimate = " << min_vfac << endl << endl;;
+					}
+#endif
+				}
 		
-		LAST_BOXDIMS.X = TRAJECTORY.BOXDIM.X;
-		LAST_BOXDIMS.Y = TRAJECTORY.BOXDIM.Y;
-		LAST_BOXDIMS.Z = TRAJECTORY.BOXDIM.Z;
-	}
+			LAST_BOXDIMS.X = TRAJECTORY.BOXDIM.X;
+			LAST_BOXDIMS.Y = TRAJECTORY.BOXDIM.Y;
+			LAST_BOXDIMS.Z = TRAJECTORY.BOXDIM.Z;
+		}
 
 	UCoul = 0;
 
@@ -298,38 +299,53 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	double kdotr;
 	double tempd;
 
-	for(int ik=-0; ik<totk; ik++)
-	{
-		tempsin = 0.0;
-		tempcos = 0.0;
+	int ikstart, ikend ;
 
-		for(int a1=0; a1<TRAJECTORY.ATOMS; a1++) 
-		{
-			kdotr = TRAJECTORY.COORDS[a1].X * K_V[ik].X + TRAJECTORY.COORDS[a1].Y * K_V[ik].Y + TRAJECTORY.COORDS[a1].Z * K_V[ik].Z;	
-			sin_array[a1] = sin(kdotr);																									
-			cos_array[a1] = cos(kdotr);		
-			
-			tempcos += TRAJECTORY.CHARGES[a1] * cos_array[a1];																			
-			tempsin += TRAJECTORY.CHARGES[a1] * sin_array[a1];		
-		}
-		
-		tempk += KFAC_V[ik]* (tempcos*tempcos + tempsin*tempsin);
-		
-		for(int a1=0; a1<TRAJECTORY.ATOMS; a1++) 
-		{
-			tempd = -4.0 * PI * KFAC_V[ik] * ke * TRAJECTORY.CHARGES[a1] * ( tempcos * sin_array[a1] - tempsin * cos_array[a1] ) / Volume;
-		
-			TRAJECTORY.TMP_EWALD[a1].X += K_V[ik].X * tempd;
-			TRAJECTORY.TMP_EWALD[a1].Y += K_V[ik].Y * tempd;
-			TRAJECTORY.TMP_EWALD[a1].Z += K_V[ik].Z * tempd;
-		}
+	if ( NPROCS <= totk ) {
+		// In this case, we divide work over k vectors.  The code is the same
+		// as dividing over atoms.
+		divide_atoms(ikstart, ikend, totk) ;
+	} else {
+		// 1 k-vector per process.
+		ikstart = RANK ;
+		ikend   = RANK ;
 	}
+
+	for(int ik= ikstart ; ik <= ikend ; ik++)
+		{
+			tempsin = 0.0;
+			tempcos = 0.0;
+
+			for(int a1 = 0 ; a1 < TRAJECTORY.ATOMS ; a1++) 
+				{
+					kdotr = TRAJECTORY.COORDS[a1].X * K_V[ik].X + TRAJECTORY.COORDS[a1].Y * K_V[ik].Y + TRAJECTORY.COORDS[a1].Z * K_V[ik].Z;	
+					sin_array[a1] = sin(kdotr);																									
+					cos_array[a1] = cos(kdotr);		
+			
+					tempcos += TRAJECTORY.CHARGES[a1] * cos_array[a1];																			
+					tempsin += TRAJECTORY.CHARGES[a1] * sin_array[a1];		
+				}
+		
+			tempk += KFAC_V[ik]* (tempcos*tempcos + tempsin*tempsin);
+		
+			for(int a1 = 0 ; a1 < TRAJECTORY.ATOMS ; a1++) 
+				{
+					tempd = -4.0 * PI * KFAC_V[ik] * ke * TRAJECTORY.CHARGES[a1] * ( tempcos * sin_array[a1] - tempsin * cos_array[a1] ) / Volume;
+		
+					TRAJECTORY.TMP_EWALD[a1].X += K_V[ik].X * tempd;
+					TRAJECTORY.TMP_EWALD[a1].Y += K_V[ik].Y * tempd;
+					TRAJECTORY.TMP_EWALD[a1].Z += K_V[ik].Z * tempd;
+				}
+		}
 	
 	tempy=(2*PI/Volume)*tempk;
 	UCoul+=ke*tempy;
 
 	// Constant energy term.
-	for ( int a1=0; a1<TRAJECTORY.ATOMS; a1++ ) 
+	int a1start, a1end ;
+	divide_atoms(a1start, a1end, TRAJECTORY.ATOMS) ;
+
+	for ( int a1=a1start ; a1 <=  a1end ; a1++ ) 
 		UCoul -= ke * alpha /sqrt(PI) * TRAJECTORY.CHARGES[a1] * TRAJECTORY.CHARGES[a1];
 
 	// End K-Space loop.
@@ -726,131 +742,136 @@ void ZCalc_Ewald(FRAME & TRAJECTORY)	// MD version
 // Calculate Ewald interactions. 
 {
 
-  XYZ RVEC; 		// Replaces Rvec[3];
-  double tempx;
+	XYZ RVEC; 		// Replaces Rvec[3];
+	double tempx;
 
-  const double PI = M_PI;
-  const double SQRT_PI = sqrt(PI);
+	const double PI = M_PI;
+	const double SQRT_PI = sqrt(PI);
 
-  double 		tempd,tempy;
-  double 		dx,dy,dz;
-  double 		rlen_mi;
-  static double alphasq;
-  int 			totk = 0;
-  static double r_cut;
-  static int	k_cut;
-  bool 			if_old_k_space = false;
-  static bool 	called_before = false;
-  static double alpha;
-  const double 	accuracy = EWALD_ACCURACY;
-  double		UCoul = 0;
-  double		TMP_UCoul;
-  double 		erfc_val;
+	double 		tempd,tempy;
+	double 		dx,dy,dz;
+	double 		rlen_mi;
+	static double alphasq;
+	int 			totk = 0;
+	static double r_cut;
+	static int	k_cut;
+	bool 			if_old_k_space = false;
+	static bool 	called_before = false;
+	static double alpha;
+	const double 	accuracy = EWALD_ACCURACY;
+	double		UCoul = 0;
+	double		TMP_UCoul;
+	double 		erfc_val;
   
-  string TEMP_STR;
+	string TEMP_STR;
 
 	if ( ! called_before ) 
-	{
-		double vol = TRAJECTORY.BOXDIM.X * TRAJECTORY.BOXDIM.Y * TRAJECTORY.BOXDIM.Z;
-		double r_acc, k_acc;
-		optimal_ewald_params(accuracy, vol, TRAJECTORY.ATOMS, alpha, r_cut, k_cut,r_acc, k_acc);	// NEEDS UPDATING!!!
-		alphasq = alpha * alpha;
+		{
+			double vol = TRAJECTORY.BOXDIM.X * TRAJECTORY.BOXDIM.Y * TRAJECTORY.BOXDIM.Z;
+			double r_acc, k_acc;
+			optimal_ewald_params(accuracy, vol, TRAJECTORY.ATOMS, alpha, r_cut, k_cut,r_acc, k_acc);	// NEEDS UPDATING!!!
+			alphasq = alpha * alpha;
 
-		#if VERBOSITY == 1
-		
-			cout << endl;
-			cout << "Ewald parameters: " << endl;
-			printf("	Requested Ewald accuracy  = %13.6e\n", accuracy);
-			printf("	Ewald alpha               = %13.6e\n", alpha);
-			printf("	R-Space Ewald cutoff      = %13.6e\n", r_cut);
-			printf("	R-Space accuracy estimate = %13.6e\n", r_acc);
-			printf("	K-Space accuracy estimate = %13.6e\n", k_acc);
-			cout << endl;
+#if VERBOSITY == 1
+			if ( RANK == 0 ) 
+				{
+					cout << endl;
+					cout << "Ewald parameters: " << endl;
+					printf("	Requested Ewald accuracy  = %13.6e\n", accuracy);
+					printf("	Ewald alpha               = %13.6e\n", alpha);
+					printf("	R-Space Ewald cutoff      = %13.6e\n", r_cut);
+					printf("	R-Space accuracy estimate = %13.6e\n", r_acc);
+					printf("	K-Space accuracy estimate = %13.6e\n", k_acc);
+					cout << endl;
+				}
 			
-		#endif
+#endif
 		
 
-		called_before = true;
-	}
+			called_before = true;
+		}
 
 	TRAJECTORY.TMP_EWALD.resize(TRAJECTORY.ATOMS);
 
-	for(int a1=0;a1<TRAJECTORY.ATOMS;a1++)
-	{
-		TRAJECTORY.TMP_EWALD[a1].X = 0;
-		TRAJECTORY.TMP_EWALD[a1].Y = 0;
-		TRAJECTORY.TMP_EWALD[a1].Z = 0;
-	}
+	int a1start, a1end ;
+	divide_atoms(a1start, a1end, TRAJECTORY.ATOMS) ;
+
+
+	for(int a1 = 0 ; a1 < TRAJECTORY.ATOMS ; a1++)
+		{
+			TRAJECTORY.TMP_EWALD[a1].X = 0;
+			TRAJECTORY.TMP_EWALD[a1].Y = 0;
+			TRAJECTORY.TMP_EWALD[a1].Z = 0;
+		}
 
 	// Main loop Ewald Coulomb energy/forces:
 	
 	int    curr_pair_type_idx;
-	
-	for(int a1=0;a1<TRAJECTORY.ATOMS;a1++)		// Double sum over atom pairs
-	{
-		for(int a2=0;a2<a1;a2++)
+
+	for(int a1 = a1start; a1 <= a1end; a1++)		// Double sum over atom pairs
 		{
-			tempy=0.0;
+			for(int a2=a1+1 ; a2 < TRAJECTORY.ATOMS ; a2++)
+				{
+					tempy=0.0;
 	
-			RVEC.X = TRAJECTORY.COORDS[a2].X - TRAJECTORY.COORDS[a1].X;
-			RVEC.Y = TRAJECTORY.COORDS[a2].Y - TRAJECTORY.COORDS[a1].Y;
-			RVEC.Z = TRAJECTORY.COORDS[a2].Z - TRAJECTORY.COORDS[a1].Z;
+					RVEC.X = TRAJECTORY.COORDS[a2].X - TRAJECTORY.COORDS[a1].X;
+					RVEC.Y = TRAJECTORY.COORDS[a2].Y - TRAJECTORY.COORDS[a1].Y;
+					RVEC.Z = TRAJECTORY.COORDS[a2].Z - TRAJECTORY.COORDS[a1].Z;
 	
-			// THIS IS THE REAL-SPACE LOOP IN MIC:
+					// THIS IS THE REAL-SPACE LOOP IN MIC:
 	
-			RVEC.X = RVEC.X - floor( 0.5 + RVEC.X / TRAJECTORY.BOXDIM.X ) * TRAJECTORY.BOXDIM.X;
-			RVEC.Y = RVEC.Y - floor( 0.5 + RVEC.Y / TRAJECTORY.BOXDIM.Y ) * TRAJECTORY.BOXDIM.Y;
-			RVEC.Z = RVEC.Z - floor( 0.5 + RVEC.Z / TRAJECTORY.BOXDIM.Z ) * TRAJECTORY.BOXDIM.Z;
+					RVEC.X = RVEC.X - floor( 0.5 + RVEC.X / TRAJECTORY.BOXDIM.X ) * TRAJECTORY.BOXDIM.X;
+					RVEC.Y = RVEC.Y - floor( 0.5 + RVEC.Y / TRAJECTORY.BOXDIM.Y ) * TRAJECTORY.BOXDIM.Y;
+					RVEC.Z = RVEC.Z - floor( 0.5 + RVEC.Z / TRAJECTORY.BOXDIM.Z ) * TRAJECTORY.BOXDIM.Z;
 
 	      
-			rlen_mi = RVEC.X*RVEC.X + RVEC.Y*RVEC.Y + RVEC.Z*RVEC.Z;
+					rlen_mi = RVEC.X*RVEC.X + RVEC.Y*RVEC.Y + RVEC.Z*RVEC.Z;
 	  
-			if ( rlen_mi < r_cut * r_cut ) 
-			{
-				rlen_mi = sqrt(rlen_mi);
+					if ( rlen_mi < r_cut * r_cut ) 
+						{
+							rlen_mi = sqrt(rlen_mi);
 
-				erfc_val = erfc(alpha * rlen_mi);
+							erfc_val = erfc(alpha * rlen_mi);
 	    
-				tempy += erfc_val/rlen_mi;
+							tempy += erfc_val/rlen_mi;
 	    
-				tempd = ( (-2.0/SQRT_PI) * exp(-1.0*alphasq*rlen_mi*rlen_mi) * rlen_mi*alpha - erfc_val ) / (rlen_mi*rlen_mi*rlen_mi);
+							tempd = ( (-2.0/SQRT_PI) * exp(-1.0*alphasq*rlen_mi*rlen_mi) * rlen_mi*alpha - erfc_val ) / (rlen_mi*rlen_mi*rlen_mi);
 				
-				tempx =- tempd * TRAJECTORY.CHARGES[a1] * TRAJECTORY.CHARGES[a2];	
+							tempx =- tempd * TRAJECTORY.CHARGES[a1] * TRAJECTORY.CHARGES[a2];	
 
-				tempx *= ke;
+							tempx *= ke;
 
-		        TRAJECTORY.TMP_EWALD[a1].X += RVEC.X * tempx;
-				TRAJECTORY.TMP_EWALD[a1].Y += RVEC.Y * tempx;
-				TRAJECTORY.TMP_EWALD[a1].Z += RVEC.Z * tempx;
+							TRAJECTORY.TMP_EWALD[a1].X += RVEC.X * tempx;
+							TRAJECTORY.TMP_EWALD[a1].Y += RVEC.Y * tempx;
+							TRAJECTORY.TMP_EWALD[a1].Z += RVEC.Z * tempx;
 				
-		        TRAJECTORY.TMP_EWALD[a2].X -= RVEC.X * tempx;
-				TRAJECTORY.TMP_EWALD[a2].Y -= RVEC.Y * tempx;
-				TRAJECTORY.TMP_EWALD[a2].Z -= RVEC.Z * tempx;	
+							TRAJECTORY.TMP_EWALD[a2].X -= RVEC.X * tempx;
+							TRAJECTORY.TMP_EWALD[a2].Y -= RVEC.Y * tempx;
+							TRAJECTORY.TMP_EWALD[a2].Z -= RVEC.Z * tempx;	
 				
 
-				UCoul += ke * TRAJECTORY.CHARGES[a1] * TRAJECTORY.CHARGES[a2] * tempy;
+							UCoul += ke * TRAJECTORY.CHARGES[a1] * TRAJECTORY.CHARGES[a2] * tempy;
 
-			} 
-			else 
-			{
-				// printf("Cutoff exclusion found\n");
-			}
+						} 
+					else 
+						{
+							// printf("Cutoff exclusion found\n");
+						}
+				}
 		}
-	}
 
 	// K-Space loops.
-	
 	Ewald_K_Space_New(alphasq, k_cut, TRAJECTORY, TMP_UCoul);
 
 	// Update potential energy..
 	TRAJECTORY.TOT_POT_ENER += UCoul;
 
-	for(int a1=0;a1<TRAJECTORY.ATOMS;a1++) 
-	{
-		TRAJECTORY.ACCEL[a1].X -= TRAJECTORY.TMP_EWALD[a1].X;
-		TRAJECTORY.ACCEL[a1].Y -= TRAJECTORY.TMP_EWALD[a1].Y;
-		TRAJECTORY.ACCEL[a1].Z -= TRAJECTORY.TMP_EWALD[a1].Z;
-	}
+	for(int a1= 0 ; a1 < TRAJECTORY.ATOMS ; a1++) 
+		{
+			TRAJECTORY.ACCEL[a1].X -= TRAJECTORY.TMP_EWALD[a1].X;
+			TRAJECTORY.ACCEL[a1].Y -= TRAJECTORY.TMP_EWALD[a1].Y;
+			TRAJECTORY.ACCEL[a1].Z -= TRAJECTORY.TMP_EWALD[a1].Z;
+		}
 	
 	// Use special relation between energy and pressure of a coulomb system.
 	// See Hummer et. al, JCP 109, 2791 (1998) eq. 15.
@@ -934,10 +955,13 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 		r_cut_squared = r_cut*r_cut;
 		
 		#if VERBOSITY == 1
-			printf("\tEwald_Deriv:\n");
-			printf("\tR-Space Ewald cutoff      = %13.6e\n", r_cut);
-	   	 	printf("\tR-Space accuracy estimate = %13.6e\n", r_acc);
-	   	 	printf("\tK-space accuracy estimate = %13.6e\n", k_acc);		
+		if ( RANK == 0 ) 
+		  {
+		    printf("\tEwald_Deriv:\n");
+		    printf("\tR-Space Ewald cutoff      = %13.6e\n", r_cut);
+		    printf("\tR-Space accuracy estimate = %13.6e\n", r_acc);
+		    printf("\tK-space accuracy estimate = %13.6e\n", k_acc);		
+		  }
 		#endif
 
 	    called_before = true;

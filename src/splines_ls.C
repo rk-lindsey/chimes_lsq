@@ -21,6 +21,10 @@ using namespace std;
 #ifndef VERBOSITY 
 	#define VERBOSITY 1 
 #endif
+
+// For MPI calculations.  Number of processors and index of current processor.
+int NPROCS ;
+int RANK ;
  
 
 static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool & fit_coul, bool & coul_consv, bool & if_subtract_coord, bool & if_subtract_coul, bool & fit_pover, int & cheby_order, string & cheby_type, int & cheby_3b_order, int & invr_parms,

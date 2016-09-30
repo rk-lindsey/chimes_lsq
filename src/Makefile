@@ -18,12 +18,19 @@
 
 MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 # -D XFORMTYPE=LEFT # -D FORCECHECK=1 -D PESFORMAT=1
 
-CXX=g++ -g  $(MYFLAGS) 
-#CXX=g++ -O3  $(MYFLAGS) 
+#CXX=g++ -g
+## Compiler setting for parallel code.
+## usage:  srun -n x house_md < run_md.in
+## x is the number of processes 
+##
+CXX=mpiicc -g -DUSE_MPI
+#CXX=g++ -O3
 #CXX=g++ -g -Wall -Wextra -Wuninitialized -O1
 #CXX=g++ -g # -Wall -Wextra
 #CXX=icpc -fast -Wall
 
+%.o: %.C
+	$(CXX) $(MYFLAGS) -c $< -o $@
 
 
 ##################################
@@ -37,13 +44,12 @@ CXX_LSQ_INCLUDES=
 house_lsq: $(CXX_LSQ_SRC:%.C=%.o)
 	$(CXX) $^ $(CXX_LSQ_INCLUDES) -o house_lsq
 
-	
 clean_lsq:
 	/bin/rm -f splines_ls.o functions.o Ewald.o
 
 realclean_lsq: clean_lsq
 	rm -f house_lsq 
-	
+
 build_tests_lsq:
 	cd ../test_suite-lsq
 	./generate_test_suite.sh
@@ -59,7 +65,6 @@ CXX_MD_INCLUDES=
 
 house_md: $(CXX_MD_SRC:%.C=%.o)
 	$(CXX) $^ $(CXX_MD_INCLUDES) -o house_md
-
 
 clean_md:
 	/bin/rm -f splines_md.o functions.o Ewald.o
@@ -79,30 +84,30 @@ build_tests_md:
 all:
 	make house_md
 	make house_lsq
-	
+
 tests:
 	make all
 	build_tests_lsq
 	build_tests_md	
 clean:
 	 rm -f *o
-	 
+
 ##################################
 # Make Travis analyzer
 ##################################	
 
 travis:
 	make -C ../contrib/Travis
-	
+
 clean_travis:
 	make clean -C ../contrib/Travis
-	
+
 ##################################
 # Make packmol initial configuration generator
 ##################################	
 
 packmol:
 	make -C ../contrib/packmol
-	
+
 clean_packmol:
 	make clean -C ../contrib/packmol
