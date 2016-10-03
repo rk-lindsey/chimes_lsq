@@ -18,12 +18,12 @@
 
 MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 # -D XFORMTYPE=LEFT # -D FORCECHECK=1 -D PESFORMAT=1
 
-#CXX=g++ -g
+CXX=g++ -g
 ## Compiler setting for parallel code.
 ## usage:  srun -n x house_md < run_md.in
 ## x is the number of processes 
 ##
-CXX=mpiicc -g -DUSE_MPI
+##CXX=mpiicc -O3 -DUSE_MPI
 #CXX=g++ -O3
 #CXX=g++ -g -Wall -Wextra -Wuninitialized -O1
 #CXX=g++ -g # -Wall -Wextra
@@ -37,7 +37,7 @@ CXX=mpiicc -g -DUSE_MPI
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C feexcept.C
 
 CXX_LSQ_INCLUDES=
 
@@ -59,7 +59,7 @@ build_tests_lsq:
 # MAKE THE C++ CODE
 ##################################
 
-CXX_MD_SRC=splines_md.C functions.C Ewald.C
+CXX_MD_SRC=splines_md.C functions.C Ewald.C feexcept.C
 
 CXX_MD_INCLUDES=
 

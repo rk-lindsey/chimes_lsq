@@ -51,6 +51,8 @@ int main(int argc, char* argv[])
 	RANK = 0 ;
 #endif
 
+	// Turn on handling of floating point exceptions
+	enable_fp_exceptions() ;
 	
 	////////////////////////////////////////////////////////////
 	// Define/initialize important variables
@@ -128,6 +130,7 @@ int main(int argc, char* argv[])
 	////////////////////////////////////////////////////////////
 
 	// dftbgen
+
 	
 	if ( CONTROLS.FREQ_DFTB_GEN > 0 ) 
 		GENFILE.open("traj.gen");
@@ -154,7 +157,7 @@ int main(int argc, char* argv[])
 	if(!COORDFILE.is_open())
 		{
 			cout << "ERROR: Cannot open coordinate file: " << CONTROLS.COORD_FILE << endl;
-			exit(0);
+			exit_run(0);
 		}
 	
 	////////////////////////////////////////////////////////////
@@ -202,7 +205,7 @@ int main(int argc, char* argv[])
 				{
 					if ( RANK == 0 )
 						cout << "ERROR: Cannot open force input file: " << CONTROLS.COMPARE_FILE << endl;
-					exit(0);
+					exit_run(0);
 				}
 
 		}
@@ -265,7 +268,7 @@ int main(int argc, char* argv[])
 						{
 							cout << "ERROR: Input file requests velocities to be read in. " << endl;
 							cout << "Expected .xyzf file, was given .xyzf file." << endl;
-							exit(0);
+							exit_run(0);
 						}
 			
 					// Read in velocities instead of forces...
@@ -311,7 +314,7 @@ int main(int argc, char* argv[])
 	if(!PARAMFILE.is_open())
 		{
 			cout << "ERROR: Cannot open coordinate file: " << CONTROLS.PARAM_FILE << endl;
-			exit(0);
+			exit_run(0);
 		}
 	
 	FOUND_END = false;
@@ -328,7 +331,7 @@ int main(int argc, char* argv[])
 					if(NATMTYP == 0)
 						{
 							cout << "ERROR: ATOM TYPES section not found in parameter file: " << CONTROLS.PARAM_FILE << endl;
-							exit(0);
+							exit_run(0);
 						}
 			
 					PARAMFILE.close();
@@ -506,7 +509,7 @@ int main(int argc, char* argv[])
 					if ( (x1 < 0.0 || x1 > 1.0) || ( x2 < 0.0 || x2 > 1.0 ) )
 						{
 							cout << "Bad random variable" << endl;
-							exit(1);
+							exit_run(1);
 						}
 			
 					y1 = sqrt(-2.0 * log(x1)) * cos(2.0 * M_PI * x2);
@@ -530,7 +533,7 @@ int main(int argc, char* argv[])
 					if ( (x1 < 0.0 || x1 > 1.0) || ( x2 < 0.0 || x2 > 1.0 ) )
 						{
 							cout << "Bad random variable" << endl;
-							exit(1);
+							exit_run(1);
 						}
 			
 					y1 = sqrt(-2.0 * log(x1)) * cos(2.0 * M_PI * x2);
@@ -554,7 +557,7 @@ int main(int argc, char* argv[])
 					if ( (x1 < 0.0 || x1 > 1.0) || ( x2 < 0.0 || x2 > 1.0 ) )
 						{
 							cout << "Bad random variable" << endl;
-							exit(1);
+							exit_run(1);
 						}
 
 					y1 = sqrt(-2.0 * log(x1)) * cos(2.0 * M_PI * x2);
@@ -675,7 +678,7 @@ int main(int argc, char* argv[])
 	if(!PARAMFILE.is_open())
 		{
 			cout << "ERROR: Cannot open coordinate file: " << CONTROLS.PARAM_FILE << endl;
-			exit(0);
+			exit_run(0);
 		}
 	
 	if ( RANK == 0 ) cout << endl << "Reading force field parameters..." << endl;
@@ -1124,7 +1127,7 @@ int main(int argc, char* argv[])
 										{
 											if( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] || FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] )
 												{
-													TMP_CHARGES[j] = sqrt(FF_2BODY[i].PAIR_CHRG)*TMP_SIGN[j];
+													TMP_CHARGES[j] = sqrt(fabs(FF_2BODY[i].PAIR_CHRG))*TMP_SIGN[j];
 													FF_2BODY[i].ATM1CHG = TMP_CHARGES[j];
 													FF_2BODY[i].ATM2CHG = TMP_CHARGES[j];
 						
@@ -1538,7 +1541,7 @@ int main(int argc, char* argv[])
 													if(!SCAN_INFILE_3B.is_open())
 														{
 															cout << "ERROR-1: Cannot open file " << SCAN_FILE_3B << " for 2B addition." << endl;
-															exit(0);
+															exit_run(0);
 														}
 					
 													cout << "	Reading in 3B scans from file: "	<< SCAN_FILE_3B << endl;						
@@ -1569,7 +1572,7 @@ int main(int argc, char* argv[])
 													if(!SCAN_INFILE_2B.is_open())
 														{
 															cout << "ERROR-2: Cannot open file " << SCAN_FILE_2B << " for 2B addition." << endl;
-															exit(0);
+															exit_run(0);
 														}								
 							
 													while(!SCAN_INFILE_2B.eof())
@@ -1594,7 +1597,7 @@ int main(int argc, char* argv[])
 													if(!SCAN_INFILE_2B.is_open())
 														{
 															cout << "ERROR-2: Cannot open file " << SCAN_FILE_2B << " for 2B addition." << endl;
-															exit(0);
+															exit_run(0);
 														}								
 							
 													while(!SCAN_INFILE_2B.eof())
@@ -1619,7 +1622,7 @@ int main(int argc, char* argv[])
 													if(!SCAN_INFILE_2B.is_open())
 														{
 															cout << "ERROR-2: Cannot open file " << SCAN_FILE_2B << " for 2B addition." << endl;
-															exit(0);
+															exit_run(0);
 														}								
 								
 													while(!SCAN_INFILE_2B.eof())
@@ -1672,7 +1675,7 @@ int main(int argc, char* argv[])
 													if(!SCAN_OUTFILE_3B.is_open())
 														{
 															cout << "ERROR-3: Cannot open file " << SCAN_FILE_3B << " for 2B addition." << endl;
-															exit(0);
+															exit_run(0);
 														}					
 					
 													cout << "		...Printing 2B+3B scan to file: " << SCAN_FILE_3B << endl;
@@ -1721,7 +1724,7 @@ int main(int argc, char* argv[])
 			
 				}
 		
-			exit(0);
+			exit_run(0);
 		}
 	
 	////////////////////////////////////////////////////////////
@@ -1818,7 +1821,7 @@ int main(int argc, char* argv[])
 			////////////////////////////////////////////////////////////
 
 			// Broadcast the position and optionally velocity from the root to all other processes.
-			sync_position(SYSTEM.COORDS, SYSTEM.VELOCITY, SYSTEM.ATOMS, true) ;
+			sync_position(SYSTEM.COORDS, SYSTEM.VELOCITY, SYSTEM.ATOMS, false) ;
 
 			// this function calculates all forces
 			ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP);
@@ -1863,7 +1866,7 @@ int main(int argc, char* argv[])
 					ferr = sqrt(ferr);
 			
 					if ( RANK == 0 ) printf("RMS force error = %13.6e\n", ferr);
-					exit(0);
+					exit_run(0);
 				}
 			else	// Print main simulation header 
 				{
@@ -2073,7 +2076,7 @@ int main(int argc, char* argv[])
 				} // RANK == 0.
 
 			// Broadcast the position and optionally velocity from the root to all other processes.
-			sync_position(SYSTEM.COORDS, SYSTEM.VELOCITY, SYSTEM.ATOMS, true) ;
+			sync_position(SYSTEM.COORDS, SYSTEM.VELOCITY, SYSTEM.ATOMS, false) ;
 		
 
 			////////////////////////////////////////////////////////////
@@ -2371,7 +2374,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 														{
 															cout << "ERROR: Unrecognized interaction type: " << LINE << endl;
 															cout << "       Allowed values are PAIRTYPE and TRIPLETTYPE" << endl;
-															exit(0);
+															exit_run(0);
 														}
 												}
 						 
@@ -2420,7 +2423,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 														{
 															cout << "ERROR: 2B Addition specifications incorrect. Format is:" << endl;
 															cout << "PAIRTYPE PARAMS IJ <2b_type_index> IK <2b_type_index> JK <2b_type_index>" << endl;
-															exit(0);
+															exit_run(0);
 														}
 							
 													FF_PLOTS.SEARCH_STRING_2B.push_back(TEMP_STR_2);
@@ -2442,7 +2445,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 											else
 												{
 													cout << "ERROR: Expected \"2B\" " << endl;
-													exit(0);
+													exit_run(0);
 												}
 						
 											LINE_PARSER.str("");
@@ -2467,7 +2470,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 													cout << "ERROR: Unrecognized pair type for fixing: " << LINE << endl;
 													cout << "       Allowed types are IJ, IK, an JK" << endl;
 													cout << "       (PES FF type index " << i << ", scan index " << j << endl;
-													exit(0);
+													exit_run(0);
 												}						
 						
 											cin >> TEMP_DOUB;
@@ -2488,7 +2491,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 													cout << "ERROR: Unrecognized pair type for fixing: " << LINE << endl;
 													cout << "       Allowed types are IJ, IK, an JK" << endl;
 													cout << "       (PES FF type index " << i << ", scan index " << j << endl;
-													exit(0);
+													exit_run(0);
 												}							
 											cin >> TEMP_DOUB;
 						
@@ -2508,7 +2511,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 													cout << "ERROR: Unrecognized pair type for scanning: " << LINE << endl;
 													cout << "       Allowed types are IJ, IK, an JK" << endl;
 													cout << "       (PES FF type index " << i << ", scan index " << j << endl;
-													exit(0);
+													exit_run(0);
 												}	
 						
 											ITEM_NO = FF_PLOTS.FIX_PAIR_1.size() - 1;
@@ -2521,7 +2524,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 													cout << "      " << FF_PLOTS.FIX_PAIR_1[ITEM_NO] << endl;
 													cout << "      " << FF_PLOTS.FIX_PAIR_2[ITEM_NO] << endl;
 													cout << "      " << TEMP_INT << endl;								
-													exit(0);
+													exit_run(0);
 												}					
 											if((FF_PLOTS.FIX_PAIR_1[ITEM_NO] == TEMP_INT)	|| (FF_PLOTS.FIX_PAIR_2[ITEM_NO] == TEMP_INT))
 												{
@@ -2530,7 +2533,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 													cout << "      " << FF_PLOTS.FIX_PAIR_1[ITEM_NO] << endl;
 													cout << "      " << FF_PLOTS.FIX_PAIR_2[ITEM_NO] << endl;
 													cout << "      " << TEMP_INT << endl;
-													exit(0);
+													exit_run(0);
 												}
 						
 											FF_PLOTS.SCAN_PAIR.push_back(TEMP_INT);
@@ -2637,7 +2640,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 					else
 						{
 							cout << "ERROR: # CMPRFRC # must be specified as true or false." << endl;
-							exit(1);	
+							exit_run(1);	
 						}					
 				
 					if(CONTROLS.COMPARE_FORCE)
@@ -2715,7 +2718,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 					else
 						{
 							cout << "ERROR: # VELINIT # must be specified as READ or GEN." << endl;
-							exit(1);	
+							exit_run(1);	
 						}			
 
 					if(CONTROLS.INIT_VEL) 
@@ -2751,7 +2754,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 							cout << "ERROR: # THRMOST # must be specified as HOOVER or VELSCALE, and a Hoover time or velocity " << endl;
 							cout << "       scaling frequency must be specified in line. " << endl;
 							cout << "       Example: HOOVER 10 "<< endl; 
-							exit(1);	
+							exit_run(1);	
 						}				
 
 				}			
@@ -2773,7 +2776,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 					else
 						{
 							cout << "ERROR: # NUMPRES # must be specified as ANALYTICAL or NUMERICAL." << endl;
-							exit(1);	
+							exit_run(1);	
 						}				
 				}	
 				
@@ -2850,7 +2853,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 					else
 						{
 							cout << "ERROR: # PRNTFRC # must be specified as true or false." << endl;
-							exit(1);	
+							exit_run(1);	
 						}								
 				}	
 		
@@ -2892,7 +2895,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 					else
 						{
 							cout << "ERROR: # PRNTVEL # must be specified as true or false." << endl;
-							exit(1);	
+							exit_run(1);	
 						}								
 				}			
 			
@@ -2947,7 +2950,7 @@ static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, do
 	if ( sizeof(XYZ) != 3 * sizeof(double) ) 
 		{
 			printf("Error: compiler padding in XYZ structure detected\n") ;
-			exit(1) ;
+			exit_run(1) ;
 		}
 
 	if ( RANK == 0 ) 
@@ -3026,7 +3029,7 @@ static void sync_position(vector<XYZ>& coord_vec, vector<XYZ>& velocity_vec, int
 	if ( sizeof(XYZ) != 3 * sizeof(double) ) 
 		{
 			printf("Error: compiler padding in XYZ structure detected\n") ;
-			exit(1) ;
+			exit_run(1) ;
 		}
 
 	MPI_Bcast(coord, 3 * atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD) ;

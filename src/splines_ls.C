@@ -104,6 +104,10 @@ int main()
 	                                        // 2-body and 3-body interactions (e.g. 2-body spline with
 	                                        // 3-body chebyshev) (LEF)
 
+
+	// Turn on handling of floating point exceptions
+	enable_fp_exceptions() ;
+
 	//////////////////////////////////////////////////
 	//
 	// Read and print input to screen
@@ -207,7 +211,7 @@ int main()
 	if(!TRAJ_INPUT.is_open())
 	{
 		cout << "ERROR: Cannot open trajectory file: " << INFILE << endl;
-		exit(1);
+		exit_run(1);
 	}
 	
 	TRAJECTORY.resize(nframes);
@@ -823,7 +827,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			else
 			{
 				cout << endl << "ERROR: # FITCOUL # must be specified as true or false." << endl;
-				exit(1);	
+				exit_run(1);	
 			}	
 			
 			#if VERBOSITY == 1
@@ -849,7 +853,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			else
 			{
 				cout << endl << "ERROR: # FITPOVR # must be specified as true or false." << endl;
-				exit(1);	
+				exit_run(1);	
 			}	
 			
 			#if VERBOSITY == 1
@@ -879,7 +883,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				cout << "INVRSE_R" << endl;
 //				cout << "LJ"       << endl;
 //				cout << "STILLIN"  << endl;
-				exit(1);
+				exit_run(1);
 				
 			}
 			
@@ -941,13 +945,13 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			{
 				cout << "ERROR: Use of layers is not supported with 3-body Chebyshev potentials." << endl;
 				cout << "       Set # NLAYERS # to 1." << endl;
-				exit(0); 
+				exit_run(0); 
 			}
 			if(if_3b_cheby && fit_pover)
 			{
 				cout << "ERROR: Overbonding is not compatible with 3-body Chebyshev potentials." << endl;
 				cout << "       Set # FITPOVR # false." << endl;
-				exit(0);				
+				exit_run(0);				
 			}
 
 			
@@ -965,7 +969,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			else
 			{
 				cout << "ERROR: # SUBCRDS # must be specified as true or false." << endl;
-				exit(1);	
+				exit_run();	
 			}	
 			
 			#if VERBOSITY == 1

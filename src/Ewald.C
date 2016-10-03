@@ -104,7 +104,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY)				
 						if(totk>maxk)
 						{
 							cout << "	totk = " << totk << " greater than maxk = " << maxk << endl;
-							exit(1);
+							exit_run();
 						}
 					}
 				}
@@ -265,7 +265,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 											if(totk>maxk)
 												{
 													cout << "	totk = " << totk << " greater than maxk = " << maxk << endl;
-													exit(1);
+													exit_run(1);
 												}
 										}
 								}
@@ -437,7 +437,7 @@ static void Ewald_K_Space_Orig(double alphasq, FRAME & TRAJECTORY, vector<PAIRS>
 							if(totk > maxk)
 							{
 								cout << "totk = " << totk << " greater than maxk = " << maxk << endl;
-								exit(1);
+								exit_run(1);
 							}
 							rksq = RK.X*RK.X + RK.Y*RK.Y + RK.Z*RK.Z;
 							Kfac = exp(-1.0*rksq/(4.0*alpha*alpha))/rksq;
@@ -575,7 +575,7 @@ static void Ewald_K_Space_Orig(double alphasq, FRAME & TRAJECTORY, vector<PAIR_F
 							if(totk > maxk)
 							{
 								cout << "totk = " << totk << " greater than maxk = " << maxk << endl;
-								exit(1);
+								exit_run(1);
 							}
 							rksq = RK.X*RK.X + RK.Y*RK.Y + RK.Z*RK.Z;
 							Kfac = exp(-1.0*rksq/(4.0*alpha*alpha))/rksq;
@@ -1010,7 +1010,7 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 						if(totk>maxk)
 						{
 							cout << "totk = " << totk << " greater than maxk = " << maxk << endl;
-							exit(1);
+							exit_run(1);
 						}
 					}
 				}

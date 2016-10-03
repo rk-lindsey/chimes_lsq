@@ -3,7 +3,6 @@
 # Make a fresh compilation of the code
 #
 ###############################################################
-
 cd ../src
 make clean_lsq; make realclean_lsq
 make house_lsq; rm -f ../test_suite-lsq/house_lsq; cp house_lsq ../test_suite-lsq/; make clean_lsq; make realclean_lsq;
@@ -25,15 +24,27 @@ MD_TESTS[4]="h2o-2bcheby-genvel"
 MD_TESTS[5]="h2o-2bcheby-numpress"
 MD_TESTS[6]="h2o-2bcheby-velscale"
 
-# Tests for compatibility between LSQ C++/python codes with the MD code
-TAG="verify-lsq-forces-"
-
 LSQ_TESTS[0]="chon-dftbpoly"
 LSQ_TESTS[1]="h2o-2bcheby"
 LSQ_TESTS[2]="h2o-3bcheby"
 LSQ_TESTS[3]="h2o-splines"
 LSQ_TESTS[4]="h2o-invr"
 LSQ_TESTS[5]="h2o-dftbpoly"
+
+## Allow command line arguments of jobs to test.  MD jobs should be single-quoted in a string followed 
+## by LSQ jobs single quoted. (LEF)
+##
+if [ $# -eq 0 ] 
+then
+  MD_JOBS="${MD_TESTS[@]}"
+  LSQ_JOBS="${LSQ_TESTS[@]}"
+else
+  MD_JOBS=$1
+  LSQ_JOBS=$2
+fi
+
+# Tests for compatibility between LSQ C++/python codes with the MD code
+TAG="verify-lsq-forces-"
 
 ########################################
 # Iterate through the tests -- MD CODE
@@ -45,7 +56,7 @@ echo " "
 
 ALL_PASS=true
 
-for i in "${MD_TESTS[@]}"
+for i in $MD_JOBS
 do
 
 	echo " "
@@ -101,12 +112,12 @@ echo " "
 echo " ...Beginning by running the lsq test suite... "
 
 cd ../test_suite-lsq 
-./run_test_suite.sh
+./run_test_suite.sh $LSQ_JOBS
 cd ../test_suite-md
 
 echo " "
 echo " ...Now running the force comparison tests... "
-for i in "${LSQ_TESTS[@]}"
+for i in $LSQ_JOBS
 do
 
 	echo " "

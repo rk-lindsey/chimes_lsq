@@ -3,6 +3,9 @@
 #include<fstream>
 #include "functions.h"
 #include<cmath>
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 using namespace std;
 
@@ -17,62 +20,38 @@ using namespace std;
 void EXIT_MSG(string EXIT_STRING) // Single error message
 {
 	cout << EXIT_STRING << endl;
-	exit(0);
+	exit_run(0);
 }
 
 void EXIT_MSG(string EXIT_STRING, string EXIT_VAR) // error message: var
 {
 	cout << EXIT_STRING << ": " << EXIT_VAR << endl;
-	exit(0);
+	exit_run(0);
 }
 
 void EXIT_MSG(string EXIT_STRING, double EXIT_VAR) // error message: var
 {
 	cout << EXIT_STRING << ": " << EXIT_VAR << endl;
-	exit(0);
+	exit_run(0);
 }
 
 // static double fix_cheby_val(double x, bool inverse_order);	// Performs the chebyshev distance transformation
+static inline void cheby_var(double rlen, double s_minim, double s_maxim, double lambda,
+									  const string &cheby_type,
+									  double &x, double &xdiff, bool &inverse_order, double &exprlen) ;
+static inline double cheby_var_deriv(double xdiff, double rlen, double exprlen, double lambda, 
+												 string & cheby_type);	// Computes the derivative of w/r/t cheby distance
 
-static double cheby_var_deriv(double xdiff, double rlen, double lambda, string & cheby_type);	// Computes the derivative of w/r/t cheby distance
-
-void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rlen, double & xdiff)
+static void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rlen, double & xdiff,
+										  double & exprlen)
 // Sets the value of the Chebyshev polynomials (Tn) and thier derivatives (Tnd)
 {
-	double xmin, xmax, xavg;
-	double x;
+	double x ;
 	bool   inverse_order = true;  // Inverse order determines whether x is an increasing (false) or decreasing (true) function of r (LEF).
-	
-	if ( FF_2BODY.CHEBY_TYPE == "INVRSE_R" ) 
-	{
-		xavg  =  0.5 * (1.0/FF_2BODY.S_MINIM + 1.0/FF_2BODY.S_MAXIM); 
-		xdiff =  0.5 * (1.0/FF_2BODY.S_MINIM - 1.0/FF_2BODY.S_MAXIM); 
-		x     = (1.0/rlen-xavg) / xdiff;
-		inverse_order = true; // (LEF)
-	} 
-	else if ( FF_2BODY.CHEBY_TYPE == "MORSE" ) 
-	{
-		xmin  = exp(-FF_2BODY.S_MAXIM/FF_2BODY.LAMBDA); 
-		xmax  = exp(-FF_2BODY.S_MINIM/FF_2BODY.LAMBDA); 
-		xavg  = 0.5 * (xmin + xmax);
-		xdiff = 0.5 * (xmax - xmin);
-		x = (exp(-rlen/FF_2BODY.LAMBDA)-xavg)/xdiff;
-		inverse_order = true; // (LEF)
-	}
-	else if (FF_2BODY.CHEBY_TYPE == "DEFAULT")
-	{
-		xavg  = 0.5 * (FF_2BODY.S_MINIM + FF_2BODY.S_MAXIM);
-		xdiff = 0.5 * (FF_2BODY.S_MAXIM - FF_2BODY.S_MINIM);
-		x = (rlen-xavg) / xdiff;
-		inverse_order = false; // (LEF)
-	}
-	else
-	{
-		cout << "ERROR: Undefined CHBTYPE: " << FF_2BODY.PRPR_NM << endl;
-		cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
-		exit(1);
-	}
 
+	cheby_var(rlen, FF_2BODY.S_MINIM,
+				 FF_2BODY.S_MAXIM, FF_2BODY.LAMBDA, FF_2BODY.CHEBY_TYPE,
+				 x, xdiff, inverse_order, exprlen) ;
 	//if ( x < -1.0 || x > 1.0 ) 
 	//x = fix_cheby_val(x, inverse_order);
 	
@@ -280,10 +259,10 @@ double numerical_pressure(const FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vecto
 	
 	static FRAME REPLICATE;
 	
-	if ( NPROCS > 0 ) 
+	if ( NPROCS > 1 ) 
 	  {
 	    cout << "Error: numerical pressure does not work for parallel calculations\n" ;
-	    exit(1) ;
+	    exit_run(1) ;
 	  }
 
 	REPLICATE_SYSTEM(SYSTEM, REPLICATE);		// Can we make this one of those "if ! called_before sorts of variables?"
@@ -428,7 +407,7 @@ void ZCalc_Deriv (vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> PAIR_TRIPLETS, FRA
     else 
     {
 		cout << "Error: bad pairtype in ZCalc_Deriv\n";
-		exit(1);
+		exit_run(1);
     }		
 }	
 
@@ -686,44 +665,15 @@ static void ZCalc_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<v
 
 						if(rlen > FF_2BODY[curr_pair_type_idx].S_MINIM and rlen < FF_2BODY[curr_pair_type_idx].S_MAXIM)
 						{
-							// Chebyshev polynomials are only defined on the range [-1,1], so transorm the pair distance
-							// in a way that allows it to fall along that range. Options are:
-							//
-							// x = 1/pair_dist				// Inverse r, 
-							// x = exp(pair_dist/lambda)	// Morse-type
-							// x = pair_dist				// default type
-							// 
-							// All types are normalized by s_min to s_max range to fall along [-1,1]													
-							
-							if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "INVRSE_R" ) 
-							{
-								xavg  =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM + 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances in r^-1 space
-								xdiff =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM - 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // width of possible pair distances in r^-1 space
-								x     = (1.0/rlen-xavg) / xdiff;																	  // pair distances in r^-1 space, normalized to fit over [-1,1]
-								inverse_order = true;
-							} 
-							else if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "MORSE" ) 
-							{
-								xmin  = exp(-FF_2BODY[curr_pair_type_idx].S_MAXIM/FF_2BODY[curr_pair_type_idx].LAMBDA); 
-								xmax  = exp(-FF_2BODY[curr_pair_type_idx].S_MINIM/FF_2BODY[curr_pair_type_idx].LAMBDA); 
-								xavg  = 0.5 * (xmin + xmax);																// midpoint of possible pair distances in morse space
-								xdiff = 0.5 * (xmax - xmin);																// width of possible pair distances in morse space
-								x = (exp(-rlen/FF_2BODY[curr_pair_type_idx].LAMBDA)-xavg)/xdiff;							// pair distances in morse space, normalized to fit over [-1,1]
-								inverse_order = true;
-							}
-							else if (FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "DEFAULT")
-							{
-								xavg  = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MINIM + FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances
-								xdiff = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MAXIM - FF_2BODY[curr_pair_type_idx].S_MINIM); // width of possible pair distances
-								x = (rlen-xavg) / xdiff;																		 // pair distances, normalized to fit over [-1,1]
-								inverse_order = false;
-							}
-							else
-							{
-								cout << "ERROR: Undefined CHBTYPE: " << FF_2BODY[curr_pair_type_idx].CHEBY_TYPE << endl;
-								cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
-								exit(1);
-							}
+							double exprlen ;
+
+							cheby_var(rlen, 
+										 FF_2BODY[curr_pair_type_idx].S_MINIM,
+										 FF_2BODY[curr_pair_type_idx].S_MAXIM,
+										 FF_2BODY[curr_pair_type_idx].LAMBDA,
+										 FF_2BODY[curr_pair_type_idx].CHEBY_TYPE,
+										 x, xdiff, inverse_order, exprlen
+										 ) ;
 							
   						    // Why are we setting it as -1? shouldn't something else be done here instead? ...since we're outside the range of the fit??
   						    // This is mostly defensive programming against bad behavior of the Cheby polynomial
@@ -803,7 +753,8 @@ static void ZCalc_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<v
 							// 1. Chain rule to account for transformation from morse-type pair distance to x
 							// 2. Product rule coming from pair distance dependence of fcut, the penalty function
 							
-  						 	dx_dr = cheby_var_deriv(xdiff, rlen, FF_2BODY[curr_pair_type_idx].LAMBDA, FF_2BODY[curr_pair_type_idx].CHEBY_TYPE);
+  						 	dx_dr = cheby_var_deriv(xdiff, rlen, exprlen,
+															FF_2BODY[curr_pair_type_idx].LAMBDA, FF_2BODY[curr_pair_type_idx].CHEBY_TYPE);
 
 							for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 							{
@@ -1001,12 +952,16 @@ static void ZCalc_3B_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vecto
 							// Everything is within allowed ranges. Begin setting up the derivative calculation
 				
 							// Set up the polynomials
+							double exprlen_ij, exprlen_ik, exprlen_jk ;
+
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij, 
+													 exprlen_ij);
 							
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik, 
+													 exprlen_ik);
 							
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik);
-							
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk);				
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk, 
+													 exprlen_jk);				
 				
 														
 							// At this point we've completed all pre-calculations needed to populate the A matrix. Now we need to figure out 
@@ -1054,11 +1009,14 @@ static void ZCalc_3B_Cheby_Deriv(FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vecto
 							
 							// --- THE KEY HERE IS TO UNDERSTAND THAT THE IJ, IK, AND JK HERE IS BASED ON ATOM PAIRS, AND DOESN'T NECESSARILY MATCH THE TRIPLET'S EXPECTED ORDER!
 							
-							dx_dr_ij = cheby_var_deriv(xdiff_ij, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
+							dx_dr_ij = cheby_var_deriv(xdiff_ij, rlen_ij, exprlen_ij, 
+																FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
 
-							dx_dr_jk = cheby_var_deriv(xdiff_jk, rlen_jk, FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
+							dx_dr_jk = cheby_var_deriv(xdiff_jk, rlen_jk, exprlen_jk,
+																FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
 
-							dx_dr_ik = cheby_var_deriv(xdiff_ik, rlen_ik, FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
+							dx_dr_ik = cheby_var_deriv(xdiff_ik, rlen_ik, exprlen_ik,
+																FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
 
 							for(int i=0; i<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 							{
@@ -1731,37 +1689,14 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 													// x = pair_dist				// default type
 													// 
 													// All types are normalized by s_min to s_max range to fall along [-1,1]
-							
-													if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "INVRSE_R" ) 
-														{
-															xavg  =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM + 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances in r^-1 space
-															xdiff =  0.5 * (1.0/FF_2BODY[curr_pair_type_idx].S_MINIM - 1.0/FF_2BODY[curr_pair_type_idx].S_MAXIM); // width of possible pair distances in r^-1 space
-															x     = (1.0/rlen-xavg) / xdiff;																	  // pair distances in r^-1 space, normalized to fit over [-1,1]
-															inverse_order = true;
-														} 
-													else if ( FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "MORSE" ) 
-														{
-															xmin  = exp(-FF_2BODY[curr_pair_type_idx].S_MAXIM/FF_2BODY[curr_pair_type_idx].LAMBDA); 
-															xmax  = exp(-FF_2BODY[curr_pair_type_idx].S_MINIM/FF_2BODY[curr_pair_type_idx].LAMBDA); 
-															xavg  = 0.5 * (xmin + xmax);																// midpoint of possible pair distances in morse space
-															xdiff = 0.5 * (xmax - xmin);																// width of possible pair distances in morse space
-															x = (exp(-rlen/FF_2BODY[curr_pair_type_idx].LAMBDA)-xavg)/xdiff;							// pair distances in morse space, normalized to fit over [-1,1]
-															inverse_order = true;
-														}
-													else if (FF_2BODY[curr_pair_type_idx].CHEBY_TYPE == "DEFAULT")
-														{
-															xavg  = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MINIM + FF_2BODY[curr_pair_type_idx].S_MAXIM); // midpoint of possible pair distances
-															xdiff = 0.5 * (FF_2BODY[curr_pair_type_idx].S_MAXIM - FF_2BODY[curr_pair_type_idx].S_MINIM); // width of possible pair distances
-															x = (rlen-xavg) / xdiff;																	 // pair distances, normalized to fit over [-1,1]
-															inverse_order = false;
-														}
-													else
-														{
-															cout << "ERROR: Undefined CHBTYPE: " << FF_2BODY[curr_pair_type_idx].CHEBY_TYPE << endl;
-															cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
-															cout << "       Check the parameter input file." << endl;
-															exit(1);
-														}
+													double exprlen ;
+													cheby_var(rlen, 
+																 FF_2BODY[curr_pair_type_idx].S_MINIM,
+																 FF_2BODY[curr_pair_type_idx].S_MAXIM,
+																 FF_2BODY[curr_pair_type_idx].LAMBDA,
+																 FF_2BODY[curr_pair_type_idx].CHEBY_TYPE,
+																 x, xdiff, inverse_order, exprlen
+																 ) ;
 
 													// Make sure our newly transformed distance falls in defined range for Cheby polynomials
 													// Testing shows cutting off x harms energy conservation (LEF).
@@ -1816,7 +1751,8 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 							
 													fcutderiv *= -1.0 * fcut_power / FF_2BODY[curr_pair_type_idx].S_MAXIM;
 							
-													dx_dr = cheby_var_deriv(xdiff, rlen, FF_2BODY[curr_pair_type_idx].LAMBDA, FF_2BODY[curr_pair_type_idx].CHEBY_TYPE);
+													dx_dr = cheby_var_deriv(xdiff, rlen, exprlen,
+																					FF_2BODY[curr_pair_type_idx].LAMBDA, FF_2BODY[curr_pair_type_idx].CHEBY_TYPE);
 							
 													for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 														{
@@ -2036,12 +1972,16 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 							// Everything is within allowed ranges. Begin setting up the force calculation
 				
 							// Set up the polynomials
+							double exprlen_ij, exprlen_ik, exprlen_jk ;
 							
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij,
+													 exprlen_ij);
 							
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik,
+													 exprlen_ik);
 							
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk,
+													 exprlen_jk);
 							
 							// Apply the FF
 
@@ -2064,11 +2004,14 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 							
 							// Set up terms for derivatives
 							
-							dx_dr_ij = cheby_var_deriv(xdiff_ij, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
+							dx_dr_ij = cheby_var_deriv(xdiff_ij, rlen_ij, exprlen_ij,
+																FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
 
-							dx_dr_jk = cheby_var_deriv(xdiff_jk, rlen_jk, FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
+							dx_dr_jk = cheby_var_deriv(xdiff_jk, rlen_jk, exprlen_jk,
+																FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
 
-							dx_dr_ik = cheby_var_deriv(xdiff_ik, rlen_ik, FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
+							dx_dr_ik = cheby_var_deriv(xdiff_ik, rlen_ik, exprlen_ik,
+																FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
 								
 
 							// Determine the FF type for the given triplet
@@ -2085,7 +2028,7 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 							{
 								cout << "ERROR: Impossible atom triplet found: " << TEMP_STR << endl;
 								cout << "       Check the parameter file." << endl;
-								exit(0);
+								exit_run(1);
 							}
 							
 							// Now compute the forces for each set of allowed powers for pairs ij, ik, and jk		
@@ -2352,7 +2295,7 @@ static void ZCalc_Spline(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_
 							if ( kstart > FF_2BODY[curr_pair_type_idx].SNUM ) 
 							{
 								cout << "Error: kstart too large " << kstart << " " << rlen << " " << FF_2BODY[curr_pair_type_idx].S_MINIM << " " << FF_2BODY[curr_pair_type_idx].SNUM << endl;
-								exit(1);
+								exit_run(1);
 							}
 						  
 							S_r =
@@ -2657,37 +2600,15 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FI
 			// All types are normalized by s_min to s_max range to fall along [-1,1]
 			
 			bool inverse_order = true ;
-			if ( FF_2BODY[ij].CHEBY_TYPE == "INVRSE_R" ) 
-			{
-				xavg  =  0.5 * (1.0/FF_2BODY[ij].S_MINIM + 1.0/FF_2BODY[ij].S_MAXIM); // midpoint of possible pair distances in r^-1 space
-				xdiff =  0.5 * (1.0/FF_2BODY[ij].S_MINIM - 1.0/FF_2BODY[ij].S_MAXIM); // width of possible pair distances in r^-1 space
-				x     = (1.0/rlen-xavg) / xdiff;																	  // pair distances in r^-1 space, normalized to fit over [-1,1]
-				inverse_order = true ;
-			} 
-			else if ( FF_2BODY[ij].CHEBY_TYPE == "MORSE" ) 
-			{
-				xmin  = exp(-FF_2BODY[ij].S_MAXIM/FF_2BODY[ij].LAMBDA); 
-				xmax  = exp(-FF_2BODY[ij].S_MINIM/FF_2BODY[ij].LAMBDA); 
-				xavg  = 0.5 * (xmin + xmax);												// midpoint of possible pair distances in morse space
-				xdiff = 0.5 * (xmax - xmin);												// width of possible pair distances in morse space
-				x = (exp(-rlen/FF_2BODY[ij].LAMBDA)-xavg)/xdiff;							// pair distances in morse space, normalized to fit over [-1,1]
-			}
-			else if (FF_2BODY[ij].CHEBY_TYPE == "DEFAULT")
-			{
-				xavg  = 0.5 * (FF_2BODY[ij].S_MINIM + FF_2BODY[ij].S_MAXIM); // midpoint of possible pair distances
-				xdiff = 0.5 * (FF_2BODY[ij].S_MAXIM - FF_2BODY[ij].S_MINIM); // width of possible pair distances
-				x = (rlen-xavg) / xdiff;							     	 // pair distances, normalized to fit over [-1,1]
-				inverse_order = false ;
+			double exprlen ;
 
-				
-			}
-			else
-			{
-				cout << "ERROR: Undefined CHBTYPE: " << FF_2BODY[ij].CHEBY_TYPE << endl;
-				cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
-				cout << "       Check the parameter input file." << endl;
-				exit(1);
-			}
+			cheby_var(rlen, 
+						 FF_2BODY[ij].S_MINIM,
+						 FF_2BODY[ij].S_MAXIM,
+						 FF_2BODY[ij].LAMBDA,
+						 FF_2BODY[ij].CHEBY_TYPE,
+						 x, xdiff, inverse_order, exprlen
+						 ) ;
 
 			// Make sure our newly transformed distance falls between the bound of -1 to 1 allowed to Cheby polynomials
 
@@ -2740,7 +2661,8 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FI
 			fcut0 = (1.0 - rlen/FF_2BODY[ij].S_MAXIM);
 			fcut      = pow(fcut0, fcut_power);
 
-			dx_dr = cheby_var_deriv(xdiff, rlen, FF_2BODY[ij].LAMBDA, FF_2BODY[ij].CHEBY_TYPE);
+			dx_dr = cheby_var_deriv(xdiff, rlen, exprlen,
+											FF_2BODY[ij].LAMBDA, FF_2BODY[ij].CHEBY_TYPE);
 													 
 			for ( int i = 0; i < FF_2BODY[ij].SNUM; i++ ) 
 			{
@@ -2872,11 +2794,15 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 				RLEN_JK = FF_2BODY[jk].S_MINIM + c * FF_2BODY[jk].S_DELTA;
 
 			
-				SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij);
+				double exprlen_ij, exprlen_ik, exprlen_jk ;
+				SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij,
+										 exprlen_ij);
 			
-				SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik);
+				SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik,
+										 exprlen_ik);
 			
-				SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk);		
+				SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk,
+										 exprlen_jk);		
 			
 				fcut0_ij     = (1.0 - RLEN_IJ/FF_2BODY[ij].S_MAXIM);
 				fcut_ij      =  pow(fcut0_ij, fcut_power);
@@ -2893,7 +2819,7 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 				{
 					cout << "ERROR: Impossible atom triplet found: " << TEMP_STR << endl;
 					cout << "       Check the parameter file." << endl;
-					exit(0);
+					exit_run(0);
 				}
 			
 				// Now compute the forces for each set of allowed powers for pairs ij, ik, and jk		
@@ -3084,12 +3010,15 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 		else
 			RLEN_JK = FF_2BODY[jk].S_MINIM + a * FF_2BODY[jk].S_DELTA;		
 
-			
-		SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij);
+		double exprlen_ij, exprlen_ik, exprlen_jk ;
+		SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij,
+								 exprlen_ij);
 	
-		SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik);
+		SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik,
+								 exprlen_ik);
 	
-		SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk);		
+		SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk,
+								 exprlen_jk);		
 	
 		fcut0_ij     = (1.0 - RLEN_IJ/FF_2BODY[ij].S_MAXIM);
 		fcut_ij      = pow(fcut0_ij, fcut_power);
@@ -3110,7 +3039,7 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 		{
 			cout << "ERROR: Impossible atom triplet found: " << TEMP_STR << endl;
 			cout << "       Check the parameter file." << endl;
-			exit(0);
+			exit_run(0);
 		}
 	
 		// Now compute the forces for each set of allowed powers for pairs ij, ik, and jk		
@@ -3180,14 +3109,15 @@ static double fix_cheby_val(double x, bool inverse_order)
 }
 #endif
 
-static double cheby_var_deriv(double xdiff, double rlen, double lambda, string& cheby_type)
+static inline double cheby_var_deriv(double xdiff, double rlen, double exprlen, 
+												 double lambda, string& cheby_type)
 // Calculate the derivative of the cheby variable x with respect to rlen.
 {
 	double dx_dr;
 	
 	if ( cheby_type == "MORSE" )
 		//dx_dr =  -exp(-rlen/lambda) / (lambda * xdiff);
-		dx_dr =  (-exp(-rlen/lambda)/lambda)/xdiff;
+		dx_dr =  (-exprlen/lambda)/xdiff;
 
 	else if ( cheby_type == "INVRSE_R" ) 
 		dx_dr = -1.0/(rlen * rlen * xdiff);
@@ -3198,10 +3128,66 @@ static double cheby_var_deriv(double xdiff, double rlen, double lambda, string& 
 	else
 		{
 			cout << "Error: bad cheby_type: " << cheby_type << endl;
-			exit(1);
+			exit_run(1);
 		}
 	
 	return dx_dr;
+}
+
+static inline void cheby_var(double rlen, double s_minim, double s_maxim, double lambda,
+								const string &cheby_type,
+								double &x, double &xdiff, bool &inverse_order, double &exprlen)
+// Given the atomic distance rlen, the fitting minimum and maximum, the Morse lambda variable,
+//	and the type of Chebyshev approximant, calculate:
+// the chebyshev variable x, 
+// the difference between maximum and minimum variable randes (xdiff)
+// a flag indicating the order of max/min variables (whether the chebyshev variable
+// is increasing or decreasing with rlen) (inverse_order)
+// the exponential of the len variable if appropriate.
+//
+// Chebyshev polynomials are only defined on the range [-1,1], so transorm the pair distance
+// in a way that allows it to fall along that range. Options are:
+//
+// x = 1/pair_dist				// Inverse r, 
+// x = exp(pair_dist/lambda)	// Morse-type
+// x = pair_dist				// default type
+// 
+// All types are normalized by s_min to s_max range to fall along [-1,1]													
+{
+	double xavg, xmin, xmax ;
+
+	if ( cheby_type == "INVRSE_R" ) 
+		{
+			xavg  =  0.5 * (1.0/s_minim + 1.0/s_maxim); // midpoint of possible pair distances in r^-1 space
+			xdiff =  0.5 * (1.0/s_minim - 1.0/s_maxim); // width of possible pair distances in r^-1 space
+			x     = (1.0/rlen-xavg) / xdiff;																	  // pair distances in r^-1 space, normalized to fit over [-1,1]
+			inverse_order = true;
+			exprlen = 0.0 ;
+		} 
+	else if ( cheby_type == "MORSE" ) 
+		{
+			xmin  = exp(-s_maxim/lambda); 
+			xmax  = exp(-s_minim/lambda); 
+			xavg  = 0.5 * (xmin + xmax);																// midpoint of possible pair distances in morse space
+			xdiff = 0.5 * (xmax - xmin);																// width of possible pair distances in morse space
+			exprlen = exp(-rlen/lambda) ;
+			x = (exprlen-xavg)/xdiff;							// pair distances in morse space, normalized to fit over [-1,1]
+			inverse_order = true;
+		}
+	else if (cheby_type == "DEFAULT")
+		{
+			xavg  = 0.5 * (s_minim + s_maxim); // midpoint of possible pair distances
+			xdiff = 0.5 * (s_maxim - s_minim); // width of possible pair distances
+			x = (rlen-xavg) / xdiff;	
+			exprlen = 0.0 ;
+			inverse_order = false;
+		}
+	else
+		{
+			cout << "ERROR: Undefined CHBTYPE: " << cheby_type << endl;
+			cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
+			exit_run(1);
+		}
 }
 
 void divide_atoms(int &a1start, int &a1end, int atoms) 
@@ -3212,7 +3198,7 @@ void divide_atoms(int &a1start, int &a1end, int atoms)
 	if ( NPROCS > atoms ) 
 		{
 			cout << "Error: number of processors > number of atoms" << endl ;
-			exit(1) ;
+			exit_run(1) ;
 		}
 	  
 	if ( RANK == NPROCS - 1 ) 
@@ -3225,4 +3211,14 @@ void divide_atoms(int &a1start, int &a1end, int atoms)
 		}
 
 	//  cout << "DIVIDING ATOMS: RANK : " << RANK << " " << a1start << ":" << a1end << endl ;
+}
+
+void exit_run(int value)
+// Call this instead of exit(1) to properly terminate all MPI processes.
+{
+#ifdef USE_MPI
+	MPI_Abort(MPI_COMM_WORLD,value) ;
+#else
+	exit(value) ;
+#endif
 }

@@ -312,6 +312,8 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
 
 void divide_atoms(int &a1start, int &a1end, int atoms) ;
+void enable_fp_exceptions() ;
+void exit_run(int val) ;
 
 #endif
 
