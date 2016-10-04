@@ -1,3 +1,8 @@
+#!/bin/bash
+
+MPICOMMAND=mpirun
+#MPICOMMAND="${MPICOMMAND} -stdin all"	# Only needed if compiled with mpicxx (OSX)
+
 ###############################################################
 #
 # Make a fresh compilation of the code
@@ -31,17 +36,29 @@ LSQ_TESTS[3]="h2o-splines"
 LSQ_TESTS[4]="h2o-invr"
 LSQ_TESTS[5]="h2o-dftbpoly"
 
+NP=0
+
 ## Allow command line arguments of jobs to test.  MD jobs should be single-quoted in a string followed 
 ## by LSQ jobs single quoted. (LEF)
 ##
-if [ $# -eq 0 ] 
-then
-  MD_JOBS="${MD_TESTS[@]}"
-  LSQ_JOBS="${LSQ_TESTS[@]}"
-else
-  MD_JOBS=$1
-  LSQ_JOBS=$2
+
+	MD_JOBS="${MD_TESTS[@]}"
+	LSQ_JOBS="${LSQ_TESTS[@]}"
+
+if [ $# -gt 0 ] ; then
+
+	if   [ "$1" == "NP" ] ; then
+		NP=$2
+	elif [ "$3" == "NP" ] ; then
+		MD_JOBS=$1
+		LSQ_JOBS=$2
+		NP=$4
+	else
+		MD_JOBS=$1
+		LSQ_JOBS=$2
+	fi
 fi
+
 
 # Tests for compatibility between LSQ C++/python codes with the MD code
 TAG="verify-lsq-forces-"
@@ -65,7 +82,17 @@ do
 	PASS=true
 	
 	cd $i
-	../house_md < run_md.in > run_md.out		
+
+	if [ $NP -eq 0 ] ; then
+		echo "HERE"	
+		$MPICOMMAND ../house_md < run_md.in > run_md.out
+			
+	else
+		echo "here"
+		$MPICOMMAND -np $NP ../house_md < run_md.in > run_md.out
+		
+	fi
+	
 	cp *.* current_output
 
 	
@@ -131,7 +158,11 @@ do
 	
 	cp ../../test_suite-lsq/$i/current_output/params.txt .
 	
-	../house_md < run_md.in > run_md.out	
+	if [ $NP -eq 0 ] ; then
+		../house_md < run_md.in > run_md.out		
+	else
+		$MPICOMMAND -np $NP ../house_md < run_md.in > run_md.out
+	fi	
 
 	cp *.* current_output
 

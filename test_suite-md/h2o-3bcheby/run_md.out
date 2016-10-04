@@ -1,3 +1,4 @@
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357
@@ -54,6 +55,15 @@ Reading force field parameters...
 	...Read FF controls...
 Attempting to read pairtype...
 	...Read FF interaction type...
+WARNING: Outer cutoff greater than half at least one box length
+	Pair type O O
+ 8.6091 8.6091
+WARNING: Outer cutoff greater than half at least one box length
+	Pair type H H
+ 8.6091 8.6091
+WARNING: Outer cutoff greater than half at least one box length
+	Pair type O H
+ 8.6091 8.6091
 	...Read general FF params...
 	...Read FF triplet specifications...
 	...Reading all remaining force field parameters...
@@ -84,15 +94,18 @@ Attempting to read pairtype...
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
+	Special 3-body cutoffs defined: 
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
 	Pair type and number of parameters per pair: 
 		CHEBYSHEV 10
+	Performing pair distance transformations over range: 
+		-1.0000 to 1.0000
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00
+		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 0.0000e+00 1.0000e+00
 		Parameters: 
 		0 -1.5379e+01
 		1 -1.6756e+01
@@ -106,7 +119,7 @@ Force field summary:
 		9 -1.5832e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
 		Parameters: 
 		0 -5.0063e+01
 		1 -7.0398e+01
@@ -120,7 +133,7 @@ Force field summary:
 		9 -3.0507e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
 		Parameters: 
 		0 4.1453e-01
 		1 1.7308e+01

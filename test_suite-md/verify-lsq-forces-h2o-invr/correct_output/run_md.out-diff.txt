@@ -1,0 +1,12 @@
+1d0
+< Code compiled in MPI mode. Will run on 1 processor(s).
+63,71d61
+< WARNING: Outer cutoff greater than half at least one box length
+< 	Pair type O O
+<  8.6091 8.6091
+< WARNING: Outer cutoff greater than half at least one box length
+< 	Pair type H H
+<  8.6091 8.6091
+< WARNING: Outer cutoff greater than half at least one box length
+< 	Pair type O H
+<  8.6091 8.6091

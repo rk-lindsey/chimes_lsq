@@ -2,29 +2,18 @@
 # CHOOSE COMPILATION TYPE, SET FLAGS
 ##################################
 
-# Quick note on flag PESFORMAT:
+# Compiling flags
+
+MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 # -D XFORMTYPE=LEFT # -D FORCECHECK=1 -D PESFORMAT=1 -D LOG_FORCE -D LOG_PES
+
+CXX=mpiicc  -g -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=mpicc   -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=mpicxx  -g # -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=g++ -g			# Serial, for debugging
+#CXX=g++ -O3			# Serial, let compiler optimize to a very high level (see also -O2)
 #
-# 1. gnuplot style
-# 2. matlab style
-# 3. python style
+# Below: Other debugging/optimiazation options
 #
-# Currently, only gnuplot style is supported
-
-# Quick note on flag FORCECHECK:
-#
-# 0. Don't print out the stuff mentioned below
-# 1. print out 3b forces on each atom at each timestep (generally for debug.)
-
-
-MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 # -D XFORMTYPE=LEFT # -D FORCECHECK=1 -D PESFORMAT=1
-
-CXX=g++ -g
-## Compiler setting for parallel code.
-## usage:  srun -n x house_md < run_md.in
-## x is the number of processes 
-##
-##CXX=mpiicc -O3 -DUSE_MPI
-#CXX=g++ -O3
 #CXX=g++ -g -Wall -Wextra -Wuninitialized -O1
 #CXX=g++ -g # -Wall -Wextra
 #CXX=icpc -fast -Wall
@@ -37,7 +26,7 @@ CXX=g++ -g
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C feexcept.C
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C
 
 CXX_LSQ_INCLUDES=
 
@@ -59,7 +48,7 @@ build_tests_lsq:
 # MAKE THE C++ CODE
 ##################################
 
-CXX_MD_SRC=splines_md.C functions.C Ewald.C feexcept.C
+CXX_MD_SRC=splines_md.C functions.C Ewald.C
 
 CXX_MD_INCLUDES=
 

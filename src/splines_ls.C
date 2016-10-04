@@ -10,6 +10,8 @@
 #include <iomanip>
 #include <map>
 #include <sstream>
+#include<unistd.h>	// Used to detect whether i/o is going to terminal or is piped... will help us decide whether to use ANSI color codes
+
 
 // User-defined headers
 
@@ -22,10 +24,11 @@ using namespace std;
 	#define VERBOSITY 1 
 #endif
 
-// For MPI calculations.  Number of processors and index of current processor.
-int NPROCS ;
-int RANK ;
- 
+// For now, keep the lsq code in serial.
+
+#ifdef USE_MPI
+	#undef USE_MPI
+#endif 
 
 static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool & fit_coul, bool & coul_consv, bool & if_subtract_coord, bool & if_subtract_coul, bool & fit_pover, int & cheby_order, string & cheby_type, int & cheby_3b_order, int & invr_parms,
  int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool & use_partial_charges, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS);
@@ -43,8 +46,26 @@ string FULL_FILE_3B;		// Global variables declared as externs in functions.h, an
 string SCAN_FILE_3B;
 string SCAN_FILE_2B;
 
+// Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
+ 
+int NPROCS;		// Number of processors
+int RANK;		// Index of current processor
+
 int main()
 {
+	
+	// Set up MPI if requested, otherwise, run in serial 
+
+	#ifdef USE_MPI
+		MPI_Init     (&argc, &argv);
+		MPI_Comm_size(MPI_COMM_WORLD, &NPROCS);
+		MPI_Comm_rank(MPI_COMM_WORLD, &RANK);
+	#else
+		NPROCS = 1;
+		RANK   = 0;
+	#endif
+	
+	
 	//////////////////////////////////////////////////
 	//
 	// Job parameters: Declare and set defaults
@@ -54,12 +75,12 @@ int main()
 	
 	// BELOW: VARIABLES INTRODUCED BY BECKY TO ALLOW EXTENSION TO MULTIPLE ATOM TYPES
 	
-	vector<PAIRS> ATOM_PAIRS;		// Will store relevant info regarding atom interaction pair types.. 
-	vector<TRIPLETS> PAIR_TRIPLETS;	// Will store relevant info regarding atom interaction triplet types.. i.e. { [OO,OO,OO], [OO,HH,HH], ... }
-	vector<FRAME> TRAJECTORY;		// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
-	vector<int>   ATOM_PAIR_TYPES;	// Fore use in double loop over atom pairs. Index corresponds to the overall double loop count. 
-									// Provides an index that rells you the atom pair's ATOM_PAIRS's type index.. THIS IS FOR LOOPS OF TYPE
-									// 	for(int a1=0;a1<nat-1;a1++)	for(int a2=a1+1;a2<nat;a2++)
+	vector<PAIRS> 		ATOM_PAIRS;		// Will store relevant info regarding atom interaction pair types.. 
+	vector<TRIPLETS> 	PAIR_TRIPLETS;	// Will store relevant info regarding atom interaction triplet types.. i.e. { [OO,OO,OO], [OO,HH,HH], ... }
+	vector<FRAME> 		TRAJECTORY;		// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
+	vector<int>   		ATOM_PAIR_TYPES;// Fore use in double loop over atom pairs. Index corresponds to the overall double loop count. 
+										// Provides an index that rells you the atom pair's ATOM_PAIRS's type index.. THIS IS FOR LOOPS OF TYPE
+										// 	for(int a1=0;a1<nat-1;a1++)	for(int a2=a1+1;a2<nat;a2++)
 	vector<int>   ATOM_PAIR_TYPES_ALL;	// THIS IS FOR LOOPS OF TYPE for(int ai=0; ai<nat; ai++), for(int ak=0; ak<nat; ak++)
 	
 	map<string,int> PAIR_MAP;			// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
@@ -98,15 +119,10 @@ int main()
 	int invr_parms = 4;				// currently uses 19 parameters per pair type
  	int NATMTYP = 0;
 
-	bool if_3b_cheby = false; 		// ************* WHY ISN'T THIS ITS OWN PAIR_TYPE????!?!?!?!?!?!?!
-	                                        // 3-body interaction is logically distinct from the 2-body interaction
-	                                        // in principle you could mix and match between different
-	                                        // 2-body and 3-body interactions (e.g. 2-body spline with
-	                                        // 3-body chebyshev) (LEF)
-
-
-	// Turn on handling of floating point exceptions
-	enable_fp_exceptions() ;
+	bool if_3b_cheby = false;		// 3-body interaction is logically distinct from the 2-body interaction                                      
+									// in principle you could mix and match between different
+									// 2-body and 3-body interactions (e.g. 2-body spline with
+									// 3-body chebyshev) (LEF)
 
 	//////////////////////////////////////////////////
 	//
@@ -211,7 +227,7 @@ int main()
 	if(!TRAJ_INPUT.is_open())
 	{
 		cout << "ERROR: Cannot open trajectory file: " << INFILE << endl;
-		exit_run(1);
+		exit(1);
 	}
 	
 	TRAJECTORY.resize(nframes);
@@ -231,6 +247,43 @@ int main()
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.X;
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Y;
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Z;
+		
+		for(int j=0; j<ATOM_PAIRS.size(); j++)
+		{
+			if( (   ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X
+				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y
+				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z )
+				&& i == 1)
+			{
+					#if WARN == TRUE
+						if (isatty(fileno(stdout)))
+						{
+							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;					
+						}
+						else
+						{
+							cout << "WARNING: Outer cutoff greater than half at least one box length" << endl;
+							cout << "	Pair type " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP  << endl;								
+						}
+
+					#else
+						if (isatty(fileno(stdout)))
+						{
+							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
+							exit(0);
+						}
+						else
+						{
+							cout << "ERROR: Outer cutoff greater than half at least one box length"  << endl;
+							cout << "	Pair type " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << endl;
+							exit(0);
+						}
+
+					#endif
+			}
+		}
 		
 		// Setup the trajectory-holding data object
 		
@@ -395,13 +448,15 @@ int main()
 	// Rows of A have the following order.
 	// A's first dimension is the number of frames.  2nd dimension is the number of atoms.
 	// 3rd dimension is the number of parameters.
-        // parameters in A are ordered as follows:
+	//
+    // parameters in A are ordered as follows:
 	// For x forces:
 	//	short-range 2-body and 3-body interaction
 	//      charge pair parameters (if any).
 	//      linear over-coordination parameter (if used)
-        // Same pattern repeated for y and z forces.
-        // charge constraints.
+	// 
+	// Same pattern repeated for y and z forces.
+	// charge constraints.
 	// (LEF)
 		
 	ofstream fileA("A.txt");
@@ -549,7 +604,7 @@ int main()
 	header << endl << "PAIRTYP: " << ATOM_PAIRS[0].PAIRTYP << " ";
 	
 	if     (ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV")
-		header << " " << ATOM_PAIRS[0].SNUM << " " << ATOM_PAIRS[0].SNUM_3B_CHEBY << endl;
+		header << " " << ATOM_PAIRS[0].SNUM << " " << ATOM_PAIRS[0].SNUM_3B_CHEBY << " " << ATOM_PAIRS[0].CHEBY_RANGE_LOW << " " << ATOM_PAIRS[0].CHEBY_RANGE_HIGH << endl;
 	else if(ATOM_PAIRS[0].PAIRTYP == "DFTBPOLY")
 		header << " " << ATOM_PAIRS[0].SNUM << endl;	
 	else if (ATOM_PAIRS[0].PAIRTYP == "INVRSE_R")
@@ -640,6 +695,22 @@ int main()
 	
 	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
+	
+		
+	int FOUND_SPECIAL = 0;
+	
+	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+		if(PAIR_TRIPLETS[i].S_MAXIM_3B != -1)
+			FOUND_SPECIAL++;
+	
+	if(FOUND_SPECIAL>0)
+	{
+		header << endl << "SPECIAL 3B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
+		
+		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+			if(PAIR_TRIPLETS[i].S_MAXIM_3B != -1)
+				header << i << " " << TRIAD_MAP_REVERSE[i] << " " << PAIR_TRIPLETS[i].S_MAXIM_3B << endl;
+	}
 	 
 	if(!if_3b_cheby)
 		header << endl << "ATOM PAIR TRIPLETS: " << 0 << endl << endl;
@@ -744,6 +815,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 	double SUM_OF_CHARGES = 0;
 	stringstream	STREAM_PARSER;
 	
+	double TMP_CHEBY_RANGE_LOW  = -1;
+	double TMP_CHEBY_RANGE_HIGH =  1;
+	
 	if_subtract_coord = false;
 	use_partial_charges = false;
 	
@@ -827,7 +901,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			else
 			{
 				cout << endl << "ERROR: # FITCOUL # must be specified as true or false." << endl;
-				exit_run(1);	
+				exit(1);	
 			}	
 			
 			#if VERBOSITY == 1
@@ -853,7 +927,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			else
 			{
 				cout << endl << "ERROR: # FITPOVR # must be specified as true or false." << endl;
-				exit_run(1);	
+				exit(1);	
 			}	
 			
 			#if VERBOSITY == 1
@@ -883,7 +957,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				cout << "INVRSE_R" << endl;
 //				cout << "LJ"       << endl;
 //				cout << "STILLIN"  << endl;
-				exit_run(1);
+				exit(1);
 				
 			}
 			
@@ -911,9 +985,11 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 
 			if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "CHEBYSHEV")
 			{
-				cin >> LINE;
-				cheby_order = int(atof(LINE.data()));
+				getline(cin,LINE);
 				
+				STREAM_PARSER.str(LINE);
+				
+				STREAM_PARSER >> cheby_order;				
 				
 				#if VERBOSITY == 1
 					cout << "	             " << "Will use 2-body order: " << cheby_order << endl;
@@ -921,9 +997,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				
 				if(TEMP_TYPE == "CHEBYSHEV")
 				{
-					cin >> LINE;
-					cheby_3b_order = int(atof(LINE.data()));
-					cin.ignore();
+					STREAM_PARSER >> cheby_3b_order;
 
 					#if VERBOSITY == 1
 						cout << "	             " << "Will use 3-body order: " << cheby_3b_order << endl;
@@ -931,9 +1005,39 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 						
 					if(cheby_3b_order>0)
 						if_3b_cheby = true;
+					
+					if (STREAM_PARSER >>  TMP_CHEBY_RANGE_LOW)
+					{
+						if(TMP_CHEBY_RANGE_LOW < -1.0 || TMP_CHEBY_RANGE_LOW > +1.0 )
+						{
+							cout << "ERROR: TMP_CHEBY_RANGE_LOW must be betwee -1 and 1" << endl;
+							exit(0);
+						}
+					}
+					if (STREAM_PARSER >>  TMP_CHEBY_RANGE_HIGH)
+					{
+						if(TMP_CHEBY_RANGE_HIGH < -1.0 || TMP_CHEBY_RANGE_HIGH > +1.0 )
+						{
+							cout << "ERROR: TMP_CHEBY_RANGE_LOW must be betwee -1 and 1" << endl;
+							exit(0);
+						}
+					}
+					if(TMP_CHEBY_RANGE_HIGH < TMP_CHEBY_RANGE_LOW)
+					{
+						cout << "ERROR: TMP_CHEBY_RANGE_HIGH must be greater than TMP_CHEBY_RANGE_LOW" << endl;
+						exit(0);
+					}					
+					
+					#if VERBOSITY == 1
+						cout << "	             " << "Will transform Chebyshev pair distances to range " << TMP_CHEBY_RANGE_LOW << " to " << TMP_CHEBY_RANGE_HIGH << endl;
+					#endif
 				}
 				else
-					cin.ignore();
+					
+				cin.ignore();
+				
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();		
 				
 			}
 			else
@@ -945,13 +1049,13 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			{
 				cout << "ERROR: Use of layers is not supported with 3-body Chebyshev potentials." << endl;
 				cout << "       Set # NLAYERS # to 1." << endl;
-				exit_run(0); 
+				exit(0); 
 			}
 			if(if_3b_cheby && fit_pover)
 			{
 				cout << "ERROR: Overbonding is not compatible with 3-body Chebyshev potentials." << endl;
 				cout << "       Set # FITPOVR # false." << endl;
-				exit_run(0);				
+				exit(0);				
 			}
 
 			
@@ -969,7 +1073,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			else
 			{
 				cout << "ERROR: # SUBCRDS # must be specified as true or false." << endl;
-				exit_run();	
+				exit(1);	
 			}	
 			
 			#if VERBOSITY == 1
@@ -1015,6 +1119,17 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			NTRIP = factorial(NATMTYP+3-1)/factorial(3)/factorial(NATMTYP-1);
 			PAIR_TRIPLETS.resize(NTRIP);
 			
+			// Set the default cheby range
+			
+			if (TEMP_TYPE == "CHEBYSHEV")
+			{
+				for(int i=0; i<NPAIR; i++)
+				{
+					ATOM_PAIRS[i].CHEBY_RANGE_LOW  = TMP_CHEBY_RANGE_LOW;
+					ATOM_PAIRS[i].CHEBY_RANGE_HIGH = TMP_CHEBY_RANGE_HIGH;
+				}
+			}	
+								
 		}
 
 		else if(LINE.find("# TYPEIDX #")!= string::npos)
@@ -1671,9 +1786,64 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			
 			cout << endl;
 		}				
+		
+		else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
+		{
+			STREAM_PARSER.str(LINE);
+			
+			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+			
+			if(TEMP_STR == "ALL" && NTRIP >0 )
+			{				
+				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MAXIM_3B;
+				
+				for(int i=1; i<NTRIP; i++)
+					PAIR_TRIPLETS[i].S_MAXIM_3B = PAIR_TRIPLETS[0].S_MAXIM_3B;
+				
+				#if VERBOSITY == 1
+					cout << "	Note: Setting all 3-body r_max values to " <<  PAIR_TRIPLETS[0].S_MAXIM_3B << endl;
+				#endif				
+			}
+			else if(TEMP_STR == "SPECIFIC" && NTRIP >0 )
+			{
+				STREAM_PARSER >> TEMP_INT;
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();
+
+				
+				#if VERBOSITY == 1
+					cout << "	Note: Setting specific 3-body r_max values: " << endl;
+				#endif	
+				
+				for(int i=0; i<TEMP_INT; i++)
+				{
+					getline(cin,LINE);
+					STREAM_PARSER.str(LINE);
+					STREAM_PARSER >> TEMP_STR;
+					STREAM_PARSER >> PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B;
+					STREAM_PARSER.str("");
+					STREAM_PARSER.clear();
+					
+					#if VERBOSITY == 1
+						cout << "		" << TEMP_STR << ": " << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B << endl;
+					#endif	
+				}
+			}
+		}
 	}	
 	
 	#if VERBOSITY == 1			
 		cout << "	Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl;; // All types use same scaling
 	#endif	
+}
+
+void exit_run(int value)
+// Call this instead of exit(1) to properly terminate all MPI processes.
+{
+	#ifdef USE_MPI
+		MPI_Abort(MPI_COMM_WORLD,value);
+	#else
+		exit(value);
+	#endif
+
 }

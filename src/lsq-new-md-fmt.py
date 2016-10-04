@@ -176,10 +176,14 @@ if FIT_POVER == "true" or USE_POVER == "true":
 else:
 	ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2
 	
-TEST = hf[ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2].split()
+TEST = hf[ATOM_TRIPS_LINE].split()
 if TEST[2] == "CUBIC":
 	ATOM_TRIPS_LINE += 2
 	
+TEST = hf[ATOM_TRIPS_LINE].split()
+if TEST[2] == "S_MAXIM:":
+	ATOM_TRIPS_LINE += 2 + int(TEST[4])
+		
 TOTAL_TRIPS =  hf[ATOM_TRIPS_LINE].split()
 TOTAL_TRIPS = int(TOTAL_TRIPS[3])
 

@@ -1,3 +1,4 @@
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357
@@ -59,12 +60,21 @@ Reading force field parameters...
 	...Read FF controls...
 Attempting to read pairtype...
 	...Read FF interaction type...
+WARNING: Outer cutoff greater than half at least one box length
+	Pair type O O
+ 8.6091 8.6091
+WARNING: Outer cutoff greater than half at least one box length
+	Pair type H H
+ 8.6091 8.6091
+WARNING: Outer cutoff greater than half at least one box length
+	Pair type O H
+ 8.6091 8.6091
 	...Read general FF params...
 	...Read FF triplet specifications...
 	...Reading all remaining force field parameters...
 		Re-setting individual atom charges based on pair charges :
-		0     O , q (e): -0.136, mass (amu):  15.9994
-		1     H , q (e):  0.418, mass (amu):   1.0079
+		0     O , q (e): -0.506, mass (amu):  15.9994
+		1     H , q (e):  0.253, mass (amu):   1.0079
 	...Read 2-body FF params...
 	...Read 3-body FF params...
 
@@ -89,15 +99,18 @@ Attempting to read pairtype...
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
+	Special 3-body cutoffs defined: 
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
 	Pair type and number of parameters per pair: 
 		CHEBYSHEV 10
+	Performing pair distance transformations over range: 
+		-1.0000 to 1.0000
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+08 1.0000e+00
+		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 0.0000e+00 1.0000e+00
 		Parameters: 
 		0 -4.4888e+01
 		1 -1.5079e+01
@@ -111,7 +124,7 @@ Force field summary:
 		9 -1.3084e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+08 1.0000e+00
+		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
 		Parameters: 
 		0 -4.2039e+01
 		1 -7.0689e+01
@@ -125,7 +138,7 @@ Force field summary:
 		9 -3.7151e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+08 1.0000e+00
+		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
 		Parameters: 
 		0 3.9085e+00
 		1 1.4036e+01
@@ -175,9 +188,9 @@ Force field summary:
 	      3       1   1   1         3               1               58.0862 
 
 	Fitted charges read from parameter file:
-		OO 0.0184
-		HH 0.1749
-		OH 0.2558
+		OO 0.2558
+		HH 0.0640
+		OH -0.1279
 
 
 BEGIN SIMULATION:
@@ -193,4 +206,4 @@ Ewald parameters:
 	Number of Ewald K-vectors = 894
 	K-space accuracy estimate = 0.00000006626103
 
-RMS force error =  1.595199e+01
+RMS force error =  9.017962e-06

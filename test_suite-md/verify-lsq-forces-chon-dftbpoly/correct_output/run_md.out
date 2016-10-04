@@ -1,3 +1,4 @@
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357

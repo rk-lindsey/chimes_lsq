@@ -1,12 +1,27 @@
-86c86
-< 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00
+1d0
+< Code compiled in MPI mode. Will run on 1 processor(s).
+58,66d56
+< WARNING: Outer cutoff greater than half at least one box length
+< 	Pair type O O
+<  8.6091 8.6091
+< WARNING: Outer cutoff greater than half at least one box length
+< 	Pair type H H
+<  8.6091 8.6091
+< WARNING: Outer cutoff greater than half at least one box length
+< 	Pair type O H
+<  8.6091 8.6091
+93,94d82
+< 	Performing pair distance transformations over range: 
+< 		-1.0000 to 1.0000
+98c86
+< 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 0.0000e+00 1.0000e+00
 ---
-> 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+08 1.0000e+00
-100c100
-< 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+> 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00
+112c100
+< 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
 ---
-> 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+08 1.0000e+00
-114c114
-< 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+> 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+126c114
+< 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
 ---
-> 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+08 1.0000e+00
+> 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00

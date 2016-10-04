@@ -6,6 +6,10 @@
 	#define FORCECHECK 0
 #endif
 
+#ifndef FPENALTY_POWER
+	#define FPENALTY_POWER 3.0
+#endif
+
 #define FULL	// distance transformation such that pair dist falls on range -1 to 1 
 #define LEFT	// distance transformation such that pair dist falls on range -1 to 0
 #define RIGHT	// distance transformation such that pair dist falls on range  0 to 1 
@@ -14,12 +18,20 @@
 	#define FULL
 #endif 
 
+#ifndef WARN
+	#define WARN TRUE
+#endif 
+
 #define GNUPLOT 1
 #define MATLAB  2
 #define PYTHON  3
 
 #ifndef PESFORMAT
 	#define PESFORMAT GNUPLOT
+#endif
+
+#ifndef CHECK_CHEBY_RANGE 
+	#define CHECK_CHEBY_RANGE 1	// (true)
 #endif
 
 #ifndef _HELPERS_
@@ -37,15 +49,24 @@
 
 using namespace std;
 
+// Unit converters 
+
 static const double ke      = 332.0637157615209;	// Converter between electron units and Stillinger units for Charge*Charge.
 static const double Hartree = 627.50961; 			// 1 Hartree in kcal/mol.
 static const double Kb      = 0.001987; 			// Boltzmann constant in kcal/mol-K.
 static const double Tfs     = 48.888;   			// Internal time unit in fs.
 static const double GPa     = 6.9479;				// Unit conversion factor to GPa.
 
+// Global variables declared as externs in functions.h, and declared in functions.C -- general
+
 extern string FULL_FILE_3B;	// The 4D PES for 3B FF
 extern string SCAN_FILE_3B;	// The 2D PES scans for 3B
 extern string SCAN_FILE_2B;	// The 2D PES scans for 2B
+
+// Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
+ 
+extern int NPROCS;		// Number of processors
+extern int RANK;		// Index of current processor
 
 struct MD_JOB_CONTROL
 {
@@ -172,6 +193,10 @@ struct PAIRS	// NEEDS UPDATING
 	double S_MAXIM;			// Maximum allowed pair distance for fitting
 	double S_DELTA;			// Fitting "grid" spacing (width)
 
+	double CHEBY_RANGE_LOW;	//	When fitting to Cheby polynomials, pair distances are typically transformed to exist defined on range -1 to 1 (where Cheby poly's are defined), 
+	double CHEBY_RANGE_HIGH;//  but under certain circumstances, it can be advantagous to only fit some sub range (i.e. -1 to 0). These variables define the transformation range
+							//  and arr, by default, set to -1 and 1 for low and high, respectively.
+
 	int    SNUM;			// Number of fitting parameters for pair ... WHY WOULD THIS BE DIFFERENT FOR DIFFERENT PAIR TYPES?***
 	int    SNUM_3B_CHEBY;	// Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
 	
@@ -197,6 +222,8 @@ struct TRIPLETS
 	string ATMPAIR2;
 	string ATMPAIR3;
 	
+	double S_MAXIM_3B;		// A unique outer cutoff for 3B interactions... by default, is set to S_MAXIM
+	
 	int N_TRUE_ALLOWED_POWERS;	// How many UNIQUE sets of powers do we have?
 	int N_ALLOWED_POWERS;	// How many total sets of powers do we have?
 	
@@ -204,6 +231,8 @@ struct TRIPLETS
 	vector<int>		EQUIV_INDICIES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
 	vector<int>		PARAM_INDICIES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICIES {0,0,2,3}, PARAM_INDICIES would be {0, 0, 1, 2}
 //	vector<int>		POWER_DUPLICATES;	// This will tell the multiplicity of each set of powers. For example, for the set (OO, OH, OH), (1,0,1) has a multiplicity of 2, since (1,1,0 is equivalent) -- No longer used
+	
+	TRIPLETS():S_MAXIM_3B(-1.0){}	// Negative values mean use 2-body s_maximum values
 };
 
 struct PAIR_FF : public PAIRS
@@ -229,6 +258,7 @@ struct PES_PLOTS
 	string TYPE_2;
 	string TYPE_3;
 	bool INCLUDE_2B;
+	bool INCLUDE_FCUT;
 	
 	// Variables used for scans of 3b potential
 	
@@ -264,16 +294,50 @@ struct CHARGE_CONSTRAINT
 	double		   FORCE;
 };
 
-// For MPI calculations.  Number of processors and index of current processor.
-extern int NPROCS ;
-extern int RANK ;
+struct ANSI_COLORS
+{
+	string MAGENTA;  
+	string BLUE;	
+	string GREEN;	
+	string PINK;	
+	string RED;	
+	string BOLD;	
+	string UNDERLINE;
+	string ENDSTYLE; 
+};
+
+static const ANSI_COLORS COUT_STYLE  = 
+{
+	"\033[95m",    // MAGENTA  
+	"\033[94m",    // BLUE     
+	"\033[92m",    // GREEN    
+	"\033[93m",    // PINK     
+	"\033[91m",    // RED	   
+	"\033[1m ",    // BOLD     
+	"\033[4m ",    // UNDERLINE
+	"\033[0m ",    // ENDSTYLE 
+
+};
+
+
+
+
+
+
+//////////////////////////////////////////
+//
+//	FUNCTION HEADERS -- MPI
+//
+//////////////////////////////////////////
+
+void divide_atoms(int &a1start, int &a1end, int atoms);
+
 
 //////////////////////////////////////////
 //
 //	FUNCTION HEADERS -- DERIVATIVE CALCULATION
 //
 //////////////////////////////////////////
-
 
 
 // FUNCTION UPDATED
@@ -307,13 +371,12 @@ void ZCalc(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 //
 //////////////////////////////////////////
 
-void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, string FILE_TAG);
+void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCLUDE_FCUT, string FILE_TAG);
 void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk);
 void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
 
-void divide_atoms(int &a1start, int &a1end, int atoms) ;
-void enable_fp_exceptions() ;
-void exit_run(int val) ;
+void enable_fp_exceptions();
+void exit_run(int val);
 
 #endif
 

@@ -1,0 +1,34 @@
+1d0
+< Code compiled in MPI mode. Will run on 1 processor(s).
+58,66d56
+< WARNING: Outer cutoff greater than half at least one box length
+< 	Pair type O O
+<  8.6091 8.6091
+< WARNING: Outer cutoff greater than half at least one box length
+< 	Pair type H H
+<  8.6091 8.6091
+< WARNING: Outer cutoff greater than half at least one box length
+< 	Pair type O H
+<  8.6091 8.6091
+97d86
+< 	Special 3-body cutoffs defined: 
+103,104d91
+< 	Performing pair distance transformations over range: 
+< 		-1.0000 to 1.0000
+108c95
+< 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 0.0000e+00 1.0000e+00
+---
+> 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00
+122c109
+< 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
+---
+> 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+136c123
+< 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
+---
+> 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+309,312d295
+< Stopping from the terminal not allowed
+< Stopping from the terminal not allowed
+< Stopping from the terminal not allowed
+< Stopping from the terminal not allowed
