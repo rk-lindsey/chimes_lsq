@@ -16,6 +16,8 @@
 	1000
 # NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
 	1
+# USENEIG # ! Use a neighbor list? HIGHLY reccommended when NLAYERS > 0
+	true
 # PRMFILE # ! Parameter file (i.e. params.txt)
 	params.3b.nodate.txt
 # CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)

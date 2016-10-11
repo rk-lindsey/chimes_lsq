@@ -33,15 +33,15 @@ using namespace std;
 
 // Define function headers -- general
 
-static void   read_input        (MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS);	// UPDATED
+static void   read_input        (MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
 static double kinetic_energy    (FRAME & SYSTEM);				// UPDATED
 static double kinetic_energy    (FRAME & SYSTEM, string TYPE);	// UPDATED
-double        numerical_pressure(const FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP);
+double        numerical_pressure(const FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
 // Define function headers -- MPI
 
 static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure);
-static void sync_position(vector<XYZ>& coord_vec, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
+static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- general
 
@@ -78,16 +78,12 @@ int main(int argc, char* argv[])
 		cout <<" Will run on " << NPROCS << " processor(s)." << endl;
 
 
-	
-
-	
 	////////////////////////////////////////////////////////////
     // Define/initialize important variables
 	////////////////////////////////////////////////////////////
 
 	MD_JOB_CONTROL CONTROLS;			// Declare the data object that will hold the main simulation control variables
 	PES_PLOTS FF_PLOTS;					// Declare the data object that will help set up PES plots
-	read_input(CONTROLS, FF_PLOTS);		// Populate object with user defined values
 	
 	// Data objects to hold coefficients for different force field types, and for FF printing (if requested)
 	 
@@ -101,12 +97,12 @@ int main(int argc, char* argv[])
 	map<string,int> TRIAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
 	map<int,string> TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
 
-	FRAME SYSTEM;						// Declare the data object that will hold the system coordinates, velocities, accelrations, etc.
+	FRAME     SYSTEM;					// Declare the data object that will hold the system coordinates, velocities, accelrations, etc.
+	NEIGHBORS NEIGHBOR_LIST;			// Declare the class that will handle the neighbor list
 	
 	double Ktot;
 	double Vol;
     double avg_temp  = 0.0;
-    double zeta_dot0 = 0.0;
     double temp_sum  = 0.0;
     double press_sum = 0.0;
 	
@@ -116,8 +112,7 @@ int main(int argc, char* argv[])
     double dens_mass;
 	
 	double vscale;
-	
-	
+
 	bool   	FOUND_END = false;
 	string 	LINE;
 	string  TEMP_STR;
@@ -131,6 +126,9 @@ int main(int argc, char* argv[])
 	vector<double> 	TMP_MASS;
 	stringstream	STREAM_PARSER;
 	
+	XYZ TEMP_XYZ;
+	int TEMP_IDX;
+	
 	ofstream GENFILE;			// Holds dftbgen info output.. whatever that is
 	ifstream CMPR_FORCEFILE;	// Holds the forces that were read in for comparison purposes
 	ofstream OUT_FORCEFILE;		// Holds the forces that are computed and are to be printed out
@@ -142,6 +140,10 @@ int main(int argc, char* argv[])
 	
 	ifstream PARAMFILE;
 	ifstream COORDFILE;
+
+
+	
+	read_input(CONTROLS, FF_PLOTS,NEIGHBOR_LIST);		// Populate object with user defined values
 	
 	cout.precision(15);			// Set output precision
 	
@@ -687,6 +689,65 @@ int main(int argc, char* argv[])
 
 
 	////////////////////////////////////////////////////////////
+	// Explicitly account for layers.. 
+	//
+	// In contrast to the old approach, we only add images in (+) direction
+	// So 0 layers returns the original cell (i.e. NATOMS atoms)
+	//    1 layer  returns a 8*NATOMS atoms
+	//    2 layers returns  27*NATOMS atoms, and so on.
+	//
+	// These atoms are explicitly added to the system, so its generally
+	// a good idea to use neighbor lists to cut down on cost
+	////////////////////////////////////////////////////////////	
+	
+	if(CONTROLS.N_LAYERS>0 )
+	{
+		
+		if(RANK == 0)
+			cout << "Building layers..." << endl;
+	
+		TEMP_IDX = SYSTEM.ATOMS;
+	
+		// Create coordinates for the layer atoms. layer elements do not include 0, 0, 0, which is the main cell
+
+		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+		{
+			for(int n1=0; n1<=CONTROLS.N_LAYERS; n1++)
+			{
+				for(int n2=0; n2<=CONTROLS.N_LAYERS; n2++)
+				{
+					for(int n3=0; n3<=CONTROLS.N_LAYERS; n3++)
+					{					
+						if ((n1 == 0) && (n2 == 0) && (n3 == 0) )
+							continue;
+						else
+						{											
+							TEMP_XYZ.X = SYSTEM.COORDS.at(a1).X + n1 * SYSTEM.BOXDIM.X;
+							TEMP_XYZ.Y = SYSTEM.COORDS.at(a1).Y + n2 * SYSTEM.BOXDIM.Y;
+							TEMP_XYZ.Z = SYSTEM.COORDS.at(a1).Z + n3 * SYSTEM.BOXDIM.Z;
+
+							SYSTEM.COORDS       .push_back(TEMP_XYZ);
+							SYSTEM.ATOMTYPE     .push_back(SYSTEM.ATOMTYPE    .at(a1));
+							SYSTEM.ATOMTYPE_IDX .push_back(SYSTEM.ATOMTYPE_IDX.at(a1));
+							SYSTEM.CHARGES      .push_back(SYSTEM.CHARGES     .at(a1));
+							SYSTEM.MASS         .push_back(SYSTEM.MASS        .at(a1));
+							SYSTEM.VELOCITY     .push_back(SYSTEM.VELOCITY    .at(a1));
+						}
+					}
+				}
+			}
+		}
+	
+		SYSTEM.ATOMS = TEMP_IDX;
+	
+		SYSTEM.BOXDIM.X *= (CONTROLS.N_LAYERS + 1);
+		SYSTEM.BOXDIM.Y *= (CONTROLS.N_LAYERS + 1);
+		SYSTEM.BOXDIM.Z *= (CONTROLS.N_LAYERS + 1);
+	
+	}
+	
+
+	////////////////////////////////////////////////////////////
 	// Begin setup of force field data objects...
 	////////////////////////////////////////////////////////////  
 
@@ -745,6 +806,10 @@ int main(int argc, char* argv[])
 						STREAM_PARSER.str(LINE);
 						STREAM_PARSER >> TMP_TERMS2 >> TEMP_STR;	// We could use the integer, but this way is probably safer
 						STREAM_PARSER >> FF_3BODY[TMP_TERMS2].S_MAXIM_3B;
+						
+						if(FF_3BODY[TMP_TERMS2].S_MAXIM_3B > NEIGHBOR_LIST.MAX_CUTOFF_3B)
+							 NEIGHBOR_LIST.MAX_CUTOFF_3B = FF_3BODY[TMP_TERMS2].S_MAXIM_3B;
+						
 						STREAM_PARSER.str("");
 						STREAM_PARSER.clear();	
 					}
@@ -776,18 +841,7 @@ int main(int argc, char* argv[])
 						if(FF_3BODY[i].S_MAXIM_3B != -1)
 							cout << "		" <<  i << " " << TRIAD_MAP_REVERSE[i] << " " << FF_3BODY[i].S_MAXIM_3B << endl;
 				}
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
+	
 			}
 
 			if(CONTROLS.USE_COULOMB)
@@ -984,11 +1038,18 @@ int main(int argc, char* argv[])
 				PARAMFILE >> FF_2BODY[i].ATM1TYP;
 				PARAMFILE >> FF_2BODY[i].ATM2TYP;	
 				PARAMFILE >> FF_2BODY[i].S_MINIM;	
-				PARAMFILE >> FF_2BODY[i].S_MAXIM;	
+				PARAMFILE >> FF_2BODY[i].S_MAXIM;
+				
+				if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
+				{
+					 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
+					 NEIGHBOR_LIST.MAX_CUTOFF_3B = FF_2BODY[i].S_MAXIM;
+				}
+				 	
 				PARAMFILE >> FF_2BODY[i].S_DELTA;
 				
 				if((FF_PLOTS.N_PLOTS == 0) &&
-				   ( FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.X
+				   (  FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.X
 				   || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.Y
 				   || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.Z ) )
 				{
@@ -1005,7 +1066,7 @@ int main(int argc, char* argv[])
 							{
 								cout << "WARNING: Outer cutoff greater than half at least one box length" << endl;
 								cout << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP  << endl;
-								cout << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+								cout << " " <<  SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
 							}								
 						}
 
@@ -1266,7 +1327,7 @@ int main(int argc, char* argv[])
 				{
 					for(int i=0; i<NO_PAIRS; i++)
 					{
-						if( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] || FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] )
+						if( (FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j]) || (FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j]) )
 						{
 							TMP_CHARGES[j] = sqrt(fabs(FF_2BODY[i].PAIR_CHRG))*TMP_SIGN[j];
 							FF_2BODY[i].ATM1CHG = TMP_CHARGES[j];
@@ -1443,10 +1504,7 @@ int main(int argc, char* argv[])
 			if (RANK==0)
 				cout << "	...Read FF triadmaps..." << endl;					
 		}	
-		
-				
-		
-	
+
 	}	
 	
 	// Set the atom charges
@@ -1465,8 +1523,6 @@ int main(int argc, char* argv[])
 	
 	// Free up some memory.. swap the contents of currend vectors with a vector w/ no assigned mem
 
-//	vector<string>().swap(TMP_ATOMTYPE); 
-//	vector<double>().swap(TMP_CHARGES); 
 	vector<double>().swap(TMP_MASS);	
 	
 	////////////////////////////////////////////////////////////
@@ -1587,8 +1643,20 @@ int main(int argc, char* argv[])
 		cout << endl;
 	}
 	
-
 	
+	////////////////////////////////////////////////////////////
+	// Set up the neighbor list
+	////////////////////////////////////////////////////////////
+	 
+	cout << "Initializing the neighbor list..." << endl;
+	
+	if(NEIGHBOR_LIST.USE)
+	{
+		NEIGHBOR_LIST.INITIALIZE(SYSTEM);
+		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+	}
+	
+
 	////////////////////////////////////////////////////////////
 	// If PES printing is requested, do so here and then 
 	// exit the program
@@ -1610,11 +1678,11 @@ int main(int argc, char* argv[])
 			
 			int ij, ik, jk;
 			string ATM_TYP_1, ATM_TYP_2, ATM_TYP_3;
-			int ADD_2B_TO_3B_IDX = 0;
+//			int ADD_2B_TO_3B_IDX = 0;
 		
-			int IJ_STEP = 0;
-			int IK_STEP = 0;
-			int JK_STEP = 0;
+//			int IJ_STEP = 0;
+//			int IK_STEP = 0;
+//			int JK_STEP = 0;
 		
 			ifstream FULL_INFILE_3B;
 			ifstream SCAN_INFILE_3B;
@@ -1899,9 +1967,7 @@ int main(int argc, char* argv[])
 			exit_run(0);
 		}
 	}
-	
 
-	
   	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
 	//
@@ -1909,6 +1975,39 @@ int main(int argc, char* argv[])
 	//
 	////////////////////////////////////////////////////////////  
 	////////////////////////////////////////////////////////////
+	
+	// For the MPI debugging 
+	/*
+	
+	int DEBUG_HOLD = 0;
+	
+	cout << endl;
+	cout << "***********************************" << endl;
+	cout << endl;
+	cout << "Code is in MPI Debug mode. " << endl;
+	cout << endl;
+	cout << "Process id is: " << ::getpid() << endl;
+	cout << endl;
+	cout << "To debug, launch either lldb or gdb, " << endl;
+	cout << " and type either: " << endl;
+	cout << " attach -p <pid> " << endl;
+	cout << " or " << endl;
+	cout << "  attach <pid>" << endl;
+	cout << " respectively. To resume the job once " << endl;
+	cout << " the debugger has been launched, type: " << endl;
+	cout << " expr DEBUG_HOLD = -1" << endl;
+	cout << " or " << endl;
+	cout << " set var DEBUG_HOLD = -1" << endl;
+	cout << " respectively and debug as usual." << endl;
+	cout << endl;
+	cout << "***********************************" << endl;
+	cout << endl;	
+	
+	while (DEBUG_HOLD == 0)
+		sleep(5);
+	
+	*/
+	
 
 	STATISTICS.open("md_statistics.out");
 
@@ -1929,12 +2028,13 @@ int main(int argc, char* argv[])
 			if (RANK==0)
 			{
 				// Update coords
-			
+
 				for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-				{
+				{			
 					SYSTEM.COORDS[a1].X += SYSTEM.VELOCITY[a1].X * CONTROLS.DELTA_T + 0.5*SYSTEM.ACCEL[a1].X * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
 					SYSTEM.COORDS[a1].Y += SYSTEM.VELOCITY[a1].Y * CONTROLS.DELTA_T + 0.5*SYSTEM.ACCEL[a1].Y * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
-					SYSTEM.COORDS[a1].Z += SYSTEM.VELOCITY[a1].Z * CONTROLS.DELTA_T + 0.5*SYSTEM.ACCEL[a1].Z * CONTROLS.DELTA_T * CONTROLS.DELTA_T;				
+					SYSTEM.COORDS[a1].Z += SYSTEM.VELOCITY[a1].Z * CONTROLS.DELTA_T + 0.5*SYSTEM.ACCEL[a1].Z * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
+
 				}
 
 				// Apply thermostatting to coords
@@ -1942,10 +2042,10 @@ int main(int argc, char* argv[])
 				if ( CONTROLS.USE_HOOVER_THRMOSTAT ) 
 				{
 					for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-					{
+					{					
 						SYSTEM.COORDS[a1].X -= 0.5*THERMOSTAT.VISCO * SYSTEM.VELOCITY[a1].X * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
 						SYSTEM.COORDS[a1].Y -= 0.5*THERMOSTAT.VISCO * SYSTEM.VELOCITY[a1].Y * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
-						SYSTEM.COORDS[a1].Z -= 0.5*THERMOSTAT.VISCO * SYSTEM.VELOCITY[a1].Z * CONTROLS.DELTA_T * CONTROLS.DELTA_T;				
+						SYSTEM.COORDS[a1].Z -= 0.5*THERMOSTAT.VISCO * SYSTEM.VELOCITY[a1].Z * CONTROLS.DELTA_T * CONTROLS.DELTA_T;					
 					}				
 
 					ke = kinetic_energy(SYSTEM);
@@ -1973,6 +2073,19 @@ int main(int argc, char* argv[])
 					SYSTEM.VELOCITY[a1].X += 0.5 * SYSTEM.ACCEL[a1].X * CONTROLS.DELTA_T;
 					SYSTEM.VELOCITY[a1].Y += 0.5 * SYSTEM.ACCEL[a1].Y * CONTROLS.DELTA_T;
 					SYSTEM.VELOCITY[a1].Z += 0.5 * SYSTEM.ACCEL[a1].Z * CONTROLS.DELTA_T;
+					
+					if(NEIGHBOR_LIST.USE)
+					{
+					
+						NEIGHBOR_LIST.CURR_VEL 
+						      = sqrt(SYSTEM.VELOCITY[a1].X*SYSTEM.VELOCITY[a1].X 
+						           + SYSTEM.VELOCITY[a1].Y*SYSTEM.VELOCITY[a1].Y 
+				      	           + SYSTEM.VELOCITY[a1].Z*SYSTEM.VELOCITY[a1].Z);
+					
+						if(NEIGHBOR_LIST.CURR_VEL > NEIGHBOR_LIST.MAX_VEL)
+							NEIGHBOR_LIST.MAX_VEL = NEIGHBOR_LIST.CURR_VEL;
+					}
+					
 				
 				}
 			
@@ -1985,10 +2098,23 @@ int main(int argc, char* argv[])
 						SYSTEM.VELOCITY[a1].X -= 0.5*THERMOSTAT.VISCO * SYSTEM.VELOCITY[a1].X * CONTROLS.DELTA_T;
 						SYSTEM.VELOCITY[a1].Y -= 0.5*THERMOSTAT.VISCO * SYSTEM.VELOCITY[a1].Y * CONTROLS.DELTA_T;
 						SYSTEM.VELOCITY[a1].Z -= 0.5*THERMOSTAT.VISCO * SYSTEM.VELOCITY[a1].Z * CONTROLS.DELTA_T;
+						
+						if(NEIGHBOR_LIST.USE)
+						{
+						
+							NEIGHBOR_LIST.CURR_VEL 
+							      = sqrt(SYSTEM.VELOCITY[a1].X*SYSTEM.VELOCITY[a1].X 
+							           + SYSTEM.VELOCITY[a1].Y*SYSTEM.VELOCITY[a1].Y 
+					      	           + SYSTEM.VELOCITY[a1].Z*SYSTEM.VELOCITY[a1].Z);
+					
+							if(NEIGHBOR_LIST.CURR_VEL > NEIGHBOR_LIST.MAX_VEL)
+								NEIGHBOR_LIST.MAX_VEL = NEIGHBOR_LIST.CURR_VEL;
+						}
 					}
-				}
+				}			
 			}
-		}      
+		}
+		
 		cout.precision(14);			// Set output precision
     
       	////////////////////////////////////////////////////////////
@@ -1997,10 +2123,28 @@ int main(int argc, char* argv[])
 
 
 		// FOR MPI:		Broadcast the position and optionally velocity from the root to all other processes. -- WHY ISN'T THIS IS A PRECOMPILER DIRECTIVE?
-		sync_position(SYSTEM.COORDS, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
+		sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
+		
+		
+		////////////////////////////////////////////////////////////
+		// Check if neighbor list update needed/do updating
+		////////////////////////////////////////////////////////////
+		 
+		if(CONTROLS.STEP>0)	
+		{
+			if(NEIGHBOR_LIST.USE)// && (RANK==0))
+			{
+				#ifdef USE_MPI
+					MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+				#endif
+			
+				NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+			}
+		
+		}
 
 		// this function calculates the spline and electrostatic forces. --- this should probably be removed
-		ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP);
+		ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
 
 		// FOR MPI:		Synchronize forces, energy, and pressure.
 		
@@ -2193,18 +2337,16 @@ int main(int argc, char* argv[])
 			// If requested, compute pressure numerically, and accumulate
 			// statistics
 			////////////////////////////////////////////////////////////
-	  
-	  	  
-	  
+
 			if ( CONTROLS.USE_NUMERICAL_PRESS ) 
 			{
-				if(CONTROLS.STEP == 0 & NPROCS>1)
+				if((CONTROLS.STEP == 0) && (NPROCS>1))
 				{
 					cout << "WARNING: Numerical pressure computed using only one processor...";
 					cout << "This has potential to be a bottleneck!" << endl;
 				}
 				
-				SYSTEM.PRESSURE_XYZ = numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP);
+				SYSTEM.PRESSURE_XYZ = numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
 			}
 
 			SYSTEM.PRESSURE = (SYSTEM.PRESSURE_XYZ + 2.0 * Ktot / (3.0 * Vol)) * GPa;	// GPa = Unit conversion factor to GPa.
@@ -2232,7 +2374,6 @@ int main(int argc, char* argv[])
 				}
 
 				cout.flush();
-
 			}	
 		
 		  	////////////////////////////////////////////////////////////
@@ -2264,9 +2405,8 @@ int main(int argc, char* argv[])
 			  avg_temp += SYSTEM.TEMPERATURE;
 		}
 		
-		
 		// MPI -- Broadcast the position and optionally velocity from the root to all other processes.
-		sync_position(SYSTEM.COORDS, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
+		sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
 
 
 		
@@ -2471,7 +2611,7 @@ int main(int argc, char* argv[])
 }       
 
 
-static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// UPDATED
+static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST) 				// UPDATED
 {
 	if (RANK==0)
 		cout << endl << "Reading the simulation control input file..." << endl;
@@ -2507,6 +2647,22 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 		if     (LINE.find("# ENDFILE #") != string::npos)
 		{
 			FOUND_END = true;
+			
+			if( (CONTROLS.N_LAYERS>0) && (!NEIGHBOR_LIST.USE) )
+			{
+				if (RANK == 0)
+				{
+					if (isatty(fileno(stdout)))
+						cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Use of neighbor lists HIGHLY reccommended when NLAYERS > 0!" << COUT_STYLE.ENDSTYLE << endl;
+
+					else
+						cout << "WARNING: Use of neighbor lists HIGHLY reccommended when NLAYERS > 0!" << endl;
+					
+					#if WARN == FALSE
+						exit_run(0);
+					#endif
+				}
+			}
 			
 			if (RANK==0)
 				cout << "   ...read complete." << endl << endl;
@@ -2904,6 +3060,21 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 				cout << "	# NLAYERS #: " << CONTROLS.N_LAYERS << endl;	
 		}	
 		
+		else if(LINE.find("# USENEIG #") != string::npos)
+		{
+			cin >> LINE; 
+			
+			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+			{
+				NEIGHBOR_LIST.USE = true;
+
+				if (RANK==0 && NEIGHBOR_LIST.USE )
+					cout << "	# USENEIG #: true "<< endl;	
+			}
+			cin.ignore();
+
+		}	
+		
 		else if(LINE.find("# PRMFILE #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
@@ -3114,8 +3285,6 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS) 				// U
 				exit_run(1);	
 			}								
 		}			
-			
-
 	}
 }
 static double kinetic_energy(FRAME & SYSTEM)					// UPDATED -- Overloaded.. compute differentely if for main or new velocities
@@ -3241,14 +3410,16 @@ static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, do
 }
 
 
-static void sync_position(vector<XYZ>& coord_vec, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 
-// Broadcast the position and optionally the velocity to all nodes.
+static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 
+// Broadcast the position, neighborlists,  and optionally the velocity to all nodes.
 // Velocity-broadcast is only necessary for velocity-dependent forces (not currently implemented).
 {
 	#ifdef USE_MPI
 	
+		// Convert out vectors to arrays so they are MPI friendly
+	
 		double *coord = (double *) coord_vec.data();
-  
+
 		if ( sizeof(XYZ) != 3*sizeof(double) ) 
 		{
 			printf("Error: compiler padding in XYZ structure detected\n");

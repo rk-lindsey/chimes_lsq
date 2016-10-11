@@ -7,6 +7,7 @@ Reading the simulation control input file...
 	# TIMESTP #: 0.125 fs
 	# N_MDSTP #: 1000
 	# NLAYERS #: 1
+	# USENEIG #: true 
 	# PRMFILE #: params.txt
 	# CRDFILE #: input.xyzf
 	# VELINIT #: GEN ... generating velocites via box Muller
@@ -50,6 +51,7 @@ Running velocity sanity checks...
 	Mass density   = 1.5002 g/cm^3
    ...checks complete
 
+Building layers...
 
 Reading force field parameters...
 		...Compute electrostatics?      false
@@ -60,15 +62,6 @@ Reading force field parameters...
 	...Read FF controls...
 Attempting to read pairtype...
 	...Read FF interaction type...
-WARNING: Outer cutoff greater than half at least one box length
-	Pair type O O
- 8.6091 8.6091
-WARNING: Outer cutoff greater than half at least one box length
-	Pair type H H
- 8.6091 8.6091
-WARNING: Outer cutoff greater than half at least one box length
-	Pair type O H
- 8.6091 8.6091
 	...Read general FF params...
 	...Read FF triplet specifications...
 	...Reading all remaining force field parameters...
@@ -124,5 +117,8 @@ Force field summary:
 		HH 13.4896 0.0000 0.0000 0.0000 0.0000
 		OH 13.4896 1.0165 -0.0657 5.0451 -3.6141
 
+Initializing the neighbor list...
+NEIGHBOR LIST MAX CUTOFF IS: 6.0000
+USING PADDING: 0.3000
 BEGIN SIMULATION:
-RMS force error =  4.650962e+01
+RMS force error =  4.636005e+01

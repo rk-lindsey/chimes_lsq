@@ -17,12 +17,19 @@ MD_TESTS[6]="h2o-2bcheby-velscale"
 # Tests for compatibility between LSQ C++/python codes with the MD code
 TAG="verify-lsq-forces-"
 
-LSQ_TESTS[0]="chon-dftbpoly"
-LSQ_TESTS[1]="h2o-2bcheby"
-LSQ_TESTS[2]="h2o-3bcheby"
-LSQ_TESTS[3]="h2o-splines"
-LSQ_TESTS[4]="h2o-invr"
-LSQ_TESTS[5]="h2o-dftbpoly"
+# Now that handling of layers has changed, we no longer expect to 
+# recover the same forces on atoms that were observed in the LSQ step
+# For this reason, these tests have been omitted. 
+#
+# Eventually, I'll add a test for a system where the cutoffs are
+# within 0.5 x the natural box length.
+
+#LSQ_TESTS[0]="chon-dftbpoly"
+#LSQ_TESTS[1]="h2o-2bcheby"
+#LSQ_TESTS[2]="h2o-3bcheby"
+#LSQ_TESTS[3]="h2o-splines"
+#LSQ_TESTS[4]="h2o-invr"
+#LSQ_TESTS[5]="h2o-dftbpoly"
 
 
 # Iterate through the tests
@@ -43,7 +50,7 @@ do
 	PASS=true
 	
 	cd $i
-	../house_md < run_md.in > run_md.out		
+	mpirun -np 1 ../house_md < run_md.in > run_md.out		
 	cp *.* current_output
 	cp *.* correct_output
 
@@ -51,6 +58,8 @@ do
 	cd ..
 done
 
+
+exit 0
 
 echo " "
 echo "SETTING UP FOR LSQ/MD CODE COMPATIBILITY..."
@@ -77,7 +86,7 @@ do
 	
 	cp ../../test_suite-lsq/$i/current_output/params.txt .
 	
-	../house_md < run_md.in > run_md.out	
+	mpirun -np 1 ../house_md < run_md.in > run_md.out	
 
 	cp *.* current_output
 	cp *.* correct_output

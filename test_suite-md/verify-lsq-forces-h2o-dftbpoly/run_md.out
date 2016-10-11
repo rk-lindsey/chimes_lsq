@@ -7,6 +7,7 @@ Reading the simulation control input file...
 	# TIMESTP #: 0.125 fs
 	# N_MDSTP #: 1000
 	# NLAYERS #: 1
+	# USENEIG #: true 
 	# PRMFILE #: params.txt
 	# CRDFILE #: input.xyzf
 	# VELINIT #: GEN ... generating velocites via box Muller
@@ -50,6 +51,7 @@ Running velocity sanity checks...
 	Mass density   = 1.5002 g/cm^3
    ...checks complete
 
+Building layers...
 
 Reading force field parameters...
 		...Compute electrostatics?      false
@@ -119,5 +121,8 @@ Force field summary:
 		7 0.0000
 
 
+Initializing the neighbor list...
+NEIGHBOR LIST MAX CUTOFF IS: 3.0000
+USING PADDING: 0.3000
 BEGIN SIMULATION:
 RMS force error =  1.092133e-01

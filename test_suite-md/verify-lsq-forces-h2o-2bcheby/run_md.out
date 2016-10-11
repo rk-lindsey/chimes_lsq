@@ -6,7 +6,7 @@ Reading the simulation control input file...
 	# CMPRFRC #: true... will only do 1 md step.
 	# TIMESTP #: 0.125 fs
 	# N_MDSTP #: 1000
-	# NLAYERS #: 1
+	# NLAYERS #: 0
 	# PRMFILE #: params.txt
 	# CRDFILE #: input.xyzf
 	# VELINIT #: GEN ... generating velocites via box Muller
@@ -50,6 +50,7 @@ Running velocity sanity checks...
 	Mass density   = 1.5002 g/cm^3
    ...checks complete
 
+Building layers...
 
 Reading force field parameters...
 		...Compute electrostatics?      true
@@ -146,6 +147,7 @@ Force field summary:
 		HH 8.7184e+00 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00
 		OH 8.7184e+00 1.0165e+00 -6.5700e-02 5.0451e+00 -3.6141e+00
 
+Initializing the neighbor list...
 BEGIN SIMULATION:
 
 Ewald parameters: 
@@ -159,4 +161,4 @@ Ewald parameters:
 	Number of Ewald K-vectors = 894
 	K-space accuracy estimate = 6.62610330157710e-08
 
-RMS force error =  1.159447e-05
+RMS force error =  4.941768e-01

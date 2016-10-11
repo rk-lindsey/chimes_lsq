@@ -581,7 +581,7 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string, int
 
 }
 
-void ZCalc_Ewald(FRAME & TRAJECTORY)	// MD version
+void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)	// MD version
 // Calculate Ewald interactions. 
 {
 
@@ -640,6 +640,7 @@ void ZCalc_Ewald(FRAME & TRAJECTORY)	// MD version
 	
 	int a1start, a1end ;
 	divide_atoms(a1start, a1end, TRAJECTORY.ATOMS) ;
+	
 
 	for(int a1=0;a1<TRAJECTORY.ATOMS;a1++)
 	{

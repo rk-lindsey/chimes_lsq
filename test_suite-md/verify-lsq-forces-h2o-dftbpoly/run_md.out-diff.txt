@@ -1,2 +1,0 @@
-1d0
-< Code compiled in MPI mode. Will run on 1 processor(s).

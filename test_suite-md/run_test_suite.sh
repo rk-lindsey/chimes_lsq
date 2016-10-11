@@ -9,10 +9,9 @@ MPICOMMAND=mpirun
 #
 ###############################################################
 cd ../src
-make clean_lsq; make realclean_lsq
-make house_lsq; rm -f ../test_suite-lsq/house_lsq; cp house_lsq ../test_suite-lsq/; make clean_lsq; make realclean_lsq;
-make clean_md; make realclean_md
-make house_md; rm -f ../test_suite-lsq/house_md; cp house_md ../test_suite-md/; make clean_md; make realclean_md;
+rm -rf *o *dSYM
+#make house_lsq; rm -f ../test_suite-lsq/house_lsq; cp house_lsq ../test_suite-lsq/
+make house_md;  rm -f ../test_suite-lsq/house_md;  cp house_md  ../test_suite-md/
 cd ../test_suite-md
 
 ########################################
@@ -29,12 +28,19 @@ MD_TESTS[4]="h2o-2bcheby-genvel"
 MD_TESTS[5]="h2o-2bcheby-numpress"
 MD_TESTS[6]="h2o-2bcheby-velscale"
 
-LSQ_TESTS[0]="chon-dftbpoly"
-LSQ_TESTS[1]="h2o-2bcheby"
-LSQ_TESTS[2]="h2o-3bcheby"
-LSQ_TESTS[3]="h2o-splines"
-LSQ_TESTS[4]="h2o-invr"
-LSQ_TESTS[5]="h2o-dftbpoly"
+# Now that handling of layers has changed, we no longer expect to 
+# recover the same forces on atoms that were observed in the LSQ step
+# For this reason, these tests have been omitted. 
+#
+# Eventually, I'll add a test for a system where the cutoffs are
+# within 0.5 x the natural box length.
+
+#LSQ_TESTS[0]="chon-dftbpoly"
+#LSQ_TESTS[1]="h2o-2bcheby"
+#LSQ_TESTS[2]="h2o-3bcheby"
+#LSQ_TESTS[3]="h2o-splines"
+#LSQ_TESTS[4]="h2o-invr"
+#LSQ_TESTS[5]="h2o-dftbpoly"
 
 NP=0
 
@@ -84,11 +90,9 @@ do
 	cd $i
 
 	if [ $NP -eq 0 ] ; then
-		echo "HERE"	
 		$MPICOMMAND ../house_md < run_md.in > run_md.out
 			
 	else
-		echo "here"
 		$MPICOMMAND -np $NP ../house_md < run_md.in > run_md.out
 		
 	fi
@@ -127,6 +131,8 @@ do
 	
 	cd ..
 done
+
+exit 0
 
 ########################################
 # Iterate through the tests -- MD/LSQ CODE COMPATIBILITY

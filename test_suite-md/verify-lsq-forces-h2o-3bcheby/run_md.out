@@ -7,6 +7,7 @@ Reading the simulation control input file...
 	# TIMESTP #: 0.125 fs
 	# N_MDSTP #: 1000
 	# NLAYERS #: 1
+	# USENEIG #: true 
 	# PRMFILE #: params.txt
 	# CRDFILE #: input.xyzf
 	# VELINIT #: GEN ... generating velocites via box Muller
@@ -50,6 +51,7 @@ Running velocity sanity checks...
 	Mass density   = 1.5002 g/cm^3
    ...checks complete
 
+Building layers...
 
 Reading force field parameters...
 		...Compute electrostatics?      true
@@ -60,15 +62,6 @@ Reading force field parameters...
 	...Read FF controls...
 Attempting to read pairtype...
 	...Read FF interaction type...
-WARNING: Outer cutoff greater than half at least one box length
-	Pair type O O
- 8.6091 8.6091
-WARNING: Outer cutoff greater than half at least one box length
-	Pair type H H
- 8.6091 8.6091
-WARNING: Outer cutoff greater than half at least one box length
-	Pair type O H
- 8.6091 8.6091
 	...Read general FF params...
 	...Read FF triplet specifications...
 	...Reading all remaining force field parameters...
@@ -193,17 +186,20 @@ Force field summary:
 		OH -0.1279
 
 
+Initializing the neighbor list...
+NEIGHBOR LIST MAX CUTOFF IS: 6.0000
+USING PADDING: 0.3000
 BEGIN SIMULATION:
 
 Ewald parameters: 
 	Requested Ewald accuracy  =  1.000000e-07
-	Ewald alpha               =  5.853127e-01
-	R-Space Ewald cutoff      =  6.173215e+00
-	R-Space accuracy estimate =  5.220777e-08
-	K-Space accuracy estimate =  5.489244e-07
+	Ewald alpha               =  2.926563e-01
+	R-Space Ewald cutoff      =  1.234643e+01
+	R-Space accuracy estimate =  2.610389e-08
+	K-Space accuracy estimate =  2.195698e-06
 
 	Cutting off K-vectors with magnitude less than 6
 	Number of Ewald K-vectors = 894
-	K-space accuracy estimate = 0.00000006626103
+	K-space accuracy estimate = 0.00000026504413
 
-RMS force error =  9.017962e-06
+RMS force error =  2.072167e+01

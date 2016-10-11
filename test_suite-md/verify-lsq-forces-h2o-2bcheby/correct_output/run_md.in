@@ -15,7 +15,9 @@
 # N_MDSTP # ! Total number of MD steps
 	1000
 # NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
-	1
+	0
+# USENEIG # ! Use a neighbor list? HIGHLY reccommended when NLAYERS > 0
+	false
 # PRMFILE # ! Parameter file (i.e. params.txt)
 	params.txt
 # CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)

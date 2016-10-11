@@ -10,14 +10,6 @@
 	#define FPENALTY_POWER 3.0
 #endif
 
-#define FULL	// distance transformation such that pair dist falls on range -1 to 1 
-#define LEFT	// distance transformation such that pair dist falls on range -1 to 0
-#define RIGHT	// distance transformation such that pair dist falls on range  0 to 1 
-
-#ifndef XFORMTYPE
-	#define FULL
-#endif 
-
 #ifndef WARN
 	#define WARN TRUE
 #endif 
@@ -121,6 +113,7 @@ struct MD_JOB_CONTROL
 	int    FREQ_FORCE;			// How often to print the forces	
 	int    SELF_CONSIST_FREQ;	// How frequently to print POSCAR file
 	bool   WRAP_COORDS;			// Should coordinates be wrapped?
+
 };
 
 struct NOSE_HOOVER
@@ -319,7 +312,41 @@ static const ANSI_COLORS COUT_STYLE  =
 
 };
 
+ 
 
+
+
+
+
+class NEIGHBORS
+{
+	private:
+
+		bool   FIRST_CALL;					// Is this the first call? if so, need to build initial list
+		bool   SECOND_CALL;					// Is this the second call? If so, pick the padding distance.
+		double RCUT_PADDING;				// Neighborlist cutoff is r_max + rcut_padding
+		double DISPLACEMENT;
+
+		void DO_UPDATE(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+
+	public:
+
+		bool   USE;							// Do we even want to use a neighbor list?
+		double CURR_VEL;
+		double MAX_VEL;
+		double MAX_CUTOFF;					// The maximum of all force field outer cutoffs (r_max and s_max)
+		double MAX_CUTOFF_3B;
+		
+		vector<vector<int> > LIST;			// The actual (2B) neighbor list. Of size [atoms][neighbors]
+		vector<vector<int> > LIST_3B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
+
+		void UPDATE_LIST(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS);	// Will check if lists need updating, and will call DO_UPDATE do so if need be
+		void INITIALIZE(FRAME & SYSTEM);
+		void INITIALIZE(FRAME & SYSTEM, double & PAD);
+
+		NEIGHBORS();
+		~NEIGHBORS();
+};
 
 
 
@@ -349,7 +376,7 @@ void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_O
 // FUNCTION UPDATED -- OVERLOADING THE FUNCTION.. DIFFERENT INPUT REQUIRED DEPENDING ON WHETHER FUNCTION IS CALLED FROM MD
 //                     PROGRAM OR LSQ FITTING PROGRAM...
 void ZCalc_Ewald (FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP);	// LSQ
-void ZCalc_Ewald(FRAME & TRAJECTORY);	// MD
+void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);	// MD
 
 // FUNCTION UPDATED
 void optimal_ewald_params(double accuracy, double V, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc);
@@ -363,7 +390,9 @@ void ZCalc_Ewald_Deriv (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, ve
 //
 //////////////////////////////////////////
 
-void ZCalc(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP);
+void ZCalc(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
+
+double get_dist(const FRAME & SYSTEM, const MD_JOB_CONTROL & CONTROLS, XYZ & RAB, int a1, int a2);
 
 //////////////////////////////////////////
 //
