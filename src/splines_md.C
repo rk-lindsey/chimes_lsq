@@ -245,18 +245,25 @@ int main(int argc, char* argv[])
     	cout << "	...Read box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
 	}
 	
+	getline(COORDFILE,LINE);
+	
     for(int a=0; a<SYSTEM.ATOMS;a++)
 	{
-        COORDFILE >> SYSTEM.ATOMTYPE[a];
-	
+		getline(COORDFILE,LINE);
+
+		STREAM_PARSER.str(LINE);
+		
+        STREAM_PARSER >> SYSTEM.ATOMTYPE[a];
+
 		// Read the coordinates
-		COORDFILE >> SYSTEM.COORDS[a].X >> SYSTEM.COORDS[a].Y >> SYSTEM.COORDS[a].Z;
+
+		STREAM_PARSER >> SYSTEM.COORDS[a].X >> SYSTEM.COORDS[a].Y >> SYSTEM.COORDS[a].Z;
 		
 		// Wrap the coordinates
 		SYSTEM.COORDS[a].X -= floor(SYSTEM.COORDS[a].X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
 		SYSTEM.COORDS[a].Y -= floor(SYSTEM.COORDS[a].Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
 		SYSTEM.COORDS[a].Z -= floor(SYSTEM.COORDS[a].Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
-		
+
 		// Prepare velocities
 		SYSTEM.VELOCITY[a].X = 0;
 		SYSTEM.VELOCITY[a].Y = 0;
@@ -271,7 +278,7 @@ int main(int argc, char* argv[])
 		SYSTEM.ACCEL[a].X = 0;
 		SYSTEM.ACCEL[a].Y = 0;
 		SYSTEM.ACCEL[a].Z = 0;		
-
+		
         if ( CONTROLS.COMPARE_FORCE ) // Reading positions from *.xyzf for force testing
 		{	
 			if(EXTENSION == "xyzf")	// Ignore forces in .xyzf file
@@ -282,7 +289,7 @@ int main(int argc, char* argv[])
 					cout << "	...will read from specified force file instead." << endl;
 				}
 
-				COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;			
+				//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;			
 			}
 					
 			// Read forces from separate force file
@@ -301,7 +308,7 @@ int main(int argc, char* argv[])
  			// Velocities must be stored so that the code can be restarted 
  			// Maybe we should use a different file extension when velocities are stored. (LEF)			
 
-			COORDFILE >> SYSTEM.VELOCITY[a].X >> SYSTEM.VELOCITY[a].Y >> SYSTEM.VELOCITY[a].Z;
+			STREAM_PARSER >> SYSTEM.VELOCITY[a].X >> SYSTEM.VELOCITY[a].Y >> SYSTEM.VELOCITY[a].Z;
 		}
 		else
 		{
@@ -309,9 +316,13 @@ int main(int argc, char* argv[])
 			{
 				if(a==0 && RANK==0)
 					cout << "	...Ignoring last three fields of atom info lines in xyzf file... " << endl;
-				COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
+				//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
 			}
 		}
+		
+		
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
 	}
 	
     COORDFILE.close();
@@ -474,7 +485,88 @@ int main(int argc, char* argv[])
 
 	if(RANK==0)
 		cout << "   ...read complete" << endl << endl;
+	
 
+	
+	
+	
+	////////////////////////////////////////////////////////////
+	// Explicitly account for layers.. 
+	//
+	// In contrast to the old approach, we only add images in (+) direction
+	// So 0 layers returns the original cell (i.e. NATOMS atoms)
+	//    1 layer  returns a 8*NATOMS atoms
+	//    2 layers returns  27*NATOMS atoms, and so on.
+	//
+	// These atoms are explicitly added to the system, so its generally
+	// a good idea to use neighbor lists to cut down on cost
+	////////////////////////////////////////////////////////////	
+
+	if(CONTROLS.N_LAYERS>0 )
+	{
+		
+		if(RANK == 0)
+			cout << "Building " << CONTROLS.N_LAYERS << " layer(s)..." << endl;
+	
+		TEMP_IDX = SYSTEM.ATOMS;
+	
+		
+		// Create coordinates for the layer atoms. layer elements do not include 0, 0, 0, which is the main cell
+
+		
+		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+		{
+			for(int n1=0; n1<=CONTROLS.N_LAYERS; n1++)
+			{
+				for(int n2=0; n2<=CONTROLS.N_LAYERS; n2++)
+				{
+					for(int n3=0; n3<=CONTROLS.N_LAYERS; n3++)
+					{					
+						if ((n1 == 0) && (n2 == 0) && (n3 == 0) )
+							continue;
+						else
+						{											
+							TEMP_XYZ.X = SYSTEM.COORDS.at(a1).X + n1 * SYSTEM.BOXDIM.X;
+							TEMP_XYZ.Y = SYSTEM.COORDS.at(a1).Y + n2 * SYSTEM.BOXDIM.Y;
+							TEMP_XYZ.Z = SYSTEM.COORDS.at(a1).Z + n3 * SYSTEM.BOXDIM.Z;
+
+							SYSTEM.COORDS       .push_back(TEMP_XYZ);
+							SYSTEM.ATOMTYPE     .push_back(SYSTEM.ATOMTYPE    .at(a1));
+							SYSTEM.ATOMTYPE_IDX .push_back(SYSTEM.ATOMTYPE_IDX.at(a1));
+							SYSTEM.CHARGES      .push_back(SYSTEM.CHARGES     .at(a1));
+							SYSTEM.MASS         .push_back(SYSTEM.MASS        .at(a1));	
+							SYSTEM.VELOCITY     .push_back(SYSTEM.VELOCITY    .at(a1));
+							
+							TEMP_IDX++;
+						}
+					}
+				}
+			}
+		}
+		
+		SYSTEM.ATOMS = TEMP_IDX;
+
+		SYSTEM.BOXDIM.X *= (CONTROLS.N_LAYERS + 1);
+		SYSTEM.BOXDIM.Y *= (CONTROLS.N_LAYERS + 1);
+		SYSTEM.BOXDIM.Z *= (CONTROLS.N_LAYERS + 1);
+
+		SYSTEM.FORCES      .resize(SYSTEM.ATOMS);
+		SYSTEM.ACCEL       .resize(SYSTEM.ATOMS);
+		SYSTEM.VELOCITY_NEW.resize(SYSTEM.ATOMS);
+		
+		if(RANK == 0)
+		{
+			cout << "	New total atoms:    " << SYSTEM.ATOMS << endl;
+			cout << "	New box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl << endl;
+		}
+
+			
+	}
+	
+	
+	
+	
+	
 	////////////////////////////////////////////////////////////
 	// Initialize velocities, if requested. Use the box Muller
 	// method, setup up thermostat if requested
@@ -520,7 +612,7 @@ int main(int argc, char* argv[])
 		{
 			
 			sigma = sqrt(CONTROLS.TEMPERATURE * Kb / SYSTEM.MASS[a] );
-			
+
 			// Do for x...
 			
 			x1    = double(rand())/double(RAND_MAX);
@@ -589,13 +681,25 @@ int main(int argc, char* argv[])
 				SYSTEM.VELOCITY[a].Z = y2; 
 			else 
 				SYSTEM.VELOCITY[a].Z = y1;
-			 
+
 			counter++;				 
 		}		
 	}
 	
 	if(RANK==0)
 		cout << "   ...setup complete" << endl << endl;
+	
+	
+	
+	
+	
+	
+
+	
+		
+	
+	
+	
 
 	////////////////////////////////////////////////////////////
 	// Setup and test system velocity center of mass... For
@@ -688,63 +792,21 @@ int main(int argc, char* argv[])
 	}
 
 
-	////////////////////////////////////////////////////////////
-	// Explicitly account for layers.. 
-	//
-	// In contrast to the old approach, we only add images in (+) direction
-	// So 0 layers returns the original cell (i.e. NATOMS atoms)
-	//    1 layer  returns a 8*NATOMS atoms
-	//    2 layers returns  27*NATOMS atoms, and so on.
-	//
-	// These atoms are explicitly added to the system, so its generally
-	// a good idea to use neighbor lists to cut down on cost
-	////////////////////////////////////////////////////////////	
-	
-	if(CONTROLS.N_LAYERS>0 )
-	{
-		
-		if(RANK == 0)
-			cout << "Building layers..." << endl;
-	
-		TEMP_IDX = SYSTEM.ATOMS;
-	
-		// Create coordinates for the layer atoms. layer elements do not include 0, 0, 0, which is the main cell
 
-		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
-		{
-			for(int n1=0; n1<=CONTROLS.N_LAYERS; n1++)
-			{
-				for(int n2=0; n2<=CONTROLS.N_LAYERS; n2++)
-				{
-					for(int n3=0; n3<=CONTROLS.N_LAYERS; n3++)
-					{					
-						if ((n1 == 0) && (n2 == 0) && (n3 == 0) )
-							continue;
-						else
-						{											
-							TEMP_XYZ.X = SYSTEM.COORDS.at(a1).X + n1 * SYSTEM.BOXDIM.X;
-							TEMP_XYZ.Y = SYSTEM.COORDS.at(a1).Y + n2 * SYSTEM.BOXDIM.Y;
-							TEMP_XYZ.Z = SYSTEM.COORDS.at(a1).Z + n3 * SYSTEM.BOXDIM.Z;
 
-							SYSTEM.COORDS       .push_back(TEMP_XYZ);
-							SYSTEM.ATOMTYPE     .push_back(SYSTEM.ATOMTYPE    .at(a1));
-							SYSTEM.ATOMTYPE_IDX .push_back(SYSTEM.ATOMTYPE_IDX.at(a1));
-							SYSTEM.CHARGES      .push_back(SYSTEM.CHARGES     .at(a1));
-							SYSTEM.MASS         .push_back(SYSTEM.MASS        .at(a1));
-							SYSTEM.VELOCITY     .push_back(SYSTEM.VELOCITY    .at(a1));
-						}
-					}
-				}
-			}
-		}
-	
-		SYSTEM.ATOMS = TEMP_IDX;
-	
-		SYSTEM.BOXDIM.X *= (CONTROLS.N_LAYERS + 1);
-		SYSTEM.BOXDIM.Y *= (CONTROLS.N_LAYERS + 1);
-		SYSTEM.BOXDIM.Z *= (CONTROLS.N_LAYERS + 1);
-	
-	}
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
 
 	////////////////////////////////////////////////////////////
@@ -1648,10 +1710,13 @@ int main(int argc, char* argv[])
 	// Set up the neighbor list
 	////////////////////////////////////////////////////////////
 	 
-	cout << "Initializing the neighbor list..." << endl;
+	
 	
 	if(NEIGHBOR_LIST.USE)
 	{
+		if(RANK == 0)
+			cout << "Initializing the neighbor list..." << endl;
+		
 		NEIGHBOR_LIST.INITIALIZE(SYSTEM);
 		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
 	}
@@ -2658,9 +2723,9 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBOR
 					else
 						cout << "WARNING: Use of neighbor lists HIGHLY reccommended when NLAYERS > 0!" << endl;
 					
-					#if WARN == FALSE
-						exit_run(0);
-					#endif
+					//#if WARN == TRUE
+					//	exit_run(0);
+					//#endif
 				}
 			}
 			

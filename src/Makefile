@@ -9,7 +9,7 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 # -D XFORMTYPE=LEFT # -D FORCECHEC
 CXX=mpiicc  -g -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicc   -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicxx  -g  -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-#CXX=g++ -g			# Serial, for debugging
+#CXX=icc -g			# Serial, for debugging
 #CXX=g++ -O3			# Serial, let compiler optimize to a very high level (see also -O2)
 #
 # Below: Other debugging/optimiazation options

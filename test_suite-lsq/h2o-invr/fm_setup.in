@@ -11,7 +11,6 @@
 	1
 # FITCOUL # ! Fit charges? If false, use user-specified fixed charges, and subtract them from the forces -- NOTE: FUNCTIONALITY CURRENTLY ONLY SUPPORTED FOR TRUE, AND FALSE WITH CHARGES = 0
 	false
-		
 # FITPOVR # ! Use ReaxFF linear overcoordination parameters? If this is false and parameters are provided below, those parameters will be subtracted from forces
 	true
 # PAIRTYP # ! Short-range interaction type. See manual for accepted types. Case sensitive

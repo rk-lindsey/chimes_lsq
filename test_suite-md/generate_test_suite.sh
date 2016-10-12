@@ -1,5 +1,7 @@
 
 
+
+
 ########################################
 # Define tests within the test suite
 ########################################
@@ -38,6 +40,15 @@ TAG="verify-lsq-forces-"
 echo " "
 echo "SETTING UP FOR MD CODE..."
 echo " "
+
+
+cd ../src
+rm -rf *o *dSYM
+#make house_lsq; rm -f ../test_suite-lsq/house_lsq; cp house_lsq ../test_suite-lsq/
+make house_md;  rm -f ../test_suite-lsq/house_md;  cp house_md  ../test_suite-md/
+cd ../test_suite-md
+
+
 
 ALL_PASS=true
 
