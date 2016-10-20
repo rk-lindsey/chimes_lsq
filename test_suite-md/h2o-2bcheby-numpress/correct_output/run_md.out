@@ -26,6 +26,7 @@ Setting up the data objects...
 Reading initial coordinates and forces...
 	...Read the following coordinate file extension: xyz
 	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+	...Reading velocities from last three fields of atom info lines in xyzf file... 
    ...read complete
 
 Reading atom info from parameter file...
@@ -43,7 +44,7 @@ Setting up thermostats/velocities...
 
 Running velocity sanity checks...
 	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
-	Final   velocity center of mass: (   -0.0000,    -0.0000,    -0.0000) 
+	Final   velocity center of mass: (   -0.0000,    -0.0000,     0.0000) 
 	Total Mass     = 4611.8400 au
 	Volume         = 5104.6729 Ang^3
 	Number density = 0.2498 mol atm/cm^3
@@ -133,9 +134,9 @@ Force field summary:
 		9 8.7526e-01
 
 	Fitted charges read from parameter file:
-		OO 4.1244e-01
-		HH 1.0311e-01
-		OH -2.0622e-01
+		OO 4.1244e-01 (1.3696e+02)
+		HH 1.0311e-01 (3.4239e+01)
+		OH -2.0622e-01 (-6.8478e+01)
 
 	ReaxFF over-coordination parameters: 
 		pair...pover...r0...p1...p2...lambda6
@@ -352,4 +353,3 @@ RANK: 0 UPDATING ON STEP: 996, WITH PADDING: 0.377
 END SIMULATION
 	Average temperature over run = 2008.3181 K
 	Average pressure    over run = 12.0116 GPa
-Stopping from the terminal not allowed

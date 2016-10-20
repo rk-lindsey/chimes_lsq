@@ -26,11 +26,12 @@ Setting up the data objects...
    ...setup complete
 
 Reading initial coordinates and forces...
-Opening force.txt to read forces for comparison
+	Opening force.txt to read forces for comparison
 	...Read the following coordinate file extension: xyzf
 	...Read box dimensions: 8.60913 8.60913 8.60913
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead.
+	...Ignoring last three fields of atom info lines in xyzf file... 
    ...read complete
 
 Reading atom info from parameter file...
@@ -39,19 +40,22 @@ Reading atom info from parameter file...
 		1     H , q (e):  0.000, mass (amu):   1.0079
    ...read complete
 
+Building 1 layer(s)...
+	New total atoms:    768
+	New box dimensions: 17.2183 17.2183 17.2183
+
 Setting up thermostats/velocities...
    ...setup complete
 
 Running velocity sanity checks...
-	Initial velocity center of mass: (   -0.0987,     0.0199,     0.1508) 
+	Initial velocity center of mass: (   -0.0386,    -0.0182,     0.0086) 
 	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
-	Total Mass     = 576.4864 au
-	Volume         = 638.0839 Ang^3
+	Total Mass     = 4611.8912 au
+	Volume         = 5104.6713 Ang^3
 	Number density = 0.2498 mol atm/cm^3
 	Mass density   = 1.5002 g/cm^3
    ...checks complete
 
-Building layers...
 
 Reading force field parameters...
 		...Compute electrostatics?      false
@@ -125,4 +129,4 @@ Initializing the neighbor list...
 NEIGHBOR LIST MAX CUTOFF IS: 3.0000
 USING PADDING: 0.3000
 BEGIN SIMULATION:
-RMS force error =  1.092133e-01
+Error: bad pairtype in ZCalc: DFTBPOLY

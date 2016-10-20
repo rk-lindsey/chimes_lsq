@@ -6,6 +6,7 @@ import numpy as np
 import math
 import sys
 
+
 # Useage is: 
 #
 # python cheby_fitting.py  <VAR1 > <VAR2 > <VAR3 > <VAR4 > <VAR5 > <VAR6 > <VAR7 > <VAR8 > <VAR9 > <VAR10> <VAR11> <VAR12>
@@ -30,7 +31,7 @@ import sys
 
 ##################################################################################################
 ##################################################################################################
-###############################		BEGIN SCRIPT	##########################################
+#################################		BEGIN SCRIPT	##########################################
 ##################################################################################################
 ##################################################################################################
 
@@ -60,7 +61,9 @@ def FIT_POL_EXTRAP(x, y, RMIN, THRESH):
             x_fit_range.append(x[i])
             y_fit_range.append(y[i])
             
-    coeff = poly.polyfit(x_fit_range,y_fit_range,[0,3],False) 
+    coeff = poly.polyfit(x_fit_range,y_fit_range,[0,3],len(x)*2e-16,True)
+    
+    coeff = coeff[0] 
     
     print "Found the following cubic extrapolation coefficients:"
     print coeff
@@ -334,11 +337,18 @@ def FIT_PL2_EXTRAP(x, y, RMIN, THRESH, FIRST_MIN_X, INFLEC_I):
     else:
         
         # Search to see whether our inflection point occurs befor our first min
+        
+#        print "FIRST MIN: " + `FIRST_MIN_X`
+#        print "INFLECTION POINTS:"
+        
+        for i in xrange(len(INFLEC_I)):
+            print  `i` + " " + `INFLEC_I[i]`
+        
     
-         for i in xrange(len(INFLEC_I)):
-             if (INFLEC_I[i] < FIRST_MIN_X):
-                 FIT_UP_TO = INFLEC_I[i]
-                 break
+        for i in xrange(len(INFLEC_I)):
+            if (INFLEC_I[i] < FIRST_MIN_X):
+                FIT_UP_TO = INFLEC_I[i]
+                break
 
     POINTS_TO_INCLUDE = FIT_UP_TO - START_EXTRAP
 
@@ -356,16 +366,61 @@ def FIT_PL2_EXTRAP(x, y, RMIN, THRESH, FIRST_MIN_X, INFLEC_I):
     print  "y_extr: " + `y_extr`
     print ""
 
-    print "Extrapolating to: "    + `x_extr[len(x_extr)-1]`    
-    print "Initial guess   : " + `x[POINTS_TO_INCLUDE]` + " " + `y[POINTS_TO_INCLUDE]`
+    #print "Fitting out to: "    + `x_extr[len(x_extr)-1]`    
     
-    coeff = curve_fit(PL2_FUNC, x_extr, y_extr, [y_extr[len(y_extr)-1],-1,x_extr[len(x_extr)-1]])
+    PASSED = False
     
+    guess_0 = y_extr[len(y_extr)-1]
+    guess_1 = x_extr[len(x_extr)-1]
+    
+    print "Initial guess   : " + `guess_0` + " " + `guess_1`
+    
+    iter  = 0
+    coeff = []
+    perr  = []
+    
+   # coeff = curve_fit(PL2_FUNC, x_extr, y_extr, [guess_0,-1, guess_1])
+    
+    
+    while not PASSED:
+        
+        print "On iter: " + `iter` + " with guess_0 = " + `guess_0`
+        
+        try:
+            coeff = curve_fit(PL2_FUNC, x_extr, y_extr, [guess_0,-1, guess_1])
+            perr = np.sqrt(np.diag(coeff[1]))
+               
+        except:
+            coeff = []
+            
+        if len(coeff)>0:
+            PASSED = True
+        else:
+            guess_0 *= 2
+            guess_1 -= 0.5
+            iter += 1
+
+        if iter > 50:
+            print "Giving up."
+            sys.exit()
+            
+        for i in xrange(len(perr)):
+            if abs(perr[i]) > 100000:
+                
+                print "Poor fit attained... PERR: " + `perr`
+   
+                try: 
+                    print "...Attempting another functional form... Ignore the immediately following parameters..."
+                    coeff = FIT_POL_EXTRAP(x_extr, y_extr, RMIN, THRESH)
+                    return "USE_POLY", START_EXTRAP
+                    #return "USE_POLY", coeff, START_EXTRAP
+                except:
+                    "Second attempt failed.. giving up."
+                    sys.exit()  
     
     coeff = coeff[0]
-    
-    print "Found the following cubic extrapolation coefficients:"
-    print coeff
+
+    print "Found the following cubic extrapolation coefficients: " + `coeff`
 
     return coeff, START_EXTRAP
    
@@ -482,7 +537,7 @@ j = 0
 
 SMOOTHING = 0
 
-while (SMOOTHING <= 0.04):
+while (SMOOTHING < 0.02):
     SMOOTHING += SPACNG
 
 for i in xrange(len(IFSTREAM)):
@@ -491,7 +546,7 @@ for i in xrange(len(IFSTREAM)):
         x.append(float(IFSTREAM[i].split()[0]))
         y.append(float(IFSTREAM[i].split()[1]))
 
-        if i>0 and i%(SMOOTHING/SPACNG)==0:  # Build in some padding/thresholding for second deriv. calcs*****************************
+        if i>0 and i%(SMOOTHING/SPACNG)==0:  # Build in some padding/thresholding for second deriv. calcs
 
             if y[i] > y_prev:
                 USE_POLY2 = True
@@ -559,30 +614,22 @@ else:
     USE_POLY2 = False
 
 if USE_POLY2: # Then we'll use a+b(x-c)^3 for extrapolation.. do the fitting, etc in this function
+
     PL2_COEFF, START_EXTRAP = FIT_PL2_EXTRAP(x, y, RMIN, THRESH, FIRST_MIN_X, INFLEC_I) 
+    
+    if type(PL2_COEFF) == type("USE_POLY"):
+        if PL2_COEFF == "USE_POLY":
+            USE_POLY2 = False
+            CUBE_COEFF = FIT_POL_EXTRAP(x, y, RMIN, THRESH)
+    
+    
 else:
     CUBE_COEFF = FIT_POL_EXTRAP(x, y, RMIN, THRESH)
-    
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
+  
 	
 BOLTZK  = 1.9872036/1000.0 # In Kcal units
 if CASE == 2:
     KT_VALU = BOLTZK*TEMPER
-
-
-
-
 
 # CASE 1: ONLY REFIT WITHIN ORIGINAL RMIN
 
@@ -694,14 +741,13 @@ else:
         
         for i in xrange(START_EXTRAP):
             y[i] = PL2_FUNC(x[i], PL2_COEFF[0], PL2_COEFF[1], PL2_COEFF[2])
-	
+
         for i in reversed(xrange(int((RMIN-RMIN_NEW)/SPACNG)+1)):
             if SPACNG*i+RMIN_NEW > RMIN:
                 break  
             x.insert(0,(SPACNG*i+RMIN_NEW))
             y.insert(0,PL2_FUNC((SPACNG*i+RMIN_NEW), PL2_COEFF[0], PL2_COEFF[1], PL2_COEFF[2]))
 
-            
     else: # Don't need to replace anything, so don't care about that first "for i in xrange(START_EXTRAP):" part
         for i in reversed(xrange(int((RMIN-RMIN_NEW)/SPACNG)+1)):
             
@@ -738,27 +784,39 @@ else:
 R_SQ_WORST = 25.0
 ORDER     -= 1 # Only because of while loop
 
-while R_SQ_WORST > 20.0:
+while R_SQ_WORST > 5: # 20.0:
 
-	ORDER += 1
+    ORDER += 1
 	
-	full_params = cheby.chebfit(xform_x,y,range(1,ORDER+1),len(x)*2e-16, True)
-	params = full_params[0]
+    full_params = cheby.chebfit(xform_x,y,range(1,ORDER+1),len(x)*2e-16, True)
+    params = full_params[0]
 
-	fitted = cheby.chebval(xform_x,params)
+    fitted = cheby.chebval(xform_x,params)
 	
-	if len(full_params[1][0]) > 0:
+    if len(full_params[1][0]) > 0:
 	
-		R_SQ_WORST = full_params[1][0][0] # sum of squared residuals of the least squares fit rank
-	else:
-		R_SQ_WORST = -1
+        R_SQ_WORST = full_params[1][0][0] # sum of squared residuals of the least squares fit rank
+    else:
+        R_SQ_WORST = -1
+
+    print "Order/R^2: " + `ORDER` + " " + `R_SQ_WORST`
+    LOGSTREAM.write("Order/R^2: " + `ORDER` + " " + `R_SQ_WORST`+"\n")
+    
+    # If we're at a low enough order, we can afford to add
+    # a few more orders to get a better fit
+    
+    
+
+    
+
 	
-	
-	print "Order/R^2: " + `ORDER` + " " + `R_SQ_WORST`
-	LOGSTREAM.write("Order/R^2: " + `ORDER` + " " + `R_SQ_WORST`+"\n")
-	
-	if ENFORCE_ORDER == "true":
-		break
+    if ENFORCE_ORDER == "true":
+        break
+    else:
+        if ORDER < 15:
+            if (R_SQ_WORST <= 20.0) and (abs(R_SQ_WORST)>1):
+                R_SQ_WORST = 50
+                print "Forcing higher order for a better fit..."
 
 # Print out the results
 

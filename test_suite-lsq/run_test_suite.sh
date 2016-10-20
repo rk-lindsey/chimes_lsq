@@ -13,7 +13,7 @@
 
 if [ $# -eq 0 ] 
 then
-  JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-3bcheby2'
+JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby' #  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
 else
   JOBS=$*
 fi

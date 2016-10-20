@@ -97,7 +97,7 @@ struct MD_JOB_CONTROL
 								// ie if | T_set - T_curr | >  NVT_CONV_CUT * T_set, end with error message.. defaults to 0.1 (10%)
 
 	// "Simulation options"
-	
+	bool   IS_LSQ;				// Is this for an lsq run or actual md?
 	bool   INIT_VEL;				// Replaces if_init_vel... If true, initialize velocities.
 	bool   USE_HOOVER_THRMOSTAT;	// Replaces if_hoover... Use a Nose-Hoover thermostat?	
 	double FREQ_UPDATE_THERMOSTAT;	// Replaces scale_freq and thoover_fs... it's usage depends on whether USE_HOOVER_THERMOSTAT is true or false.. will be cast as int where required
@@ -156,6 +156,8 @@ struct FRAME
 	XYZ		PRESSURE_TENSORS;	// These are the RUNNING pressure tensors, no the set pressure tensors!
 	double	TOT_POT_ENER;		// Replaces VTOT
 	
+	vector<int>		PARENT;
+	vector<XYZ_INT>LAYER_IDX;
 	vector<string> 	ATOMTYPE;
 	vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen file printing
 	vector<XYZ>		COORDS;
@@ -252,6 +254,8 @@ struct PES_PLOTS
 	string TYPE_3;
 	bool INCLUDE_2B;
 	bool INCLUDE_FCUT;
+	bool INCLUDE_CHARGES;
+	bool DO_4D;	// Do we want to include the 4D 3-body scan data??
 	
 	// Variables used for scans of 3b potential
 	
@@ -275,7 +279,7 @@ struct PES_PLOTS
 	vector<XYZ_INT>	IJ_IK_JK_TYPE;
 		
 	
-	PES_PLOTS():N_PLOTS(0), N_SCAN(0), INCLUDE_2B(0){}
+	PES_PLOTS():N_PLOTS(0), N_SCAN(0), INCLUDE_2B(0), DO_4D(1){}
 		
 };
 
@@ -368,7 +372,7 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 
 
 // FUNCTION UPDATED
-void ZCalc_Deriv (vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> PAIR_TRIPLETS, FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP);
+void ZCalc_Deriv (MD_JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> PAIR_TRIPLETS, FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP);
 
 // FUNCTION UPDATED
 void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP);
@@ -400,9 +404,12 @@ double get_dist(const FRAME & SYSTEM, const MD_JOB_CONTROL & CONTROLS, XYZ & RAB
 //
 //////////////////////////////////////////
 
-void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCLUDE_FCUT, string FILE_TAG);
+void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_CHARGES, string FILE_TAG);
 void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk);
 void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
+
+
+double get_dist(const FRAME & SYSTEM, const MD_JOB_CONTROL & CONTROLS, XYZ & RAB, int a1, int a2);
 
 void enable_fp_exceptions();
 void exit_run(int val);

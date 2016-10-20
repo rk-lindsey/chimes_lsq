@@ -9,6 +9,7 @@ Reading input file...
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 10
 	             Will use 3-body order: 2
+	             Will transform Chebyshev pair distances to range -1 to 1
 	# CHBTYPE #: MORSE
 	# NATMTYP #: 2
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #

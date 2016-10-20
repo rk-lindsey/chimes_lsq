@@ -128,6 +128,7 @@ int main(int argc, char* argv[])
 	
 	XYZ TEMP_XYZ;
 	int TEMP_IDX;
+	XYZ_INT TEMP_LAYER;
 	
 	ofstream GENFILE;			// Holds dftbgen info output.. whatever that is
 	ifstream CMPR_FORCEFILE;	// Holds the forces that were read in for comparison purposes
@@ -226,7 +227,7 @@ int main(int argc, char* argv[])
     if ( CONTROLS.COMPARE_FORCE ) 
     {
 		if (RANK==0)
-			cout << "Opening " << CONTROLS.COMPARE_FILE.data() << " to read forces for comparison\n";
+			cout << "	Opening " << CONTROLS.COMPARE_FILE.data() << " to read forces for comparison\n";
 		CMPR_FORCEFILE.open(CONTROLS.COMPARE_FILE.data());
 
 		if(!CMPR_FORCEFILE.is_open())
@@ -295,8 +296,9 @@ int main(int argc, char* argv[])
 			// Read forces from separate force file
 			CMPR_FORCEFILE >> SYSTEM.FORCES[a].X >> SYSTEM.FORCES[a].Y >> SYSTEM.FORCES[a].Z;
 		}
-        else if(!CONTROLS.INIT_VEL) // Reading positions from *.xyz
-		{
+		
+        if(!CONTROLS.INIT_VEL) // Reading positions from *.xyz
+		{			
 			if(EXTENSION == ".xyz")
 			{
 				cout << "ERROR: Input file requests velocities to be read in. " << endl;
@@ -306,7 +308,10 @@ int main(int argc, char* argv[])
 			
  			// Read in velocities instead of forces...
  			// Velocities must be stored so that the code can be restarted 
- 			// Maybe we should use a different file extension when velocities are stored. (LEF)			
+ 			// Maybe we should use a different file extension when velocities are stored. (LEF)		
+			
+			if(a==0 && RANK==0)
+				cout << "	...Reading velocities from last three fields of atom info lines in xyzf file... " << endl;	
 
 			STREAM_PARSER >> SYSTEM.VELOCITY[a].X >> SYSTEM.VELOCITY[a].Y >> SYSTEM.VELOCITY[a].Z;
 		}
@@ -485,11 +490,7 @@ int main(int argc, char* argv[])
 
 	if(RANK==0)
 		cout << "   ...read complete" << endl << endl;
-	
 
-	
-	
-	
 	////////////////////////////////////////////////////////////
 	// Explicitly account for layers.. 
 	//
@@ -503,39 +504,50 @@ int main(int argc, char* argv[])
 	////////////////////////////////////////////////////////////	
 
 	if(CONTROLS.N_LAYERS>0 )
-	{
-		
+	{	
 		if(RANK == 0)
 			cout << "Building " << CONTROLS.N_LAYERS << " layer(s)..." << endl;
 	
 		TEMP_IDX = SYSTEM.ATOMS;
-	
 		
+		SYSTEM.PARENT   .resize(SYSTEM.ATOMS);
+		SYSTEM.LAYER_IDX.resize(SYSTEM.ATOMS);
+			
 		// Create coordinates for the layer atoms. layer elements do not include 0, 0, 0, which is the main cell
 
-		
 		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
-		{
+		{			
 			for(int n1=0; n1<=CONTROLS.N_LAYERS; n1++)
 			{
 				for(int n2=0; n2<=CONTROLS.N_LAYERS; n2++)
 				{
 					for(int n3=0; n3<=CONTROLS.N_LAYERS; n3++)
-					{					
+					{	
 						if ((n1 == 0) && (n2 == 0) && (n3 == 0) )
-							continue;
+						{
+							SYSTEM.PARENT[a1] = -1;
+							SYSTEM.LAYER_IDX[a1].X = n1;
+							SYSTEM.LAYER_IDX[a1].Y = n2;
+							SYSTEM.LAYER_IDX[a1].Z = n3;
+						}
 						else
 						{											
 							TEMP_XYZ.X = SYSTEM.COORDS.at(a1).X + n1 * SYSTEM.BOXDIM.X;
 							TEMP_XYZ.Y = SYSTEM.COORDS.at(a1).Y + n2 * SYSTEM.BOXDIM.Y;
 							TEMP_XYZ.Z = SYSTEM.COORDS.at(a1).Z + n3 * SYSTEM.BOXDIM.Z;
+							
+							TEMP_LAYER.X = n1;
+							TEMP_LAYER.Y = n2;
+							TEMP_LAYER.Z = n3;
 
 							SYSTEM.COORDS       .push_back(TEMP_XYZ);
+							SYSTEM.LAYER_IDX    .push_back(TEMP_LAYER);
 							SYSTEM.ATOMTYPE     .push_back(SYSTEM.ATOMTYPE    .at(a1));
 							SYSTEM.ATOMTYPE_IDX .push_back(SYSTEM.ATOMTYPE_IDX.at(a1));
 							SYSTEM.CHARGES      .push_back(SYSTEM.CHARGES     .at(a1));
 							SYSTEM.MASS         .push_back(SYSTEM.MASS        .at(a1));	
 							SYSTEM.VELOCITY     .push_back(SYSTEM.VELOCITY    .at(a1));
+							SYSTEM.PARENT       .push_back(a1);
 							
 							TEMP_IDX++;
 						}
@@ -554,18 +566,31 @@ int main(int argc, char* argv[])
 		SYSTEM.ACCEL       .resize(SYSTEM.ATOMS);
 		SYSTEM.VELOCITY_NEW.resize(SYSTEM.ATOMS);
 		
+		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+		{
+			SYSTEM.ACCEL[a1].X = 0;
+			SYSTEM.ACCEL[a1].Y = 0;
+			SYSTEM.ACCEL[a1].Z = 0;
+		}
+		
+		if(!CONTROLS.COMPARE_FORCE)
+		{
+			for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+			{
+			
+				SYSTEM.FORCES[a1].X = 0;
+				SYSTEM.FORCES[a1].Y = 0;
+				SYSTEM.FORCES[a1].Z = 0;
+			}
+		}
+
+		
 		if(RANK == 0)
 		{
 			cout << "	New total atoms:    " << SYSTEM.ATOMS << endl;
 			cout << "	New box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl << endl;
-		}
-
-			
+		}	
 	}
-	
-	
-	
-	
 	
 	////////////////////////////////////////////////////////////
 	// Initialize velocities, if requested. Use the box Muller
@@ -690,17 +715,6 @@ int main(int argc, char* argv[])
 		cout << "   ...setup complete" << endl << endl;
 	
 	
-	
-	
-	
-	
-
-	
-		
-	
-	
-	
-
 	////////////////////////////////////////////////////////////
 	// Setup and test system velocity center of mass... For
 	// consevation of momentum, this number should zero (or
@@ -790,24 +804,6 @@ int main(int argc, char* argv[])
 	
 		cout << "   ...checks complete" << endl << endl;
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
 
 	////////////////////////////////////////////////////////////
 	// Begin setup of force field data objects...
@@ -1292,9 +1288,7 @@ int main(int argc, char* argv[])
 				
 				// If this is a spline type, we will over-write parameter coefficients with 
 				// a value less than 1.
-				
 
-				
 				int 	STOP_FILL_IDX = -1;
 				double 	slope          = -10.0;
 				
@@ -1400,17 +1394,22 @@ int main(int argc, char* argv[])
 					}
 				}
 			
-			    for(int a=0; a<SYSTEM.ATOMS;a++)
+			
+				if(!CONTROLS.PLOT_PES)
 				{
-					for(int i=0; i<NATMTYP; i++)
+				    for(int a=0; a<SYSTEM.ATOMS;a++)
 					{
-						if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
+						for(int i=0; i<NATMTYP; i++)
 						{
-							SYSTEM.CHARGES[a] = TMP_CHARGES[i];
-							break;
-						}			
+							if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
+							{
+								SYSTEM.CHARGES[a] = TMP_CHARGES[i];
+								break;
+							}			
+						}
 					}
 				}
+
 			
 				if(RANK==0)
 				{
@@ -1681,7 +1680,7 @@ int main(int argc, char* argv[])
 			cout << "	Fitted charges read from parameter file:" << endl;
 		
 			for(int i=0; i<FF_2BODY.size(); i++)
-				cout << "		" << FF_2BODY[i].PRPR_NM << " " << FF_2BODY[i].PAIR_CHRG << endl;;
+				cout << "		" << FF_2BODY[i].PRPR_NM << " " << FF_2BODY[i].PAIR_CHRG << " (" << FF_2BODY[i].PAIR_CHRG*ke << ")" << endl;
 			cout << endl;
 		}	
 	
@@ -1813,7 +1812,9 @@ int main(int argc, char* argv[])
 					cout << "	Will work with pair types: " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR1 << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR2 << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR3 << endl;
 					cout << "	and atom types:            " << ATM_TYP_1 << " " << ATM_TYP_2 << " " << ATM_TYP_3 << endl;
 				
-					Print_3B_Cheby(CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk);
+				
+					if(FF_PLOTS.DO_4D)
+						Print_3B_Cheby(CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk);
 
 					cout << "	Now printing for n scans: " << FF_PLOTS.N_SCAN << endl;
 				
@@ -1869,7 +1870,7 @@ int main(int argc, char* argv[])
 
 								// Compute/save/read the corresponding 2b interactions -- IJ
 						
-								Print_Cheby(FF_2BODY, FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].X, PAIR_MAP_REVERSE[FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].X], FF_PLOTS.INCLUDE_FCUT, "for_3b");						
+								Print_Cheby(FF_2BODY, FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].X, PAIR_MAP_REVERSE[FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].X], FF_PLOTS.INCLUDE_FCUT, FF_PLOTS.INCLUDE_CHARGES, "for_3b");						
 								cout << "		Reading in 2B scans from file (1): "	<< SCAN_FILE_2B << endl;					
 						
 								SCAN_INFILE_2B.open(SCAN_FILE_2B.data());
@@ -1893,7 +1894,7 @@ int main(int argc, char* argv[])
 							
 								// Compute/save/read the corresponding 2b interactions -- IK
 							
-								Print_Cheby(FF_2BODY,  FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Y, PAIR_MAP_REVERSE[FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Y], FF_PLOTS.INCLUDE_FCUT, "for_3b");
+								Print_Cheby(FF_2BODY,  FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Y, PAIR_MAP_REVERSE[FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Y], FF_PLOTS.INCLUDE_FCUT, FF_PLOTS.INCLUDE_CHARGES, "for_3b");
 							
 								cout << "		Reading in 2B scans from file (2): "	<< SCAN_FILE_2B << endl;					
 						
@@ -1918,7 +1919,7 @@ int main(int argc, char* argv[])
 							
 								// Compute/save/read the corresponding 2b interactions -- JK
 
-								Print_Cheby(FF_2BODY,  FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Z, PAIR_MAP_REVERSE[FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Z], FF_PLOTS.INCLUDE_FCUT, "for_3b");
+								Print_Cheby(FF_2BODY,  FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Z, PAIR_MAP_REVERSE[FF_PLOTS.IJ_IK_JK_TYPE[scan_2b_idx].Z], FF_PLOTS.INCLUDE_FCUT, FF_PLOTS.INCLUDE_CHARGES, "for_3b");
 							
 								cout << "		Reading in 2B scans from file (3): "	<< SCAN_FILE_2B << endl;					
 						
@@ -2014,9 +2015,9 @@ int main(int argc, char* argv[])
 				{
 
 					cout << "	Will work with pair types: " << PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]] << endl;
-					cout << "	and atom types:            " << FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM1TYP << endl;
+					cout << "	and atom types:            " << FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << endl;
 					
-					Print_Cheby(FF_2BODY, FF_PLOTS.TYPE_INDEX[i], PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]], FF_PLOTS.INCLUDE_FCUT, "");
+					Print_Cheby(FF_2BODY, FF_PLOTS.TYPE_INDEX[i], PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]], FF_PLOTS.INCLUDE_FCUT, FF_PLOTS.INCLUDE_CHARGES, "");
 				}
 				else
 				{
@@ -2239,19 +2240,25 @@ int main(int argc, char* argv[])
 
 		if ( CONTROLS.COMPARE_FORCE && RANK == 0 ) 
 		{
-			// Check against read-in forces for code verification... Note, ferr is initialized to zero.
 			
-			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+			int END = SYSTEM.ATOMS;
+			
+			if(CONTROLS.N_LAYERS>0)
+				END = SYSTEM.ATOMS/pow(CONTROLS.N_LAYERS+1,3.0);
+		
+
+			// Check against read-in forces for code verification... Note, ferr is initialized to zero.
+		
+			for(int a1=0;a1<END;a1++)
 			{
-					ferr += (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X) * (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X);
-					ferr += (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y) * (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y);
-					ferr += (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z) * (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z);
+				ferr += (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X) * (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X);
+				ferr += (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y) * (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y);
+				ferr += (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z) * (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z);
 			}
 			
-			ferr /= 3.0 * SYSTEM.ATOMS;
-			ferr = sqrt(ferr);
-			
-			printf("RMS force error = %13.6e\n", ferr);
+			ferr = sqrt(ferr/3.0/END);
+			cout << "RMS force error = " << fixed << setprecision(6) << ferr << endl;
+			//printf("RMS force error = %13.6e\n", ferr);
 			return 0;
 		}
 		else if (RANK == 0)	// Print main simulation header 
@@ -2695,11 +2702,15 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBOR
 	
 	// Set some defaults
 	
+	CONTROLS.IS_LSQ       = false;
 	CONTROLS.SELF_CONSIST = false;
 	CONTROLS.PLOT_PES     = false;
 	CONTROLS.WRAP_COORDS  = true;
 	CONTROLS.PRINT_VELOC  = false;
 	CONTROLS.NVT_CONV_CUT = 0.10;
+	
+	FF_PLOTS.INCLUDE_FCUT    = true;
+	FF_PLOTS.INCLUDE_CHARGES = true;
 	
 	// Begin reading
 	
@@ -2757,27 +2768,73 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBOR
 				
 				LINE_PARSER >> CONTROLS.PARAM_FILE;		
 				
-				if(LINE_PARSER >> TEMP_STR)
+				while(LINE_PARSER >> TEMP_STR)
 				{
 					if(TEMP_STR=="Exclude"  || TEMP_STR=="exclude"  || TEMP_STR=="EXCLUDE")
 					{
-						FF_PLOTS.INCLUDE_FCUT = false;
-						if (RANK==0)
+						if(LINE_PARSER >> TEMP_STR)
 						{
-							if (isatty(fileno(stdout)))
-								cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "		Excluding cubic scaling (fcut)" << COUT_STYLE.ENDSTYLE << endl;	
-							else
-								cout << "		Excluding cubic scaling (fcut)" << endl;
+							if(TEMP_STR=="Fcut"  || TEMP_STR=="fcut"  || TEMP_STR=="FCUT")
+							{
+								FF_PLOTS.INCLUDE_FCUT = false;
+								if (RANK==0)
+								{
+									if (isatty(fileno(stdout)))
+										cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "		Excluding cubic scaling (fcut)" << COUT_STYLE.ENDSTYLE << endl;	
+									else
+										cout << "		Excluding cubic scaling (fcut)" << endl;
+								}
+							}
+							else if (TEMP_STR=="Charges"  || TEMP_STR=="charges"  || TEMP_STR=="CHARGES")
+							{
+								FF_PLOTS.INCLUDE_CHARGES = false;
+								if (RANK==0)
+								{
+									if (isatty(fileno(stdout)))
+										cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "		Excluding charges" << COUT_STYLE.ENDSTYLE << endl;	
+									else
+										cout << "		Excluding charges" << endl;
+								}
+							}
 						}
 					}
-					else
+					
+					if(TEMP_STR=="No"  || TEMP_STR=="no"  || TEMP_STR=="NO")
 					{
-							FF_PLOTS.INCLUDE_FCUT = true;
+						if(LINE_PARSER >> TEMP_STR)
+						{
+							if(TEMP_STR=="4D"  || TEMP_STR=="4d")
+							{
+								FF_PLOTS.DO_4D = false;
+								if (RANK==0)
+								{
+									if (isatty(fileno(stdout)))
+										cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "		Will not print the 4D 3-body data" << COUT_STYLE.ENDSTYLE << endl;	
+									else
+										cout << "		Will not print the 4D 3-body data" << endl;
+								}
+							}
+						}
 					}
 				}
-
-						
-
+				if(FF_PLOTS.INCLUDE_FCUT)
+				{
+					if (isatty(fileno(stdout)))
+						cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "		Including cubic scaling (fcut)" << COUT_STYLE.ENDSTYLE << endl;	
+					else
+						cout << "		Including cubic scaling (fcut)" << endl;						
+					
+						FF_PLOTS.INCLUDE_FCUT = true;
+				}
+				if(FF_PLOTS.INCLUDE_CHARGES)
+				{
+					if (isatty(fileno(stdout)))
+						cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "		Including charges" << COUT_STYLE.ENDSTYLE << endl;	
+					else
+						cout << "		Including charges" << endl;						
+					
+						FF_PLOTS.INCLUDE_FCUT = true;
+				}
 				LINE_PARSER.str("");
 				LINE_PARSER.clear();
 
@@ -3238,9 +3295,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBOR
 		
 		else if(LINE.find("# WRPCRDS #") != string::npos)
 		{
-			getline(cin,LINE);
-			LINE_PARSER.str(LINE);
-			LINE_PARSER >> LINE;
+			cin >> LINE; cin.ignore();
 			
 			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
 			{

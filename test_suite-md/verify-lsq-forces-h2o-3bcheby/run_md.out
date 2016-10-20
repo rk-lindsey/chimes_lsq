@@ -26,11 +26,12 @@ Setting up the data objects...
    ...setup complete
 
 Reading initial coordinates and forces...
-Opening force.txt to read forces for comparison
+	Opening force.txt to read forces for comparison
 	...Read the following coordinate file extension: xyzf
 	...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead.
+	...Ignoring last three fields of atom info lines in xyzf file... 
    ...read complete
 
 Reading atom info from parameter file...
@@ -39,19 +40,22 @@ Reading atom info from parameter file...
 		1     H , q (e): POSITIVE, mass (amu):   1.0079
    ...read complete
 
+Building 1 layer(s)...
+	New total atoms:    768
+	New box dimensions: 17.2183 17.2183 17.2183
+
 Setting up thermostats/velocities...
    ...setup complete
 
 Running velocity sanity checks...
-	Initial velocity center of mass: (   -0.0987,     0.0199,     0.1508) 
+	Initial velocity center of mass: (   -0.0386,    -0.0182,     0.0086) 
 	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
-	Total Mass     = 576.4864 au
-	Volume         = 638.0841 Ang^3
+	Total Mass     = 4611.8912 au
+	Volume         = 5104.6729 Ang^3
 	Number density = 0.2498 mol atm/cm^3
 	Mass density   = 1.5002 g/cm^3
    ...checks complete
 
-Building layers...
 
 Reading force field parameters...
 		...Compute electrostatics?      true
@@ -66,8 +70,8 @@ Attempting to read pairtype...
 	...Read FF triplet specifications...
 	...Reading all remaining force field parameters...
 		Re-setting individual atom charges based on pair charges :
-		0     O , q (e): -0.506, mass (amu):  15.9994
-		1     H , q (e):  0.253, mass (amu):   1.0079
+		0     O , q (e): -0.483, mass (amu):  15.9994
+		1     H , q (e):  0.241, mass (amu):   1.0079
 	...Read 2-body FF params...
 	...Read 3-body FF params...
 
@@ -105,44 +109,44 @@ Force field summary:
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 0.0000e+00 1.0000e+00
 		Parameters: 
-		0 -4.4888e+01
-		1 -1.5079e+01
-		2 2.1203e+01
-		3 1.2126e+01
-		4 -1.8269e+01
-		5 -1.0533e+01
-		6 2.4452e+01
-		7 -5.1861e+00
-		8 -1.3238e+01
-		9 -1.3084e+01
+		0 9.2268e-01
+		1 -2.7288e+01
+		2 2.4482e+01
+		3 -6.1224e-01
+		4 -8.3640e+00
+		5 -8.0563e+00
+		6 2.6192e+01
+		7 -1.5837e+01
+		8 -2.0647e+01
+		9 -1.7479e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
 		Parameters: 
-		0 -4.2039e+01
-		1 -7.0689e+01
-		2 -8.5884e+01
-		3 -9.2876e+01
-		4 -7.3866e+01
-		5 -5.6988e+01
-		6 -3.8380e+01
-		7 -2.3676e+01
-		8 -1.1068e+01
-		9 -3.7151e+00
+		0 -3.1078e+01
+		1 -7.1188e+01
+		2 -8.0871e+01
+		3 -9.3694e+01
+		4 -7.2237e+01
+		5 -5.8036e+01
+		6 -3.8250e+01
+		7 -2.4343e+01
+		8 -1.1137e+01
+		9 -3.8906e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
 		Parameters: 
-		0 3.9085e+00
-		1 1.4036e+01
-		2 3.4026e+01
-		3 1.1029e+01
-		4 4.1699e+00
-		5 1.2706e+00
-		6 -8.9645e-01
-		7 8.7471e-03
-		8 7.4545e-01
-		9 2.1722e-01
+		0 -3.5559e+00
+		1 1.6520e+01
+		2 3.2028e+01
+		3 1.2141e+01
+		4 3.5038e+00
+		5 1.5627e+00
+		6 -1.0398e+00
+		7 3.4443e-02
+		8 7.3683e-01
+		9 2.0826e-01
 
 	Triplet type and polynomial order per triplet: 
 		CHEBYSHEV 2
@@ -151,39 +155,39 @@ Force field summary:
 	0  OO OO OO: 2 parameters, 4 total parameters 
 	     index  |  powers  |  equiv index  |  param index  | parameter 
 	   --------------------------------------------------------------------
-	      0       0   1   1         0               0               593.3015
-	      1       1   0   1         0               0               593.3015
-	      2       1   1   0         0               0               593.3015
-	      3       1   1   1         3               1               -123.1201
+	      0       0   1   1         0               0               628.7151
+	      1       1   0   1         0               0               628.7151
+	      2       1   1   0         0               0               628.7151
+	      3       1   1   1         3               1               -127.9845
 
 	1  OO OH OH: 3 parameters, 4 total parameters 
 	     index  |  powers  |  equiv index  |  param index  | parameter 
 	   --------------------------------------------------------------------
-	      0       0   1   1         0               0               1134.9449
-	      1       1   0   1         1               1               -354.5347
-	      2       1   1   0         1               1               -354.5347
-	      3       1   1   1         3               2               1410.3591
+	      0       0   1   1         0               0               1139.4935
+	      1       1   0   1         1               1               -357.0996
+	      2       1   1   0         1               1               -357.0996
+	      3       1   1   1         3               2               1427.6468
 
 	2  OH OH HH: 3 parameters, 4 total parameters 
 	     index  |  powers  |  equiv index  |  param index  | parameter 
 	   --------------------------------------------------------------------
-	      0       0   1   1         0               0               -88.5301
-	      1       1   0   1         0               0               -88.5301
-	      2       1   1   0         2               1               55.2115 
-	      3       1   1   1         3               2               -224.9689
+	      0       0   1   1         0               0               -89.1933
+	      1       1   0   1         0               0               -89.1933
+	      2       1   1   0         2               1               55.4964 
+	      3       1   1   1         3               2               -223.9806
 
 	3  HH HH HH: 2 parameters, 4 total parameters 
 	     index  |  powers  |  equiv index  |  param index  | parameter 
 	   --------------------------------------------------------------------
-	      0       0   1   1         0               0               6.1261  
-	      1       1   0   1         0               0               6.1261  
-	      2       1   1   0         0               0               6.1261  
-	      3       1   1   1         3               1               58.0862 
+	      0       0   1   1         0               0               7.2901  
+	      1       1   0   1         0               0               7.2901  
+	      2       1   1   0         0               0               7.2901  
+	      3       1   1   1         3               1               54.6069 
 
 	Fitted charges read from parameter file:
-		OO 0.2558
-		HH 0.0640
-		OH -0.1279
+		OO 0.2331 (77.3916)
+		HH 0.0583 (19.3479)
+		OH -0.1165 (-38.6958)
 
 
 Initializing the neighbor list...
@@ -193,13 +197,13 @@ BEGIN SIMULATION:
 
 Ewald parameters: 
 	Requested Ewald accuracy  =  1.000000e-07
-	Ewald alpha               =  2.926563e-01
-	R-Space Ewald cutoff      =  1.234643e+01
-	R-Space accuracy estimate =  2.610389e-08
-	K-Space accuracy estimate =  2.195698e-06
+	Ewald alpha               =  5.853127e-01
+	R-Space Ewald cutoff      =  6.173215e+00
+	R-Space accuracy estimate =  5.220777e-08
+	K-Space accuracy estimate =  5.489244e-07
 
 	Cutting off K-vectors with magnitude less than 6
 	Number of Ewald K-vectors = 894
-	K-space accuracy estimate = 0.00000026504413
+	K-space accuracy estimate = 0.00000006626103
 
-RMS force error =  2.072167e+01
+RMS force error = 0.028274

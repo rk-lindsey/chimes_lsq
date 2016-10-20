@@ -15,9 +15,9 @@
 # N_MDSTP # ! Total number of MD steps
 	1000
 # NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
-	0
+	1
 # USENEIG # ! Use a neighbor list? HIGHLY reccommended when NLAYERS > 0
-	false
+	true
 # PRMFILE # ! Parameter file (i.e. params.txt)
 	params.txt
 # CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)
@@ -29,7 +29,7 @@
 ###################################
 
 # VELINIT # (options are READ or GEN)
-	GEN
+	READ
 # THRMOST # (options are HOOVER <hoover time> or VELSCALE <scale freq>
 	HOOVER 10
 # PRESSUR # (options are ANALYTICAL or NUMERICAL)
@@ -44,7 +44,7 @@
 # FRQENER # ! Frequency to output energies
 	10	
 # PRNTFRC # ! Print computed forces? Forces are printed to force_out.txt 
-	true 1
+	false
 	
 	
 # ENDFILE #

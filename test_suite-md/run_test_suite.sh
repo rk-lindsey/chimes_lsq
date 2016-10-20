@@ -1,17 +1,24 @@
 #!/bin/bash
 
-MPICOMMAND=mpirun
-#MPICOMMAND="${MPICOMMAND} -stdin all"	# Only needed if compiled with mpicxx (OSX)
 
+NP=8
+
+
+
+#MPICOMMAND="${MPICOMMAND} -stdin all"	# Only needed if compiled with mpicxx (OSX)
+MPICOMMAND=mpirun
 ###############################################################
 #
 # Make a fresh compilation of the code
 #
 ###############################################################
+
 cd ../src
 rm -rf *o *dSYM
-#make house_lsq; rm -f ../test_suite-lsq/house_lsq; cp house_lsq ../test_suite-lsq/
-make house_md;  rm -f ../test_suite-lsq/house_md;  cp house_md  ../test_suite-md/
+cp Makefile Makefile-back
+cp Makefile-TS-MD Makefile
+make house_md;  rm -f ../test_suite-lsq/house_md;  mv house_md  ../test_suite-md/
+mv Makefile-back Makefile
 cd ../test_suite-md
 
 ########################################
@@ -28,28 +35,19 @@ MD_TESTS[4]="h2o-2bcheby-genvel"
 MD_TESTS[5]="h2o-2bcheby-numpress"
 MD_TESTS[6]="h2o-2bcheby-velscale"
 
-# Now that handling of layers has changed, we no longer expect to 
-# recover the same forces on atoms that were observed in the LSQ step
-# For this reason, these tests have been omitted. 
-#
-# Eventually, I'll add a test for a system where the cutoffs are
-# within 0.5 x the natural box length.
-
-#LSQ_TESTS[0]="chon-dftbpoly"
-#LSQ_TESTS[1]="h2o-2bcheby"
-#LSQ_TESTS[2]="h2o-3bcheby"
-#LSQ_TESTS[3]="h2o-splines"
-#LSQ_TESTS[4]="h2o-invr"
-#LSQ_TESTS[5]="h2o-dftbpoly"
-
-NP=0
+#LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
+LSQ_TESTS[1]="h2o-2bcheby"
+LSQ_TESTS[2]="h2o-3bcheby"
+LSQ_TESTS[3]="h2o-splines"
+#LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
+#LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
 
 ## Allow command line arguments of jobs to test.  MD jobs should be single-quoted in a string followed 
 ## by LSQ jobs single quoted. (LEF)
 ##
 
-	MD_JOBS="${MD_TESTS[@]}"
-	LSQ_JOBS="${LSQ_TESTS[@]}"
+MD_JOBS="${MD_TESTS[@]}"
+LSQ_JOBS="${LSQ_TESTS[@]}"
 
 if [ $# -gt 0 ] ; then
 
@@ -93,8 +91,16 @@ do
 		$MPICOMMAND ../house_md < run_md.in > run_md.out
 			
 	else
-		$MPICOMMAND -np $NP ../house_md < run_md.in > run_md.out
+		#$MPICOMMAND -np $NP ../house_md < run_md.in > run_md.out
 		
+		if [[ "$i" == "generic-lj" || "$i" == "h2o-2bcheby-numpress" ]] ; then
+		
+			# Numerical pressure calcs currently only supported on 1 proc
+			$MPICOMMAND ../house_md < run_md.in > run_md.out
+			
+		else
+			srun -n $NP ../house_md < run_md.in > run_md.out
+		fi
 	fi
 	
 	cp *.* current_output
@@ -132,8 +138,6 @@ do
 	cd ..
 done
 
-exit 0
-
 ########################################
 # Iterate through the tests -- MD/LSQ CODE COMPATIBILITY
 ########################################
@@ -144,8 +148,18 @@ echo "VALIDATING FOR LSQ/MD CODE COMPATIBILITY..."
 echo " "
 echo " ...Beginning by running the lsq test suite... "
 
+cd ../src
+rm -rf *o *dSYM
+cp Makefile Makefile-back
+cp Makefile-TS-MD-Verif Makefile
+cd ../test_suite-md
+
 cd ../test_suite-lsq 
 ./run_test_suite.sh $LSQ_JOBS
+
+cd ../src
+mv Makefile-back Makefile
+
 cd ../test_suite-md
 
 echo " "
@@ -160,15 +174,13 @@ do
 	
 	cd ${TAG}${i}
 	
-	# Grab the parameter file from the lsq test suite output
+	# Grab the parameter and force files from the lsq test suite output
 	
-	cp ../../test_suite-lsq/$i/current_output/params.txt .
-	
-	if [ $NP -eq 0 ] ; then
-		../house_md < run_md.in > run_md.out		
-	else
-		$MPICOMMAND -np $NP ../house_md < run_md.in > run_md.out
-	fi	
+	cp ../../test_suite-lsq/$i/current_output/params.txt    .
+	cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
+	cp ../../test_suite-lsq/$i/current_output/force.txt     .
+
+	../house_md < run_md.in > run_md.out		
 
 	cp *.* current_output
 
@@ -201,8 +213,7 @@ do
 
 	
 	cd ..
-done	
-
+done
 
 echo " "
 

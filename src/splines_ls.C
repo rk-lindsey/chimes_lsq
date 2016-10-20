@@ -123,6 +123,8 @@ int main()
 									// in principle you could mix and match between different
 									// 2-body and 3-body interactions (e.g. 2-body spline with
 									// 3-body chebyshev) (LEF)
+	
+	MD_JOB_CONTROL CONTROLS;		// Will hold info on layering, etc.
 
 	//////////////////////////////////////////////////
 	//
@@ -135,6 +137,10 @@ int main()
 	#endif
 
 	read_lsq_input(INFILE, nframes, nlayers, fit_coul, coul_consv, ifsubtract_coord, ifsubtract_coul, fit_pover, cheby_order, cheby_type, cheby_3b_order, invr_parms, NATMTYP, if_3b_cheby, ATOM_PAIRS, PAIR_TRIPLETS, WRAPCOORDS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, use_partial_charges,CHARGE_CONSTRAINTS );
+
+	CONTROLS.COMPARE_FORCE = true;	// is this variable really necessary for LSQ?
+	CONTROLS.N_LAYERS      = nlayers; 
+	CONTROLS.IS_LSQ        = true; 
 
 	#if VERBOSITY == 1
 		cout << "...input file read successful: " << endl << endl;
@@ -195,9 +201,7 @@ int main()
 		cout << "The number of two-body non-coulomb parameters is: " << tot_snum <<  endl;
 	#endif
 
-
-
-//	if ( ATOM_PAIRS[0].SNUM_3B_CHEBY > 0 ) // All atoms types must use same potential, so check if 3b order is greater than zero 
+	
 	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" && cheby_3b_order  > 0 ) // All atoms types must use same potential, so check if 3b order is greater than zero 
 	{
 		num_cheby_3b = 0;
@@ -235,6 +239,33 @@ int main()
 	#if VERBOSITY == 1
 		cout << endl << "Reading in the trajectory file..." << endl;
 	#endif
+		
+	// Prepare for layering
+		
+	vector<XYZ_INT> LAYER_MATRX;
+	int             N_LAYER_ELEM = 0;		
+	
+	if(CONTROLS.N_LAYERS>0)	
+	{
+		XYZ_INT TMP;
+		
+		for(int n1=0; n1<=CONTROLS.N_LAYERS; n1++)
+		{
+			for(int n2=0; n2<=CONTROLS.N_LAYERS; n2++)
+			{
+				for(int n3=0; n3<=CONTROLS.N_LAYERS; n3++)
+				{	
+					TMP.X = n1;
+					TMP.Y = n2;
+					TMP.Z = n3;
+					
+					LAYER_MATRX.push_back(TMP);
+					N_LAYER_ELEM++;
+				}
+			}
+		}
+	}
+		
 
 	for (int i=0; i<nframes; i++)
 	{
@@ -250,9 +281,9 @@ int main()
 		
 		for(int j=0; j<ATOM_PAIRS.size(); j++)
 		{
-			if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X
-				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y
-				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z )
+			if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X * (nlayers +1)
+				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (nlayers +1)
+				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z * (nlayers +1) )
 				&& i == 1)
 			{
 					#if WARN == TRUE
@@ -320,7 +351,49 @@ int main()
 				TRAJECTORY[i].COORDS[j].Z -= floor(TRAJECTORY[i].COORDS[j].Z/TRAJECTORY[i].BOXDIM.Z)*TRAJECTORY[i].BOXDIM.Z;
 			} 
 		}
+		
+		// If layering requested, replicate the system
 	
+		if(CONTROLS.N_LAYERS>0 )
+		{	
+			XYZ		TEMP_XYZ;
+			XYZ_INT	TEMP_LAYER;
+			int		TEMP_IDX;
+
+			TEMP_IDX = TRAJECTORY[i].ATOMS;
+
+			TRAJECTORY[i].PARENT   .resize(TRAJECTORY[i].ATOMS);
+			TRAJECTORY[i].LAYER_IDX.resize(TRAJECTORY[i].ATOMS);
+	
+			// Create coordinates for the layer atoms. layer elements do not include 0, 0, 0, which is the main cell
+
+			for(int a1=0; a1<TRAJECTORY[i].ATOMS; a1++)
+			{	
+				for(int n1=0; n1<N_LAYER_ELEM; n1++)
+				{	
+					if ((LAYER_MATRX[n1].X == 0) && (LAYER_MATRX[n1].Y == 0) && (LAYER_MATRX[n1].Z == 0) )
+					{
+						TRAJECTORY[i].PARENT[a1] = -1;
+						TRAJECTORY[i].LAYER_IDX[a1].X = LAYER_MATRX[n1].X;
+						TRAJECTORY[i].LAYER_IDX[a1].Y = LAYER_MATRX[n1].Y;
+						TRAJECTORY[i].LAYER_IDX[a1].Z = LAYER_MATRX[n1].Z;
+					}
+					else
+					{											
+						TEMP_XYZ.X = TRAJECTORY[i].COORDS.at(a1).X + LAYER_MATRX[n1].X * TRAJECTORY[i].BOXDIM.X;
+						TEMP_XYZ.Y = TRAJECTORY[i].COORDS.at(a1).Y + LAYER_MATRX[n1].Y * TRAJECTORY[i].BOXDIM.Y;
+						TEMP_XYZ.Z = TRAJECTORY[i].COORDS.at(a1).Z + LAYER_MATRX[n1].Z * TRAJECTORY[i].BOXDIM.Z;
+
+						TRAJECTORY[i].COORDS       .push_back(TEMP_XYZ);
+						TRAJECTORY[i].LAYER_IDX    .push_back(LAYER_MATRX[n1]);
+						TRAJECTORY[i].ATOMTYPE     .push_back(TRAJECTORY[i].ATOMTYPE    .at(a1));
+						TRAJECTORY[i].PARENT       .push_back(a1);
+			
+						TEMP_IDX++;
+					}
+				}
+			}
+		}
 	}
 	
 	#if VERBOSITY == 1
@@ -417,8 +490,8 @@ int main()
 			cout << "             and FITCOUL set false." << endl;
 		}
 		
-		ZCalc_Deriv(ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], nlayers, if_3b_cheby, PAIR_MAP, TRIAD_MAP);
-	
+		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], nlayers, if_3b_cheby, PAIR_MAP, TRIAD_MAP);
+		
 		if ( ifsubtract_coord ) // Subtract over-coordination forces from force to be output.
 			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);	
 		

@@ -6,10 +6,11 @@
 
 MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 # -D XFORMTYPE=LEFT # -D FORCECHECK=1 -D PESFORMAT=1 -D LOG_FORCE -D LOG_PES
 
-CXX=mpiicc  -g -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+CXX=mpiicc  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicc   -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicxx  -g  -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=icc -g			# Serial, for debugging
+#CXX=icc -O3
 #CXX=g++ -O3			# Serial, let compiler optimize to a very high level (see also -O2)
 #
 # Below: Other debugging/optimiazation options
@@ -45,10 +46,10 @@ build_tests_lsq:
 	cd -
 
 ##################################
-# MAKE THE C++ CODE
+# MAKE THE MD CODE
 ##################################
 
-CXX_MD_SRC=splines_md.C functions.C Ewald.C
+CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C
 
 CXX_MD_INCLUDES=
 

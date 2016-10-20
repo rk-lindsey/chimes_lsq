@@ -11,12 +11,14 @@ using namespace std;
 //
 //////////////////////////////////////////
 
-
-
 static double add_sines    (int kx, int ky, int kz, vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ);
 static void   generate_trig(vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ, XYZ & RVEC, XYZ & BOXDIM, int kmax);
-static void   Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul);	
-// Function Overloaded .. Different input required depending on whether used by splines_ls or splines_md -- THIS PROBABLY DOESN'T NEED TO BE OVERLOADED
+
+static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, XYZ & PRIM_BOX); // MD compare force version
+
+
+// Overloading the function... different input needed for LSQ and MD calls
+// ... I don't think Ewald_K_Space_Orig actually ever get used... these have NOT been updated, and likely have logic errors.
 static void   Ewald_K_Space_Orig(double alphasq, FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, double & Vtot);	// LSQ
 static void   Ewald_K_Space_Orig(double alphasq, FRAME & TRAJECTORY, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, double & Vtot);	// MD
 
@@ -26,12 +28,13 @@ static void   Ewald_K_Space_Orig(double alphasq, FRAME & TRAJECTORY, vector<PAIR
 //
 //////////////////////////////////////////
 
-static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul)				// MD version
+static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, XYZ & PRIM_BOX)
+{
 // Calculate Ewald K-space components.  Use a rearrangement of the usual Ewald
 // expression to generate an order-N evaluation.   See A. Y. Toukmaji et. al,
 // Comp. Phys. Comm. 95, 73-92 (1996).
-{
-	double Volume   = TRAJECTORY.BOXDIM.X * TRAJECTORY.BOXDIM.Y * TRAJECTORY.BOXDIM.Z;
+	
+	double Volume   = PRIM_BOX.X * PRIM_BOX.Y * PRIM_BOX.Z;
 	const double PI = M_PI;
   
 	//set up Ewald Coulomb parameters:
@@ -52,20 +55,17 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	static int      totk;
 	static vector <double> KFAC_V(maxk);
 	static vector <XYZ>    K_V(maxk);
-	vector <double> sin_array(TRAJECTORY.ATOMS);
-	vector <double> cos_array(TRAJECTORY.ATOMS);
+	vector <double> sin_array(PRIM_ATOMS);
+	vector <double> cos_array(PRIM_ATOMS);
 
 
 	if (!called_before) 
 	{
 		called_before = true;
-		LAST_BOXDIMS.X = LAST_BOXDIMS.Y = LAST_BOXDIMS.Z = 0.0;
-		
-		string TEMP_STR;
-		
+		LAST_BOXDIMS.X = LAST_BOXDIMS.Y = LAST_BOXDIMS.Z = 0.0;		
 	}
 
-	if ( TRAJECTORY.BOXDIM.X != LAST_BOXDIMS.X || TRAJECTORY.BOXDIM.Y != LAST_BOXDIMS.Y || TRAJECTORY.BOXDIM.Z != LAST_BOXDIMS.Z ) 
+	if (PRIM_BOX.X != LAST_BOXDIMS.X || PRIM_BOX.Y != LAST_BOXDIMS.Y || PRIM_BOX.Z != LAST_BOXDIMS.Z ) 
 	{
 		// Update K factors when box dimensions change.
 	
@@ -85,9 +85,9 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 					
 					if(ksq!=0 && ksq<ksqmax)
 					{						
-						K_V[totk].X = (2.0*PI/TRAJECTORY.BOXDIM.X)*kx;
-						K_V[totk].Y = (2.0*PI/TRAJECTORY.BOXDIM.Y)*ky;
-						K_V[totk].Z = (2.0*PI/TRAJECTORY.BOXDIM.Z)*kz;
+						K_V[totk].X = (2.0*PI/PRIM_BOX.X)*kx;
+						K_V[totk].Y = (2.0*PI/PRIM_BOX.Y)*ky;
+						K_V[totk].Z = (2.0*PI/PRIM_BOX.Z)*kz;
 						
 						rksq = K_V[totk].X*K_V[totk].X + K_V[totk].Y*K_V[totk].Y + K_V[totk].Z*K_V[totk].Z;
 						
@@ -124,9 +124,9 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 
 		}
 		
-		LAST_BOXDIMS.X = TRAJECTORY.BOXDIM.X;
-		LAST_BOXDIMS.Y = TRAJECTORY.BOXDIM.Y;
-		LAST_BOXDIMS.Z = TRAJECTORY.BOXDIM.Z;
+		LAST_BOXDIMS.X = PRIM_BOX.X;
+		LAST_BOXDIMS.Y = PRIM_BOX.Y;
+		LAST_BOXDIMS.Z = PRIM_BOX.Z;
 	}
 
 	UCoul = 0;
@@ -156,7 +156,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 		tempsin = 0.0;
 		tempcos = 0.0;
 
-		for(int a1=0; a1<TRAJECTORY.ATOMS; a1++) 
+		for(int a1=0; a1<PRIM_ATOMS; a1++) 
 		{
 			kdotr = TRAJECTORY.COORDS[a1].X * K_V[ik].X + TRAJECTORY.COORDS[a1].Y * K_V[ik].Y + TRAJECTORY.COORDS[a1].Z * K_V[ik].Z;	
 			sin_array[a1] = sin(kdotr);																									
@@ -168,7 +168,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 		
 		tempk += KFAC_V[ik]* (tempcos*tempcos + tempsin*tempsin);
 		
-		for(int a1=0; a1<TRAJECTORY.ATOMS; a1++) 
+		for(int a1=0; a1<PRIM_ATOMS; a1++) 
 		{
 			tempd = -4.0 * PI * KFAC_V[ik] * ke * TRAJECTORY.CHARGES[a1] * ( tempcos * sin_array[a1] - tempsin * cos_array[a1] ) / Volume;
 		
@@ -186,7 +186,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	// Set up for MPI
 
 	int a1start, a1end ;
-	divide_atoms(a1start, a1end, TRAJECTORY.ATOMS) ;
+	divide_atoms(a1start, a1end, PRIM_ATOMS) ;
 
 	for ( int a1=a1start ; a1 <=  a1end ; a1++ ) // Loop is MPI'd over TRAJECTORY.ATOMS
 		UCoul -= ke * alpha /sqrt(PI) * TRAJECTORY.CHARGES[a1] * TRAJECTORY.CHARGES[a1];
@@ -202,7 +202,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	
 }
 
-// FUNCTION UPDATED -- OVERLOADING THE FUNCTION.. DIFFERENT INPUT REQUIRED DEPENDING ON WHETHER FUNCTION IS CALLED FROM MD
+// Overloading the function... different input needed for LSQ and MD calls
 // ... I don't think Ewald_K_Space_Orig actually ever get used... these have NOT been updated, and likely have logic errors.
 static void Ewald_K_Space_Orig(double alphasq, FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, double & Vtot)	// LSQ version
 {
@@ -467,12 +467,11 @@ static void Ewald_K_Space_Orig(double alphasq, FRAME & TRAJECTORY, vector<PAIR_F
   return;
 }
 
-
-// FUNCTION UPDATED -- OVERLOADING THE FUNCTION.. DIFFERENT INPUT REQUIRED DEPENDING ON WHETHER FUNCTION IS CALLED FROM MD
-//                     PROGRAM OR LSQ FITTING PROGRAM...
+// Overloading the function... different input needed for LSQ and MD calls
 void ZCalc_Ewald(FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string, int>  & PAIR_MAP)	// LSQ version
-// Calculate Ewald interactions.
 {
+	
+	// Calculate Ewald interactions.
   XYZ RVEC; 		// Replaces Rvec[3];
   double tempx;
 
@@ -575,16 +574,17 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string, int
 	if ( if_old_k_space ) 
 		Ewald_K_Space_Orig(alphasq, TRAJECTORY, ATOM_PAIRS, PAIR_MAP, UCoul);
 	else 
-		Ewald_K_Space_New(alphasq, k_cut, TRAJECTORY, UCoul);
+		Ewald_K_Space_New(alphasq, k_cut, TRAJECTORY, UCoul, TRAJECTORY.ATOMS, TRAJECTORY.BOXDIM);
 
 	return;
 
 }
-
 void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)	// MD version
-// Calculate Ewald interactions. 
 {
-
+// Calculate Ewald interactions... When comparing forces with LSQ, remember that LSQ doesn't use
+// layers for this part.
+	
+	
   XYZ RVEC; 		// Replaces Rvec[3];
   double tempx;
 
@@ -606,13 +606,35 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIG
   double		TMP_UCoul;
   double 		erfc_val;
   
-  string TEMP_STR;
+	string TEMP_STR;
+
+	XYZ PRIM_BOX;
+	int PRIM_ATOMS;
+	
+	if (CONTROLS.COMPARE_FORCE && (CONTROLS.N_LAYERS>0))
+	{
+		PRIM_BOX.X = TRAJECTORY.BOXDIM.X/(CONTROLS.N_LAYERS+1);
+		PRIM_BOX.Y = TRAJECTORY.BOXDIM.Y/(CONTROLS.N_LAYERS+1);
+		PRIM_BOX.Z = TRAJECTORY.BOXDIM.Z/(CONTROLS.N_LAYERS+1);
+		
+		PRIM_ATOMS = TRAJECTORY.ATOMS/pow(CONTROLS.N_LAYERS+1,3.0);
+	}
+	else
+	{
+		PRIM_BOX.X = TRAJECTORY.BOXDIM.X;
+		PRIM_BOX.Y = TRAJECTORY.BOXDIM.Y;
+		PRIM_BOX.Z = TRAJECTORY.BOXDIM.Z;
+		
+		PRIM_ATOMS = TRAJECTORY.ATOMS;
+	}
+  
+  
 
 	if ( ! called_before ) 
 	{
-		double vol = TRAJECTORY.BOXDIM.X * TRAJECTORY.BOXDIM.Y * TRAJECTORY.BOXDIM.Z;
+		double vol = PRIM_BOX.X * PRIM_BOX.Y * PRIM_BOX.Z;
 		double r_acc, k_acc;
-		optimal_ewald_params(accuracy, vol, TRAJECTORY.ATOMS, alpha, r_cut, k_cut,r_acc, k_acc);	// NEEDS UPDATING!!!
+		optimal_ewald_params(accuracy, vol, PRIM_ATOMS, alpha, r_cut, k_cut,r_acc, k_acc);	// NEEDS UPDATING!!!
 		alphasq = alpha * alpha;
 
 		#if VERBOSITY == 1
@@ -634,15 +656,15 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIG
 		called_before = true;
 	}
 
-	TRAJECTORY.TMP_EWALD.resize(TRAJECTORY.ATOMS);
+	TRAJECTORY.TMP_EWALD.resize(PRIM_ATOMS);
 	
 	// Set up for MPI
 	
 	int a1start, a1end ;
-	divide_atoms(a1start, a1end, TRAJECTORY.ATOMS) ;
+	divide_atoms(a1start, a1end, PRIM_ATOMS) ;
 	
 
-	for(int a1=0;a1<TRAJECTORY.ATOMS;a1++)
+	for(int a1=0;a1<PRIM_ATOMS;a1++)
 	{
 		TRAJECTORY.TMP_EWALD[a1].X = 0;
 		TRAJECTORY.TMP_EWALD[a1].Y = 0;
@@ -658,20 +680,20 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIG
 		for(int a2=0;a2<a1;a2++)
 		{
 			tempy=0.0;
-	
+			
 			RVEC.X = TRAJECTORY.COORDS[a2].X - TRAJECTORY.COORDS[a1].X;
 			RVEC.Y = TRAJECTORY.COORDS[a2].Y - TRAJECTORY.COORDS[a1].Y;
 			RVEC.Z = TRAJECTORY.COORDS[a2].Z - TRAJECTORY.COORDS[a1].Z;
 	
 			// THIS IS THE REAL-SPACE LOOP IN MIC:
 	
-			RVEC.X = RVEC.X - floor( 0.5 + RVEC.X / TRAJECTORY.BOXDIM.X ) * TRAJECTORY.BOXDIM.X;
-			RVEC.Y = RVEC.Y - floor( 0.5 + RVEC.Y / TRAJECTORY.BOXDIM.Y ) * TRAJECTORY.BOXDIM.Y;
-			RVEC.Z = RVEC.Z - floor( 0.5 + RVEC.Z / TRAJECTORY.BOXDIM.Z ) * TRAJECTORY.BOXDIM.Z;
+			RVEC.X = RVEC.X - floor( 0.5 + RVEC.X / PRIM_BOX.X ) * PRIM_BOX.X;
+			RVEC.Y = RVEC.Y - floor( 0.5 + RVEC.Y / PRIM_BOX.Y ) * PRIM_BOX.Y;
+			RVEC.Z = RVEC.Z - floor( 0.5 + RVEC.Z / PRIM_BOX.Z ) * PRIM_BOX.Z;
 
 	      
 			rlen_mi = RVEC.X*RVEC.X + RVEC.Y*RVEC.Y + RVEC.Z*RVEC.Z;
-	  
+
 			if ( rlen_mi < r_cut * r_cut ) 
 			{
 				rlen_mi = sqrt(rlen_mi);
@@ -707,12 +729,15 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIG
 
 	// K-Space loops.
 	
-	Ewald_K_Space_New(alphasq, k_cut, TRAJECTORY, TMP_UCoul);
+//	if (CONTROLS.COMPARE_FORCE && (CONTROLS.N_LAYERS>0))
+		Ewald_K_Space_New(alphasq, k_cut, TRAJECTORY, TMP_UCoul, PRIM_ATOMS, PRIM_BOX);
+//	else	
+//		Ewald_K_Space_New(alphasq, k_cut, TRAJECTORY, TMP_UCoul);
 
 	// Update potential energy..
 	TRAJECTORY.TOT_POT_ENER += UCoul;
 
-	for(int a1=0;a1<TRAJECTORY.ATOMS;a1++) 
+	for(int a1=0;a1<PRIM_ATOMS;a1++) 
 	{
 		TRAJECTORY.ACCEL[a1].X -= TRAJECTORY.TMP_EWALD[a1].X;
 		TRAJECTORY.ACCEL[a1].Y -= TRAJECTORY.TMP_EWALD[a1].Y;
@@ -728,10 +753,9 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIG
 
 }
 
-// FUNCTION UPDATED
 void optimal_ewald_params(double accuracy, double V, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc)
-// Calculate optimal Ewald parameters as suggested by Fincham, Mol. Sim. 1, 1-9 (1994) and the Moldy code manual.
 {
+	// Calculate optimal Ewald parameters as suggested by Fincham, Mol. Sim. 1, 1-9 (1994) and the Moldy code manual.
   double p;
   
   double effort_ratio = 5.5;  // Ratio of time for real vs. fourier term.
@@ -753,7 +777,6 @@ void optimal_ewald_params(double accuracy, double V, int nat, double &alpha, dou
 
 }
 
-// FUNCTION UPDATED
 void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP)
 {
 	XYZ RVEC; // Replaces  Rvec[3];
@@ -995,8 +1018,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 					tempd3 *= 2.0; 
 					tempd4 *= 2.0; 
 				}
-				
-//cout << tempd << " " << tempd2 << " " << tempd3 << " " << tempd4 << endl;
 
 				FRAME_COULOMB_FORCES[i_pair][a1].X += ( tempd + tempd2 + tempd3 + tempd4 ) * R_K.X;
 				FRAME_COULOMB_FORCES[i_pair][a1].Y += ( tempd - tempd2 - tempd3 + tempd4 ) * R_K.Y;
@@ -1023,10 +1044,9 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 	return;
 }
 
-// FUNCTION UPDATED
-static double add_sines(int kx, int ky, int kz, vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ) // Add precomputed sines to get overall factor.
+static double add_sines(int kx, int ky, int kz, vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ) 
 {
-	
+// Add precomputed sines to get overall factor.	
 	static double SINYZ = 0;
 	static double COSYZ = 0;
 	
@@ -1069,7 +1089,6 @@ static double add_sines(int kx, int ky, int kz, vector<XYZ> & SIN_XYZ, vector<XY
 	return(SIN_K.X * COSYZ + COS_K.X * SINYZ);
 }
 
-// FUNCTION UPDATED
 static void  generate_trig(vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ, XYZ & RVEC, XYZ & BOXDIM, int kmax)
 {
 	SIN_XYZ.resize(kmax);

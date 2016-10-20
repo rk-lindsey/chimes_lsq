@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 1 processor(s).
+Code compiled in MPI mode. Will run on 8 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357
@@ -134,9 +134,9 @@ Force field summary:
 		9 8.7526e-01
 
 	Fitted charges read from parameter file:
-		OO 4.1244e-01
-		HH 1.0311e-01
-		OH -2.0622e-01
+		OO 4.1244e-01 (1.3696e+02)
+		HH 1.0311e-01 (3.4239e+01)
+		OH -2.0622e-01 (-6.8478e+01)
 
 	ReaxFF over-coordination parameters: 
 		pair...pover...r0...p1...p2...lambda6
@@ -333,4 +333,3 @@ RANK: 0 UPDATING ON STEP: 986, WITH PADDING: 0.569
 END SIMULATION
 	Average temperature over run = 1994.4264 K
 	Average pressure    over run = 11.7872 GPa
-Stopping from the terminal not allowed

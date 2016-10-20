@@ -32,12 +32,6 @@ Reading input file...
 The number of two-body non-coulomb parameters is: 12
 
 Reading in the trajectory file...
-WARNING: Outer cutoff greater than half at least one box length
-	Pair type O O
-WARNING: Outer cutoff greater than half at least one box length
-	Pair type H H
-WARNING: Outer cutoff greater than half at least one box length
-	Pair type O H
 ...trajectory file read successful: 
 
 Setting up the matricies for A, Coulomb forces, and overbonding...
