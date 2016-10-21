@@ -1704,13 +1704,10 @@ int main(int argc, char* argv[])
 		cout << endl;
 	}
 	
-	
 	////////////////////////////////////////////////////////////
 	// Set up the neighbor list
 	////////////////////////////////////////////////////////////
-	 
-	
-	
+
 	if(NEIGHBOR_LIST.USE)
 	{
 		if(RANK == 0)
@@ -1943,9 +1940,11 @@ int main(int argc, char* argv[])
 								SCAN_INFILE_2B.close();		
 
 								// Now add the 2B values to the 3B PES
-					
+
 								for(int a=0; a<PES_VAL_3B.size(); a++)
 								{
+									// Check if ij distances the same between the 2b ij type and the 3b scan
+									
 									for(int b=0; b<PES_VAL_2B_IJ.size(); b++)
 									{
 										if(IJ_DIST_2B[b] == IJ_DIST_3B[a])
@@ -1954,14 +1953,20 @@ int main(int argc, char* argv[])
 											break;
 										}
 									}
+									
+									// Check if ik distances the same between the 2b ik type and the 3b scan
+									
 									for(int c=0; c<PES_VAL_2B_IK.size(); c++)
 									{
 										if(IK_DIST_2B[c] == IK_DIST_3B[a])
 										{							
-											PES_VAL_3B[a] += PES_VAL_2B_IJ[c];
+											PES_VAL_3B[a] += PES_VAL_2B_IK[c];
 											break;
 										}
 									}	
+									
+									// Check if jk distances the same between the 2b jk type and the 3b scan
+									
 									for(int d=0; d<PES_VAL_2B_JK.size(); d++)
 									{
 										if(JK_DIST_2B[d] == JK_DIST_3B[a])
