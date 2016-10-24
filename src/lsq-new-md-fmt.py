@@ -183,6 +183,10 @@ if TEST[2] == "CUBIC":
 TEST = hf[ATOM_TRIPS_LINE].split()
 if TEST[2] == "S_MAXIM:":
 	ATOM_TRIPS_LINE += 2 + int(TEST[4])
+	
+TEST = hf[ATOM_TRIPS_LINE].split()
+if TEST[2] == "S_MINIM:":
+	ATOM_TRIPS_LINE += 2 + int(TEST[4])	
 		
 TOTAL_TRIPS =  hf[ATOM_TRIPS_LINE].split()
 TOTAL_TRIPS = int(TOTAL_TRIPS[3])

@@ -281,7 +281,7 @@ void divide_atoms(int &a1start, int &a1end, int atoms)
 // 3B Cheby functions
 //////////////////////////////////////////
  
-void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rlen, double & xdiff, double SMAX)
+void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rlen, double & xdiff, double SMAX, double SMIN)
 // Sets the value of the Chebyshev polynomials (Tn) and thier derivatives (Tnd)
 {
 	double x, exprlen;
@@ -295,7 +295,7 @@ void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double
 	
 	cheby_var(
 		rlen, 
-		FF_2BODY.S_MINIM, 
+		SMIN, 
 		SMAX, 
 		FF_2BODY.LAMBDA, 
 		FF_2BODY.CHEBY_TYPE, 
@@ -468,6 +468,28 @@ double SET_SMAXIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS)
 	else
 		return PAIR_TRIPLETS.S_MAXIM_3B;
 }
+
+double SET_SMINIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE)
+// Used for 3-body interactions. Decides whether outer cutoff should be set by 2-body value or 3-body value. Returns the cutoff value.
+{
+
+	double VAL;
+	
+	if(PAIR_TRIPLETS.S_MINIM_3B.X == -1)
+		VAL =  FF_2BODY.S_MINIM;
+	else
+	{
+		if      (TYPE == PAIR_TRIPLETS.ATMPAIR1)
+			VAL =  PAIR_TRIPLETS.S_MINIM_3B.X;
+		else if (TYPE == PAIR_TRIPLETS.ATMPAIR2)
+			VAL =  PAIR_TRIPLETS.S_MINIM_3B.Y;
+		else if (TYPE == PAIR_TRIPLETS.ATMPAIR3)
+			VAL =  PAIR_TRIPLETS.S_MINIM_3B.Z;
+	}
+	return VAL;
+}
+
+
 
 
 //////////////////////////////////////////
@@ -1125,6 +1147,7 @@ static void ZCalc_3B_Cheby_Deriv(MD_JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vect
 	static double CHEBY_DERIV_CONST;	// Accounts for when cheby range is changed from -1:1 to x:y
 
 	double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
+	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
 
 	const double fcut_power = 
     #ifndef FPENALTY_POWER
@@ -1243,6 +1266,10 @@ static void ZCalc_3B_Cheby_Deriv(MD_JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vect
 				S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], PAIR_TRIPLETS[curr_triple_type_index]);
 				S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], PAIR_TRIPLETS[curr_triple_type_index]);
 				
+				S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+				S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+				S_MINIM_JK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_jk], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+				
 				// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 				// within the allowed range.
 				// Unlike the 2-body Cheby, we only evaluate this for r > s_minim.  We
@@ -1251,21 +1278,21 @@ static void ZCalc_3B_Cheby_Deriv(MD_JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vect
 
 				
 
-				if(rlen_ij > FF_2BODY[curr_pair_type_idx_ij].S_MINIM && rlen_ij < S_MAXIM_IJ)
+				if(rlen_ij > S_MINIM_IJ && rlen_ij < S_MAXIM_IJ)
 				{		
-					if(rlen_ik > FF_2BODY[curr_pair_type_idx_ik].S_MINIM && rlen_ik < S_MAXIM_IK)
+					if(rlen_ik > S_MINIM_IK && rlen_ik < S_MAXIM_IK)
 					{	
-						if(rlen_jk > FF_2BODY[curr_pair_type_idx_jk].S_MINIM && rlen_jk < S_MAXIM_JK)											
+						if(rlen_jk > S_MINIM_JK && rlen_jk < S_MAXIM_JK)											
 						{		
 							// Everything is within allowed ranges. Begin setting up the derivative calculation
 
 							// Set up the polynomials
 			
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij, S_MAXIM_IJ);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ);
 			
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik, S_MAXIM_IK);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik, S_MAXIM_IK, S_MINIM_IK);
 			
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk, S_MAXIM_JK);				
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk, S_MAXIM_JK, S_MINIM_JK);				
 
 							// At this point we've completed all pre-calculations needed to populate the A matrix. Now we need to figure out 
 							// where within the matrix to put the data, and to do so. 
@@ -2182,6 +2209,7 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 	double coeff;
 	
 	double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
+	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
 
 	const double fcut_power = 
     #ifndef FPENALTY_POWER
@@ -2327,24 +2355,28 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 				S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index]);
 				S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index]);
 				
+				S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+				S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+				S_MINIM_JK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+				
 				// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 				// within the allowed range.
 
-				if(rlen_ij > FF_2BODY[curr_pair_type_idx_ij].S_MINIM && rlen_ij < S_MAXIM_IJ)
+				if(rlen_ij > S_MINIM_IJ && rlen_ij < S_MAXIM_IJ)
 				{			
-					if(rlen_ik > FF_2BODY[curr_pair_type_idx_ik].S_MINIM && rlen_ik < S_MAXIM_IK)	
+					if(rlen_ik > S_MINIM_IK && rlen_ik < S_MAXIM_IK)	
 					{
-						if(rlen_jk > FF_2BODY[curr_pair_type_idx_jk].S_MINIM && rlen_jk < S_MAXIM_JK)									
+						if(rlen_jk > S_MINIM_JK && rlen_jk < S_MAXIM_JK)									
 						{
 							// Everything is within allowed ranges. Begin setting up the force calculation
 
 							// Set up the polynomials
 			
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij,S_MAXIM_IJ);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ);
 			
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik,S_MAXIM_IK);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik, S_MAXIM_IK, S_MINIM_IK);
 			
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk,S_MAXIM_JK);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk, S_MAXIM_JK, S_MINIM_JK);
 			
 							// Apply the FF
 
@@ -3172,12 +3204,16 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 	double S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index]);
 	double S_MAXIM_IK = SET_SMAXIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index]);
 	double S_MAXIM_JK = SET_SMAXIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index]);
+	
+	double S_MINIM_IJ = SET_SMINIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index],FF_2BODY[ij].PRPR_NM);
+	double S_MINIM_IK = SET_SMINIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index],FF_2BODY[ik].PRPR_NM);
+	double S_MINIM_JK = SET_SMINIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index],FF_2BODY[jk].PRPR_NM);
 
 	tempx = 0;
 
-	int n_ij = (S_MAXIM_IJ - FF_2BODY[ij].S_MINIM)/FF_2BODY[ij].S_DELTA;
-	int n_ik = (S_MAXIM_IK - FF_2BODY[ik].S_MINIM)/FF_2BODY[ik].S_DELTA;
-	int n_jk = (S_MAXIM_JK - FF_2BODY[jk].S_MINIM)/FF_2BODY[jk].S_DELTA;
+	int n_ij = (S_MAXIM_IJ - S_MINIM_IJ)/FF_2BODY[ij].S_DELTA;
+	int n_ik = (S_MAXIM_IK - S_MINIM_IK)/FF_2BODY[ik].S_DELTA;
+	int n_jk = (S_MAXIM_JK - S_MINIM_JK)/FF_2BODY[jk].S_DELTA;
 
 
 	int outer, middle, inner;
@@ -3194,16 +3230,16 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 			for (int c=0; c<inner; c++)
 			{
 
-				RLEN_IJ = FF_2BODY[ij].S_MINIM + a * FF_2BODY[ij].S_DELTA;
-				RLEN_IK = FF_2BODY[ik].S_MINIM + b * FF_2BODY[ik].S_DELTA;
-				RLEN_JK = FF_2BODY[jk].S_MINIM + c * FF_2BODY[jk].S_DELTA;
+				RLEN_IJ = S_MINIM_IJ + a * FF_2BODY[ij].S_DELTA;
+				RLEN_IK = S_MINIM_IK + b * FF_2BODY[ik].S_DELTA;
+				RLEN_JK = S_MINIM_JK + c * FF_2BODY[jk].S_DELTA;
 
 			
-				SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij, S_MAXIM_IJ);
+				SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ);
 			
-				SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik, S_MAXIM_IK);
+				SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik, S_MAXIM_IK, S_MINIM_IK);
 			
-				SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk, S_MAXIM_JK);		
+				SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk, S_MAXIM_JK, S_MINIM_JK);		
 			
 				fcut0_ij     = (1.0 - RLEN_IJ/S_MAXIM_IJ);
 				fcut_ij      =  pow(fcut0_ij, fcut_power);
@@ -3341,8 +3377,6 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	OUTFILE_3B_POT.open(OUTFILE.data());
 	
 	SCAN_FILE_3B = OUTFILE;
-	
-//	cout << "******** WRITING TO FILE:  " << SCAN_FILE_3B << endl;
 
 	if ( ! called_before ) 
 	{
@@ -3369,10 +3403,13 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 
 	tempx = 0;
 	
-	
 	double S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index]);
 	double S_MAXIM_IK = SET_SMAXIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index]);
 	double S_MAXIM_JK = SET_SMAXIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index]);
+		
+	double S_MINIM_IJ = SET_SMINIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index],FF_2BODY[ij].PRPR_NM);
+	double S_MINIM_IK = SET_SMINIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index],FF_2BODY[ik].PRPR_NM);
+	double S_MINIM_JK = SET_SMINIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index],FF_2BODY[jk].PRPR_NM);
 	
 	
 	// Set the fixed distances
@@ -3401,13 +3438,13 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	int n;
 	
 	if      (FF_PLOTS.SCAN_PAIR[scan] == 1)
-		n = (S_MAXIM_IJ - FF_2BODY[ij].S_MINIM)/FF_2BODY[ij].S_DELTA;
+		n = (S_MAXIM_IJ - S_MINIM_IJ)/FF_2BODY[ij].S_DELTA;
 	
 	else if (FF_PLOTS.SCAN_PAIR[scan] == 2)
-		n = (S_MAXIM_IK - FF_2BODY[ik].S_MINIM)/FF_2BODY[ik].S_DELTA;
+		n = (S_MAXIM_IK - S_MINIM_IK)/FF_2BODY[ik].S_DELTA;
 	
 	else
-		n = (S_MAXIM_JK - FF_2BODY[jk].S_MINIM)/FF_2BODY[jk].S_DELTA;
+		n = (S_MAXIM_JK - S_MINIM_JK)/FF_2BODY[jk].S_DELTA;
 	
 	// Run the scan	
 
@@ -3415,18 +3452,18 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	{
 
 		if      (FF_PLOTS.SCAN_PAIR[scan] == 1)
-			RLEN_IJ = FF_2BODY[ij].S_MINIM + a * FF_2BODY[ij].S_DELTA;
+			RLEN_IJ = S_MINIM_IJ + a * FF_2BODY[ij].S_DELTA;
 		else if (FF_PLOTS.SCAN_PAIR[scan] == 2)
-			RLEN_IK = FF_2BODY[ik].S_MINIM + a * FF_2BODY[ik].S_DELTA;
+			RLEN_IK = S_MINIM_IK + a * FF_2BODY[ik].S_DELTA;
 		else
-			RLEN_JK = FF_2BODY[jk].S_MINIM + a * FF_2BODY[jk].S_DELTA;		
+			RLEN_JK = S_MINIM_JK + a * FF_2BODY[jk].S_DELTA;		
 
 			
-		SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij, S_MAXIM_IJ);
+		SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ);
 	
-		SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik, S_MAXIM_IK);
+		SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik, S_MAXIM_IK, S_MINIM_IK);
 	
-		SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk, S_MAXIM_JK);		
+		SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk, S_MAXIM_JK, S_MINIM_JK);		
 	
 		fcut0_ij     = (1.0 - RLEN_IJ/S_MAXIM_IJ);
 		fcut_ij      = pow(fcut0_ij, fcut_power);

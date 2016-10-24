@@ -850,6 +850,128 @@ int main(int argc, char* argv[])
 				
 				if(LINE.find("ENDFILE") != string::npos)
 					break;		
+				
+				else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
+				{
+					STREAM_PARSER.str(LINE);
+	
+					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+	
+					#if VERBOSITY == 1
+						cout << "	Note: Setting specific 3-body r_min values: " << endl;
+					#endif	
+
+					double TMP_VAL;
+					
+					string  TMP_IJ,  TMP_IK,  TMP_JK;	
+					string TARG_IJ, TARG_IK, TARG_JK;
+		
+					for(int i=0; i<TMP_TERMS1; i++)
+					{
+						getline(PARAMFILE,LINE);
+						
+						STREAM_PARSER.str("");
+						STREAM_PARSER.clear();
+						
+						STREAM_PARSER.str(LINE);
+						STREAM_PARSER >> TEMP_STR;	// Just and index for the pair type
+						STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
+
+						STREAM_PARSER >> TMP_IJ;	// What is the IJ?
+						STREAM_PARSER >> TMP_IK;	// What is the IK?
+						STREAM_PARSER >> TMP_JK;	// What is the JK?
+
+						// Check that triplet pair types are correct
+		
+						try
+						{
+							TMP_IJ = FF_2BODY[ PAIR_MAP[ TMP_IJ ] ].PRPR_NM;
+						}
+						catch(...)
+						{
+							cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+							cout << "		Triplet type:              " << TEMP_STR << endl;
+							cout << "		First distance, pair type: " << TMP_IJ << endl;
+						}
+						try
+						{
+							TMP_IK = FF_2BODY[ PAIR_MAP[ TMP_IK ] ].PRPR_NM;
+						}
+						catch(...)
+						{
+							cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+							cout << "		Triplet type:              " << TEMP_STR << endl;
+							cout << "		First distance, pair type: " << TMP_IK << endl;
+						}
+						try
+						{
+							TMP_JK = FF_2BODY[ PAIR_MAP[ TMP_JK ] ].PRPR_NM;
+						}
+						catch(...)
+						{
+							cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+							cout << "		Triplet type:              " << TEMP_STR << endl;
+							cout << "		First distance, pair type: " << TMP_JK << endl;
+						}
+		
+						TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR1 ] ].PRPR_NM;
+						TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR2 ] ].PRPR_NM;
+						TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR3 ] ].PRPR_NM;
+	
+						// Read the first inner cutoff
+
+						STREAM_PARSER >> TMP_VAL;
+		
+						if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+		
+						else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+		
+						else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+
+
+						// Read the second inner cutoff
+
+						STREAM_PARSER >> TMP_VAL;
+		
+						if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+		
+						else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+		
+						else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+
+		
+						// Read the third inner cutoff
+
+						STREAM_PARSER >> TMP_VAL;
+		
+						if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+		
+						else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+		
+						else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+
+						#if VERBOSITY == 1
+							cout << "		" << TEMP_STR << "( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
+								              << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X << ", "
+										 	  << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y << ", "
+											  << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z << endl;
+						#endif	
+					}
+					
+					STREAM_PARSER.str("");
+					STREAM_PARSER.clear();
+	
+				}
+				
 				else if(LINE.find("SPECIAL 3B S_MAXIM: ") != string::npos)
 				{
 					STREAM_PARSER.str(LINE);			
@@ -873,6 +995,8 @@ int main(int argc, char* argv[])
 					}
 
 				}
+				
+				
 			}
 			
 			FOUND_END = true;
@@ -1014,7 +1138,7 @@ int main(int argc, char* argv[])
 			{
 				STREAM_PARSER >> TMP_TERMS1;
 				STREAM_PARSER >> TMP_TERMS2;
-				
+
 				if (STREAM_PARSER >>  TMP_LOW)
 				{
 					if( TMP_LOW < -1.0 ||  TMP_LOW > +1.0 )
@@ -1250,6 +1374,13 @@ int main(int argc, char* argv[])
 			// Resize pair parameter object
 			
 			FF_3BODY.resize(NO_TRIPS);	
+			
+			for (int i=0; i<NO_TRIPS; i++)
+			{	
+				FF_3BODY[i].S_MINIM_3B.X = -1;
+				FF_3BODY[i].S_MINIM_3B.Y = -1;
+				FF_3BODY[i].S_MINIM_3B.Z = -1;
+			}	
 
 			TEMP_SEARCH_3B = "TRIPLET ";
 			TEMP_SEARCH_3B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type, and 2b and 3b are same pair type
@@ -1940,7 +2071,12 @@ int main(int argc, char* argv[])
 								SCAN_INFILE_2B.close();		
 
 								// Now add the 2B values to the 3B PES
-
+					
+					
+								cout << PES_VAL_2B_IJ.size() << endl;
+								cout << PES_VAL_2B_IK.size() << endl;
+								cout << PES_VAL_2B_JK.size() << endl;
+					
 								for(int a=0; a<PES_VAL_3B.size(); a++)
 								{
 									// Check if ij distances the same between the 2b ij type and the 3b scan
@@ -2046,39 +2182,6 @@ int main(int argc, char* argv[])
 	//
 	////////////////////////////////////////////////////////////  
 	////////////////////////////////////////////////////////////
-	
-	// For the MPI debugging 
-	/*
-	
-	int DEBUG_HOLD = 0;
-	
-	cout << endl;
-	cout << "***********************************" << endl;
-	cout << endl;
-	cout << "Code is in MPI Debug mode. " << endl;
-	cout << endl;
-	cout << "Process id is: " << ::getpid() << endl;
-	cout << endl;
-	cout << "To debug, launch either lldb or gdb, " << endl;
-	cout << " and type either: " << endl;
-	cout << " attach -p <pid> " << endl;
-	cout << " or " << endl;
-	cout << "  attach <pid>" << endl;
-	cout << " respectively. To resume the job once " << endl;
-	cout << " the debugger has been launched, type: " << endl;
-	cout << " expr DEBUG_HOLD = -1" << endl;
-	cout << " or " << endl;
-	cout << " set var DEBUG_HOLD = -1" << endl;
-	cout << " respectively and debug as usual." << endl;
-	cout << endl;
-	cout << "***********************************" << endl;
-	cout << endl;	
-	
-	while (DEBUG_HOLD == 0)
-		sleep(5);
-	
-	*/
-	
 
 	STATISTICS.open("md_statistics.out");
 
@@ -2137,7 +2240,8 @@ int main(int argc, char* argv[])
 					}	
 				}
 			
-				// Update first half of velocity (i.e. using a(t)):
+				// Update first half of velocity (i.e. using a(t))... Also update maximum
+				// velocity for neighbor lists:
 			
 				for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 				{
@@ -2160,7 +2264,8 @@ int main(int argc, char* argv[])
 				
 				}
 			
-				// Apply thermostatting to velocities
+				// Apply thermostatting to velocities... Also update maximum
+				// velocity for neighbor lists:
 
 				if ( CONTROLS.USE_HOOVER_THRMOSTAT ) 
 				{
@@ -2263,7 +2368,7 @@ int main(int argc, char* argv[])
 			
 			ferr = sqrt(ferr/3.0/END);
 			cout << "RMS force error = " << fixed << setprecision(6) << ferr << endl;
-			//printf("RMS force error = %13.6e\n", ferr);
+			
 			return 0;
 		}
 		else if (RANK == 0)	// Print main simulation header 

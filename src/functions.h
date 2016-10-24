@@ -157,7 +157,7 @@ struct FRAME
 	double	TOT_POT_ENER;		// Replaces VTOT
 	
 	vector<int>		PARENT;
-	vector<XYZ_INT>LAYER_IDX;
+	vector<XYZ_INT> LAYER_IDX;
 	vector<string> 	ATOMTYPE;
 	vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen file printing
 	vector<XYZ>		COORDS;
@@ -217,7 +217,11 @@ struct TRIPLETS
 	string ATMPAIR2;
 	string ATMPAIR3;
 	
-	double S_MAXIM_3B;		// A unique outer cutoff for 3B interactions... by default, is set to S_MAXIM
+	double S_MAXIM_3B;	// A unique outer cutoff for 3B interactions... by default, is set to S_MAXIM
+	XYZ S_MINIM_3B;		// Similar for inner cutoff. This is useful when the 2-body 
+						// is refit/extrapolated, thus has a s_min lower than the original fitted value
+						// Values need to be specified for each contributing pair
+						// X -> IJ, Y -> IK,  -> JK 
 	
 	int N_TRUE_ALLOWED_POWERS;	// How many UNIQUE sets of powers do we have?
 	int N_ALLOWED_POWERS;	// How many total sets of powers do we have?
@@ -227,7 +231,7 @@ struct TRIPLETS
 	vector<int>		PARAM_INDICIES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICIES {0,0,2,3}, PARAM_INDICIES would be {0, 0, 1, 2}
 //	vector<int>		POWER_DUPLICATES;	// This will tell the multiplicity of each set of powers. For example, for the set (OO, OH, OH), (1,0,1) has a multiplicity of 2, since (1,1,0 is equivalent) -- No longer used
 	
-	TRIPLETS():S_MAXIM_3B(-1.0){}	// Negative values mean use 2-body s_maximum values
+	TRIPLETS():S_MAXIM_3B(-1.0){}	// Negative values mean use 2-body values
 };
 
 struct PAIR_FF : public PAIRS
@@ -316,9 +320,134 @@ static const ANSI_COLORS COUT_STYLE  =
 
 };
 
- 
+/*
 
+class CELLS
+{
+	public:
+		
+		int MAX_CUTOFF;		// What is the maximum force field cutoff?
+		int TOTAL_CELLS;	// What is the total number of cells we have?
+		bool USE_CELLS;		// Don't use cells if our box is very small
+		
+		void INITIALIZE(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS);
+		
+		CELLS();
+		~CELLS();
+	
+	private:
+		
+		XYZ WIDTHS;			// What are the x, y, and z widths of each cell?
+		XYZ_INT N_CELLS;	// What is the number of cells in the x, y, and z direction?
+		
+		vector<XYZ>			LOWER_BOUNDS;	// What is the lower-bound allowed distance for each cell?
+		vector<XYZ>			UPPER_BOUNDS;
+		vector<int>			MY_CELL;		// What cell does each atom belong to?
+		vector<vector<int>> NEARBY;			// What are the immediate neighbors of each cell?	
+};
 
+void CELLS::INITIALIZE(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, int MAX_FF_CUTOFF)
+{
+	// Set the max cutoff
+	
+	MAX_CUTOFF = MAX_FF_CUTOFF;
+	
+	// Set the possible number of cells in x, y, and z, and the total resulting
+	// number of cells
+	
+	N_CELLS.X = floor(SYSTEM.BOXDIM.X/MAX_CUTOFF);
+	N_CELLS.Y = floor(SYSTEM.BOXDIM.Y/MAX_CUTOFF);
+	N_CELLS.Z = floor(SYSTEM.BOXDIM.Z/MAX_CUTOFF);
+	
+	TOTAL_CELLS = N_CELLS.X * N_CELLS.Y * N_CELLS.Z;
+	
+	// Set the width of each box in x, y, and z
+
+	WIDTHS.X = SYSTEM.BOXDIM.X/N_CELLS.X;
+	WIDTHS.Y = SYSTEM.BOXDIM.Y/N_CELLS.Y;
+	WIDTHS.Z = SYSTEM.BOXDIM.Z/N_CELLS.Z;
+	
+	// Set the upper and lower bounds for each box. We'll
+	// use >= lower, < upper
+	
+	XYZ TMP_VALS;
+	
+	TMP_VALS.X = 0;
+	TMP_VALS.Y = 0;
+	TMP_VALS.Z = 0;
+	
+	LOWER_BOUNDS.resize(TOTAL_CELLS);
+	UPPER_BOUNDS.resize(TOTAL_CELLS);
+	
+	// Temporary variables to help set nearest neighbor cells
+	
+	vector<XYZ> MIDPOINT(TOTAL_CELLS);	
+	NEARBY.resize(TOTAL_CELLS);
+	
+	int CURRENT_CELL = 0;
+	
+	for(int i=0; i<N_CELLS.X; i++)
+	{
+		for(int j=0; j<N_CELLS.Y; j++)
+		{
+			for(int k=0; k<N_CELLS.Z; k++)
+			{
+				LOWER_BOUNDS[CURRENT_CELL].X = TMP_VALS.X;
+				LOWER_BOUNDS[CURRENT_CELL].Y = TMP_VALS.Y;
+				LOWER_BOUNDS[CURRENT_CELL].Z = TMP_VALS.Z;
+				
+				TMP_VALS.X += (i+1)*WIDTHS.X;
+				TMP_VALS.Y += (j+1)*WIDTHS.Y;
+				TMP_VALS.Z += (k+1)*WIDTHS.Z;
+				
+				UPPER_BOUNDS[CURRENT_CELL].X = TMP_VALS.X;
+				UPPER_BOUNDS[CURRENT_CELL].Y = TMP_VALS.Y;
+				UPPER_BOUNDS[CURRENT_CELL].Z = TMP_VALS.Z;
+				
+				MIDPOINT[CURRENT_CELL].X = 0.5*(UPPER_BOUNDS.X + LOWER_BOUNDS.X);
+				MIDPOINT[CURRENT_CELL].Y = 0.5*(UPPER_BOUNDS.Y + LOWER_BOUNDS.Y);
+				MIDPOINT[CURRENT_CELL].Z = 0.5*(UPPER_BOUNDS.Z + LOWER_BOUNDS.Z);
+
+				CURRENT_CELL++;			
+			}
+		}
+	}
+	
+	// Determine the neighboring cells for each cell
+	// Remember, PBC applies here! ... Also, include
+	// "self" as a neighbor, because we want to compute interactions 
+	// for atoms within the cell
+	
+	XYZ TMP_D;
+	double len_diag = sqrt(WIDTHS.X*WIDTHS.X + WIDTHS.Y*WIDTHS.Y + WIDTHS.Z*WIDTHS.Z);
+	
+	for(int i=0; i<TOTAL_CELLS; i++)
+	{
+		for (int j=i; j<TOTAL_CELLS; j++)
+		{
+			TMP_D.X = MIDPOINT[j].X - MIDPOINT[i].X;
+			TMP_D.Y = MIDPOINT[j].Y - MIDPOINT[i].Y;
+			TMP_D.Z = MIDPOINT[j].Z - MIDPOINT[i].Z;
+			
+			TMP_D.X -= floor( 0.5 + TMP_D.X/SYSTEM.BOXDIM.X )  * SYSTEM.BOXDIM.X;
+			TMP_D.Y -= floor( 0.5 + TMP_D.Y/SYSTEM.BOXDIM.Y )  * SYSTEM.BOXDIM.Y;
+			TMP_D.Z -= floor( 0.5 + TMP_D.Z/SYSTEM.BOXDIM.Z )  * SYSTEM.BOXDIM.Z;
+			
+			if( (sqrt(TMP_D.X*TMP_D.X + TMP_D.Y*TMP_D.Y + TMP_D.Z*TMP_D.Z)) < len_diag ) // Then its a neighbor.. add both lists
+			{
+				NEARBY[i].push_back(j);
+				NEARBY[j].push_back(i);
+			}
+		}
+	}
+	
+	
+	
+	
+	
+}
+
+*/
 
 
 
@@ -379,14 +508,15 @@ void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_O
 
 // FUNCTION UPDATED -- OVERLOADING THE FUNCTION.. DIFFERENT INPUT REQUIRED DEPENDING ON WHETHER FUNCTION IS CALLED FROM MD
 //                     PROGRAM OR LSQ FITTING PROGRAM...
-void ZCalc_Ewald (FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP);	// LSQ
+
+void ZCalc_Ewald(FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP);	// LSQ
 void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);	// MD
 
 // FUNCTION UPDATED
 void optimal_ewald_params(double accuracy, double V, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc);
 
 // FUNCTION UPDATED
-void ZCalc_Ewald_Deriv (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP);
+void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP);
 
 //////////////////////////////////////////
 //

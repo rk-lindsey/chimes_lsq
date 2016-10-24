@@ -469,11 +469,14 @@ int main()
 	cout.precision(16);
 	
 	#if VERBOSITY == 1
-		cout << "...Populating the matricies for A, Coulomb forces, and overbonding..." << endl;
+		cout << "...Populating the matricies for A, Coulomb forces, and overbonding..." << endl << endl;
 	#endif
 
 	for(int i=0; i<nframes; i++)
 	{
+		
+		cout << "	Processing frame: " << setw(5) << i+1 << " of: " << nframes << endl;
+		
 		// Run a few checks to make sure logic is correct
 		 
 		if(ifsubtract_coord && fit_pover)
@@ -769,8 +772,32 @@ int main()
 	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
 	
-		
+	
 	int FOUND_SPECIAL = 0;
+	
+	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+		if(PAIR_TRIPLETS[i].S_MINIM_3B.X != -1)
+			FOUND_SPECIAL++;
+	
+	if(FOUND_SPECIAL>0)
+	{
+		header << endl << "SPECIAL 3B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
+		
+		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+			if(PAIR_TRIPLETS[i].S_MINIM_3B.X != -1)
+				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
+					<< PAIR_TRIPLETS[i].ATMPAIR1 << " " 
+					<< PAIR_TRIPLETS[i].ATMPAIR2 << " " 
+					<< PAIR_TRIPLETS[i].ATMPAIR3 << " " 
+					<< fixed << setprecision(5) 
+		            << PAIR_TRIPLETS[i].S_MINIM_3B.X << " "
+				 	<< PAIR_TRIPLETS[i].S_MINIM_3B.Y << " "
+					<< PAIR_TRIPLETS[i].S_MINIM_3B.Z << endl;						
+	}
+	
+	
+		
+	FOUND_SPECIAL = 0;
 	
 	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
 		if(PAIR_TRIPLETS[i].S_MAXIM_3B != -1)
@@ -1020,7 +1047,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			
 			TEMP_TYPE = LINE;
 
-			if      (LINE != "SPLINE" && LINE != "CHEBYSHEV" && LINE != "DFTBPOLY" && LINE != "INVRSE_R") // I don't think these are supported still:  && LINE != "LJ" && LINE != "STILLIN")
+			if      (LINE != "SPLINE" && LINE != "CHEBYSHEV" && LINE != "DFTBPOLY" && LINE != "INVRSE_R") // These are not supported:  && LINE != "LJ" && LINE != "STILLIN")
 			{
 				cout << endl;
 				cout << "ERROR: Unrecognized pair type. Acceptable options are:" << endl;
@@ -1044,8 +1071,8 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					cout << " ....NOTE: Forces reported in atomic units." << endl;
 			#endif
 				
-				if(TEMP_TYPE == "INVRSE_R")
-				{
+			if(TEMP_TYPE == "INVRSE_R")
+			{
 					cin >> LINE;
 					cin.ignore();
 					invr_parms = int(atof(LINE.data()));
@@ -1134,33 +1161,6 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			
 		}
 
-/*		
-		else if(LINE.find("# SUBCRDS #") != string::npos)
-		{
-			cin >> LINE; cin.ignore();
-
-			if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
-				if_subtract_coord = true;
-			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
-				if_subtract_coord = false;
-			else
-			{
-				cout << "ERROR: # SUBCRDS # must be specified as true or false." << endl;
-				exit(1);	
-			}	
-			
-			#if VERBOSITY == 1
-			
-				cout << "	# SUBCRDS #: ";
-			
-				if (if_subtract_coord)
-					cout << "true" << endl;				
-				else
-					cout << "false" << endl;
-			#endif
-
-		}
-*/
 		else if( (TEMP_TYPE == "CHEBYSHEV") && (LINE.find("# CHBTYPE #") != string::npos))
 		{
 			cin >> LINE; cin.ignore();
@@ -1191,6 +1191,13 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			
 			NTRIP = factorial(NATMTYP+3-1)/factorial(3)/factorial(NATMTYP-1);
 			PAIR_TRIPLETS.resize(NTRIP);
+			
+			for (int i=0; i<NTRIP; i++)
+			{	
+				PAIR_TRIPLETS[i].S_MINIM_3B.X = -1;
+				PAIR_TRIPLETS[i].S_MINIM_3B.Y = -1;
+				PAIR_TRIPLETS[i].S_MINIM_3B.Z = -1;
+			}	
 			
 			// Set the default cheby range
 			
@@ -1903,6 +1910,153 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				}
 			}
 		}
+		
+		else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
+		{
+			STREAM_PARSER.str("");
+			STREAM_PARSER.clear();	
+			
+			STREAM_PARSER.str(LINE);
+			
+			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+			
+			if(TEMP_STR == "ALL" && NTRIP >0 )
+			{				
+				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MINIM_3B.X;
+				
+				for(int i=1; i<NTRIP; i++)
+				{
+					PAIR_TRIPLETS[i].S_MINIM_3B.X = PAIR_TRIPLETS[0].S_MINIM_3B.X;
+					PAIR_TRIPLETS[i].S_MINIM_3B.Y = PAIR_TRIPLETS[0].S_MINIM_3B.X;
+					PAIR_TRIPLETS[i].S_MINIM_3B.Z = PAIR_TRIPLETS[0].S_MINIM_3B.X;
+				}
+				
+				#if VERBOSITY == 1
+					cout << "	Note: Setting all 3-body r_min values to " <<  PAIR_TRIPLETS[0].S_MINIM_3B.X << endl;
+				#endif				
+			}
+			else if(TEMP_STR == "SPECIFIC" && NTRIP >0 )
+			{
+				STREAM_PARSER >> TEMP_INT;
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();
+
+				
+				#if VERBOSITY == 1
+					cout << "	Note: Setting specific 3-body r_min values: " << endl;
+				#endif	
+
+				double TMP_VAL;
+				string  TMP_IJ,  TMP_IK,  TMP_JK;	
+				string TARG_IJ, TARG_IK, TARG_JK;
+					
+				
+				for(int i=0; i<TEMP_INT; i++)
+				{
+					getline(cin,LINE);
+					STREAM_PARSER.str(LINE);
+					STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
+					
+					
+					STREAM_PARSER >> TMP_IJ;	// What is the IJ?
+					STREAM_PARSER >> TMP_IK;	// What is the IK?
+					STREAM_PARSER >> TMP_JK;	// What is the JK?
+					
+					// Check that triplet pair types are correct
+					
+					try
+					{
+						TMP_IJ = ATOM_PAIRS[ PAIR_MAP[ TMP_IJ ] ].PRPR_NM;
+					}
+					catch(...)
+					{
+						cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+						cout << "		Triplet type:              " << TEMP_STR << endl;
+						cout << "		First distance, pair type: " << TMP_IJ << endl;
+					}
+					try
+					{
+						TMP_IK = ATOM_PAIRS[ PAIR_MAP[ TMP_IK ] ].PRPR_NM;
+					}
+					catch(...)
+					{
+						cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+						cout << "		Triplet type:              " << TEMP_STR << endl;
+						cout << "		First distance, pair type: " << TMP_IK << endl;
+					}
+					try
+					{
+						TMP_JK = ATOM_PAIRS[ PAIR_MAP[ TMP_JK ] ].PRPR_NM;
+					}
+					catch(...)
+					{
+						cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+						cout << "		Triplet type:              " << TEMP_STR << endl;
+						cout << "		First distance, pair type: " << TMP_JK << endl;
+					}
+					
+					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR1 ] ].PRPR_NM;
+					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR2 ] ].PRPR_NM;
+					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR3 ] ].PRPR_NM;
+					
+					// Read the first inner cutoff
+
+					STREAM_PARSER >> TMP_VAL;
+					
+					if      ( (TMP_IJ == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+					
+					else if ( (TMP_IJ == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+					
+					else if ( (TMP_IJ == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+
+
+					// Read the second inner cutoff
+
+					STREAM_PARSER >> TMP_VAL;
+					
+					if      ( (TMP_IK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+					
+					else if ( (TMP_IK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+					
+					else if ( (TMP_IK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+
+					
+					// Read the third inner cutoff
+
+					STREAM_PARSER >> TMP_VAL;
+					
+					if      ( (TMP_JK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+					
+					else if ( (TMP_JK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+					
+					else if ( (TMP_JK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+					
+					
+					
+					PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B;
+					STREAM_PARSER.str("");
+					STREAM_PARSER.clear();
+					
+					#if VERBOSITY == 1
+						cout << "		" << TEMP_STR << "(" <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
+							              << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X << ", "
+									 	  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y << ", "
+										  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z << endl;
+					#endif	
+				}
+			}
+		}
+		
+		
 	}	
 	
 	#if VERBOSITY == 1			
