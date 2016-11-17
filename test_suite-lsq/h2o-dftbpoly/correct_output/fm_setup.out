@@ -34,9 +34,73 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix setup complete: 
 
 ...Populating the matricies for A, Coulomb forces, and overbonding...
+
+	Processing frame: 1     of: 63
 	rc[0] = 5.669 bohr (3.000 Angstr.)
 	rc[1] = 5.669 bohr (3.000 Angstr.)
 	rc[2] = 5.669 bohr (3.000 Angstr.)
+	Processing frame: 2     of: 63
+	Processing frame: 3     of: 63
+	Processing frame: 4     of: 63
+	Processing frame: 5     of: 63
+	Processing frame: 6     of: 63
+	Processing frame: 7     of: 63
+	Processing frame: 8     of: 63
+	Processing frame: 9     of: 63
+	Processing frame: 10    of: 63
+	Processing frame: 11    of: 63
+	Processing frame: 12    of: 63
+	Processing frame: 13    of: 63
+	Processing frame: 14    of: 63
+	Processing frame: 15    of: 63
+	Processing frame: 16    of: 63
+	Processing frame: 17    of: 63
+	Processing frame: 18    of: 63
+	Processing frame: 19    of: 63
+	Processing frame: 20    of: 63
+	Processing frame: 21    of: 63
+	Processing frame: 22    of: 63
+	Processing frame: 23    of: 63
+	Processing frame: 24    of: 63
+	Processing frame: 25    of: 63
+	Processing frame: 26    of: 63
+	Processing frame: 27    of: 63
+	Processing frame: 28    of: 63
+	Processing frame: 29    of: 63
+	Processing frame: 30    of: 63
+	Processing frame: 31    of: 63
+	Processing frame: 32    of: 63
+	Processing frame: 33    of: 63
+	Processing frame: 34    of: 63
+	Processing frame: 35    of: 63
+	Processing frame: 36    of: 63
+	Processing frame: 37    of: 63
+	Processing frame: 38    of: 63
+	Processing frame: 39    of: 63
+	Processing frame: 40    of: 63
+	Processing frame: 41    of: 63
+	Processing frame: 42    of: 63
+	Processing frame: 43    of: 63
+	Processing frame: 44    of: 63
+	Processing frame: 45    of: 63
+	Processing frame: 46    of: 63
+	Processing frame: 47    of: 63
+	Processing frame: 48    of: 63
+	Processing frame: 49    of: 63
+	Processing frame: 50    of: 63
+	Processing frame: 51    of: 63
+	Processing frame: 52    of: 63
+	Processing frame: 53    of: 63
+	Processing frame: 54    of: 63
+	Processing frame: 55    of: 63
+	Processing frame: 56    of: 63
+	Processing frame: 57    of: 63
+	Processing frame: 58    of: 63
+	Processing frame: 59    of: 63
+	Processing frame: 60    of: 63
+	Processing frame: 61    of: 63
+	Processing frame: 62    of: 63
+	Processing frame: 63    of: 63
 ...matrix population complete: 
 
 Printing matricies...
@@ -44,5 +108,9 @@ Printing matricies...
 		0	O O	1.933
 		1	H H	1.093
 		2	O H	0.825
+	Total number of configurations contributing to each pair type:
+		0	O O 0
+		1	H H 0
+		2	O H 0
 ...matrix printing complete: 
 

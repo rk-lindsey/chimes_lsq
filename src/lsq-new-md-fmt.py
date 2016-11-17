@@ -9,14 +9,27 @@ from numpy.linalg import lstsq
 from datetime import *
 
 TEST_SUITE_RUN = False
+DO_WEIGHTING   = False
+WEIGHTS        = None
 
 if(len(sys.argv) < 5):
     print "Usage is: ./lsq.py A.txt b.txt params.header ff_groups.map"
+    print "or "
+    print "./lsq.py A.txt b.txt params.header ff_groups.map TESTING"
+    print "or "
+    print "./lsq.py A.txt b.txt params.header ff_groups.map WEIGHTS weight_file.txt" 
     sys.exit()
+    
 if(len (sys.argv) == 6): 
 	# Then this run is being used for the test suite... 
 	# print out parameters without any fanciness so tolerances can be checked  
 	TEST_SUITE_RUN = "do"
+	
+if(len (sys.argv) == 7): 
+	# Then this run is being used for the test suite... 
+	# print out parameters without any fanciness so tolerances can be checked  
+	WEIGHTS=open(sys.argv[6],"r").readlines()
+	DO_WEIGHTING = True	
 
 #################################
 #################################
@@ -55,14 +68,29 @@ for i in range(0,nlines):
         A[i][n]=float(af[i][n])
         
     b[i]=float(bf[i])
+    
+    if DO_WEIGHTING:
+    	WEIGHTS[i] = float(WEIGHTS[i])
+    
+#################################
+# Apply weighting to A and b
+#################################
+
+if DO_WEIGHTING:
+    weightedA = dot(diag(WEIGHTS),A)
+    weightedb = dot(diag(WEIGHTS),b)
+    
 
 #################################
 # Do the SVD, process output
 #################################
-# 
-U,D,VT=numpy.linalg.svd(A)
 
-Dmat=array((transpose(A)))
+if DO_WEIGHTING:
+    U,D,VT=numpy.linalg.svd(weightedA)
+    Dmat=array((transpose(weightedA)))
+else:
+    U,D,VT=numpy.linalg.svd(A)
+    Dmat=array((transpose(A)))
 
 dmax = 0.0
 
@@ -81,9 +109,12 @@ for i in range(0,len(D)):
     if(abs(D[i])>eps):
         Dmat[i][i]=1.0/D[i]
 
-
 x=dot(transpose(VT),Dmat)
-x=dot(x,dot(transpose(U),b))
+
+if DO_WEIGHTING:
+	x=dot(x,dot(transpose(U),weightedb))
+else:
+	x=dot(x,dot(transpose(U),b))	
 
 
 #print "SHAPE OF Dmat: ***** " + `shape(Dmat)`
@@ -180,13 +211,21 @@ TEST = hf[ATOM_TRIPS_LINE].split()
 if TEST[2] == "CUBIC":
 	ATOM_TRIPS_LINE += 2
 	
-TEST = hf[ATOM_TRIPS_LINE].split()
-if TEST[2] == "S_MAXIM:":
-	ATOM_TRIPS_LINE += 2 + int(TEST[4])
+
 	
 TEST = hf[ATOM_TRIPS_LINE].split()
 if TEST[2] == "S_MINIM:":
-	ATOM_TRIPS_LINE += 2 + int(TEST[4])	
+    if TEST[3] == "ALL":
+        ATOM_TRIPS_LINE += 2
+    else:
+        ATOM_TRIPS_LINE += 2 + int(TEST[4])
+        
+TEST = hf[ATOM_TRIPS_LINE].split()
+if TEST[2] == "S_MAXIM:":
+    if TEST[3] == "ALL":
+        ATOM_TRIPS_LINE += 2
+    else:
+        ATOM_TRIPS_LINE += 2 + int(TEST[4])        
 		
 TOTAL_TRIPS =  hf[ATOM_TRIPS_LINE].split()
 TOTAL_TRIPS = int(TOTAL_TRIPS[3])

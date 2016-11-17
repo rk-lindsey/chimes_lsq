@@ -85,6 +85,7 @@ struct MD_JOB_CONTROL
 	double TEMPERATURE;			// Replaces TempMD
 	bool   PLOT_PES;			// Plot out the potential energy surfaces? IF so, nothing else will be done.
 	bool   COMPARE_FORCE;		// Replaces if_read_force... If TRUE, read in read in a set of forces from a file for comparison with those computed by this code
+	bool   SUBTRACT_FORCE;		// Read frame, compute forces based on parameter file, print out frame where FF forces have been subtracted from input forces
 	string COMPARE_FILE;		// Name of the file that holds the forces
 	double DELTA_T;				// Relaces deltat
 	double DELTA_T_FS;			// Replaces deltat_fs... in femtoseconds
@@ -184,9 +185,12 @@ struct PAIRS	// NEEDS UPDATING
 	string CHRGSGN;			// Should the fitted charge on a given atom be negative or positive?
 	double ATM1MAS;			// Atomic mass (i.e. 12.011 for C)
 	double ATM2MAS;	
+	double OLD_S_MINIM;		// Used for smoothing functions when 3B and 2B inner cutoffs differ. This should be the inner cutoffs used for the actual SVD
 	double S_MINIM;			// Minimum allowed pair distance for fitting
 	double S_MAXIM;			// Maximum allowed pair distance for fitting
 	double S_DELTA;			// Fitting "grid" spacing (width)
+
+	int N_CFG_CONTRIB;		// How many configurations actually contribute to fitting this pair??
 
 	double CHEBY_RANGE_LOW;	//	When fitting to Cheby polynomials, pair distances are typically transformed to exist defined on range -1 to 1 (where Cheby poly's are defined), 
 	double CHEBY_RANGE_HIGH;//  but under certain circumstances, it can be advantagous to only fit some sub range (i.e. -1 to 0). These variables define the transformation range
@@ -207,7 +211,7 @@ struct PAIRS	// NEEDS UPDATING
 	string OVER_TO_ATM;		// Which atom is overbonding *to* being defined for... for example, overbonding to oxygen
 	vector<double> OVRPRMS;	// [0] = P_OVERB; [1] = R_0_VAL; [2] = P_1_VAL; [3] = P_2_VAL; [4] = LAMBDA6
 	
-	PAIRS():OVRPRMS(5){}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
+	PAIRS():OVRPRMS(5),N_CFG_CONTRIB(0){}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 };
 
 struct TRIPLETS
@@ -217,7 +221,10 @@ struct TRIPLETS
 	string ATMPAIR2;
 	string ATMPAIR3;
 	
-	double S_MAXIM_3B;	// A unique outer cutoff for 3B interactions... by default, is set to S_MAXIM
+	int    N_CFG_CONTRIB;	// How many configurations actually contribute to fitting this triplet??
+	
+//	double S_MAXIM_3B;	// A unique outer cutoff for 3B interactions... by default, is set to S_MAXIM
+	XYZ S_MAXIM_3B;
 	XYZ S_MINIM_3B;		// Similar for inner cutoff. This is useful when the 2-body 
 						// is refit/extrapolated, thus has a s_min lower than the original fitted value
 						// Values need to be specified for each contributing pair
@@ -231,7 +238,9 @@ struct TRIPLETS
 	vector<int>		PARAM_INDICIES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICIES {0,0,2,3}, PARAM_INDICIES would be {0, 0, 1, 2}
 //	vector<int>		POWER_DUPLICATES;	// This will tell the multiplicity of each set of powers. For example, for the set (OO, OH, OH), (1,0,1) has a multiplicity of 2, since (1,1,0 is equivalent) -- No longer used
 	
-	TRIPLETS():S_MAXIM_3B(-1.0){}	// Negative values mean use 2-body values
+	//TRIPLETS():S_MAXIM_3B(-1.0){}	// Negative values mean use 2-body values
+	
+	TRIPLETS():N_CFG_CONTRIB(0){}
 };
 
 struct PAIR_FF : public PAIRS
@@ -501,7 +510,7 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 
 
 // FUNCTION UPDATED
-void ZCalc_Deriv (MD_JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> PAIR_TRIPLETS, FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP);
+void ZCalc_Deriv (MD_JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> & PAIR_TRIPLETS, FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP);
 
 // FUNCTION UPDATED
 void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP);

@@ -54,7 +54,7 @@ double get_dist(const FRAME & SYSTEM, const MD_JOB_CONTROL & CONTROLS, XYZ & RAB
 	// Apply MIC ... this method is also compatbile with coords
 	// that aren't wrapped
 	
-	if((!CONTROLS.COMPARE_FORCE) || (CONTROLS.N_LAYERS==0))
+	if(((!CONTROLS.COMPARE_FORCE)&&(!CONTROLS.SUBTRACT_FORCE))||(CONTROLS.N_LAYERS==0))
 	{	
 		// If this is a normal MD run or an LSQ run with zero layers...
 		
@@ -130,6 +130,9 @@ static inline double fix_cheby_val(double x, bool inverse_order)
 	
 	if ( x < -1.0)
 	{
+
+		// Only use these for debugging...
+/*		
 		if ( inverse_order )
 		{
 			if (isatty(fileno(stdout)))
@@ -144,14 +147,16 @@ static inline double fix_cheby_val(double x, bool inverse_order)
 			else
 				cout << "Warning: r < rmin " << endl;
 		}
-		
+*/	
 		x = -1.0;
 	}
 	else if ( x > 1.0 )
     {
 		// Added a warning...Do we need to turn off the interaction, because it's beyond rcut?
    	 	// The cutoff function (handled elsewhere) we do that automatially (LEF)
-		
+
+		// Only use these for debugging... t
+/*			
 		if ( inverse_order )
 		{
 			if (isatty(fileno(stdout)))
@@ -166,6 +171,7 @@ static inline double fix_cheby_val(double x, bool inverse_order)
 			else
 				cout << "Warning: r > rmax " << endl;
 		}
+*/		
 		x = 1.0;								
 	}
 	return x;
@@ -263,7 +269,8 @@ void divide_atoms(int &a1start, int &a1end, int atoms)
 
 	if ( NPROCS > atoms ) 
 	{
-		cout << "Error: number of processors > number of atoms" << endl;
+		cout << "Error: number of processors > number of atoms: " << endl;
+		cout << NPROCS << " " << atoms << endl;
 		exit_run(1);
 	}
 	  
@@ -308,7 +315,7 @@ void SET_3B_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double
 	
 		if ( x < -1.0 || x > 1.0 ) 
 			x = fix_cheby_val(x, inverse_order);
-	
+
 		// Now change the range, if the user requested
 	
 		x = x*CHEBY_DERIV_CONST + FF_2BODY.CHEBY_RANGE_LOW - -1.0*CHEBY_DERIV_CONST;
@@ -460,19 +467,37 @@ void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<stri
 	
 }
 
-double SET_SMAXIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS)
+double SET_SMAXIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE)
 // Used for 3-body interactions. Decides whether outer cutoff should be set by 2-body value or 3-body value. Returns the cutoff value.
 {
+	
+	/*
 	if(PAIR_TRIPLETS.S_MAXIM_3B == -1)
 		return FF_2BODY.S_MAXIM;
 	else
 		return PAIR_TRIPLETS.S_MAXIM_3B;
+	*/
+	
+	
+	double VAL;
+	
+	if(PAIR_TRIPLETS.S_MAXIM_3B.X == -1)
+		VAL =  FF_2BODY.S_MAXIM;
+	else
+	{
+		if      (TYPE == PAIR_TRIPLETS.ATMPAIR1)
+			VAL =  PAIR_TRIPLETS.S_MAXIM_3B.X;
+		else if (TYPE == PAIR_TRIPLETS.ATMPAIR2)
+			VAL =  PAIR_TRIPLETS.S_MAXIM_3B.Y;
+		else if (TYPE == PAIR_TRIPLETS.ATMPAIR3)
+			VAL =  PAIR_TRIPLETS.S_MAXIM_3B.Z;
+	}
+	return VAL;	
 }
 
 double SET_SMINIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE)
 // Used for 3-body interactions. Decides whether outer cutoff should be set by 2-body value or 3-body value. Returns the cutoff value.
 {
-
 	double VAL;
 	
 	if(PAIR_TRIPLETS.S_MINIM_3B.X == -1)
@@ -488,9 +513,6 @@ double SET_SMINIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE)
 	}
 	return VAL;
 }
-
-
-
 
 //////////////////////////////////////////
 // Pressure functions
@@ -617,9 +639,6 @@ double numerical_pressure(const FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vecto
 
 }
 
-
-
-
 //////////////////////////////////////////
 //
 //	FUNCTION HEADERS -- DERIVATIVE CALCULATION
@@ -661,7 +680,7 @@ static void ZCalcSR_Over(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_
 
 
 // FUNCTION UPDATED
-void ZCalc_Deriv (MD_JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> PAIR_TRIPLETS, FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP)
+void ZCalc_Deriv (MD_JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> & PAIR_TRIPLETS, FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP)
 // Controls which functions are used to calculate derivatives
 {
   	// Will ewald calculations be needed? DFTB doesn't use the "default"
@@ -682,7 +701,12 @@ void ZCalc_Deriv (MD_JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  vector<T
 	
 	else if ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" )	// FUNCTION UPDATED
 	{
-		ZCalc_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP);
+		// Only enter if 2B are requested. For example, skip if user wants to fit ONLY 3B cheby
+		// i.e. PAIRTYP: CHEBYSHEV  0 6 or similar
+		//
+		
+		if ( FF_2BODY[0].SNUM > 0)
+			ZCalc_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP);
 	
 		if (if_3b_cheby)
 			ZCalc_3B_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, PAIR_TRIPLETS, FRAME_A_MATRIX, nlayers, PAIR_MAP, TRIAD_MAP);		
@@ -959,7 +983,7 @@ static void ZCalc_Cheby_Deriv(MD_JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 
 			if(rlen > FF_2BODY[curr_pair_type_idx].S_MINIM and rlen < FF_2BODY[curr_pair_type_idx].S_MAXIM)
 			{
-				
+				FF_2BODY[curr_pair_type_idx].N_CFG_CONTRIB++;
 			
 				// Do the distance transformation
 				
@@ -1257,14 +1281,18 @@ static void ZCalc_3B_Cheby_Deriv(MD_JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vect
 
 				curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
 				
-									
+				// If this type has been excluded, then skip to the next iteration of the loop
+				
+				if(curr_triple_type_index<0)
+					continue;
+				
 				rlen_ij = get_dist(SYSTEM, CONTROLS, RAB_IJ, a1, a2);	// Updates RAB!
 				rlen_ik = get_dist(SYSTEM, CONTROLS, RAB_IK, a1, a3);	// Updates RAB!
 				rlen_jk = get_dist(SYSTEM, CONTROLS, RAB_JK, a2, a3);	// Updates RAB!
 	
-				S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ij], PAIR_TRIPLETS[curr_triple_type_index]);
-				S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], PAIR_TRIPLETS[curr_triple_type_index]);
-				S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], PAIR_TRIPLETS[curr_triple_type_index]);
+				S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ij], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+				S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+				S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
 				
 				S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
 				S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
@@ -1276,15 +1304,21 @@ static void ZCalc_3B_Cheby_Deriv(MD_JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vect
 				// might want an inner cutoff function to ensure energy conservation (LEF)
 				// To clarify, this refers to the evaluation in the MD functions
 
-				
-
 				if(rlen_ij > S_MINIM_IJ && rlen_ij < S_MAXIM_IJ)
 				{		
 					if(rlen_ik > S_MINIM_IK && rlen_ik < S_MAXIM_IK)
 					{	
 						if(rlen_jk > S_MINIM_JK && rlen_jk < S_MAXIM_JK)											
 						{		
-							// Everything is within allowed ranges. Begin setting up the derivative calculation
+							
+							
+							// Everything is within allowed ranges.
+							
+							// Add this to the number of configs contributing to a fit for this triplet type
+							
+							PAIR_TRIPLETS[curr_triple_type_index].N_CFG_CONTRIB++;
+
+							// Begin setting up the derivative calculation
 
 							// Set up the polynomials
 			
@@ -1427,7 +1461,7 @@ static void ZCalc_3B_Cheby_Deriv(MD_JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vect
 						} // end if rlen_jk within cutoffs...
 					} // end if rlen_ik within cutoffs...	
 
-				} // end third loop over atoms						
+				} // end third loop over atoms					
 			}
 		}
 	}
@@ -1966,7 +2000,7 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 
 	// Divide atoms on a per-processor basis.
 
-	if (CONTROLS.COMPARE_FORCE && (CONTROLS.N_LAYERS>0))
+	if ((CONTROLS.COMPARE_FORCE && (CONTROLS.N_LAYERS>0)) || (CONTROLS.SUBTRACT_FORCE && (CONTROLS.N_LAYERS>0)))
 		divide_atoms(a1start, a1end, SYSTEM.ATOMS/pow(CONTROLS.N_LAYERS+1,3.0));
 	else 
 		divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
@@ -1994,7 +2028,7 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 			// If a2 is NOT a primitive atom, exclude a1/a2 interactions
 			// when a2's parent is larger than a1 (which must be primitive)
 			
-			if (CONTROLS.COMPARE_FORCE)
+			if (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE)
 				if(CONTROLS.N_LAYERS>0)
 					if(SYSTEM.PARENT[a2] != -1)
 						if(SYSTEM.PARENT[a2]<a1)
@@ -2094,12 +2128,14 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 				
 				// Now compute the force/potential
 
+				// Smoothing function to force PES to zero at outer cutoff
+
 				fcut0 = (1.0 - rlen/FF_2BODY[curr_pair_type_idx].S_MAXIM);
 				fcut      = pow(fcut0, fcut_power);
 				fcutderiv = pow(fcut0,fcut_power-1);
 				
 				fcutderiv *= -1.0 * fcut_power / FF_2BODY[curr_pair_type_idx].S_MAXIM;
-				
+
 				dx_dr = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff, rlen, FF_2BODY[curr_pair_type_idx].LAMBDA, FF_2BODY[curr_pair_type_idx].CHEBY_TYPE);
 
 				fidx = a2;
@@ -2107,7 +2143,7 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 				// When doing a compare force calculation, make sure that forces on 
 				// replicate atoms are attributed to the parent atoms
 				
-				if (CONTROLS.COMPARE_FORCE)
+				if (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE)
 					if(CONTROLS.N_LAYERS>0)
 						if(SYSTEM.PARENT[a2] != -1)
 								fidx = SYSTEM.PARENT[a2];
@@ -2137,7 +2173,7 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 					if (isatty(fileno(stdout)))
 						cout << COUT_STYLE.BOLD << COUT_STYLE.MAGENTA << "Warning: (Step " << CONTROLS.STEP << ")Adding penalty in 2B Cheby calc, r < rmin+penalty_dist " << rlen << " " << FF_2BODY[curr_pair_type_idx].S_MINIM+penalty_dist << " " << TEMP_STR << COUT_STYLE.ENDSTYLE << endl;
 					else
-						cout << "Warning: (Step " << CONTROLS.STEP << ")Adding penalty in 2B Cheby calc, r < rmin+penalty_dist " << rlen << " " << FF_2BODY[curr_pair_type_idx].S_MINIM+penalty_dist << " " << TEMP_STR << endl;
+						cout << "Warning: (Step " << CONTROLS.STEP << ") Adding penalty in 2B Cheby calc, r < rmin+penalty_dist " << rlen << " " << FF_2BODY[curr_pair_type_idx].S_MINIM+penalty_dist << " " << TEMP_STR << endl;
 					
 
 							
@@ -2210,6 +2246,27 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 	
 	double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
 	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
+	
+	double DUMMY_RIJ;
+	double DUMMY_RIK;
+	double DUMMY_RJK;
+
+	double SWITCH_IJ;
+	double SWITCH_IK;
+	double SWITCH_JK;
+	
+	double DSWITCH_IJ;
+	double DSWITCH_IK;
+	double DSWITCH_JK;
+
+	double SWITCH_SMOOTHNESS = 2.0;
+	
+	bool PENALTY_KICKIN = false;
+
+	// A penalty function is added to the potential for r + penalty_dist < smin[ipair]
+	// All pairs have the same penalty scale and distance
+	const double penalty_scale  = FF_2BODY[0].PENALTY_SCALE;	// 1.0e8;
+	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
 
 	const double fcut_power = 
     #ifndef FPENALTY_POWER
@@ -2261,7 +2318,7 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 	
 	int a1start, a1end;	
 
-	if (CONTROLS.COMPARE_FORCE && (CONTROLS.N_LAYERS>0))
+	if ((CONTROLS.COMPARE_FORCE && (CONTROLS.N_LAYERS>0)) || (CONTROLS.SUBTRACT_FORCE && (CONTROLS.N_LAYERS>0)))
 		divide_atoms(a1start, a1end, SYSTEM.ATOMS/pow(CONTROLS.N_LAYERS+1,3.0));
 	else 
 		divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
@@ -2303,7 +2360,7 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 				a3end   = SYSTEM.ATOMS;
 			}
 			
-			if (CONTROLS.COMPARE_FORCE)
+			if (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE)
 				if(CONTROLS.N_LAYERS>0)
 					if(SYSTEM.PARENT[a2] != -1)
 						if(SYSTEM.PARENT[a2]<a1)
@@ -2316,7 +2373,7 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 				else
 					a3 = a3idx;
 				
-				if (CONTROLS.COMPARE_FORCE)
+				if (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE)
 					if(CONTROLS.N_LAYERS>0)
 						if(SYSTEM.PARENT[a3] != -1)
 							if(SYSTEM.PARENT[a3]<SYSTEM.PARENT[a2])
@@ -2345,38 +2402,106 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 				TEMP_STR.append(FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);	
 
 				curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
+
+				if(curr_triple_type_index<0)
+					continue;
 				
 									
 				rlen_ij = get_dist(SYSTEM, CONTROLS, RAB_IJ, a1, a2);	// Updates RAB!
 				rlen_ik = get_dist(SYSTEM, CONTROLS, RAB_IK, a1, a3);	// Updates RAB!
 				rlen_jk = get_dist(SYSTEM, CONTROLS, RAB_JK, a2, a3);	// Updates RAB!
-	
-				S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index]);
-				S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index]);
-				S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index]);
+
+				S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+				S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+				S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
 				
 				S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
 				S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
 				S_MINIM_JK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
-				
+
+
 				// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 				// within the allowed range.
 
-				if(rlen_ij > S_MINIM_IJ && rlen_ij < S_MAXIM_IJ)
+				if((rlen_ij < S_MAXIM_IJ) && (rlen_ij > FF_2BODY[curr_pair_type_idx_ij].S_MINIM))
 				{			
-					if(rlen_ik > S_MINIM_IK && rlen_ik < S_MAXIM_IK)	
+					if((rlen_ik < S_MAXIM_IK) && (rlen_ik > FF_2BODY[curr_pair_type_idx_ik].S_MINIM))	
 					{
-						if(rlen_jk > S_MINIM_JK && rlen_jk < S_MAXIM_JK)									
+						if((rlen_jk < S_MAXIM_JK) && (rlen_jk > FF_2BODY[curr_pair_type_idx_jk].S_MINIM))
 						{
+							
+							PENALTY_KICKIN = false;
+							
+							// Set up variables for switching
+							
+							DUMMY_RIJ = rlen_ij;
+							DUMMY_RIK = rlen_ik;
+							DUMMY_RJK = rlen_jk;
+							
+							SWITCH_IJ = 0.0;
+							SWITCH_IK = 0.0;
+							SWITCH_JK = 0.0;
+		
+							DSWITCH_IJ = 0.0;
+							DSWITCH_IK = 0.0;
+							DSWITCH_JK = 0.0;
+		
+							
+							if(rlen_ij<S_MINIM_IJ)
+								DUMMY_RIJ = S_MINIM_IJ;
+							
+							if(rlen_ik<S_MINIM_IK)
+								DUMMY_RIK = S_MINIM_IK;
+							
+							if(rlen_jk<S_MINIM_JK)
+								DUMMY_RJK = S_MINIM_JK;
+
+							if (rlen_ij < S_MINIM_IJ )
+							{
+								PENALTY_KICKIN = true;
+								SWITCH_IJ  = penalty_scale * tanh( SWITCH_SMOOTHNESS*(S_MINIM_IJ - rlen_ij));
+								
+								DSWITCH_IJ = -1.0 * penalty_scale * SWITCH_SMOOTHNESS * pow(cosh(SWITCH_SMOOTHNESS*(S_MINIM_IJ - rlen_ij)),-2.0);
+								DSWITCH_IJ /= rlen_ij;
+
+								if(rlen_ij < S_MINIM_IJ)
+									DUMMY_RIJ =  S_MINIM_IJ;
+							}
+							if(rlen_ik < S_MINIM_IK )
+							{
+								PENALTY_KICKIN = true;
+								
+								SWITCH_IK  = penalty_scale * tanh( SWITCH_SMOOTHNESS*(S_MINIM_IK - rlen_ik));
+								
+								DSWITCH_IK = -1.0 * penalty_scale * SWITCH_SMOOTHNESS * pow(cosh(SWITCH_SMOOTHNESS*(S_MINIM_IK - rlen_ik)),-2.0); 
+								DSWITCH_IK /= rlen_ik;
+
+								if(rlen_ik < S_MINIM_IK)
+									DUMMY_RIK =  S_MINIM_IK;
+							}
+							if (rlen_jk < S_MINIM_JK )
+							{
+								PENALTY_KICKIN = true;
+								
+								SWITCH_JK  = penalty_scale * tanh( SWITCH_SMOOTHNESS*(S_MINIM_JK - rlen_jk));
+								
+								DSWITCH_JK = -1.0 * penalty_scale * SWITCH_SMOOTHNESS * pow(cosh(SWITCH_SMOOTHNESS*(S_MINIM_JK - rlen_jk)),-2.0);
+								DSWITCH_JK /= rlen_jk;
+
+								if(rlen_jk < S_MINIM_JK)
+									DUMMY_RJK =  S_MINIM_JK;
+							}
+			
+							
 							// Everything is within allowed ranges. Begin setting up the force calculation
 
 							// Set up the polynomials
 			
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, DUMMY_RIJ, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ);
 			
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik, S_MAXIM_IK, S_MINIM_IK);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, DUMMY_RIK, xdiff_ik, S_MAXIM_IK, S_MINIM_IK);
 			
-							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk, S_MAXIM_JK, S_MINIM_JK);
+							SET_3B_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, DUMMY_RJK, xdiff_jk, S_MAXIM_JK, S_MINIM_JK);
 			
 							// Apply the FF
 
@@ -2399,12 +2524,12 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 			
 							// Set up terms for derivatives
 			
-							dx_dr_ij = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_ij, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
+							dx_dr_ij = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_ij, DUMMY_RIJ, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
+							
+							dx_dr_ik = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_ik, DUMMY_RIK, FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
 
-							dx_dr_jk = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_jk, rlen_jk, FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
+							dx_dr_jk = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_jk, DUMMY_RJK, FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
 
-							dx_dr_ik = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_ik, rlen_ik, FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
-			
 							// Error check: Certain triplets are impossible...
 			
 							if(curr_triple_type_index < 0)
@@ -2443,28 +2568,23 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 				
 								coeff = FF_3BODY[curr_triple_type_index].PARAMS[i];
 				
-								tempx += coeff * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];	
-				
-								deriv_ij = fcut_ij * Tnd_ij[pow_ij] * dx_dr_ij + fcutderiv_ij * Tn_ij [pow_ij];
-				
-								deriv_ik = fcut_ik * Tnd_ik[pow_ik] * dx_dr_ik + fcutderiv_ik * Tn_ik [pow_ik];
-				
-								deriv_jk = fcut_jk * Tnd_jk[pow_jk] * dx_dr_jk + fcutderiv_jk * Tn_jk [pow_jk];
-				
-								force_ij  = coeff * deriv_ij * fcut_ik * fcut_jk * Tn_ik [pow_ik] * Tn_jk [pow_jk];
-								SYSTEM.PRESSURE_XYZ    -= force_ij * rlen_ij;
-								force_ij /= rlen_ij;
-				
-								force_ik  = coeff * deriv_ik * fcut_ij * fcut_jk * Tn_ij [pow_ij] * Tn_jk [pow_jk];
-								SYSTEM.PRESSURE_XYZ    -= force_ik * rlen_ik;
-								force_ik /= rlen_ik;
-				
-								force_jk  = coeff * deriv_jk * fcut_ij * fcut_ik * Tn_ij [pow_ij] * Tn_ik [pow_ik];
-								SYSTEM.PRESSURE_XYZ    -= force_jk * rlen_jk;
-								force_jk /= rlen_jk;
-								
-								
+								tempx += coeff * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]; 
 
+								deriv_ij  = fcut_ij * Tnd_ij[pow_ij] * dx_dr_ij + fcutderiv_ij * Tn_ij [pow_ij];
+								deriv_ik  = fcut_ik * Tnd_ik[pow_ik] * dx_dr_ik + fcutderiv_ik * Tn_ik [pow_ik];
+								deriv_jk  = fcut_jk * Tnd_jk[pow_jk] * dx_dr_jk + fcutderiv_jk * Tn_jk [pow_jk];
+							
+								force_ij  = coeff * deriv_ij * fcut_ik * fcut_jk * Tn_ik [pow_ik] * Tn_jk [pow_jk];
+								force_ik  = coeff * deriv_ik * fcut_ij * fcut_jk * Tn_ij [pow_ij] * Tn_jk [pow_jk];
+								force_jk  = coeff * deriv_jk * fcut_ij * fcut_ik * Tn_ij [pow_ij] * Tn_ik [pow_ik];
+								
+								SYSTEM.PRESSURE_XYZ    -= force_ij * rlen_ij;
+								SYSTEM.PRESSURE_XYZ    -= force_ik * rlen_ik;
+								SYSTEM.PRESSURE_XYZ    -= force_jk * rlen_jk;
+								
+								force_ij /= rlen_ij;
+								force_ik /= rlen_ik;
+								force_jk /= rlen_jk;
 
 								// Apply forces to ij pair
 				
@@ -2484,7 +2604,7 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 				
 								SYSTEM.ACCEL[fidx_a3].X -= force_ik * RAB_IK.X;
 								SYSTEM.ACCEL[fidx_a3].Y -= force_ik * RAB_IK.Y;
-								SYSTEM.ACCEL[fidx_a3].Z -= force_ik * RAB_IK.Z;	
+								SYSTEM.ACCEL[fidx_a3].Z -= force_ik  * RAB_IK.Z;	
 				
 								// Apply forces to jk pair
 				
@@ -2494,7 +2614,19 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 				
 								SYSTEM.ACCEL[a3]     .X -= force_jk * RAB_JK.X;
 								SYSTEM.ACCEL[a3]     .Y -= force_jk * RAB_JK.Y;
-								SYSTEM.ACCEL[a3]     .Z -= force_jk * RAB_JK.Z;										
+								SYSTEM.ACCEL[a3]     .Z -= force_jk * RAB_JK.Z;			
+								
+								
+								
+/*								
+								///////////
+								PE_NORMAL += tempx;
+
+								F_NORMAL.X = force_jk * RAB_JK.X;
+								F_NORMAL.Y = force_jk * RAB_JK.Y;
+								F_NORMAL.Z = force_jk * RAB_JK.Z;
+*/
+															
 				
 								#if FORCECHECK
 				
@@ -2512,7 +2644,7 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 				
 									FORCE_3B[a1]     .X += force_ik * RAB_IK.X;
 									FORCE_3B[a1]     .Y += force_ik * RAB_IK.Y;
-									FORCE_3B[a1]     .Z += force_ik * RAB_IK.Z;	
+									FORCE_3B[a1]     .Z += force_ik  * RAB_IK.Z;	
 				
 									FORCE_3B[fidx_a3].X -= force_ik * RAB_IK.X;
 									FORCE_3B[fidx_a3].Y -= force_ik * RAB_IK.Y;
@@ -2531,13 +2663,90 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 								#endif
 											
 							}	
+							
+							if(PENALTY_KICKIN)
+							{
+								tempx += SWITCH_IJ + SWITCH_IK + SWITCH_JK;
+								
+								// Apply forces to ij pair
+				
+								SYSTEM.ACCEL[a1]     .X += DSWITCH_IJ * RAB_IJ.X;
+								SYSTEM.ACCEL[a1]     .Y += DSWITCH_IJ * RAB_IJ.Y;
+								SYSTEM.ACCEL[a1]     .Z += DSWITCH_IJ * RAB_IJ.Z;
+				
+								SYSTEM.ACCEL[fidx_a2].X -= DSWITCH_IJ * RAB_IJ.X;
+								SYSTEM.ACCEL[fidx_a2].Y -= DSWITCH_IJ * RAB_IJ.Y;
+								SYSTEM.ACCEL[fidx_a2].Z -= DSWITCH_IJ * RAB_IJ.Z;
+				
+								// Apply forces to ik pair
+				
+								SYSTEM.ACCEL[a1]     .X += DSWITCH_IK * RAB_IK.X;
+								SYSTEM.ACCEL[a1]     .Y += DSWITCH_IK * RAB_IK.Y;
+								SYSTEM.ACCEL[a1]     .Z += DSWITCH_IK * RAB_IK.Z;	
+				
+								SYSTEM.ACCEL[fidx_a3].X -= DSWITCH_IK * RAB_IK.X;
+								SYSTEM.ACCEL[fidx_a3].Y -= DSWITCH_IK * RAB_IK.Y;
+								SYSTEM.ACCEL[fidx_a3].Z -= DSWITCH_IK * RAB_IK.Z;	
+				
+								// Apply forces to jk pair
+				
+								SYSTEM.ACCEL[fidx_a2].X += DSWITCH_JK * RAB_JK.X;
+								SYSTEM.ACCEL[fidx_a2].Y += DSWITCH_JK * RAB_JK.Y;
+								SYSTEM.ACCEL[fidx_a2].Z += DSWITCH_JK * RAB_JK.Z;
+				
+								SYSTEM.ACCEL[a3]     .X -= DSWITCH_JK * RAB_JK.X;
+								SYSTEM.ACCEL[a3]     .Y -= DSWITCH_JK * RAB_JK.Y;
+								SYSTEM.ACCEL[a3]     .Z -= DSWITCH_JK * RAB_JK.Z;	
+								
+								SYSTEM.TOT_POT_ENER += SWITCH_IJ + SWITCH_IK + SWITCH_JK;	
+
+								#if FORCECHECK
+				
+									// Apply forces to ij pair
+				
+									FORCE_3B[a1]     .X += DSWITCH_IJ * RAB_IJ.X;
+									FORCE_3B[a1]     .Y += DSWITCH_IJ * RAB_IJ.Y;
+									FORCE_3B[a1]     .Z += DSWITCH_IJ * RAB_IJ.Z;
+				
+									FORCE_3B[fidx_a2].X -= DSWITCH_IJ * RAB_IJ.X;
+									FORCE_3B[fidx_a2].Y -= DSWITCH_IJ * RAB_IJ.Y;
+									FORCE_3B[fidx_a2].Z -= DSWITCH_IJ * RAB_IJ.Z;
+				
+									// Apply forces to ik pair
+				
+									FORCE_3B[a1]     .X += DSWITCH_IK * RAB_IK.X;
+									FORCE_3B[a1]     .Y += DSWITCH_IK * RAB_IK.Y;
+									FORCE_3B[a1]     .Z += DSWITCH_IK * RAB_IK.Z;	
+				
+									FORCE_3B[fidx_a3].X -= DSWITCH_IK * RAB_IK.X;
+									FORCE_3B[fidx_a3].Y -= DSWITCH_IK * RAB_IK.Y;
+									FORCE_3B[fidx_a3].Z -= DSWITCH_IK * RAB_IK.Z;	
+				
+									// Apply forces to jk pair
+				
+									FORCE_3B[fidx_a2].X += DSWITCH_JK * RAB_JK.X;
+									FORCE_3B[fidx_a2].Y += DSWITCH_JK * RAB_JK.Y;
+									FORCE_3B[fidx_a2].Z += DSWITCH_JK * RAB_JK.Z;
+				
+									FORCE_3B[fidx_a3].X -= DSWITCH_JK * RAB_JK.X;
+									FORCE_3B[fidx_a3].Y -= DSWITCH_JK * RAB_JK.Y;
+									FORCE_3B[fidx_a3].Z -= DSWITCH_JK * RAB_JK.Z;										
+				
+								#endif
+								
+							}
 						}	
 					}				
 				}
-
 			}
 		}
     }
+	
+	
+	
+
+	
+	
 	
 	#if FORCECHECK
 
@@ -2556,6 +2765,7 @@ static void ZCalc_3B_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAI
 
   return;
 }
+
 
 // UPDATED AND VERIFIED
 static void ZCalc_Lj(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP)
@@ -2648,7 +2858,7 @@ static void ZCalc_Spline(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_
 	
 	int a1start, a1end, fidx;
 	
-	if (CONTROLS.COMPARE_FORCE && (CONTROLS.N_LAYERS>0))
+	if ((CONTROLS.COMPARE_FORCE && (CONTROLS.N_LAYERS>0)) || (CONTROLS.SUBTRACT_FORCE && (CONTROLS.N_LAYERS>0)))
 		divide_atoms(a1start, a1end, SYSTEM.ATOMS/pow(CONTROLS.N_LAYERS+1,3.0));
 	else 
 		divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
@@ -2680,7 +2890,7 @@ static void ZCalc_Spline(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_
 			// If a2 is NOT a primitive atom, exclude a1/a2 interactions
 			// when a2's parent is larger than a1 (which must be primitive)
 			
-			if (CONTROLS.COMPARE_FORCE)
+			if (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE)
 				if(CONTROLS.N_LAYERS>0)
 					if(SYSTEM.PARENT[a2] != -1)
 						if(SYSTEM.PARENT[a2]<a1)
@@ -2762,7 +2972,7 @@ static void ZCalc_Spline(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_
 				// When doing a compare force calculation, make sure that forces on 
 				// replicate atoms are attributed to the parent atoms
 				
-				if (CONTROLS.COMPARE_FORCE)
+				if (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE)
 					if(CONTROLS.N_LAYERS>0)
 						if(SYSTEM.PARENT[a2] != -1)
 								fidx = SYSTEM.PARENT[a2];
@@ -3007,8 +3217,21 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCL
 	for (int a=1; a<n_ij; a++)
 	{
 		tempx = 0;
-
+		
+		double SWITCH, DSWITCH;
+		double SWITCH_SMOOTHNESS = 0.1;
+	
+		SWITCH  = 1.0;
+		DSWITCH = 1.0;
+		
 		rlen = FF_2BODY[ij].S_MINIM + a * FF_2BODY[ij].S_DELTA;
+		
+		// Check if this is for a 2+3B scan, and whether 2B has been extrapolated from old values
+		if (FF_2BODY[ij].S_MINIM != FF_2BODY[ij].OLD_S_MINIM && (FILE_TAG != "") )
+		{
+			//SWITCH_IJ  = 1.0 - 0.5 + 0.5 * tanh( (RLEN_IJ-S_MINIM_IJ_3B)/SWITCH_SMOOTHNESS );
+			SWITCH  =  0.5 + 0.5 * tanh( (rlen-FF_2BODY[ij].OLD_S_MINIM)/SWITCH_SMOOTHNESS );
+		}
 
 		if(rlen > FF_2BODY[ij].S_MINIM and rlen < FF_2BODY[ij].S_MAXIM)
 		{
@@ -3102,6 +3325,8 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCL
 				tempx += Vpenalty;
 			}
 			
+//			tempx *= SWITCH;
+			
 			OUTFILE_2B_POT << rlen << " " << tempx << endl;						
 		} 
 
@@ -3136,7 +3361,7 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 	double RLEN_IJ;
 	double RLEN_IK;
 	double RLEN_JK;
-	
+
 	
 	
 	PAIR_TYPE_IJ = ATM_TYP_1;
@@ -3164,6 +3389,8 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 	FULL_FILE_3B = OUTFILE;
 	
 	//const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
+	
+
 	
 	static double CHEBY_DERIV_CONST;	// Accounts for when cheby range is changed from -1:1 to x:y 
 	
@@ -3201,9 +3428,9 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 	}
 
 
-	double S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index]);
-	double S_MAXIM_IK = SET_SMAXIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index]);
-	double S_MAXIM_JK = SET_SMAXIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index]);
+	double S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index],FF_2BODY[ij].PRPR_NM);
+	double S_MAXIM_IK = SET_SMAXIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index],FF_2BODY[ik].PRPR_NM);
+	double S_MAXIM_JK = SET_SMAXIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index],FF_2BODY[jk].PRPR_NM);
 	
 	double S_MINIM_IJ = SET_SMINIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index],FF_2BODY[ij].PRPR_NM);
 	double S_MINIM_IK = SET_SMINIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index],FF_2BODY[ik].PRPR_NM);
@@ -3233,7 +3460,6 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 				RLEN_IJ = S_MINIM_IJ + a * FF_2BODY[ij].S_DELTA;
 				RLEN_IK = S_MINIM_IK + b * FF_2BODY[ik].S_DELTA;
 				RLEN_JK = S_MINIM_JK + c * FF_2BODY[jk].S_DELTA;
-
 			
 				SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ);
 			
@@ -3254,7 +3480,7 @@ void Print_3B_Cheby(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vecto
 			
 				if(curr_triple_type_index < 0)
 				{
-					cout << "ERROR: Impossible atom triplet found: " << TEMP_STR << endl;
+					cout << "ERROR: Impossible atom triplet requested: " << TEMP_STR << endl;
 					cout << "       Check the parameter file." << endl;
 					exit_run(0);
 				}
@@ -3312,9 +3538,7 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 // Not perturbed distances are fixed at a user-specified value
 // pair distances will range from smin to smax, incremented by sdelta
 {
-	
-	//string SCAN_FILE_3B;	// Declared as a global (external) variable in functions.h
-		
+			
 	static double *Tn_ij,  *Tn_ik,  *Tn_jk;
 	static double *Tnd_ij, *Tnd_ik, *Tnd_jk;
 	static bool   called_before = false;
@@ -3324,6 +3548,9 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	double fcut0_ij, fcut0_ik, fcut0_jk; 
 	double fcut_ij,  fcut_ik,  fcut_jk; 	
 	static string TEMP_STR;
+	
+	double inner_fcut0_ij, inner_fcut0_ik, inner_fcut0_jk;
+	double inner_fcut_ij,  inner_fcut_ik,  inner_fcut_jk;
 
 	static int curr_triple_type_index;
 	static int pow_ij, pow_ik, pow_jk;
@@ -3333,6 +3560,10 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	double RLEN_IJ;
 	double RLEN_IK;
 	double RLEN_JK;
+	
+	double RPEN_IJ;
+	double RPEN_IK;
+	double RPEN_JK;
 
 	PAIR_TYPE_IJ = ATM_TYP_1;
 	PAIR_TYPE_IK = ATM_TYP_1;
@@ -3351,6 +3582,11 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
 	
 	const double fpenalty_scale = FF_2BODY[0].CUBIC_SCALE;		// 1.0;
+	// A penalty function is added to the potential for r + penalty_dist < smin[ipair]
+	// All pairs have the same penalty scale and distance
+	const double penalty_scale  = FF_2BODY[0].PENALTY_SCALE;	// 1.0e8;
+	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
+	
 	
 	static double CHEBY_DERIV_CONST;	// Accounts for when cheby range is changed from -1:1 to x:y
 	
@@ -3401,16 +3637,17 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	
 	}
 
-	tempx = 0;
+	double S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index],FF_2BODY[ij].PRPR_NM);
+	double S_MAXIM_IK = SET_SMAXIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index],FF_2BODY[ik].PRPR_NM);
+	double S_MAXIM_JK = SET_SMAXIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index],FF_2BODY[jk].PRPR_NM);
 	
-	double S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index]);
-	double S_MAXIM_IK = SET_SMAXIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index]);
-	double S_MAXIM_JK = SET_SMAXIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index]);
-		
-	double S_MINIM_IJ = SET_SMINIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index],FF_2BODY[ij].PRPR_NM);
-	double S_MINIM_IK = SET_SMINIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index],FF_2BODY[ik].PRPR_NM);
-	double S_MINIM_JK = SET_SMINIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index],FF_2BODY[jk].PRPR_NM);
+	double S_MINIM_IJ_3B = SET_SMINIM(FF_2BODY[ij], FF_3BODY[curr_triple_type_index],FF_2BODY[ij].PRPR_NM);
+	double S_MINIM_IK_3B = SET_SMINIM(FF_2BODY[ik], FF_3BODY[curr_triple_type_index],FF_2BODY[ik].PRPR_NM);
+	double S_MINIM_JK_3B = SET_SMINIM(FF_2BODY[jk], FF_3BODY[curr_triple_type_index],FF_2BODY[jk].PRPR_NM);
 	
+	double S_MINIM_IJ_2B = FF_2BODY[ij].S_MINIM;
+	double S_MINIM_IK_2B = FF_2BODY[ik].S_MINIM;
+	double S_MINIM_JK_2B = FF_2BODY[jk].S_MINIM;
 	
 	// Set the fixed distances
 	
@@ -3432,19 +3669,19 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	
 	else
 		RLEN_JK = FF_PLOTS.FIX_VAL_2[scan];	
-	
+
 	// Set the scan pair
 	
 	int n;
 	
 	if      (FF_PLOTS.SCAN_PAIR[scan] == 1)
-		n = (S_MAXIM_IJ - S_MINIM_IJ)/FF_2BODY[ij].S_DELTA;
+		n = (S_MAXIM_IJ - S_MINIM_IJ_2B)/FF_2BODY[ij].S_DELTA;
 	
 	else if (FF_PLOTS.SCAN_PAIR[scan] == 2)
-		n = (S_MAXIM_IK - S_MINIM_IK)/FF_2BODY[ik].S_DELTA;
+		n = (S_MAXIM_IK - S_MINIM_IK_2B)/FF_2BODY[ik].S_DELTA;
 	
 	else
-		n = (S_MAXIM_JK - S_MINIM_JK)/FF_2BODY[jk].S_DELTA;
+		n = (S_MAXIM_JK - S_MINIM_JK_2B)/FF_2BODY[jk].S_DELTA;
 	
 	// Run the scan	
 
@@ -3452,18 +3689,85 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 	{
 
 		if      (FF_PLOTS.SCAN_PAIR[scan] == 1)
-			RLEN_IJ = S_MINIM_IJ + a * FF_2BODY[ij].S_DELTA;
+			RLEN_IJ = S_MINIM_IJ_2B + a * FF_2BODY[ij].S_DELTA;
 		else if (FF_PLOTS.SCAN_PAIR[scan] == 2)
-			RLEN_IK = S_MINIM_IK + a * FF_2BODY[ik].S_DELTA;
+			RLEN_IK = S_MINIM_IK_2B + a * FF_2BODY[ik].S_DELTA;
 		else
-			RLEN_JK = S_MINIM_JK + a * FF_2BODY[jk].S_DELTA;		
-
+			RLEN_JK = S_MINIM_JK_2B + a * FF_2BODY[jk].S_DELTA;		
+		
+		// Set up for switching function... 
+		
+		tempx = 0;
+		
+		double SWITCH_IJ,  SWITCH_IK,  SWITCH_JK;
+		double DSWITCH_IJ, DSWITCH_IK, DSWITCH_JK;
+		double SWITCH_ENDPOINT;
+		double SWITCH_SMOOTHNESS = 2.0; // = 0.1;
+		
+		SWITCH_IJ = 0.0;
+		SWITCH_IK = 0.0;
+		SWITCH_JK = 0.0;
+		
+		DSWITCH_IJ = 0.0;
+		DSWITCH_IK = 0.0;
+		DSWITCH_JK = 0.0;
+		
+		
+		RPEN_IJ = 0.0;
+		RPEN_IK = 0.0;
+		RPEN_JK = 0.0;
+		
+		if (  (FF_PLOTS.SCAN_PAIR[scan] == 1) && (RLEN_IJ < S_MINIM_IJ_3B )) 
+		{
+			RPEN_IJ   = S_MINIM_IJ_3B + penalty_dist - RLEN_IJ;
+			//SWITCH_IJ = penalty_scale * tanh( SWITCH_SMOOTHNESS*(S_MINIM_IJ_3B - RLEN_IJ)/S_MINIM_IJ_3B);
+			SWITCH_IJ = penalty_scale * tanh( SWITCH_SMOOTHNESS*(S_MINIM_IJ_3B - RLEN_IJ));
 			
-		SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ);
-	
-		SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik, S_MAXIM_IK, S_MINIM_IK);
-	
-		SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk, S_MAXIM_JK, S_MINIM_JK);		
+			if(RLEN_IJ < S_MINIM_IJ_3B)
+				RLEN_IJ =  S_MINIM_IJ_3B;
+		}
+		if(RLEN_IJ < FF_2BODY[ij].S_MINIM )
+		{
+			cout << "ERROR: IJ pair is fixed below 2b smin value!" << endl;
+			cout << "rlen, 2b_smin: " << RLEN_IJ  << " " << FF_2BODY[ij].S_MINIM << endl;
+			exit(0);
+		}
+		
+		if (  (FF_PLOTS.SCAN_PAIR[scan] == 2) && (RLEN_IK < S_MINIM_IK_3B )) 
+		{
+			RPEN_IK   = S_MINIM_IK_3B + penalty_dist - RLEN_IK;
+			//SWITCH_IK = penalty_scale * tanh( SWITCH_SMOOTHNESS*(S_MINIM_IK_3B - RLEN_IK)/S_MINIM_IK_3B);
+			SWITCH_IK = penalty_scale * tanh( SWITCH_SMOOTHNESS*(S_MINIM_IK_3B - RLEN_IK));
+			
+			if(RLEN_IK < S_MINIM_IK_3B)
+				RLEN_IK =  S_MINIM_IK_3B;
+		}
+		if(RLEN_IK < FF_2BODY[ik].S_MINIM )
+		{
+			cout << "ERROR: IK pair is fixed below 2b smin value!" << endl;
+			cout << "rlen, 2b_smin: " << RLEN_IK  << " " << FF_2BODY[ik].S_MINIM << endl;
+			exit(0);
+		}
+		
+		if (  (FF_PLOTS.SCAN_PAIR[scan] == 3) && (RLEN_JK < S_MINIM_JK_3B )) 
+		{
+			RPEN_JK   = S_MINIM_JK_3B + penalty_dist - RLEN_JK;
+			//SWITCH_JK = penalty_scale * tanh( SWITCH_SMOOTHNESS*(S_MINIM_JK_3B - RLEN_JK)/S_MINIM_JK_3B);
+			SWITCH_JK = penalty_scale * tanh( SWITCH_SMOOTHNESS*(S_MINIM_JK_3B - RLEN_JK));
+			
+			if(RLEN_JK < S_MINIM_JK_3B)
+				RLEN_JK =  S_MINIM_JK_3B;
+		}
+		if(RLEN_JK < FF_2BODY[jk].S_MINIM )
+		{
+			cout << "ERROR: JK pair is fixed below 2b smin value!" << endl;
+			cout << "rlen, 2b_smin: " << RLEN_JK  << " " << FF_2BODY[jk].S_MINIM << endl;
+			exit(0);
+		}		
+
+		SET_3B_CHEBY_POLYS(FF_2BODY[ij], Tn_ij, Tnd_ij, RLEN_IJ, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ_3B);
+		SET_3B_CHEBY_POLYS(FF_2BODY[ik], Tn_ik, Tnd_ik, RLEN_IK, xdiff_ik, S_MAXIM_IK, S_MINIM_IK_3B);
+		SET_3B_CHEBY_POLYS(FF_2BODY[jk], Tn_jk, Tnd_jk, RLEN_JK, xdiff_jk, S_MAXIM_JK, S_MINIM_JK_3B);		
 	
 		fcut0_ij     = (1.0 - RLEN_IJ/S_MAXIM_IJ);
 		fcut_ij      = pow(fcut0_ij, fcut_power);
@@ -3491,9 +3795,7 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 		// Keep in mind that the order in which allowed powers are stored may not match the
 		// ordering of pairs resulting from the present atom triplet. Thus, we need to order
 		// the stored powers properly before applying the FF.
-		 
-		tempx = 0;
-		
+
 		// Coulombic contributions...IF THEY ARE COMPUTED HERE, THEY SHOULDN'T BE COMPUTED IN THE 2-BODY CALCULATIONS!
 		// ...Scan logic in the splines_md.C main function control this.
 		
@@ -3505,10 +3807,23 @@ void Print_3B_Cheby_Scan(MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 		{
 			SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
 		
-			tempx += FF_3BODY[curr_triple_type_index].PARAMS[i] * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];	
+			tempx += FF_3BODY[curr_triple_type_index].PARAMS[i] 
+				   * fcut_ij   * fcut_ik   * fcut_jk 
+				   * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];		
 		}
+
+		tempx += SWITCH_IJ + SWITCH_IK + SWITCH_JK;
 		
-		OUTFILE_3B_POT << 	RLEN_IJ << " " << RLEN_IK << " " << RLEN_JK << " " << tempx << endl;			
+		// Make sure we're using the right rlen for printing
+		
+		if      (FF_PLOTS.SCAN_PAIR[scan] == 1)
+			RLEN_IJ = S_MINIM_IJ_2B + a * FF_2BODY[ij].S_DELTA;
+		else if (FF_PLOTS.SCAN_PAIR[scan] == 2)
+			RLEN_IK = S_MINIM_IK_2B + a * FF_2BODY[ik].S_DELTA;
+		else
+			RLEN_JK = S_MINIM_JK_2B + a * FF_2BODY[jk].S_DELTA;	
+				
+		OUTFILE_3B_POT << 	RLEN_IJ << " " << RLEN_IK << " " << RLEN_JK << " " << tempx <<endl;						
 			
 	}
 	

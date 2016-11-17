@@ -42,11 +42,111 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix setup complete: 
 
 ...Populating the matricies for A, Coulomb forces, and overbonding...
+
+	Processing frame: 1     of: 99
 	Ewald_Deriv:
 	R-Space Ewald cutoff      =  6.173215e+00
 	R-Space accuracy estimate =  5.220777e-08
 	K-space accuracy estimate =  5.489244e-07
 	Number of Ewald K-vectors = 235
+	Processing frame: 2     of: 99
+	Processing frame: 3     of: 99
+	Processing frame: 4     of: 99
+	Processing frame: 5     of: 99
+	Processing frame: 6     of: 99
+	Processing frame: 7     of: 99
+	Processing frame: 8     of: 99
+	Processing frame: 9     of: 99
+	Processing frame: 10    of: 99
+	Processing frame: 11    of: 99
+	Processing frame: 12    of: 99
+	Processing frame: 13    of: 99
+	Processing frame: 14    of: 99
+	Processing frame: 15    of: 99
+	Processing frame: 16    of: 99
+	Processing frame: 17    of: 99
+	Processing frame: 18    of: 99
+	Processing frame: 19    of: 99
+	Processing frame: 20    of: 99
+	Processing frame: 21    of: 99
+	Processing frame: 22    of: 99
+	Processing frame: 23    of: 99
+	Processing frame: 24    of: 99
+	Processing frame: 25    of: 99
+	Processing frame: 26    of: 99
+	Processing frame: 27    of: 99
+	Processing frame: 28    of: 99
+	Processing frame: 29    of: 99
+	Processing frame: 30    of: 99
+	Processing frame: 31    of: 99
+	Processing frame: 32    of: 99
+	Processing frame: 33    of: 99
+	Processing frame: 34    of: 99
+	Processing frame: 35    of: 99
+	Processing frame: 36    of: 99
+	Processing frame: 37    of: 99
+	Processing frame: 38    of: 99
+	Processing frame: 39    of: 99
+	Processing frame: 40    of: 99
+	Processing frame: 41    of: 99
+	Processing frame: 42    of: 99
+	Processing frame: 43    of: 99
+	Processing frame: 44    of: 99
+	Processing frame: 45    of: 99
+	Processing frame: 46    of: 99
+	Processing frame: 47    of: 99
+	Processing frame: 48    of: 99
+	Processing frame: 49    of: 99
+	Processing frame: 50    of: 99
+	Processing frame: 51    of: 99
+	Processing frame: 52    of: 99
+	Processing frame: 53    of: 99
+	Processing frame: 54    of: 99
+	Processing frame: 55    of: 99
+	Processing frame: 56    of: 99
+	Processing frame: 57    of: 99
+	Processing frame: 58    of: 99
+	Processing frame: 59    of: 99
+	Processing frame: 60    of: 99
+	Processing frame: 61    of: 99
+	Processing frame: 62    of: 99
+	Processing frame: 63    of: 99
+	Processing frame: 64    of: 99
+	Processing frame: 65    of: 99
+	Processing frame: 66    of: 99
+	Processing frame: 67    of: 99
+	Processing frame: 68    of: 99
+	Processing frame: 69    of: 99
+	Processing frame: 70    of: 99
+	Processing frame: 71    of: 99
+	Processing frame: 72    of: 99
+	Processing frame: 73    of: 99
+	Processing frame: 74    of: 99
+	Processing frame: 75    of: 99
+	Processing frame: 76    of: 99
+	Processing frame: 77    of: 99
+	Processing frame: 78    of: 99
+	Processing frame: 79    of: 99
+	Processing frame: 80    of: 99
+	Processing frame: 81    of: 99
+	Processing frame: 82    of: 99
+	Processing frame: 83    of: 99
+	Processing frame: 84    of: 99
+	Processing frame: 85    of: 99
+	Processing frame: 86    of: 99
+	Processing frame: 87    of: 99
+	Processing frame: 88    of: 99
+	Processing frame: 89    of: 99
+	Processing frame: 90    of: 99
+	Processing frame: 91    of: 99
+	Processing frame: 92    of: 99
+	Processing frame: 93    of: 99
+	Processing frame: 94    of: 99
+	Processing frame: 95    of: 99
+	Processing frame: 96    of: 99
+	Processing frame: 97    of: 99
+	Processing frame: 98    of: 99
+	Processing frame: 99    of: 99
 ...matrix population complete: 
 
 Printing matricies...
@@ -54,5 +154,9 @@ Printing matricies...
 		0	O O	2.039
 		1	H H	1.082
 		2	O H	0.820
+	Total number of configurations contributing to each pair type:
+		0	O O 0
+		1	H H 0
+		2	O H 0
 ...matrix printing complete: 
 

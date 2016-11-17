@@ -30,7 +30,7 @@ Reading initial coordinates and forces...
 	...Read the following coordinate file extension: xyzf
 	...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Ignoring last three fields of atom info lines in xyzf file... 
-	...will read from specified force file instead.
+	...will read from specified force file instead: force.txt
 	...Ignoring last three fields of atom info lines in xyzf file... 
    ...read complete
 
@@ -96,7 +96,6 @@ Attempting to read pairtype...
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
-	Special 3-body cutoffs defined: 
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
@@ -107,7 +106,7 @@ Force field summary:
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 0.0000e+00 1.0000e+00
+		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00
 		Parameters: 
 		0 9.2268e-01
 		1 -2.7288e+01
@@ -121,7 +120,7 @@ Force field summary:
 		9 -1.7479e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
+		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
 		Parameters: 
 		0 -3.1078e+01
 		1 -7.1188e+01
@@ -135,7 +134,7 @@ Force field summary:
 		9 -3.8906e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 0.0000e+00 1.0000e+00
+		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
 		Parameters: 
 		0 -3.5559e+00
 		1 1.6520e+01
@@ -206,4 +205,4 @@ Ewald parameters:
 	Number of Ewald K-vectors = 894
 	K-space accuracy estimate = 0.00000006626103
 
-RMS force error = 0.028274
+RMS force error = 0.014375

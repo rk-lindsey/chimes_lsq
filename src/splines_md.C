@@ -142,8 +142,6 @@ int main(int argc, char* argv[])
 	ifstream PARAMFILE;
 	ifstream COORDFILE;
 
-
-	
 	read_input(CONTROLS, FF_PLOTS,NEIGHBOR_LIST);		// Populate object with user defined values
 	
 	cout.precision(15);			// Set output precision
@@ -224,7 +222,7 @@ int main(int argc, char* argv[])
 	if (RANK==0)
 		cout << "Reading initial coordinates and forces..." << endl;
 
-    if ( CONTROLS.COMPARE_FORCE ) 
+    if ( CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE) 
     {
 		if (RANK==0)
 			cout << "	Opening " << CONTROLS.COMPARE_FILE.data() << " to read forces for comparison\n";
@@ -280,14 +278,14 @@ int main(int argc, char* argv[])
 		SYSTEM.ACCEL[a].Y = 0;
 		SYSTEM.ACCEL[a].Z = 0;		
 		
-        if ( CONTROLS.COMPARE_FORCE ) // Reading positions from *.xyzf for force testing
+        if ( CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE ) // Reading positions from *.xyzf for force testing
 		{	
 			if(EXTENSION == "xyzf")	// Ignore forces in .xyzf file
 			{
 				if(a==0 && RANK==0)
 				{
 					cout << "	...Ignoring last three fields of atom info lines in xyzf file... " << endl;
-					cout << "	...will read from specified force file instead." << endl;
+					cout << "	...will read from specified force file instead: " << CONTROLS.COMPARE_FILE << endl;
 				}
 
 				//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;			
@@ -295,6 +293,7 @@ int main(int argc, char* argv[])
 					
 			// Read forces from separate force file
 			CMPR_FORCEFILE >> SYSTEM.FORCES[a].X >> SYSTEM.FORCES[a].Y >> SYSTEM.FORCES[a].Z;
+			
 		}
 		
         if(!CONTROLS.INIT_VEL) // Reading positions from *.xyz
@@ -354,7 +353,7 @@ int main(int argc, char* argv[])
 	PARAMFILE.open(CONTROLS.PARAM_FILE.data());
 	if(!PARAMFILE.is_open())
 	{
-		cout << "ERROR: Cannot open coordinate file: " << CONTROLS.PARAM_FILE << endl;
+		cout << "ERROR: Cannot open paramter file: " << CONTROLS.PARAM_FILE << endl;
 		exit_run(0);
 	}
 	
@@ -573,7 +572,7 @@ int main(int argc, char* argv[])
 			SYSTEM.ACCEL[a1].Z = 0;
 		}
 		
-		if(!CONTROLS.COMPARE_FORCE)
+		if(!CONTROLS.COMPARE_FORCE && !CONTROLS.SUBTRACT_FORCE)
 		{
 			for(int a1=0; a1<SYSTEM.ATOMS; a1++)
 			{
@@ -814,7 +813,7 @@ int main(int argc, char* argv[])
 	PARAMFILE.open(CONTROLS.PARAM_FILE.data());
 	if(!PARAMFILE.is_open())
 	{
-		cout << "ERROR: Cannot open coordinate file: " << CONTROLS.PARAM_FILE << endl;
+		cout << "ERROR: Cannot open paramter file: " << CONTROLS.PARAM_FILE << endl;
 		exit_run(0);
 	}
 	
@@ -849,7 +848,37 @@ int main(int argc, char* argv[])
 				getline(PARAMFILE,LINE);
 				
 				if(LINE.find("ENDFILE") != string::npos)
-					break;		
+					break;	
+				
+				else if(LINE.find("SPECIAL 2B OLD_S_MINIM: ") != string::npos)
+				{
+					STREAM_PARSER.str(LINE);			
+					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+					STREAM_PARSER.str("");
+					STREAM_PARSER.clear();	
+					
+					#if VERBOSITY == 1
+						if(RANK==0)
+							cout << "	Note: Storing original 2-body r_min values for 2/3-body switching: " << endl;
+					#endif	
+			
+					for(int i=0;i<TMP_TERMS1; i++)
+					{
+						getline(PARAMFILE,LINE);
+	
+						STREAM_PARSER.str(LINE);
+						STREAM_PARSER >> TMP_TERMS2 >> TEMP_STR;	// We could use the integer, but this way is probably safer
+						STREAM_PARSER >> FF_2BODY[TMP_TERMS2].OLD_S_MINIM;
+						
+						STREAM_PARSER.str("");
+						STREAM_PARSER.clear();	
+						
+						#if VERBOSITY == 1
+							if(RANK==0)
+								cout << "		" << TEMP_STR << "   " <<  FF_2BODY[TMP_TERMS2].OLD_S_MINIM << endl;
+						#endif	
+					}
+				}	
 				
 				else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
 				{
@@ -858,7 +887,8 @@ int main(int argc, char* argv[])
 					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
 	
 					#if VERBOSITY == 1
-						cout << "	Note: Setting specific 3-body r_min values: " << endl;
+						if(RANK==0)
+							cout << "	Note: Setting specific 3-body r_min values: " << endl;
 					#endif	
 
 					double TMP_VAL;
@@ -882,46 +912,50 @@ int main(int argc, char* argv[])
 						STREAM_PARSER >> TMP_JK;	// What is the JK?
 
 						// Check that triplet pair types are correct
-		
-						try
+						
+						
+						if ( PAIR_MAP.count(TMP_IJ) == 1 ) 
 						{
 							TMP_IJ = FF_2BODY[ PAIR_MAP[ TMP_IJ ] ].PRPR_NM;
 						}
-						catch(...)
+						else
 						{
 							cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
 							cout << "		Triplet type:              " << TEMP_STR << endl;
 							cout << "		First distance, pair type: " << TMP_IJ << endl;
+							exit_run(0);
 						}
-						try
+						if ( PAIR_MAP.count(TMP_IK) == 1 ) 
 						{
 							TMP_IK = FF_2BODY[ PAIR_MAP[ TMP_IK ] ].PRPR_NM;
 						}
-						catch(...)
+						else
 						{
 							cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
 							cout << "		Triplet type:              " << TEMP_STR << endl;
 							cout << "		First distance, pair type: " << TMP_IK << endl;
+							exit_run(0);
 						}
-						try
+						if ( PAIR_MAP.count(TMP_JK) == 1 ) 
 						{
 							TMP_JK = FF_2BODY[ PAIR_MAP[ TMP_JK ] ].PRPR_NM;
 						}
-						catch(...)
+						else
 						{
 							cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
 							cout << "		Triplet type:              " << TEMP_STR << endl;
 							cout << "		First distance, pair type: " << TMP_JK << endl;
+							exit_run(0);
 						}
 		
 						TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR1 ] ].PRPR_NM;
 						TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR2 ] ].PRPR_NM;
 						TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR3 ] ].PRPR_NM;
-	
+						
+						STREAM_PARSER >> TMP_VAL;
+
 						// Read the first inner cutoff
 
-						STREAM_PARSER >> TMP_VAL;
-		
 						if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
 							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
 		
@@ -960,10 +994,13 @@ int main(int argc, char* argv[])
 							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
 
 						#if VERBOSITY == 1
-							cout << "		" << TEMP_STR << "( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-								              << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X << ", "
-										 	  << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y << ", "
-											  << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z << endl;
+							if(RANK==0)
+							{
+								cout << "		" << TEMP_STR << " ( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
+								     << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X << ", "
+									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y << ", "
+									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z << endl;
+							}
 						#endif	
 					}
 					
@@ -972,12 +1009,18 @@ int main(int argc, char* argv[])
 	
 				}
 				
+				/*
 				else if(LINE.find("SPECIAL 3B S_MAXIM: ") != string::npos)
 				{
 					STREAM_PARSER.str(LINE);			
 					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
 					STREAM_PARSER.str("");
 					STREAM_PARSER.clear();	
+					
+					#if VERBOSITY == 1
+						if(RANK==0)
+							cout << "	Note: Setting specific 3-body r_max values: " << endl;
+					#endif	
 			
 					for(int i=0;i<TMP_TERMS1; i++)
 					{
@@ -992,11 +1035,139 @@ int main(int argc, char* argv[])
 						
 						STREAM_PARSER.str("");
 						STREAM_PARSER.clear();	
+						
+						#if VERBOSITY == 1
+							if(RANK==0)
+								cout << "		" << TEMP_STR << "   " <<  FF_3BODY[TMP_TERMS2].S_MAXIM_3B << endl;
+						#endif	
 					}
-
 				}
+				*/
 				
-				
+				else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
+				{
+					STREAM_PARSER.str(LINE);
+	
+					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+	
+					#if VERBOSITY == 1
+						if(RANK==0)
+							cout << "	Note: Setting specific 3-body r_max values: " << endl;
+					#endif	
+
+					double TMP_VAL;
+					
+					string  TMP_IJ,  TMP_IK,  TMP_JK;	
+					string TARG_IJ, TARG_IK, TARG_JK;
+		
+					for(int i=0; i<TMP_TERMS1; i++)
+					{
+						getline(PARAMFILE,LINE);
+						
+						STREAM_PARSER.str("");
+						STREAM_PARSER.clear();
+						
+						STREAM_PARSER.str(LINE);
+						STREAM_PARSER >> TEMP_STR;	// Just and index for the pair type
+						STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
+
+						STREAM_PARSER >> TMP_IJ;	// What is the IJ?
+						STREAM_PARSER >> TMP_IK;	// What is the IK?
+						STREAM_PARSER >> TMP_JK;	// What is the JK?
+
+						// Check that triplet pair types are correct
+		
+						try
+						{
+							TMP_IJ = FF_2BODY[ PAIR_MAP[ TMP_IJ ] ].PRPR_NM;
+						}
+						catch(...)
+						{
+							cout << "ERROR: Unknown triplet pair for special outer cutoff." << endl;
+							cout << "		Triplet type:              " << TEMP_STR << endl;
+							cout << "		First distance, pair type: " << TMP_IJ << endl;
+						}
+						try
+						{
+							TMP_IK = FF_2BODY[ PAIR_MAP[ TMP_IK ] ].PRPR_NM;
+						}
+						catch(...)
+						{
+							cout << "ERROR: Unknown triplet pair for special outer cutoff." << endl;
+							cout << "		Triplet type:              " << TEMP_STR << endl;
+							cout << "		First distance, pair type: " << TMP_IK << endl;
+						}
+						try
+						{
+							TMP_JK = FF_2BODY[ PAIR_MAP[ TMP_JK ] ].PRPR_NM;
+						}
+						catch(...)
+						{
+							cout << "ERROR: Unknown triplet pair for special outer cutoff." << endl;
+							cout << "		Triplet type:              " << TEMP_STR << endl;
+							cout << "		First distance, pair type: " << TMP_JK << endl;
+						}
+		
+						TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR1 ] ].PRPR_NM;
+						TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR2 ] ].PRPR_NM;
+						TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR3 ] ].PRPR_NM;
+	
+						// Read the first outer cutoff
+
+						STREAM_PARSER >> TMP_VAL;
+		
+						if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+		
+						else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+		
+						else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+
+
+						// Read the second outer cutoff
+
+						STREAM_PARSER >> TMP_VAL;
+		
+						if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+		
+						else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+		
+						else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+
+		
+						// Read the third outer cutoff
+
+						STREAM_PARSER >> TMP_VAL;
+		
+						if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+		
+						else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+		
+						else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+
+						#if VERBOSITY == 1
+							if(RANK==0)
+							{
+								cout << "		" << TEMP_STR << " ( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
+								     << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X << ", "
+									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y << ", "
+									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z << endl;
+							}
+						#endif	
+					}
+					
+					STREAM_PARSER.str("");
+					STREAM_PARSER.clear();
+	
+				}
 			}
 			
 			FOUND_END = true;
@@ -1007,7 +1178,7 @@ int main(int argc, char* argv[])
 				cout << "Notes on simulation: " << endl;
 				cout << "	Using fpenalty power " << FPENALTY_POWER << endl;
 				
-				
+				/*
 				
 				int FOUND_SPECIAL = 0;
 	
@@ -1015,7 +1186,7 @@ int main(int argc, char* argv[])
 					if(FF_3BODY[i].S_MAXIM_3B != -1)
 						FOUND_SPECIAL++;
 	
-				if(FOUND_SPECIAL<FF_3BODY.size())
+				if(FOUND_SPECIAL<FF_3BODY.size() > 0)
 				{
 					cout << "	Special 3-body cutoffs defined: " << endl;
 		
@@ -1023,6 +1194,7 @@ int main(int argc, char* argv[])
 						if(FF_3BODY[i].S_MAXIM_3B != -1)
 							cout << "		" <<  i << " " << TRIAD_MAP_REVERSE[i] << " " << FF_3BODY[i].S_MAXIM_3B << endl;
 				}
+				*/
 	
 			}
 
@@ -1199,7 +1371,7 @@ int main(int argc, char* argv[])
 				for(int i=0; i<NO_PAIRS; i++)
 				{
 					FF_2BODY[i].PENALTY_DIST     = 0.01;
-					//FF_2BODY[i].PENALTY_SCALE    = 1.0e4;
+					FF_2BODY[i].PENALTY_SCALE    = 1.0e4;
 					FF_2BODY[i].CUBIC_SCALE      = 1.0;
 					FF_2BODY[i].CHEBY_RANGE_HIGH = TMP_HIGH;
 					FF_2BODY[i].CHEBY_RANGE_LOW  = TMP_LOW;
@@ -1221,6 +1393,8 @@ int main(int argc, char* argv[])
 				PARAMFILE >> FF_2BODY[i].ATM2TYP;	
 				PARAMFILE >> FF_2BODY[i].S_MINIM;	
 				PARAMFILE >> FF_2BODY[i].S_MAXIM;
+				
+				FF_2BODY[i].OLD_S_MINIM = FF_2BODY[i].S_MINIM;
 				
 				if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
 				{
@@ -1380,6 +1554,10 @@ int main(int argc, char* argv[])
 				FF_3BODY[i].S_MINIM_3B.X = -1;
 				FF_3BODY[i].S_MINIM_3B.Y = -1;
 				FF_3BODY[i].S_MINIM_3B.Z = -1;
+				
+				FF_3BODY[i].S_MAXIM_3B.X = -1;
+				FF_3BODY[i].S_MAXIM_3B.Y = -1;
+				FF_3BODY[i].S_MAXIM_3B.Z = -1;
 			}	
 
 			TEMP_SEARCH_3B = "TRIPLET ";
@@ -1576,7 +1754,7 @@ int main(int argc, char* argv[])
 				STREAM_PARSER >> FF_3BODY[i].ATMPAIR1;
 				STREAM_PARSER >> FF_3BODY[i].ATMPAIR2;
 				STREAM_PARSER >> FF_3BODY[i].ATMPAIR3;	
-				
+
 				// Get rid of the colon at the end of the atom pair:
 				
 				FF_3BODY[i].ATMPAIR3 = FF_3BODY[i].ATMPAIR3.substr(0,FF_3BODY[i].ATMPAIR3.length()-1);
@@ -1870,12 +2048,7 @@ int main(int argc, char* argv[])
 			
 			int ij, ik, jk;
 			string ATM_TYP_1, ATM_TYP_2, ATM_TYP_3;
-//			int ADD_2B_TO_3B_IDX = 0;
-		
-//			int IJ_STEP = 0;
-//			int IK_STEP = 0;
-//			int JK_STEP = 0;
-		
+
 			ifstream FULL_INFILE_3B;
 			ifstream SCAN_INFILE_3B;
 			ifstream SCAN_INFILE_2B;
@@ -2071,11 +2244,6 @@ int main(int argc, char* argv[])
 								SCAN_INFILE_2B.close();		
 
 								// Now add the 2B values to the 3B PES
-					
-					
-								cout << PES_VAL_2B_IJ.size() << endl;
-								cout << PES_VAL_2B_IK.size() << endl;
-								cout << PES_VAL_2B_JK.size() << endl;
 					
 								for(int a=0; a<PES_VAL_3B.size(); a++)
 								{
@@ -2348,14 +2516,29 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		if ( CONTROLS.COMPARE_FORCE && RANK == 0 ) 
+		if ( (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE)&& RANK == 0 ) 
 		{
+			// To print the modified frame, used if CONTROLS.SUBTRACT_FORCE true
+			
+			ofstream FORCE_SUBTRACTED_OUTPUT;
+			string   FORCE_SUBTRACTED_FILE   = CONTROLS.COORD_FILE;
+
+
 			
 			int END = SYSTEM.ATOMS;
 			
 			if(CONTROLS.N_LAYERS>0)
 				END = SYSTEM.ATOMS/pow(CONTROLS.N_LAYERS+1,3.0);
 		
+
+			if(CONTROLS.SUBTRACT_FORCE)
+			{
+				FORCE_SUBTRACTED_FILE  .append("_forces_subtracted.xyz");
+				FORCE_SUBTRACTED_OUTPUT.open(FORCE_SUBTRACTED_FILE.data());
+				
+				FORCE_SUBTRACTED_OUTPUT << END << endl;
+				FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.X/(CONTROLS.N_LAYERS+1) << " " << SYSTEM.BOXDIM.Y/(CONTROLS.N_LAYERS+1) << " " << SYSTEM.BOXDIM.Z/(CONTROLS.N_LAYERS+1) << endl;
+			}
 
 			// Check against read-in forces for code verification... Note, ferr is initialized to zero.
 		
@@ -2364,7 +2547,21 @@ int main(int argc, char* argv[])
 				ferr += (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X) * (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X);
 				ferr += (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y) * (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y);
 				ferr += (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z) * (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z);
+				
+				// Before printing force file with current ff forces subtracted, convert from simulation units (kca/mol/Ang)
+				// to Hartree/bohr
+
+
+
+				FORCE_SUBTRACTED_OUTPUT << SYSTEM.ATOMTYPE[a1] << "	"
+										<< SYSTEM.COORDS[a1].X << "	" << SYSTEM.COORDS[a1].Y << "	" << SYSTEM.COORDS[a1].Z << "	"										
+										<< (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(627.50960803*1.889725989) << "	"
+										<< (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(627.50960803*1.889725989) << "	"
+										<< (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(627.50960803*1.889725989) << endl;				
 			}
+			
+			if(CONTROLS.SUBTRACT_FORCE)
+				FORCE_SUBTRACTED_OUTPUT.close();
 			
 			ferr = sqrt(ferr/3.0/END);
 			cout << "RMS force error = " << fixed << setprecision(6) << ferr << endl;
@@ -2812,12 +3009,13 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBOR
 	
 	// Set some defaults
 	
-	CONTROLS.IS_LSQ       = false;
-	CONTROLS.SELF_CONSIST = false;
-	CONTROLS.PLOT_PES     = false;
-	CONTROLS.WRAP_COORDS  = true;
-	CONTROLS.PRINT_VELOC  = false;
-	CONTROLS.NVT_CONV_CUT = 0.10;
+	CONTROLS.IS_LSQ         = false;
+	CONTROLS.SELF_CONSIST   = false;
+	CONTROLS.SUBTRACT_FORCE = false;
+	CONTROLS.PLOT_PES       = false;
+	CONTROLS.WRAP_COORDS    = true;
+	CONTROLS.PRINT_VELOC    = false;
+	CONTROLS.NVT_CONV_CUT   = 0.10;
 	
 	FF_PLOTS.INCLUDE_FCUT    = true;
 	FF_PLOTS.INCLUDE_CHARGES = true;
@@ -2887,6 +3085,7 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBOR
 							if(TEMP_STR=="Fcut"  || TEMP_STR=="fcut"  || TEMP_STR=="FCUT")
 							{
 								FF_PLOTS.INCLUDE_FCUT = false;
+
 								if (RANK==0)
 								{
 									if (isatty(fileno(stdout)))
@@ -2933,8 +3132,6 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBOR
 						cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "		Including cubic scaling (fcut)" << COUT_STYLE.ENDSTYLE << endl;	
 					else
 						cout << "		Including cubic scaling (fcut)" << endl;						
-					
-						FF_PLOTS.INCLUDE_FCUT = true;
 				}
 				if(FF_PLOTS.INCLUDE_CHARGES)
 				{
@@ -2942,8 +3139,6 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBOR
 						cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "		Including charges" << COUT_STYLE.ENDSTYLE << endl;	
 					else
 						cout << "		Including charges" << endl;						
-					
-						FF_PLOTS.INCLUDE_FCUT = true;
 				}
 				LINE_PARSER.str("");
 				LINE_PARSER.clear();
@@ -3263,8 +3458,63 @@ static void read_input(MD_JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBOR
 			else
 				if (RANK==0)
 					cout << "	# CMPRFRC #: false" << endl;	
-		}		
+		}
+
+		else if(LINE.find("# SUBTFRC #") != string::npos)
+		{
+			getline(cin,LINE);
 			
+			LINE_PARSER.str("");
+			LINE_PARSER.clear();
+			
+			LINE_PARSER.str(LINE);
+			LINE_PARSER >> LINE;
+			
+			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+			{
+				CONTROLS.SUBTRACT_FORCE = true;
+				
+				// Read in the name of the file
+
+				LINE_PARSER >> TEMP_STR;
+				LINE_PARSER.str("");
+				LINE_PARSER.clear();
+				
+				// Make sure user actually entered a name
+				
+				if(LINE == TEMP_STR)
+				{
+					cout << "ERROR: If # SUBTFRC # is true, a force file must be specified on the same line." << endl; 
+					cout << "       Example: true dft_forces.txt" << endl; 
+					exit_run(0);
+				}
+				else
+					CONTROLS.COMPARE_FILE = TEMP_STR;
+			}
+			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
+				CONTROLS.SUBTRACT_FORCE = false;
+			else
+			{
+				cout << "ERROR: # SUBTFRC # must be specified as true or false." << endl;
+				exit_run(1);	
+			}					
+				
+			if(CONTROLS.SUBTRACT_FORCE)
+			{
+				if (RANK==0)
+					cout << "	# SUBTFRC #: true... will only do 1 md step." << endl;	
+				
+				// If CONTROLS.COMPARE_FORCE is true, then only do one step,
+				// because all we're trying to do is to see if md computed
+				// forces match the expected forces
+
+				CONTROLS.N_MD_STEPS = 1;
+			}
+			else
+				if (RANK==0)
+					cout << "	# SUBTFRC #: false" << endl;	
+		}
+
 		else if(LINE.find("# TIMESTP #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();

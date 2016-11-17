@@ -21,6 +21,8 @@ Reading input file...
 		1  H H
 		2  O H
 	The following unique triplets of pair types and thier allowed pair polynomial powers have been identified:
+	Note: The following types have been removed, if present: 
+	
 		0  OO OO OO: Number of unique sets of powers: 2 (4 total)...
 		     index  |  powers  |  equiv index  |  param index  
 		   ----------------------------------------------------
@@ -72,11 +74,45 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix setup complete: 
 
 ...Populating the matricies for A, Coulomb forces, and overbonding...
+
+	Processing frame: 1     of: 33
 	Ewald_Deriv:
 	R-Space Ewald cutoff      =  6.173215e+00
 	R-Space accuracy estimate =  5.220777e-08
 	K-space accuracy estimate =  5.489244e-07
 	Number of Ewald K-vectors = 235
+	Processing frame: 2     of: 33
+	Processing frame: 3     of: 33
+	Processing frame: 4     of: 33
+	Processing frame: 5     of: 33
+	Processing frame: 6     of: 33
+	Processing frame: 7     of: 33
+	Processing frame: 8     of: 33
+	Processing frame: 9     of: 33
+	Processing frame: 10    of: 33
+	Processing frame: 11    of: 33
+	Processing frame: 12    of: 33
+	Processing frame: 13    of: 33
+	Processing frame: 14    of: 33
+	Processing frame: 15    of: 33
+	Processing frame: 16    of: 33
+	Processing frame: 17    of: 33
+	Processing frame: 18    of: 33
+	Processing frame: 19    of: 33
+	Processing frame: 20    of: 33
+	Processing frame: 21    of: 33
+	Processing frame: 22    of: 33
+	Processing frame: 23    of: 33
+	Processing frame: 24    of: 33
+	Processing frame: 25    of: 33
+	Processing frame: 26    of: 33
+	Processing frame: 27    of: 33
+	Processing frame: 28    of: 33
+	Processing frame: 29    of: 33
+	Processing frame: 30    of: 33
+	Processing frame: 31    of: 33
+	Processing frame: 32    of: 33
+	Processing frame: 33    of: 33
 ...matrix population complete: 
 
 Printing matricies...
@@ -84,5 +120,14 @@ Printing matricies...
 		0	O O	2.039
 		1	H H	1.082
 		2	O H	0.820
+	Total number of configurations contributing to each pair type:
+		0	O O 19697
+		1	H H 79238
+		2	O H 80438
+	Total number of configurations contributing to each triplet type:
+		0	OO OO OO 153075
+		1	OO OH OH 980091
+		2	OH OH HH 1985861
+		3	HH HH HH 1274392
 ...matrix printing complete: 
 

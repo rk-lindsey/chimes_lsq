@@ -338,8 +338,8 @@ def FIT_PL2_EXTRAP(x, y, RMIN, THRESH, FIRST_MIN_X, INFLEC_I):
         
         # Search to see whether our inflection point occurs befor our first min
         
-#        print "FIRST MIN: " + `FIRST_MIN_X`
-#        print "INFLECTION POINTS:"
+        # print "FIRST MIN: " + `FIRST_MIN_X`
+        # print "INFLECTION POINTS:"
         
         for i in xrange(len(INFLEC_I)):
             print  `i` + " " + `INFLEC_I[i]`
@@ -621,8 +621,6 @@ if USE_POLY2: # Then we'll use a+b(x-c)^3 for extrapolation.. do the fitting, et
         if PL2_COEFF == "USE_POLY":
             USE_POLY2 = False
             CUBE_COEFF = FIT_POL_EXTRAP(x, y, RMIN, THRESH)
-    
-    
 else:
     CUBE_COEFF = FIT_POL_EXTRAP(x, y, RMIN, THRESH)
   
@@ -784,7 +782,9 @@ else:
 R_SQ_WORST = 25.0
 ORDER     -= 1 # Only because of while loop
 
-while R_SQ_WORST > 5: # 20.0:
+# USE THIS WHILE FOR A LESS STRICT REFITTING CRITERIA... **USUALLY** A TARGET VAL OF 20 IS PLENTY!
+# while R_SQ_WORST > 20.0:
+while R_SQ_WORST > 5.0: # 20.0:
 
     ORDER += 1
 	
@@ -812,7 +812,7 @@ while R_SQ_WORST > 5: # 20.0:
 	
     if ENFORCE_ORDER == "true":
         break
-    else:
+    else: # COMMENT OUT THIS ELSE FOR A LESS STRICT REFITTING CRITERIA... **USUALLY** THIS IS OVERLY-STRICT!
         if ORDER < 15:
             if (R_SQ_WORST <= 20.0) and (abs(R_SQ_WORST)>1):
                 R_SQ_WORST = 50

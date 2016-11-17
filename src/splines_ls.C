@@ -11,7 +11,7 @@
 #include <map>
 #include <sstream>
 #include<unistd.h>	// Used to detect whether i/o is going to terminal or is piped... will help us decide whether to use ANSI color codes
-
+#include<algorithm>
 
 // User-defined headers
 
@@ -774,17 +774,19 @@ int main()
 	
 	
 	int FOUND_SPECIAL = 0;
-	
+
 	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-		if(PAIR_TRIPLETS[i].S_MINIM_3B.X != -1)
+	{
+		if(PAIR_TRIPLETS[i].S_MINIM_3B.X >= 0)
 			FOUND_SPECIAL++;
+	}
 	
 	if(FOUND_SPECIAL>0)
 	{
 		header << endl << "SPECIAL 3B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-			if(PAIR_TRIPLETS[i].S_MINIM_3B.X != -1)
+			if(PAIR_TRIPLETS[i].S_MINIM_3B.X >= 0)
 				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR1 << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR2 << " " 
@@ -794,13 +796,11 @@ int main()
 				 	<< PAIR_TRIPLETS[i].S_MINIM_3B.Y << " "
 					<< PAIR_TRIPLETS[i].S_MINIM_3B.Z << endl;						
 	}
-	
-	
 		
 	FOUND_SPECIAL = 0;
 	
 	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-		if(PAIR_TRIPLETS[i].S_MAXIM_3B != -1)
+		if(PAIR_TRIPLETS[i].S_MAXIM_3B.X >= 0)
 			FOUND_SPECIAL++;
 	
 	if(FOUND_SPECIAL>0)
@@ -808,9 +808,17 @@ int main()
 		header << endl << "SPECIAL 3B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-			if(PAIR_TRIPLETS[i].S_MAXIM_3B != -1)
-				header << i << " " << TRIAD_MAP_REVERSE[i] << " " << PAIR_TRIPLETS[i].S_MAXIM_3B << endl;
-	}
+			if(PAIR_TRIPLETS[i].S_MAXIM_3B.X >= 0)
+				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
+					<< PAIR_TRIPLETS[i].ATMPAIR1 << " " 
+					<< PAIR_TRIPLETS[i].ATMPAIR2 << " " 
+					<< PAIR_TRIPLETS[i].ATMPAIR3 << " " 
+					<< fixed << setprecision(5) 
+		            << PAIR_TRIPLETS[i].S_MAXIM_3B.X << " "
+				 	<< PAIR_TRIPLETS[i].S_MAXIM_3B.Y << " "
+					<< PAIR_TRIPLETS[i].S_MAXIM_3B.Z << endl;						
+	}	
+
 	 
 	if(!if_3b_cheby)
 		header << endl << "ATOM PAIR TRIPLETS: " << 0 << endl << endl;
@@ -882,6 +890,29 @@ int main()
 		for (int k=0; k<NPAIR; k++)
 			cout << "		" << k << "	" << ATOM_PAIRS[k].ATM1TYP << " " << ATOM_PAIRS[k].ATM2TYP << "	" << fixed << setprecision(3) << ATOM_PAIRS[k].MIN_FOUND_DIST << endl;
 
+		cout << "	Total number of configurations contributing to each pair type:" << endl;
+		
+		for (int k=0; k<NPAIR; k++)
+			cout << "		" << k << "	" 					
+				<< ATOM_PAIRS[k].ATM1TYP << " " 
+				<< ATOM_PAIRS[k].ATM2TYP << " " 
+				<< ATOM_PAIRS[k].N_CFG_CONTRIB << endl;
+
+		if(if_3b_cheby)
+		{
+			cout << "	Total number of configurations contributing to each triplet type:" << endl;
+		
+			for (int k=0; k<PAIR_TRIPLETS.size(); k++)
+				cout << "		" << k << "	" 					
+					<< PAIR_TRIPLETS[k].ATMPAIR1 << " " 
+					<< PAIR_TRIPLETS[k].ATMPAIR2 << " " 
+					<< PAIR_TRIPLETS[k].ATMPAIR3 << " " 
+					<< PAIR_TRIPLETS[k].N_CFG_CONTRIB << endl;
+		}
+
+				
+
+
 		cout << "...matrix printing complete: " << endl << endl;
 	#endif
 	
@@ -914,6 +945,8 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 	int    NTRIP;
 	double SUM_OF_CHARGES = 0;
 	stringstream	STREAM_PARSER;
+	
+	vector<string> EXCLUDE_3B;
 	
 	double TMP_CHEBY_RANGE_LOW  = -1;
 	double TMP_CHEBY_RANGE_HIGH =  1;
@@ -1177,6 +1210,21 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 		// will need to be fixed later.
 		/////////////////////////////////////////////////////////////////////
 		
+		else if(LINE.find("EXLUDE 3B INTERACTION:")!= string::npos)
+		{
+			STREAM_PARSER.str(LINE);
+			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_INT;
+
+			for(int i=0; i<TEMP_INT; i++)
+			{
+				cin >> LINE;
+				EXCLUDE_3B.push_back(LINE);
+			}
+			
+			STREAM_PARSER.str("");
+			STREAM_PARSER.clear();	
+		}	
+		
 		else if(LINE.find("# NATMTYP #")!= string::npos)
 		{
 			cin >> LINE; cin.ignore();
@@ -1190,6 +1238,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			ATOM_PAIRS.resize(NPAIR);
 			
 			NTRIP = factorial(NATMTYP+3-1)/factorial(3)/factorial(NATMTYP-1);
+			
+			// Account for excluded types:
+			
 			PAIR_TRIPLETS.resize(NTRIP);
 			
 			for (int i=0; i<NTRIP; i++)
@@ -1197,6 +1248,10 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				PAIR_TRIPLETS[i].S_MINIM_3B.X = -1;
 				PAIR_TRIPLETS[i].S_MINIM_3B.Y = -1;
 				PAIR_TRIPLETS[i].S_MINIM_3B.Z = -1;
+				
+				PAIR_TRIPLETS[i].S_MAXIM_3B.X = -1;
+				PAIR_TRIPLETS[i].S_MAXIM_3B.Y = -1;
+				PAIR_TRIPLETS[i].S_MAXIM_3B.Z = -1;
 			}	
 			
 			// Set the default cheby range
@@ -1656,6 +1711,112 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 						}
 					}
 				}
+				
+				
+				
+				// Now that we've got the maps and the 3b ff structures created, we can go back an remove triplet types
+				// that the user requested to exclude
+				
+				TEMP_INT = NTRIP;
+				vector<int> ERASE_LIST;
+						
+				for(int i=0; i<TEMP_INT; i++)
+				{
+					TEMP_STR =      PAIR_TRIPLETS[i].ATMPAIR1;
+					TEMP_STR.append(PAIR_TRIPLETS[i].ATMPAIR2);
+					TEMP_STR.append(PAIR_TRIPLETS[i].ATMPAIR3);
+
+					for(int j=0; j<EXCLUDE_3B.size(); j++)
+					{
+						if(TRIAD_MAP[TEMP_STR] == TRIAD_MAP[EXCLUDE_3B[j]])	// Then we need to exclude it!
+						{
+							ERASE_LIST.push_back(i);
+							NTRIP--;
+							break;
+						}
+					}
+				}	
+
+				for(int i=0; i<ERASE_LIST.size(); i++)
+					PAIR_TRIPLETS.erase(PAIR_TRIPLETS.begin()+ERASE_LIST[i]);
+
+			    // iterator->first = key
+			    // iterator->second = value
+				
+				bool FOUND = false;
+				map<string, int>::iterator it, ita, itb;
+				map<string, int>::iterator it2, it2a,itrem;
+				
+				ita = TRIAD_MAP.begin();
+				itb = TRIAD_MAP.end();
+				advance(itb,-1);
+				int TARGET;
+
+				for(int j=0; j<EXCLUDE_3B.size(); j++)
+				{
+					
+					TARGET = TRIAD_MAP[EXCLUDE_3B[j]];
+					
+					bool EXIT_COND = false;
+
+					for(it = ita; it != TRIAD_MAP.end(); it++)
+					{
+						if(it == itb)
+						{
+							EXIT_COND = true;
+							break;
+						}
+					
+						if(it->second != TARGET)
+							continue;
+						else
+						{
+							it->second = -2;
+							ita    = it;
+
+							break;
+						}
+					}
+
+					advance(ita,1);
+
+					for(it = ita; it != TRIAD_MAP.end(); it++)
+					{
+						if(it->second == TARGET)
+							it->second = -2;
+						else if(it->second>TARGET)
+							it->second -= 1;
+					}
+				}
+
+				/*
+				//	Sanity check				
+				cout << "YOUR NEW MAPS: " << endl;
+
+				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
+					cout <<"		" << it->first << " : " << it->second << endl;
+				*/
+				
+				
+				// Rebuild the new reverse maps
+				
+				TRIAD_MAP_REVERSE.clear();
+
+				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
+					TRIAD_MAP_REVERSE.insert(make_pair(it->second,it->first));
+
+				/*
+				//	Sanity check	
+							
+				cout << "YOUR NEW MAPS: " << endl;
+
+				map<int, string>::iterator itc;
+				
+				for(itc = TRIAD_MAP_REVERSE.begin(); itc != TRIAD_MAP_REVERSE.end(); itc++)
+					cout <<"		" << itc->first << " : " << itc->second << endl;
+				*/
+
+				
 			}
 					
 			#if VERBOSITY == 1						
@@ -1669,6 +1830,11 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			{
 				#if VERBOSITY == 1	
 					cout << "	The following unique triplets of pair types and thier allowed pair polynomial powers have been identified:" << endl;
+					cout << "	Note: The following types have been removed, if present: " << endl;
+					
+					for(int i=0;i<EXCLUDE_3B.size(); i++)
+						cout << "		" << EXCLUDE_3B[i] << endl;
+					cout << "	" << endl;
 					for(int i=0;i<NTRIP; i++)
 					{
 						cout << "		" << PAIR_TRIPLETS[i].TRIPINDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << ":";
@@ -1693,8 +1859,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 
 					}
 				#endif	
-			}			
-						
+			}									
 		}
 
 		else if(LINE.find("# PAIRIDX #")!= string::npos) // Read the topology part. For now, ignoring index and atom types..
@@ -1865,23 +2030,30 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			}
 			
 			cout << endl;
-		}				
+		}
 		
 		else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
 		{
+			STREAM_PARSER.str("");
+			STREAM_PARSER.clear();	
+			
 			STREAM_PARSER.str(LINE);
 			
 			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
 			
 			if(TEMP_STR == "ALL" && NTRIP >0 )
 			{				
-				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MAXIM_3B;
+				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MAXIM_3B.X;
 				
 				for(int i=1; i<NTRIP; i++)
-					PAIR_TRIPLETS[i].S_MAXIM_3B = PAIR_TRIPLETS[0].S_MAXIM_3B;
+				{
+					PAIR_TRIPLETS[i].S_MAXIM_3B.X = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
+					PAIR_TRIPLETS[i].S_MAXIM_3B.Y = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
+					PAIR_TRIPLETS[i].S_MAXIM_3B.Z = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
+				}
 				
 				#if VERBOSITY == 1
-					cout << "	Note: Setting all 3-body r_max values to " <<  PAIR_TRIPLETS[0].S_MAXIM_3B << endl;
+					cout << "	Note: Setting all 3-body r_max values to " <<  PAIR_TRIPLETS[0].S_MAXIM_3B.X << endl;
 				#endif				
 			}
 			else if(TEMP_STR == "SPECIFIC" && NTRIP >0 )
@@ -1894,18 +2066,112 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				#if VERBOSITY == 1
 					cout << "	Note: Setting specific 3-body r_max values: " << endl;
 				#endif	
+
+				double TMP_VAL;
+				string  TMP_IJ,  TMP_IK,  TMP_JK;	
+				string TARG_IJ, TARG_IK, TARG_JK;
+					
 				
 				for(int i=0; i<TEMP_INT; i++)
 				{
 					getline(cin,LINE);
 					STREAM_PARSER.str(LINE);
-					STREAM_PARSER >> TEMP_STR;
-					STREAM_PARSER >> PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B;
+					STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
+					
+					
+					STREAM_PARSER >> TMP_IJ;	// What is the IJ?
+					STREAM_PARSER >> TMP_IK;	// What is the IK?
+					STREAM_PARSER >> TMP_JK;	// What is the JK?
+					
+					// Check that triplet pair types are correct
+					
+					try
+					{
+						TMP_IJ = ATOM_PAIRS[ PAIR_MAP[ TMP_IJ ] ].PRPR_NM;
+					}
+					catch(...)
+					{
+						cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+						cout << "		Triplet type:              " << TEMP_STR << endl;
+						cout << "		First distance, pair type: " << TMP_IJ << endl;
+					}
+					try
+					{
+						TMP_IK = ATOM_PAIRS[ PAIR_MAP[ TMP_IK ] ].PRPR_NM;
+					}
+					catch(...)
+					{
+						cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+						cout << "		Triplet type:              " << TEMP_STR << endl;
+						cout << "		First distance, pair type: " << TMP_IK << endl;
+					}
+					try
+					{
+						TMP_JK = ATOM_PAIRS[ PAIR_MAP[ TMP_JK ] ].PRPR_NM;
+					}
+					catch(...)
+					{
+						cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+						cout << "		Triplet type:              " << TEMP_STR << endl;
+						cout << "		First distance, pair type: " << TMP_JK << endl;
+					}
+					
+					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR1 ] ].PRPR_NM;
+					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR2 ] ].PRPR_NM;
+					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR3 ] ].PRPR_NM;
+					
+					// Read the first inner cutoff
+
+					STREAM_PARSER >> TMP_VAL;
+					
+					if      ( (TMP_IJ == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+					
+					else if ( (TMP_IJ == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+					
+					else if ( (TMP_IJ == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+
+
+					// Read the second inner cutoff
+
+					STREAM_PARSER >> TMP_VAL;
+					
+					if      ( (TMP_IK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+					
+					else if ( (TMP_IK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+					
+					else if ( (TMP_IK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+
+					
+					// Read the third inner cutoff
+
+					STREAM_PARSER >> TMP_VAL;
+					
+					if      ( (TMP_JK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+					
+					else if ( (TMP_JK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+					
+					else if ( (TMP_JK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+					
+					
+					
+					PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B;
 					STREAM_PARSER.str("");
 					STREAM_PARSER.clear();
 					
 					#if VERBOSITY == 1
-						cout << "		" << TEMP_STR << ": " << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B << endl;
+						cout << "		" << TEMP_STR << "(" <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
+							              << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X << ", "
+									 	  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y << ", "
+										  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z << endl;
 					#endif	
 				}
 			}
@@ -1956,7 +2222,6 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					getline(cin,LINE);
 					STREAM_PARSER.str(LINE);
 					STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
-					
 					
 					STREAM_PARSER >> TMP_IJ;	// What is the IJ?
 					STREAM_PARSER >> TMP_IK;	// What is the IK?
@@ -2048,9 +2313,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					
 					#if VERBOSITY == 1
 						cout << "		" << TEMP_STR << "(" <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-							              << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X << ", "
-									 	  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y << ", "
-										  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z << endl;
+							              << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X << ", "
+									 	  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y << ", "
+										  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z << endl;
 					#endif	
 				}
 			}
