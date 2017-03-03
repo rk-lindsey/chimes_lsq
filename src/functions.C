@@ -2152,6 +2152,7 @@ static void ZCalc_Cheby(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_F
 				{
 					coeff                = FF_2BODY[curr_pair_type_idx].PARAMS[i]; // This is the Cheby FF param for the given power
 					SYSTEM.TOT_POT_ENER += coeff * fcut * Tn[i+1];
+
 					deriv                = (fcut * Tnd[i+1] * dx_dr + fcutderiv * Tn[i+1]);
 					SYSTEM.PRESSURE_XYZ -= coeff * deriv * rlen;
 
@@ -2794,6 +2795,9 @@ static void ZCalc_Lj(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> 
 							
 			curr_pair_type_idx = PAIR_MAP[TEMP_STR];
 
+			// pair interaction cutoff distance.
+			double rcutoff = FF_2BODY[curr_pair_type_idx].S_MAXIM ;
+
 			RVEC.X = SYSTEM.COORDS[a2].X - SYSTEM.COORDS[a1].X;
 			RVEC.Y = SYSTEM.COORDS[a2].Y - SYSTEM.COORDS[a1].Y;
 			RVEC.Z = SYSTEM.COORDS[a2].Z - SYSTEM.COORDS[a1].Z;
@@ -2808,29 +2812,29 @@ static void ZCalc_Lj(FRAME & SYSTEM, MD_JOB_CONTROL & CONTROLS, vector<PAIR_FF> 
 			
 	  	  	rlen_mi = sqrt( RVEC.X*RVEC.X + RVEC.Y*RVEC.Y + RVEC.Z*RVEC.Z );
 			
-			if ( rlen_mi < FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2)			
-				EXIT_MSG("Error: close approach", rlen_mi);
-
-			SYSTEM.TOT_POT_ENER += 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,12.0) - pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,6.0) );
-
-
-
-			fac = 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( 
-				    -12.0 * pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,14.0) 
-				    + 6.0 * pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi, 8.0) );
+			if ( rlen_mi < FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2) 
+				{				
+					EXIT_MSG("Error: close approach", rlen_mi);
+				}
+			else if ( rlen_mi < rcutoff ) {
+				SYSTEM.TOT_POT_ENER += 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,12.0) - pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,6.0) );
+				
+				fac = 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( 
+																						-12.0 * pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,14.0) 
+																						+ 6.0 * pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi, 8.0) );
 			
-			fac *= 1.0 / ( FF_2BODY[curr_pair_type_idx].PARAMS[1] * FF_2BODY[curr_pair_type_idx].PARAMS[1] );		
+				fac *= 1.0 / ( FF_2BODY[curr_pair_type_idx].PARAMS[1] * FF_2BODY[curr_pair_type_idx].PARAMS[1] );		
 	  
-			SYSTEM.PRESSURE_XYZ -= fac * (rlen_mi*rlen_mi);
+				SYSTEM.PRESSURE_XYZ -= fac * (rlen_mi*rlen_mi);
+				
+				SYSTEM.ACCEL[a1].X += RVEC.X*fac;
+				SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
+				SYSTEM.ACCEL[a1].Z += RVEC.Z*fac;
 			
-			SYSTEM.ACCEL[a1].X += RVEC.X*fac;
-			SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
-			SYSTEM.ACCEL[a1].Z += RVEC.Z*fac;
-			
-			SYSTEM.ACCEL[a2].X -= RVEC.X*fac;
-			SYSTEM.ACCEL[a2].Y -= RVEC.Y*fac;
-			SYSTEM.ACCEL[a2].Z -= RVEC.Z*fac;
-			
+				SYSTEM.ACCEL[a2].X -= RVEC.X*fac;
+				SYSTEM.ACCEL[a2].Y -= RVEC.Y*fac;
+				SYSTEM.ACCEL[a2].Z -= RVEC.Z*fac;
+			}
 		}
 	}
 }
