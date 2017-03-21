@@ -412,6 +412,7 @@ int main(int argc, char* argv[])
 		  used[n] = true ;
 		}
 		fileA<<Als[N][a][n][c]<<"   ";
+		//fileA << N << " " << a << " " << n << " " << c << " " << Als[N][a][n][c] << endl ;
 	      }
 	  
 	    if ( fit_coul ) 

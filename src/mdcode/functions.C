@@ -382,142 +382,144 @@ static void ZCalcSR_Over(double **Coord, const char *Lbc, double *Latcons,
 			 int n_over, double *over_param) 
 // Calculate short-range overcoordination forces.
 {
-  double Rvec[3] ;
+	double Rvec[3] ;
   
-  //these are short-ranged cutoffs for analytical potential.
-  //e.g. for r<oo_cut, force(r)=force(oo_cut). The values are 
-  //at least 0.2 Angs below any sampled by MD; they are there 
-  //in case trajectories reach them.
+	//these are short-ranged cutoffs for analytical potential.
+	//e.g. for r<oo_cut, force(r)=force(oo_cut). The values are 
+	//at least 0.2 Angs below any sampled by MD; they are there 
+	//in case trajectories reach them.
 
-  ////Many-body overcoordination term:
-  ///The rest of this function can be commented out and the MD 
-  //will still run. The ReaxFF terms have been fitted using
-  //Powell minimization (separate routines, but very easy to do).
-  // 
+	////Many-body overcoordination term:
+	///The rest of this function can be commented out and the MD 
+	//will still run. The ReaxFF terms have been fitted using
+	//Powell minimization (separate routines, but very easy to do).
+	// 
 
-  ////MANY-BODY POTENTIAL:
-  double Eover;
-  double pover,p1,p2,r0,lambda6;
-  double rik,tempr,temps;
+	////MANY-BODY POTENTIAL:
+	double Eover;
+	double pover,p1,p2,r0,lambda6;
+	double rik,tempr,temps;
 
-  //ReaxFF over-coordination parameters (from non-linear fitting).
-  // pover=75.0;
-  // p1=  -2.5881042987450e-01   ; 
-  // r0=  9.6000387075695e-01    ;
-  // p2=  3.8995379237250e+00    ;
-  // lambda6=-8.9;
+	//ReaxFF over-coordination parameters (from non-linear fitting).
+	// pover=75.0;
+	// p1=  -2.5881042987450e-01   ; 
+	// r0=  9.6000387075695e-01    ;
+	// p2=  3.8995379237250e+00    ;
+	// lambda6=-8.9;
 
-  // Chenoweth values for p1, p2, r0, lambda6 p(ovun2)
-  if ( n_over != 5 ) {
-    cout << "Error: wrong number of overcoordination parameters\n" ;
-    exit(1) ;
-  }
+	// Chenoweth values for p1, p2, r0, lambda6 p(ovun2)
+	if ( n_over != 5 ) {
+		cout << "Error: wrong number of overcoordination parameters\n" ;
+		exit(1) ;
+	}
 
-  pover   = over_param[0] ;
-  r0      = over_param[1] ;
-  p1      = over_param[2] ;
-  p2      = over_param[3] ;
-  lambda6 = over_param[4] ;
+	pover   = over_param[0] ;
+	r0      = over_param[1] ;
+	p1      = over_param[2] ;
+	p2      = over_param[3] ;
+	lambda6 = over_param[4] ;
 
-  Eover=0.0;
+	Eover=0.0;
 
-  double S[nat];
-  for(int ai=0;ai<nat;ai++)
-    S[ai]=0.0;
+	double S[nat];
+	for(int ai=0;ai<nat;ai++)
+		S[ai]=0.0;
 
-  double Sexp[nat] ;
-  for(int ai=0;ai<nat;ai++)
-    Sexp[ai]=0.0;
+	double Sexp[nat] ;
+	for(int ai=0;ai<nat;ai++)
+		Sexp[ai]=0.0;
 
-  for(int ai=0;ai<nat;ai++)
-    if(Lbc[ai]=='O')
-      {
-	temps=0.0;
-	for(int ak=0;ak<nat;ak++)
-	  {
-	    if(ai==ak)
-	      continue ;
+	for(int ai=0;ai<nat;ai++)
+		if(Lbc[ai]=='O')
+			{
+				temps=0.0;
+				for(int ak=0;ak<nat;ak++)
+					{
+						if(ai==ak)
+							continue ;
 
-	    for(int c=0;c<3;c++)
-	      Rvec[c]=Coord[ak][c]-Coord[ai][c];
+						for(int c=0;c<3;c++)
+							Rvec[c]=Coord[ak][c]-Coord[ai][c];
 
-	    // Short-range interaction, so use minimum image convention.
-	    double Rab[3] ;
+						// Short-range interaction, so use minimum image convention.
+						double Rab[3] ;
 
-	    Rab[0] = Rvec[0] - floor(0.5+Rvec[0]/Latcons[0])*Latcons[0];
-	    Rab[1] = Rvec[1] - floor(0.5+Rvec[1]/Latcons[1])*Latcons[1];
-	    Rab[2] = Rvec[2] - floor(0.5+Rvec[2]/Latcons[2])*Latcons[2];
+						Rab[0] = Rvec[0] - floor(0.5+Rvec[0]/Latcons[0])*Latcons[0];
+						Rab[1] = Rvec[1] - floor(0.5+Rvec[1]/Latcons[1])*Latcons[1];
+						Rab[2] = Rvec[2] - floor(0.5+Rvec[2]/Latcons[2])*Latcons[2];
 
-	    rik=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
+						rik=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
 
-	    temps+=exp(p1*pow(rik/r0,p2));
-	  }
-	S[ai]=temps-2.0;
-	// printf("Overcoordination of %d = %13.6e\n", ai, S[ai]) ;
-	Sexp[ai] = exp(lambda6*S[ai]) ;
-	Eover+=pover*S[ai]*1.0/(1.0+Sexp[ai]);
-      }
+						temps+=exp(p1*pow(rik/r0,p2));
+					}
+				S[ai]=temps-2.0;
 
-  Vtot+=Eover;
+				//	printf("Overcoordination of %d = %13.6e\n", ai, S[ai]) ;
+
+				Sexp[ai] = exp(lambda6*S[ai]) ;
+				Eover+=pover*S[ai]*1.0/(1.0+Sexp[ai]);
+			}
+
+	Vtot+=Eover;
   
 
-  double dEover[nat][3];
-  for(int a1=0;a1<nat;a1++)
-    for(int c=0;c<3;c++)
-      dEover[a1][c]=0.0;
+	double dEover[nat][3];
+	for(int a1=0;a1<nat;a1++)
+		for(int c=0;c<3;c++)
+			dEover[a1][c]=0.0;
   
-  for(int aj=0;aj<nat;aj++)
-    for(int ai=0;ai<nat;ai++)
-      if(Lbc[ai]=='O')
-	for(int ak=0;ak<nat;ak++)
-	  if(aj==ai or aj==ak)
-	    {
-	      if(ai==ak ) 
-		{
-		  continue ;
-		}
+	for(int aj=0;aj<nat;aj++)
+		for(int ai=0;ai<nat;ai++)
+			if(Lbc[ai]=='O')
+				for(int ak=0;ak<nat;ak++)
+					if(aj==ai or aj==ak)
+						{
+							if(ai==ak ) 
+								{
+									continue ;
+								}
 
-	      for(int c=0;c<3;c++)
-		Rvec[c]=Coord[ak][c]-Coord[ai][c];
+							for(int c=0;c<3;c++)
+								Rvec[c]=Coord[ak][c]-Coord[ai][c];
 
 		
-	      // Short-range interaction, so use minimum image convention.
-	      double Rab[3] ;
-	      Rab[0] = Rvec[0] - floor(0.5+Rvec[0]/Latcons[0])*Latcons[0];
-	      Rab[1] = Rvec[1] - floor(0.5+Rvec[1]/Latcons[1])*Latcons[1];
-	      Rab[2] = Rvec[2] - floor(0.5+Rvec[2]/Latcons[2])*Latcons[2];
+							// Short-range interaction, so use minimum image convention.
+							double Rab[3] ;
+							Rab[0] = Rvec[0] - floor(0.5+Rvec[0]/Latcons[0])*Latcons[0];
+							Rab[1] = Rvec[1] - floor(0.5+Rvec[1]/Latcons[1])*Latcons[1];
+							Rab[2] = Rvec[2] - floor(0.5+Rvec[2]/Latcons[2])*Latcons[2];
 
-	      rik=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
+							rik=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
 
-	      double powrik = pow(rik/r0,p2) ;
-	      double Sexp2  = (1.0 + Sexp[ai]) * (1.0 + Sexp[ai]) ;
+							double powrik = pow(rik/r0,p2) ;
+							double Sexp2  = (1.0 + Sexp[ai]) * (1.0 + Sexp[ai]) ;
 
-	      tempr=pover;
-	      tempr*=1.0/(1+Sexp[ai]) - lambda6*S[ai]*Sexp[ai]/Sexp2 ;
-	      tempr*=p1*powrik*p2*exp(p1*powrik)/rik;
+							tempr=pover;
+							tempr*=1.0/(1+Sexp[ai]) - lambda6*S[ai]*Sexp[ai]/Sexp2 ;
+							tempr*=p1*powrik*p2*exp(p1*powrik)/rik;
 	      
-	      if(aj==ai) 
-		{
-		  Pxyz -= 0.5 * tempr * rik ;
-		  for(int c=0;c<3;c++)
-		    {
-		      dEover[aj][c]-=tempr*Rab[c]/rik;
-		    }
-		}
+							if(aj==ai) 
+								{
+									Pxyz -= 0.5 * tempr * rik ;
+									for(int c=0;c<3;c++)
+										{
+											dEover[aj][c]-=tempr*Rab[c]/rik;
+										}
+								}
 
-	      if(aj==ak) {
-		Pxyz -= 0.5 * tempr * rik ;
+							if(aj==ak) {
+								Pxyz -= 0.5 * tempr * rik ;
+								for(int c=0;c<3;c++)
+									{
+										dEover[aj][c]+=tempr*Rab[c]/rik;
+									}
+							}
+						}
+	for(int a1=0;a1<nat;a1++)
 		for(int c=0;c<3;c++)
-		  {
-		    dEover[aj][c]+=tempr*Rab[c]/rik;
-		  }
-	      }
-	    }
-  for(int a1=0;a1<nat;a1++)
-    for(int c=0;c<3;c++)
-      SForce[a1][c] -= dEover[a1][c];
+			SForce[a1][c] -= dEover[a1][c];
   
-    return;
+	return;
 }
 
 static void ZCalc_Stillinger(double **Coord,const char *Lbc, double *Latcons,const int nlayers,
@@ -1424,7 +1426,10 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 
 		if(rlen>smin[ipair] and rlen<smax[ipair])
 		  {
+
 		    double xavg, xdiff ;
+
+			 //printf("a1 %d a2 %d p[a2] %d rlen %f\n", a1, a2, a2, rlen) ;
 
 		    if ( inverse_r ) {
 		      xavg = 0.5 * (1.0/smin[ipair] + 1.0/smax[ipair]) ;
@@ -1483,6 +1488,11 @@ static void ZCalc_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 				  (fcut * Tnd[i+1] *(-exp(-rlen/lambda[ipair])/lambda[ipair])/xdiff + 
 				   fcutderiv * Tn[i+1]
 				   ) * Rab[c] / rlen ; 
+
+				//if ( c == 0 ) {
+				//printf("  Deriv: %d %11.4e\n", i, deriv) ;
+				//}
+
 				A[a1][vstart+i][c] += deriv ;
 				A[a2][vstart+i][c] -= deriv ;
 			      } 
@@ -1515,153 +1525,166 @@ void SubtractCoordForces(double **Coord,double **Force,string *Lb, double *Latco
 			 double **Fderiv, int n_over, double *over_param)
 {
 
-  double Rvec[3];
-  double Rab[3];
-  double Vtot;
+	double Rvec[3];
+	double Rab[3];
+	double Vtot;
 
-  double SForce[nat][3];
-  for(int a=0;a<nat;a++)
-    for(int c=0;c<3;c++)
-      SForce[a][c]=0;
+	double SForce[nat][3];
+	for(int a=0;a<nat;a++)
+		for(int c=0;c<3;c++)
+			SForce[a][c]=0;
 
-  double p[35];
-  for(int n=0;n<35;n++)
-    p[n]=0.0;
+	double p[35];
+	for(int n=0;n<35;n++)
+		p[n]=0.0;
 
-  ////THREE-BODY POTENTIAL:
-  double Eover;
-  double p1,p2,r0,pover,lambda6;
-  double rik,tempr,temps;
+	////THREE-BODY POTENTIAL:
+	double Eover;
+	double p1,p2,r0,pover,lambda6;
+	double rik,tempr,temps;
 
 
-  // Lucas paper draft parameters.
-  // p1=  -2.5881042987450e-01   ; 
-  // r0=  9.6000387075695e-01    ;
-  // p2=  3.8995379237250e+00    ;
-  // lambda6=     -8.9                 ;  
+	// Lucas paper draft parameters.
+	// p1=  -2.5881042987450e-01   ; 
+	// r0=  9.6000387075695e-01    ;
+	// p2=  3.8995379237250e+00    ;
+	// lambda6=     -8.9                 ;  
  
-  // Chenoweth values for p1, p2, r0, lambda6 p(ovun2)
-  // pover=50.0;
-  // p1 = -0.0657 ;
-  // p2 = 5.0451 ;
-  // r0 = 1.0165 ;
-  // lambda6 = -3.6141 ;
+	// Chenoweth values for p1, p2, r0, lambda6 p(ovun2)
+	// pover=50.0;
+	// p1 = -0.0657 ;
+	// p2 = 5.0451 ;
+	// r0 = 1.0165 ;
+	// lambda6 = -3.6141 ;
   
-  if ( n_over != 5 ) 
-    {
-      cout << "Error: wrong number of overcoordination parameters\n" ;
-      exit(1) ;
-    }
+	if ( n_over != 5 ) 
+		{
+			cout << "Error: wrong number of overcoordination parameters\n" ;
+			exit(1) ;
+		}
   
-  pover = over_param[0] ;
-  r0    = over_param[1] ;
-  p1    = over_param[2] ;
-  p2   =  over_param[3] ;
-  lambda6 = over_param[4] ;
+	pover = over_param[0] ;
+	
+	// Set to 1 for consistency with generalized code.
+	if ( calc_deriv )
+		pover = 1.0 ;
+
+	r0    = over_param[1] ;
+	p1    = over_param[2] ;
+	p2   =  over_param[3] ;
+	lambda6 = over_param[4] ;
 
   
-  Vtot=0.0;
-  Eover=0.0;
+	Vtot=0.0;
+	Eover=0.0;
 
-  double S[nat];
-  for(int ai=0;ai<nat;ai++)
-    S[ai]=0.0;
+	double S[nat];
+	for(int ai=0;ai<nat;ai++)
+		S[ai]=0.0;
 
-  for(int ai=0;ai<nat;ai++)
-    if(Lb[ai]=="O")
-      {
-	temps=0.0;
-	for(int ak=0;ak<nat;ak++)
-	  {
-	    // Minimum image only for overcoordination.
-	    for(int c=0;c<3;c++) {
-	      Rvec[c]=Coord[ak][c]-Coord[ai][c];
-	      Rvec[c] -= floor(0.5+Rvec[c]/Latcons[c])*Latcons[c];
-	    }
+	for(int ai=0;ai<nat;ai++)
+		if(Lb[ai]=="O")
+			{
+				temps=0.0;
+				for(int ak=0;ak<nat;ak++)
+					{
+						// Minimum image only for overcoordination.
+						for(int c=0;c<3;c++) {
+							Rvec[c]=Coord[ak][c]-Coord[ai][c];
+							Rvec[c] -= floor(0.5+Rvec[c]/Latcons[c])*Latcons[c];
+						}
 
-	    Rab[0]=Rvec[0];
-	    Rab[1]=Rvec[1];
-	    Rab[2]=Rvec[2];
+						Rab[0]=Rvec[0];
+						Rab[1]=Rvec[1];
+						Rab[2]=Rvec[2];
 
-	    rik=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
+						rik=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
 		    		    
-	    if(ai==ak)
-	      rik=1000.0;
+						if(ai==ak)
+							rik=1000.0;
 	    
-	    temps+=exp(p1*pow(rik/r0,p2));
-	  }
-	S[ai]=temps-2.0;
-	Eover+=pover*S[ai]*1.0/(1.0+exp(lambda6*S[ai]));
-      }
+						temps+=exp(p1*pow(rik/r0,p2));
+					}
+				S[ai]=temps-2.0;
+				//printf("Overcoordination of %d = %13.6e\n", ai, S[ai]) ;
+				Eover+=pover*S[ai]*1.0/(1.0+exp(lambda6*S[ai]));
+			}
 
-  Vtot+=Eover;
+	Vtot+=Eover;
   
 
-  double dEover[nat][3];
-  for(int a1=0;a1<nat;a1++)
-    for(int c=0;c<3;c++)
-      dEover[a1][c]=0.0;
+	double dEover[nat][3];
+	for(int a1=0;a1<nat;a1++)
+		for(int c=0;c<3;c++)
+			dEover[a1][c]=0.0;
   
-  for(int aj=0;aj<nat;aj++) 
-    {
-      for(int ai=0;ai<nat;ai++) 
-	{
-      if(Lb[ai]=="O")
-	for(int ak=0;ak<nat;ak++)
-	  if(aj==ai or aj==ak)
-	    {
-	      for(int c=0;c<3;c++) {
-		  Rvec[c]=Coord[ak][c]-Coord[ai][c];
-		  Rvec[c] -= floor(0.5+Rvec[c]/Latcons[c])*Latcons[c];
-	      }		
-	      Rab[0]=Rvec[0];
-	      Rab[1]=Rvec[1];
-	      Rab[2]=Rvec[2];
+	for(int aj=0;aj<nat;aj++) 
+		{
+			for(int ai=0;ai<nat;ai++) 
+				{
+					if(Lb[ai]=="O")
+						for(int ak=0;ak<nat;ak++)
+							if(aj==ai or aj==ak)
+								{
+									for(int c=0;c<3;c++) {
+										Rvec[c]=Coord[ak][c]-Coord[ai][c];
+										Rvec[c] -= floor(0.5+Rvec[c]/Latcons[c])*Latcons[c];
+									}		
+									Rab[0]=Rvec[0];
+									Rab[1]=Rvec[1];
+									Rab[2]=Rvec[2];
 
-	      rik=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
+									rik=sqrt(Rab[0]*Rab[0]+Rab[1]*Rab[1]+Rab[2]*Rab[2]);
 
 
-	      tempr=pover;
-	      tempr*=1.0/(1+exp(lambda6*S[ai])) - lambda6*S[ai]*exp(lambda6*S[ai])/pow(1.0+exp(lambda6*S[ai]),2);
-	      tempr*=p1*pow(rik/r0,p2)*p2*exp(p1*pow(rik/r0,p2))/rik;
+									tempr=pover;
+									tempr*=1.0/(1+exp(lambda6*S[ai])) - lambda6*S[ai]*exp(lambda6*S[ai])/pow(1.0+exp(lambda6*S[ai]),2);
+									tempr*=p1*pow(rik/r0,p2)*p2*exp(p1*pow(rik/r0,p2))/rik;
 	      
-	      if(ai==ak) 
-		{
-		  tempr=0.0;
-		  rik=1000.0;
+									if(ai==ak) 
+										{
+											tempr=0.0;
+											rik=1000.0;
+										}
+
+
+									//double dfover = tempr*Rab[0]/rik; 
+									//if ( aj == ai ) {
+									//	dfover = - dfover ;
+									//}
+									//printf("ai = %3d ak = %3d rik = %9.6f dfover = %11.4e\n", ai, ak, rik, dfover) ;
+
+									for(int c=0;c<3;c++)
+										{
+											if(aj==ai) {
+												dEover[aj][c]-=tempr*Rab[c]/rik;
+											}
+											if(aj==ak) {
+												dEover[aj][c]+=tempr*Rab[c]/rik;
+											}
+										}
+								}
+				}
 		}
 
-	      for(int c=0;c<3;c++)
-		{
-		  if(aj==ai) {
-		    dEover[aj][c]-=tempr*Rab[c]/rik;
-                  }
-		  if(aj==ak) {
-		    dEover[aj][c]+=tempr*Rab[c]/rik;
-                  }
-		}
-	    }
+	for(int a1=0;a1<nat;a1++)
+		for(int c=0;c<3;c++)
+			SForce[a1][c] -= dEover[a1][c];
+
+
+	if ( calc_deriv == false ) {
+		//subtract Coord. force:
+		for(int a1=0;a1<nat;a1++)
+			for(int c=0;c<3;c++)
+				Force[a1][c] -= SForce[a1][c];
 	}
-  }
-
-  for(int a1=0;a1<nat;a1++)
-    for(int c=0;c<3;c++)
-      SForce[a1][c] -= dEover[a1][c];
-
-
-  if ( calc_deriv == false ) {
-    //subtract Coord. force:
-    for(int a1=0;a1<nat;a1++)
-      for(int c=0;c<3;c++)
-	Force[a1][c] -= SForce[a1][c];
-  }
-  else 
-    {
-      // Calculate derivative of 3-body force wrt pover.
-      for(int a1=0;a1<nat;a1++)
-	for(int c=0;c<3;c++)
-	  Fderiv[a1][c] = -dEover[a1][c]/pover ;
-    }
+	else 
+		{
+			// Calculate derivative of 3-body force wrt pover.
+			for(int a1=0;a1<nat;a1++)
+				for(int c=0;c<3;c++)
+					Fderiv[a1][c] = -dEover[a1][c]/pover ;
+		}
 }
 
 
