@@ -1,6 +1,12 @@
-all : cheby cheby2 spline spline2
+all : cheby cheby2 spline spline2 subtract_coul
 
 # tests spline2 and cheby2 use separate fitting parameters for each interaction.
+
+subtract_coul :
+	../../bin/splines_ls subtract_coul.in 49 > subtract_coul.out
+	../../bin/lsq.py A.txt b.txt params.header > params.subtract.txt
+	../../bin/cheby_print.pl < params.subtract.txt
+	-diff params.subtract.txt output/params.subtract.txt
 
 cheby :
 	../../bin/splines_ls cheby_ls.in 49 > cheby_ls.out
