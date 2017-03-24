@@ -579,7 +579,7 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string, int
 	return;
 
 }
-void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)	// MD version
+void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)	// MD version
 {
 // Calculate Ewald interactions... When comparing forces with LSQ, remember that LSQ doesn't use
 // layers for this part.
@@ -652,8 +652,11 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, MD_JOB_CONTROL & CONTROLS, NEIGHBORS & NEIG
 			}
 
 		#endif
-		
-		called_before = true;
+			
+		#ifndef LINK_LAMMPS
+			//	comment out line below for LAMMPS calls, in case of flexible simulation cells
+			called_before = true;
+		#endif
 	}
 
 	TRAJECTORY.TMP_EWALD.resize(PRIM_ATOMS);

@@ -2,6 +2,7 @@
 
 import sys
 import numpy
+import scipy.linalg
 import math as m
 
 from numpy import *
@@ -71,6 +72,9 @@ for i in range(0,nlines):
     
     if DO_WEIGHTING:
     	WEIGHTS[i] = float(WEIGHTS[i])
+	
+af = 0
+bf = 0	
     
 #################################
 # Apply weighting to A and b
@@ -89,8 +93,9 @@ if DO_WEIGHTING:
     U,D,VT=numpy.linalg.svd(weightedA)
     Dmat=array((transpose(weightedA)))
 else:
-    U,D,VT=numpy.linalg.svd(A)
-    Dmat=array((transpose(A)))
+    #U,D,VT=numpy.linalg.svd(A)
+    U,D,VT=scipy.linalg.svd(A,overwrite_a=True)
+    Dmat=array((transpose(A)))  
 
 dmax = 0.0
 
@@ -177,7 +182,7 @@ elif POTENTIAL == "INVRSE_R":
 	SNUM_2B = int(TMP[2])
 else:
 	CASE_BY_CASE = True # We'll need to do it per atom pair type.	
-    
+     
 # 3. Print out the parameters
 
 FIT_COUL = hf[1].split()
@@ -208,24 +213,29 @@ else:
 	ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2
 	
 TEST = hf[ATOM_TRIPS_LINE].split()
-if TEST[2] == "CUBIC":
+if len(TEST) == 3 and TEST[2] == "CUBIC":
 	ATOM_TRIPS_LINE += 2
 	
 
 	
 TEST = hf[ATOM_TRIPS_LINE].split()
-if TEST[2] == "S_MINIM:":
+if len(TEST) == 3 and TEST[2] == "S_MINIM:":
     if TEST[3] == "ALL":
         ATOM_TRIPS_LINE += 2
     else:
         ATOM_TRIPS_LINE += 2 + int(TEST[4])
         
 TEST = hf[ATOM_TRIPS_LINE].split()
-if TEST[2] == "S_MAXIM:":
+if len(TEST) == 3 and TEST[2] == "S_MAXIM:":
     if TEST[3] == "ALL":
         ATOM_TRIPS_LINE += 2
     else:
-        ATOM_TRIPS_LINE += 2 + int(TEST[4])        
+        ATOM_TRIPS_LINE += 2 + int(TEST[4])      
+	
+TEST = hf[ATOM_TRIPS_LINE].split()
+
+if TEST[0] == "FCUT":
+	ATOM_TRIPS_LINE += 2	  
 		
 TOTAL_TRIPS =  hf[ATOM_TRIPS_LINE].split()
 TOTAL_TRIPS = int(TOTAL_TRIPS[3])
@@ -248,6 +258,8 @@ if TOTAL_TRIPS > 0:
 	for t in xrange(0, int(TOTAL_TRIPS)):
 
 		P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
+		
+		#print P1
 		
 		SNUM_3B +=  int(P1[4])
 

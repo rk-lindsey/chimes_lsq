@@ -30,8 +30,7 @@ using namespace std;
 	#undef USE_MPI
 #endif 
 
-static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool & fit_coul, bool & coul_consv, bool & if_subtract_coord, bool & if_subtract_coul, bool & fit_pover, int & cheby_order, string & cheby_type, int & cheby_3b_order, int & invr_parms,
- int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool & use_partial_charges, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS);
+static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS);
 
 int factorial(int input)
 {
@@ -72,8 +71,10 @@ int main()
 	//
 	//////////////////////////////////////////////////
 	
-	
-	// BELOW: VARIABLES INTRODUCED BY BECKY TO ALLOW EXTENSION TO MULTIPLE ATOM TYPES
+	// MAJOR ASSUMPTIONS: 
+	// 
+	// 1. Number of atoms does not change over frames ( should always be true for MD)
+	// 2. Atom ordering in trajectory file does not change over frames ( should also always be true)
 	
 	vector<PAIRS> 		ATOM_PAIRS;		// Will store relevant info regarding atom interaction pair types.. 
 	vector<TRIPLETS> 	PAIR_TRIPLETS;	// Will store relevant info regarding atom interaction triplet types.. i.e. { [OO,OO,OO], [OO,HH,HH], ... }
@@ -89,42 +90,8 @@ int main()
 	map<int,string> TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
 	
 	vector<CHARGE_CONSTRAINT> CHARGE_CONSTRAINTS;	// Specifies how we constrain charge fitting
-	
-	// MAJOR ASSUMPTIONS: 
-	// 1. Number of atoms does not change over frames ( should always be true for MD)
-	// 2. Atom ordering in trajectory file does not change over frames ( should also always be true)
-	
-	
-	// BELOW: VARIABLES MORE-OR-LESS ORIGINAL TO THE VERSION I FIRST HAD ACCESS TO 
-	
-	string INFILE;					// Input trajectory file
-	bool WRAPCOORDS = false;
-	
-	int nframes;					// Number of frames in the movie file	
-	int nlayers=1;					// supercells adjacent to central cell. 1 is enough because of 8-Ang. limit to spline potential; 
-									// electrostatic energy doesn't depend on this number. Setting to 2 gives identical result.
-  
-	bool ifsubtract_coord = false;	// If true, subtract overcoordination forces.
-	bool ifsubtract_coul = false;	// If true, subtract Coulombic forces (for use with fixed charges). 
-	bool fit_coul = false;			// If true, fit coulomb parameters.
-	bool use_partial_charges = true; // Will there be any charges in the system?
-	bool fit_pover = false;			// If true, fit overcoordination parameters.
-	bool coul_consv = false;		// If true, constraints will be applied to charge fitting to try to maintain consistency
 
-	int cheby_order = 8; 			// Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
-	string cheby_type;				// How will distance be transformed?
-	int cheby_3b_order = 2;			// how many polynomials for 3b cheby?
-	int num_cheby_3b = 0;
-	
-	int invr_parms = 4;				// currently uses 19 parameters per pair type
- 	int NATMTYP = 0;
-
-	bool if_3b_cheby = false;		// 3-body interaction is logically distinct from the 2-body interaction                                      
-									// in principle you could mix and match between different
-									// 2-body and 3-body interactions (e.g. 2-body spline with
-									// 3-body chebyshev) (LEF)
-	
-	MD_JOB_CONTROL CONTROLS;		// Will hold info on layering, etc.
+	JOB_CONTROL 	CONTROLS;		// Will hold job controls shared by both lsq and md
 
 	//////////////////////////////////////////////////
 	//
@@ -136,11 +103,13 @@ int main()
 		cout << endl << "Reading input file..." << endl;
 	#endif
 
-	read_lsq_input(INFILE, nframes, nlayers, fit_coul, coul_consv, ifsubtract_coord, ifsubtract_coul, fit_pover, cheby_order, cheby_type, cheby_3b_order, invr_parms, NATMTYP, if_3b_cheby, ATOM_PAIRS, PAIR_TRIPLETS, WRAPCOORDS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, use_partial_charges,CHARGE_CONSTRAINTS );
-
-	CONTROLS.COMPARE_FORCE = true;	// is this variable really necessary for LSQ?
-	CONTROLS.N_LAYERS      = nlayers; 
-	CONTROLS.IS_LSQ        = true; 
+	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, CHARGE_CONSTRAINTS);
+	
+	if(CONTROLS.FIT_STRESS && CONTROLS.CALL_EWALD)
+	{
+		cout << "ERROR: Inclusion of stress tensors currently no compatible with use of ZCalc_Ewald_Deriv." << endl;
+		exit(0);
+	}
 
 	#if VERBOSITY == 1
 		cout << "...input file read successful: " << endl << endl;
@@ -167,74 +136,91 @@ int main()
 	vector<vector <vector <XYZ > > > COULOMB_FORCES;	// [ # frames ] [ # pair types ] [ # atoms ]              .. replaces Coul_xx
 	vector<vector <XYZ > >           P_OVER_FORCES;  	// [ # frames ] [ # atoms ]                               .. replaces Pover
 	
-	A_MATRIX      .resize(nframes);
-	COULOMB_FORCES.resize(nframes);
-	P_OVER_FORCES.resize(nframes);
+	A_MATRIX      .resize(CONTROLS.NFRAMES);
+	COULOMB_FORCES.resize(CONTROLS.NFRAMES);
+	P_OVER_FORCES .resize(CONTROLS.NFRAMES);
 
 	// Figure out necessary dimensions for the force/force derivative vectors
 	
-	int tot_snum = 0; 
+	CONTROLS.TOT_SNUM = 0; 
+	CONTROLS.NUM_3B_CHEBY = 0;
 
 	for (int i=0; i<ATOM_PAIRS.size(); i++)
 	{
 		if ( (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) || (ATOM_PAIRS[i].PAIRTYP == "DFTBPOLY") )	
         {
-			ATOM_PAIRS[i].SNUM          = cheby_order;
+			ATOM_PAIRS[i].SNUM          = CONTROLS.CHEBY_ORDER;
 			
 			if (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" )
-				ATOM_PAIRS[i].SNUM_3B_CHEBY = cheby_3b_order;
+				ATOM_PAIRS[i].SNUM_3B_CHEBY = CONTROLS.CHEBY_3B_ORDER;
         }
 		
 		else if (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) 	// Set the distance transformation type
-			ATOM_PAIRS[i].CHEBY_TYPE          = cheby_type;
+			ATOM_PAIRS[i].CHEBY_TYPE          = CONTROLS.CHEBY_TYPE;
 			
 		else if (ATOM_PAIRS[i].PAIRTYP == "INVRSE_R") 
-			ATOM_PAIRS[i].SNUM = invr_parms;
+			ATOM_PAIRS[i].SNUM = CONTROLS.INVR_PARAMS;
 
 		else // Spline
 			ATOM_PAIRS[i].SNUM = (2+floor((ATOM_PAIRS[i].S_MAXIM - ATOM_PAIRS[i].S_MINIM)/ATOM_PAIRS[i].S_DELTA))*2; //2 is for p0/m0/p1/m1.. 
 	
-		tot_snum += ATOM_PAIRS[i].SNUM;
+		CONTROLS.TOT_SNUM += ATOM_PAIRS[i].SNUM;
 	}
 	
 	#if VERBOSITY == 1		
-		cout << "The number of two-body non-coulomb parameters is: " << tot_snum <<  endl;
+		cout << "The number of two-body non-coulomb parameters is: " << CONTROLS.TOT_SNUM <<  endl;
 	#endif
 
 	
-	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" && cheby_3b_order  > 0 ) // All atoms types must use same potential, so check if 3b order is greater than zero 
+	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" && CONTROLS.CHEBY_3B_ORDER  > 0 ) // All atoms types must use same potential, so check if 3b order is greater than zero 
 	{
-		num_cheby_3b = 0;
+		CONTROLS.NUM_3B_CHEBY = 0;
 		
 		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-			num_cheby_3b += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;
+			CONTROLS.NUM_3B_CHEBY += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;
 
 		#if VERBOSITY == 1
-			cout << "The number of three-body Chebyshev parameters is: " << num_cheby_3b << endl;
+			cout << "The number of three-body Chebyshev parameters is: " << CONTROLS.NUM_3B_CHEBY << endl;
 		#endif
 	}
 
-	int tot_short_range = tot_snum + num_cheby_3b;	
-	
+	CONTROLS.TOT_SHORT_RANGE = CONTROLS.TOT_SNUM + CONTROLS.NUM_3B_CHEBY;	
 
 	//////////////////////////////////////////////////
 	//
 	// Read and store MD trajectory (coords and forces)
 	//
 	//////////////////////////////////////////////////
-		
+	
+	// Start off with a warning for the MD code... This 
+	// won't be necessary once Larry's ghost atom fix 
+	// is implemented in the MD code
+	
+	XYZ MAX_RMIN;
+	MAX_RMIN.X = MAX_RMIN.Y = MAX_RMIN.Z = 0;
+	
+	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+	{
+		if(PAIR_TRIPLETS[i].S_MINIM_3B.X > MAX_RMIN.X)
+			MAX_RMIN.X = PAIR_TRIPLETS[i].S_MINIM_3B.X;
+		if(PAIR_TRIPLETS[i].S_MINIM_3B.Y > MAX_RMIN.Y)
+			MAX_RMIN.Y = PAIR_TRIPLETS[i].S_MINIM_3B.Y;
+		if(PAIR_TRIPLETS[i].S_MINIM_3B.Z > MAX_RMIN.Z) 
+			MAX_RMIN.Z = PAIR_TRIPLETS[i].S_MINIM_3B.Z;
+	}
+			
 	// Read in the trajectory
 					 
 	ifstream TRAJ_INPUT;
-	TRAJ_INPUT.open(INFILE.data());
+	TRAJ_INPUT.open(CONTROLS.INFILE.data());
 	
 	if(!TRAJ_INPUT.is_open())
 	{
-		cout << "ERROR: Cannot open trajectory file: " << INFILE << endl;
+		cout << "ERROR: Cannot open trajectory file: " << CONTROLS.INFILE << endl;
 		exit(1);
 	}
 	
-	TRAJECTORY.resize(nframes);
+	TRAJECTORY.resize(CONTROLS.NFRAMES);
 	
 	#if VERBOSITY == 1
 		cout << endl << "Reading in the trajectory file..." << endl;
@@ -266,8 +252,7 @@ int main()
 		}
 	}
 		
-
-	for (int i=0; i<nframes; i++)
+	for (int i=0; i<CONTROLS.NFRAMES; i++)
 	{
 		// Read in line with the number of atoms
 		
@@ -279,36 +264,85 @@ int main()
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Y;
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Z;
 		
+		bool IFANY = false;
+	
+		if (MAX_RMIN.X >= 0.25*TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1))
+		{
+			#if WARN == TRUE
+				if (isatty(fileno(stdout)))
+					cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "3B rmin's must be < 0.25*effective_boxlengths to avoid artifacts in the MD simulations!" << COUT_STYLE.ENDSTYLE << endl;
+				else
+					cout << "3B rmin's must be < 0.25*effective_boxlengths to avoid artifacts in the MD simulations!" << endl;
+			#else	
+				if (isatty(fileno(stdout)))
+					cout << COUT_STYLE.RED     << COUT_STYLE.BOLD << "3B rmin's must be < 0.25*effective_boxlengths to avoid artifacts in the MD simulations!" << COUT_STYLE.ENDSTYLE << endl;
+				else
+					cout << "3B rmin's must be < 0.25*effective_boxlengths to avoid artifacts in the MD simulations!" << endl;
+				
+				exit(0);
+			#endif
+		}
+		if(CONTROLS.FIT_STRESS)
+		{
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.X;
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Y;
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Z;
+		}
+		if(CONTROLS.FIT_ENER) // We're actually fitting to relative *differences* in energy
+		{
+			TRAJ_INPUT >> TRAJECTORY[i].QM_POT_ENER;
+			
+			if(i>0)
+				TRAJECTORY[i].QM_POT_ENER -= TRAJECTORY[0].QM_POT_ENER;
+		}
+			
+		// Check that outer cutoffs do not exceed half of the boxlength
+		// with consideration of layering
+		
 		for(int j=0; j<ATOM_PAIRS.size(); j++)
 		{
-			if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X * (nlayers +1)
-				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (nlayers +1)
-				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z * (nlayers +1) )
-				&& i == 1)
+			if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1)
+				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1)
+				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) ))
 			{
 					#if WARN == TRUE
 						if (isatty(fileno(stdout)))
 						{
-							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;					
+							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length:"  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Layers:               " << CONTROLS.N_LAYERS << COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Effective boxlengths: " << TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) << COUT_STYLE.ENDSTYLE << endl;
 						}
 						else
 						{
-							cout << "WARNING: Outer cutoff greater than half at least one box length" << endl;
-							cout << "	Pair type " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP  << endl;								
+							cout << "WARNING: Outer cutoff greater than half at least one box length:"  << ATOM_PAIRS[j].S_MAXIM <<endl;
+							cout << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+							cout << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << endl;
+							cout << "	Layers:               " << CONTROLS.N_LAYERS << endl;
+							cout << "	Effective boxlengths: " << TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) << endl;
+														
 						}
 
 					#else
 						if (isatty(fileno(stdout)))
 						{
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length:"  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Layers:               " << CONTROLS.N_LAYERS << COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Effective boxlengths: " << TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) << COUT_STYLE.ENDSTYLE << endl;
+							
 							exit(0);
 						}
 						else
 						{
-							cout << "ERROR: Outer cutoff greater than half at least one box length"  << endl;
-							cout << "	Pair type " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << endl;
+							cout << "ERROR: Outer cutoff greater than half at least one box length:"  << ATOM_PAIRS[j].S_MAXIM <<endl;
+							cout << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+							cout << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << endl;
+							cout << "	Layers:               " << CONTROLS.N_LAYERS << endl;
+							cout << "	Effective boxlengths: " << TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) << endl;
+							
 							exit(0);
 						}
 
@@ -322,7 +356,7 @@ int main()
 		TRAJECTORY[i].COORDS  .resize(TRAJECTORY[i].ATOMS);
 		TRAJECTORY[i].FORCES  .resize(TRAJECTORY[i].ATOMS);
 		TRAJECTORY[i].CHARGES .resize(TRAJECTORY[i].ATOMS);
-
+		
 		// Read trajectory, convert to proper units, and apply PBC
 		
 		for (int j=0; j<TRAJECTORY[i].ATOMS; j++)
@@ -344,7 +378,7 @@ int main()
 				TRAJECTORY[i].FORCES[j].Z *= 627.50960803*1.889725989;
 			}
 						
-			if(WRAPCOORDS)	// Apply PBC (for cases of unwrapped coordinates)
+			if(CONTROLS.WRAP_COORDS)	// Apply PBC (for cases of unwrapped coordinates)
 			{
 				TRAJECTORY[i].COORDS[j].X -= floor(TRAJECTORY[i].COORDS[j].X/TRAJECTORY[i].BOXDIM.X)*TRAJECTORY[i].BOXDIM.X;
 				TRAJECTORY[i].COORDS[j].Y -= floor(TRAJECTORY[i].COORDS[j].Y/TRAJECTORY[i].BOXDIM.Y)*TRAJECTORY[i].BOXDIM.Y;
@@ -396,6 +430,8 @@ int main()
 		}
 	}
 	
+	TRAJECTORY[0].QM_POT_ENER = 0;
+	
 	#if VERBOSITY == 1
 		cout << "...trajectory file read successful: " << endl << endl;
 	#endif
@@ -412,34 +448,44 @@ int main()
 		cout << "Setting up the matricies for A, Coulomb forces, and overbonding..." << endl;
 	#endif
 
-	for (int f=0; f<nframes; f++)
+	int A_SIZE;	// Do we iterate over atoms, or over atoms+1, etc  (where the latter allows us to account for inclusion of stress tensors and/or frame energy)
+
+	for (int f=0; f<CONTROLS.NFRAMES; f++)
 	{	
 		// Set up the A "matrix"
-	
-		A_MATRIX[f].resize(TRAJECTORY[f].ATOMS);
+		
+		A_SIZE = TRAJECTORY[f].ATOMS;
 
-		for (int i=0; i<TRAJECTORY[f].ATOMS; i++)
+		if (CONTROLS.FIT_STRESS)
+			A_SIZE++; 
+
+		if (CONTROLS.FIT_ENER)
+			A_SIZE++; 
+
+		A_MATRIX[f].resize(A_SIZE);
+
+		for (int i=0; i<A_SIZE; i++)
 		{
-			A_MATRIX[f][i].resize(tot_short_range); 
+			A_MATRIX[f][i].resize(CONTROLS.TOT_SHORT_RANGE); 
 
-			for (int j=0; j<tot_short_range; j++)
+			for (int j=0; j<CONTROLS.TOT_SHORT_RANGE; j++)
 			{		
 				A_MATRIX[f][i][j].X = 0;
 				A_MATRIX[f][i][j].Y = 0;
 				A_MATRIX[f][i][j].Z = 0;
 			}
 		}
-		
+
 		// Setup the Coulomb force "matrix"
 	 
 		COULOMB_FORCES[f].resize(ATOM_PAIRS.size());
-		P_OVER_FORCES[f] .resize(TRAJECTORY[f].ATOMS);
+		P_OVER_FORCES[f] .resize(A_SIZE);
 		
 		for (int i=0; i<ATOM_PAIRS.size(); i++)
 		{
-			COULOMB_FORCES[f][i].resize(TRAJECTORY[f].ATOMS);		
+			COULOMB_FORCES[f][i].resize(A_SIZE);		
 		
-			for (int j=0; j<TRAJECTORY[f].ATOMS; j++)
+			for (int j=0; j<A_SIZE; j++)
 			{			
 				COULOMB_FORCES[f][i][j].X = 0;
 				COULOMB_FORCES[f][i][j].Y = 0;
@@ -458,6 +504,95 @@ int main()
 	#if VERBOSITY == 1
 		cout << "...matrix setup complete: " << endl << endl;
 	#endif
+		
+	//////////////////////////////////////////////////
+	//
+	// Set up the 3B histograms
+	//
+	//////////////////////////////////////////////////	
+	
+	if(CONTROLS.USE_3B_CHEBY)
+	{
+	
+		#if VERBOSITY == 1
+			cout << "Setting up the histograms to handle sparse 3b-distance populations..." << endl;
+		#endif
+		
+		double tmp_max, tmp_min;
+	
+		bool ANY_ZERO = false;
+		
+		for (int i=0; i<PAIR_TRIPLETS.size(); i++)
+		{
+
+			PAIR_TRIPLETS[i].NBINS.X = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS.X;
+			PAIR_TRIPLETS[i].NBINS.Y = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS.Y;
+			PAIR_TRIPLETS[i].NBINS.Z = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS.Z;
+		
+			if(PAIR_TRIPLETS[i].NBINS.X == 0 || PAIR_TRIPLETS[i].NBINS.Y == 0 || PAIR_TRIPLETS[i].NBINS.X == 0)
+			{
+				ANY_ZERO = true;
+			
+				#if VERBOSITY == 1
+					cout << "Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramming. " << endl;
+				#endif
+				
+				break;
+			}
+		
+			tmp_max = PAIR_TRIPLETS[i].S_MAXIM_3B.X;
+			tmp_min = PAIR_TRIPLETS[i].S_MINIM_3B.X;
+			if(tmp_min == -1)
+				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].S_MINIM;
+			if(tmp_max == -1)
+				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].S_MAXIM;
+			PAIR_TRIPLETS[i].BINWS.X = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS.X;
+		
+			tmp_max = PAIR_TRIPLETS[i].S_MAXIM_3B.Y;
+			tmp_min = PAIR_TRIPLETS[i].S_MINIM_3B.Y;
+			if(tmp_min == -1)
+				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR2] ].S_MINIM;
+			if(tmp_max == -1)
+				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR2] ].S_MAXIM;
+			PAIR_TRIPLETS[i].BINWS.Y = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS.Y;
+		
+			tmp_max = PAIR_TRIPLETS[i].S_MAXIM_3B.Z;
+			tmp_min = PAIR_TRIPLETS[i].S_MINIM_3B.Z;
+			if(tmp_min == -1)
+				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR3] ].S_MINIM;
+			if(tmp_max == -1)
+				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR3] ].S_MAXIM;
+			PAIR_TRIPLETS[i].BINWS.Z = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS.Z;
+		
+			PAIR_TRIPLETS[i].POP_HIST.resize(PAIR_TRIPLETS[i].NBINS.X);
+		
+			for(int x=0; x<PAIR_TRIPLETS[i].NBINS.X; x++)
+			{
+				PAIR_TRIPLETS[i].POP_HIST[x].resize(PAIR_TRIPLETS[i].NBINS.Y);
+			
+				for(int y=0; y<PAIR_TRIPLETS[i].NBINS.Y; y++)
+				{
+					PAIR_TRIPLETS[i].POP_HIST[x][y].resize(PAIR_TRIPLETS[i].NBINS.Z);
+
+					for(int z=0; z<PAIR_TRIPLETS[i].NBINS.Z; z++)
+					{
+						PAIR_TRIPLETS[i].POP_HIST[x][y][z] = 0;
+					}
+				
+				}
+			}
+			
+			cout << "	" << i << " " << fixed << setprecision(1) << PAIR_TRIPLETS[i].NBINS.X << " " << PAIR_TRIPLETS[i].NBINS.Y << " " << PAIR_TRIPLETS[i].NBINS.Z << endl;
+		}	
+		
+		#if VERBOSITY == 1
+			if(!ANY_ZERO)
+				cout << "...Initial histogram setup complete!" << endl << endl;
+			else
+				cout << endl << endl;
+		#endif
+	}
+		
 
 	//////////////////////////////////////////////////
 	//
@@ -471,39 +606,48 @@ int main()
 	#if VERBOSITY == 1
 		cout << "...Populating the matricies for A, Coulomb forces, and overbonding..." << endl << endl;
 	#endif
+		
 
-	for(int i=0; i<nframes; i++)
+	int FRAME_MATRX_SIZE; 
+
+	for(int i=0; i<CONTROLS.NFRAMES; i++)
 	{
+		cout << "	Processing frame: " << setw(5) << i+1 << " of: " << CONTROLS.NFRAMES << endl;
+
+		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, TRIAD_MAP);
 		
-		cout << "	Processing frame: " << setw(5) << i+1 << " of: " << nframes << endl;
-		
-		// Run a few checks to make sure logic is correct
-		 
-		if(ifsubtract_coord && fit_pover)
-		{
-			cout << "LOGIC ERROR: Problem with code logic. Both fit_pover and ifsubtract_coord cannot be true." << endl;
-			cout << "             if_subtract_coord should only be true if overbonding parameters have been " << endl;
-			cout << "             specified, and FITPOVR set false." << endl;
-		}
-		
-		if(ifsubtract_coul && fit_coul)
-		{
-			cout << "LOGIC ERROR: Problem with code logic. Both fit_coul and ifsubtract_coul cannot be true." << endl;
-			cout << "             ifsubtract_coul should only be true if non-zero charges have been specified " << endl;
-			cout << "             and FITCOUL set false." << endl;
-		}
-		
-		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], nlayers, if_3b_cheby, PAIR_MAP, TRIAD_MAP);
-		
-		if ( ifsubtract_coord ) // Subtract over-coordination forces from force to be output.
+		if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
 			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);	
 		
-		if (ifsubtract_coul) 
+		if (CONTROLS.IF_SUBTRACT_COUL) 
 			ZCalc_Ewald(TRAJECTORY[i], ATOM_PAIRS, PAIR_MAP);
 
-		if ( fit_pover )	// Fit the overcoordination parameter.
-			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);		
+		if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
+			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);	
+		
+		// If we're including the energy in the fit, we need to subtract off the A matrix entries from the first frame from all the rest
+		if((CONTROLS.FIT_ENER) &&(i>0))
+		{
+			FRAME_MATRX_SIZE = A_MATRIX[i].size()-1;
+				
+			for (int j=0; j<A_MATRIX[i][FRAME_MATRX_SIZE].size(); j++)
+			{
+				A_MATRIX[i][FRAME_MATRX_SIZE][j].X -= A_MATRIX[0][FRAME_MATRX_SIZE][j].X;
+				A_MATRIX[i][FRAME_MATRX_SIZE][j].Y -= A_MATRIX[0][FRAME_MATRX_SIZE][j].Y;
+				A_MATRIX[i][FRAME_MATRX_SIZE][j].Z -= A_MATRIX[0][FRAME_MATRX_SIZE][j].Z;
+			}
+		}	
 	}	
+	
+	
+	
+	
+	
+	if(CONTROLS.USE_3B_CHEBY && PAIR_TRIPLETS[0].NBINS.X>0) // Set the 3b-population-histogram based constraints 
+	{
+		cout << "Setting constraints based on 3b-population histogram constraints " << endl << endl;
+		ZCalc_3B_Cheby_Deriv_HIST(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, A_MATRIX, PAIR_MAP, TRIAD_MAP);	
+	}
 	
 	
 	#if VERBOSITY == 1
@@ -541,36 +685,37 @@ int main()
   
 	fileA.precision(16);	//  Reduced precision to 6 for code testing.
 	fileb.precision(16);	//  Usual precision set to 16.
-	  
-	for(int N=0;N<nframes;N++)
-    {
 	
-		for(int a=0;a<TRAJECTORY[N].ATOMS;a++)
+	cout << "	...A matrix length: " << A_MATRIX.size() << endl << endl;
+	  
+	for(int N=0;N<A_MATRIX.size();N++)
+    {
+		for(int a=0;a<A_MATRIX[N].size();a++)
 		{		
 			// Print Afile: .../////////////// -- For X
 		  
-			for(int n=0; n < tot_short_range; n++)	// Afile
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
 				fileA << A_MATRIX[N][a][n].X  << "   ";
 			  
-			if ( fit_coul ) 
+			if ( CONTROLS.FIT_COUL ) 
 				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
 					fileA << COULOMB_FORCES[N][i][a].X << "   ";
 			  
-			if ( fit_pover ) 
+			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << P_OVER_FORCES[N][a].X;
 			  
 			fileA << endl;	
 		  
 			// Print Afile: .../////////////// -- For Y
 		  
-			for(int n=0; n < tot_short_range; n++)	// Afile
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
 				fileA << A_MATRIX[N][a][n].Y  << "   ";
 			  
-			if ( fit_coul ) 
+			if ( CONTROLS.FIT_COUL ) 
 				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
 					fileA << COULOMB_FORCES[N][i][a].Y << "   ";
 			  
-			if ( fit_pover ) 
+			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << P_OVER_FORCES[N][a].Y;
 			  
 			fileA << endl;	
@@ -578,29 +723,68 @@ int main()
 
 			// Print Afile: .../////////////// -- For Z
 		  
-			for(int n=0; n < tot_short_range; n++)	// Afile
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
 				fileA << A_MATRIX[N][a][n].Z  << "   ";
 			  
-			if ( fit_coul ) 
+			if ( CONTROLS.FIT_COUL ) 
 				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
 					fileA << COULOMB_FORCES[N][i][a].Z << "   ";
 			  
-			if ( fit_pover ) 
+			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << P_OVER_FORCES[N][a].Z;
 			  
 			fileA << endl;		
 			
 			// Print Bfile: ...
-
-			fileb << TRAJECTORY[N].FORCES[a].X << endl;
-			fileb << TRAJECTORY[N].FORCES[a].Y << endl;
-			fileb << TRAJECTORY[N].FORCES[a].Z << endl;
 			
-			fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].X << endl;
-			fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Y << endl;
-			fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Z << endl;	 	
+			if(N>CONTROLS.NFRAMES-1) // then this is the 3b histogram stuff. All b values (energies) should be zero. -- assumes we're using 3b!!
+			{
+				if(PAIR_TRIPLETS[0].FCUT_TYPE == "CUBIC")
+				{	
+					fileb << 150.0 << endl;
+					fileb << 150.0 << endl;
+					fileb << 150.0 << endl;
+				}
+				else		
+				{
+					fileb << 0.0 << endl;
+					fileb << 0.0 << endl;
+					fileb << 0.0 << endl;
+				}
+			}
+			else
+			{
+				if(a<TRAJECTORY[N].ATOMS)
+				{
+					fileb << TRAJECTORY[N].FORCES[a].X << endl;
+					fileb << TRAJECTORY[N].FORCES[a].Y << endl;
+					fileb << TRAJECTORY[N].FORCES[a].Z << endl;
 			
-		  
+					fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].X << endl;
+					fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Y << endl;
+					fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Z << endl;
+				}
+				else if ((a==TRAJECTORY[N].ATOMS)&& (CONTROLS.FIT_STRESS))
+				{
+					fileb << TRAJECTORY[N].STRESS_TENSORS.X << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS.Y << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS.Z << endl;
+			
+					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.X << endl;
+					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Y << endl;
+					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Z << endl;
+				}
+				else
+				{
+					fileb << TRAJECTORY[N].QM_POT_ENER << endl;
+					fileb << TRAJECTORY[N].QM_POT_ENER << endl;
+					fileb << TRAJECTORY[N].QM_POT_ENER << endl;
+			
+					fileb_labeled << "-1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;
+					fileb_labeled << "-1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;
+					fileb_labeled << "-1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;	
+				}	
+			}
 		}  	
     }
 	
@@ -609,11 +793,11 @@ int main()
 	// The order that charge constraints are printed needs to match
 	// the order atom pairs are expected...
 
-	if ( fit_coul && CHARGE_CONSTRAINTS.size()>0) 
+	if ( CONTROLS.FIT_COUL && CHARGE_CONSTRAINTS.size()>0) 
 	{
 		for(int i=0; i<CHARGE_CONSTRAINTS.size(); i++)
 		{
-			for(int n=0; n < tot_short_range; n++)
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << "0.0 ";
 			
 			for(int j=0; j<ATOM_PAIRS.size(); j++)
@@ -621,7 +805,7 @@ int main()
 					if(CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX[k] == j)
 						fileA << CHARGE_CONSTRAINTS[i].CONSTRAINTS[k] << " ";
 			
-			if ( fit_pover ) 
+			if ( CONTROLS.FIT_POVER ) 
 				fileA  << " 0.0 ";
 			
 			fileA << endl;	
@@ -647,32 +831,32 @@ int main()
 	// THE NEW WAY
 	//////////////////////////////////////////////////	
 
-	if(!fit_coul && !use_partial_charges)
+	if(!CONTROLS.FIT_COUL && !CONTROLS.USE_PARTIAL_CHARGES)
 		header << "USECOUL: false" << endl;
 	else
 		header << "USECOUL: true" << endl;
 
-	if(fit_coul)	
+	if(CONTROLS.FIT_COUL)	
 		header << "FITCOUL: true" << endl;
 	else
 		header << "FITCOUL: false" << endl;
 	
-	bool use_pover = false;
+	CONTROLS.USE_POVER = false;
 	for(int i=0; i<ATOM_PAIRS.size(); i++)
 		if(ATOM_PAIRS[i].USE_OVRPRMS)
-			use_pover = true;
+			CONTROLS.USE_POVER = true;
 	
-	if(use_pover)
+	if(CONTROLS.USE_POVER)
 		header << "USEPOVR: true" << endl;
 	else
 		header << "USEPOVR: false" << endl;
 	
-	if(fit_pover)
+	if(CONTROLS.FIT_POVER)
 		header << "FITPOVR: true" << endl;
 	else
 		header << "FITPOVR: false" << endl;
 	
-	if(if_3b_cheby)
+	if(CONTROLS.USE_3B_CHEBY)
 		header << "USE3BCH: true" << endl;
 	else
 		header << "USE3BCH: false" << endl;
@@ -684,22 +868,22 @@ int main()
 	else if(ATOM_PAIRS[0].PAIRTYP == "DFTBPOLY")
 		header << " " << ATOM_PAIRS[0].SNUM << endl;	
 	else if (ATOM_PAIRS[0].PAIRTYP == "INVRSE_R")
-		header << " " << invr_parms << endl;
+		header << " " << CONTROLS.INVR_PARAMS << endl;
 	else
 		header << endl;
 	
-	header << endl << "ATOM TYPES: " << NATMTYP << endl << endl;
+	header << endl << "ATOM TYPES: " << CONTROLS.NATMTYP << endl << endl;
 	header << "# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #" << endl;
 	
 	
-	if(fit_coul)
+	if(CONTROLS.FIT_COUL)
 	{
-		for(int i=0; i<NATMTYP; i++)
+		for(int i=0; i<CONTROLS.NATMTYP; i++)
 			header << i << "		" << ATOM_PAIRS[i].ATM1TYP << "		" << ATOM_PAIRS[i].CHRGSGN << "		" << ATOM_PAIRS[i].ATM1MAS << endl;
 	}
 	else
 	{
-		for(int i=0; i<NATMTYP; i++)
+		for(int i=0; i<CONTROLS.NATMTYP; i++)
 			header << i << "		" << ATOM_PAIRS[i].ATM1TYP << "		" << ATOM_PAIRS[i].ATM1CHG << "		" << ATOM_PAIRS[i].ATM1MAS << endl;		
 	}
 	
@@ -734,7 +918,7 @@ int main()
 	}
 	
 
-	if(use_pover)
+	if(CONTROLS.USE_POVER)
 	{
 		header << endl;
  		header << "!# PAIRIDX #	";
@@ -769,6 +953,18 @@ int main()
 			
 	}
 	
+	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0)
+	{
+		header << endl << "FCUT TYPE: " << PAIR_TRIPLETS[0].FCUT_TYPE;
+		
+		if (PAIR_TRIPLETS[0].FCUT_TYPE == "SIGMOID" || PAIR_TRIPLETS[0].FCUT_TYPE == "CUBSIG" || PAIR_TRIPLETS[0].FCUT_TYPE == "CUBESTRETCH" || PAIR_TRIPLETS[0].FCUT_TYPE == "SIGFLT")
+			header << " " << PAIR_TRIPLETS[0].FCUT_STEEPNESS << " " << PAIR_TRIPLETS[0].FCUT_OFFSET;
+		if(PAIR_TRIPLETS[0].FCUT_TYPE == "SIGFLT")
+			header << " " << PAIR_TRIPLETS[0].FCUT_HEIGHT;
+
+		 header << endl;
+	 }
+		
 	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
 	
@@ -820,7 +1016,7 @@ int main()
 	}	
 
 	 
-	if(!if_3b_cheby)
+	if(!CONTROLS.USE_3B_CHEBY)
 		header << endl << "ATOM PAIR TRIPLETS: " << 0 << endl << endl;
 	else
 	{
@@ -898,8 +1094,20 @@ int main()
 				<< ATOM_PAIRS[k].ATM2TYP << " " 
 				<< ATOM_PAIRS[k].N_CFG_CONTRIB << endl;
 
-		if(if_3b_cheby)
+		if(CONTROLS.USE_3B_CHEBY)
 		{
+			cout << "	Minimum distances between atoms triplet pairs: (Angstr.)" << endl;
+			
+			for (int k=0; k<PAIR_TRIPLETS.size(); k++)
+				cout << "		" << k << "	" 					
+					<< PAIR_TRIPLETS[k].ATMPAIR1    << " " 
+					<< PAIR_TRIPLETS[k].ATMPAIR2    << " " 
+					<< PAIR_TRIPLETS[k].ATMPAIR3    << " " 
+					<< PAIR_TRIPLETS[k].MIN_FOUND.X << " " 
+					<< PAIR_TRIPLETS[k].MIN_FOUND.Y << " " 
+					<< PAIR_TRIPLETS[k].MIN_FOUND.Z << endl;
+			
+			
 			cout << "	Total number of configurations contributing to each triplet type:" << endl;
 		
 			for (int k=0; k<PAIR_TRIPLETS.size(); k++)
@@ -909,9 +1117,6 @@ int main()
 					<< PAIR_TRIPLETS[k].ATMPAIR3 << " " 
 					<< PAIR_TRIPLETS[k].N_CFG_CONTRIB << endl;
 		}
-
-				
-
 
 		cout << "...matrix printing complete: " << endl << endl;
 	#endif
@@ -932,8 +1137,7 @@ return 0;
 
 
 // Read program input from the file "splines_ls.in".
-static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool & fit_coul, bool & coul_consv, bool & if_subtract_coord, bool & if_subtract_coul, bool & fit_pover, int & cheby_order, string & cheby_type, int & cheby_3b_order, int & invr_parms,
- int &  NATMTYP, bool & if_3b_cheby, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, bool & WRAPCOORDS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, bool & use_partial_charges, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS )
+static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS)
 {
 	bool   FOUND_END = false;
 	string LINE;
@@ -948,11 +1152,15 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 	
 	vector<string> EXCLUDE_3B;
 	
+	// Set some defaults
+	
 	double TMP_CHEBY_RANGE_LOW  = -1;
 	double TMP_CHEBY_RANGE_HIGH =  1;
 	
-	if_subtract_coord = false;
-	use_partial_charges = false;
+	CONTROLS.COMPARE_FORCE = true;	// is this variable really necessary for LSQ?
+	CONTROLS.IS_LSQ        = true; 
+	CONTROLS.CALL_EWALD    = false;
+	CONTROLS.FIT_ENER      = false;
 	
 	while (FOUND_END == false)
 	{
@@ -961,17 +1169,35 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 
 		if(LINE.find("# ENDFILE #") != string::npos)
 		{
+			// Run a few checks to make sure logic is correct
+		 
+			if(CONTROLS.IF_SUBTRACT_COORD && CONTROLS.FIT_POVER)
+			{
+				cout << "LOGIC ERROR: Problem with code logic. Both fit_pover and ifsubtract_coord cannot be true." << endl;
+				cout << "             if_subtract_coord should only be true if overbonding parameters have been " << endl;
+				cout << "             specified, and FITPOVR set false." << endl;
+				exit(0);
+			}
+		
+			if(CONTROLS.IF_SUBTRACT_COUL && CONTROLS.FIT_COUL)
+			{
+				cout << "LOGIC ERROR: Problem with code logic. Both fit_coul and ifsubtract_coul cannot be true." << endl;
+				cout << "             ifsubtract_coul should only be true if non-zero charges have been specified " << endl;
+				cout << "             and FITCOUL set false." << endl;
+				exit(0);
+			}
+			
 
 			#if VERBOSITY == 1
-			
-				if (if_subtract_coord)
+
+				if (CONTROLS.IF_SUBTRACT_COORD)
 				{
 					cout << "Special feature: " << endl;
 					cout << " Will subtract contributions from user-specified overbonding " << endl;
 					cout << " parameters before generating A-matrix." << endl << endl;	
 				}					
 
-				if(use_partial_charges)
+				if(CONTROLS.USE_PARTIAL_CHARGES)
 				{
 					cout << "Special feature: " << endl;
 					cout << " Will subtract contributions stemming from user-specified " << endl;
@@ -979,6 +1205,10 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				}	
 			
 			#endif
+				
+				
+				if (CONTROLS.USE_PARTIAL_CHARGES || CONTROLS.FIT_COUL)
+					CONTROLS.CALL_EWALD = true;	
 				
 			FOUND_END = true;
 			break;
@@ -988,38 +1218,38 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 		else if(LINE.find("# WRAPTRJ #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
-			WRAPCOORDS = bool(LINE.data());
+			CONTROLS.WRAP_COORDS = bool(LINE.data());
 			#if VERBOSITY == 1
-				cout << "	# WRAPTRJ #: " << WRAPCOORDS << endl;	
+				cout << "	# WRAPTRJ #: " << CONTROLS.WRAP_COORDS << endl;	
 			#endif
 		}
 		
 		else if(LINE.find("# TRJFILE #") != string::npos)
 		{
-			cin >> INFILE; cin.ignore();
+			cin >> CONTROLS.INFILE; cin.ignore();
 
 			#if VERBOSITY == 1
-				cout << "	# TRJFILE #: " << INFILE << endl;	
+				cout << "	# TRJFILE #: " << CONTROLS.INFILE << endl;	
 			#endif
 		}			
 		
 		else if(LINE.find("# NFRAMES #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
-			nframes = int(atof(LINE.data()));
+			CONTROLS.NFRAMES = int(atof(LINE.data()));
 			
 			#if VERBOSITY == 1
-				cout << "	# NFRAMES #: " << nframes << endl;			
+				cout << "	# NFRAMES #: " << CONTROLS.NFRAMES << endl;			
 			#endif
 		}
 		
 		else if(LINE.find("# NLAYERS #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
-			nlayers = int(atof(LINE.data()));
+			CONTROLS.N_LAYERS = int(atof(LINE.data()));
 			
 			#if VERBOSITY == 1
-				cout << "	# NLAYERS #: " << nlayers << endl;
+				cout << "	# N_LAYERS #: " << CONTROLS.N_LAYERS << endl;
 			#endif
 		}
 		
@@ -1028,9 +1258,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			cin >> LINE; cin.ignore();
 
 			if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
-				fit_coul = true;
+				CONTROLS.FIT_COUL = true;
 			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
-				fit_coul = false;
+				CONTROLS.FIT_COUL = false;
 			else
 			{
 				cout << endl << "ERROR: # FITCOUL # must be specified as true or false." << endl;
@@ -1041,7 +1271,59 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			
 				cout << "	# FITCOUL #: ";
 			
-				if (fit_coul)
+				if (CONTROLS.FIT_COUL)
+					cout << "true" << endl;				
+				else
+					cout << "false" << endl;
+				
+			#endif
+		}
+		
+		else if(LINE.find("# FITSTRS #") != string::npos)
+		{
+			cin >> LINE; cin.ignore();
+
+			if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+				CONTROLS.FIT_STRESS = true;
+			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
+				CONTROLS.FIT_STRESS = false;
+			else
+			{
+				cout << endl << "ERROR: # FITSTRS # must be specified as true or false." << endl;
+				exit(1);	
+			}	
+			
+			#if VERBOSITY == 1
+			
+				cout << "	# FITSTRS #: ";
+			
+				if (CONTROLS.FIT_STRESS)
+					cout << "true" << endl;				
+				else
+					cout << "false" << endl;
+				
+			#endif
+		}
+		
+		else if(LINE.find("# FITENER #") != string::npos)
+		{
+			cin >> LINE; cin.ignore();
+
+			if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+				CONTROLS.FIT_ENER = true;
+			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
+				CONTROLS.FIT_ENER = false;
+			else
+			{
+				cout << endl << "ERROR: # FITENER # must be specified as true or false." << endl;
+				exit(1);	
+			}	
+			
+			#if VERBOSITY == 1
+			
+				cout << "	# FITENER #: ";
+			
+				if (CONTROLS.FIT_ENER)
 					cout << "true" << endl;				
 				else
 					cout << "false" << endl;
@@ -1054,9 +1336,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			cin >> LINE; cin.ignore();
 
 			if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
-				fit_pover = true;
+				CONTROLS.FIT_POVER = true;
 			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
-				fit_pover = false;
+				CONTROLS.FIT_POVER = false;
 			else
 			{
 				cout << endl << "ERROR: # FITPOVR # must be specified as true or false." << endl;
@@ -1067,7 +1349,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			
 				cout << "	# FITPOVR #: ";
 			
-				if (fit_pover)
+				if (CONTROLS.FIT_POVER)
 					cout << "true" << endl;				
 				else
 					cout << "false" << endl;
@@ -1108,13 +1390,13 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			{
 					cin >> LINE;
 					cin.ignore();
-					invr_parms = int(atof(LINE.data()));
+					CONTROLS.INVR_PARAMS = int(atof(LINE.data()));
 					
 					#if VERBOSITY == 1
-						cout << "	             " << "Will use the following number of inverse-r params: " << invr_parms << endl;
+						cout << "	             " << "Will use the following number of inverse-r params: " << CONTROLS.INVR_PARAMS << endl;
 					#endif
 					
-				}
+			}
 
 			if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "CHEBYSHEV")
 			{
@@ -1122,22 +1404,22 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				
 				STREAM_PARSER.str(LINE);
 				
-				STREAM_PARSER >> cheby_order;				
+				STREAM_PARSER >> CONTROLS.CHEBY_ORDER;				
 				
 				#if VERBOSITY == 1
-					cout << "	             " << "Will use 2-body order: " << cheby_order << endl;
+					cout << "	             " << "Will use 2-body order: " << CONTROLS.CHEBY_ORDER << endl;
 				#endif
 				
 				if(TEMP_TYPE == "CHEBYSHEV")
 				{
-					STREAM_PARSER >> cheby_3b_order;
+					STREAM_PARSER >> CONTROLS.CHEBY_3B_ORDER;
 
 					#if VERBOSITY == 1
-						cout << "	             " << "Will use 3-body order: " << cheby_3b_order << endl;
+						cout << "	             " << "Will use 3-body order: " << CONTROLS.CHEBY_3B_ORDER << endl;
 					#endif
 						
-					if(cheby_3b_order>0)
-						if_3b_cheby = true;
+					if(CONTROLS.CHEBY_3B_ORDER>0)
+						CONTROLS.USE_3B_CHEBY = true;
 					
 					if (STREAM_PARSER >>  TMP_CHEBY_RANGE_LOW)
 					{
@@ -1178,13 +1460,13 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			
 			// Do some error checks
 			
-			if(if_3b_cheby && nlayers > 1)
+			if(CONTROLS.USE_3B_CHEBY && CONTROLS.N_LAYERS > 1)
 			{
 				cout << "ERROR: Use of layers is not supported with 3-body Chebyshev potentials." << endl;
-				cout << "       Set # NLAYERS # to 1." << endl;
+				cout << "       Set # N_LAYERS # to 1." << endl;
 				exit(0); 
 			}
-			if(if_3b_cheby && fit_pover)
+			if(CONTROLS.USE_3B_CHEBY && CONTROLS.FIT_POVER)
 			{
 				cout << "ERROR: Overbonding is not compatible with 3-body Chebyshev potentials." << endl;
 				cout << "       Set # FITPOVR # false." << endl;
@@ -1197,10 +1479,10 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 		else if( (TEMP_TYPE == "CHEBYSHEV") && (LINE.find("# CHBTYPE #") != string::npos))
 		{
 			cin >> LINE; cin.ignore();
-			cheby_type = LINE;
+			CONTROLS.CHEBY_TYPE = LINE;
 
 			#if VERBOSITY == 1
-				cout << "	# CHBTYPE #: " << cheby_type << endl;	
+				cout << "	# CHBTYPE #: " << CONTROLS.CHEBY_TYPE << endl;	
 			#endif
 		}		
 		
@@ -1210,7 +1492,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 		// will need to be fixed later.
 		/////////////////////////////////////////////////////////////////////
 		
-		else if(LINE.find("EXLUDE 3B INTERACTION:")!= string::npos)
+		else if(LINE.find("EXCLUDE 3B INTERACTION:")!= string::npos)
 		{
 			STREAM_PARSER.str(LINE);
 			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_INT;
@@ -1221,6 +1503,10 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				EXCLUDE_3B.push_back(LINE);
 			}
 			
+			// Sort the vector into ascending order
+			
+			sort (EXCLUDE_3B.begin(), EXCLUDE_3B.end());
+			
 			STREAM_PARSER.str("");
 			STREAM_PARSER.clear();	
 		}	
@@ -1228,16 +1514,19 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 		else if(LINE.find("# NATMTYP #")!= string::npos)
 		{
 			cin >> LINE; cin.ignore();
-			NATMTYP = int(atof(LINE.data()));
+			CONTROLS.NATMTYP = int(atof(LINE.data()));
 			
 			#if VERBOSITY == 1
-				cout << "	# NATMTYP #: " << NATMTYP << endl;	
+				cout << "	# NATMTYP #: " << CONTROLS.NATMTYP << endl;	
 			#endif
 			
-			NPAIR = NATMTYP*(NATMTYP+1)/2;
+			NPAIR = CONTROLS.NATMTYP*(CONTROLS.NATMTYP+1)/2;
 			ATOM_PAIRS.resize(NPAIR);
 			
-			NTRIP = factorial(NATMTYP+3-1)/factorial(3)/factorial(NATMTYP-1);
+			NTRIP = factorial(CONTROLS.NATMTYP+3-1)/factorial(3)/factorial(CONTROLS.NATMTYP-1);
+			
+			for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+				PAIR_TRIPLETS[i].FCUT_TYPE = "CUBIC";
 			
 			// Account for excluded types:
 			
@@ -1276,21 +1565,21 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			
 			// Figure out the number of non-unique pairs
 
-			TEMP_INT = NATMTYP*NATMTYP;
+			TEMP_INT = CONTROLS.NATMTYP*CONTROLS.NATMTYP;
 			
 			SUM_OF_CHARGES = 0;
 			
-			for(int i=0; i<NATMTYP; i++)
+			for(int i=0; i<CONTROLS.NATMTYP; i++)
 			{
 				
 				// Set the first atom pair types to be of type OO, HH, CC, etc...
 				
 				ATOM_PAIRS[i].PAIRTYP    = TEMP_TYPE;
 				ATOM_PAIRS[i].PAIRIDX	 = i; 
-				ATOM_PAIRS[i].CHEBY_TYPE = cheby_type;
+				ATOM_PAIRS[i].CHEBY_TYPE = CONTROLS.CHEBY_TYPE;
 				
 				cin >> LINE >> ATOM_PAIRS[i].ATM1TYP >> LINE;
-				if(!fit_coul)
+				if(!CONTROLS.FIT_COUL)
 				{
 					ATOM_PAIRS[i].ATM1CHG = double(atof(LINE.data()));
 				}
@@ -1299,10 +1588,8 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					ATOM_PAIRS[i].CHRGSGN = LINE;
 					ATOM_PAIRS[i].ATM1CHG = 0.0;
 				}
-				
-				
-				
-				SUM_OF_CHARGES += ATOM_PAIRS[i].ATM1CHG;
+
+				SUM_OF_CHARGES += abs(ATOM_PAIRS[i].ATM1CHG);
 
 				cin >> LINE; cin.ignore();
 				ATOM_PAIRS[i].ATM1MAS = double(atof(LINE.data()));
@@ -1317,7 +1604,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				#if VERBOSITY == 1
 					cout << " 	" << setw(15) << left << i+1 
 						 << setw(15) << left << ATOM_PAIRS[i].ATM1TYP;
-					if(!fit_coul) 
+					if(!CONTROLS.FIT_COUL) 
 						cout << setw(15) << left << ATOM_PAIRS[i].ATM1CHG;
 					else
 						cout << ATOM_PAIRS[i].CHRGSGN << "		";
@@ -1326,27 +1613,28 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				#endif
 			}
 			
-			if(!fit_coul)
+			if(!CONTROLS.FIT_COUL)
 			{
 				if (SUM_OF_CHARGES>0)
 				{
-					use_partial_charges = true;
-					if_subtract_coul = true;
+					CONTROLS.USE_PARTIAL_CHARGES = true;
+					CONTROLS.IF_SUBTRACT_COUL    = true;
+					
 				}
 				else
-					use_partial_charges = false;				
+					CONTROLS.USE_PARTIAL_CHARGES = false;				
 			}
 			
 			// Set up all possible unique pair types
 			
-			TEMP_INT = NATMTYP;
+			TEMP_INT = CONTROLS.NATMTYP;
 			
-			for(int i=0; i<NATMTYP; i++)
+			for(int i=0; i<CONTROLS.NATMTYP; i++)
 			{
-				for(int j=i+1; j<NATMTYP; j++)
+				for(int j=i+1; j<CONTROLS.NATMTYP; j++)
 				{	
-					ATOM_PAIRS[TEMP_INT].PAIRTYP = ATOM_PAIRS[i].PAIRTYP;
-					ATOM_PAIRS[TEMP_INT].PAIRIDX = TEMP_INT; 
+					ATOM_PAIRS[TEMP_INT].PAIRTYP    = ATOM_PAIRS[i].PAIRTYP;
+					ATOM_PAIRS[TEMP_INT].PAIRIDX    = TEMP_INT; 
 					ATOM_PAIRS[TEMP_INT].CHEBY_TYPE = ATOM_PAIRS[i].CHEBY_TYPE;
 														
 					ATOM_PAIRS[TEMP_INT].ATM1TYP = ATOM_PAIRS[i].ATM1TYP;
@@ -1367,9 +1655,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 
 			// Set up the maps to account for non-unique pairs
 			
-			for(int i=0; i<NATMTYP; i++)
+			for(int i=0; i<CONTROLS.NATMTYP; i++)
 			{
-				for(int j=0; j<NATMTYP; j++)
+				for(int j=0; j<CONTROLS.NATMTYP; j++)
 				{
 					TEMP_STR = ATOM_PAIRS[i].ATM1TYP;
 					TEMP_STR.append(ATOM_PAIRS[j].ATM1TYP);
@@ -1388,18 +1676,18 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				}
 			}
 			
-			if(if_3b_cheby)
+			if(CONTROLS.USE_3B_CHEBY)
 			{
 				// Generate unique triplets
 			
 				TRIPLETS TRIP_ATOMS;		// Each item is an atom type
 				TEMP_INT = 0;				// Will hold pair triplet index
 			
-				for(int i=0; i<NATMTYP; i++)
+				for(int i=0; i<CONTROLS.NATMTYP; i++)
 				{
-					for(int j=i; j<NATMTYP; j++)
+					for(int j=i; j<CONTROLS.NATMTYP; j++)
 					{
-						for(int k=j; k<NATMTYP; k++)
+						for(int k=j; k<CONTROLS.NATMTYP; k++)
 						{
 							// Get the three atoms that will define the 3-body interaction
 						
@@ -1446,7 +1734,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				XYZ_INT UNSORTED_POWERS;
 				XYZ_INT SORTED_POWERS;
 			
-				vector<XYZ_INT> STORED_SORTED_POWERS;//(cheby_3b_order*cheby_3b_order*cheby_3b_order);		// Make this the max possible size... it will be destroyed later anyway.
+				vector<XYZ_INT> STORED_SORTED_POWERS;//(CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER);		// Make this the max possible size... it will be destroyed later anyway.
 			
 				int TOP, BOT;
 				int ITEMS = -1; 
@@ -1458,11 +1746,13 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				for(int i=0; i<NTRIP; i++)
 				{
 					ITEMS = 0;
-					for(int pair1_pow=0; pair1_pow<cheby_3b_order; pair1_pow++)
+					vector<int> STORED_SORTED_POWERS_EQVS;
+					
+					for(int pair1_pow=0; pair1_pow<CONTROLS.CHEBY_3B_ORDER; pair1_pow++)
 					{
-						for(int pair2_pow=0; pair2_pow<cheby_3b_order; pair2_pow++)
+						for(int pair2_pow=0; pair2_pow<CONTROLS.CHEBY_3B_ORDER; pair2_pow++)
 						{
-							for(int pair3_pow=0; pair3_pow<cheby_3b_order; pair3_pow++)
+							for(int pair3_pow=0; pair3_pow<CONTROLS.CHEBY_3B_ORDER; pair3_pow++)
 							{
 								// Check number 1: Are at least two powers greater than 0?
 								if( (pair1_pow>0 && pair2_pow>0) || (pair1_pow>0 && pair3_pow>0) || (pair2_pow>0 && pair3_pow>0) )
@@ -1479,7 +1769,9 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 	
 									// Case 1: each pair in the current pair triplet is unique ... multiplicities will be one for each item
 								
-									if( (PAIR_TRIPLETS[i].ATMPAIR1 != PAIR_TRIPLETS[i].ATMPAIR2) && (PAIR_TRIPLETS[i].ATMPAIR1 != PAIR_TRIPLETS[i].ATMPAIR3) && (PAIR_TRIPLETS[i].ATMPAIR2 != PAIR_TRIPLETS[i].ATMPAIR3) )
+									if( (PAIR_TRIPLETS[i].ATMPAIR1 != PAIR_TRIPLETS[i].ATMPAIR2) 
+									 && (PAIR_TRIPLETS[i].ATMPAIR1 != PAIR_TRIPLETS[i].ATMPAIR3) 
+									 && (PAIR_TRIPLETS[i].ATMPAIR2 != PAIR_TRIPLETS[i].ATMPAIR3) )
 										PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
 
 								
@@ -1537,11 +1829,13 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 										if(!STORED)
 										{
 											STORED_SORTED_POWERS           .push_back(SORTED_POWERS);
-											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);									
+											STORED_SORTED_POWERS_EQVS      .push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
+											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);	// The current power	
+																			
 										}
 										else
 										{
-											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(STORED_IDX);
+											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(STORED_SORTED_POWERS_EQVS[STORED_IDX]);											
 										}
 										STORED = false;
 
@@ -1608,11 +1902,12 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 										if(!STORED)
 										{
 											STORED_SORTED_POWERS           .push_back(SORTED_POWERS);
+											STORED_SORTED_POWERS_EQVS      .push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
 											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);	
 										}
 										else
-										{
-											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(STORED_IDX);
+										{										
+											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(STORED_SORTED_POWERS_EQVS[STORED_IDX]);
 										}									
 										STORED = false;
 					
@@ -1668,7 +1963,16 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				bool REAL_TRIPLET = false;
 			
 				string TEMP_STR_A, TEMP_STR_B, TEMP_STR_C;
+				/*
 			
+			
+				cout << "SANITY CHECK: These are your triplets:" << endl;
+				for(int m=0; m<NTRIP; m++)
+				{
+					cout << m << " " << PAIR_TRIPLETS[m].ATMPAIR1 << " " << PAIR_TRIPLETS[m].ATMPAIR2 << " " << PAIR_TRIPLETS[m].ATMPAIR3 << endl;
+				}
+			
+			*/
 				for(int i=0; i<NPAIR; i++)
 				{
 					for(int j=0; j<NPAIR; j++)
@@ -1706,99 +2010,92 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 								
 								}
 								if(!REAL_TRIPLET)	// Then this is not an allowed triplet type!
-									TRIAD_MAP        .insert(make_pair(TEMP_STR,-1));	
+									TRIAD_MAP        .insert(make_pair(TEMP_STR,-1*m-1));	
 							}
 						}
 					}
 				}
 				
 				
+
+				
 				
 				// Now that we've got the maps and the 3b ff structures created, we can go back an remove triplet types
 				// that the user requested to exclude
-				
+
+
 				TEMP_INT = NTRIP;
-				vector<int> ERASE_LIST;
-						
-				for(int i=0; i<TEMP_INT; i++)
-				{
-					TEMP_STR =      PAIR_TRIPLETS[i].ATMPAIR1;
-					TEMP_STR.append(PAIR_TRIPLETS[i].ATMPAIR2);
-					TEMP_STR.append(PAIR_TRIPLETS[i].ATMPAIR3);
-
-					for(int j=0; j<EXCLUDE_3B.size(); j++)
-					{
-						if(TRIAD_MAP[TEMP_STR] == TRIAD_MAP[EXCLUDE_3B[j]])	// Then we need to exclude it!
-						{
-							ERASE_LIST.push_back(i);
-							NTRIP--;
-							break;
-						}
-					}
-				}	
-
-				for(int i=0; i<ERASE_LIST.size(); i++)
-					PAIR_TRIPLETS.erase(PAIR_TRIPLETS.begin()+ERASE_LIST[i]);
-
-			    // iterator->first = key
-			    // iterator->second = value
-				
+				vector<int>EXCL_IDX;
 				bool FOUND = false;
-				map<string, int>::iterator it, ita, itb;
 				map<string, int>::iterator it2, it2a,itrem;
-				
+				map<string, int>::iterator it, ita, itb;
 				ita = TRIAD_MAP.begin();
 				itb = TRIAD_MAP.end();
 				advance(itb,-1);
 				int TARGET;
-
-				for(int j=0; j<EXCLUDE_3B.size(); j++)
-				{
-					
-					TARGET = TRIAD_MAP[EXCLUDE_3B[j]];
-					
-					bool EXIT_COND = false;
-
-					for(it = ita; it != TRIAD_MAP.end(); it++)
-					{
-						if(it == itb)
-						{
-							EXIT_COND = true;
-							break;
-						}
-					
-						if(it->second != TARGET)
-							continue;
-						else
-						{
-							it->second = -2;
-							ita    = it;
-
-							break;
-						}
-					}
-
-					advance(ita,1);
-
-					for(it = ita; it != TRIAD_MAP.end(); it++)
-					{
-						if(it->second == TARGET)
-							it->second = -2;
-						else if(it->second>TARGET)
-							it->second -= 1;
-					}
-				}
-
+				
 				/*
-				//	Sanity check				
-				cout << "YOUR NEW MAPS: " << endl;
-
+				//	Sanity check	
+				cout << "YOUR OLD MAPS: " << endl;	
 				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
 					cout <<"		" << it->first << " : " << it->second << endl;
 				*/
 				
+				// Start by making all removed type indicies negative
+				// ALSO, THIS IS WHERE WE POP OFF ELEMENTS OF OUR PAIR TRIPLET VECTOR
+
+				for (unsigned j = EXCLUDE_3B.size(); j-- > 0; ) // Since we're popping off by index, iterate over vector (ascending sorted) in reverse
+					PAIR_TRIPLETS.erase (PAIR_TRIPLETS.begin() + TRIAD_MAP[EXCLUDE_3B[j]]);
 				
-				// Rebuild the new reverse maps
+				for(int j=0; j<EXCLUDE_3B.size(); j++)
+				{
+					EXCL_IDX.push_back(TRIAD_MAP[EXCLUDE_3B[j]]);
+
+					NTRIP--;
+					
+					for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)				
+						if(it->second == EXCL_IDX[j])	// Then we need to exclude it!
+								it->second = -1*it->second - 1;					
+				}	
+				
+				/*
+				//	Sanity check	
+				cout << "YOUR ~~ MAPS: " << endl;	
+				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
+					cout <<"		" << it->first << " : " << it->second << endl;
+				*/
+				
+				// Next, re-number all the real (positive) entries to be sequential
+				
+				int count = 0;
+				
+				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
+				{				
+					if( (it->second >= 0) && (it->second >= count))
+					{
+						ita = it;
+						advance(ita,1);
+
+						for (it2=ita; it2 != TRIAD_MAP.end(); it2++)
+						{
+							if(it2->second == it->second)
+								it2->second = count;
+						}
+												
+						it->second = count;
+						count++;
+						continue;
+					}
+				}
+				
+				/*
+				//	Sanity check	
+				cout << "YOUR NEW MAPS: " << endl;	
+				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
+					cout <<"		" << it->first << " : " << it->second << endl;
+				*/
+				
+				// Finally, rebuild the reverse maps
 				
 				TRIAD_MAP_REVERSE.clear();
 
@@ -1808,7 +2105,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				/*
 				//	Sanity check	
 							
-				cout << "YOUR NEW MAPS: " << endl;
+				cout << "YOUR NEW REV MAPS: " << endl;
 
 				map<int, string>::iterator itc;
 				
@@ -1826,7 +2123,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 						cout << "		" << ATOM_PAIRS[i].PAIRIDX << "  " << ATOM_PAIRS[i].ATM1TYP << " " << ATOM_PAIRS[i].ATM2TYP << endl;
 				#endif
 					
-			if(if_3b_cheby)
+			if(CONTROLS.USE_3B_CHEBY)
 			{
 				#if VERBOSITY == 1	
 					cout << "	The following unique triplets of pair types and thier allowed pair polynomial powers have been identified:" << endl;
@@ -1907,8 +2204,22 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 				else
 				{
 						ATOM_PAIRS[TEMP_INT].USE_OVRPRMS = false;
-				}									
-		
+				}		
+				
+				// Check if 3B bin widths are specified
+				
+				if(!cin.eof())	
+				{
+					cin >> ATOM_PAIRS[TEMP_INT].NBINS.X;
+					cin >> ATOM_PAIRS[TEMP_INT].NBINS.Y;
+					cin >> ATOM_PAIRS[TEMP_INT].NBINS.Z;
+				}
+				else
+				{
+					ATOM_PAIRS[TEMP_INT].NBINS.X = 0;
+					ATOM_PAIRS[TEMP_INT].NBINS.Y = 0;
+					ATOM_PAIRS[TEMP_INT].NBINS.Z = 0;
+				}	
 			}
 			
 			#if VERBOSITY == 1			
@@ -1937,15 +2248,15 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 						 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS << endl;
 				#endif
 					 
-					 if(ATOM_PAIRS[i].USE_OVRPRMS)
-						 PRINT_OVR = true;
+				 if(ATOM_PAIRS[i].USE_OVRPRMS)
+					 PRINT_OVR = true;
 			}
 		
 			// If overbonding parameters are provided, and they are not requested to be fit, 
 			// subtract thier contribution before generating A matrix
 			
-			if(PRINT_OVR && !fit_pover)
-				if_subtract_coord = true;
+			if(PRINT_OVR && !CONTROLS.FIT_POVER)
+				CONTROLS.IF_SUBTRACT_COORD = true;
 
 			if(PRINT_OVR)
 			{
@@ -1974,6 +2285,14 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 					#endif													
 				}											
 			}
+			
+			cout << endl;
+			cout << "Read the following number of ij ik jk bins for pairs: " << endl;
+			
+			for(int i=0; i<NPAIR; i++)
+				cout << "	" << ATOM_PAIRS[i].PRPR_NM  << ": " << ATOM_PAIRS[i].NBINS.X << " " << ATOM_PAIRS[i].NBINS.Y << " " << ATOM_PAIRS[i].NBINS.Z << endl;					
+			cout << endl;
+	
 		}
 		
 		else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING")!= string::npos)
@@ -2045,7 +2364,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			{				
 				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MAXIM_3B.X;
 				
-				for(int i=1; i<NTRIP; i++)
+				for(int i=0; i<NTRIP; i++)
 				{
 					PAIR_TRIPLETS[i].S_MAXIM_3B.X = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
 					PAIR_TRIPLETS[i].S_MAXIM_3B.Y = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
@@ -2190,7 +2509,7 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			{				
 				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MINIM_3B.X;
 				
-				for(int i=1; i<NTRIP; i++)
+				for(int i=0; i<NTRIP; i++)
 				{
 					PAIR_TRIPLETS[i].S_MINIM_3B.X = PAIR_TRIPLETS[0].S_MINIM_3B.X;
 					PAIR_TRIPLETS[i].S_MINIM_3B.Y = PAIR_TRIPLETS[0].S_MINIM_3B.X;
@@ -2321,11 +2640,48 @@ static void read_lsq_input(string & INFILE, int & nframes, int & nlayers, bool &
 			}
 		}
 		
+		else if (LINE.find("# FCUTTYP #") != string::npos)
+		{
+			cin >> TEMP_TYPE;
+			
+			for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+				PAIR_TRIPLETS[i].FCUT_TYPE = TEMP_TYPE;
+			
+			#if VERBOSITY == 1
+				cout << "	# FCUTTYP #: " << TEMP_TYPE << "	... for 3-body Chebyshev interactions" << endl;	
+			#endif
+			
+			if(TEMP_TYPE=="SIGMOID" || TEMP_TYPE=="CUBSIG" || TEMP_TYPE=="CUBESTRETCH" || TEMP_TYPE == "SIGFLT")
+			{
+				cin >> PAIR_TRIPLETS[0].FCUT_STEEPNESS;
+				cin >> PAIR_TRIPLETS[0].FCUT_OFFSET;
+				
+				if(PAIR_TRIPLETS[0].FCUT_TYPE == "SIGFLT")
+					cin >> PAIR_TRIPLETS[0].FCUT_HEIGHT;
+				
+				#if VERBOSITY == 1
+					cout << "			With steepness, offset, and height of: " << fixed << setprecision(3) << PAIR_TRIPLETS[0].FCUT_STEEPNESS << ",	" << PAIR_TRIPLETS[0].FCUT_OFFSET << ", and  " << PAIR_TRIPLETS[0].FCUT_HEIGHT << endl;	
+				#endif
+				
+				for(int i=1; i<PAIR_TRIPLETS.size(); i++)
+				{
+					PAIR_TRIPLETS[i].FCUT_STEEPNESS = PAIR_TRIPLETS[0].FCUT_STEEPNESS;
+					PAIR_TRIPLETS[i].FCUT_OFFSET    = PAIR_TRIPLETS[0].FCUT_OFFSET;
+					PAIR_TRIPLETS[i].FCUT_HEIGHT    = PAIR_TRIPLETS[0].FCUT_HEIGHT;
+				}
+					
+			}
+			cin.ignore();
+
+
+
+		}	
+		
 		
 	}	
 	
 	#if VERBOSITY == 1			
-		cout << "	Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl;; // All types use same scaling
+		cout << "Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl;; // All types use same scaling
 	#endif	
 }
 
