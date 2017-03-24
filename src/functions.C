@@ -400,7 +400,7 @@ void divide_atoms(int &a1start, int &a1end, int atoms)
 		a1end   = ((RANK+1) * atoms / NPROCS) - 1;
 
 
-//	  cout << "DIVIDING ATOMS: RANK : " << RANK << " " << atoms << " " << a1start << ":" << a1end << endl;
+	  cout << "DIVIDING ATOMS: RANK : " << RANK << " " << atoms << " " << a1start << ":" << a1end << endl;
 }
 
 //////////////////////////////////////////
@@ -2742,9 +2742,6 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	// Set up for MPI
 	
 	int a1start, a1end;	
-	
-	
-//cout << "ON " << NPROCS << " PROCESSORS, EXPECTING " << SYSTEM.ATOMS << " ATOMS." << endl;
 
 	#ifndef LINK_LAMMPS
 

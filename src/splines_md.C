@@ -4402,36 +4402,37 @@ void exit_run(int value)
 	}
 
 	void Write_Lammps_inputfile(const JOB_CONTROL & CONTROLS)
+	// Eventually we should link the pair_style cutoff distance with whatever the max forcefield cutoff is
 	{
 		ofstream LMPINFILE;
 		LMPINFILE.open("in.lammps");
 	
 		// These inputs shouldn't *need* to change, so we'll hard-code them
 
-		LMPINFILE << "units 			real" << endl;
-		LMPINFILE << "kspace_style 	ewald 1e-4" << endl;
-		LMPINFILE << "atom_style		charge" << endl;
-		LMPINFILE << "atom_modify 	map array" << endl;
-		LMPINFILE << "atom_modify 	sort 0 0.0" << endl;
-		LMPINFILE << "read_data 		data.lammps" << endl;
-		LMPINFILE << "neighbor        1.0 bin" << endl;
-		LMPINFILE << "neigh_modify    delay 0 every 1 check no" << endl << endl;
+		LMPINFILE << "units            real" << endl;
+		LMPINFILE << "kspace_style     ewald 1e-4" << endl;
+		LMPINFILE << "atom_style       charge" << endl;
+		LMPINFILE << "atom_modify      map array" << endl;
+		LMPINFILE << "atom_modify      sort 0 0.0" << endl;
+		LMPINFILE << "read_data        data.lammps" << endl;
+		LMPINFILE << "neighbor         1.0 bin" << endl;
+		LMPINFILE << "neigh_modify     delay 0 every 1 check no" << endl << endl;
 	
 		// Initialize the velocity via the temperature
 	
-		LMPINFILE << "velocity		all create " << CONTROLS.TEMPERATURE << " " << CONTROLS.SEED << endl << endl;
+		LMPINFILE << "velocity         all create " << CONTROLS.TEMPERATURE << " " << CONTROLS.SEED << endl << endl;
 	
 		// Set the pairstyle and coefficients
 	
-		LMPINFILE << "pair_style 		coul/long 10.0" << endl;	
-		LMPINFILE << "pair_coeff 		* *"  << endl << endl;
+		LMPINFILE << "pair_style       coul/long 10.0" << endl;	
+		LMPINFILE << "pair_coeff       * *"  << endl << endl;
 	
 		if      (CONTROLS.ENSEMBLE == "LMP-NVE")
-			LMPINFILE << "fix 	1 all nve " << endl;
+			LMPINFILE << "fix       1 all nve " << endl;
 		else if (CONTROLS.ENSEMBLE == "LMP-NVT")
-			LMPINFILE << "fix 	1 all nvt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << endl; 
+			LMPINFILE << "fix       1 all nvt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << endl; 
 		else if (CONTROLS.ENSEMBLE == "LMP-NPT")
-			LMPINFILE << "fix 	1 all npt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " iso " << CONTROLS.PRESSURE*GPa2atm << " " << CONTROLS.PRESSURE*GPa2atm <<  " " <<  CONTROLS.FREQ_UPDATE_BAROSTAT << endl;
+			LMPINFILE << "fix       1 all npt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " iso " << CONTROLS.PRESSURE*GPa2atm << " " << CONTROLS.PRESSURE*GPa2atm <<  " " <<  CONTROLS.FREQ_UPDATE_BAROSTAT << endl;
 		else
 		{
 			cout << "ERROR: Unrecognized ensemble for LAMMPS linking." << endl;
@@ -4443,36 +4444,36 @@ void exit_run(int value)
 	
 		// I *think* this line converts the potential energy in the thermodynamic output section to the potential energy + thermostat/barostat contributions?
 	
-		LMPINFILE << "fix_modify 	1 energy yes" << endl;
+		LMPINFILE << "fix_modify       1 energy yes" << endl;
 	
 		// Not sure of the exact meaning of this syntax, but I think this is saying use the callback function to compute potential energies and forces?
 	
-		LMPINFILE << "fix 		ext all external pf/callback 1 1" << endl;
+		LMPINFILE << "fix              ext all external pf/callback 1 1" << endl;
 	
 		// Again, adding contributions from the callback function to the PE?
 	
-		LMPINFILE << "fix_modify ext energy yes" << endl << endl;
+		LMPINFILE << "fix_modify       ext energy yes" << endl << endl;
 	
 		// Custom thermo output ... Make this an optional read-in string from the house_md input file eventually
 	
-		LMPINFILE << "thermo_style custom step temp etotal ke pe lx ly lz pxx pyy pzz press vol" << endl;
-		LMPINFILE << "thermo_modify format float %20.15g flush yes " << endl << endl;
+		LMPINFILE << "thermo_style     custom step temp etotal ke pe lx ly lz pxx pyy pzz press vol" << endl;
+		LMPINFILE << "thermo_modify    format float %20.15g flush yes " << endl << endl;
 	
 		// Print frequencies/formats 
 	
-		LMPINFILE << "thermo 		" << CONTROLS.FREQ_ENER << endl << endl;;
+		LMPINFILE << "thermo           " << CONTROLS.FREQ_ENER << endl << endl;;
 		
 		// Dump a plain xyz format
 							
-		LMPINFILE << "dump		dump_1 all xyz " << CONTROLS.FREQ_DFTB_GEN << " traj.xyz " << endl; 	// name of dump, atom group, type of dump, dump frequency, name of dumped file
+		LMPINFILE << "dump             dump_1 all xyz " << CONTROLS.FREQ_DFTB_GEN << " traj.xyz " << endl; 	// name of dump, atom group, type of dump, dump frequency, name of dumped file
 	
 		// Don't do any spacial ordering of molecules
 	
-		LMPINFILE << "atom_modify	sort 0 0.0 " << endl;
+		LMPINFILE << "atom_modify      sort 0 0.0 " << endl;
 	
 		// Write a restart file every 1000 steps ...Printing alternates between .a and .b
 	
-		LMPINFILE << "restart 100 restart.a restart.b" << endl;
+		LMPINFILE << "restart          100 restart.a restart.b" << endl;
 		
 		// Other dump options that I'm ignoring for now
 		//
@@ -4489,9 +4490,9 @@ void exit_run(int value)
 	// "f" can be NULL if proc owns no atoms
 	{
 	
-	    class LAMMPS *lmp = (class LAMMPS *) ptr;
+		class LAMMPS *lmp = (class LAMMPS *) ptr;
 
-	    // Get information about the system that LAMMPS has built based on the lammps input file?
+		// Get information about the system that LAMMPS has built based on the lammps input file?
 	    
 		double boxxlo = *((double *) lammps_extract_global(lmp,"boxxlo"));
 	    	double boxylo = *((double *) lammps_extract_global(lmp,"boxylo"));
@@ -4542,23 +4543,23 @@ void exit_run(int value)
 		// For the callback force calculation
 		
 		
-	    FRAME SYS; 
+		FRAME SYS; 
 
-	    SYS.ATOMS      = TOTAL_ATOMS;//nlocal;
+		SYS.ATOMS      = TOTAL_ATOMS;//nlocal;
 		
-	    SYS.BOXDIM.X   = xprd;
-	    SYS.BOXDIM.Y   = yprd;
-	    SYS.BOXDIM.Z   = zprd;
+		SYS.BOXDIM.X   = xprd;
+		SYS.BOXDIM.Y   = yprd;
+		SYS.BOXDIM.Z   = zprd;
 		
-	    SYS.ATOMTYPE    .resize(TOTAL_ATOMS);
-	    SYS.COORDS      .resize(TOTAL_ATOMS);
-	    SYS.CHARGES     .resize(TOTAL_ATOMS);
-	    SYS.MASS        .resize(TOTAL_ATOMS);
-	    SYS.FORCES      .resize(TOTAL_ATOMS);
-	    SYS.ACCEL       .resize(TOTAL_ATOMS);
-	    SYS.VELOCITY    .resize(TOTAL_ATOMS);
-	    SYS.VELOCITY_NEW.resize(TOTAL_ATOMS);
-	    SYS.ATOMTYPE_IDX.resize(TOTAL_ATOMS);
+		SYS.ATOMTYPE    .resize(TOTAL_ATOMS);
+		SYS.COORDS      .resize(TOTAL_ATOMS);
+		SYS.CHARGES     .resize(TOTAL_ATOMS);
+		SYS.MASS        .resize(TOTAL_ATOMS);
+		SYS.FORCES      .resize(TOTAL_ATOMS);
+		SYS.ACCEL       .resize(TOTAL_ATOMS);
+		SYS.VELOCITY    .resize(TOTAL_ATOMS);
+		SYS.VELOCITY_NEW.resize(TOTAL_ATOMS);
+		SYS.ATOMTYPE_IDX.resize(TOTAL_ATOMS);
 	
 		for (int iter = 0; iter < nlocal; iter++) 
 		{
@@ -4599,44 +4600,42 @@ void exit_run(int value)
 			SYS.ACCEL[i].Z = 0;	
 		}
 	    
-	    // Now we need to sync SYS.COORDS across all processors.. 
-	    // Note, masses and velocities have not been updated because they 
-	    // do not factor into anything in house_md but kinetic energy calculations, which 
-	    // are not used in conjunction with LAMMPS
+		// Now we need to sync SYS.COORDS across all processors.. 
+		// Note, masses and velocities have not been updated because they 
+		// do not factor into anything in house_md but kinetic energy calculations, which 
+		// are not used in conjunction with LAMMPS
 
 	    
-	    vector<int> STARTS(NPROCS);
-	    vector<int> NCOORDS_PER_PROC(NPROCS);
-	    vector<int> STARTS_COORDS(NPROCS);
+		vector<int> STARTS          (NPROCS);
+		vector<int> NCOORDS_PER_PROC(NPROCS);
+		vector<int> STARTS_COORDS   (NPROCS);
 	    
-	    SYS.MY_ATOMS       = nlocal;
-	    SYS.MY_ATOMS_START = START; 
+		SYS.MY_ATOMS       = nlocal;
+		SYS.MY_ATOMS_START = START; 
 
-	for(int i=0; i<NPROCS; i++)
-	{
-	    	STARTS[i] = 0;
-		STARTS_COORDS[i] = 0;
-		NCOORDS_PER_PROC[i] = 3*NATOMS_PER_PROC[i];	
-			
-		for(int j=0; j<i; j++)
+		for(int i=0; i<NPROCS; i++)
 		{
-	    		STARTS[i] += NATOMS_PER_PROC[j];
+			STARTS[i]           = 0;
+			STARTS_COORDS[i]    = 0;
+			NCOORDS_PER_PROC[i] = 3*NATOMS_PER_PROC[i];	
 			
-
-			STARTS_COORDS[i] += 3*NATOMS_PER_PROC[j];
+			for(int j=0; j<i; j++)
+			{
+				STARTS[i]        += NATOMS_PER_PROC[j];
+				STARTS_COORDS[i] += 3*NATOMS_PER_PROC[j];
+			}
 		}
-	}
 	    
 	    
-	double *coord = (double *) SYS.COORDS.data();
-	double *force = (double *) SYS.FORCES.data();
-	double *accel = (double *) SYS.ACCEL .data();
+		double *coord = (double *) SYS.COORDS.data();
+		double *force = (double *) SYS.FORCES.data();
+		double *accel = (double *) SYS.ACCEL .data();
 
-	MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.CHARGES.front(),      &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_DOUBLE, MPI_COMM_WORLD);
-	MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.ATOMTYPE_IDX.front(), &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_INT,    MPI_COMM_WORLD);
-	MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, coord,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
-	MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, force,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
-	MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, accel,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
+		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.CHARGES.front(),      &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_DOUBLE, MPI_COMM_WORLD);
+		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.ATOMTYPE_IDX.front(), &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_INT,    MPI_COMM_WORLD);
+		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, coord,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
+		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, force,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
+		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, accel,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
 		
 		for(int i=0; i<TOTAL_ATOMS; i++)
 			SYS.ATOMTYPE[i] = TMP_ATOMTYPE[SYS.ATOMTYPE_IDX[i]-1];
@@ -4646,17 +4645,16 @@ void exit_run(int value)
 		ZCalc(SYS, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
     	    
 
-		// Now we need to sync up all the forces, potential energy, and tensors
+		// Now we need to sync up all the forces, potential energy, and tensors with LAMMPS
+		//... but first, we need to sum the potential energy computed by each process, since 
+		// we're saving it directly to LAMMPS' PE which corresponds to the sum over all processes.
 		
 		MPI_Allreduce(MPI_IN_PLACE, &SYS.TOT_POT_ENER,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
 		
-		// I'm not sure why, but when I include these lines, the tensor values at step = 0 are wrong.
+		// Also, need to add up the forces (accel) to account for f[i]+=val, f[j]+=val, for when 
+		// j is on a different proc than i
 		
-//		MPI_Allreduce(MPI_IN_PLACE, &SYS.PRESSURE_TENSORS_XYZ.X,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-//		MPI_Allreduce(MPI_IN_PLACE, &SYS.PRESSURE_TENSORS_XYZ.Y,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-//		MPI_Allreduce(MPI_IN_PLACE, &SYS.PRESSURE_TENSORS_XYZ.Z,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		
-		
+		MPI_Allreduce(MPI_IN_PLACE, accel, 3*SYS.ATOMS, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		
 		// Give LAMMPS the computed forces
 		
@@ -4675,9 +4673,9 @@ void exit_run(int value)
 		FixExternal *fix = (FixExternal *) lmp->modify->fix[ifix];
 		fix->set_energy(SYS.TOT_POT_ENER);
 		
-	    // stress tensor is multiplied by (atm/vol) in LAMMPS; multiply out volume here
-	    // virial points to LAMMPS array for stress tensor
-	    // XY, YZ, and XZ components need to be included at a later date.
+		// stress tensor is multiplied by (atm/vol) in LAMMPS; multiply out volume here
+		// virial points to LAMMPS array for stress tensor
+		// XY, YZ, and XZ components need to be included at a later date.
 	    
 		// Set the stresses based on our MD code's calculation
 	    
@@ -4690,8 +4688,6 @@ void exit_run(int value)
 		virial[3] = 0.0; // XY
 	    	virial[4] = 0.0; // XZ
 	    	virial[5] = 0.0; // YZ
-		
-	MPI_Barrier(MPI_COMM_WORLD);
     
 	}
 	
