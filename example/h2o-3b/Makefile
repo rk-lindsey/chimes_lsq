@@ -19,12 +19,18 @@ cheby_fit2 :
 	../../bin/splines_ls cheby_ls_3b2.in 49 > cheby_ls_3b2.out
 	../../bin/lsq.py A.txt b.txt params.header > params.3b2.txt
 	../../bin/cheby_print.pl < params.3b2.txt
-	-diff chebypot.0.out output/chebypot2.0.out
-	-diff chebypot.1.out output/chebypot2.1.out
-	-diff chebypot.2.out output/chebypot2.2.out
-	-diff cheby.0.out output/cheby2.0.out
-	-diff cheby.1.out output/cheby2.1.out
-	-diff cheby.2.out output/cheby2.2.out
+	mv chebypot.0.out chebypot.2.0.out
+	mv chebypot.1.out chebypot.2.1.out
+	mv chebypot.2.out chebypot.2.2.out
+	mv cheby.0.out cheby2.0.out
+	mv cheby.1.out cheby2.1.out
+	mv cheby.2.out cheby2.2.out
+	-diff chebypot.2.0.out output/chebypot2.0.out
+	-diff chebypot.2.1.out output/chebypot2.1.out
+	-diff chebypot.2.2.out output/chebypot2.2.out
+	-diff cheby2.0.out output/cheby2.0.out
+	-diff cheby2.1.out output/cheby2.1.out
+	-diff cheby2.2.out output/cheby2.2.out
 	-grep -v Date params.3b2.txt > params.3b2.nodate.txt
 	-diff params.3b2.nodate.txt output/params.3b2.nodate.txt
 	touch cheby_fit2
@@ -69,7 +75,7 @@ check_sorting :
 # (scramble.xyz)
 # The "unscrambled" forces are places in forceout.scramble.order.txt for
 # comparison to forceout.orig.txt
-check_scramble:
+check_scramble: cheby_fit
 	../../bin/splines_md scramble_3b_force.in > scramble_3b_force.out	
 	mv forceout.txt forceout.scramble.txt
 	sort forceout.scramble.txt > scramble.sort.txt
@@ -79,7 +85,7 @@ check_scramble:
 	sort forceout.orig.txt > orig.sort.txt
 	diff scramble.sort.txt orig.sort.txt
 
-check_scramble2:
+check_scramble2: cheby_fit2
 	../../bin/splines_md scramble_3b_force2.in > scramble_3b_force2.out	
 	mv forceout.txt forceout.scramble2.txt
 	sort forceout.scramble2.txt > scramble.sort2.txt

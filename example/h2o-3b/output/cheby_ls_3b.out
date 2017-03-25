@@ -2,13 +2,13 @@ Number of layers used in force evaluation = 1
 Chebyshev pair interaction used
 Number of chebyshev terms = 10
 Pair interaction minimum distance for pair 0 =  7.500000e-01
-Pair interaction maximum distance for pair 0 =  6.000000e+00
+Pair interaction maximum distance for pair 0 =  4.000000e+00
 Pair interaction Morse distance   for pair 0 =  1.250000e+00
 Pair interaction minimum distance for pair 1 =  7.500000e-01
-Pair interaction maximum distance for pair 1 =  6.000000e+00
+Pair interaction maximum distance for pair 1 =  3.000000e+00
 Pair interaction Morse distance   for pair 1 =  1.250000e+00
 Pair interaction minimum distance for pair 2 =  7.500000e-01
-Pair interaction maximum distance for pair 2 =  6.000000e+00
+Pair interaction maximum distance for pair 2 =  3.500000e+00
 Pair interaction Morse distance   for pair 2 =  1.250000e+00
 Coulomb parameters will be determined by fitting
 Coulombic forces will NOT be subtracted before fitting
@@ -16,10 +16,10 @@ Coulombic forces will NOT be subtracted before fitting
 The number of two-body non-coulomb parameters is 30
 Number of 3-Body Chebyshev parameter =10
 Ewald_Deriv:
-R-Space Ewald cutoff      =  6.173215e+00
-R-Space accuracy estimate =  5.220777e-08
-K-space accuracy estimate =  5.489244e-07
-Number of Ewald K-vectors = 235
+R-Space Ewald cutoff      =  4.304565e+00
+R-Space accuracy estimate =  5.997380e-07
+K-space accuracy estimate =  6.801448e-07
+Number of Ewald K-vectors = 238
 2-Body Chebyshev Polynomial Coefficients:
 ele: O O pair index: 0 pow: 0 parameter index: 0
 ele: O O pair index: 0 pow: 1 parameter index: 1
