@@ -1,4 +1,5 @@
-all : cheby_fit cheby_force cheby_md check_scramble cheby_fit2 cheby_md2 cheby_force2
+all : cheby_fit cheby_force cheby_md check_scramble cheby_fit2 cheby_md2 cheby_force2 \
+ cheby_fit3 cheby_md3
 
 cheby_fit :
 	../../bin/splines_ls cheby_ls_3b.in 49 > cheby_ls_3b.out
@@ -28,6 +29,14 @@ cheby_fit2 :
 	-diff params.3b2.nodate.txt output/params.3b2.nodate.txt
 	touch cheby_fit2
 
+cheby_fit3 :
+	../../bin/splines_ls cheby_ls_3b3.in 49 > cheby_ls_3b3.out
+	../../bin/lsq.py A.txt b.txt params.header > params.3b3.txt
+	../../bin/cheby_print.pl < params.3b3.txt
+	-grep -v Date params.3b3.txt > params.3b3.nodate.txt
+	-diff params.3b3.nodate.txt output/params.3b3.nodate.txt
+	touch cheby_fit3
+
 cheby_md : cheby_fit
 	../../bin/splines_md cheby_md_3b.in > cheby_md_3b.out
 	-diff cheby_md_3b.out output/cheby_md_3b.out
@@ -35,6 +44,10 @@ cheby_md : cheby_fit
 cheby_md2 : cheby_fit2
 	../../bin/splines_md cheby_md_3b2.in > cheby_md_3b2.out
 	-diff cheby_md_3b2.out output/cheby_md_3b2.out
+
+cheby_md3 : cheby_fit3
+	../../bin/splines_md cheby_md_3b3.in > cheby_md_3b3.out
+	-diff cheby_md_3b3.out output/cheby_md_3b3.out
 
 cheby_force : cheby_fit
 	../../bin/splines_md cheby_3b_force.in > cheby_3b_force.out
@@ -78,4 +91,4 @@ check_scramble2:
 
 clean :
 	rm -f A.txt b.txt params.header params.spline.txt force.txt *.out cheby_fit cheby_fit2\
- forceout*.txt *.sort.txt *.sort2.txt *.nodate.txt traj.gen params.*.txt
+ forceout*.txt *.sort.txt *.sort2.txt *.nodate.txt traj.gen params.*.txt cheby_fit3
