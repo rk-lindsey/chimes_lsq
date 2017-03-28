@@ -216,26 +216,25 @@ TEST = hf[ATOM_TRIPS_LINE].split()
 if len(TEST) == 3 and TEST[2] == "CUBIC":
 	ATOM_TRIPS_LINE += 2
 	
-
+TEST = hf[ATOM_TRIPS_LINE].split()
+if TEST[0] == "FCUT":
+	ATOM_TRIPS_LINE += 2	
 	
 TEST = hf[ATOM_TRIPS_LINE].split()
-if len(TEST) == 3 and TEST[2] == "S_MINIM:":
+if len(TEST) == 4 and TEST[2] == "S_MINIM:":
     if TEST[3] == "ALL":
         ATOM_TRIPS_LINE += 2
-    else:
-        ATOM_TRIPS_LINE += 2 + int(TEST[4])
+if len(TEST) == 5 and TEST[2] == "S_MINIM:":	
+        ATOM_TRIPS_LINE += 2 + int(TEST[4])   
         
 TEST = hf[ATOM_TRIPS_LINE].split()
-if len(TEST) == 3 and TEST[2] == "S_MAXIM:":
+if len(TEST) == 4 and TEST[2] == "S_MAXIM:":
     if TEST[3] == "ALL":
         ATOM_TRIPS_LINE += 2
-    else:
-        ATOM_TRIPS_LINE += 2 + int(TEST[4])      
+if len(TEST) == 5 and TEST[2] == "S_MAXIM:":	
+        ATOM_TRIPS_LINE += 2 + int(TEST[4])       
 	
-TEST = hf[ATOM_TRIPS_LINE].split()
-
-if TEST[0] == "FCUT":
-	ATOM_TRIPS_LINE += 2	  
+  
 		
 TOTAL_TRIPS =  hf[ATOM_TRIPS_LINE].split()
 TOTAL_TRIPS = int(TOTAL_TRIPS[3])
@@ -371,4 +370,5 @@ if TEST_SUITE_RUN == "do":
 # OLD WAY:
 #for i in range(0,len(x)):
 #    print i,x[i]
+
 

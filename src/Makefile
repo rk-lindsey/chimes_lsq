@@ -4,7 +4,7 @@
 
 # For linking to LAMMPS:
 
-LINK2LMPS= no
+LINK2LMPS= yes
 LAMMPSDIR=/usr/gapps/polymers/lammps_borax/
 
 # Compiling flags

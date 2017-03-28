@@ -54,6 +54,7 @@ double      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vec
 
 static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
 static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
+static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, string filename);
 
 // Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
 
@@ -823,6 +824,9 @@ int main(int argc, char* argv[])
 	if(RANK==0)
 		cout << "   ...read complete" << endl << endl;
 
+
+	/* OLD layer handling: explicit
+	
 	////////////////////////////////////////////////////////////
 	// Explicitly account for layers.. 
 	//
@@ -923,6 +927,29 @@ int main(int argc, char* argv[])
 			cout << "	New total atoms:    " << SYSTEM.ATOMS << endl;
 			cout << "	New box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl << endl;
 		}	
+	}
+	
+	*/
+	
+	// New layer handling: ghost atoms
+	
+	build_layers(SYSTEM, CONTROLS) ;
+
+
+	SYSTEM.WRAPDIM.X = SYSTEM.BOXDIM.X * (2*CONTROLS.N_LAYERS + 1);
+	SYSTEM.WRAPDIM.Y = SYSTEM.BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1);
+	SYSTEM.WRAPDIM.Z = SYSTEM.BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1);
+
+	if(RANK == 0)
+	{
+		cout << "	New total atoms:    " << SYSTEM.ALL_ATOMS << endl;
+		cout << "	Extended box dimensions: " << SYSTEM.WRAPDIM.X << " " << SYSTEM.WRAPDIM.Y << " " << SYSTEM.WRAPDIM.Z << endl << endl;
+	}	
+		
+	if ( CONTROLS.N_LAYERS < 1 ) // No ghost atoms.
+	{
+		cout << "ERROR: N_LAYERS must be >= 1" ;
+		exit_run(1) ;
 	}
 	
 	////////////////////////////////////////////////////////////
@@ -1177,7 +1204,7 @@ int main(int argc, char* argv[])
 	string  TEMP_SEARCH_3B = "some default text";
 	string	TEMP_TYPE;
 	int     NO_PAIRS, NO_TRIPS;
-	int		TMP_TERMS1, TMP_TERMS2;
+	int		TMP_TERMS1, TMP_TERMS2;;
 	double	TMP_LOW  = -1;
 	double 	TMP_HIGH =  1;
 	
@@ -2362,7 +2389,20 @@ int main(int argc, char* argv[])
 			cout << "Initializing the neighbor list..." << endl;
 		
 		NEIGHBOR_LIST.INITIALIZE(SYSTEM);
-		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS,true);
+		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+		
+		NEIGHBOR_LIST.MAX_VEL = -1.0;
+		
+		for(int i=0; i<SYSTEM.ATOMS; i++)
+		{
+			NEIGHBOR_LIST.CURR_VEL 
+			      = sqrt(SYSTEM.VELOCITY[i].X*SYSTEM.VELOCITY[i].X 
+			           + SYSTEM.VELOCITY[i].Y*SYSTEM.VELOCITY[i].Y 
+	      	           + SYSTEM.VELOCITY[i].Z*SYSTEM.VELOCITY[i].Z);
+			
+			if(NEIGHBOR_LIST.CURR_VEL > NEIGHBOR_LIST.MAX_VEL)
+				NEIGHBOR_LIST.MAX_VEL = NEIGHBOR_LIST.CURR_VEL;
+		}
 	}
 	
 
@@ -2525,12 +2565,10 @@ int main(int argc, char* argv[])
 		
 		TOTAL_ATOMS = SYSTEM.ATOMS;
 
-
 		// Only one rank does file writing
 		
 		if(RANK==0)
 		{
-		
 			// Generate the LAMMPS input file based ENTIRELY on the house_md input. 
 			// The user does not need to provide anything other than the usual house_md input!!!!
 
@@ -2564,16 +2602,19 @@ int main(int argc, char* argv[])
 		ss1 << "timestep " << CONTROLS.DELTA_T_FS;
 		tmpstr = ss1.str();     
 		command = tmpstr.c_str();
-		cout << command << endl;
+		if(RANK==0)
+			cout << command << endl;
 		lmp->input->one(command);
 
-	        ss2 << "run " << CONTROLS.N_MD_STEPS;
-	        tmpstr = ss2.str();     
-	        command = tmpstr.c_str();
-	        cout << command << endl;
-	        lmp->input->one(command);
+		ss2 << "run " << CONTROLS.N_MD_STEPS;
+		tmpstr = ss2.str();     
+		command = tmpstr.c_str();
+		if(RANK==0)
+			cout << command << endl;
+		lmp->input->one(command);
 	
-		cout << "LAMMPS run finished." << endl;
+		if(RANK==0)
+			cout << "LAMMPS run finished." << endl;
 
 		// exit code here; no need to run simulation code. But first, wait for all the other processes
 		//(i.e. those running lammps) to get here.
@@ -2584,7 +2625,7 @@ int main(int argc, char* argv[])
 		
 		delete lmp;
 		
-		exit_run(0); 
+		return 0; 
 
 	#endif
 
@@ -2605,10 +2646,12 @@ int main(int argc, char* argv[])
 	
 	for(CONTROLS.STEP=0;CONTROLS.STEP<CONTROLS.N_MD_STEPS;CONTROLS.STEP++)	//start Big Loop here.
     {
-
 	  	////////////////////////////////////////////////////////////
 		// Do first half of coordinate/velocity updating
 		////////////////////////////////////////////////////////////
+		
+		if ( (CONTROLS.STEP+1) % CONTROLS.FREQ_BACKUP == 0 ) 
+			write_xyzv(SYSTEM, CONTROLS, "backup.xyzv");
 		
 		if(CONTROLS.STEP>0)	
 		{
@@ -2616,21 +2659,11 @@ int main(int argc, char* argv[])
 			{
 				ENSEMBLE_CONTROL.UPDATE_COORDS(SYSTEM, CONTROLS);	// Update coordinates
 
-				if(CONTROLS.WRAP_COORDS)							// Wrap the coordinates:
-				{
-					for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-					{
-						SYSTEM.COORDS[a1].X -= floor(SYSTEM.COORDS[a1].X / SYSTEM.BOXDIM.X) * SYSTEM.BOXDIM.X;
-						SYSTEM.COORDS[a1].Y -= floor(SYSTEM.COORDS[a1].Y / SYSTEM.BOXDIM.Y) * SYSTEM.BOXDIM.Y;
-						SYSTEM.COORDS[a1].Z -= floor(SYSTEM.COORDS[a1].Z / SYSTEM.BOXDIM.Z) * SYSTEM.BOXDIM.Z;
-					}	
-				}
-				
+				// Don't wrap coordinates during MD.  This invalidates the neighbor list.
+
 				if(CONTROLS.ENSEMBLE=="NPT-BEREND" || CONTROLS.ENSEMBLE=="NPT-BEREND-ANISO" || CONTROLS.ENSEMBLE=="NPT-MTK" )	// Update the neighborlist, since box dimensions have changed
-				{
 					if(NEIGHBOR_LIST.USE)
 						NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS, true);
-				}
 				
 				
 				if(CONTROLS.ENSEMBLE=="NPT-BEREND" || CONTROLS.ENSEMBLE=="NPT-BEREND-ANISO" || CONTROLS.ENSEMBLE=="NPT-MTK" )	// Check if any outer cutoff has dropped below half the boxlength
@@ -2679,26 +2712,55 @@ int main(int argc, char* argv[])
 				ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_1(SYSTEM, CONTROLS);		
 			}
 		}
-		
+
 		cout.precision(14);			// Set output precision
     
-      	////////////////////////////////////////////////////////////
+      		////////////////////////////////////////////////////////////
 		// Calculate acceleration
 		////////////////////////////////////////////////////////////
 
 
-		// FOR MPI:		Broadcast the position and optionally velocity from the root to all other processes. -- WHY ISN'T THIS IS A PRECOMPILER DIRECTIVE?
-		sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
+		#ifdef USE_MPI
+			sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
+		#endif
 
-		// this function calculates the spline and electrostatic forces. --- this should probably be removed
+		// Move ghost atoms if present.
+		sync_layers(SYSTEM, CONTROLS) ;
+
+		// Do the actual force calculation
 		ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
 
+		// Check if neighbor list update needed/do updating
+		 
+		if(CONTROLS.STEP>0)	
+		{
+			if(NEIGHBOR_LIST.USE)
+			{
+				#ifdef USE_MPI
+					MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+				#endif
+				
+				NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+			}
+		}
+
 		// FOR MPI:		Synchronize forces, energy, and pressure.
-		
+
+/*	
+cout << "RANK HAS PE: " << RANK << " " 
+<< fixed << setprecision(3) << setw(10) << right << SYSTEM.ACCEL[0].X 
+<< fixed << setprecision(3) << setw(10) << right << SYSTEM.ATOMS 
+<< fixed << setprecision(3) << setw(10) << right << SYSTEM.TOT_POT_ENER 
+<< fixed << setprecision(3) << setw(10) << right << SYSTEM.PRESSURE_XYZ 
+<< fixed << setprecision(3) << setw(10) << right << SYSTEM.PRESSURE_TENSORS_XYZ.X 
+<< fixed << setprecision(3) << setw(10) << right << SYSTEM.PRESSURE_TENSORS_XYZ.Y 
+<< fixed << setprecision(3) << setw(10) << right << SYSTEM.PRESSURE_TENSORS_XYZ.Z << endl; 
+*/
+
 		#ifdef USE_MPI
 			sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
 		#endif
-
+		
 		////////////////////////////////////////////////////////////
 		// Print some info on new forces, compare to input forces if
 		// requested
@@ -2847,26 +2909,10 @@ int main(int argc, char* argv[])
 				ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_2(SYSTEM, CONTROLS, NEIGHBOR_LIST);	//update second half of velocity
 
 		}
+
 		// FOR MPI:		Broadcast the position and optionally velocity from the root to all other processes. -- WHY ISN'T THIS IS A PRECOMPILER DIRECTIVE?
 		sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
-		
 
-		////////////////////////////////////////////////////////////
-		// Check if neighbor list update needed to account for new velocities /do updating
-		////////////////////////////////////////////////////////////
-	 
-		if(CONTROLS.STEP>0)	
-		{
-			if(NEIGHBOR_LIST.USE)// && (RANK==0))
-			{
-				#ifdef USE_MPI
-					MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-				#endif
-		
-					NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS, false);
-			}
-		}
-			
 		if (RANK == 0)
 		{
 
@@ -2964,7 +3010,8 @@ int main(int argc, char* argv[])
 		// MPI -- Broadcast the position and optionally velocity from the root to all other processes.
 		sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
 
-
+		// Move ghost atoms if present.
+		sync_layers(SYSTEM, CONTROLS) ;
 		
 	  	////////////////////////////////////////////////////////////
 		// If requested, write the dftbgen output file
@@ -2981,10 +3028,21 @@ int main(int argc, char* argv[])
 			for (int a1=0; a1<SYSTEM.ATOMS; a1++) 
 			{
 				
+				XYZ tmp = SYSTEM.COORDS[a1] ;
+
+				if ( CONTROLS.WRAP_COORDS ) 
+				{
+					// Wrap into the primitive cell
+					tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
+					tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
+					tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+				}
+				
+				
 				GENFILE << right << setw(4) << a1+1 << " " << setw(2) << SYSTEM.ATOMTYPE_IDX[a1]+1 << " " 
-				       << fixed << setprecision(5) << setw(8) << SYSTEM.COORDS[a1].X << " "
-					   << fixed << setprecision(5) << setw(8) << SYSTEM.COORDS[a1].Y << " " 	
-					   << fixed << setprecision(5) << setw(8) << SYSTEM.COORDS[a1].Z << endl;    	
+				       << fixed << setprecision(5) << setw(8) << tmp.X << " "
+					   << fixed << setprecision(5) << setw(8) << tmp.Y << " " 	
+					   << fixed << setprecision(5) << setw(8) << tmp.Z << endl;    	
 			}
 		   
 			GENFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
@@ -3079,9 +3137,19 @@ int main(int argc, char* argv[])
 				{
 					if(TMP_ATOMTYPE[i] == SYSTEM.ATOMTYPE[j])
 					{
-						POSCAR << SYSTEM.COORDS[j].X/SYSTEM.BOXDIM.X << " " 
-							   << SYSTEM.COORDS[j].Y/SYSTEM.BOXDIM.Y << " " 
-							   << SYSTEM.COORDS[j].Z/SYSTEM.BOXDIM.Z << endl;
+						// Wrap into the primitive cell
+						XYZ tmp = SYSTEM.COORDS[j] ;
+
+						if ( CONTROLS.WRAP_COORDS ) 
+						{
+							tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
+							tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
+							tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+						}
+
+						POSCAR 	<< tmp.X/SYSTEM.BOXDIM.X << " " 
+								<< tmp.Y/SYSTEM.BOXDIM.Y << " " 
+								<< tmp.Z/SYSTEM.BOXDIM.Z << endl;
 					
 						if(INSTANCE == 1)
 							POSCAR_MAPPER << j << " " << VASP_IDX++ << " " << SYSTEM.ATOMTYPE[j] << endl;
@@ -3101,7 +3169,6 @@ int main(int argc, char* argv[])
 		// 
 		////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////
-   
 	   
     }//End big loop here.
     
@@ -3121,51 +3188,22 @@ int main(int argc, char* argv[])
 			TEMP_MASS  += SYSTEM.MASS[a];
 
 
-			cout << "	Average temperature over run = " << fixed << setprecision(4) << right << temp_sum  / CONTROLS.N_MD_STEPS << " K"   << endl;
-			cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << press_sum / CONTROLS.N_MD_STEPS << " GPa" << endl;
-			
-			if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
-			{
-				cout << "	Pressures from diagonal stress tensors over run: " << (stress_tensor_sum.X + stress_tensor_sum.Y + stress_tensor_sum.Z)/3.0/ CONTROLS.N_MD_STEPS << endl;
-				cout << "	Average diagonal stress tensors over run: " << endl;
-				cout << "		sigma_xx: " << stress_tensor_sum.X/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-				cout << "		sigma_yy: " << stress_tensor_sum.Y/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-				cout << "		sigma_zz: " << stress_tensor_sum.Z/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
-			}
-			
-
-	
-
-
-		// Output final xyz position in the same format as input.xyz for restarting.
-		ofstream fxyz;
-		fxyz.open("output.xyz");
-
-		fxyz << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
-		fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.BOXDIM.X << " ";
-		fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.BOXDIM.Y << " ";
-		fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.BOXDIM.Z << endl;;
-	
-		// Note the conversion of our string to a c-style string... printf can't handle c++ strings,
-		// since it is a C method.
-		// 
-	 	// I think there is a way to get at the underlying C char* in a C++ String if you like
-	 	// printf better (LEF).	
-
-		for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
+		cout << "	Average temperature over run = " << fixed << setprecision(4) << right << temp_sum  / CONTROLS.N_MD_STEPS << " K"   << endl;
+		cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << press_sum / CONTROLS.N_MD_STEPS << " GPa" << endl;
+		
+		if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
 		{
-			fxyz << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
-			fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.COORDS[ia].X << " ";
-			fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.COORDS[ia].Y << " ";
-			fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.COORDS[ia].Z << "    ";
-			fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.VELOCITY[ia].X << " ";
-			fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.VELOCITY[ia].Y << " ";
-			fxyz << fixed << setw(8) << setprecision(5) << SYSTEM.VELOCITY[ia].Z << endl;		
+			cout << "	Pressures from diagonal stress tensors over run: " << (stress_tensor_sum.X + stress_tensor_sum.Y + stress_tensor_sum.Z)/3.0/ CONTROLS.N_MD_STEPS << endl;
+			cout << "	Average diagonal stress tensors over run: " << endl;
+			cout << "		sigma_xx: " << stress_tensor_sum.X/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+			cout << "		sigma_yy: " << stress_tensor_sum.Y/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+			cout << "		sigma_zz: " << stress_tensor_sum.Z/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
 		}
-	
-		fxyz.close();
-		STATISTICS.close();
 
+		// Write the final configuration to file.
+		write_xyzv(SYSTEM, CONTROLS, "output.xyz");
+			
+		STATISTICS.close();
 	}
 	
 	
@@ -3174,7 +3212,8 @@ int main(int argc, char* argv[])
 	#ifdef USE_MPI
 		MPI_Finalize();
 	#endif
-  
+ 
+return 0; 
 }       
 
 
@@ -3211,11 +3250,15 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	CONTROLS.FIT_STRESS       = false;
 	CONTROLS.FIT_ENER         = false;
 	
-	FF_PLOTS.INCLUDE_FCUT    = true;
-	FF_PLOTS.INCLUDE_CHARGES = true;
+	FF_PLOTS.INCLUDE_FCUT     = true;
+	FF_PLOTS.INCLUDE_CHARGES  = true;
 	FF_PLOTS.INCLUDE_PENALTY  = true;
 	
+	CONTROLS.FREQ_BACKUP      = 100;
 	CONTROLS.FREQ_UPDATE_THERMOSTAT = -1.0;
+	NEIGHBOR_LIST.USE 		  = true;
+	
+	
 	
 	// Begin reading
 	
@@ -3813,8 +3856,15 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				if (RANK==0 && NEIGHBOR_LIST.USE )
 					cout << "	# USENEIG #: true "<< endl;	
 			}
+			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f") 
+			{
+				// Everybody is considered a neighbor.
+				NEIGHBOR_LIST.USE = false ;
+				
+				if (RANK==0 && NEIGHBOR_LIST.USE )
+					cout << "	# USENEIG #: false "<< endl;	
+			}
 			cin.ignore();
-
 		}	
 		
 		else if(LINE.find("# PRMFILE #") != string::npos)
@@ -4192,106 +4242,78 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	}
 }
 
+static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, string filename)
+// Output final xyz position in the same format as input.xyz for restarting.
+// Includes velocities.
+// Output full precision to aid in testing and restart.
+{
+	int PRINT_WIDTH     = 8; // Use 21 for testing
+	int PRINT_PRECISION = 5; // Use 14 for testing
+	
+	// Check if the file already exists
+	
+	string BACKUP = filename;
+	
+	ifstream FILE_EXISTS(filename);
+	if(FILE_EXISTS)
+	{
+		BACKUP.append(".bak");
+		rename(filename.c_str(),BACKUP.c_str());		
+	}
+	FILE_EXISTS.close();
+	
+	ofstream fxyz;
+	fxyz.open(filename);
+
+	// Print out the file
+	
+	fxyz << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
+	fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.X << " ";
+	fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Y << " ";
+	fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Z << endl;
+	
+	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
+	{
+		XYZ tmp = SYSTEM.COORDS[ia] ;
+		
+		if ( CONTROLS.WRAP_COORDS ) 	// Wrap into the primitive cell
+		{
+			
+			tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
+			tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
+			tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+		}
+
+		fxyz << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.X << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Y << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Z << "    ";
+
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].X << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].Y << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].Z << endl;		
+	}
+
+	fxyz.close();	
+
+}
+
+
 // MPI -- Related functions -- See headers at top of file
 
 static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z)
 // Add up forces, potential energy, and pressure from all processes.  
 {
-	#ifdef USE_MPI
+	// Sum up the potential energy, pressure, tensors , and forces from all processors
+	
+	double *accel = (double *) accel_vec .data();
 
-		double *accel_sum = new double [3 * atoms];			// Makes a 1d array of 3*atoms doubles
-		
-		// Makes 1 1d array of 3(X,Y,Z)*atoms doubles... the "(double*)" recasts the XYZ as a double array, 
-		// which flattens it out so [0] = vec[0].X, [1] = vec[0].Y, ... [5] = vec[1].Z and so on.
-		
-		double *accel    = (double*) accel_vec.data();
-
-		if (sizeof(XYZ) != 3*sizeof(double)) 
-		{
-			// But then what should be done??
-			
-			printf("Error: compiler padding in XYZ structure detected\n");
-			exit_run(1);
-		}
-
-		if ( RANK == 0 ) 
-		{
-			for (int i=0; i<3*atoms; i++) 
-				accel_sum[i] = 0.0;
-		}
-
-		#ifdef LOG_FORCE
-
-			char buf[20];
-			sprintf(buf, "%d.%d", RANK,NPROCS);
-			string force_out = string("force.") + string(buf) + string(".out");
-			ofstream outf;
-			outf.open(force_out.c_str());
-			outf.precision(15);
-
-			for (int i=0; i<3*atoms; i++)
-				outf << i << " " << accel[i] << " " << endl;
-
-			outf.close();
-			
-		#endif
-
-		MPI_Reduce(accel, accel_sum, 3*atoms, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
-		#ifdef LOG_FORCE
-
-			ofstream outall;
-			char buf2[20];
-			sprintf(buf2, "force.all.%d.out", NPROCS);
-			printf("OPENING: %s\n", buf2);
-
-			outall.open(buf2);
-			outall.precision(15);
-			for(int i=0; i<3*atoms; i++)
-				outall << i << " " << accel_sum[i] << " " << endl;
-
-			outall.close();
-			
-		#endif
-			
-		double petot = 0.0;
-		double pe    = pot_energy;
-
-		MPI_Reduce(&pe, &petot, 1, MPI_DOUBLE, MPI_SUM, 0,MPI_COMM_WORLD);
-
-		pot_energy = petot;
-
-		double pressure_tot = 0.0;
-		double press        = pressure;
-
-		MPI_Reduce(&press, &pressure_tot, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
-		pressure = pressure_tot;
-  
-		if ( RANK == 0 ) 
-			for ( int i = 0; i < 3 * atoms; i++ ) 
-				accel[i] = accel_sum[i];
-		
-		delete [] accel_sum;
-		
-		pressure_tot = 0.0;
-		press        = tens_x;
-		MPI_Reduce(&press, &pressure_tot, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-		tens_x = pressure_tot;
-		
-		pressure_tot = 0.0;
-		press        = tens_y;
-		MPI_Reduce(&press, &pressure_tot, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-		tens_y = pressure_tot;
-		
-		pressure_tot = 0.0;
-		press        = tens_z;
-		MPI_Reduce(&press, &pressure_tot, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-		tens_z = pressure_tot;
-		
-		
-
-	#endif
+	MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_x,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_y,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_z,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
 }
 
@@ -4495,24 +4517,24 @@ void exit_run(int value)
 		// Get information about the system that LAMMPS has built based on the lammps input file?
 	    
 		double boxxlo = *((double *) lammps_extract_global(lmp,"boxxlo"));
-	    	double boxylo = *((double *) lammps_extract_global(lmp,"boxylo"));
-	    	double boxzlo = *((double *) lammps_extract_global(lmp,"boxzlo"));
+		double boxylo = *((double *) lammps_extract_global(lmp,"boxylo"));
+		double boxzlo = *((double *) lammps_extract_global(lmp,"boxzlo"));
 	    
 		double boxxhi = *((double *) lammps_extract_global(lmp,"boxxhi"));
 		double boxyhi = *((double *) lammps_extract_global(lmp,"boxyhi"));
 		double boxzhi = *((double *) lammps_extract_global(lmp,"boxzhi"));
 		
-	    	double boxxy  = *((double *) lammps_extract_global(lmp,"xy"));
-	    	double boxxz  = *((double *) lammps_extract_global(lmp,"xz"));
-	    	double boxyz  = *((double *) lammps_extract_global(lmp,"yz"));
+		double boxxy  = *((double *) lammps_extract_global(lmp,"xy"));
+		double boxxz  = *((double *) lammps_extract_global(lmp,"xz"));
+		double boxyz  = *((double *) lammps_extract_global(lmp,"yz"));
 
-	    	double xprd = (boxxhi-boxxlo);
-	    	double yprd = (boxyhi-boxylo);
-	    	double zprd = (boxzhi-boxzlo);
+		double xprd = (boxxhi-boxxlo);
+		double yprd = (boxyhi-boxylo);
+		double zprd = (boxzhi-boxzlo);
   
 
 		double *mass   = (double *) lammps_extract_atom(lmp,"mass"  );
-	    	double *virial = (double *) lammps_extract_atom(lmp,"virial");
+		double *virial = (double *) lammps_extract_atom(lmp,"virial");
 	    
 		int    *type   = (int *)    lammps_extract_atom(lmp,"type"  );
 		
@@ -4528,6 +4550,9 @@ void exit_run(int value)
 		// Let all processors know how many atoms each processor "has"
 		
 		vector<int> NATOMS_PER_PROC(NPROCS);	// Figure out how many atoms each processor has
+		
+		MPI_Barrier(MPI_COMM_WORLD);
+		
 		MPI_Gather(&nlocal, 1, MPI_INT, &NATOMS_PER_PROC.front(), 1, MPI_INT, 0, MPI_COMM_WORLD);
 		MPI_Bcast (&NATOMS_PER_PROC.front(),NPROCS,MPI_INT,0,MPI_COMM_WORLD);
 
@@ -4630,6 +4655,8 @@ void exit_run(int value)
 		double *coord = (double *) SYS.COORDS.data();
 		double *force = (double *) SYS.FORCES.data();
 		double *accel = (double *) SYS.ACCEL .data();
+		
+		MPI_Barrier(MPI_COMM_WORLD);
 
 		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.CHARGES.front(),      &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_DOUBLE, MPI_COMM_WORLD);
 		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.ATOMTYPE_IDX.front(), &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_INT,    MPI_COMM_WORLD);
@@ -4640,14 +4667,30 @@ void exit_run(int value)
 		for(int i=0; i<TOTAL_ATOMS; i++)
 			SYS.ATOMTYPE[i] = TMP_ATOMTYPE[SYS.ATOMTYPE_IDX[i]-1];
 		
+		// Now we need to build the ghost atoms/neighbor lists
+		
+		build_layers(SYS, CONTROLS) ;
+
+		SYS.WRAPDIM.X = SYS.BOXDIM.X * (2*CONTROLS.N_LAYERS + 1);
+		SYS.WRAPDIM.Y = SYS.BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1);
+		SYS.WRAPDIM.Z = SYS.BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1);
+		
+		// Use very little padding because we will update neighbor list for every frame.
+		
+		double PADDING = 0.01;
+		
+		NEIGHBOR_LIST.INITIALIZE(SYS, PADDING);
+		NEIGHBOR_LIST.DO_UPDATE(SYS, CONTROLS);	
+		
 		// Do the actual force calculation using our MD code
 
 		ZCalc(SYS, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
     	    
-
 		// Now we need to sync up all the forces, potential energy, and tensors with LAMMPS
 		//... but first, we need to sum the potential energy computed by each process, since 
 		// we're saving it directly to LAMMPS' PE which corresponds to the sum over all processes.
+		
+		MPI_Barrier(MPI_COMM_WORLD);
 		
 		MPI_Allreduce(MPI_IN_PLACE, &SYS.TOT_POT_ENER,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
 		
@@ -4686,8 +4729,8 @@ void exit_run(int value)
 		virial[2] =  SYS.PRESSURE_TENSORS_XYZ.Z*vol;
 	    
 		virial[3] = 0.0; // XY
-	    	virial[4] = 0.0; // XZ
-	    	virial[5] = 0.0; // YZ
+		virial[4] = 0.0; // XZ
+		virial[5] = 0.0; // YZ
     
 	}
 	

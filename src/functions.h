@@ -40,8 +40,6 @@
 #include<assert.h>
 #include<map>
 
-
-
 // For the LAMMPS version of the MD Code
 
 #if defined(USE_MPI) && defined(LINK_LAMMPS)
@@ -93,13 +91,12 @@ struct JOB_CONTROL
 	// Variables read in from the parameter file:
 	///////////////////////////////////////////////
 	
-	bool   FIT_COUL;			// Replaces fit_coul... If true, taKIN_ENER charges from spline parameters.
+	bool   FIT_COUL;			// Replaces fit_coul... If true, take charges from spline parameters.
 	bool   USE_COULOMB;	 		// Replaces if_coulomb... If true, calculate Coulomb forces.
-    bool   USE_OVERCOORD;		// Replaces if_overcoord... If true, calculate ReaxFF-liKIN_ENER overcoordination term.
+    bool   USE_OVERCOORD;		// Replaces if_overcoord... If true, calculate ReaxFF-like overcoordination term.
     bool   FIT_POVER;			// Replaces fit_pover... If true, find linear overcoordination parameter from least-squares fitting. -- this needs to be updated for new handling
     bool   USE_3B_CHEBY;		// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
-	
-    
+        
 	
 	///////////////////////////////////////////////
 	// Variables read in from main md code input file
@@ -139,6 +136,7 @@ struct JOB_CONTROL
 	// "Output control" 
 
 	int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
+	int    FREQ_BACKUP;       // How often to write backup files for restart.
 	bool   PRINT_VELOC;			// If true, write out the velocities 
 	int    FREQ_VELOC;
 	int    FREQ_ENER;			// Replaces energy_freq... How often to output energy
@@ -202,10 +200,13 @@ struct XYZ_INT
 
 struct FRAME
 {
-	int ATOMS;
-	int MY_ATOMS;				// Used for lammps linking. Specify how many atoms in SYS the process owns
-	int MY_ATOMS_START;			// Used for lammps linking. Specify what index along SYS starts the process' atoms
-	XYZ BOXDIM;
+    int ATOMS;                 		// Just the parent atoms.
+    int ALL_ATOMS;             	// All atoms, including ghosts. 
+	
+	int MY_ATOMS;					// Used for lammps linking. Specify how many atoms in SYS the process owns
+	int MY_ATOMS_START;				// Used for lammps linking. Specify what index along SYS starts the process' atoms
+	XYZ BOXDIM;						// Dimenions of the primitive box.
+	XYZ WRAPDIM;              		 // Dimensions to use in wrapping coordinates for forces.  
 	XYZ STRESS_TENSORS;
 	
 	double QM_POT_ENER;				// This is the potential energy of the QM calculation!
@@ -223,11 +224,12 @@ struct FRAME
 	vector<string> 	ATOMTYPE;
 	vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPS file printing
 	vector<XYZ>		COORDS;
+	vector<XYZ>    ALL_COORDS;  	// Coordinates of atoms + ghosts used for force evaluation.
 	vector<double> 	CHARGES;
 	vector<double> 	MASS;
 	vector<XYZ>		FORCES;
 	vector<XYZ>		ACCEL;
-	vector<XYZ>		TMP_EWALD;	// Holds temporary ewald accels/forces
+	vector<XYZ>		TMP_EWALD;		// Holds temporary ewald accels/forces
 	vector<XYZ>		VELOCITY;
 	vector<XYZ>		VELOCITY_NEW;
 	vector<XYZ>		VELOCITY_ITER;
@@ -308,7 +310,7 @@ struct TRIPLETS
 	int N_TRUE_ALLOWED_POWERS;	// How many UNIQUE sets of powers do we have?
 	int N_ALLOWED_POWERS;		// How many total sets of powers do we have?
 	
-	vector<XYZ_INT> ALLOWED_POWERS;	// This will KIN_ENERep a list of the allowed polynomial powers for each coefficient
+	vector<XYZ_INT> ALLOWED_POWERS;	// This will keep a list of the allowed polynomial powers for each coefficient
 	vector<int>		EQUIV_INDICIES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
 	vector<int>		PARAM_INDICIES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICIES {0,0,2,3}, PARAM_INDICIES would be {0, 0, 1, 2}
 	
@@ -547,9 +549,8 @@ class NEIGHBORS
 		bool   SECOND_CALL;					// Is this the second call? If so, pick the padding distance.
 		double RCUT_PADDING;				// Neighborlist cutoff is r_max + rcut_padding
 		double DISPLACEMENT;
-
-		//void DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
-
+		double SAFETY;                 		// Safety factor in calculating neighbors.
+		
 	public:
 
 		bool   USE;							// Do we even want to use a neighbor list?
@@ -557,14 +558,19 @@ class NEIGHBORS
 		double MAX_VEL;
 		double MAX_CUTOFF;					// The maximum of all force field outer cutoffs (r_max and s_max)
 		double MAX_CUTOFF_3B;
+		double EWALD_CUTOFF;           		// The cutoff for Ewald interactions.
+		double UPDATE_FREQ;            		// Target update frequency.
 		
 		vector<vector<int> > LIST;			// The actual (2B) neighbor list. Of size [atoms][neighbors]
-		vector<vector<int> > LIST_3B;		// The 3B neighbor list (3B interactions liKIN_ENERly have a shorter cutoff)
+		vector<vector<int> > LIST_EWALD;	// The Ewald neighbor list. Of size [atoms][neighbors]
+		vector<vector<int> > LIST_UNORDERED;// All neighbors of particle i with i not equal to j.
+		vector<vector<int> > LIST_3B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
 
-		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE);	// Will check if lists need updating, and will call DO_UPDATE do so if need be
+		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Will check if lists need updating, and will call DO_UPDATE do so if need be
+		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE);
 		void INITIALIZE(FRAME & SYSTEM);
 		void INITIALIZE(FRAME & SYSTEM, double & PAD);
-		void DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+		void DO_UPDATE (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
 		NEIGHBORS();
 		~NEIGHBORS();
 };
@@ -658,24 +664,17 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 //
 //////////////////////////////////////////
 
+void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> & PAIR_TRIPLETS, FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
-// FUNCTION UPDATED
-void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> & PAIR_TRIPLETS, FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP);
+void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
-// FUNCTION UPDATED
-void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP);
+void SubtractEwaldForces(FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
 
-// FUNCTION UPDATED -- OVERLOADING THE FUNCTION.. DIFFERENT INPUT REQUIRED DEPENDING ON WHETHER FUNCTION IS CALLED FROM MD
-//                     PROGRAM OR LSQ FITTING PROGRAM...
+void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
 
-void ZCalc_Ewald(FRAME & TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP);	// LSQ
-void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);	// MD
+void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc, XYZ boxdim);
 
-// FUNCTION UPDATED
-void optimal_ewald_params(double accuracy, double V, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc);
-
-// FUNCTION UPDATED
-void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP);
+void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS);
 
 //////////////////////////////////////////
 //
@@ -685,7 +684,7 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 
 void   ZCalc                    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
 void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
-double get_dist                 (const FRAME & SYSTEM, const JOB_CONTROL & CONTROLS, XYZ & RAB, int a1, int a2);
+double get_dist                 (const FRAME & SYSTEM, XYZ & RAB, int a1, int a2);
 
 //////////////////////////////////////////
 //
@@ -705,10 +704,11 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 //
 //////////////////////////////////////////
 
-double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// UPDATED -- Overloaded.. compute differentely if for main or new velocities
-double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// UPDATED -- Overloaded.. compute differentely if for main or new velocities
+double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// Overloaded.. compute differentely if for main or new velocities
+double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// Overloaded.. compute differentely if for main or new velocities
 
-double get_dist(const FRAME & SYSTEM, const JOB_CONTROL & CONTROLS, XYZ & RAB, int a1, int a2);
+void sync_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
+void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
 
 void enable_fp_exceptions();
 void exit_run(int val);

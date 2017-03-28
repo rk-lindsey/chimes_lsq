@@ -30,7 +30,7 @@ using namespace std;
 	#undef USE_MPI
 #endif 
 
-static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS);
+static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, NEIGHBORS & NEIGHBOR_LIST);
 
 int factorial(int input)
 {
@@ -79,6 +79,7 @@ int main()
 	vector<PAIRS> 		ATOM_PAIRS;		// Will store relevant info regarding atom interaction pair types.. 
 	vector<TRIPLETS> 	PAIR_TRIPLETS;	// Will store relevant info regarding atom interaction triplet types.. i.e. { [OO,OO,OO], [OO,HH,HH], ... }
 	vector<FRAME> 		TRAJECTORY;		// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
+	NEIGHBORS        	 NEIGHBOR_LIST;	// Declare the class that will handle the neighbor list
 	vector<int>   		ATOM_PAIR_TYPES;// Fore use in double loop over atom pairs. Index corresponds to the overall double loop count. 
 										// Provides an index that rells you the atom pair's ATOM_PAIRS's type index.. THIS IS FOR LOOPS OF TYPE
 										// 	for(int a1=0;a1<nat-1;a1++)	for(int a2=a1+1;a2<nat;a2++)
@@ -91,7 +92,7 @@ int main()
 	
 	vector<CHARGE_CONSTRAINT> CHARGE_CONSTRAINTS;	// Specifies how we constrain charge fitting
 
-	JOB_CONTROL 	CONTROLS;		// Will hold job controls shared by both lsq and md
+	JOB_CONTROL 	CONTROLS;			// Will hold job controls shared by both lsq and md
 
 	//////////////////////////////////////////////////
 	//
@@ -103,7 +104,7 @@ int main()
 		cout << endl << "Reading input file..." << endl;
 	#endif
 
-	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, CHARGE_CONSTRAINTS);
+	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
 	
 	if(CONTROLS.FIT_STRESS && CONTROLS.CALL_EWALD)
 	{
@@ -230,28 +231,7 @@ int main()
 		
 	vector<XYZ_INT> LAYER_MATRX;
 	int             N_LAYER_ELEM = 0;		
-	
-	if(CONTROLS.N_LAYERS>0)	
-	{
-		XYZ_INT TMP;
-		
-		for(int n1=0; n1<=CONTROLS.N_LAYERS; n1++)
-		{
-			for(int n2=0; n2<=CONTROLS.N_LAYERS; n2++)
-			{
-				for(int n3=0; n3<=CONTROLS.N_LAYERS; n3++)
-				{	
-					TMP.X = n1;
-					TMP.Y = n2;
-					TMP.Z = n3;
-					
-					LAYER_MATRX.push_back(TMP);
-					N_LAYER_ELEM++;
-				}
-			}
-		}
-	}
-		
+
 	for (int i=0; i<CONTROLS.NFRAMES; i++)
 	{
 		// Read in line with the number of atoms
@@ -266,22 +246,6 @@ int main()
 		
 		bool IFANY = false;
 	
-		if (MAX_RMIN.X >= 0.25*TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1))
-		{
-			#if WARN == TRUE
-				if (isatty(fileno(stdout)))
-					cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "3B rmin's must be < 0.25*effective_boxlengths to avoid artifacts in the MD simulations!" << COUT_STYLE.ENDSTYLE << endl;
-				else
-					cout << "3B rmin's must be < 0.25*effective_boxlengths to avoid artifacts in the MD simulations!" << endl;
-			#else	
-				if (isatty(fileno(stdout)))
-					cout << COUT_STYLE.RED     << COUT_STYLE.BOLD << "3B rmin's must be < 0.25*effective_boxlengths to avoid artifacts in the MD simulations!" << COUT_STYLE.ENDSTYLE << endl;
-				else
-					cout << "3B rmin's must be < 0.25*effective_boxlengths to avoid artifacts in the MD simulations!" << endl;
-				
-				exit(0);
-			#endif
-		}
 		if(CONTROLS.FIT_STRESS)
 		{
 				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.X;
@@ -308,7 +272,7 @@ int main()
 					#if WARN == TRUE
 						if (isatty(fileno(stdout)))
 						{
-							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length:"  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
 							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
 							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
 							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Layers:               " << CONTROLS.N_LAYERS << COUT_STYLE.ENDSTYLE << endl;
@@ -316,7 +280,7 @@ int main()
 						}
 						else
 						{
-							cout << "WARNING: Outer cutoff greater than half at least one box length:"  << ATOM_PAIRS[j].S_MAXIM <<endl;
+							cout << "WARNING: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<endl;
 							cout << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
 							cout << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << endl;
 							cout << "	Layers:               " << CONTROLS.N_LAYERS << endl;
@@ -327,7 +291,7 @@ int main()
 					#else
 						if (isatty(fileno(stdout)))
 						{
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length:"  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
+							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
 							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
 							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
 							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Layers:               " << CONTROLS.N_LAYERS << COUT_STYLE.ENDSTYLE << endl;
@@ -337,8 +301,8 @@ int main()
 						}
 						else
 						{
-							cout << "ERROR: Outer cutoff greater than half at least one box length:"  << ATOM_PAIRS[j].S_MAXIM <<endl;
-							cout << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+							cout << "ERROR: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<endl;
+							cout << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << endl;		
 							cout << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << endl;
 							cout << "	Layers:               " << CONTROLS.N_LAYERS << endl;
 							cout << "	Effective boxlengths: " << TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) << endl;
@@ -354,7 +318,8 @@ int main()
 		
 		TRAJECTORY[i].ATOMTYPE.resize(TRAJECTORY[i].ATOMS);		
 		TRAJECTORY[i].COORDS  .resize(TRAJECTORY[i].ATOMS);
-		TRAJECTORY[i].FORCES  .resize(TRAJECTORY[i].ATOMS);
+		TRAJECTORY[i].FORCES  .resize(TRAJECTORY[i].ATOMS);	// Use for read-in forces.
+		TRAJECTORY[i].ACCEL   .resize(TRAJECTORY[i].ATOMS); // Use for calculated forces in ZCalc_Ewald.
 		TRAJECTORY[i].CHARGES .resize(TRAJECTORY[i].ATOMS);
 		
 		// Read trajectory, convert to proper units, and apply PBC
@@ -383,51 +348,21 @@ int main()
 				TRAJECTORY[i].COORDS[j].X -= floor(TRAJECTORY[i].COORDS[j].X/TRAJECTORY[i].BOXDIM.X)*TRAJECTORY[i].BOXDIM.X;
 				TRAJECTORY[i].COORDS[j].Y -= floor(TRAJECTORY[i].COORDS[j].Y/TRAJECTORY[i].BOXDIM.Y)*TRAJECTORY[i].BOXDIM.Y;
 				TRAJECTORY[i].COORDS[j].Z -= floor(TRAJECTORY[i].COORDS[j].Z/TRAJECTORY[i].BOXDIM.Z)*TRAJECTORY[i].BOXDIM.Z;
-			} 
+			}			
+			
+			// Assign atom charges.
+			if ( CONTROLS.IF_SUBTRACT_COUL ) 
+				for(int ii=0; ii< CONTROLS.NATMTYP; ii++)
+					if( TRAJECTORY[i].ATOMTYPE[j] == ATOM_PAIRS[ii].ATM1TYP )
+					{
+						TRAJECTORY[i].CHARGES[j] = ATOM_PAIRS[ii].ATM1CHG;
+						break;								
+					}
 		}
 		
 		// If layering requested, replicate the system
-	
-		if(CONTROLS.N_LAYERS>0 )
-		{	
-			XYZ		TEMP_XYZ;
-			XYZ_INT	TEMP_LAYER;
-			int		TEMP_IDX;
 
-			TEMP_IDX = TRAJECTORY[i].ATOMS;
-
-			TRAJECTORY[i].PARENT   .resize(TRAJECTORY[i].ATOMS);
-			TRAJECTORY[i].LAYER_IDX.resize(TRAJECTORY[i].ATOMS);
-	
-			// Create coordinates for the layer atoms. layer elements do not include 0, 0, 0, which is the main cell
-
-			for(int a1=0; a1<TRAJECTORY[i].ATOMS; a1++)
-			{	
-				for(int n1=0; n1<N_LAYER_ELEM; n1++)
-				{	
-					if ((LAYER_MATRX[n1].X == 0) && (LAYER_MATRX[n1].Y == 0) && (LAYER_MATRX[n1].Z == 0) )
-					{
-						TRAJECTORY[i].PARENT[a1] = -1;
-						TRAJECTORY[i].LAYER_IDX[a1].X = LAYER_MATRX[n1].X;
-						TRAJECTORY[i].LAYER_IDX[a1].Y = LAYER_MATRX[n1].Y;
-						TRAJECTORY[i].LAYER_IDX[a1].Z = LAYER_MATRX[n1].Z;
-					}
-					else
-					{											
-						TEMP_XYZ.X = TRAJECTORY[i].COORDS.at(a1).X + LAYER_MATRX[n1].X * TRAJECTORY[i].BOXDIM.X;
-						TEMP_XYZ.Y = TRAJECTORY[i].COORDS.at(a1).Y + LAYER_MATRX[n1].Y * TRAJECTORY[i].BOXDIM.Y;
-						TEMP_XYZ.Z = TRAJECTORY[i].COORDS.at(a1).Z + LAYER_MATRX[n1].Z * TRAJECTORY[i].BOXDIM.Z;
-
-						TRAJECTORY[i].COORDS       .push_back(TEMP_XYZ);
-						TRAJECTORY[i].LAYER_IDX    .push_back(LAYER_MATRX[n1]);
-						TRAJECTORY[i].ATOMTYPE     .push_back(TRAJECTORY[i].ATOMTYPE    .at(a1));
-						TRAJECTORY[i].PARENT       .push_back(a1);
-			
-						TEMP_IDX++;
-					}
-				}
-			}
-		}
+		build_layers(TRAJECTORY[i], CONTROLS) ;
 	}
 	
 	TRAJECTORY[0].QM_POT_ENER = 0;
@@ -478,7 +413,7 @@ int main()
 
 		// Setup the Coulomb force "matrix"
 	 
-		COULOMB_FORCES[f].resize(ATOM_PAIRS.size());
+		COULOMB_FORCES[f].resize(A_SIZE);
 		P_OVER_FORCES[f] .resize(A_SIZE);
 		
 		for (int i=0; i<ATOM_PAIRS.size(); i++)
@@ -608,22 +543,28 @@ int main()
 	#endif
 		
 
-	int FRAME_MATRX_SIZE; 
+	int 	FRAME_MATRX_SIZE; 
+	double 	NEIGHBOR_PADDING = 0.01;
 
 	for(int i=0; i<CONTROLS.NFRAMES; i++)
 	{
 		cout << "	Processing frame: " << setw(5) << i+1 << " of: " << CONTROLS.NFRAMES << endl;
 
-		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, TRIAD_MAP);
+		// Use very little padding because we will update neighbor list for every frame.
+		
+		NEIGHBOR_LIST.INITIALIZE(TRAJECTORY[i], NEIGHBOR_PADDING);
+		NEIGHBOR_LIST.DO_UPDATE(TRAJECTORY[i], CONTROLS);		
+
+		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
 		
 		if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
-			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);	
+			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST);	
 		
 		if (CONTROLS.IF_SUBTRACT_COUL) 
-			ZCalc_Ewald(TRAJECTORY[i], ATOM_PAIRS, PAIR_MAP);
+			SubtractEwaldForces(TRAJECTORY[i], NEIGHBOR_LIST, CONTROLS) ;
 
 		if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
-			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP);	
+			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST);	
 		
 		// If we're including the energy in the fit, we need to subtract off the A matrix entries from the first frame from all the rest
 		if((CONTROLS.FIT_ENER) &&(i>0))
@@ -1137,7 +1078,7 @@ return 0;
 
 
 // Read program input from the file "splines_ls.in".
-static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS)
+static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, NEIGHBORS & NEIGHBOR_LIST)
 {
 	bool   FOUND_END = false;
 	string LINE;
@@ -2185,7 +2126,13 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				cin >> LINE; cin.ignore();
 				ATOM_PAIRS[TEMP_INT].LAMBDA = double(atof(LINE.data()));	
 				
-				ATOM_PAIRS[TEMP_INT].MIN_FOUND_DIST = 	1.0e10;	// Set an initial minimum distance		
+				ATOM_PAIRS[TEMP_INT].MIN_FOUND_DIST = 	1.0e10;	// Set an initial minimum distance	
+				
+				if( ATOM_PAIRS[TEMP_INT].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
+				{
+					 NEIGHBOR_LIST.MAX_CUTOFF    = ATOM_PAIRS[TEMP_INT].S_MAXIM;
+					 NEIGHBOR_LIST.MAX_CUTOFF_3B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
+				}	
 				
 				cin >> LINE; cin.ignore();
 				

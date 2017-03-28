@@ -14,15 +14,20 @@ using namespace std;
 
 NEIGHBORS::NEIGHBORS()		// Constructor 
 {
-	RCUT_PADDING  = 0.3;
-	DISPLACEMENT  = 0.0;
-	MAX_CUTOFF    = 0.0;
-	MAX_CUTOFF_3B = 0.0;
+	RCUT_PADDING  =  0.3;
+	DISPLACEMENT  =  0.0;
+	MAX_CUTOFF    =  0.0;
+	MAX_CUTOFF_3B =  0.0;
 	FIRST_CALL    = true;
 	SECOND_CALL   = true;
 	USE           = false;
-	MAX_VEL       =  -1.0;
-	CURR_VEL      =   0.0;
+	MAX_VEL       =  0.0;
+	CURR_VEL      =  0.0;
+	
+	// New from Larry
+	EWALD_CUTOFF  =  0.0;
+	UPDATE_FREQ   =  30.0;
+	SAFETY        =  1.01;
 	
 }
 NEIGHBORS::~NEIGHBORS(){}	// Deconstructor
@@ -31,30 +36,47 @@ void NEIGHBORS::INITIALIZE(FRAME & SYSTEM)		// (overloaded) class constructor --
 {
 	if(USE)
 	{
-		LIST   .resize(SYSTEM.ATOMS);
-		LIST_3B.resize(SYSTEM.ATOMS);
+		LIST          .resize(SYSTEM.ATOMS);
+		LIST_EWALD    .resize(SYSTEM.ATOMS);
+		LIST_UNORDERED.resize(SYSTEM.ATOMS);
+		LIST_3B       .resize(SYSTEM.ALL_ATOMS);
 	}
 }
 
 void NEIGHBORS::INITIALIZE(FRAME & SYSTEM, double & PAD)	// (overloaded) class constructor -- if padding specified, set to value
 {
 	INITIALIZE(SYSTEM);
-	RCUT_PADDING = PAD;
+	
+	if (USE)
+		RCUT_PADDING = PAD;
+	else 
+		RCUT_PADDING = 1.0e+10;
 }
 
 void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
-
 	XYZ RAB;
 	XYZ TMP_BOX;
 	
-	double MAX = 0;
+	double MAX  = 0;
 	double rlen = 0;
+	
+	// ALL_COORDS is used for force evaluation. Wrap atoms in ALL_COORDS into primitive cell prior to constructing replicas.
+	for ( int a = 0; a < SYSTEM.ATOMS; a++ ) 
+	{
+		SYSTEM.ALL_COORDS[a].X = SYSTEM.COORDS[a].X - floor(SYSTEM.COORDS[a].X / SYSTEM.BOXDIM.X) * SYSTEM.BOXDIM.X;
+		SYSTEM.ALL_COORDS[a].Y = SYSTEM.COORDS[a].Y - floor(SYSTEM.COORDS[a].Y / SYSTEM.BOXDIM.Y) * SYSTEM.BOXDIM.Y;
+		SYSTEM.ALL_COORDS[a].Z = SYSTEM.COORDS[a].Z - floor(SYSTEM.COORDS[a].Z / SYSTEM.BOXDIM.Z) * SYSTEM.BOXDIM.Z; 
+	}
+	
+	sync_layers(SYSTEM,CONTROLS);
 	
 	if(FIRST_CALL)									// Set up the first dimension of the list 
 	{
-		LIST   .resize(SYSTEM.ATOMS);	
-		LIST_3B.resize(SYSTEM.ATOMS);	
+		LIST          .resize(SYSTEM.ATOMS);	
+		LIST_EWALD    .resize(SYSTEM.ATOMS);	
+		LIST_UNORDERED.resize(SYSTEM.ATOMS);	
+		LIST_3B       .resize(SYSTEM.ALL_ATOMS);	
 	}
 
 	for(int a1=0; a1<SYSTEM.ATOMS; a1++)
@@ -62,41 +84,88 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		if(!FIRST_CALL)								// Clear out the second dimension so we can start over again
 		{										
 			vector<int>().swap(LIST   [a1]);	
-			vector<int>().swap(LIST_3B[a1]);
+			vector<int>().swap(LIST_UNORDERED[a1]);
+			vector<int>().swap(LIST_EWALD[a1]);
 		}
 		
-		for (int a2=a1+1; a2<SYSTEM.ATOMS; a2++)		// for (int a2=0; a2<SYSTEM.COORDS.size(); a2++)
+		// Search across a2 < a1 for unordered list
+		for (int a2 = 0 ; a2< a1 ; a2++)
 		{			
 			// Get pair distance
 
-			rlen = get_dist(SYSTEM, CONTROLS, RAB, a1, a2);		// Updates RAB!
+			rlen = get_dist(SYSTEM, RAB, a1, a2);		// Updates RAB!
 
 			// I get the correct result when the list contains all a2 achievable
 			// at this point in the function, regardless of update frequency
 			// i.e. "if(true)"
 
 			if (rlen < MAX_CUTOFF + RCUT_PADDING)		// Then add it to the atoms neighbor list (2B)
+				LIST_UNORDERED[a1].push_back(a2);
+
+		}
+		
+		// Search across a2 > a1 for both regular and unordered lists.
+		for (int a2=a1+1 ; a2<SYSTEM.ALL_ATOMS; a2++)
+		{			
+			// Get pair distance
+
+			rlen = get_dist(SYSTEM, RAB, a1, a2);		// Updates RAB!
+
+			// I get the correct result when the list contains all a2 achievable
+			// at this point in the function, regardless of update frequency
+			// i.e. "if(true)"
+
+			if (rlen < (MAX_CUTOFF + RCUT_PADDING) )	// Then add it to the atoms neighbor list (2B)
 			{
-				LIST[a1].push_back(a2);		
-				
-				if(rlen < MAX_CUTOFF_3B + RCUT_PADDING)	// Then add it to the atoms neighbor list (3B)
-					LIST_3B[a1].push_back(a2);		
+				if (a1 <= SYSTEM.PARENT[a2])			// Select atoms in neighbor list according to parents.
+					LIST[a1].push_back(a2);		
+
+				LIST_UNORDERED[a1].push_back(a2) ;
 			}
+
+			if (rlen < (EWALD_CUTOFF + RCUT_PADDING) )	// Then add it to the atoms neighbor list (2B)
+				if ( a1 <= SYSTEM.PARENT[a2] ) 			// Select atoms in neighbor list according to parents.
+					LIST_EWALD[a1].push_back(a2);		
 		}
 	}
+	
+	// Calculate neighbors of images for the 3 body list only.
+	for(int a1= SYSTEM.ATOMS ; a1<SYSTEM.ALL_ATOMS; a1++)
+	{
+		if(!FIRST_CALL)	
+			vector<int>().swap(LIST_3B[a1]); // Clear out the second dimension so we can start over again
+
+		// Search across a2 > a1 for both regular and unordered lists.
+		for (int a2 = 0 ; a2<SYSTEM.ALL_ATOMS; a2++)
+		{			
+			if ( a1 == a2 ) 
+				continue ;
+			
+			rlen = get_dist(SYSTEM, RAB, a1, a2);	// Get pair distance
+
+			if(rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
+				if ( SYSTEM.PARENT[a1] <= SYSTEM.PARENT[a2] ) 
+					LIST_3B[a1].push_back(a2);	// Then add it to the atoms neighbor list (3B)
+		}
+	}
+	
+	FIRST_CALL = false;	
 }
 
-void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
+void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {	
 	if(FIRST_CALL)	// Then start from scratch by cycling through all atom (and layer atom) pairs
 	{
 		DO_UPDATE(SYSTEM, CONTROLS);
-		FIRST_CALL = false;	
+		FIRST_CALL = false;
+		
+		if (!USE) 
+			RCUT_PADDING = 1.0e10 ;
 		
 		if(RANK==0)
 		{
-			cout << "NEIGHBOR LIST MAX CUTOFF IS: " << MAX_CUTOFF << endl;
-			cout << "USING PADDING: " << RCUT_PADDING << endl;
+			cout << "NEIGHBOR LIST MAX CUTOFF IS: " << fixed << setprecision(5) << MAX_CUTOFF << endl;
+			cout << "USING PADDING: " << fixed << setprecision(3) << RCUT_PADDING << endl;
 		}
 	}
 	/* For debugging
@@ -112,7 +181,8 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
 
 		if( (SECOND_CALL))	// Update the cutoff padding
 		{
-			RCUT_PADDING = MAX_VEL * 30.0 * CONTROLS.DELTA_T;	// should give a distance in AA
+			if(USE)
+				RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// should give a distance in AA
 
 			SECOND_CALL = false;
 			
@@ -123,20 +193,12 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
 		}
 		else
 		{
-
 			DISPLACEMENT += MAX_VEL * CONTROLS.DELTA_T;
 			
-			if(FORCE)
+			if(DISPLACEMENT>0.5*RCUT_PADDING)
 			{
-				DO_UPDATE(SYSTEM, CONTROLS);
-				
-				if(RANK == 0)
-					cout << "RANK: " << RANK << " FORCING UPDATING ON STEP: " << CONTROLS.STEP << ", WITH PADDING: " << fixed << setprecision(3) << RCUT_PADDING <<  endl;
-			}
-				
-			else if(DISPLACEMENT > 0.5*RCUT_PADDING)	// Then update the neighbor list	
-			{
-				RCUT_PADDING = MAX_VEL * 30.0 * CONTROLS.DELTA_T;	// should give a distance in AA
+				if (USE) 
+					RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// Update padding in case max_vel changed. (LEF).
 				
 				DO_UPDATE(SYSTEM, CONTROLS);
 				
@@ -145,18 +207,25 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
 
 				if(RANK == 0)
 					cout << "RANK: " << RANK << " UPDATING ON STEP: " << CONTROLS.STEP << ", WITH PADDING: " << fixed << setprecision(3) << RCUT_PADDING <<  endl;
+				
 			}
 		}
 	}
 }
-
-
-
-
-
-
-
-
+void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
+{
+	if(FIRST_CALL || SECOND_CALL)
+		UPDATE_LIST(SYSTEM, CONTROLS);
+	else
+	{
+		DISPLACEMENT += MAX_VEL * CONTROLS.DELTA_T;
+		
+		DO_UPDATE(SYSTEM, CONTROLS);
+	
+		if(RANK == 0)
+			cout << "RANK: " << RANK << " FORCING UPDATING ON STEP: " << CONTROLS.STEP << ", WITH PADDING: " << fixed << setprecision(3) << RCUT_PADDING <<  endl;
+	}
+}
 
 
 
