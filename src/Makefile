@@ -40,7 +40,7 @@ CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machine
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C
 
 house_lsq: 
 	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq
