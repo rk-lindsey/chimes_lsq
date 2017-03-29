@@ -2901,9 +2901,6 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			}
 		}
 		
-		
-		int INTERACTIONS = 0;
-		
 		/////////////////////////////////////////////
 		// EVALUATE THE 3-BODY INTERACTIONS
 		/////////////////////////////////////////////
@@ -2966,13 +2963,12 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 					// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 					// within the allowed range.
 
-	
 					if(PROCEED(rlen_ij, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_IJ, S_MAXIM_IJ))
 					{
 						if(PROCEED(rlen_ik, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_IK, S_MAXIM_IK))
 						{
 							if(PROCEED(rlen_jk, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_JK, S_MAXIM_JK))
-							{								
+							{											
 								// Everything is within allowed ranges. Begin setting up the force calculation
 								
 								rlen_ij_dummy = rlen_ij;
@@ -3130,7 +3126,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 				} 	
 			}
 		
-		} 	// End 3-body outer-most loop	
+		} 	// End 3-body outer-most loop		
 	}	
 	return;
 } 

@@ -2902,6 +2902,25 @@ int main(int argc, char* argv[])
 		// FOR MPI:		Broadcast the position and optionally velocity from the root to all other processes. -- WHY ISN'T THIS IS A PRECOMPILER DIRECTIVE?
 		sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
 
+        ////////////////////////////////////////////////////////////
+        // Check if neighbor list update needed to account for new velocities /do updating
+        ////////////////////////////////////////////////////////////
+
+        if(CONTROLS.STEP>0)
+        {
+                if(NEIGHBOR_LIST.USE)// && (RANK==0))
+                {
+                        #ifdef USE_MPI
+                                MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+                        #endif
+
+                                //NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS, false);
+                                NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+                }
+        }
+
+
+
 		if (RANK == 0)
 		{
 
@@ -4580,20 +4599,20 @@ void exit_run(int value)
 
 			int i=START+iter;
 
-  	      		SYS.CHARGES[i] = LMP_CHARGE[type[iter]-1];
+  	      	SYS.CHARGES[i] = LMP_CHARGE[type[iter]-1];
 		
 			SYS.COORDS[i].X = x[iter][0];
 			SYS.COORDS[i].Y = x[iter][1];
 			SYS.COORDS[i].Z = x[iter][2];
 		  
-  	      		SYS.MASS[i] = mass[type[iter]];
+  	      	SYS.MASS[i] = mass[type[iter]];
 	  
 			f[iter][0] = 0;
 			f[iter][1] = 0;
 			f[iter][2] = 0;
 	  
 			SYS.ATOMTYPE_IDX[i] = type[iter];
-		      	SYS.ATOMTYPE    [i] = TMP_ATOMTYPE[type[iter]-1];
+		    SYS.ATOMTYPE    [i] = TMP_ATOMTYPE[type[iter]-1];
 		  
 			// Wrap the coordinates
 			
@@ -4683,7 +4702,7 @@ void exit_run(int value)
 		
 		MPI_Allreduce(MPI_IN_PLACE, &SYS.TOT_POT_ENER,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
 		
-		// Also, need to add up the forces (accel) to account for f[i]+=val, f[j]+=val, for when 
+		// Also, need to add up the forces (accel) to account for f[i]+=val, f[j]-=val, for when 
 		// j is on a different proc than i
 		
 		MPI_Allreduce(MPI_IN_PLACE, accel, 3*SYS.ATOMS, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
