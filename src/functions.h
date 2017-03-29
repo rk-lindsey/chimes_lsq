@@ -201,12 +201,12 @@ struct XYZ_INT
 struct FRAME
 {
     int ATOMS;                 		// Just the parent atoms.
-    int ALL_ATOMS;             	// All atoms, including ghosts. 
+    int ALL_ATOMS;          	   	// All atoms, including ghosts. 
 	
 	int MY_ATOMS;					// Used for lammps linking. Specify how many atoms in SYS the process owns
 	int MY_ATOMS_START;				// Used for lammps linking. Specify what index along SYS starts the process' atoms
 	XYZ BOXDIM;						// Dimenions of the primitive box.
-	XYZ WRAPDIM;              		 // Dimensions to use in wrapping coordinates for forces.  
+	XYZ WRAPDIM;              		// Dimensions to use in wrapping coordinates for forces.  
 	XYZ STRESS_TENSORS;
 	
 	double QM_POT_ENER;				// This is the potential energy of the QM calculation!

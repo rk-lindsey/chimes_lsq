@@ -84,6 +84,7 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		if(!FIRST_CALL)								// Clear out the second dimension so we can start over again
 		{										
 			vector<int>().swap(LIST   [a1]);	
+			vector<int>().swap(LIST_3B[a1]);
 			vector<int>().swap(LIST_UNORDERED[a1]);
 			vector<int>().swap(LIST_EWALD[a1]);
 		}
@@ -95,13 +96,8 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 			rlen = get_dist(SYSTEM, RAB, a1, a2);		// Updates RAB!
 
-			// I get the correct result when the list contains all a2 achievable
-			// at this point in the function, regardless of update frequency
-			// i.e. "if(true)"
-
 			if (rlen < MAX_CUTOFF + RCUT_PADDING)		// Then add it to the atoms neighbor list (2B)
 				LIST_UNORDERED[a1].push_back(a2);
-
 		}
 		
 		// Search across a2 > a1 for both regular and unordered lists.
@@ -110,10 +106,6 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			// Get pair distance
 
 			rlen = get_dist(SYSTEM, RAB, a1, a2);		// Updates RAB!
-
-			// I get the correct result when the list contains all a2 achievable
-			// at this point in the function, regardless of update frequency
-			// i.e. "if(true)"
 
 			if (rlen < (MAX_CUTOFF + RCUT_PADDING) )	// Then add it to the atoms neighbor list (2B)
 			{
@@ -126,22 +118,6 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			if (rlen < (EWALD_CUTOFF + RCUT_PADDING) )	// Then add it to the atoms neighbor list (2B)
 				if ( a1 <= SYSTEM.PARENT[a2] ) 			// Select atoms in neighbor list according to parents.
 					LIST_EWALD[a1].push_back(a2);		
-		}
-	}
-	
-	// Calculate neighbors of images for the 3 body list only.
-	for(int a1= SYSTEM.ATOMS ; a1<SYSTEM.ALL_ATOMS; a1++)
-	{
-		if(!FIRST_CALL)	
-			vector<int>().swap(LIST_3B[a1]); // Clear out the second dimension so we can start over again
-
-		// Search across a2 > a1 for both regular and unordered lists.
-		for (int a2 = 0 ; a2<SYSTEM.ALL_ATOMS; a2++)
-		{			
-			if ( a1 == a2 ) 
-				continue ;
-			
-			rlen = get_dist(SYSTEM, RAB, a1, a2);	// Get pair distance
 
 			if(rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
 				if ( SYSTEM.PARENT[a1] <= SYSTEM.PARENT[a2] ) 

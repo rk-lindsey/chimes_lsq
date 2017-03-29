@@ -4,7 +4,7 @@
 
 # For linking to LAMMPS:
 
-LINK2LMPS= yes
+LINK2LMPS= no
 LAMMPSDIR=/usr/gapps/polymers/lammps_borax/
 
 # Compiling flags
@@ -21,9 +21,9 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 
 # Compilers
 
-CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-#CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+CXX=mpicxx -std=c++11 -g -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=icc -g				# Serial, for debugging
 #CXX=icc -O3
 #CXX=g++ -std=c++11 -g			# Serial, let compiler optimize to a very high level (see also -O2)

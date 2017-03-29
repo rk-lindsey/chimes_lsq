@@ -544,7 +544,7 @@ int main()
 		
 
 	int 	FRAME_MATRX_SIZE; 
-	double 	NEIGHBOR_PADDING = 0.01;
+	double 	NEIGHBOR_PADDING = 0.3;
 
 	for(int i=0; i<CONTROLS.NFRAMES; i++)
 	{
@@ -1103,6 +1103,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 	CONTROLS.CALL_EWALD    = false;
 	CONTROLS.FIT_ENER      = false;
 	
+	NEIGHBOR_LIST.USE	   = true;
+	
 	while (FOUND_END == false)
 	{
 		getline(cin,LINE);
@@ -1653,6 +1655,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 							PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR1] ].PRPR_NM;
 							PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR2] ].PRPR_NM;
 							PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR3] ].PRPR_NM;
+							
+cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 << endl;		
 
 							TEMP_INT++;						
 						}
@@ -1904,16 +1908,16 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				bool REAL_TRIPLET = false;
 			
 				string TEMP_STR_A, TEMP_STR_B, TEMP_STR_C;
-				/*
+				
 			
-			
+/*			
 				cout << "SANITY CHECK: These are your triplets:" << endl;
 				for(int m=0; m<NTRIP; m++)
 				{
 					cout << m << " " << PAIR_TRIPLETS[m].ATMPAIR1 << " " << PAIR_TRIPLETS[m].ATMPAIR2 << " " << PAIR_TRIPLETS[m].ATMPAIR3 << endl;
 				}
-			
-			*/
+*/			
+				
 				for(int i=0; i<NPAIR; i++)
 				{
 					for(int j=0; j<NPAIR; j++)
@@ -1975,15 +1979,17 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				advance(itb,-1);
 				int TARGET;
 				
-				/*
+/*				
 				//	Sanity check	
 				cout << "YOUR OLD MAPS: " << endl;	
 				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
 					cout <<"		" << it->first << " : " << it->second << endl;
-				*/
+*/				
 				
 				// Start by making all removed type indicies negative
 				// ALSO, THIS IS WHERE WE POP OFF ELEMENTS OF OUR PAIR TRIPLET VECTOR
+				 
+				vector<int> POPPED; 
 
 				for (unsigned j = EXCLUDE_3B.size(); j-- > 0; ) // Since we're popping off by index, iterate over vector (ascending sorted) in reverse
 					PAIR_TRIPLETS.erase (PAIR_TRIPLETS.begin() + TRIAD_MAP[EXCLUDE_3B[j]]);
@@ -1995,46 +2001,41 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 					NTRIP--;
 					
 					for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)				
+					{
 						if(it->second == EXCL_IDX[j])	// Then we need to exclude it!
-								it->second = -1*it->second - 1;					
+						{		
+							POPPED.push_back(it->second);
+							it->second = -1*it->second - 1;	
+						}
+					}				
 				}	
 				
-				/*
+				// Sort the popoff list in ascending order
+				
+				sort (POPPED.begin(), POPPED.end());
+				
+/*				
 				//	Sanity check	
 				cout << "YOUR ~~ MAPS: " << endl;	
 				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
 					cout <<"		" << it->first << " : " << it->second << endl;
-				*/
 				
-				// Next, re-number all the real (positive) entries to be sequential
-				
-				int count = 0;
-				
-				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
-				{				
-					if( (it->second >= 0) && (it->second >= count))
+*/
+								
+				for(int i=0; i<POPPED.size(); i++)
+				{
+					for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
 					{
-						ita = it;
-						advance(ita,1);
-
-						for (it2=ita; it2 != TRIAD_MAP.end(); it2++)
-						{
-							if(it2->second == it->second)
-								it2->second = count;
-						}
-												
-						it->second = count;
-						count++;
-						continue;
+						if(it->second>POPPED[i])
+							it->second -= 1;
 					}
 				}
-				
-				/*
+/*				
 				//	Sanity check	
 				cout << "YOUR NEW MAPS: " << endl;	
 				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
 					cout <<"		" << it->first << " : " << it->second << endl;
-				*/
+*/				
 				
 				// Finally, rebuild the reverse maps
 				
@@ -2043,7 +2044,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
 					TRIAD_MAP_REVERSE.insert(make_pair(it->second,it->first));
 
-				/*
+/*				
 				//	Sanity check	
 							
 				cout << "YOUR NEW REV MAPS: " << endl;
@@ -2052,9 +2053,14 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				
 				for(itc = TRIAD_MAP_REVERSE.begin(); itc != TRIAD_MAP_REVERSE.end(); itc++)
 					cout <<"		" << itc->first << " : " << itc->second << endl;
-				*/
-
+*/				
+/*				
+				// Sanity check
 				
+				cout << "Triplet types (force field): " << endl;
+				for(int i=0;i<NTRIP; i++)
+					cout << "		" << PAIR_TRIPLETS[i].TRIPINDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << endl;
+*/
 			}
 					
 			#if VERBOSITY == 1						

@@ -2745,18 +2745,7 @@ int main(int argc, char* argv[])
 		}
 
 		// FOR MPI:		Synchronize forces, energy, and pressure.
-
-/*	
-cout << "RANK HAS PE: " << RANK << " " 
-<< fixed << setprecision(3) << setw(10) << right << SYSTEM.ACCEL[0].X 
-<< fixed << setprecision(3) << setw(10) << right << SYSTEM.ATOMS 
-<< fixed << setprecision(3) << setw(10) << right << SYSTEM.TOT_POT_ENER 
-<< fixed << setprecision(3) << setw(10) << right << SYSTEM.PRESSURE_XYZ 
-<< fixed << setprecision(3) << setw(10) << right << SYSTEM.PRESSURE_TENSORS_XYZ.X 
-<< fixed << setprecision(3) << setw(10) << right << SYSTEM.PRESSURE_TENSORS_XYZ.Y 
-<< fixed << setprecision(3) << setw(10) << right << SYSTEM.PRESSURE_TENSORS_XYZ.Z << endl; 
-*/
-
+		
 		#ifdef USE_MPI
 			sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
 		#endif
@@ -2790,8 +2779,8 @@ cout << "RANK HAS PE: " << RANK << " "
 			
 			int END = SYSTEM.ATOMS;
 			
-			if(CONTROLS.N_LAYERS>0)
-				END = SYSTEM.ATOMS/pow(CONTROLS.N_LAYERS+1,3.0);
+			//if(CONTROLS.N_LAYERS>0)
+			//	END = SYSTEM.ATOMS/pow(CONTROLS.N_LAYERS+1,3.0);
 		
 			if(CONTROLS.SUBTRACT_FORCE)
 			{
@@ -2819,11 +2808,11 @@ cout << "RANK HAS PE: " << RANK << " "
 				ferr += (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X) * (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X);
 				ferr += (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y) * (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y);
 				ferr += (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z) * (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z);
-				/*
+/*				
 				cout << SYSTEM.ACCEL[a1].X << "		" << SYSTEM.ACCEL[a1].Y << "	" << SYSTEM.ACCEL[a1].Z << endl;
 				cout << SYSTEM.FORCES[a1].X << "	" << SYSTEM.FORCES[a1].Y << "	" << SYSTEM.FORCES[a1].Z << endl;
 				cout << endl;
-				*/
+*/				
 				// Before printing force file with current ff forces subtracted, convert from simulation units (kca/mol/Ang)
 				// to Hartree/bohr
 
