@@ -110,7 +110,7 @@ def FIT_EXP_EXTRAP(x, y, RMIN, THRESH):
         LOGSTREAM.write("	All slopes in this domain must be (-)	        "+"\n")
         LOGSTREAM.write("	Choose a different THRESH and try again.        "+"\n")
         LOGSTREAM.write("	Base THRES on PES scan shape near rmin          "+"\n")
-		
+    	
         exit()
 				
     if len(SLOPES) < 2:
@@ -279,6 +279,10 @@ def FIT_PL2_EXTRAP(x, y, RMIN, THRESH, FIRST_MIN_X, INFLEC_I):
         LOGSTREAM.write("	Choose a different THRESH and try again.        "+"\n")
         LOGSTREAM.write("	Base THRES on PES scan shape near rmin          "+"\n")
 		
+        print "RMIN+THRESH:" + `RMIN+THRESH`
+        print "SLOPES:"
+        print FRST_DER_Y
+        
         exit()
 				
     if len(FRST_DER_Y) < 2:
@@ -612,6 +616,8 @@ if CHANGED_SIGN > 1:
     USE_POLY2 = True
 else:
     USE_POLY2 = False
+    
+USE_POLY2 = True    
 
 if USE_POLY2: # Then we'll use a+b(x-c)^3 for extrapolation.. do the fitting, etc in this function
 
@@ -630,7 +636,6 @@ if CASE == 2:
     KT_VALU = BOLTZK*TEMPER
 
 # CASE 1: ONLY REFIT WITHIN ORIGINAL RMIN
-
 
 if CASE == 1:
 
@@ -690,11 +695,19 @@ else:
                 RMIN_NEW = float(int(RMIN_NEW*100.0)/100.0)
                 print  bcolors.WARNING +  bcolors.BOLD +"Warning: requested KT product requires r_min < 0." + bcolors.ENDC
                 print  bcolors.WARNING +  bcolors.BOLD +"      ...setting RMIN to " + `RMIN_NEW ` + bcolors.ENDC
-                print  bcolors.WARNING +  bcolors.BOLD +"      ...get to KT =  " + `pow((1-0/RMAX),3.0)*PL2_FUNC(test, PL2_COEFF[0], PL2_COEFF[1], PL2_COEFF[2])/KT_VALU` + bcolors.ENDC
+                
 				
                 LOGSTREAM.write("Warning: requested KT product requires r_min < 0."+"\n")
                 LOGSTREAM.write("      ...setting RMIN to " + `RMIN_NEW `+"\n")
-                LOGSTREAM.write("      ...get to KT =  " + `pow((1-0/RMAX),3.0)*PL2_FUNC(test, PL2_COEFF[0], PL2_COEFF[1], PL2_COEFF[2])/KT_VALU` +"\n")
+                
+                
+                if USE_POLY2:
+                    print  bcolors.WARNING +  bcolors.BOLD +"      ...get to KT =  " + `pow((1-0/RMAX),3.0)*PL2_FUNC(test, PL2_COEFF[0], PL2_COEFF[1], PL2_COEFF[2])/KT_VALU` + bcolors.ENDC
+                    LOGSTREAM.write("      ...get to KT =  "                         + `pow((1-0/RMAX),3.0)*PL2_FUNC(test, PL2_COEFF[0], PL2_COEFF[1], PL2_COEFF[2])/KT_VALU` +"\n")
+                else:
+                    print  bcolors.WARNING +  bcolors.BOLD +"      ...get to KT =  " + `pow((1-0/RMAX),3.0)*poly.polyval(test,CUBE_COEFF)/KT_VALU` + bcolors.ENDC
+                    LOGSTREAM.write("      ...get to KT =  "                         + `pow((1-0/RMAX),3.0)*poly.polyval(test,CUBE_COEFF)/KT_VALU` +"\n")
+                
                 
                 RMIN_NEW = 0
                 
@@ -741,7 +754,7 @@ else:
             y[i] = PL2_FUNC(x[i], PL2_COEFF[0], PL2_COEFF[1], PL2_COEFF[2])
 
         for i in reversed(xrange(int((RMIN-RMIN_NEW)/SPACNG)+1)):
-            if SPACNG*i+RMIN_NEW > RMIN:
+            if round(SPACNG*i+RMIN_NEW,5) > RMIN:
                 break  
             x.insert(0,(SPACNG*i+RMIN_NEW))
             y.insert(0,PL2_FUNC((SPACNG*i+RMIN_NEW), PL2_COEFF[0], PL2_COEFF[1], PL2_COEFF[2]))
@@ -749,11 +762,10 @@ else:
     else: # Don't need to replace anything, so don't care about that first "for i in xrange(START_EXTRAP):" part
         for i in reversed(xrange(int((RMIN-RMIN_NEW)/SPACNG)+1)):
             
-            if SPACNG*i+RMIN_NEW > RMIN:
+            if round(SPACNG*i+RMIN_NEW,5) > RMIN:
                 break
             x.insert(0,(SPACNG*i+RMIN_NEW))
             y.insert(0,poly.polyval((SPACNG*i+RMIN_NEW),CUBE_COEFF))
-                
 
     # Do the morse transform on distances
 
@@ -784,7 +796,7 @@ ORDER     -= 1 # Only because of while loop
 
 # USE THIS WHILE FOR A LESS STRICT REFITTING CRITERIA... **USUALLY** A TARGET VAL OF 20 IS PLENTY!
 # while R_SQ_WORST > 20.0:
-while R_SQ_WORST > 5.0: # 20.0:
+while R_SQ_WORST > 5.0: # 20.0: # 5.0: # 20.0:
 
     ORDER += 1
 	

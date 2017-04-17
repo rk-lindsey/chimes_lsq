@@ -9,9 +9,6 @@
 
 using namespace std;
 
-
-
-
 NEIGHBORS::NEIGHBORS()		// Constructor 
 {
 	RCUT_PADDING  =  0.3;
@@ -43,6 +40,27 @@ void NEIGHBORS::INITIALIZE(FRAME & SYSTEM)		// (overloaded) class constructor --
 	}
 }
 
+void NEIGHBORS::INITIALIZE_MD(FRAME & SYSTEM)		// (overloaded) class constructor -- if no padding specified, default to 0.3
+{
+	if(USE)
+	{
+		INITIALIZE(SYSTEM);
+		
+		MAX_VEL = -1.0;
+
+		for(int i=0; i<SYSTEM.ATOMS; i++)
+		{
+			CURR_VEL 
+			      = sqrt(SYSTEM.VELOCITY[i].X*SYSTEM.VELOCITY[i].X 
+			           + SYSTEM.VELOCITY[i].Y*SYSTEM.VELOCITY[i].Y 
+	      	           + SYSTEM.VELOCITY[i].Z*SYSTEM.VELOCITY[i].Z);
+			
+			if(CURR_VEL > MAX_VEL)
+				MAX_VEL = CURR_VEL;
+		}
+	}
+}
+
 void NEIGHBORS::INITIALIZE(FRAME & SYSTEM, double & PAD)	// (overloaded) class constructor -- if padding specified, set to value
 {
 	INITIALIZE(SYSTEM);
@@ -53,88 +71,290 @@ void NEIGHBORS::INITIALIZE(FRAME & SYSTEM, double & PAD)	// (overloaded) class c
 		RCUT_PADDING = 1.0e+10;
 }
 
-void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
+void NEIGHBORS::FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
+// Wrap atoms in ALL_COORDS into primitive cell prior to constructing replicas.	
 {
+	// Set the first NATOMS of ghost atoms to have the wrapped coordinates of the "real" coords
+		
+	for (int a=0; a<SYSTEM.ATOMS; a++) 
+	{
+		SYSTEM.WRAP_IDX[a].X = floor(SYSTEM.COORDS[a].X/SYSTEM.BOXDIM.X);
+		SYSTEM.WRAP_IDX[a].Y = floor(SYSTEM.COORDS[a].Y/SYSTEM.BOXDIM.Y);
+		SYSTEM.WRAP_IDX[a].Z = floor(SYSTEM.COORDS[a].Z/SYSTEM.BOXDIM.Z);
+		
+		SYSTEM.ALL_COORDS[a].X = SYSTEM.COORDS[a].X - SYSTEM.WRAP_IDX[a].X * SYSTEM.BOXDIM.X;
+		SYSTEM.ALL_COORDS[a].Y = SYSTEM.COORDS[a].Y - SYSTEM.WRAP_IDX[a].Y * SYSTEM.BOXDIM.Y;
+		SYSTEM.ALL_COORDS[a].Z = SYSTEM.COORDS[a].Z - SYSTEM.WRAP_IDX[a].Z * SYSTEM.BOXDIM.Z; 
+	}
+	
+	// Build the surrounding "cell's" ghost atoms based on the first NATOMS ghost atoms
+	
+	if(CONTROLS.N_LAYERS>0 )
+	{	
+		int TEMP_IDX = SYSTEM.ATOMS;	
+
+		for(int n1 = -CONTROLS.N_LAYERS ; n1<=CONTROLS.N_LAYERS; n1++)
+		{
+			for(int n2 = -CONTROLS.N_LAYERS ; n2<=CONTROLS.N_LAYERS; n2++)
+			{
+				for(int n3 = -CONTROLS.N_LAYERS ; n3<=CONTROLS.N_LAYERS; n3++)
+				{	
+					if (n1 == 0 && n2 == 0 && n3 == 0 ) 
+						continue;
+					else
+					{
+						for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+						{
+							SYSTEM.ALL_COORDS[TEMP_IDX].X = SYSTEM.ALL_COORDS[a1].X + n1 * SYSTEM.BOXDIM.X;
+							SYSTEM.ALL_COORDS[TEMP_IDX].Y = SYSTEM.ALL_COORDS[a1].Y + n2 * SYSTEM.BOXDIM.Y;
+							SYSTEM.ALL_COORDS[TEMP_IDX].Z = SYSTEM.ALL_COORDS[a1].Z + n3 * SYSTEM.BOXDIM.Z;
+				
+							if(SYSTEM.PARENT[TEMP_IDX] != a1)
+							{
+								cout << "ERROR: Wrong parent atom in found while updating layers" << endl;
+								exit_run(0);
+							}
+				
+							TEMP_IDX++;
+						}
+					}
+				}
+			}
+		}
+		
+		if ( TEMP_IDX != SYSTEM.ALL_ATOMS ) 
+		{
+			printf("Error updating layers\n") ;
+			exit(1) ;
+		}
+	}	
+}
+
+void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
+// Choose algorithm based on system size including ghost atoms.
+{
+	FIX_LAYERS(SYSTEM, CONTROLS);
+
+	if ( SYSTEM.ALL_ATOMS < 200 ) 
+		DO_UPDATE_SMALL(SYSTEM, CONTROLS);
+	else 
+		DO_UPDATE_BIG(SYSTEM, CONTROLS);
+}	
+
+void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)	
+{
+
 	XYZ RAB;
 	XYZ TMP_BOX;
 	
-	double MAX  = 0;
+	double MAX = 0;
 	double rlen = 0;
 	
-	// ALL_COORDS is used for force evaluation. Wrap atoms in ALL_COORDS into primitive cell prior to constructing replicas.
-	for ( int a = 0; a < SYSTEM.ATOMS; a++ ) 
+	if(!FIRST_CALL)	// Clear out the second dimension so we can start over again
 	{
-		SYSTEM.ALL_COORDS[a].X = SYSTEM.COORDS[a].X - floor(SYSTEM.COORDS[a].X / SYSTEM.BOXDIM.X) * SYSTEM.BOXDIM.X;
-		SYSTEM.ALL_COORDS[a].Y = SYSTEM.COORDS[a].Y - floor(SYSTEM.COORDS[a].Y / SYSTEM.BOXDIM.Y) * SYSTEM.BOXDIM.Y;
-		SYSTEM.ALL_COORDS[a].Z = SYSTEM.COORDS[a].Z - floor(SYSTEM.COORDS[a].Z / SYSTEM.BOXDIM.Z) * SYSTEM.BOXDIM.Z; 
-	}
-	
-	sync_layers(SYSTEM,CONTROLS);
-	
-	if(FIRST_CALL)									// Set up the first dimension of the list 
-	{
-		LIST          .resize(SYSTEM.ATOMS);	
-		LIST_EWALD    .resize(SYSTEM.ATOMS);	
-		LIST_UNORDERED.resize(SYSTEM.ATOMS);	
-		LIST_3B       .resize(SYSTEM.ALL_ATOMS);	
+		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+		{
+			LIST          [a1].clear();
+			LIST_UNORDERED[a1].clear();
+			LIST_EWALD    [a1].clear();
+
+			LIST_3B[a1].clear();
+		}
 	}
 
 	for(int a1=0; a1<SYSTEM.ATOMS; a1++)
 	{
-		if(!FIRST_CALL)								// Clear out the second dimension so we can start over again
-		{										
-			vector<int>().swap(LIST   [a1]);	
-			vector<int>().swap(LIST_3B[a1]);
-			vector<int>().swap(LIST_UNORDERED[a1]);
-			vector<int>().swap(LIST_EWALD[a1]);
-		}
-		
-		// Search across a2 < a1 for unordered list
-		for (int a2 = 0 ; a2< a1 ; a2++)
-		{			
-			// Get pair distance
-
-			rlen = get_dist(SYSTEM, RAB, a1, a2);		// Updates RAB!
-
-			if (rlen < MAX_CUTOFF + RCUT_PADDING)		// Then add it to the atoms neighbor list (2B)
-				LIST_UNORDERED[a1].push_back(a2);
-		}
-		
-		// Search across a2 > a1 for both regular and unordered lists.
-		for (int a2=a1+1 ; a2<SYSTEM.ALL_ATOMS; a2++)
-		{			
-			// Get pair distance
-
-			rlen = get_dist(SYSTEM, RAB, a1, a2);		// Updates RAB!
-
-			if (rlen < (MAX_CUTOFF + RCUT_PADDING) )	// Then add it to the atoms neighbor list (2B)
+		for (int a2=0 ; a2<SYSTEM.ALL_ATOMS; a2++)
+		{
+			if(a2 == a1)
+				continue;
+			
+			rlen = get_dist(SYSTEM, RAB, a1, a2);
+			
+			if (rlen < MAX_CUTOFF + RCUT_PADDING)
+				LIST_UNORDERED[a1].push_back(a2);	
+			
+			if ((SYSTEM.PARENT[a2]>=a1) && (a2 > a1))
 			{
-				if (a1 <= SYSTEM.PARENT[a2])			// Select atoms in neighbor list according to parents.
+				if(rlen < (MAX_CUTOFF + RCUT_PADDING)) 			// Select atoms in neighbor list according to parents.
 					LIST[a1].push_back(a2);		
-
-				LIST_UNORDERED[a1].push_back(a2) ;
+				
+				if (rlen < (EWALD_CUTOFF + RCUT_PADDING) )	
+					LIST_EWALD[a1].push_back(a2);	
+				
+				if (rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
+					LIST_3B[a1].push_back(a2);		
 			}
-
-			if (rlen < (EWALD_CUTOFF + RCUT_PADDING) )	// Then add it to the atoms neighbor list (2B)
-				if ( a1 <= SYSTEM.PARENT[a2] ) 			// Select atoms in neighbor list according to parents.
-					LIST_EWALD[a1].push_back(a2);		
-
-			if(rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
-				if ( SYSTEM.PARENT[a1] <= SYSTEM.PARENT[a2] ) 
-					LIST_3B[a1].push_back(a2);	// Then add it to the atoms neighbor list (3B)
 		}
 	}
-	
+
+	if(FIRST_CALL == false)
+		SECOND_CALL = false;
+
 	FIRST_CALL = false;	
+}
+
+void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS) // NOT WORKING CORRECTLY CURRENTLY, EVEN FOR 2B -- MISSES CERTAIN ATOMS
+// Order-N Neighbor list update with binning of particles.
+{
+	XYZ RAB;
+	double rlen = 0;
+	
+	if(FIRST_CALL) // Set up the first dimension of the list 
+	{
+		LIST          .resize(SYSTEM.ATOMS);	
+		LIST_EWALD    .resize(SYSTEM.ATOMS);	
+		LIST_UNORDERED.resize(SYSTEM.ATOMS);	
+		LIST_3B       .resize(SYSTEM.ATOMS);	
+	}
+	
+	// Find maximum distance to search for neighbors.
+	
+	double SEARCH_DIST = MAX_CUTOFF;
+	
+	if ( EWALD_CUTOFF > SEARCH_DIST )
+		SEARCH_DIST = EWALD_CUTOFF;
+	
+	if ( MAX_CUTOFF_3B > SEARCH_DIST ) 
+		SEARCH_DIST = MAX_CUTOFF_3B;
+	
+	SEARCH_DIST += RCUT_PADDING;
+
+	XYZ_INT NBINS;
+	
+	NBINS.X = ceil((2 * CONTROLS.N_LAYERS+1) * SYSTEM.BOXDIM.X /SEARCH_DIST) + 2;
+	NBINS.Y = ceil((2 * CONTROLS.N_LAYERS+1) * SYSTEM.BOXDIM.Y /SEARCH_DIST) + 2;
+	NBINS.Z = ceil((2 * CONTROLS.N_LAYERS+1) * SYSTEM.BOXDIM.Z /SEARCH_DIST) + 2;
+	
+	int TOTAL_BINS = NBINS.X * NBINS.Y * NBINS.Z;
+
+	vector<vector<int> > BIN(TOTAL_BINS);
+	
+	for (int i=0; i<TOTAL_BINS; i++) 
+		vector<int>().swap(BIN[i]);
+	
+	XYZ_INT BIN_IDX;
+	
+	int FULLNESS = 0;
+	
+	for ( int a1 = 0; a1 < SYSTEM.ALL_ATOMS; a1++ ) 
+	{				
+		BIN_IDX.X = floor( (SYSTEM.ALL_COORDS[a1].X + SYSTEM.BOXDIM.X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX.Y = floor( (SYSTEM.ALL_COORDS[a1].Y + SYSTEM.BOXDIM.Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX.Z = floor( (SYSTEM.ALL_COORDS[a1].Z + SYSTEM.BOXDIM.Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+
+		if ( BIN_IDX.X < 0 || BIN_IDX.Y < 0 || BIN_IDX.Z < 0 ) 
+		{
+			cout << "Error: negative binning BIN_IDX for atom a1 = " << a1 << endl;
+			exit(1);
+		}
+		
+		// Calculate bin BIN_IDX of the atom.
+		int ibin = BIN_IDX.X + BIN_IDX.Y * NBINS.X + BIN_IDX.Z * NBINS.X * NBINS.Y;
+
+		if ( ibin >= TOTAL_BINS ) 
+		{
+			cout << "Error: binning BIN_IDX out of range\n";
+			cout << "BIN_IDX.X = " << BIN_IDX.X << "BIN_IDX.Y = " << BIN_IDX.Y << "BIN_IDX.Z = " << BIN_IDX.Z << endl;
+			exit(1);
+		}
+		
+		// Push the atom into the bin 
+		BIN[ibin].push_back(a1);
+		FULLNESS++;
+		
+			
+	}
+
+	for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+	{
+		if(!FIRST_CALL)
+		{
+			LIST          [a1].clear();
+			LIST_UNORDERED[a1].clear();
+			LIST_EWALD    [a1].clear();
+			LIST_3B       [a1].clear();
+		}
+		
+		XYZ_INT BIN_IDX_a1;
+
+		BIN_IDX_a1.X = floor( (SYSTEM.ALL_COORDS[a1].X + SYSTEM.BOXDIM.X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX_a1.Y = floor( (SYSTEM.ALL_COORDS[a1].Y + SYSTEM.BOXDIM.Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX_a1.Z = floor( (SYSTEM.ALL_COORDS[a1].Z + SYSTEM.BOXDIM.Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+
+		if ( BIN_IDX_a1.X < 1 || BIN_IDX_a1.Y < 1 || BIN_IDX_a1.Z < 1 ) 
+		{
+			cout << "Error: bad binning BIN_IDX\n";
+			cout << "BIN_IDX.X = " << BIN_IDX_a1.X << "BIN_IDX.Y = " << BIN_IDX_a1.Y << "BIN_IDX.Z = " << BIN_IDX_a1.Z << endl;
+			exit(1);
+		}
+
+		// Loop over relevant bins only, not all atoms.
+		
+		int ibin, a2, a2end;
+		
+		for (int i=BIN_IDX_a1.X-1; i<= BIN_IDX_a1.X+1; i++)	//BIN_IDX_a1.X 
+		{
+			for (int j=BIN_IDX_a1.Y-1; j<=BIN_IDX_a1.Y+1; j++ ) //BIN_IDX_a1.Y
+			{
+				for (int k=BIN_IDX_a1.Z-1; k<=BIN_IDX_a1.Z+1; k++ ) // BIN_IDX_a1.Z
+				{
+					ibin = i + j * NBINS.X + k * NBINS.X * NBINS.Y;
+
+
+					if (ibin >= TOTAL_BINS) 
+					{
+						cout << "Error: binning BIN_IDX out of range\n";
+						cout << "BIN_IDX.X = " << i << "BIN_IDX.Y = " << j << "BIN_IDX.Z = " << k << endl;
+						exit(1);
+					}
+
+					a2end = BIN[ibin].size();
+					
+					// Check all atoms in the bin.
+ 
+					for (int a2idx=0; a2idx<a2end; a2idx++) 
+					{
+						a2 = BIN[ibin][a2idx];
+
+						if ( a2 == a1 ) 
+							continue;
+
+						rlen = get_dist(SYSTEM, RAB, a1, a2);
+
+						if (rlen < MAX_CUTOFF + RCUT_PADDING)		
+							LIST_UNORDERED[a1].push_back(a2);	
+						
+						if ( a1 <= SYSTEM.PARENT[a2] ) 
+						{
+							if (rlen < (MAX_CUTOFF + RCUT_PADDING) )		
+								LIST[a1].push_back(a2);		
+
+							if (rlen < (EWALD_CUTOFF + RCUT_PADDING) )
+								LIST_EWALD[a1].push_back(a2);		
+
+							if(rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
+								LIST_3B[a1].push_back(a2);		
+						}	
+					}
+				}
+			}
+		}
+		
+
+	}
+
+	if(FIRST_CALL == false)
+		SECOND_CALL = false;
+
+	FIRST_CALL = false;	
+	
 }
 
 void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {	
 	if(FIRST_CALL)	// Then start from scratch by cycling through all atom (and layer atom) pairs
-	{
-		DO_UPDATE(SYSTEM, CONTROLS);
-		FIRST_CALL = false;
-		
+	{		
 		if (!USE) 
 			RCUT_PADDING = 1.0e10 ;
 		
@@ -143,6 +363,9 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			cout << "NEIGHBOR LIST MAX CUTOFF IS: " << fixed << setprecision(5) << MAX_CUTOFF << endl;
 			cout << "USING PADDING: " << fixed << setprecision(3) << RCUT_PADDING << endl;
 		}
+		
+		DO_UPDATE(SYSTEM, CONTROLS);
+		FIRST_CALL = false;	
 	}
 	/* For debugging
 	else if(!USE)	// If we don't want to use neighbor lists, this is the same as updating it each time.
@@ -159,18 +382,17 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		{
 			if(USE)
 				RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// should give a distance in AA
-
-			SECOND_CALL = false;
-			
-			DO_UPDATE(SYSTEM, CONTROLS);
 			
 			if(RANK == 0)
-				cout << "RANK: " << RANK << " RESET RCUT_PADDING TO: " << fixed << RCUT_PADDING << endl;
+				cout << "RANK: " << RANK << " RESET RCUT_PADDING TO: " << fixed << setprecision(10) << RCUT_PADDING << endl;
+			
+			DO_UPDATE(SYSTEM, CONTROLS);
+			SECOND_CALL = false;
 		}
 		else
 		{
 			DISPLACEMENT += MAX_VEL * CONTROLS.DELTA_T;
-			
+
 			if(DISPLACEMENT>0.5*RCUT_PADDING)
 			{
 				if (USE) 
@@ -222,10 +444,15 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 		STYLE = IN_STYLE;
 	else if(CONTROLS.USE_HOOVER_THRMOSTAT)			// Uses MTK Thermostat
 		STYLE = "NVT-MTK";
+	else if(IN_STYLE=="NVE")					// Uses velocity scaling to thermostat
+		STYLE = IN_STYLE;	
 	else if(CONTROLS.FREQ_UPDATE_THERMOSTAT > -1.0)	// Trivial velocity scaling
 		STYLE = "NVT-SCALE";
 	else
-		STYLE="NVE";
+	{
+		cout << "ERROR: UNKNOWN CONSTRAINT STYLE" << endl;
+		exit_run(0);
+	}
 	
 	TIME  = CONTROLS.FREQ_UPDATE_THERMOSTAT;
 	TIME_BARO = CONTROLS.FREQ_UPDATE_BAROSTAT;
@@ -296,9 +523,6 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		SYSTEM.COORDS[a1].Y += SYSTEM.VELOCITY[a1].Y * CONTROLS.DELTA_T + 0.5*SYSTEM.ACCEL[a1].Y * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
 		SYSTEM.COORDS[a1].Z += SYSTEM.VELOCITY[a1].Z * CONTROLS.DELTA_T + 0.5*SYSTEM.ACCEL[a1].Z * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
 	}
-	
-	if(STYLE=="NVE" || STYLE=="NVT-SCALE" || STYLE=="NVT-BEREND")
-		return;
 
 	///////////////////////////////////////////////
 	// If requested, do Berendsen barostatting, isotropically
@@ -335,8 +559,6 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		SYSTEM.BOXDIM.Z *= BEREND_MU;
 
 		VOLUME_T = SYSTEM.BOXDIM.X*SYSTEM.BOXDIM.Y*SYSTEM.BOXDIM.Z;
-		
-		return;
 	}
 	
 	///////////////////////////////////////////////
@@ -371,8 +593,7 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		SYSTEM.BOXDIM.Z *= BEREND_ANI_MU.Z;
 
 		VOLUME_T = SYSTEM.BOXDIM.X*SYSTEM.BOXDIM.Y*SYSTEM.BOXDIM.Z;
-		
-		return;
+
 	}	
 
 	///////////////////////////////////////////////
@@ -431,7 +652,63 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		SYSTEM.BOXDIM.Z *= BAROS_SCALE;
 	
 		VOLUME_T = SYSTEM.BOXDIM.X*SYSTEM.BOXDIM.Y*SYSTEM.BOXDIM.Z;	
+	}
+	
+	///////////////////////////////////////////////
+	// Refresh ghost atom positions
+	///////////////////////////////////////////////
+
+	// Set the first NATOMS of ghost atoms to have the coordinates of the "real" coords
+
+	for (int a=0; a<SYSTEM.ATOMS; a++) 
+	{
+		SYSTEM.ALL_COORDS[a].X = SYSTEM.COORDS[a].X - SYSTEM.WRAP_IDX[a].X * SYSTEM.BOXDIM.X;
+		SYSTEM.ALL_COORDS[a].Y = SYSTEM.COORDS[a].Y - SYSTEM.WRAP_IDX[a].Y * SYSTEM.BOXDIM.Y;
+		SYSTEM.ALL_COORDS[a].Z = SYSTEM.COORDS[a].Z - SYSTEM.WRAP_IDX[a].Z * SYSTEM.BOXDIM.Z; 
+	}
+	
+	// Build the surrounding "cell's" ghost atoms based on the first NATOMS ghost atoms
+	
+	if(CONTROLS.N_LAYERS>0 )
+	{	
+		int TEMP_IDX = SYSTEM.ATOMS;	
+
+		for(int n1 = -CONTROLS.N_LAYERS ; n1<=CONTROLS.N_LAYERS; n1++)
+		{
+			for(int n2 = -CONTROLS.N_LAYERS ; n2<=CONTROLS.N_LAYERS; n2++)
+			{
+				for(int n3 = -CONTROLS.N_LAYERS ; n3<=CONTROLS.N_LAYERS; n3++)
+				{	
+					if (n1 == 0 && n2 == 0 && n3 == 0 ) 
+						continue;
+					else
+					{
+						for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+						{
+							SYSTEM.ALL_COORDS[TEMP_IDX].X = SYSTEM.ALL_COORDS[a1].X + n1 * SYSTEM.BOXDIM.X;
+							SYSTEM.ALL_COORDS[TEMP_IDX].Y = SYSTEM.ALL_COORDS[a1].Y + n2 * SYSTEM.BOXDIM.Y;
+							SYSTEM.ALL_COORDS[TEMP_IDX].Z = SYSTEM.ALL_COORDS[a1].Z + n3 * SYSTEM.BOXDIM.Z;
+				
+							if(SYSTEM.PARENT[TEMP_IDX] != a1)
+							{
+								cout << "ERROR: Wrong parent atom in found while updating layers" << endl;
+								exit_run(0);
+							}
+				
+							TEMP_IDX++;
+						}
+					}
+				}
+			}
+		}
+		
+		if ( TEMP_IDX != SYSTEM.ALL_ATOMS ) 
+		{
+			printf("Error updating layers\n") ;
+			exit(1) ;
+		}
 	}	
+		
 }
 
 void CONSTRAINT::UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
@@ -660,8 +937,8 @@ double CONSTRAINT::CONSERVED_QUANT (FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	{
 		THERM_KE = 0.5 * THERM_VELOC_T * THERM_VELOC_T * THERM_INERT_Q;
 		THERM_PE = N_DOF * Kb * CONTROLS.TEMPERATURE * THERM_POSIT_T;
-		
-		return THERM_KE + THERM_PE;
+
+		return  THERM_KE + THERM_PE;
 	}
 	else // NPT-MTK
 	{

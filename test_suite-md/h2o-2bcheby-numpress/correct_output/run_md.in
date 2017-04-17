@@ -33,15 +33,17 @@
 
 # VELINIT # (options are READ or GEN)
 	READ
-# THRMOST # (options are HOOVER <hoover time> or VELSCALE <scale freq>
-	HOOVER 10
-# PRESSUR # (options are ANALYTICAL or NUMERICAL)
+# CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>
+	NVT-MTK HOOVER 10
+# PRSCALC # (options are ANALYTICAL or NUMERICAL)
 	NUMERICAL
 	
 ###################################
 ####      OUTPUT  CONTROL      ####
 ###################################	
 	
+# WRPCRDS # 
+	false	
 # FRQDFTB # ! Frequency to output the DFTB gen file
 	20
 # FRQENER # ! Frequency to output energies

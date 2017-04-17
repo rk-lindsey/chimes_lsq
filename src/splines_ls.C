@@ -363,6 +363,25 @@ int main()
 		// If layering requested, replicate the system
 
 		build_layers(TRAJECTORY[i], CONTROLS) ;
+		
+		if(i==0)
+		{
+			if ( (CONTROLS.N_LAYERS > 0) && (RANK == 0) )	// Then ghost atoms are used 
+			{
+					cout << "	Real atoms:                   " << TRAJECTORY[i].ATOMS << endl;
+					cout << "	Total atoms (ghost):          " << TRAJECTORY[i].ALL_ATOMS << endl;
+					cout << "	Real box dimesntions:         " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << endl;
+					cout << "	Total box dimensions (ghost): " << TRAJECTORY[i].BOXDIM.X * (2*CONTROLS.N_LAYERS + 1) << " " << TRAJECTORY[i].BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1) << " " << TRAJECTORY[i].BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1) << endl << endl;
+			
+					if(CONTROLS.WRAP_COORDS)
+					{
+						cout << "WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off" << endl;
+						CONTROLS.WRAP_COORDS = false;
+					}
+			}
+			else if(RANK==0) // No ghost atoms.
+				cout << "WARNING: Ghost atoms/implicit layers are NOT being used." << endl;
+		}
 	}
 	
 	TRAJECTORY[0].QM_POT_ENER = 0;
@@ -413,7 +432,7 @@ int main()
 
 		// Setup the Coulomb force "matrix"
 	 
-		COULOMB_FORCES[f].resize(A_SIZE);
+		COULOMB_FORCES[f].resize(ATOM_PAIRS.size());
 		P_OVER_FORCES[f] .resize(A_SIZE);
 		
 		for (int i=0; i<ATOM_PAIRS.size(); i++)
@@ -425,7 +444,7 @@ int main()
 				COULOMB_FORCES[f][i][j].X = 0;
 				COULOMB_FORCES[f][i][j].Y = 0;
 				COULOMB_FORCES[f][i][j].Z = 0;	
-				
+
 				if (i==0)	
 				{
 					P_OVER_FORCES[f][j].X = 0;
@@ -641,7 +660,7 @@ int main()
 			if ( CONTROLS.FIT_COUL ) 
 				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
 					fileA << COULOMB_FORCES[N][i][a].X << "   ";
-			  
+
 			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << P_OVER_FORCES[N][a].X;
 			  
@@ -1102,6 +1121,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 	CONTROLS.IS_LSQ        = true; 
 	CONTROLS.CALL_EWALD    = false;
 	CONTROLS.FIT_ENER      = false;
+	CONTROLS.FIT_STRESS    = false;
 	
 	NEIGHBOR_LIST.USE	   = true;
 	
@@ -1402,13 +1422,14 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				 cin.ignore();
 			
 			// Do some error checks
-			
+/*			
 			if(CONTROLS.USE_3B_CHEBY && CONTROLS.N_LAYERS > 1)
 			{
 				cout << "ERROR: Use of layers is not supported with 3-body Chebyshev potentials." << endl;
 				cout << "       Set # N_LAYERS # to 1." << endl;
 				exit(0); 
 			}
+*/			
 			if(CONTROLS.USE_3B_CHEBY && CONTROLS.FIT_POVER)
 			{
 				cout << "ERROR: Overbonding is not compatible with 3-body Chebyshev potentials." << endl;
@@ -1656,7 +1677,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 							PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR2] ].PRPR_NM;
 							PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR3] ].PRPR_NM;
 							
-cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 << endl;		
+//cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 << endl;		
 
 							TEMP_INT++;						
 						}
@@ -2240,10 +2261,10 @@ cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1
 			}
 			
 			cout << endl;
-			cout << "Read the following number of ij ik jk bins for pairs: " << endl;
+			cout << "	Read the following number of ij ik jk bins for pairs: " << endl;
 			
 			for(int i=0; i<NPAIR; i++)
-				cout << "	" << ATOM_PAIRS[i].PRPR_NM  << ": " << ATOM_PAIRS[i].NBINS.X << " " << ATOM_PAIRS[i].NBINS.Y << " " << ATOM_PAIRS[i].NBINS.Z << endl;					
+				cout << "		" << ATOM_PAIRS[i].PRPR_NM  << ": " << ATOM_PAIRS[i].NBINS.X << " " << ATOM_PAIRS[i].NBINS.Y << " " << ATOM_PAIRS[i].NBINS.Z << endl;					
 			cout << endl;
 	
 		}
@@ -2634,7 +2655,7 @@ cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1
 	}	
 	
 	#if VERBOSITY == 1			
-		cout << "Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl;; // All types use same scaling
+		cout << endl << "Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl;; // All types use same scaling
 	#endif	
 }
 
