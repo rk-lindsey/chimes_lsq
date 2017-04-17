@@ -3,7 +3,7 @@ Reading input file...
 	# TRJFILE #: input.xyzf
 	# WRAPTRJ #: 1
 	# NFRAMES #: 33
-	# NLAYERS #: 1
+	# N_LAYERS #: 1
 	# FITCOUL #: true
 	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
@@ -56,11 +56,19 @@ Reading input file...
 	1               H               H               0.750000        6.000000        0.100000        1.250000         0               
 	2               O               H               0.750000        6.000000        0.100000        1.250000         0               
 
+	Read the following number of ij ik jk bins for pairs: 
+		OO: 0.000000 0.000000 0.000000
+		HH: 0.000000 0.000000 0.000000
+		OH: 0.000000 0.000000 0.000000
+
+
 	Attempting to read 2 charge constraints...:
 		1	 OO (0) HH (1) OH (2) 1000.000000 4000.000000 4000.000000 0.000000
 		2	 OO (0) HH (1) OH (2) 1000.000000 -4000.000000 0.000000 0.000000
 
-	Note: Will use cubic scaling of: 1.000000
+	# FCUTTYP #: CUBIC	... for 3-body Chebyshev interactions
+
+Note: Will use cubic scaling of: 1.000000
 
 ...input file read successful: 
 
@@ -68,19 +76,29 @@ The number of two-body non-coulomb parameters is: 30
 The number of three-body Chebyshev parameters is: 10
 
 Reading in the trajectory file...
+	Real atoms:                   96
+	Total atoms (ghost):          2592
+	Real box dimesntions:         8.609131 8.609131 8.609131
+	Total box dimensions (ghost): 25.827393 25.827393 25.827393
+
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 ...trajectory file read successful: 
 
 Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix setup complete: 
 
+Setting up the histograms to handle sparse 3b-distance populations...
+Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramming. 
+
+
 ...Populating the matricies for A, Coulomb forces, and overbonding...
 
 	Processing frame: 1     of: 33
 	Ewald_Deriv:
-	R-Space Ewald cutoff      =  6.173215e+00
-	R-Space accuracy estimate =  5.220777e-08
-	K-space accuracy estimate =  5.489244e-07
-	Number of Ewald K-vectors = 235
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-space accuracy estimate =  6.801448e-07
+	Number of Ewald K-vectors = 238
 	Processing frame: 2     of: 33
 	Processing frame: 3     of: 33
 	Processing frame: 4     of: 33
@@ -116,18 +134,25 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix population complete: 
 
 Printing matricies...
+	...A matrix length: 33
+
 	Minimum distances between atoms: (Angstr.)
 		0	O O	2.039
 		1	H H	1.082
 		2	O H	0.820
 	Total number of configurations contributing to each pair type:
-		0	O O 19697
-		1	H H 79238
-		2	O H 80438
+		0	O O 23715
+		1	H H 94841
+		2	O H 96183
+	Minimum distances between atoms triplet pairs: (Angstr.)
+		0	OO OO OO 2.039 2.039 2.039
+		1	OO OH OH 0.820 0.820 0.820
+		2	OH OH HH 0.820 0.820 0.820
+		3	HH HH HH 1.082 1.082 1.082
 	Total number of configurations contributing to each triplet type:
-		0	OO OO OO 153075
-		1	OO OH OH 980091
-		2	OH OH HH 1985861
-		3	HH HH HH 1274392
+		0	OO OO OO 152348
+		1	OO OH OH 990096
+		2	OH OH HH 2008851
+		3	HH HH HH 1276891
 ...matrix printing complete: 
 

@@ -1,12 +1,8 @@
 #!/bin/bash
 
 
-NP=8
+NP=16
 
-
-
-#MPICOMMAND="${MPICOMMAND} -stdin all"	# Only needed if compiled with mpicxx (OSX)
-MPICOMMAND=mpirun
 ###############################################################
 #
 # Make a fresh compilation of the code
@@ -14,12 +10,15 @@ MPICOMMAND=mpirun
 ###############################################################
 
 cd ../src
-rm -rf *o *dSYM
+rm -rf *o *dSYM house_md
 cp Makefile Makefile-back
 cp Makefile-TS-MD Makefile
-make house_md;  rm -f ../test_suite-lsq/house_md;  mv house_md  ../test_suite-md/
+module load intel impi
+make house_md;  
+rm -f ../test_suite-lsq/house_md;  mv house_md  ../test_suite-md/
 mv Makefile-back Makefile
 cd ../test_suite-md
+
 
 ########################################
 # Define tests within the test suite
@@ -87,16 +86,14 @@ do
 	
 	cd $i
 
-	if [ $NP -eq 0 ] ; then
-		$MPICOMMAND ../house_md < run_md.in > run_md.out
+	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
+		../house_md < run_md.in > run_md.out
 			
 	else
-		#$MPICOMMAND -np $NP ../house_md < run_md.in > run_md.out
-		
 		if [[ "$i" == "generic-lj" || "$i" == "h2o-2bcheby-numpress" ]] ; then
 		
 			# Numerical pressure calcs currently only supported on 1 proc
-			$MPICOMMAND ../house_md < run_md.in > run_md.out
+			../house_md < run_md.in > run_md.out
 			
 		else
 			srun -n $NP ../house_md < run_md.in > run_md.out
@@ -149,7 +146,7 @@ echo " "
 echo " ...Beginning by running the lsq test suite... "
 
 cd ../src
-rm -rf *o *dSYM
+rm -rf *o *dSYM house_lsq
 cp Makefile Makefile-back
 cp Makefile-TS-MD-Verif Makefile
 cd ../test_suite-md

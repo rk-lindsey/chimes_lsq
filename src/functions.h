@@ -116,6 +116,7 @@ struct JOB_CONTROL
 	double DELTA_T_FS;			// Replaces deltat_fs... in femtoseconds
 	int	   N_MD_STEPS;			// Replaces nsteps...
 	int    N_LAYERS;			// Replaces nlayers... Number of periodic images to use. Usually, no need to go past 1 ...(depends only on spline interaction cutoff).
+	int    REAL_REPLICATES;		// Number of real replicate layers to create. Only goes in the positive direction, so 1 replicate corresponds to 8*attoms
 	double SCALE_SYSTEM_BY;		// Amount to scale boxlengths/coordinates by
     string PARAM_FILE;			// Replaces params_file...
     vector<string> COORD_FILE;	// Replaces xyz_file... Can be a list of files, which will be assembled together along the z-axis to form a single cell
@@ -206,7 +207,7 @@ struct FRAME
 	int MY_ATOMS;					// Used for lammps linking. Specify how many atoms in SYS the process owns
 	int MY_ATOMS_START;				// Used for lammps linking. Specify what index along SYS starts the process' atoms
 	XYZ BOXDIM;						// Dimenions of the primitive box.
-	XYZ WRAPDIM;              		// Dimensions to use in wrapping coordinates for forces.  
+	XYZ WRAPDIM;					// Dimenions of the ghost atom box. Equivalent to BOXDIM if no layers are used
 	XYZ STRESS_TENSORS;
 	
 	double QM_POT_ENER;				// This is the potential energy of the QM calculation!
@@ -221,6 +222,7 @@ struct FRAME
 	
 	vector<int>		PARENT;
 	vector<XYZ_INT> LAYER_IDX;
+	vector<XYZ_INT> WRAP_IDX;  // Index of box wrapping for this atom.
 	vector<string> 	ATOMTYPE;
 	vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPS file printing
 	vector<XYZ>		COORDS;
@@ -551,6 +553,10 @@ class NEIGHBORS
 		double DISPLACEMENT;
 		double SAFETY;                 		// Safety factor in calculating neighbors.
 		
+		void FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);		// Updates ghost atoms based on pbc-wrapped real atoms
+		void DO_UPDATE_SMALL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+		void DO_UPDATE_BIG   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+		
 	public:
 
 		bool   USE;							// Do we even want to use a neighbor list?
@@ -569,8 +575,10 @@ class NEIGHBORS
 		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Will check if lists need updating, and will call DO_UPDATE do so if need be
 		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE);
 		void INITIALIZE(FRAME & SYSTEM);
+		void INITIALIZE_MD(FRAME & SYSTEM);
 		void INITIALIZE(FRAME & SYSTEM, double & PAD);
 		void DO_UPDATE (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+
 		NEIGHBORS();
 		~NEIGHBORS();
 };
@@ -707,7 +715,6 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// Overloaded.. compute differentely if for main or new velocities
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// Overloaded.. compute differentely if for main or new velocities
 
-void sync_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
 void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
 
 void enable_fp_exceptions();

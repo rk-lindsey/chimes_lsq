@@ -6,6 +6,9 @@
 import sys
 import math
 
+def str2bool(v):
+    return v.lower() in ("true")
+
 print "WARNING: Converting forces from Hartree/bohr to simulation units (kca/mol/Ang)"
 
 
@@ -18,8 +21,12 @@ FRAMES = int(sys.argv[1])
 XYZFILE = open(sys.argv[2],"r")
 
 CHUNK_LEN = 1
-if len(sys.argv) == 4:
-	CHUNK_LEN = int(sys.argv[3])
+if len(sys.argv) >= 4:
+    CHUNK_LEN = int(sys.argv[3])
+    
+FIRST_ONLY = False
+if len(sys.argv) >= 5:
+    FIRST_ONLY = str2bool(sys.argv[4])
 
 #########
 
@@ -28,84 +35,101 @@ ZEROES = len(str(FRAMES))+1
 
 for f in xrange(FRAMES):
 
-	if f%CHUNK_LEN == 0:
-	
-		if f > 1:
-			OFSTREAM.close()
-			FRSTREAM.close()
+    if f%CHUNK_LEN == 0:
+    
+        if f > 1:
+            OFSTREAM.close()
+            FRSTREAM.close()
 
-		# Generate the output filename
+        # Generate the output filename
 
-		TAG = ""
-		for i in xrange(ZEROES):
-			if f == 0:
-				if f+1 < pow(10.0,i):
-					for j in xrange(ZEROES-i):
-						TAG += "0"
-					TAG += `f`
-					break
-				
-			elif f < pow(10.0,i):
-				for j in xrange(ZEROES-i):
-					TAG += "0"
-				TAG += `f`
-				break
+        TAG = ""
+        for i in xrange(ZEROES):
+            if f == 0:
+                if f+1 < pow(10.0,i):
+                    for j in xrange(ZEROES-i):
+                        TAG += "0"
+                    TAG += `f`
+                    break
+                
+            elif f < pow(10.0,i):
+                for j in xrange(ZEROES-i):
+                    TAG += "0"
+                TAG += `f`
+                break
 
-		OUTFILE  = sys.argv[2]
-		FORCES   = sys.argv[2]
-		TESTER   = OUTFILE [0:-4]
-		TESTER   = TESTER  [-1]
+        OUTFILE  = sys.argv[2]
+        FORCES   = sys.argv[2]
+        TESTER   = OUTFILE [0:-4]
+        TESTER   = TESTER  [-1]
 
-		if TESTER == ".":
-			FORCES   = OUTFILE[0:-5] + "_FORCES_#" + TAG + ".xyzf" 
-			OUTFILE  = OUTFILE[0:-5] + "_#"        + TAG + ".xyzf" 
-			
-		else:
-			FORCES   = OUTFILE[0:-4] + "_FORCES_#" + TAG + ".xyz" 
-			OUTFILE  = OUTFILE[0:-4] + "_#"        + TAG + ".xyz" 
-			
+        if TESTER == ".":
+            FORCES   = OUTFILE[0:-5] + "_FORCES_#" + TAG + ".xyzf" 
+            OUTFILE  = OUTFILE[0:-5] + "_#"        + TAG + ".xyzf" 
+            
+        else:
+            FORCES   = OUTFILE[0:-4] + "_FORCES_#" + TAG + ".xyz" 
+            OUTFILE  = OUTFILE[0:-4] + "_#"        + TAG + ".xyz" 
+            
 
-		OFSTREAM = open(OUTFILE,"w")
-		FRSTREAM = open(FORCES,"w")
-	
-	
+        OFSTREAM = open(OUTFILE,"w")
+        FRSTREAM = open(FORCES,"w")
+        
+    if FIRST_ONLY and f%CHUNK_LEN > 0: # We still need to filter through ignored frames
+    
+        # Read the first line to get the number of atoms in the frame,
+        # print back out to the xyzf file
+    
+        ATOMS = XYZFILE.readline()
+        ATOMS = ATOMS.split()
+        ATOMS = int(ATOMS[0])
+    
+        # Read/print the comment line
 
-	# Read the first line to get the number of atoms in the frame,
-	# print back out to the xyzf file
-	
-	ATOMS = XYZFILE.readline()
-	
-	OFSTREAM.write(ATOMS)
-	
-	ATOMS = ATOMS.split()
-	ATOMS = int(ATOMS[0])
-	
-	# Read/print the comment line
+        XYZFILE.readline()
 
-	OFSTREAM.write( XYZFILE.readline())
+        # Now, read/print each atom line
+    
+        for j in xrange(ATOMS):
+            XYZFILE.readline()
+            
+    else:
+    
+        # Read the first line to get the number of atoms in the frame,
+        # print back out to the xyzf file
+    
+        ATOMS = XYZFILE.readline()
+        
+        OFSTREAM.write(ATOMS)
+    
+        ATOMS = ATOMS.split()
+        
+        ATOMS = int(ATOMS[0])
+    
+        # Read/print the comment line
 
-	# Now, read/print each atom line
-	
-	for j in xrange(ATOMS):
-	
-		LINE = XYZFILE.readline()
+        OFSTREAM.write( XYZFILE.readline())
 
-		OFSTREAM.write(LINE)
-		
-		LINE = LINE.split()
+        # Now, read/print each atom line
+    
+        for j in xrange(ATOMS):
+    
+            LINE = XYZFILE.readline()
 
-		if len(LINE)>4:
-			FRSTREAM.write(`float(LINE[4])*(627.50960803*1.889725989)` + '\n')
-			FRSTREAM.write(`float(LINE[5])*(627.50960803*1.889725989)` + '\n')
-			FRSTREAM.write(`float(LINE[6])*(627.50960803*1.889725989)` + '\n')
-			
-#			FRSTREAM.write(LINE[4]  + '\n')
-#			FRSTREAM.write(LINE[5]  + '\n')
-#			FRSTREAM.write(LINE[6]  + '\n')
+            OFSTREAM.write(LINE)
+        
+            LINE = LINE.split()
 
-	
-		
+            if len(LINE)>4:
+                FRSTREAM.write(`float(LINE[4])*(627.50960803*1.889725989)` + '\n')
+                FRSTREAM.write(`float(LINE[5])*(627.50960803*1.889725989)` + '\n')
+                FRSTREAM.write(`float(LINE[6])*(627.50960803*1.889725989)` + '\n')    
 
-	
+
+
+    
+        
+
+    
 
 
