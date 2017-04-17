@@ -27,10 +27,10 @@
 1		O		 0.0		15.9994
 2		H		 0.0		1.0079
 
-# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #	# TO_ATOM #	# P_OVERB #	# R_0_VAL #	# P_1_VAL #	# P_2_VAL #	# LAMBDA6 #	# NIJBINS #	# NIKBINS #	# NJKBINS #	   	   
-1		O		O		0.6		6.0		0.1		1.25			true		O		50.0		1.0165		-0.0657		5.0451		-3.6141 	0		0		0
-2		O		H		0.6		6.0		0.1		1.25			true		O		50.0		1.0165		-0.0657		5.0451		-3.6141 	0		0		0
-3		H		H		0.6		6.0		0.1		1.25			false														0		0		0
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #	# TO_ATOM #	# P_OVERB #	# R_0_VAL #	# P_1_VAL #	# P_2_VAL #	# LAMBDA6 #
+1		O		O		0.6		6.0		0.1		1.25			true		O		50.0		1.0165		-0.0657		5.0451		-3.6141
+2		O		H		0.6		6.0		0.1		1.25			true		O		50.0		1.0165		-0.0657		5.0451		-3.6141
+3		H		H		0.6		6.0		0.1		1.25			false
 
 # ENDFILE #
 

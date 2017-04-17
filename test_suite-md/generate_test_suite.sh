@@ -1,6 +1,6 @@
 
 
-NP=16
+NP=8
 
 ########################################
 # Define tests within the test suite
@@ -36,10 +36,9 @@ echo " "
 
 
 cd ../src
-rm -rf *o *dSYM house_md
+rm -rf *o *dSYM
 cp Makefile Makefile-back
 cp Makefile-TS-MD Makefile
-module load intel impi
 make house_md;  rm -f ../test_suite-lsq/house_md;  mv house_md  ../test_suite-md/
 mv Makefile-back Makefile
 cd ../test_suite-md
@@ -52,15 +51,16 @@ do
 	
 	cd $i
 	
-	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		../house_md < run_md.in > run_md.out
+	if [ $NP -eq 0 ] ; then
+		$MPICOMMAND ../house_md < run_md.in > run_md.out
 			
 	else
-
+		#$MPICOMMAND -np $NP ../house_md < run_md.in > run_md.out
+		
 		if [[ "$i" == "generic-lj" || "$i" == "h2o-2bcheby-numpress" ]] ; then
 		
 			# Numerical pressure calcs currently only supported on 1 proc
-			../house_md < run_md.in > run_md.out
+			$MPICOMMAND ../house_md < run_md.in > run_md.out
 			
 		else
 			srun -n $NP ../house_md < run_md.in > run_md.out
@@ -81,7 +81,7 @@ echo " "
 echo " ...Beginning by running the lsq test suite... "
 
 cd ../src
-rm -rf *o *dSYM house_lsq house_md
+rm -rf *o *dSYM
 cp Makefile Makefile-back
 cp Makefile-TS-MD-Verif Makefile
 cd ../test_suite-md

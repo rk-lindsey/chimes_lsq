@@ -38,8 +38,8 @@ RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_gr
 ###############################################################
 
 cd ../src
-rm -f *o house_lsq
-make house_lsq; mv house_lsq ../test_suite-lsq/
+make clean_lsq; make realclean_lsq
+make house_lsq; rm -f ../test_suite-lsq/house_lsq; cp house_lsq ../test_suite-lsq/; make clean_lsq; make realclean_lsq;
 cd ../test_suite-lsq
 
 ###############################################################

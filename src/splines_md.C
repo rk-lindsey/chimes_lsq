@@ -823,11 +823,14 @@ int main(int argc, char* argv[])
 
 	if(RANK==0)
 		cout << "   ...read complete" << endl << endl;
+
+
+	/* OLD layer handling: explicit
 	
 	////////////////////////////////////////////////////////////
-	// Explicitly account for replicate images.. 
+	// Explicitly account for layers.. 
 	//
-	// In contrast to the old approach,  only add images in (+) direction
+	// In contrast to the old approach, we only add images in (+) direction
 	// So 0 layers returns the original cell (i.e. NATOMS atoms)
 	//    1 layer  returns a 8*NATOMS atoms
 	//    2 layers returns  27*NATOMS atoms, and so on.
@@ -835,11 +838,11 @@ int main(int argc, char* argv[])
 	// These atoms are explicitly added to the system, so its generally
 	// a good idea to use neighbor lists to cut down on cost
 	////////////////////////////////////////////////////////////	
-	
-	if(CONTROLS.REAL_REPLICATES>0 )
+
+	if(CONTROLS.N_LAYERS>0 )
 	{	
 		if(RANK == 0)
-			cout << "Building " << CONTROLS.REAL_REPLICATES << " replicates..." << endl;
+			cout << "Building " << CONTROLS.N_LAYERS << " layer(s)..." << endl;
 	
 		TEMP_IDX = SYSTEM.ATOMS;
 		
@@ -850,31 +853,40 @@ int main(int argc, char* argv[])
 
 		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
 		{			
-			for(int n1=0; n1<=CONTROLS.REAL_REPLICATES; n1++)
+			for(int n1=0; n1<=CONTROLS.N_LAYERS; n1++)
 			{
-				for(int n2=0; n2<=CONTROLS.REAL_REPLICATES; n2++)
+				for(int n2=0; n2<=CONTROLS.N_LAYERS; n2++)
 				{
-					for(int n3=0; n3<=CONTROLS.REAL_REPLICATES; n3++)
+					for(int n3=0; n3<=CONTROLS.N_LAYERS; n3++)
 					{	
 						if ((n1 == 0) && (n2 == 0) && (n3 == 0) )
-							SYSTEM.PARENT[a1] = a1;
+						{
+							SYSTEM.PARENT[a1] = -1;
+							SYSTEM.LAYER_IDX[a1].X = n1;
+							SYSTEM.LAYER_IDX[a1].Y = n2;
+							SYSTEM.LAYER_IDX[a1].Z = n3;
+						}
 						else
 						{											
 							TEMP_XYZ.X = SYSTEM.COORDS.at(a1).X + n1 * SYSTEM.BOXDIM.X;
 							TEMP_XYZ.Y = SYSTEM.COORDS.at(a1).Y + n2 * SYSTEM.BOXDIM.Y;
 							TEMP_XYZ.Z = SYSTEM.COORDS.at(a1).Z + n3 * SYSTEM.BOXDIM.Z;
+							
+							TEMP_LAYER.X = n1;
+							TEMP_LAYER.Y = n2;
+							TEMP_LAYER.Z = n3;
 
 							SYSTEM.COORDS       .push_back(TEMP_XYZ);
+							SYSTEM.LAYER_IDX    .push_back(TEMP_LAYER);
 							SYSTEM.ATOMTYPE     .push_back(SYSTEM.ATOMTYPE     .at(a1));
 							SYSTEM.ATOMTYPE_IDX .push_back(SYSTEM.ATOMTYPE_IDX .at(a1));
 							SYSTEM.CHARGES      .push_back(SYSTEM.CHARGES      .at(a1));
 							SYSTEM.MASS         .push_back(SYSTEM.MASS         .at(a1));	
 							SYSTEM.VELOCITY     .push_back(SYSTEM.VELOCITY     .at(a1));
 							SYSTEM.VELOCITY_ITER.push_back(SYSTEM.VELOCITY_ITER.at(a1));
-
-							TEMP_IDX++;
+							SYSTEM.PARENT       .push_back(a1);
 							
-							SYSTEM.PARENT.push_back(TEMP_IDX);
+							TEMP_IDX++;
 						}
 					}
 				}
@@ -883,16 +895,16 @@ int main(int argc, char* argv[])
 		
 		SYSTEM.ATOMS = TEMP_IDX;
 
-		SYSTEM.BOXDIM.X *= (CONTROLS.REAL_REPLICATES + 1);
-		SYSTEM.BOXDIM.Y *= (CONTROLS.REAL_REPLICATES + 1);
-		SYSTEM.BOXDIM.Z *= (CONTROLS.REAL_REPLICATES + 1);
+		SYSTEM.BOXDIM.X *= (CONTROLS.N_LAYERS + 1);
+		SYSTEM.BOXDIM.Y *= (CONTROLS.N_LAYERS + 1);
+		SYSTEM.BOXDIM.Z *= (CONTROLS.N_LAYERS + 1);
 
 		SYSTEM.FORCES      .resize(SYSTEM.ATOMS);
 		SYSTEM.ACCEL       .resize(SYSTEM.ATOMS);
 		SYSTEM.VELOCITY_NEW.resize(SYSTEM.ATOMS);
 		
 		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
-		{			
+		{
 			SYSTEM.ACCEL[a1].X = 0;
 			SYSTEM.ACCEL[a1].Y = 0;
 			SYSTEM.ACCEL[a1].Z = 0;
@@ -917,33 +929,28 @@ int main(int argc, char* argv[])
 		}	
 	}
 	
+	*/
 	
-	// New layer handling: ghost atoms.. but this should be called whether or not ghost atoms are requested
-	// (Required for neighbor lists, which are now ALWAYS used)
+	// New layer handling: ghost atoms
+	
+	build_layers(SYSTEM, CONTROLS) ;
 
 
 	SYSTEM.WRAPDIM.X = SYSTEM.BOXDIM.X * (2*CONTROLS.N_LAYERS + 1);
 	SYSTEM.WRAPDIM.Y = SYSTEM.BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1);
 	SYSTEM.WRAPDIM.Z = SYSTEM.BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1);
 
-	build_layers(SYSTEM, CONTROLS);
-	
-	if ( (CONTROLS.N_LAYERS > 0) && (RANK == 0) )	// Then ghost atoms are used 
+	if(RANK == 0)
 	{
-			cout << "	Real atoms:                   " << SYSTEM.ATOMS << endl;
-			cout << "	Total atoms (ghost):          " << SYSTEM.ALL_ATOMS << endl;
-			cout << "	Real box dimesntions:         " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
-			
-			cout << "	Total box dimensions (ghost): " << SYSTEM.WRAPDIM.X << " " << SYSTEM.WRAPDIM.Y << " " << SYSTEM.WRAPDIM.Z << endl << endl;
-			
-			if(CONTROLS.WRAP_COORDS)
-			{
-				cout << "WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off" << endl;
-				CONTROLS.WRAP_COORDS = false;
-			}
+		cout << "	New total atoms:    " << SYSTEM.ALL_ATOMS << endl;
+		cout << "	Extended box dimensions: " << SYSTEM.WRAPDIM.X << " " << SYSTEM.WRAPDIM.Y << " " << SYSTEM.WRAPDIM.Z << endl << endl;
+	}	
+		
+	if ( CONTROLS.N_LAYERS < 1 ) // No ghost atoms.
+	{
+		cout << "ERROR: N_LAYERS must be >= 1" ;
+		exit_run(1) ;
 	}
-	else if(RANK==0) // No ghost atoms.
-		cout << "WARNING: Ghost atoms/implicit layers are NOT being used." << endl;
 	
 	////////////////////////////////////////////////////////////
 	// Initialize velocities, if requested. Use the box Muller
@@ -1763,9 +1770,9 @@ int main(int argc, char* argv[])
 				PARAMFILE >> FF_2BODY[i].S_DELTA;
 				
 				if((FF_PLOTS.N_PLOTS == 0) &&
-				   (  FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.X
-				   || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.Y
-				   || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.Z ) )
+				   (  FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.X
+				   || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.Y
+				   || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.Z ) )
 				{
 					#if WARN == TRUE
 						if(RANK==0)
@@ -2376,13 +2383,26 @@ int main(int argc, char* argv[])
 	// Set up the neighbor list
 	////////////////////////////////////////////////////////////
 
-	if(NEIGHBOR_LIST.USE && !CONTROLS.PLOT_PES)
+	if(NEIGHBOR_LIST.USE)
 	{
 		if(RANK == 0)
 			cout << "Initializing the neighbor list..." << endl;
 		
-		NEIGHBOR_LIST.INITIALIZE_MD(SYSTEM);
+		NEIGHBOR_LIST.INITIALIZE(SYSTEM);
 		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+		
+		NEIGHBOR_LIST.MAX_VEL = -1.0;
+		
+		for(int i=0; i<SYSTEM.ATOMS; i++)
+		{
+			NEIGHBOR_LIST.CURR_VEL 
+			      = sqrt(SYSTEM.VELOCITY[i].X*SYSTEM.VELOCITY[i].X 
+			           + SYSTEM.VELOCITY[i].Y*SYSTEM.VELOCITY[i].Y 
+	      	           + SYSTEM.VELOCITY[i].Z*SYSTEM.VELOCITY[i].Z);
+			
+			if(NEIGHBOR_LIST.CURR_VEL > NEIGHBOR_LIST.MAX_VEL)
+				NEIGHBOR_LIST.MAX_VEL = NEIGHBOR_LIST.CURR_VEL;
+		}
 	}
 	
 
@@ -2391,10 +2411,19 @@ int main(int argc, char* argv[])
 	// exit the program
 	////////////////////////////////////////////////////////////  	
 	
+	// For now, just do this in serial
+	
 	if(RANK==0)
 	{
 		if (FF_PLOTS.N_PLOTS > 0)
 		{
+			if(FF_PLOTS.INCLUDE_2B)
+			{
+				if (isatty(fileno(stdout)))
+					cout << COUT_STYLE.BOLD << COUT_STYLE.MAGENTA << "WARNING: 2B+3B only used for 2D 3B scans, not 4D 3B scans." << COUT_STYLE.ENDSTYLE << endl;
+				else
+					cout << "WARNING: 2B+3B only used for 2D 3B scans, not 4D 3B scans." << endl;
+			}
 			
 			int ij, ik, jk;
 			string ATM_TYP_1, ATM_TYP_2, ATM_TYP_3;
@@ -2468,9 +2497,24 @@ int main(int argc, char* argv[])
 					{
 						cout << "ERROR: Functionality depreciated. Code needs updating " << endl; 
 						exit_run(0);
+						//Print_3B_Cheby(CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk);
 					}
-
-					Print_Ternary_Cheby_Scan(CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk, FF_PLOTS, i);	
+					
+					cout << "	Now printing for n scans: " << FF_PLOTS.N_SCAN << endl;
+				
+					for(int j=0; j<FF_PLOTS.N_SCAN; j++)
+					{
+						IJ_DIST_3B.clear();
+						IK_DIST_3B.clear();
+						JK_DIST_3B.clear();
+						PES_VAL_3B.clear();	
+					
+						if(FF_PLOTS.PARENT_TYPE[j] == FF_PLOTS.TYPE_INDEX[i] )
+						{	
+							
+							Print_Ternary_Cheby_Scan(CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk, FF_PLOTS, j);	
+						}	
+					}	
 				
 					scan_2b_idx++;				
 				}
@@ -2495,7 +2539,7 @@ int main(int argc, char* argv[])
 		
 			exit_run(0);
 		}
-	}	
+	}
 
 	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
@@ -2585,7 +2629,6 @@ int main(int argc, char* argv[])
 
 	#endif
 
-
   	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
 	//
@@ -2605,42 +2648,101 @@ int main(int argc, char* argv[])
     {
 	  	////////////////////////////////////////////////////////////
 		// Do first half of coordinate/velocity updating
-		////////////////////////////////////////////////////////////		
-
-		if(CONTROLS.STEP>0 && RANK==0)	
-		{
-			ENSEMBLE_CONTROL.UPDATE_COORDS(SYSTEM, CONTROLS);			// Update coordinates and ghost atoms
-			
-			if(CONTROLS.WRAP_COORDS)									// Wrap the coordinates:
-			{
-				for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-				{
-					SYSTEM.COORDS[a1].X -= floor(SYSTEM.COORDS[a1].X / SYSTEM.BOXDIM.X) * SYSTEM.BOXDIM.X;
-					SYSTEM.COORDS[a1].Y -= floor(SYSTEM.COORDS[a1].Y / SYSTEM.BOXDIM.Y) * SYSTEM.BOXDIM.Y;
-					SYSTEM.COORDS[a1].Z -= floor(SYSTEM.COORDS[a1].Z / SYSTEM.BOXDIM.Z) * SYSTEM.BOXDIM.Z;
-				}	
-			} 
-
-			ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_1(SYSTEM, CONTROLS);	// Update first half of velocity and max velocity for neighbor lists:		
-		}
+		////////////////////////////////////////////////////////////
 		
-		#ifdef USE_MPI
-			sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-			sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-			MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
-		#endif
+		if ( (CONTROLS.STEP+1) % CONTROLS.FREQ_BACKUP == 0 ) 
+			write_xyzv(SYSTEM, CONTROLS, "backup.xyzv");
+		
+		if(CONTROLS.STEP>0)	
+		{
+			if (RANK==0)
+			{
+				ENSEMBLE_CONTROL.UPDATE_COORDS(SYSTEM, CONTROLS);	// Update coordinates
 
-		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);//	-- only commented for current 3b testing
-	
+				// Don't wrap coordinates during MD.  This invalidates the neighbor list.
+
+				if(CONTROLS.ENSEMBLE=="NPT-BEREND" || CONTROLS.ENSEMBLE=="NPT-BEREND-ANISO" || CONTROLS.ENSEMBLE=="NPT-MTK" )	// Update the neighborlist, since box dimensions have changed
+					if(NEIGHBOR_LIST.USE)
+						NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS, true);
+				
+				
+				if(CONTROLS.ENSEMBLE=="NPT-BEREND" || CONTROLS.ENSEMBLE=="NPT-BEREND-ANISO" || CONTROLS.ENSEMBLE=="NPT-MTK" )	// Check if any outer cutoff has dropped below half the boxlength
+				{
+					for(int i=0; i<NO_PAIRS; i++)
+					{
+						 if(  FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.X || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.Y || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.BOXDIM.Z )
+						 {
+							#if WARN == TRUE
+							 	if(RANK==0)
+								{
+									if (isatty(fileno(stdout)))
+									{
+										cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
+										cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
+										cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD <<  SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
+									}
+									else
+									{
+										cout << "WARNING: Outer cutoff greater than half at least one box length" << endl;
+										cout << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP  << endl;
+										cout << " " <<  SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+									}								
+								}
+
+							#else
+								if (isatty(fileno(stdout)))
+								{
+									cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
+									cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
+									exit_run(0);
+								}
+								else
+								{
+									cout << "ERROR: Outer cutoff greater than half at least one box length" << endl;
+									cout << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << endl;
+									exit_run(0);							
+								}
+							#endif
+						 }
+					} 
+				}
+			
+				// Update first half of velocity and max velocity for neighbor lists:
+				
+				ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_1(SYSTEM, CONTROLS);		
+			}
+		}
 
 		cout.precision(14);			// Set output precision
     
-      	////////////////////////////////////////////////////////////
+      		////////////////////////////////////////////////////////////
 		// Calculate acceleration
 		////////////////////////////////////////////////////////////
 
+
+		#ifdef USE_MPI
+			sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
+		#endif
+
+		// Move ghost atoms if present.
+		sync_layers(SYSTEM, CONTROLS) ;
+
 		// Do the actual force calculation
 		ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
+
+		// Check if neighbor list update needed/do updating
+		 
+		if(CONTROLS.STEP>0)	
+		{
+			if(NEIGHBOR_LIST.USE)
+			{
+				#ifdef USE_MPI
+					MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+				#endif
+				
+				NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+			}
+		}
 
 		// FOR MPI:		Synchronize forces, energy, and pressure.
 		
@@ -2772,7 +2874,7 @@ int main(int argc, char* argv[])
 		}
 		
 		////////////////////////////////////////////////////////////
-		// Do some thermostatting and statistics updating/output (2nd 1/2 v updates)
+		// Do some thermostatting and statistics updating/output
 		////////////////////////////////////////////////////////////
 		
 		if (RANK == 0)
@@ -2792,15 +2894,32 @@ int main(int argc, char* argv[])
 			// Do second half of coordinate/velocity updating
 			////////////////////////////////////////////////////////////
 
-			if(CONTROLS.STEP>0  && RANK==0)	
+			if(CONTROLS.STEP>0)
 				ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_2(SYSTEM, CONTROLS, NEIGHBOR_LIST);	//update second half of velocity
-			
 
-		}	
-		
-	  	////////////////////////////////////////////////////////////
-		// Update temperature and pressure
-		////////////////////////////////////////////////////////////
+		}
+
+		// FOR MPI:		Broadcast the position and optionally velocity from the root to all other processes. -- WHY ISN'T THIS IS A PRECOMPILER DIRECTIVE?
+		sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
+
+        ////////////////////////////////////////////////////////////
+        // Check if neighbor list update needed to account for new velocities /do updating
+        ////////////////////////////////////////////////////////////
+
+        if(CONTROLS.STEP>0)
+        {
+                if(NEIGHBOR_LIST.USE)// && (RANK==0))
+                {
+                        #ifdef USE_MPI
+                                MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+                        #endif
+
+                                //NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS, false);
+                                NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+                }
+        }
+
+
 
 		if (RANK == 0)
 		{
@@ -2834,7 +2953,7 @@ int main(int argc, char* argv[])
 					cout << "Step : " << CONTROLS.STEP << endl;
 					exit_run(-10);
 			}			
-					
+		
 		  	////////////////////////////////////////////////////////////
 			// If requested, compute pressure numerically, and accumulate
 			// statistics
@@ -2844,8 +2963,8 @@ int main(int argc, char* argv[])
 			{
 				if((CONTROLS.STEP == 0) && (NPROCS>1))
 				{
-					cout << "WARNING: Numerical pressure only supported for serial runs." << endl;
-					exit_run(0);
+					cout << "WARNING: Numerical pressure computed using only one processor...";
+					cout << "This has potential to be a bottleneck!" << endl;
 				}
 				
 				SYSTEM.PRESSURE_XYZ = numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
@@ -2896,15 +3015,12 @@ int main(int argc, char* argv[])
 				SYSTEM.AVG_TEMPERATURE += SYSTEM.TEMPERATURE;
 		}
 		
-		if((ENSEMBLE_CONTROL.STYLE=="NVT-SCALE") && ((CONTROLS.STEP+1) % int(CONTROLS.FREQ_UPDATE_THERMOSTAT) == 0) )
-		{
-			#ifdef USE_MPI
-				sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-				sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-				MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
-			#endif
-		}		
-	
+		// MPI -- Broadcast the position and optionally velocity from the root to all other processes.
+		sync_position(SYSTEM.COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true);
+
+		// Move ghost atoms if present.
+		sync_layers(SYSTEM, CONTROLS) ;
+		
 	  	////////////////////////////////////////////////////////////
 		// If requested, write the dftbgen output file
 		////////////////////////////////////////////////////////////
@@ -3145,14 +3261,10 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	FF_PLOTS.INCLUDE_FCUT     = true;
 	FF_PLOTS.INCLUDE_CHARGES  = true;
 	FF_PLOTS.INCLUDE_PENALTY  = true;
-	FF_PLOTS.DO_4D            = false;
 	
-	CONTROLS.FREQ_BACKUP     		= 100;
+	CONTROLS.FREQ_BACKUP      = 100;
 	CONTROLS.FREQ_UPDATE_THERMOSTAT = -1.0;
-	CONTROLS.USE_HOOVER_THRMOSTAT	= false;
-	CONTROLS.REAL_REPLICATES        = 0;
-	NEIGHBOR_LIST.USE 		  		= true;
-	
+	NEIGHBOR_LIST.USE 		  = true;
 	
 	
 	
@@ -3186,7 +3298,6 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			
 			if (RANK==0)
 				cout << "   ...read complete." << endl << endl;
-			
 			break;
 		}
 		
@@ -3339,6 +3450,171 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 					FF_PLOTS.TYPE_INDEX.push_back(atoi(LINE.c_str()));
 					
 					FF_PLOTS.PES_TYPES.push_back(TEMP_STR);
+					
+					// Are we doing any 3b scans?
+					
+					LINE_PARSER >> LINE;
+
+					TMP_NSCAN = 0;
+
+					if (LINE=="scan"  || LINE=="SCAN"  || LINE=="Scan")
+					{
+						LINE_PARSER >> LINE;
+ 						
+						FF_PLOTS.N_SCAN += int(atof(LINE.c_str()));
+						TMP_NSCAN = int(atof(LINE.c_str()));
+						if (RANK==0)
+							cout << "	Found " << TMP_NSCAN << " scans to run for FF type index " << i << endl;
+						
+					}
+					
+					LINE_PARSER >> TEMP_STR_2;
+
+					if(TEMP_STR_2 == "INCLUDE")
+					{
+						LINE_PARSER >> TEMP_STR_2;
+						
+						if(TEMP_STR_2 == "2B")
+						{
+							FF_PLOTS.INCLUDE_2B = true;
+
+							LINE_PARSER >> TEMP_STR_2;
+							TEMP_STR_2.append(" ");
+							LINE_PARSER >> LINE;
+							TEMP_STR_2.append(LINE);	// Should be "PAIRTYPE_PARAMS"
+							
+							if(TEMP_STR_2 != "PAIRTYPE PARAMS")
+							{
+								cout << "ERROR: 2B Addition specifications incorrect. Format is:" << endl;
+								cout << "PAIRTYPE PARAMS IJ <2b_type_index> IK <2b_type_index> JK <2b_type_index>" << endl;
+								exit_run(0);
+							}
+							
+							FF_PLOTS.SEARCH_STRING_2B.push_back(TEMP_STR_2);
+
+							XYZ_INT TMP_FF_TYPES;
+							
+							LINE_PARSER >> TEMP_STR_2  >> TEMP_STR_2;
+							TMP_FF_TYPES.X = int(atof(TEMP_STR_2.data()));
+							LINE_PARSER >> TEMP_STR_2  >> TEMP_STR_2;
+							TMP_FF_TYPES.Y = int(atof(TEMP_STR_2.data()));
+							LINE_PARSER >> TEMP_STR_2  >> TEMP_STR_2;
+							TMP_FF_TYPES.Z = int(atof(TEMP_STR_2.data()));
+							
+							FF_PLOTS.IJ_IK_JK_TYPE.push_back(TMP_FF_TYPES);	
+							
+							if (RANK==0)
+								cout << "		...Adding contributions from ij, ik, and jk pair type indicies: " << TMP_FF_TYPES.X << " " << TMP_FF_TYPES.Y << " " << TMP_FF_TYPES.Z << endl;
+						}
+						else
+						{
+							cout << "ERROR: Expected \"2B\" " << endl;
+							exit_run(0);
+						}
+						
+						LINE_PARSER.str("");
+						LINE_PARSER.clear();
+					}	
+
+					LINE_PARSER.str("");
+					LINE_PARSER.clear();
+					
+					for(int j=0; j<TMP_NSCAN; j++)
+					{
+						cin >> LINE >> LINE; 
+
+						if(LINE == "ij" || LINE == "IJ")
+								TEMP_INT = 1;
+						else if(LINE == "ik" || LINE == "IK")
+							TEMP_INT = 2;
+						else if(LINE == "jk" || LINE == "JK")
+							TEMP_INT = 3;	
+						else
+						{
+							cout << "ERROR: Unrecognized pair type for fixing: " << LINE << endl;
+							cout << "       Allowed types are IJ, IK, an JK" << endl;
+							cout << "       (PES FF type index " << i << ", scan index " << j << endl;
+							exit_run(0);
+						}						
+						
+						cin >> TEMP_DOUB;
+						
+						FF_PLOTS.FIX_PAIR_1.push_back(TEMP_INT);
+						FF_PLOTS.FIX_VAL_1 .push_back(TEMP_DOUB);
+						
+						cin >> LINE; 
+
+						if(LINE == "ij" || LINE == "IJ")
+								TEMP_INT = 1;
+						else if(LINE == "ik" || LINE == "IK")
+							TEMP_INT = 2;
+						else if(LINE == "jk" || LINE == "JK")
+							TEMP_INT = 3;						
+						else
+						{
+							cout << "ERROR: Unrecognized pair type for fixing: " << LINE << endl;
+							cout << "       Allowed types are IJ, IK, an JK" << endl;
+							cout << "       (PES FF type index " << i << ", scan index " << j << endl;
+							exit_run(0);
+						}							
+						cin >> TEMP_DOUB;
+						
+						FF_PLOTS.FIX_PAIR_2.push_back(TEMP_INT);
+						FF_PLOTS.FIX_VAL_2 .push_back(TEMP_DOUB);						
+						
+						cin >> LINE >> LINE;
+						
+						if(LINE == "ij" || LINE == "IJ")
+								TEMP_INT = 1;
+						else if(LINE == "ik" || LINE == "IK")
+							TEMP_INT = 2;
+						else if(LINE == "jk" || LINE == "JK")
+							TEMP_INT = 3;	
+						else
+						{
+							cout << "ERROR: Unrecognized pair type for scanning: " << LINE << endl;
+							cout << "       Allowed types are IJ, IK, an JK" << endl;
+							cout << "       (PES FF type index " << i << ", scan index " << j << endl;
+							exit_run(0);
+						}	
+						
+						ITEM_NO = FF_PLOTS.FIX_PAIR_1.size() - 1;
+											
+						if(FF_PLOTS.FIX_PAIR_1[ITEM_NO] == FF_PLOTS.FIX_PAIR_2[ITEM_NO])	
+						{
+								cout << "ERROR: Fixed pair types must be unique." << endl;
+								cout << "       (PES FF type index " << i << ", scan index " << ITEM_NO << endl;
+								cout << "       (PES FF type index " << i << ", scan index " << ITEM_NO << endl;
+								cout << "      " << FF_PLOTS.FIX_PAIR_1[ITEM_NO] << endl;
+								cout << "      " << FF_PLOTS.FIX_PAIR_2[ITEM_NO] << endl;
+								cout << "      " << TEMP_INT << endl;								
+								exit_run(0);
+						}					
+						if((FF_PLOTS.FIX_PAIR_1[ITEM_NO] == TEMP_INT)	|| (FF_PLOTS.FIX_PAIR_2[ITEM_NO] == TEMP_INT))
+						{
+							cout << "ERROR: Fixed and scanned pair types cannot be the same." << endl;
+							cout << "       (PES FF type index " << i << ", scan index " << ITEM_NO << endl;
+							cout << "      " << FF_PLOTS.FIX_PAIR_1[ITEM_NO] << endl;
+							cout << "      " << FF_PLOTS.FIX_PAIR_2[ITEM_NO] << endl;
+							cout << "      " << TEMP_INT << endl;
+							exit_run(0);
+						}
+						
+						FF_PLOTS.SCAN_PAIR.push_back(TEMP_INT);
+						FF_PLOTS.PARENT_TYPE.push_back(FF_PLOTS.TYPE_INDEX[i]);
+						
+						cin.ignore();
+						
+						if (RANK==0)
+							cout << "	Scanning triplet pair index " << TEMP_INT 
+							 << " and holding "                <<  FF_PLOTS.FIX_PAIR_1[j] 
+						     << " and "                        <<  FF_PLOTS.FIX_PAIR_2[j] 
+							 << " fixed at "                   << FF_PLOTS.FIX_VAL_1[j] 
+							 << " and "                        << FF_PLOTS.FIX_VAL_2[j] 
+							 << " respectively."               << endl;
+					}
+					
+
 
 				}
 
@@ -3571,29 +3847,10 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 		
 		else if(LINE.find("# NLAYERS #") != string::npos)
 		{
-			LINE_PARSER.str("");
-			LINE_PARSER.clear();
-			
-			getline(cin,LINE);
-			
-			LINE_PARSER.str(LINE);
-			LINE_PARSER >> LINE;
-				
+			cin >> LINE; cin.ignore();
 			CONTROLS.N_LAYERS = int(atof(LINE.data()));
 			if (RANK==0)
 				cout << "	# NLAYERS #: " << CONTROLS.N_LAYERS << endl;	
-			
-			if(LINE_PARSER >> LINE)
-			{
-				if(LINE == "REPLICATE")
-				{
-					LINE_PARSER >> LINE;
-					CONTROLS.REAL_REPLICATES = int(atof(LINE.data()));
-					if (RANK==0)
-						cout << "	             ... Creating " << CONTROLS.REAL_REPLICATES << " real replicates before ghost atom layering." << endl;	
-				}
-			}
-			cin.ignore();
 		}	
 		
 		else if(LINE.find("# USENEIG #") != string::npos)
@@ -3747,7 +4004,6 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			
 			LINE_PARSER.str(LINE);
 			LINE_PARSER >> CONTROLS.ENSEMBLE;	// Which ensemble do we have?
-				
 			
 			if( CONTROLS.ENSEMBLE != "NVT-SCALE" && CONTROLS.ENSEMBLE != "NVT-MTK"    && CONTROLS.ENSEMBLE != "NVE" && 
 				CONTROLS.ENSEMBLE != "NPT-MTK"   && CONTROLS.ENSEMBLE != "NPT-BEREND" && CONTROLS.ENSEMBLE != "NVT-BEREND" &&
@@ -3775,68 +4031,63 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			}
 			else
 			{
-				if(CONTROLS.ENSEMBLE != "NVE")
-				{
-					// Keep reading..
+				// Keep reading..
 				
+				LINE_PARSER >> LINE;
+				
+				if (CONTROLS.ENSEMBLE == "NVT-MTK" || CONTROLS.ENSEMBLE == "NPT-MTK")
+				{
+					CONTROLS.USE_HOOVER_THRMOSTAT = true;
+					LINE_PARSER >> LINE;
+					CONTROLS.FREQ_UPDATE_THERMOSTAT = double(atof(LINE.data()));
+					if (RANK==0)
+						cout << "	# CONSRNT #: HOOVER... a Hoover time of " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " will be used." << endl;
+
+					if(CONTROLS.ENSEMBLE == "NPT-MTK")
+					{
+						if( bool(LINE_PARSER >> LINE))
+						{
+							CONTROLS.FREQ_UPDATE_BAROSTAT = double(atof(LINE.data()));
+						}
+						else
+						{
+							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
+						}
+						if (RANK==0)
+							cout << "	                   ... and barostat will use  " << CONTROLS.FREQ_UPDATE_BAROSTAT << "." << endl;	
+					}
+	
+				}
+				else if (CONTROLS.ENSEMBLE == "NVT-SCALE" || CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NVT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
+				{
+					CONTROLS.USE_HOOVER_THRMOSTAT = false;
 					LINE_PARSER >> LINE;
 				
-					if (CONTROLS.ENSEMBLE == "NVT-MTK" || CONTROLS.ENSEMBLE == "NPT-MTK")
-					{
-						CONTROLS.USE_HOOVER_THRMOSTAT = true;
-						LINE_PARSER >> LINE;
-						CONTROLS.FREQ_UPDATE_THERMOSTAT = double(atof(LINE.data()));
-						if (RANK==0)
-							cout << "	# CONSRNT #: HOOVER... a Hoover time of " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " will be used." << endl;
+					CONTROLS.FREQ_UPDATE_THERMOSTAT = double(atof(LINE.data()));
 
-						if(CONTROLS.ENSEMBLE == "NPT-MTK")
-						{
-							if( bool(LINE_PARSER >> LINE))
-							{
-								CONTROLS.FREQ_UPDATE_BAROSTAT = double(atof(LINE.data()));
-							}
-							else
-							{
-								CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
-							}
-							if (RANK==0)
-								cout << "	                   ... and barostat will use  " << CONTROLS.FREQ_UPDATE_BAROSTAT << "." << endl;	
-						}
-	
-					}
-					else if (CONTROLS.ENSEMBLE == "NVT-SCALE" || CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NVT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
+					if (CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
 					{
-						CONTROLS.USE_HOOVER_THRMOSTAT = false;
-						LINE_PARSER >> LINE;
-				
-						CONTROLS.FREQ_UPDATE_THERMOSTAT = double(atof(LINE.data()));
-
-						if (CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
+						if( bool(LINE_PARSER >> LINE))
 						{
-							if( bool(LINE_PARSER >> LINE))
-							{
-								LINE_PARSER >> LINE; // ignores the "COORDSCALE" command.
-								CONTROLS.FREQ_UPDATE_BAROSTAT = double(atof(LINE.data()));
-							}
-							else
-							{
-								CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
-							}
+							LINE_PARSER >> LINE; // ignores the "COORDSCALE" command.
+							CONTROLS.FREQ_UPDATE_BAROSTAT = double(atof(LINE.data()));
 						}
-				
-						if (RANK==0)
-							cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << "... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." << endl;	
+						else
+						{
+							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
+						}
 					}
-					else
-					{
-						cout << "ERROR: # CONSRNT # must be specified as HOOVER or VELSCALE, and a Hoover time or velocity " << endl;
-						cout << "       scaling frequency must be specified in line. " << endl;
-						cout << "       Example: HOOVER 10 "<< endl; 
-						exit_run(1);	
-					}	
+				
+					if (RANK==0)
+						cout << "	# CONSRNT #: VELSCALE... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." << endl;	
 				}
-				
-
+				else if (CONTROLS.ENSEMBLE != "NVE")
+				{
+					cout << "ERROR: # CONSRNT # must be specified as HOOVER or VELSCALE, and a Hoover time or velocity " << endl;
+					cout << "       scaling frequency must be specified in line. " << endl;
+					cout << "       Example: HOOVER 10 "<< endl; 
+					exit_run(1);	
+				}	
 			
 				if(LINE_PARSER >> LINE)
 				{
@@ -4004,8 +4255,8 @@ static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, string filename)
 // Includes velocities.
 // Output full precision to aid in testing and restart.
 {
-	int PRINT_WIDTH     = 21; // Use 21 for testing
-	int PRINT_PRECISION = 14; // Use 14 for testing
+	int PRINT_WIDTH     = 8; // Use 21 for testing
+	int PRINT_PRECISION = 5; // Use 14 for testing
 	
 	// Check if the file already exists
 	
@@ -4091,7 +4342,7 @@ static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector
 		}
 
 		MPI_Bcast(coord, 3*atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-		
+
 		#ifdef LOG_POS
 		
 			char buf[20];
@@ -4436,7 +4687,7 @@ void exit_run(int value)
 		
 		double PADDING = 0.01;
 		
-		NEIGHBOR_LIST.INITIALIZE(SYS, PADDING);	// Doesn't care about velocity
+		NEIGHBOR_LIST.INITIALIZE(SYS, PADDING);
 		NEIGHBOR_LIST.DO_UPDATE(SYS, CONTROLS);	
 		
 		// Do the actual force calculation using our MD code

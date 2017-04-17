@@ -3,7 +3,7 @@ Reading input file...
 	# TRJFILE #: input.xyzf
 	# WRAPTRJ #: 1
 	# NFRAMES #: 54
-	# N_LAYERS #: 1
+	# NLAYERS #: 1
 	# FITCOUL #: false
 	# FITPOVR #: false
 	# PAIRTYP #: DFTBPOLY ....NOTE: Forces reported in atomic units.
@@ -37,33 +37,13 @@ Reading input file...
 	7               H               O               0               4.5             0               0                0               
 	8               H               N               0               4.5             0               0                0               
 	9               O               N               0               4.5             0               0                0               
-
-	Read the following number of ij ik jk bins for pairs: 
-		CC: 0 0 0
-		HH: 0 0 0
-		OO: 0 0 0
-		NN: 0 0 0
-		CH: 0 0 0
-		CO: 0 0 0
-		CN: 0 0 0
-		HO: 0 0 0
-		HN: 0 0 0
-		ON: 0 0 0
-
-
-Note: Will use cubic scaling of: 1
+	Note: Will use cubic scaling of: 1
 
 ...input file read successful: 
 
 The number of two-body non-coulomb parameters is: 80
 
 Reading in the trajectory file...
-	Real atoms:                   208
-	Total atoms (ghost):          5616
-	Real box dimesntions:         13.5192 13.5192 13.5192
-	Total box dimensions (ghost): 40.5576 40.5576 40.5576
-
-WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 ...trajectory file read successful: 
 
 Setting up the matricies for A, Coulomb forces, and overbonding...
@@ -138,8 +118,6 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix population complete: 
 
 Printing matricies...
-	...A matrix length: 54
-
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.244
 		1	H H	1.019

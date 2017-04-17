@@ -27,16 +27,13 @@
 1		O		 -		15.9994
 2		H		 +		1.0079
 
-# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #	# NIJBINS #	# NIKBINS #	# NJKBINS #
-1		O		O		0.75		6.0		0.1		1.25			false		0		0		0
-2		O		H		0.75		6.0		0.1		1.25			false		0		0		0
-3		H		H		0.75		6.0		0.1		1.25			false		0		0		0
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #
+1		O		O		0.75		6.0		0.1		1.25			false	
+2		O		H		0.75		6.0		0.1		1.25			false	
+3		H		H		0.75		6.0		0.1		1.25			false
 
 CHARGE CONSTRAINTS:
 OO	HH	OH	1000.0		 4000.0		4000.0	0.0
 OO	HH	OH	1000.0		-4000.0		0.0	0.0
-
-# FCUTTYP #
-	CUBIC
 
 # ENDFILE #

@@ -2,32 +2,16 @@
 # CHOOSE COMPILATION TYPE, SET FLAGS
 ##################################
 
-# For linking to LAMMPS:
-
-LINK2LMPS= no
-LAMMPSDIR=/usr/gapps/polymers/lammps_borax/
-
 # Compiling flags
 
-MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 
+MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 # -D XFORMTYPE=LEFT # -D FORCECHECK=1 -D PESFORMAT=1 -D LOG_FORCE -D LOG_PES
 
-# Other options:
-#
-# -D XFORMTYPE=LEFT 
-# -D FORCECHECK=1 
-# -D PESFORMAT=1 
-# -D LOG_FORCE 
-# -D LOG_PES
-
-# Compilers
-
-#CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-#CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-#CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-#CXX=icc -g				# Serial, for debugging
+#CXX=mpiicc  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=mpicc   -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=mpicxx  -g  -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=icc -g			# Serial, for debugging
 #CXX=icc -O3
-#CXX=g++ -std=c++11 -g			# Serial, let compiler optimize to a very high level (see also -O2)
-CXX=g++ -std=c++11 -O3			# Serial, let compiler optimize to a very high level (see also -O2)
+CXX=g++ -O3			# Serial, let compiler optimize to a very high level (see also -O2)
 #
 # Below: Other debugging/optimiazation options
 #
@@ -35,15 +19,20 @@ CXX=g++ -std=c++11 -O3			# Serial, let compiler optimize to a very high level (s
 #CXX=g++ -g # -Wall -Wextra
 #CXX=icpc -fast -Wall
 
+%.o: %.C
+	$(CXX) $(MYFLAGS) -c $< -o $@
+
 
 ##################################
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C
 
-house_lsq: 
-	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq
+CXX_LSQ_INCLUDES=
+
+house_lsq: $(CXX_LSQ_SRC:%.C=%.o)
+	$(CXX) $^ $(CXX_LSQ_INCLUDES) -o house_lsq
 
 clean_lsq:
 	/bin/rm -f splines_ls.o functions.o Ewald.o
@@ -62,26 +51,21 @@ build_tests_lsq:
 
 CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C
 
-FLAGLMP=-D LINK_LAMMPS
-LAMMPS_LIB=$(LAMMPSDIR)/src/liblammps.a
-LMP_COUPLE_LIB=$(LAMMPSDIR)/examples/COUPLE/library/libcouple.a
-LIBS=/usr/lib64/libfftw3.a
+CXX_MD_INCLUDES=
 
-house_md: 
-ifeq ($(LINK2LMPS), yes)
-	$(CXX) $(FLAGLMP) $(CXX_MD_SRC) $(LAMMPS_LIB) $(LMP_COUPLE_LIB) $(LIBS) -o house_md
-else
-	$(CXX) $(CXX_MD_SRC) -o house_md
-endif
+house_md: $(CXX_MD_SRC:%.C=%.o)
+	$(CXX) $^ $(CXX_MD_INCLUDES) -o house_md
 
 clean_md:
-	/bin/rm -f house_md
+	/bin/rm -f splines_md.o functions.o Ewald.o
+
+realclean_md: clean_md
+	rm -f house_md 
 
 build_tests_md:
 	cd ../test_suite-md
 	./generate_test_suite.sh
 	cd -
-	
 ##################################
 # MAKE BOTH THE LSQ AND MD CODES
 ##################################

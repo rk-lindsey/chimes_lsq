@@ -25,8 +25,6 @@ ATOM PAIRS: 3
 	1               H               H               0.75            6               0.1             MORSE           1.25            
 	2               O               H               0.75            6               0.1             MORSE           1.25            
 
-FCUT TYPE: CUBIC
-
 ATOM PAIR TRIPLETS: 4
 
 PAIR CHEBYSHEV PARAMS 

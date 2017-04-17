@@ -1,9 +1,6 @@
 # NOTE: The path below needs to point to the "lsq-new-md-fmt.py" version of the lsq code.
 #       If you want to use other versions, you'll probably need to modify the inputs that
 #       are sent to the script (way down below)
-#
-# NOTE: Make sure the right compiler is specified in the Makefile... don't use MPI for lsq.
-#
 
 ###############################################################
 #
@@ -25,8 +22,7 @@ PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq-new-md-fmt.py" # Path to the python code
 ###############################################################
 
 cd ../src
-rm -f *o house_lsq
-make house_lsq; mv house_lsq ../test_suite-lsq/
+make house_lsq; cp house_lsq ../test_suite-lsq/; make clean_lsq; make realclean_lsq;
 cd ../test_suite-lsq
 
 ###############################################################

@@ -43,42 +43,96 @@ void EXIT_MSG(string EXIT_STRING, double EXIT_VAR) // error message: var
 // Functions to manage layers
 //////////////////////////////////////////
 
-void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
+void sync_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
+// Create coordinates for the layer atoms given the parent atoms.
 {
-	
-	
-	int     TEMP_IDX;
-	XYZ     TEMP_XYZ;
+	XYZ TEMP_XYZ;
+
+	if ( CONTROLS.N_LAYERS == 0 ) 
+		return ;
+
+	int count = SYSTEM.ATOMS ;
+	double x_spacing = SYSTEM.BOXDIM.X ;
+	double y_spacing = SYSTEM.BOXDIM.Y ;
+	double z_spacing = SYSTEM.BOXDIM.Z ;
+
+	// ALL_COORDS is used for force evaluation.
+	for ( int a = 0 ; a < SYSTEM.ATOMS ; a++ ) 
+	{
+		SYSTEM.ALL_COORDS[a].X = SYSTEM.COORDS[a].X ;
+		SYSTEM.ALL_COORDS[a].Y = SYSTEM.COORDS[a].Y ;
+		SYSTEM.ALL_COORDS[a].Z = SYSTEM.COORDS[a].Z ;
+	}
+
+	for(int n1 = -CONTROLS.N_LAYERS ; n1<=CONTROLS.N_LAYERS; n1++)
+	{
+		for(int n2 = -CONTROLS.N_LAYERS ; n2<=CONTROLS.N_LAYERS; n2++)
+		{
+			for(int n3= -CONTROLS.N_LAYERS ; n3<=CONTROLS.N_LAYERS; n3++)
+			{	
+				if ((n1 == 0) && (n2 == 0) && (n3 == 0) )
+					continue ;
+				else
+				{
+					for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+					{			
+						TEMP_XYZ.X = SYSTEM.ALL_COORDS.at(a1).X + n1 * x_spacing ;
+						TEMP_XYZ.Y = SYSTEM.ALL_COORDS.at(a1).Y + n2 * y_spacing ;
+						TEMP_XYZ.Z = SYSTEM.ALL_COORDS.at(a1).Z + n3 * z_spacing ;
+						SYSTEM.ALL_COORDS[count++]  = TEMP_XYZ ;
+					}
+				}
+			}
+		}
+	}
+
+	if ( count != SYSTEM.ALL_ATOMS ) 
+	{
+		printf("Error in sync_layers\n") ;
+		exit(1) ;
+	}
+}
+
+void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
+// Build replicas (layers) for the atoms in the primitive cell.
+// Results are places in SYSTEM.ALL_COORDS.
+{
+	int TEMP_IDX ;
+	XYZ TEMP_XYZ ;
 	XYZ_INT TEMP_LAYER;
-	
+
 	SYSTEM.PARENT    .resize(SYSTEM.ATOMS);
 	SYSTEM.LAYER_IDX .resize(SYSTEM.ATOMS);
 	SYSTEM.ALL_COORDS.resize(SYSTEM.ATOMS);
-	SYSTEM.WRAP_IDX  .resize(SYSTEM.ATOMS);
-	
-	// Set the first ATOMS atoms of ALL_COORDS equivalent to the "real" COORDS
-	// Then wrap those ALL_COORDS into primitive cell
-	
-	SYSTEM.ALL_ATOMS = SYSTEM.ATOMS;	// Default setting: for zero layers
-	
-	for (int a1=0; a1<SYSTEM.ATOMS; a1++) 
-	{
-		SYSTEM.WRAP_IDX[a1].X = floor(SYSTEM.COORDS[a1].X/SYSTEM.BOXDIM.X) ;
-		SYSTEM.WRAP_IDX[a1].Y = floor(SYSTEM.COORDS[a1].Y/SYSTEM.BOXDIM.Y) ;
-		SYSTEM.WRAP_IDX[a1].Z = floor(SYSTEM.COORDS[a1].Z/SYSTEM.BOXDIM.Z) ;
+	SYSTEM.MASS      .resize(SYSTEM.ATOMS);
 
-		SYSTEM.ALL_COORDS[a1].X = SYSTEM.COORDS[a1].X - SYSTEM.WRAP_IDX[a1].X * SYSTEM.BOXDIM.X;
-		SYSTEM.ALL_COORDS[a1].Y = SYSTEM.COORDS[a1].Y - SYSTEM.WRAP_IDX[a1].Y * SYSTEM.BOXDIM.Y;
-		SYSTEM.ALL_COORDS[a1].Z = SYSTEM.COORDS[a1].Z - SYSTEM.WRAP_IDX[a1].Z * SYSTEM.BOXDIM.Z;
-		
-		SYSTEM.PARENT    [a1] = a1;
-		SYSTEM.LAYER_IDX [a1].X = SYSTEM.LAYER_IDX [a1].Y = SYSTEM.LAYER_IDX [a1].Z = 0;
+	for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+	{			
+		SYSTEM.PARENT[a1] = a1 ;
+		SYSTEM.LAYER_IDX[a1].X = 0;
+		SYSTEM.LAYER_IDX[a1].Y = 0;
+		SYSTEM.LAYER_IDX[a1].Z = 0;
 	}
-	
+
 	if(CONTROLS.N_LAYERS>0 )
 	{	
-		TEMP_IDX = SYSTEM.ATOMS;	
+//		if(RANK == 0)
+//			cout << "Building " << CONTROLS.N_LAYERS << " layer(s)..." << endl;
+	
+		TEMP_IDX = SYSTEM.ATOMS;
+		
+		// ALL_COORDS is used for force evaluation. Atoms in the primitive cell are listed first.
+		
+		for ( int a = 0 ; a < SYSTEM.ATOMS ; a++ ) 
+		{
+			SYSTEM.ALL_COORDS[a].X = SYSTEM.COORDS[a].X - floor(SYSTEM.COORDS[a].X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
+			SYSTEM.ALL_COORDS[a].Y = SYSTEM.COORDS[a].Y - floor(SYSTEM.COORDS[a].Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
+			SYSTEM.ALL_COORDS[a].Z = SYSTEM.COORDS[a].Z - floor(SYSTEM.COORDS[a].Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+		}
 
+		// Create coordinates for the layer atoms. layer elements do not include 0, 0, 0, which is the main cell
+		// All other atoms are listed next.
+		
 		for(int n1 = -CONTROLS.N_LAYERS ; n1<=CONTROLS.N_LAYERS; n1++)
 		{
 			for(int n2 = -CONTROLS.N_LAYERS ; n2<=CONTROLS.N_LAYERS; n2++)
@@ -86,35 +140,39 @@ void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 				for(int n3 = -CONTROLS.N_LAYERS ; n3<=CONTROLS.N_LAYERS; n3++)
 				{	
 					if (n1 == 0 && n2 == 0 && n3 == 0 ) 
-						continue;
+						continue ;
+
 					else
 					{		
 						for(int a1=0; a1<SYSTEM.ATOMS; a1++)
-						{
-							TEMP_XYZ.X = SYSTEM.ALL_COORDS[a1].X + n1 * SYSTEM.BOXDIM.X;
-							TEMP_XYZ.Y = SYSTEM.ALL_COORDS[a1].Y + n2 * SYSTEM.BOXDIM.Y;
-							TEMP_XYZ.Z = SYSTEM.ALL_COORDS[a1].Z + n3 * SYSTEM.BOXDIM.Z;
-				
+						{			
+									
+							TEMP_XYZ.X = SYSTEM.ALL_COORDS.at(a1).X + n1 * SYSTEM.BOXDIM.X;
+							TEMP_XYZ.Y = SYSTEM.ALL_COORDS.at(a1).Y + n2 * SYSTEM.BOXDIM.Y;
+							TEMP_XYZ.Z = SYSTEM.ALL_COORDS.at(a1).Z + n3 * SYSTEM.BOXDIM.Z;
+							
 							TEMP_LAYER.X = n1;
 							TEMP_LAYER.Y = n2;
 							TEMP_LAYER.Z = n3;
 
 							SYSTEM.ALL_COORDS	.push_back(TEMP_XYZ);
 							SYSTEM.LAYER_IDX    .push_back(TEMP_LAYER);
-							SYSTEM.ATOMTYPE     .push_back(SYSTEM.ATOMTYPE    [a1]);
-							SYSTEM.CHARGES      .push_back(SYSTEM.CHARGES     [a1]);
+							SYSTEM.ATOMTYPE     .push_back(SYSTEM.ATOMTYPE    .at(a1));
+							SYSTEM.CHARGES      .push_back(SYSTEM.CHARGES     .at(a1));
+							SYSTEM.MASS         .push_back(SYSTEM.MASS        .at(a1));	
 							SYSTEM.PARENT       .push_back(a1);
-				
+							
 							TEMP_IDX++;
 						}
 					}
 				}
 			}
 		}
+			
 		SYSTEM.ALL_ATOMS = TEMP_IDX;
-	}		
-}
+	}
 
+}
 
 //////////////////////////////////////////
 // Distance calculation and smoothing functions
@@ -123,22 +181,10 @@ void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 double get_dist(const FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 // Calculates distance as a2 - a1... This function modifies RAB!
 {
-	if(SYSTEM.ATOMS == SYSTEM.ALL_ATOMS) // Then we're not using ghost atoms. Need to use MIC
-	{
-		RAB.X = SYSTEM.COORDS[a2].X - SYSTEM.COORDS[a1].X;
-		RAB.Y = SYSTEM.COORDS[a2].Y - SYSTEM.COORDS[a1].Y;
-		RAB.Z = SYSTEM.COORDS[a2].Z - SYSTEM.COORDS[a1].Z;
-		
-		RAB.X -= floor( 0.5 + RAB.X/SYSTEM.BOXDIM.X )  * SYSTEM.BOXDIM.X;
-		RAB.Y -= floor( 0.5 + RAB.Y/SYSTEM.BOXDIM.Y )  * SYSTEM.BOXDIM.Y;
-		RAB.Z -= floor( 0.5 + RAB.Z/SYSTEM.BOXDIM.Z )  * SYSTEM.BOXDIM.Z;
-	}
-	else
-	{
-		RAB.X = SYSTEM.ALL_COORDS[a2].X - SYSTEM.ALL_COORDS[a1].X;
-		RAB.Y = SYSTEM.ALL_COORDS[a2].Y - SYSTEM.ALL_COORDS[a1].Y;
-		RAB.Z = SYSTEM.ALL_COORDS[a2].Z - SYSTEM.ALL_COORDS[a1].Z;
-	}
+	RAB.X = SYSTEM.ALL_COORDS[a2].X - SYSTEM.ALL_COORDS[a1].X;
+	RAB.Y = SYSTEM.ALL_COORDS[a2].Y - SYSTEM.ALL_COORDS[a1].Y;
+	RAB.Z = SYSTEM.ALL_COORDS[a2].Z - SYSTEM.ALL_COORDS[a1].Z;
+	
 	return sqrt( RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z );
 }
 
@@ -162,12 +208,12 @@ void get_fcut(int BODIEDNESS, string TYPE, double & fcut, double & fcut_deriv, c
 	}
 	
 	if(BODIEDNESS==2 || (BODIEDNESS==3 && TYPE=="CUBIC"))
-	{		
+	{
 		fcut0 = (1.0 - rlen/rmax);
 		fcut        = pow(fcut0, fcut_power);
 		fcut_deriv  = pow(fcut0,fcut_power-1);
 		fcut_deriv *= -1.0 * fcut_power /rmax;
-
+		
 		return;
 	}
 	else if(BODIEDNESS==3)
@@ -293,13 +339,6 @@ void get_fcut(int BODIEDNESS, string TYPE, double & fcut, double & fcut_deriv, c
 				cout << a << " " << b << " " << a_prime << " " << b_prime << " ++ " << A << " " << B << " -- " << fcut << " " << fcut_deriv << endl;
 
 			return;
-		}
-		else
-		{
-			cout << "ERROR: UNDEFINED N-BODY PARAMETER!" << endl;
-			cout << "       Did you forget to set # FCUTTYP #?" << endl;
-			cout << "       Check calls to get_fcut." << endl;
-			exit(0);
 		}
 		
 	}
@@ -760,6 +799,10 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	REPLICATE.BOXDIM.Y	= SYSTEM.BOXDIM.Y;
 	REPLICATE.BOXDIM.Z	= SYSTEM.BOXDIM.Z;
 
+	REPLICATE.WRAPDIM.X	= SYSTEM.WRAPDIM.X;
+	REPLICATE.WRAPDIM.Y	= SYSTEM.WRAPDIM.Y;
+	REPLICATE.WRAPDIM.Z	= SYSTEM.WRAPDIM.Z;
+
 	REPLICATE.TEMPERATURE			= SYSTEM.TEMPERATURE;
 	REPLICATE.PRESSURE 				= SYSTEM.PRESSURE;
 	REPLICATE.PRESSURE_XYZ 			= SYSTEM.PRESSURE_XYZ;
@@ -860,6 +903,10 @@ double numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<P
 	REPLICATE.BOXDIM.Y = lscale * SYSTEM.BOXDIM.Y;
 	REPLICATE.BOXDIM.Z = lscale * SYSTEM.BOXDIM.Z;
 
+	REPLICATE.WRAPDIM.X = lscale * SYSTEM.WRAPDIM.X;
+	REPLICATE.WRAPDIM.Y = lscale * SYSTEM.WRAPDIM.Y;
+	REPLICATE.WRAPDIM.Z = lscale * SYSTEM.WRAPDIM.Z;
+
 	// Compute/store new total potential energy and volume
 	
 	Vol1 = REPLICATE.BOXDIM.X * REPLICATE.BOXDIM.Y * REPLICATE.BOXDIM.Z;
@@ -889,7 +936,11 @@ double numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<P
 	REPLICATE.BOXDIM.X = lscale * SYSTEM.BOXDIM.X;
 	REPLICATE.BOXDIM.Y = lscale * SYSTEM.BOXDIM.Y;
 	REPLICATE.BOXDIM.Z = lscale * SYSTEM.BOXDIM.Z;
-	
+
+	REPLICATE.WRAPDIM.X = lscale * SYSTEM.WRAPDIM.X;
+	REPLICATE.WRAPDIM.Y = lscale * SYSTEM.WRAPDIM.Y;
+	REPLICATE.WRAPDIM.Z = lscale * SYSTEM.WRAPDIM.Z;
+
 	// Compute/store new total potential energy and volume
 	
 	Vol2 = REPLICATE.BOXDIM.X * REPLICATE.BOXDIM.Y * REPLICATE.BOXDIM.Z;
@@ -1540,21 +1591,14 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 
 		for(int a2idx=a2start; a2idx<a2end; a2idx++)	
 		{			
-			a2 = NEIGHBOR_LIST.LIST_3B[a1][a2idx];
+			a2 = NEIGHBOR_LIST.LIST_3B[a1][a2idx] ;
 
-			// Get a3 as a neighbor of a1 to avoid
-			// creating neighbor lists for ghost atoms.
-			
 			a3start = 0 ;
-			a3end   = NEIGHBOR_LIST.LIST_3B[a1].size();
-			
+			a3end   = NEIGHBOR_LIST.LIST_3B[a2].size();
 
 			for(int a3idx=a3start; a3idx<a3end; a3idx++)	
 			{			
-				a3 = NEIGHBOR_LIST.LIST_3B[a1][a3idx];
-				
-				if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) 
-					continue;
+				a3 = NEIGHBOR_LIST.LIST_3B[a2][a3idx] ;
 
 				TEMP_STR = SYSTEM.ATOMTYPE[a1];
 				TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);		
@@ -1602,15 +1646,14 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 				// To handle this, change the functional form of the fcut function to a cosine-like function, whose endpoints at rmax AND rmin
 				// go smoothly to zero. This way, no special handling is needed beyond cutoffs.
 				
-				FORCE_IS_ZERO_IJ = FORCE_IS_ZERO_IK = FORCE_IS_ZERO_JK = false;					
+				FORCE_IS_ZERO_IJ = FORCE_IS_ZERO_IK = FORCE_IS_ZERO_JK = false;	
 				
 				if(PROCEED(rlen_ij, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, S_MINIM_IJ, S_MAXIM_IJ))
 				{
 					if(PROCEED(rlen_ik, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, S_MINIM_IK, S_MAXIM_IK))
 					{
 						if(PROCEED(rlen_jk, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, S_MINIM_JK, S_MAXIM_JK))
-						{		
-										
+						{						
 							// Populate the appropriate histogram
 							
 							if(PAIR_TRIPLETS[curr_triple_type_index].NBINS.X>0)
@@ -1693,7 +1736,6 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 							
 								PAIR_TRIPLETS[curr_triple_type_index].POP_HIST[ij_bin][ik_bin][jk_bin]++;
 							}
-							
 						
 							// For all types, if r < rcut, then the potential is constant, thus the force  must be zero.
 							// Additional, the potential is then taken to be the potential at r_cut.
@@ -1768,12 +1810,13 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 							vstart = n_2b_cheby_terms;
 			
 							for (int i=0; i<curr_triple_type_index; i++)
-								vstart += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;						
+								vstart += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;	
+							
 							
 							get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);
 							get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);
 							get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);							
-
+	
 							/////////////////////////////////////////////////////////////////////
 							/////////////////////////////////////////////////////////////////////
 							// Consider special restrictions on allowed triplet types and powers
@@ -1794,7 +1837,7 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 							for(int i=0; i<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 							{
 							    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICIES[i];
-								
+
 							    SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP, pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
 
 							    deriv_ij =  fcut_ij * Tnd_ij[pow_ij] * dx_dr_ij + fcutderiv_ij * Tn_ij[pow_ij];
@@ -2764,13 +2807,14 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	#else
 		a1start = SYSTEM.MY_ATOMS_START;
 		a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-	#endif	
+	#endif
+	
 
 	// Set up for neighbor lists
 	
 	int a2start, a2end, a2;
 	int a3start, a3end, a3;
-
+	
 	for(int a1=a1start; a1<=a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS (prev -1)
 	{	
 		a2start = 0;
@@ -2778,20 +2822,17 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			
 		for(int a2idx=a2start; a2idx<a2end; a2idx++)	
 		{
-			a2 = NEIGHBOR_LIST.LIST[a1][a2idx];			
-			
-			
+			a2 = NEIGHBOR_LIST.LIST[a1][a2idx];
+						
 			TEMP_STR = SYSTEM.ATOMTYPE[a1];
-			TEMP_STR.append(SYSTEM.ATOMTYPE[SYSTEM.PARENT[a2]]);		
+			TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);		
 			PAIR_TYPE_IJ = TEMP_STR;					
 			curr_pair_type_idx_ij = PAIR_MAP[TEMP_STR];
 			
 			rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
-								
+						
 			if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MAXIM)	// We want to evaluate the penalty function when r < rmin (LEF) .. Assumes 3b inner cutoff is never shorter than 2b's
 			{	
-
-		
 				/////////////////////////////////////////////
 				// EVALUATE THE 2-BODY INTERACTIONS
 				/////////////////////////////////////////////
@@ -2857,7 +2898,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 					SYSTEM.TOT_POT_ENER += Vpenalty;
 					cout << "	...Penalty potential = "<< Vpenalty << endl;
 				}					
-			}			
+			}
 		}
 		
 		/////////////////////////////////////////////
@@ -2874,18 +2915,13 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			{
 				a2 = NEIGHBOR_LIST.LIST_3B[a1][a2idx];
 			
-				// Get a3 as a neighbor of a1 to avoid
-				// creating neighbor lists for ghost atoms.
-				
 				a3start = 0;
-				a3end   = NEIGHBOR_LIST.LIST_3B[a1].size();
+				a3end   = NEIGHBOR_LIST.LIST_3B[a2].size(); // here we can actually use the 3b neighbor list
 			
 				for(int a3idx=a3start; a3idx<a3end; a3idx++)	
 				{			
-					a3 = NEIGHBOR_LIST.LIST_3B[a1][a3idx];	
+					a3 = NEIGHBOR_LIST.LIST_3B[a2][a3idx];	
 					
-					if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) 
-						continue ;
 				
 					TEMP_STR = SYSTEM.ATOMTYPE[a1];
 					TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);		
@@ -2924,7 +2960,6 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 					S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
 					S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
 					S_MINIM_JK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
-					
 					// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 					// within the allowed range.
 
@@ -3086,14 +3121,14 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 								
 							}	
 						}				
-					}		
+					}
+					
 				} 	
 			}
+		
 		} 	// End 3-body outer-most loop		
-	}
-	
-//cout << "COUNTED : " << INTERACTIONS << " interactions." << endl;		
-//	return;
+	}	
+	return;
 } 
 
 static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
