@@ -1,4 +1,7 @@
-
+##
+## Test of force matching.  Use a cutoff of less than 1/2 box size to allow
+## checking against original code.  Corresponds to original code example/h2o-3b/cheby_ls_3b4.in.
+##
 ####### CONTROL VARIABLES #######
 
 # TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force
@@ -14,7 +17,7 @@
 # FITPOVR #  ! Use ReaxFF linear overcoordination parameters? If this is false and parameters are provided below, those parameters will be subtracted from forces
 	false
 # PAIRTYP # ! Short-range interaction type. See manual for accepted types. Case sensitive
-	CHEBYSHEV 10 2
+	CHEBYSHEV 10 6
 # CHBTYPE # ! Are we transforming distance in terms of inverse distance(INVRSE_R), a morse-type function? (MORSE)? .. "DEFAULT" for no transformation.
 	MORSE
 
@@ -28,9 +31,9 @@
 2		H		 +		1.0079
 
 # PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #	# NIJBINS #	# NIKBINS #	# NJKBINS #
-1		O		O		0.75		6.0		0.1		1.25			false		0		0		0
-2		O		H		0.75		6.0		0.1		1.25			false		0		0		0
-3		H		H		0.75		6.0		0.1		1.25			false		0		0		0
+1		O		O		0.75		4.0		0.1		1.25			false		0		0		0
+2		O		H		0.75		4.0		0.1		1.25			false		0		0		0
+3		H		H		0.75		4.0		0.1		1.25			false		0		0		0
 
 CHARGE CONSTRAINTS:
 OO	HH	OH	1000.0		 4000.0		4000.0	0.0
