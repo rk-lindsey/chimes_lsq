@@ -146,6 +146,8 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 		divide_atoms(ikstart, ikend, totk);
 
 
+	XYZ B ;
+	double kweight ;
 	for(int ik= ikstart; ik <= ikend; ik++)	// Loop is MPI'd over totk
 	{
 		tempsin = 0.0;
@@ -161,7 +163,22 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 			tempsin += TRAJECTORY.CHARGES[a1] * sin_array[a1];		
 		}
 		
-		tempk += KFAC_V[ik]* (tempcos*tempcos + tempsin*tempsin);
+		kweight = KFAC_V[ik]* (tempcos*tempcos + tempsin*tempsin); 
+		tempk += kweight ;
+
+		// K space part of the pressure tensor.
+		// See Heyes, PRB, 49, 755(1994), eq. 22.
+
+		rksq = K_V[ik].X * K_V[ik].X + K_V[ik].Y * K_V[ik].Y + K_V[ik].Z * K_V[ik].Z ;
+
+		// Diagonal part of B tensor from Heyes.
+		B.X = 1.0 - 2.0 * K_V[ik].X * K_V[ik].X / rksq - 0.5 * K_V[ik].X * K_V[ik].X / alphasq ;
+		B.Y = 1.0 - 2.0 * K_V[ik].Y * K_V[ik].Y / rksq - 0.5 * K_V[ik].Y * K_V[ik].Y / alphasq ;
+		B.Z = 1.0 - 2.0 * K_V[ik].Z * K_V[ik].Z / rksq - 0.5 * K_V[ik].Z * K_V[ik].Z / alphasq ;
+
+		TRAJECTORY.PRESSURE_TENSORS_XYZ.X += (2*PI*ke/Volume)*kweight * B.X ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ.Y += (2*PI*ke/Volume)*kweight * B.Y ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ.Z += (2*PI*ke/Volume)*kweight * B.Z ;
 		
 		for(int a1=0; a1<PRIM_ATOMS; a1++) 
 		{
@@ -315,15 +332,20 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 
 				tempx *= ke;
 
-		        TRAJECTORY.TMP_EWALD[a1].X += RVEC.X * tempx;
+				TRAJECTORY.TMP_EWALD[a1].X += RVEC.X * tempx;
 				TRAJECTORY.TMP_EWALD[a1].Y += RVEC.Y * tempx;
 				TRAJECTORY.TMP_EWALD[a1].Z += RVEC.Z * tempx;
+
+				// Real space part of the pressure tensor.
+				// See Heyes, PRB, 49, 755(1994), eq. 22.
+				TRAJECTORY.PRESSURE_TENSORS_XYZ.X += tempx * RVEC.X * RVEC.X ;
+				TRAJECTORY.PRESSURE_TENSORS_XYZ.Y += tempx * RVEC.Y * RVEC.Y ;
+				TRAJECTORY.PRESSURE_TENSORS_XYZ.Z += tempx * RVEC.Z * RVEC.Z ;
 				
-		        TRAJECTORY.TMP_EWALD[fidx_a2].X -= RVEC.X * tempx;
+				TRAJECTORY.TMP_EWALD[fidx_a2].X -= RVEC.X * tempx;
 				TRAJECTORY.TMP_EWALD[fidx_a2].Y -= RVEC.Y * tempx;
 				TRAJECTORY.TMP_EWALD[fidx_a2].Z -= RVEC.Z * tempx;	
 				
-
 				UCoul += ke * TRAJECTORY.CHARGES[a1] * TRAJECTORY.CHARGES[fidx_a2] * tempy;
 			} 
 		}
@@ -332,7 +354,6 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 	// K-Space loops.
 
 	Ewald_K_Space_New(alphasq, k_cut, TRAJECTORY, TMP_UCoul, PRIM_ATOMS, PRIM_BOX);
-
 
 	// Update potential energy..
 	TRAJECTORY.TOT_POT_ENER += UCoul;
@@ -349,10 +370,6 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 	
 	TRAJECTORY.PRESSURE_XYZ += UCoul+TMP_UCoul;
 	
-	TRAJECTORY.PRESSURE_TENSORS_XYZ.X += (UCoul+TMP_UCoul / rlen_mi) * RVEC.X * RVEC.X / rlen_mi;
-	TRAJECTORY.PRESSURE_TENSORS_XYZ.Y += (UCoul+TMP_UCoul / rlen_mi) * RVEC.Y * RVEC.Y / rlen_mi;
-	TRAJECTORY.PRESSURE_TENSORS_XYZ.Z += (UCoul+TMP_UCoul / rlen_mi) * RVEC.Z * RVEC.Z / rlen_mi;
-
 	return;
 
 }
