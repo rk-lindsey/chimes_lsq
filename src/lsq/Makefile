@@ -1,7 +1,9 @@
 # Choose g++ for debugging and icpc for fast execution.
 #
 #CXX=g++ -g -Wall -Wextra -Wuninitialized -O1#-pg
-CXX=g++ -g -Wall -Wextra 
+#CXX=g++ -g -Wall -Wextra 
+CXX=g++ -O3
+#CXX=icc -O3
 #CXX=icpc -fast
 CXX_SRC=splines_ls.C ../mdcode/functions.C ../mdcode/Ewald.C ../mdcode/Cheby3B.C
 CXX_INCLUDES=-I ../mdcode
