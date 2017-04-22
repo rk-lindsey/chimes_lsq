@@ -41,8 +41,9 @@ CXX=g++ -std=c++11 -O3			# Serial, let compiler optimize to a very high level (s
 ##################################
 
 CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C
+CXX_LSQ_HEADER=functions.h
 
-house_lsq: 
+house_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
 	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq
 
 clean_lsq:
@@ -66,13 +67,14 @@ build_tests_lsq:
 ##################################
 
 CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C
+CXX_MD_HEADER=functions.h lmppath.h
 
 FLAGLMP=-D LINK_LAMMPS
 LAMMPS_LIB=$(LAMMPSDIR)/src/liblammps.a
 LMP_COUPLE_LIB=$(LAMMPSDIR)/examples/COUPLE/library/libcouple.a
 LIBS=/usr/lib64/libfftw3.a
 
-house_md: 
+house_md: $(CXX_MD_SRC) $(CXX_MD_HEADER)
 ifeq ($(LINK2LMPS), yes)
 	$(CXX) $(FLAGLMP) $(CXX_MD_SRC) $(LAMMPS_LIB) $(LMP_COUPLE_LIB) $(LIBS) -o house_md
 else
@@ -101,7 +103,7 @@ tests:
 	build_tests_lsq
 	build_tests_md	
 clean:
-	 rm -f *o
+	 rm -f *.o
 
 ##################################
 # Make Travis analyzer
