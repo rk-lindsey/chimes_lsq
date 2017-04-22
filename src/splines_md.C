@@ -1065,7 +1065,7 @@ int main(int argc, char* argv[])
 	
 	////////////////////////////////////////////////////////////
 	// Setup and test system velocity center of mass... For
-	// consevation of momentum, this number should zero (or
+	// calculation of diffusion constants, this number should zero (or
 	// VERY close)
 	////////////////////////////////////////////////////////////  
 	// ... Also, figure out how many atoms of each type we have
@@ -4061,16 +4061,16 @@ static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, do
 // Add up forces, potential energy, and pressure from all processes.  
 {
 	// Sum up the potential energy, pressure, tensors , and forces from all processors
-	
-	double *accel = (double *) accel_vec .data();
+   #ifdef USE_MPI
+		double *accel = (double *) accel_vec .data();
 
-	MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &tens_x,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &tens_y,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &tens_z,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-
+		MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, &tens_x,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, &tens_y,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, &tens_z,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+   #endif
 }
 
 static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 

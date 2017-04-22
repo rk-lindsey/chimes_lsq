@@ -48,8 +48,13 @@ house_lsq:
 clean_lsq:
 	/bin/rm -f splines_ls.o functions.o Ewald.o
 
+realclean: realclean_lsq realclean_md
+
 realclean_lsq: clean_lsq
 	rm -f house_lsq 
+
+realclean_md : clean_md
+	rm -r house_md
 
 build_tests_lsq:
 	cd ../test_suite-lsq
@@ -75,13 +80,13 @@ else
 endif
 
 clean_md:
-	/bin/rm -f house_md
+	/bin/rm -f house_md.o
 
 build_tests_md:
 	cd ../test_suite-md
 	./generate_test_suite.sh
 	cd -
-	
+
 ##################################
 # MAKE BOTH THE LSQ AND MD CODES
 ##################################
