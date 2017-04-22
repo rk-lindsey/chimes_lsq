@@ -1,0 +1,12 @@
+# Corresponds to test_suite-lsq/h2o-3bcheby2 in generalized branch.
+nlayers 1
+fit_coulomb true
+fit_pover false
+3b_cheby true
+3b_cheby_order 6
+pair_type chebyshev
+cheby_order 10
+subtract_coord false
+smin 1.939 0.720 0.982
+smax 4.3 4.2 4.1
+lambda 2.70 1.00 1.60
