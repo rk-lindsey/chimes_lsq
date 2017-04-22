@@ -73,12 +73,6 @@ bool read_tf_option(ifstream *paramread, const char *option, const char *params_
 
 Sr_pair_t parse_pair_type(const char *val, int bufsz)  ;
 
-void optimal_ewald_params(double accuracy, 
-			  double V, int nat, double &alpha, 
-			  double &rc, int &kc, double &r_acc,
-			  double &k_acc) ;
-
-
 void ZCalc_Ewald_Deriv(double **Coord, const char *Lbc, 
 		       double *Latcons,
 		       const int nat,

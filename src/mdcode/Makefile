@@ -1,5 +1,8 @@
 #CXX=g++ -g -Wall -Wextra -Wuninitialized -O1
-CXX=g++ -g -Wall -Wextra
+#CXX=g++ -g -Wall -Wextra
+#CXX=g++ -g -Wall -Wextra
+CXX=g++ -O3
+#CXX=icc -O3
 #CXX=icpc -fast -Wall
 CXX_SRC=splines_md.C functions.C Ewald.C Cheby3B.C
 CXX_INCLUDES=

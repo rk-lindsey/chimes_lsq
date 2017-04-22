@@ -554,10 +554,9 @@ void ZCalc_3B_Cheby_Deriv(double **Coord,const char *Lbc, double *Latcons,
 						if ( fcut13 == 0.0 ) 
 							continue ;
 
-						// DEBUG !!
-						printf("a1 = %2d a2 = %2d a3 = %2d\n", a1, a2, a3) ;
-						printf("rlen12 = %11.4e rlen23 = %11.4e rlen13 = %11.3e\n",
-								 rlen12, rlen23, rlen13) ;
+						//printf("a1 = %2d a2 = %2d a3 = %2d\n", a1, a2, a3) ;
+						//printf("rlen12 = %11.4e rlen23 = %11.4e rlen13 = %11.3e\n",
+						//rlen12, rlen23, rlen13) ;
 
 						for ( int i = 0 ; i < snum_3b_cheby[ipair12] ; i++ ) 
 							for ( int j = 0 ; j < snum_3b_cheby[ipair13] ; j++ ) 

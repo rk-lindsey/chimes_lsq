@@ -813,7 +813,12 @@ static void ZCalc_Cheby(double **Coord,const char *Lbc, double *Latcons,
   double exprlen ;
 
   // A penalty function is added to the potential for r + penalty_dist < smin[ipair]
-  const double penalty_scale = 1.0e+04 ;
+  // Parameters based on 500 kcal/mol barrier at 0.1 Angstroms.
+  //const double penalty_scale = 5.0e+05 ;
+  //const double penalty_dist = 0.1 ;
+
+  // Default parameters in generalized code.
+  const double penalty_scale = 1.0e4 ;
   const double penalty_dist = 0.01 ;
 
   if ( ! called_before ) {
