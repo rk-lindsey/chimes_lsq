@@ -543,6 +543,17 @@ void CELLS::INITIALIZE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, int MAX_FF_CUTOFF
 */
 
 
+class INTERACTION_3B
+// A 3-body interaction.
+{
+	// Indices ordered such that i < parent[j] < parent[k].
+	// a1 is a non-ghost atom.
+public:
+	int a1 ;  // Atom 1.
+	int a2 ;  // Atom 2.
+	int a3 ;  // Atom 3.
+} ;
+  
 class NEIGHBORS
 {
 	private:
@@ -556,6 +567,7 @@ class NEIGHBORS
 		void FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);		// Updates ghost atoms based on pbc-wrapped real atoms
 		void DO_UPDATE_SMALL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
 		void DO_UPDATE_BIG   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+		void UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) ;  // Update 3-Body interaction list.
 		
 	public:
 
@@ -571,6 +583,8 @@ class NEIGHBORS
 		vector<vector<int> > LIST_EWALD;	// The Ewald neighbor list. Of size [atoms][neighbors]
 		vector<vector<int> > LIST_UNORDERED;// All neighbors of particle i with i not equal to j.
 		vector<vector<int> > LIST_3B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
+
+		vector<INTERACTION_3B> LIST_3B_INT ;    // A flat list of all 3-body interactions.
 
 		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Will check if lists need updating, and will call DO_UPDATE do so if need be
 		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE);

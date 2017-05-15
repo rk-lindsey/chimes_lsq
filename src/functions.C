@@ -331,9 +331,10 @@ static inline double fix_cheby_val(double x, bool inverse_order)
 	
 	if ( x < -1.0)
 		return x = -1.0;
-
 	else if ( x > 1.0 )
 		return x = 1.0;								
+	else
+	  return x ;  // Defensive coding.
 }
 
 static inline void   cheby_var(double rlen, double s_minim, double s_maxim, double lambda, const string & cheby_type, double & x, double & xdiff, bool & inverse_order, double & exprlen)
@@ -2645,10 +2646,10 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	XYZ RAB_IK;
 	XYZ RAB_JK;
 	
-	#if FORCECHECK == 1	
-		static vector<XYZ> FORCE_3B;	// Equivalent of f3b 	
-		static ofstream FILE_FORCE_3B;
-	#endif
+#if FORCECHECK == 1	
+	static vector<XYZ> FORCE_3B;	// Equivalent of f3b 	
+	static ofstream FILE_FORCE_3B;
+#endif
 		
 	double rlen_ij,  rlen_ik,  rlen_jk;
 	double rlen_ij_dummy, rlen_ik_dummy, rlen_jk_dummy;
@@ -2696,11 +2697,11 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	double rpenalty_ij, rpenalty_ik, rpenalty_jk;
 
 	const double fcut_power = 
-    #ifndef FPENALTY_POWER
+#ifndef FPENALTY_POWER
 		3.0;
-	#else
-		FPENALTY_POWER;
-    #endif
+#else
+	FPENALTY_POWER;
+#endif
 
 	if ( ! called_before ) 
 	{
@@ -2736,7 +2737,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 		Tnd_ik  = new double [dim];
 		Tnd_jk  = new double [dim]; 
 		
-	#if FORCECHECK
+#if FORCECHECK
 
 		FORCE_3B.resize(SYSTEM.ATOMS);
 
@@ -2745,12 +2746,12 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
 		FILE_FORCE_3B.open("3b_results.dat");
 
-	#endif 
+#endif 
 	
-	CHEBY_DERIV_CONST = FF_2BODY[0].CHEBY_RANGE_HIGH - FF_2BODY[0].CHEBY_RANGE_LOW;	// Ranges should be the same for all types
-	CHEBY_DERIV_CONST /= 2.0; // i.e the width of the default cheby range
+		CHEBY_DERIV_CONST = FF_2BODY[0].CHEBY_RANGE_HIGH - FF_2BODY[0].CHEBY_RANGE_LOW;	// Ranges should be the same for all types
+		CHEBY_DERIV_CONST /= 2.0; // i.e the width of the default cheby range
 
-														// i.e the width of the default cheby range
+		// i.e the width of the default cheby range
 	}
 
 	// Main loop for Chebyshev terms:
@@ -2759,12 +2760,12 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	
 	int a1start, a1end;	
 
-	#ifndef LINK_LAMMPS
-			divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
-	#else
-		a1start = SYSTEM.MY_ATOMS_START;
-		a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-	#endif	
+#ifndef LINK_LAMMPS
+	divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+#else
+	a1start = SYSTEM.MY_ATOMS_START;
+	a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
+#endif	
 
 	// Set up for neighbor lists
 	
@@ -2860,240 +2861,248 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			}			
 		}
 		
-		/////////////////////////////////////////////
-		// EVALUATE THE 3-BODY INTERACTIONS
-		/////////////////////////////////////////////
-		
-		if(FF_2BODY[0].SNUM_3B_CHEBY>0)
-		{ 
-		
-			a2start = 0;
-			a2end   = NEIGHBOR_LIST.LIST_3B[a1].size();
-			
-			for(int a2idx=a2start; a2idx<a2end; a2idx++)	
-			{
-				a2 = NEIGHBOR_LIST.LIST_3B[a1][a2idx];
-			
-				// Get a3 as a neighbor of a1 to avoid
-				// creating neighbor lists for ghost atoms.
-				
-				a3start = 0;
-				a3end   = NEIGHBOR_LIST.LIST_3B[a1].size();
-			
-				for(int a3idx=a3start; a3idx<a3end; a3idx++)	
-				{			
-					a3 = NEIGHBOR_LIST.LIST_3B[a1][a3idx];	
-					
-					if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) 
-						continue ;
-				
-					TEMP_STR = SYSTEM.ATOMTYPE[a1];
-					TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);		
-					PAIR_TYPE_IJ = TEMP_STR;					
-					curr_pair_type_idx_ij = PAIR_MAP[TEMP_STR];
-				
-					TEMP_STR = SYSTEM.ATOMTYPE[a1];
-					TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
-					PAIR_TYPE_IK = TEMP_STR;							
-					curr_pair_type_idx_ik = PAIR_MAP[TEMP_STR];	
-		
-					TEMP_STR = SYSTEM.ATOMTYPE[a2];
-					TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
-					PAIR_TYPE_JK = TEMP_STR;							
-					curr_pair_type_idx_jk = PAIR_MAP[TEMP_STR];		
-	
-					// Determine the FF type for the given triplet
-
-					TEMP_STR =      FF_2BODY[curr_pair_type_idx_ij].PRPR_NM;
-					TEMP_STR.append(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);	
-					TEMP_STR.append(FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);	
-
-					curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
-					
-					if(curr_triple_type_index<0)
-						continue;
-				
-					rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
-					rlen_ik = get_dist(SYSTEM, RAB_IK, a1, a3);	// Updates RAB!
-					rlen_jk = get_dist(SYSTEM, RAB_JK, a2, a3);	// Updates RAB!
-
-					S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
-					S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
-					S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
-			
-					S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
-					S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
-					S_MINIM_JK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
-					
-					// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
-					// within the allowed range.
-
-					if(PROCEED(rlen_ij, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_IJ, S_MAXIM_IJ))
-					{
-						if(PROCEED(rlen_ik, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_IK, S_MAXIM_IK))
-						{
-							if(PROCEED(rlen_jk, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_JK, S_MAXIM_JK))
-							{											
-								// Everything is within allowed ranges. Begin setting up the force calculation
-								
-								rlen_ij_dummy = rlen_ij;
-								rlen_ik_dummy = rlen_ik;
-								rlen_jk_dummy = rlen_jk;
-							
-								if(rlen_ij < S_MINIM_IJ)
-									rlen_ij_dummy = S_MINIM_IJ;
-							
-								if(rlen_ik < S_MINIM_IK)
-									rlen_ik_dummy = S_MINIM_IK;
-							
-								if(rlen_jk < S_MINIM_JK)
-									rlen_jk_dummy = S_MINIM_JK;
-
-								// Set up the polynomials
-		
-								SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij_dummy, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ, FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY);
-								SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik_dummy, xdiff_ik, S_MAXIM_IK, S_MINIM_IK, FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY);
-								SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk_dummy, xdiff_jk, S_MAXIM_JK, S_MINIM_JK, FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY);
-												
-								// Apply the FF
-
-								// Set up the smoothing functions
-
-								get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-								get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-								get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-
-								// Set up terms for derivatives
-		
-								dx_dr_ij = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_ij, rlen_ij_dummy, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
-								dx_dr_ik = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_ik, rlen_ik_dummy, FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
-								dx_dr_jk = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_jk, rlen_jk_dummy, FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
-		
-								// Now compute the forces for each set of allowed powers for pairs ij, ik, and jk		
-								// Keep in mind that the order in which allowed powers are stored may not match the
-								// ordering of pairs resulting from the present atom triplet. Thus, we need to order
-								// the stored powers properly before applying the FF.
-						
-								// When doing a compare force calculation, make sure that forces on 
-								// replicate atoms are attributed to the parent atoms
-	
-								//fidx_a1 = SYSTEM.PARENT[a1];
-								fidx_a2 = SYSTEM.PARENT[a2];
-								fidx_a3 = SYSTEM.PARENT[a3];
-							
-								for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
-								{
-									SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
-		
-									coeff = FF_3BODY[curr_triple_type_index].PARAMS[i];
-			
-									SYSTEM.TOT_POT_ENER += coeff * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]; 
-
-									deriv_ij  = fcut_ij * Tnd_ij[pow_ij] * dx_dr_ij + fcutderiv_ij * Tn_ij [pow_ij];
-									deriv_ik  = fcut_ik * Tnd_ik[pow_ik] * dx_dr_ik + fcutderiv_ik * Tn_ik [pow_ik];
-									deriv_jk  = fcut_jk * Tnd_jk[pow_jk] * dx_dr_jk + fcutderiv_jk * Tn_jk [pow_jk];
-									
-									force_ij  = coeff * deriv_ij * fcut_ik * fcut_jk * Tn_ik [pow_ik] * Tn_jk [pow_jk];
-									force_ik  = coeff * deriv_ik * fcut_ij * fcut_jk * Tn_ij [pow_ij] * Tn_jk [pow_jk];
-									force_jk  = coeff * deriv_jk * fcut_ij * fcut_ik * Tn_ij [pow_ij] * Tn_ik [pow_ik];
-							
-									SYSTEM.PRESSURE_XYZ    -= force_ij * rlen_ij;
-									SYSTEM.PRESSURE_XYZ    -= force_ik * rlen_ik;
-									SYSTEM.PRESSURE_XYZ    -= force_jk * rlen_jk;
-							
-									SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
-									SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
-									SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
-							
-									SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ik * RAB_IK.X * RAB_IK.X / rlen_ik;
-									SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ik * RAB_IK.Y * RAB_IK.Y / rlen_ik;
-									SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ik * RAB_IK.Z * RAB_IK.Z / rlen_ik;
-							
-									SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_jk * RAB_JK.X * RAB_JK.X / rlen_jk;
-									SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_jk * RAB_JK.Y * RAB_JK.Y / rlen_jk;
-									SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;
-							
-									force_ij /= rlen_ij;
-									force_ik /= rlen_ik;
-									force_jk /= rlen_jk;
-
-									// Apply forces to ij pair
-			
-									SYSTEM.ACCEL[a1]     .X += force_ij * RAB_IJ.X;
-									SYSTEM.ACCEL[a1]     .Y += force_ij * RAB_IJ.Y;
-									SYSTEM.ACCEL[a1]     .Z += force_ij * RAB_IJ.Z;
-			
-									SYSTEM.ACCEL[fidx_a2].X -= force_ij * RAB_IJ.X;
-									SYSTEM.ACCEL[fidx_a2].Y -= force_ij * RAB_IJ.Y;
-									SYSTEM.ACCEL[fidx_a2].Z -= force_ij * RAB_IJ.Z;
-			
-									// Apply forces to ik pair
-			
-									SYSTEM.ACCEL[a1]     .X += force_ik * RAB_IK.X;
-									SYSTEM.ACCEL[a1]     .Y += force_ik * RAB_IK.Y;
-									SYSTEM.ACCEL[a1]     .Z += force_ik * RAB_IK.Z;	
-			
-									SYSTEM.ACCEL[fidx_a3].X -= force_ik * RAB_IK.X;
-									SYSTEM.ACCEL[fidx_a3].Y -= force_ik * RAB_IK.Y;
-									SYSTEM.ACCEL[fidx_a3].Z -= force_ik * RAB_IK.Z;	
-			
-									// Apply forces to jk pair
-			
-									SYSTEM.ACCEL[fidx_a2].X += force_jk * RAB_JK.X;
-									SYSTEM.ACCEL[fidx_a2].Y += force_jk * RAB_JK.Y;
-									SYSTEM.ACCEL[fidx_a2].Z += force_jk * RAB_JK.Z;
-			
-									SYSTEM.ACCEL[fidx_a3].X -= force_jk * RAB_JK.X;
-									SYSTEM.ACCEL[fidx_a3].Y -= force_jk * RAB_JK.Y;
-									SYSTEM.ACCEL[fidx_a3].Z -= force_jk * RAB_JK.Z;	
-
-			
-									#if FORCECHECK
-			
-										// Apply forces to ij pair
-			
-										FORCE_3B[a1]     .X += force_ij * RAB_IJ.X;
-										FORCE_3B[a1]     .Y += force_ij * RAB_IJ.Y;
-										FORCE_3B[a1]     .Z += force_ij * RAB_IJ.Z;
-			
-										FORCE_3B[fidx_a2].X -= force_ij * RAB_IJ.X;
-										FORCE_3B[fidx_a2].Y -= force_ij * RAB_IJ.Y;
-										FORCE_3B[fidx_a2].Z -= force_ij * RAB_IJ.Z;
-			
-										// Apply forces to ik pair
-			
-										FORCE_3B[a1]     .X += force_ik * RAB_IK.X;
-										FORCE_3B[a1]     .Y += force_ik * RAB_IK.Y;
-										FORCE_3B[a1]     .Z += force_ik * RAB_IK.Z;	
-			
-										FORCE_3B[fidx_a3].X -= force_ik * RAB_IK.X;
-										FORCE_3B[fidx_a3].Y -= force_ik * RAB_IK.Y;
-										FORCE_3B[fidx_a3].Z -= force_ik * RAB_IK.Z;	
-			
-										// Apply forces to jk pair
-			
-										FORCE_3B[fidx_a2].X += force_jk * RAB_JK.X;
-										FORCE_3B[fidx_a2].Y += force_jk * RAB_JK.Y;
-										FORCE_3B[fidx_a2].Z += force_jk * RAB_JK.Z;
-			
-										FORCE_3B[fidx_a3].X -= force_jk * RAB_JK.X;
-										FORCE_3B[fidx_a3].Y -= force_jk * RAB_JK.Y;
-										FORCE_3B[fidx_a3].Z -= force_jk * RAB_JK.Z;										
-			
-									#endif								
-										
-								}	
-								
-							}	
-						}				
-					}		
-				} 	
-			}
-		} 	// End 3-body outer-most loop		
 	}
+
+
+	/////////////////////////////////////////////
+	// EVALUATE THE 3-BODY INTERACTIONS
+	/////////////////////////////////////////////
+	if(FF_2BODY[0].SNUM_3B_CHEBY>0)
+	{ 
+
+		int i_start, i_end ;
+
+#ifndef LINK_LAMMPS
+		divide_atoms(i_start, i_end, NEIGHBOR_LIST.LIST_3B_INT.size()) ;	
+#else
+		// Not sure if this is correct for LAMMPS.  Please check ! (Larry)
+		i_start = 0 ;
+		i_end = NEIGHBOR_LIST.LIB_3B_INT.size() - 1 ;
+		a1start = SYSTEM.MY_ATOMS_START;
+		a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
+#endif	
+		int a1 ;
+		int INTERACTIONS = 0;
+
+		// Loop over a1, a2, a3 interaction triples, not atoms
+		for ( int ii = i_start ; ii <= i_end ; ii++ ) {
+
+			a1 = NEIGHBOR_LIST.LIST_3B_INT[ii].a1 ;
+
+#ifdef LINK_LAMMPS
+			if ( a1 < a1start || a1 > a1end ) continue ;
+#endif
+			a2 = NEIGHBOR_LIST.LIST_3B_INT[ii].a2 ;
+			a3 = NEIGHBOR_LIST.LIST_3B_INT[ii].a3 ;
+
+			if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) {
+				cout << "Bad pair found " << a3 << a2 << endl ;
+				cout << "Parents " << SYSTEM.PARENT[a2] << SYSTEM.PARENT[a3] << endl ;
+			}
+			
+			TEMP_STR = SYSTEM.ATOMTYPE[a1];
+			TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);		
+			PAIR_TYPE_IJ = TEMP_STR;					
+			curr_pair_type_idx_ij = PAIR_MAP[TEMP_STR];
+				
+			TEMP_STR = SYSTEM.ATOMTYPE[a1];
+			TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
+			PAIR_TYPE_IK = TEMP_STR;							
+			curr_pair_type_idx_ik = PAIR_MAP[TEMP_STR];	
+		
+			TEMP_STR = SYSTEM.ATOMTYPE[a2];
+			TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
+			PAIR_TYPE_JK = TEMP_STR;							
+			curr_pair_type_idx_jk = PAIR_MAP[TEMP_STR];		
 	
-//cout << "COUNTED : " << INTERACTIONS << " interactions." << endl;		
-//	return;
+			// Determine the FF type for the given triplet
+	      
+			TEMP_STR =      FF_2BODY[curr_pair_type_idx_ij].PRPR_NM;
+			TEMP_STR.append(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);	
+			TEMP_STR.append(FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);	
+
+			curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
+					
+			if(curr_triple_type_index<0)
+				continue;
+				
+			rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
+			rlen_ik = get_dist(SYSTEM, RAB_IK, a1, a3);	// Updates RAB!
+			rlen_jk = get_dist(SYSTEM, RAB_JK, a2, a3);	// Updates RAB!
+
+			S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+			S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+			S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+	      
+			S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+			S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+			S_MINIM_JK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+					
+			// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
+			// within the allowed range.
+
+			if(PROCEED(rlen_ij, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_IJ, S_MAXIM_IJ))
+			{
+				if(PROCEED(rlen_ik, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_IK, S_MAXIM_IK))
+				{
+					if(PROCEED(rlen_jk, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_JK, S_MAXIM_JK))
+					{											
+						// Everything is within allowed ranges. Begin setting up the force calculation
+			  
+						INTERACTIONS++ ;
+						//cout << a1 << " " << a2 << " " << a3 << " " << endl ;
+
+						rlen_ij_dummy = rlen_ij;
+						rlen_ik_dummy = rlen_ik;
+						rlen_jk_dummy = rlen_jk;
+			  
+						if(rlen_ij < S_MINIM_IJ)
+							rlen_ij_dummy = S_MINIM_IJ;
+			  
+						if(rlen_ik < S_MINIM_IK)
+							rlen_ik_dummy = S_MINIM_IK;
+							
+						if(rlen_jk < S_MINIM_JK)
+							rlen_jk_dummy = S_MINIM_JK;
+
+						// Set up the polynomials
+			  
+						SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij_dummy, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ, FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY);
+						SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik_dummy, xdiff_ik, S_MAXIM_IK, S_MINIM_IK, FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY);
+						SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk_dummy, xdiff_jk, S_MAXIM_JK, S_MINIM_JK, FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY);
+												
+						// Apply the FF
+
+						// Set up the smoothing functions
+
+						get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+						get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+						get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+
+						// Set up terms for derivatives
+		
+						dx_dr_ij = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_ij, rlen_ij_dummy, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
+						dx_dr_ik = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_ik, rlen_ik_dummy, FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
+						dx_dr_jk = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_jk, rlen_jk_dummy, FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
+		
+						// Now compute the forces for each set of allowed powers for pairs ij, ik, and jk		
+						// Keep in mind that the order in which allowed powers are stored may not match the
+						// ordering of pairs resulting from the present atom triplet. Thus, we need to order
+						// the stored powers properly before applying the FF.
+			  
+						// When doing a compare force calculation, make sure that forces on 
+						// replicate atoms are attributed to the parent atoms
+	
+						//fidx_a1 = SYSTEM.PARENT[a1];
+						fidx_a2 = SYSTEM.PARENT[a2];
+						fidx_a3 = SYSTEM.PARENT[a3];
+							
+						for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
+						{
+							SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
+			      
+							coeff = FF_3BODY[curr_triple_type_index].PARAMS[i];
+			      
+							SYSTEM.TOT_POT_ENER += coeff * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]; 
+
+							deriv_ij  = fcut_ij * Tnd_ij[pow_ij] * dx_dr_ij + fcutderiv_ij * Tn_ij [pow_ij];
+							deriv_ik  = fcut_ik * Tnd_ik[pow_ik] * dx_dr_ik + fcutderiv_ik * Tn_ik [pow_ik];
+							deriv_jk  = fcut_jk * Tnd_jk[pow_jk] * dx_dr_jk + fcutderiv_jk * Tn_jk [pow_jk];
+									
+							force_ij  = coeff * deriv_ij * fcut_ik * fcut_jk * Tn_ik [pow_ik] * Tn_jk [pow_jk];
+							force_ik  = coeff * deriv_ik * fcut_ij * fcut_jk * Tn_ij [pow_ij] * Tn_jk [pow_jk];
+							force_jk  = coeff * deriv_jk * fcut_ij * fcut_ik * Tn_ij [pow_ij] * Tn_ik [pow_ik];
+							
+							SYSTEM.PRESSURE_XYZ    -= force_ij * rlen_ij;
+							SYSTEM.PRESSURE_XYZ    -= force_ik * rlen_ik;
+							SYSTEM.PRESSURE_XYZ    -= force_jk * rlen_jk;
+							
+							SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
+							SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
+							SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
+							
+							SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ik * RAB_IK.X * RAB_IK.X / rlen_ik;
+							SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ik * RAB_IK.Y * RAB_IK.Y / rlen_ik;
+							SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ik * RAB_IK.Z * RAB_IK.Z / rlen_ik;
+							
+							SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_jk * RAB_JK.X * RAB_JK.X / rlen_jk;
+							SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_jk * RAB_JK.Y * RAB_JK.Y / rlen_jk;
+							SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;
+							
+							force_ij /= rlen_ij;
+							force_ik /= rlen_ik;
+							force_jk /= rlen_jk;
+
+							// Apply forces to ij pair
+			      
+							SYSTEM.ACCEL[a1]     .X += force_ij * RAB_IJ.X;
+							SYSTEM.ACCEL[a1]     .Y += force_ij * RAB_IJ.Y;
+							SYSTEM.ACCEL[a1]     .Z += force_ij * RAB_IJ.Z;
+			
+							SYSTEM.ACCEL[fidx_a2].X -= force_ij * RAB_IJ.X;
+							SYSTEM.ACCEL[fidx_a2].Y -= force_ij * RAB_IJ.Y;
+							SYSTEM.ACCEL[fidx_a2].Z -= force_ij * RAB_IJ.Z;
+			
+							// Apply forces to ik pair
+			      
+							SYSTEM.ACCEL[a1]     .X += force_ik * RAB_IK.X;
+							SYSTEM.ACCEL[a1]     .Y += force_ik * RAB_IK.Y;
+							SYSTEM.ACCEL[a1]     .Z += force_ik * RAB_IK.Z;	
+			
+							SYSTEM.ACCEL[fidx_a3].X -= force_ik * RAB_IK.X;
+							SYSTEM.ACCEL[fidx_a3].Y -= force_ik * RAB_IK.Y;
+							SYSTEM.ACCEL[fidx_a3].Z -= force_ik * RAB_IK.Z;	
+			
+							// Apply forces to jk pair
+			      
+							SYSTEM.ACCEL[fidx_a2].X += force_jk * RAB_JK.X;
+							SYSTEM.ACCEL[fidx_a2].Y += force_jk * RAB_JK.Y;
+							SYSTEM.ACCEL[fidx_a2].Z += force_jk * RAB_JK.Z;
+			
+							SYSTEM.ACCEL[fidx_a3].X -= force_jk * RAB_JK.X;
+							SYSTEM.ACCEL[fidx_a3].Y -= force_jk * RAB_JK.Y;
+							SYSTEM.ACCEL[fidx_a3].Z -= force_jk * RAB_JK.Z;	
+
+			      
+#if FORCECHECK
+			      
+							// Apply forces to ij pair
+			      
+							FORCE_3B[a1]     .X += force_ij * RAB_IJ.X;
+							FORCE_3B[a1]     .Y += force_ij * RAB_IJ.Y;
+							FORCE_3B[a1]     .Z += force_ij * RAB_IJ.Z;
+			      
+							FORCE_3B[fidx_a2].X -= force_ij * RAB_IJ.X;
+							FORCE_3B[fidx_a2].Y -= force_ij * RAB_IJ.Y;
+							FORCE_3B[fidx_a2].Z -= force_ij * RAB_IJ.Z;
+			
+							// Apply forces to ik pair
+			      
+							FORCE_3B[a1]     .X += force_ik * RAB_IK.X;
+							FORCE_3B[a1]     .Y += force_ik * RAB_IK.Y;
+							FORCE_3B[a1]     .Z += force_ik * RAB_IK.Z;	
+			
+							FORCE_3B[fidx_a3].X -= force_ik * RAB_IK.X;
+							FORCE_3B[fidx_a3].Y -= force_ik * RAB_IK.Y;
+							FORCE_3B[fidx_a3].Z -= force_ik * RAB_IK.Z;	
+			
+							// Apply forces to jk pair
+			      
+							FORCE_3B[fidx_a2].X += force_jk * RAB_JK.X;
+							FORCE_3B[fidx_a2].Y += force_jk * RAB_JK.Y;
+							FORCE_3B[fidx_a2].Z += force_jk * RAB_JK.Z;
+			      
+							FORCE_3B[fidx_a3].X -= force_jk * RAB_JK.X;
+							FORCE_3B[fidx_a3].Y -= force_jk * RAB_JK.Y;
+							FORCE_3B[fidx_a3].Z -= force_jk * RAB_JK.Z;										
+#endif								
+						}	
+					}	
+				}				
+			}		
+		} 	// Loop over interactions.
+		// cout << "COUNTED: " << INTERACTIONS << "3-body interactions." << endl;		
+	}  // If 3-body interaction.
 } 
 
 static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)

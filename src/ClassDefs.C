@@ -139,6 +139,10 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		DO_UPDATE_SMALL(SYSTEM, CONTROLS);
 	else 
 		DO_UPDATE_BIG(SYSTEM, CONTROLS);
+
+	if ( CONTROLS.USE_3B_CHEBY ) {
+	  UPDATE_3B_INTERACTION(SYSTEM, CONTROLS) ;
+	}
 }	
 
 void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)	
@@ -194,7 +198,7 @@ void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	FIRST_CALL = false;	
 }
 
-void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS) // NOT WORKING CORRECTLY CURRENTLY, EVEN FOR 2B -- MISSES CERTAIN ATOMS
+void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS) 
 // Order-N Neighbor list update with binning of particles.
 {
 	XYZ RAB;
@@ -958,3 +962,37 @@ double CONSTRAINT::CONSERVED_QUANT (FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 	
 }
+
+void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) 
+// Build a list of all 3-body interactions.  This "flat" list parallelizes much
+// more efficiently than a nested neighbor list loop.
+{
+	XYZ RAB ;  
+	INTERACTION_3B inter ;
+
+	LIST_3B_INT.clear() ;
+	for ( int i = 0 ; i < SYSTEM.ATOMS ; i++ ) {
+		int ai = i ;
+		for ( int j = 0 ; j < LIST_3B[i].size() ; j++ ) {
+			int aj = LIST_3B[i][j] ;
+			for ( int k = 0 ; k < LIST_3B[i].size() ; k++ ) {
+				int ak = LIST_3B[i][k] ;
+
+				if ( aj == ak || SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] ) 
+					continue;
+
+				// The j-k list is possibly outside of the cutoff, so test it here.
+				double rlen = get_dist(SYSTEM, RAB, aj, ak);
+	
+				if ( rlen < MAX_CUTOFF_3B + RCUT_PADDING ) {
+					inter.a1 = ai ;
+					inter.a2 = aj ;
+					inter.a3 = ak ;
+	  
+					LIST_3B_INT.push_back(inter) ;
+				}
+			}
+		}
+	}
+}
+
