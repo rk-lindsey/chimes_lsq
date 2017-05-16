@@ -11,6 +11,9 @@
 #
 ###############################################################
 
+# SVD regularization factor.
+EPS_FAC=1.0e-09
+
 if [ $# -eq 0 ] 
 then
 JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby' #  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
@@ -24,7 +27,7 @@ SOURCE_BASE="${TESTSU_BASE}/../src/"
 # Run the job with the new version of the python code (Compatible with non-generalized md code)
 #
 PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq-new-md-fmt.py" # Path to the python code.
-RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map TEST_SUITE_RUN"
+RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map ${EPS_FAC} TEST_SUITE_RUN"
 
 # Run the job with the old version of the python code (Compatible with non-generalized md code)
 #

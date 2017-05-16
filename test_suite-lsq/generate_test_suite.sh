@@ -11,6 +11,9 @@
 #
 ###############################################################
 
+# SVD regularization factor.
+EPS_FAC=1.0e-09
+
 TESTSU_BASE=`pwd -P` #`dirname $0`
 SOURCE_BASE="${TESTSU_BASE}/../src/"
 
@@ -79,8 +82,7 @@ do
 
 	cd $i/current_output
 	
-	python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map TEST_SUITE_RUN > params.txt
-	
+	python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map $EPS_FAC TEST_SUITE_RUN > params.txt
 	
 	for j in params.txt force.txt
 	do

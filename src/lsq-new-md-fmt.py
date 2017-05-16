@@ -13,23 +13,23 @@ TEST_SUITE_RUN = False
 DO_WEIGHTING   = False
 WEIGHTS        = None
 
-if(len(sys.argv) < 5):
-    print "Usage is: ./lsq.py A.txt b.txt params.header ff_groups.map"
+if(len(sys.argv) < 6):
+    print "Usage is: ./lsq.py A.txt b.txt params.header ff_groups.map eps_fac"
     print "or "
-    print "./lsq.py A.txt b.txt params.header ff_groups.map TESTING"
+    print "./lsq.py A.txt b.txt params.header ff_groups.map eps_fac TESTING"
     print "or "
-    print "./lsq.py A.txt b.txt params.header ff_groups.map WEIGHTS weight_file.txt" 
+    print "./lsq.py A.txt b.txt params.header ff_groups.map eps_fac WEIGHTS weight_file.txt" 
     sys.exit()
     
-if(len (sys.argv) == 6): 
+if(len (sys.argv) == 7): 
 	# Then this run is being used for the test suite... 
 	# print out parameters without any fanciness so tolerances can be checked  
 	TEST_SUITE_RUN = "do"
 	
-if(len (sys.argv) == 7): 
+if(len (sys.argv) == 8): 
 	# Then this run is being used for the test suite... 
 	# print out parameters without any fanciness so tolerances can be checked  
-	WEIGHTS=open(sys.argv[6],"r").readlines()
+	WEIGHTS=open(sys.argv[7],"r").readlines()
 	DO_WEIGHTING = True	
 
 #################################
@@ -46,6 +46,7 @@ if(len (sys.argv) == 7):
 af=open(sys.argv[1],"r").readlines()
 bf=open(sys.argv[2],"r").readlines()
 hf=open(sys.argv[3],"r").readlines()
+eps_fac = float(sys.argv[5]) ;
 
 nlines=len(af)
 nlines2=len(bf)
@@ -56,8 +57,8 @@ if ( nlines != nlines2 ):
 np=len(af[0].split())
 print "! Date ", date.today() ;
 print "!"
-print "! Number of columns = ", np
-print "! Number of rows    = ", nlines
+print "! Number of variables = ", np
+print "! Number of equations    = ", nlines
 
 A=zeros((nlines,np))
 b=zeros((nlines))
@@ -108,11 +109,12 @@ for i in range(0,len(Dmat)):
 
 # Cut off singular values based on fraction of maximum value as per 
 # numerical recipes (LEF).
-eps=1.0e-5 * dmax
-
+eps=eps_fac * dmax
+nvars = 0
 for i in range(0,len(D)):
     if(abs(D[i])>eps):
         Dmat[i][i]=1.0/D[i]
+        nvars = nvars + 1
 
 x=dot(transpose(VT),Dmat)
 
@@ -136,10 +138,15 @@ for a in range(0,len(b)):
     Z=Z+(y[a]-b[a])**2.0
     yfile.write("%13.6e\n"% y[a]) 
 
+
+bic = float(nlines) * log(Z/float(nlines)) + float(nvars) * log(float(nlines))
+
 print "! RMS force error = " , sqrt(Z/float(nlines))
-print "! max variable = ",  max(x)
+print "! max abs variable = ",  max(abs(x))
+print "! SVD regularization factor = ", eps_fac
+print "! number of SVD fitting vars = ", nvars
+print "! Bayesian Information Criterion =  ", bic
 print "!"
-print " "
 
 for i in range(0, len(hf)):
     sys.stdout.write(hf[i])
