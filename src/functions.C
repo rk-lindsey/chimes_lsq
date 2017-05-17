@@ -10,6 +10,10 @@
 
 using namespace std;
 
+
+extern 	vector<int>	INT_PAIR_MAP;
+extern	vector<int>	INT_TRIAD_MAP;	
+
 //////////////////////////////////////////
 //
 //	SMALL UTILITY FUNCTION
@@ -331,6 +335,7 @@ static inline double fix_cheby_val(double x, bool inverse_order)
 	
 	if ( x < -1.0)
 		return x = -1.0;
+
 	else if ( x > 1.0 )
 		return x = 1.0;								
 	else
@@ -498,6 +503,38 @@ double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS)		// U
 // 3B Cheby functions
 //////////////////////////////////////////
  
+void SORT_THREE_DESCEND(int & a, int & b, int & c)
+{
+	static int tmp;
+	
+	tmp = a;
+	
+	if(b>a)
+	{
+		tmp = a;
+		a = b;
+		b = tmp;
+	}
+	
+	tmp = a;
+	
+	if(c>a)
+	{
+		tmp = a;
+		a = c;
+		c = tmp;
+	}
+	
+	tmp = b;
+	
+	if(c>b)
+	{
+		tmp = b;
+		b = c;
+		c = tmp;
+	}
+} 
+ 
 void SET_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rlen, double & xdiff, double SMAX, double SMIN, double SNUM)	//  FF_2BODY.SNUM_3B_CHEBY
 // Sets the value of the Chebyshev polynomials (Tn) and thier derivatives (Tnd)
 {
@@ -638,7 +675,7 @@ void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<st
 	}
 }
 
-void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) // MD version
+void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) // MD version - 1
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
 {
 	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATMPAIR1)
@@ -679,6 +716,65 @@ void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<stri
 	else // PAIR_TYPE_IJ matches alloweD[i].z
 	{
 		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATMPAIR1)
+		{
+			// Then jk = z
+			
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+		}
+		else
+		{
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+		}										
+	}	
+}
+
+void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, int PAIR_TYPE_IJ, int PAIR_TYPE_IK, int PAIR_TYPE_JK, int POWER_SET) // MD version - 2
+// Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
+{
+	
+	
+	if    (FF_2BODY[PAIR_TYPE_IJ].PRPR_NM == FF_3BODY.ATMPAIR1)
+	{
+		if    (FF_2BODY[ PAIR_TYPE_IK].PRPR_NM == FF_3BODY.ATMPAIR2)
+		{
+			// Then jk = z
+			
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+		}
+		else
+		{
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+		}
+
+	}
+	else if(FF_2BODY[PAIR_TYPE_IJ].PRPR_NM == FF_3BODY.ATMPAIR2)
+	{
+		if    (FF_2BODY[PAIR_TYPE_IK].PRPR_NM == FF_3BODY.ATMPAIR1)
+		{
+			// Then jk = z
+			
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+		}
+		else
+		{
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+		}										
+	}
+	else // PAIR_TYPE_IJ matches alloweD[i].z
+	{
+		if    (FF_2BODY[PAIR_TYPE_IK].PRPR_NM == FF_3BODY.ATMPAIR1)
 		{
 			// Then jk = z
 			
@@ -800,6 +896,7 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	}
 
 	REPLICATE.ATOMTYPE    .resize(REPLICATE.ALL_ATOMS);
+	REPLICATE.ATOMTYPE_IDX.resize(REPLICATE.ALL_ATOMS);
 	REPLICATE.PARENT      .resize(REPLICATE.ALL_ATOMS);
 	REPLICATE.ALL_COORDS  .resize(REPLICATE.ALL_ATOMS);
 	REPLICATE.CHARGES     .resize(REPLICATE.ALL_ATOMS);
@@ -808,10 +905,11 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 
 	for(int i=0; i<REPLICATE.ALL_ATOMS; i++)
 	{
-		REPLICATE.ATOMTYPE[i] 	= SYSTEM.ATOMTYPE[i];
-		REPLICATE.PARENT[i] 	= SYSTEM.PARENT[i];
-		REPLICATE.CHARGES[i] 	= SYSTEM.CHARGES[i];
-		REPLICATE.MASS[i] 		= SYSTEM.MASS[i];
+		REPLICATE.ATOMTYPE    [i] = SYSTEM.ATOMTYPE[i];
+		REPLICATE.ATOMTYPE_IDX[i] = SYSTEM.ATOMTYPE_IDX[i];
+		REPLICATE.PARENT      [i] = SYSTEM.PARENT[i];
+		REPLICATE.CHARGES     [i] = SYSTEM.CHARGES[i];
+		REPLICATE.MASS        [i] = SYSTEM.MASS[i];
 
 		REPLICATE.LAYER_IDX[i].X = SYSTEM.LAYER_IDX[i].X;
 		REPLICATE.LAYER_IDX[i].Y = SYSTEM.LAYER_IDX[i].X;
@@ -2011,7 +2109,24 @@ void ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,
 		curr_pair_type_idx_ij = PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1];
 		curr_pair_type_idx_ik = PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR2];
 		curr_pair_type_idx_jk = PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR3];
+
+/* TO WRITE OUT BINS		
+string TEMP_NAME = 	PAIR_TRIPLETS[i].ATMPAIR1;
+TEMP_NAME.append(   PAIR_TRIPLETS[i].ATMPAIR2);
+TEMP_NAME.append(   PAIR_TRIPLETS[i].ATMPAIR3);
+TEMP_NAME.append("temp_hist_out.dat");
+ofstream TMP_HIST_OUT;
+TMP_HIST_OUT.open(TEMP_NAME);
+*/
 		
+/* TO READ IN BINS 	
+string TEMP_NAME = 	PAIR_TRIPLETS[i].ATMPAIR1;
+TEMP_NAME.append(   PAIR_TRIPLETS[i].ATMPAIR2);
+TEMP_NAME.append(   PAIR_TRIPLETS[i].ATMPAIR3);
+TEMP_NAME.append("temp_hist_out.dat");
+ifstream TMP_HIST_OUT;
+TMP_HIST_OUT.open(TEMP_NAME);	
+*/		
 		for(int x=0; x<PAIR_TRIPLETS[i].NBINS.X; x++)
 		{
 			if( ((x+1)<6*COMBINE) && ((x+1)%COMBINE==0))
@@ -2072,7 +2187,17 @@ void ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,
 					
 					//OUTFILE_3B_POP_HIST << rlen_ij << " " << rlen_ik << " " << rlen_jk << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
 					OUTFILE_3B_POP_HIST << rlen_ik << " " << rlen_jk << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
-					
+/* TO WRITE OUT BINS					
+TMP_HIST_OUT << x << " " << y << " " << z << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
+*/	
+
+/* TO READ IN BINS
+int xx, yy, zz, pop; 
+TMP_HIST_OUT >> xx >> yy >> zz >> pop;
+PAIR_TRIPLETS[i].POP_HIST[xx][yy][zz] += pop;
+*/					
+										
+									
 					if(PAIR_TRIPLETS[i].POP_HIST[x][y][z] == 0)	// Then we need to add an entry to the A matrix
 					{						
 						// Begin setting up the derivative calculation
@@ -2125,7 +2250,13 @@ void ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,
 			
 			OUTFILE_3B_POP_HIST.close();
 		}
-
+/* TO WRITE OUT BINS		
+TMP_HIST_OUT.close();	
+*/	
+		
+/* TO READ IN BINS	
+TMP_HIST_OUT.close();
+*/
 		cout << "For pair triplet " << i << " added " << ADDED_LINES << " elements of the " << fixed << setprecision(0) << PAIR_TRIPLETS[i].NBINS.X << "*" << PAIR_TRIPLETS[i].NBINS.Y <<"*"<< PAIR_TRIPLETS[i].NBINS.Z << " = "<< 
 			PAIR_TRIPLETS[i].NBINS.X*PAIR_TRIPLETS[i].NBINS.Y*PAIR_TRIPLETS[i].NBINS.Z << " possible bins " << endl;
 		
@@ -2646,10 +2777,10 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	XYZ RAB_IK;
 	XYZ RAB_JK;
 	
-#if FORCECHECK == 1	
-	static vector<XYZ> FORCE_3B;	// Equivalent of f3b 	
-	static ofstream FILE_FORCE_3B;
-#endif
+	#if FORCECHECK == 1	
+		static vector<XYZ> FORCE_3B;	// Equivalent of f3b 	
+		static ofstream FILE_FORCE_3B;
+	#endif
 		
 	double rlen_ij,  rlen_ik,  rlen_jk;
 	double rlen_ij_dummy, rlen_ik_dummy, rlen_jk_dummy;
@@ -2697,11 +2828,11 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	double rpenalty_ij, rpenalty_ik, rpenalty_jk;
 
 	const double fcut_power = 
-#ifndef FPENALTY_POWER
+    #ifndef FPENALTY_POWER
 		3.0;
-#else
-	FPENALTY_POWER;
-#endif
+	#else
+		FPENALTY_POWER;
+    #endif
 
 	if ( ! called_before ) 
 	{
@@ -2737,7 +2868,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 		Tnd_ik  = new double [dim];
 		Tnd_jk  = new double [dim]; 
 		
-#if FORCECHECK
+	#if FORCECHECK
 
 		FORCE_3B.resize(SYSTEM.ATOMS);
 
@@ -2746,12 +2877,12 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
 		FILE_FORCE_3B.open("3b_results.dat");
 
-#endif 
+	#endif 
 	
-		CHEBY_DERIV_CONST = FF_2BODY[0].CHEBY_RANGE_HIGH - FF_2BODY[0].CHEBY_RANGE_LOW;	// Ranges should be the same for all types
-		CHEBY_DERIV_CONST /= 2.0; // i.e the width of the default cheby range
+	CHEBY_DERIV_CONST = FF_2BODY[0].CHEBY_RANGE_HIGH - FF_2BODY[0].CHEBY_RANGE_LOW;	// Ranges should be the same for all types
+	CHEBY_DERIV_CONST /= 2.0; // i.e the width of the default cheby range
 
-		// i.e the width of the default cheby range
+														// i.e the width of the default cheby range
 	}
 
 	// Main loop for Chebyshev terms:
@@ -2760,12 +2891,12 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	
 	int a1start, a1end;	
 
-#ifndef LINK_LAMMPS
-	divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
-#else
-	a1start = SYSTEM.MY_ATOMS_START;
-	a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-#endif	
+	#ifndef LINK_LAMMPS
+			divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+	#else
+		a1start = SYSTEM.MY_ATOMS_START;
+		a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
+	#endif	
 
 	// Set up for neighbor lists
 	
@@ -2781,12 +2912,12 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 		{
 			a2 = NEIGHBOR_LIST.LIST[a1][a2idx];			
 			
-			
-			TEMP_STR = SYSTEM.ATOMTYPE[a1];
-			TEMP_STR.append(SYSTEM.ATOMTYPE[SYSTEM.PARENT[a2]]);		
-			PAIR_TYPE_IJ = TEMP_STR;					
-			curr_pair_type_idx_ij = PAIR_MAP[TEMP_STR];
-			
+			#ifndef LINK_LAMMPS
+				curr_pair_type_idx_ij =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+			#else
+				curr_pair_type_idx_ij =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
+			#endif
+		
 			rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
 								
 			if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MAXIM)	// We want to evaluate the penalty function when r < rmin (LEF) .. Assumes 3b inner cutoff is never shorter than 2b's
@@ -2872,15 +3003,16 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
 		int i_start, i_end ;
 
-#ifndef LINK_LAMMPS
-		divide_atoms(i_start, i_end, NEIGHBOR_LIST.LIST_3B_INT.size()) ;	
-#else
-		// Not sure if this is correct for LAMMPS.  Please check ! (Larry)
-		i_start = 0 ;
-		i_end = NEIGHBOR_LIST.LIB_3B_INT.size() - 1 ;
-		a1start = SYSTEM.MY_ATOMS_START;
-		a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-#endif	
+		#ifndef LINK_LAMMPS
+			divide_atoms(i_start, i_end, NEIGHBOR_LIST.LIST_3B_INT.size()) ;	
+		#else
+			// Not sure if this is correct for LAMMPS.  Please check ! (Larry) -- it looks correct (RKL)
+			i_start = 0 ;
+			i_end = NEIGHBOR_LIST.LIST_3B_INT.size() - 1 ;
+			a1start = SYSTEM.MY_ATOMS_START;
+			a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
+		#endif	
+		
 		int a1 ;
 		int INTERACTIONS = 0;
 
@@ -2889,9 +3021,10 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
 			a1 = NEIGHBOR_LIST.LIST_3B_INT[ii].a1 ;
 
-#ifdef LINK_LAMMPS
-			if ( a1 < a1start || a1 > a1end ) continue ;
-#endif
+			#ifdef LINK_LAMMPS
+				if ( a1 < a1start || a1 > a1end ) continue ;
+			#endif
+			
 			a2 = NEIGHBOR_LIST.LIST_3B_INT[ii].a2 ;
 			a3 = NEIGHBOR_LIST.LIST_3B_INT[ii].a3 ;
 
@@ -2900,28 +3033,29 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 				cout << "Parents " << SYSTEM.PARENT[a2] << SYSTEM.PARENT[a3] << endl ;
 			}
 			
-			TEMP_STR = SYSTEM.ATOMTYPE[a1];
-			TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);		
-			PAIR_TYPE_IJ = TEMP_STR;					
-			curr_pair_type_idx_ij = PAIR_MAP[TEMP_STR];
-				
-			TEMP_STR = SYSTEM.ATOMTYPE[a1];
-			TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
-			PAIR_TYPE_IK = TEMP_STR;							
-			curr_pair_type_idx_ik = PAIR_MAP[TEMP_STR];	
-		
-			TEMP_STR = SYSTEM.ATOMTYPE[a2];
-			TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
-			PAIR_TYPE_JK = TEMP_STR;							
-			curr_pair_type_idx_jk = PAIR_MAP[TEMP_STR];		
+			#ifndef LINK_LAMMPS
+				curr_pair_type_idx_ij =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]               *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+				curr_pair_type_idx_ik =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]               *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]];
+				curr_pair_type_idx_jk =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]];
 	
-			// Determine the FF type for the given triplet
-	      
-			TEMP_STR =      FF_2BODY[curr_pair_type_idx_ij].PRPR_NM;
-			TEMP_STR.append(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);	
-			TEMP_STR.append(FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);	
+				int idx1 = SYSTEM.ATOMTYPE_IDX[a1];
+				int idx2 = SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]];
+				int idx3 = SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]];
+			#else
+				curr_pair_type_idx_ij =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)               *CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
+				curr_pair_type_idx_ik =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)               *CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]-1)];
+				curr_pair_type_idx_jk =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]-1)];
 
-			curr_triple_type_index = TRIAD_MAP[TEMP_STR];	
+				int idx1 = SYSTEM.ATOMTYPE_IDX[a1]-1;
+				int idx2 = SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1;
+				int idx3 = SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]-1;
+			#endif
+
+
+                    	SORT_THREE_DESCEND(idx1, idx2, idx3);
+
+                    	idx1 = 100*idx1 + 10*idx2 + idx3;
+                    	curr_triple_type_index = INT_TRIAD_MAP[idx1];
 					
 			if(curr_triple_type_index<0)
 				continue;
@@ -2999,7 +3133,8 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 							
 						for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 						{
-							SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
+							//SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
+							SET_3B_CHEBY_POWERS_NEW(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, curr_pair_type_idx_ij, curr_pair_type_idx_ik, curr_pair_type_idx_jk, i);
 			      
 							coeff = FF_3BODY[curr_triple_type_index].PARAMS[i];
 			      
@@ -3108,9 +3243,9 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
 // Calculate LJ interaction.. first parameter is epsilon, second parameter is sigma. ...eventually SMAX should be used for the pair distance cutoff value...
 {
-	XYZ		RVEC, RAB; 
+	XYZ	RVEC, RAB; 
 	double	rlen_mi;
-	int		curr_pair_type_idx;
+	int	curr_pair_type_idx;
 	double	fac;
 	string	TEMP_STR;
 	
@@ -3135,11 +3270,12 @@ static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		for(int a2idx =a2start ; a2idx < a2end ;a2idx++)
 		{			
 			int a2 = NEIGHBOR_LIST.LIST[a1][a2idx] ;
-
-			TEMP_STR = SYSTEM.ATOMTYPE[a1];
-			TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);
 					
-			curr_pair_type_idx = PAIR_MAP[TEMP_STR];
+			#ifndef LINK_LAMMPS
+				curr_pair_type_idx =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+			#else
+				curr_pair_type_idx =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
+			#endif
 
 			// pair interaction cutoff distance.
 			double rcutoff = FF_2BODY[curr_pair_type_idx].S_MAXIM ;
@@ -3218,12 +3354,13 @@ static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 			a2 = NEIGHBOR_LIST.LIST[a1][a2idx];
 
 			rlen = get_dist(SYSTEM, RAB, a1, a2);	// Updates RAB!
-			
-			TEMP_STR = SYSTEM.ATOMTYPE[a1];
-			TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);
-							
-			curr_pair_type_idx = PAIR_MAP[TEMP_STR];
-
+								
+			#ifndef LINK_LAMMPS
+				curr_pair_type_idx =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+			#else
+				curr_pair_type_idx =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
+			#endif
+				
 			if(rlen > FF_2BODY[curr_pair_type_idx].S_MINIM && rlen < FF_2BODY[curr_pair_type_idx].S_MAXIM)
 			{			
 
@@ -3377,10 +3514,12 @@ static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 			{
 				int ak = NEIGHBOR_LIST.LIST_UNORDERED[ai][akidx];
 
-				TEMP_STR = SYSTEM.ATOMTYPE[ai];
-				TEMP_STR.append(SYSTEM.ATOMTYPE[ak]);
-				curr_pair_type_idx = PAIR_MAP[TEMP_STR];	
-	
+				#ifndef LINK_LAMMPS
+					curr_pair_type_idx =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[ai]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[ak]]];
+				#else
+					curr_pair_type_idx =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[ai]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[ak]]-1)];
+				#endif
+					
 				if(FF_2BODY[curr_pair_type_idx].USE_OVRPRMS)  // Then we should have a defined pair type
 				{									
 					rik = get_dist(SYSTEM, RAB, ai, ak) ;
@@ -3409,9 +3548,8 @@ static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 		for(int akidx = a2start ; akidx < a2end ; akidx++ )
 		{	
 			int ak = NEIGHBOR_LIST.LIST_UNORDERED[ai][akidx];
-			TEMP_STR = SYSTEM.ATOMTYPE[ai];
-			TEMP_STR.append(SYSTEM.ATOMTYPE[ak]);
-			curr_pair_type_idx = PAIR_MAP[TEMP_STR];
+
+			curr_pair_type_idx =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[ai]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[ak]]];
 
 			if((FF_2BODY[curr_pair_type_idx].USE_OVRPRMS && SYSTEM.ATOMTYPE[ai] == FF_2BODY[curr_pair_type_idx].OVER_TO_ATM))
 			{

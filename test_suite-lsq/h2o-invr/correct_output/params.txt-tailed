@@ -1,10 +1,12 @@
 !
-! Number of columns =  13
-! Number of rows    =  28512
+! Number of variables =  13
+! Number of equations    =  28512
 ! RMS force error =  12.3258183454
-! max variable =  13.9424247098
+! max abs variable =  13.9424247098
+! SVD regularization factor =  1e-05
+! number of SVD fitting vars =  12
+! Bayesian Information Criterion =   143350.056221
 !
- 
 USECOUL: false
 FITCOUL: false
 USEPOVR: true

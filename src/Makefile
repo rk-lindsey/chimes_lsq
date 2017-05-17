@@ -4,7 +4,7 @@
 
 # For linking to LAMMPS:
 
-LINK2LMPS= no
+LINK2LMPS=no
 LAMMPSDIR=/usr/gapps/polymers/lammps_borax/
 
 # Compiling flags
@@ -21,19 +21,13 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 
 # Compilers
 
-# Use mpicxx in conjunction with use mvapich2-intel-2.2 for intel compiler + infiniband (fastest) MPI.
-# use ic-17.0.174
-# use mvapich2-intel-2.2
-CXX=mpicxx  -std=c++11  -O3 -D USE_MPI 
-
 #CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-#CXX=mpicc  -std=c++11  -O3 -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=icc -g				# Serial, for debugging
 #CXX=icc -O3
 #CXX=g++ -std=c++11 -g			# Serial, let compiler optimize to a very high level (see also -O2)
-#CXX=g++ -std=c++11 -O3			# Serial, let compiler optimize to a very high level (see also -O2)
+CXX=g++ -std=c++11 -O3			# Serial, let compiler optimize to a very high level (see also -O2)
 #
 # Below: Other debugging/optimiazation options
 #
@@ -55,13 +49,8 @@ house_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
 clean_lsq:
 	/bin/rm -f splines_ls.o functions.o Ewald.o
 
-realclean: realclean_lsq realclean_md
-
 realclean_lsq: clean_lsq
 	rm -f house_lsq 
-
-realclean_md : clean_md
-	rm -r house_md
 
 build_tests_lsq:
 	cd ../test_suite-lsq
@@ -88,7 +77,10 @@ else
 endif
 
 clean_md:
-	/bin/rm -f house_md.o
+	/bin/rm -f *.o
+
+realclean_md: clean_md
+	/bin/rm -f house_md
 
 build_tests_md:
 	cd ../test_suite-md

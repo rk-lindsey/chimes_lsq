@@ -12,6 +12,12 @@ NP=16
 cd ../src
 rm -rf *o *dSYM house_md
 cp Makefile Makefile-back
+
+cp Makefile-TS-LSQ Makefile
+module load intel
+make house_md
+mv house_md ../test_suite-md/house_md-serial
+
 cp Makefile-TS-MD Makefile
 module load intel impi
 make house_md;  
@@ -93,7 +99,8 @@ do
 		if [[ "$i" == "generic-lj" || "$i" == "h2o-2bcheby-numpress" ]] ; then
 		
 			# Numerical pressure calcs currently only supported on 1 proc
-			../house_md < run_md.in > run_md.out
+			echo "Running in serial (numerical pressure)"
+			../house_md-serial < run_md.in > run_md.out
 			
 		else
 			srun -n $NP ../house_md < run_md.in > run_md.out
@@ -135,6 +142,7 @@ do
 	cd ..
 done
 
+
 ########################################
 # Iterate through the tests -- MD/LSQ CODE COMPATIBILITY
 ########################################
@@ -154,8 +162,8 @@ cd ../test_suite-md
 cd ../test_suite-lsq 
 ./run_test_suite.sh $LSQ_JOBS
 
-cd ../src
-mv Makefile-back Makefile
+#cd ../src
+#mv Makefile-back Makefile
 
 cd ../test_suite-md
 

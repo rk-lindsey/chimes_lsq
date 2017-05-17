@@ -12,7 +12,7 @@
 ###############################################################
 
 # SVD regularization factor.
-EPS_FAC=1.0e-09
+EPS_FAC=1.0e-5 # 1.0E-5 is the old default value... should match value used in gen test suite script.  1.0e-09
 
 TESTSU_BASE=`pwd -P` #`dirname $0`
 SOURCE_BASE="${TESTSU_BASE}/../src/"
@@ -29,7 +29,10 @@ PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq-new-md-fmt.py" # Path to the python code
 
 cd ../src
 rm -f *o house_lsq
+cp Makefile Makefile-back
+cp Makefile-TS-LSQ Makefile
 make house_lsq; mv house_lsq ../test_suite-lsq/
+mv Makefile-back Makefile
 cd ../test_suite-lsq
 
 ###############################################################
@@ -42,7 +45,7 @@ if [ $# -eq 0 ]
 # Use default JOBS.  
 then
 #  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
-JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby sub_coulomb'
+JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby' #  sub_coulomb'
 else
 # Take JOBS from command line.
   JOBS=$*

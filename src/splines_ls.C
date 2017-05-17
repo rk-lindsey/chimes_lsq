@@ -50,6 +50,12 @@ string SCAN_FILE_2B;
 int NPROCS;		// Number of processors
 int RANK;		// Index of current processor
 
+// Define my new integer maps.. Only needed here to prevent compiler errors related 
+// to functions.C... only used in MD part right now
+
+vector<int>	INT_PAIR_MAP;
+vector<int>	INT_TRIAD_MAP;
+
 int main()
 {
 	
@@ -265,9 +271,9 @@ int main()
 		
 		for(int j=0; j<ATOM_PAIRS.size(); j++)
 		{
-			if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1)
-				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1)
-				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) ))
+			if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X * (2*CONTROLS.N_LAYERS +1)
+				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (2*CONTROLS.N_LAYERS +1)
+				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z * (2*CONTROLS.N_LAYERS +1) ))
 			{
 					#if WARN == TRUE
 						if (isatty(fileno(stdout)))
@@ -701,9 +707,9 @@ int main()
 			{
 				if(PAIR_TRIPLETS[0].FCUT_TYPE == "CUBIC")
 				{	
-					fileb << 150.0 << endl;
-					fileb << 150.0 << endl;
-					fileb << 150.0 << endl;
+					fileb << 1500.0 << endl;
+					fileb << 1500.0 << endl;
+					fileb << 1500.0 << endl;
 				}
 				else		
 				{

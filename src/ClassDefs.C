@@ -140,9 +140,8 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	else 
 		DO_UPDATE_BIG(SYSTEM, CONTROLS);
 
-	if ( CONTROLS.USE_3B_CHEBY ) {
+	if ( CONTROLS.USE_3B_CHEBY ) 
 	  UPDATE_3B_INTERACTION(SYSTEM, CONTROLS) ;
-	}
 }	
 
 void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)	
@@ -452,6 +451,8 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 		STYLE = IN_STYLE;	
 	else if(CONTROLS.FREQ_UPDATE_THERMOSTAT > -1.0)	// Trivial velocity scaling
 		STYLE = "NVT-SCALE";
+	else if(IN_STYLE=="LMP-NVE" || IN_STYLE=="LMP-NVT" || IN_STYLE=="LMP-NPT")
+		cout << "	...Configuring constraints for a " << IN_STYLE << " simulation." << endl;
 	else
 	{
 		cout << "ERROR: UNKNOWN CONSTRAINT STYLE" << endl;

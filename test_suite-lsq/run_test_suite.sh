@@ -12,7 +12,7 @@
 ###############################################################
 
 # SVD regularization factor.
-EPS_FAC=1.0e-09
+EPS_FAC=1.0e-5 # 1.0E-5 is the old default value... should match value used in gen test suite script.  1.0e-09
 
 if [ $# -eq 0 ] 
 then
@@ -42,7 +42,10 @@ RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_gr
 
 cd ../src
 rm -f *o house_lsq
+cp Makefile Makefile-back
+cp Makefile-TS-LSQ Makefile
 make house_lsq; mv house_lsq ../test_suite-lsq/
+mv Makefile-back Makefile
 cd ../test_suite-lsq
 
 ###############################################################

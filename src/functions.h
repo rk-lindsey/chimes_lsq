@@ -87,6 +87,8 @@ struct JOB_CONTROL
 {
 	int STEP;					// Tracks the current md step
 	
+	int		NATMTYP;			// How many atom types are in the trajectory?
+	
 	///////////////////////////////////////////////
 	// Variables read in from the parameter file:
 	///////////////////////////////////////////////
@@ -166,7 +168,6 @@ struct JOB_CONTROL
 	bool USE_POVER;			// Should overbonding information be printed to the header file?
 	
 	int		NFRAMES;			// Number of frames in the movie file
-	int		NATMTYP;			// How many atom types are in the trajectory?
 	int		CHEBY_ORDER;		// Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
 	int		CHEBY_3B_ORDER;		// how many polynomials for 3b cheby?
 	int		NUM_3B_CHEBY;		// How many parameters are associated with cheby order CHEBY_3B_ORDER?
@@ -730,6 +731,7 @@ double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// Overloaded
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// Overloaded.. compute differentely if for main or new velocities
 
 void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
+void SORT_THREE_DESCEND(int & a, int & b, int & c);
 
 void enable_fp_exceptions();
 void exit_run(int val);

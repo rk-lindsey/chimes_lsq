@@ -41,10 +41,6 @@
 	
 using namespace std;	
 	
-
-
-
-
 // Define function headers -- general
 
 static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
@@ -93,8 +89,8 @@ int RANK;		// Index of current processor
 	
 	int TOTAL_ATOMS;
 	vector<double>	LMP_CHARGE;			// Global data object to hold charges for the LAMMPS input files     
-	vector<string>  TMP_ATOMTYPE;			// Will be used by lammps to map lammps atom types (int's) back to chemical symbols
-	JOB_CONTROL	CONTROLS;			// Declare the data object that will hold the main simulation control variables
+	vector<string>  TMP_ATOMTYPE;		// Will be used by lammps to map lammps atom types (int's) back to chemical symbols
+	JOB_CONTROL	CONTROLS;				// Declare the data object that will hold the main simulation control variables
 	map<string,int> PAIR_MAP;			// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
 	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
 	map<string,int> TRIAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
@@ -106,7 +102,10 @@ int RANK;		// Index of current processor
 #endif
 	
 	
+	// Define my new integer maps
 	
+	vector<int>	INT_PAIR_MAP;
+	vector<int>	INT_TRIAD_MAP;	
 	
 
 ////////////////////////////////////////////////////////////
@@ -169,6 +168,8 @@ int main(int argc, char* argv[])
 		map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
 		map<string,int> TRIAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
 		map<int,string> TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
+		
+
 		
 		// For parameter file parsing
 		
@@ -710,6 +711,7 @@ int main(int argc, char* argv[])
 		{
 			STREAM_PARSER.str(LINE);
 			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> NATMTYP;
+			CONTROLS.NATMTYP = NATMTYP;
 			STREAM_PARSER.str("");
 			STREAM_PARSER.clear();
 		
@@ -1065,7 +1067,7 @@ int main(int argc, char* argv[])
 	
 	////////////////////////////////////////////////////////////
 	// Setup and test system velocity center of mass... For
-	// calculation of diffusion constants, this number should zero (or
+	// consevation of momentum, this number should zero (or
 	// VERY close)
 	////////////////////////////////////////////////////////////  
 	// ... Also, figure out how many atoms of each type we have
@@ -2203,7 +2205,7 @@ int main(int argc, char* argv[])
 				PAIR_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
 				PAIR_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
 					
-			}
+			}					
 						
 			if (RANK==0)
 				cout << "	...Read FF pairmaps..." << endl << endl;					
@@ -2496,6 +2498,116 @@ int main(int argc, char* argv[])
 			exit_run(0);
 		}
 	}	
+	
+	////////////////////////////////////////////////////////////
+	// Rebuild maps into a faster data structure
+	////////////////////////////////////////////////////////////
+	
+	
+	// Build the 2-body  and 3-body int-atomtype-ff-maps
+
+	INT_PAIR_MAP.resize(NATMTYP*NATMTYP);
+
+	int    int_map_idx;
+	string int_map_str, int_map_3b_str;
+
+	// Sanity checks on fast maps: 
+	
+	if(RANK==0)
+	{
+
+		cout << endl << "Generating fast maps " << endl;
+
+		cout << "	Pair maps:" << endl;
+	}
+
+	for(int i=0; i<NATMTYP; i++)
+	{
+		for (int j=0; j<NATMTYP; j++)
+		{
+			int_map_str =      TMP_ATOMTYPE[i];
+			int_map_str.append(TMP_ATOMTYPE[j]);
+		
+			int_map_idx = TMP_ATOMTYPEIDX[i]*NATMTYP + TMP_ATOMTYPEIDX[j];
+		
+			INT_PAIR_MAP[int_map_idx] = PAIR_MAP[int_map_str];
+		
+			if(RANK == 0)
+			{
+				cout << "		";
+				cout<< "Atom type idxs: ";
+			    cout<< fixed << setw(2) << right << i;
+				cout<< fixed << setw(2) << right << j;
+				cout<< " Pair name: "           << setw(4) << right << int_map_str;
+				cout<< " Explicit pair index: " << setw(4) << right << int_map_idx;
+				cout<< " Unique pair index: "   << setw(4) << right << INT_PAIR_MAP[int_map_idx] << endl;		
+			}
+
+		}
+	}
+	
+	if(FF_2BODY[0].SNUM_3B_CHEBY > 0)
+	{
+		INT_TRIAD_MAP.resize(1000);
+
+		int idx1, idx2, idx3;
+
+
+		if(RANK==0)
+			cout << endl << "	Triplet maps:" << endl;
+
+		for(int i=0; i<NATMTYP; i++)
+		{
+			for (int j=0; j<NATMTYP; j++)
+			{
+				for(int k=0; k<NATMTYP; k++)
+				{
+					idx1 = i;
+					idx2 = j;
+					idx3 = k;
+				
+					int_map_str =      TMP_ATOMTYPE[i];
+					int_map_str.append(TMP_ATOMTYPE[j]);
+					int_map_idx = TMP_ATOMTYPEIDX[i]*NATMTYP + TMP_ATOMTYPEIDX[j];
+				
+					int_map_3b_str =      FF_2BODY[INT_PAIR_MAP[int_map_idx]].PRPR_NM;
+				
+					int_map_str =      TMP_ATOMTYPE[i];
+					int_map_str.append(TMP_ATOMTYPE[k]);
+					int_map_idx = TMP_ATOMTYPEIDX[i]*NATMTYP + TMP_ATOMTYPEIDX[k];
+				
+					int_map_3b_str.append(FF_2BODY[INT_PAIR_MAP[int_map_idx]].PRPR_NM);
+				
+					int_map_str =      TMP_ATOMTYPE[j];
+					int_map_str.append(TMP_ATOMTYPE[k]);
+					int_map_idx = TMP_ATOMTYPEIDX[j]*NATMTYP + TMP_ATOMTYPEIDX[k];
+				
+					int_map_3b_str.append(FF_2BODY[INT_PAIR_MAP[int_map_idx]].PRPR_NM);
+				
+
+				
+					SORT_THREE_DESCEND(idx1, idx2, idx3);
+				
+					idx1 = 100*idx1 + 10*idx2 + idx3;
+					INT_TRIAD_MAP[idx1] = TRIAD_MAP[int_map_3b_str];
+				
+					if(RANK == 0)
+					{
+						cout << "		";
+						cout<< "Atom type idxs: ";
+					    cout<< fixed << setw(2) << right << i;
+						cout<< fixed << setw(2) << right << j;
+						cout<< fixed << setw(2) << right << k;
+						cout<< " Triplet name: "           << setw(12) << right << int_map_3b_str;
+						cout<< " Explicit Triplet index: " << setw(4) << right << int_map_idx;
+						cout<< " Unique Triplet index: "   << setw(4) << right << INT_PAIR_MAP[int_map_idx] << endl;
+					}
+				}
+			}
+		}
+	}
+	
+		
 
 	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
@@ -2686,7 +2798,8 @@ int main(int argc, char* argv[])
 				FORCE_SUBTRACTED_OUTPUT.open(FORCE_SUBTRACTED_FILE.data());
 				
 				FORCE_SUBTRACTED_OUTPUT << END << endl;
-				FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " ";	
+				FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " ";
+				
 				
 				if(CONTROLS.FIT_STRESS)
 					FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS.X - SYSTEM.STRESS_TENSORS.X << " " << 
@@ -4061,16 +4174,17 @@ static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, do
 // Add up forces, potential energy, and pressure from all processes.  
 {
 	// Sum up the potential energy, pressure, tensors , and forces from all processors
-   #ifdef USE_MPI
-		double *accel = (double *) accel_vec .data();
+#ifdef USE_MPI	
+	double *accel = (double *) accel_vec .data();
 
-		MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_x,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_y,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_z,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-   #endif
+	MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_x,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_y,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_z,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+#endif	
+
 }
 
 static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 
@@ -4234,16 +4348,17 @@ void exit_run(int value)
 	
 		// Custom thermo output ... Make this an optional read-in string from the house_md input file eventually
 	
-		LMPINFILE << "thermo_style     custom step temp etotal ke pe lx ly lz pxx pyy pzz press vol" << endl;
+		LMPINFILE << "thermo_style     custom step temp etotal ke pe lx ly lz pxx pyy pzz press vol density" << endl;
 		LMPINFILE << "thermo_modify    format float %20.15g flush yes " << endl << endl;
 	
 		// Print frequencies/formats 
 	
 		LMPINFILE << "thermo           " << CONTROLS.FREQ_ENER << endl << endl;;
 		
-		// Dump a plain xyz format
+		// Dump a plain xyz format and in a lammps format that has boxlengths
 							
-		LMPINFILE << "dump             dump_1 all xyz " << CONTROLS.FREQ_DFTB_GEN << " traj.xyz " << endl; 	// name of dump, atom group, type of dump, dump frequency, name of dumped file
+		LMPINFILE << "dump             dump_1 all xyz    " << CONTROLS.FREQ_DFTB_GEN << " traj.xyz " << endl; 	// name of dump, atom group, type of dump, dump frequency, name of dumped file
+		LMPINFILE << "dump             dump_2 all custom " << CONTROLS.FREQ_DFTB_GEN << " traj.lammpstrj element xu yu zu " << endl; 	// name of dump, atom group, type of dump, dump frequency, name of dumped file
 	
 		// Don't do any spacial ordering of molecules
 	
