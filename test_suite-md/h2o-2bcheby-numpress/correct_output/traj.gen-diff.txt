@@ -1,4 +1,4 @@
 4795c4795
-<    96 S #Step 960 Time 120.00000 (fs) Temp 1939.69148 (k)
+<    96 S #Step 960 Time 120.00000 (fs) Temp 1939.69149 (k)
 ---
->    96 S #Step 960 Time 120.00000 (fs) Temp 1939.69149 (k)
+>    96 S #Step 960 Time 120.00000 (fs) Temp 1939.69148 (k)

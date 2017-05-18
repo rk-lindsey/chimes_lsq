@@ -44,7 +44,7 @@ using namespace std;
 // Define function headers -- general
 
 static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
-double      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
+void      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
 
 // Define function headers -- MPI
 
@@ -2946,22 +2946,28 @@ int main(int argc, char* argv[])
 					cout << "Step : " << CONTROLS.STEP << endl;
 					exit_run(-10);
 			}			
-					
+		}	
 		  	////////////////////////////////////////////////////////////
 			// If requested, compute pressure numerically, and accumulate
 			// statistics
 			////////////////////////////////////////////////////////////
 
-			if ( CONTROLS.USE_NUMERICAL_PRESS ) 
-			{
-				if((CONTROLS.STEP == 0) && (NPROCS>1))
-				{
-					cout << "WARNING: Numerical pressure only supported for serial runs." << endl;
-					exit_run(0);
-				}
-				
-				SYSTEM.PRESSURE_XYZ = numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
-			}
+		if ( CONTROLS.USE_NUMERICAL_PRESS ) 
+		{
+			double PE_1, PE_2, dV; 
+			
+			numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST, PE_1, PE_2, dV);
+			#ifdef USE_MPI
+				MPI_Barrier(MPI_COMM_WORLD);
+				MPI_Allreduce(MPI_IN_PLACE, &PE_1,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+				MPI_Allreduce(MPI_IN_PLACE, &PE_2,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+			#endif
+			
+			SYSTEM.PRESSURE_XYZ = -1.0*(PE_2 - PE_1)/dV;
+
+		}
+		if(RANK==0)
+		{
 
 			SYSTEM.PRESSURE = (SYSTEM.PRESSURE_XYZ + 2.0 * Ktot / (3.0 * Vol)) * GPa;	// GPa = Unit conversion factor to GPa.
 			

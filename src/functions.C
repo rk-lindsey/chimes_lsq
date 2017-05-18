@@ -8,6 +8,10 @@
 #include<limits>	// Help with handling of over/underflow
 #include "functions.h"
 
+#ifdef USE_MPI
+	#include <mpi.h>
+#endif
+
 using namespace std;
 
 
@@ -850,6 +854,19 @@ bool PROCEED(const double & rlen, const string & TYPE, const double & rmin, cons
 
 void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 {
+	// Set up for MPI
+	
+	int a1start, a1end, a2start, a2end;
+	/*
+	divide_atoms(a1start, a1end, SYSTEM.ATOMS);
+	divide_atoms(a2start, a2end, SYSTEM.ALL_ATOMS);
+	*/
+	
+	a1start = 0;
+	a2start = 0;
+	a1end   = REPLICATE.ATOMS;
+	a2end   = REPLICATE.ALL_ATOMS;
+
 	REPLICATE.ATOMS		= SYSTEM.ATOMS;
 	REPLICATE.ALL_ATOMS	= SYSTEM.ALL_ATOMS;
 
@@ -857,42 +874,17 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	REPLICATE.BOXDIM.Y	= SYSTEM.BOXDIM.Y;
 	REPLICATE.BOXDIM.Z	= SYSTEM.BOXDIM.Z;
 
-	REPLICATE.TEMPERATURE			= SYSTEM.TEMPERATURE;
-	REPLICATE.PRESSURE 				= SYSTEM.PRESSURE;
-	REPLICATE.PRESSURE_XYZ 			= SYSTEM.PRESSURE_XYZ;
-	REPLICATE.PRESSURE_TENSORS.X	= SYSTEM.PRESSURE_TENSORS.X;
-	REPLICATE.PRESSURE_TENSORS.Y 	= SYSTEM.PRESSURE_TENSORS.Y;
-	REPLICATE.PRESSURE_TENSORS.Z	= SYSTEM.PRESSURE_TENSORS.Z;
 	REPLICATE.TOT_POT_ENER 			= SYSTEM.TOT_POT_ENER;
 	
 	REPLICATE.FORCES      .resize(REPLICATE.ATOMS);
 	REPLICATE.ACCEL       .resize(REPLICATE.ATOMS);
-	REPLICATE.VELOCITY    .resize(REPLICATE.ATOMS);
-	REPLICATE.VELOCITY_NEW.resize(REPLICATE.ATOMS);
 	REPLICATE.COORDS      .resize(REPLICATE.ATOMS);
 
-	for(int i=0; i<REPLICATE.ATOMS; i++)
+	for(int i=a1start; i<a1end; i++)
 	{
-		REPLICATE.FORCES[i].X = SYSTEM.FORCES[i].X;
-		REPLICATE.FORCES[i].Y = SYSTEM.FORCES[i].Y;
-		REPLICATE.FORCES[i].Z = SYSTEM.FORCES[i].Z;
-		
-		REPLICATE.ACCEL[i].X = SYSTEM.ACCEL[i].X;
-		REPLICATE.ACCEL[i].Y = SYSTEM.ACCEL[i].Y;
-		REPLICATE.ACCEL[i].Z = SYSTEM.ACCEL[i].Z;
-
-		REPLICATE.VELOCITY[i].X = SYSTEM.VELOCITY[i].X;
-		REPLICATE.VELOCITY[i].Y = SYSTEM.VELOCITY[i].Y;
-		REPLICATE.VELOCITY[i].Z = SYSTEM.VELOCITY[i].Z;
-		
-		REPLICATE.VELOCITY_NEW[i].X = SYSTEM.VELOCITY_NEW[i].X;
-		REPLICATE.VELOCITY_NEW[i].Y = SYSTEM.VELOCITY_NEW[i].Y;
-		REPLICATE.VELOCITY_NEW[i].Z = SYSTEM.VELOCITY_NEW[i].Z;
-
 		REPLICATE.COORDS[i].X = SYSTEM.COORDS[i].X;
 		REPLICATE.COORDS[i].Y = SYSTEM.COORDS[i].Y;
-		REPLICATE.COORDS[i].Z = SYSTEM.COORDS[i].Z;
-		
+		REPLICATE.COORDS[i].Z = SYSTEM.COORDS[i].Z;		
 	}
 
 	REPLICATE.ATOMTYPE    .resize(REPLICATE.ALL_ATOMS);
@@ -903,7 +895,7 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	REPLICATE.MASS        .resize(REPLICATE.ALL_ATOMS);
 	REPLICATE.LAYER_IDX   .resize(REPLICATE.ALL_ATOMS);
 
-	for(int i=0; i<REPLICATE.ALL_ATOMS; i++)
+	for(int i=a2start; i<a2end; i++)
 	{
 		REPLICATE.ATOMTYPE    [i] = SYSTEM.ATOMTYPE[i];
 		REPLICATE.ATOMTYPE_IDX[i] = SYSTEM.ATOMTYPE_IDX[i];
@@ -921,11 +913,10 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	}
 }
 
-double numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST)   
+void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV)
 // Evaluates the configurational part of the pressure numerically by -dU/dV.
 // Essentially, we are taking the system and expanding/contracting it a bit (lscale) to get the change in potential energy 
 {
-
 	const double eps = 1.0e-04;
 	double lscale;
 	double Vtot1, Vtot2;
@@ -963,6 +954,8 @@ double numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<P
 	
 	Vol1 = REPLICATE.BOXDIM.X * REPLICATE.BOXDIM.Y * REPLICATE.BOXDIM.Z;
 	
+	REPLICATE.TOT_POT_ENER = 0;
+	
 	ZCalc(REPLICATE, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
 	
 	Vtot1 = REPLICATE.TOT_POT_ENER;
@@ -993,14 +986,19 @@ double numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<P
 	
 	Vol2 = REPLICATE.BOXDIM.X * REPLICATE.BOXDIM.Y * REPLICATE.BOXDIM.Z;
 	
+	REPLICATE.TOT_POT_ENER = 0;
+	
 	ZCalc(REPLICATE, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
 	
 	Vtot2 = REPLICATE.TOT_POT_ENER;
 
 	// compute (return) pressure 
 	
-	return -(Vtot2 - Vtot1)/(Vol2 - Vol1);
-
+	//return -(Vtot2 - Vtot1)/(Vol2 - Vol1);
+	
+	PE_1 = Vtot1;
+	PE_2 = Vtot2;
+	dV   = Vol2 - Vol1;
 }
 
 

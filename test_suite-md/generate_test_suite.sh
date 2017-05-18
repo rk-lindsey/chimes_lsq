@@ -63,16 +63,7 @@ do
 		../house_md < run_md.in > run_md.out
 			
 	else
-
-		if [[ "$i" == "generic-lj" || "$i" == "h2o-2bcheby-numpress" ]] ; then
-		
-			# Numerical pressure calcs currently only supported on 1 proc
-			echo "Running in serial (numerical pressure)"
-			../house_md-serial < run_md.in > run_md.out
-			
-		else
-			srun -n $NP ../house_md < run_md.in > run_md.out
-		fi
+		srun -n $NP ../house_md < run_md.in > run_md.out
 	fi		
 		
 	cp *.* current_output
