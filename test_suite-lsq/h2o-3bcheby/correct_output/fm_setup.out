@@ -93,44 +93,11 @@ Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramm
 
 ...Populating the matricies for A, Coulomb forces, and overbonding...
 
-	Processing frame: 1     of: 33
 	Ewald_Deriv:
 	R-Space Ewald cutoff      =  4.304565e+00
 	R-Space accuracy estimate =  5.997380e-07
 	K-space accuracy estimate =  6.801448e-07
 	Number of Ewald K-vectors = 238
-	Processing frame: 2     of: 33
-	Processing frame: 3     of: 33
-	Processing frame: 4     of: 33
-	Processing frame: 5     of: 33
-	Processing frame: 6     of: 33
-	Processing frame: 7     of: 33
-	Processing frame: 8     of: 33
-	Processing frame: 9     of: 33
-	Processing frame: 10    of: 33
-	Processing frame: 11    of: 33
-	Processing frame: 12    of: 33
-	Processing frame: 13    of: 33
-	Processing frame: 14    of: 33
-	Processing frame: 15    of: 33
-	Processing frame: 16    of: 33
-	Processing frame: 17    of: 33
-	Processing frame: 18    of: 33
-	Processing frame: 19    of: 33
-	Processing frame: 20    of: 33
-	Processing frame: 21    of: 33
-	Processing frame: 22    of: 33
-	Processing frame: 23    of: 33
-	Processing frame: 24    of: 33
-	Processing frame: 25    of: 33
-	Processing frame: 26    of: 33
-	Processing frame: 27    of: 33
-	Processing frame: 28    of: 33
-	Processing frame: 29    of: 33
-	Processing frame: 30    of: 33
-	Processing frame: 31    of: 33
-	Processing frame: 32    of: 33
-	Processing frame: 33    of: 33
 ...matrix population complete: 
 
 Printing matricies...

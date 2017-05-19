@@ -11,8 +11,14 @@
 #
 ###############################################################
 
+# Number of MPI tasks.
+NP=16
+
+# Number of threads for SVD decomposition
+NUM_THREADS=16
+
 # SVD regularization factor.
-EPS_FAC=1.0e-5 # 1.0E-5 is the old default value... should match value used in gen test suite script.  1.0e-09
+EPS_FAC=1.0e-5 # 1.0E-5 is the old default value... should match value used in gen test suite script. 
 
 if [ $# -eq 0 ] 
 then
@@ -24,10 +30,15 @@ fi
 TESTSU_BASE=`pwd -P` #`dirname $0`
 SOURCE_BASE="${TESTSU_BASE}/../src/"
 
+# Intel parallel python - supports thread parallelism.
+PYTHON=/collab/usr/global/tools/intel/chaos_5_x86_64_ib/python-2.7.10/bin/python
+# Default python
+# PYTHON=python
+
 # Run the job with the new version of the python code (Compatible with non-generalized md code)
 #
 PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq-new-md-fmt.py" # Path to the python code.
-RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map ${EPS_FAC} TEST_SUITE_RUN"
+RUN_LSQ_PYTHON_CODE="$PYTHON $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map ${EPS_FAC} TEST_SUITE_RUN"
 
 # Run the job with the old version of the python code (Compatible with non-generalized md code)
 #
@@ -42,10 +53,8 @@ RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_gr
 
 cd ../src
 rm -f *o house_lsq
-cp Makefile Makefile-back
-cp Makefile-TS-LSQ Makefile
-make house_lsq; mv house_lsq ../test_suite-lsq/
-mv Makefile-back Makefile
+make -f Makefile-TS-LSQ house_lsq
+mv house_lsq ../test_suite-lsq/
 cd ../test_suite-lsq
 
 ###############################################################
@@ -71,7 +80,12 @@ do
 
 	cd $i
 	rm -rf *diff*
-	../house_lsq < fm_setup.in > fm_setup.out
+
+	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
+		 ../house_lsq < fm_setup.in > fm_setup.out
+	else
+		 srun -n $NP ../house_lsq < fm_setup.in > fm_setup.out
+	fi
 	
 	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
 
@@ -132,6 +146,7 @@ do
 	cd $i/current_output
 	rm -rf diff-*
 #	python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map TEST_SUITE_RUN > params.txt
+	export OMP_NUM_THREADS=$NUM_THREADS
 	$RUN_LSQ_PYTHON_CODE > params.txt
 
 #	cp params.txt force.txt current_output	

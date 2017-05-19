@@ -71,7 +71,6 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 
 ...Populating the matricies for A, Coulomb forces, and overbonding...
 
-	Processing frame: 1     of: 54
 	rc[0] = 9.449 bohr (5.000 Angstr.)
 	rc[1] = 8.504 bohr (4.500 Angstr.)
 	rc[2] = 9.449 bohr (5.000 Angstr.)
@@ -82,59 +81,6 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 	rc[7] = 8.504 bohr (4.500 Angstr.)
 	rc[8] = 8.504 bohr (4.500 Angstr.)
 	rc[9] = 8.504 bohr (4.500 Angstr.)
-	Processing frame: 2     of: 54
-	Processing frame: 3     of: 54
-	Processing frame: 4     of: 54
-	Processing frame: 5     of: 54
-	Processing frame: 6     of: 54
-	Processing frame: 7     of: 54
-	Processing frame: 8     of: 54
-	Processing frame: 9     of: 54
-	Processing frame: 10    of: 54
-	Processing frame: 11    of: 54
-	Processing frame: 12    of: 54
-	Processing frame: 13    of: 54
-	Processing frame: 14    of: 54
-	Processing frame: 15    of: 54
-	Processing frame: 16    of: 54
-	Processing frame: 17    of: 54
-	Processing frame: 18    of: 54
-	Processing frame: 19    of: 54
-	Processing frame: 20    of: 54
-	Processing frame: 21    of: 54
-	Processing frame: 22    of: 54
-	Processing frame: 23    of: 54
-	Processing frame: 24    of: 54
-	Processing frame: 25    of: 54
-	Processing frame: 26    of: 54
-	Processing frame: 27    of: 54
-	Processing frame: 28    of: 54
-	Processing frame: 29    of: 54
-	Processing frame: 30    of: 54
-	Processing frame: 31    of: 54
-	Processing frame: 32    of: 54
-	Processing frame: 33    of: 54
-	Processing frame: 34    of: 54
-	Processing frame: 35    of: 54
-	Processing frame: 36    of: 54
-	Processing frame: 37    of: 54
-	Processing frame: 38    of: 54
-	Processing frame: 39    of: 54
-	Processing frame: 40    of: 54
-	Processing frame: 41    of: 54
-	Processing frame: 42    of: 54
-	Processing frame: 43    of: 54
-	Processing frame: 44    of: 54
-	Processing frame: 45    of: 54
-	Processing frame: 46    of: 54
-	Processing frame: 47    of: 54
-	Processing frame: 48    of: 54
-	Processing frame: 49    of: 54
-	Processing frame: 50    of: 54
-	Processing frame: 51    of: 54
-	Processing frame: 52    of: 54
-	Processing frame: 53    of: 54
-	Processing frame: 54    of: 54
 ...matrix population complete: 
 
 Printing matricies...
