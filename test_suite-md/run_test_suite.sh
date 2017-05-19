@@ -13,13 +13,9 @@ module load intel impi
 
 cd ../src
 rm -rf *o *dSYM house_md
-cp Makefile Makefile-back
-
-cp Makefile-TS-MD Makefile
 module load intel impi
-make house_md;  
+make -f Makefile-TS-MD house_md;  
 rm -f ../test_suite-lsq/house_md;  mv house_md  ../test_suite-md/
-mv Makefile-back Makefile
 cd ../test_suite-md
 
 
@@ -144,15 +140,10 @@ echo " ...Beginning by running the lsq test suite... "
 
 cd ../src
 rm -rf *o *dSYM house_lsq
-cp Makefile Makefile-back
-cp Makefile-TS-MD-Verif Makefile
 cd ../test_suite-md
 
 cd ../test_suite-lsq 
 ./run_test_suite.sh $LSQ_JOBS
-
-#cd ../src
-#mv Makefile-back Makefile
 
 cd ../test_suite-md
 
