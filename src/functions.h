@@ -689,7 +689,7 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 
 void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> & PAIR_TRIPLETS, FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
-void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
 
 void SubtractEwaldForces(FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
 

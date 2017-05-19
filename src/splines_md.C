@@ -44,7 +44,9 @@ using namespace std;
 // Define function headers -- general
 
 static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
-void      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
+void      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+									  vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, 
+									  NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
 
 // Define function headers -- MPI
 

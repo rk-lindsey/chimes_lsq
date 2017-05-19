@@ -433,23 +433,33 @@ static inline double cheby_var_deriv(double xdiff, double rlen, double lambda, s
  
 void divide_atoms(int &a1start, int &a1end, int atoms) 
 {
-	a1start = RANK * atoms / NPROCS;
+	int procs_used ;
 
-	if ( NPROCS > atoms ) 
+	// Deal gracefully with more tasks than processors.
+	if ( NPROCS <= atoms ) 
+		procs_used = NPROCS ;
+	else
+		procs_used = atoms ;
+
+	// Use ceil so the last process always has fewer tasks than the other
+	// This improves load balancing.
+	a1start = ceil( (double) RANK * atoms / procs_used) ;
+
+	if ( RANK > atoms ) 
 	{
-		cout << "Error: number of processors > number of atoms: " << endl;
-		cout << NPROCS << " " << atoms << endl;
-		exit_run(1);
-	}
-	  
-	if ( RANK == NPROCS - 1 ) 
+		a1start = atoms + 1 ;
+		a1end = atoms - 1 ;
+	} else if ( RANK == procs_used - 1 ) {
+		// End of the list.
 		a1end = atoms - 1;
+	} else {
+		// Next starting value - 1 .
+		a1end   = ceil( (double) (RANK+1) * atoms / procs_used ) - 1 ;
+		if ( a1end > atoms - 1 ) 
+			a1end = atoms - 1 ;
+	}
 
-	else 
-		a1end   = ((RANK+1) * atoms / NPROCS) - 1;
-
-
-//	 cout << "DIVIDING ATOMS: RANK : " << RANK << " " << atoms << " " << a1start << ":" << a1end << endl;
+	//cout << "DIVIDING ATOMS: RANK : " << RANK << " " << atoms << " " << a1start << ":" << a1end << endl;
 }
 
 //////////////////////////////////////////
@@ -1617,7 +1627,9 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 	
 	int a1start, a1end;	
 
-	divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+	//divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+	a1start = 0 ;
+	a1end = SYSTEM.ATOMS-1 ;
 
 	// Set up for neighbor lists
 	
@@ -2291,7 +2303,9 @@ static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	int a2start, a2end, a2;
 	int a1start, a1end;	
 
-	divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+	//divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+	a1start = 0 ;
+	a1end = SYSTEM.ATOMS-1 ;
 
 	for(int a1=a1start ; a1 <= a1end ;a1++)		// Double sum over atom pairs
 	{
@@ -2402,7 +2416,12 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 			// Convert cutoff (S_MAXIM) from units of Angstrom to bohr (atomic units), (rc)
 			
 			rc[i] = FF_2BODY[i].S_MAXIM/autoang;
-			cout << "	rc[" << i << "] = " << fixed << setprecision(3) << rc[i] << " bohr (" << fixed << setprecision(3) << FF_2BODY[i].S_MAXIM << " Angstr.)" << endl;
+			if ( RANK == 0 ) cout << "	rc[" << i << "] = " 
+										 << fixed << setprecision(3) 
+										 << rc[i] << " bohr (" 
+										 << fixed << setprecision(3) 
+										 << FF_2BODY[i].S_MAXIM << " Angstr.)" 
+										 << endl;
 			
 			if ( FF_2BODY[i].SNUM > dim ) 
 				dim = FF_2BODY[i].SNUM;
@@ -2419,7 +2438,11 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	int a2start, a2end, a2;
 	int a1start, a1end;	
 
-	divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+
+	//divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+	a1start = 0 ;
+	a1end = SYSTEM.ATOMS-1 ;
+
 	
 	int MATR_SIZE = FRAME_A_MATRIX.size();
 
@@ -2496,7 +2519,10 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 }
 
 // FUNCTION UPDATED
-void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
+void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  
+								 vector<PAIRS> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST,
+								 bool lsq_mode)
+// lsq_mode is true if this is a least-squares calculation.
 {
 	// this function subtracts the ReaxFF over-coordination term to re-fit 
 	// splines/charges iteratively for self-consistence.
@@ -2557,7 +2583,13 @@ void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_F
 	// Set up for MPI
 	
 	int aistart, aiend, ak;	
-	divide_atoms(aistart, aiend, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+
+	if (  lsq_mode ) {
+		aistart = 0 ;
+		aiend = SYSTEM.ATOMS-1 ;
+	} else {
+		divide_atoms(aistart, aiend, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+	}
 			
 	for(int ai=aistart ; ai <= aiend ; ai++) 
 	{
@@ -3486,7 +3518,6 @@ static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 	int aistart, aiend;	
 	
 	#ifndef LINK_LAMMPS
-	
 		divide_atoms(aistart, aiend, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
 	#else
 		aistart = SYSTEM.MY_ATOMS_START;
