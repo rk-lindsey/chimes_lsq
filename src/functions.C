@@ -150,175 +150,6 @@ double get_dist(const FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 	return sqrt( RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z );
 }
 
-void get_fcut(int BODIEDNESS, string TYPE, double & fcut, double & fcut_deriv, const double rlen, const double rmin, const double rmax, const int fcut_power, double OFFSET, double STEEPNESS, double HEIGHT)
-// Calculates the fcut function and its derivative. Used to force the potential to zero at rcut max, 
-// and for 3-body interactions, to zero at rcut min
-{	
-	static double fcut0;
-	static double A, a, a_prime;
-	static double B, b, b_prime;
-	
-	static bool FIRST_PASS = true;
-
-
-	// Original cubic style smoothing... does not constrian value at rmin
-	
-	if(TYPE == "CUBESTRETCH")
-	{
-		cout << "ERROR: TYPE CUBESTRETCH NO LONGER SUPPORTED...Please clean up code!" << endl;
-		exit_run(0);
-	}
-	
-	if(BODIEDNESS==2 || (BODIEDNESS==3 && TYPE=="CUBIC"))
-	{		
-		fcut0 = (1.0 - rlen/rmax);
-		fcut        = pow(fcut0, fcut_power);
-		fcut_deriv  = pow(fcut0,fcut_power-1);
-		fcut_deriv *= -1.0 * fcut_power /rmax;
-
-		return;
-	}
-	else if(BODIEDNESS==3)
-	{
-		if(TYPE=="COSINE")
-		{
-			fcut0     = 2.0*pi*( (rlen - rmin) /(rmax - rmin) );
-			fcut      = -0.5*cos(fcut0) + 0.5;
-			fcut_deriv =  0.5*sin(fcut0) * (2.0*pi/(rmax - rmin));
-
-			return;
-		}
-		else if(TYPE=="CUBSIG")	// Outer cutoff handled by normal fcut function, inner cutoff is handled by a sigmoid, who is ~1 until r LESS THAN the inner cutoff. does NOT go to zero within rmin<->rmax
-		{
-			if(FIRST_PASS && RANK==0)
-			{
-				cout << "		NOTE: Using cubic-sigmoid steepness and offset of " << fixed << setprecision(3) << STEEPNESS << " and " << fixed << setprecision(3) << OFFSET << endl;
-				FIRST_PASS = false;
-			}
-			
-			A = exp( (rlen - rmin - OFFSET ) * STEEPNESS);	// A_prime is just STEEPNESS*A
-			
-			if (A>10E20) // If A is huge, then a = 1 and a' = 0
-			{
-				a       = 1;
-				a_prime = 0;
-			}
-			else
-			{
-				a       = -1.0/(1.0+A) + 1;
-				a_prime = STEEPNESS*A/(1.0+A)/(1.0+A);
-			}
-			
-			fcut0    = fcut0 = (1.0 - rlen/rmax);
-			b        = pow(fcut0, fcut_power);
-			b_prime  = pow(fcut0,fcut_power-1);
-			b_prime *= -1.0 * fcut_power /rmax;
-			
-			fcut = a*b;
-			
-			fcut_deriv = a_prime*b + b_prime*a;
-
-			return;
-		}
-		
-		else if(TYPE=="SIGMOID") // Both outer and inner cutoffs handed by sigmoid functions
-		{
-			
-			/* FOR DEBUGGING 
-			
-			if(FIRST_PASS && RANK==0)
-			{
-				cout << "		NOTE: Using sigmoid steepness and offset of " << fixed << setprecision(3) << STEEPNESS << " and " << fixed << setprecision(3) << OFFSET << endl;
-				FIRST_PASS = false;
-			}
-			
-			*/
-			
-			A = exp( (rlen - rmin - OFFSET ) * STEEPNESS);	// A_prime is just STEEPNESS*A
-			B = exp( (rlen - rmax + OFFSET ) * STEEPNESS);	// Same for B_prime
-			
-			if (A>10E20) // If A is huge, then a = 1 and a' = 0
-			{
-				a       = 1;
-				a_prime = 0;
-			}
-			else
-			{
-				a       = -1.0/(1.0+A) + 1;
-				a_prime = STEEPNESS*A/(1.0+A)/(1.0+A);
-			}
-				
-			if (B>10E20) // If B is huge, then b = 1 and b' = 0
-			{
-				b       = 1;
-				b_prime = 0;
-			}
-			else
-			{
-				b       =  1.0/(1.0+B);
-				b_prime = -1.0*STEEPNESS*B/(1.0+B)/(1.0+B);
-			}
-
-			fcut       = a*b;
-			fcut_deriv = a_prime*b + b_prime*a;
-			
-			if(std::isinf(fcut)||std::isinf(fcut_deriv))
-				cout << a << " " << b << " " << a_prime << " " << b_prime << " ++ " << A << " " << B << " -- " << fcut << " " << fcut_deriv << endl;
-
-			return;
-		}
-		else if(TYPE=="SIGFLT")
-		{
-			A = exp( (rlen - rmin - OFFSET ) * STEEPNESS);	// A_prime is just STEEPNESS*A
-			B = exp( (rlen - rmax + OFFSET ) * STEEPNESS);	// Same for B_prime
-			
-			if (A>10E20) // If A is huge, then a = 1 and a' = 0
-			{
-				a       = 1;
-				a_prime = 0;
-			}
-			else
-			{
-				a       =  HEIGHT/(1.0+A)+1;
-				a_prime = -1.0*HEIGHT*STEEPNESS*A/(1.0+A)/(1.0+A);
-			}
-				
-			if (B>10E20) // If B is huge, then b = 1 and b' = 0
-			{
-				b       = 1;
-				b_prime = 0;
-			}
-			else
-			{
-				b       =  1.0/(1.0+B);
-				b_prime = -1.0*STEEPNESS*B/(1.0+B)/(1.0+B);
-			}
-
-			fcut       = a*b;
-			fcut_deriv = a_prime*b + b_prime*a;
-			
-			if(std::isinf(fcut)||std::isinf(fcut_deriv))
-				cout << a << " " << b << " " << a_prime << " " << b_prime << " ++ " << A << " " << B << " -- " << fcut << " " << fcut_deriv << endl;
-
-			return;
-		}
-		else
-		{
-			cout << "ERROR: UNDEFINED N-BODY PARAMETER!" << endl;
-			cout << "       Did you forget to set # FCUTTYP #?" << endl;
-			cout << "       Check calls to get_fcut." << endl;
-			exit(0);
-		}
-		
-	}
-	else
-	{
-		cout << "ERROR: UNDEFINED N-BODY PARAMETER!" << endl;
-		cout << "       Check calls to get_fcut." << endl;
-		exit(0);
-	}
-}
-
 //////////////////////////////////////////
 // Cheby transformation functions
 //////////////////////////////////////////
@@ -843,10 +674,13 @@ double SET_SMINIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE)
 	return VAL;
 }
 
-bool PROCEED(const double & rlen, const string & TYPE, const double & rmin, const double & rmax)
+bool PROCEED(const double & rlen, FCUT_TYPE TYPE, const double & rmin, const double & rmax)
 // Determines whether rlen is within permissible ranges for the given fcut type... i.e. cubic doesn't care about inner cutoff, while other types do.
 {
-	if(TYPE == "CUBIC" || TYPE == "CUBSIG" || TYPE == "CUBESTRETCH" || TYPE == "SIGFLT")
+	if(TYPE == FCUT_TYPE::CUBIC 
+		|| TYPE == FCUT_TYPE::CUBSIG
+		|| TYPE == FCUT_TYPE::CUBESTRETCH 
+		|| TYPE == FCUT_TYPE::SIGFLT)
 		if(rlen < rmax)
 			return true;
 		else
@@ -1458,7 +1292,7 @@ static void ZCalc_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAI
 				
 				// fcut and fcutderv are the form that the penalty func and its derivative for the morse-type pair distance transformation
 				
-				get_fcut(2, "CUBIC", fcut, fcutderiv, rlen, 0, FF_2BODY[curr_pair_type_idx].S_MAXIM, fcut_power,0,0,0);
+				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut, fcutderiv, rlen, 0, FF_2BODY[curr_pair_type_idx].S_MAXIM, fcut_power,0,0,0);
 				
 				// Compute part of the derivative
 				
@@ -1879,9 +1713,9 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 							for (int i=0; i<curr_triple_type_index; i++)
 								vstart += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;						
 							
-							get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);
-							get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);
-							get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);							
+							FCUT::get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);
+							FCUT::get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);
+							FCUT::get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);							
 
 							/////////////////////////////////////////////////////////////////////
 							/////////////////////////////////////////////////////////////////////
@@ -2230,9 +2064,9 @@ PAIR_TRIPLETS[i].POP_HIST[xx][yy][zz] += pop;
 						for (int p=0; p<curr_triple_type_index; p++)
 							vstart += PAIR_TRIPLETS[p].N_TRUE_ALLOWED_POWERS;	
 									
-						get_fcut(3, PAIR_TRIPLETS[i].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power,PAIR_TRIPLETS[i].FCUT_OFFSET, PAIR_TRIPLETS[i].FCUT_STEEPNESS, PAIR_TRIPLETS[i].FCUT_HEIGHT);
-						get_fcut(3, PAIR_TRIPLETS[i].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power,PAIR_TRIPLETS[i].FCUT_OFFSET, PAIR_TRIPLETS[i].FCUT_STEEPNESS, PAIR_TRIPLETS[i].FCUT_HEIGHT);
-						get_fcut(3, PAIR_TRIPLETS[i].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power,PAIR_TRIPLETS[i].FCUT_OFFSET, PAIR_TRIPLETS[i].FCUT_STEEPNESS, PAIR_TRIPLETS[i].FCUT_HEIGHT);							
+						FCUT::get_fcut(3, PAIR_TRIPLETS[i].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power,PAIR_TRIPLETS[i].FCUT_OFFSET, PAIR_TRIPLETS[i].FCUT_STEEPNESS, PAIR_TRIPLETS[i].FCUT_HEIGHT);
+						FCUT::get_fcut(3, PAIR_TRIPLETS[i].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power,PAIR_TRIPLETS[i].FCUT_OFFSET, PAIR_TRIPLETS[i].FCUT_STEEPNESS, PAIR_TRIPLETS[i].FCUT_HEIGHT);
+						FCUT::get_fcut(3, PAIR_TRIPLETS[i].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power,PAIR_TRIPLETS[i].FCUT_OFFSET, PAIR_TRIPLETS[i].FCUT_STEEPNESS, PAIR_TRIPLETS[i].FCUT_HEIGHT);							
 
 						/////////////////////////////////////////////////////////////////////
 						// Consider special restrictions on allowed triplet types and powers
@@ -2963,7 +2797,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 							 
 				SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn, Tnd, rlen_ij, xdiff_2b, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, FF_2BODY[curr_pair_type_idx_ij].S_MINIM, FF_2BODY[curr_pair_type_idx_ij].SNUM);
 				
-				get_fcut(2, "CUBIC", fcut_2b, fcutderiv_2b, rlen_ij, 0, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, fcut_power,0,0,0);
+				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut_2b, fcutderiv_2b, rlen_ij, 0, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, fcut_power,0,0,0);
 
 				dx_dr = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
 
@@ -3139,9 +2973,9 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
 						// Set up the smoothing functions
 
-						get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-						get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-						get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+						FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+						FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+						FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
 
 						// Set up terms for derivatives
 		
@@ -4012,7 +3846,7 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 						 
 				SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn, Tnd, rlen_ij, xdiff_2b, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, FF_2BODY[curr_pair_type_idx_ij].S_MINIM, FF_2BODY[curr_pair_type_idx_ij].SNUM);
 			
-				get_fcut(2, "CUBIC", fcut_2b, TMP_DOUB, rlen_ij, 0, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, fcut_power,0,0,0);
+				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut_2b, TMP_DOUB, rlen_ij, 0, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, fcut_power,0,0,0);
 
 				for ( int m = 0; m < FF_2BODY[curr_pair_type_idx_ij].SNUM; m++ ) 
 					POT_ENER += FF_2BODY[curr_pair_type_idx_ij].PARAMS[m] * fcut_2b * Tn[m+1];
@@ -4024,7 +3858,7 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 				
 				SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn, Tnd, rlen_ik, xdiff_2b, FF_2BODY[curr_pair_type_idx_ik].S_MAXIM, FF_2BODY[curr_pair_type_idx_ik].S_MINIM, FF_2BODY[curr_pair_type_idx_ik].SNUM);
 			
-				get_fcut(2, "CUBIC", fcut_2b, TMP_DOUB, rlen_ik, 0, FF_2BODY[curr_pair_type_idx_ik].S_MAXIM, fcut_power,0,0,0);
+				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut_2b, TMP_DOUB, rlen_ik, 0, FF_2BODY[curr_pair_type_idx_ik].S_MAXIM, fcut_power,0,0,0);
 
 				for ( int m = 0; m < FF_2BODY[curr_pair_type_idx_ik].SNUM; m++ ) 
 					POT_ENER += FF_2BODY[curr_pair_type_idx_ik].PARAMS[m] * fcut_2b * Tn[m+1];
@@ -4036,7 +3870,7 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 				
 				SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn, Tnd, rlen_jk, xdiff_2b, FF_2BODY[curr_pair_type_idx_jk].S_MAXIM, FF_2BODY[curr_pair_type_idx_jk].S_MINIM, FF_2BODY[curr_pair_type_idx_jk].SNUM);
 			
-				get_fcut(2, "CUBIC", fcut_2b, TMP_DOUB, rlen_jk, 0, FF_2BODY[curr_pair_type_idx_jk].S_MAXIM, fcut_power,0,0,0);
+				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut_2b, TMP_DOUB, rlen_jk, 0, FF_2BODY[curr_pair_type_idx_jk].S_MAXIM, fcut_power,0,0,0);
 
 				for ( int m = 0; m < FF_2BODY[curr_pair_type_idx_jk].SNUM; m++ ) 
 					POT_ENER += FF_2BODY[curr_pair_type_idx_jk].PARAMS[m] * fcut_2b * Tn[m+1];
@@ -4056,9 +3890,9 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 								
 				// Set up the penalty functions
 
-				get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ij, TMP_DOUB, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-				get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ik, TMP_DOUB, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-				get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_jk, TMP_DOUB, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+				FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ij, TMP_DOUB, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+				FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ik, TMP_DOUB, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+				FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_jk, TMP_DOUB, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
 			
 				for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 				{
@@ -4081,5 +3915,4 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 	
 	return;
 } 
-
 

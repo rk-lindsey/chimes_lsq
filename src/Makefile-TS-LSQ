@@ -52,8 +52,8 @@ CXX=mpicxx  -std=c++11  -O3 -D USE_MPI
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C
-CXX_LSQ_HEADER=functions.h
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C
+CXX_LSQ_HEADER=functions.h Fcut.h
 
 house_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
 	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq

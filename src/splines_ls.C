@@ -740,7 +740,7 @@ int main(int argc, char* argv[])
 			
 			if(N>CONTROLS.NFRAMES-1) // then this is the 3b histogram stuff. All b values (energies) should be zero. -- assumes we're using 3b!!
 			{
-				if(PAIR_TRIPLETS[0].FCUT_TYPE == "CUBIC")
+				if(PAIR_TRIPLETS[0].FCUT_TYPE == FCUT_TYPE::CUBIC)
 				{	
 					fileb << 1500.0 << endl;
 					fileb << 1500.0 << endl;
@@ -975,11 +975,14 @@ int main(int argc, char* argv[])
 	
 	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0)
 	{
-		header << endl << "FCUT TYPE: " << PAIR_TRIPLETS[0].FCUT_TYPE;
+		header << endl << "FCUT TYPE: " << FCUT::to_string(PAIR_TRIPLETS[0].FCUT_TYPE);
 		
-		if (PAIR_TRIPLETS[0].FCUT_TYPE == "SIGMOID" || PAIR_TRIPLETS[0].FCUT_TYPE == "CUBSIG" || PAIR_TRIPLETS[0].FCUT_TYPE == "CUBESTRETCH" || PAIR_TRIPLETS[0].FCUT_TYPE == "SIGFLT")
+		if (PAIR_TRIPLETS[0].FCUT_TYPE == FCUT_TYPE::SIGMOID 
+			 || PAIR_TRIPLETS[0].FCUT_TYPE == FCUT_TYPE::CUBSIG 
+			 || PAIR_TRIPLETS[0].FCUT_TYPE == FCUT_TYPE::CUBESTRETCH 
+			 || PAIR_TRIPLETS[0].FCUT_TYPE == FCUT_TYPE::SIGFLT)
 			header << " " << PAIR_TRIPLETS[0].FCUT_STEEPNESS << " " << PAIR_TRIPLETS[0].FCUT_OFFSET;
-		if(PAIR_TRIPLETS[0].FCUT_TYPE == "SIGFLT")
+		if(PAIR_TRIPLETS[0].FCUT_TYPE == FCUT_TYPE::SIGFLT)
 			header << " " << PAIR_TRIPLETS[0].FCUT_HEIGHT;
 
 		 header << endl;
@@ -1524,7 +1527,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			NTRIP = factorial(CONTROLS.NATMTYP+3-1)/factorial(3)/factorial(CONTROLS.NATMTYP-1);
 			
 			for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-				PAIR_TRIPLETS[i].FCUT_TYPE = "CUBIC";
+				PAIR_TRIPLETS[i].FCUT_TYPE = FCUT_TYPE::CUBIC;
 			
 			// Account for excluded types:
 			
@@ -2684,7 +2687,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			cin >> TEMP_TYPE;
 			
 			for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-				PAIR_TRIPLETS[i].FCUT_TYPE = TEMP_TYPE;
+				PAIR_TRIPLETS[i].FCUT_TYPE = FCUT::to_val(TEMP_TYPE);
 			
 			#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# FCUTTYP #: " << TEMP_TYPE << "	... for 3-body Chebyshev interactions" << endl;	
@@ -2695,7 +2698,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				cin >> PAIR_TRIPLETS[0].FCUT_STEEPNESS;
 				cin >> PAIR_TRIPLETS[0].FCUT_OFFSET;
 				
-				if(PAIR_TRIPLETS[0].FCUT_TYPE == "SIGFLT")
+				if(PAIR_TRIPLETS[0].FCUT_TYPE == FCUT_TYPE::SIGFLT)
 					cin >> PAIR_TRIPLETS[0].FCUT_HEIGHT;
 				
 				#if VERBOSITY == 1

@@ -28,12 +28,12 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 # use mvapich2-intel-2.2
 #
 # TOSS-3 commands:
-# module load intel/17.0.3
+# module load intel/17.0.2
 # module load mvapich2/2.2
 #
-#CXX=mpicxx  -std=c++11  -g -D USE_MPI 
+CXX=mpicxx  -std=c++11  -g -pg -D USE_MPI 
 
-CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=icc -g				# Serial, for debugging
@@ -52,8 +52,8 @@ CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machine
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C
-CXX_LSQ_HEADER=functions.h
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C
+CXX_LSQ_HEADER=functions.h Fcut.h
 
 house_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
 	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq
@@ -73,7 +73,7 @@ build_tests_lsq:
 # MAKE THE MD CODE
 ##################################
 
-CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C
+CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C Fcut.C
 CXX_MD_HEADER=functions.h lmppath.h
 
 FLAGLMP=-D LINK_LAMMPS

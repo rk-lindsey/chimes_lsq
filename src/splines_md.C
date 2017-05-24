@@ -1229,9 +1229,13 @@ int main(int argc, char* argv[])
 					STREAM_PARSER.str(LINE);	
 					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
 					
-					FF_3BODY[0].FCUT_TYPE = TEMP_STR;
+					FCUT_TYPE cutoff_type = FCUT::to_val(TEMP_STR);
+					FF_3BODY[0].FCUT_TYPE = cutoff_type ;
 					
-					if(TEMP_STR == "SIGMOID" || TEMP_STR == "CUBSIG" || TEMP_STR=="CUBESTRETCH" || TEMP_STR=="SIGFLT")
+					if( cutoff_type == FCUT_TYPE::SIGMOID 
+						 || cutoff_type == FCUT_TYPE::CUBSIG 
+						 || cutoff_type == FCUT_TYPE::CUBESTRETCH 
+						 || cutoff_type == FCUT_TYPE::SIGFLT)
 					{
 						STREAM_PARSER >> FF_3BODY[0].FCUT_STEEPNESS;
 						STREAM_PARSER >> FF_3BODY[0].FCUT_OFFSET;
@@ -1555,7 +1559,8 @@ int main(int argc, char* argv[])
 				
 				if(FF_3BODY.size()>0)
 				{
-					cout << "	Using the following fcut style for 3B Chebyshev interactions: " << FF_3BODY[0].FCUT_TYPE << endl;
+					cout << "	Using the following fcut style for 3B Chebyshev interactions: " << 
+						FCUT::to_string(FF_3BODY[0].FCUT_TYPE) << endl;
 					cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << FF_3BODY[0].FCUT_STEEPNESS << " " << FF_3BODY[0].FCUT_OFFSET << endl;
 				}
 			}

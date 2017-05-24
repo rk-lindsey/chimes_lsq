@@ -40,6 +40,10 @@
 #include<assert.h>
 #include<map>
 
+using namespace std;
+
+#include "Fcut.h"
+
 // For the LAMMPS version of the MD Code
 
 #if defined(USE_MPI) && defined(LINK_LAMMPS)
@@ -58,8 +62,6 @@
 	#include QUOTE(LMPPATH/src/modify.h)
 #endif
 
-
-using namespace std;
 
 // Unit converters 
 
@@ -200,6 +202,7 @@ struct XYZ_INT
 	int Z;
 };
 
+
 struct FRAME
 {
     int ATOMS;                 		// Just the parent atoms.
@@ -290,7 +293,7 @@ struct TRIPLETS
 	string ATMPAIR2;
 	string ATMPAIR3;
 	
-	string FCUT_TYPE;		// "CUBIC" "COSINE" or "SIGMOID" currently supported
+	FCUT_TYPE FCUT_TYPE;		// "CUBIC" "COSINE" or "SIGMOID" currently supported
 	double FCUT_STEEPNESS;
 	double FCUT_OFFSET; 
 	double FCUT_HEIGHT;
@@ -413,7 +416,7 @@ static const ANSI_COLORS COUT_STYLE  =
 	"\033[0m ",    // ENDSTYLE 
 
 };
-
+	
 /*
 
 class CELLS
