@@ -1391,13 +1391,6 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 	
 	bool FORCE_IS_ZERO_IJ, FORCE_IS_ZERO_IK, FORCE_IS_ZERO_JK;
 
-	const double fcut_power = 
-    #ifndef FPENALTY_POWER
-		3.0;
-	#else
-		FPENALTY_POWER;
-    #endif
-	
 	if ( ! called_before ) 
 	{
 		called_before = true;
@@ -1867,13 +1860,6 @@ void ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,
 	double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
 	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
 
-	const double fcut_power = 
-    #ifndef FPENALTY_POWER
-		3.0;
-	#else
-		FPENALTY_POWER;
-    #endif
-	
 	if ( ! called_before ) 
 	{
 		called_before = true;
@@ -2665,13 +2651,6 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
 
 	double rpenalty_ij, rpenalty_ik, rpenalty_jk;
-
-	const double fcut_power = 
-    #ifndef FPENALTY_POWER
-		3.0;
-	#else
-		FPENALTY_POWER;
-    #endif
 
 	if ( ! called_before ) 
 	{
@@ -3477,13 +3456,6 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCL
 	const double penalty_scale  = FF_2BODY[0].PENALTY_SCALE;	// 1.0e8;
 	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
 
-	const double fcut_power = 
-    #ifndef FPENALTY_POWER
-		3.0;
-	#else
-		FPENALTY_POWER;
-    #endif
-
 	if ( ! called_before ) 
 	{
 		called_before = true;
@@ -3591,7 +3563,7 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCL
 			// Now compute the force/potential... Cheby
 
 			fcut0 = (1.0 - rlen/FF_2BODY[ij].S_MAXIM);
-			fcut      = pow(fcut0, fcut_power);
+			fcut      = pow(fcut0, FF_2BODY[ij].FORCE_CUTOFF.POWER );
 									 
 			for ( int i = 0; i < FF_2BODY[ij].SNUM; i++ ) 
 			{
@@ -3677,13 +3649,6 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 	 
 	const double penalty_scale  = FF_2BODY[0].PENALTY_SCALE;	// 1.0e8;
 	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
-
-	const double fcut_power = 
-    #ifndef FPENALTY_POWER
-		3.0;
-	#else
-		FPENALTY_POWER;
-    #endif
 
 	if ( ! called_before ) 
 	{
