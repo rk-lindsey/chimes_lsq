@@ -674,24 +674,6 @@ double SET_SMINIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE)
 	return VAL;
 }
 
-bool PROCEED(const double & rlen, FCUT_TYPE TYPE, const double & rmin, const double & rmax)
-// Determines whether rlen is within permissible ranges for the given fcut type... i.e. cubic doesn't care about inner cutoff, while other types do.
-{
-	if(TYPE == FCUT_TYPE::CUBIC 
-		|| TYPE == FCUT_TYPE::CUBSIG
-		|| TYPE == FCUT_TYPE::CUBESTRETCH 
-		|| TYPE == FCUT_TYPE::SIGFLT)
-		if(rlen < rmax)
-			return true;
-		else
-			return false;
-	else
-		if((rlen < rmax) && (rlen > rmin))
-			return true;
-		else
-			return false;
-}
-
 //////////////////////////////////////////
 // Pressure functions
 //////////////////////////////////////////
@@ -1141,13 +1123,6 @@ static void ZCalc_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAI
 
 	bool inverse_order;
 	
-	const double fcut_power = 
-    #ifndef FPENALTY_POWER
-		3.0;
-	#else
-		FPENALTY_POWER;
-    #endif
-
 	if ( ! called_before ) 
 	{
 		called_before = true;
@@ -1292,7 +1267,8 @@ static void ZCalc_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAI
 				
 				// fcut and fcutderv are the form that the penalty func and its derivative for the morse-type pair distance transformation
 				
-				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut, fcutderiv, rlen, 0, FF_2BODY[curr_pair_type_idx].S_MAXIM, fcut_power,0,0,0);
+				FF_2BODY[curr_pair_type_idx].FORCE_CUTOFF.get_fcut(fcut, fcutderiv, rlen, 0, 
+																					FF_2BODY[curr_pair_type_idx].S_MAXIM) ;
 				
 				// Compute part of the derivative
 				
@@ -1547,11 +1523,11 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 				
 				FORCE_IS_ZERO_IJ = FORCE_IS_ZERO_IK = FORCE_IS_ZERO_JK = false;					
 				
-				if(PROCEED(rlen_ij, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, S_MINIM_IJ, S_MAXIM_IJ))
+				if( PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_ij, S_MINIM_IJ, S_MAXIM_IJ))
 				{
-					if(PROCEED(rlen_ik, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, S_MINIM_IK, S_MAXIM_IK))
+					if( PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_ik, S_MINIM_IK, S_MAXIM_IK))
 					{
-						if(PROCEED(rlen_jk, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, S_MINIM_JK, S_MAXIM_JK))
+						if( PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_jk, S_MINIM_JK, S_MAXIM_JK))
 						{		
 										
 							// Populate the appropriate histogram
@@ -1713,10 +1689,9 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 							for (int i=0; i<curr_triple_type_index; i++)
 								vstart += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;						
 							
-							FCUT::get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);
-							FCUT::get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);
-							FCUT::get_fcut(3, PAIR_TRIPLETS[curr_triple_type_index].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power,PAIR_TRIPLETS[curr_triple_type_index].FCUT_OFFSET, PAIR_TRIPLETS[curr_triple_type_index].FCUT_STEEPNESS, PAIR_TRIPLETS[curr_triple_type_index].FCUT_HEIGHT);							
-
+							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ);
+							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK);
+							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK);							
 							/////////////////////////////////////////////////////////////////////
 							/////////////////////////////////////////////////////////////////////
 							// Consider special restrictions on allowed triplet types and powers
@@ -2064,9 +2039,9 @@ PAIR_TRIPLETS[i].POP_HIST[xx][yy][zz] += pop;
 						for (int p=0; p<curr_triple_type_index; p++)
 							vstart += PAIR_TRIPLETS[p].N_TRUE_ALLOWED_POWERS;	
 									
-						FCUT::get_fcut(3, PAIR_TRIPLETS[i].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power,PAIR_TRIPLETS[i].FCUT_OFFSET, PAIR_TRIPLETS[i].FCUT_STEEPNESS, PAIR_TRIPLETS[i].FCUT_HEIGHT);
-						FCUT::get_fcut(3, PAIR_TRIPLETS[i].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power,PAIR_TRIPLETS[i].FCUT_OFFSET, PAIR_TRIPLETS[i].FCUT_STEEPNESS, PAIR_TRIPLETS[i].FCUT_HEIGHT);
-						FCUT::get_fcut(3, PAIR_TRIPLETS[i].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power,PAIR_TRIPLETS[i].FCUT_OFFSET, PAIR_TRIPLETS[i].FCUT_STEEPNESS, PAIR_TRIPLETS[i].FCUT_HEIGHT);							
+						PAIR_TRIPLETS[i].FORCE_CUTOFF.get_fcut(fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ);
+						PAIR_TRIPLETS[i].FORCE_CUTOFF.get_fcut(fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK) ;
+						PAIR_TRIPLETS[i].FORCE_CUTOFF.get_fcut(fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK) ;
 
 						/////////////////////////////////////////////////////////////////////
 						// Consider special restrictions on allowed triplet types and powers
@@ -2797,7 +2772,8 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 							 
 				SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn, Tnd, rlen_ij, xdiff_2b, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, FF_2BODY[curr_pair_type_idx_ij].S_MINIM, FF_2BODY[curr_pair_type_idx_ij].SNUM);
 				
-				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut_2b, fcutderiv_2b, rlen_ij, 0, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, fcut_power,0,0,0);
+				FF_2BODY[curr_pair_type_idx_ij].FORCE_CUTOFF.get_fcut(fcut_2b, fcutderiv_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].S_MINIM,
+																						FF_2BODY[curr_pair_type_idx_ij].S_MAXIM);
 
 				dx_dr = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
 
@@ -2939,11 +2915,11 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 			// within the allowed range.
 
-			if(PROCEED(rlen_ij, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_IJ, S_MAXIM_IJ))
+			if ( FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_ij, S_MINIM_IJ, S_MAXIM_IJ) )
 			{
-				if(PROCEED(rlen_ik, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_IK, S_MAXIM_IK))
+				if ( FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_ik, S_MINIM_IK, S_MAXIM_IK))
 				{
-					if(PROCEED(rlen_jk, FF_3BODY[curr_triple_type_index].FCUT_TYPE, S_MINIM_JK, S_MAXIM_JK))
+					if ( FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_jk, S_MINIM_JK, S_MAXIM_JK) )
 					{											
 						// Everything is within allowed ranges. Begin setting up the force calculation
 			  
@@ -2973,9 +2949,9 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
 						// Set up the smoothing functions
 
-						FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-						FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-						FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+						FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ) ;
+						FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK) ;
+						FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK) ;
 
 						// Set up terms for derivatives
 		
@@ -3846,7 +3822,8 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 						 
 				SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn, Tnd, rlen_ij, xdiff_2b, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, FF_2BODY[curr_pair_type_idx_ij].S_MINIM, FF_2BODY[curr_pair_type_idx_ij].SNUM);
 			
-				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut_2b, TMP_DOUB, rlen_ij, 0, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, fcut_power,0,0,0);
+				FF_2BODY[curr_pair_type_idx_ij].FORCE_CUTOFF.get_fcut(fcut_2b, TMP_DOUB, rlen_ij, 0.0, 
+																						FF_2BODY[curr_pair_type_idx_ij].S_MAXIM) ;
 
 				for ( int m = 0; m < FF_2BODY[curr_pair_type_idx_ij].SNUM; m++ ) 
 					POT_ENER += FF_2BODY[curr_pair_type_idx_ij].PARAMS[m] * fcut_2b * Tn[m+1];
@@ -3858,7 +3835,7 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 				
 				SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn, Tnd, rlen_ik, xdiff_2b, FF_2BODY[curr_pair_type_idx_ik].S_MAXIM, FF_2BODY[curr_pair_type_idx_ik].S_MINIM, FF_2BODY[curr_pair_type_idx_ik].SNUM);
 			
-				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut_2b, TMP_DOUB, rlen_ik, 0, FF_2BODY[curr_pair_type_idx_ik].S_MAXIM, fcut_power,0,0,0);
+				FF_2BODY[curr_pair_type_idx_ik].FORCE_CUTOFF.get_fcut(fcut_2b, TMP_DOUB, rlen_ik, 0.0, FF_2BODY[curr_pair_type_idx_ik].S_MAXIM) ;
 
 				for ( int m = 0; m < FF_2BODY[curr_pair_type_idx_ik].SNUM; m++ ) 
 					POT_ENER += FF_2BODY[curr_pair_type_idx_ik].PARAMS[m] * fcut_2b * Tn[m+1];
@@ -3870,7 +3847,7 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 				
 				SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn, Tnd, rlen_jk, xdiff_2b, FF_2BODY[curr_pair_type_idx_jk].S_MAXIM, FF_2BODY[curr_pair_type_idx_jk].S_MINIM, FF_2BODY[curr_pair_type_idx_jk].SNUM);
 			
-				FCUT::get_fcut(2, FCUT_TYPE::CUBIC, fcut_2b, TMP_DOUB, rlen_jk, 0, FF_2BODY[curr_pair_type_idx_jk].S_MAXIM, fcut_power,0,0,0);
+				FF_2BODY[curr_pair_type_idx_jk].FORCE_CUTOFF.get_fcut(fcut_2b, TMP_DOUB, rlen_jk, 0.0, FF_2BODY[curr_pair_type_idx_jk].S_MAXIM);
 
 				for ( int m = 0; m < FF_2BODY[curr_pair_type_idx_jk].SNUM; m++ ) 
 					POT_ENER += FF_2BODY[curr_pair_type_idx_jk].PARAMS[m] * fcut_2b * Tn[m+1];
@@ -3890,9 +3867,9 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 								
 				// Set up the penalty functions
 
-				FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ij, TMP_DOUB, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-				FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_ik, TMP_DOUB, rlen_ik, S_MINIM_IK, S_MAXIM_IK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
-				FCUT::get_fcut(3, FF_3BODY[curr_triple_type_index].FCUT_TYPE, fcut_jk, TMP_DOUB, rlen_jk, S_MINIM_JK, S_MAXIM_JK, fcut_power, FF_3BODY[curr_triple_type_index].FCUT_OFFSET, FF_3BODY[curr_triple_type_index].FCUT_STEEPNESS, FF_3BODY[curr_triple_type_index].FCUT_HEIGHT);
+				FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ij, TMP_DOUB, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ) ;
+				FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ik, TMP_DOUB, rlen_ik, S_MINIM_IK, S_MAXIM_IK) ;
+				FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_jk, TMP_DOUB, rlen_jk, S_MINIM_JK, S_MAXIM_JK) ;
 			
 				for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 				{

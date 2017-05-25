@@ -282,6 +282,8 @@ struct PAIRS	// NEEDS UPDATING
 	vector<double> OVRPRMS;	// [0] = P_OVERB; [1] = R_0_VAL; [2] = P_1_VAL; [3] = P_2_VAL; [4] = LAMBDA6
 	
 	XYZ NBINS;				// Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
+
+	FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
 	
 	PAIRS():OVRPRMS(5),N_CFG_CONTRIB(0){}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 };
@@ -293,10 +295,7 @@ struct TRIPLETS
 	string ATMPAIR2;
 	string ATMPAIR3;
 	
-	FCUT_TYPE FCUT_TYPE;		// "CUBIC" "COSINE" or "SIGMOID" currently supported
-	double FCUT_STEEPNESS;
-	double FCUT_OFFSET; 
-	double FCUT_HEIGHT;
+	FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
 	
 	int    N_CFG_CONTRIB;	// How many configurations actually contribute to fitting this triplet??
 	

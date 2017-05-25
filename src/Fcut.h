@@ -15,17 +15,36 @@ enum class FCUT_TYPE {
 
 class FCUT {
 public:
-	// Convert a string to an FCUT_TYPE.
-	static FCUT_TYPE to_val(string s) ;
+
+	double STEEPNESS;
+	double OFFSET; 
+	double HEIGHT;
+
+	// power used in the cutoff function.
+	int  POWER ;
+
+	// 2, 3, 4, body interaction.
+	int BODIEDNESS ;
+
+	// Type of cutoff-function employed.
+	FCUT_TYPE TYPE ;
+
+	// set the type of the cutoff function.
+	void set_type(string s) ;
+
+	// Default constructor.
+	FCUT() ;
 
 	// Convert a cut-off function to a string.
-	static string to_string(FCUT_TYPE val) ;
+	string to_string() ;
 
 	// Evaluate the cut-off function.
-	static void get_fcut(int BODIEDNESS, FCUT_TYPE TYPE,
-								double & fcut, double & fcut_deriv, const double rlen, 
-								const double rmin, const double rmax, const int fcut_power, 
-								double OFFSET, double STEEPNESS, double HEIGHT) ;
+	void get_fcut(double & fcut, double & fcut_deriv, const double rlen, 
+								const double rmin, const double rmax) ;
+
+	// Decide whether to proceed with a pair interaction.
+	bool PROCEED(const double & rlen, const double & rmin, const double & rmax) ;
+
 } ;
 
 #endif

@@ -13,9 +13,8 @@ using namespace std;
 #include "Fcut.h"
 #include "functions.h"
 
-void FCUT::get_fcut(int BODIEDNESS, FCUT_TYPE type, double & fcut, double & fcut_deriv, 
-						  const double rlen, const double rmin, const double rmax, 
-						  const int fcut_power, double OFFSET, double STEEPNESS, double HEIGHT)
+void FCUT::get_fcut(double & fcut, double & fcut_deriv, 
+						  const double rlen, const double rmin, const double rmax) 
 // Calculates the fcut function and its derivative. Used to force the potential to zero at rcut max, 
 // and for 3-body interactions, to zero at rcut min
 {	
@@ -27,24 +26,24 @@ void FCUT::get_fcut(int BODIEDNESS, FCUT_TYPE type, double & fcut, double & fcut
 
 	// Original cubic style smoothing... does not constrian value at rmin
 	
-	if(type == FCUT_TYPE::CUBESTRETCH )
+	if(TYPE == FCUT_TYPE::CUBESTRETCH )
 	{
 		cout << "ERROR: TYPE CUBESTRETCH NO LONGER SUPPORTED...Please clean up code!" << endl;
 		exit_run(0);
 	}
 	
-	if(BODIEDNESS==2 || (BODIEDNESS==3 && type == FCUT_TYPE::CUBIC))
+	if(BODIEDNESS==2 || (BODIEDNESS==3 && TYPE == FCUT_TYPE::CUBIC))
 	{		
 		fcut0 = (1.0 - rlen/rmax);
-		fcut        = pow(fcut0, fcut_power);
-		fcut_deriv  = pow(fcut0,fcut_power-1);
-		fcut_deriv *= -1.0 * fcut_power /rmax;
+		fcut        = pow(fcut0, POWER);
+		fcut_deriv  = pow(fcut0,POWER-1);
+		fcut_deriv *= -1.0 * POWER /rmax;
 
 		return;
 	}
 	else if(BODIEDNESS==3)
 	{
-		if(type == FCUT_TYPE::COSINE)
+		if(TYPE == FCUT_TYPE::COSINE)
 		{
 			fcut0     = 2.0*pi*( (rlen - rmin) /(rmax - rmin) );
 			fcut      = -0.5*cos(fcut0) + 0.5;
@@ -52,7 +51,7 @@ void FCUT::get_fcut(int BODIEDNESS, FCUT_TYPE type, double & fcut, double & fcut
 
 			return;
 		}
-		else if(type == FCUT_TYPE::CUBSIG)	// Outer cutoff handled by normal fcut function, inner cutoff is handled by a sigmoid, who is ~1 until r LESS THAN the inner cutoff. does NOT go to zero within rmin<->rmax
+		else if(TYPE == FCUT_TYPE::CUBSIG)	// Outer cutoff handled by normal fcut function, inner cutoff is handled by a sigmoid, who is ~1 until r LESS THAN the inner cutoff. does NOT go to zero within rmin<->rmax
 		{
 			if(FIRST_PASS && RANK==0)
 			{
@@ -74,9 +73,9 @@ void FCUT::get_fcut(int BODIEDNESS, FCUT_TYPE type, double & fcut, double & fcut
 			}
 			
 			fcut0    = fcut0 = (1.0 - rlen/rmax);
-			b        = pow(fcut0, fcut_power);
-			b_prime  = pow(fcut0,fcut_power-1);
-			b_prime *= -1.0 * fcut_power /rmax;
+			b        = pow(fcut0, POWER);
+			b_prime  = pow(fcut0,POWER-1);
+			b_prime *= -1.0 * POWER /rmax;
 			
 			fcut = a*b;
 			
@@ -85,7 +84,7 @@ void FCUT::get_fcut(int BODIEDNESS, FCUT_TYPE type, double & fcut, double & fcut
 			return;
 		}
 		
-		else if( type == FCUT_TYPE::SIGMOID) // Both outer and inner cutoffs handed by sigmoid functions
+		else if( TYPE == FCUT_TYPE::SIGMOID) // Both outer and inner cutoffs handed by sigmoid functions
 		{
 			
 			/* FOR DEBUGGING 
@@ -131,7 +130,7 @@ void FCUT::get_fcut(int BODIEDNESS, FCUT_TYPE type, double & fcut, double & fcut
 
 			return;
 		}
-		else if( type== FCUT_TYPE::SIGFLT)
+		else if( TYPE== FCUT_TYPE::SIGFLT)
 		{
 			A = exp( (rlen - rmin - OFFSET ) * STEEPNESS);	// A_prime is just STEEPNESS*A
 			B = exp( (rlen - rmax + OFFSET ) * STEEPNESS);	// Same for B_prime
@@ -183,36 +182,49 @@ void FCUT::get_fcut(int BODIEDNESS, FCUT_TYPE type, double & fcut, double & fcut
 	}
 }
 
-
-FCUT_TYPE FCUT::to_val(string s) 
-// Constructor for cutoffs.
+FCUT::FCUT() 
 {
-	FCUT_TYPE type ;
+#ifndef FPENALTY_POWER
+	POWER = 3.0;
+#else
+	POWER = FPENALTY_POWER;
+#endif
+
+	BODIEDNESS = 2 ;
+	
+	TYPE = FCUT_TYPE::CUBIC ;
+
+}
+
+
+
+void FCUT::set_type(string s) 
+// Set the type of the cutoff function.
+{
 	if ( s == "CUBESTRETCH" ) {
-		type = FCUT_TYPE::CUBESTRETCH ;
+		TYPE = FCUT_TYPE::CUBESTRETCH ;
 	} else if ( s == "CUBIC" ) {
-		type = FCUT_TYPE::CUBIC ;
+		TYPE = FCUT_TYPE::CUBIC ;
 	} else if ( s == "COSINE" ) {
-		type = FCUT_TYPE::COSINE ;
+		TYPE = FCUT_TYPE::COSINE ;
 	} else if ( s == "CUBSIG" ) {
-		type = FCUT_TYPE::CUBSIG ;
+		TYPE = FCUT_TYPE::CUBSIG ;
 	} else if ( s == "SIGMOID" ) {
-		type = FCUT_TYPE::SIGMOID ;
+		TYPE = FCUT_TYPE::SIGMOID ;
 	} else if ( s == "SIGFLT" ) {
-		type = FCUT_TYPE::SIGFLT ;
+		TYPE = FCUT_TYPE::SIGFLT ;
 	} else {
 		cout << "Error: unknown cutoff type " << s << endl ;
 		exit(1) ;
 	}
-	return type ;
 }
 
-string FCUT::to_string(FCUT_TYPE type)
+string FCUT::to_string()
 // Convert an fcut_type to a string.
 {
 	string str ;
 
-	switch ( type ) {
+	switch ( TYPE ) {
 	case FCUT_TYPE::CUBESTRETCH:
 		str = "CUBESTRETCH" ;
 		break ;
@@ -232,8 +244,28 @@ string FCUT::to_string(FCUT_TYPE type)
 		str = "SIGFLT" ;
 		break ;
 	default:
-		cout << "Error: unknown cutoff value " << (int) type << endl ;
+		cout << "Error: unknown cutoff value " << (int) TYPE << endl ;
 		exit(1) ;
 	}
 	return(str) ;
+}
+
+
+bool FCUT::PROCEED(const double & rlen, const double & rmin, const double & rmax)
+// Determines whether rlen is within permissible ranges for the given fcut type... i.e. cubic doesn't care about inner cutoff, while other types do.
+{
+
+	if(TYPE == FCUT_TYPE::CUBIC 
+		|| TYPE == FCUT_TYPE::CUBSIG
+		|| TYPE == FCUT_TYPE::CUBESTRETCH 
+		|| TYPE == FCUT_TYPE::SIGFLT)
+		if(rlen < rmax)
+			return true;
+		else
+			return false;
+	else
+		if((rlen < rmax) && (rlen > rmin))
+			return true;
+		else
+			return false;
 }
