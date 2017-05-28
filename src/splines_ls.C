@@ -2709,8 +2709,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 											 << ", and  " << PAIR_TRIPLETS[0].FORCE_CUTOFF.HEIGHT << endl;	
 				#endif
 				
+				PAIR_TRIPLETS[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
+
 				for(int i=1; i<PAIR_TRIPLETS.size(); i++)
 				{
+					// Copy all class elements
 					PAIR_TRIPLETS[i].FORCE_CUTOFF = PAIR_TRIPLETS[0].FORCE_CUTOFF ;
 				}
 					

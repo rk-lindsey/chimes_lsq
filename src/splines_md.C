@@ -1247,6 +1247,9 @@ int main(int argc, char* argv[])
 					STREAM_PARSER.str("");
 					STREAM_PARSER.clear();	
 					
+					FF_3BODY[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
+					
+					// Copy all class members.
 					for(int i=1; i<FF_3BODY.size(); i++)
 					{
 						FF_3BODY[i].FORCE_CUTOFF = FF_3BODY[0].FORCE_CUTOFF ;
