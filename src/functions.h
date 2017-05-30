@@ -143,6 +143,7 @@ struct JOB_CONTROL
 	int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
 	int    FREQ_BACKUP;       // How often to write backup files for restart.
 	bool   PRINT_VELOC;			// If true, write out the velocities 
+	bool   RESTART ;          // If true, read a restart file.
 	int    FREQ_VELOC;
 	int    FREQ_ENER;			// Replaces energy_freq... How often to output energy
 	bool   PRINT_FORCE;			// Replaces if_output_force... If TRUE, write out calculated forces.	
@@ -563,7 +564,6 @@ class NEIGHBORS
 
 		bool   FIRST_CALL;					// Is this the first call? if so, need to build initial list
 		bool   SECOND_CALL;					// Is this the second call? If so, pick the padding distance.
-		double RCUT_PADDING;				// Neighborlist cutoff is r_max + rcut_padding
 		double DISPLACEMENT;
 		double SAFETY;                 		// Safety factor in calculating neighbors.
 		
@@ -574,6 +574,7 @@ class NEIGHBORS
 		
 	public:
 
+		double RCUT_PADDING;				// Neighborlist cutoff is r_max + rcut_padding
 		bool   USE;							// Do we even want to use a neighbor list?
 		double CURR_VEL;
 		double MAX_VEL;
@@ -654,6 +655,9 @@ class CONSTRAINT
 		
 		string STYLE;		// NPT, NVT-MTK, NVT-SCALE, NVE
 
+		void WRITE(ofstream &STREAM) ;  // Write variables to file.
+		void READ(ifstream &STREAM) ;   // Read variables from file.
+
 		void INITIALIZE          (string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS); 
 		void UPDATE_COORDS       (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
 		void UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
@@ -668,6 +672,15 @@ class CONSTRAINT
 };
 
 
+class THERMO_AVG {
+// Time average of thermodynamic properties.
+public:
+	double TEMP_SUM ;
+	double PRESS_SUM ;
+	XYZ STRESS_TENSOR_SUM ;
+	void WRITE(ofstream &fout) ;
+	void READ(ifstream &fin) ;
+} ;
 
 
 

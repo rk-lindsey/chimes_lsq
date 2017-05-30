@@ -499,9 +499,88 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	VOLUME_T = 0;
 	
 	BAROS_SCALE = 1;
-
 	
 }
+
+void CONSTRAINT::WRITE(ofstream &output)
+// Write parameters for restart.
+{
+	output << THERM_POSIT_T << endl ;
+	output << THERM_VELOC_T << endl ;
+	output << THERM_INERT_T << endl ;
+	output << THERM_INERT_Q << endl ;
+	output << THERM_POSIT_0 << endl ;
+	output << THERM_INERT_0 << endl ;
+	output << THERM_VELOC_0 << endl ;
+
+	output << BAROS_POSIT_T << endl ;
+	output << BAROS_VELOC_T << endl ;
+	output << BAROS_FORCE_T << endl ;
+	output << BAROS_INERT_W << endl ;
+	output << BAROS_POSIT_0 << endl ;
+	output << BAROS_FORCE_0 << endl ;
+	output << BAROS_VELOC_0 << endl ;
+
+	output << BAROS_SCALE << endl ;
+	output << VOLUME_0 << endl ;
+	output << VOLUME_T << endl ;
+
+	output << BEREND_MU << endl ;
+	output << BEREND_ANI_MU.X << endl ;
+	output << BEREND_ANI_MU.Y << endl ;
+	output << BEREND_ANI_MU.Z << endl ;
+	output << BEREND_KP << endl ;
+
+	output << BEREND_ETA << endl ;
+	output << BEREND_TAU << endl ;
+
+	output << TIME << endl ;
+	output << TIME_BARO << endl ;
+	output << N_DOF << endl ;
+	output << VSCALEH << endl ;
+	output << KIN_ENER << endl ;
+}
+
+
+void CONSTRAINT::READ(ifstream &input)
+// Write parameters for restart.
+{
+	input >> THERM_POSIT_T;
+	input >> THERM_VELOC_T;
+	input >> THERM_INERT_T;
+	input >> THERM_INERT_Q ;
+	input >> THERM_POSIT_0 ;
+	input >> THERM_INERT_0 ;
+	input >> THERM_VELOC_0 ;
+
+	input >> BAROS_POSIT_T;
+	input >> BAROS_VELOC_T;
+	input >> BAROS_FORCE_T;
+	input >> BAROS_INERT_W;
+	input >> BAROS_POSIT_0 ;
+	input >> BAROS_FORCE_0 ;
+	input >> BAROS_VELOC_0 ;
+
+	input >> BAROS_SCALE  ;
+	input >> VOLUME_0  ;
+	input >> VOLUME_T  ;
+
+	input >> BEREND_MU  ;
+	input >> BEREND_ANI_MU.X  ;
+	input >> BEREND_ANI_MU.Y  ;
+	input >> BEREND_ANI_MU.Z  ;
+	input >> BEREND_KP  ;
+
+	input >> BEREND_ETA  ;
+	input >> BEREND_TAU  ;
+
+	input >> TIME  ;
+	input >> TIME_BARO  ;
+	input >> N_DOF  ;
+	input >> VSCALEH  ;
+	input >> KIN_ENER ;
+}
+
 
 void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
@@ -996,4 +1075,26 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 		}
 	}
 }
+
+void THERMO_AVG::WRITE(ofstream &fout)
+// Write out thermodynamic average properties.
+{
+	fout << TEMP_SUM << endl ;
+	fout << PRESS_SUM << endl ;
+	fout << STRESS_TENSOR_SUM.X << endl ;
+	fout << STRESS_TENSOR_SUM.Y << endl ;
+	fout << STRESS_TENSOR_SUM.Z << endl ;
+}
+
+
+void THERMO_AVG::READ(ifstream &fin)
+// Read in thermodynamic average properties.
+{
+	fin >> TEMP_SUM  ;
+	fin >> PRESS_SUM  ;
+	fin >> STRESS_TENSOR_SUM.X  ;
+	fin >> STRESS_TENSOR_SUM.Y  ;
+	fin >> STRESS_TENSOR_SUM.Z  ;
+}
+
 

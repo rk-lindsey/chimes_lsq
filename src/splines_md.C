@@ -52,7 +52,10 @@ void      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vecto
 
 static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
 static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
-static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, string filename);
+static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, 
+							  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
+static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL,
+										  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
 
 // Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
 
@@ -150,7 +153,7 @@ int main(int argc, char* argv[])
 	PES_PLOTS FF_PLOTS;					// Declare the data object that will help set up PES plots
 	FRAME      SYSTEM;					// Declare the data object that will hold the system coordinates, velocities, accelrations, etc.
 	CONSTRAINT ENSEMBLE_CONTROL;		// Declare the class that will handle integration/constraints
-		
+	THERMO_AVG AVG_DATA ;
 	
 	// These are data objects that are normally defined locally, but need to be global for LAMMPS linking
 	
@@ -182,13 +185,6 @@ int main(int argc, char* argv[])
 	double Ktot;
 	double Vol;
     SYSTEM.AVG_TEMPERATURE = 0.0;
-    double temp_sum  = 0.0;
-    double press_sum = 0.0;
-	XYZ    stress_tensor_sum;
-	
-	stress_tensor_sum.X = 0;
-	stress_tensor_sum.Y = 0;
-	stress_tensor_sum.Z = 0;
 	
 	double ferr = 0.0;
 		
@@ -546,7 +542,7 @@ int main(int argc, char* argv[])
 	
 			getline(COORDFILE,LINE);
 
-		    for(int a=0; a<TEMP_INT;a++)
+			for(int a=0; a<TEMP_INT;a++)
 			{
 			
 				CURR_ATOM++;
@@ -555,7 +551,7 @@ int main(int argc, char* argv[])
 
 				STREAM_PARSER.str(LINE);
 		
-		        STREAM_PARSER >> SYSTEM.ATOMTYPE[CURR_ATOM];
+				STREAM_PARSER >> SYSTEM.ATOMTYPE[CURR_ATOM];
 
 				// Read the coordinates
 
@@ -583,7 +579,18 @@ int main(int argc, char* argv[])
 				SYSTEM.ACCEL[CURR_ATOM].Y = 0;
 				SYSTEM.ACCEL[CURR_ATOM].Z = 0;		
 		
-		        if ( CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE ) // Reading positions from *.xyzf for force testing
+
+				if ( CONTROLS.RESTART ) 
+				{
+					if(a==0 && RANK==0)
+						cout << "	...Reading positions, velocities, and forces from a restart file " << endl ;
+
+					STREAM_PARSER >> SYSTEM.VELOCITY[CURR_ATOM].X >> SYSTEM.VELOCITY[CURR_ATOM].Y 
+									  >> SYSTEM.VELOCITY[CURR_ATOM].Z;	
+					STREAM_PARSER >> SYSTEM.ACCEL[CURR_ATOM].X >> SYSTEM.ACCEL[CURR_ATOM].Y 
+									  >> SYSTEM.ACCEL[CURR_ATOM].Z;	
+				} 
+				else if ( CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE ) // Reading positions from *.xyzf for force testing
 				{	
 					if(EXTENSION == "xyzf")	// Ignore forces in .xyzf file
 					{
@@ -600,8 +607,7 @@ int main(int argc, char* argv[])
 					CMPR_FORCEFILE >> SYSTEM.FORCES[CURR_ATOM].X >> SYSTEM.FORCES[CURR_ATOM].Y >> SYSTEM.FORCES[CURR_ATOM].Z;
 			
 				}
-		
-		        if(!CONTROLS.INIT_VEL) // Reading positions from *.xyz
+				else if (!CONTROLS.INIT_VEL) // Reading positions from *.xyz
 				{			
 					if(EXTENSION == ".xyz")
 					{
@@ -619,16 +625,12 @@ int main(int argc, char* argv[])
 
 					STREAM_PARSER >> SYSTEM.VELOCITY[CURR_ATOM].X >> SYSTEM.VELOCITY[CURR_ATOM].Y >> SYSTEM.VELOCITY[CURR_ATOM].Z;
 				}
-				else
+				else if(EXTENSION == "xyzf")
 				{
-					if(EXTENSION == "xyzf")
-					{
-						if(a==0 && RANK==0)
-							cout << "	...Ignoring last three fields of atom info lines in xyzf file... " << endl;
-						//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
-					}
+					if(a==0 && RANK==0)
+						cout << "	...Ignoring last three fields of atom info lines in xyzf file... " << endl;
+					//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
 				}
-		
 		
 				STREAM_PARSER.str("");
 				STREAM_PARSER.clear();	
@@ -656,9 +658,12 @@ int main(int argc, char* argv[])
 		
 			if (RANK==0)
 				cout << "	... Updated simulation box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
-	
-		    COORDFILE.close();
-		    COORDFILE.clear();
+
+			if ( ! CONTROLS.RESTART ) 
+			{
+				COORDFILE.close();
+				COORDFILE.clear();
+			}
 	
 			if ( CONTROLS.COMPARE_FORCE ) 
 				CMPR_FORCEFILE.close();
@@ -668,7 +673,6 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	
 	////////////////////////////////////////////////////////////
 	// Figure out atom charges and masses, based on parameter 
 	// file
@@ -961,14 +965,16 @@ int main(int argc, char* argv[])
 	
 	ENSEMBLE_CONTROL.INITIALIZE(CONTROLS.ENSEMBLE, CONTROLS, SYSTEM.ATOMS);
 
-	// Use box Muller to initialize velocities
+	if ( CONTROLS.RESTART ) 
+		read_restart_params(COORDFILE, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, SYSTEM) ;
 
 	Vol = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
 
 	if ( CONTROLS.INIT_VEL ) 
 	{
 		// Declare some task-specific variables
-		
+		// Use box Muller to initialize velocities
+
 		double x1, x2 , y1 ,y2;
 		double sigma;
 		int    counter = 0;
@@ -2720,8 +2726,8 @@ int main(int argc, char* argv[])
 	
 	double ke; // A temporary variable used when updating thermostatting 
 	
-	for(CONTROLS.STEP=0;CONTROLS.STEP<CONTROLS.N_MD_STEPS;CONTROLS.STEP++)	//start Big Loop here.
-    {
+	for( ; CONTROLS.STEP < CONTROLS.N_MD_STEPS ; CONTROLS.STEP++)	//start Big Loop here.
+	{
 	  	////////////////////////////////////////////////////////////
 		// Do first half of coordinate/velocity updating
 		////////////////////////////////////////////////////////////		
@@ -2935,7 +2941,7 @@ int main(int argc, char* argv[])
 
 			// Exit with an error if the set and block temperatures differ by more than CONTROLS.NVT_CONV_CUT
 		
-			temp_sum += SYSTEM.TEMPERATURE;
+			AVG_DATA.TEMP_SUM += SYSTEM.TEMPERATURE;
 		
 			if (SYSTEM.TEMPERATURE/CONTROLS.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
 			{
@@ -2978,15 +2984,15 @@ int main(int argc, char* argv[])
 
 			SYSTEM.PRESSURE = (SYSTEM.PRESSURE_XYZ + 2.0 * Ktot / (3.0 * Vol)) * GPa;	// GPa = Unit conversion factor to GPa.
 			
-			press_sum += SYSTEM.PRESSURE;
+			AVG_DATA.PRESS_SUM += SYSTEM.PRESSURE;
 			
 			SYSTEM.PRESSURE_TENSORS.X = (SYSTEM.PRESSURE_TENSORS_XYZ.X + 2.0 / 3.0 * Ktot / Vol) * GPa;
 			SYSTEM.PRESSURE_TENSORS.Y = (SYSTEM.PRESSURE_TENSORS_XYZ.Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
 			SYSTEM.PRESSURE_TENSORS.Z = (SYSTEM.PRESSURE_TENSORS_XYZ.Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
 				
-			stress_tensor_sum.X += SYSTEM.PRESSURE_TENSORS.X;
-			stress_tensor_sum.Y += SYSTEM.PRESSURE_TENSORS.Y;
-			stress_tensor_sum.Z += SYSTEM.PRESSURE_TENSORS.Z;
+			AVG_DATA.STRESS_TENSOR_SUM.X += SYSTEM.PRESSURE_TENSORS.X;
+			AVG_DATA.STRESS_TENSOR_SUM.Y += SYSTEM.PRESSURE_TENSORS.Y;
+			AVG_DATA.STRESS_TENSOR_SUM.Z += SYSTEM.PRESSURE_TENSORS.Z;
 
 		  	////////////////////////////////////////////////////////////
 			// Periodically print simulation output
@@ -3034,6 +3040,12 @@ int main(int argc, char* argv[])
 		// If requested, write the dftbgen output file
 		////////////////////////////////////////////////////////////
 		
+		if ( (CONTROLS.FREQ_BACKUP > 0 ) && (CONTROLS.STEP+1) % CONTROLS.FREQ_BACKUP == 0 && RANK == 0) 
+		{
+			rename("restart.xyzv", "restart.bak") ;
+			write_xyzv(SYSTEM, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, "restart.xyzv", true) ;
+		}
+
 		if ( (CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0) && RANK == 0) 
 		{
 			GENFILE << setw(5) << right << SYSTEM.ATOMS << " S #Step " << CONTROLS.STEP+1 << " Time " << (CONTROLS.STEP+1) * CONTROLS.DELTA_T_FS << " (fs) Temp " << SYSTEM.TEMPERATURE << " (k)" << endl;
@@ -3205,20 +3217,23 @@ int main(int argc, char* argv[])
 			TEMP_MASS  += SYSTEM.MASS[a];
 
 
-		cout << "	Average temperature over run = " << fixed << setprecision(4) << right << temp_sum  / CONTROLS.N_MD_STEPS << " K"   << endl;
-		cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << press_sum / CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
+		cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
 		
 		if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
 		{
-			cout << "	Pressures from diagonal stress tensors over run: " << (stress_tensor_sum.X + stress_tensor_sum.Y + stress_tensor_sum.Z)/3.0/ CONTROLS.N_MD_STEPS << endl;
+			double Pavg = (AVG_DATA.STRESS_TENSOR_SUM.X 
+								+ AVG_DATA.STRESS_TENSOR_SUM.Y 
+								+ AVG_DATA.STRESS_TENSOR_SUM.Z)/3.0/ CONTROLS.N_MD_STEPS ;
+			cout << "	Pressures from diagonal stress tensors over run: " << Pavg << endl;
 			cout << "	Average diagonal stress tensors over run: " << endl;
-			cout << "		sigma_xx: " << stress_tensor_sum.X/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-			cout << "		sigma_yy: " << stress_tensor_sum.Y/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-			cout << "		sigma_zz: " << stress_tensor_sum.Z/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
+			cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM.X/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+			cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM.Y/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+			cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM.Z/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
 		}
 
 		// Write the final configuration to file.
-		write_xyzv(SYSTEM, CONTROLS, "output.xyz");
+		write_xyzv(SYSTEM, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, "output.xyz", false);
 			
 		STATISTICS.close();
 	}
@@ -3837,6 +3852,8 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				CONTROLS.INIT_VEL = false;
 			else if (LINE=="GEN")
 				CONTROLS.INIT_VEL = true;
+			else if ( LINE == "RESTART" ) 
+				CONTROLS.RESTART = true ;
 			else
 			{
 				cout << "ERROR: # VELINIT # must be specified as READ or GEN." << endl;
@@ -4124,9 +4141,11 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	}
 }
 
-static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, string filename)
+static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL,
+							  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart)
 // Output final xyz position in the same format as input.xyz for restarting.
-// Includes velocities.
+// Includes velocities in addition to positions.
+// If restart is true, output information for job restart, including forces.
 // Output full precision to aid in testing and restart.
 {
 	int PRINT_WIDTH     = 21; // Use 21 for testing
@@ -4173,11 +4192,35 @@ static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, string filename)
 
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].X << " ";
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].Y << " ";
-		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].Z << endl;		
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].Z ;
+
+		if ( restart ) {
+			fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.ACCEL[ia].X << " ";
+			fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.ACCEL[ia].Y << " ";
+			fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.ACCEL[ia].Z << endl;
+		} else {
+			fxyz << endl ;
+		}
 	}
 
+	if ( restart ) 
+	{
+		fxyz << CONTROLS.STEP + 1 << endl ;
+		fxyz << NEIGHBOR_LIST.RCUT_PADDING << endl ;
+		ENSEMBLE_CONTROL.WRITE(fxyz) ;
+		AVG_DATA.WRITE(fxyz) ;
+	}		
 	fxyz.close();	
 
+}
+
+static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL,
+										  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, FRAME &SYSTEM)
+{
+	COORDFILE >> CONTROLS.STEP ;
+	COORDFILE >> NEIGHBOR_LIST.RCUT_PADDING ;
+	ENSEMBLE_CONTROL.READ(COORDFILE) ;
+	AVG_DATA.READ(COORDFILE) ;
 }
 
 
