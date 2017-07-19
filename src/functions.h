@@ -137,7 +137,11 @@ struct JOB_CONTROL
 	double FREQ_UPDATE_THERMOSTAT;	// Replaces scale_freq and thoover_fs... it's usage depends on whether USE_HOOVER_THERMOSTAT is true or false.. will be cast as int where required
 	double FREQ_UPDATE_BAROSTAT;	// Barostat time constant... defaults to 1000
 	bool   USE_NUMERICAL_PRESS;		// Replaces num_pressure... Whether to calculate pressures by finite difference.
-	 
+	double MIN_E_CONVG_CRIT;		// Options for LAMMPS minimization: Stopping criteria for energy and force, max iterations, max energy/force evaluations
+	double MIN_F_CONVG_CRIT;
+	double MIN_MAX_ITER;
+	double MIN_MAX_EVAL;
+	
 	// "Output control" 
 
 	int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.

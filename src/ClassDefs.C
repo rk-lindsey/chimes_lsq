@@ -451,7 +451,8 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 		STYLE = IN_STYLE;	
 	else if(CONTROLS.FREQ_UPDATE_THERMOSTAT > -1.0)	// Trivial velocity scaling
 		STYLE = "NVT-SCALE";
-	else if(IN_STYLE=="LMP-NVE" || IN_STYLE=="LMP-NVT" || IN_STYLE=="LMP-NPT")
+	else if(IN_STYLE=="LMP-NVE" || IN_STYLE=="LMP-NVT" || IN_STYLE=="LMP-NPT" ||
+	 (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI" || CONTROLS.ENSEMBLE == "LMP-MIN"))
 		cout << "	...Configuring constraints for a " << IN_STYLE << " simulation." << endl;
 	else
 	{

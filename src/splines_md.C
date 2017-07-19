@@ -2687,8 +2687,13 @@ int main(int argc, char* argv[])
 			cout << command << endl;
 		lmp->input->one(command);
 
-		ss2 << "run " << CONTROLS.N_MD_STEPS;
-		tmpstr = ss2.str();     
+		if      ((CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ANISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-TRI") && (CONTROLS.ENSEMBLE != "LMP-MIN"))
+			ss2 << "run " << CONTROLS.N_MD_STEPS;
+		else if ((CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO") || (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO") || (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI") || (CONTROLS.ENSEMBLE == "LMP-MIN"))
+			ss2 << "minimize " << CONTROLS.MIN_E_CONVG_CRIT << " " << CONTROLS.MIN_F_CONVG_CRIT << " " << CONTROLS.MIN_MAX_ITER << " " << CONTROLS.MIN_MAX_EVAL;
+			
+		tmpstr = ss2.str();    
+		
 		command = tmpstr.c_str();
 		if(RANK==0)
 			cout << command << endl;
@@ -2726,7 +2731,7 @@ int main(int argc, char* argv[])
 	
 	double ke; // A temporary variable used when updating thermostatting 
 	
-	for( ; CONTROLS.STEP < CONTROLS.N_MD_STEPS ; CONTROLS.STEP++)	//start Big Loop here.
+	for(CONTROLS.STEP=0;CONTROLS.STEP<CONTROLS.N_MD_STEPS;CONTROLS.STEP++)	//start Big Loop here.
 	{
 	  	////////////////////////////////////////////////////////////
 		// Do first half of coordinate/velocity updating
@@ -3281,6 +3286,8 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	CONTROLS.BUILD            = false;
 	CONTROLS.FIT_STRESS       = false;
 	CONTROLS.FIT_ENER         = false;
+	
+	CONTROLS.RESTART          = false;
 	
 	FF_PLOTS.INCLUDE_FCUT     = true;
 	FF_PLOTS.INCLUDE_CHARGES  = true;
@@ -3894,11 +3901,12 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			if( CONTROLS.ENSEMBLE != "NVT-SCALE" && CONTROLS.ENSEMBLE != "NVT-MTK"    && CONTROLS.ENSEMBLE != "NVE" && 
 				CONTROLS.ENSEMBLE != "NPT-MTK"   && CONTROLS.ENSEMBLE != "NPT-BEREND" && CONTROLS.ENSEMBLE != "NVT-BEREND" &&
 				CONTROLS.ENSEMBLE != "NPT-BEREND-ANISO" && 
-				CONTROLS.ENSEMBLE != "LMP-NVE"	 && CONTROLS.ENSEMBLE != "LMP-NVT"	  && CONTROLS.ENSEMBLE != "LMP-NPT")
+				CONTROLS.ENSEMBLE != "LMP-NVE"	 && CONTROLS.ENSEMBLE != "LMP-NVT"	  && CONTROLS.ENSEMBLE != "LMP-NPT" &&
+				CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ISO" &&CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ANISO" && CONTROLS.ENSEMBLE != "LMP-MIN-BOX-TRI" && CONTROLS.ENSEMBLE != "LMP-MIN")
 			{
 				cout << "ERROR: Unrecognized ensemble: " << CONTROLS.ENSEMBLE << endl;
 				cout << "       Options are: NVE, NVT-SCALE, NVT-MTK, NPT-BEREND, or NPT-MTK for plain house_md, " << endl;
-				cout << "       and LMP-NVE, LMP-NVT, and LMP-NPT for md linked to LAMMPS" << endl;
+				cout << "       and LMP-NVE, LMP-NVT, LMP-NPT, LMP-MIN-BOX-ISO,  LMP-MIN-BOX-ANISO, LMP-MIN-BOX-TRI, and MP-MIN for md linked to LAMMPS" << endl;
 				exit_run(0);
 			}
 			
@@ -3914,6 +3922,13 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				if(CONTROLS.ENSEMBLE == "LMP-NPT")
 					LINE_PARSER >> CONTROLS.FREQ_UPDATE_BAROSTAT;
 
+			}
+			else if(CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI" || CONTROLS.ENSEMBLE == "LMP-MIN")
+			{
+				LINE_PARSER >> CONTROLS.MIN_E_CONVG_CRIT;
+				LINE_PARSER >> CONTROLS.MIN_F_CONVG_CRIT;
+				LINE_PARSER >> CONTROLS.MIN_MAX_ITER;
+				LINE_PARSER >> CONTROLS.MIN_MAX_EVAL;
 			}
 			else
 			{
@@ -4365,30 +4380,43 @@ void exit_run(int value)
 		LMPINFILE << "read_data        data.lammps" << endl;
 		LMPINFILE << "neighbor         1.0 bin" << endl;
 		LMPINFILE << "neigh_modify     delay 0 every 1 check no" << endl << endl;
-	
-		// Initialize the velocity via the temperature
-	
-		LMPINFILE << "velocity         all create " << CONTROLS.TEMPERATURE << " " << CONTROLS.SEED << endl << endl;
-	
+		
 		// Set the pairstyle and coefficients
 	
 		LMPINFILE << "pair_style       coul/long 10.0" << endl;	
 		LMPINFILE << "pair_coeff       * *"  << endl << endl;
 	
-		if      (CONTROLS.ENSEMBLE == "LMP-NVE")
-			LMPINFILE << "fix       1 all nve " << endl;
-		else if (CONTROLS.ENSEMBLE == "LMP-NVT")
-			LMPINFILE << "fix       1 all nvt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << endl; 
-		else if (CONTROLS.ENSEMBLE == "LMP-NPT")
-			LMPINFILE << "fix       1 all npt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " iso " << CONTROLS.PRESSURE*GPa2atm << " " << CONTROLS.PRESSURE*GPa2atm <<  " " <<  CONTROLS.FREQ_UPDATE_BAROSTAT << endl;
+		// Initialize the velocity via the temperature (only used if this ISNT a minimization job)
+		
+		if ((CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ANISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-TRI") && (CONTROLS.ENSEMBLE != "LMP-MIN"))
+		{
+			LMPINFILE << "velocity         all create " << CONTROLS.TEMPERATURE << " " << CONTROLS.SEED << endl << endl;
+	
+			if      (CONTROLS.ENSEMBLE == "LMP-NVE")
+				LMPINFILE << "fix       1 all nve " << endl;
+			else if (CONTROLS.ENSEMBLE == "LMP-NVT")
+				LMPINFILE << "fix       1 all nvt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << endl; 
+			else if (CONTROLS.ENSEMBLE == "LMP-NPT")
+				LMPINFILE << "fix       1 all npt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " iso " << CONTROLS.PRESSURE*GPa2atm << " " << CONTROLS.PRESSURE*GPa2atm <<  " " <<  CONTROLS.FREQ_UPDATE_BAROSTAT << endl;
+			else
+			{
+				cout << "ERROR: Unrecognized ensemble for LAMMPS linking." << endl;
+				cout << endl;
+				cout << "...Currently supported options are \"LMP-NVE,\" \"LMP-NVT,\" \"LMP-NPT\" \"LMP-MIN-BOX-ISO,\" \"LMP-MIN-BOX-ANISO,\" \"LMP-MIN-BOX-TRI,\" and \"LMP-MIN,\"" << endl;
+				exit_run(0);
+			}
+		}
 		else
 		{
-			cout << "ERROR: Unrecognized ensemble for LAMMPS linking." << endl;
-			cout << endl;
-			cout << "...Currently supported options are \"LMP-NVE,\" \"LMP-NVT,\" and \"LMP-NPT\"." << endl;
-			exit_run(0);
-		}
-		LMPINFILE << endl;
+			if      (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO")
+				LMPINFILE << "fix       1 all box/relax iso   "  << CONTROLS.PRESSURE*GPa2atm << endl;
+			else if (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO")
+				LMPINFILE << "fix       1 all box/relax aniso "  << CONTROLS.PRESSURE*GPa2atm << endl;
+			else if (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI")
+				LMPINFILE << "fix       1 all box/relax tri   "  << CONTROLS.PRESSURE*GPa2atm << endl;
+			//else if (CONTROLS.ENSEMBLE != "LMP-MIN")
+			//	...No fix needed for a plain minimaztion
+		}		LMPINFILE << endl;
 	
 		// I *think* this line converts the potential energy in the thermodynamic output section to the potential energy + thermostat/barostat contributions?
 	

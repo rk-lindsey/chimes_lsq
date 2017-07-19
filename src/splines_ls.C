@@ -352,11 +352,22 @@ int main(int argc, char* argv[])
 			TRAJ_INPUT >> TRAJECTORY[i].FORCES[j].Y;
 			TRAJ_INPUT >> TRAJECTORY[i].FORCES[j].Z;
 
-			if (ATOM_PAIRS[0].PAIRTYP != "DFTBPOLY") // Convert forces from Hartree/bohr to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
+			if (ATOM_PAIRS[0].PAIRTYP != "DFTBPOLY") // Convert forces to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
 			{
+				// Assume units are in Hartree/bohr
+				
 				TRAJECTORY[i].FORCES[j].X *= 627.50960803*1.889725989;
 				TRAJECTORY[i].FORCES[j].Y *= 627.50960803*1.889725989;
 				TRAJECTORY[i].FORCES[j].Z *= 627.50960803*1.889725989;
+				
+				
+				// Assume units are in eV/A
+				
+				/*
+				TRAJECTORY[i].FORCES[j].X *= 23.0609;
+				TRAJECTORY[i].FORCES[j].Y *= 23.0609;
+				TRAJECTORY[i].FORCES[j].Z *= 23.0609;
+				*/
 			}
 						
 			if(CONTROLS.WRAP_COORDS)	// Apply PBC (for cases of unwrapped coordinates)
@@ -592,10 +603,20 @@ int main(int argc, char* argv[])
 	// Each processor only calculates certain frames.
 	divide_atoms(istart, iend, CONTROLS.NFRAMES) ;
 
+	// I think the current parallel implementation is problematic for at least one reason:
+	// If the Ewald routines are needed, they won't be able to tell if the box dimensions have changed
+	// thus the cell vectors will never get updated. 
+	//
+	// Additionally, when running for a system with NO charges but with variable box length, I get a different answer 
+	// depending of if I run in serial or parallel.
+	// ... Why could that be...?
+
 	for(int i= istart ; i <= iend ; i++)
 	{
 		// This output is specific to the number of processors.
-		//cout << "	Processing frame: " << setw(5) << i+1 << " of: " << CONTROLS.NFRAMES << endl;
+		
+		if(NPROCS==1)
+			cout << "	Processing frame: " << setw(5) << i+1 << " of: " << CONTROLS.NFRAMES << endl;
 
 		// Use very little padding because we will update neighbor list for every frame.
 		
@@ -767,13 +788,15 @@ int main(int argc, char* argv[])
 				}
 				else if ((a==TRAJECTORY[N].ATOMS)&& (CONTROLS.FIT_STRESS))
 				{
-					fileb << TRAJECTORY[N].STRESS_TENSORS.X << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS.Y << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS.Z << endl;
+					// Convert from GPa to internal units to match A-matrix elements
+					 
+					fileb << TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
 			
-					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.X << endl;
-					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Y << endl;
-					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Z << endl;
+					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
+					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
+					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
 				}
 				else
 				{
@@ -830,11 +853,11 @@ int main(int argc, char* argv[])
 		// Serialize into a single A and b file for now.
 		// Could make the SVD program read multiple files.
 		system("cat A.[0-9]*.txt > A.txt") ;
-		//system("rm A.[0-9]*.txt") ;
+		system("rm A.[0-9]*.txt") ;
 		system("cat b.[0-9]*.txt > b.txt") ;
-		//system("rm b.[0-9]*.txt") ;
+		system("rm b.[0-9]*.txt") ;
 		system("cat b-labeled.[0-9]*.txt > b-labeled.txt") ;
-		//system("rm b-labeled.[0-9]*.txt") ;
+		system("rm b-labeled.[0-9]*.txt") ;
 	}
 
 	  	  
@@ -2801,10 +2824,15 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 				if ( RANK == 0 ) cout << "		" << k << "	" 					
 											 << PAIR_TRIPLETS[k].ATMPAIR1    << " " 
 											 << PAIR_TRIPLETS[k].ATMPAIR2    << " " 
-											 << PAIR_TRIPLETS[k].ATMPAIR3    << " " 
+											 << PAIR_TRIPLETS[k].ATMPAIR3    << " "
+											 /* 
 											 << sum.X << " " 
 											 << sum.Y << " " 
 											 << sum.Z << endl;
+											 */
+											 << PAIR_TRIPLETS[k].MIN_FOUND.X << " " 
+											 << PAIR_TRIPLETS[k].MIN_FOUND.Y << " " 
+											 << PAIR_TRIPLETS[k].MIN_FOUND.Z << endl;
 			
 			}
 			if ( RANK == 0 ) cout << "	Total number of configurations contributing to each triplet type:" << endl;
