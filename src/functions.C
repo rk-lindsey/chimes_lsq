@@ -872,17 +872,36 @@ static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> & PAIR_TRIPLETS, FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, NEIGHBORS &NEIGHBOR_LIST)
 // Controls which functions are used to calculate derivatives
 {
+	// Check for control option compatability:
+	
+	if((CONTROLS.FIT_ENER) && (FF_2BODY[0].PAIRTYP == "SPLINE"))
+	{
+		cout << "ERROR: Energy fititng has not been implemented for potential type " << FF_2BODY[0].PAIRTYP << endl;
+		exit_run(0);
+	}
+	
+	if(CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL || CONTROLS.FIT_ENER)
+	{
+		if(CONTROLS.IF_SUBTRACT_COORD || CONTROLS.IF_SUBTRACT_COUL || CONTROLS.FIT_POVER)
+		{
+			cout << "ERROR: The following options must be false when including energies or stresses in fit: " << endl;
+			cout << "CONTROLS.FIT_STRESS     " << endl;
+			cout << "CONTROLS.FIT_STRESS_ALL" << endl;
+			cout << "CONTROLS.FIT_ENER      " << endl;
+		}
+	}
+	
+	
   	// Will ewald calculations be needed? DFTB doesn't use the "default"
     // Ewald calculation because it has its own special way of dealing with charges
-		
-	bool if_ewald;
   
-    if (FF_2BODY[0].PAIRTYP != "DFTBPOLY") 
-  	  if_ewald = true;
-    else
-  	  if_ewald = false;
+    if (FF_2BODY[0].PAIRTYP == "DFTBPOLY" && CONTROLS.FIT_COUL) 
+	{
+		cout << "ERROR: Turn of FITCOUL and set charges to zero when using pairtype " << FF_2BODY[0].PAIRTYP << endl;
+		exit_run(0);
+	}	
 
-	if ( if_ewald ) 
+	if ( CONTROLS.FIT_COUL ) 
 		ZCalc_Ewald_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME_COULOMB_FORCES, PAIR_MAP, NEIGHBOR_LIST, CONTROLS);	
 	
     if ( FF_2BODY[0].PAIRTYP == "SPLINE" )
@@ -1064,20 +1083,75 @@ static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PA
 				
 				if (CONTROLS.FIT_STRESS)
 				{
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+0].X -= h00 * RAB.X * RAB.X / rlen;
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+1].X -= h10 * RAB.X * RAB.X / rlen;
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+2].X -= h01 * RAB.X * RAB.X / rlen;
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+3].X -= h11 * RAB.X * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+0].X -= h00 * RAB.X * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+1].X -= h10 * RAB.X * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+2].X -= h01 * RAB.X * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+3].X -= h11 * RAB.X * RAB.X / rlen;
 			  
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+0].Y -= h00 * RAB.Y * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+1].Y -= h10 * RAB.Y * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+2].Y -= h01 * RAB.Y * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+3].Y -= h11 * RAB.Y * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+0].Y -= h00 * RAB.Y * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+1].Y -= h10 * RAB.Y * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+2].Y -= h01 * RAB.Y * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+3].Y -= h11 * RAB.Y * RAB.Y / rlen;
 				  
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+0].Z -= h00 * RAB.Z * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+1].Z -= h10 * RAB.Z * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+2].Z -= h01 * RAB.Z * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[MATR_SIZE-1][vstart+kstart+3].Z -= h11 * RAB.Z * RAB.Z / rlen;					
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+0].Z -= h00 * RAB.Z * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+1].Z -= h10 * RAB.Z * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+2].Z -= h01 * RAB.Z * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+3].Z -= h11 * RAB.Z * RAB.Z / rlen;					
+				}
+				else if (CONTROLS.FIT_STRESS_ALL)
+				{
+					// xx, xy, and xz
+					
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+0].X -= h00 * RAB.X * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+1].X -= h10 * RAB.X * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+2].X -= h01 * RAB.X * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+3].X -= h11 * RAB.X * RAB.X / rlen;
+			  
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+0].Y -= h00 * RAB.X * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+1].Y -= h10 * RAB.X * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+2].Y -= h01 * RAB.X * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+3].Y -= h11 * RAB.X * RAB.Y / rlen;
+				  
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+0].Z -= h00 * RAB.X * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+1].Z -= h10 * RAB.X * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+2].Z -= h01 * RAB.X * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+3].Z -= h11 * RAB.X * RAB.Z / rlen;	
+					
+					
+					// yx, yy, and yz
+					
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+0].X -= h00 * RAB.Y * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+1].X -= h10 * RAB.Y * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+2].X -= h01 * RAB.Y * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+3].X -= h11 * RAB.Y * RAB.X / rlen;
+			  
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+0].Y -= h00 * RAB.Y * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+1].Y -= h10 * RAB.Y * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+2].Y -= h01 * RAB.Y * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+3].Y -= h11 * RAB.Y * RAB.Y / rlen;
+				  
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+0].Z -= h00 * RAB.Y * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+1].Z -= h10 * RAB.Y * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+2].Z -= h01 * RAB.Y * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+3].Z -= h11 * RAB.Y * RAB.Z / rlen;	
+					
+					
+					// yx, yy, and yz
+					
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+0].X -= h00 * RAB.Z * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+1].X -= h10 * RAB.Z * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+2].X -= h01 * RAB.Z * RAB.X / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+3].X -= h11 * RAB.Z * RAB.X / rlen;
+			  
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+0].Y -= h00 * RAB.Z * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+1].Y -= h10 * RAB.Z * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+2].Y -= h01 * RAB.Z * RAB.Y / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+3].Y -= h11 * RAB.Z * RAB.Y / rlen;
+				  
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+0].Z -= h00 * RAB.Z * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+1].Z -= h10 * RAB.Z * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+2].Z -= h01 * RAB.Z * RAB.Z / rlen;
+				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+3].Z -= h11 * RAB.Z * RAB.Z / rlen;	
 				}							
 				
 			}
@@ -1088,9 +1162,27 @@ static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PA
 	{
 		for (int i=0; i<FF_2BODY[curr_pair_type_idx].SNUM; i++) 
 		{
-			FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Z /= VOL;	
+			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z /= VOL;	
+		}
+	}
+	
+	else if (CONTROLS.FIT_STRESS_ALL)
+	{
+		for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
+		{
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z /= VOL;	
+		
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z /= VOL;
+		
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z /= VOL;
 		}
 	}
 	
@@ -1307,6 +1399,21 @@ static void ZCalc_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAI
 						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z -= tmp_doub * RAB.Z * RAB.Z / rlen;	
 					}
 					
+					else if (CONTROLS.FIT_STRESS_ALL)
+					{
+						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X -= tmp_doub * RAB.X * RAB.X / rlen;	// xx
+						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y -= tmp_doub * RAB.X * RAB.Y / rlen;	// xy
+						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z -= tmp_doub * RAB.X * RAB.Z / rlen;	// xz
+						
+						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X -= tmp_doub * RAB.Y * RAB.X / rlen;	// yx
+						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y -= tmp_doub * RAB.Y * RAB.Y / rlen;	// yy
+						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z -= tmp_doub * RAB.Y * RAB.Z / rlen;	// yz
+						
+						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X -= tmp_doub * RAB.Z * RAB.X / rlen;	// zx
+						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y -= tmp_doub * RAB.Z * RAB.Y / rlen;	// zy
+						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z -= tmp_doub * RAB.Z * RAB.Z / rlen;	// zz
+					}
+					
 					if(CONTROLS.FIT_ENER) 
 					{
 						FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].X += fcut * Tn[i+1];
@@ -1321,12 +1428,32 @@ static void ZCalc_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAI
 
 	if (CONTROLS.FIT_STRESS)
 	{
-		for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
+
+
+		for ( int i = 0; i < CONTROLS.TOT_SNUM; i++ ) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z /= VOL;	
+			FRAME_A_MATRIX[SYSTEM.ATOMS][i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][i].Z /= VOL;	 
 		}
+	}
+	else if (CONTROLS.FIT_STRESS_ALL)
+	{		
+		for ( int i = 0; i < CONTROLS.TOT_SNUM; i++ ) 
+		{
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][i].Z /= VOL;	 
+			
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][i].Z /= VOL;
+			
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][i].Z /= VOL;
+		}
+		
 	}
 
   return;
@@ -1786,7 +1913,56 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 								    FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].X -= force_wo_coeff_jk * RAB_JK.X * RAB_JK.X / rlen_jk;
 								    FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Y -= force_wo_coeff_jk * RAB_JK.Y * RAB_JK.Y / rlen_jk;
 								    FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Z -= force_wo_coeff_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;									
-								}	
+								}
+								
+								else if (CONTROLS.FIT_STRESS_ALL)
+								{
+								    // ij pairs: 
+
+									FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Y -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.Y / rlen_ij;
+									FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.Z / rlen_ij;	
+									
+									FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.X / rlen_ij;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Y -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
+									FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.Z / rlen_ij;	
+									
+									FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.X / rlen_ij;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Y -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.Y / rlen_ij;
+									FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
+									
+								    // ik pairs
+
+								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].X -= force_wo_coeff_ik * RAB_IK.X * RAB_IK.X / rlen_ik;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Y -= force_wo_coeff_ik * RAB_IK.X * RAB_IK.Y / rlen_ik;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Z -= force_wo_coeff_ik * RAB_IK.X * RAB_IK.Z / rlen_ik;
+									
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].X -= force_wo_coeff_ik * RAB_IK.Y * RAB_IK.X / rlen_ik;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Y -= force_wo_coeff_ik * RAB_IK.Y * RAB_IK.Y / rlen_ik;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Z -= force_wo_coeff_ik * RAB_IK.Y * RAB_IK.Z / rlen_ik;
+									
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].X -= force_wo_coeff_ik * RAB_IK.Z * RAB_IK.X / rlen_ik;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Y -= force_wo_coeff_ik * RAB_IK.Z * RAB_IK.Y / rlen_ik;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Z -= force_wo_coeff_ik * RAB_IK.Z * RAB_IK.Z / rlen_ik;	
+									
+								    // jk pairs
+
+								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].X -= force_wo_coeff_jk * RAB_JK.X * RAB_JK.X / rlen_jk;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Y -= force_wo_coeff_jk * RAB_JK.X * RAB_JK.Y / rlen_jk;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Z -= force_wo_coeff_jk * RAB_JK.X * RAB_JK.Z / rlen_jk;			
+									
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].X -= force_wo_coeff_jk * RAB_JK.Y * RAB_JK.X / rlen_jk;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Y -= force_wo_coeff_jk * RAB_JK.Y * RAB_JK.Y / rlen_jk;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Z -= force_wo_coeff_jk * RAB_JK.Y * RAB_JK.Z / rlen_jk;		
+									
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].X -= force_wo_coeff_jk * RAB_JK.Z * RAB_JK.X / rlen_jk;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Y -= force_wo_coeff_jk * RAB_JK.Z * RAB_JK.Y / rlen_jk;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Z -= force_wo_coeff_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;																																				
+									
+										
+								}
+								
+									
 
 								if(CONTROLS.FIT_ENER) 
 								{
@@ -1807,17 +1983,31 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 	
 	if (CONTROLS.FIT_STRESS)
 	{
-		for(int i=0; i<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
+		for(int i=0; i<CONTROLS.NUM_3B_CHEBY; i++) 
 		{
-		    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICIES[i];
-			
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Z /= VOL;	
+			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms+i].Z /= VOL;	
 		}
 	}
 	
-	
+	else if (CONTROLS.FIT_STRESS_ALL)
+	{
+		for(int i=0; i<CONTROLS.NUM_3B_CHEBY; i++) 
+		{
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms+i].Z /= VOL;	
+		
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms+i].Z /= VOL;
+		
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms+i].Z /= VOL;
+		}
+	}	
 }
 
 void ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP)		
@@ -2159,9 +2349,24 @@ static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 					
 					if (CONTROLS.FIT_STRESS)
 					{
-						FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].X -= rfac * RAB.X * RAB.X / rlen;
-						FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Y -= rfac * RAB.Y * RAB.Y / rlen;
-						FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Z -= rfac * RAB.Z * RAB.Z / rlen;	
+						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X -= rfac * RAB.X * RAB.X / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y -= rfac * RAB.Y * RAB.Y / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z -= rfac * RAB.Z * RAB.Z / rlen;	
+					}
+					
+					else if (CONTROLS.FIT_STRESS_ALL)
+					{
+						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X -= rfac * RAB.X * RAB.X / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y -= rfac * RAB.X * RAB.Y / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z -= rfac * RAB.X * RAB.Z / rlen;	
+						
+						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X -= rfac * RAB.Y * RAB.X / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y -= rfac * RAB.Y * RAB.Y / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z -= rfac * RAB.Y * RAB.Z / rlen;	
+						
+						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X -= rfac * RAB.Z * RAB.X / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y -= rfac * RAB.Z * RAB.Y / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z -= rfac * RAB.Z * RAB.Z / rlen;	
 					}						
 				}
 			}
@@ -2172,9 +2377,27 @@ static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	{
 		for (int i=0; i<FF_2BODY[curr_pair_type_idx].SNUM; i++) 
 		{
-			FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Z /= VOL;	
+			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z /= VOL;	
+		}
+	}
+	
+	else if (CONTROLS.FIT_STRESS_ALL)
+	{
+		for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
+		{
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z /= VOL;	
+		
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z /= VOL;
+		
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z /= VOL;
 		}
 	}
 	
@@ -2293,9 +2516,24 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 					
 					if (CONTROLS.FIT_STRESS)
 					{
-						FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].X -= 29421.02407027691 * rfac * RAB.X * RAB.X / rlen;
-						FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Y -= 29421.02407027691 * rfac * RAB.Y * RAB.Y / rlen;
-						FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Z -= 29421.02407027691 * rfac * RAB.Z * RAB.Z / rlen;	
+						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X -= 29421.02407027691 * rfac * RAB.X * RAB.X / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y -= 29421.02407027691 * rfac * RAB.Y * RAB.Y / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z -= 29421.02407027691 * rfac * RAB.Z * RAB.Z / rlen;	
+					}
+					
+					else if (CONTROLS.FIT_STRESS_ALL)
+					{
+						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X -= 29421.02407027691 * rfac * RAB.X * RAB.X / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y -= 29421.02407027691 * rfac * RAB.X * RAB.Y / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z -= 29421.02407027691 * rfac * RAB.X * RAB.Z / rlen;	
+						
+						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X -= 29421.02407027691 * rfac * RAB.Y * RAB.X / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y -= 29421.02407027691 * rfac * RAB.Y * RAB.Y / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z -= 29421.02407027691 * rfac * RAB.Y * RAB.Z / rlen;	
+						
+						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X -= 29421.02407027691 * rfac * RAB.Z * RAB.X / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y -= 29421.02407027691 * rfac * RAB.Z * RAB.Y / rlen;
+						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z -= 29421.02407027691 * rfac * RAB.Z * RAB.Z / rlen;	
 					}
 				}
 			}
@@ -2307,9 +2545,27 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	{
 		for (int i=0; i<FF_2BODY[curr_pair_type_idx].SNUM; i++) 
 		{
-			FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[MATR_SIZE-1][vstart+i].Z /= VOL;	
+			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z /= VOL;	
+		}
+	}
+	
+	else if (CONTROLS.FIT_STRESS_ALL)
+	{
+		for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
+		{
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z /= VOL;	
+		
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z /= VOL;
+		
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z /= VOL;
 		}
 	}
 	
@@ -2581,7 +2837,7 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, v
 	else 
 		EXIT_MSG("Error: Unknown pair type", pair_type)
 	*/
-
+	
 	SYSTEM.PRESSURE_XYZ           /= 3.0 *  SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
 	SYSTEM.PRESSURE_TENSORS_XYZ.X /=        SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
 	SYSTEM.PRESSURE_TENSORS_XYZ.Y /=        SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;

@@ -69,7 +69,7 @@ static const double ke      = 332.0637157615209;	// Converter between electron u
 static const double Hartree = 627.50961; 			// 1 Hartree in kcal/mol.
 static const double Kb      = 0.001987; 			// Boltzmann constant in kcal/mol-K.
 static const double Tfs     = 48.888;   			// Internal time unit in fs.
-static const double GPa     = 6.9479;				// Unit conversion factor... 1 kcal/mol/A^3 = (this constant) GPa
+static const double GPa     = 6.9479;				// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
 static const double atm     = GPa*9869.23266716;    // stress conversion to atm (for LAMMPS).
 static const double GPa2atm = 9869.23266716;		// x_GPa * GPa2atm = x_atm
 static const double pi		= 3.14159265359;		
@@ -169,7 +169,9 @@ struct JOB_CONTROL
 	///////////////////////////////////////////////
 	
 	bool IS_LSQ;				// Is this for an lsq run or actual md?
-	bool FIT_STRESS;			// Should stress tensors be included in the fit?
+	bool FIT_STRESS;			// Should stress tensors be included in the fit? --> This is ONLY for the diagonal components, xx, yy, zz
+	bool FIT_STRESS_ALL;		// Should stress tensors be included in the fit? --> This is ONLY for ALL components, xx, xy, xz ... zz 
+	int  NSTRESS;				// Only fit stresses for first NSTRESS frames of trajectory
 	bool FIT_ENER;				// Should the total frame energy be included in the fit?
 	bool CALL_EWALD;			// Should ewald subroutines be called?
 	bool USE_POVER;			// Should overbonding information be printed to the header file?
@@ -217,7 +219,10 @@ struct FRAME
 	int MY_ATOMS_START;				// Used for lammps linking. Specify what index along SYS starts the process' atoms
 	XYZ BOXDIM;						// Dimenions of the primitive box.
 	XYZ WRAPDIM;					// Dimenions of the ghost atom box. Equivalent to BOXDIM if no layers are used
-	XYZ STRESS_TENSORS;
+	XYZ STRESS_TENSORS;				// Only used for the diagonal components, xx, yy, zz
+	XYZ STRESS_TENSORS_X;			// Used when all tensor components are requested
+	XYZ STRESS_TENSORS_Y;
+	XYZ STRESS_TENSORS_Z;
 	
 	double QM_POT_ENER;				// This is the potential energy of the QM calculation!
 	

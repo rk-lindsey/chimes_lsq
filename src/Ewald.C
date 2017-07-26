@@ -14,8 +14,7 @@ using namespace std;
 static double add_sines    (int kx, int ky, int kz, vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ);
 static void   generate_trig(vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ, XYZ & RVEC, XYZ & BOXDIM, int kmax);
 
-static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, XYZ & PRIM_BOX,
-	bool lsq_mode); // MD compare force version
+static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, XYZ & PRIM_BOX, bool lsq_mode); // MD compare force version
 
 
 //////////////////////////////////////////
@@ -24,8 +23,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 //
 //////////////////////////////////////////
 
-static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, XYZ & PRIM_BOX,
-	bool lsq_mode)
+static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, XYZ & PRIM_BOX, bool lsq_mode)
 {
 // Calculate Ewald K-space components.  Use a rearrangement of the usual Ewald
 // expression to generate an order-N evaluation.   See A. Y. Toukmaji et. al,
@@ -56,7 +54,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	vector <double> cos_array(PRIM_ATOMS);
 
 
-	if (!called_before) 
+	if ((!called_before) || (lsq_mode && NPROCS>1)) 
 	{
 		called_before = true;
 		LAST_BOXDIMS.X = LAST_BOXDIMS.Y = LAST_BOXDIMS.Z = 0.0;		
@@ -145,10 +143,13 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	ikend   = RANK;
 
 
-	if ( lsq_mode ) {
+	if ( lsq_mode ) 
+	{
 		ikstart = 0 ;
 		ikend = totk - 1 ;
-	} else {
+	}
+	else
+	{
 		if ( NPROCS <= totk ) 
 			divide_atoms(ikstart, ikend, totk);
 	}
@@ -260,11 +261,10 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 		
 	PRIM_ATOMS = TRAJECTORY.ATOMS;
 
-	if ( CONTROLS.NFRAMES > 0 ) {
+	if ( CONTROLS.NFRAMES > 0 ) 
 		lsq_mode = true ;
-	} else {
+	else 
 		lsq_mode = false ;
-	}
 
 	if ( ! called_before ) 
 	{
@@ -304,15 +304,15 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 	// Set up for MPI
 	
 	int a1start, a1end;
+	
+	// Set up for a least squares calculation... if statement takes care of MD
+	
+	a1start = 0;
+	a1end = PRIM_ATOMS-1;
 
-	if ( ! lsq_mode ) {
-		// MD Calculation.
+	if ( ! lsq_mode ) // MD Calculation.
 		divide_atoms(a1start, a1end, PRIM_ATOMS);
-	} else {
-		// Least squares calculation.
-		a1start = 0 ;
-		a1end = PRIM_ATOMS-1 ;
-	}
+
 	
 
 	for(int a1=0;a1<PRIM_ATOMS;a1++)
@@ -484,10 +484,14 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 	
 	Volume = FRAME_TRAJECTORY.BOXDIM.X * FRAME_TRAJECTORY.BOXDIM.Y * FRAME_TRAJECTORY.BOXDIM.Z;
 	
-
-
-
-	if (LAST_BOXDIMS.X != FRAME_TRAJECTORY.BOXDIM.X  || LAST_BOXDIMS.Y != FRAME_TRAJECTORY.BOXDIM.Y  || LAST_BOXDIMS.Z != FRAME_TRAJECTORY.BOXDIM.Z) // NOTE: This is modifying STATIC variables.. meaning they exist even after the block exits
+	bool BOX_CHANGED = false;
+	
+	if (LAST_BOXDIMS.X != FRAME_TRAJECTORY.BOXDIM.X  || LAST_BOXDIMS.Y != FRAME_TRAJECTORY.BOXDIM.Y  || LAST_BOXDIMS.Z != FRAME_TRAJECTORY.BOXDIM.Z)
+		BOX_CHANGED = true;
+	if(NPROCS>1)
+		BOX_CHANGED = true;
+			
+	if (BOX_CHANGED) // NOTE: This is modifying STATIC variables.. meaning they exist even after the block exits
 	{
 		double r_acc, k_acc;
 

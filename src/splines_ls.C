@@ -122,9 +122,9 @@ int main(int argc, char* argv[])
 
 	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
 	
-	if(CONTROLS.FIT_STRESS && CONTROLS.CALL_EWALD)
+	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
 	{
-		cout << "ERROR: Inclusion of stress tensors currently no compatible with use of ZCalc_Ewald_Deriv." << endl;
+		cout << "ERROR: Inclusion of stress tensors currently not compatible with use of ZCalc_Ewald_Deriv." << endl;
 		exit(0);
 	}
 
@@ -268,6 +268,21 @@ int main(int argc, char* argv[])
 				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Y;
 				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Z;
 		}
+		else if(CONTROLS.FIT_STRESS_ALL)	// Expects as: xx, xy, xz, yy, yx, yz, zx, zy, zz
+		{
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.X;
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.Y;
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.Z;
+				
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.X;
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.Y;
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.Z;
+				
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.X;
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.Y;
+				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.Z;
+				
+		}
 		if(CONTROLS.FIT_ENER) // We're actually fitting to relative *differences* in energy
 		{
 			TRAJ_INPUT >> TRAJECTORY[i].QM_POT_ENER;
@@ -397,6 +412,7 @@ int main(int argc, char* argv[])
 			{
 				if ( RANK == 0 ) 
 				{
+					cout << "	Reporting outcome of layering for first frame ONLY: " << endl;
 					cout << "	Real atoms:                   " << TRAJECTORY[i].ATOMS << endl;
 					cout << "	Total atoms (ghost):          " << TRAJECTORY[i].ALL_ATOMS << endl;
 					cout << "	Real box dimesntions:         " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << endl;
@@ -441,7 +457,9 @@ int main(int argc, char* argv[])
 		A_SIZE = TRAJECTORY[f].ATOMS;
 
 		if (CONTROLS.FIT_STRESS)
-			A_SIZE++; 
+			A_SIZE++;
+		else if (CONTROLS.FIT_STRESS_ALL)
+			A_SIZE +=3;
 
 		if (CONTROLS.FIT_ENER)
 			A_SIZE++; 
@@ -610,9 +628,23 @@ int main(int argc, char* argv[])
 	// Additionally, when running for a system with NO charges but with variable box length, I get a different answer 
 	// depending of if I run in serial or parallel.
 	// ... Why could that be...?
+	
+	if((CONTROLS.FIT_STRESS  || CONTROLS.FIT_STRESS_ALL) && CONTROLS.NSTRESS == -1)
+		CONTROLS.NSTRESS = CONTROLS.NFRAMES;
+	
+	bool DO_STRESS     = CONTROLS.FIT_STRESS;    
+	bool DO_STRESS_ALL = CONTROLS.FIT_STRESS_ALL;
 
 	for(int i= istart ; i <= iend ; i++)
 	{
+		// Only include stress tensor data for first NSTRESS frames..
+		
+		if(i >= CONTROLS.NSTRESS)
+		{
+			CONTROLS.FIT_STRESS     = false;	
+			CONTROLS.FIT_STRESS_ALL = false;
+		}
+	
 		// This output is specific to the number of processors.
 		
 		if(NPROCS==1)
@@ -648,6 +680,8 @@ int main(int argc, char* argv[])
 		}	
 	}	
 	
+	CONTROLS.FIT_STRESS     = DO_STRESS;    
+	CONTROLS.FIT_STRESS_ALL = DO_STRESS_ALL;
 	
 	
 	
@@ -712,8 +746,18 @@ int main(int argc, char* argv[])
 	// Print only the assigned frames.
 	for(int N= istart ; N <= iend ;N++)
     {
+    
 		for(int a=0;a<A_MATRIX[N].size();a++)
-		{		
+		{	
+			// Check if we need to exclude some tensor data from the A and b text files.
+			if((CONTROLS.FIT_STRESS  || CONTROLS.FIT_STRESS_ALL) && N >= CONTROLS.NSTRESS)
+			{
+				if((a==TRAJECTORY[N].ATOMS) || (a==TRAJECTORY[N].ATOMS+1) ||  (a==TRAJECTORY[N].ATOMS+2))
+					continue;
+			}
+		
+		
+			
 			// Print Afile: .../////////////// -- For X
 		  
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
@@ -797,6 +841,20 @@ int main(int argc, char* argv[])
 					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
 					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
 					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
+				}
+				else if((a==TRAJECTORY[N].ATOMS)&& (CONTROLS.FIT_STRESS_ALL))
+				{
+					fileb << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;
+					
+					fileb << TRAJECTORY[N].STRESS_TENSORS_Y.X/GPa << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
+					
+					fileb << TRAJECTORY[N].STRESS_TENSORS_Z.X/GPa << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS_Z.Y/GPa << endl;
+					fileb << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
 				}
 				else
 				{
@@ -1170,6 +1228,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 	CONTROLS.CALL_EWALD    = false;
 	CONTROLS.FIT_ENER      = false;
 	CONTROLS.FIT_STRESS    = false;
+	CONTROLS.FIT_STRESS_ALL= false;
+	CONTROLS.NSTRESS       = -1;
 	
 	NEIGHBOR_LIST.USE	   = true;
 	
@@ -1295,18 +1355,29 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 		
 		else if(LINE.find("# FITSTRS #") != string::npos)
 		{
-			cin >> LINE; cin.ignore();
-
-			if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+			cin >> LINE;
+			
+			if (LINE=="first"  || LINE=="First"  || LINE=="FIRST")
+			{
 				CONTROLS.FIT_STRESS = true;
-			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
-				CONTROLS.FIT_STRESS = false;
+				cin >> CONTROLS.NSTRESS;
+				cin >> LINE;
+				cin.ignore();
+			}
 			else
 			{
-				cout << endl << "ERROR: # FITSTRS # must be specified as true or false." << endl;
-				exit(1);	
-			}	
-			
+				if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+					CONTROLS.FIT_STRESS = true;	
+				else if (LINE=="all"  || LINE=="All"  || LINE=="ALL"  || LINE == "A" || LINE == "a")
+					CONTROLS.FIT_STRESS_ALL = true;	
+				else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
+					CONTROLS.FIT_STRESS = false;
+				else
+				{
+					cout << endl << "ERROR: # FITSTRS # must be specified as true or false." << endl;
+					exit(1);	
+				}
+			}
 			#if VERBOSITY == 1
 			
 			if ( RANK == 0 ) 
@@ -1314,9 +1385,14 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				cout << "	# FITSTRS #: ";
 			
 				if (CONTROLS.FIT_STRESS)
-					cout << "true" << endl;				
+					cout << "true" << endl;							
+				else if (CONTROLS.FIT_STRESS_ALL)
+					cout << "true ...will fit to all tensor components" << endl;	
 				else
 					cout << "false" << endl;
+					
+				if(CONTROLS.NSTRESS>0)
+					cout << "    			 ...will only fit tensors for first " << CONTROLS.NSTRESS << " frames." << endl;
 			}
 				
 			#endif
