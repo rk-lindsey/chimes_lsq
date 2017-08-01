@@ -624,7 +624,10 @@ int main(int argc, char* argv[])
 	// I think the current parallel implementation is problematic for at least one reason:
 	// If the Ewald routines are needed, they won't be able to tell if the box dimensions have changed
 	// thus the cell vectors will never get updated. 
-	//
+
+	// I tested the v. 241 Ewald implementation for parallel calculations.  See the par-ewald test case.
+	// Running it with different numbers of CPU's does not change the output (LEF).
+
 	// Additionally, when running for a system with NO charges but with variable box length, I get a different answer 
 	// depending of if I run in serial or parallel.
 	// ... Why could that be...?

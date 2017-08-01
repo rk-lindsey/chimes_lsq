@@ -54,7 +54,8 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	vector <double> cos_array(PRIM_ATOMS);
 
 
-	if ((!called_before) || (lsq_mode && NPROCS>1)) 
+	//if ((!called_before) || (lsq_mode && NPROCS>1)) 
+	if ( ! called_before ) 
 	{
 		called_before = true;
 		LAST_BOXDIMS.X = LAST_BOXDIMS.Y = LAST_BOXDIMS.Z = 0.0;		
@@ -488,8 +489,9 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 	
 	if (LAST_BOXDIMS.X != FRAME_TRAJECTORY.BOXDIM.X  || LAST_BOXDIMS.Y != FRAME_TRAJECTORY.BOXDIM.Y  || LAST_BOXDIMS.Z != FRAME_TRAJECTORY.BOXDIM.Z)
 		BOX_CHANGED = true;
-	if(NPROCS>1)
-		BOX_CHANGED = true;
+
+	//if(NPROCS>1)
+	//BOX_CHANGED = true;
 			
 	if (BOX_CHANGED) // NOTE: This is modifying STATIC variables.. meaning they exist even after the block exits
 	{
