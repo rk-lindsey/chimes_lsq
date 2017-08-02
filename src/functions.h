@@ -80,6 +80,8 @@ extern string FULL_FILE_3B;	// The 4D PES for 3B FF
 extern string SCAN_FILE_3B;	// The 2D PES scans for 3B
 extern string SCAN_FILE_2B;	// The 2D PES scans for 2B
 
+extern	ofstream 	BAD_CONFIGS;
+
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  
 extern int NPROCS;		// Number of processors

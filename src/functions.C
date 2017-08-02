@@ -17,6 +17,7 @@ using namespace std;
 
 extern 	vector<int>	INT_PAIR_MAP;
 extern	vector<int>	INT_TRIAD_MAP;	
+ofstream 	BAD_CONFIGS;
 
 //////////////////////////////////////////
 //
@@ -825,6 +826,46 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 	PE_1 = Vtot1;
 	PE_2 = Vtot2;
 	dV   = Vol2 - Vol1;
+}
+
+
+//////////////////////////////////////////
+// Bad configuration tracking functions
+//////////////////////////////////////////
+
+
+static void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS)
+// Output the current configuration
+{
+	int PRINT_WIDTH     = 21; // Use 21 for testing
+	int PRINT_PRECISION = 14; // Use 14 for testing
+	
+	// Print out the file
+	
+	BAD_CONFIGS << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
+	BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.X << " ";
+	BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Y << " ";
+	BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Z << endl;
+	
+	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
+	{
+		XYZ tmp = SYSTEM.COORDS[ia] ;
+		
+		if ( CONTROLS.WRAP_COORDS ) 	// Wrap into the primitive cell
+		{
+			
+			tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
+			tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
+			tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+		}
+
+		BAD_CONFIGS << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
+		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.X << " ";
+		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Y << " ";
+		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Z << "    ";
+
+		BAD_CONFIGS << endl ;
+	}
 }
 
 
@@ -2981,6 +3022,8 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	
 	int a2start, a2end, a2;
 	int a3start, a3end, a3;
+	
+	int BAD_CONFIG_FOUND = 0; // 0 == false, 1+ == true
 
 	for(int a1=a1start; a1<=a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS (prev -1)
 	{	
@@ -3050,6 +3093,9 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
 				if ( rpenalty > 0.0 ) 
 				{
+					if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MINIM) // Then we've found a config that should be useful for self-consistent fitting
+						BAD_CONFIG_FOUND++;
+				
 					Vpenalty = 0.0;
 					
 					if (isatty(fileno(stdout)))
@@ -3318,6 +3364,17 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 		} 	// Loop over interactions.
 		// cout << "COUNTED: " << INTERACTIONS << "3-body interactions." << endl;		
 	}  // If 3-body interaction.
+	
+	// Check if a truly bad configuration was found, and if so, print it out
+	
+	#ifdef USE_MPI
+		MPI_Barrier(MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, &BAD_CONFIG_FOUND,1,MPI_INT, MPI_SUM,MPI_COMM_WORLD);
+	#endif
+	
+	if(BAD_CONFIG_FOUND>0)
+		PRINT_CONFIG(SYSTEM, CONTROLS);
+	
 } 
 
 static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)

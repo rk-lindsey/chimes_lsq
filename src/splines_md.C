@@ -80,6 +80,8 @@ string FULL_FILE_3B;
 string SCAN_FILE_3B;
 string SCAN_FILE_2B;
 
+//ifstream BAD_CONFIGS;
+
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  
 int NPROCS;		// Number of processors
@@ -2725,6 +2727,7 @@ int main(int argc, char* argv[])
 	////////////////////////////////////////////////////////////
 
 	STATISTICS.open("md_statistics.out");
+	BAD_CONFIGS.open("traj_bad.xyz");
 
 	if (RANK==0)
 		cout << "BEGIN SIMULATION:" << endl;
@@ -3205,6 +3208,8 @@ int main(int argc, char* argv[])
 		////////////////////////////////////////////////////////////
 	   
     }//End big loop here.
+    
+    BAD_CONFIGS.close();
     
 	if (RANK==0)	
 	{
