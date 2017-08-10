@@ -298,9 +298,12 @@ void divide_atoms(int &a1start, int &a1end, int atoms)
 // Kinetic energy functions
 //////////////////////////////////////////
 
-double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)					// UPDATED -- Overloaded.. compute differentely if for main or new velocities
+double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, double KTensor[6])	
+// UPDATED -- Overloaded.. compute differentely if for main or new velocities
 {
 	double Ktot = 0.0;
+
+	for ( int k = 0 ; k < 6 ; k++ ) KTensor[k] = 0.0 ;
 	
 	for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 	{
@@ -312,10 +315,19 @@ double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)					// UPDATED -- 
 			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].X;
 			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Y * SYSTEM.VELOCITY[a1].Y;
 			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Z * SYSTEM.VELOCITY[a1].Z;
+
+			KTensor[0] += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].X;
+			KTensor[1] += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Y * SYSTEM.VELOCITY[a1].Y;
+			KTensor[2] += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Z * SYSTEM.VELOCITY[a1].Z;
+
+			KTensor[3] += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].Y;
+			KTensor[4] += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].Z;
+			KTensor[5] += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Y * SYSTEM.VELOCITY[a1].Z;
 	}
 
   return(Ktot);
 }
+
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS)		// UPDATED -- Overloaded.. compute differentely if for main or new velocities
 {
 	double Ktot = 0.0;
@@ -2838,11 +2850,7 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, v
 	SYSTEM.TOT_POT_ENER = 0;
 	SYSTEM.PRESSURE_XYZ = 0;
 	
-	// XY, YZ, and XZ need to be included at a future date ...
-	
-	SYSTEM.PRESSURE_TENSORS_XYZ.X = 0;
-	SYSTEM.PRESSURE_TENSORS_XYZ.Y = 0;
-	SYSTEM.PRESSURE_TENSORS_XYZ.Z = 0;
+	for ( int i = 0 ; i < 6 ; i++ ) SYSTEM.VIRIAL_CALC[i] = 0.0 ;
 
 	if      ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" ) 
 		ZCalc_Cheby_ALL(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
@@ -2878,12 +2886,14 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, v
 	else 
 		EXIT_MSG("Error: Unknown pair type", pair_type)
 	*/
-	
-	SYSTEM.PRESSURE_XYZ           /= 3.0 *  SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
-	SYSTEM.PRESSURE_TENSORS_XYZ.X /=        SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
-	SYSTEM.PRESSURE_TENSORS_XYZ.Y /=        SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
-	SYSTEM.PRESSURE_TENSORS_XYZ.Z /=        SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
 
+	double volume = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
+	SYSTEM.PRESSURE_XYZ           /= 3.0 *  volume ;
+
+	for ( int i = 0 ; i < 6 ; i++ ) 
+	{
+		SYSTEM.VIRIAL_CALC[i] /= volume ;
+	}
   return;
 }
 
@@ -3070,9 +3080,13 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 					deriv                = (fcut_2b * Tnd[i+1] * dx_dr + fcutderiv_2b * Tn[i+1]);
 					SYSTEM.PRESSURE_XYZ -= coeff * deriv * rlen_ij;
 					
-					SYSTEM.PRESSURE_TENSORS_XYZ.X -= coeff * deriv * RAB_IJ.X * RAB_IJ.X / rlen_ij;
-					SYSTEM.PRESSURE_TENSORS_XYZ.Y -= coeff * deriv * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
-					SYSTEM.PRESSURE_TENSORS_XYZ.Z -= coeff * deriv * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
+					SYSTEM.VIRIAL_CALC[0] -= coeff * deriv * RAB_IJ.X * RAB_IJ.X / rlen_ij;
+					SYSTEM.VIRIAL_CALC[1] -= coeff * deriv * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
+					SYSTEM.VIRIAL_CALC[2] -= coeff * deriv * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
+
+					SYSTEM.VIRIAL_CALC[3] -= coeff * deriv * RAB_IJ.X * RAB_IJ.Y / rlen_ij;
+					SYSTEM.VIRIAL_CALC[4] -= coeff * deriv * RAB_IJ.X * RAB_IJ.Z / rlen_ij;
+					SYSTEM.VIRIAL_CALC[5] -= coeff * deriv * RAB_IJ.Y * RAB_IJ.Z / rlen_ij;
 					
 					SYSTEM.ACCEL[a1].X += coeff * deriv * RAB_IJ.X / rlen_ij;
 					SYSTEM.ACCEL[a1].Y += coeff * deriv * RAB_IJ.Y / rlen_ij;
@@ -3278,17 +3292,29 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 							SYSTEM.PRESSURE_XYZ    -= force_ik * rlen_ik;
 							SYSTEM.PRESSURE_XYZ    -= force_jk * rlen_jk;
 							
-							SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
-							SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
-							SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
+							SYSTEM.VIRIAL_CALC[0] -= force_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
+							SYSTEM.VIRIAL_CALC[1] -= force_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
+							SYSTEM.VIRIAL_CALC[2] -= force_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
 							
-							SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ik * RAB_IK.X * RAB_IK.X / rlen_ik;
-							SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ik * RAB_IK.Y * RAB_IK.Y / rlen_ik;
-							SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ik * RAB_IK.Z * RAB_IK.Z / rlen_ik;
+							SYSTEM.VIRIAL_CALC[3] -= force_ij * RAB_IJ.X * RAB_IJ.Y / rlen_ij;
+							SYSTEM.VIRIAL_CALC[4] -= force_ij * RAB_IJ.X * RAB_IJ.Z / rlen_ij;
+							SYSTEM.VIRIAL_CALC[5] -= force_ij * RAB_IJ.Y * RAB_IJ.Z / rlen_ij;
+
+							SYSTEM.VIRIAL_CALC[0] -= force_ik * RAB_IK.X * RAB_IK.X / rlen_ik;
+							SYSTEM.VIRIAL_CALC[1] -= force_ik * RAB_IK.Y * RAB_IK.Y / rlen_ik;
+							SYSTEM.VIRIAL_CALC[2] -= force_ik * RAB_IK.Z * RAB_IK.Z / rlen_ik;
+
+							SYSTEM.VIRIAL_CALC[3] -= force_ik * RAB_IK.X * RAB_IK.Y / rlen_ik;
+							SYSTEM.VIRIAL_CALC[4] -= force_ik * RAB_IK.X * RAB_IK.Z / rlen_ik;
+							SYSTEM.VIRIAL_CALC[5] -= force_ik * RAB_IK.Y * RAB_IK.Z / rlen_ik;
 							
-							SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_jk * RAB_JK.X * RAB_JK.X / rlen_jk;
-							SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_jk * RAB_JK.Y * RAB_JK.Y / rlen_jk;
-							SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;
+							SYSTEM.VIRIAL_CALC[0] -= force_jk * RAB_JK.X * RAB_JK.X / rlen_jk;
+							SYSTEM.VIRIAL_CALC[1] -= force_jk * RAB_JK.Y * RAB_JK.Y / rlen_jk;
+							SYSTEM.VIRIAL_CALC[2] -= force_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;
+
+							SYSTEM.VIRIAL_CALC[3] -= force_jk * RAB_JK.X * RAB_JK.Y / rlen_jk;
+							SYSTEM.VIRIAL_CALC[4] -= force_jk * RAB_JK.X * RAB_JK.Z / rlen_jk;
+							SYSTEM.VIRIAL_CALC[5] -= force_jk * RAB_JK.Y * RAB_JK.Z / rlen_jk;
 							
 							force_ij /= rlen_ij;
 							force_ik /= rlen_ik;
@@ -3419,8 +3445,14 @@ static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 
 			rlen_mi = get_dist(SYSTEM, RVEC, a1, a2) ;
 	
-			if ( rlen_mi < FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2) 
-				EXIT_MSG("Error: close approach", rlen_mi);
+			if ( rlen_mi < FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2) {
+				cout << "Warning: close approach\n" ;
+				cout << "Distance = " << rlen_mi << endl ;
+				cout << "a1 = " << a1 << endl ;
+				cout << "a2 = " << a2 << endl ;
+				cout << SYSTEM.COORDS[a1].X << " " << SYSTEM.COORDS[a1].Y << " " << SYSTEM.COORDS[a1].Z << endl ;
+				cout << SYSTEM.COORDS[a2].X << " " << SYSTEM.COORDS[a2].Y << " " << SYSTEM.COORDS[a2].Z << endl ;
+			}
 
 			else if ( rlen_mi < rcutoff ) 
 			{
@@ -3430,10 +3462,16 @@ static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 
 				SYSTEM.PRESSURE_XYZ -= fac * (rlen_mi*rlen_mi);
 				
-				SYSTEM.PRESSURE_TENSORS_XYZ.X -= fac * rlen_mi * RVEC.X * RVEC.X / rlen_mi;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= fac * rlen_mi * RVEC.Y * RVEC.Y / rlen_mi;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= fac * rlen_mi * RVEC.Z * RVEC.Z / rlen_mi;
-	
+				// Diagonal part of pressure tensor.
+				SYSTEM.VIRIAL_CALC[0] -= fac * rlen_mi * RVEC.X * RVEC.X / rlen_mi;
+				SYSTEM.VIRIAL_CALC[1] -= fac * rlen_mi * RVEC.Y * RVEC.Y / rlen_mi;
+				SYSTEM.VIRIAL_CALC[2] -= fac * rlen_mi * RVEC.Z * RVEC.Z / rlen_mi;
+
+				// Off-diagonal pressure tensor.
+				SYSTEM.VIRIAL_CALC[3]  -= fac * rlen_mi * RVEC.X * RVEC.Y / rlen_mi;
+				SYSTEM.VIRIAL_CALC[4]  -= fac * rlen_mi * RVEC.X * RVEC.Z / rlen_mi;
+				SYSTEM.VIRIAL_CALC[5]  -= fac * rlen_mi * RVEC.Y * RVEC.Z / rlen_mi;
+				
 				SYSTEM.ACCEL[a1].X += RVEC.X*fac;
 				SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
 				SYSTEM.ACCEL[a1].Z += RVEC.Z*fac;
@@ -3574,10 +3612,14 @@ static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 	   
 				SYSTEM.PRESSURE_XYZ -= S_r * rlen;
 				
-				SYSTEM.PRESSURE_TENSORS_XYZ.X -= S_r * RAB.X * RAB.X / rlen;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= S_r * RAB.Y * RAB.Y / rlen;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= S_r * RAB.Z * RAB.Z / rlen;
+				SYSTEM.VIRIAL_CALC[0] -= S_r * RAB.X * RAB.X / rlen;
+				SYSTEM.VIRIAL_CALC[1] -= S_r * RAB.Y * RAB.Y / rlen;
+				SYSTEM.VIRIAL_CALC[2] -= S_r * RAB.Z * RAB.Z / rlen;
 				
+				SYSTEM.VIRIAL_CALC[3] -= S_r * RAB.X * RAB.Y / rlen;
+				SYSTEM.VIRIAL_CALC[4] -= S_r * RAB.X * RAB.Z / rlen;
+				SYSTEM.VIRIAL_CALC[5] -= S_r * RAB.Y * RAB.Z / rlen;
+
 				SYSTEM.TOT_POT_ENER += tempx;
 
 			}//rlen
@@ -3713,9 +3755,15 @@ static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 				dEover[akp].Z += tempr*RVEC.Z/rik;		
 			
 				SYSTEM.PRESSURE_XYZ -= tempr * rik;		
-				SYSTEM.PRESSURE_TENSORS_XYZ.X -= tempr * (RVEC.X*RVEC.X)/rik;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= tempr * (RVEC.Y*RVEC.Y)/rik;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= tempr * (RVEC.Z*RVEC.Z)/rik;				
+
+				SYSTEM.VIRIAL_CALC[0] -= tempr * (RVEC.X*RVEC.X)/rik;
+				SYSTEM.VIRIAL_CALC[1] -= tempr * (RVEC.Y*RVEC.Y)/rik;
+				SYSTEM.VIRIAL_CALC[2] -= tempr * (RVEC.Z*RVEC.Z)/rik;				
+
+				SYSTEM.VIRIAL_CALC[3] -= tempr * (RVEC.X*RVEC.Y)/rik;
+				SYSTEM.VIRIAL_CALC[4] -= tempr * (RVEC.X*RVEC.Z)/rik;
+				SYSTEM.VIRIAL_CALC[5] -= tempr * (RVEC.Y*RVEC.Z)/rik;
+
 			}
 		}
 	}

@@ -371,9 +371,9 @@ int main(int argc, char* argv[])
 			{
 				// Assume units are in Hartree/bohr
 				
-				TRAJECTORY[i].FORCES[j].X *= 627.50960803*1.889725989;
-				TRAJECTORY[i].FORCES[j].Y *= 627.50960803*1.889725989;
-				TRAJECTORY[i].FORCES[j].Z *= 627.50960803*1.889725989;
+				TRAJECTORY[i].FORCES[j].X *= Hartree*Bohr;
+				TRAJECTORY[i].FORCES[j].Y *= Hartree*Bohr;
+				TRAJECTORY[i].FORCES[j].Z *= Hartree*Bohr;
 				
 				
 				// Assume units are in eV/A

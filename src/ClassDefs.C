@@ -479,7 +479,12 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	
 	BEREND_KP = TIME_BARO/ Tfs;	// Barostat damping parameter... 
 	BEREND_TAU = TIME / Tfs;	// Thermostat damping parameter
-	
+	BEREND_MU = 0.0 ;
+	BEREND_ANI_MU.X = 0.0 ;
+	BEREND_ANI_MU.Y = 0.0 ;
+	BEREND_ANI_MU.Z = 0.0 ;
+	BEREND_ETA = 0.0 ;
+
 	THERM_POSIT_T = 0;
 	THERM_VELOC_T = 0;
 	THERM_INERT_T = 0;
@@ -495,7 +500,8 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	BAROS_POSIT_0 = 0;
 	BAROS_VELOC_0 = 0;
 	BAROS_FORCE_0 = 0;
-	
+	BAROS_INERT_W = 0 ;
+
 	VOLUME_0 = 0;
 	VOLUME_T = 0;
 	
@@ -654,9 +660,9 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	{
 		VOLUME_0 = SYSTEM.BOXDIM.X*SYSTEM.BOXDIM.Y*SYSTEM.BOXDIM.Z;
 		
-		BEREND_ANI_MU.X = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS.X)/GPa,1.0/3.0);
-		BEREND_ANI_MU.Y = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS.Y)/GPa,1.0/3.0);
-		BEREND_ANI_MU.Z = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS.Z)/GPa,1.0/3.0);
+		BEREND_ANI_MU.X = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS[0])/GPa,1.0/3.0);
+		BEREND_ANI_MU.Y = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS[1])/GPa,1.0/3.0);
+		BEREND_ANI_MU.Z = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS[2])/GPa,1.0/3.0);
 		
 	
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)	
@@ -856,6 +862,7 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 
 	static double dV = CONTROLS.DELTA_T*VOLUME_T; //(VOLUME_T-VOLUME_0);
 	static double dP = (SYSTEM.PRESSURE - CONTROLS.PRESSURE)/GPa;
+	double KTensor[6] ;
 
 	if(STYLE=="NVE" || STYLE=="NVT-SCALE" || STYLE == "NPT-BEREND" || STYLE == "NVT-BEREND" || STYLE=="NPT-BEREND-ANISO")
 	{
@@ -906,12 +913,12 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 	{
 		if(STYLE=="NVT-MTK")	
 		{
-			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS);
+			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS, KTensor);
 			THERM_INERT_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
 		}
 		else // NPT-MTK
 		{	
-			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS);	
+			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS, KTensor);	
 			
 			BAROS_FORCE_T = 3.0/(N_DOF) * 2.0 * KIN_ENER + dV*dP;
 			THERM_INERT_T = ( 2.0 * KIN_ENER + BAROS_INERT_W * BAROS_VELOC_T * BAROS_VELOC_T - (N_DOF+1)*(Kb * CONTROLS.TEMPERATURE) ) / (THERM_INERT_Q);
@@ -1006,8 +1013,10 @@ void CONSTRAINT::SCALE_VELOCITIES(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 void CONSTRAINT::UPDATE_TEMPERATURE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
-	static double Ktot;
-	Ktot = kinetic_energy(SYSTEM, CONTROLS);	//calculate kinetic energy for scaling:
+	double Ktot;
+	double KTensor[6] ;
+
+	Ktot = kinetic_energy(SYSTEM, CONTROLS, KTensor);	//calculate kinetic energy for scaling:
 
 	SYSTEM.TEMPERATURE = 2.0 * Ktot / (N_DOF * Kb);
 
@@ -1077,14 +1086,28 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 	}
 }
 
+THERMO_AVG::THERMO_AVG()
+{
+	TEMP_SUM = 0.0 ;
+	PRESS_SUM = 0.0 ;
+
+	for ( int i = 0 ; i < 6 ; i++ ) 
+	{
+		STRESS_TENSOR_SUM[i] = 0.0 ;
+	}
+}
+
+
 void THERMO_AVG::WRITE(ofstream &fout)
 // Write out thermodynamic average properties.
 {
 	fout << TEMP_SUM << endl ;
 	fout << PRESS_SUM << endl ;
-	fout << STRESS_TENSOR_SUM.X << endl ;
-	fout << STRESS_TENSOR_SUM.Y << endl ;
-	fout << STRESS_TENSOR_SUM.Z << endl ;
+
+	for ( int i = 0 ; i < 6 ; i++ ) 
+	{
+		fout << STRESS_TENSOR_SUM[i] << endl ;
+	}
 }
 
 
@@ -1093,9 +1116,11 @@ void THERMO_AVG::READ(ifstream &fin)
 {
 	fin >> TEMP_SUM  ;
 	fin >> PRESS_SUM  ;
-	fin >> STRESS_TENSOR_SUM.X  ;
-	fin >> STRESS_TENSOR_SUM.Y  ;
-	fin >> STRESS_TENSOR_SUM.Z  ;
+
+	for ( int i = 0 ; i < 6 ; i++ ) 
+	{	
+		fin >> STRESS_TENSOR_SUM[i] ;
+	}
 }
 
 

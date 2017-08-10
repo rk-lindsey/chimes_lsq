@@ -66,12 +66,13 @@ using namespace std;
 // Unit converters 
 
 static const double ke      = 332.0637157615209;	// Converter between electron units and Stillinger units for Charge*Charge.
-static const double Hartree = 627.50961; 			// 1 Hartree in kcal/mol.
+static const double Hartree = 627.50960803 ;		// 1 Hartree in kcal/mol.
 static const double Kb      = 0.001987; 			// Boltzmann constant in kcal/mol-K.
 static const double Tfs     = 48.888;   			// Internal time unit in fs.
 static const double GPa     = 6.9479;				// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
 static const double atm     = GPa*9869.23266716;    // stress conversion to atm (for LAMMPS).
 static const double GPa2atm = 9869.23266716;		// x_GPa * GPa2atm = x_atm
+static const double Bohr    = 1.889725989 ;     // 1 Angstrom in Bohr.
 static const double pi		= 3.14159265359;		
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- general
@@ -153,6 +154,7 @@ struct JOB_CONTROL
 	int    FREQ_VELOC;
 	int    FREQ_ENER;			// Replaces energy_freq... How often to output energy
 	bool   PRINT_FORCE;			// Replaces if_output_force... If TRUE, write out calculated forces.	
+	bool   PRINT_STRESS ;      // Print the stress in the xyzf output file.
 	int    FREQ_FORCE;			// How often to print the forces	
 	int    SELF_CONSIST_FREQ;	// How frequently to print POSCAR file
 	bool   WRAP_COORDS;			// Should coordinates be wrapped?
@@ -221,7 +223,7 @@ struct FRAME
 	int MY_ATOMS_START;				// Used for lammps linking. Specify what index along SYS starts the process' atoms
 	XYZ BOXDIM;						// Dimenions of the primitive box.
 	XYZ WRAPDIM;					// Dimenions of the ghost atom box. Equivalent to BOXDIM if no layers are used
-	XYZ STRESS_TENSORS;				// Only used for the diagonal components, xx, yy, zz
+	XYZ STRESS_TENSORS ;		// Only used for the diagonal components, xx, yy, zz
 	XYZ STRESS_TENSORS_X;			// Used when all tensor components are requested
 	XYZ STRESS_TENSORS_Y;
 	XYZ STRESS_TENSORS_Z;
@@ -232,8 +234,10 @@ struct FRAME
 	double 	PRESSURE;				// This is the RUNNING pressure, not the set pressure!
 	double 	AVG_TEMPERATURE;		// Only used for velocity scaling-type thermostats
 	double 	PRESSURE_XYZ;			// This is the running pressure sans the ideal gas term
-	XYZ		PRESSURE_TENSORS_XYZ;	// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term
-	XYZ		PRESSURE_TENSORS;		// Adds in the ideal gas term
+
+	double VIRIAL_CALC[6] ;            // This is the virial tensor currently calculated.
+
+	double PRESSURE_TENSORS[6];		// Adds in the ideal gas term
 	double	TOT_POT_ENER;			// Replaces VTOT
 	
 	vector<int>		PARENT;
@@ -688,7 +692,9 @@ class THERMO_AVG {
 public:
 	double TEMP_SUM ;
 	double PRESS_SUM ;
-	XYZ STRESS_TENSOR_SUM ;
+	double STRESS_TENSOR_SUM[6] ;
+
+   THERMO_AVG() ;
 	void WRITE(ofstream &fout) ;
 	void READ(ifstream &fin) ;
 } ;
@@ -753,7 +759,7 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 //
 //////////////////////////////////////////
 
-double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// Overloaded.. compute differentely if for main or new velocities
+double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, double KTensor[6])	 ;
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// Overloaded.. compute differentely if for main or new velocities
 
 void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;

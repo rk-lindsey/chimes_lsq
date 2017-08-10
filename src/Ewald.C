@@ -156,7 +156,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	}
 
 
-	XYZ B ;
+	double B[6] ;
 	double kweight ;
 	for(int ik= ikstart; ik <= ikend; ik++)	// Loop is MPI'd over totk
 	{
@@ -181,14 +181,19 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 
 		rksq = K_V[ik].X * K_V[ik].X + K_V[ik].Y * K_V[ik].Y + K_V[ik].Z * K_V[ik].Z ;
 
-		// Diagonal part of B tensor from Heyes.
-		B.X = 1.0 - 2.0 * K_V[ik].X * K_V[ik].X / rksq - 0.5 * K_V[ik].X * K_V[ik].X / alphasq ;
-		B.Y = 1.0 - 2.0 * K_V[ik].Y * K_V[ik].Y / rksq - 0.5 * K_V[ik].Y * K_V[ik].Y / alphasq ;
-		B.Z = 1.0 - 2.0 * K_V[ik].Z * K_V[ik].Z / rksq - 0.5 * K_V[ik].Z * K_V[ik].Z / alphasq ;
+		// B tensor from Heyes.
+		B[0] = 1.0 - 2.0 * K_V[ik].X * K_V[ik].X / rksq - 0.5 * K_V[ik].X * K_V[ik].X / alphasq ;
+		B[1] = 1.0 - 2.0 * K_V[ik].Y * K_V[ik].Y / rksq - 0.5 * K_V[ik].Y * K_V[ik].Y / alphasq ;
+		B[2] = 1.0 - 2.0 * K_V[ik].Z * K_V[ik].Z / rksq - 0.5 * K_V[ik].Z * K_V[ik].Z / alphasq ;
 
-		TRAJECTORY.PRESSURE_TENSORS_XYZ.X += (2*PI*ke/Volume)*kweight * B.X ;
-		TRAJECTORY.PRESSURE_TENSORS_XYZ.Y += (2*PI*ke/Volume)*kweight * B.Y ;
-		TRAJECTORY.PRESSURE_TENSORS_XYZ.Z += (2*PI*ke/Volume)*kweight * B.Z ;
+		B[3] = - 2.0 * K_V[ik].X * K_V[ik].Y / rksq - 0.5 * K_V[ik].X * K_V[ik].Y / alphasq ;
+		B[4] = - 2.0 * K_V[ik].X * K_V[ik].Z / rksq - 0.5 * K_V[ik].X * K_V[ik].Z / alphasq ;
+		B[5] = - 2.0 * K_V[ik].Y * K_V[ik].Z / rksq - 0.5 * K_V[ik].Y * K_V[ik].Z / alphasq ;
+
+		for ( int ii = 0 ; ii < 6 ; ii++ ) 
+		{
+			TRAJECTORY.VIRIAL_CALC[ii] += (2*PI*ke/Volume)*kweight * B[ii] ;
+		}
 		
 		for(int a1=0; a1<PRIM_ATOMS; a1++) 
 		{
@@ -361,9 +366,13 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 
 				// Real space part of the pressure tensor.
 				// See Heyes, PRB, 49, 755(1994), eq. 22.
-				TRAJECTORY.PRESSURE_TENSORS_XYZ.X += tempx * RVEC.X * RVEC.X ;
-				TRAJECTORY.PRESSURE_TENSORS_XYZ.Y += tempx * RVEC.Y * RVEC.Y ;
-				TRAJECTORY.PRESSURE_TENSORS_XYZ.Z += tempx * RVEC.Z * RVEC.Z ;
+				TRAJECTORY.VIRIAL_CALC[0] += tempx * RVEC.X * RVEC.X ;
+				TRAJECTORY.VIRIAL_CALC[1] += tempx * RVEC.Y * RVEC.Y ;
+				TRAJECTORY.VIRIAL_CALC[2] += tempx * RVEC.Z * RVEC.Z ;
+
+				TRAJECTORY.VIRIAL_CALC[3] += tempx * RVEC.X * RVEC.Y ;
+				TRAJECTORY.VIRIAL_CALC[4] += tempx * RVEC.X * RVEC.Z ;
+				TRAJECTORY.VIRIAL_CALC[5] += tempx * RVEC.Y * RVEC.Z ;
 				
 				TRAJECTORY.TMP_EWALD[fidx_a2].X -= RVEC.X * tempx;
 				TRAJECTORY.TMP_EWALD[fidx_a2].Y -= RVEC.Y * tempx;
