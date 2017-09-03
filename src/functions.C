@@ -19,6 +19,10 @@ extern 	vector<int>	INT_PAIR_MAP;
 extern	vector<int>	INT_TRIAD_MAP;	
 ofstream 	BAD_CONFIGS;
 
+static void scale_coords(const FRAME &SYSTEM,
+								 vector<XYZ> & COORDS, vector<XYZ> & ALL_COORDS, XYZ & BOXDIM, double lscale[3][3], int ATOMS,
+								 int ALL_ATOMS) ;
+
 //////////////////////////////////////////
 //
 //	SMALL UTILITY FUNCTION
@@ -703,8 +707,8 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	
 	a1start = 0;
 	a2start = 0;
-	a1end   = REPLICATE.ATOMS;
-	a2end   = REPLICATE.ALL_ATOMS;
+	a1end   = SYSTEM.ATOMS;
+	a2end   = SYSTEM.ALL_ATOMS;
 
 	REPLICATE.ATOMS		= SYSTEM.ATOMS;
 	REPLICATE.ALL_ATOMS	= SYSTEM.ALL_ATOMS;
@@ -718,33 +722,42 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	REPLICATE.FORCES      .resize(REPLICATE.ATOMS);
 	REPLICATE.ACCEL       .resize(REPLICATE.ATOMS);
 	REPLICATE.COORDS      .resize(REPLICATE.ATOMS);
+	REPLICATE.ATOMTYPE_IDX.resize(REPLICATE.ATOMS);
+	REPLICATE.MASS        .resize(REPLICATE.ATOMS);
 
 	for(int i=a1start; i<a1end; i++)
 	{
 		REPLICATE.COORDS[i].X = SYSTEM.COORDS[i].X;
 		REPLICATE.COORDS[i].Y = SYSTEM.COORDS[i].Y;
 		REPLICATE.COORDS[i].Z = SYSTEM.COORDS[i].Z;		
+
+		REPLICATE.FORCES[i].X = SYSTEM.FORCES[i].X ;
+		REPLICATE.FORCES[i].Y = SYSTEM.FORCES[i].Y ;
+		REPLICATE.FORCES[i].Z = SYSTEM.FORCES[i].Z ;
+
+		REPLICATE.ACCEL[i].X = SYSTEM.ACCEL[i].X ;
+		REPLICATE.ACCEL[i].Y = SYSTEM.ACCEL[i].Y ;
+		REPLICATE.ACCEL[i].Z = SYSTEM.ACCEL[i].Z ;
+
+		REPLICATE.ATOMTYPE_IDX[i] = SYSTEM.ATOMTYPE_IDX[i] ;
+		REPLICATE.MASS        [i] = SYSTEM.MASS[i];
 	}
 
 	REPLICATE.ATOMTYPE    .resize(REPLICATE.ALL_ATOMS);
-	REPLICATE.ATOMTYPE_IDX.resize(REPLICATE.ALL_ATOMS);
 	REPLICATE.PARENT      .resize(REPLICATE.ALL_ATOMS);
 	REPLICATE.ALL_COORDS  .resize(REPLICATE.ALL_ATOMS);
 	REPLICATE.CHARGES     .resize(REPLICATE.ALL_ATOMS);
-	REPLICATE.MASS        .resize(REPLICATE.ALL_ATOMS);
 	REPLICATE.LAYER_IDX   .resize(REPLICATE.ALL_ATOMS);
 
 	for(int i=a2start; i<a2end; i++)
 	{
 		REPLICATE.ATOMTYPE    [i] = SYSTEM.ATOMTYPE[i];
-		REPLICATE.ATOMTYPE_IDX[i] = SYSTEM.ATOMTYPE_IDX[i];
 		REPLICATE.PARENT      [i] = SYSTEM.PARENT[i];
 		REPLICATE.CHARGES     [i] = SYSTEM.CHARGES[i];
-		REPLICATE.MASS        [i] = SYSTEM.MASS[i];
 
 		REPLICATE.LAYER_IDX[i].X = SYSTEM.LAYER_IDX[i].X;
-		REPLICATE.LAYER_IDX[i].Y = SYSTEM.LAYER_IDX[i].X;
-		REPLICATE.LAYER_IDX[i].Z = SYSTEM.LAYER_IDX[i].X;		
+		REPLICATE.LAYER_IDX[i].Y = SYSTEM.LAYER_IDX[i].Y;
+		REPLICATE.LAYER_IDX[i].Z = SYSTEM.LAYER_IDX[i].Z;		
 
 		REPLICATE.ALL_COORDS[i].X = SYSTEM.ALL_COORDS[i].X;
 		REPLICATE.ALL_COORDS[i].Y = SYSTEM.ALL_COORDS[i].Y;
@@ -763,9 +776,9 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 
 	// Make a copy of the system
 	
-	static FRAME REPLICATE;
+	FRAME REPLICATE;
 		
-	REPLICATE_SYSTEM(SYSTEM, REPLICATE);		// Can we make this one of those "if ! called_before sorts of variables?"
+	REPLICATE_SYSTEM(SYSTEM, REPLICATE);	
 
 	// Expand coords by a bit (lscale)
 
@@ -840,6 +853,150 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 	dV   = Vol2 - Vol1;
 }
 
+
+void numerical_virial(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+							 vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, 
+							 NEIGHBORS & NEIGHBOR_LIST,double PE_1[3]) 
+// Evaluates the configurational part of the virial tensor numerically by -dU/d(strain).
+// Essentially, we are taking the system and expanding/contracting it a bit (lscale) to get the change in potential energy 
+// Only the diagonal parts of the stress can be done this way, because off-diagonal components would require
+// the box to be non-orthogonal.
+// sigma_ij = - 1/V * dE / d epsilon_ij, where epsilon is the strain
+// tensor and sigma is the stress tensor.
+{
+	const double eps = 1.0e-04 ;
+	double lscale[3][3];
+	double Vtot1, Vtot2;
+	double Vol1, Vol2;
+	double Vol0 ;
+
+	// Make a copy of the system
+
+	Vol0 = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;	
+
+	FRAME REPLICATE;
+		
+	REPLICATE_SYSTEM(SYSTEM, REPLICATE);
+
+	// Expand coords by a bit (lscale)
+
+	for ( int ixyz = 0 ; ixyz < 3 ; ixyz++ ) 
+	{
+		// Iterate over components of the stress tensor.
+		
+		for ( int i = 0 ; i < 3 ; i++ ) 
+		{
+			for ( int j = 0 ; j < 3 ; j++ )
+			{
+				if ( i != j ) {
+					lscale[i][j] = 0.0 ;
+				}
+			}
+			lscale[i][i] = 1.0 ;
+		}
+
+		// Set the appropriate value of the scaling tensor.
+		lscale[ixyz][ixyz] = 1.0 + eps ;
+
+		scale_coords(SYSTEM,
+						 REPLICATE.COORDS, REPLICATE.ALL_COORDS, REPLICATE.BOXDIM, lscale,
+						 REPLICATE.ATOMS,REPLICATE.ALL_ATOMS) ;
+
+		// Compute/store new total potential energy and volume
+	
+		Vol1 = REPLICATE.BOXDIM.X * REPLICATE.BOXDIM.Y * REPLICATE.BOXDIM.Z;
+	
+		REPLICATE.TOT_POT_ENER = 0;
+	
+		ZCalc(REPLICATE, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
+	
+		Vtot1 = REPLICATE.TOT_POT_ENER;
+	
+		// Contract coords by a bit
+
+		lscale[ixyz][ixyz] = 1.0  - eps;
+	
+		scale_coords(SYSTEM,REPLICATE.COORDS, REPLICATE.ALL_COORDS, REPLICATE.BOXDIM, lscale,
+						 REPLICATE.ATOMS,REPLICATE.ALL_ATOMS) ;
+		
+
+		// Compute/store new total potential energy and volume
+
+		Vol2 = REPLICATE.BOXDIM.X * REPLICATE.BOXDIM.Y * REPLICATE.BOXDIM.Z;
+	
+		REPLICATE.TOT_POT_ENER = 0;
+	
+		ZCalc(REPLICATE, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
+	
+		Vtot2 = REPLICATE.TOT_POT_ENER;
+
+		// compute (return) pressure 
+	
+		//return -(Vtot2 - Vtot1)/(Vol2 - Vol1);
+	
+		//cout << " Vtot1 = " << Vtot1 << endl ;
+		//cout << " Vtot2 = " << Vtot2 << endl ;
+
+		PE_1[ixyz] = (Vtot2 - Vtot1) / (Vol0 * 2.0 * eps) ;
+	}
+}
+
+static void scale_coords(const FRAME &SYSTEM,
+								 vector<XYZ> & COORDS, vector<XYZ> & ALL_COORDS, XYZ & BOXDIM, double lscale[3][3], int ATOMS,
+								 int ALL_ATOMS) 
+{
+
+	for (int j=0; j < ATOMS; j++ ) 
+	{
+		COORDS[j].X = 0.0 ;
+		COORDS[j].Y = 0.0 ;
+		COORDS[j].Z = 0.0 ;
+	}
+
+	for (int j=0; j < ATOMS; j++ ) 
+	{
+		COORDS[j].X += lscale[0][0] * SYSTEM.COORDS[j].X 
+			+ lscale[0][1] * SYSTEM.COORDS[j].Y 
+			+ lscale[0][2] * SYSTEM.COORDS[j].Z ;
+
+		COORDS[j].Y += lscale[1][0] * SYSTEM.COORDS[j].X 
+			+ lscale[1][1] * SYSTEM.COORDS[j].Y 
+			+ lscale[1][2] * SYSTEM.COORDS[j].Z ;
+
+		COORDS[j].Z += lscale[2][0] * SYSTEM.COORDS[j].X 
+			+ lscale[2][1] * SYSTEM.COORDS[j].Y 
+			+ lscale[2][2] * SYSTEM.COORDS[j].Z ;
+
+	}
+
+	for (int j=0; j < ALL_ATOMS; j++ ) 
+	{
+		ALL_COORDS[j].X = 0.0 ;
+		ALL_COORDS[j].Y = 0.0 ;
+		ALL_COORDS[j].Z = 0.0 ;
+	}
+	for (int j=0; j < ALL_ATOMS; j++ ) 
+	{
+		ALL_COORDS[j].X += lscale[0][0] * SYSTEM.ALL_COORDS[j].X 
+			+ lscale[0][1] * SYSTEM.ALL_COORDS[j].Y 
+			+ lscale[0][2] * SYSTEM.ALL_COORDS[j].Z ;
+
+		ALL_COORDS[j].Y += lscale[1][0] * SYSTEM.ALL_COORDS[j].X 
+			+ lscale[1][1] * SYSTEM.ALL_COORDS[j].Y 
+			+ lscale[1][2] * SYSTEM.ALL_COORDS[j].Z ;
+
+		ALL_COORDS[j].Z += lscale[2][0] * SYSTEM.ALL_COORDS[j].X 
+			+ lscale[2][1] * SYSTEM.ALL_COORDS[j].Y 
+			+ lscale[2][2] * SYSTEM.ALL_COORDS[j].Z ;
+
+	}
+
+	// The box is kept orthogonal due to current code assumptions.
+	// The shear components of the stress can't be calculated numerically.
+	BOXDIM.X = lscale[0][0] * SYSTEM.BOXDIM.X;
+	BOXDIM.Y = lscale[1][1] * SYSTEM.BOXDIM.Y;
+	BOXDIM.Z = lscale[2][2] * SYSTEM.BOXDIM.Z;
+}
 
 //////////////////////////////////////////
 // Bad configuration tracking functions
@@ -2897,7 +3054,9 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, v
   return;
 }
 
-static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST)
+static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+									 vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, 
+									 map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST)
 // Calculate short-range forces using a Chebyshev polynomial expansion. Can use morse variables similar to the work of Bowman.
 {
 	
@@ -3051,7 +3210,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			#endif
 		
 			rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
-								
+						
 			if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MAXIM)	// We want to evaluate the penalty function when r < rmin (LEF) .. Assumes 3b inner cutoff is never shorter than 2b's
 			{	
 
@@ -3076,6 +3235,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 				for ( int i = 0; i < FF_2BODY[curr_pair_type_idx_ij].SNUM; i++ ) 
 				{
 					coeff                = FF_2BODY[curr_pair_type_idx_ij].PARAMS[i]; // This is the Cheby FF param for the given power
+
 					SYSTEM.TOT_POT_ENER += coeff * fcut_2b * Tn[i+1];
 					deriv                = (fcut_2b * Tnd[i+1] * dx_dr + fcutderiv_2b * Tn[i+1]);
 					SYSTEM.PRESSURE_XYZ -= coeff * deriv * rlen_ij;
@@ -3133,7 +3293,6 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 		}
 		
 	}
-
 
 	/////////////////////////////////////////////
 	// EVALUATE THE 3-BODY INTERACTIONS

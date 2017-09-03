@@ -44,9 +44,6 @@ using namespace std;
 // Define function headers -- general
 
 static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
-void      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-									  vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, 
-									  NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
 
 // Define function headers -- MPI
 
@@ -2743,9 +2740,10 @@ int main(int argc, char* argv[])
 		// Do first half of coordinate/velocity updating
 		////////////////////////////////////////////////////////////		
 
-		if(CONTROLS.STEP>0 && RANK==0)	
+		if(CONTROLS.STEP>0 && RANK==0 )	
 		{
 			ENSEMBLE_CONTROL.UPDATE_COORDS(SYSTEM, CONTROLS);			// Update coordinates and ghost atoms
+
 			
 			if(CONTROLS.WRAP_COORDS)									// Wrap the coordinates:
 			{
@@ -2761,8 +2759,17 @@ int main(int argc, char* argv[])
 		}
 		
 		#ifdef USE_MPI
-			sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-			sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
+		sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
+
+		// Update ghost atom positions.  Not necessary to communicate ghost atoms via MPI. (LEF)
+		if ( RANK != 0 ) 
+		{
+			ENSEMBLE_CONTROL.UPDATE_GHOST(SYSTEM,CONTROLS) ;
+		}
+
+		// Commented out (LEF). Not necessary.
+		//sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
+
 			MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
 		#endif
 
@@ -2783,7 +2790,7 @@ int main(int argc, char* argv[])
 		#ifdef USE_MPI
 		sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.VIRIAL_CALC) ;
 		#endif
-		
+
 		////////////////////////////////////////////////////////////
 		// Print some info on new forces, compare to input forces if
 		// requested
@@ -2797,16 +2804,15 @@ int main(int argc, char* argv[])
 
 			OUT_XYZF << SYSTEM.ATOMS << endl ;
 			OUT_XYZF << scientific << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " " ;
-			OUT_XYZF << endl ;
-
 			if ( CONTROLS.PRINT_STRESS ) 
 			{
 				for ( int i = 0 ; i < 6 ; i++ ) 
 				{
 					OUT_XYZF << scientific << SYSTEM.VIRIAL_CALC[i] * GPa << " " ;
 				}
-				OUT_XYZF << endl ;
 			}
+			OUT_XYZF << endl ;
+
 			// convert xyzf forces to Hartree per Bohr
 			double fconv = Hartree*Bohr;
 			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
@@ -3013,6 +3019,25 @@ int main(int argc, char* argv[])
 			SYSTEM.PRESSURE_XYZ = -1.0*(PE_2 - PE_1)/dV;
 
 		}
+		if ( CONTROLS.USE_NUMERICAL_STRESS ) 
+		{
+			double PE_1[3] ;
+			
+			numerical_virial(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST, PE_1) ;
+			#ifdef USE_MPI
+				MPI_Barrier(MPI_COMM_WORLD);
+				MPI_Allreduce(MPI_IN_PLACE, &PE_1,3,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+			#endif
+			
+			for ( int i = 0 ; i < 3 ; i++ ) {
+				SYSTEM.VIRIAL_CALC[i] = PE_1[i] ;
+			}
+			// Off-diagonal elements of the stress tensor can't be calculated numerically.
+			for ( int i = 3 ; i < 6 ; i++ ) {
+				SYSTEM.VIRIAL_CALC[i] = 0.0 ;
+			}
+
+		}
 		if(RANK==0)
 		{
 
@@ -3070,7 +3095,13 @@ int main(int argc, char* argv[])
 		{
 			#ifdef USE_MPI
 				sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-				sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
+
+				// Update ghost atom positions.  Not necessary to communicate ghost atoms via MPI. (LEF)
+				if ( RANK != 0 ) 
+				{
+					ENSEMBLE_CONTROL.UPDATE_GHOST(SYSTEM,CONTROLS) ;
+				}
+				//sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
 				MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
 			#endif
 		}		
@@ -3261,21 +3292,18 @@ int main(int argc, char* argv[])
 		cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
 		cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
 		
-		if( ! CONTROLS.USE_NUMERICAL_PRESS )
-		{
-			double Pavg = (AVG_DATA.STRESS_TENSOR_SUM[0] 
-								+ AVG_DATA.STRESS_TENSOR_SUM[1] 
-								+ AVG_DATA.STRESS_TENSOR_SUM[2])/3.0/ CONTROLS.N_MD_STEPS ;
-			cout << "	Pressure from diagonal stress tensors over run: " << Pavg << endl;
-			cout << "	Average stress tensor over run: " << endl;
-			cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM[0]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-			cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM[1]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-			cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM[2]/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
+		double Pavg = (AVG_DATA.STRESS_TENSOR_SUM[0] 
+							+ AVG_DATA.STRESS_TENSOR_SUM[1] 
+							+ AVG_DATA.STRESS_TENSOR_SUM[2])/3.0/ CONTROLS.N_MD_STEPS ;
+		cout << "	Pressure from diagonal stress tensors over run: " << Pavg << endl;
+		cout << "	Average stress tensor over run: " << endl;
+		cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM[0]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM[1]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM[2]/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
 
-			cout << "		sigma_xy: " << AVG_DATA.STRESS_TENSOR_SUM[3]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-			cout << "		sigma_xz: " << AVG_DATA.STRESS_TENSOR_SUM[4]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-			cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM[5]/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
-		}
+		cout << "		sigma_xy: " << AVG_DATA.STRESS_TENSOR_SUM[3]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_xz: " << AVG_DATA.STRESS_TENSOR_SUM[4]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM[5]/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
 
 		// Write the final configuration to file.
 		write_xyzv(SYSTEM, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, "output.xyz", false);
@@ -4080,6 +4108,30 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				exit_run(1);	
 			}				
 		}	
+
+
+		else if(LINE.find("# STRSCALC #") != string::npos)
+		{
+			cin >> LINE; cin.ignore();
+			
+			if (LINE=="ANALYTICAL")
+			{
+				CONTROLS.USE_NUMERICAL_STRESS = false;
+				if (RANK==0)
+					cout << "	# STRSCALC #: ANALYTICAL" << endl;	
+			}
+			else if (LINE=="NUMERICAL")
+			{
+				CONTROLS.USE_NUMERICAL_STRESS = true;
+				if (RANK==0)
+					cout << "	# STRSCALC #: NUMERICAL" << endl;	
+			}
+			else
+			{
+				cout << "ERROR: # STRSCALC # must be specified as ANALYTICAL or NUMERICAL." << endl;
+				exit_run(1);	
+			}				
+		}	
 				
 		// "Output control"
 		
@@ -4166,7 +4218,6 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
 			{
 				CONTROLS.PRINT_STRESS = true;
-				cin >> LINE; cin.ignore();
 				
 				if (RANK==0)
 					cout << "	# PRNTSTR #: true " << endl ;
@@ -4314,17 +4365,56 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 
 // MPI -- Related functions -- See headers at top of file
 
-static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double stress_tensor[6])
+static void sum_forces(vector<XYZ>& accel, int atoms, double &pot_energy, double &pressure, double stress_tensor[6])
 // Add up forces, potential energy, and pressure from all processes.  
 {
 	// Sum up the potential energy, pressure, tensors , and forces from all processors
 #ifdef USE_MPI	
-	double *accel = (double *) accel_vec .data();
+	int nbuf = 3*atoms+8 ;
 
-	MPI_Allreduce(MPI_IN_PLACE, &pot_energy,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &pressure,      1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &stress_tensor, 6,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, accel,          3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	// Pack an array for the forces.
+	double *buf = new double[3*atoms+8] ;
+	int count = 0 ;
+
+	buf[count++] = pot_energy ;
+	buf[count++] = pressure ;
+	for ( int i = 0 ; i < 6 ; i++ ) {
+		buf[count++] = stress_tensor[i] ;
+	}
+	for ( int i = 0 ; i < atoms ; i++ ) {
+		buf[count++] = accel[i].X ;
+		buf[count++] = accel[i].Y ;
+		buf[count++] = accel[i].Z ;
+	}
+
+	if ( count != nbuf ) {
+		printf("Index error in sum_forces\n") ;
+		exit_run(1) ;
+	}
+
+	// Sum the buffers on all processes.
+	MPI_Allreduce(MPI_IN_PLACE, buf, nbuf,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	
+	// Unpack the array
+	count = 0 ;
+	pot_energy = buf[count++] ;
+	pressure   = buf[count++] ;
+	for ( int i = 0 ; i < 6 ; i++ ) {
+		stress_tensor[i] = buf[count++] ;
+	}
+	for ( int i = 0 ; i < atoms ; i++ ) {
+		accel[i].X = buf[count++] ;
+		accel[i].Y = buf[count++] ;
+		accel[i].Z = buf[count++] ;
+	}
+
+	if ( count != nbuf ) {
+		printf("Index error in sum_forces\n") ;
+		exit_run(1) ;
+	}
+
+	delete[] buf ;
+
 #endif	
 
 }
@@ -4634,7 +4724,7 @@ void exit_run(int value)
 		  
 			// Wrap the coordinates
 			
-  	   	   	SYS.COORDS[i].X -= floor(SYS.COORDS[i].X/SYS.BOXDIM.X)*SYS.BOXDIM.X;
+			 SYS.COORDS[i].X -= floor(SYS.COORDS[i].X/SYS.BOXDIM.X)*SYS.BOXDIM.X;
 			SYS.COORDS[i].Y -= floor(SYS.COORDS[i].Y/SYS.BOXDIM.Y)*SYS.BOXDIM.Y;
 			SYS.COORDS[i].Z -= floor(SYS.COORDS[i].Z/SYS.BOXDIM.Z)*SYS.BOXDIM.Z;
 			

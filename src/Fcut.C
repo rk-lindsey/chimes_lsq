@@ -72,7 +72,7 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv,
 				a_prime = STEEPNESS*A/(1.0+A)/(1.0+A);
 			}
 			
-			fcut0    = fcut0 = (1.0 - rlen/rmax);
+			fcut0 = (1.0 - rlen/rmax);
 			b        = pow(fcut0, POWER);
 			b_prime  = pow(fcut0,POWER-1);
 			b_prime *= -1.0 * POWER /rmax;

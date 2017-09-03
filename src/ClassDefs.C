@@ -748,7 +748,12 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	///////////////////////////////////////////////
 	// Refresh ghost atom positions
 	///////////////////////////////////////////////
+	UPDATE_GHOST(SYSTEM, CONTROLS) ;
+}
 
+void CONSTRAINT::UPDATE_GHOST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
+// Update the primitive and ghost atom positions contained in SYSTEM.ALL_COORDS.
+{
 	// Set the first NATOMS of ghost atoms to have the coordinates of the "real" coords
 
 	for (int a=0; a<SYSTEM.ATOMS; a++) 
@@ -799,7 +804,6 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			exit(1) ;
 		}
 	}	
-		
 }
 
 void CONSTRAINT::UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)

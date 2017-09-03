@@ -140,6 +140,7 @@ struct JOB_CONTROL
 	double FREQ_UPDATE_THERMOSTAT;	// Replaces scale_freq and thoover_fs... it's usage depends on whether USE_HOOVER_THERMOSTAT is true or false.. will be cast as int where required
 	double FREQ_UPDATE_BAROSTAT;	// Barostat time constant... defaults to 1000
 	bool   USE_NUMERICAL_PRESS;		// Replaces num_pressure... Whether to calculate pressures by finite difference.
+	bool   USE_NUMERICAL_STRESS;		// Whether to calculate stresses by finite difference.
 	double MIN_E_CONVG_CRIT;		// Options for LAMMPS minimization: Stopping criteria for energy and force, max iterations, max energy/force evaluations
 	double MIN_F_CONVG_CRIT;
 	double MIN_MAX_ITER;
@@ -675,6 +676,7 @@ class CONSTRAINT
 
 		void INITIALIZE          (string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS); 
 		void UPDATE_COORDS       (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
+		void UPDATE_GHOST        (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
 		void UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
 		void UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
 		void SCALE_VELOCITIES    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
@@ -767,8 +769,11 @@ void SORT_THREE_DESCEND(int & a, int & b, int & c);
 
 void enable_fp_exceptions();
 void exit_run(int val);
-
-
-
+void      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+									  vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, 
+									  NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
+void numerical_virial(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+							 vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, 
+							 map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST,double PE_1[3]) ;
 #endif
 
