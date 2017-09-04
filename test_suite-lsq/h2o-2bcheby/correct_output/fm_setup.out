@@ -66,48 +66,18 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 	R-Space accuracy estimate =  5.997380e-07
 	K-space accuracy estimate =  6.801448e-07
 	Number of Ewald K-vectors = 238
-	Ewald_Deriv:
-	R-Space Ewald cutoff      =  4.304565e+00
-	R-Space accuracy estimate =  5.997380e-07
-	K-space accuracy estimate =  8.163595e-07
-	Number of Ewald K-vectors = 238
-	Ewald_Deriv:
-	R-Space Ewald cutoff      =  4.404565e+00
-	R-Space accuracy estimate =  5.861217e-07
-	K-space accuracy estimate =  7.121130e-07
-	Number of Ewald K-vectors = 238
-	Ewald_Deriv:
-	R-Space Ewald cutoff      =  4.454565e+00
-	R-Space accuracy estimate =  5.795428e-07
-	K-space accuracy estimate =  7.283724e-07
-	Number of Ewald K-vectors = 238
-	Ewald_Deriv:
-	R-Space Ewald cutoff      =  4.254565e+00
-	R-Space accuracy estimate =  6.067862e-07
-	K-space accuracy estimate =  6.644361e-07
-	Number of Ewald K-vectors = 238
-	Ewald_Deriv:
-	R-Space Ewald cutoff      =  4.154565e+00
-	R-Space accuracy estimate =  6.213914e-07
-	K-space accuracy estimate =  6.335691e-07
-	Number of Ewald K-vectors = 238
-	Ewald_Deriv:
-	R-Space Ewald cutoff      =  4.000000e+00
-	R-Space accuracy estimate =  6.454028e-07
-	K-space accuracy estimate =  5.873037e-07
-	Number of Ewald K-vectors = 238
 ...matrix population complete: 
 
 Printing matricies...
 	...A matrix length: 99
 
 	Minimum distances between atoms: (Angstr.)
-		0	O O	1.860
-		1	H H	0.834
-		2	O H	0.279
+		0	O O	2.039
+		1	H H	1.082
+		2	O H	0.820
 	Total number of configurations contributing to each pair type:
-		0	O O 58365
-		1	H H 237370
-		2	O H 241090
+		0	O O 58201
+		1	H H 236732
+		2	O H 240454
 ...matrix printing complete: 
 
