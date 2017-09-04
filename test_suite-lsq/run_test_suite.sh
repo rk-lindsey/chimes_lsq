@@ -22,7 +22,7 @@ EPS_FAC=1.0e-5 # 1.0E-5 is the old default value... should match value used in g
 
 if [ $# -eq 0 ] 
 then
-JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby' #  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
+JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald' 
 else
   JOBS=$*
 fi

@@ -58,6 +58,7 @@ Note: Will use cubic scaling of: 1
 The number of two-body non-coulomb parameters is: 80
 
 Reading in the trajectory file...
+	Reporting outcome of layering for first frame ONLY: 
 	Real atoms:                   208
 	Total atoms (ghost):          5616
 	Real box dimesntions:         13.5192 13.5192 13.5192
