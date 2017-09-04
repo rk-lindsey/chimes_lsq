@@ -39,8 +39,6 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	const int     maxk =10000;
 	int           kmax =10;
 	int           ksq;
-	double        Kfac;
-	XYZ			  R_K;//        rkx,rky,rkz;
 	double        rksq;
 	static XYZ    LAST_BOXDIMS;
 
@@ -240,13 +238,10 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
   const double SQRT_PI = sqrt(PI);
 
   double 		tempd,tempy;
-  double 		dx,dy,dz;
   double 		rlen_mi;
   static double alphasq;
-  int 			totk = 0;
   static double r_cut;
   static int	k_cut;
-  bool 			if_old_k_space = false;
   static bool 	called_before = false;
   static double alpha;
   const double 	accuracy = EWALD_ACCURACY;
@@ -329,8 +324,6 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 	}
 
 	// Main loop Ewald Coulomb energy/forces:
-	
-	int    curr_pair_type_idx;
 	
 	for(int a1 = a1start; a1 <= a1end; a1++)	// Double sum over atom pairs (outer loop is MPI'd over TRAJECTORY.ATOMS)
 	{
@@ -458,7 +451,6 @@ void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, 
 void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS)	
 {
 	XYZ RVEC; // Replaces  Rvec[3];
-	double rlen;
 
 	// Main loop Ewald Coulomb:
   
@@ -476,12 +468,10 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 	double 			rksq;
 	double 			alpha 		= sqrt(alphasq);
 	static double 	r_cut;						
-	static double   r_cut_squared;				// so we don't need to do an r_cut*r_cut calculation inside of a loop
 	const  double 	accuracy	 = EWALD_ACCURACY;
 	double 			tempd, tempd2, tempd3, tempd4;
 	
 	double 			Volume;
-	static bool 	called_before = false;
 	XYZ 			D_XYZ; 						
 	double 			rlen_mi;
 	static vector<XYZ> SIN_XYZ; 				
@@ -515,7 +505,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 		NEIGHBOR_LIST.DO_UPDATE(FRAME_TRAJECTORY,CONTROLS) ;
 		
 		alphasq = alpha * alpha;
-		r_cut_squared = r_cut*r_cut;
 		
 		#if VERBOSITY == 1
 		if ( RANK == 0 ) 
@@ -527,9 +516,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 		}
 		#endif
 
-	    called_before = true;
-
-    
 	    Kfac_v = new double [maxk];	// DECLARING STUFF LIKE THIS IN A FUNCTION A MILLION TIMES WILL KILL EFFICIENCY... CAN WE MAKE THESE GLOBAL-ISH?		
 		SIN_XYZ.resize(maxk); // Replaces sinx, siny, sinz
 		COS_XYZ.resize(maxk);
@@ -629,8 +615,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 		}
 	}
 	
-	int kx, ky, kz;
-	
     for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++) //Ewald K-space sum.	// -- this is where the slow down occurs
     {
 		for(int a2=0; a2<a1;a2++)
@@ -720,7 +704,7 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 	
 	for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++)
 	{
-		for(int i_pair=0; i_pair<ATOM_PAIRS.size(); i_pair++)
+		for(unsigned int i_pair=0; i_pair<ATOM_PAIRS.size(); i_pair++)
 		{				
 			FRAME_COULOMB_FORCES[i_pair][a1].X *= -1.0;
 			FRAME_COULOMB_FORCES[i_pair][a1].Y *= -1.0;

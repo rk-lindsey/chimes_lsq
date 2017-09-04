@@ -9,6 +9,51 @@
 
 using namespace std;
 
+
+JOB_CONTROL::JOB_CONTROL() // Constructor
+{
+	N_LAYERS = 0 ; 
+	WRAP_COORDS = false ;
+	IF_SUBTRACT_COORD = false ;
+	IF_SUBTRACT_COUL = false ;
+	FIT_COUL = false ;
+	USE_PARTIAL_CHARGES = false ;
+	COUL_CONSV = false ;
+	FIT_POVER = false ;
+	USE_3B_CHEBY = false ;
+	TOT_SNUM = 0 ;
+
+	STEP = 0 ;
+	NATMTYP = 0 ;
+	PLOT_PES = false ;
+	COMPARE_FORCE = false ;
+	SUBTRACT_FORCE = false ;
+	REAL_REPLICATES = 0 ;
+	SCALE_SYSTEM_BY = 1.0 ;
+	SELF_CONSIST = false ;
+	INIT_VEL = false ;
+	USE_HOOVER_THRMOSTAT = false ;
+	FREEZE_IDX_START = -1 ;
+	USE_NUMERICAL_PRESS = false ;
+	PRINT_VELOC = false ;
+	RESTART = false ;
+	PRINT_FORCE = false ;
+	PRINT_STRESS = false ;
+	WRAP_COORDS = false ;
+	BUILD = false ;
+	IS_LSQ = false ;
+	FIT_STRESS = false ;
+	FIT_STRESS_ALL = false ;
+	FIT_ENER = false ;
+	CALL_EWALD = false ;
+	USE_POVER = false ;
+	COUL_CONSV = false ;
+	IF_SUBTRACT_COORD = false ;
+	IF_SUBTRACT_COUL = false ;
+	USE_PARTIAL_CHARGES = false ;
+	
+}
+
 NEIGHBORS::NEIGHBORS()		// Constructor 
 {
 	RCUT_PADDING  =  0.3;
@@ -136,21 +181,20 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	FIX_LAYERS(SYSTEM, CONTROLS);
 
 	if ( SYSTEM.ALL_ATOMS < 200 ) 
-		DO_UPDATE_SMALL(SYSTEM, CONTROLS);
+		DO_UPDATE_SMALL(SYSTEM) ;
 	else 
 		DO_UPDATE_BIG(SYSTEM, CONTROLS);
 
 	if ( CONTROLS.USE_3B_CHEBY ) 
-	  UPDATE_3B_INTERACTION(SYSTEM, CONTROLS) ;
+		UPDATE_3B_INTERACTION(SYSTEM) ;
 }	
 
-void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)	
+void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM)
 {
 
 	XYZ RAB;
-	XYZ TMP_BOX;
 	
-	double MAX = 0;
+	//double MAX = 0;
 	double rlen = 0;
 	
 	if(!FIRST_CALL)	// Clear out the second dimension so we can start over again
@@ -413,25 +457,9 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		}
 	}
 }
-void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
-{
-	if(FIRST_CALL || SECOND_CALL)
-		UPDATE_LIST(SYSTEM, CONTROLS);
-	else
-	{
-		DISPLACEMENT += MAX_VEL * CONTROLS.DELTA_T;
-		
-		DO_UPDATE(SYSTEM, CONTROLS);
-	
-		if(RANK == 0)
-			cout << "RANK: " << RANK << " FORCING UPDATING ON STEP: " << CONTROLS.STEP << ", WITH PADDING: " << fixed << setprecision(3) << RCUT_PADDING <<  endl;
-	}
-}
-
-
 
 CONSTRAINT::CONSTRAINT(){}	// Constructor
-CONSTRAINT::~CONSTRAINT(){}	// Deconstructor
+CONSTRAINT::~CONSTRAINT(){}	// Destructor
 
 void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 {
@@ -1001,7 +1029,7 @@ void CONSTRAINT::SCALE_VELOCITIES(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 	if (RANK==0)
 	{
-		cout << "Average temperature     = " << SYSTEM.AVG_TEMPERATURE << endl;
+		cout << "Average temperature     = " << fixed << setprecision(2) << SYSTEM.AVG_TEMPERATURE << endl;
 		cout << "Velocity scaling factor = " << vscale << endl;	
 	}
 
@@ -1057,7 +1085,7 @@ double CONSTRAINT::CONSERVED_QUANT (FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	
 }
 
-void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) 
+void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM)
 // Build a list of all 3-body interactions.  This "flat" list parallelizes much
 // more efficiently than a nested neighbor list loop.
 {
@@ -1067,9 +1095,9 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 	LIST_3B_INT.clear() ;
 	for ( int i = 0 ; i < SYSTEM.ATOMS ; i++ ) {
 		int ai = i ;
-		for ( int j = 0 ; j < LIST_3B[i].size() ; j++ ) {
+		for ( unsigned int j = 0 ; j < LIST_3B[i].size() ; j++ ) {
 			int aj = LIST_3B[i][j] ;
-			for ( int k = 0 ; k < LIST_3B[i].size() ; k++ ) {
+			for ( unsigned int k = 0 ; k < LIST_3B[i].size() ; k++ ) {
 				int ak = LIST_3B[i][k] ;
 
 				if ( aj == ak || SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] ) 
@@ -1128,3 +1156,18 @@ void THERMO_AVG::READ(ifstream &fin)
 }
 
 
+PAIRS::PAIRS(): OVRPRMS(5)
+{
+	//OVRPRMS(5) ;
+	N_CFG_CONTRIB = 0 ;
+}
+
+PES_PLOTS::PES_PLOTS()
+{
+	N_PLOTS = 0 ;
+	N_SCAN = 0 ;
+	INCLUDE_2B = 0 ;
+	DO_4D = 1 ;
+}
+
+		

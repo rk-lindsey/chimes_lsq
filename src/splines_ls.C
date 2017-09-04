@@ -58,8 +58,12 @@ int RANK;		// Index of current processor
 vector<int>	INT_PAIR_MAP;
 vector<int>	INT_TRIAD_MAP;
 
-
+#ifdef USE_MPI
 int main(int argc, char* argv[])
+#else
+// No command-line parameters.
+int main()
+#endif
 {
 	
 	// Set up MPI if requested, otherwise, run in serial 
@@ -162,7 +166,7 @@ int main(int argc, char* argv[])
 	CONTROLS.TOT_SNUM = 0; 
 	CONTROLS.NUM_3B_CHEBY = 0;
 
-	for (int i=0; i<ATOM_PAIRS.size(); i++)
+	for (unsigned int i=0; i<ATOM_PAIRS.size(); i++)
 	{
 		if ( (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) || (ATOM_PAIRS[i].PAIRTYP == "DFTBPOLY") )	
         {
@@ -193,7 +197,7 @@ int main(int argc, char* argv[])
 	{
 		CONTROLS.NUM_3B_CHEBY = 0;
 		
-		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+		for(unsigned int i=0; i<PAIR_TRIPLETS.size(); i++)
 			CONTROLS.NUM_3B_CHEBY += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;
 
 #if VERBOSITY == 1
@@ -216,7 +220,7 @@ int main(int argc, char* argv[])
 	XYZ MAX_RMIN;
 	MAX_RMIN.X = MAX_RMIN.Y = MAX_RMIN.Z = 0;
 	
-	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+	for(unsigned int i=0; i<PAIR_TRIPLETS.size(); i++)
 	{
 		if(PAIR_TRIPLETS[i].S_MINIM_3B.X > MAX_RMIN.X)
 			MAX_RMIN.X = PAIR_TRIPLETS[i].S_MINIM_3B.X;
@@ -246,7 +250,6 @@ int main(int argc, char* argv[])
 	// Prepare for layering
 		
 	vector<XYZ_INT> LAYER_MATRX;
-	int             N_LAYER_ELEM = 0;		
 
 	for (int i=0; i<CONTROLS.NFRAMES; i++)
 	{
@@ -260,8 +263,6 @@ int main(int argc, char* argv[])
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Y;
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Z;
 		
-		bool IFANY = false;
-	
 		if(CONTROLS.FIT_STRESS)
 		{
 				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.X;
@@ -294,7 +295,7 @@ int main(int argc, char* argv[])
 		// Check that outer cutoffs do not exceed half of the boxlength
 		// with consideration of layering
 		
-		for(int j=0; j<ATOM_PAIRS.size(); j++)
+		for(unsigned int j=0; j<ATOM_PAIRS.size(); j++)
 		{
 			if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X * (2*CONTROLS.N_LAYERS +1)
 				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (2*CONTROLS.N_LAYERS +1)
@@ -483,7 +484,7 @@ int main(int argc, char* argv[])
 		COULOMB_FORCES[f].resize(ATOM_PAIRS.size());
 		P_OVER_FORCES[f] .resize(A_SIZE);
 		
-		for (int i=0; i<ATOM_PAIRS.size(); i++)
+		for (unsigned int i=0; i<ATOM_PAIRS.size(); i++)
 		{
 			COULOMB_FORCES[f][i].resize(A_SIZE);		
 		
@@ -524,7 +525,7 @@ int main(int argc, char* argv[])
 	
 		bool ANY_ZERO = false;
 		
-		for (int i=0; i<PAIR_TRIPLETS.size(); i++)
+		for (unsigned int i=0; i<PAIR_TRIPLETS.size(); i++)
 		{
 
 			PAIR_TRIPLETS[i].NBINS.X = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS.X;
@@ -658,7 +659,8 @@ int main(int argc, char* argv[])
 		NEIGHBOR_LIST.INITIALIZE(TRAJECTORY[i], NEIGHBOR_PADDING);
 		NEIGHBOR_LIST.DO_UPDATE(TRAJECTORY[i], CONTROLS);		
 
-		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
+		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], 
+						CONTROLS.USE_3B_CHEBY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
 		
 		if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
 			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
@@ -674,7 +676,7 @@ int main(int argc, char* argv[])
 		{
 			FRAME_MATRX_SIZE = A_MATRIX[i].size()-1;
 				
-			for (int j=0; j<A_MATRIX[i][FRAME_MATRX_SIZE].size(); j++)
+			for (unsigned int j=0; j<A_MATRIX[i][FRAME_MATRX_SIZE].size(); j++)
 			{
 				A_MATRIX[i][FRAME_MATRX_SIZE][j].X -= A_MATRIX[0][FRAME_MATRX_SIZE][j].X;
 				A_MATRIX[i][FRAME_MATRX_SIZE][j].Y -= A_MATRIX[0][FRAME_MATRX_SIZE][j].Y;
@@ -692,7 +694,7 @@ int main(int argc, char* argv[])
 	if(CONTROLS.USE_3B_CHEBY && PAIR_TRIPLETS[0].NBINS.X>0) // Set the 3b-population-histogram based constraints 
 	{
 		if ( RANK == 0 ) cout << "Setting constraints based on 3b-population histogram constraints " << endl << endl;
-		ZCalc_3B_Cheby_Deriv_HIST(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, A_MATRIX, PAIR_MAP, TRIAD_MAP);	
+		ZCalc_3B_Cheby_Deriv_HIST(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, A_MATRIX, PAIR_MAP);	
 	}
 	
 	
@@ -750,7 +752,7 @@ int main(int argc, char* argv[])
 	for(int N= istart ; N <= iend ;N++)
     {
     
-		for(int a=0;a<A_MATRIX[N].size();a++)
+		 for(int a=0;a< (int) A_MATRIX[N].size();a++)
 		{	
 			// Check if we need to exclude some tensor data from the A and b text files.
 			if((CONTROLS.FIT_STRESS  || CONTROLS.FIT_STRESS_ALL) && N >= CONTROLS.NSTRESS)
@@ -767,7 +769,7 @@ int main(int argc, char* argv[])
 				fileA << A_MATRIX[N][a][n].X  << "   ";
 			  
 			if ( CONTROLS.FIT_COUL ) 
-				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
+				for(unsigned int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
 					fileA << COULOMB_FORCES[N][i][a].X << "   ";
 
 			if ( CONTROLS.FIT_POVER ) 
@@ -781,7 +783,7 @@ int main(int argc, char* argv[])
 				fileA << A_MATRIX[N][a][n].Y  << "   ";
 			  
 			if ( CONTROLS.FIT_COUL ) 
-				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
+				for(unsigned int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
 					fileA << COULOMB_FORCES[N][i][a].Y << "   ";
 			  
 			if ( CONTROLS.FIT_POVER ) 
@@ -796,7 +798,7 @@ int main(int argc, char* argv[])
 				fileA << A_MATRIX[N][a][n].Z  << "   ";
 			  
 			if ( CONTROLS.FIT_COUL ) 
-				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
+				for(unsigned int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
 					fileA << COULOMB_FORCES[N][i][a].Z << "   ";
 			  
 			if ( CONTROLS.FIT_POVER ) 
@@ -882,14 +884,14 @@ int main(int argc, char* argv[])
 		  && CHARGE_CONSTRAINTS.size()>0 
 		  && RANK == NPROCS - 1) 
 	{
-		for(int i=0; i<CHARGE_CONSTRAINTS.size(); i++)
+		for(unsigned int i=0; i<CHARGE_CONSTRAINTS.size(); i++)
 		{
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << "0.0 ";
 			
-			for(int j=0; j<ATOM_PAIRS.size(); j++)
-				for(int k=0; k<CHARGE_CONSTRAINTS.size()+1; k++) // +1 because we n_constr = npairs-1
-					if(CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX[k] == j)
+			for(unsigned int j=0; j<ATOM_PAIRS.size(); j++)
+				for(unsigned int k=0; k<CHARGE_CONSTRAINTS.size()+1; k++) // +1 because we n_constr = npairs-1
+					if(CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX[k] == (int) j)
 						fileA << CHARGE_CONSTRAINTS[i].CONSTRAINTS[k] << " ";
 			
 			if ( CONTROLS.FIT_POVER ) 
@@ -946,7 +948,7 @@ int main(int argc, char* argv[])
 		header << "FITCOUL: false" << endl;
 	
 	CONTROLS.USE_POVER = false;
-	for(int i=0; i<ATOM_PAIRS.size(); i++)
+	for(unsigned int i=0; i<ATOM_PAIRS.size(); i++)
 		if(ATOM_PAIRS[i].USE_OVRPRMS)
 			CONTROLS.USE_POVER = true;
 	
@@ -991,7 +993,6 @@ int main(int argc, char* argv[])
 			header << i << "		" << ATOM_PAIRS[i].ATM1TYP << "		" << ATOM_PAIRS[i].ATM1CHG << "		" << ATOM_PAIRS[i].ATM1MAS << endl;		
 	}
 	
-	bool PRINT_OVR = false;
 	int NPAIR =  ATOM_PAIRS.size();	
 	
 	header << endl << "ATOM PAIRS: " << NPAIR << endl << endl;
@@ -1078,7 +1079,7 @@ int main(int argc, char* argv[])
 	
 	int FOUND_SPECIAL = 0;
 
-	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+	for(unsigned int i=0; i<PAIR_TRIPLETS.size(); i++)
 	{
 		if(PAIR_TRIPLETS[i].S_MINIM_3B.X >= 0)
 			FOUND_SPECIAL++;
@@ -1088,7 +1089,7 @@ int main(int argc, char* argv[])
 	{
 		header << endl << "SPECIAL 3B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
-		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+		for(unsigned int i=0; i<PAIR_TRIPLETS.size(); i++)
 			if(PAIR_TRIPLETS[i].S_MINIM_3B.X >= 0)
 				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR1 << " " 
@@ -1102,7 +1103,7 @@ int main(int argc, char* argv[])
 		
 	FOUND_SPECIAL = 0;
 	
-	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+	for(unsigned int i=0; i<PAIR_TRIPLETS.size(); i++)
 		if(PAIR_TRIPLETS[i].S_MAXIM_3B.X >= 0)
 			FOUND_SPECIAL++;
 	
@@ -1110,7 +1111,7 @@ int main(int argc, char* argv[])
 	{
 		header << endl << "SPECIAL 3B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
-		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+		for(unsigned int i=0; i<PAIR_TRIPLETS.size(); i++)
 			if(PAIR_TRIPLETS[i].S_MAXIM_3B.X >= 0)
 				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR1 << " " 
@@ -1129,14 +1130,14 @@ int main(int argc, char* argv[])
 	{
 		header << endl << "ATOM PAIR TRIPLETS: " << PAIR_TRIPLETS.size() << endl << endl;	
 
-		for(int i=0;i<PAIR_TRIPLETS.size(); i++)
+		for(unsigned int i=0;i<PAIR_TRIPLETS.size(); i++)
 		{
 			header << "" << PAIR_TRIPLETS[i].TRIPINDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << ": ";
 			header << PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS << " parameters, " << PAIR_TRIPLETS[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
 			header << "     index  |  powers  |  equiv index  |  param index  " << endl;
 			header << "   ----------------------------------------------------" << endl;	
 
-			for(int j=0; j<PAIR_TRIPLETS[i].ALLOWED_POWERS.size(); j++)
+			for(unsigned int j=0; j<PAIR_TRIPLETS[i].ALLOWED_POWERS.size(); j++)
 			{
 				header << "      " << setw(6) << fixed << left << j << " ";
 				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X  << " ";
@@ -1628,7 +1629,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			NTRIP = factorial(CONTROLS.NATMTYP+3-1)/factorial(3)/factorial(CONTROLS.NATMTYP-1);
 			
-			for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+			for(unsigned int i=0; i<PAIR_TRIPLETS.size(); i++)
 				PAIR_TRIPLETS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;
 			
 			// Account for excluded types:
@@ -1768,7 +1769,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 					TEMP_STR = ATOM_PAIRS[i].ATM1TYP;
 					TEMP_STR.append(ATOM_PAIRS[j].ATM1TYP);
 					
-					for(int k=0;k<ATOM_PAIRS.size(); k++)
+					for(unsigned int k=0;k<ATOM_PAIRS.size(); k++)
 					{
 						if((ATOM_PAIRS[i].ATM1TYP == ATOM_PAIRS[k].ATM1TYP && ATOM_PAIRS[j].ATM1TYP == ATOM_PAIRS[k].ATM2TYP)
 						 ||(ATOM_PAIRS[j].ATM1TYP == ATOM_PAIRS[k].ATM1TYP && ATOM_PAIRS[i].ATM1TYP == ATOM_PAIRS[k].ATM2TYP))
@@ -1845,15 +1846,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				vector<XYZ_INT> STORED_SORTED_POWERS;//(CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER);		// Make this the max possible size... it will be destroyed later anyway.
 			
 				int TOP, BOT;
-				int ITEMS = -1; 
 			
 				bool STORED = false;
 				int  STORED_IDX;
-				int  RUNNING_IDX = 0;
-			
+
 				for(int i=0; i<NTRIP; i++)
 				{
-					ITEMS = 0;
 					vector<int> STORED_SORTED_POWERS_EQVS;
 					
 					for(int pair1_pow=0; pair1_pow<CONTROLS.CHEBY_3B_ORDER; pair1_pow++)
@@ -1922,7 +1920,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 									
 										STORED = false;
 									
-										for(int j=0; j<STORED_SORTED_POWERS.size(); j++)
+										for(unsigned int j=0; j<STORED_SORTED_POWERS.size(); j++)
 										{
 											if( (STORED_SORTED_POWERS[j].X == SORTED_POWERS.X) &&  (STORED_SORTED_POWERS[j].Y == SORTED_POWERS.Y) &&  (STORED_SORTED_POWERS[j].Z == SORTED_POWERS.Z))
 											{
@@ -1995,7 +1993,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 									
 										STORED = false;
 									
-										for(int j=0; j<STORED_SORTED_POWERS.size(); j++)
+										for(unsigned int j=0; j<STORED_SORTED_POWERS.size(); j++)
 										{
 											if( (STORED_SORTED_POWERS[j].X == SORTED_POWERS.X) &&  (STORED_SORTED_POWERS[j].Y == SORTED_POWERS.Y) &&  (STORED_SORTED_POWERS[j].Z == SORTED_POWERS.Z))
 											{
@@ -2038,11 +2036,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 					int  USE_SET = 0;
 					int  MAX_SET = 0;
 					
-					for(int set1=1; set1<PAIR_TRIPLETS[i].EQUIV_INDICIES.size(); set1++)
+					for(unsigned int set1=1; set1<PAIR_TRIPLETS[i].EQUIV_INDICIES.size(); set1++)
 					{
 						FOUND_EQV = false;
 						
-						for(int set2=0; set2<set1; set2++)
+						for(unsigned int set2=0; set2<set1; set2++)
 						{
 							if(PAIR_TRIPLETS[i].EQUIV_INDICIES[set1] == PAIR_TRIPLETS[i].EQUIV_INDICIES[set2])
 							{
@@ -2100,13 +2098,19 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 						
 							for(int m=0; m<NTRIP; m++)
 							{
-								if ((TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR3) )
-									
+								if (
+									((TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR3) ) 
+									 ||
+									 ((TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR3)) 
+									 ||
+									 ((TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR3)) 
+									 ||
+									 ((TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR3)) 
+									 ||
+									 ((TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR3)) 
+									 ||
+									 ((TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR3)) 
+									)
 								{
 									TEMP_STR = TEMP_STR_A;
 									TEMP_STR.append(TEMP_STR_B);	
@@ -2134,13 +2138,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 
 				TEMP_INT = NTRIP;
 				vector<int>EXCL_IDX;
-				bool FOUND = false;
 				map<string, int>::iterator it2, it2a,itrem;
 				map<string, int>::iterator it, ita, itb;
 				ita = TRIAD_MAP.begin();
 				itb = TRIAD_MAP.end();
 				advance(itb,-1);
-				int TARGET;
 				
 /*				
 				//	Sanity check	
@@ -2157,7 +2159,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				for (unsigned j = EXCLUDE_3B.size(); j-- > 0; ) // Since we're popping off by index, iterate over vector (ascending sorted) in reverse
 					PAIR_TRIPLETS.erase (PAIR_TRIPLETS.begin() + TRIAD_MAP[EXCLUDE_3B[j]]);
 				
-				for(int j=0; j<EXCLUDE_3B.size(); j++)
+				for(unsigned int j=0; j<EXCLUDE_3B.size(); j++)
 				{
 					EXCL_IDX.push_back(TRIAD_MAP[EXCLUDE_3B[j]]);
 
@@ -2185,7 +2187,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				
 */
 								
-				for(int i=0; i<POPPED.size(); i++)
+				for(unsigned int i=0; i<POPPED.size(); i++)
 				{
 					for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
 					{
@@ -2244,7 +2246,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 					cout << "	The following unique triplets of pair types and thier allowed pair polynomial powers have been identified:" << endl;
 					cout << "	Note: The following types have been removed, if present: " << endl;
 					
-					for(int i=0;i<EXCLUDE_3B.size(); i++)
+					for(unsigned int i=0;i<EXCLUDE_3B.size(); i++)
 						cout << "		" << EXCLUDE_3B[i] << endl;
 					cout << "	" << endl;
 					for(int i=0;i<NTRIP; i++)
@@ -2254,7 +2256,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 						cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
 						cout << "		   ----------------------------------------------------" << endl;					
 					
-						for(int j=0; j<PAIR_TRIPLETS[i].ALLOWED_POWERS.size(); j++)
+						for(unsigned int j=0; j<PAIR_TRIPLETS[i].ALLOWED_POWERS.size(); j++)
 						{
 							//						cout << "		   " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X << " " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Y << " " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Z << endl;		
 						 
@@ -2788,7 +2790,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 		{
 			cin >> TEMP_TYPE;
 			
-			for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+			for(unsigned int i=0; i<PAIR_TRIPLETS.size(); i++)
 				PAIR_TRIPLETS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
 			
 			#if VERBOSITY == 1
@@ -2813,7 +2815,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				
 				PAIR_TRIPLETS[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
 
-				for(int i=1; i<PAIR_TRIPLETS.size(); i++)
+				for(unsigned int i=1; i<PAIR_TRIPLETS.size(); i++)
 				{
 					// Copy all class elements
 					PAIR_TRIPLETS[i].FORCE_CUTOFF = PAIR_TRIPLETS[0].FORCE_CUTOFF ;
@@ -2890,7 +2892,7 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 		{
 			if ( RANK == 0 ) cout << "	Minimum distances between atoms triplet pairs: (Angstr.)" << endl;
 			
-			for (int k=0; k<PAIR_TRIPLETS.size(); k++) 
+			for (unsigned int k=0; k<PAIR_TRIPLETS.size(); k++) 
 			{
 				XYZ sum = {0.0, 0.0, 0.0} ;
 #ifdef USE_MPI
@@ -2904,19 +2906,19 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 											 << PAIR_TRIPLETS[k].ATMPAIR1    << " " 
 											 << PAIR_TRIPLETS[k].ATMPAIR2    << " " 
 											 << PAIR_TRIPLETS[k].ATMPAIR3    << " "
-											 /* 
 											 << sum.X << " " 
 											 << sum.Y << " " 
 											 << sum.Z << endl;
-											 */
+				/**  Report minimum across all processes in sum variable (LEF)
 											 << PAIR_TRIPLETS[k].MIN_FOUND.X << " " 
 											 << PAIR_TRIPLETS[k].MIN_FOUND.Y << " " 
 											 << PAIR_TRIPLETS[k].MIN_FOUND.Z << endl;
+				**/
 			
 			}
 			if ( RANK == 0 ) cout << "	Total number of configurations contributing to each triplet type:" << endl;
 		
-			for (int k=0; k<PAIR_TRIPLETS.size(); k++)
+			for (unsigned int k=0; k<PAIR_TRIPLETS.size(); k++)
 			{
 				int sum = 0 ;
 #ifdef USE_MPI

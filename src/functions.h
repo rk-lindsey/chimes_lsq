@@ -197,7 +197,7 @@ struct JOB_CONTROL
 	string	CHEBY_TYPE;			// How will distance be transformed?
 	string	INFILE;				// Input trajectory file
 	
-	JOB_CONTROL():N_LAYERS(0), WRAP_COORDS(false),IF_SUBTRACT_COORD(false),IF_SUBTRACT_COUL(false),FIT_COUL(false),USE_PARTIAL_CHARGES(false),COUL_CONSV(false),FIT_POVER(false),USE_3B_CHEBY(false),TOT_SNUM(0){}
+	JOB_CONTROL() ;  // Got rid of in-line constructor to eliminate g++ warnings.
 };
 
 struct XYZ
@@ -301,8 +301,8 @@ struct PAIRS	// NEEDS UPDATING
 	XYZ NBINS;				// Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
 
 	FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
-	
-	PAIRS():OVRPRMS(5),N_CFG_CONTRIB(0){}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
+
+	PAIRS() ; // Use explicit constructor to avoid g++ warnings. (LEF)
 };
 
 struct TRIPLETS
@@ -395,9 +395,8 @@ struct PES_PLOTS
 	vector<string> 	SEARCH_STRING_2B;
 	vector<XYZ_INT>	IJ_IK_JK_TYPE;
 		
-	
-	PES_PLOTS():N_PLOTS(0), N_SCAN(0), INCLUDE_2B(0), DO_4D(1){}
-		
+
+	PES_PLOTS() ;
 };
 
 struct CHARGE_CONSTRAINT
@@ -584,9 +583,9 @@ class NEIGHBORS
 		double SAFETY;                 		// Safety factor in calculating neighbors.
 		
 		void FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);		// Updates ghost atoms based on pbc-wrapped real atoms
-		void DO_UPDATE_SMALL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+		void DO_UPDATE_SMALL (FRAME & SYSTEM);	// Builds and/or updates neighbor list
 		void DO_UPDATE_BIG   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
-		void UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) ;  // Update 3-Body interaction list.
+		void UPDATE_3B_INTERACTION(FRAME & SYSTEM) ;  // Update 3-Body interaction list.
 		
 	public:
 
@@ -721,7 +720,10 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 //
 //////////////////////////////////////////
 
-void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> & PAIR_TRIPLETS, FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
+void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> & PAIR_TRIPLETS, 
+						FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, 
+						vector<vector <XYZ > > & FRAME_COULOMB_FORCES, bool if_3b_cheby, 
+						map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
 void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
 
@@ -739,8 +741,10 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 //
 //////////////////////////////////////////
 
-void   ZCalc                    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
-void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
+void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+			  vector<TRIP_FF> & FF_3BODY, vector<int> INT_PAIR_MAP, vector<int> INT_TRIAD_MAP,
+			  NEIGHBORS & NEIGHBOR_LIST) ;
+void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP) ;
 double get_dist                 (const FRAME & SYSTEM, XYZ & RAB, int a1, int a2);
 
 //////////////////////////////////////////
@@ -752,8 +756,9 @@ double get_dist                 (const FRAME & SYSTEM, XYZ & RAB, int a1, int a2
 void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_CHARGES, bool INCLUDE_PENALTY, string FILE_TAG);
 void Print_3B_Cheby(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk);
 void Print_3B_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
-void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
-
+void Print_Ternary_Cheby_Scan(vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, 
+										map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, 
+										string & ATM_TYP_3, int ij, int ik, int jk) ;
 
 //////////////////////////////////////////
 //
@@ -769,11 +774,14 @@ void SORT_THREE_DESCEND(int & a, int & b, int & c);
 
 void enable_fp_exceptions();
 void exit_run(int val);
-void      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-									  vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, 
-									  NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
+void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+								vector<TRIP_FF> & FF_3BODY, 
+								vector<int> &INT_PAIR_MAP, vector<int> &INT_TRIAD_MAP,
+								NEIGHBORS & NEIGHBOR_LIST,
+								double & PE_1, double & PE_2, double & dV) ;
 void numerical_virial(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-							 vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, 
-							 map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST,double PE_1[3]) ;
+							 vector<TRIP_FF> & FF_3BODY, 
+							 vector<int> & INT_PAIR_MAP, vector<int> & INT_TRIAD_MAP,
+							 NEIGHBORS & NEIGHBOR_LIST,double PE_1[3])  ;
 #endif
 
