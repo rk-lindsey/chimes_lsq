@@ -20,6 +20,15 @@ NUM_THREADS=16
 # SVD regularization factor.
 EPS_FAC=1.0e-5 # 1.0E-5 is the old default value... should match value used in gen test suite script. 
 
+
+if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
+	 source /usr/local/tools/dotkit/init.sh
+	 use ic-17.0.174
+    use mvapich2-intel-2.2
+else
+    module load intel impi
+fi
+
 if [ $# -eq 0 ] 
 then
 JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald' 
