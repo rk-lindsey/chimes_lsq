@@ -9,11 +9,18 @@ NP=16
 #
 ###############################################################
 
-module load intel impi
+#module load intel impi
 
 cd ../src
 rm -rf *o *dSYM house_md
-module load intel impi
+if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
+	 source /usr/local/tools/dotkit/init.sh
+	 use ic-17.0.174
+    use mvapich2-intel-2.2
+else
+    module load intel impi
+fi
+
 make -f Makefile-TS-MD house_md;  
 rm -f ../test_suite-lsq/house_md;  mv house_md  ../test_suite-md/
 cd ../test_suite-md

@@ -1,8 +1,12 @@
-152,158d151
-< 
-< Generating fast maps 
-< 	Pair maps:
-< 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
-< 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
-< 		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
-< 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+31a32
+> 	...Reading velocities from last three fields of atom info lines in xyzf file... 
+53,54c54,55
+< 	Initial velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+< 	Final   velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+---
+> 	Initial velocity center of mass: (    0.0180,    -0.0034,    -0.0117) 
+> 	Final   velocity center of mass: (   -0.0000,     0.0000,     0.0000) 
+159c160
+< RANK: 0 RESET RCUT_PADDING TO: 0.0000000000
+---
+> RANK: 0 RESET RCUT_PADDING TO: 0.0133795956

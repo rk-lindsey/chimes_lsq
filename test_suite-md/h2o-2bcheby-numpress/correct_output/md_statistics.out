@@ -1,5 +1,5 @@
-# Step	Time	Ktot/N	Vtot/N	Etot/N	T	P
-#	(fs)	(kcal/mol)	(kcal/mol)	(kcal/mol)	(K)	(GPa)
+# Step	Time	Ktot/N	Vtot/N	Etot/N	T	P	Econs/N
+#	(fs)	(kcal/mol)	(kcal/mol)	(kcal/mol)	(K)	(GPa)	(kcal/mol)
 10	1.25	3.87998	-55.0448	-51.1648	1315.49	13.1595	-51.1793
 20	2.5	3.70572	-54.8163	-51.1106	1256.41	14.6214	-51.179
 30	3.75	3.79968	-54.814	-51.0143	1288.27	13.2201	-51.1792

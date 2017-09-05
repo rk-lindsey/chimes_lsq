@@ -26,6 +26,7 @@ LSQ_TESTS[3]="h2o-splines"
 #LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
 #LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
 
+LSQ_JOBS="${LSQ_TESTS[@]}"
 
 # Iterate through the tests
 
@@ -37,11 +38,19 @@ echo " "
 cd ../src
 rm -rf *o *dSYM house_md
 
-module load intel
-make -f Makefile-TS-LSQ house_md
-mv house_md ../test_suite-md/house_md-serial
+if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
+	 source /usr/local/tools/dotkit/init.sh
+	 use ic-17.0.174
+    use mvapich2-intel-2.2
+else
+    module load intel impi
+fi
 
-module load intel impi
+
+#make -f Makefile-TS-MD house_md
+#mv house_md ../test_suite-md/house_md-serial
+#module load intel impi
+
 make -f Makefile-TS-MD house_md;  
 rm -f ../test_suite-lsq/house_md;  mv house_md  ../test_suite-md/
 cd ../test_suite-md

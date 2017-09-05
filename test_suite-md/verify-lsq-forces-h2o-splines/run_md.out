@@ -31,7 +31,6 @@ Reading initial coordinates and forces...
 	...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead: force.txt
-	...Ignoring last three fields of atom info lines in xyzf file... 
 	... Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyzf
 
@@ -258,7 +257,7 @@ Force field summary:
 		108 1.0685
 		109 31.9617
 		110 -0.0000
-		111 -0.0000
+		111 0.0000
 
 		pair type...smin...smax...sdelta...
 		HH 0.6000 6.0000 0.1000 
@@ -373,7 +372,7 @@ Force field summary:
 		107 -1.0271
 		108 -0.2236
 		109 -16.1343
-		110 0.0000
+		110 -0.0000
 		111 -0.0000
 
 		pair type...smin...smax...sdelta...

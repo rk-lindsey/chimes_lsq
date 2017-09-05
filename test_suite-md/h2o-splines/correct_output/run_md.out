@@ -522,8 +522,8 @@ Ewald parameters:
 	Number of Ewald K-vectors = 1364
 	K-space accuracy estimate = 0.00000086798168
 
-    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P
-              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
       10      1.25       3.8689001     -48.6747154     -44.8058153          1311.7     14.33727285    -44.8203010
 RANK: 0 UPDATING ON STEP: 16, WITH PADDING: 0.378
       20      2.50       3.7103577     -48.4598609     -44.7495032          1258.0     15.85541458    -44.8180969
@@ -690,3 +690,11 @@ RANK: 0 UPDATING ON STEP: 993, WITH PADDING: 0.612
 END SIMULATION
 	Average temperature over run = 1994.0298 K
 	Average pressure    over run = 13.4310 GPa
+	Pressure from diagonal stress tensors over run: 13.4314
+	Average stress tensor over run: 
+		sigma_xx: 14.1657 GPa
+		sigma_yy: 12.2264 GPa
+		sigma_zz: 13.9020 GPa
+		sigma_xy: -0.0876 GPa
+		sigma_xz: -0.0370 GPa
+		sigma_yz: -1.4987 GPa
