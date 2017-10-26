@@ -9,51 +9,6 @@
 
 using namespace std;
 
-
-JOB_CONTROL::JOB_CONTROL() // Constructor
-{
-	N_LAYERS = 0 ; 
-	WRAP_COORDS = false ;
-	IF_SUBTRACT_COORD = false ;
-	IF_SUBTRACT_COUL = false ;
-	FIT_COUL = false ;
-	USE_PARTIAL_CHARGES = false ;
-	COUL_CONSV = false ;
-	FIT_POVER = false ;
-	USE_3B_CHEBY = false ;
-	TOT_SNUM = 0 ;
-
-	STEP = 0 ;
-	NATMTYP = 0 ;
-	PLOT_PES = false ;
-	COMPARE_FORCE = false ;
-	SUBTRACT_FORCE = false ;
-	REAL_REPLICATES = 0 ;
-	SCALE_SYSTEM_BY = 1.0 ;
-	SELF_CONSIST = false ;
-	INIT_VEL = false ;
-	USE_HOOVER_THRMOSTAT = false ;
-	FREEZE_IDX_START = -1 ;
-	USE_NUMERICAL_PRESS = false ;
-	PRINT_VELOC = false ;
-	RESTART = false ;
-	PRINT_FORCE = false ;
-	PRINT_STRESS = false ;
-	WRAP_COORDS = false ;
-	BUILD = false ;
-	IS_LSQ = false ;
-	FIT_STRESS = false ;
-	FIT_STRESS_ALL = false ;
-	FIT_ENER = false ;
-	CALL_EWALD = false ;
-	USE_POVER = false ;
-	COUL_CONSV = false ;
-	IF_SUBTRACT_COORD = false ;
-	IF_SUBTRACT_COUL = false ;
-	USE_PARTIAL_CHARGES = false ;
-	
-}
-
 NEIGHBORS::NEIGHBORS()		// Constructor 
 {
 	RCUT_PADDING  =  0.3;
@@ -181,20 +136,20 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	FIX_LAYERS(SYSTEM, CONTROLS);
 
 	if ( SYSTEM.ALL_ATOMS < 200 ) 
-		DO_UPDATE_SMALL(SYSTEM) ;
+		DO_UPDATE_SMALL(SYSTEM, CONTROLS);
 	else 
 		DO_UPDATE_BIG(SYSTEM, CONTROLS);
 
 	if ( CONTROLS.USE_3B_CHEBY ) 
-		UPDATE_3B_INTERACTION(SYSTEM) ;
+	  UPDATE_3B_INTERACTION(SYSTEM, CONTROLS) ;
 }	
-
-void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM)
+void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)	
 {
 
 	XYZ RAB;
+	XYZ TMP_BOX;
 	
-	//double MAX = 0;
+	double MAX = 0;
 	double rlen = 0;
 	
 	if(!FIRST_CALL)	// Clear out the second dimension so we can start over again
@@ -240,6 +195,7 @@ void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM)
 
 	FIRST_CALL = false;	
 }
+
 
 void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS) 
 // Order-N Neighbor list update with binning of particles.
@@ -293,6 +249,7 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		if ( BIN_IDX.X < 0 || BIN_IDX.Y < 0 || BIN_IDX.Z < 0 ) 
 		{
 			cout << "Error: negative binning BIN_IDX for atom a1 = " << a1 << endl;
+			cout << "Check box lengths in .xyz* file." << endl;
 			exit(1);
 		}
 		
@@ -457,9 +414,25 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		}
 	}
 }
+void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
+{
+	if(FIRST_CALL || SECOND_CALL)
+		UPDATE_LIST(SYSTEM, CONTROLS);
+	else
+	{
+		DISPLACEMENT += MAX_VEL * CONTROLS.DELTA_T;
+		
+		DO_UPDATE(SYSTEM, CONTROLS);
+	
+		if(RANK == 0)
+			cout << "RANK: " << RANK << " FORCING UPDATING ON STEP: " << CONTROLS.STEP << ", WITH PADDING: " << fixed << setprecision(3) << RCUT_PADDING <<  endl;
+	}
+}
+
+
 
 CONSTRAINT::CONSTRAINT(){}	// Constructor
-CONSTRAINT::~CONSTRAINT(){}	// Destructor
+CONSTRAINT::~CONSTRAINT(){}	// Deconstructor
 
 void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 {
@@ -507,12 +480,7 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	
 	BEREND_KP = TIME_BARO/ Tfs;	// Barostat damping parameter... 
 	BEREND_TAU = TIME / Tfs;	// Thermostat damping parameter
-	BEREND_MU = 0.0 ;
-	BEREND_ANI_MU.X = 0.0 ;
-	BEREND_ANI_MU.Y = 0.0 ;
-	BEREND_ANI_MU.Z = 0.0 ;
-	BEREND_ETA = 0.0 ;
-
+	
 	THERM_POSIT_T = 0;
 	THERM_VELOC_T = 0;
 	THERM_INERT_T = 0;
@@ -528,8 +496,7 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	BAROS_POSIT_0 = 0;
 	BAROS_VELOC_0 = 0;
 	BAROS_FORCE_0 = 0;
-	BAROS_INERT_W = 0 ;
-
+	
 	VOLUME_0 = 0;
 	VOLUME_T = 0;
 	
@@ -688,9 +655,9 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	{
 		VOLUME_0 = SYSTEM.BOXDIM.X*SYSTEM.BOXDIM.Y*SYSTEM.BOXDIM.Z;
 		
-		BEREND_ANI_MU.X = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS[0])/GPa,1.0/3.0);
-		BEREND_ANI_MU.Y = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS[1])/GPa,1.0/3.0);
-		BEREND_ANI_MU.Z = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS[2])/GPa,1.0/3.0);
+		BEREND_ANI_MU.X = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS.X)/GPa,1.0/3.0);
+		BEREND_ANI_MU.Y = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS.Y)/GPa,1.0/3.0);
+		BEREND_ANI_MU.Z = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS.Z)/GPa,1.0/3.0);
 		
 	
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)	
@@ -776,12 +743,7 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	///////////////////////////////////////////////
 	// Refresh ghost atom positions
 	///////////////////////////////////////////////
-	UPDATE_GHOST(SYSTEM, CONTROLS) ;
-}
 
-void CONSTRAINT::UPDATE_GHOST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
-// Update the primitive and ghost atom positions contained in SYSTEM.ALL_COORDS.
-{
 	// Set the first NATOMS of ghost atoms to have the coordinates of the "real" coords
 
 	for (int a=0; a<SYSTEM.ATOMS; a++) 
@@ -832,6 +794,7 @@ void CONSTRAINT::UPDATE_GHOST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			exit(1) ;
 		}
 	}	
+		
 }
 
 void CONSTRAINT::UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
@@ -894,7 +857,6 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 
 	static double dV = CONTROLS.DELTA_T*VOLUME_T; //(VOLUME_T-VOLUME_0);
 	static double dP = (SYSTEM.PRESSURE - CONTROLS.PRESSURE)/GPa;
-	double KTensor[6] ;
 
 	if(STYLE=="NVE" || STYLE=="NVT-SCALE" || STYLE == "NPT-BEREND" || STYLE == "NVT-BEREND" || STYLE=="NPT-BEREND-ANISO")
 	{
@@ -945,12 +907,12 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 	{
 		if(STYLE=="NVT-MTK")	
 		{
-			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS, KTensor);
+			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS);
 			THERM_INERT_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
 		}
 		else // NPT-MTK
 		{	
-			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS, KTensor);	
+			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS);	
 			
 			BAROS_FORCE_T = 3.0/(N_DOF) * 2.0 * KIN_ENER + dV*dP;
 			THERM_INERT_T = ( 2.0 * KIN_ENER + BAROS_INERT_W * BAROS_VELOC_T * BAROS_VELOC_T - (N_DOF+1)*(Kb * CONTROLS.TEMPERATURE) ) / (THERM_INERT_Q);
@@ -1029,7 +991,7 @@ void CONSTRAINT::SCALE_VELOCITIES(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 	if (RANK==0)
 	{
-		cout << "Average temperature     = " << fixed << setprecision(2) << SYSTEM.AVG_TEMPERATURE << endl;
+		cout << "Average temperature     = " << SYSTEM.AVG_TEMPERATURE << endl;
 		cout << "Velocity scaling factor = " << vscale << endl;	
 	}
 
@@ -1045,10 +1007,8 @@ void CONSTRAINT::SCALE_VELOCITIES(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 void CONSTRAINT::UPDATE_TEMPERATURE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
-	double Ktot;
-	double KTensor[6] ;
-
-	Ktot = kinetic_energy(SYSTEM, CONTROLS, KTensor);	//calculate kinetic energy for scaling:
+	static double Ktot;
+	Ktot = kinetic_energy(SYSTEM, CONTROLS);	//calculate kinetic energy for scaling:
 
 	SYSTEM.TEMPERATURE = 2.0 * Ktot / (N_DOF * Kb);
 
@@ -1085,7 +1045,7 @@ double CONSTRAINT::CONSERVED_QUANT (FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	
 }
 
-void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM)
+void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) 
 // Build a list of all 3-body interactions.  This "flat" list parallelizes much
 // more efficiently than a nested neighbor list loop.
 {
@@ -1095,9 +1055,9 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM)
 	LIST_3B_INT.clear() ;
 	for ( int i = 0 ; i < SYSTEM.ATOMS ; i++ ) {
 		int ai = i ;
-		for ( unsigned int j = 0 ; j < LIST_3B[i].size() ; j++ ) {
+		for ( int j = 0 ; j < LIST_3B[i].size() ; j++ ) {
 			int aj = LIST_3B[i][j] ;
-			for ( unsigned int k = 0 ; k < LIST_3B[i].size() ; k++ ) {
+			for ( int k = 0 ; k < LIST_3B[i].size() ; k++ ) {
 				int ak = LIST_3B[i][k] ;
 
 				if ( aj == ak || SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] ) 
@@ -1118,28 +1078,14 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM)
 	}
 }
 
-THERMO_AVG::THERMO_AVG()
-{
-	TEMP_SUM = 0.0 ;
-	PRESS_SUM = 0.0 ;
-
-	for ( int i = 0 ; i < 6 ; i++ ) 
-	{
-		STRESS_TENSOR_SUM[i] = 0.0 ;
-	}
-}
-
-
 void THERMO_AVG::WRITE(ofstream &fout)
 // Write out thermodynamic average properties.
 {
 	fout << TEMP_SUM << endl ;
 	fout << PRESS_SUM << endl ;
-
-	for ( int i = 0 ; i < 6 ; i++ ) 
-	{
-		fout << STRESS_TENSOR_SUM[i] << endl ;
-	}
+	fout << STRESS_TENSOR_SUM.X << endl ;
+	fout << STRESS_TENSOR_SUM.Y << endl ;
+	fout << STRESS_TENSOR_SUM.Z << endl ;
 }
 
 
@@ -1148,26 +1094,9 @@ void THERMO_AVG::READ(ifstream &fin)
 {
 	fin >> TEMP_SUM  ;
 	fin >> PRESS_SUM  ;
-
-	for ( int i = 0 ; i < 6 ; i++ ) 
-	{	
-		fin >> STRESS_TENSOR_SUM[i] ;
-	}
+	fin >> STRESS_TENSOR_SUM.X  ;
+	fin >> STRESS_TENSOR_SUM.Y  ;
+	fin >> STRESS_TENSOR_SUM.Z  ;
 }
 
 
-PAIRS::PAIRS(): OVRPRMS(5)
-{
-	//OVRPRMS(5) ;
-	N_CFG_CONTRIB = 0 ;
-}
-
-PES_PLOTS::PES_PLOTS()
-{
-	N_PLOTS = 0 ;
-	N_SCAN = 0 ;
-	INCLUDE_2B = 0 ;
-	DO_4D = 1 ;
-}
-
-		

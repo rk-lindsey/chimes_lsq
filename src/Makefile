@@ -4,18 +4,15 @@
 
 # For linking to LAMMPS:
 
+# I get strange behavior when I use intel/mvapich/mpicxx... I use intel/impi/mpiicc... check which other edits were made (Besides restart and lsq)
+
+
 LINK2LMPS=no
 LAMMPSDIR=/usr/gapps/polymers/lammps_borax/
 
 # Compiling flags
 
 MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0 
-
-# Warnings for GCC
-WARNINGS=-Wall -Wunused-parameters
-
-# Warnings for ICC
-WARNINGS=-Wall
 
 # Other options:
 #
@@ -40,12 +37,12 @@ WARNINGS=-Wall
 #CXX=mpicxx  -std=c++11  -g -pg -D USE_MPI 
 
 #CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-CXX=mpicc  -std=c++11  -g -Wall -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-#CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicxx -std=c++11 -g -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=icc -g				# Serial, for debugging
 #CXX=icc -O3
-#CXX=g++ -std=c++11 -g       	# Serial, let compiler optimize to a very high level (see also -O2)
+#CXX=g++ -std=c++11 -g			# Serial, let compiler optimize to a very high level (see also -O2)
 #CXX=g++ -std=c++11 -O3			# Serial, let compiler optimize to a very high level (see also -O2)
 #
 # Below: Other debugging/optimiazation options
@@ -63,7 +60,7 @@ CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C
 CXX_LSQ_HEADER=functions.h Fcut.h
 
 house_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
-	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) $(WARNINGS) -o house_lsq
+	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq
 
 clean_lsq:
 	/bin/rm -f splines_ls.o functions.o Ewald.o
@@ -90,9 +87,9 @@ LIBS=/usr/lib64/libfftw3.a
 
 house_md: $(CXX_MD_SRC) $(CXX_MD_HEADER)
 ifeq ($(LINK2LMPS), yes)
-	$(CXX) $(FLAGLMP) $(CXX_MD_SRC) $(LAMMPS_LIB) $(LMP_COUPLE_LIB) $(LIBS) $(WARNINGS) -o house_md
+	$(CXX) $(FLAGLMP) $(CXX_MD_SRC) $(LAMMPS_LIB) $(LMP_COUPLE_LIB) $(LIBS) -o house_md
 else
-	$(CXX) $(CXX_MD_SRC) $(WARNINGS) -o house_md
+	$(CXX) $(CXX_MD_SRC) -o house_md
 endif
 
 clean_md:

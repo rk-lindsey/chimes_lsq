@@ -44,18 +44,18 @@ using namespace std;
 // Define function headers -- general
 
 static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
+void      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+									  vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, 
+									  NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
 
 // Define function headers -- MPI
 
-#ifdef USE_MPI
-static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double stress_tensor[6]) ;
+static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
 static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
-#endif
-
 static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, 
 							  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
 static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL,
-										  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST)  ;
+										  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
 
 // Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
 
@@ -105,15 +105,14 @@ int RANK;		// Index of current processor
 	vector<PAIR_FF> FF_2BODY;			// Holds all 2-body parameters
 	vector<TRIP_FF> FF_3BODY; 			// Holds all 3-body parameters
 	NEIGHBORS		NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
-
-	// Define my new integer maps
-	
-	vector<int>	INT_PAIR_MAP;
-	vector<int>	INT_TRIAD_MAP;	
 	
 #endif
 	
 	
+	// Define my new integer maps
+	
+	vector<int>	INT_PAIR_MAP;
+	vector<int>	INT_TRIAD_MAP;	
 	
 
 ////////////////////////////////////////////////////////////
@@ -125,11 +124,8 @@ int RANK;		// Index of current processor
 ////////////////////////////////////////////////////////////
 
 
-#ifdef USE_MPI
+
 int main(int argc, char* argv[])
-#else
-int main()
-#endif
 {
 	// Set up MPI if requested, otherwise, run in serial
 	
@@ -160,18 +156,13 @@ int main()
 	FRAME      SYSTEM;					// Declare the data object that will hold the system coordinates, velocities, accelrations, etc.
 	CONSTRAINT ENSEMBLE_CONTROL;		// Declare the class that will handle integration/constraints
 	THERMO_AVG AVG_DATA ;
-
+	
 	// These are data objects that are normally defined locally, but need to be global for LAMMPS linking
 	
 	#if not defined(LINK_LAMMPS)
 	
 		JOB_CONTROL CONTROLS;				// Declare the data object that will hold the main simulation control variables
 		NEIGHBORS  NEIGHBOR_LIST;			// Declare the class that will handle the neighbor list
-
-		// Define my new integer maps
-	
-		vector<int>	INT_PAIR_MAP;
-		vector<int>	INT_TRIAD_MAP;	
 	
 		// Data objects to hold coefficients for different force field types, and for FF printing (if requested)
 
@@ -194,7 +185,6 @@ int main()
 	#endif 
 
 	double Ktot;
-	double KTensor[6] ;
 	double Vol;
     SYSTEM.AVG_TEMPERATURE = 0.0;
 	
@@ -203,6 +193,8 @@ int main()
     double dens_mol;
     double dens_mass;
 	
+	double vscale;
+
 	bool   	FOUND_END = false;
 	string 	LINE;
 	string  TEMP_STR;
@@ -223,11 +215,11 @@ int main()
 	int CURR_ATOM = -1;
 	
 	string FIRST_EXT;
+	XYZ_INT TEMP_LAYER;
 
 	ofstream GENFILE;			// Holds dftbgen info output.. whatever that is
 	ifstream CMPR_FORCEFILE;	// Holds the forces that were read in for comparison purposes
 	ofstream OUT_FORCEFILE;		// Holds the forces that are computed and are to be printed out
-	ofstream OUT_XYZF ;        // Print out positions and forces in same format as for force matching.
 	ofstream OUT_FORCELABL;		// Holds the forces that are computed and are to be printed out.. has atom labels
 	ofstream OUT_VELOCFILE;		// Holds the velocities that are computed and are to be printed out
 	ofstream STATISTICS;		// Holds a copy of the "Step      Time          Ktot/N          Vtot/N ..." part of the output file.. uninterrupted by warnings
@@ -263,7 +255,6 @@ int main()
 	{
 		OUT_FORCEFILE.open("forceout.txt");	
 		OUT_FORCELABL.open("forceout-labeled.txt");		
-		OUT_XYZF.open("forceout.xyzf") ;
 	}
 
 	// velocity
@@ -279,7 +270,7 @@ int main()
 	{
 		SYSTEM.ATOMS = 0;
 	
-		for (unsigned int i=0; i<CONTROLS.COORD_FILE.size(); i++)
+		for (int i=0; i<CONTROLS.COORD_FILE.size(); i++)
 		{
 			COORDFILE.open(CONTROLS.COORD_FILE[i].data());
 			if(!COORDFILE.is_open())
@@ -434,7 +425,7 @@ int main()
 			{
 				for (int k=0; k<GRIDPOINTS; k++)
 				{
-					for (unsigned int c=0; c<BASE.size(); c++)
+					for (int c=0; c<BASE.size(); c++)
 					{
 						TMP.X = BASE[c].X + i*GRIDSPACE;
 						TMP.Y = BASE[c].Y + j*GRIDSPACE;
@@ -489,7 +480,7 @@ int main()
 	}	
 	else
 	{
-		for (unsigned int i=0; i<CONTROLS.COORD_FILE.size(); i++)
+		for (int i=0; i<CONTROLS.COORD_FILE.size(); i++)
 		{
 			COORDFILE.open(CONTROLS.COORD_FILE[i].data());
 	
@@ -497,7 +488,7 @@ int main()
 			COORDFILE >> TMP_BOX.X >> TMP_BOX.Y >> TMP_BOX.Z;
 
 	        if(CONTROLS.FIT_STRESS)                                                                                           
-				  COORDFILE >>  SYSTEM.PRESSURE_TENSORS[0] >>  SYSTEM.PRESSURE_TENSORS[1] >>  SYSTEM.PRESSURE_TENSORS[2] ;      
+	                COORDFILE >>  SYSTEM.PRESSURE_TENSORS.X >>  SYSTEM.PRESSURE_TENSORS.Y >>  SYSTEM.PRESSURE_TENSORS.Z;      
 	        if(CONTROLS.FIT_ENER)                                                                                             
 	                COORDFILE >> SYSTEM.QM_POT_ENER;   
 
@@ -545,7 +536,7 @@ int main()
 		    	cout << "	...Read box dimensions: " << TMP_BOX.X << " " << TMP_BOX.Y << " " << TMP_BOX.Z << endl;
 			
 	            if(CONTROLS.FIT_STRESS)
-	                       cout << "       ...Read stress tensors: " << SYSTEM.PRESSURE_TENSORS[0] << " " << SYSTEM.PRESSURE_TENSORS[1] << " " << SYSTEM.PRESSURE_TENSORS[2] << endl;
+	                       cout << "       ...Read stress tensors: " << SYSTEM.PRESSURE_TENSORS.X << " " << SYSTEM.PRESSURE_TENSORS.Y << " " << SYSTEM.PRESSURE_TENSORS.Z << endl;
 	            if(CONTROLS.FIT_ENER)                                                                                                          
 	                       cout << "       ...Read potential energy: " << SYSTEM.QM_POT_ENER << endl;                                             
 			
@@ -596,10 +587,8 @@ int main()
 					if(a==0 && RANK==0)
 						cout << "	...Reading positions, velocities, and forces from a restart file " << endl ;
 
-					STREAM_PARSER >> SYSTEM.VELOCITY[CURR_ATOM].X >> SYSTEM.VELOCITY[CURR_ATOM].Y 
-									  >> SYSTEM.VELOCITY[CURR_ATOM].Z;	
-					STREAM_PARSER >> SYSTEM.ACCEL[CURR_ATOM].X >> SYSTEM.ACCEL[CURR_ATOM].Y 
-									  >> SYSTEM.ACCEL[CURR_ATOM].Z;	
+					STREAM_PARSER >> SYSTEM.VELOCITY[CURR_ATOM].X >> SYSTEM.VELOCITY[CURR_ATOM].Y  >> SYSTEM.VELOCITY[CURR_ATOM].Z;	
+					STREAM_PARSER >> SYSTEM.ACCEL   [CURR_ATOM].X >> SYSTEM.ACCEL   [CURR_ATOM].Y  >> SYSTEM.ACCEL   [CURR_ATOM].Z;	
 				} 
 				else if ( CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE ) // Reading positions from *.xyzf for force testing
 				{	
@@ -668,7 +657,7 @@ int main()
 			}
 		
 			if (RANK==0)
-				cout << "	... Updated simulation box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+				cout << "	...Updated simulation box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
 
 			if ( ! CONTROLS.RESTART ) 
 			{
@@ -744,7 +733,7 @@ int main()
 			TMP_MASS       .resize(NATMTYP);	
 			TMP_SIGN	   .resize(NATMTYP);
 			
-			for(unsigned int i=0; i<TMP_NATOMTYPE.size(); i++)
+			for(int i=0; i<TMP_NATOMTYPE.size(); i++)
 				TMP_NATOMTYPE[i] = 0;
 			
 			if(RANK==0)
@@ -977,7 +966,7 @@ int main()
 	ENSEMBLE_CONTROL.INITIALIZE(CONTROLS.ENSEMBLE, CONTROLS, SYSTEM.ATOMS);
 
 	if ( CONTROLS.RESTART ) 
-		read_restart_params(COORDFILE, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST) ;
+		read_restart_params(COORDFILE, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, SYSTEM) ;
 
 	Vol = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
 
@@ -985,6 +974,9 @@ int main()
 	{
 		// Declare some task-specific variables
 		// Use box Muller to initialize velocities
+		
+		if(RANK == 0)
+			cout << "Initializing velocities via box Muller..." << endl; 
 
 		double x1, x2 , y1 ,y2;
 		double sigma;
@@ -1108,7 +1100,7 @@ int main()
 
 	for(int a=0; a<SYSTEM.ATOMS; a++)
     {
-		for(unsigned int j=0; j<TMP_ATOMTYPE.size(); j++)
+		for(int j=0; j<TMP_ATOMTYPE.size(); j++)
 			if (SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[j])
 					TMP_NATOMTYPE[j]++;
 		
@@ -1267,7 +1259,7 @@ int main()
 					FF_3BODY[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
 					
 					// Copy all class members.
-					for(unsigned int i=1; i<FF_3BODY.size(); i++)
+					for(int i=1; i<FF_3BODY.size(); i++)
 					{
 						FF_3BODY[i].FORCE_CUTOFF = FF_3BODY[0].FORCE_CUTOFF ;
 					}
@@ -2024,7 +2016,7 @@ int main()
 					
 					FF_2BODY[i].POT_PARAMS.resize(FF_2BODY[i].SNUM/2);
 					
-					for(unsigned int j=0; j<FF_2BODY[i].POT_PARAMS.size(); j++) 
+					for(int j=0; j<FF_2BODY[i].POT_PARAMS.size(); j++) 
 						FF_2BODY[i].POT_PARAMS[j] = 0;
 					
 					for(int j=FF_2BODY[i].SNUM/2-2; j>=0; j--) 
@@ -2268,7 +2260,7 @@ int main()
 	
 	// Set the atom charges
 	
-	for(unsigned int a=0; a<FF_2BODY.size(); a++)
+	for(int a=0; a<FF_2BODY.size(); a++)
 	{
 		for(int i=0; i<NATMTYP; i++)
 		{	
@@ -2301,7 +2293,7 @@ int main()
 	
 		cout << "	Interaction parameters for each pair type: " << endl;
 
-		for(unsigned int i=0; i<FF_2BODY.size(); i++)
+		for(int i=0; i<FF_2BODY.size(); i++)
 		{
 		
 			cout << "		pair type...smin...smax...sdelta...";
@@ -2346,14 +2338,14 @@ int main()
 			
 			cout << "	Interaction parameters for each triplet type: " << endl;
 
-			for(unsigned int i=0;i<FF_3BODY.size(); i++)
+			for(int i=0;i<FF_3BODY.size(); i++)
 			{
 				cout << "	" << FF_3BODY[i].TRIPINDX << "  " << FF_3BODY[i].ATMPAIR1 << " " << FF_3BODY[i].ATMPAIR2 << " " << FF_3BODY[i].ATMPAIR3 << ": ";
 				cout << FF_3BODY[i].N_TRUE_ALLOWED_POWERS << " parameters, " << FF_3BODY[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
 				cout << "	     index  |  powers  |  equiv index  |  param index  | parameter " << endl;
 				cout << "	   --------------------------------------------------------------------" << endl;	
 
-				for(unsigned int j=0; j<FF_3BODY[i].ALLOWED_POWERS.size(); j++)
+				for(int j=0; j<FF_3BODY[i].ALLOWED_POWERS.size(); j++)
 				{
 					cout << "	      " << setw(6) << fixed << left << j << " ";
 					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j].X  << " ";
@@ -2373,7 +2365,7 @@ int main()
 		{
 			cout << "	Fitted charges read from parameter file:" << endl;
 		
-			for(unsigned int i=0; i<FF_2BODY.size(); i++)
+			for(int i=0; i<FF_2BODY.size(); i++)
 				cout << "		" << FF_2BODY[i].PRPR_NM << " " << FF_2BODY[i].PAIR_CHRG << " (" << FF_2BODY[i].PAIR_CHRG*ke << ")" << endl;
 			cout << endl;
 		}	
@@ -2384,7 +2376,7 @@ int main()
 		
 			cout << "		pair...pover...r0...p1...p2...lambda6" << endl;
 		
-			for(unsigned int i=0; i<FF_2BODY.size(); i++)
+			for(int i=0; i<FF_2BODY.size(); i++)
 			{
 				cout << "		" << FF_2BODY[i].PRPR_NM << " ";
 				cout << FF_2BODY[i].OVRPRMS[0] << " ";
@@ -2433,6 +2425,9 @@ int main()
 			ofstream SCAN_OUTFILE_3B;
 			ofstream SCAN_OUTFILE_2B;			
 
+			XYZ 	TMP_DISTS;
+			double 	TMP_PES;
+		
 			vector<double> IJ_DIST_3B;
 			vector<double> IK_DIST_3B;
 			vector<double> JK_DIST_3B;
@@ -2493,7 +2488,7 @@ int main()
 						exit_run(0);
 					}
 
-					Print_Ternary_Cheby_Scan(FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk) ;
+					Print_Ternary_Cheby_Scan(CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk, FF_PLOTS, i);	
 				
 					scan_2b_idx++;				
 				}
@@ -2738,16 +2733,22 @@ int main()
 	if (RANK==0)
 		cout << "BEGIN SIMULATION:" << endl;
 	
-	for(CONTROLS.STEP=0;CONTROLS.STEP<CONTROLS.N_MD_STEPS;CONTROLS.STEP++)	//start Big Loop here.
+	double ke; // A temporary variable used when updating thermostatting 
+	
+	int FIRST_STEP = 0;
+	
+	if(CONTROLS.RESTART)
+		FIRST_STEP = CONTROLS.STEP;
+	
+	for(CONTROLS.STEP=FIRST_STEP;CONTROLS.STEP<CONTROLS.N_MD_STEPS;CONTROLS.STEP++)	//start Big Loop here.
 	{
 	  	////////////////////////////////////////////////////////////
 		// Do first half of coordinate/velocity updating
 		////////////////////////////////////////////////////////////		
 
-		if(CONTROLS.STEP>0 && RANK==0 )	
+		if(CONTROLS.STEP>FIRST_STEP && RANK==0)	
 		{
 			ENSEMBLE_CONTROL.UPDATE_COORDS(SYSTEM, CONTROLS);			// Update coordinates and ghost atoms
-
 			
 			if(CONTROLS.WRAP_COORDS)									// Wrap the coordinates:
 			{
@@ -2763,17 +2764,8 @@ int main()
 		}
 		
 		#ifdef USE_MPI
-		sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-
-		// Update ghost atom positions.  Not necessary to communicate ghost atoms via MPI. (LEF)
-		if ( RANK != 0 ) 
-		{
-			ENSEMBLE_CONTROL.UPDATE_GHOST(SYSTEM,CONTROLS) ;
-		}
-
-		// Commented out (LEF). Not necessary.
-		//sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-
+			sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
+			sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
 			MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
 		#endif
 
@@ -2787,14 +2779,14 @@ int main()
 		////////////////////////////////////////////////////////////
 
 		// Do the actual force calculation
-		ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, INT_PAIR_MAP, INT_TRIAD_MAP, NEIGHBOR_LIST);
+		ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
 
 		// FOR MPI:		Synchronize forces, energy, and pressure.
 		
 		#ifdef USE_MPI
-		sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.VIRIAL_CALC) ;
+			sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
 		#endif
-
+		
 		////////////////////////////////////////////////////////////
 		// Print some info on new forces, compare to input forces if
 		// requested
@@ -2803,22 +2795,6 @@ int main()
 
 	  	if ( CONTROLS.PRINT_FORCE && (CONTROLS.STEP+1)%CONTROLS.FREQ_FORCE == 0 && RANK == 0 ) 
 	  	{
-			// xyzf output allows to test force-matching against an MD run.
-			OUT_XYZF.precision(10) ;
-
-			OUT_XYZF << SYSTEM.ATOMS << endl ;
-			OUT_XYZF << scientific << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " " ;
-			if ( CONTROLS.PRINT_STRESS ) 
-			{
-				for ( int i = 0 ; i < 6 ; i++ ) 
-				{
-					OUT_XYZF << scientific << SYSTEM.VIRIAL_CALC[i] * GPa << " " ;
-				}
-			}
-			OUT_XYZF << endl ;
-
-			// convert xyzf forces to Hartree per Bohr
-			double fconv = Hartree*Bohr;
 			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 			{
 				OUT_FORCEFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].X << endl;
@@ -2826,12 +2802,6 @@ int main()
 				OUT_FORCEFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Z << endl;
 				
 				OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].X << endl;
-				OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Y << endl;
-				OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Z << endl;
-
-				OUT_XYZF << SYSTEM.ATOMTYPE[a1] << " " << SYSTEM.COORDS[a1].X << " " << SYSTEM.COORDS[a1].Y << " " << SYSTEM.COORDS[a1].Z << " " ;
-				OUT_XYZF << SYSTEM.ACCEL[a1].X / fconv << " " << SYSTEM.ACCEL[a1].Y / fconv << " " << SYSTEM.ACCEL[a1].Z / fconv << endl ;
-				
 				OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Y << endl;
 				OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Z << endl;
 			}
@@ -2859,9 +2829,9 @@ int main()
 				
 				
 				if(CONTROLS.FIT_STRESS)
-					FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS[0] - SYSTEM.STRESS_TENSORS.X << " " << 
-						    					SYSTEM.PRESSURE_TENSORS[1] - SYSTEM.STRESS_TENSORS.Y << " " << 
-												SYSTEM.PRESSURE_TENSORS[2] - SYSTEM.STRESS_TENSORS.Z;
+					FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS.X - SYSTEM.STRESS_TENSORS.X << " " << 
+						    					SYSTEM.PRESSURE_TENSORS.Y - SYSTEM.STRESS_TENSORS.Y << " " << 
+												SYSTEM.PRESSURE_TENSORS.Z - SYSTEM.STRESS_TENSORS.Z;
 				if(CONTROLS.FIT_ENER)
 					FORCE_SUBTRACTED_OUTPUT << SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER;
 					
@@ -2887,9 +2857,9 @@ int main()
 
 				FORCE_SUBTRACTED_OUTPUT << SYSTEM.ATOMTYPE[a1] << "	"
 										<< SYSTEM.COORDS[a1].X << "	" << SYSTEM.COORDS[a1].Y << "	" << SYSTEM.COORDS[a1].Z << "	"										
-										<< (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(Hartree*Bohr) << "	"
-										<< (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(Hartree*Bohr) << "	"
-										<< (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(Hartree*Bohr) << endl;				
+										<< (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(627.50960803*1.889725989) << "	"
+										<< (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(627.50960803*1.889725989) << "	"
+										<< (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(627.50960803*1.889725989) << endl;				
 			}
 			
 			if(CONTROLS.SUBTRACT_FORCE)
@@ -2906,13 +2876,13 @@ int main()
 			// Print the header for mains simulation output
 			////////////////////////////////////////////////////////////		
 
-			if ( CONTROLS.STEP == 0 ) 
+			if ( CONTROLS.STEP == FIRST_STEP ) 
 			{
 				printf("%8s %9s %15s %15s %15s %15s %15s", "Step", "Time", "Ktot/N", "Vtot/N", "Etot/N", "T", "P");
 				
 				STATISTICS << "# Step	Time	Ktot/N	Vtot/N	Etot/N	T	P";
 	  
-				if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
+				if ( ENSEMBLE_CONTROL.STYLE == "NVE-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
 				{
 					printf(" %15s\n", "Econs/N");
 					STATISTICS << "	Econs/N" << endl;
@@ -2925,7 +2895,7 @@ int main()
 			
 				printf("%8s %9s %15s %15s %15s %15s %15s", " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
 				STATISTICS << "#	(fs)	(kcal/mol)	(kcal/mol)	(kcal/mol)	(K)	(GPa)";
-				if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
+				if ( ENSEMBLE_CONTROL.STYLE == "NVE-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
 				{
 					printf(" %15s\n", "(kcal/mol)");
 					STATISTICS << "	(kcal/mol)" << endl;
@@ -2961,7 +2931,7 @@ int main()
 			// Do second half of coordinate/velocity updating
 			////////////////////////////////////////////////////////////
 
-			if(CONTROLS.STEP>0  && RANK==0)	
+			if(CONTROLS.STEP>FIRST_STEP  && RANK==0)	
 				ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_2(SYSTEM, CONTROLS, NEIGHBOR_LIST);	//update second half of velocity
 			
 
@@ -2979,7 +2949,7 @@ int main()
 			// to allow for thermostat verification
 			////////////////////////////////////////////////////////////
 
-			Ktot = kinetic_energy(SYSTEM, CONTROLS, KTensor);
+			Ktot = kinetic_energy(SYSTEM, CONTROLS);
 
 			ENSEMBLE_CONTROL.UPDATE_TEMPERATURE(SYSTEM, CONTROLS);
 
@@ -3013,8 +2983,7 @@ int main()
 		{
 			double PE_1, PE_2, dV; 
 			
-			numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, 
-									 INT_PAIR_MAP, INT_TRIAD_MAP, NEIGHBOR_LIST, PE_1, PE_2, dV);
+			numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST, PE_1, PE_2, dV);
 			#ifdef USE_MPI
 				MPI_Barrier(MPI_COMM_WORLD);
 				MPI_Allreduce(MPI_IN_PLACE, &PE_1,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
@@ -3024,45 +2993,20 @@ int main()
 			SYSTEM.PRESSURE_XYZ = -1.0*(PE_2 - PE_1)/dV;
 
 		}
-		if ( CONTROLS.USE_NUMERICAL_STRESS ) 
-		{
-			double PE_1[3] ;
-			
-			numerical_virial(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, 
-								  INT_PAIR_MAP, INT_TRIAD_MAP, NEIGHBOR_LIST, PE_1) ;
-			#ifdef USE_MPI
-				MPI_Barrier(MPI_COMM_WORLD);
-				MPI_Allreduce(MPI_IN_PLACE, &PE_1,3,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-			#endif
-			
-			for ( int i = 0 ; i < 3 ; i++ ) {
-				SYSTEM.VIRIAL_CALC[i] = PE_1[i] ;
-			}
-			// Off-diagonal elements of the stress tensor can't be calculated numerically.
-			for ( int i = 3 ; i < 6 ; i++ ) {
-				SYSTEM.VIRIAL_CALC[i] = 0.0 ;
-			}
-
-		}
 		if(RANK==0)
 		{
 
 			SYSTEM.PRESSURE = (SYSTEM.PRESSURE_XYZ + 2.0 * Ktot / (3.0 * Vol)) * GPa;	// GPa = Unit conversion factor to GPa.
 			
 			AVG_DATA.PRESS_SUM += SYSTEM.PRESSURE;
-
-			SYSTEM.PRESSURE_TENSORS[0] = (SYSTEM.VIRIAL_CALC[0] + 2.0 / 3.0 * Ktot / Vol) * GPa;
-			SYSTEM.PRESSURE_TENSORS[1] = (SYSTEM.VIRIAL_CALC[1] + 2.0 / 3.0 * Ktot / Vol) * GPa;
-			SYSTEM.PRESSURE_TENSORS[2] = (SYSTEM.VIRIAL_CALC[2] + 2.0 / 3.0 * Ktot / Vol) * GPa;
-
-			SYSTEM.PRESSURE_TENSORS[3] = SYSTEM.VIRIAL_CALC[3] * GPa;
-			SYSTEM.PRESSURE_TENSORS[4] = SYSTEM.VIRIAL_CALC[4] * GPa;
-			SYSTEM.PRESSURE_TENSORS[5] = SYSTEM.VIRIAL_CALC[5] * GPa;
 			
-			for ( int i = 0 ; i < 6 ; i++ ) 
-			{
-				AVG_DATA.STRESS_TENSOR_SUM[i] += SYSTEM.PRESSURE_TENSORS[i];
-			}
+			SYSTEM.PRESSURE_TENSORS.X = (SYSTEM.PRESSURE_TENSORS_XYZ.X + 2.0 / 3.0 * Ktot / Vol) * GPa;
+			SYSTEM.PRESSURE_TENSORS.Y = (SYSTEM.PRESSURE_TENSORS_XYZ.Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
+			SYSTEM.PRESSURE_TENSORS.Z = (SYSTEM.PRESSURE_TENSORS_XYZ.Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
+				
+			AVG_DATA.STRESS_TENSOR_SUM.X += SYSTEM.PRESSURE_TENSORS.X;
+			AVG_DATA.STRESS_TENSOR_SUM.Y += SYSTEM.PRESSURE_TENSORS.Y;
+			AVG_DATA.STRESS_TENSOR_SUM.Z += SYSTEM.PRESSURE_TENSORS.Z;
 
 		  	////////////////////////////////////////////////////////////
 			// Periodically print simulation output
@@ -3101,13 +3045,7 @@ int main()
 		{
 			#ifdef USE_MPI
 				sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-
-				// Update ghost atom positions.  Not necessary to communicate ghost atoms via MPI. (LEF)
-				if ( RANK != 0 ) 
-				{
-					ENSEMBLE_CONTROL.UPDATE_GHOST(SYSTEM,CONTROLS) ;
-				}
-				//sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
+				sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
 				MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
 			#endif
 		}		
@@ -3230,13 +3168,13 @@ int main()
 			POSCAR << "0.0 " << SYSTEM.BOXDIM.Y << " 0.0" <<  endl;
 			POSCAR << "0.0 0.0 " << SYSTEM.BOXDIM.Z << endl;
 	
-			for(unsigned int i=0; i<TMP_NATOMTYPE.size(); i++)
+			for(int i=0; i<TMP_NATOMTYPE.size(); i++)
 				POSCAR << TMP_NATOMTYPE[i] << " ";
 			POSCAR << endl;
 	
 			POSCAR << "Direct" << endl;
 	
-			for(unsigned int i=0; i<TMP_NATOMTYPE.size(); i++)
+			for(int i=0; i<TMP_NATOMTYPE.size(); i++)
 			{
 				for(int j=0; j<SYSTEM.ATOMS; j++)
 				{
@@ -3298,18 +3236,17 @@ int main()
 		cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
 		cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
 		
-		double Pavg = (AVG_DATA.STRESS_TENSOR_SUM[0] 
-							+ AVG_DATA.STRESS_TENSOR_SUM[1] 
-							+ AVG_DATA.STRESS_TENSOR_SUM[2])/3.0/ CONTROLS.N_MD_STEPS ;
-		cout << "	Pressure from diagonal stress tensors over run: " << Pavg << endl;
-		cout << "	Average stress tensor over run: " << endl;
-		cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM[0]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM[1]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM[2]/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
-
-		cout << "		sigma_xy: " << AVG_DATA.STRESS_TENSOR_SUM[3]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_xz: " << AVG_DATA.STRESS_TENSOR_SUM[4]/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM[5]/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
+		if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
+		{
+			double Pavg = (AVG_DATA.STRESS_TENSOR_SUM.X 
+								+ AVG_DATA.STRESS_TENSOR_SUM.Y 
+								+ AVG_DATA.STRESS_TENSOR_SUM.Z)/3.0/ CONTROLS.N_MD_STEPS ;
+			cout << "	Pressures from diagonal stress tensors over run: " << Pavg << endl;
+			cout << "	Average diagonal stress tensors over run: " << endl;
+			cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM.X/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+			cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM.Y/ CONTROLS.N_MD_STEPS << " GPa" << endl;
+			cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM.Z/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
+		}
 
 		// Write the final configuration to file.
 		write_xyzv(SYSTEM, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, "output.xyz", false);
@@ -3338,7 +3275,11 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	bool   			FOUND_END = false;
 	string 			LINE;
 	string			TEMP_STR,TEMP_STR_2;
+	double			TEMP_DOUB;
+	int				TEMP_INT;
+	int				TMP_NSCAN;
 	stringstream	LINE_PARSER;
+	int				ITEM_NO;
 	int				ADD_TO_NPLOTS = 0;
 	
 	// Set some defaults
@@ -3364,13 +3305,13 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	FF_PLOTS.INCLUDE_PENALTY  = true;
 	FF_PLOTS.DO_4D            = false;
 	
-	CONTROLS.FREQ_BACKUP     		= 100;
+	CONTROLS.FREQ_BACKUP     	= 100;
 	CONTROLS.FREQ_UPDATE_THERMOSTAT = -1.0;
-	CONTROLS.FREQ_UPDATE_BAROSTAT   = -1.0 ;
 	CONTROLS.USE_HOOVER_THRMOSTAT	= false;
 	CONTROLS.REAL_REPLICATES        = 0;
-	CONTROLS.NFRAMES               = 0 ;
-	NEIGHBOR_LIST.USE 		  		= true;
+	NEIGHBOR_LIST.USE               = true;
+	
+	CONTROLS.PRINT_BAD_CFGS         = false;
 	
 	
 	
@@ -3927,6 +3868,8 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 		{
 			cin >> LINE; cin.ignore();
 			
+			CONTROLS.INIT_VEL = false;
+			
 			if (LINE=="READ")
 				CONTROLS.INIT_VEL = false;
 			else if (LINE=="GEN")
@@ -3953,7 +3896,9 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			{
 				if(CONTROLS.INIT_VEL)
 					cout << "	# VELINIT #: GEN ... generating velocites via box Muller" << endl;	
-				else	
+				else if(CONTROLS.RESTART)
+					cout << "	# VELINIT #: RESTART ... reading velocities from coordinate (restart) file" << endl;	
+				else if(!CONTROLS.INIT_VEL && !CONTROLS.RESTART)	
 					cout << "	# VELINIT #: READ ... reading velocities from coordinate file" << endl;	
 			}
 		}	
@@ -4110,30 +4055,6 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				exit_run(1);	
 			}				
 		}	
-
-
-		else if(LINE.find("# STRSCALC #") != string::npos)
-		{
-			cin >> LINE; cin.ignore();
-			
-			if (LINE=="ANALYTICAL")
-			{
-				CONTROLS.USE_NUMERICAL_STRESS = false;
-				if (RANK==0)
-					cout << "	# STRSCALC #: ANALYTICAL" << endl;	
-			}
-			else if (LINE=="NUMERICAL")
-			{
-				CONTROLS.USE_NUMERICAL_STRESS = true;
-				if (RANK==0)
-					cout << "	# STRSCALC #: NUMERICAL" << endl;	
-			}
-			else
-			{
-				cout << "ERROR: # STRSCALC # must be specified as ANALYTICAL or NUMERICAL." << endl;
-				exit_run(1);	
-			}				
-		}	
 				
 		// "Output control"
 		
@@ -4212,36 +4133,28 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				exit_run(1);	
 			}								
 		}	
-
-		else if(LINE.find("# PRNTSTR #") != string::npos)
+		
+		else if(LINE.find("# PRNTBAD #") != string::npos)
 		{
 			cin >> LINE; cin.ignore();
 			
 			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
 			{
-				CONTROLS.PRINT_STRESS = true;
+				CONTROLS.PRINT_BAD_CFGS = true;
+				//cin >> LINE; cin.ignore();
 				
 				if (RANK==0)
-					cout << "	# PRNTSTR #: true " << endl ;
-				
-				if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0 && RANK == 0)
-				{
-					cout << "		... printing every " << CONTROLS.FREQ_FORCE*CONTROLS.DELTA_T_FS << " fs, " << endl;
-					cout << "		... printing " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_FORCE << " frames. " << endl; 
-				}
+					cout << "	# PRNTBAD #: true ...will print out all bad configs (r < r_cut)" << endl;	
+
 			}
 			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
 			{
-				CONTROLS.PRINT_FORCE = false;
+				CONTROLS.PRINT_BAD_CFGS = false;
 				if (RANK==0)
-					cout << "	# PRNTSTR #: false" << endl;	
+					cout << "	# PRNTBAD #: false" << endl;	
 			}
-			else
-			{
-				cout << "ERROR: # PRNTSTR # must be specified as true or false." << endl;
-				exit_run(1);	
-			}								
-		}	
+			cin.ignore();							
+		}		
 		
 		else if(LINE.find("# PRNTVEL #") != string::npos)
 		{
@@ -4333,7 +4246,7 @@ static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBL
 
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].X << " ";
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].Y << " ";
-		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].Z ;
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.VELOCITY[ia].Z << " ";
 
 		if ( restart ) {
 			fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.ACCEL[ia].X << " ";
@@ -4356,7 +4269,7 @@ static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBL
 }
 
 static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL,
-										  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST) 
+										  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, FRAME &SYSTEM)
 {
 	COORDFILE >> CONTROLS.STEP ;
 	COORDFILE >> NEIGHBOR_LIST.RCUT_PADDING ;
@@ -4367,63 +4280,29 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 
 // MPI -- Related functions -- See headers at top of file
 
-#ifdef USE_MPI	
-static void sum_forces(vector<XYZ>& accel, int atoms, double &pot_energy, double &pressure, double stress_tensor[6])
+static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z)
 // Add up forces, potential energy, and pressure from all processes.  
 {
 	// Sum up the potential energy, pressure, tensors , and forces from all processors
-	int nbuf = 3*atoms+8 ;
+#ifdef USE_MPI	
+	double *accel = (double *) accel_vec .data();
 
-	// Pack an array for the forces.
-	double *buf = new double[3*atoms+8] ;
-	int count = 0 ;
-
-	buf[count++] = pot_energy ;
-	buf[count++] = pressure ;
-	for ( int i = 0 ; i < 6 ; i++ ) {
-		buf[count++] = stress_tensor[i] ;
-	}
-	for ( int i = 0 ; i < atoms ; i++ ) {
-		buf[count++] = accel[i].X ;
-		buf[count++] = accel[i].Y ;
-		buf[count++] = accel[i].Z ;
-	}
-
-	if ( count != nbuf ) {
-		printf("Index error in sum_forces\n") ;
-		exit_run(1) ;
-	}
-
-	// Sum the buffers on all processes.
-	MPI_Allreduce(MPI_IN_PLACE, buf, nbuf,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	
-	// Unpack the array
-	count = 0 ;
-	pot_energy = buf[count++] ;
-	pressure   = buf[count++] ;
-	for ( int i = 0 ; i < 6 ; i++ ) {
-		stress_tensor[i] = buf[count++] ;
-	}
-	for ( int i = 0 ; i < atoms ; i++ ) {
-		accel[i].X = buf[count++] ;
-		accel[i].Y = buf[count++] ;
-		accel[i].Z = buf[count++] ;
-	}
-
-	if ( count != nbuf ) {
-		printf("Index error in sum_forces\n") ;
-		exit_run(1) ;
-	}
-
-	delete[] buf ;
-}
+	MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_x,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_y,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_z,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #endif	
 
-#ifdef USE_MPI
+}
+
 static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 
 // Broadcast the position, neighborlists,  and optionally the velocity to all nodes.
 // Velocity-broadcast is only necessary for velocity-dependent forces (not currently implemented).
 {
+	#ifdef USE_MPI
+	
 		// Convert out vectors to arrays so they are MPI friendly
 	
 		double *coord = (double *) coord_vec.data();
@@ -4457,8 +4336,9 @@ static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector
 				double *velocity = (double *) velocity_vec.data();
 				MPI_Bcast(velocity, 3 * atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 			}
+			
+	#endif
 }
-#endif
 
 void exit_run(int value)
 // Call this instead of exit(1) to properly terminate all MPI processes.
@@ -4538,11 +4418,11 @@ void exit_run(int value)
 		LMPINFILE << "atom_modify      sort 0 0.0" << endl;
 		LMPINFILE << "read_data        data.lammps" << endl;
 		LMPINFILE << "neighbor         1.0 bin" << endl;
-		LMPINFILE << "neigh_modify     delay 0 every 1 check no" << endl << endl;
+		LMPINFILE << "neigh_modify     delay 0 every 1 check no page 100000 one 10000" << endl << endl;
 		
 		// Set the pairstyle and coefficients
 	
-		LMPINFILE << "pair_style       coul/long 10.0" << endl;	
+		LMPINFILE << "pair_style       coul/long 20.0" << endl;	
 		LMPINFILE << "pair_coeff       * *"  << endl << endl;
 	
 		// Initialize the velocity via the temperature (only used if this ISNT a minimization job)
@@ -4722,7 +4602,7 @@ void exit_run(int value)
 		  
 			// Wrap the coordinates
 			
-			 SYS.COORDS[i].X -= floor(SYS.COORDS[i].X/SYS.BOXDIM.X)*SYS.BOXDIM.X;
+  	   	   	SYS.COORDS[i].X -= floor(SYS.COORDS[i].X/SYS.BOXDIM.X)*SYS.BOXDIM.X;
 			SYS.COORDS[i].Y -= floor(SYS.COORDS[i].Y/SYS.BOXDIM.Y)*SYS.BOXDIM.Y;
 			SYS.COORDS[i].Z -= floor(SYS.COORDS[i].Z/SYS.BOXDIM.Z)*SYS.BOXDIM.Z;
 			
@@ -4832,15 +4712,20 @@ void exit_run(int value)
 		
 		// stress tensor is multiplied by (atm/vol) in LAMMPS; multiply out volume here
 		// virial points to LAMMPS array for stress tensor
+		// XY, YZ, and XZ components need to be included at a later date.
 	    
 		// Set the stresses based on our MD code's calculation
 	    
 		double vol = SYS.BOXDIM.X * SYS.BOXDIM.Y * SYS.BOXDIM.Z;
 
-		for ( int i = 0 ; i < 6 ; i++ ) 
-		{
-			virial[i] =  SYS.VIRIAL_CALC[i] * vol;
-		}
+		virial[0] =  SYS.PRESSURE_TENSORS_XYZ.X*vol;
+		virial[1] =  SYS.PRESSURE_TENSORS_XYZ.Y*vol;
+		virial[2] =  SYS.PRESSURE_TENSORS_XYZ.Z*vol;
+	    
+		virial[3] = 0.0; // XY
+		virial[4] = 0.0; // XZ
+		virial[5] = 0.0; // YZ
+    
 	}
 	
 #endif

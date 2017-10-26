@@ -1,4 +1,4 @@
-#! /usr/bin/python
+# ! /usr/bin/python
 
 import sys
 import numpy
@@ -91,7 +91,8 @@ if DO_WEIGHTING:
 #################################
 
 if DO_WEIGHTING:
-    U,D,VT=numpy.linalg.svd(weightedA)
+    #U,D,VT=numpy.linalg.svd(weightedA)
+    U,D,VT=scipy.linalg.svd(weightedA,overwrite_a=True)
     Dmat=array((transpose(weightedA)))
 else:
     #U,D,VT=numpy.linalg.svd(A)
@@ -111,10 +112,12 @@ for i in range(0,len(Dmat)):
 # numerical recipes (LEF).
 eps=eps_fac * dmax
 nvars = 0
-for i in range(0,len(D)):
-    if(abs(D[i])>eps):
+for i in xrange(0,len(D)):
+    if abs(D[i]) > eps:
         Dmat[i][i]=1.0/D[i]
-        nvars = nvars + 1
+        nvars += 1
+        
+print "! eps (= eps_fac*dmax) =  ", eps        
 
 x=dot(transpose(VT),Dmat)
 
@@ -175,12 +178,16 @@ CASE_BY_CASE = False
 
 SNUM_2B = 0
 SNUM_3B = 0
+SNUM_3B = 0
 
 if POTENTIAL == "CHEBYSHEV" or POTENTIAL == "DFTBPOLY":
 	TMP = hf[6].split()
 	
 	if len(TMP) == 4:
 		SNUM_3B = int(TMP[3])
+        
+	if len(TMP) == 5:
+		SNUM_4B = int(TMP[3])
 	
 	SNUM_2B = int(TMP[2])
 	
@@ -212,6 +219,7 @@ ATOM_PAIRS_LINE=10+TOTAL_ATOM_TYPES+2
 TOTAL_PAIRS =  hf[ATOM_PAIRS_LINE].split()
 TOTAL_PAIRS = int(TOTAL_PAIRS[2])
 
+# ... figure out which line "ATOM PAIR TRIPLETS: " is on 
 
 ATOM_TRIPS_LINE=0
 if FIT_POVER == "true" or USE_POVER == "true":
@@ -245,6 +253,33 @@ if len(TEST) == 5 and TEST[2] == "S_MAXIM:":
 		
 TOTAL_TRIPS =  hf[ATOM_TRIPS_LINE].split()
 TOTAL_TRIPS = int(TOTAL_TRIPS[3])
+
+# ... figure out which line "ATOM PAIR QUADRUPLETS: " is on 
+
+ATOM_QUADS_LINE = 0
+TOTAL_QUADS     = 0
+
+if TOTAL_TRIPS == 0:
+    ATOMS_QUADS_LINE = TOTAL_TRIPS + 2
+    
+    # Sanity check. Never expect to have 4-body parameters when no 3-body parameters exist
+    
+    TOTAL_QUADS = int(hf[ATOMS_QUADS_LINE].split()[3])
+    
+    if TOTAL_TRIPS == 0 and TOTAL_QUADS > 0:
+        print "Error: Found multiple atom pair qudruplets but no triplets."
+        exit()
+    
+else:
+    TMP = ATOM_TRIPS_LINE+2
+    
+    for i in xrange(TOTAL_TRIPS):
+        TMP += 2 + int(hf[TMP].split()[6]) # total number of 3-body parmeters for first triplet type
+        
+    ATOM_QUADS_LINE = TMP+2
+    TOTAL_QUADS = int(hf[ATOM_QUADS_LINE].split()[3])
+
+
 
 A1 = ""
 A2 = ""
@@ -308,6 +343,8 @@ for i in range(0,TOTAL_PAIRS):
 ADD_LINES = 0
 ADD_PARAM = 0
 
+COUNTED_TRIP_PARAMS = 0;
+
 if TOTAL_TRIPS > 0:
 	print "TRIPLET " + POTENTIAL + " PARAMS \n"
 	
@@ -316,7 +353,7 @@ if TOTAL_TRIPS > 0:
 	for t in xrange(0, int(TOTAL_TRIPS)):
 	
 		PREV_TRIPIDX = 0
-
+        
 		P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
         
 		UNIQ = P1[4]
@@ -343,11 +380,59 @@ if TOTAL_TRIPS > 0:
 #			print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + int(LINE_SPLIT[5])]`
 			print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]`
 
-		TRIP_PAR_IDX += int(UNIQ)
+		TRIP_PAR_IDX        += int(UNIQ)
+		COUNTED_TRIP_PARAMS += int(UNIQ)
             
 		print ""
         
 		ADD_LINES += 2
+        
+ADD_LINES = 0
+ADD_PARAM = 0        
+        
+if TOTAL_TRIPS > 0:
+	print "QUADRUPLET " + POTENTIAL + " PARAMS \n"
+	
+	QUAD_PAR_IDX = 0
+	
+	for t in xrange(0, int(TOTAL_QUADS)):
+	
+		PREV_QUADIDX = 0
+        
+		P1 = hf[ATOM_QUADS_LINE+2].split()
+        
+		UNIQ = P1[8]
+		TOTL = P1[10]
+        
+		P2 = P1[2]
+		P3 = P1[3]
+		P4 = P1[4]
+		P5 = P1[5]
+		P6 = P1[6]
+		P1 = P1[1]
+        
+		print "QUADRUPLETYPE PARAMS: " +`t` + " " + P1 + " " + P2 + " " + P3 + " " + P4 + " " + P5 + " " + P6 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL + "\n"
+		print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
+		print "   ----------------------------------------------------------------------------"
+		
+		ADD_LINES += 2
+		
+		if(t>0):
+			ADD_PARAM += 1
+		
+		for i in xrange(0,int(TOTL)):
+			ADD_LINES += 1
+			LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
+			LINE_SPLIT = LINE.split()
+
+			print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX+int(LINE_SPLIT[8])]`
+			#print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS]`
+
+		QUAD_PAR_IDX += int(UNIQ)
+            
+		print ""
+        
+		ADD_LINES += 2        
 
 			
 if FIT_POVER == "true":
@@ -372,8 +457,6 @@ if TEST_SUITE_RUN == "do":
 		test_suite_params.write(phrase)
 	test_suite_params.close()
 		
- 
-    
 # OLD WAY:
 #for i in range(0,len(x)):
 #    print i,x[i]

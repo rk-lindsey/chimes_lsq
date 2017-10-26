@@ -66,13 +66,12 @@ using namespace std;
 // Unit converters 
 
 static const double ke      = 332.0637157615209;	// Converter between electron units and Stillinger units for Charge*Charge.
-static const double Hartree = 627.50960803 ;		// 1 Hartree in kcal/mol.
+static const double Hartree = 627.50961; 			// 1 Hartree in kcal/mol.
 static const double Kb      = 0.001987; 			// Boltzmann constant in kcal/mol-K.
 static const double Tfs     = 48.888;   			// Internal time unit in fs.
 static const double GPa     = 6.9479;				// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
 static const double atm     = GPa*9869.23266716;    // stress conversion to atm (for LAMMPS).
 static const double GPa2atm = 9869.23266716;		// x_GPa * GPa2atm = x_atm
-static const double Bohr    = 1.889725989 ;     // 1 Angstrom in Bohr.
 static const double pi		= 3.14159265359;		
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- general
@@ -103,6 +102,7 @@ struct JOB_CONTROL
     bool   USE_OVERCOORD;		// Replaces if_overcoord... If true, calculate ReaxFF-like overcoordination term.
     bool   FIT_POVER;			// Replaces fit_pover... If true, find linear overcoordination parameter from least-squares fitting. -- this needs to be updated for new handling
     bool   USE_3B_CHEBY;		// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
+    bool   USE_4B_CHEBY;		//If true, calculate 4-Body Chebyshev interaction.
         
 	
 	///////////////////////////////////////////////
@@ -140,7 +140,6 @@ struct JOB_CONTROL
 	double FREQ_UPDATE_THERMOSTAT;	// Replaces scale_freq and thoover_fs... it's usage depends on whether USE_HOOVER_THERMOSTAT is true or false.. will be cast as int where required
 	double FREQ_UPDATE_BAROSTAT;	// Barostat time constant... defaults to 1000
 	bool   USE_NUMERICAL_PRESS;		// Replaces num_pressure... Whether to calculate pressures by finite difference.
-	bool   USE_NUMERICAL_STRESS;		// Whether to calculate stresses by finite difference.
 	double MIN_E_CONVG_CRIT;		// Options for LAMMPS minimization: Stopping criteria for energy and force, max iterations, max energy/force evaluations
 	double MIN_F_CONVG_CRIT;
 	double MIN_MAX_ITER;
@@ -155,7 +154,7 @@ struct JOB_CONTROL
 	int    FREQ_VELOC;
 	int    FREQ_ENER;			// Replaces energy_freq... How often to output energy
 	bool   PRINT_FORCE;			// Replaces if_output_force... If TRUE, write out calculated forces.	
-	bool   PRINT_STRESS ;      // Print the stress in the xyzf output file.
+	bool   PRINT_BAD_CFGS;			// Print any config where r < r_cut
 	int    FREQ_FORCE;			// How often to print the forces	
 	int    SELF_CONSIST_FREQ;	// How frequently to print POSCAR file
 	bool   WRAP_COORDS;			// Should coordinates be wrapped?
@@ -178,13 +177,16 @@ struct JOB_CONTROL
 	bool FIT_STRESS_ALL;		// Should stress tensors be included in the fit? --> This is ONLY for ALL components, xx, xy, xz ... zz 
 	int  NSTRESS;				// Only fit stresses for first NSTRESS frames of trajectory
 	bool FIT_ENER;				// Should the total frame energy be included in the fit?
+	int  NENER;
 	bool CALL_EWALD;			// Should ewald subroutines be called?
 	bool USE_POVER;			// Should overbonding information be printed to the header file?
 	
 	int		NFRAMES;			// Number of frames in the movie file
 	int		CHEBY_ORDER;		// Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
 	int		CHEBY_3B_ORDER;		// how many polynomials for 3b cheby?
+	int		CHEBY_4B_ORDER;		// how many polynomials for 4b cheby?
 	int		NUM_3B_CHEBY;		// How many parameters are associated with cheby order CHEBY_3B_ORDER?
+	int		NUM_4B_CHEBY;		// How many parameters are associated with cheby order CHEBY_4B_ORDER?
 	int		INVR_PARAMS;		// currently uses 19 parameters per pair type
 	int 	TOT_SNUM;			// total number of force field parameters
 	int 	TOT_SHORT_RANGE;	// Number of short tranged FF params... i.e. not Ewald
@@ -197,7 +199,7 @@ struct JOB_CONTROL
 	string	CHEBY_TYPE;			// How will distance be transformed?
 	string	INFILE;				// Input trajectory file
 	
-	JOB_CONTROL() ;  // Got rid of in-line constructor to eliminate g++ warnings.
+	JOB_CONTROL():N_LAYERS(0), WRAP_COORDS(false),IF_SUBTRACT_COORD(false),IF_SUBTRACT_COUL(false),FIT_COUL(false),USE_PARTIAL_CHARGES(false),COUL_CONSV(false),FIT_POVER(false),USE_3B_CHEBY(false),USE_4B_CHEBY(false),TOT_SNUM(0){}
 };
 
 struct XYZ
@@ -224,7 +226,7 @@ struct FRAME
 	int MY_ATOMS_START;				// Used for lammps linking. Specify what index along SYS starts the process' atoms
 	XYZ BOXDIM;						// Dimenions of the primitive box.
 	XYZ WRAPDIM;					// Dimenions of the ghost atom box. Equivalent to BOXDIM if no layers are used
-	XYZ STRESS_TENSORS ;		// Only used for the diagonal components, xx, yy, zz
+	XYZ STRESS_TENSORS;				// Only used for the diagonal components, xx, yy, zz
 	XYZ STRESS_TENSORS_X;			// Used when all tensor components are requested
 	XYZ STRESS_TENSORS_Y;
 	XYZ STRESS_TENSORS_Z;
@@ -235,10 +237,8 @@ struct FRAME
 	double 	PRESSURE;				// This is the RUNNING pressure, not the set pressure!
 	double 	AVG_TEMPERATURE;		// Only used for velocity scaling-type thermostats
 	double 	PRESSURE_XYZ;			// This is the running pressure sans the ideal gas term
-
-	double VIRIAL_CALC[6] ;            // This is the virial tensor currently calculated.
-
-	double PRESSURE_TENSORS[6];		// Adds in the ideal gas term
+	XYZ		PRESSURE_TENSORS_XYZ;	// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term
+	XYZ		PRESSURE_TENSORS;		// Adds in the ideal gas term
 	double	TOT_POT_ENER;			// Replaces VTOT
 	
 	vector<int>		PARENT;
@@ -285,6 +285,7 @@ struct PAIRS	// NEEDS UPDATING
 
 	int    SNUM;			// Number of fitting parameters for pair ... WHY WOULD THIS BE DIFFERENT FOR DIFFERENT PAIR TYPES?***
 	int    SNUM_3B_CHEBY;	// Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
+	int    SNUM_4B_CHEBY;	// Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
 	
 	string CHEBY_TYPE;		// Are distances transformed into inverse-r type or morse-type distances?... or not at all? (default)
 	double PENALTY_SCALE;	// For 2B Cheby potentials... "a" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 1.0e8
@@ -301,8 +302,8 @@ struct PAIRS	// NEEDS UPDATING
 	XYZ NBINS;				// Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
 
 	FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
-
-	PAIRS() ; // Use explicit constructor to avoid g++ warnings. (LEF)
+	
+	PAIRS():OVRPRMS(5),N_CFG_CONTRIB(0){}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 };
 
 struct TRIPLETS
@@ -316,13 +317,13 @@ struct TRIPLETS
 	
 	int    N_CFG_CONTRIB;	// How many configurations actually contribute to fitting this triplet??
 	
-	XYZ MIN_FOUND;			// Testing two cases: 1. 
+	XYZ MIN_FOUND;		// Testing two cases: 1. 
 	
-	XYZ S_MAXIM_3B;			// A unique outer cutoff for 3B interactions... by default, is set to S_MAXIM
-	XYZ S_MINIM_3B;			// Similar for inner cutoff. This is useful when the 2-body 
-							// is refit/extrapolated, thus has a s_min lower than the original fitted value
-							// Values need to be specified for each contributing pair
-							// X -> IJ, Y -> IK,  -> JK 
+	XYZ S_MAXIM_3B;		// A unique outer cutoff for 3B interactions... by default, is set to S_MAXIM
+	XYZ S_MINIM_3B;		// Similar for inner cutoff. This is useful when the 2-body 
+				// is refit/extrapolated, thus has a s_min lower than the original fitted value
+				// Values need to be specified for each contributing pair
+				// X -> IJ, Y -> IK,  -> JK 
 	
 	vector<vector<vector< int > > > POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
 	 
@@ -344,6 +345,46 @@ struct TRIPLETS
 		MIN_FOUND.X   = -1;
 		
 	}
+};
+
+struct QUADRUPLETS
+{
+	int    QUADINDX;
+	vector<string>ATOM_PAIRS; 	// Contains the six different atom pair string names
+
+	
+	FCUT FORCE_CUTOFF;		// "CUBIC" "COSINE" or "SIGMOID" currently supported
+	
+	int    N_CFG_CONTRIB;		// How many configurations actually contribute to fitting this triplet??
+	
+	vector<double> MIN_FOUND;	// Testing two cases: 1. 
+	
+	vector<double> S_MAXIM_4B;	// A unique outer cutoff for 4B interactions... by default, is set to S_MAXIM
+	vector<double> S_MINIM_4B;	// Similar for inner cutoff. This is useful when the 2-body 
+					// is refit/extrapolated, thus has a s_min lower than the original fitted value
+					// Values need to be specified for each contributing pair
+					// [0] -> ij, [1] -> ik, [2] -> il, [3] -> jk, [4] -> jl, [5] -> kl 
+
+	
+	int N_TRUE_ALLOWED_POWERS;	// How many UNIQUE sets of powers do we have?
+	int N_ALLOWED_POWERS;		// How many total sets of powers do we have?
+	
+	vector<vector<int> > ALLOWED_POWERS;	// This will keep a list of the allowed polynomial powers for each coefficient
+	vector<int> EQUIV_INDICIES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
+	vector<int>	PARAM_INDICIES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICIES {0,0,2,3}, PARAM_INDICIES would be {0, 0, 1, 2}
+	
+	
+	QUADRUPLETS():ATOM_PAIRS(6), S_MAXIM_4B(6), S_MINIM_4B(6), MIN_FOUND(6) // Default constructor
+	{
+		N_CFG_CONTRIB =  0;
+		MIN_FOUND[0]   = -1;
+		MIN_FOUND[1]   = -1;
+		MIN_FOUND[2]   = -1;
+		MIN_FOUND[3]   = -1;
+		MIN_FOUND[4]   = -1;
+		MIN_FOUND[5]   = -1;
+	}
+		
 };
 
 struct PAIR_FF : public PAIRS
@@ -395,8 +436,9 @@ struct PES_PLOTS
 	vector<string> 	SEARCH_STRING_2B;
 	vector<XYZ_INT>	IJ_IK_JK_TYPE;
 		
-
-	PES_PLOTS() ;
+	
+	PES_PLOTS():N_PLOTS(0), N_SCAN(0), INCLUDE_2B(0), DO_4D(1){}
+		
 };
 
 struct CHARGE_CONSTRAINT
@@ -583,9 +625,9 @@ class NEIGHBORS
 		double SAFETY;                 		// Safety factor in calculating neighbors.
 		
 		void FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);		// Updates ghost atoms based on pbc-wrapped real atoms
-		void DO_UPDATE_SMALL (FRAME & SYSTEM);	// Builds and/or updates neighbor list
+		void DO_UPDATE_SMALL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
 		void DO_UPDATE_BIG   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
-		void UPDATE_3B_INTERACTION(FRAME & SYSTEM) ;  // Update 3-Body interaction list.
+		void UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) ;  // Update 3-Body interaction list.
 		
 	public:
 
@@ -675,7 +717,6 @@ class CONSTRAINT
 
 		void INITIALIZE          (string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS); 
 		void UPDATE_COORDS       (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
-		void UPDATE_GHOST        (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
 		void UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
 		void UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
 		void SCALE_VELOCITIES    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
@@ -693,9 +734,7 @@ class THERMO_AVG {
 public:
 	double TEMP_SUM ;
 	double PRESS_SUM ;
-	double STRESS_TENSOR_SUM[6] ;
-
-   THERMO_AVG() ;
+	XYZ STRESS_TENSOR_SUM ;
 	void WRITE(ofstream &fout) ;
 	void READ(ifstream &fin) ;
 } ;
@@ -720,11 +759,7 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 //
 //////////////////////////////////////////
 
-void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,  vector<TRIPLETS> & PAIR_TRIPLETS, 
-						FRAME & FRAME_TRAJECTORY, vector<vector <XYZ > > & FRAME_A_MATRIX, 
-						vector<vector <XYZ > > & FRAME_COULOMB_FORCES, bool if_3b_cheby, 
-						map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
-
+void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> & PAIR_TRIPLETS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS,FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, map<int,int> & INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST);
 void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
 
 void SubtractEwaldForces(FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
@@ -741,10 +776,8 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 //
 //////////////////////////////////////////
 
-void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-			  vector<TRIP_FF> & FF_3BODY, vector<int> INT_PAIR_MAP, vector<int> INT_TRIAD_MAP,
-			  NEIGHBORS & NEIGHBOR_LIST) ;
-void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP) ;
+void   ZCalc                    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
+void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
 double get_dist                 (const FRAME & SYSTEM, XYZ & RAB, int a1, int a2);
 
 //////////////////////////////////////////
@@ -756,9 +789,8 @@ double get_dist                 (const FRAME & SYSTEM, XYZ & RAB, int a1, int a2
 void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_CHARGES, bool INCLUDE_PENALTY, string FILE_TAG);
 void Print_3B_Cheby(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk);
 void Print_3B_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
-void Print_Ternary_Cheby_Scan(vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, 
-										map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, 
-										string & ATM_TYP_3, int ij, int ik, int jk) ;
+void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
+
 
 //////////////////////////////////////////
 //
@@ -766,7 +798,7 @@ void Print_Ternary_Cheby_Scan(vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3
 //
 //////////////////////////////////////////
 
-double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, double KTensor[6])	 ;
+double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// Overloaded.. compute differentely if for main or new velocities
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// Overloaded.. compute differentely if for main or new velocities
 
 void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
@@ -774,14 +806,8 @@ void SORT_THREE_DESCEND(int & a, int & b, int & c);
 
 void enable_fp_exceptions();
 void exit_run(int val);
-void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-								vector<TRIP_FF> & FF_3BODY, 
-								vector<int> &INT_PAIR_MAP, vector<int> &INT_TRIAD_MAP,
-								NEIGHBORS & NEIGHBOR_LIST,
-								double & PE_1, double & PE_2, double & dV) ;
-void numerical_virial(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-							 vector<TRIP_FF> & FF_3BODY, 
-							 vector<int> & INT_PAIR_MAP, vector<int> & INT_TRIAD_MAP,
-							 NEIGHBORS & NEIGHBOR_LIST,double PE_1[3])  ;
+
+
+
 #endif
 
