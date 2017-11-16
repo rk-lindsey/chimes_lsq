@@ -1019,7 +1019,7 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  vector<TRIP
 	
 		if (if_3b_cheby)
 			ZCalc_3B_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, PAIR_TRIPLETS, FRAME_A_MATRIX,  nlayers, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);	
-		
+			
 		if (CONTROLS.USE_4B_CHEBY)
 			ZCalc_4B_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, PAIR_TRIPLETS, PAIR_QUADRUPLETS, FRAME_A_MATRIX,  nlayers, PAIR_MAP, INT_QUAD_MAP, NEIGHBOR_LIST);		
 	}			
@@ -2379,8 +2379,12 @@ static void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 					vstart = n_2b_cheby_terms + n_3b_cheby_terms;
 	
 					for (int i=0; i<curr_quad_type_index; i++)
-						vstart += PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS;						
-					
+						vstart += PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS;	
+/*
+cout << "Calling.." << endl;
+cout << "with:    " << PAIR_QUADRUPLETS[curr_quad_type_index].FORCE_CUTOFF.BODIEDNESS << endl;
+cout << "and:     " << curr_quad_type_index << endl;
+*/
 					for (int f=0; f<6; f++)
 						PAIR_QUADRUPLETS[curr_quad_type_index].FORCE_CUTOFF.get_fcut(fcut[f], fcut_deriv[f], rlen[f], S_MINIM[f], S_MAXIM[f]);
 	
@@ -2389,11 +2393,14 @@ static void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 					// Consider special restrictions on allowed quadruplet types and powers
 					/////////////////////////////////////////////////////////////////////
 					/////////////////////////////////////////////////////////////////////
+/*
 for (int f=0; f<6; f++)	
 {
 	fcut[f] = 1;
 	fcut_deriv[f] = 1;
 }
+*/
+
 					row_offset = 0;
 	
 					// --- THE KEY HERE IS TO UNDERSTAND THAT THE IJ, IK, AND JK HERE IS BASED ON ATOM PAIRS, AND DOESN'T NECESSARILY MATCH THE QUAD'S EXPECTED ORDER!

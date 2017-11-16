@@ -2443,6 +2443,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 						ATOM_CHEMS.push_back(TMP_CHEM);
 				}
 				
+				
 				//////////////////////////////////////////////////////////////////////
 				// Generate unique quadruplets and thier corresponding sets of powers
 				//////////////////////////////////////////////////////////////////////
@@ -2478,19 +2479,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[4] += ATOM_CHEMS[l]; // jl
 								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[5] += ATOM_CHEMS[l]; // kl								
 								
-
-
 								// Now save the "proper" (ordered) name of the pair	
-								
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[0] = ATOM_CHEMS[i]; // ij
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[1] = ATOM_CHEMS[i]; // ik
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[2] = ATOM_CHEMS[i]; // il
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[3] = ATOM_CHEMS[j]; // jk
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[4] = ATOM_CHEMS[j]; // jl
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[5] = ATOM_CHEMS[k]; // kl
+
 								 
 								for(int m=0; m<6; m++) 
 									PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[m] = ATOM_PAIRS[ PAIR_MAP[ PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[m]] ].PRPR_NM;	
+
 							
 cout << "ADDED QUADRUPLET: " << TEMP_INT << " ";
 for(int m=0; m<6; m++) 
@@ -2761,13 +2755,7 @@ cout << endl;
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////
 				// Set up quadruplet maps... Account for cases where quadruplet type is meaningless by setting mapped index to -1
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////					
-/*			
-				cout << "SANITY CHECK: These are your triplets:" << endl;
-				for(int m=0; m<NTRIP; m++)
-				{
-					cout << m << " " << PAIR_TRIPLETS[m].ATMPAIR1 << " " << PAIR_TRIPLETS[m].ATMPAIR2 << " " << PAIR_TRIPLETS[m].ATMPAIR3 << endl;
-				}
-*/			
+
 				bool REAL_QUAD;
 			
 				vector<string> TEMP_STR(6);	
@@ -2850,24 +2838,7 @@ cout << endl;
 
 				for(it = QUAD_MAP.begin(); it != QUAD_MAP.end(); it++)
 					QUAD_MAP_REVERSE.insert(make_pair(it->second,it->first));
-				
-/*				
-				//	Sanity check	
-							
-				cout << "YOUR NEW REV MAPS: " << endl;
 
-				map<int, string>::iterator itc;
-				
-				for(itc = TRIAD_MAP_REVERSE.begin(); itc != TRIAD_MAP_REVERSE.end(); itc++)
-					cout <<"		" << itc->first << " : " << itc->second << endl;
-*/				
-/*				
-				// Sanity check
-				
-				cout << "Triplet types (force field): " << endl;
-				for(int i=0;i<NTRIP; i++)
-					cout << "		" << PAIR_TRIPLETS[i].TRIPINDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << endl;
-*/
 				
 				//////////////////////////////////////////////////////////////////////
 				// Since there are so many pairs in an atom quadruplet, we'll use "fast" maps here.
@@ -2942,7 +2913,9 @@ cout << endl;
 						}
 					}
 				}
+
 			}
+			
 					
 #if VERBOSITY == 1						
 			if ( RANK == 0 ) 
@@ -3024,11 +2997,21 @@ cout << endl;
 					}
 				}
 				#endif		
+				
+if ( RANK == 0 ) 
+{
+	cout << endl;
+	cout << "	The following unique pair types have been identified:" << endl;
+	for(int i=0;i<NPAIR; i++)
+		cout << "		" << ATOM_PAIRS[i].PAIRIDX << "  " << ATOM_PAIRS[i].ATM1TYP << " " << ATOM_PAIRS[i].ATM2TYP << endl;
+}				
 			}
 			
 //VERIFIED TO HERE FOR 4-BODY IMPLEMENTATION!!!!!
 									
 		}
+	
+		
 
 		else if(LINE.find("# PAIRIDX #")!= string::npos) // Read the topology part. For now, ignoring index and atom types..
 		{
@@ -3595,6 +3578,9 @@ cout << endl;
 		{
 			cin >> TEMP_TYPE;
 			
+			for(int i=0; i<ATOM_PAIRS.size(); i++)
+				ATOM_PAIRS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
+			
 			for(int i=0; i<PAIR_TRIPLETS.size(); i++)
 				PAIR_TRIPLETS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
 			
@@ -3619,31 +3605,35 @@ cout << endl;
 											 << PAIR_TRIPLETS[0].FORCE_CUTOFF.STEEPNESS 
 											 << ",	" << PAIR_TRIPLETS[0].FORCE_CUTOFF.OFFSET 
 											 << ", and  " << PAIR_TRIPLETS[0].FORCE_CUTOFF.HEIGHT << endl;	
-				#endif
-				
-				PAIR_TRIPLETS[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
-
-				for(int i=1; i<PAIR_TRIPLETS.size(); i++)	// Copy all class elements
-					PAIR_TRIPLETS[i].FORCE_CUTOFF = PAIR_TRIPLETS[0].FORCE_CUTOFF;
-				
-				if(CONTROLS.USE_4B_CHEBY)
-				{
-					PAIR_QUADRUPLETS[0].FORCE_CUTOFF.STEEPNESS =  PAIR_TRIPLETS[0].FORCE_CUTOFF.STEEPNESS;
-					PAIR_QUADRUPLETS[0].FORCE_CUTOFF.OFFSET    =  PAIR_TRIPLETS[0].FORCE_CUTOFF.OFFSET;
-				
-					if(PAIR_QUADRUPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-						PAIR_QUADRUPLETS[0].FORCE_CUTOFF.HEIGHT = PAIR_TRIPLETS[0].FORCE_CUTOFF.HEIGHT;
-				
-					PAIR_QUADRUPLETS[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
-
-					for(int i=1; i<PAIR_QUADRUPLETS.size(); i++)	// Copy all class elements
-						PAIR_QUADRUPLETS[i].FORCE_CUTOFF = PAIR_QUADRUPLETS[0].FORCE_CUTOFF;
-				}
-					
+				#endif					
 			}
 			cin.ignore();
+			
+			PAIR_TRIPLETS[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
 
+			for(int i=1; i<PAIR_TRIPLETS.size(); i++)	// Copy all class elements
+			{
+//				PAIR_TRIPLETS[i].FORCE_CUTOFF = PAIR_TRIPLETS[0].FORCE_CUTOFF;
+				PAIR_TRIPLETS[i].FORCE_CUTOFF.BODIEDNESS = PAIR_TRIPLETS[0].FORCE_CUTOFF.BODIEDNESS;
+			}
+			
+			if(CONTROLS.USE_4B_CHEBY)
+			{
+//				PAIR_QUADRUPLETS[0].FORCE_CUTOFF           =  PAIR_TRIPLETS[0].FORCE_CUTOFF;
+				PAIR_QUADRUPLETS[0].FORCE_CUTOFF.STEEPNESS =  PAIR_TRIPLETS[0].FORCE_CUTOFF.STEEPNESS;
+				PAIR_QUADRUPLETS[0].FORCE_CUTOFF.OFFSET    =  PAIR_TRIPLETS[0].FORCE_CUTOFF.OFFSET;
+			
+				if(PAIR_QUADRUPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
+					PAIR_QUADRUPLETS[0].FORCE_CUTOFF.HEIGHT = PAIR_TRIPLETS[0].FORCE_CUTOFF.HEIGHT;
+			
+				PAIR_QUADRUPLETS[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
 
+				for(int i=1; i<PAIR_QUADRUPLETS.size(); i++)	// Copy all class elements
+				{
+//					PAIR_QUADRUPLETS[i].FORCE_CUTOFF = PAIR_QUADRUPLETS[0].FORCE_CUTOFF;
+					PAIR_QUADRUPLETS[i].FORCE_CUTOFF.BODIEDNESS = PAIR_QUADRUPLETS[0].FORCE_CUTOFF.BODIEDNESS;
+				}
+			}
 
 		}	
 		

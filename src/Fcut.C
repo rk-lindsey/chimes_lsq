@@ -25,13 +25,13 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv,
 	static bool FIRST_PASS = true;
 
 	// Original cubic style smoothing... does not constrian value at rmin
-	
+
 	if(TYPE == FCUT_TYPE::CUBESTRETCH )
 	{
 		cout << "ERROR: TYPE CUBESTRETCH NO LONGER SUPPORTED...Please clean up code!" << endl;
 		exit_run(0);
 	}
-	
+
 	if(BODIEDNESS==2 || (BODIEDNESS==3 && TYPE == FCUT_TYPE::CUBIC) || BODIEDNESS==4)
 	{		
 		fcut0 = (1.0 - rlen/rmax);
@@ -190,9 +190,9 @@ FCUT::FCUT()
 	POWER = FPENALTY_POWER;
 #endif
 
-	BODIEDNESS = 2 ;
+	BODIEDNESS = 2;
 	
-	TYPE = FCUT_TYPE::CUBIC ;
+//	TYPE = FCUT_TYPE::CUBIC;
 
 }
 
@@ -201,53 +201,66 @@ FCUT::FCUT()
 void FCUT::set_type(string s) 
 // Set the type of the cutoff function.
 {
-	if ( s == "CUBESTRETCH" ) {
-		TYPE = FCUT_TYPE::CUBESTRETCH ;
-	} else if ( s == "CUBIC" ) {
-		TYPE = FCUT_TYPE::CUBIC ;
-	} else if ( s == "COSINE" ) {
-		TYPE = FCUT_TYPE::COSINE ;
-	} else if ( s == "CUBSIG" ) {
-		TYPE = FCUT_TYPE::CUBSIG ;
-	} else if ( s == "SIGMOID" ) {
-		TYPE = FCUT_TYPE::SIGMOID ;
-	} else if ( s == "SIGFLT" ) {
-		TYPE = FCUT_TYPE::SIGFLT ;
-	} else {
-		cout << "Error: unknown cutoff type " << s << endl ;
-		exit(1) ;
+	if ( s == "CUBESTRETCH" ) 
+	{
+		TYPE = FCUT_TYPE::CUBESTRETCH;
+	} 
+	else if ( s == "CUBIC" ) 
+	{
+		TYPE = FCUT_TYPE::CUBIC;
+	} 
+	else if ( s == "COSINE" ) 
+	{
+		TYPE = FCUT_TYPE::COSINE;
+	} 
+	else if ( s == "CUBSIG" ) 
+	{
+		TYPE = FCUT_TYPE::CUBSIG;
+	} 
+	else if ( s == "SIGMOID" ) 
+	{
+		TYPE = FCUT_TYPE::SIGMOID;
+	} 
+	else if ( s == "SIGFLT" ) 
+	{
+	
+		TYPE = FCUT_TYPE::SIGFLT;
+	} else 
+	{
+		cout << "Error: unknown cutoff type " << s << endl;
+		exit(1);
 	}
 }
 
 string FCUT::to_string()
 // Convert an fcut_type to a string.
 {
-	string str ;
+	string str;
 
 	switch ( TYPE ) {
 	case FCUT_TYPE::CUBESTRETCH:
-		str = "CUBESTRETCH" ;
-		break ;
+		str = "CUBESTRETCH";
+		break;
 	case FCUT_TYPE::CUBIC:
-		str = "CUBIC" ;
-		break ;
+		str = "CUBIC";
+		break;
 	case FCUT_TYPE::COSINE:
-	   str = "COSINE" ;
-		break ;
+	   str = "COSINE";
+		break;
 	case FCUT_TYPE::CUBSIG:
-		str = "CUBSIG" ;
-		break ;
+		str = "CUBSIG";
+		break;
 	case FCUT_TYPE::SIGMOID:
-		str = "SIGMOID" ;
-		break ;
+		str = "SIGMOID";
+		break;
 	case FCUT_TYPE::SIGFLT:
-		str = "SIGFLT" ;
-		break ;
+		str = "SIGFLT";
+		break;
 	default:
-		cout << "Error: unknown cutoff value " << (int) TYPE << endl ;
-		exit(1) ;
+		cout << "Error: unknown cutoff value " << (int) TYPE << endl;
+		exit(1);
 	}
-	return(str) ;
+	return(str);
 }
 
 
