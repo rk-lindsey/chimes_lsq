@@ -151,12 +151,22 @@ print "! number of SVD fitting vars = ", nvars
 print "! Bayesian Information Criterion =  ", bic
 print "!"
 
+BREAK_COND = False
+
 for i in range(0, len(hf)):
     sys.stdout.write(hf[i])
     TEMP = hf[i].split()
     if len(TEMP)>3:
     	if (TEMP[2] == "TRIPLETS:"):
-   		 break
+		for j in range(i, len(hf)):
+			TEMP = hf[j].split()
+			if len(TEMP)>3:
+				if (TEMP[2] == "QUADRUPLETS:"):
+					sys.stdout.write(hf[j])
+					BREAK_COND = True
+					break
+		if (BREAK_COND):
+			break
     
     
 # Actually process the header file...
@@ -165,7 +175,7 @@ for i in range(0, len(hf)):
 # 1. Figure out what potential type we have
 
 
-POTENTIAL = hf[6].split()
+POTENTIAL = hf[7].split()
 POTENTIAL = POTENTIAL[1]
 
 print ""
@@ -181,7 +191,7 @@ SNUM_3B = 0
 SNUM_3B = 0
 
 if POTENTIAL == "CHEBYSHEV" or POTENTIAL == "DFTBPOLY":
-	TMP = hf[6].split()
+	TMP = hf[7].split()
 	
 	if len(TMP) == 4:
 		SNUM_3B = int(TMP[3])
@@ -208,13 +218,13 @@ FIT_POVER = FIT_POVER[1]
 USE_POVER = hf[2].split()
 USE_POVER = USE_POVER[1]
 
-ATOM_TYPES_LINE=8
+ATOM_TYPES_LINE=9
 
 TOTAL_ATOM_TYPES = hf[ATOM_TYPES_LINE].split()
 
 TOTAL_ATOM_TYPES = int(TOTAL_ATOM_TYPES[2])
 
-ATOM_PAIRS_LINE=10+TOTAL_ATOM_TYPES+2
+ATOM_PAIRS_LINE=11+TOTAL_ATOM_TYPES+2
 
 TOTAL_PAIRS =  hf[ATOM_PAIRS_LINE].split()
 TOTAL_PAIRS = int(TOTAL_PAIRS[2])
