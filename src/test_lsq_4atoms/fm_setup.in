@@ -1,0 +1,37 @@
+####### CONTROL VARIABLES #######
+
+# TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force
+	dump.xyzf
+# WRAPTRJ # ! Does the trajectory file need wrapping? (i.e. post-run PBC)
+	true
+# NFRAMES # ! How many frames are in the .xyzf file?
+	250
+# NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
+	1
+# FITCOUL # ! Fit charges? If false, use user-specified fixed charges, and subtract them from the forces -- NOTE: FUNCTIONALITY CURRENTLY ONLY SUPPORTED FOR TRUE, AND FALSE WITH CHARGES = 0
+	false
+# CNSCOUL # ! Will we try to have consistent charges -- only used when FITCOUL is true?
+	false	
+# FITSTRS # ! Fit stress tensors?
+	false
+# FITENER # ! Fit stress tensors?
+	false	
+# FITPOVR # ! Use ReaxFF linear overcoordination parameters? If this is false and parameters are provided below, those parameters will be subtracted from forces
+	false
+# PAIRTYP # ! Short-range interaction type. See manual for accepted types. Case sensitive #.. 3b order 5 eventually
+	CHEBYSHEV 12 0 0 -1 1
+# CHBTYPE # ! Are we transforming distance in terms of inverse distance(INVRSE_R), a morse-type function? (MORSE)? .. "DEFAULT" for no transformation.
+	MORSE
+
+####### TOPOLOGY VARIABLES #######
+
+# NATMTYP # 
+	1
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS # 
+1		C		 0.0		12.011
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #	# NIJBINS #     # NIKBINS #     # NJKBINS #
+1		C 		C		1.305		10.0		0.01		1.54			false		0		0		0	
+
+# ENDFILE #

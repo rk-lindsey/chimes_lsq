@@ -10,8 +10,8 @@
 #include <iomanip>
 #include <map>
 #include <sstream>
-#include<unistd.h>	// Used to detect whether i/o is going to terminal or is piped... will help us decide whether to use ANSI color codes
-#include<algorithm>
+#include <unistd.h>	// Used to detect whether i/o is going to terminal or is piped... will help us decide whether to use ANSI color codes
+#include <algorithm> // For specials vector-related functions (i.e. permute)
 
 // User-defined headers
 
@@ -1054,11 +1054,11 @@ int main(int argc, char* argv[])
 		header << "USE3BCH: true" << endl;
 	else
 		header << "USE3BCH: false" << endl;
-		
+	
 	if(CONTROLS.USE_4B_CHEBY)
 		header << "USE4BCH: true" << endl;
 	else
-		header << "USE4BCH: false" << endl;		
+		header << "USE4BCH: false" << endl;	
 	
 	header << endl << "PAIRTYP: " << ATOM_PAIRS[0].PAIRTYP << " ";
 	
@@ -1795,7 +1795,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			NPAIR = CONTROLS.NATMTYP*(CONTROLS.NATMTYP+1)/2;
 			ATOM_PAIRS.resize(NPAIR);
 			
-			// Set the default cheby range
+			// Set the default cheby range and the fcut type
 			
 			if (TEMP_TYPE == "CHEBYSHEV")
 			{
@@ -1803,6 +1803,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				{
 					ATOM_PAIRS[i].CHEBY_RANGE_LOW  = TMP_CHEBY_RANGE_LOW;
 					ATOM_PAIRS[i].CHEBY_RANGE_HIGH = TMP_CHEBY_RANGE_HIGH;
+					ATOM_PAIRS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;
 				}
 			}	
 			
@@ -2860,6 +2861,8 @@ cout << endl;
 				int 	ATOM_QUAD_ID_INT;
 				int		CURR_QUAD_IDX = 0;
 
+				vector<int> TMP_QUAD_SET(4);
+
 				// Create a list of each posible combination of atom quadruplets, i through
 				// l are given in ascending order
 				
@@ -2895,7 +2898,17 @@ cout << endl;
 								TMP_QUAD_PAIR    = ATOM_CHEMS[k] + ATOM_CHEMS[l]; 	// Define an ij pair
 								TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					// Append pair to string
 								
-								ATOM_QUAD_ID_INT = 1000*(i+1) + 100*(j+1) + 10+(k+1) + l+1;
+								TMP_QUAD_SET[0] = i;
+								TMP_QUAD_SET[1] = j;
+								TMP_QUAD_SET[2] = k;
+								TMP_QUAD_SET[3] = l;
+								
+								// Always construct ATOM_QUAD_ID_INT lookup key based on atom types in decending order
+								
+								sort   (TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
+								reverse(TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
+
+								ATOM_QUAD_ID_INT = 1000*(TMP_QUAD_SET[0]+1) + 100*(TMP_QUAD_SET[1]+1) + 10+(TMP_QUAD_SET[2]+1) + TMP_QUAD_SET[3]+1;
 								
 								INT_QUAD_MAP        .insert(make_pair(ATOM_QUAD_ID_INT,QUAD_MAP[TMP_QUAD_SIXLET]));	
 								INT_QUAD_MAP_REVERSE.insert(make_pair(QUAD_MAP[TMP_QUAD_SIXLET], ATOM_QUAD_ID_INT));	
@@ -2908,8 +2921,8 @@ cout << endl;
 									cout<< fixed << setw(2) << right << j;
 									cout<< fixed << setw(2) << right << k;
 									cout<< fixed << setw(2) << right << l;
-									cout<< " Triplet name: "           << setw(12) << right << TMP_QUAD_SIXLET;
-									cout<< " Unique Triplet index: "   << setw(4) << right << INT_QUAD_MAP[CURR_QUAD_IDX] << endl;
+									cout<< " Quadruplet name: "           << setw(12) << right << TMP_QUAD_SIXLET;
+									cout<< " Unique quadruplet index: "   << setw(4) << right << INT_QUAD_MAP[CURR_QUAD_IDX] << endl;
 								}
 								
 								CURR_QUAD_IDX++;
@@ -3050,6 +3063,7 @@ if ( RANK == 0 )
 				{
 					 NEIGHBOR_LIST.MAX_CUTOFF    = ATOM_PAIRS[TEMP_INT].S_MAXIM;
 					 NEIGHBOR_LIST.MAX_CUTOFF_3B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
+					 NEIGHBOR_LIST.MAX_CUTOFF_4B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
 				}	
 				
 				cin >> LINE; cin.ignore();

@@ -150,7 +150,7 @@ struct JOB_CONTROL
 	int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
 	int    FREQ_BACKUP;       // How often to write backup files for restart.
 	bool   PRINT_VELOC;			// If true, write out the velocities 
-	bool   RESTART ;          // If true, read a restart file.
+	bool   RESTART;          // If true, read a restart file.
 	int    FREQ_VELOC;
 	int    FREQ_ENER;			// Replaces energy_freq... How often to output energy
 	bool   PRINT_FORCE;			// Replaces if_output_force... If TRUE, write out calculated forces.	
@@ -399,6 +399,11 @@ struct TRIP_FF : public TRIPLETS
 	vector<double> 	PARAMS;
 };
 
+struct QUAD_FF : public QUADRUPLETS
+{
+	vector<double> 	PARAMS;
+};
+
 
 struct PES_PLOTS
 {
@@ -474,146 +479,30 @@ static const ANSI_COLORS COUT_STYLE  =
 
 };
 	
-/*
-
-class CELLS
-{
-	public:
-		
-		int MAX_CUTOFF;		// What is the maximum force field cutoff?
-		int TOTAL_CELLS;	// What is the total number of cells we have?
-		bool USE_CELLS;		// Don't use cells if our box is very small
-		
-		void INITIALIZE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
-		
-		CELLS();
-		~CELLS();
-	
-	private:
-		
-		XYZ WIDTHS;			// What are the x, y, and z widths of each cell?
-		XYZ_INT N_CELLS;	// What is the number of cells in the x, y, and z direction?
-		
-		vector<XYZ>			LOWER_BOUNDS;	// What is the lower-bound allowed distance for each cell?
-		vector<XYZ>			UPPER_BOUNDS;
-		vector<int>			MY_CELL;		// What cell does each atom belong to?
-		vector<vector<int>> NEARBY;			// What are the immediate neighbors of each cell?	
-};
-
-void CELLS::INITIALIZE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, int MAX_FF_CUTOFF)
-{
-	// Set the max cutoff
-	
-	MAX_CUTOFF = MAX_FF_CUTOFF;
-	
-	// Set the possible number of cells in x, y, and z, and the total resulting
-	// number of cells
-	
-	N_CELLS.X = floor(SYSTEM.BOXDIM.X/MAX_CUTOFF);
-	N_CELLS.Y = floor(SYSTEM.BOXDIM.Y/MAX_CUTOFF);
-	N_CELLS.Z = floor(SYSTEM.BOXDIM.Z/MAX_CUTOFF);
-	
-	TOTAL_CELLS = N_CELLS.X * N_CELLS.Y * N_CELLS.Z;
-	
-	// Set the width of each box in x, y, and z
-
-	WIDTHS.X = SYSTEM.BOXDIM.X/N_CELLS.X;
-	WIDTHS.Y = SYSTEM.BOXDIM.Y/N_CELLS.Y;
-	WIDTHS.Z = SYSTEM.BOXDIM.Z/N_CELLS.Z;
-	
-	// Set the upper and lower bounds for each box. We'll
-	// use >= lower, < upper
-	
-	XYZ TMP_VALS;
-	
-	TMP_VALS.X = 0;
-	TMP_VALS.Y = 0;
-	TMP_VALS.Z = 0;
-	
-	LOWER_BOUNDS.resize(TOTAL_CELLS);
-	UPPER_BOUNDS.resize(TOTAL_CELLS);
-	
-	// Temporary variables to help set nearest neighbor cells
-	
-	vector<XYZ> MIDPOINT(TOTAL_CELLS);	
-	NEARBY.resize(TOTAL_CELLS);
-	
-	int CURRENT_CELL = 0;
-	
-	for(int i=0; i<N_CELLS.X; i++)
-	{
-		for(int j=0; j<N_CELLS.Y; j++)
-		{
-			for(int k=0; k<N_CELLS.Z; k++)
-			{
-				LOWER_BOUNDS[CURRENT_CELL].X = TMP_VALS.X;
-				LOWER_BOUNDS[CURRENT_CELL].Y = TMP_VALS.Y;
-				LOWER_BOUNDS[CURRENT_CELL].Z = TMP_VALS.Z;
-				
-				TMP_VALS.X += (i+1)*WIDTHS.X;
-				TMP_VALS.Y += (j+1)*WIDTHS.Y;
-				TMP_VALS.Z += (k+1)*WIDTHS.Z;
-				
-				UPPER_BOUNDS[CURRENT_CELL].X = TMP_VALS.X;
-				UPPER_BOUNDS[CURRENT_CELL].Y = TMP_VALS.Y;
-				UPPER_BOUNDS[CURRENT_CELL].Z = TMP_VALS.Z;
-				
-				MIDPOINT[CURRENT_CELL].X = 0.5*(UPPER_BOUNDS.X + LOWER_BOUNDS.X);
-				MIDPOINT[CURRENT_CELL].Y = 0.5*(UPPER_BOUNDS.Y + LOWER_BOUNDS.Y);
-				MIDPOINT[CURRENT_CELL].Z = 0.5*(UPPER_BOUNDS.Z + LOWER_BOUNDS.Z);
-
-				CURRENT_CELL++;			
-			}
-		}
-	}
-	
-	// Determine the neighboring cells for each cell
-	// Remember, PBC applies here! ... Also, include
-	// "self" as a neighbor, because we want to compute interactions 
-	// for atoms within the cell
-	
-	XYZ TMP_D;
-	double len_diag = sqrt(WIDTHS.X*WIDTHS.X + WIDTHS.Y*WIDTHS.Y + WIDTHS.Z*WIDTHS.Z);
-	
-	for(int i=0; i<TOTAL_CELLS; i++)
-	{
-		for (int j=i; j<TOTAL_CELLS; j++)
-		{
-			TMP_D.X = MIDPOINT[j].X - MIDPOINT[i].X;
-			TMP_D.Y = MIDPOINT[j].Y - MIDPOINT[i].Y;
-			TMP_D.Z = MIDPOINT[j].Z - MIDPOINT[i].Z;
-			
-			TMP_D.X -= floor( 0.5 + TMP_D.X/SYSTEM.BOXDIM.X )  * SYSTEM.BOXDIM.X;
-			TMP_D.Y -= floor( 0.5 + TMP_D.Y/SYSTEM.BOXDIM.Y )  * SYSTEM.BOXDIM.Y;
-			TMP_D.Z -= floor( 0.5 + TMP_D.Z/SYSTEM.BOXDIM.Z )  * SYSTEM.BOXDIM.Z;
-			
-			if( (sqrt(TMP_D.X*TMP_D.X + TMP_D.Y*TMP_D.Y + TMP_D.Z*TMP_D.Z)) < len_diag ) // Then its a neighbor.. add both lists
-			{
-				NEARBY[i].push_back(j);
-				NEARBY[j].push_back(i);
-			}
-		}
-	}
-	
-	
-	
-	
-	
-}
-
-*/
-
-
 class INTERACTION_3B
 // A 3-body interaction.
 {
 	// Indices ordered such that i < parent[j] < parent[k].
 	// a1 is a non-ghost atom.
-public:
-	int a1 ;  // Atom 1.
-	int a2 ;  // Atom 2.
-	int a3 ;  // Atom 3.
-} ;
+	
+	public:
+		int a1;  // Atom 1.
+		int a2;  // Atom 2.
+		int a3;  // Atom 3.
+};
+
+class INTERACTION_4B
+// A 4-body interaction.
+{
+	// Indices ordered such that i < parent[j] < parent[k] < parent[l].
+	// a1 is a non-ghost atom.
+	
+	public:
+		int a1;  // Atom 1.
+		int a2;  // Atom 2.
+		int a3;  // Atom 3.
+		int a4;  // Atom 4.
+};
   
 class NEIGHBORS
 {
@@ -627,7 +516,8 @@ class NEIGHBORS
 		void FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);		// Updates ghost atoms based on pbc-wrapped real atoms
 		void DO_UPDATE_SMALL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
 		void DO_UPDATE_BIG   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
-		void UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) ;  // Update 3-Body interaction list.
+		void UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS);  // Update 3-Body interaction list.
+		void UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS);  // Update 4-Body interaction list.
 		
 	public:
 
@@ -637,6 +527,7 @@ class NEIGHBORS
 		double MAX_VEL;
 		double MAX_CUTOFF;					// The maximum of all force field outer cutoffs (r_max and s_max)
 		double MAX_CUTOFF_3B;
+		double MAX_CUTOFF_4B;
 		double EWALD_CUTOFF;           		// The cutoff for Ewald interactions.
 		double UPDATE_FREQ;            		// Target update frequency.
 		
@@ -644,8 +535,10 @@ class NEIGHBORS
 		vector<vector<int> > LIST_EWALD;	// The Ewald neighbor list. Of size [atoms][neighbors]
 		vector<vector<int> > LIST_UNORDERED;// All neighbors of particle i with i not equal to j.
 		vector<vector<int> > LIST_3B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
+		vector<vector<int> > LIST_4B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
 
-		vector<INTERACTION_3B> LIST_3B_INT ;    // A flat list of all 3-body interactions.
+		vector<INTERACTION_3B> LIST_3B_INT;    // A flat list of all 3-body interactions.
+		vector<INTERACTION_4B> LIST_4B_INT;    // A flat list of all 3-body interactions.
 
 		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Will check if lists need updating, and will call DO_UPDATE do so if need be
 		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE);
@@ -712,8 +605,8 @@ class CONSTRAINT
 		
 		string STYLE;		// NPT, NVT-MTK, NVT-SCALE, NVE
 
-		void WRITE(ofstream &STREAM) ;  // Write variables to file.
-		void READ(ifstream &STREAM) ;   // Read variables from file.
+		void WRITE(ofstream &STREAM);  // Write variables to file.
+		void READ(ifstream &STREAM);   // Read variables from file.
 
 		void INITIALIZE          (string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS); 
 		void UPDATE_COORDS       (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
@@ -732,12 +625,12 @@ class CONSTRAINT
 class THERMO_AVG {
 // Time average of thermodynamic properties.
 public:
-	double TEMP_SUM ;
-	double PRESS_SUM ;
-	XYZ STRESS_TENSOR_SUM ;
-	void WRITE(ofstream &fout) ;
-	void READ(ifstream &fin) ;
-} ;
+	double TEMP_SUM;
+	double PRESS_SUM;
+	XYZ STRESS_TENSOR_SUM;
+	void WRITE(ofstream &fout);
+	void READ(ifstream &fin);
+};
 
 
 
@@ -759,16 +652,16 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 //
 //////////////////////////////////////////
 
-void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> & PAIR_TRIPLETS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS,FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, map<int,int> & INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST);
+void ZCalc_Deriv         (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> & PAIR_TRIPLETS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS,FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, map<int,int> & INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST);
 void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
 
-void SubtractEwaldForces(FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
+void SubtractEwaldForces (FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
 
-void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
+void ZCalc_Ewald         (FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
 
 void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc, XYZ boxdim);
 
-void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS);
+void ZCalc_Ewald_Deriv   (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS);
 
 //////////////////////////////////////////
 //
@@ -776,7 +669,7 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 //
 //////////////////////////////////////////
 
-void   ZCalc                    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
+void   ZCalc                    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, vector<QUAD_FF> & FF_4BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, map<int,int> & INT_QUAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
 void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
 double get_dist                 (const FRAME & SYSTEM, XYZ & RAB, int a1, int a2);
 
@@ -786,9 +679,9 @@ double get_dist                 (const FRAME & SYSTEM, XYZ & RAB, int a1, int a2
 //
 //////////////////////////////////////////
 
-void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_CHARGES, bool INCLUDE_PENALTY, string FILE_TAG);
-void Print_3B_Cheby(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk);
-void Print_3B_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
+void Print_Cheby             (vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_CHARGES, bool INCLUDE_PENALTY, string FILE_TAG);
+void Print_3B_Cheby          (JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk);
+void Print_3B_Cheby_Scan     (JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
 void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan);
 
 
@@ -801,7 +694,7 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// Overloaded.. compute differentely if for main or new velocities
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// Overloaded.. compute differentely if for main or new velocities
 
-void build_layers(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
+void build_layers      (FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
 void SORT_THREE_DESCEND(int & a, int & b, int & c);
 
 void enable_fp_exceptions();

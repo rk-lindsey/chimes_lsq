@@ -22,6 +22,8 @@
 #include<cstring>
 #include<string>
 #include<sstream>
+#include<map>
+#include<algorithm> // For specials vector-related functions (i.e. permute)
 
 // Used to detect whether i/o is going to terminal or is piped... 
 // will help us decide whether to use ANSI color codes
@@ -44,18 +46,14 @@ using namespace std;
 // Define function headers -- general
 
 static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
-void      numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-									  vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, 
-									  NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
+void        numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, vector<QUAD_FF> & FF_4BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, map<int,int> & INT_QUAD_MAP, NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
 
 // Define function headers -- MPI
 
-static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
-static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
-static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, 
-							  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
-static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL,
-										  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
+static void sum_forces         (vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
+static void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
+static void write_xyzv         (FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
+static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
 
 // Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
 
@@ -63,7 +61,7 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 
 	// Helper functions
 
-	void Write_Lammps_datafile(const FRAME & SYSTEM, const int & NATMTYP, const vector<double> & TMP_MASS);
+	void Write_Lammps_datafile (const FRAME & SYSTEM, const int & NATMTYP, const vector<double> & TMP_MASS);
 	void Write_Lammps_inputfile(const JOB_CONTROL & CONTROLS); 
 
 	// callback function for LAMMPS simulation
@@ -102,8 +100,12 @@ int RANK;		// Index of current processor
 	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
 	map<string,int> TRIAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
 	map<int,string> TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
+	map<string,int> QUAD_MAP;			// Input is 6 of any ATOM_PAIRS.PRPR_NM pairs, output is a quadruplet type index
+	map<int,string> QUAD_MAP_REVERSE;	// Input/output is the reverse of QUAD_MAP
+	
 	vector<PAIR_FF> FF_2BODY;			// Holds all 2-body parameters
 	vector<TRIP_FF> FF_3BODY; 			// Holds all 3-body parameters
+	vector<QUAD_FF> FF_4BODY; 			// Holds all 3-body parameters
 	NEIGHBORS		NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
 	
 #endif
@@ -111,8 +113,9 @@ int RANK;		// Index of current processor
 	
 	// Define my new integer maps
 	
-	vector<int>	INT_PAIR_MAP;
-	vector<int>	INT_TRIAD_MAP;	
+	vector<int>	 INT_PAIR_MAP;
+	vector<int>	 INT_TRIAD_MAP;	
+	map<int,int> INT_QUAD_MAP;	// maps for collections of 4 atoms
 	
 
 ////////////////////////////////////////////////////////////
@@ -168,6 +171,7 @@ int main(int argc, char* argv[])
 
 		vector<PAIR_FF> FF_2BODY;			// Holds all 2-body parameters
 		vector<TRIP_FF> FF_3BODY; 			// Holds all 3-body parameters
+		vector<QUAD_FF> FF_4BODY; 			// Holds all 4-body parameters
 		
 		// Define the mapping variables that let us figure out which FF params to use for a given pair/triplet of pairs
 		
@@ -175,6 +179,8 @@ int main(int argc, char* argv[])
 		map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
 		map<string,int> TRIAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
 		map<int,string> TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
+		map<string,int> QUAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
+		map<int,string> QUAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
 		
 
 		
@@ -1208,9 +1214,10 @@ int main(int argc, char* argv[])
 
 	string  TEMP_SEARCH_2B = "some default text";
 	string  TEMP_SEARCH_3B = "some default text";
+	string  TEMP_SEARCH_4B = "some default text";
 	string	TEMP_TYPE;
-	int     NO_PAIRS, NO_TRIPS;
-	int		TMP_TERMS1, TMP_TERMS2;;
+	int     NO_PAIRS, NO_TRIPS, NO_QUADS;
+	int		TMP_TERMS1, TMP_TERMS2, TMP_TERMS3;
 	double	TMP_LOW  = -1;
 	double 	TMP_HIGH =  1;
 	
@@ -1238,6 +1245,8 @@ int main(int argc, char* argv[])
 					STREAM_PARSER.str(LINE);	
 					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
 					
+					// Setup force cutoff type for 3-body
+					
 					FF_3BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
 					FCUT_TYPE cutoff_type = FF_3BODY[0].FORCE_CUTOFF.TYPE ;
 					
@@ -1260,8 +1269,35 @@ int main(int argc, char* argv[])
 					
 					// Copy all class members.
 					for(int i=1; i<FF_3BODY.size(); i++)
+						FF_3BODY[i].FORCE_CUTOFF = FF_3BODY[0].FORCE_CUTOFF;
+					
+					if(FF_2BODY[0].SNUM_4B_CHEBY>0)
 					{
-						FF_3BODY[i].FORCE_CUTOFF = FF_3BODY[0].FORCE_CUTOFF ;
+						// Setup force cutoff type for 4-body
+					
+						FF_4BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
+						cutoff_type = FF_4BODY[0].FORCE_CUTOFF.TYPE ;
+					
+						if( cutoff_type == FCUT_TYPE::SIGMOID 
+							 || cutoff_type == FCUT_TYPE::CUBSIG 
+							 || cutoff_type == FCUT_TYPE::CUBESTRETCH 
+							 || cutoff_type == FCUT_TYPE::SIGFLT)
+						{
+							STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.STEEPNESS;
+							STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.OFFSET;
+						
+							if(TEMP_STR == "SIGFLT")
+								cin >> FF_4BODY[0].FORCE_CUTOFF.HEIGHT;
+						}
+					
+						STREAM_PARSER.str("");
+						STREAM_PARSER.clear();	
+					
+						FF_4BODY[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
+					
+						// Copy all class members.
+						for(int i=1; i<FF_4BODY.size(); i++)
+							FF_4BODY[i].FORCE_CUTOFF = FF_4BODY[0].FORCE_CUTOFF;							
 					}
 				}
 				
@@ -1274,7 +1310,10 @@ int main(int argc, char* argv[])
 					
 					#if VERBOSITY == 1
 						if(RANK==0)
+						{
 							cout << "	Note: Storing original 2-body r_min values for 2/3-body switching: " << endl;
+							cout << "   WARINGING!!!! ...This feature isn't tested and may be incompatible with neighbor lists." << endl;
+						}
 					#endif	
 			
 					for(int i=0;i<TMP_TERMS1; i++)
@@ -1550,6 +1589,182 @@ int main(int argc, char* argv[])
 									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z << endl;
 							}
 						#endif	
+							
+						
+					}
+					
+					STREAM_PARSER.str("");
+					STREAM_PARSER.clear();
+	
+				}
+				
+				else if(LINE.find("SPECIAL 4B S_MINIM:") != string::npos)
+				{
+					STREAM_PARSER.str(LINE);
+	
+					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+	
+					#if VERBOSITY == 1
+						if(RANK==0)
+							cout << "	Note: Setting specific 4-body r_min values: " << endl;
+					#endif	
+
+					double TMP_VAL;
+					
+					vector<string>  TMPS(6);	
+					vector<string> TARGS(6);
+		
+					for(int i=0; i<TMP_TERMS1; i++)
+					{
+						getline(PARAMFILE,LINE);
+						
+						STREAM_PARSER.str("");
+						STREAM_PARSER.clear();
+						
+						STREAM_PARSER.str(LINE);
+						STREAM_PARSER >> TEMP_STR;	// Just an index for the pair type
+						STREAM_PARSER >> TEMP_STR;	// Which 4-body type is it?
+						
+						for(int j=0; j<6; j++)
+							STREAM_PARSER >> TMPS[j]; // What are the constituent atom pair types?
+
+						// Check that triplet pair types are correct
+						
+						for(int j=0; j<6; j++)
+						{
+							try
+							{
+								TMPS[j] = FF_2BODY[ PAIR_MAP[ TMPS[j] ] ].PRPR_NM;
+							}
+							catch(...)
+							{
+								cout << "ERROR: Unknown quadruplet pair for special outer cutoff." << endl;
+								cout << "		quadruplet type:           " << TEMP_STR << endl;
+								cout << "		First distance, pair type: " << TMPS[j] << endl;
+							}
+						}
+						
+						for(int j=0; j<6; j++)
+							TARGS[j] = FF_2BODY[ PAIR_MAP[ FF_4BODY[QUAD_MAP[TEMP_STR]].ATOM_PAIRS[j] ] ].PRPR_NM;
+						
+						// Read and store the cutoffs
+						
+						for(int j=0; j<6; j++)
+						{
+							STREAM_PARSER >> TMP_VAL;
+							
+							for(int k=0; k<6; k++)
+								if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[k] == -1) )
+									FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[k] = TMP_VAL;
+								
+						}
+
+
+						#if VERBOSITY == 1
+							if(RANK==0)
+							{
+								cout << "		" << TEMP_STR << " ( " 
+									 << TARGS[0] << ", " 
+								     << TARGS[1] << ", " 
+									 << TARGS[2] << ", " 
+									 << TARGS[3] << ", " 
+									 << TARGS[4] << ", " 
+									 << TARGS[5] << "): " 
+								     << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[0] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[1] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[2] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[3] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[4] << ", "										 										 
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[5] << endl;
+							}
+						#endif	
+					}
+					
+					STREAM_PARSER.str("");
+					STREAM_PARSER.clear();
+	
+				}
+				
+				else if(LINE.find("SPECIAL 4B S_MAXIM:") != string::npos)
+				{
+					STREAM_PARSER.str(LINE);
+	
+					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+	
+					#if VERBOSITY == 1
+						if(RANK==0)
+							cout << "	Note: Setting specific 4-body r_max values: " << endl;
+					#endif	
+
+					double TMP_VAL;
+					
+					vector<string>  TMPS(6);	
+					vector<string> TARGS(6);
+		
+					for(int i=0; i<TMP_TERMS1; i++)
+					{
+						getline(PARAMFILE,LINE);
+						
+						STREAM_PARSER.str("");
+						STREAM_PARSER.clear();
+						
+						STREAM_PARSER.str(LINE);
+						STREAM_PARSER >> TEMP_STR;	// Just an index for the pair type
+						STREAM_PARSER >> TEMP_STR;	// Which 4-body type is it?
+						
+						for(int j=0; j<6; j++)
+							STREAM_PARSER >> TMPS[j]; // What are the constituent atom pair types?
+
+						// Check that triplet pair types are correct
+						
+						for(int j=0; j<6; j++)
+						{
+							try
+							{
+								TMPS[j] = FF_2BODY[ PAIR_MAP[ TMPS[j] ] ].PRPR_NM;
+							}
+							catch(...)
+							{
+								cout << "ERROR: Unknown quadruplet pair for special outer cutoff." << endl;
+								cout << "		quadruplet type:           " << TEMP_STR << endl;
+								cout << "		First distance, pair type: " << TMPS[j] << endl;
+							}
+						}
+						
+						for(int j=0; j<6; j++)
+							TARGS[j] = FF_2BODY[ PAIR_MAP[ FF_4BODY[QUAD_MAP[TEMP_STR]].ATOM_PAIRS[j] ] ].PRPR_NM;
+						
+						// Read and store the cutoffs
+						
+						for(int j=0; j<6; j++)
+						{
+							STREAM_PARSER >> TMP_VAL;
+							
+							for(int k=0; k<6; k++)
+								if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[k] == -1) )
+									FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[k] = TMP_VAL;
+								
+						}
+
+
+						#if VERBOSITY == 1
+							if(RANK==0)
+							{
+								cout << "		" << TEMP_STR << " ( " 
+									 << TARGS[0] << ", " 
+								     << TARGS[1] << ", " 
+									 << TARGS[2] << ", " 
+									 << TARGS[3] << ", " 
+									 << TARGS[4] << ", " 
+									 << TARGS[5] << "): " 
+								     << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[0] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[1] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[2] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[3] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[4] << ", "										 										 
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[5] << endl;
+							}
+						#endif	
 					}
 					
 					STREAM_PARSER.str("");
@@ -1571,6 +1786,12 @@ int main(int argc, char* argv[])
 					cout << "	Using the following fcut style for 3B Chebyshev interactions: " << 
 						FF_3BODY[0].FORCE_CUTOFF.to_string() << endl;
 					cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << FF_3BODY[0].FORCE_CUTOFF.STEEPNESS << " " << FF_3BODY[0].FORCE_CUTOFF.OFFSET << endl;
+				}
+				if(FF_4BODY.size()>0)
+				{
+					cout << "	Using the following fcut style for 4B Chebyshev interactions: " << 
+						FF_4BODY[0].FORCE_CUTOFF.to_string() << endl;
+					cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << FF_4BODY[0].FORCE_CUTOFF.STEEPNESS << " " << FF_4BODY[0].FORCE_CUTOFF.OFFSET << endl;
 				}
 			}
 
@@ -1607,6 +1828,31 @@ int main(int argc, char* argv[])
 			
 			if(RANK==0)
 				cout << endl;
+			
+			
+			// Update neighbor list cutoffs for 3- and 4-body interactions
+			
+			double MAX_FOUND_3B = 0;
+			double MAX_FOUND_4B = 0;
+			
+			for (int i=0; i<FF_3BODY.size(); i++)
+			{
+				if(FF_3BODY[i].S_MAXIM_3B.X > MAX_FOUND_3B)
+					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM_3B.X;
+				if(FF_3BODY[i].S_MAXIM_3B.Y > MAX_FOUND_3B)
+					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM_3B.Y;
+				if(FF_3BODY[i].S_MAXIM_3B.Z > MAX_FOUND_3B)
+					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM_3B.Z;
+			}
+			
+			for (int i=0; i<FF_4BODY.size(); i++)
+			{
+				for(int j=0; j<6; j++)
+					if(FF_4BODY[i].S_MAXIM_4B[j] > MAX_FOUND_4B)
+						MAX_FOUND_4B = FF_4BODY[i].S_MAXIM_4B[j];
+			}
+			
+			
 			
 			PARAMFILE.close();
 			break;
@@ -1650,6 +1896,14 @@ int main(int argc, char* argv[])
 				CONTROLS.USE_3B_CHEBY = true;
 			else
 				CONTROLS.USE_3B_CHEBY = false;
+			
+			PARAMFILE >> TEMP_STR >> TEMP_STR;
+			if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
+				CONTROLS.USE_4B_CHEBY = true;
+			else
+				CONTROLS.USE_4B_CHEBY = false;
+			
+			
 			if(RANK==0)
 			{
 				cout << "		...Compute electrostatics?      " << boolalpha << CONTROLS.USE_COULOMB << endl;
@@ -1657,6 +1911,7 @@ int main(int argc, char* argv[])
 				cout << "		...Compute ReaxFF overbonding?  " << boolalpha << CONTROLS.USE_OVERCOORD << endl;
 				cout << "		...Use fit overbonding param?   " << boolalpha << CONTROLS.FIT_POVER << endl;
 				cout << "		...Use 3-body Cheby params?     " << boolalpha << CONTROLS.USE_3B_CHEBY << endl;
+				cout << "		...Use 4-body Cheby params?     " << boolalpha << CONTROLS.USE_4B_CHEBY << endl;
 			
 				cout << "	...Read FF controls..." << endl;	
 			}
@@ -1686,6 +1941,7 @@ int main(int argc, char* argv[])
 			{
 				STREAM_PARSER >> TMP_TERMS1;
 				STREAM_PARSER >> TMP_TERMS2;
+				STREAM_PARSER >> TMP_TERMS3;
 
 				if (STREAM_PARSER >>  TMP_LOW)
 				{
@@ -1776,6 +2032,7 @@ int main(int argc, char* argv[])
 				{
 					 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
 					 NEIGHBOR_LIST.MAX_CUTOFF_3B = FF_2BODY[i].S_MAXIM;
+					 NEIGHBOR_LIST.MAX_CUTOFF_4B = FF_2BODY[i].S_MAXIM;
 				}
 				 	
 				PARAMFILE >> FF_2BODY[i].S_DELTA;
@@ -1835,6 +2092,16 @@ int main(int argc, char* argv[])
 					
 					FF_2BODY[i].SNUM          = TMP_TERMS1;
 					FF_2BODY[i].SNUM_3B_CHEBY = TMP_TERMS2;
+					FF_2BODY[i].SNUM_4B_CHEBY = TMP_TERMS3;
+					
+					// Setup force cutoff type for 2-body
+					
+					FF_2BODY[0].FORCE_CUTOFF.set_type("CUBIC");
+					FF_2BODY[0].FORCE_CUTOFF.BODIEDNESS = 2 ;
+					
+					// Copy all class members.
+					for(int i=1; i<FF_2BODY.size(); i++)
+						FF_2BODY[i].FORCE_CUTOFF = FF_2BODY[0].FORCE_CUTOFF;										
 				}
 				else if(TEMP_TYPE =="LJ")
 				{
@@ -1942,6 +2209,44 @@ int main(int argc, char* argv[])
 			
 			if(RANK==0)
 				cout << "	...Read FF triplet specifications..." << endl;
+			
+		}
+		
+		// Setup quadruplets
+		
+		else if(LINE.find("ATOM PAIR QUADRUPLETS: ") != string::npos)
+		{	
+			// Determine the number of pairs
+
+			STREAM_PARSER.str(LINE);
+			
+			STREAM_PARSER >> TEMP_STR;
+			STREAM_PARSER >> TEMP_STR;
+			STREAM_PARSER >> TEMP_STR;
+			STREAM_PARSER >> NO_QUADS;
+			
+			STREAM_PARSER.str("");
+			STREAM_PARSER.clear();	
+			
+			// Resize pair parameter object
+			
+			FF_4BODY.resize(NO_QUADS);	
+			
+			for (int i=0; i<NO_QUADS; i++)
+			{	
+				for(int j=0; j<6; j++)
+				{
+					FF_4BODY[i].S_MINIM_4B[j] = -1;
+					FF_4BODY[i].S_MAXIM_4B[j] = -1;
+				}
+			}	
+
+			TEMP_SEARCH_4B = "QUADRUPLET ";
+			TEMP_SEARCH_4B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type, and 2b and 3b are same pair type
+			TEMP_SEARCH_4B.append(" PARAMS");	
+			
+			if(RANK==0)
+				cout << "	...Read FF quadruplet specifications..." << endl;
 			
 		}
 		
@@ -2174,8 +2479,72 @@ int main(int argc, char* argv[])
 			}
 			
 			if (RANK==0)
-				cout << "	...Read 3-body FF params..." << endl << endl;;				
+				cout << "	...Read 3-body FF params..." << endl;;				
 		}
+		
+		// Read 4B parameters
+		
+		else if( (LINE.find(TEMP_SEARCH_4B) != string::npos) && CONTROLS.USE_4B_CHEBY) // "PAIR <PAIRTYPE> PARAMS"
+		{	
+			for(int i=0; i<NO_QUADS; i++)
+			{
+				getline(PARAMFILE,LINE);	// Blank line
+				getline(PARAMFILE,LINE);	// "QUADRUPLETYPE PARAMS: <index> <pair1> <pair2> <pair3> <pair4> <pair5> <pair6>"
+				 
+				STREAM_PARSER.str(LINE);
+				
+				STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
+				STREAM_PARSER >> FF_4BODY[i].QUADINDX;
+				
+				for(int j=0; j<6; j++)
+					STREAM_PARSER >> FF_4BODY[i].ATOM_PAIRS[j];
+
+				// Get rid of the colon at the end of the atom pair:
+				
+				FF_4BODY[i].ATOM_PAIRS[5] = FF_4BODY[i].ATOM_PAIRS[5].substr(0,FF_4BODY[i].ATOM_PAIRS[5].length()-1);
+							
+				STREAM_PARSER >> TEMP_STR;
+				STREAM_PARSER >> FF_4BODY[i].N_TRUE_ALLOWED_POWERS;
+				STREAM_PARSER >> TEMP_STR;
+				STREAM_PARSER >> FF_4BODY[i].N_ALLOWED_POWERS;
+				
+				FF_4BODY[i].ALLOWED_POWERS.resize(FF_4BODY[i].N_ALLOWED_POWERS);
+				FF_4BODY[i].EQUIV_INDICIES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
+				FF_4BODY[i].PARAM_INDICIES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
+				FF_4BODY[i].PARAMS        .resize(FF_4BODY[i].N_ALLOWED_POWERS);
+				
+				for(int j=0; j<FF_4BODY[i].ALLOWED_POWERS.size(); j++)
+					FF_4BODY[i].ALLOWED_POWERS[j].resize(6);
+					
+				
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();	
+
+				getline(PARAMFILE,LINE);	// Blank line
+				getline(PARAMFILE,LINE);	// header line
+
+				
+				getline(PARAMFILE,LINE);	// dashes line
+				 
+				for(int j=0; j<FF_4BODY[i].N_ALLOWED_POWERS; j++)
+				{
+					PARAMFILE >> TEMP_STR;
+					
+					for (int k=0; k<6; k++)
+						PARAMFILE >> FF_4BODY[i].ALLOWED_POWERS[j][k];
+
+
+					PARAMFILE >> FF_4BODY[i].EQUIV_INDICIES[j];
+					PARAMFILE >> FF_4BODY[i].PARAM_INDICIES[j];
+					PARAMFILE >> FF_4BODY[i].PARAMS        [j];
+					PARAMFILE.ignore();
+
+				} 
+			}
+			
+			if (RANK==0)
+				cout << "	...Read 4-body FF params..." << endl << endl;;				
+		}		
 		
 		// Read in the fit overbonding parameter
 		
@@ -2227,7 +2596,7 @@ int main(int argc, char* argv[])
 				cout << "	...Read FF pairmaps..." << endl << endl;					
 		}	
 		
-		// Read the pair maps
+		// Read the triplet maps
 		
 		else if(LINE.find("TRIPMAPS: ") != string::npos)
 		{
@@ -2254,6 +2623,35 @@ int main(int argc, char* argv[])
 			}
 			if (RANK==0)
 				cout << "	...Read FF triadmaps..." << endl;					
+		}	
+		
+		// Read the quadruplet maps
+
+		else if(LINE.find("QUADMAPS: ") != string::npos)
+		{
+			STREAM_PARSER.str(LINE);			
+			STREAM_PARSER >> TEMP_STR;
+			STREAM_PARSER >> TMP_TERMS1;	
+			STREAM_PARSER.str("");
+			STREAM_PARSER.clear();	
+			
+			if (RANK==0)
+				cout << "	Reading  " << TMP_TERMS1 << " quadruplets for mapping" << endl;
+			
+			for(int i=0; i<TMP_TERMS1; i++)
+			{
+				PARAMFILE >> TMP_TERMS2;
+				PARAMFILE >> TEMP_TYPE;
+				
+				if (RANK==0)
+					cout << "	........Reading quadruplet: " << TEMP_TYPE << " with mapped index: " << TMP_TERMS2 << endl; 
+				
+				QUAD_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
+				QUAD_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
+					
+			}
+			if (RANK==0)
+				cout << "	...Read FF quadmaps..." << endl;					
 		}	
 
 	}	
@@ -2354,6 +2752,40 @@ int main(int argc, char* argv[])
 					cout << "       " << setw(8) << FF_3BODY[i].EQUIV_INDICIES[j] << " ";
 					cout << "       " << setw(8) << FF_3BODY[i].PARAM_INDICIES[j] << " "; 
 					cout << "       " << setw(8) << FF_3BODY[i].PARAMS[j] << endl; 
+	
+				}
+
+				cout << endl;
+			}	 	
+		}
+		
+		if(FF_2BODY[0].SNUM_4B_CHEBY > 0)
+		{
+			cout << "	Quadruplet type and polynomial order per quadruplet: " << endl;
+			cout << "		" << FF_2BODY[0].PAIRTYP << " " << FF_2BODY[0].SNUM_4B_CHEBY << endl << endl;	
+			
+			cout << "	Interaction parameters for each triplet type: " << endl;
+
+			for(int i=0;i<FF_3BODY.size(); i++)
+			{
+				cout << "	" << FF_4BODY[i].QUADINDX;
+				for(int j=0; j<6; j++)
+					cout << " " << FF_4BODY[i].ATOM_PAIRS[j];
+				
+				cout << ": " << FF_4BODY[i].N_TRUE_ALLOWED_POWERS << " parameters, " << FF_4BODY[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
+				cout << "	     index  |  powers         |  equiv index  |  param index  | parameter " << endl;
+				cout << "	   ---------------------------------------------------------------------------" << endl;	
+
+				for(int j=0; j<FF_4BODY[i].ALLOWED_POWERS.size(); j++)
+				{
+					cout << "	      " << setw(6) << fixed << left << j << " ";
+					
+					for(int k=0; k<6; k++)
+						cout << " " << setw(2) << fixed << left << FF_4BODY[i].ALLOWED_POWERS[j][k]  << " ";					
+					
+					cout << "       " << setw(8) << FF_4BODY[i].EQUIV_INDICIES[j] << " ";
+					cout << "       " << setw(8) << FF_4BODY[i].PARAM_INDICIES[j] << " "; 
+					cout << "       " << setw(8) << FF_4BODY[i].PARAMS[j] << endl; 
 	
 				}
 
@@ -2536,6 +2968,8 @@ int main(int argc, char* argv[])
 
 		cout << "	Pair maps:" << endl;
 	}
+	
+	// Build 2-body fast maps
 
 	for(int i=0; i<NATMTYP; i++)
 	{
@@ -2561,6 +2995,8 @@ int main(int argc, char* argv[])
 
 		}
 	}
+	
+	// Build 3-body fast maps
 	
 	if(FF_2BODY[0].SNUM_3B_CHEBY > 0)
 	{
@@ -2621,6 +3057,77 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
+	}
+	
+	// Build 4-body fast maps
+	
+	if(FF_2BODY[0].SNUM_4B_CHEBY > 0)
+	{
+		string 	TMP_QUAD_SIXLET = "";
+		string 	TMP_QUAD_PAIR   = "";
+		
+		int 	ATOM_QUAD_ID_INT;
+		int		CURR_QUAD_IDX = 0;
+
+		// Create a list of each posible combination of atom quadruplets, i through
+		// l are given in ascending order
+		
+		for(int i=0; i<NATMTYP; i++)
+		{
+			for(int j=i; j<NATMTYP; j++)
+			{
+				for(int k=j; k<NATMTYP; k++)
+				{
+					for(int l=k; l<NATMTYP; l++)
+					{
+						// A given set of i-through-l defines a unique set of 4 atoms.
+						// Determine the corresponding quadruplet force field type
+						
+						TMP_QUAD_SIXLET = "";
+						TMP_QUAD_PAIR   = "";
+						
+						TMP_QUAD_PAIR    = TMP_ATOMTYPE[i] + TMP_ATOMTYPE[j]; 	// Define an ij pair
+						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    // Append pair to string
+						
+						TMP_QUAD_PAIR    = TMP_ATOMTYPE[i] + TMP_ATOMTYPE[k]; 	
+						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
+						
+						TMP_QUAD_PAIR    = TMP_ATOMTYPE[i] + TMP_ATOMTYPE[l]; 	
+						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
+						
+						TMP_QUAD_PAIR    = TMP_ATOMTYPE[j] + TMP_ATOMTYPE[k]; 	
+						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
+						
+						TMP_QUAD_PAIR    = TMP_ATOMTYPE[j] + TMP_ATOMTYPE[l]; 	
+						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
+						
+						TMP_QUAD_PAIR    = TMP_ATOMTYPE[k] + TMP_ATOMTYPE[l]; 	
+						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
+						
+						ATOM_QUAD_ID_INT = 1000*(i+1) + 100*(j+1) + 10+(k+1) + l+1;
+						
+						INT_QUAD_MAP        .insert(make_pair(ATOM_QUAD_ID_INT,QUAD_MAP[TMP_QUAD_SIXLET]));	
+						//INT_QUAD_MAP_REVERSE.insert(make_pair(QUAD_MAP[TMP_QUAD_SIXLET], ATOM_QUAD_ID_INT));	
+						
+						if(RANK == 0)
+						{
+							cout << "		";
+							cout<< "Atom type idxs: ";
+						    cout<< fixed << setw(2) << right << i;
+							cout<< fixed << setw(2) << right << j;
+							cout<< fixed << setw(2) << right << k;
+							cout<< fixed << setw(2) << right << l;
+							cout<< " Quadruplet name: "           << setw(12) << right << TMP_QUAD_SIXLET;
+							cout<< " Unique quadruplet index: "   << setw(4)  << right << INT_QUAD_MAP[CURR_QUAD_IDX] << endl;
+						}
+						
+						CURR_QUAD_IDX++;
+
+					}
+				}
+			}
+		}
+		
 	}
 	
 		
@@ -2779,7 +3286,7 @@ int main(int argc, char* argv[])
 		////////////////////////////////////////////////////////////
 
 		// Do the actual force calculation
-		ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);
+		ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, FF_4BODY, PAIR_MAP, TRIAD_MAP, INT_QUAD_MAP, NEIGHBOR_LIST);
 
 		// FOR MPI:		Synchronize forces, energy, and pressure.
 		
@@ -2983,7 +3490,8 @@ int main(int argc, char* argv[])
 		{
 			double PE_1, PE_2, dV; 
 			
-			numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST, PE_1, PE_2, dV);
+			numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, FF_4BODY, PAIR_MAP, TRIAD_MAP, INT_QUAD_MAP, NEIGHBOR_LIST, PE_1, PE_2, dV);
+			
 			#ifdef USE_MPI
 				MPI_Barrier(MPI_COMM_WORLD);
 				MPI_Allreduce(MPI_IN_PLACE, &PE_1,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);

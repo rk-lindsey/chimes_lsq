@@ -15,6 +15,7 @@ NEIGHBORS::NEIGHBORS()		// Constructor
 	DISPLACEMENT  =  0.0;
 	MAX_CUTOFF    =  0.0;
 	MAX_CUTOFF_3B =  0.0;
+	MAX_CUTOFF_4B =  0.0;
 	FIRST_CALL    = true;
 	SECOND_CALL   = true;
 	USE           = false;
@@ -37,6 +38,7 @@ void NEIGHBORS::INITIALIZE(FRAME & SYSTEM)		// (overloaded) class constructor --
 		LIST_EWALD    .resize(SYSTEM.ATOMS);
 		LIST_UNORDERED.resize(SYSTEM.ATOMS);
 		LIST_3B       .resize(SYSTEM.ALL_ATOMS);
+		LIST_4B       .resize(SYSTEM.ALL_ATOMS);
 	}
 }
 
@@ -93,11 +95,11 @@ void NEIGHBORS::FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	{	
 		int TEMP_IDX = SYSTEM.ATOMS;	
 
-		for(int n1 = -CONTROLS.N_LAYERS ; n1<=CONTROLS.N_LAYERS; n1++)
+		for(int n1 = -CONTROLS.N_LAYERS; n1<=CONTROLS.N_LAYERS; n1++)
 		{
-			for(int n2 = -CONTROLS.N_LAYERS ; n2<=CONTROLS.N_LAYERS; n2++)
+			for(int n2 = -CONTROLS.N_LAYERS; n2<=CONTROLS.N_LAYERS; n2++)
 			{
-				for(int n3 = -CONTROLS.N_LAYERS ; n3<=CONTROLS.N_LAYERS; n3++)
+				for(int n3 = -CONTROLS.N_LAYERS; n3<=CONTROLS.N_LAYERS; n3++)
 				{	
 					if (n1 == 0 && n2 == 0 && n3 == 0 ) 
 						continue;
@@ -124,8 +126,8 @@ void NEIGHBORS::FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		
 		if ( TEMP_IDX != SYSTEM.ALL_ATOMS ) 
 		{
-			printf("Error updating layers\n") ;
-			exit(1) ;
+			printf("Error updating layers\n");
+			exit(1);
 		}
 	}	
 }
@@ -141,7 +143,10 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		DO_UPDATE_BIG(SYSTEM, CONTROLS);
 
 	if ( CONTROLS.USE_3B_CHEBY ) 
-	  UPDATE_3B_INTERACTION(SYSTEM, CONTROLS) ;
+	  UPDATE_3B_INTERACTION(SYSTEM, CONTROLS);
+	
+	if ( CONTROLS.USE_3B_CHEBY ) 
+	  UPDATE_4B_INTERACTION(SYSTEM, CONTROLS);
 }	
 void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)	
 {
@@ -161,12 +166,13 @@ void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			LIST_EWALD    [a1].clear();
 
 			LIST_3B[a1].clear();
+			LIST_4B[a1].clear();
 		}
 	}
 
 	for(int a1=0; a1<SYSTEM.ATOMS; a1++)
 	{
-		for (int a2=0 ; a2<SYSTEM.ALL_ATOMS; a2++)
+		for (int a2=0; a2<SYSTEM.ALL_ATOMS; a2++)
 		{
 			if(a2 == a1)
 				continue;
@@ -185,7 +191,10 @@ void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 					LIST_EWALD[a1].push_back(a2);	
 				
 				if (rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
-					LIST_3B[a1].push_back(a2);		
+					LIST_3B[a1].push_back(a2);	
+				
+				if (rlen < MAX_CUTOFF_4B + RCUT_PADDING)	
+					LIST_4B[a1].push_back(a2);		
 			}
 		}
 	}
@@ -208,7 +217,8 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		LIST          .resize(SYSTEM.ATOMS);	
 		LIST_EWALD    .resize(SYSTEM.ATOMS);	
 		LIST_UNORDERED.resize(SYSTEM.ATOMS);	
-		LIST_3B       .resize(SYSTEM.ATOMS);	
+		LIST_3B       .resize(SYSTEM.ATOMS);
+		LIST_4B       .resize(SYSTEM.ATOMS);	
 	}
 	
 	// Find maximum distance to search for neighbors.
@@ -278,6 +288,7 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			LIST_UNORDERED[a1].clear();
 			LIST_EWALD    [a1].clear();
 			LIST_3B       [a1].clear();
+			LIST_4B       [a1].clear();
 		}
 		
 		XYZ_INT BIN_IDX_a1;
@@ -338,7 +349,10 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 								LIST_EWALD[a1].push_back(a2);		
 
 							if(rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
-								LIST_3B[a1].push_back(a2);		
+								LIST_3B[a1].push_back(a2);
+							
+							if(rlen < MAX_CUTOFF_4B + RCUT_PADDING)	
+								LIST_4B[a1].push_back(a2);	
 						}	
 					}
 				}
@@ -360,7 +374,7 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	if(FIRST_CALL)	// Then start from scratch by cycling through all atom (and layer atom) pairs
 	{		
 		if (!USE) 
-			RCUT_PADDING = 1.0e10 ;
+			RCUT_PADDING = 1.0e10;
 		
 		if(RANK==0)
 		{
@@ -507,40 +521,40 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 void CONSTRAINT::WRITE(ofstream &output)
 // Write parameters for restart.
 {
-	output << THERM_POSIT_T << endl ;
-	output << THERM_VELOC_T << endl ;
-	output << THERM_INERT_T << endl ;
-	output << THERM_INERT_Q << endl ;
-	output << THERM_POSIT_0 << endl ;
-	output << THERM_INERT_0 << endl ;
-	output << THERM_VELOC_0 << endl ;
+	output << THERM_POSIT_T << endl;
+	output << THERM_VELOC_T << endl;
+	output << THERM_INERT_T << endl;
+	output << THERM_INERT_Q << endl;
+	output << THERM_POSIT_0 << endl;
+	output << THERM_INERT_0 << endl;
+	output << THERM_VELOC_0 << endl;
 
-	output << BAROS_POSIT_T << endl ;
-	output << BAROS_VELOC_T << endl ;
-	output << BAROS_FORCE_T << endl ;
-	output << BAROS_INERT_W << endl ;
-	output << BAROS_POSIT_0 << endl ;
-	output << BAROS_FORCE_0 << endl ;
-	output << BAROS_VELOC_0 << endl ;
+	output << BAROS_POSIT_T << endl;
+	output << BAROS_VELOC_T << endl;
+	output << BAROS_FORCE_T << endl;
+	output << BAROS_INERT_W << endl;
+	output << BAROS_POSIT_0 << endl;
+	output << BAROS_FORCE_0 << endl;
+	output << BAROS_VELOC_0 << endl;
 
-	output << BAROS_SCALE << endl ;
-	output << VOLUME_0 << endl ;
-	output << VOLUME_T << endl ;
+	output << BAROS_SCALE << endl;
+	output << VOLUME_0 << endl;
+	output << VOLUME_T << endl;
 
-	output << BEREND_MU << endl ;
-	output << BEREND_ANI_MU.X << endl ;
-	output << BEREND_ANI_MU.Y << endl ;
-	output << BEREND_ANI_MU.Z << endl ;
-	output << BEREND_KP << endl ;
+	output << BEREND_MU << endl;
+	output << BEREND_ANI_MU.X << endl;
+	output << BEREND_ANI_MU.Y << endl;
+	output << BEREND_ANI_MU.Z << endl;
+	output << BEREND_KP << endl;
 
-	output << BEREND_ETA << endl ;
-	output << BEREND_TAU << endl ;
+	output << BEREND_ETA << endl;
+	output << BEREND_TAU << endl;
 
-	output << TIME << endl ;
-	output << TIME_BARO << endl ;
-	output << N_DOF << endl ;
-	output << VSCALEH << endl ;
-	output << KIN_ENER << endl ;
+	output << TIME << endl;
+	output << TIME_BARO << endl;
+	output << N_DOF << endl;
+	output << VSCALEH << endl;
+	output << KIN_ENER << endl;
 }
 
 
@@ -550,37 +564,37 @@ void CONSTRAINT::READ(ifstream &input)
 	input >> THERM_POSIT_T;
 	input >> THERM_VELOC_T;
 	input >> THERM_INERT_T;
-	input >> THERM_INERT_Q ;
-	input >> THERM_POSIT_0 ;
-	input >> THERM_INERT_0 ;
-	input >> THERM_VELOC_0 ;
+	input >> THERM_INERT_Q;
+	input >> THERM_POSIT_0;
+	input >> THERM_INERT_0;
+	input >> THERM_VELOC_0;
 
 	input >> BAROS_POSIT_T;
 	input >> BAROS_VELOC_T;
 	input >> BAROS_FORCE_T;
 	input >> BAROS_INERT_W;
-	input >> BAROS_POSIT_0 ;
-	input >> BAROS_FORCE_0 ;
-	input >> BAROS_VELOC_0 ;
+	input >> BAROS_POSIT_0;
+	input >> BAROS_FORCE_0;
+	input >> BAROS_VELOC_0;
 
-	input >> BAROS_SCALE  ;
-	input >> VOLUME_0  ;
-	input >> VOLUME_T  ;
+	input >> BAROS_SCALE ;
+	input >> VOLUME_0 ;
+	input >> VOLUME_T ;
 
-	input >> BEREND_MU  ;
-	input >> BEREND_ANI_MU.X  ;
-	input >> BEREND_ANI_MU.Y  ;
-	input >> BEREND_ANI_MU.Z  ;
-	input >> BEREND_KP  ;
+	input >> BEREND_MU ;
+	input >> BEREND_ANI_MU.X ;
+	input >> BEREND_ANI_MU.Y ;
+	input >> BEREND_ANI_MU.Z ;
+	input >> BEREND_KP ;
 
-	input >> BEREND_ETA  ;
-	input >> BEREND_TAU  ;
+	input >> BEREND_ETA ;
+	input >> BEREND_TAU ;
 
-	input >> TIME  ;
-	input >> TIME_BARO  ;
-	input >> N_DOF  ;
-	input >> VSCALEH  ;
-	input >> KIN_ENER ;
+	input >> TIME ;
+	input >> TIME_BARO ;
+	input >> N_DOF ;
+	input >> VSCALEH ;
+	input >> KIN_ENER;
 }
 
 
@@ -759,11 +773,11 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	{	
 		int TEMP_IDX = SYSTEM.ATOMS;	
 
-		for(int n1 = -CONTROLS.N_LAYERS ; n1<=CONTROLS.N_LAYERS; n1++)
+		for(int n1 = -CONTROLS.N_LAYERS; n1<=CONTROLS.N_LAYERS; n1++)
 		{
-			for(int n2 = -CONTROLS.N_LAYERS ; n2<=CONTROLS.N_LAYERS; n2++)
+			for(int n2 = -CONTROLS.N_LAYERS; n2<=CONTROLS.N_LAYERS; n2++)
 			{
-				for(int n3 = -CONTROLS.N_LAYERS ; n3<=CONTROLS.N_LAYERS; n3++)
+				for(int n3 = -CONTROLS.N_LAYERS; n3<=CONTROLS.N_LAYERS; n3++)
 				{	
 					if (n1 == 0 && n2 == 0 && n3 == 0 ) 
 						continue;
@@ -790,8 +804,8 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		
 		if ( TEMP_IDX != SYSTEM.ALL_ATOMS ) 
 		{
-			printf("Error updating layers\n") ;
-			exit(1) ;
+			printf("Error updating layers\n");
+			exit(1);
 		}
 	}	
 		
@@ -1049,16 +1063,16 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 // Build a list of all 3-body interactions.  This "flat" list parallelizes much
 // more efficiently than a nested neighbor list loop.
 {
-	XYZ RAB ;  
-	INTERACTION_3B inter ;
+	XYZ RAB;  
+	INTERACTION_3B inter;
 
-	LIST_3B_INT.clear() ;
-	for ( int i = 0 ; i < SYSTEM.ATOMS ; i++ ) {
-		int ai = i ;
-		for ( int j = 0 ; j < LIST_3B[i].size() ; j++ ) {
-			int aj = LIST_3B[i][j] ;
-			for ( int k = 0 ; k < LIST_3B[i].size() ; k++ ) {
-				int ak = LIST_3B[i][k] ;
+	LIST_3B_INT.clear();
+	for ( int i = 0; i < SYSTEM.ATOMS; i++ ) {
+		int ai = i;
+		for ( int j = 0; j < LIST_3B[i].size(); j++ ) {
+			int aj = LIST_3B[i][j];
+			for ( int k = 0; k < LIST_3B[i].size(); k++ ) {
+				int ak = LIST_3B[i][k];
 
 				if ( aj == ak || SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] ) 
 					continue;
@@ -1067,11 +1081,66 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 				double rlen = get_dist(SYSTEM, RAB, aj, ak);
 	
 				if ( rlen < MAX_CUTOFF_3B + RCUT_PADDING ) {
-					inter.a1 = ai ;
-					inter.a2 = aj ;
-					inter.a3 = ak ;
+					inter.a1 = ai;
+					inter.a2 = aj;
+					inter.a3 = ak;
 	  
-					LIST_3B_INT.push_back(inter) ;
+					LIST_3B_INT.push_back(inter);
+				}
+			}
+		}
+	}
+}
+
+void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) 
+// Build a list of all 4-body interactions.  This "flat" list parallelizes much
+// more efficiently than a nested neighbor list loop.
+{
+	XYZ RAB;  
+	INTERACTION_4B inter;
+	LIST_4B_INT.clear();
+	int ai, aj, ak, al;
+	double rlen;
+	
+	for (int i=0; i<SYSTEM.ATOMS; i++)	// Loop over all real atoms
+	{
+		ai = i;
+		
+		for (int j=0; j<LIST_3B[i].size(); j++) // Loop over all neighbors of i to get atom j
+		{
+			aj = LIST_4B[i][j];
+			
+			for (int k=0; k<LIST_3B[i].size(); k++) // Loop over all neighbors of i to get atom k
+			{
+				ak = LIST_4B[i][k];
+				
+				for (int l=0; l<LIST_3B[i].size(); l++) // Loop over all neighbors of i to get atom l
+				{
+					al = LIST_4B[i][l];
+				
+					// Check that this is a valid quadruplet
+
+					if (aj == ak || aj == al || ak == al)
+						continue;
+					
+					if(SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] || SYSTEM.PARENT[aj] > SYSTEM.PARENT[al] || SYSTEM.PARENT[ak] > SYSTEM.PARENT[al])
+						continue;
+					
+					// We know ij, ik, and il distances are within the allowed cutoffs, but we still need to check jk, jl, and kl
+
+					if(get_dist(SYSTEM, RAB, aj, ak) >  MAX_CUTOFF_4B + RCUT_PADDING)
+						continue;
+					if(get_dist(SYSTEM, RAB, aj, al) >  MAX_CUTOFF_4B + RCUT_PADDING)
+						continue;
+					if(get_dist(SYSTEM, RAB, ak, al) >  MAX_CUTOFF_4B + RCUT_PADDING)
+						continue;
+					
+					inter.a1 = ai;
+					inter.a2 = aj;
+					inter.a3 = ak;
+					inter.a4 = al;
+					
+					LIST_4B_INT.push_back(inter);
 				}
 			}
 		}
@@ -1081,22 +1150,22 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 void THERMO_AVG::WRITE(ofstream &fout)
 // Write out thermodynamic average properties.
 {
-	fout << TEMP_SUM << endl ;
-	fout << PRESS_SUM << endl ;
-	fout << STRESS_TENSOR_SUM.X << endl ;
-	fout << STRESS_TENSOR_SUM.Y << endl ;
-	fout << STRESS_TENSOR_SUM.Z << endl ;
+	fout << TEMP_SUM << endl;
+	fout << PRESS_SUM << endl;
+	fout << STRESS_TENSOR_SUM.X << endl;
+	fout << STRESS_TENSOR_SUM.Y << endl;
+	fout << STRESS_TENSOR_SUM.Z << endl;
 }
 
 
 void THERMO_AVG::READ(ifstream &fin)
 // Read in thermodynamic average properties.
 {
-	fin >> TEMP_SUM  ;
-	fin >> PRESS_SUM  ;
-	fin >> STRESS_TENSOR_SUM.X  ;
-	fin >> STRESS_TENSOR_SUM.Y  ;
-	fin >> STRESS_TENSOR_SUM.Z  ;
+	fin >> TEMP_SUM ;
+	fin >> PRESS_SUM ;
+	fin >> STRESS_TENSOR_SUM.X ;
+	fin >> STRESS_TENSOR_SUM.Y ;
+	fin >> STRESS_TENSOR_SUM.Z ;
 }
 
 
