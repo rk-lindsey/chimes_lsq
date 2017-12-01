@@ -1152,7 +1152,7 @@ int main(int argc, char* argv[])
 			
 	}
 	
-	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0)
+	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0 || ATOM_PAIRS[0].SNUM_4B_CHEBY> 0)
 	{
 		header << endl << "FCUT TYPE: " << PAIR_TRIPLETS[0].FORCE_CUTOFF.to_string();
 		

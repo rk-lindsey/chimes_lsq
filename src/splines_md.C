@@ -1240,7 +1240,7 @@ int main(int argc, char* argv[])
 				if(LINE.find("ENDFILE") != string::npos)
 					break;	
 				
-				else if((FF_2BODY[0].SNUM_3B_CHEBY>0) && (LINE.find("FCUT TYPE:") != string::npos))
+				if((FF_2BODY[0].SNUM_3B_CHEBY>0) && (LINE.find("FCUT TYPE:") != string::npos))
 				{
 					STREAM_PARSER.str(LINE);	
 					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
@@ -1299,6 +1299,37 @@ int main(int argc, char* argv[])
 						for(int i=1; i<FF_4BODY.size(); i++)
 							FF_4BODY[i].FORCE_CUTOFF = FF_4BODY[0].FORCE_CUTOFF;							
 					}
+				}
+				if((FF_2BODY[0].SNUM_4B_CHEBY>0) && (LINE.find("FCUT TYPE:") != string::npos))
+				{	
+					STREAM_PARSER.str(LINE);	
+					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+					
+					// Setup force cutoff type for 4-body
+				
+					FF_4BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
+					FCUT_TYPE cutoff_type = FF_4BODY[0].FORCE_CUTOFF.TYPE ;
+				
+					if( cutoff_type == FCUT_TYPE::SIGMOID 
+						 || cutoff_type == FCUT_TYPE::CUBSIG 
+						 || cutoff_type == FCUT_TYPE::CUBESTRETCH 
+						 || cutoff_type == FCUT_TYPE::SIGFLT)
+					{
+						STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.STEEPNESS;
+						STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.OFFSET;
+					
+						if(TEMP_STR == "SIGFLT")
+							cin >> FF_4BODY[0].FORCE_CUTOFF.HEIGHT;
+					}
+				
+					STREAM_PARSER.str("");
+					STREAM_PARSER.clear();	
+				
+					FF_4BODY[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
+				
+					// Copy all class members.
+					for(int i=1; i<FF_4BODY.size(); i++)
+						FF_4BODY[i].FORCE_CUTOFF = FF_4BODY[0].FORCE_CUTOFF;	
 				}
 				
 				else if(LINE.find("SPECIAL 2B OLD_S_MINIM: ") != string::npos)

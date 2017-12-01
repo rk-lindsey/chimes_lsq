@@ -687,22 +687,21 @@ void SET_4B_CHEBY_POWERS(QUADRUPLETS & PAIR_QUADRUPLET, vector<string> & PAIR_TY
 	
 	vector <PAIR_STR_INT> 	PAIR_TYPE_AND_INDEX(6);	// [a1/a2/a3/a4 atom pair chemistry][index of pair (from 1-6)]
 	vector <PAIR_STR_INT> 	PAIR_TYPE_AND_POWER(6);	// [power set pair type chemistry][value of pair's power]
-	
+
 	for(int m=0; m<6; m++)
 	{ 					
 		PAIR_TYPE_AND_INDEX[m].first  = PAIR_TYPE[m];
 		PAIR_TYPE_AND_INDEX[m].second = m;	
 		
 		PAIR_TYPE_AND_POWER[m].first  = PAIR_QUADRUPLET.ATOM_PAIRS[m];
-		PAIR_TYPE_AND_POWER[m].first  = powers[m];
+		PAIR_TYPE_AND_POWER[m].second  = powers[m];
 	}
-	
+
 	sort (PAIR_TYPE_AND_INDEX.begin(), PAIR_TYPE_AND_INDEX.end());	// Sort the vector contents... automatically does on the basis of the .first element, preserving "link" between .first and .second
 	sort (PAIR_TYPE_AND_POWER.begin(), PAIR_TYPE_AND_POWER.end());
-	
+
 	for(int m=0; m<6; m++)
 		powers[PAIR_TYPE_AND_INDEX[m].second] = PAIR_TYPE_AND_POWER[m].second;
-	
 }
 
 double SET_SMAXIM(PAIRS & FF_2BODY, QUADRUPLETS & PAIR_QUADRUPLETS, string TYPE)	// Overloaded. One for 3B data structures, and one for 4B
@@ -3644,100 +3643,102 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 	/////////////////////////////////////////////
 	// EVALUATE THE 2-BODY INTERACTIONS
 	/////////////////////////////////////////////
-
-	for(int a1=a1start; a1<=a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS (prev -1)
-	{	
-		a2start = 0;
-		a2end   = NEIGHBOR_LIST.LIST[a1].size();
+	
+	if(FF_2BODY[0].SNUM>0)
+	{
+		for(int a1=a1start; a1<=a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS (prev -1)
+		{	
+			a2start = 0;
+			a2end   = NEIGHBOR_LIST.LIST[a1].size();
 			
-		for(int a2idx=a2start; a2idx<a2end; a2idx++)	
-		{
-			a2 = NEIGHBOR_LIST.LIST[a1][a2idx];			
+			for(int a2idx=a2start; a2idx<a2end; a2idx++)	
+			{
+				a2 = NEIGHBOR_LIST.LIST[a1][a2idx];			
 			
-			#ifndef LINK_LAMMPS
-				curr_pair_type_idx_ij =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
-			#else
-				curr_pair_type_idx_ij =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
-			#endif
+				#ifndef LINK_LAMMPS
+					curr_pair_type_idx_ij =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+				#else
+					curr_pair_type_idx_ij =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
+				#endif
 		
-			rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
+				rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
 								
-			if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MAXIM)	// We want to evaluate the penalty function when r < rmin (LEF) .. Assumes 3b inner cutoff is never shorter than 2b's
-			{	
+				if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MAXIM)	// We want to evaluate the penalty function when r < rmin (LEF) .. Assumes 3b inner cutoff is never shorter than 2b's
+				{	
 		
-				/////////////////////////////////////////////
-				// EVALUATE THE 2-BODY INTERACTIONS
-				/////////////////////////////////////////////
+					/////////////////////////////////////////////
+					// EVALUATE THE 2-BODY INTERACTIONS
+					/////////////////////////////////////////////
 			
-				// Make sure our newly transformed distance falls in defined range for Cheby polynomials and change the range, if the user requested
-				// Generate Chebyshev polynomials. 
+					// Make sure our newly transformed distance falls in defined range for Cheby polynomials and change the range, if the user requested
+					// Generate Chebyshev polynomials. 
 							 
-				SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn, Tnd, rlen_ij, xdiff_2b, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, FF_2BODY[curr_pair_type_idx_ij].S_MINIM, FF_2BODY[curr_pair_type_idx_ij].SNUM);
+					SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn, Tnd, rlen_ij, xdiff_2b, FF_2BODY[curr_pair_type_idx_ij].S_MAXIM, FF_2BODY[curr_pair_type_idx_ij].S_MINIM, FF_2BODY[curr_pair_type_idx_ij].SNUM);
 				
-				FF_2BODY[curr_pair_type_idx_ij].FORCE_CUTOFF.get_fcut(fcut_2b, fcutderiv_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].S_MINIM,
-																						FF_2BODY[curr_pair_type_idx_ij].S_MAXIM);
+					FF_2BODY[curr_pair_type_idx_ij].FORCE_CUTOFF.get_fcut(fcut_2b, fcutderiv_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].S_MINIM,
+																							FF_2BODY[curr_pair_type_idx_ij].S_MAXIM);
 
-				dx_dr = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
+					dx_dr = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
 
-				fidx_a2 = SYSTEM.PARENT[a2];
+					fidx_a2 = SYSTEM.PARENT[a2];
 				
-				for ( int i = 0; i < FF_2BODY[curr_pair_type_idx_ij].SNUM; i++ ) 
-				{
-					coeff                = FF_2BODY[curr_pair_type_idx_ij].PARAMS[i]; // This is the Cheby FF param for the given power
-					SYSTEM.TOT_POT_ENER += coeff * fcut_2b * Tn[i+1];
-					deriv                = (fcut_2b * Tnd[i+1] * dx_dr + fcutderiv_2b * Tn[i+1]);
-					SYSTEM.PRESSURE_XYZ -= coeff * deriv * rlen_ij;				
+					for ( int i = 0; i < FF_2BODY[curr_pair_type_idx_ij].SNUM; i++ ) 
+					{
+						coeff                = FF_2BODY[curr_pair_type_idx_ij].PARAMS[i]; // This is the Cheby FF param for the given power
+						SYSTEM.TOT_POT_ENER += coeff * fcut_2b * Tn[i+1];
+						deriv                = (fcut_2b * Tnd[i+1] * dx_dr + fcutderiv_2b * Tn[i+1]);
+						SYSTEM.PRESSURE_XYZ -= coeff * deriv * rlen_ij;				
 					
-					SYSTEM.PRESSURE_TENSORS_XYZ.X -= coeff * deriv * RAB_IJ.X * RAB_IJ.X / rlen_ij;
-					SYSTEM.PRESSURE_TENSORS_XYZ.Y -= coeff * deriv * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
-					SYSTEM.PRESSURE_TENSORS_XYZ.Z -= coeff * deriv * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
+						SYSTEM.PRESSURE_TENSORS_XYZ.X -= coeff * deriv * RAB_IJ.X * RAB_IJ.X / rlen_ij;
+						SYSTEM.PRESSURE_TENSORS_XYZ.Y -= coeff * deriv * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
+						SYSTEM.PRESSURE_TENSORS_XYZ.Z -= coeff * deriv * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
 					
-					SYSTEM.ACCEL[a1].X += coeff * deriv * RAB_IJ.X / rlen_ij;
-					SYSTEM.ACCEL[a1].Y += coeff * deriv * RAB_IJ.Y / rlen_ij;
-					SYSTEM.ACCEL[a1].Z += coeff * deriv * RAB_IJ.Z / rlen_ij;
+						SYSTEM.ACCEL[a1].X += coeff * deriv * RAB_IJ.X / rlen_ij;
+						SYSTEM.ACCEL[a1].Y += coeff * deriv * RAB_IJ.Y / rlen_ij;
+						SYSTEM.ACCEL[a1].Z += coeff * deriv * RAB_IJ.Z / rlen_ij;
 					
-					SYSTEM.ACCEL[fidx_a2].X -= coeff * deriv * RAB_IJ.X / rlen_ij;
-					SYSTEM.ACCEL[fidx_a2].Y -= coeff * deriv * RAB_IJ.Y / rlen_ij;
-					SYSTEM.ACCEL[fidx_a2].Z -= coeff * deriv * RAB_IJ.Z / rlen_ij;
+						SYSTEM.ACCEL[fidx_a2].X -= coeff * deriv * RAB_IJ.X / rlen_ij;
+						SYSTEM.ACCEL[fidx_a2].Y -= coeff * deriv * RAB_IJ.Y / rlen_ij;
+						SYSTEM.ACCEL[fidx_a2].Z -= coeff * deriv * RAB_IJ.Z / rlen_ij;
 
-				}
+					}
 								
-				// Add penalty for very short distances(less than smin + penalty_dist), where the fit FF may be unphysical (preserve conservation of E).
+					// Add penalty for very short distances(less than smin + penalty_dist), where the fit FF may be unphysical (preserve conservation of E).
 
-				if ( rlen_ij - penalty_dist < FF_2BODY[curr_pair_type_idx_ij].S_MINIM ) 
-					rpenalty = FF_2BODY[curr_pair_type_idx_ij].S_MINIM + penalty_dist - rlen_ij;
-				else 
-					rpenalty = 0.0;		
+					if ( rlen_ij - penalty_dist < FF_2BODY[curr_pair_type_idx_ij].S_MINIM ) 
+						rpenalty = FF_2BODY[curr_pair_type_idx_ij].S_MINIM + penalty_dist - rlen_ij;
+					else 
+						rpenalty = 0.0;		
 
-				if ( rpenalty > 0.0 ) 
-				{
-					if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MINIM) // Then we've found a config that should be useful for self-consistent fitting
-						BAD_CONFIG_FOUND++;
+					if ( rpenalty > 0.0 ) 
+					{
+						if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MINIM) // Then we've found a config that should be useful for self-consistent fitting
+							BAD_CONFIG_FOUND++;
 				
-					Vpenalty = 0.0;
+						Vpenalty = 0.0;
 					
-					if (isatty(fileno(stdout)))
-						cout << COUT_STYLE.BOLD << COUT_STYLE.MAGENTA << "Warning: (Step " << CONTROLS.STEP << ")Adding penalty in 2B Cheby calc, r < rmin+penalty_dist " << fixed << rlen_ij << " " << FF_2BODY[curr_pair_type_idx_ij].S_MINIM+penalty_dist << " " << TEMP_STR << " " << a1 << " " << a2 << COUT_STYLE.ENDSTYLE << endl;
-					else
-						cout << "Warning: (Step " << CONTROLS.STEP << ") Adding penalty in 2B Cheby calc, r < rmin+penalty_dist " << fixed << rlen_ij << " " << FF_2BODY[curr_pair_type_idx_ij].S_MINIM+penalty_dist << " " << TEMP_STR << " " << a1 << " " << a2 << endl;
+						if (isatty(fileno(stdout)))
+							cout << COUT_STYLE.BOLD << COUT_STYLE.MAGENTA << "Warning: (Step " << CONTROLS.STEP << ")Adding penalty in 2B Cheby calc, r < rmin+penalty_dist " << fixed << rlen_ij << " " << FF_2BODY[curr_pair_type_idx_ij].S_MINIM+penalty_dist << " " << TEMP_STR << " " << a1 << " " << a2 << COUT_STYLE.ENDSTYLE << endl;
+						else
+							cout << "Warning: (Step " << CONTROLS.STEP << ") Adding penalty in 2B Cheby calc, r < rmin+penalty_dist " << fixed << rlen_ij << " " << FF_2BODY[curr_pair_type_idx_ij].S_MINIM+penalty_dist << " " << TEMP_STR << " " << a1 << " " << a2 << endl;
 					
-					SYSTEM.ACCEL[fidx_a2].X += 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.X / rlen_ij;
-					SYSTEM.ACCEL[fidx_a2].Y += 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Y / rlen_ij;
-					SYSTEM.ACCEL[fidx_a2].Z += 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Z / rlen_ij;
+						SYSTEM.ACCEL[fidx_a2].X += 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.X / rlen_ij;
+						SYSTEM.ACCEL[fidx_a2].Y += 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Y / rlen_ij;
+						SYSTEM.ACCEL[fidx_a2].Z += 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Z / rlen_ij;
 					
-					SYSTEM.ACCEL[a1].X -= 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.X / rlen_ij;
-					SYSTEM.ACCEL[a1].Y -= 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Y / rlen_ij;
-					SYSTEM.ACCEL[a1].Z -= 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Z / rlen_ij;							
+						SYSTEM.ACCEL[a1].X -= 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.X / rlen_ij;
+						SYSTEM.ACCEL[a1].Y -= 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Y / rlen_ij;
+						SYSTEM.ACCEL[a1].Z -= 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Z / rlen_ij;							
 					
-					Vpenalty = rpenalty * rpenalty * rpenalty * penalty_scale;
-					SYSTEM.TOT_POT_ENER += Vpenalty;
-					cout << "	...Penalty potential = "<< Vpenalty << endl;
-				}					
-			}			
-		}
+						Vpenalty = rpenalty * rpenalty * rpenalty * penalty_scale;
+						SYSTEM.TOT_POT_ENER += Vpenalty;
+						cout << "	...Penalty potential = "<< Vpenalty << endl;
+					}					
+				}			
+			}
 		
+		}	// If 2-body interaction.
 	}	// If 2-body interaction.
-
 
 	/////////////////////////////////////////////
 	// EVALUATE THE 3-BODY INTERACTIONS
@@ -3995,7 +3996,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 		// Prepare iterators for outermost loop
 		
 		int i_start, i_end;
-
+		
 		#ifndef LINK_LAMMPS
 			divide_atoms(i_start, i_end, NEIGHBOR_LIST.LIST_4B_INT.size());	
 		#else
@@ -4004,7 +4005,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			a1start = SYSTEM.MY_ATOMS_START;
 			a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
 		#endif	
-		
+
 		int a1;
 		
 		// Loop over a1, a2, a3, a4 interaction quadruplets, not atoms
@@ -4019,17 +4020,17 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			
 			a2 = NEIGHBOR_LIST.LIST_4B_INT[ii].a2;
 			a3 = NEIGHBOR_LIST.LIST_4B_INT[ii].a3;
-			a4 = NEIGHBOR_LIST.LIST_4B_INT[ii].a3;
+			a4 = NEIGHBOR_LIST.LIST_4B_INT[ii].a4;
 
 			if ( a3 == a2 || a4 == a2 || a3 == a4 ) 
 			{
-				cout << "Bad pair found " << a3 << a2 << endl;
-				cout << "Parents " << SYSTEM.PARENT[a2] << SYSTEM.PARENT[a3] << endl;
+				cout << "Bad pair found " << a1 << ", " << a2 << ", " << a3 << ", " << a4 << endl;
+				cout << "Parents " << SYSTEM.PARENT[a1] << ", " << SYSTEM.PARENT[a2] << ", " <<  SYSTEM.PARENT[a3] << ", " <<  SYSTEM.PARENT[a4] << endl;
 			}
 			if (SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a4] || SYSTEM.PARENT[a3] > SYSTEM.PARENT[a4]) 
 			{
-				cout << "Bad pair found " << a3 << a2 << endl;
-				cout << "Parents " << SYSTEM.PARENT[a2] << SYSTEM.PARENT[a3] << endl;
+				cout << "Bad pair found " << a1 << ", " << a2 << ", " << a3 << ", " << a4 << endl;
+				cout << "Parents " << SYSTEM.PARENT[a1] << ", " << SYSTEM.PARENT[a2] << ", " <<  SYSTEM.PARENT[a3] << ", " <<  SYSTEM.PARENT[a4] << endl;
 			}			
 			
 			fidx_a2 = SYSTEM.PARENT[a2];
@@ -4059,7 +4060,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			TMP_QUAD_SET[3] = SYSTEM.ATOMTYPE_IDX[fidx_a4];
 			
 			// Always construct ATOM_QUAD_ID_INT lookup key based on atom types in decending order
-			
+
 			sort   (TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 			reverse(TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 			
@@ -4079,11 +4080,13 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			rlen[5] = get_dist(SYSTEM, RAB[5], a3, a4);	// Updates RAB!
 			
 			// Determine the inner and outer cutoffs for each pair type in the quadruplet
+			// Also set the PAIR_TYPE vector values
 		
 			for (int f=0; f<6; f++)
 			{
-				S_MAXIM[f] = SET_SMAXIM(FF_2BODY[curr_pair_type_idx[f]], FF_4BODY[curr_quad_type_index],FF_2BODY[curr_pair_type_idx[f]].PRPR_NM);
-				S_MINIM[f] = SET_SMINIM(FF_2BODY[curr_pair_type_idx[f]], FF_4BODY[curr_quad_type_index],FF_2BODY[curr_pair_type_idx[f]].PRPR_NM);
+				PAIR_TYPE[f] = FF_2BODY[curr_pair_type_idx[f]].PRPR_NM;
+				S_MAXIM  [f] = SET_SMAXIM(FF_2BODY[curr_pair_type_idx[f]], FF_4BODY[curr_quad_type_index],PAIR_TYPE[f]);
+				S_MINIM  [f] = SET_SMINIM(FF_2BODY[curr_pair_type_idx[f]], FF_4BODY[curr_quad_type_index],PAIR_TYPE[f]);
 			}
 			
 			// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are within the allowed range.
@@ -4101,12 +4104,12 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 				continue;
 			if( !FF_4BODY[curr_quad_type_index].FORCE_CUTOFF.PROCEED(rlen[5], S_MINIM[5], S_MAXIM[5]))
 				continue;	
-		
+
 			// At this point, all distances are within allowed ranges. We can now proceed to the force derivative calculation
 			
 			// For all types, if r < rcut, then the potential is constant, thus the force  must be zero.
 			// Additionally, the potential is then taken to be the potential at r_cut.
-			
+
 			for (int f=0; f<6; f++)
 			{
 				rlen_dummy[f] = rlen[f];
@@ -4114,7 +4117,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 				if(rlen[f] < S_MINIM[f])
 					rlen_dummy[f] = S_MINIM[f];
 			}
-			
+
 			// Set up the polynomials
 
 			SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx[0]], Tn_4b_ij, Tnd_4b_ij, rlen_dummy[0], xdiff_4b[0], S_MAXIM[0], S_MINIM[0], FF_2BODY[curr_pair_type_idx[0]].SNUM_4B_CHEBY);
@@ -4123,7 +4126,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx[3]], Tn_4b_jk, Tnd_4b_jk, rlen_dummy[3], xdiff_4b[3], S_MAXIM[3], S_MINIM[3], FF_2BODY[curr_pair_type_idx[3]].SNUM_4B_CHEBY);
 			SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx[4]], Tn_4b_jl, Tnd_4b_jl, rlen_dummy[4], xdiff_4b[4], S_MAXIM[4], S_MINIM[4], FF_2BODY[curr_pair_type_idx[4]].SNUM_4B_CHEBY);
 			SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx[5]], Tn_4b_kl, Tnd_4b_kl, rlen_dummy[5], xdiff_4b[5], S_MAXIM[5], S_MINIM[5], FF_2BODY[curr_pair_type_idx[5]].SNUM_4B_CHEBY);
-			
+
 			// Set up the smoothing functions
 			
 			for (int f=0; f<6; f++)
@@ -4137,11 +4140,10 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
 			for(int i=0; i<FF_4BODY[curr_quad_type_index].N_ALLOWED_POWERS; i++) 
 			{
-				
 				SET_4B_CHEBY_POWERS(FF_4BODY[curr_quad_type_index],PAIR_TYPE, powers);
-				
+
 				coeff = FF_4BODY[curr_quad_type_index].PARAMS[i];
-			      
+
 				SYSTEM.TOT_POT_ENER += coeff * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ij[powers[0]] * Tn_4b_ik[powers[1]] * Tn_4b_il[powers[2]] * Tn_4b_jk[powers[3]] * Tn_4b_jl[powers[4]] * Tn_4b_kl[powers[5]]; 			
 
 				deriv_4b[0] = fcut_4b[0] * Tnd_4b_ij[powers[0]] * dx_dr_4b[0] + fcut_deriv_4b[0] * Tn[powers[0]];
@@ -4157,18 +4159,18 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 				force_4b[3]  = coeff * deriv_4b[3] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[4] * fcut_4b[5]  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
 				force_4b[4]  = coeff * deriv_4b[4] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5]  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_kl[powers[5]];
                 force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4]  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]];
-				
+
 				for(int j=0; j<6; j++)
 				{
-					SYSTEM.PRESSURE_XYZ -= force_4b[i] * rlen[i];
+					SYSTEM.PRESSURE_XYZ -= force_4b[j] * rlen[j];
 					
-					SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_4b[i] * RAB[i].X * RAB[i].X / rlen[i];
-					SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_4b[i] * RAB[i].Y * RAB[i].Y / rlen[i];
-					SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_4b[i] * RAB[i].Z * RAB[i].Z / rlen[i];
+					SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_4b[j] * RAB[j].X * RAB[j].X / rlen[j];
+					SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_4b[j] * RAB[j].Y * RAB[j].Y / rlen[j];
+					SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_4b[j] * RAB[j].Z * RAB[j].Z / rlen[j];
 					
-					force_4b[i] /= rlen[i];
+					force_4b[j] /= rlen[j];
 				}
-				
+
 				// Apply forces to ij pair
 				
 				SYSTEM.ACCEL[a1]     .X += force_4b[0] * RAB[0].X;
@@ -4228,7 +4230,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 				SYSTEM.ACCEL[fidx_a4].X -= force_4b[5] * RAB[5].X;
 				SYSTEM.ACCEL[fidx_a4].Y -= force_4b[5] * RAB[5].Y;
 				SYSTEM.ACCEL[fidx_a4].Z -= force_4b[5] * RAB[5].Z;					
-		
+
 			}	
 		}		
 	}	// If 4-body intereaction.

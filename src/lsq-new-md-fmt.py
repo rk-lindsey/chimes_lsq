@@ -22,23 +22,23 @@ if(len(sys.argv) < 6):
     sys.exit()
     
 if(len (sys.argv) == 7): 
-	# Then this run is being used for the test suite... 
-	# print out parameters without any fanciness so tolerances can be checked  
-	TEST_SUITE_RUN = "do"
-	
+    # Then this run is being used for the test suite... 
+    # print out parameters without any fanciness so tolerances can be checked  
+    TEST_SUITE_RUN = "do"
+
 if(len (sys.argv) == 8): 
-	# Then this run is being used for the test suite... 
-	# print out parameters without any fanciness so tolerances can be checked  
-	WEIGHTS=open(sys.argv[7],"r").readlines()
-	DO_WEIGHTING = True	
+    # Then this run is being used for the test suite... 
+    # print out parameters without any fanciness so tolerances can be checked  
+    WEIGHTS=open(sys.argv[7],"r").readlines()
+    DO_WEIGHTING = True
 
 #################################
 #################################
 #           BEGIN CODE
 #################################
 #################################
- 
- 
+
+
 #################################
 #   Process input, setup output
 #################################
@@ -72,11 +72,11 @@ for i in range(0,nlines):
     b[i]=float(bf[i])
     
     if DO_WEIGHTING:
-    	WEIGHTS[i] = float(WEIGHTS[i])
-	
+        WEIGHTS[i] = float(WEIGHTS[i])
+
 af = 0
-bf = 0	
-    
+bf = 0
+
 #################################
 # Apply weighting to A and b
 #################################
@@ -122,15 +122,9 @@ print "! eps (= eps_fac*dmax) =  ", eps
 x=dot(transpose(VT),Dmat)
 
 if DO_WEIGHTING:
-	x=dot(x,dot(transpose(U),weightedb))
+    x=dot(x,dot(transpose(U),weightedb))
 else:
-	x=dot(x,dot(transpose(U),b))	
-
-
-#print "SHAPE OF Dmat: ***** " + `shape(Dmat)`
-#print "SHAPE OF VT  : ***** " + `shape(VT)`
-#print "SHAPE OF U   : ***** " + `shape(U)`
-#print "SHAPE OF b   : ***** " + `shape(b)`
+    x=dot(x,dot(transpose(U),b))
 
 y=dot(A,x)
 Z=0.0
@@ -151,29 +145,31 @@ print "! number of SVD fitting vars = ", nvars
 print "! Bayesian Information Criterion =  ", bic
 print "!"
 
+
+####################################
+# Actually process the header file...
+####################################
+
 BREAK_COND = False
+
+# Figure out whether we have triplets and/or quadruplets
 
 for i in range(0, len(hf)):
     sys.stdout.write(hf[i])
     TEMP = hf[i].split()
     if len(TEMP)>3:
-    	if (TEMP[2] == "TRIPLETS:"):
-		for j in range(i, len(hf)):
-			TEMP = hf[j].split()
-			if len(TEMP)>3:
-				if (TEMP[2] == "QUADRUPLETS:"):
-					sys.stdout.write(hf[j])
-					BREAK_COND = True
-					break
-		if (BREAK_COND):
-			break
-    
-    
-# Actually process the header file...
-
+        if (TEMP[2] == "TRIPLETS:"):
+            for j in range(i, len(hf)):
+                TEMP = hf[j].split()
+                if len(TEMP)>3:
+                    if (TEMP[2] == "QUADRUPLETS:"):
+                        sys.stdout.write(hf[j])
+                        BREAK_COND = True
+                        break
+        if (BREAK_COND):
+             break
 
 # 1. Figure out what potential type we have
-
 
 POTENTIAL = hf[7].split()
 POTENTIAL = POTENTIAL[1]
@@ -188,25 +184,30 @@ CASE_BY_CASE = False
 
 SNUM_2B = 0
 SNUM_3B = 0
-SNUM_3B = 0
+SNUM_4B = 0
 
 if POTENTIAL == "CHEBYSHEV" or POTENTIAL == "DFTBPOLY":
-	TMP = hf[7].split()
-	
-	if len(TMP) == 4:
-		SNUM_3B = int(TMP[3])
+    TMP = hf[7].split()
+    
+    if len(TMP) >= 4:
+        SNUM_3B = int(TMP[3])
         
-	if len(TMP) == 5:
-		SNUM_4B = int(TMP[3])
-	
-	SNUM_2B = int(TMP[2])
-	
+        if len(TMP) >= 5:
+            SNUM_4B = int(TMP[4])
+        
+        SNUM_2B = int(TMP[2])
+        
+        #print "Expecting:"
+        #print SNUM_2B
+        #print SNUM_3B
+        #print SNUM_4B        
+
 elif POTENTIAL == "INVRSE_R":
-	TMP = hf[6].split()
-	SNUM_2B = int(TMP[2])
+    TMP = hf[6].split()
+    SNUM_2B = int(TMP[2])
 else:
-	CASE_BY_CASE = True # We'll need to do it per atom pair type.	
-     
+    CASE_BY_CASE = True # We'll need to do it per atom pair type.	
+
 # 3. Print out the parameters
 
 FIT_COUL = hf[1].split()
@@ -233,10 +234,10 @@ TOTAL_PAIRS = int(TOTAL_PAIRS[2])
 
 ATOM_TRIPS_LINE=0
 if FIT_POVER == "true" or USE_POVER == "true":
-	ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2+TOTAL_PAIRS+2
+    ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2+TOTAL_PAIRS+2
 else:
-	ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2
-	
+    ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2
+
 TEST = hf[ATOM_TRIPS_LINE].split()
 if len(TEST) == 3 and TEST[2] == "CUBIC":
 	ATOM_TRIPS_LINE += 2
@@ -258,9 +259,11 @@ if len(TEST) == 4 and TEST[2] == "S_MAXIM:":
         ATOM_TRIPS_LINE += 2
 if len(TEST) == 5 and TEST[2] == "S_MAXIM:":	
         ATOM_TRIPS_LINE += 2 + int(TEST[4])       
-	
-  
-		
+
+
+
+# Figure out which line "ATOM PAIR TRIPLETS" is on
+
 TOTAL_TRIPS =  hf[ATOM_TRIPS_LINE].split()
 TOTAL_TRIPS = int(TOTAL_TRIPS[3])
 
@@ -269,27 +272,12 @@ TOTAL_TRIPS = int(TOTAL_TRIPS[3])
 ATOM_QUADS_LINE = 0
 TOTAL_QUADS     = 0
 
-if TOTAL_TRIPS == 0:
-    ATOMS_QUADS_LINE = TOTAL_TRIPS + 2
-    
-    # Sanity check. Never expect to have 4-body parameters when no 3-body parameters exist
-    
-    TOTAL_QUADS = int(hf[ATOMS_QUADS_LINE].split()[3])
-    
-    if TOTAL_TRIPS == 0 and TOTAL_QUADS > 0:
-        print "Error: Found multiple atom pair qudruplets but no triplets."
-        exit()
-    
-else:
-    TMP = ATOM_TRIPS_LINE+2
-    
-    for i in xrange(TOTAL_TRIPS):
-        TMP += 2 + int(hf[TMP].split()[6]) # total number of 3-body parmeters for first triplet type
-        
-    ATOM_QUADS_LINE = TMP+2
-    TOTAL_QUADS = int(hf[ATOM_QUADS_LINE].split()[3])
+#if TOTAL_TRIPS == 0:
+ATOM_QUADS_LINE = 1 + ATOM_TRIPS_LINE
+TOTAL_QUADS = hf[ATOM_TRIPS_LINE+1].split()
 
-
+if len(TOTAL_QUADS)>0:
+    TOTAL_QUADS = int(TOTAL_QUADS[3])
 
 A1 = ""
 A2 = ""
@@ -306,145 +294,140 @@ SNUM_3B   = 0
 ADD_LINES = 0
 
 if TOTAL_TRIPS > 0:
-	for t in xrange(0, int(TOTAL_TRIPS)):
+    for t in xrange(0, int(TOTAL_TRIPS)):
 
-		P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
-		
-		#print P1
-		
-		SNUM_3B +=  int(P1[4])
-
-		TOTL = P1[6]
+        P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
         
-		ADD_LINES += 4
-				
-		for i in xrange(0,int(TOTL)):
-			ADD_LINES += 1
+        #print P1
+        
+        SNUM_3B +=  int(P1[4])
+        
+        TOTL = P1[6]
+        
+        ADD_LINES += 4
+        
+        for i in xrange(0,int(TOTL)):
+            ADD_LINES += 1
 
 for i in range(0,TOTAL_PAIRS):
-	
-	A1 = hf[ATOM_PAIRS_LINE+2+i+1].split()
-	A2 = A1[2]
-	A1 = A1[1]
-	
-	print "PAIRTYPE PARAMS: " + `i` + " " + A1 + " " + A2 + "\n"
-	
-	if CASE_BY_CASE:  
-		
-		# Figure out individual SNUM_2B
+    
+    A1 = hf[ATOM_PAIRS_LINE+2+i+1].split()
+    A2 = A1[2]
+    A1 = A1[1]
+    
+    print "PAIRTYPE PARAMS: " + `i` + " " + A1 + " " + A2 + "\n"
+    
+    if CASE_BY_CASE:  
+        
+        # Figure out individual SNUM_2B
+        
+        MIN = hf[ATOM_PAIRS_LINE+2+i+1].split()
+        MAX = float(MIN[4])
+        DEL = float(MIN[5])
+        MIN = float(MIN[3])
+        
+        SNUM_2B = int((2+m.floor((MAX - MIN)/DEL))*2)
+        
+    for j in range(0, int(SNUM_2B)):
+        print `j` + " " + `x[i*SNUM_2B+j]`
+    
+    if FIT_COUL == "true":
+        print "q_" + A1 + " x q_" + A2 + " " + `x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + i]`
+    
+    print " "
 
-		MIN = hf[ATOM_PAIRS_LINE+2+i+1].split()
-		MAX = float(MIN[4])
-		DEL = float(MIN[5])
-		MIN = float(MIN[3])
-		
-		SNUM_2B = int((2+m.floor((MAX - MIN)/DEL))*2)
-
-	for j in range(0, int(SNUM_2B)):
-		print `j` + " " + `x[i*SNUM_2B+j]`
-	
-	if FIT_COUL == "true":
-		print "q_" + A1 + " x q_" + A2 + " " + `x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + i]`
-			
-	print " "
-	
 # TRIPLETS
 
 ADD_LINES = 0
 ADD_PARAM = 0
 
-COUNTED_TRIP_PARAMS = 0;
+COUNTED_TRIP_PARAMS = 0
 
 if TOTAL_TRIPS > 0:
-	print "TRIPLET " + POTENTIAL + " PARAMS \n"
-	
-	TRIP_PAR_IDX = 0
-	
-	for t in xrange(0, int(TOTAL_TRIPS)):
-	
-		PREV_TRIPIDX = 0
-        
-		P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
-        
-		UNIQ = P1[4]
-		TOTL = P1[6]
-        
-		P2 = P1[2]
-		P3 = P1[3]
-		P1 = P1[1]
-        
-		print "TRIPLETTYPE PARAMS: " +`t` + " " + P1 + " " + P2 + " " + P3 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL + "\n"
-		print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
-		print "   ----------------------------------------------------------------------------"
-		
-		ADD_LINES += 2
-		
-		if(t>0):
-			ADD_PARAM += 1
-		
-		for i in xrange(0,int(TOTL)):
-			ADD_LINES += 1
-			LINE       = hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip('\n')
-			LINE_SPLIT = LINE.split()
+    print "TRIPLET " + POTENTIAL + " PARAMS \n"
+    
+    TRIP_PAR_IDX = 0
+    
+    for t in xrange(0, int(TOTAL_TRIPS)):
+    
+        PREV_TRIPIDX = 0
 
-#			print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + int(LINE_SPLIT[5])]`
-			print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]`
+        P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
+        
+        UNIQ = P1[4]
+        TOTL = P1[6]
+        
+        P2 = P1[2]
+        P3 = P1[3]
+        P1 = P1[1]
+        
+        print "TRIPLETTYPE PARAMS: " +`t` + " " + P1 + " " + P2 + " " + P3 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL + "\n"
+        print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
+        print "   ----------------------------------------------------------------------------"
+        
+        ADD_LINES += 2
+        
+        if(t>0):
+            ADD_PARAM += 1
+        
+        for i in xrange(0,int(TOTL)):
+            ADD_LINES += 1
+            LINE       = hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip('\n')
+            LINE_SPLIT = LINE.split()
 
-		TRIP_PAR_IDX        += int(UNIQ)
-		COUNTED_TRIP_PARAMS += int(UNIQ)
+            print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]`
+
+        TRIP_PAR_IDX += int(UNIQ)
+        COUNTED_TRIP_PARAMS += TRIP_PAR_IDX
             
-		print ""
+        print ""
         
-		ADD_LINES += 2
-        
-ADD_LINES = 0
-ADD_PARAM = 0        
-        
-if TOTAL_TRIPS > 0:
-	print "QUADRUPLET " + POTENTIAL + " PARAMS \n"
-	
-	QUAD_PAR_IDX = 0
-	
-	for t in xrange(0, int(TOTAL_QUADS)):
-	
-		PREV_QUADIDX = 0
-        
-		P1 = hf[ATOM_QUADS_LINE+2].split()
-        
-		UNIQ = P1[8]
-		TOTL = P1[10]
-        
-		P2 = P1[2]
-		P3 = P1[3]
-		P4 = P1[4]
-		P5 = P1[5]
-		P6 = P1[6]
-		P1 = P1[1]
-        
-		print "QUADRUPLETYPE PARAMS: " +`t` + " " + P1 + " " + P2 + " " + P3 + " " + P4 + " " + P5 + " " + P6 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL + "\n"
-		print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
-		print "   ----------------------------------------------------------------------------"
-		
-		ADD_LINES += 2
-		
-		if(t>0):
-			ADD_PARAM += 1
-		
-		for i in xrange(0,int(TOTL)):
-			ADD_LINES += 1
-			LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
-			LINE_SPLIT = LINE.split()
+        ADD_LINES += 2
 
-			print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX+int(LINE_SPLIT[8])]`
-			#print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS]`
+if TOTAL_QUADS > 0:
+    print "QUADRUPLET " + POTENTIAL + " PARAMS \n"
+    
+    QUAD_PAR_IDX = 0
+    
+    for t in xrange(0, int(TOTAL_QUADS)):
+    
+        PREV_QUADIDX = 0
+                
+        P1 = hf[ATOM_QUADS_LINE+2].split()
+        
+        UNIQ = P1[8]
+        TOTL = P1[10]
+        
+        P2 = P1[2]
+        P3 = P1[3]
+        P4 = P1[4]
+        P5 = P1[5]
+        P6 = P1[6]
+        P1 = P1[1]
+        
+        print "QUADRUPLETYPE PARAMS: " +`t` + " " + P1 + " " + P2 + " " + P3 + " " + P4 + " " + P5 + " " + P6 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL + "\n"
+        print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
+        print "   ----------------------------------------------------------------------------"
+        
+        ADD_LINES += 2
+        
+        if(t>0):
+            ADD_PARAM += 1
+        
+        for i in xrange(0,int(TOTL)):
+            ADD_LINES += 1
+            LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
+            LINE_SPLIT = LINE.split()
 
-		QUAD_PAR_IDX += int(UNIQ)
+            print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX+int(LINE_SPLIT[8])]`
+            #print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS]`
+
+        QUAD_PAR_IDX += int(UNIQ)
             
-		print ""
+        print ""
         
-		ADD_LINES += 2        
+        ADD_LINES += 2        
 
-			
 if FIT_POVER == "true":
 	print "P OVER: " + `x[len(x)-1]`
 	
@@ -470,5 +453,23 @@ if TEST_SUITE_RUN == "do":
 # OLD WAY:
 #for i in range(0,len(x)):
 #    print i,x[i]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
