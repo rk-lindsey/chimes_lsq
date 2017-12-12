@@ -343,6 +343,7 @@ struct TRIPLETS
 		MIN_FOUND.X   = -1;
 		MIN_FOUND.X   = -1;
 		MIN_FOUND.X   = -1;
+		N_TRUE_ALLOWED_POWERS = 0;
 		
 	}
 };
@@ -383,6 +384,7 @@ struct QUADRUPLETS
 		MIN_FOUND[3]   = -1;
 		MIN_FOUND[4]   = -1;
 		MIN_FOUND[5]   = -1;
+		N_TRUE_ALLOWED_POWERS = 0;
 	}
 		
 };

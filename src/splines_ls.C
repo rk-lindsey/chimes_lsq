@@ -518,9 +518,9 @@ int main(int argc, char* argv[])
 
 			for (int j=0; j<CONTROLS.TOT_SHORT_RANGE; j++)
 			{		
-				A_MATRIX[f][i][j].X = 0;
-				A_MATRIX[f][i][j].Y = 0;
-				A_MATRIX[f][i][j].Z = 0;
+				A_MATRIX[f][i][j].X = 0.0;
+				A_MATRIX[f][i][j].Y = 0.0;
+				A_MATRIX[f][i][j].Z = 0.0;
 			}
 		}
 
@@ -1168,6 +1168,8 @@ int main(int argc, char* argv[])
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
 	
 	
+	// Print out special cutoffs for 3-body interaction
+	
 	int FOUND_SPECIAL = 0;
 
 	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
@@ -1214,6 +1216,66 @@ int main(int argc, char* argv[])
 					<< PAIR_TRIPLETS[i].S_MAXIM_3B.Z << endl;						
 	}	
 
+	// Print out special cutoffs for 4-body interactions
+	
+	FOUND_SPECIAL = 0;
+
+	for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
+	{
+		if(PAIR_QUADRUPLETS[i].S_MINIM_4B[0] >= 0)
+			FOUND_SPECIAL++;
+	}
+	
+	if(FOUND_SPECIAL>0)
+	{
+		header << endl << "SPECIAL 4B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
+		
+		for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
+			if(PAIR_QUADRUPLETS[i].S_MINIM_4B[0] >= 0)
+				header << i << " " << QUAD_MAP_REVERSE[i] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[0] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[1] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[2] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[3] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[4] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[5] << " " 
+					<< fixed << setprecision(5) 
+		            << PAIR_QUADRUPLETS[i].S_MINIM_4B[0] << " "
+				 	<< PAIR_QUADRUPLETS[i].S_MINIM_4B[1] << " "
+					<< PAIR_QUADRUPLETS[i].S_MINIM_4B[2] << " "
+					<< PAIR_QUADRUPLETS[i].S_MINIM_4B[3] << " "
+					<< PAIR_QUADRUPLETS[i].S_MINIM_4B[4] << " "
+					<< PAIR_QUADRUPLETS[i].S_MINIM_4B[5] << endl;						
+	}
+		
+	FOUND_SPECIAL = 0;
+	
+	for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
+		if(PAIR_QUADRUPLETS[i].S_MAXIM_4B[0] >= 0)
+			FOUND_SPECIAL++;
+	
+	if(FOUND_SPECIAL>0)
+	{
+		header << endl << "SPECIAL 4B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
+		
+		for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
+			if(PAIR_QUADRUPLETS[i].S_MAXIM_4B[0] >= 0)
+				header << i << " " << QUAD_MAP_REVERSE[i] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[0] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[1] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[2] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[3] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[4] << " " 
+					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[5] << " " 
+					<< fixed << setprecision(5) 
+		            << PAIR_QUADRUPLETS[i].S_MAXIM_4B[0] << " "
+				 	<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[1] << " "
+					<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[2] << " "
+					<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[3] << " "
+					<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[4] << " "
+					<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[5] << endl;							
+	}	
+	
 	 
 	if(!CONTROLS.USE_3B_CHEBY)
 		header << endl << "ATOM PAIR TRIPLETS: " << 0 << endl;
@@ -1254,7 +1316,11 @@ int main(int argc, char* argv[])
 		{
 			header << PAIR_QUADRUPLETS[i].QUADINDX << "  ";
 			for(int m=0; m<6; m++)
-				header << PAIR_QUADRUPLETS[i].ATOM_PAIRS[m] << "  ";
+			{
+				header << PAIR_QUADRUPLETS[i].ATOM_PAIRS[m];
+				if(m<5)
+					header << " ";
+			}
 			header << ": " << PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS << " parameters, " << PAIR_QUADRUPLETS[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
 	
 			header << "     index  |  powers  |  equiv index  |  param index  " << endl;

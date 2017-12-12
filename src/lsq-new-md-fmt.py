@@ -112,6 +112,7 @@ for i in range(0,len(Dmat)):
 # numerical recipes (LEF).
 eps=eps_fac * dmax
 nvars = 0
+
 for i in xrange(0,len(D)):
     if abs(D[i]) > eps:
         Dmat[i][i]=1.0/D[i]
@@ -153,17 +154,29 @@ print "!"
 BREAK_COND = False
 
 # Figure out whether we have triplets and/or quadruplets
+# Find the ATOM_TRIPS_LINE and ATOM_QUADS_LINE
+# Find the TOTAL_TRIPS and TOTAL_QUADS
+
+ATOM_TRIPS_LINE = 0
+ATOM_QUADS_LINE = 0
+TOTAL_TRIPS = 0
+TOTAL_QUADS = 0
 
 for i in range(0, len(hf)):
-    sys.stdout.write(hf[i])
+    print hf[i].rstrip('\n')
     TEMP = hf[i].split()
     if len(TEMP)>3:
         if (TEMP[2] == "TRIPLETS:"):
+            TOTAL_TRIPS = TEMP[3]
+            ATOM_TRIPS_LINE = i
+            
             for j in range(i, len(hf)):
                 TEMP = hf[j].split()
                 if len(TEMP)>3:
                     if (TEMP[2] == "QUADRUPLETS:"):
-                        sys.stdout.write(hf[j])
+                        print hf[j].rstrip('\n')
+                        TOTAL_QUADS = TEMP[3]
+                        ATOM_QUADS_LINE = j
                         BREAK_COND = True
                         break
         if (BREAK_COND):
@@ -230,55 +243,6 @@ ATOM_PAIRS_LINE=11+TOTAL_ATOM_TYPES+2
 TOTAL_PAIRS =  hf[ATOM_PAIRS_LINE].split()
 TOTAL_PAIRS = int(TOTAL_PAIRS[2])
 
-# ... figure out which line "ATOM PAIR TRIPLETS: " is on 
-
-ATOM_TRIPS_LINE=0
-if FIT_POVER == "true" or USE_POVER == "true":
-    ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2+TOTAL_PAIRS+2
-else:
-    ATOM_TRIPS_LINE=ATOM_PAIRS_LINE+2+TOTAL_PAIRS+2
-
-TEST = hf[ATOM_TRIPS_LINE].split()
-if len(TEST) == 3 and TEST[2] == "CUBIC":
-	ATOM_TRIPS_LINE += 2
-	
-TEST = hf[ATOM_TRIPS_LINE].split()
-if TEST[0] == "FCUT":
-	ATOM_TRIPS_LINE += 2	
-	
-TEST = hf[ATOM_TRIPS_LINE].split()
-if len(TEST) == 4 and TEST[2] == "S_MINIM:":
-    if TEST[3] == "ALL":
-        ATOM_TRIPS_LINE += 2
-if len(TEST) == 5 and TEST[2] == "S_MINIM:":	
-        ATOM_TRIPS_LINE += 2 + int(TEST[4])   
-        
-TEST = hf[ATOM_TRIPS_LINE].split()
-if len(TEST) == 4 and TEST[2] == "S_MAXIM:":
-    if TEST[3] == "ALL":
-        ATOM_TRIPS_LINE += 2
-if len(TEST) == 5 and TEST[2] == "S_MAXIM:":	
-        ATOM_TRIPS_LINE += 2 + int(TEST[4])       
-
-
-
-# Figure out which line "ATOM PAIR TRIPLETS" is on
-
-TOTAL_TRIPS =  hf[ATOM_TRIPS_LINE].split()
-TOTAL_TRIPS = int(TOTAL_TRIPS[3])
-
-# ... figure out which line "ATOM PAIR QUADRUPLETS: " is on 
-
-ATOM_QUADS_LINE = 0
-TOTAL_QUADS     = 0
-
-#if TOTAL_TRIPS == 0:
-ATOM_QUADS_LINE = 1 + ATOM_TRIPS_LINE
-TOTAL_QUADS = hf[ATOM_TRIPS_LINE+1].split()
-
-if len(TOTAL_QUADS)>0:
-    TOTAL_QUADS = int(TOTAL_QUADS[3])
-
 A1 = ""
 A2 = ""
 
@@ -303,9 +267,30 @@ if TOTAL_TRIPS > 0:
         SNUM_3B +=  int(P1[4])
         
         TOTL = P1[6]
-        
+
         ADD_LINES += 4
         
+        for i in xrange(0,int(TOTL)):
+            ADD_LINES += 1
+            
+# Figure out how many 4B parameters there are
+
+SNUM_4B   = 0
+ADD_LINES = 0
+
+if TOTAL_QUADS > 0:
+    for t in xrange(0, int(TOTAL_QUADS)):
+
+        P1 = hf[ATOM_QUADS_LINE+2+ADD_LINES].split()
+        
+        #print P1
+        
+        SNUM_4B +=  int(P1[7])
+        
+        TOTL = P1[9]
+        
+        ADD_LINES += 4
+
         for i in xrange(0,int(TOTL)):
             ADD_LINES += 1
 
@@ -384,19 +369,21 @@ if TOTAL_TRIPS > 0:
         
         ADD_LINES += 2
 
+ADD_LINES = 0
+
 if TOTAL_QUADS > 0:
     print "QUADRUPLET " + POTENTIAL + " PARAMS \n"
     
     QUAD_PAR_IDX = 0
-    
-    for t in xrange(0, int(TOTAL_QUADS)):
+
+    for t in xrange(int(TOTAL_QUADS)):
     
         PREV_QUADIDX = 0
                 
         P1 = hf[ATOM_QUADS_LINE+2].split()
         
-        UNIQ = P1[8]
-        TOTL = P1[10]
+        UNIQ = P1[7]
+        TOTL = P1[9]
         
         P2 = P1[2]
         P3 = P1[3]
