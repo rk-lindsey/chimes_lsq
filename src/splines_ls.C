@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 #endif
 
 	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, PAIR_QUADRUPLETS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, QUAD_MAP, QUAD_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
-	
+
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
 	{
 		cout << "ERROR: Inclusion of stress tensors currently not compatible with use of ZCalc_Ewald_Deriv." << endl;
@@ -1875,9 +1875,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			// Set up triplets
 			
-			NTRIP = factorial(CONTROLS.NATMTYP+4-1)/factorial(4)/factorial(CONTROLS.NATMTYP-1);
-		
-			
+			NTRIP = factorial(CONTROLS.NATMTYP+3-1)/factorial(3)/factorial(CONTROLS.NATMTYP-1);
+	
 			// Account for excluded types:
 			
 			PAIR_TRIPLETS.resize(NTRIP);
@@ -1894,7 +1893,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				
 				PAIR_TRIPLETS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;
 			}	
-			
+
 			// Set up quadruplets
 			
 			NQUAD = factorial(CONTROLS.NATMTYP+4-1)/factorial(4)/factorial(CONTROLS.NATMTYP-1);
@@ -1911,7 +1910,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				
 				PAIR_QUADRUPLETS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;	
 			}	
-					
+
 		}
 
 		else if(LINE.find("# TYPEIDX #")!= string::npos)
@@ -2087,12 +2086,20 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 							PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR2] ].PRPR_NM;
 							PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR3] ].PRPR_NM;
 							
-//cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 << endl;		
+//cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 << endl;	
+if(RANK==0)
+{							
+	cout << "Made the following triplets: ";
+	cout <<TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 << endl;		
+}
+	
 
 							TEMP_INT++;						
 						}
 					}
-				}			
+				}
+				
+							
 			
 				// Figure out the allowed pair triplet powers. Here are some rules and considerations:
 				//
@@ -2557,12 +2564,14 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 								for(int m=0; m<6; m++) 
 									PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[m] = ATOM_PAIRS[ PAIR_MAP[ PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[m]] ].PRPR_NM;	
 
-							
-cout << "ADDED QUADRUPLET: " << TEMP_INT << " ";
+
+if(RANK==0)
+{							
+cout << "Made the following quadruplets: " << TEMP_INT << " ";
 for(int m=0; m<6; m++) 
  	cout << PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[m] << " ";
 cout << endl;		
-
+}
 							TEMP_INT++;	
 							}					
 						}
@@ -2624,7 +2633,8 @@ cout << endl;
 				
 					PAIR_TYPE_AND_INDEX_TMP.erase( unique( PAIR_TYPE_AND_INDEX_TMP.begin(), PAIR_TYPE_AND_INDEX_TMP.end(),check_pairs ), PAIR_TYPE_AND_INDEX_TMP.end() );	// Removes duplicated from SORTED vector, based only on the .first element (i.e. uses our check_pairs function)
 
-					int N_UNIQUE_PAIRS  = PAIR_TYPE_AND_INDEX_VEC.size();
+					//int N_UNIQUE_PAIRS  = PAIR_TYPE_AND_INDEX_VEC.size();
+					int N_UNIQUE_PAIRS  = PAIR_TYPE_AND_INDEX_TMP.size();
 					
 					// Loops start at zero for a trick to speed up check for powers > 0
 					
@@ -2652,35 +2662,29 @@ cout << endl;
 											FOUND_I = FOUND_J = FOUND_K = FOUND_L = false;										
 											
 											if (pair1_pow == 0)
-											{
 												THRESHOLD++;
+											else
 												FOUND_I = FOUND_J = true;
-											}
 											if (pair2_pow == 0)
-											{
 												THRESHOLD++;
+											else
 												FOUND_I = FOUND_K = true;
-											}
 											if (pair3_pow == 0)
-											{
 												THRESHOLD++;
+											else
 												FOUND_I = FOUND_L = true;
-											}
 											if (pair4_pow == 0)
-											{
 												THRESHOLD++;
+											else
 												FOUND_J = FOUND_K = true;
-											}
 											if (pair5_pow == 0)
-											{
 												THRESHOLD++;
+											else
 												FOUND_J = FOUND_L = true;
-											}
 											if (pair6_pow == 0)
-											{
 												THRESHOLD++;
+											else
 												FOUND_K = FOUND_L = true;
-											}
 											
 											if(THRESHOLD > 3) // Then this is not a valid set of powers. Move on to the next set
 												continue;
@@ -2695,7 +2699,7 @@ cout << endl;
 											SORTED_POWERS[4] = UNSORTED_POWERS[4] =  pair5_pow;
 											SORTED_POWERS[5] = UNSORTED_POWERS[5] =  pair6_pow;
 											
-											// Store all valid triplets
+											// Store all valid sixlets
 											
 											PAIR_QUADRUPLETS[i].ALLOWED_POWERS.push_back(UNSORTED_POWERS);
 											
@@ -2706,9 +2710,9 @@ cout << endl;
 											
 											// Next, for each chunk of common pair types, we need to sort the corresponding powers in ascending order
 											// ...to do this we first need to figure out where those chunks begin and end
-											// ...the case where are pair types are the same is unique, we don't need to worry about sub-sorting within pair types
+											// ...the case where all pair types are the same is unique, we don't need to worry about sub-sorting within pair types
 											
-											if(N_UNIQUE_PAIRS = 1)
+											if(N_UNIQUE_PAIRS == 1)
 											{
 												sort (SORTED_POWERS.begin(), SORTED_POWERS.end());
 											}
@@ -2721,7 +2725,7 @@ cout << endl;
 												
 												for(int m=0; m<6; m++)
 												{
-													if(PAIR_TYPE_AND_INDEX_VEC[0].first != PREV_UNIQUE)
+													if(PAIR_TYPE_AND_INDEX_VEC[m].first != PREV_UNIQUE)
 													{
 														UNIQUE_SORT.push_back(m);
 														PREV_UNIQUE = PAIR_TYPE_AND_INDEX_VEC[m].first;	
@@ -2856,7 +2860,8 @@ cout << endl;
 
 										// Compare every possible permutation of these pairs with those for the quadruplet ff types
 						
-										for(int m=0; m<NQUAD; m++)
+						
+										for(int p=0; p<NQUAD; p++)
 										{
 											sort(TEMP_STR.begin(),TEMP_STR.end());
 											do
@@ -2867,26 +2872,30 @@ cout << endl;
 
 												for (int s=0; s<6; s++)
 												{
-													if(TEMP_STR[s] != PAIR_QUADRUPLETS[m].ATOM_PAIRS[s])
+													if(TEMP_STR[s] != PAIR_QUADRUPLETS[p].ATOM_PAIRS[s])
 														REAL_QUAD = false;
 													
-													FULL_TEMP_STR += TEMP_STR[i];
+													FULL_TEMP_STR += TEMP_STR[s];
 												}
 												
+												
+												
 												if(REAL_QUAD)
-												{
-													QUAD_MAP        .insert(make_pair(FULL_TEMP_STR,m));	
-													QUAD_MAP_REVERSE.insert(make_pair(m,FULL_TEMP_STR));															
+												{													
+													QUAD_MAP        .insert(make_pair(FULL_TEMP_STR,p));	
+													QUAD_MAP_REVERSE.insert(make_pair(p,FULL_TEMP_STR));														
 													break;
 												}
 
 												
 											} while (next_permutation(TEMP_STR.begin(),TEMP_STR.end()));
-											
-											if(!REAL_QUAD)
+/* // THIS IS THE CULPRIT											
+									 		if(!REAL_QUAD)
 											{
-												QUAD_MAP        .insert(make_pair(FULL_TEMP_STR,-1*m-1));
+												QUAD_MAP        .insert(make_pair(FULL_TEMP_STR,-1*p-1));
 											}
+*/											
+											
 										}
 									}
 								}
@@ -2975,7 +2984,7 @@ cout << endl;
 								reverse(TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 
 								ATOM_QUAD_ID_INT = 1000*(TMP_QUAD_SET[0]+1) + 100*(TMP_QUAD_SET[1]+1) + 10+(TMP_QUAD_SET[2]+1) + TMP_QUAD_SET[3]+1;
-								
+
 								INT_QUAD_MAP        .insert(make_pair(ATOM_QUAD_ID_INT,QUAD_MAP[TMP_QUAD_SIXLET]));	
 								INT_QUAD_MAP_REVERSE.insert(make_pair(QUAD_MAP[TMP_QUAD_SIXLET], ATOM_QUAD_ID_INT));	
 								
@@ -2983,12 +2992,12 @@ cout << endl;
 								{
 									cout << "		";
 									cout<< "Atom type idxs: ";
-								    cout<< fixed << setw(2) << right << i;
+									cout<< fixed << setw(2) << right << i;
 									cout<< fixed << setw(2) << right << j;
 									cout<< fixed << setw(2) << right << k;
 									cout<< fixed << setw(2) << right << l;
 									cout<< " Quadruplet name: "           << setw(12) << right << TMP_QUAD_SIXLET;
-									cout<< " Unique quadruplet index: "   << setw(4) << right << INT_QUAD_MAP[CURR_QUAD_IDX] << endl;
+									cout<< " Unique quadruplet index: "   << setw(4)  << right << INT_QUAD_MAP[ATOM_QUAD_ID_INT] << endl;
 								}
 								
 								CURR_QUAD_IDX++;
@@ -3630,8 +3639,8 @@ if ( RANK == 0 )
 			{				
 				STREAM_PARSER >> PAIR_QUADRUPLETS[0].S_MAXIM_4B[0];
 				
-				if(PAIR_QUADRUPLETS[0].S_MAXIM_4B[0] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
-					NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_QUADRUPLETS[0].S_MAXIM_4B[0];
+				if(PAIR_QUADRUPLETS[0].S_MAXIM_4B[0] > NEIGHBOR_LIST.MAX_CUTOFF_4B)
+					NEIGHBOR_LIST.MAX_CUTOFF_4B = PAIR_QUADRUPLETS[0].S_MAXIM_4B[0];
 
 				for(int i=0; i<NQUAD; i++)
 				{
@@ -3645,12 +3654,93 @@ if ( RANK == 0 )
 			}
 			else if(TEMP_STR == "SPECIFIC" && NQUAD >0 )
 			{
-				cout << "ERROR: Functionality not programmed for 4-body yet." << endl;
-				exit(0);
+				STREAM_PARSER >> TEMP_INT;
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();
+			
+				
+				#if VERBOSITY == 1
+				if ( RANK == 0 ) cout << "	Note: Setting specific 4-body r_max values: " << endl;
+				#endif	
+
+				double TMP_VAL;
+				vector<string>TMP_PAIRTYPS(6);
+				vector<double>TMP_CUTOFFS(6);
+				vector<string>TRG_PAIRTYPS(6);
+				
+				for(int i=0; i<TEMP_INT; i++)
+				{
+					getline(cin,LINE);
+
+					STREAM_PARSER.str(LINE);
+					STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
+
+					// Figure out the pair types for the quadruplet being read, and figure out the expected order
+					// of those pair types for the quadruplet force field type
+					
+					for(int j=0; j<6; j++)
+					{
+						STREAM_PARSER >> TMP_PAIRTYPS[j];	// What are the pair types (strings)
+						
+						// Check that sixlet pair types are correct
+						
+						try
+						{
+							TMP_PAIRTYPS[j] = ATOM_PAIRS[ PAIR_MAP[ TMP_PAIRTYPS[j] ] ].PRPR_NM;
+						}
+						catch(...)
+						{
+							cout << "ERROR: Unknown quad pair for special inner cutoff." << endl;
+							cout << "		Quadruplet type:           " << TEMP_STR        << endl;
+							cout << "		First distance, pair type: " << TMP_PAIRTYPS[j] << endl;
+						}
+						
+						TRG_PAIRTYPS[j] = ATOM_PAIRS[ PAIR_MAP[ PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].ATOM_PAIRS[j] ] ].PRPR_NM;
+
+					}
+					
+					// Read the cutoffs
+					
+					for(int j=0; j<6; j++)
+						STREAM_PARSER >> TMP_CUTOFFS[j];
+					
+					// Store cutoffs
+					
+					for(int j=0; j<6; j++)	// Iterate over TMP pair types
+					{
+						for(int k=0; k<6; k++)	// Iterate over TRG pair types
+							if( (TMP_PAIRTYPS[j] == TRG_PAIRTYPS[k]) && (PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[k] == -1))
+								PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[k] = TMP_CUTOFFS[j];
+						
+						// Reset the 4b max cutoff value
+						
+						if(TMP_CUTOFFS[j] > NEIGHBOR_LIST.MAX_CUTOFF_4B)
+							NEIGHBOR_LIST.MAX_CUTOFF_4B = TMP_CUTOFFS[j];
+					}
+					
+					// Print new cutoffs
+					
+					#if VERBOSITY == 1
+					if(RANK==0)
+					{
+						cout << "		" << TEMP_STR << "(";
+						
+						for (int j=0; j<5; j++)
+							cout << TRG_PAIRTYPS[j] << ", ";
+						
+						cout << TRG_PAIRTYPS[5] << "): ";
+							
+						for (int j=0; j<5; j++)
+							cout << PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[j] << ", ";
+						
+						cout << PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[5] << endl;	
+					}
+					#endif	
+					
+					STREAM_PARSER.str("");
+					STREAM_PARSER.clear();
+				}
 			}
-			
-			
-			
 
 		}
 		else if(LINE.find("SPECIAL 4B S_MINIM:") != string::npos)
