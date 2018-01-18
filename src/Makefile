@@ -138,3 +138,6 @@ packmol:
 
 clean_packmol:
 	make clean -C ../contrib/packmol
+
+tags:
+	./maketags.pl
