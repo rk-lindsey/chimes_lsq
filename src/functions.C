@@ -2306,11 +2306,9 @@ static void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 					sort   (TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 					reverse(TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 			
-					ATOM_QUAD_ID_INT       = 1000*(TMP_QUAD_SET[0]+1) + 100*(TMP_QUAD_SET[1]+1) + 10+(TMP_QUAD_SET[2]+1) + TMP_QUAD_SET[3]+1;
+					ATOM_QUAD_ID_INT       = make_quad_id_int(TMP_QUAD_SET[0], TMP_QUAD_SET[1], TMP_QUAD_SET[2], TMP_QUAD_SET[3]) ;
 					curr_quad_type_index = INT_QUAD_MAP[ATOM_QUAD_ID_INT];				
-					
-					curr_quad_type_index =  INT_QUAD_MAP[1000*(TMP_QUAD_SET[0]+1) + 100*(TMP_QUAD_SET[1]+1) + 10+(TMP_QUAD_SET[2]+1) + TMP_QUAD_SET[3]+1];
-				
+
 					// If this type has been excluded, then skip to the next iteration of the loop
 
 					if(curr_quad_type_index<0)
@@ -3793,7 +3791,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
                     	SORT_THREE_DESCEND(idx1, idx2, idx3);
 
-                    	idx1 = 100*idx1 + 10*idx2 + idx3;
+                    	idx1 = make_triplet_id_int(idx1, idx2, idx3) ;
                     	curr_triple_type_index = INT_TRIAD_MAP[idx1];
 					
 			if(curr_triple_type_index<0)
@@ -4056,7 +4054,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			sort   (TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 			reverse(TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 			
-			ATOM_QUAD_ID_INT       = 1000*(TMP_QUAD_SET[0]+1) + 100*(TMP_QUAD_SET[1]+1) + 10+(TMP_QUAD_SET[2]+1) + TMP_QUAD_SET[3]+1;
+			ATOM_QUAD_ID_INT       = make_quad_id_int(TMP_QUAD_SET[0], TMP_QUAD_SET[1], TMP_QUAD_SET[2], TMP_QUAD_SET[3]) ;
 			curr_quad_type_index = INT_QUAD_MAP[ATOM_QUAD_ID_INT];
 
 			if(curr_quad_type_index<0)
@@ -4195,9 +4193,9 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 				
 				// Apply forces to jk pair
 				
-				SYSTEM.ACCEL[a2]     .X += force_4b[3] * RAB[3].X;
-				SYSTEM.ACCEL[a2]     .Y += force_4b[3] * RAB[3].Y;
-				SYSTEM.ACCEL[a2]     .Z += force_4b[3] * RAB[3].Z;
+				SYSTEM.ACCEL[fidx_a2].X += force_4b[3] * RAB[3].X;
+				SYSTEM.ACCEL[fidx_a2].Y += force_4b[3] * RAB[3].Y;
+				SYSTEM.ACCEL[fidx_a2].Z += force_4b[3] * RAB[3].Z;
 
 				SYSTEM.ACCEL[fidx_a3].X -= force_4b[3] * RAB[3].X;
 				SYSTEM.ACCEL[fidx_a3].Y -= force_4b[3] * RAB[3].Y;
@@ -4205,9 +4203,9 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 				
 				// Apply forces to jl pair
 
-				SYSTEM.ACCEL[a2]     .X += force_4b[4] * RAB[4].X;
-				SYSTEM.ACCEL[a2]     .Y += force_4b[4] * RAB[4].Y;
-				SYSTEM.ACCEL[a2]     .Z += force_4b[4] * RAB[4].Z;
+				SYSTEM.ACCEL[fidx_a2].X += force_4b[4] * RAB[4].X;
+				SYSTEM.ACCEL[fidx_a2].Y += force_4b[4] * RAB[4].Y;
+				SYSTEM.ACCEL[fidx_a2].Z += force_4b[4] * RAB[4].Z;
 
 				SYSTEM.ACCEL[fidx_a4].X -= force_4b[4] * RAB[4].X;
 				SYSTEM.ACCEL[fidx_a4].Y -= force_4b[4] * RAB[4].Y;
@@ -4215,9 +4213,9 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 											
 				// Apply forces to kl pair
 				
-				SYSTEM.ACCEL[a3]     .X += force_4b[5] * RAB[5].X;
-				SYSTEM.ACCEL[a3]     .Y += force_4b[5] * RAB[5].Y;
-				SYSTEM.ACCEL[a3]     .Z += force_4b[5] * RAB[5].Z;
+				SYSTEM.ACCEL[fidx_a3].X += force_4b[5] * RAB[5].X;
+				SYSTEM.ACCEL[fidx_a3].Y += force_4b[5] * RAB[5].Y;
+				SYSTEM.ACCEL[fidx_a3].Z += force_4b[5] * RAB[5].Z;
 
 				SYSTEM.ACCEL[fidx_a4].X -= force_4b[5] * RAB[5].X;
 				SYSTEM.ACCEL[fidx_a4].Y -= force_4b[5] * RAB[5].Y;
@@ -5037,4 +5035,3 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 	
 	return;
 } 
-

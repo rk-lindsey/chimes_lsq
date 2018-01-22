@@ -727,6 +727,12 @@ int main(int argc, char* argv[])
 			STREAM_PARSER.str("");
 			STREAM_PARSER.clear();
 		
+			if ( NATMTYP > MAX_ATOM_TYPES ) 
+			{
+			  cout << "ERROR: TOO MANY ATOM TYPES DEFINED\n" ;
+			  exit_run(0) ;
+			}
+  
 			// We need a globally-defined data object to hold charges for passing into LAMMPS
 			#if defined(USE_MPI) && defined(LINK_LAMMPS)
 				LMP_CHARGE         .resize(NATMTYP);
@@ -3031,7 +3037,7 @@ int main(int argc, char* argv[])
 	
 	if(FF_2BODY[0].SNUM_3B_CHEBY > 0)
 	{
-		INT_TRIAD_MAP.resize(1000);
+	  INT_TRIAD_MAP.resize(MAX_ATOM_TYPES3) ;
 
 		int idx1, idx2, idx3;
 
@@ -3071,7 +3077,7 @@ int main(int argc, char* argv[])
 				
 					SORT_THREE_DESCEND(idx1, idx2, idx3);
 				
-					idx1 = 100*idx1 + 10*idx2 + idx3;
+               idx1 = make_triplet_id_int(idx1, idx2, idx3) ;
 					INT_TRIAD_MAP[idx1] = TRIAD_MAP[int_map_3b_str];
 				
 					if(RANK == 0)
@@ -3135,7 +3141,7 @@ int main(int argc, char* argv[])
 						TMP_QUAD_PAIR    = TMP_ATOMTYPE[k] + TMP_ATOMTYPE[l]; 	
 						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
 						
-						ATOM_QUAD_ID_INT = 1000*(i+1) + 100*(j+1) + 10+(k+1) + l+1;
+						ATOM_QUAD_ID_INT = make_quad_id_int(i, j, k, l) ;
 						
 						INT_QUAD_MAP        .insert(make_pair(ATOM_QUAD_ID_INT,QUAD_MAP[TMP_QUAD_SIXLET]));	
 						//INT_QUAD_MAP_REVERSE.insert(make_pair(QUAD_MAP[TMP_QUAD_SIXLET], ATOM_QUAD_ID_INT));	

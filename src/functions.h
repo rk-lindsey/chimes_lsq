@@ -63,8 +63,12 @@ using namespace std;
 #endif
 
 
-// Unit converters 
+// Maximum number of atom types.
+#define MAX_ATOM_TYPES 10 
+#define MAX_ATOM_TYPES2 (MAX_ATOM_TYPES  * MAX_ATOM_TYPES)
+#define MAX_ATOM_TYPES3 (MAX_ATOM_TYPES2 * MAX_ATOM_TYPES) 
 
+// Unit converters 
 static const double ke      = 332.0637157615209;	// Converter between electron units and Stillinger units for Charge*Charge.
 static const double Hartree = 627.50961; 			// 1 Hartree in kcal/mol.
 static const double Kb      = 0.001987; 			// Boltzmann constant in kcal/mol-K.
@@ -703,6 +707,18 @@ void enable_fp_exceptions();
 void exit_run(int val);
 
 
+
+inline int make_quad_id_int(int i, int j, int k, int l)
+// Returns a unique ID number for a quadruple of 4 atom types.
+{
+  return(MAX_ATOM_TYPES3 * (i+1) + MAX_ATOM_TYPES2 * (j+1) + MAX_ATOM_TYPES * (k+1) + l + 1) ;
+}
+
+inline int make_triplet_id_int(int i, int j, int k) 
+// Returns a unique ID number for a triplet of 3 atom types.
+{
+  return(MAX_ATOM_TYPES2 * i + MAX_ATOM_TYPES * j + k) ;
+}
 
 #endif
 
