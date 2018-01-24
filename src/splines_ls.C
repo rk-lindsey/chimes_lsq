@@ -30,12 +30,14 @@ using namespace std;
 #include <mpi.h>
 #endif 
 
-typedef pair<string,int> test;
-
-
 static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, NEIGHBORS & NEIGHBOR_LIST);
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_TRIPLETS, vector<QUADRUPLETS> &PAIR_QUADRUPLETS, bool use_3b_cheby, bool use_4b_cheby);
+
+void store_quad_permutations(QUADRUPLETS &quad, vector<int> &unsorted_powers)  ;
+void permute_atom_indices(int idx, vector<string> names, QUADRUPLETS &quad, vector<int> &unsorted_powers, vector<int> perm, int unique_index,
+								  int equiv_index) ;
+bool operator==(const vector<int>& lhs, const vector<int>& rhs)  ;
 
 int factorial(int input)
 {
@@ -44,11 +46,6 @@ int factorial(int input)
 		result *= i;
 	
 	return result;
-}
-
-bool check_pairs(test a, test b)
-{
-	return (a.first == b.first);
 }
 
 string FULL_FILE_3B;		// Global variables declared as externs in functions.h, and declared in functions.C
@@ -1902,15 +1899,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			for (int i=0; i<NQUAD; i++)
 			{	
-				for(int j=0; j<6; j++)
-				{
-					PAIR_QUADRUPLETS[i].S_MINIM_4B[j] = -1;
-					PAIR_QUADRUPLETS[i].S_MAXIM_4B[j] = -1;
-				}
-				
-				PAIR_QUADRUPLETS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;	
-			}	
-
+			  PAIR_QUADRUPLETS[i].init() ;
+			}
 		}
 
 		else if(LINE.find("# TYPEIDX #")!= string::npos)
@@ -2120,7 +2110,6 @@ if(RANK==0)
 				vector<XYZ_INT> STORED_SORTED_POWERS;//(CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER);		// Make this the max possible size... it will be destroyed later anyway.
 			
 				int TOP, BOT;
-				int ITEMS = -1; 
 			
 				bool STORED = false;
 				int  STORED_IDX;
@@ -2128,7 +2117,6 @@ if(RANK==0)
 			
 				for(int i=0; i<NTRIP; i++)
 				{
-					ITEMS = 0;
 					vector<int> STORED_SORTED_POWERS_EQVS;
 					
 					for(int pair1_pow=0; pair1_pow<CONTROLS.CHEBY_3B_ORDER; pair1_pow++)
@@ -2537,9 +2525,15 @@ if(RANK==0)
 						{
 							for(int l=k; l<CONTROLS.NATMTYP; l++)
 							{
-								
 								PAIR_QUADRUPLETS[TEMP_INT].QUADINDX = TEMP_INT;	// Index for current triplet type
 								
+								// Save the names of each atom type in the pair.
+
+								PAIR_QUADRUPLETS[TEMP_INT].ATOM_NAMES[0] = ATOM_CHEMS[i] ;
+								PAIR_QUADRUPLETS[TEMP_INT].ATOM_NAMES[1] = ATOM_CHEMS[j] ;
+								PAIR_QUADRUPLETS[TEMP_INT].ATOM_NAMES[2] = ATOM_CHEMS[k] ;
+								PAIR_QUADRUPLETS[TEMP_INT].ATOM_NAMES[3] = ATOM_CHEMS[l] ;
+
 								// Save the first atom type in each pair
 								
 								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[0] = ATOM_CHEMS[i]; // ij
@@ -2592,240 +2586,9 @@ cout << endl;
 				// 
 				// NOTE: We need to also take into consideration the corresponding parameter multiplicities.
 
-				vector<int> UNSORTED_POWERS(6);
-				vector<int> SORTED_POWERS  (6);
-				
-				vector<vector<int> > STORED_SORTED_POWERS; 
-
-				int TOP, BOT;
-				int ITEMS = -1; 
-			
-				bool STORED = false;
-				int  STORED_IDX;
-				int  RUNNING_IDX = 0;
-			
 				for(int i=0; i<NQUAD; i++)
 				{
-					ITEMS = 0;
-					vector<int> STORED_SORTED_POWERS_EQVS;
-					
-					// The point of this loop is to determine true unique power sets. Whether or not a given set of 6 powers is 
-					// unique depends on the number of unique pairs within the corresponding set of pair types. We will determine
-					// this first.
-					
-					// The data types below will be used to determine uniqueness of power sets
-					
-					typedef pair<string,int> 		PAIR_TYPE_AND_INDEX;
-					vector <PAIR_TYPE_AND_INDEX> 	PAIR_TYPE_AND_INDEX_VEC(6);	// Used to determine uniqueness of power sets
-					vector <PAIR_TYPE_AND_INDEX> 	PAIR_TYPE_AND_INDEX_TMP(6);	// A temporary data structure
-					
-					for(int m=0; m<6; m++)
-					{ 					
-						PAIR_TYPE_AND_INDEX_VEC[m].first  = PAIR_QUADRUPLETS[i].ATOM_PAIRS[m];
-						PAIR_TYPE_AND_INDEX_VEC[m].second = m;	
-					}
-
-					sort (PAIR_TYPE_AND_INDEX_VEC.begin(), PAIR_TYPE_AND_INDEX_VEC.end());	// Sort the vector contents... automatically does on the basis of the .first element, preserving "link" between .first and .second
-					
-					// Since we don't actually want to erase duplicates from the PAIR_TYPE_AND_INDEX_VEC vector, make a temporary copy to use for unique counting
-					
-					copy(PAIR_TYPE_AND_INDEX_VEC.begin(), PAIR_TYPE_AND_INDEX_VEC.end(), PAIR_TYPE_AND_INDEX_TMP.begin());
-				
-					PAIR_TYPE_AND_INDEX_TMP.erase( unique( PAIR_TYPE_AND_INDEX_TMP.begin(), PAIR_TYPE_AND_INDEX_TMP.end(),check_pairs ), PAIR_TYPE_AND_INDEX_TMP.end() );	// Removes duplicated from SORTED vector, based only on the .first element (i.e. uses our check_pairs function)
-
-					//int N_UNIQUE_PAIRS  = PAIR_TYPE_AND_INDEX_VEC.size();
-					int N_UNIQUE_PAIRS  = PAIR_TYPE_AND_INDEX_TMP.size();
-					
-					// Loops start at zero for a trick to speed up check for powers > 0
-					
-					int THRESHOLD = 0;
-					bool FOUND_I, FOUND_J, FOUND_K, FOUND_L;
-					
-					for(int pair1_pow=0; pair1_pow<CONTROLS.CHEBY_4B_ORDER; pair1_pow++)
-					{
-						for(int pair2_pow=0; pair2_pow<CONTROLS.CHEBY_4B_ORDER; pair2_pow++)
-						{
-							for(int pair3_pow=0; pair3_pow<CONTROLS.CHEBY_4B_ORDER; pair3_pow++)
-							{
-								for(int pair4_pow=0; pair4_pow<CONTROLS.CHEBY_4B_ORDER; pair4_pow++)
-								{
-									for(int pair5_pow=0; pair5_pow<CONTROLS.CHEBY_4B_ORDER; pair5_pow++)
-									{
-										for(int pair6_pow=0; pair6_pow<CONTROLS.CHEBY_4B_ORDER; pair6_pow++)
-										{
-											// Before we go any further, make sure that:
-											// 1. at least 3 powers are greater than zero
-											// 2. all 4 atoms (i.e. i, j, k, and l) are represented in the non-zero powers
-											
-											THRESHOLD = 0;
-											
-											FOUND_I = FOUND_J = FOUND_K = FOUND_L = false;										
-											
-											if (pair1_pow == 0)
-												THRESHOLD++;
-											else
-												FOUND_I = FOUND_J = true;
-											if (pair2_pow == 0)
-												THRESHOLD++;
-											else
-												FOUND_I = FOUND_K = true;
-											if (pair3_pow == 0)
-												THRESHOLD++;
-											else
-												FOUND_I = FOUND_L = true;
-											if (pair4_pow == 0)
-												THRESHOLD++;
-											else
-												FOUND_J = FOUND_K = true;
-											if (pair5_pow == 0)
-												THRESHOLD++;
-											else
-												FOUND_J = FOUND_L = true;
-											if (pair6_pow == 0)
-												THRESHOLD++;
-											else
-												FOUND_K = FOUND_L = true;
-											
-											if(THRESHOLD > 3) // Then this is not a valid set of powers. Move on to the next set
-												continue;
-											
-											if(!(FOUND_I && FOUND_J && FOUND_K && FOUND_L))	// Then this is not a valid set of powers. Move on to the next set
-												continue;
-											
-											SORTED_POWERS[0] = UNSORTED_POWERS[0] =  pair1_pow;
-											SORTED_POWERS[1] = UNSORTED_POWERS[1] =  pair2_pow;
-											SORTED_POWERS[2] = UNSORTED_POWERS[2] =  pair3_pow;
-											SORTED_POWERS[3] = UNSORTED_POWERS[3] =  pair4_pow;
-											SORTED_POWERS[4] = UNSORTED_POWERS[4] =  pair5_pow;
-											SORTED_POWERS[5] = UNSORTED_POWERS[5] =  pair6_pow;
-											
-											// Store all valid sixlets
-											
-											PAIR_QUADRUPLETS[i].ALLOWED_POWERS.push_back(UNSORTED_POWERS);
-											
-											// Now we need to sort the powers to match the pair type sorting 
-											
-											for(int m=0; m<6; m++)
-												SORTED_POWERS[m] = UNSORTED_POWERS[PAIR_TYPE_AND_INDEX_VEC[m].second];
-											
-											// Next, for each chunk of common pair types, we need to sort the corresponding powers in ascending order
-											// ...to do this we first need to figure out where those chunks begin and end
-											// ...the case where all pair types are the same is unique, we don't need to worry about sub-sorting within pair types
-											
-											if(N_UNIQUE_PAIRS == 1)
-											{
-												sort (SORTED_POWERS.begin(), SORTED_POWERS.end());
-											}
-											else
-											{
-												vector<int> UNIQUE_SORT;	// The index of the first pair type in each chunk
-												UNIQUE_SORT.push_back(0);
-												
-												string PREV_UNIQUE = PAIR_TYPE_AND_INDEX_VEC[0].first;	// The pair type of the first pair
-												
-												for(int m=0; m<6; m++)
-												{
-													if(PAIR_TYPE_AND_INDEX_VEC[m].first != PREV_UNIQUE)
-													{
-														UNIQUE_SORT.push_back(m);
-														PREV_UNIQUE = PAIR_TYPE_AND_INDEX_VEC[m].first;	
-													}
-												}
-												
-												// Now that we have the start point for each unique, we can sort the sub-sections of the powers
-												
-												for(int m=0; m<N_UNIQUE_PAIRS; m++)
-												{
-													if(m<N_UNIQUE_PAIRS-1)
-														sort (SORTED_POWERS.begin()+UNIQUE_SORT[m]-1, SORTED_POWERS.begin()+UNIQUE_SORT[m+1]-1);
-													else
-														sort (SORTED_POWERS.begin()+UNIQUE_SORT[m]-1, SORTED_POWERS.end());
-												}
-												
-											}
-											
-											// Now Check if sorted powers have already been saved
-											
-											STORED = false;
-								
-											for(int j=0; j<STORED_SORTED_POWERS.size(); j++)
-											{
-												for(int k=0; k<6; k++)
-												{
-													if (STORED_SORTED_POWERS[j][k] != SORTED_POWERS[k])
-														break;
-													
-													if(k==5)
-													{
-														STORED = true;
-														STORED_IDX = j;
-														break;
-													}
-												}									
-											}
-											
-											// Save them, if they have not been already
-											
-											if(!STORED)
-											{
-												STORED_SORTED_POWERS              .push_back(SORTED_POWERS);
-												STORED_SORTED_POWERS_EQVS         .push_back(PAIR_QUADRUPLETS[i].ALLOWED_POWERS.size()-1);
-												PAIR_QUADRUPLETS[i].EQUIV_INDICIES.push_back(PAIR_QUADRUPLETS[i].ALLOWED_POWERS.size()-1);	// The current power	
-																		
-											}
-											else
-											{
-												PAIR_QUADRUPLETS[i].EQUIV_INDICIES.push_back(STORED_SORTED_POWERS_EQVS[STORED_IDX]);											
-											}
-											STORED = false;
-										}
-									}
-								}
-							}
-						}
-					}
-				
-					PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS = STORED_SORTED_POWERS.size();
-					STORED_SORTED_POWERS.clear();
-					vector<vector<int> >().swap(STORED_SORTED_POWERS);
-				
-					// Now all that's left to do is set the force field index for each set of powers
-				 
-					PAIR_QUADRUPLETS[i].PARAM_INDICIES.resize(PAIR_QUADRUPLETS[i].EQUIV_INDICIES.size());
-				
-					PAIR_QUADRUPLETS[i].PARAM_INDICIES[0] = 0;
-					
-					bool FOUND_EQV;
-					int  USE_SET = 0;
-					int  MAX_SET = 0;
-					
-					for(int set1=1; set1<PAIR_QUADRUPLETS[i].EQUIV_INDICIES.size(); set1++)
-					{
-						FOUND_EQV = false;
-						
-						for(int set2=0; set2<set1; set2++)
-						{
-							if(PAIR_QUADRUPLETS[i].EQUIV_INDICIES[set1] == PAIR_QUADRUPLETS[i].EQUIV_INDICIES[set2])
-							{
-								FOUND_EQV = true;
-								USE_SET   = set2;
-								break;
-							}
-						}
-						
-						if(FOUND_EQV)
-							PAIR_QUADRUPLETS[i].PARAM_INDICIES[set1] = PAIR_QUADRUPLETS[i].PARAM_INDICIES[USE_SET];
-						else
-						{
-							MAX_SET++;
-							PAIR_QUADRUPLETS[i].PARAM_INDICIES[set1] = MAX_SET;	
-						}					
-
-					}
-
-					//PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS = PAIR_QUADRUPLETS[i].PARAM_INDICIES[PAIR_QUADRUPLETS[i].PARAM_INDICIES.size()-1]+1; // See line 2710 for definition
-					//PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS = PAIR_QUADRUPLETS[i].EQUIV_INDICIES.size();
-					PAIR_QUADRUPLETS[i].N_ALLOWED_POWERS = PAIR_QUADRUPLETS[i].PARAM_INDICIES.size();
+				  PAIR_QUADRUPLETS[i].build(CONTROLS.CHEBY_4B_ORDER) ;
 				}
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2983,7 +2746,7 @@ cout << endl;
 								sort   (TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 								reverse(TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 
-								ATOM_QUAD_ID_INT = 1000*(TMP_QUAD_SET[0]+1) + 100*(TMP_QUAD_SET[1]+1) + 10+(TMP_QUAD_SET[2]+1) + TMP_QUAD_SET[3]+1;
+								ATOM_QUAD_ID_INT = make_quad_id_int(TMP_QUAD_SET[0], TMP_QUAD_SET[1], TMP_QUAD_SET[2], TMP_QUAD_SET[3]) ;
 
 								INT_QUAD_MAP        .insert(make_pair(ATOM_QUAD_ID_INT,QUAD_MAP[TMP_QUAD_SIXLET]));	
 								INT_QUAD_MAP_REVERSE.insert(make_pair(QUAD_MAP[TMP_QUAD_SIXLET], ATOM_QUAD_ID_INT));	
@@ -3972,4 +3735,15 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 
 		if ( RANK == 0 ) cout << "...matrix printing complete: " << endl << endl;
 
+}
+  
+bool operator==(const vector<int>& lhs, const vector<int>& rhs) 
+{
+  if ( lhs.size() != rhs.size() ) return false ;
+
+  for ( int i = 0 ; i < lhs.size() ; i++ ) 
+  {
+	 if ( lhs[i] != rhs[i] ) return false ;
+  }
+  return true ;
 }
