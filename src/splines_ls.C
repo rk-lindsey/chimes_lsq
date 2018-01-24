@@ -2514,78 +2514,9 @@ if(RANK==0)
 				//////////////////////////////////////////////////////////////////////
 				// Generate unique quadruplets and thier corresponding sets of powers
 				//////////////////////////////////////////////////////////////////////
+
+				build_quad_pairs(PAIR_QUADRUPLETS, CONTROLS.NATMTYP, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP) ;
 			
-				TEMP_INT = 0;				// Will hold pair quadruplet index
-			
-				for(int i=0; i<CONTROLS.NATMTYP; i++)
-				{
-					for(int j=i; j<CONTROLS.NATMTYP; j++)
-					{
-						for(int k=j; k<CONTROLS.NATMTYP; k++)
-						{
-							for(int l=k; l<CONTROLS.NATMTYP; l++)
-							{
-								PAIR_QUADRUPLETS[TEMP_INT].QUADINDX = TEMP_INT;	// Index for current triplet type
-								
-								// Save the names of each atom type in the pair.
-
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_NAMES[0] = ATOM_CHEMS[i] ;
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_NAMES[1] = ATOM_CHEMS[j] ;
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_NAMES[2] = ATOM_CHEMS[k] ;
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_NAMES[3] = ATOM_CHEMS[l] ;
-
-								// Save the first atom type in each pair
-								
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[0] = ATOM_CHEMS[i]; // ij
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[1] = ATOM_CHEMS[i]; // ik
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[2] = ATOM_CHEMS[i]; // il
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[3] = ATOM_CHEMS[j]; // jk
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[4] = ATOM_CHEMS[j]; // jl
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[5] = ATOM_CHEMS[k]; // kl
-								
-								// Save the second atom type in each pair
-								
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[0] += ATOM_CHEMS[j]; // ij
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[1] += ATOM_CHEMS[k]; // ik
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[2] += ATOM_CHEMS[l]; // il
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[3] += ATOM_CHEMS[k]; // jk
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[4] += ATOM_CHEMS[l]; // jl
-								PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[5] += ATOM_CHEMS[l]; // kl								
-								
-								// Now save the "proper" (ordered) name of the pair	
-
-								 
-								for(int m=0; m<6; m++) 
-									PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[m] = ATOM_PAIRS[ PAIR_MAP[ PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[m]] ].PRPR_NM;	
-
-
-if(RANK==0)
-{							
-cout << "Made the following quadruplets: " << TEMP_INT << " ";
-for(int m=0; m<6; m++) 
- 	cout << PAIR_QUADRUPLETS[TEMP_INT].ATOM_PAIRS[m] << " ";
-cout << endl;		
-}
-							TEMP_INT++;	
-							}					
-						}
-					}
-				}			
-			
-				// Figure out the allowed pair quadruplet powers. Here are some rules and considerations:
-				//
-				// 1. Powers start from zero. So, if order is specified to be 2, polynomial powers range
-				//    from 0 to n-1, NOT 1 to n!
-				//
-				// 2. At least three pairs must have non-zero powers for the interaction to truly correspond
-				//    to 4-body interactions
-				//
-				// 3. Non-uniqueness upon power sorting must be taken into consideration. For example, for
-				//    the set of pairs {AA, AA, AB, AA, AB, AB}, the following are true for corresponding powers: 
-				//    {0,1,1,1,1,1} = {1,0,1,1,1,1} = {1,1,1,0,1,1} and {1,1,0,1,1,1} = {1,1,1,1,0,1} = {1,1,1,1,1,0}
-				// 
-				// NOTE: We need to also take into consideration the corresponding parameter multiplicities.
-
 				for(int i=0; i<NQUAD; i++)
 				{
 				  PAIR_QUADRUPLETS[i].build(CONTROLS.CHEBY_4B_ORDER) ;
@@ -2595,184 +2526,17 @@ cout << endl;
 				// Set up quadruplet maps... Account for cases where quadruplet type is meaningless by setting mapped index to -1
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////					
 
-				bool REAL_QUAD;
-			
-				vector<string> TEMP_STR(6);	
-				string FULL_TEMP_STR;	
-				
-				for(int i=0; i<NPAIR; i++)
-				{
-					for(int j=0; j<NPAIR; j++)
-					{
-						for(int k=0; k<NPAIR; k++)
-						{
-							for(int l=0; l<NPAIR; l++)
-							{
-								for(int m=0; m<NPAIR; m++)
-								{
-									for(int n=0; n<NPAIR; n++)
-									{
-										TEMP_STR[0] = ATOM_PAIRS[i].ATM1TYP; TEMP_STR[0].append(ATOM_PAIRS[i].ATM2TYP);
-										TEMP_STR[1] = ATOM_PAIRS[j].ATM1TYP; TEMP_STR[1].append(ATOM_PAIRS[j].ATM2TYP);
-										TEMP_STR[2] = ATOM_PAIRS[k].ATM1TYP; TEMP_STR[2].append(ATOM_PAIRS[k].ATM2TYP);
-										TEMP_STR[3] = ATOM_PAIRS[l].ATM1TYP; TEMP_STR[3].append(ATOM_PAIRS[l].ATM2TYP);
-										TEMP_STR[4] = ATOM_PAIRS[m].ATM1TYP; TEMP_STR[4].append(ATOM_PAIRS[m].ATM2TYP);
-										TEMP_STR[5] = ATOM_PAIRS[n].ATM1TYP; TEMP_STR[5].append(ATOM_PAIRS[n].ATM2TYP);
-										
-										
 
-										// Compare every possible permutation of these pairs with those for the quadruplet ff types
-						
-						
-										for(int p=0; p<NQUAD; p++)
-										{
-											sort(TEMP_STR.begin(),TEMP_STR.end());
-											do
-											{
-												REAL_QUAD = true;
-												
-												FULL_TEMP_STR = "";
+				build_quad_maps(QUAD_MAP, QUAD_MAP_REVERSE, ATOM_PAIRS, NPAIR, PAIR_QUADRUPLETS, NQUAD) ;
 
-												for (int s=0; s<6; s++)
-												{
-													if(TEMP_STR[s] != PAIR_QUADRUPLETS[p].ATOM_PAIRS[s])
-														REAL_QUAD = false;
-													
-													FULL_TEMP_STR += TEMP_STR[s];
-												}
-												
-												
-												
-												if(REAL_QUAD)
-												{													
-													QUAD_MAP        .insert(make_pair(FULL_TEMP_STR,p));	
-													QUAD_MAP_REVERSE.insert(make_pair(p,FULL_TEMP_STR));														
-													break;
-												}
-
-												
-											} while (next_permutation(TEMP_STR.begin(),TEMP_STR.end()));
-/* // THIS IS THE CULPRIT											
-									 		if(!REAL_QUAD)
-											{
-												QUAD_MAP        .insert(make_pair(FULL_TEMP_STR,-1*p-1));
-											}
-*/											
-											
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				
-				///////////////////////////////////////////////////////////////////////////////////////////////////////////
-				// Remove excluded types (NOT CURRENTLY SUPPORTED)
-				///////////////////////////////////////////////////////////////////////////////////////////////////////////					
-
-				
-				///////////////////////////////////////////////////////////////////////////////////////////////////////////
-				// Set up quadruplet REVERSE maps... 
-				///////////////////////////////////////////////////////////////////////////////////////////////////////////	
-				
-				QUAD_MAP_REVERSE.clear();
-
-				map<string, int>::iterator it;
-
-				for(it = QUAD_MAP.begin(); it != QUAD_MAP.end(); it++)
-					QUAD_MAP_REVERSE.insert(make_pair(it->second,it->first));
-
-				
 				//////////////////////////////////////////////////////////////////////
 				// Since there are so many pairs in an atom quadruplet, we'll use "fast" maps here.
-				// Generate "fast" maps for 4-body interactions. Assumes never more than 9
+				// Generate "fast" maps for 4-body interactions. Assumes never more than MAX_ATOM_TYPES
 				// atom types in a simulation
 				//////////////////////////////////////////////////////////////////////
-				
-				if(RANK == 0)
-					cout << endl << "Generating fast maps for atom quadruplets: " << endl;
-				
-				string 	TMP_QUAD_SIXLET = "";
-				string 	TMP_QUAD_PAIR   = "";
-				
-				int 	ATOM_QUAD_ID_INT;
-				int		CURR_QUAD_IDX = 0;
+				build_fast_quad_maps(QUAD_MAP, INT_QUAD_MAP, INT_QUAD_MAP_REVERSE, ATOM_CHEMS) ;
+			}  // CONTROLS.USE_4B_CHEBY
 
-				vector<int> TMP_QUAD_SET(4);
-
-				// Create a list of each posible combination of atom quadruplets, i through
-				// l are given in ascending order
-				
-				for(int i=0; i<ATOM_CHEMS.size(); i++)
-				{
-					for(int j=i; j<ATOM_CHEMS.size(); j++)
-					{
-						for(int k=j; k<ATOM_CHEMS.size(); k++)
-						{
-							for(int l=k; l<ATOM_CHEMS.size(); l++)
-							{
-								// A given set of i-through-l defines a unique set of 4 atoms.
-								// Determine the corresponding quadruplet force field type
-								
-								TMP_QUAD_SIXLET = "";
-								TMP_QUAD_PAIR   = "";
-								
-								TMP_QUAD_PAIR    = ATOM_CHEMS[i] + ATOM_CHEMS[j]; 	// Define an ij pair
-								TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					// Append pair to string
-								
-								TMP_QUAD_PAIR    = ATOM_CHEMS[i] + ATOM_CHEMS[k]; 	// Define an ij pair
-								TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					// Append pair to string
-								
-								TMP_QUAD_PAIR    = ATOM_CHEMS[i] + ATOM_CHEMS[l]; 	// Define an ij pair
-								TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					// Append pair to string
-								
-								TMP_QUAD_PAIR    = ATOM_CHEMS[j] + ATOM_CHEMS[k]; 	// Define an ij pair
-								TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					// Append pair to string
-								
-								TMP_QUAD_PAIR    = ATOM_CHEMS[j] + ATOM_CHEMS[l]; 	// Define an ij pair
-								TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					// Append pair to string
-								
-								TMP_QUAD_PAIR    = ATOM_CHEMS[k] + ATOM_CHEMS[l]; 	// Define an ij pair
-								TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					// Append pair to string
-								
-								TMP_QUAD_SET[0] = i;
-								TMP_QUAD_SET[1] = j;
-								TMP_QUAD_SET[2] = k;
-								TMP_QUAD_SET[3] = l;
-								
-								// Always construct ATOM_QUAD_ID_INT lookup key based on atom types in decending order
-								
-								sort   (TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
-								reverse(TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
-
-								ATOM_QUAD_ID_INT = make_quad_id_int(TMP_QUAD_SET[0], TMP_QUAD_SET[1], TMP_QUAD_SET[2], TMP_QUAD_SET[3]) ;
-
-								INT_QUAD_MAP        .insert(make_pair(ATOM_QUAD_ID_INT,QUAD_MAP[TMP_QUAD_SIXLET]));	
-								INT_QUAD_MAP_REVERSE.insert(make_pair(QUAD_MAP[TMP_QUAD_SIXLET], ATOM_QUAD_ID_INT));	
-								
-								if(RANK == 0)
-								{
-									cout << "		";
-									cout<< "Atom type idxs: ";
-									cout<< fixed << setw(2) << right << i;
-									cout<< fixed << setw(2) << right << j;
-									cout<< fixed << setw(2) << right << k;
-									cout<< fixed << setw(2) << right << l;
-									cout<< " Quadruplet name: "           << setw(12) << right << TMP_QUAD_SIXLET;
-									cout<< " Unique quadruplet index: "   << setw(4)  << right << INT_QUAD_MAP[ATOM_QUAD_ID_INT] << endl;
-								}
-								
-								CURR_QUAD_IDX++;
-
-							}
-						}
-					}
-				}
-
-			}
-			
-					
 #if VERBOSITY == 1						
 			if ( RANK == 0 ) 
 			{
@@ -2830,41 +2594,13 @@ cout << endl;
 
 					for(int i=0;i<NQUAD; i++)
 					{
-						cout << "		" <<  PAIR_QUADRUPLETS[i].QUADINDX;
-						for(int j=0; j<6; j++)
-							cout  << "  " << PAIR_QUADRUPLETS[i].ATOM_PAIRS[j];					
-						cout<< ": Number of unique sets of powers: " << PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS << " (" << PAIR_QUADRUPLETS[i].N_ALLOWED_POWERS << " total)..." << endl; 
-
-						cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
-						cout << "		   ----------------------------------------------------" << endl;					
-				
-						for(int j=0; j<PAIR_QUADRUPLETS[i].ALLOWED_POWERS.size(); j++)
-						{
-
-							cout << "		      " << setw(6) << fixed << left << j << " ";
-						
-							for(int k=0; k<6; k++)
-								cout << " " << setw(2) << fixed << left << PAIR_QUADRUPLETS[i].ALLOWED_POWERS[j][k] << " ";
-						
-							cout << "       " << setw(8) << PAIR_QUADRUPLETS[i].EQUIV_INDICIES[j] << " ";
-							cout << "       " << setw(8) << PAIR_QUADRUPLETS[i].PARAM_INDICIES[j] << endl; 
-					
-						}
+					  PAIR_QUADRUPLETS[i].print() ;
 					}
 				}
 				#endif		
 				
-if ( RANK == 0 ) 
-{
-	cout << endl;
-	cout << "	The following unique pair types have been identified:" << endl;
-	for(int i=0;i<NPAIR; i++)
-		cout << "		" << ATOM_PAIRS[i].PAIRIDX << "  " << ATOM_PAIRS[i].ATM1TYP << " " << ATOM_PAIRS[i].ATM2TYP << endl;
-}				
-			}
+			} // CONTROLS.USE_4B_CHEBY
 			
-//VERIFIED TO HERE FOR 4-BODY IMPLEMENTATION!!!!!
-									
 		}
 	
 		

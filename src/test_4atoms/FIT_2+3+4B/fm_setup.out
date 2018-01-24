@@ -57148,9 +57148,6 @@ Generating fast maps for atom quadruplets:
 		      15101   4   4   4   4   3   4         15097           853     
 		      15102   4   4   4   4   4   3         15097           853     
 		      15103   4   4   4   4   4   4         15103           854     
-
-	The following unique pair types have been identified:
-		0  C C
 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
 	0               C               C               1.305000        20.000000       0.010000        1.540000         0               
 

@@ -41,9 +41,11 @@ QUADRUPLETS(): ATOM_NAMES(4), ATOM_PAIRS(6), S_MAXIM_4B(6), S_MINIM_4B(6), MIN_F
 		N_TRUE_ALLOWED_POWERS = 0;
 	 }
 		
+  // Member functions.
   void init() ;  // Initialize values to defaults.
   void build(int cheby_4b_order) ; // The the ALLOWED_POWERS, etc. for an interaction.
   void store_permutations(vector<int> &unsorted_powers) ; // Store all the permutations.
+  void print() ;  // Print the quad powers and element types.
 
 private:
   // Recursively permute atom indices for each element type.
@@ -52,11 +54,18 @@ private:
 };
 
 
+
 struct QUAD_FF : public QUADRUPLETS
 {
 	vector<double> 	PARAMS;
 };
 
+void build_quad_maps(map<string,int> &QUAD_MAP, map<int,string> &QUAD_MAP_REVERSE, vector<struct PAIRS> &ATOM_PAIRS, int NPAIR,
+                     vector<QUADRUPLETS> PAIR_QUADRUPLETS, int NQUAD) ;
+void build_fast_quad_maps(map<string,int> QUAD_MAP, map<int,int> INT_QUAD_MAP, 
+								  map<int,int> INT_QUAD_MAP_REVERSE, vector<string> ATOM_CHEMS) ;
+void build_quad_pairs(vector<QUADRUPLETS>& PAIR_QUADRUPLETS, int NATMTYP, vector<string> ATOM_CHEMS, 
+							 vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP) ;
 #define _Quad_h
 #endif // ifndef _Quad_h
 
