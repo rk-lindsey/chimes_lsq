@@ -304,53 +304,53 @@ struct PAIRS	// NEEDS UPDATING
 	string OVER_TO_ATM;		// Which atom is overbonding *to* being defined for... for example, overbonding to oxygen
 	vector<double> OVRPRMS;	// [0] = P_OVERB; [1] = R_0_VAL; [2] = P_1_VAL; [3] = P_2_VAL; [4] = LAMBDA6
 	
-	XYZ NBINS;				// Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
+   vector<double> NBINS;				// Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
 
 	FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
 	
-	PAIRS():OVRPRMS(5),N_CFG_CONTRIB(0){}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
+   PAIRS():OVRPRMS(5),N_CFG_CONTRIB(0), NBINS(3) {}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 };
 
 struct TRIPLETS
 {
-	int    TRIPINDX;
-	string ATMPAIR1;
-	string ATMPAIR2;
-	string ATMPAIR3;
+  int    INDX;
+  string ATMPAIR1;
+  string ATMPAIR2;
+  string ATMPAIR3;
 	
-	FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
+  FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
 	
-	int    N_CFG_CONTRIB;	// How many configurations actually contribute to fitting this triplet??
+  int    N_CFG_CONTRIB;	// How many configurations actually contribute to fitting this triplet??
 	
-	XYZ MIN_FOUND;		// Testing two cases: 1. 
+  vector<double> MIN_FOUND;		// Testing two cases: 1. 
 	
-	XYZ S_MAXIM_3B;		// A unique outer cutoff for 3B interactions... by default, is set to S_MAXIM
-	XYZ S_MINIM_3B;		// Similar for inner cutoff. This is useful when the 2-body 
-				// is refit/extrapolated, thus has a s_min lower than the original fitted value
-				// Values need to be specified for each contributing pair
-				// X -> IJ, Y -> IK,  -> JK 
+  vector<double> S_MAXIM;		// A unique outer cutoff for 3B interactions... by default, is set to S_MAXIM
+  vector<double> S_MINIM;		// Similar for inner cutoff. This is useful when the 2-body 
+  // is refit/extrapolated, thus has a s_min lower than the original fitted value
+  // Values need to be specified for each contributing pair
+  // X -> IJ, Y -> IK,  -> JK 
 	
-	vector<vector<vector< int > > > POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
+  vector<vector<vector< int > > > POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
 	 
-	XYZ NBINS;				// Number of bins to use for ij, ik, and jk distances when building the population histograms 
-	XYZ BINWS; 				// Binwidths to use for ij, ik, and jk distances when building the population histograms 
+  vector<double> NBINS ;				// Number of bins to use for ij, ik, and jk distances when building the population histograms 
+  vector<double> BINWS; 				// Binwidths to use for ij, ik, and jk distances when building the population histograms 
 	
-	int N_TRUE_ALLOWED_POWERS;	// How many UNIQUE sets of powers do we have?
-	int N_ALLOWED_POWERS;		// How many total sets of powers do we have?
+  int N_TRUE_ALLOWED_POWERS;	// How many UNIQUE sets of powers do we have?
+  int N_ALLOWED_POWERS;		// How many total sets of powers do we have?
 	
-	vector<XYZ_INT> ALLOWED_POWERS;	// This will keep a list of the allowed polynomial powers for each coefficient
-	vector<int>		EQUIV_INDICES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
-	vector<int>		PARAM_INDICES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
+  vector<vector<int>> ALLOWED_POWERS;	// This will keep a list of the allowed polynomial powers for each coefficient
+  vector<int>		EQUIV_INDICES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
+  vector<int>		PARAM_INDICES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
 	
-	TRIPLETS()	// Default constructor
-	{
+  TRIPLETS(): S_MINIM(3), S_MAXIM(3), MIN_FOUND(3), NBINS(3), BINWS(3)	// Default constructor
+	 {
 		N_CFG_CONTRIB =  0;
-		MIN_FOUND.X   = -1;
-		MIN_FOUND.X   = -1;
-		MIN_FOUND.X   = -1;
+		MIN_FOUND[0]   = -1;
+		MIN_FOUND[1]   = -1;
+		MIN_FOUND[2]   = -1;
 		N_TRUE_ALLOWED_POWERS = 0;
 		
-	}
+	 }
 };
 
 struct PAIR_FF : public PAIRS

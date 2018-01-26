@@ -474,15 +474,15 @@ void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<st
 		{
 			// Then jk = z
 			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
 		}
 		else
 		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
 		}
 
 	}
@@ -492,15 +492,15 @@ void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<st
 		{
 			// Then jk = z
 			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
 		}
 		else
 		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
 		}										
 	}
 	else // PAIR_TYPE_IJ matches alloweD[i].z
@@ -509,15 +509,15 @@ void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<st
 		{
 			// Then jk = z
 			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
 		}
 		else
 		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
 		}										
 	}
 }
@@ -531,15 +531,15 @@ void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<stri
 		{
 			// Then jk = z
 			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
 		}
 		else
 		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
 		}
 
 	}
@@ -549,15 +549,15 @@ void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<stri
 		{
 			// Then jk = z
 			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
 		}
 		else
 		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
 		}										
 	}
 	else // PAIR_TYPE_IJ matches alloweD[i].z
@@ -566,15 +566,15 @@ void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<stri
 		{
 			// Then jk = z
 			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
 		}
 		else
 		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
 		}										
 	}	
 }
@@ -590,15 +590,15 @@ void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, ma
 		{
 			// Then jk = z
 			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
 		}
 		else
 		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
 		}
 
 	}
@@ -608,15 +608,15 @@ void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, ma
 		{
 			// Then jk = z
 			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
 		}
 		else
 		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
 		}										
 	}
 	else // PAIR_TYPE_IJ matches alloweD[i].z
@@ -625,15 +625,15 @@ void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, ma
 		{
 			// Then jk = z
 			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
 		}
 		else
 		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET].Z;
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET].Y;
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET].X;
+			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
+			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
+			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
 		}										
 	}
 }
@@ -643,16 +643,16 @@ double SET_SMAXIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE)	// Ov
 {	
 	double VAL;
 	
-	if(PAIR_TRIPLETS.S_MAXIM_3B.X == -1)
+	if(PAIR_TRIPLETS.S_MAXIM[0] == -1)
 		VAL =  FF_2BODY.S_MAXIM;
 	else
 	{
 		if      (TYPE == PAIR_TRIPLETS.ATMPAIR1)
-			VAL =  PAIR_TRIPLETS.S_MAXIM_3B.X;
+			VAL =  PAIR_TRIPLETS.S_MAXIM[0];
 		else if (TYPE == PAIR_TRIPLETS.ATMPAIR2)
-			VAL =  PAIR_TRIPLETS.S_MAXIM_3B.Y;
+			VAL =  PAIR_TRIPLETS.S_MAXIM[1];
 		else if (TYPE == PAIR_TRIPLETS.ATMPAIR3)
-			VAL =  PAIR_TRIPLETS.S_MAXIM_3B.Z;
+			VAL =  PAIR_TRIPLETS.S_MAXIM[2];
 	}
 	return VAL;	
 }
@@ -662,16 +662,16 @@ double SET_SMINIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE) // Ov
 {
 	double VAL;
 	
-	if(PAIR_TRIPLETS.S_MINIM_3B.X == -1)
+	if(PAIR_TRIPLETS.S_MINIM[0] == -1)
 		VAL =  FF_2BODY.S_MINIM;
 	else
 	{
 		if      (TYPE == PAIR_TRIPLETS.ATMPAIR1)
-			VAL =  PAIR_TRIPLETS.S_MINIM_3B.X;
+			VAL =  PAIR_TRIPLETS.S_MINIM[0];
 		else if (TYPE == PAIR_TRIPLETS.ATMPAIR2)
-			VAL =  PAIR_TRIPLETS.S_MINIM_3B.Y;
+			VAL =  PAIR_TRIPLETS.S_MINIM[1];
 		else if (TYPE == PAIR_TRIPLETS.ATMPAIR3)
-			VAL =  PAIR_TRIPLETS.S_MINIM_3B.Z;
+			VAL =  PAIR_TRIPLETS.S_MINIM[2];
 	}
 	return VAL;
 }
@@ -1767,60 +1767,60 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 										
 							// Populate the appropriate histogram
 							
-							if(PAIR_TRIPLETS[curr_triple_type_index].NBINS.X>0)
+							if(PAIR_TRIPLETS[curr_triple_type_index].NBINS[0]>0)
 							{
 								
 								ij_bin = -10;
 								ik_bin = -10;
 								jk_bin = -10;
 
-								// Sync up ij ik jk with ATOMPAIR1 ATOMPAIR2  ATOMPAIR3 and NBINS.X NBINS.Y NBINS.Z
+								// Sync up ij ik jk with ATOMPAIR1 ATOMPAIR2  ATOMPAIR3 and NBINS[0] NBINS[1] NBINS[2]
 							
 								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR1)
 								{
-									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.X)-1.0);	
+									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);	
 									
 									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR2)
 									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Y)-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Z)-1.0);
+										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
+										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
 									}
 									else
 									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Z)-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Y)-1.0);
+										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
+										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
 									}
 								}
 								
 								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR2)
 								{
-									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Y)-1.0);	
+									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);	
 									
 									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR1)
 									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.X)-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Z)-1.0);
+										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
+										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
 									}
 									else
 									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Z)-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.X)-1.0);
+										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
+										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
 									}
 								}
 								
 								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR3)
 								{
-									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Z)-1.0);	
+									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);	
 									
 									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR1)
 									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.X)-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Y)-1.0);
+										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
+										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
 									}
 									else
 									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.Y)-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS.X)-1.0);
+										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
+										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
 									}
 								}								
 
@@ -1837,9 +1837,9 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 									exit_run(0);
 								}
 								
-								if(ij_bin>=PAIR_TRIPLETS[curr_triple_type_index].NBINS.X ||
-								   ik_bin>=PAIR_TRIPLETS[curr_triple_type_index].NBINS.Y ||
-								   jk_bin>=PAIR_TRIPLETS[curr_triple_type_index].NBINS.Z   )
+								if(ij_bin>=PAIR_TRIPLETS[curr_triple_type_index].NBINS[0] ||
+								   ik_bin>=PAIR_TRIPLETS[curr_triple_type_index].NBINS[1] ||
+								   jk_bin>=PAIR_TRIPLETS[curr_triple_type_index].NBINS[2]   )
 								{
 									cout << "ERROR: bad bin (2)" << endl;
 									exit_run(0);
@@ -1878,25 +1878,25 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 							
 							// Track the minimum triplet distances for each given pair
 							
-							if (PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.X == -1) 	// Then this is our first check. Just set all equal to current distances
+							if (PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[0] == -1) 	// Then this is our first check. Just set all equal to current distances
 							{
-								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.X = rlen_ij;
-								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.Y = rlen_ik;
-								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.Z = rlen_jk;
+								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[0] = rlen_ij;
+								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[1] = rlen_ik;
+								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[2] = rlen_jk;
 							}
 							
 							// Case 2: If any distance is smaller than a previous distance
 							
 							else 
 							{
-								if (rlen_ij<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.X)
-									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.X = rlen_ij;
+								if (rlen_ij<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[0])
+									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[0] = rlen_ij;
 								
-								if (rlen_ik<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.Y)
-									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.Y = rlen_ik;
+								if (rlen_ik<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[1])
+									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[1] = rlen_ik;
 								
-								if (rlen_jk<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.Z)
-									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND.Z = rlen_jk;
+								if (rlen_jk<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[2])
+									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[2] = rlen_jk;
 									
 							}
 				
@@ -2676,7 +2676,7 @@ void ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,
 	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
 	{
 		int COUNTER = 1;
-		int COMBINE = int(PAIR_TRIPLETS[i].NBINS.X)/6;
+		int COMBINE = int(PAIR_TRIPLETS[i].NBINS[0])/6;
 		
 		for(int j=0; j<CONTROLS.TOT_SHORT_RANGE; j++)
 		{
@@ -2706,7 +2706,7 @@ TEMP_NAME.append("temp_hist_out.dat");
 ifstream TMP_HIST_OUT;
 TMP_HIST_OUT.open(TEMP_NAME);	
 */		
-		for(int x=0; x<PAIR_TRIPLETS[i].NBINS.X; x++)
+		for(int x=0; x<PAIR_TRIPLETS[i].NBINS[0]; x++)
 		{
 			if( ((x+1)<6*COMBINE) && ((x+1)%COMBINE==0))
 				COUNTER++;
@@ -2724,36 +2724,36 @@ TMP_HIST_OUT.open(TEMP_NAME);
 			OUTFILE_3B_POP_HIST.open(OUTFILE.data());
 			
 			
-			S_MINIM_IJ = PAIR_TRIPLETS[i].S_MINIM_3B.X;
-			S_MAXIM_IJ = PAIR_TRIPLETS[i].S_MAXIM_3B.X;
+			S_MINIM_IJ = PAIR_TRIPLETS[i].S_MINIM[0];
+			S_MAXIM_IJ = PAIR_TRIPLETS[i].S_MAXIM[0];
 			
 			if(S_MINIM_IJ == -1)
 				S_MINIM_IJ = FF_2BODY[curr_pair_type_idx_ij].S_MINIM;
 			if(S_MAXIM_IJ == -1)
 				S_MAXIM_IJ = FF_2BODY[curr_pair_type_idx_ij].S_MAXIM;
 			
-			rlen_ij = x*PAIR_TRIPLETS[i].BINWS.X+0.5*PAIR_TRIPLETS[i].BINWS.X+S_MINIM_IJ;
+			rlen_ij = x*PAIR_TRIPLETS[i].BINWS[0]+0.5*PAIR_TRIPLETS[i].BINWS[0]+S_MINIM_IJ;
 			
 			OUTFILE_3B_POP_HIST << "#IJ DIST: " << fixed << setprecision(3) << rlen_ij << endl;
 			
-			for(int y=0;y<PAIR_TRIPLETS[i].NBINS.Y; y++)
+			for(int y=0;y<PAIR_TRIPLETS[i].NBINS[1]; y++)
 			{
-				for (int z=0;z<PAIR_TRIPLETS[i].NBINS.Z; z++)
+				for (int z=0;z<PAIR_TRIPLETS[i].NBINS[2]; z++)
 				{	
 					// Print out the histograms
 					
 
 					
-					S_MINIM_IK = PAIR_TRIPLETS[i].S_MINIM_3B.Y;
-					S_MAXIM_IK = PAIR_TRIPLETS[i].S_MAXIM_3B.Y;
+					S_MINIM_IK = PAIR_TRIPLETS[i].S_MINIM[1];
+					S_MAXIM_IK = PAIR_TRIPLETS[i].S_MAXIM[1];
 					
 					if(S_MINIM_IK == -1)
 						S_MINIM_IK = FF_2BODY[curr_pair_type_idx_ik].S_MINIM;
 					if(S_MAXIM_IK == -1)
 						S_MAXIM_IK = FF_2BODY[curr_pair_type_idx_ik].S_MAXIM;
 					
-					S_MINIM_JK = PAIR_TRIPLETS[i].S_MINIM_3B.Z;
-					S_MAXIM_JK = PAIR_TRIPLETS[i].S_MAXIM_3B.Z;
+					S_MINIM_JK = PAIR_TRIPLETS[i].S_MINIM[2];
+					S_MAXIM_JK = PAIR_TRIPLETS[i].S_MAXIM[2];
 					
 					if(S_MINIM_JK == -1)
 						S_MINIM_JK = FF_2BODY[curr_pair_type_idx_jk].S_MINIM;
@@ -2761,8 +2761,8 @@ TMP_HIST_OUT.open(TEMP_NAME);
 						S_MAXIM_JK = FF_2BODY[curr_pair_type_idx_jk].S_MAXIM;
 
 
-					rlen_ik = y*PAIR_TRIPLETS[i].BINWS.Y+0.5*PAIR_TRIPLETS[i].BINWS.Y+S_MINIM_IK;
-					rlen_jk = z*PAIR_TRIPLETS[i].BINWS.Z+0.5*PAIR_TRIPLETS[i].BINWS.Z+S_MINIM_JK;
+					rlen_ik = y*PAIR_TRIPLETS[i].BINWS[1]+0.5*PAIR_TRIPLETS[i].BINWS[1]+S_MINIM_IK;
+					rlen_jk = z*PAIR_TRIPLETS[i].BINWS[2]+0.5*PAIR_TRIPLETS[i].BINWS[2]+S_MINIM_JK;
 					
 					//OUTFILE_3B_POP_HIST << rlen_ij << " " << rlen_ik << " " << rlen_jk << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
 					OUTFILE_3B_POP_HIST << rlen_ik << " " << rlen_jk << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
@@ -2836,8 +2836,8 @@ TMP_HIST_OUT.close();
 /* TO READ IN BINS	
 TMP_HIST_OUT.close();
 */
-		cout << "For pair triplet " << i << " added " << ADDED_LINES << " elements of the " << fixed << setprecision(0) << PAIR_TRIPLETS[i].NBINS.X << "*" << PAIR_TRIPLETS[i].NBINS.Y <<"*"<< PAIR_TRIPLETS[i].NBINS.Z << " = "<< 
-			PAIR_TRIPLETS[i].NBINS.X*PAIR_TRIPLETS[i].NBINS.Y*PAIR_TRIPLETS[i].NBINS.Z << " possible bins " << endl;
+		cout << "For pair triplet " << i << " added " << ADDED_LINES << " elements of the " << fixed << setprecision(0) << PAIR_TRIPLETS[i].NBINS[0] << "*" << PAIR_TRIPLETS[i].NBINS[1] <<"*"<< PAIR_TRIPLETS[i].NBINS[2] << " = "<< 
+			PAIR_TRIPLETS[i].NBINS[0]*PAIR_TRIPLETS[i].NBINS[1]*PAIR_TRIPLETS[i].NBINS[2] << " possible bins " << endl;
 		
 		TOTAL_LINES += ADDED_LINES;
 		ADDED_LINES = 0;

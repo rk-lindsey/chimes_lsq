@@ -1455,50 +1455,50 @@ int main(int argc, char* argv[])
 
 						// Read the first inner cutoff
 
-						if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+						if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
 		
-						else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+						else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
 		
-						else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+						else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 
 
 						// Read the second inner cutoff
 
 						STREAM_PARSER >> TMP_VAL;
 		
-						if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+						if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
 		
-						else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+						else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
 		
-						else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+						else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 
 		
 						// Read the third inner cutoff
 
 						STREAM_PARSER >> TMP_VAL;
 		
-						if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+						if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
 		
-						else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+						else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
 		
-						else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+						else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 
 						#if VERBOSITY == 1
 							if(RANK==0)
 							{
 								cout << "		" << TEMP_STR << " ( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-								     << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X << ", "
-									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y << ", "
-									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z << endl;
+								     << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] << ", "
+									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] << ", "
+									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] << endl;
 							}
 						#endif	
 					}
@@ -1580,50 +1580,50 @@ int main(int argc, char* argv[])
 
 						STREAM_PARSER >> TMP_VAL;
 		
-						if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+						if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
 		
-						else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+						else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
 		
-						else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+						else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 
 
 						// Read the second outer cutoff
 
 						STREAM_PARSER >> TMP_VAL;
 		
-						if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+						if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
 		
-						else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+						else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
 		
-						else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+						else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 
 		
 						// Read the third outer cutoff
 
 						STREAM_PARSER >> TMP_VAL;
 		
-						if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+						if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
 		
-						else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+						else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
 		
-						else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+						else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 
 						#if VERBOSITY == 1
 							if(RANK==0)
 							{
 								cout << "		" << TEMP_STR << " ( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-								     << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X << ", "
-									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y << ", "
-									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z << endl;
+								     << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] << ", "
+									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] << ", "
+									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] << endl;
 							}
 						#endif	
 							
@@ -1874,12 +1874,12 @@ int main(int argc, char* argv[])
 			
 			for (int i=0; i<FF_3BODY.size(); i++)
 			{
-				if(FF_3BODY[i].S_MAXIM_3B.X > MAX_FOUND_3B)
-					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM_3B.X;
-				if(FF_3BODY[i].S_MAXIM_3B.Y > MAX_FOUND_3B)
-					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM_3B.Y;
-				if(FF_3BODY[i].S_MAXIM_3B.Z > MAX_FOUND_3B)
-					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM_3B.Z;
+				if(FF_3BODY[i].S_MAXIM[0] > MAX_FOUND_3B)
+					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[0];
+				if(FF_3BODY[i].S_MAXIM[1] > MAX_FOUND_3B)
+					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[1];
+				if(FF_3BODY[i].S_MAXIM[2] > MAX_FOUND_3B)
+					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[2];
 			}
 			
 			for (int i=0; i<FF_4BODY.size(); i++)
@@ -2231,13 +2231,13 @@ int main(int argc, char* argv[])
 			
 			for (int i=0; i<NO_TRIPS; i++)
 			{	
-				FF_3BODY[i].S_MINIM_3B.X = -1;
-				FF_3BODY[i].S_MINIM_3B.Y = -1;
-				FF_3BODY[i].S_MINIM_3B.Z = -1;
+				FF_3BODY[i].S_MINIM[0] = -1;
+				FF_3BODY[i].S_MINIM[1] = -1;
+				FF_3BODY[i].S_MINIM[2] = -1;
 				
-				FF_3BODY[i].S_MAXIM_3B.X = -1;
-				FF_3BODY[i].S_MAXIM_3B.Y = -1;
-				FF_3BODY[i].S_MAXIM_3B.Z = -1;
+				FF_3BODY[i].S_MAXIM[0] = -1;
+				FF_3BODY[i].S_MAXIM[1] = -1;
+				FF_3BODY[i].S_MAXIM[2] = -1;
 			}	
 
 			TEMP_SEARCH_3B = "TRIPLET ";
@@ -2473,7 +2473,7 @@ int main(int argc, char* argv[])
 				STREAM_PARSER.str(LINE);
 				
 				STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
-				STREAM_PARSER >> FF_3BODY[i].TRIPINDX;				
+				STREAM_PARSER >> FF_3BODY[i].INDX;				
 				STREAM_PARSER >> FF_3BODY[i].ATMPAIR1;
 				STREAM_PARSER >> FF_3BODY[i].ATMPAIR2;
 				STREAM_PARSER >> FF_3BODY[i].ATMPAIR3;	
@@ -2488,6 +2488,9 @@ int main(int argc, char* argv[])
 				STREAM_PARSER >> FF_3BODY[i].N_ALLOWED_POWERS;
 				
 				FF_3BODY[i].ALLOWED_POWERS.resize(FF_3BODY[i].N_ALLOWED_POWERS);
+				for ( int j = 0 ; j  < FF_3BODY[i].N_ALLOWED_POWERS ; j++ ) 
+				  FF_3BODY[i][j].resize(3) ;
+				  
 				FF_3BODY[i].EQUIV_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
 				FF_3BODY[i].PARAM_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
 				FF_3BODY[i].PARAMS        .resize(FF_3BODY[i].N_ALLOWED_POWERS);
@@ -2504,9 +2507,9 @@ int main(int argc, char* argv[])
 				for(int j=0; j<FF_3BODY[i].N_ALLOWED_POWERS; j++)
 				{
 					PARAMFILE >> TEMP_STR;
-					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j].X;
-					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j].Y;
-					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j].Z;
+					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j][0];
+					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j][1];
+					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j][2];
 					PARAMFILE >> FF_3BODY[i].EQUIV_INDICES[j];
 					PARAMFILE >> FF_3BODY[i].PARAM_INDICES[j];
 					PARAMFILE >> FF_3BODY[i].PARAMS        [j];
@@ -2775,7 +2778,7 @@ int main(int argc, char* argv[])
 
 			for(int i=0;i<FF_3BODY.size(); i++)
 			{
-				cout << "	" << FF_3BODY[i].TRIPINDX << "  " << FF_3BODY[i].ATMPAIR1 << " " << FF_3BODY[i].ATMPAIR2 << " " << FF_3BODY[i].ATMPAIR3 << ": ";
+				cout << "	" << FF_3BODY[i].INDX << "  " << FF_3BODY[i].ATMPAIR1 << " " << FF_3BODY[i].ATMPAIR2 << " " << FF_3BODY[i].ATMPAIR3 << ": ";
 				cout << FF_3BODY[i].N_TRUE_ALLOWED_POWERS << " parameters, " << FF_3BODY[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
 				cout << "	     index  |  powers  |  equiv index  |  param index  | parameter " << endl;
 				cout << "	   --------------------------------------------------------------------" << endl;	
@@ -2783,9 +2786,9 @@ int main(int argc, char* argv[])
 				for(int j=0; j<FF_3BODY[i].ALLOWED_POWERS.size(); j++)
 				{
 					cout << "	      " << setw(6) << fixed << left << j << " ";
-					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j].X  << " ";
-					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j].Y  << " ";
-					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j].Z  << " ";
+					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j][0]  << " ";
+					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j][1]  << " ";
+					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j][2] << " ";
 					cout << "       " << setw(8) << FF_3BODY[i].EQUIV_INDICES[j] << " ";
 					cout << "       " << setw(8) << FF_3BODY[i].PARAM_INDICES[j] << " "; 
 					cout << "       " << setw(8) << FF_3BODY[i].PARAMS[j] << endl; 

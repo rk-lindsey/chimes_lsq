@@ -251,12 +251,12 @@ int main(int argc, char* argv[])
 	
 	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
 	{
-		if(PAIR_TRIPLETS[i].S_MINIM_3B.X > MAX_RMIN.X)
-			MAX_RMIN.X = PAIR_TRIPLETS[i].S_MINIM_3B.X;
-		if(PAIR_TRIPLETS[i].S_MINIM_3B.Y > MAX_RMIN.Y)
-			MAX_RMIN.Y = PAIR_TRIPLETS[i].S_MINIM_3B.Y;
-		if(PAIR_TRIPLETS[i].S_MINIM_3B.Z > MAX_RMIN.Z) 
-			MAX_RMIN.Z = PAIR_TRIPLETS[i].S_MINIM_3B.Z;
+		if(PAIR_TRIPLETS[i].S_MINIM[0] > MAX_RMIN.X)
+			MAX_RMIN.X = PAIR_TRIPLETS[i].S_MINIM[0];
+		if(PAIR_TRIPLETS[i].S_MINIM[1] > MAX_RMIN.Y)
+			MAX_RMIN.Y = PAIR_TRIPLETS[i].S_MINIM[1];
+		if(PAIR_TRIPLETS[i].S_MINIM[2] > MAX_RMIN.Z) 
+			MAX_RMIN.Z = PAIR_TRIPLETS[i].S_MINIM[2];
 	}
 			
 	// Read in the trajectory
@@ -570,11 +570,11 @@ int main(int argc, char* argv[])
 		for (int i=0; i<PAIR_TRIPLETS.size(); i++)
 		{
 
-			PAIR_TRIPLETS[i].NBINS.X = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS.X;
-			PAIR_TRIPLETS[i].NBINS.Y = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS.Y;
-			PAIR_TRIPLETS[i].NBINS.Z = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS.Z;
+			PAIR_TRIPLETS[i].NBINS[0] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS[0];
+			PAIR_TRIPLETS[i].NBINS[1] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS[1];
+			PAIR_TRIPLETS[i].NBINS[2] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS[2];
 		
-			if(PAIR_TRIPLETS[i].NBINS.X == 0 || PAIR_TRIPLETS[i].NBINS.Y == 0 || PAIR_TRIPLETS[i].NBINS.X == 0)
+			if(PAIR_TRIPLETS[i].NBINS[0] == 0 || PAIR_TRIPLETS[i].NBINS[1] == 0 || PAIR_TRIPLETS[i].NBINS[0] == 0)
 			{
 				ANY_ZERO = true;
 			
@@ -585,41 +585,41 @@ int main(int argc, char* argv[])
 				break;
 			}
 		
-			tmp_max = PAIR_TRIPLETS[i].S_MAXIM_3B.X;
-			tmp_min = PAIR_TRIPLETS[i].S_MINIM_3B.X;
+			tmp_max = PAIR_TRIPLETS[i].S_MAXIM[0];
+			tmp_min = PAIR_TRIPLETS[i].S_MINIM[0];
 			if(tmp_min == -1)
 				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].S_MINIM;
 			if(tmp_max == -1)
 				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].S_MAXIM;
-			PAIR_TRIPLETS[i].BINWS.X = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS.X;
+			PAIR_TRIPLETS[i].BINWS[0] = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS[0];
 		
-			tmp_max = PAIR_TRIPLETS[i].S_MAXIM_3B.Y;
-			tmp_min = PAIR_TRIPLETS[i].S_MINIM_3B.Y;
+			tmp_max = PAIR_TRIPLETS[i].S_MAXIM[1];
+			tmp_min = PAIR_TRIPLETS[i].S_MINIM[1];
 			if(tmp_min == -1)
 				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR2] ].S_MINIM;
 			if(tmp_max == -1)
 				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR2] ].S_MAXIM;
-			PAIR_TRIPLETS[i].BINWS.Y = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS.Y;
+			PAIR_TRIPLETS[i].BINWS[1] = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS[1];
 		
-			tmp_max = PAIR_TRIPLETS[i].S_MAXIM_3B.Z;
-			tmp_min = PAIR_TRIPLETS[i].S_MINIM_3B.Z;
+			tmp_max = PAIR_TRIPLETS[i].S_MAXIM[2];
+			tmp_min = PAIR_TRIPLETS[i].S_MINIM[2];
 			if(tmp_min == -1)
 				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR3] ].S_MINIM;
 			if(tmp_max == -1)
 				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR3] ].S_MAXIM;
-			PAIR_TRIPLETS[i].BINWS.Z = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS.Z;
+			PAIR_TRIPLETS[i].BINWS[2] = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS[2];
 		
-			PAIR_TRIPLETS[i].POP_HIST.resize(PAIR_TRIPLETS[i].NBINS.X);
+			PAIR_TRIPLETS[i].POP_HIST.resize(PAIR_TRIPLETS[i].NBINS[0]);
 		
-			for(int x=0; x<PAIR_TRIPLETS[i].NBINS.X; x++)
+			for(int x=0; x<PAIR_TRIPLETS[i].NBINS[0]; x++)
 			{
-				PAIR_TRIPLETS[i].POP_HIST[x].resize(PAIR_TRIPLETS[i].NBINS.Y);
+				PAIR_TRIPLETS[i].POP_HIST[x].resize(PAIR_TRIPLETS[i].NBINS[1]);
 			
-				for(int y=0; y<PAIR_TRIPLETS[i].NBINS.Y; y++)
+				for(int y=0; y<PAIR_TRIPLETS[i].NBINS[1]; y++)
 				{
-					PAIR_TRIPLETS[i].POP_HIST[x][y].resize(PAIR_TRIPLETS[i].NBINS.Z);
+					PAIR_TRIPLETS[i].POP_HIST[x][y].resize(PAIR_TRIPLETS[i].NBINS[2]);
 
-					for(int z=0; z<PAIR_TRIPLETS[i].NBINS.Z; z++)
+					for(int z=0; z<PAIR_TRIPLETS[i].NBINS[2]; z++)
 					{
 						PAIR_TRIPLETS[i].POP_HIST[x][y][z] = 0;
 					}
@@ -627,7 +627,7 @@ int main(int argc, char* argv[])
 				}
 			}
 			
-			if ( RANK == 0 ) cout << "	" << i << " " << fixed << setprecision(1) << PAIR_TRIPLETS[i].NBINS.X << " " << PAIR_TRIPLETS[i].NBINS.Y << " " << PAIR_TRIPLETS[i].NBINS.Z << endl;
+			if ( RANK == 0 ) cout << "	" << i << " " << fixed << setprecision(1) << PAIR_TRIPLETS[i].NBINS[0] << " " << PAIR_TRIPLETS[i].NBINS[1] << " " << PAIR_TRIPLETS[i].NBINS[2] << endl;
 		}	
 		
 		#if VERBOSITY == 1
@@ -745,7 +745,7 @@ int main(int argc, char* argv[])
 		}
 	} 
 	
-	if(CONTROLS.USE_3B_CHEBY && PAIR_TRIPLETS[0].NBINS.X>0) // Set the 3b-population-histogram based constraints 
+	if(CONTROLS.USE_3B_CHEBY && PAIR_TRIPLETS[0].NBINS[0]>0) // Set the 3b-population-histogram based constraints 
 	{
 		if ( RANK == 0 ) cout << "Setting constraints based on 3b-population histogram constraints " << endl << endl;
 		ZCalc_3B_Cheby_Deriv_HIST(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, A_MATRIX, PAIR_MAP, TRIAD_MAP);	
@@ -1171,7 +1171,7 @@ int main(int argc, char* argv[])
 
 	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
 	{
-		if(PAIR_TRIPLETS[i].S_MINIM_3B.X >= 0)
+		if(PAIR_TRIPLETS[i].S_MINIM[0] >= 0)
 			FOUND_SPECIAL++;
 	}
 	
@@ -1180,21 +1180,21 @@ int main(int argc, char* argv[])
 		header << endl << "SPECIAL 3B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-			if(PAIR_TRIPLETS[i].S_MINIM_3B.X >= 0)
+			if(PAIR_TRIPLETS[i].S_MINIM[0] >= 0)
 				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR1 << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR2 << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR3 << " " 
 					<< fixed << setprecision(5) 
-		            << PAIR_TRIPLETS[i].S_MINIM_3B.X << " "
-				 	<< PAIR_TRIPLETS[i].S_MINIM_3B.Y << " "
-					<< PAIR_TRIPLETS[i].S_MINIM_3B.Z << endl;						
+		            << PAIR_TRIPLETS[i].S_MINIM[0] << " "
+				 	<< PAIR_TRIPLETS[i].S_MINIM[1] << " "
+					<< PAIR_TRIPLETS[i].S_MINIM[2] << endl;						
 	}
 		
 	FOUND_SPECIAL = 0;
 	
 	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-		if(PAIR_TRIPLETS[i].S_MAXIM_3B.X >= 0)
+		if(PAIR_TRIPLETS[i].S_MAXIM[0] >= 0)
 			FOUND_SPECIAL++;
 	
 	if(FOUND_SPECIAL>0)
@@ -1202,15 +1202,15 @@ int main(int argc, char* argv[])
 		header << endl << "SPECIAL 3B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-			if(PAIR_TRIPLETS[i].S_MAXIM_3B.X >= 0)
+			if(PAIR_TRIPLETS[i].S_MAXIM[0] >= 0)
 				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR1 << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR2 << " " 
 					<< PAIR_TRIPLETS[i].ATMPAIR3 << " " 
 					<< fixed << setprecision(5) 
-		            << PAIR_TRIPLETS[i].S_MAXIM_3B.X << " "
-				 	<< PAIR_TRIPLETS[i].S_MAXIM_3B.Y << " "
-					<< PAIR_TRIPLETS[i].S_MAXIM_3B.Z << endl;						
+		            << PAIR_TRIPLETS[i].S_MAXIM[0] << " "
+				 	<< PAIR_TRIPLETS[i].S_MAXIM[1] << " "
+					<< PAIR_TRIPLETS[i].S_MAXIM[2] << endl;						
 	}	
 
 	// Print out special cutoffs for 4-body interactions
@@ -1255,7 +1255,7 @@ int main(int argc, char* argv[])
 
 		for(int i=0;i<PAIR_TRIPLETS.size(); i++)
 		{
-			header << "" << PAIR_TRIPLETS[i].TRIPINDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << ": ";
+			header << "" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << ": ";
 			header << PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS << " parameters, " << PAIR_TRIPLETS[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
 			header << "     index  |  powers  |  equiv index  |  param index  " << endl;
 			header << "   ----------------------------------------------------" << endl;	
@@ -1263,9 +1263,9 @@ int main(int argc, char* argv[])
 			for(int j=0; j<PAIR_TRIPLETS[i].ALLOWED_POWERS.size(); j++)
 			{
 				header << "      " << setw(6) << fixed << left << j << " ";
-				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X  << " ";
-				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Y  << " ";
-				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Z  << " ";
+				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][0]  << " ";
+				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][1]  << " ";
+				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][2]  << " ";
 				header << "       " << setw(8) << PAIR_TRIPLETS[i].EQUIV_INDICES[j] << " ";
 				header << "       " << setw(8) << PAIR_TRIPLETS[i].PARAM_INDICES[j] << endl; 
 	
@@ -1831,13 +1831,13 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			for (int i=0; i<NTRIP; i++)
 			{	
-				PAIR_TRIPLETS[i].S_MINIM_3B.X = -1;
-				PAIR_TRIPLETS[i].S_MINIM_3B.Y = -1;
-				PAIR_TRIPLETS[i].S_MINIM_3B.Z = -1;
+				PAIR_TRIPLETS[i].S_MINIM[0] = -1;
+				PAIR_TRIPLETS[i].S_MINIM[1] = -1;
+				PAIR_TRIPLETS[i].S_MINIM[2] = -1;
 				
-				PAIR_TRIPLETS[i].S_MAXIM_3B.X = -1;
-				PAIR_TRIPLETS[i].S_MAXIM_3B.Y = -1;
-				PAIR_TRIPLETS[i].S_MAXIM_3B.Z = -1;
+				PAIR_TRIPLETS[i].S_MAXIM[0] = -1;
+				PAIR_TRIPLETS[i].S_MAXIM[1] = -1;
+				PAIR_TRIPLETS[i].S_MAXIM[2] = -1;
 				
 				PAIR_TRIPLETS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;
 			}	
@@ -2011,7 +2011,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 
 							// Construct the triplet atom pairs from those atoms
 						
-							PAIR_TRIPLETS[TEMP_INT].TRIPINDX = TEMP_INT;
+							PAIR_TRIPLETS[TEMP_INT].INDX = TEMP_INT;
 						
 							PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 = TRIP_ATOMS.ATMPAIR1;	// ij
 							PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 = TRIP_ATOMS.ATMPAIR1;	// ik
@@ -2057,6 +2057,7 @@ if(RANK==0)
 			 
 				XYZ_INT UNSORTED_POWERS;
 				XYZ_INT SORTED_POWERS;
+				vector<int> unsorted_vec(3) ;
 			
 				vector<XYZ_INT> STORED_SORTED_POWERS;//(CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER);		// Make this the max possible size... it will be destroyed later anyway.
 			
@@ -2084,8 +2085,11 @@ if(RANK==0)
 									UNSORTED_POWERS.Z = pair3_pow;		
 								
 									// Store all triplet powers that meet the above criteria.
-								
-									PAIR_TRIPLETS[i].ALLOWED_POWERS.push_back(UNSORTED_POWERS);
+
+									unsorted_vec[0] = UNSORTED_POWERS.X ;
+									unsorted_vec[1] = UNSORTED_POWERS.Y ;
+									unsorted_vec[2] = UNSORTED_POWERS.Z ;
+									PAIR_TRIPLETS[i].ALLOWED_POWERS.push_back(unsorted_vec) ;
 								
 									// Now, we need to figure out which of these sets of powers is truly unique. This will depend on a few things.
 	
@@ -2436,7 +2440,7 @@ if(RANK==0)
 				
 				cout << "Triplet types (force field): " << endl;
 				for(int i=0;i<NTRIP; i++)
-					cout << "		" << PAIR_TRIPLETS[i].TRIPINDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << endl;
+					cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << endl;
 */
 			}
 								
@@ -2511,7 +2515,7 @@ if(RANK==0)
 					cout << "	" << endl;
 					for(int i=0;i<NTRIP; i++)
 					{
-						cout << "		" << PAIR_TRIPLETS[i].TRIPINDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << ":";
+						cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << ":";
 						cout << " Number of unique sets of powers: " << PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS << " (" << PAIR_TRIPLETS[i].N_ALLOWED_POWERS << " total)..." << endl;	
 						cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
 						cout << "		   ----------------------------------------------------" << endl;					
@@ -2523,9 +2527,9 @@ if(RANK==0)
 										
 
 							cout << "		      " << setw(6) << fixed << left << j << " ";
-							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X  << " ";
-							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Y  << " ";
-							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Z  << " ";
+							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][0]  << " ";
+							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][1]  << " ";
+							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][2]  << " ";
 							cout << "       " << setw(8) << PAIR_TRIPLETS[i].EQUIV_INDICES[j] << " ";
 							cout << "       " << setw(8) << PAIR_TRIPLETS[i].PARAM_INDICES[j] << endl; 
 						
@@ -2614,15 +2618,15 @@ if(RANK==0)
 				
 				if(!cin.eof())	
 				{
-					cin >> ATOM_PAIRS[TEMP_INT].NBINS.X;
-					cin >> ATOM_PAIRS[TEMP_INT].NBINS.Y;
-					cin >> ATOM_PAIRS[TEMP_INT].NBINS.Z;
+					cin >> ATOM_PAIRS[TEMP_INT].NBINS[0];
+					cin >> ATOM_PAIRS[TEMP_INT].NBINS[1];
+					cin >> ATOM_PAIRS[TEMP_INT].NBINS[2];
 				}
 				else
 				{
-					ATOM_PAIRS[TEMP_INT].NBINS.X = 0;
-					ATOM_PAIRS[TEMP_INT].NBINS.Y = 0;
-					ATOM_PAIRS[TEMP_INT].NBINS.Z = 0;
+					ATOM_PAIRS[TEMP_INT].NBINS[0] = 0;
+					ATOM_PAIRS[TEMP_INT].NBINS[1] = 0;
+					ATOM_PAIRS[TEMP_INT].NBINS[2] = 0;
 				}	
 			}
 			
@@ -2708,7 +2712,7 @@ if(RANK==0)
 				cout << "	Read the following number of ij ik jk bins for pairs: " << endl;
 			
 				for(int i=0; i<NPAIR; i++)
-					cout << "		" << ATOM_PAIRS[i].PRPR_NM  << ": " << ATOM_PAIRS[i].NBINS.X << " " << ATOM_PAIRS[i].NBINS.Y << " " << ATOM_PAIRS[i].NBINS.Z << endl;					
+					cout << "		" << ATOM_PAIRS[i].PRPR_NM  << ": " << ATOM_PAIRS[i].NBINS[0] << " " << ATOM_PAIRS[i].NBINS[1] << " " << ATOM_PAIRS[i].NBINS[2] << endl;					
 				cout << endl;
 			}
 	
@@ -2784,20 +2788,20 @@ if(RANK==0)
 			
 			if(TEMP_STR == "ALL" && NTRIP >0 )
 			{				
-				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MAXIM_3B.X;
+				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MAXIM[0];
 				
-				if(PAIR_TRIPLETS[0].S_MAXIM_3B.X>NEIGHBOR_LIST.MAX_CUTOFF_3B)
-					NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
+				if(PAIR_TRIPLETS[0].S_MAXIM[0]>NEIGHBOR_LIST.MAX_CUTOFF_3B)
+					NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM[0];
 				
 				for(int i=0; i<NTRIP; i++)
 				{
-					PAIR_TRIPLETS[i].S_MAXIM_3B.X = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
-					PAIR_TRIPLETS[i].S_MAXIM_3B.Y = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
-					PAIR_TRIPLETS[i].S_MAXIM_3B.Z = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
+					PAIR_TRIPLETS[i].S_MAXIM[0] = PAIR_TRIPLETS[0].S_MAXIM[0];
+					PAIR_TRIPLETS[i].S_MAXIM[1] = PAIR_TRIPLETS[0].S_MAXIM[0];
+					PAIR_TRIPLETS[i].S_MAXIM[2] = PAIR_TRIPLETS[0].S_MAXIM[0];
 				}
 				
 				#if VERBOSITY == 1
-				if ( RANK == 0 ) cout << "	Note: Setting all 3-body r_max values to " <<  PAIR_TRIPLETS[0].S_MAXIM_3B.X << endl;
+				if ( RANK == 0 ) cout << "	Note: Setting all 3-body r_max values to " <<  PAIR_TRIPLETS[0].S_MAXIM[0] << endl;
 				#endif				
 			}
 			else if(TEMP_STR == "SPECIFIC" && NTRIP >0 )
@@ -2868,53 +2872,53 @@ if(RANK==0)
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_IJ == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+					if      ( (TMP_IJ == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
 					
-					else if ( (TMP_IJ == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+					else if ( (TMP_IJ == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
 					
-					else if ( (TMP_IJ == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+					else if ( (TMP_IJ == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 
 
 					// Read the second inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_IK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+					if      ( (TMP_IK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
 					
-					else if ( (TMP_IK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+					else if ( (TMP_IK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
 					
-					else if ( (TMP_IK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
+					else if ( (TMP_IK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 
 					
 					// Read the third inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_JK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X = TMP_VAL;
+					if      ( (TMP_JK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
 					
-					else if ( (TMP_JK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y = TMP_VAL;
+					else if ( (TMP_JK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
 					
-					else if ( (TMP_JK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z = TMP_VAL;
-					
-					
-					if(PAIR_TRIPLETS[0].S_MAXIM_3B.X > NEIGHBOR_LIST.MAX_CUTOFF_3B)
-						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM_3B.X;
-					if(PAIR_TRIPLETS[0].S_MAXIM_3B.Y > NEIGHBOR_LIST.MAX_CUTOFF_3B)
-						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM_3B.Y;
-					if(PAIR_TRIPLETS[0].S_MAXIM_3B.Z > NEIGHBOR_LIST.MAX_CUTOFF_3B)
-						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM_3B.Z;
+					else if ( (TMP_JK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 					
 					
-					PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B;
+					if(PAIR_TRIPLETS[0].S_MAXIM[0] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
+						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM[0];
+					if(PAIR_TRIPLETS[0].S_MAXIM[1] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
+						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM[1];
+					if(PAIR_TRIPLETS[0].S_MAXIM[2] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
+						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM[2];
+					
+					
+					PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM;
 					STREAM_PARSER.str("");
 					STREAM_PARSER.clear();
 					
@@ -2922,9 +2926,9 @@ if(RANK==0)
 					if ( RANK == 0 ) 
 					{
 						cout << "		" << TEMP_STR << "(" <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-							              << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.X << ", "
-									 	  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Y << ", "
-										  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM_3B.Z << endl;
+							              << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] << ", "
+									 	  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] << ", "
+										  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] << endl;
 					}
 					#endif	
 				}
@@ -2942,17 +2946,17 @@ if(RANK==0)
 			
 			if(TEMP_STR == "ALL" && NTRIP >0 )
 			{				
-				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MINIM_3B.X;
+				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MINIM[0];
 				
 				for(int i=0; i<NTRIP; i++)
 				{
-					PAIR_TRIPLETS[i].S_MINIM_3B.X = PAIR_TRIPLETS[0].S_MINIM_3B.X;
-					PAIR_TRIPLETS[i].S_MINIM_3B.Y = PAIR_TRIPLETS[0].S_MINIM_3B.X;
-					PAIR_TRIPLETS[i].S_MINIM_3B.Z = PAIR_TRIPLETS[0].S_MINIM_3B.X;
+					PAIR_TRIPLETS[i].S_MINIM[0] = PAIR_TRIPLETS[0].S_MINIM[0];
+					PAIR_TRIPLETS[i].S_MINIM[1] = PAIR_TRIPLETS[0].S_MINIM[0];
+					PAIR_TRIPLETS[i].S_MINIM[2] = PAIR_TRIPLETS[0].S_MINIM[0];
 				}
 				
 				#if VERBOSITY == 1
-				if ( RANK == 0 ) cout << "	Note: Setting all 3-body r_min values to " <<  PAIR_TRIPLETS[0].S_MINIM_3B.X << endl;
+				if ( RANK == 0 ) cout << "	Note: Setting all 3-body r_min values to " <<  PAIR_TRIPLETS[0].S_MINIM[0] << endl;
 				#endif				
 			}
 			else if(TEMP_STR == "SPECIFIC" && NTRIP >0 )
@@ -3022,55 +3026,55 @@ if(RANK==0)
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_IJ == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+					if      ( (TMP_IJ == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
 					
-					else if ( (TMP_IJ == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+					else if ( (TMP_IJ == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
 					
-					else if ( (TMP_IJ == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+					else if ( (TMP_IJ == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 
 
 					// Read the second inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_IK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+					if      ( (TMP_IK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
 					
-					else if ( (TMP_IK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+					else if ( (TMP_IK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
 					
-					else if ( (TMP_IK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+					else if ( (TMP_IK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 
 					
 					// Read the third inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_JK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X = TMP_VAL;
+					if      ( (TMP_JK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
 					
-					else if ( (TMP_JK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y = TMP_VAL;
+					else if ( (TMP_JK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
 					
-					else if ( (TMP_JK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z = TMP_VAL;
+					else if ( (TMP_JK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
+						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 					
 					
 					
-					PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B;
+					PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM;
 					STREAM_PARSER.str("");
 					STREAM_PARSER.clear();
 					
 					#if VERBOSITY == 1
 					if ( RANK == 0 ) 
 						cout << "		" << TEMP_STR << "(" <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-							  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.X << ", "
-							  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Y << ", "
-							  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM_3B.Z << endl;
+							  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] << ", "
+							  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] << ", "
+							  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] << endl;
 					#endif	
 				}
 			}
@@ -3330,9 +3334,9 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 			{
 				XYZ sum = {0.0, 0.0, 0.0} ;
 #ifdef USE_MPI
-				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND.X), &(sum.X), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND.Y), &(sum.Y), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND.Z), &(sum.Z), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND[0]), &(sum.X), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND[1]), &(sum.Y), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND[2]), &(sum.Z), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 #else				
 				sum = PAIR_TRIPLETS[k].MIN_FOUND ;
 #endif
@@ -3345,9 +3349,9 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 											 << sum.Y << " " 
 											 << sum.Z << endl;
 											 */
-											 << PAIR_TRIPLETS[k].MIN_FOUND.X << " " 
-											 << PAIR_TRIPLETS[k].MIN_FOUND.Y << " " 
-											 << PAIR_TRIPLETS[k].MIN_FOUND.Z << endl;
+											 << PAIR_TRIPLETS[k].MIN_FOUND[0] << " " 
+											 << PAIR_TRIPLETS[k].MIN_FOUND[1] << " " 
+											 << PAIR_TRIPLETS[k].MIN_FOUND[2] << endl;
 			
 			}
 			if ( RANK == 0 ) cout << "	Total number of configurations contributing to each triplet type:" << endl;
