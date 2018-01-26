@@ -38,7 +38,7 @@ public:
   // Pure virtual (overridable) functions.
   virtual void init() = 0 ;  // Initialize values to defaults.
   virtual void build(int cheby_4b_order) = 0 ; // The the ALLOWED_POWERS, etc. for an interaction.
-  virtual void store_permutations(vector<int> &unsorted_powers) = 0 ; // Store all the permutations.
+  void store_permutations(vector<int> &unsorted_powers) ; // Store all the permutations.
   virtual void print() = 0 ;  // Print the quad powers and element types.
 
   // Print special parameters to the header file.
@@ -62,8 +62,8 @@ CLUSTER(int natom, int npair): ATOM_NAMES(natom), ATOM_PAIRS(npair), S_MAXIM(npa
   }
 private:
   // Recursively permute atom indices for each element type.
-  virtual void permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
-												vector<int> perm, int unique_index, int equiv_index) = 0 ;
+  void permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
+									 vector<int> perm, int unique_index, int equiv_index) ;
 
 };
 
@@ -84,7 +84,6 @@ public:
   // Virtual (overridable) functions.
   virtual void init() {}  // Initialize values to defaults.
   virtual void build(int cheby_4b_order) {} // The the ALLOWED_POWERS, etc. for an interaction.
-  virtual void store_permutations(vector<int> &unsorted_powers) {} // Store all the permutations.
   virtual void print() {}  // Print the quad powers and element types.
 
   // Print special parameters to the header file.
@@ -92,8 +91,6 @@ public:
 
   // Print the params file header for a quad interaction.
   virtual void print_header(ofstream &header) {}
-  virtual void permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
-												vector<int> perm, int unique_index, int equiv_index) {}
 };
 
 
@@ -109,7 +106,6 @@ QUADRUPLETS():CLUSTER(4,6) { }
   // Member functions.
   void init() ;  // Initialize values to defaults.
   void build(int cheby_4b_order) ; // The the ALLOWED_POWERS, etc. for an interaction.
-  void store_permutations(vector<int> &unsorted_powers) ; // Store all the permutations.
   void print() ;  // Print the quad powers and element types.
 
   // Print special parameters to the header file.
@@ -117,10 +113,6 @@ QUADRUPLETS():CLUSTER(4,6) { }
 
   // Print the params file header for a quad interaction.
   void print_header(ofstream &header) ;
-private:
-  // Recursively permute atom indices for each element type.
-  void permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
-									 vector<int> perm, int unique_index, int equiv_index) ;
 };
 
 

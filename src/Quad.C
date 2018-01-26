@@ -123,7 +123,7 @@ void QUADRUPLETS::build(int cheby_4b_order)
 }
 
 
-void QUADRUPLETS::store_permutations(vector<int> &unsorted_powers) 
+void CLUSTER::store_permutations(vector<int> &unsorted_powers) 
 {
   map<vector<int>,int>::iterator it ;
 
@@ -146,21 +146,21 @@ void QUADRUPLETS::store_permutations(vector<int> &unsorted_powers)
   if ( RANK == 0 ) 
   {
 	 cout << "Permuting atom indices for " ;
-	 for ( int i = 0 ; i < 4 ; i++ ) cout << ATOM_NAMES[i] << " " ;
+	 for ( int i = 0 ; i < NATOMS ; i++ ) cout << ATOM_NAMES[i] << " " ;
 	 cout << endl ;
   }
 #endif
 
-  vector<int> perm(4) ;
-  for ( int i = 0 ; i < 4 ; i++ ) perm[i] = i ;
+  vector<int> perm(NATOMS) ;
+  for ( int i = 0 ; i < NATOMS ; i++ ) perm[i] = i ;
 
   int equiv_index = ALLOWED_POWERS.size() ;
   permute_atom_indices(0, ATOM_NAMES, unsorted_powers, perm, UNIQUE_POWERS.size()-1, equiv_index ) ;
 
 }
 
-void QUADRUPLETS::permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
-													vector<int> perm, int unique_index, int equiv_index) 
+void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
+											  vector<int> perm, int unique_index, int equiv_index) 
 {
 
   if ( idx < names.size() ) {
@@ -182,57 +182,60 @@ void QUADRUPLETS::permute_atom_indices(int idx, vector<string> names, vector<int
 	 } while ( std::next_permutation(perm.data() +idx, perm.data() + idx+count) ) ;
   } else {
 	 // Store the generated permutation.
-		int pow_mat[4][4] ;
-		vector<int> perm_powers(6) ;
+	 // Just love c++ syntax.... don't you ?
+	 vector<vector<int>> pow_mat(NATOMS, vector<int>(NATOMS)) ;
+	 vector<int> perm_powers(NPAIRS) ;
 
-		// Generate the permutation transformation matrix.
-		pow_mat[0][0] = pow_mat[1][1] = pow_mat[2][2] = pow_mat[3][3] = 0 ;
-		pow_mat[0][1] = unsorted_powers[0] ;
-		pow_mat[0][2] = unsorted_powers[1] ;
-		pow_mat[0][3] = unsorted_powers[2] ;
-		pow_mat[1][2] = unsorted_powers[3] ;
-		pow_mat[1][3] = unsorted_powers[4] ;
-		pow_mat[2][3] = unsorted_powers[5] ;
-
-		/// Fill in other side of the diagonal
-		for ( int k = 0 ; k < 4 ; k++ ) {
-		  for ( int l = 0 ; l < k ; l++ ) {
-			 pow_mat[k][l] = pow_mat[l][k] ;
-		  }
+	 // Generate the permutation transformation matrix.
+	 int count = 0 ;
+	 for ( int i = 0 ; i < NATOMS ; i++ ) {
+		pow_mat[i][i] = 0 ;
+		for ( int j = i + 1 ; j < NATOMS ; j++ ) {
+		  pow_mat[i][j] = unsorted_powers[count++] ;
 		}
+	 }
+	 /// Fill in other side of the diagonal
+	 for ( int k = 0 ; k < NATOMS ; k++ ) {
+		for ( int l = 0 ; l < k ; l++ ) {
+		  pow_mat[k][l] = pow_mat[l][k] ;
+		}
+	 }
 
-		
-		// Permute the powers.
-		perm_powers[0] = pow_mat[ perm[0] ][ perm[1] ] ;
-		perm_powers[1] = pow_mat[ perm[0] ][ perm[2] ] ;
-		perm_powers[2] = pow_mat[ perm[0] ][ perm[3] ] ;
-		perm_powers[3] = pow_mat[ perm[1] ][ perm[2] ] ;
-		perm_powers[4] = pow_mat[ perm[1] ][ perm[3] ] ;
-		perm_powers[5] = pow_mat[ perm[2] ][ perm[3] ] ;
+	 // Permute the powers.
+	 count = 0 ;
+	 for ( int i = 0 ; i < NATOMS ; i++ ) {
+		pow_mat[i][i] = 0 ;
+		for ( int j = i + 1 ; j < NATOMS ; j++ ) {
+		  perm_powers[count++] = pow_mat[ perm[i] ] [ perm[j] ] ;
+		}
+	 }
 
 #if(VERBOSITY > 1)
-		if ( RANK == 0 ) 
-		{
-		  cout << "Permutation: " << perm[0] << " " << perm[1] << " "
-				 << perm[2] << " " << perm[3] << endl ;
-
-		  cout << "Permuted powers: " ;
-		  for ( int j = 0 ; j < 6 ; j++ ) {
-			 cout << perm_powers[j] << " " ;
-		  }
-		  cout << endl ;
+	 if ( RANK == 0 ) 
+	 {
+		cout << "Permutation: " 
+		for ( int j = 0 ; j < NATOMS ; j++ ) {
+		  cout << perm[j] << " " ;
 		}
+		cout << endl ;
+
+		cout << "Permuted powers: " ;
+		for ( int j = 0 ; j < NPAIRS ; j++ ) {
+		  cout << perm_powers[j] << " " ;
+		}
+		cout << endl ;
+	 }
 #endif
-		map<vector<int>,int>::iterator it ;
+	 map<vector<int>,int>::iterator it ;
 
-		it = ALLOWED_POWERS_MAP.find(perm_powers) ;
+	 it = ALLOWED_POWERS_MAP.find(perm_powers) ;
 
-		if ( it == ALLOWED_POWERS_MAP.end() ) {
-		  ALLOWED_POWERS.push_back(perm_powers) ;
-		  ALLOWED_POWERS_MAP.insert( std::pair<vector<int>,int>(perm_powers, 1) ) ;
-		  PARAM_INDICES.push_back(unique_index) ;
-		  EQUIV_INDICES.push_back(equiv_index) ;
-		} 
+	 if ( it == ALLOWED_POWERS_MAP.end() ) {
+		ALLOWED_POWERS.push_back(perm_powers) ;
+		ALLOWED_POWERS_MAP.insert( std::pair<vector<int>,int>(perm_powers, 1) ) ;
+		PARAM_INDICES.push_back(unique_index) ;
+		EQUIV_INDICES.push_back(equiv_index) ;
+	 } 
   }
 }
 
