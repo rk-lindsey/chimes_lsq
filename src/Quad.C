@@ -19,7 +19,7 @@ static bool check_pairs(test a, test b)
 }
 
 
-void QUADRUPLETS::build(int cheby_4b_order)
+void CLUSTER::build(int cheby_order)
 // Build a set of interactions for a quad.
 // Figure out the allowed pair quadruplet powers. Here are some rules and considerations:
 //
@@ -32,82 +32,60 @@ void QUADRUPLETS::build(int cheby_4b_order)
 // 3. Non-uniqueness upon atom permutation must be taken into consideration. 
 //    Pairs permutations occur as a consequence of atom permutations.
 {
-  vector<int> UNSORTED_POWERS(6);
+  vector<int> powers(NPAIRS);
 					
   // Loops start at zero for a trick to speed up check for powers > 0
-					
-  int THRESHOLD = 0;
-  bool FOUND_I, FOUND_J, FOUND_K, FOUND_L;
-					
-  for(int pair1_pow=0; pair1_pow<cheby_4b_order; pair1_pow++)
-  {
-	 for(int pair2_pow=0; pair2_pow<cheby_4b_order; pair2_pow++)
-	 {
-		for(int pair3_pow=0; pair3_pow<cheby_4b_order; pair3_pow++)
-		{
-		  for(int pair4_pow=0; pair4_pow<cheby_4b_order; pair4_pow++)
-		  {
-			 for(int pair5_pow=0; pair5_pow<cheby_4b_order; pair5_pow++)
-			 {
-				for(int pair6_pow=0; pair6_pow<cheby_4b_order; pair6_pow++)
-				{
-				  // Before we go any further, make sure that:
-				  // 1. at least 3 powers are greater than zero
-				  // 2. all 4 atoms (i.e. i, j, k, and l) are represented in the non-zero powers
-											
-				  THRESHOLD = 0;
-											
-				  FOUND_I = FOUND_J = FOUND_K = FOUND_L = false;										
-											
-				  if (pair1_pow == 0)
-					 THRESHOLD++;
-				  else
-					 FOUND_I = FOUND_J = true;
-				  if (pair2_pow == 0)
-					 THRESHOLD++;
-				  else
-					 FOUND_I = FOUND_K = true;
-				  if (pair3_pow == 0)
-					 THRESHOLD++;
-				  else
-					 FOUND_I = FOUND_L = true;
-				  if (pair4_pow == 0)
-					 THRESHOLD++;
-				  else
-					 FOUND_J = FOUND_K = true;
-				  if (pair5_pow == 0)
-					 THRESHOLD++;
-				  else
-					 FOUND_J = FOUND_L = true;
-				  if (pair6_pow == 0)
-					 THRESHOLD++;
-				  else
-					 FOUND_K = FOUND_L = true;
-											
-				  if(THRESHOLD > 3) // Then this is not a valid set of powers. Move on to the next set
-					 continue;
-											
-				  if(!(FOUND_I && FOUND_J && FOUND_K && FOUND_L))	// Then this is not a valid set of powers. Move on to the next set
-					 continue;
-											
-				  UNSORTED_POWERS[0] =	pair1_pow;
-				  UNSORTED_POWERS[1] =	pair2_pow;
-				  UNSORTED_POWERS[2] =	pair3_pow;
-				  UNSORTED_POWERS[3] =	pair4_pow;
-				  UNSORTED_POWERS[4] =	pair5_pow;
-				  UNSORTED_POWERS[5] =	pair6_pow;
-											
-				  // Store all valid sixlets and permutations 
-				  store_permutations(UNSORTED_POWERS) ;
-				}
-			 }
-		  }
-		}
-	 }
-  }
+
+
+  build_loop(0, cheby_order, powers) ;
 				
   N_TRUE_ALLOWED_POWERS = UNIQUE_POWERS.size() ;
   N_ALLOWED_POWERS = PARAM_INDICES.size();
+}
+
+void CLUSTER::build_loop(int indx, int cheby_order, vector<int> powers)
+// Recursive function implements nested loops over pair powers.
+{
+
+  if ( indx < NPAIRS ) 
+  {
+	 for(int pair_pow=0; pair_pow < cheby_order; pair_pow++)
+	 {
+		powers[indx] = pair_pow ;
+		build_loop(indx+1, cheby_order, powers) ;
+	 }
+
+  } 
+  else 
+  {
+	 int THRESHOLD = 0;
+	 vector<bool> represented(NATOMS,false) ;
+	 int count = 0 ;
+	 for ( int i = 0 ; i < NATOMS ; i++ ) 
+	 {
+		for ( int j = i + 1 ; j < NATOMS ; j++ ) 
+		{
+		  if ( powers[count++] > 0 ) {
+			 represented[i] = true ;
+			 represented[j] = true ;
+		  }
+		}
+	 }
+
+	 
+	 // All atoms must be represented with non-zero powers.
+	 // Note:  the original 4-body code also had the requirement of 3 non-zero powers.
+	 // An interaction of xij * xkl has 4 atoms represented, but only 2 non-zero powers.
+	 // I think this should be included in the 4 body interaction.  Note that this term would
+	 // not be included in a 3 body interaction. (LEF)
+	 for ( int i = 0 ; i < NATOMS ; i++ ) 
+	 {
+		if ( ! represented[i] ) 
+		  return ;
+	 }
+	 // Store all valid atom index permutations 
+	 store_permutations(powers) ;
+  }
 }
 
 
@@ -412,6 +390,105 @@ void build_quad_maps(map<string,int> &QUAD_MAP, map<int,string> &QUAD_MAP_REVERS
 }
 
 
+void CLUSTER_LIST::link(vector<CLUSTER>& cluster_vec) 
+// Link a CLUSTER_LIST to an allocated vector of clusters.
+{
+  VEC.resize(cluster_vec.size() ) ;
+
+  for ( int j = 0 ; j < VEC.size() ; j++ ) {
+	 VEC[j] = &cluster_vec[j] ;
+  }
+}
+
+void CLUSTER_LIST::link(vector<QUADRUPLETS>& quad_vec) 
+// Link a CLUSTER_LIST to an allocated vector of quadruplets
+{
+  VEC.resize(quad_vec.size() ) ;
+
+  for ( int j = 0 ; j < VEC.size() ; j++ ) {
+	 VEC[j] = &quad_vec[j] ;
+  }
+}
+
+
+void CLUSTER_LIST::link(vector<TRIPLETS>& trip_vec) 
+// Link a CLUSTER_LIST to an allocated vector of triplets
+{
+  VEC.resize(trip_vec.size() ) ;
+
+  for ( int j = 0 ; j < VEC.size() ; j++ ) {
+	 VEC[j] = &trip_vec[j] ;
+  }
+}
+
+  
+void CLUSTER_LIST::build_maps(vector<struct PAIRS> &atom_pairs)
+{
+  int npair = atom_pairs.size() ;
+  vector<int> pair_index(npair) ;
+
+  build_maps_loop(0, pair_index, atom_pairs) ;
+				
+  MAP_REVERSE.clear();
+
+  map<string, int>::iterator it;
+
+  for(it = MAP.begin(); it != MAP.end(); it++)
+	 MAP_REVERSE.insert(make_pair(it->second,it->first));
+}
+
+void CLUSTER_LIST::build_maps_loop(int index, vector<int> pair_index, vector<struct PAIRS> &atom_pairs)
+{
+  int cluster_npair = VEC[0]->NPAIRS ;
+
+  if ( index < cluster_npair ) 
+  {
+	 for(int i=0; i< atom_pairs.size() ; i++) 
+	 {
+		pair_index[index] = i ;
+		build_maps_loop(index+1, pair_index, atom_pairs) ;
+	 }
+  } 
+  else
+  {
+	 // Done looping.  Actually build the loop
+	 vector<string> temp_str(cluster_npair);	
+	 bool real_cluster ;
+	 string full_tmp_str;	
+
+	 for ( int j = 0 ; j < cluster_npair ; j++ ) 
+	 {
+		temp_str[j] = atom_pairs[ pair_index[j] ].ATM1TYP; 
+		temp_str[j].append(atom_pairs[ pair_index[j] ].ATM2TYP) ;
+	 }										
+										
+	 for(int p=0; p < NCLUSTERS ; p++)
+	 {
+		sort(temp_str.begin(),temp_str.end());
+		do
+		{
+		  real_cluster = true;
+												
+		  full_tmp_str = "";
+
+		  for (int s = 0 ; s< cluster_npair ; s++)
+		  {
+			 if(temp_str[s] != VEC[p]->ATOM_PAIRS[s])
+				real_cluster = false;
+			 
+			 full_tmp_str += temp_str[s];
+		  }
+												
+		  if( real_cluster )
+		  {													
+			 MAP.insert(make_pair(full_tmp_str,p));	
+			 break;
+		  }
+		} while (next_permutation(temp_str.begin(),temp_str.end()));
+	 }
+  }
+}
+				
 void build_fast_quad_maps(map<string,int> QUAD_MAP, map<int,int> INT_QUAD_MAP, map<int,int> INT_QUAD_MAP_REVERSE, vector<string> ATOM_CHEMS)
 {
   if(RANK == 0)

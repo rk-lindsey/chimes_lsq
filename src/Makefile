@@ -51,6 +51,7 @@ CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines
 #CXX=g++ -g # -Wall -Wextra
 #CXX=icpc -fast -Wall
 
+#CXX=clang -std=c++11
 
 ##################################
 # MAKE THE LSQ CODE

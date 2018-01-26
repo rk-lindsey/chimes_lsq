@@ -30,7 +30,10 @@ using namespace std;
 #include <mpi.h>
 #endif 
 
-static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, NEIGHBORS & NEIGHBOR_LIST);
+static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, vector<QUADRUPLETS> &PAIR_QUADRUPLETS, 
+									CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, 
+									map<int,string> & TRIAD_MAP_REVERSE, map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, 
+									vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, NEIGHBORS & NEIGHBOR_LIST);
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_TRIPLETS, vector<QUADRUPLETS> &PAIR_QUADRUPLETS, bool use_3b_cheby, bool use_4b_cheby);
 
@@ -98,7 +101,9 @@ int main(int argc, char* argv[])
 	
 	vector<PAIRS> 		ATOM_PAIRS;			// Will store relevant info regarding atom interaction pair types.. 
 	vector<TRIPLETS> 	PAIR_TRIPLETS;		// Will store relevant info regarding atom interaction triplet types.. i.e. { [OO,OO,OO], [OO,HH,HH], ... }
-	vector<QUADRUPLETS> PAIR_QUADRUPLETS;	// Will store relevant info regarding atom interaction quadruplet types.. note that a set of 4 atoms are described by 6 pairs
+	CLUSTER_LIST QUADS ;                // Quadruplet interaction.
+	vector<QUADRUPLETS> PAIR_QUADRUPLETS ;
+
 	vector<FRAME> 		TRAJECTORY;			// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
 	NEIGHBORS        	 NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
 	vector<int>   		ATOM_PAIR_TYPES;	// Fore use in double loop over atom pairs. Index corresponds to the overall double loop count. 
@@ -136,7 +141,8 @@ int main(int argc, char* argv[])
 	}
 #endif
 
-	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, PAIR_QUADRUPLETS, PAIR_MAP, PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, QUAD_MAP, QUAD_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
+	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, PAIR_QUADRUPLETS, QUADS, PAIR_MAP, 
+						PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, QUAD_MAP, QUAD_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
 
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
 	{
@@ -226,7 +232,7 @@ int main(int argc, char* argv[])
 	{
 		CONTROLS.NUM_4B_CHEBY = 0;
 		
-		for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
+		for(int i=0; i< PAIR_QUADRUPLETS.size(); i++)
 			CONTROLS.NUM_4B_CHEBY += PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS;
 
 #if VERBOSITY == 1
@@ -1227,21 +1233,21 @@ int main(int argc, char* argv[])
 	{
 		header << endl << "SPECIAL 4B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
-		for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
+		for(int i=0; i< PAIR_QUADRUPLETS.size(); i++)
 		  PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MINIM") ;
 	}
 		
 	FOUND_SPECIAL = 0;
 	
-	for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
-		if(PAIR_QUADRUPLETS[i].S_MAXIM[0] >= 0)
+	for(int i=0; i < PAIR_QUADRUPLETS.size(); i++)
+		if( PAIR_QUADRUPLETS[i].S_MAXIM[0] >= 0)
 			FOUND_SPECIAL++;
 	
 	if(FOUND_SPECIAL>0)
 	{
 		header << endl << "SPECIAL 4B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
-		for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
+		for(int i=0; i< PAIR_QUADRUPLETS.size(); i++)
 		  PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MAXIM" ) ;
 
 	}	
@@ -1283,7 +1289,7 @@ int main(int argc, char* argv[])
 		header << "ATOM PAIR QUADRUPLETS: " << PAIR_QUADRUPLETS.size() << endl << endl;	
 		
 		
-		for(int i=0;i<PAIR_QUADRUPLETS.size(); i++)
+		for(int i=0; i < PAIR_QUADRUPLETS.size(); i++)
 		{
 		  PAIR_QUADRUPLETS[i].print_header(header) ;
 		}
@@ -1357,7 +1363,11 @@ return 0;
 
 
 // Read program input from the file "splines_ls.in".
-static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, NEIGHBORS & NEIGHBOR_LIST)
+static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, 
+									vector<QUADRUPLETS> & PAIR_QUADRUPLETS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
+									map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, 
+									map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
+									NEIGHBORS & NEIGHBOR_LIST)
 {
 	bool   FOUND_END = false;
 	string LINE;
@@ -1846,7 +1856,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			NQUAD = factorial(CONTROLS.NATMTYP+4-1)/factorial(4)/factorial(CONTROLS.NATMTYP-1);
 			
-			PAIR_QUADRUPLETS.resize(NQUAD);		
+			PAIR_QUADRUPLETS.resize(NQUAD) ;
+			QUADS.link( PAIR_QUADRUPLETS ) ;
 			
 		}
 
@@ -2914,7 +2925,6 @@ if(RANK==0)
 						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM[2];
 					
 					
-					PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM;
 					STREAM_PARSER.str("");
 					STREAM_PARSER.clear();
 					
@@ -3061,7 +3071,6 @@ if(RANK==0)
 					
 					
 					
-					PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM;
 					STREAM_PARSER.str("");
 					STREAM_PARSER.clear();
 					
@@ -3089,7 +3098,7 @@ if(RANK==0)
 			{				
 				STREAM_PARSER >> PAIR_QUADRUPLETS[0].S_MAXIM[0];
 				
-				if(PAIR_QUADRUPLETS[0].S_MAXIM[0] > NEIGHBOR_LIST.MAX_CUTOFF_4B)
+				if( PAIR_QUADRUPLETS[0].S_MAXIM[0] > NEIGHBOR_LIST.MAX_CUTOFF_4B)
 					NEIGHBOR_LIST.MAX_CUTOFF_4B = PAIR_QUADRUPLETS[0].S_MAXIM[0];
 
 				for(int i=0; i<NQUAD; i++)
@@ -3334,7 +3343,9 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND[1]), &(sum.Y), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND[2]), &(sum.Z), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 #else				
-				sum = PAIR_TRIPLETS[k].MIN_FOUND ;
+				sum.X = PAIR_TRIPLETS[k].MIN_FOUND[0] ;
+				sum.Y = PAIR_TRIPLETS[k].MIN_FOUND[1] ;
+				sum.Z = PAIR_TRIPLETS[k].MIN_FOUND[1] ;
 #endif
 				if ( RANK == 0 ) cout << "		" << k << "	" 					
 											 << PAIR_TRIPLETS[k].ATOM_PAIRS[0]    << " " 

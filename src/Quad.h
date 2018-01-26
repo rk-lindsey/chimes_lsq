@@ -36,7 +36,7 @@ public:
   vector<int>	PARAM_INDICES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
 		
   // Pure virtual (overridable) functions.
-  virtual void build(int cheby_4b_order) = 0 ; // The the ALLOWED_POWERS, etc. for an interaction.
+  void build(int cheby_4b_order) ; // The the ALLOWED_POWERS, etc. for an interaction.
   void store_permutations(vector<int> &unsorted_powers) ; // Store all the permutations.
   void print()  ;  // Print the quad powers and element types.
 
@@ -70,8 +70,9 @@ private:
   void permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
 									 vector<int> perm, int unique_index, int equiv_index) ;
 
+  // Interate over a power index in constructing the powers vector.
+  void build_loop(int indx, int cheby_order, vector<int> powers) ;
 };
-
 
 class TRIPLETS : public CLUSTER
 {
@@ -87,8 +88,6 @@ public:
 	 }
 
   // Virtual (overridable) functions.
-  virtual void build(int cheby_4b_order) {} // The the ALLOWED_POWERS, etc. for an interaction.
-
 };
 
 
@@ -101,10 +100,36 @@ QUADRUPLETS():CLUSTER(4,6) { }
 
 ~QUADRUPLETS() { } 
 		
-  // Member functions.
-  void build(int cheby_4b_order) ; // The the ALLOWED_POWERS, etc. for an interaction.
 };
 
+
+class CLUSTER_LIST
+{
+public:
+  // The number of CLUSTERS in the list.
+  int NCLUSTERS ;        
+
+  // A vector containing all clusters.
+  // Need to store cluster pointers so that polymorphism with different cluster types works.
+  vector<CLUSTER*> VEC ;
+
+  // A map from pair types into the VEC index.
+  map<string,int> MAP ;
+
+  // A map from the VEC index into the pair types.
+  map<int,string> MAP_REVERSE ;
+
+  void build_maps(vector<struct PAIRS> &atom_pairs) ;
+
+  void link(vector<CLUSTER> &cluster) ;
+
+  void link(vector<TRIPLETS> &cluster) ;
+
+  void link(vector<QUADRUPLETS> &cluster) ;
+
+private:
+  void build_maps_loop(int index, vector<int> pair_index, vector<struct PAIRS> &atom_pairs) ;
+} ;
 
 
 struct QUAD_FF : public QUADRUPLETS
