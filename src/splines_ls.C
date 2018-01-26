@@ -570,9 +570,9 @@ int main(int argc, char* argv[])
 		for (int i=0; i<PAIR_TRIPLETS.size(); i++)
 		{
 
-			PAIR_TRIPLETS[i].NBINS[0] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS[0];
-			PAIR_TRIPLETS[i].NBINS[1] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS[1];
-			PAIR_TRIPLETS[i].NBINS[2] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].NBINS[2];
+			PAIR_TRIPLETS[i].NBINS[0] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].NBINS[0];
+			PAIR_TRIPLETS[i].NBINS[1] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].NBINS[1];
+			PAIR_TRIPLETS[i].NBINS[2] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].NBINS[2];
 		
 			if(PAIR_TRIPLETS[i].NBINS[0] == 0 || PAIR_TRIPLETS[i].NBINS[1] == 0 || PAIR_TRIPLETS[i].NBINS[0] == 0)
 			{
@@ -588,25 +588,25 @@ int main(int argc, char* argv[])
 			tmp_max = PAIR_TRIPLETS[i].S_MAXIM[0];
 			tmp_min = PAIR_TRIPLETS[i].S_MINIM[0];
 			if(tmp_min == -1)
-				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].S_MINIM;
+				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].S_MINIM;
 			if(tmp_max == -1)
-				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1] ].S_MAXIM;
+				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].S_MAXIM;
 			PAIR_TRIPLETS[i].BINWS[0] = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS[0];
 		
 			tmp_max = PAIR_TRIPLETS[i].S_MAXIM[1];
 			tmp_min = PAIR_TRIPLETS[i].S_MINIM[1];
 			if(tmp_min == -1)
-				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR2] ].S_MINIM;
+				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[1]] ].S_MINIM;
 			if(tmp_max == -1)
-				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR2] ].S_MAXIM;
+				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[1]] ].S_MAXIM;
 			PAIR_TRIPLETS[i].BINWS[1] = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS[1];
 		
 			tmp_max = PAIR_TRIPLETS[i].S_MAXIM[2];
 			tmp_min = PAIR_TRIPLETS[i].S_MINIM[2];
 			if(tmp_min == -1)
-				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR3] ].S_MINIM;
+				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[2]] ].S_MINIM;
 			if(tmp_max == -1)
-				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR3] ].S_MAXIM;
+				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[2]] ].S_MAXIM;
 			PAIR_TRIPLETS[i].BINWS[2] = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS[2];
 		
 			PAIR_TRIPLETS[i].POP_HIST.resize(PAIR_TRIPLETS[i].NBINS[0]);
@@ -1182,9 +1182,9 @@ int main(int argc, char* argv[])
 		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
 			if(PAIR_TRIPLETS[i].S_MINIM[0] >= 0)
 				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
-					<< PAIR_TRIPLETS[i].ATMPAIR1 << " " 
-					<< PAIR_TRIPLETS[i].ATMPAIR2 << " " 
-					<< PAIR_TRIPLETS[i].ATMPAIR3 << " " 
+					<< PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " 
+					<< PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " 
+					<< PAIR_TRIPLETS[i].ATOM_PAIRS[2] << " " 
 					<< fixed << setprecision(5) 
 		            << PAIR_TRIPLETS[i].S_MINIM[0] << " "
 				 	<< PAIR_TRIPLETS[i].S_MINIM[1] << " "
@@ -1204,9 +1204,9 @@ int main(int argc, char* argv[])
 		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
 			if(PAIR_TRIPLETS[i].S_MAXIM[0] >= 0)
 				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
-					<< PAIR_TRIPLETS[i].ATMPAIR1 << " " 
-					<< PAIR_TRIPLETS[i].ATMPAIR2 << " " 
-					<< PAIR_TRIPLETS[i].ATMPAIR3 << " " 
+					<< PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " 
+					<< PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " 
+					<< PAIR_TRIPLETS[i].ATOM_PAIRS[2] << " " 
 					<< fixed << setprecision(5) 
 		            << PAIR_TRIPLETS[i].S_MAXIM[0] << " "
 				 	<< PAIR_TRIPLETS[i].S_MAXIM[1] << " "
@@ -1255,7 +1255,7 @@ int main(int argc, char* argv[])
 
 		for(int i=0;i<PAIR_TRIPLETS.size(); i++)
 		{
-			header << "" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << ": ";
+			header << "" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[2] << ": ";
 			header << PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS << " parameters, " << PAIR_TRIPLETS[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
 			header << "     index  |  powers  |  equiv index  |  param index  " << endl;
 			header << "   ----------------------------------------------------" << endl;	
@@ -2005,33 +2005,33 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 						{
 							// Get the three atoms that will define the 3-body interaction
 						
-							TRIP_ATOMS.ATMPAIR1 = ATOM_PAIRS[i].ATM1TYP;	// The first N_ATMTYP pairs are of type AA, BB, CC ... N_ATMTYP
-							TRIP_ATOMS.ATMPAIR2 = ATOM_PAIRS[j].ATM1TYP;
-							TRIP_ATOMS.ATMPAIR3 = ATOM_PAIRS[k].ATM1TYP;
+							TRIP_ATOMS.ATOM_PAIRS[0] = ATOM_PAIRS[i].ATM1TYP;	// The first N_ATMTYP pairs are of type AA, BB, CC ... N_ATMTYP
+							TRIP_ATOMS.ATOM_PAIRS[1] = ATOM_PAIRS[j].ATM1TYP;
+							TRIP_ATOMS.ATOM_PAIRS[2] = ATOM_PAIRS[k].ATM1TYP;
 
 							// Construct the triplet atom pairs from those atoms
 						
 							PAIR_TRIPLETS[TEMP_INT].INDX = TEMP_INT;
 						
-							PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 = TRIP_ATOMS.ATMPAIR1;	// ij
-							PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 = TRIP_ATOMS.ATMPAIR1;	// ik
-							PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 = TRIP_ATOMS.ATMPAIR2;	// jk
+							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0] = TRIP_ATOMS.ATOM_PAIRS[0];	// ij
+							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1] = TRIP_ATOMS.ATOM_PAIRS[0];	// ik
+							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2] = TRIP_ATOMS.ATOM_PAIRS[1];	// jk
 
-							PAIR_TRIPLETS[TEMP_INT].ATMPAIR1.append(TRIP_ATOMS.ATMPAIR2);	// ij
-							PAIR_TRIPLETS[TEMP_INT].ATMPAIR2.append(TRIP_ATOMS.ATMPAIR3);	// ik
-							PAIR_TRIPLETS[TEMP_INT].ATMPAIR3.append(TRIP_ATOMS.ATMPAIR3);	// jk		
+							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0].append(TRIP_ATOMS.ATOM_PAIRS[1]);	// ij
+							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1].append(TRIP_ATOMS.ATOM_PAIRS[2]);	// ik
+							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2].append(TRIP_ATOMS.ATOM_PAIRS[2]);	// jk		
 
 							// Now save the "proper" (ordered) name of the pair			
 
-							PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR1] ].PRPR_NM;
-							PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR2] ].PRPR_NM;
-							PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATMPAIR3] ].PRPR_NM;
+							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0]] ].PRPR_NM;
+							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1]] ].PRPR_NM;
+							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2]] ].PRPR_NM;
 							
-//cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 << endl;	
+//cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2] << endl;	
 if(RANK==0)
 {							
 	cout << "Made the following triplets: ";
-	cout <<TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR1 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR2 << " " << PAIR_TRIPLETS[TEMP_INT].ATMPAIR3 << endl;		
+	cout <<TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2] << endl;		
 }
 	
 
@@ -2095,15 +2095,15 @@ if(RANK==0)
 	
 									// Case 1: each pair in the current pair triplet is unique ... multiplicities will be one for each item
 								
-									if( (PAIR_TRIPLETS[i].ATMPAIR1 != PAIR_TRIPLETS[i].ATMPAIR2) 
-									 && (PAIR_TRIPLETS[i].ATMPAIR1 != PAIR_TRIPLETS[i].ATMPAIR3) 
-									 && (PAIR_TRIPLETS[i].ATMPAIR2 != PAIR_TRIPLETS[i].ATMPAIR3) )
+									if( (PAIR_TRIPLETS[i].ATOM_PAIRS[0] != PAIR_TRIPLETS[i].ATOM_PAIRS[1]) 
+									 && (PAIR_TRIPLETS[i].ATOM_PAIRS[0] != PAIR_TRIPLETS[i].ATOM_PAIRS[2]) 
+									 && (PAIR_TRIPLETS[i].ATOM_PAIRS[1] != PAIR_TRIPLETS[i].ATOM_PAIRS[2]) )
 										PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
 
 								
 									// Case 2: each pair in the current pair triplet is identical... multiplicity should be 3 when all three powers are not the same
 								 
-									else if( (PAIR_TRIPLETS[i].ATMPAIR1 == PAIR_TRIPLETS[i].ATMPAIR2) && (PAIR_TRIPLETS[i].ATMPAIR1 == PAIR_TRIPLETS[i].ATMPAIR3))
+									else if( (PAIR_TRIPLETS[i].ATOM_PAIRS[0] == PAIR_TRIPLETS[i].ATOM_PAIRS[1]) && (PAIR_TRIPLETS[i].ATOM_PAIRS[0] == PAIR_TRIPLETS[i].ATOM_PAIRS[2]))
 									{
 										// Sort the powers in ascending order
 
@@ -2175,7 +2175,7 @@ if(RANK==0)
 
 										// Case 3a.: A == B != C
 									
-										if(PAIR_TRIPLETS[i].ATMPAIR1 == PAIR_TRIPLETS[i].ATMPAIR2)
+										if(PAIR_TRIPLETS[i].ATOM_PAIRS[0] == PAIR_TRIPLETS[i].ATOM_PAIRS[1])
 										{
 											SORTED_POWERS.X = pair3_pow;
 											SORTED_POWERS.Y = pair1_pow;
@@ -2184,7 +2184,7 @@ if(RANK==0)
 									
 										// Case 3b.: A != B == C
 									
-										if(PAIR_TRIPLETS[i].ATMPAIR2 == PAIR_TRIPLETS[i].ATMPAIR3)
+										if(PAIR_TRIPLETS[i].ATOM_PAIRS[1] == PAIR_TRIPLETS[i].ATOM_PAIRS[2])
 										{
 											SORTED_POWERS.X = pair1_pow;
 											SORTED_POWERS.Y = pair2_pow;
@@ -2193,7 +2193,7 @@ if(RANK==0)
 									
 										// Case 3c.: A == C != B
 									
-										if(PAIR_TRIPLETS[i].ATMPAIR1 == PAIR_TRIPLETS[i].ATMPAIR3)
+										if(PAIR_TRIPLETS[i].ATOM_PAIRS[0] == PAIR_TRIPLETS[i].ATOM_PAIRS[2])
 										{
 											SORTED_POWERS.X = pair2_pow;
 											SORTED_POWERS.Y = pair1_pow;
@@ -2295,7 +2295,7 @@ if(RANK==0)
 				cout << "SANITY CHECK: These are your triplets:" << endl;
 				for(int m=0; m<NTRIP; m++)
 				{
-					cout << m << " " << PAIR_TRIPLETS[m].ATMPAIR1 << " " << PAIR_TRIPLETS[m].ATMPAIR2 << " " << PAIR_TRIPLETS[m].ATMPAIR3 << endl;
+					cout << m << " " << PAIR_TRIPLETS[m].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[m].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[m].ATOM_PAIRS[2] << endl;
 				}
 */			
 				
@@ -2318,12 +2318,12 @@ if(RANK==0)
 						
 							for(int m=0; m<NTRIP; m++)
 							{
-								if ((TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR3) ||
-									(TEMP_STR_C == PAIR_TRIPLETS[m].ATMPAIR1) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATMPAIR2) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATMPAIR3) )
+								if ((TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
+									(TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
+									(TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
+									(TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
+									(TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
+									(TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) )
 									
 								{
 									TEMP_STR = TEMP_STR_A;
@@ -2440,7 +2440,7 @@ if(RANK==0)
 				
 				cout << "Triplet types (force field): " << endl;
 				for(int i=0;i<NTRIP; i++)
-					cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << endl;
+					cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[2] << endl;
 */
 			}
 								
@@ -2515,7 +2515,7 @@ if(RANK==0)
 					cout << "	" << endl;
 					for(int i=0;i<NTRIP; i++)
 					{
-						cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATMPAIR1 << " " << PAIR_TRIPLETS[i].ATMPAIR2 << " " << PAIR_TRIPLETS[i].ATMPAIR3 << ":";
+						cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[2] << ":";
 						cout << " Number of unique sets of powers: " << PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS << " (" << PAIR_TRIPLETS[i].N_ALLOWED_POWERS << " total)..." << endl;	
 						cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
 						cout << "		   ----------------------------------------------------" << endl;					
@@ -2864,9 +2864,9 @@ if(RANK==0)
 						cout << "		First distance, pair type: " << TMP_JK << endl;
 					}
 					
-					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR1 ] ].PRPR_NM;
-					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR2 ] ].PRPR_NM;
-					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR3 ] ].PRPR_NM;
+					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
+					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
+					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
 					
 					// Read the first inner cutoff
 
@@ -3018,9 +3018,9 @@ if(RANK==0)
 						cout << "		First distance, pair type: " << TMP_JK << endl;
 					}
 					
-					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR1 ] ].PRPR_NM;
-					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR2 ] ].PRPR_NM;
-					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATMPAIR3 ] ].PRPR_NM;
+					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
+					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
+					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
 					
 					// Read the first inner cutoff
 
@@ -3341,9 +3341,9 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 				sum = PAIR_TRIPLETS[k].MIN_FOUND ;
 #endif
 				if ( RANK == 0 ) cout << "		" << k << "	" 					
-											 << PAIR_TRIPLETS[k].ATMPAIR1    << " " 
-											 << PAIR_TRIPLETS[k].ATMPAIR2    << " " 
-											 << PAIR_TRIPLETS[k].ATMPAIR3    << " "
+											 << PAIR_TRIPLETS[k].ATOM_PAIRS[0]    << " " 
+											 << PAIR_TRIPLETS[k].ATOM_PAIRS[1]    << " " 
+											 << PAIR_TRIPLETS[k].ATOM_PAIRS[2]    << " "
 											 /* 
 											 << sum.X << " " 
 											 << sum.Y << " " 
@@ -3365,9 +3365,9 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 				sum = PAIR_TRIPLETS[k].N_CFG_CONTRIB ;
 #endif				
 				if ( RANK == 0 ) cout << "		" << k << "	" 					
-											 << PAIR_TRIPLETS[k].ATMPAIR1 << " " 
-											 << PAIR_TRIPLETS[k].ATMPAIR2 << " " 
-											 << PAIR_TRIPLETS[k].ATMPAIR3 << " " 
+											 << PAIR_TRIPLETS[k].ATOM_PAIRS[0] << " " 
+											 << PAIR_TRIPLETS[k].ATOM_PAIRS[1] << " " 
+											 << PAIR_TRIPLETS[k].ATOM_PAIRS[2] << " " 
 											 << sum << endl;
 			}
 		}

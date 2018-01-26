@@ -468,9 +468,9 @@ void SET_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rl
 void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) // LSQ version
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
 {
-	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATMPAIR1)
+	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATMPAIR2)
+		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
 		{
 			// Then jk = z
 			
@@ -486,9 +486,9 @@ void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<st
 		}
 
 	}
-	else if(FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATMPAIR2)
+	else if(FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
 	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATMPAIR1)
+		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 		{
 			// Then jk = z
 			
@@ -505,7 +505,7 @@ void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<st
 	}
 	else // PAIR_TYPE_IJ matches alloweD[i].z
 	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATMPAIR1)
+		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 		{
 			// Then jk = z
 			
@@ -525,9 +525,9 @@ void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<st
 void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) // MD version - 1
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
 {
-	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATMPAIR1)
+	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATMPAIR2)
+		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
 		{
 			// Then jk = z
 			
@@ -543,9 +543,9 @@ void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<stri
 		}
 
 	}
-	else if(FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATMPAIR2)
+	else if(FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
 	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATMPAIR1)
+		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 		{
 			// Then jk = z
 			
@@ -562,7 +562,7 @@ void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<stri
 	}
 	else // PAIR_TYPE_IJ matches alloweD[i].z
 	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATMPAIR1)
+		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 		{
 			// Then jk = z
 			
@@ -584,9 +584,9 @@ void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, ma
 {
 	
 	
-	if    (FF_2BODY[PAIR_TYPE_IJ].PRPR_NM == FF_3BODY.ATMPAIR1)
+	if    (FF_2BODY[PAIR_TYPE_IJ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 	{
-		if    (FF_2BODY[ PAIR_TYPE_IK].PRPR_NM == FF_3BODY.ATMPAIR2)
+		if    (FF_2BODY[ PAIR_TYPE_IK].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
 		{
 			// Then jk = z
 			
@@ -602,9 +602,9 @@ void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, ma
 		}
 
 	}
-	else if(FF_2BODY[PAIR_TYPE_IJ].PRPR_NM == FF_3BODY.ATMPAIR2)
+	else if(FF_2BODY[PAIR_TYPE_IJ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
 	{
-		if    (FF_2BODY[PAIR_TYPE_IK].PRPR_NM == FF_3BODY.ATMPAIR1)
+		if    (FF_2BODY[PAIR_TYPE_IK].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 		{
 			// Then jk = z
 			
@@ -621,7 +621,7 @@ void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, ma
 	}
 	else // PAIR_TYPE_IJ matches alloweD[i].z
 	{
-		if    (FF_2BODY[PAIR_TYPE_IK].PRPR_NM == FF_3BODY.ATMPAIR1)
+		if    (FF_2BODY[PAIR_TYPE_IK].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 		{
 			// Then jk = z
 			
@@ -647,11 +647,11 @@ double SET_SMAXIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE)	// Ov
 		VAL =  FF_2BODY.S_MAXIM;
 	else
 	{
-		if      (TYPE == PAIR_TRIPLETS.ATMPAIR1)
+		if      (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[0])
 			VAL =  PAIR_TRIPLETS.S_MAXIM[0];
-		else if (TYPE == PAIR_TRIPLETS.ATMPAIR2)
+		else if (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[1])
 			VAL =  PAIR_TRIPLETS.S_MAXIM[1];
-		else if (TYPE == PAIR_TRIPLETS.ATMPAIR3)
+		else if (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[2])
 			VAL =  PAIR_TRIPLETS.S_MAXIM[2];
 	}
 	return VAL;	
@@ -666,11 +666,11 @@ double SET_SMINIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE) // Ov
 		VAL =  FF_2BODY.S_MINIM;
 	else
 	{
-		if      (TYPE == PAIR_TRIPLETS.ATMPAIR1)
+		if      (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[0])
 			VAL =  PAIR_TRIPLETS.S_MINIM[0];
-		else if (TYPE == PAIR_TRIPLETS.ATMPAIR2)
+		else if (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[1])
 			VAL =  PAIR_TRIPLETS.S_MINIM[1];
-		else if (TYPE == PAIR_TRIPLETS.ATMPAIR3)
+		else if (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[2])
 			VAL =  PAIR_TRIPLETS.S_MINIM[2];
 	}
 	return VAL;
@@ -1776,11 +1776,11 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 
 								// Sync up ij ik jk with ATOMPAIR1 ATOMPAIR2  ATOMPAIR3 and NBINS[0] NBINS[1] NBINS[2]
 							
-								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR1)
+								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[0])
 								{
 									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);	
 									
-									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR2)
+									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[1])
 									{
 										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
 										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
@@ -1792,11 +1792,11 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 									}
 								}
 								
-								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR2)
+								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[1])
 								{
 									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);	
 									
-									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR1)
+									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[0])
 									{
 										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
 										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
@@ -1808,11 +1808,11 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 									}
 								}
 								
-								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR3)
+								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[2])
 								{
 									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);	
 									
-									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATMPAIR1)
+									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[0])
 									{
 										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
 										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
@@ -2685,23 +2685,23 @@ void ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,
 				TEMP[0][j].Z = 0;
 		}
 
-		curr_pair_type_idx_ij = PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR1];
-		curr_pair_type_idx_ik = PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR2];
-		curr_pair_type_idx_jk = PAIR_MAP[ PAIR_TRIPLETS[i].ATMPAIR3];
+		curr_pair_type_idx_ij = PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]];
+		curr_pair_type_idx_ik = PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[1]];
+		curr_pair_type_idx_jk = PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[2]];
 
 /* TO WRITE OUT BINS		
-string TEMP_NAME = 	PAIR_TRIPLETS[i].ATMPAIR1;
-TEMP_NAME.append(   PAIR_TRIPLETS[i].ATMPAIR2);
-TEMP_NAME.append(   PAIR_TRIPLETS[i].ATMPAIR3);
+string TEMP_NAME = 	PAIR_TRIPLETS[i].ATOM_PAIRS[0];
+TEMP_NAME.append(   PAIR_TRIPLETS[i].ATOM_PAIRS[1]);
+TEMP_NAME.append(   PAIR_TRIPLETS[i].ATOM_PAIRS[2]);
 TEMP_NAME.append("temp_hist_out.dat");
 ofstream TMP_HIST_OUT;
 TMP_HIST_OUT.open(TEMP_NAME);
 */
 		
 /* TO READ IN BINS 	
-string TEMP_NAME = 	PAIR_TRIPLETS[i].ATMPAIR1;
-TEMP_NAME.append(   PAIR_TRIPLETS[i].ATMPAIR2);
-TEMP_NAME.append(   PAIR_TRIPLETS[i].ATMPAIR3);
+string TEMP_NAME = 	PAIR_TRIPLETS[i].ATOM_PAIRS[0];
+TEMP_NAME.append(   PAIR_TRIPLETS[i].ATOM_PAIRS[1]);
+TEMP_NAME.append(   PAIR_TRIPLETS[i].ATOM_PAIRS[2]);
 TEMP_NAME.append("temp_hist_out.dat");
 ifstream TMP_HIST_OUT;
 TMP_HIST_OUT.open(TEMP_NAME);	
@@ -2711,9 +2711,9 @@ TMP_HIST_OUT.open(TEMP_NAME);
 			if( ((x+1)<6*COMBINE) && ((x+1)%COMBINE==0))
 				COUNTER++;
 			
-			string TEMPSTR = PAIR_TRIPLETS[i].ATMPAIR1;
-			TEMPSTR  .append(PAIR_TRIPLETS[i].ATMPAIR2);
-			TEMPSTR  .append(PAIR_TRIPLETS[i].ATMPAIR3);
+			string TEMPSTR = PAIR_TRIPLETS[i].ATOM_PAIRS[0];
+			TEMPSTR  .append(PAIR_TRIPLETS[i].ATOM_PAIRS[1]);
+			TEMPSTR  .append(PAIR_TRIPLETS[i].ATOM_PAIRS[2]);
 			string OUTFILE = "3b_Cheby_Pot-pop_hist-";
 			OUTFILE.append(TEMPSTR);
 			OUTFILE.append("-scan-");

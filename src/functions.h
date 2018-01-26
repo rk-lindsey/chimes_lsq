@@ -314,9 +314,8 @@ struct PAIRS	// NEEDS UPDATING
 struct TRIPLETS
 {
   int    INDX;
-  string ATMPAIR1;
-  string ATMPAIR2;
-  string ATMPAIR3;
+
+  vector<string> ATOM_PAIRS ;
 	
   FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
 	
@@ -342,7 +341,7 @@ struct TRIPLETS
   vector<int>		EQUIV_INDICES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
   vector<int>		PARAM_INDICES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
 	
-  TRIPLETS(): S_MINIM(3), S_MAXIM(3), MIN_FOUND(3), NBINS(3), BINWS(3)	// Default constructor
+  TRIPLETS(): S_MINIM(3), S_MAXIM(3), MIN_FOUND(3), NBINS(3), BINWS(3), ATOM_PAIRS(3)	// Default constructor
 	 {
 		N_CFG_CONTRIB =  0;
 		MIN_FOUND[0]   = -1;

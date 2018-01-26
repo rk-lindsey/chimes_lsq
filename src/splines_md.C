@@ -1447,9 +1447,9 @@ int main(int argc, char* argv[])
 							exit_run(0);
 						}
 		
-						TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR1 ] ].PRPR_NM;
-						TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR2 ] ].PRPR_NM;
-						TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR3 ] ].PRPR_NM;
+						TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
+						TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
+						TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
 						
 						STREAM_PARSER >> TMP_VAL;
 
@@ -1572,9 +1572,9 @@ int main(int argc, char* argv[])
 							cout << "		First distance, pair type: " << TMP_JK << endl;
 						}
 		
-						TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR1 ] ].PRPR_NM;
-						TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR2 ] ].PRPR_NM;
-						TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATMPAIR3 ] ].PRPR_NM;
+						TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
+						TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
+						TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
 	
 						// Read the first outer cutoff
 
@@ -2474,13 +2474,13 @@ int main(int argc, char* argv[])
 				
 				STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
 				STREAM_PARSER >> FF_3BODY[i].INDX;				
-				STREAM_PARSER >> FF_3BODY[i].ATMPAIR1;
-				STREAM_PARSER >> FF_3BODY[i].ATMPAIR2;
-				STREAM_PARSER >> FF_3BODY[i].ATMPAIR3;	
+				STREAM_PARSER >> FF_3BODY[i].ATOM_PAIRS[0];
+				STREAM_PARSER >> FF_3BODY[i].ATOM_PAIRS[1];
+				STREAM_PARSER >> FF_3BODY[i].ATOM_PAIRS[2];	
 
 				// Get rid of the colon at the end of the atom pair:
 				
-				FF_3BODY[i].ATMPAIR3 = FF_3BODY[i].ATMPAIR3.substr(0,FF_3BODY[i].ATMPAIR3.length()-1);
+				FF_3BODY[i].ATOM_PAIRS[2] = FF_3BODY[i].ATOM_PAIRS[2].substr(0,FF_3BODY[i].ATOM_PAIRS[2].length()-1);
 							
 				STREAM_PARSER >> TEMP_STR;
 				STREAM_PARSER >> FF_3BODY[i].N_TRUE_ALLOWED_POWERS;
@@ -2778,7 +2778,7 @@ int main(int argc, char* argv[])
 
 			for(int i=0;i<FF_3BODY.size(); i++)
 			{
-				cout << "	" << FF_3BODY[i].INDX << "  " << FF_3BODY[i].ATMPAIR1 << " " << FF_3BODY[i].ATMPAIR2 << " " << FF_3BODY[i].ATMPAIR3 << ": ";
+				cout << "	" << FF_3BODY[i].INDX << "  " << FF_3BODY[i].ATOM_PAIRS[0] << " " << FF_3BODY[i].ATOM_PAIRS[1] << " " << FF_3BODY[i].ATOM_PAIRS[2] << ": ";
 				cout << FF_3BODY[i].N_TRUE_ALLOWED_POWERS << " parameters, " << FF_3BODY[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
 				cout << "	     index  |  powers  |  equiv index  |  param index  | parameter " << endl;
 				cout << "	   --------------------------------------------------------------------" << endl;	
@@ -2942,15 +2942,15 @@ int main(int argc, char* argv[])
 			
 				if(FF_PLOTS.NBODY[i] == 3)	// Eventually also add a check that tye 3B type is Chebyshev...
 				{
-					ij =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR1];
-					ik =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR2];
-					jk =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR3];
+					ij =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[0]];
+					ik =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[1]];
+					jk =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[2]];
 			
 					ATM_TYP_1 = FF_2BODY[ij].ATM1TYP;
 					ATM_TYP_2 = FF_2BODY[jk].ATM1TYP;
 					ATM_TYP_3 = FF_2BODY[jk].ATM2TYP;
 				
-					cout << "	Will work with pair types: " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR1 << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR2 << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATMPAIR3 << endl;
+					cout << "	Will work with pair types: " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[0] << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[1] << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[2] << endl;
 					cout << "	and atom types:            " << ATM_TYP_1 << " " << ATM_TYP_2 << " " << ATM_TYP_3 << endl;
 				
 				
