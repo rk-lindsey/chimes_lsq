@@ -2489,7 +2489,12 @@ if(RANK==0)
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////					
 
 
-				build_quad_maps(QUAD_MAP, QUAD_MAP_REVERSE, ATOM_PAIRS, NPAIR, PAIR_QUADRUPLETS, NQUAD) ;
+				QUADS.build_maps(ATOM_PAIRS) ;
+				QUAD_MAP.clear() ;
+				QUAD_MAP = QUADS.MAP ;
+				QUAD_MAP_REVERSE = QUADS.MAP_REVERSE ;
+
+				//build_quad_maps(QUAD_MAP, QUAD_MAP_REVERSE, ATOM_PAIRS, NPAIR, PAIR_QUADRUPLETS, NQUAD) ;
 
 				//////////////////////////////////////////////////////////////////////
 				// Since there are so many pairs in an atom quadruplet, we'll use "fast" maps here.

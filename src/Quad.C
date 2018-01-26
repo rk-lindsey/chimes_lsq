@@ -394,6 +394,8 @@ void CLUSTER_LIST::link(vector<CLUSTER>& cluster_vec)
 // Link a CLUSTER_LIST to an allocated vector of clusters.
 {
   VEC.resize(cluster_vec.size() ) ;
+  
+  NCLUSTERS = VEC.size() ;
 
   for ( int j = 0 ; j < VEC.size() ; j++ ) {
 	 VEC[j] = &cluster_vec[j] ;
@@ -404,6 +406,8 @@ void CLUSTER_LIST::link(vector<QUADRUPLETS>& quad_vec)
 // Link a CLUSTER_LIST to an allocated vector of quadruplets
 {
   VEC.resize(quad_vec.size() ) ;
+
+  NCLUSTERS = VEC.size() ;
 
   for ( int j = 0 ; j < VEC.size() ; j++ ) {
 	 VEC[j] = &quad_vec[j] ;
@@ -416,6 +420,8 @@ void CLUSTER_LIST::link(vector<TRIPLETS>& trip_vec)
 {
   VEC.resize(trip_vec.size() ) ;
 
+  NCLUSTERS = VEC.size() ;
+
   for ( int j = 0 ; j < VEC.size() ; j++ ) {
 	 VEC[j] = &trip_vec[j] ;
   }
@@ -425,7 +431,9 @@ void CLUSTER_LIST::link(vector<TRIPLETS>& trip_vec)
 void CLUSTER_LIST::build_maps(vector<struct PAIRS> &atom_pairs)
 {
   int npair = atom_pairs.size() ;
-  vector<int> pair_index(npair) ;
+
+  int cluster_npair = VEC[0]->NPAIRS ;
+  vector<int> pair_index(cluster_npair) ;
 
   build_maps_loop(0, pair_index, atom_pairs) ;
 				
