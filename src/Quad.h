@@ -8,6 +8,8 @@ class CLUSTER
 {
 public:
   int    INDX;
+  int NATOMS ;
+  int NPAIRS ;
   vector<string> ATOM_PAIRS; 	// Contains the different atom pair string names
   vector<string> ATOM_NAMES ; // Names of each atom in the quad
 
@@ -50,6 +52,8 @@ public:
 
 CLUSTER(int natom, int npair): ATOM_NAMES(natom), ATOM_PAIRS(npair), S_MAXIM(npair), S_MINIM(npair), MIN_FOUND(npair) // Default constructor
   {
+	 NATOMS = natom ;
+	 NPAIRS = npair ;
 	 N_CFG_CONTRIB = 0 ;
 	 N_TRUE_ALLOWED_POWERS = 0 ;
 	 for ( int j = 0 ; j < npair ; j++ ) {
@@ -64,6 +68,33 @@ private:
 };
 
 
+class TRIPLETS : public CLUSTER
+{
+public:
+	
+  vector<vector<vector< int > > > POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
+	 
+  vector<double> NBINS ;				// Number of bins to use for ij, ik, and jk distances when building the population histograms 
+  vector<double> BINWS; 				// Binwidths to use for ij, ik, and jk distances when building the population histograms 
+	
+   TRIPLETS(): CLUSTER(3,3), NBINS(3), BINWS(3)
+	 {
+	 }
+
+  // Virtual (overridable) functions.
+  virtual void init() {}  // Initialize values to defaults.
+  virtual void build(int cheby_4b_order) {} // The the ALLOWED_POWERS, etc. for an interaction.
+  virtual void store_permutations(vector<int> &unsorted_powers) {} // Store all the permutations.
+  virtual void print() {}  // Print the quad powers and element types.
+
+  // Print special parameters to the header file.
+  virtual void print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode) {} 
+
+  // Print the params file header for a quad interaction.
+  virtual void print_header(ofstream &header) {}
+  virtual void permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
+												vector<int> perm, int unique_index, int equiv_index) {}
+};
 
 
 class QUADRUPLETS : public CLUSTER
