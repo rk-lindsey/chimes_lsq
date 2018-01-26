@@ -119,7 +119,13 @@ public:
   // A map from the VEC index into the pair types.
   map<int,string> MAP_REVERSE ;
 
+  map<int,int> INT_MAP ;
+
+  map<int,int> INT_MAP_REVERSE ;
+
   void build_maps(vector<struct PAIRS> &atom_pairs) ;
+
+  void build_fast_maps(vector<string>& ATOM_CHEMS) ;
 
   void link(vector<CLUSTER> &cluster) ;
 
@@ -129,6 +135,8 @@ public:
 
 private:
   void build_maps_loop(int index, vector<int> pair_index, vector<struct PAIRS> &atom_pairs) ;
+  void build_fast_maps_loop(int index, vector<int> atom_index, vector<string>& ATOM_CHEMS) ;
+  int make_id_int(vector<int>& index) ;
 } ;
 
 
@@ -137,8 +145,6 @@ struct QUAD_FF : public QUADRUPLETS
 	vector<double> 	PARAMS;
 };
 
-void build_quad_maps(map<string,int> &QUAD_MAP, map<int,string> &QUAD_MAP_REVERSE, vector<struct PAIRS> &ATOM_PAIRS, int NPAIR,
-                     vector<QUADRUPLETS> PAIR_QUADRUPLETS, int NQUAD) ;
 void build_fast_quad_maps(map<string,int> QUAD_MAP, map<int,int> INT_QUAD_MAP, 
 								  map<int,int> INT_QUAD_MAP_REVERSE, vector<string> ATOM_CHEMS) ;
 void build_quad_pairs(vector<QUADRUPLETS>& PAIR_QUADRUPLETS, int NATMTYP, vector<string> ATOM_CHEMS, 

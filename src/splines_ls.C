@@ -2501,7 +2501,12 @@ if(RANK==0)
 				// Generate "fast" maps for 4-body interactions. Assumes never more than MAX_ATOM_TYPES
 				// atom types in a simulation
 				//////////////////////////////////////////////////////////////////////
-				build_fast_quad_maps(QUAD_MAP, INT_QUAD_MAP, INT_QUAD_MAP_REVERSE, ATOM_CHEMS) ;
+
+				QUADS.build_fast_maps(ATOM_CHEMS) ;
+				INT_QUAD_MAP = QUADS.INT_MAP ;
+				INT_QUAD_MAP_REVERSE = QUADS.INT_MAP_REVERSE ;
+
+				//build_fast_quad_maps(QUAD_MAP, INT_QUAD_MAP, INT_QUAD_MAP_REVERSE, ATOM_CHEMS) ;
 			}  // CONTROLS.USE_4B_CHEBY
 
 #if VERBOSITY == 1						

@@ -298,98 +298,6 @@ void CLUSTER::print_header(ofstream &header)
   header << endl;
 }
 
-void build_quad_maps(map<string,int> &QUAD_MAP, map<int,string> &QUAD_MAP_REVERSE, vector<struct PAIRS> &ATOM_PAIRS, int NPAIR,
-                     vector<QUADRUPLETS> PAIR_QUADRUPLETS, int NQUAD)
-{
-  bool REAL_QUAD;
-			
-  vector<string> TEMP_STR(6);	
-  string FULL_TEMP_STR;	
-				
-  for(int i=0; i<NPAIR; i++)
-  {
-	 for(int j=0; j<NPAIR; j++)
-	 {
-		for(int k=0; k<NPAIR; k++)
-		{
-		  for(int l=0; l<NPAIR; l++)
-		  {
-			 for(int m=0; m<NPAIR; m++)
-			 {
-				for(int n=0; n<NPAIR; n++)
-				{
-				  TEMP_STR[0] = ATOM_PAIRS[i].ATM1TYP; TEMP_STR[0].append(ATOM_PAIRS[i].ATM2TYP);
-				  TEMP_STR[1] = ATOM_PAIRS[j].ATM1TYP; TEMP_STR[1].append(ATOM_PAIRS[j].ATM2TYP);
-				  TEMP_STR[2] = ATOM_PAIRS[k].ATM1TYP; TEMP_STR[2].append(ATOM_PAIRS[k].ATM2TYP);
-				  TEMP_STR[3] = ATOM_PAIRS[l].ATM1TYP; TEMP_STR[3].append(ATOM_PAIRS[l].ATM2TYP);
-				  TEMP_STR[4] = ATOM_PAIRS[m].ATM1TYP; TEMP_STR[4].append(ATOM_PAIRS[m].ATM2TYP);
-				  TEMP_STR[5] = ATOM_PAIRS[n].ATM1TYP; TEMP_STR[5].append(ATOM_PAIRS[n].ATM2TYP);
-										
-										
-
-				  // Compare every possible permutation of these pairs with those for the quadruplet ff types
-						
-						
-				  for(int p=0; p<NQUAD; p++)
-				  {
-					 sort(TEMP_STR.begin(),TEMP_STR.end());
-					 do
-					 {
-						REAL_QUAD = true;
-												
-						FULL_TEMP_STR = "";
-
-						for (int s=0; s<6; s++)
-						{
-						  if(TEMP_STR[s] != PAIR_QUADRUPLETS[p].ATOM_PAIRS[s])
-							 REAL_QUAD = false;
-													
-						  FULL_TEMP_STR += TEMP_STR[s];
-						}
-												
-												
-												
-						if(REAL_QUAD)
-						{													
-						  QUAD_MAP.insert(make_pair(FULL_TEMP_STR,p));	
-						  break;
-						}
-
-												
-					 } while (next_permutation(TEMP_STR.begin(),TEMP_STR.end()));
-/* // THIS IS THE CULPRIT											
-	if(!REAL_QUAD)
-	{
-	QUAD_MAP        .insert(make_pair(FULL_TEMP_STR,-1*p-1));
-	}
-*/											
-											
-				  }
-				}
-			 }
-		  }
-		}
-	 }
-  }
-				
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Remove excluded types (NOT CURRENTLY SUPPORTED)
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////					
-
-				
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Set up quadruplet REVERSE maps... 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////	
-				
-  QUAD_MAP_REVERSE.clear();
-
-  map<string, int>::iterator it;
-
-  for(it = QUAD_MAP.begin(); it != QUAD_MAP.end(); it++)
-	 QUAD_MAP_REVERSE.insert(make_pair(it->second,it->first));
-}
-
-
 void CLUSTER_LIST::link(vector<CLUSTER>& cluster_vec) 
 // Link a CLUSTER_LIST to an allocated vector of clusters.
 {
@@ -580,6 +488,111 @@ void build_fast_quad_maps(map<string,int> QUAD_MAP, map<int,int> INT_QUAD_MAP, m
   }
 
 }
+				
+void CLUSTER_LIST::build_fast_maps(vector<string>& ATOM_CHEMS)
+{
+  int natoms = VEC[0]->NATOMS ;
+
+  if(RANK == 0) 
+  {
+	 if ( natoms == 4 ) 
+		cout << endl << "Generating fast maps for atom quadruplets: " << endl;
+	 else if ( natoms == 3 ) 
+		cout << endl << "Generating fast maps for atom triplets: " << endl;
+	 else if ( natoms == 5 ) 
+		cout << endl << "Generating fast maps for atom quintuplets: " << endl;
+				
+  string 	TMP_QUAD_SIXLET = "";
+  string 	TMP_QUAD_PAIR   = "";
+				
+  int 	ATOM_QUAD_ID_INT;
+  int		CURR_QUAD_IDX = 0;
+
+  vector<int> TMP_QUAD_SET(4);
+
+  vector<int> atom_index(natoms) ;
+
+  build_fast_maps_loop(0, atom_index, ATOM_CHEMS) ;
+  }
+}
+
+void CLUSTER_LIST::build_fast_maps_loop(int index, vector<int> atom_index, vector<string>& ATOM_CHEMS)
+{
+  // Create a list of each posible combination of atom quadruplets, i through
+  // l are given in ascending order
+  int natoms = VEC[0]->NATOMS ;
+  
+  if ( index < natoms ) 
+  {
+	 for ( int i = 0 ; i < ATOM_CHEMS.size() ; i++ ) {
+		atom_index[index] = i ;
+		build_fast_maps_loop(index+1, atom_index, ATOM_CHEMS) ;
+	 }
+  }
+  else
+  {
+	 string tmp_pair = "" ;
+	 vector<int> tmp_set(natoms) ;
+
+	 for ( int i = 0 ; i < natoms ; i++ ) {
+		for ( int j = i + 1 ; j < natoms ; j++ ) {
+			 // Determine the corresponding quadruplet force field type
+
+		  tmp_pair += ATOM_CHEMS[ atom_index[i] ] + ATOM_CHEMS[ atom_index[j] ] ;
+		}
+		tmp_set[i] = atom_index[i] ;
+	 }
+	
+	 // Always construct ATOM_QUAD_ID_INT lookup key based on atom types in decending order
+	 sort(tmp_set.begin(), tmp_set.end());
+	 reverse(tmp_set.begin(), tmp_set.end());
+
+	 int atom_id_int = make_id_int(tmp_set) ;
+	 
+	 INT_MAP.insert(make_pair(atom_id_int,MAP[tmp_pair]));	
+	 INT_MAP_REVERSE.insert(make_pair(MAP[tmp_pair], atom_id_int));	
+								
+	 if(RANK == 0)
+	 {
+		cout << "		";
+		cout<< "Atom type idxs: ";
+
+		for ( int i = 0 ; i < natoms ; i++ ) {
+		  cout<< fixed << setw(2) << right << atom_index[i] ;
+		}
+		
+		if ( natoms == 4 ) 
+		{
+		  cout<< " Quadruplet name: "           << setw(12) << right << tmp_pair ;
+		  cout<< " Unique quadruplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
+		} 
+		else if ( natoms == 3 ) 
+		{
+		  cout<< " Triplet name: "           << setw(12) << right << tmp_pair ;
+		  cout<< " Unique triplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
+		}
+		else if ( natoms == 5 ) 
+		{
+		  cout<< " Quintuplet name: "           << setw(12) << right << tmp_pair ;
+		  cout<< " Unique quintuplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
+		}
+	 }
+  }
+}
+
+
+int CLUSTER_LIST::make_id_int(vector<int>& index)
+// Returns a unique ID number for a cluster of atoms.
+{
+  int sum = 0 ;
+  int weight = 1 ;
+  for ( int i = 0 ; i < index.size() ; i++ ) {
+	 sum += weight * (index[i]+1) ;
+	 weight *= MAX_ATOM_TYPES ;
+  }
+  return(sum) ;
+}
+
 
 void build_quad_pairs(vector<QUADRUPLETS>& PAIR_QUADRUPLETS, int NATMTYP, vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP)
 // Build the pair variables for all of the quads.
