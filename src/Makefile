@@ -37,9 +37,9 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 #CXX=mpicxx  -std=c++11  -g -pg -D USE_MPI 
 
 #CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-#CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-CXX=mpicxx -std=c++11 -g -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+#CXX=mpicxx -std=c++11 -g -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=icc -g				# Serial, for debugging
 #CXX=icc -O3
 #CXX=g++ -std=c++11 -g			# Serial, let compiler optimize to a very high level (see also -O2)
@@ -47,7 +47,7 @@ CXX=mpicxx -std=c++11 -g -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines 
 #
 # Below: Other debugging/optimiazation options
 #
-#CXX=g++ -g -Wall -Wextra -Wuninitialized -O1
+##CXX=g++ -g -std=c++11 -g
 #CXX=g++ -g # -Wall -Wextra
 #CXX=icpc -fast -Wall
 

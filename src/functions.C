@@ -713,13 +713,13 @@ double SET_SMAXIM(PAIRS & FF_2BODY, QUADRUPLETS & PAIR_QUADRUPLETS, string TYPE)
 {	
 	double VAL;
 	
-	if(PAIR_QUADRUPLETS.S_MAXIM_4B[0] == -1)
+	if(PAIR_QUADRUPLETS.S_MAXIM[0] == -1)
 		VAL =  FF_2BODY.S_MAXIM;
 	else
 	{
 		for (int i=0; i<6; i++)
 			if(TYPE == PAIR_QUADRUPLETS.ATOM_PAIRS[i])
-				VAL =  PAIR_QUADRUPLETS.S_MAXIM_4B[i];
+				VAL =  PAIR_QUADRUPLETS.S_MAXIM[i];
 	}
 	return VAL;	
 }
@@ -730,13 +730,13 @@ double SET_SMINIM(PAIRS & FF_2BODY, QUADRUPLETS & PAIR_QUADRUPLETS, string TYPE)
 	double VAL;
 	
 	
-	if(PAIR_QUADRUPLETS.S_MINIM_4B[0] == -1)
+	if(PAIR_QUADRUPLETS.S_MINIM[0] == -1)
 		VAL =  FF_2BODY.S_MINIM;
 	else
 	{
 		for (int i=0; i<6; i++)
 			if(TYPE == PAIR_QUADRUPLETS.ATOM_PAIRS[i])
-				VAL =  PAIR_QUADRUPLETS.S_MINIM_4B[i];
+				VAL =  PAIR_QUADRUPLETS.S_MINIM[i];
 	}
 	return VAL;	
 }
@@ -1946,7 +1946,7 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 
 							for(int i=0; i<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 							{
-							    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICIES[i];
+							    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICES[i];
 								
 							    SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP, pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
 
@@ -2428,7 +2428,7 @@ static void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 
 					for(int i=0; i<PAIR_QUADRUPLETS[curr_quad_type_index].N_ALLOWED_POWERS; i++) 
 					{
-					    row_offset = PAIR_QUADRUPLETS[curr_quad_type_index].PARAM_INDICIES[i];
+					    row_offset = PAIR_QUADRUPLETS[curr_quad_type_index].PARAM_INDICES[i];
 						
 						for (int f=0; f<6; f++)	// This isn't necessary, but it makes the code cleaner to read. We can worry about efficiency a bit later.
 							powers[f] = PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][f];
@@ -2811,7 +2811,7 @@ PAIR_TRIPLETS[i].POP_HIST[xx][yy][zz] += pop;
 		
 						for(int p=0; p<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; p++) 
 						{
-						    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICIES[p];
+						    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICES[p];
 
 						    SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP, pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, p);
 

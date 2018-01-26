@@ -24,8 +24,8 @@ void QUADRUPLETS::init()
 {
   for(int j=0; j<6; j++)
   {
-	 S_MINIM_4B[j] = -1;
-	 S_MAXIM_4B[j] = -1;
+	 S_MINIM[j] = -1;
+	 S_MAXIM[j] = -1;
   }
 				
   FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;	
@@ -44,35 +44,7 @@ void QUADRUPLETS::build(int cheby_4b_order)
 // 3. Non-uniqueness upon atom permutation must be taken into consideration. 
 //    Pairs permutations occur as a consequence of atom permutations.
 {
-  vector<int> STORED_SORTED_POWERS_EQVS;
   vector<int> UNSORTED_POWERS(6);
-					
-  // The point of this loop is to determine true unique power sets. Whether or not a given set of 6 powers is 
-  // unique depends on the number of unique pairs within the corresponding set of pair types. We will determine
-  // this first.
-					
-  // The data types below will be used to determine uniqueness of power sets
-					
-  typedef pair<string,int>			PAIR_TYPE_AND_INDEX;
-  vector <PAIR_TYPE_AND_INDEX>	PAIR_TYPE_AND_INDEX_VEC(6);	// Used to determine uniqueness of power sets
-  vector <PAIR_TYPE_AND_INDEX>	PAIR_TYPE_AND_INDEX_TMP(6);	// A temporary data structure
-					
-  for(int m=0; m<6; m++)
-  {					
-	 PAIR_TYPE_AND_INDEX_VEC[m].first  = ATOM_PAIRS[m];
-	 PAIR_TYPE_AND_INDEX_VEC[m].second = m;	
-  }
-
-  sort (PAIR_TYPE_AND_INDEX_VEC.begin(), PAIR_TYPE_AND_INDEX_VEC.end());	// Sort the vector contents... automatically does on the basis of the .first element, preserving "link" between .first and .second
-					
-  // Since we don't actually want to erase duplicates from the PAIR_TYPE_AND_INDEX_VEC vector, make a temporary copy to use for unique counting
-					
-  copy(PAIR_TYPE_AND_INDEX_VEC.begin(), PAIR_TYPE_AND_INDEX_VEC.end(), PAIR_TYPE_AND_INDEX_TMP.begin());
-				
-  PAIR_TYPE_AND_INDEX_TMP.erase( unique( PAIR_TYPE_AND_INDEX_TMP.begin(), PAIR_TYPE_AND_INDEX_TMP.end(),check_pairs ), PAIR_TYPE_AND_INDEX_TMP.end() );	// Removes duplicated from SORTED vector, based only on the .first element (i.e. uses our check_pairs function)
-
-  //int N_UNIQUE_PAIRS	= PAIR_TYPE_AND_INDEX_VEC.size();
-  int N_UNIQUE_PAIRS	 = PAIR_TYPE_AND_INDEX_TMP.size();
 					
   // Loops start at zero for a trick to speed up check for powers > 0
 					
@@ -147,17 +119,19 @@ void QUADRUPLETS::build(int cheby_4b_order)
   }
 				
   N_TRUE_ALLOWED_POWERS = UNIQUE_POWERS.size() ;
-  N_ALLOWED_POWERS = PARAM_INDICIES.size();
+  N_ALLOWED_POWERS = PARAM_INDICES.size();
 }
 
 
 void QUADRUPLETS::store_permutations(vector<int> &unsorted_powers) 
 {
-  vector<vector<int>>::iterator it ;
+  map<vector<int>,int>::iterator it ;
 
-  it = find( ALLOWED_POWERS.begin(), ALLOWED_POWERS.end(), unsorted_powers) ;
+  // Avoid searching the ALLOWED_POWERS vector directly for efficiency.
+  // Search the ALLOWED_POWERS_MAP instead.
+  it = ALLOWED_POWERS_MAP.find(unsorted_powers) ;
 
-  if ( it != ALLOWED_POWERS.end() ) 
+  if ( it != ALLOWED_POWERS_MAP.end() ) 
   {
 	 // This interaction is already handled.
 	 return ;
@@ -168,14 +142,19 @@ void QUADRUPLETS::store_permutations(vector<int> &unsorted_powers)
   }
 
   // Recursively permute each element and added to the ALLOWED_POWERS.
-  cout << "Permuting atom indices for " ;
-  for ( int i = 0 ; i < 4 ; i++ ) cout << ATOM_NAMES[i] << " " ;
-  cout << endl ;
+#if( VERBOSITY > 1)
+  if ( RANK == 0 ) 
+  {
+	 cout << "Permuting atom indices for " ;
+	 for ( int i = 0 ; i < 4 ; i++ ) cout << ATOM_NAMES[i] << " " ;
+	 cout << endl ;
+  }
+#endif
 
   vector<int> perm(4) ;
   for ( int i = 0 ; i < 4 ; i++ ) perm[i] = i ;
 
-  int equiv_index = it - ALLOWED_POWERS.begin() ;
+  int equiv_index = ALLOWED_POWERS.size() ;
   permute_atom_indices(0, ATOM_NAMES, unsorted_powers, perm, UNIQUE_POWERS.size()-1, equiv_index ) ;
 
 }
@@ -231,49 +210,132 @@ void QUADRUPLETS::permute_atom_indices(int idx, vector<string> names, vector<int
 		perm_powers[4] = pow_mat[ perm[1] ][ perm[3] ] ;
 		perm_powers[5] = pow_mat[ perm[2] ][ perm[3] ] ;
 
-		cout << "Permutation: " << perm[0] << " " << perm[1] << " "
-			  << perm[2] << " " << perm[3] << endl ;
+#if(VERBOSITY > 1)
+		if ( RANK == 0 ) 
+		{
+		  cout << "Permutation: " << perm[0] << " " << perm[1] << " "
+				 << perm[2] << " " << perm[3] << endl ;
 
-		cout << "Permuted powers: " ;
-		for ( int j = 0 ; j < 6 ; j++ ) {
-		  cout << perm_powers[j] << " " ;
+		  cout << "Permuted powers: " ;
+		  for ( int j = 0 ; j < 6 ; j++ ) {
+			 cout << perm_powers[j] << " " ;
+		  }
+		  cout << endl ;
 		}
-		cout << endl ;
+#endif
+		map<vector<int>,int>::iterator it ;
 
-		vector<vector<int>>::iterator it ;
+		it = ALLOWED_POWERS_MAP.find(perm_powers) ;
 
-		it = find( ALLOWED_POWERS.begin(), ALLOWED_POWERS.end(), perm_powers) ;
-
-		if ( it == ALLOWED_POWERS.end() ) {
+		if ( it == ALLOWED_POWERS_MAP.end() ) {
 		  ALLOWED_POWERS.push_back(perm_powers) ;
-		  PARAM_INDICIES.push_back(unique_index) ;
-		  EQUIV_INDICIES.push_back(equiv_index) ;
+		  ALLOWED_POWERS_MAP.insert( std::pair<vector<int>,int>(perm_powers, 1) ) ;
+		  PARAM_INDICES.push_back(unique_index) ;
+		  EQUIV_INDICES.push_back(equiv_index) ;
 		} 
   }
 }
 
 void QUADRUPLETS::print()
 {
-  cout << "		" <<  QUADINDX;
-  for(int j=0; j<6; j++)
-	 cout  << "  " << ATOM_PAIRS[j];					
-  cout<< ": Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
+  if ( RANK == 0 ) 
+  {
+	 cout << "		" <<  INDX;
+	 for(int j=0; j<6; j++)
+		cout  << "  " << ATOM_PAIRS[j];					
+	 cout<< ": Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
 
-  cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
-  cout << "		   ----------------------------------------------------" << endl;					
+	 cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
+	 cout << "		   ----------------------------------------------------" << endl;					
 				
+	 for(int j=0; j<ALLOWED_POWERS.size(); j++)
+	 {
+
+		cout << "		      " << setw(6) << fixed << left << j << " ";
+		
+		for(int k=0; k<6; k++)
+		  cout << " " << setw(2) << fixed << left << ALLOWED_POWERS[j][k] << " ";
+						
+		cout << "       " << setw(8) << EQUIV_INDICES[j] << " ";
+		cout << "       " << setw(8) << PARAM_INDICES[j] << endl; 
+		
+	 }
+  }
+}
+
+void QUADRUPLETS::print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode)
+{
+  int i = INDX ;
+  if ( output_mode == "S_MINIM" ) 
+  {
+	 if(S_MINIM[0] >= 0) 
+		header << i << " " << QUAD_MAP_REVERSE << " " 
+					<< ATOM_PAIRS[0] << " " 
+					<< ATOM_PAIRS[1] << " " 
+					<< ATOM_PAIRS[2] << " " 
+					<< ATOM_PAIRS[3] << " " 
+					<< ATOM_PAIRS[4] << " " 
+					<< ATOM_PAIRS[5] << " " 
+					<< fixed << setprecision(5) 
+		            << S_MINIM[0] << " "
+				 	<< S_MINIM[1] << " "
+					<< S_MINIM[2] << " "
+					<< S_MINIM[3] << " "
+					<< S_MINIM[4] << " "
+					<< S_MINIM[5] << endl;						
+  } 
+  else if ( output_mode == "S_MAXIM" ) 
+  {
+	 if ( S_MAXIM[0] >= 0)
+		header << i << " " << QUAD_MAP_REVERSE[i] << " " 
+				 << ATOM_PAIRS[0] << " " 
+				 << ATOM_PAIRS[1] << " " 
+				 << ATOM_PAIRS[2] << " " 
+				 << ATOM_PAIRS[3] << " " 
+				 << ATOM_PAIRS[4] << " " 
+				 << ATOM_PAIRS[5] << " " 
+				 << fixed << setprecision(5) 
+				 << S_MAXIM[0] << " "
+				 << S_MAXIM[1] << " "
+				 << S_MAXIM[2] << " "
+				 << S_MAXIM[3] << " "
+				 << S_MAXIM[4] << " "
+				 << S_MAXIM[5] << endl;	
+  }						
+  else 
+  {
+	 cout << "Bad special parameter mode found\n" ;
+	 exit(1) ;
+  }
+	 
+}
+
+void QUADRUPLETS::print_header(ofstream &header)
+{
+  header << INDX << "  ";
+  for(int m=0; m<6; m++)
+  {
+	 header << ATOM_PAIRS[m];
+	 if(m<5)
+		header << " ";
+  }
+  header << ": " << N_TRUE_ALLOWED_POWERS << " parameters, " << N_ALLOWED_POWERS << " total parameters "<< endl;	
+	
+  header << "     index  |  powers  |  equiv index  |  param index  " << endl;
+  header << "   ----------------------------------------------------" << endl;	
+
   for(int j=0; j<ALLOWED_POWERS.size(); j++)
   {
-
-	 cout << "		      " << setw(6) << fixed << left << j << " ";
-						
-	 for(int k=0; k<6; k++)
-		cout << " " << setw(2) << fixed << left << ALLOWED_POWERS[j][k] << " ";
-						
-	 cout << "       " << setw(8) << EQUIV_INDICIES[j] << " ";
-	 cout << "       " << setw(8) << PARAM_INDICIES[j] << endl; 
-					
+	 header << "      " << setw(6) << fixed << left << j << " ";
+	 header << " ";
+	 for(int m=0; m<6; m++)
+		header << setw(2) << fixed << left << ALLOWED_POWERS[j][m] << " ";
+	 header << "       " << setw(8) << EQUIV_INDICES[j] << " ";
+	 header << "       " << setw(8) << PARAM_INDICES[j] << endl; 
+	
   }
+
+  header << endl;
 }
 
 void build_quad_maps(map<string,int> &QUAD_MAP, map<int,string> &QUAD_MAP_REVERSE, vector<struct PAIRS> &ATOM_PAIRS, int NPAIR,
@@ -329,8 +391,7 @@ void build_quad_maps(map<string,int> &QUAD_MAP, map<int,string> &QUAD_MAP_REVERS
 												
 						if(REAL_QUAD)
 						{													
-						  QUAD_MAP        .insert(make_pair(FULL_TEMP_STR,p));	
-						  QUAD_MAP_REVERSE.insert(make_pair(p,FULL_TEMP_STR));														
+						  QUAD_MAP.insert(make_pair(FULL_TEMP_STR,p));	
 						  break;
 						}
 
@@ -467,7 +528,7 @@ void build_quad_pairs(vector<QUADRUPLETS>& PAIR_QUADRUPLETS, int NATMTYP, vector
 		{
 		  for(int l=k; l<NATMTYP; l++)
 		  {
-			 PAIR_QUADRUPLETS[TEMP_INT].QUADINDX = TEMP_INT;	// Index for current triplet type
+			 PAIR_QUADRUPLETS[TEMP_INT].INDX = TEMP_INT;	// Index for current triplet type
 								
 			 // Save the names of each atom type in the pair.
 

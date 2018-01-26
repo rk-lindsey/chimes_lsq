@@ -1691,8 +1691,8 @@ int main(int argc, char* argv[])
 							STREAM_PARSER >> TMP_VAL;
 							
 							for(int k=0; k<6; k++)
-								if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[k] == -1) )
-									FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[k] = TMP_VAL;
+								if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[k] == -1) )
+									FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[k] = TMP_VAL;
 								
 						}
 
@@ -1707,12 +1707,12 @@ int main(int argc, char* argv[])
 									 << TARGS[3] << ", " 
 									 << TARGS[4] << ", " 
 									 << TARGS[5] << "): " 
-								     << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[0] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[1] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[2] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[3] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[4] << ", "										 										 
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM_4B[5] << endl;
+								     << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[0] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[1] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[2] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[3] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[4] << ", "										 										 
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[5] << endl;
 							}
 						#endif	
 					}
@@ -1778,8 +1778,8 @@ int main(int argc, char* argv[])
 							STREAM_PARSER >> TMP_VAL;
 							
 							for(int k=0; k<6; k++)
-								if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[k] == -1) )
-									FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[k] = TMP_VAL;
+								if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[k] == -1) )
+									FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[k] = TMP_VAL;
 								
 						}
 
@@ -1794,12 +1794,12 @@ int main(int argc, char* argv[])
 									 << TARGS[3] << ", " 
 									 << TARGS[4] << ", " 
 									 << TARGS[5] << "): " 
-								     << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[0] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[1] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[2] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[3] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[4] << ", "										 										 
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[5] << endl;
+								     << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[0] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[1] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[2] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[3] << ", "
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[4] << ", "										 										 
+									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[5] << endl;
 							}
 						#endif	
 					}
@@ -1885,8 +1885,8 @@ int main(int argc, char* argv[])
 			for (int i=0; i<FF_4BODY.size(); i++)
 			{
 				for(int j=0; j<6; j++)
-					if(FF_4BODY[i].S_MAXIM_4B[j] > MAX_FOUND_4B)
-						MAX_FOUND_4B = FF_4BODY[i].S_MAXIM_4B[j];
+					if(FF_4BODY[i].S_MAXIM[j] > MAX_FOUND_4B)
+						MAX_FOUND_4B = FF_4BODY[i].S_MAXIM[j];
 			}
 			
 			
@@ -2273,8 +2273,8 @@ int main(int argc, char* argv[])
 			{	
 				for(int j=0; j<6; j++)
 				{
-					FF_4BODY[i].S_MINIM_4B[j] = -1;
-					FF_4BODY[i].S_MAXIM_4B[j] = -1;
+					FF_4BODY[i].S_MINIM[j] = -1;
+					FF_4BODY[i].S_MAXIM[j] = -1;
 				}
 			}	
 
@@ -2488,8 +2488,8 @@ int main(int argc, char* argv[])
 				STREAM_PARSER >> FF_3BODY[i].N_ALLOWED_POWERS;
 				
 				FF_3BODY[i].ALLOWED_POWERS.resize(FF_3BODY[i].N_ALLOWED_POWERS);
-				FF_3BODY[i].EQUIV_INDICIES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
-				FF_3BODY[i].PARAM_INDICIES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
+				FF_3BODY[i].EQUIV_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
+				FF_3BODY[i].PARAM_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
 				FF_3BODY[i].PARAMS        .resize(FF_3BODY[i].N_ALLOWED_POWERS);
 				
 				STREAM_PARSER.str("");
@@ -2507,8 +2507,8 @@ int main(int argc, char* argv[])
 					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j].X;
 					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j].Y;
 					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j].Z;
-					PARAMFILE >> FF_3BODY[i].EQUIV_INDICIES[j];
-					PARAMFILE >> FF_3BODY[i].PARAM_INDICIES[j];
+					PARAMFILE >> FF_3BODY[i].EQUIV_INDICES[j];
+					PARAMFILE >> FF_3BODY[i].PARAM_INDICES[j];
 					PARAMFILE >> FF_3BODY[i].PARAMS        [j];
 					PARAMFILE.ignore();
 
@@ -2531,7 +2531,7 @@ int main(int argc, char* argv[])
 				STREAM_PARSER.str(LINE);
 				
 				STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
-				STREAM_PARSER >> FF_4BODY[i].QUADINDX;
+				STREAM_PARSER >> FF_4BODY[i].INDX;
 				
 				for(int j=0; j<6; j++)
 					STREAM_PARSER >> FF_4BODY[i].ATOM_PAIRS[j];
@@ -2546,8 +2546,8 @@ int main(int argc, char* argv[])
 				STREAM_PARSER >> FF_4BODY[i].N_ALLOWED_POWERS;
 				
 				FF_4BODY[i].ALLOWED_POWERS.resize(FF_4BODY[i].N_ALLOWED_POWERS);
-				FF_4BODY[i].EQUIV_INDICIES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
-				FF_4BODY[i].PARAM_INDICIES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
+				FF_4BODY[i].EQUIV_INDICES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
+				FF_4BODY[i].PARAM_INDICES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
 				FF_4BODY[i].PARAMS        .resize(FF_4BODY[i].N_ALLOWED_POWERS);
 				
 				for(int j=0; j<FF_4BODY[i].ALLOWED_POWERS.size(); j++)
@@ -2571,8 +2571,8 @@ int main(int argc, char* argv[])
 						PARAMFILE >> FF_4BODY[i].ALLOWED_POWERS[j][k];
 
 
-					PARAMFILE >> FF_4BODY[i].EQUIV_INDICIES[j];
-					PARAMFILE >> FF_4BODY[i].PARAM_INDICIES[j];
+					PARAMFILE >> FF_4BODY[i].EQUIV_INDICES[j];
+					PARAMFILE >> FF_4BODY[i].PARAM_INDICES[j];
 					PARAMFILE >> FF_4BODY[i].PARAMS        [j];
 					PARAMFILE.ignore();
 
@@ -2786,8 +2786,8 @@ int main(int argc, char* argv[])
 					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j].X  << " ";
 					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j].Y  << " ";
 					cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j].Z  << " ";
-					cout << "       " << setw(8) << FF_3BODY[i].EQUIV_INDICIES[j] << " ";
-					cout << "       " << setw(8) << FF_3BODY[i].PARAM_INDICIES[j] << " "; 
+					cout << "       " << setw(8) << FF_3BODY[i].EQUIV_INDICES[j] << " ";
+					cout << "       " << setw(8) << FF_3BODY[i].PARAM_INDICES[j] << " "; 
 					cout << "       " << setw(8) << FF_3BODY[i].PARAMS[j] << endl; 
 	
 				}
@@ -2805,7 +2805,7 @@ int main(int argc, char* argv[])
 
 			for(int i=0;i<FF_3BODY.size(); i++)
 			{
-				cout << "	" << FF_4BODY[i].QUADINDX;
+				cout << "	" << FF_4BODY[i].INDX;
 				for(int j=0; j<6; j++)
 					cout << " " << FF_4BODY[i].ATOM_PAIRS[j];
 				
@@ -2820,8 +2820,8 @@ int main(int argc, char* argv[])
 					for(int k=0; k<6; k++)
 						cout << " " << setw(2) << fixed << left << FF_4BODY[i].ALLOWED_POWERS[j][k]  << " ";					
 					
-					cout << "       " << setw(8) << FF_4BODY[i].EQUIV_INDICIES[j] << " ";
-					cout << "       " << setw(8) << FF_4BODY[i].PARAM_INDICIES[j] << " "; 
+					cout << "       " << setw(8) << FF_4BODY[i].EQUIV_INDICES[j] << " ";
+					cout << "       " << setw(8) << FF_4BODY[i].PARAM_INDICES[j] << " "; 
 					cout << "       " << setw(8) << FF_4BODY[i].PARAMS[j] << endl; 
 	
 				}

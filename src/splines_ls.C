@@ -1219,7 +1219,7 @@ int main(int argc, char* argv[])
 
 	for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
 	{
-		if(PAIR_QUADRUPLETS[i].S_MINIM_4B[0] >= 0)
+		if(PAIR_QUADRUPLETS[i].S_MINIM[0] >= 0)
 			FOUND_SPECIAL++;
 	}
 	
@@ -1228,27 +1228,13 @@ int main(int argc, char* argv[])
 		header << endl << "SPECIAL 4B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 		for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
-			if(PAIR_QUADRUPLETS[i].S_MINIM_4B[0] >= 0)
-				header << i << " " << QUAD_MAP_REVERSE[i] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[0] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[1] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[2] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[3] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[4] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[5] << " " 
-					<< fixed << setprecision(5) 
-		            << PAIR_QUADRUPLETS[i].S_MINIM_4B[0] << " "
-				 	<< PAIR_QUADRUPLETS[i].S_MINIM_4B[1] << " "
-					<< PAIR_QUADRUPLETS[i].S_MINIM_4B[2] << " "
-					<< PAIR_QUADRUPLETS[i].S_MINIM_4B[3] << " "
-					<< PAIR_QUADRUPLETS[i].S_MINIM_4B[4] << " "
-					<< PAIR_QUADRUPLETS[i].S_MINIM_4B[5] << endl;						
+		  PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MINIM") ;
 	}
 		
 	FOUND_SPECIAL = 0;
 	
 	for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
-		if(PAIR_QUADRUPLETS[i].S_MAXIM_4B[0] >= 0)
+		if(PAIR_QUADRUPLETS[i].S_MAXIM[0] >= 0)
 			FOUND_SPECIAL++;
 	
 	if(FOUND_SPECIAL>0)
@@ -1256,21 +1242,8 @@ int main(int argc, char* argv[])
 		header << endl << "SPECIAL 4B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 		for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
-			if(PAIR_QUADRUPLETS[i].S_MAXIM_4B[0] >= 0)
-				header << i << " " << QUAD_MAP_REVERSE[i] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[0] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[1] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[2] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[3] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[4] << " " 
-					<< PAIR_QUADRUPLETS[i].ATOM_PAIRS[5] << " " 
-					<< fixed << setprecision(5) 
-		            << PAIR_QUADRUPLETS[i].S_MAXIM_4B[0] << " "
-				 	<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[1] << " "
-					<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[2] << " "
-					<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[3] << " "
-					<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[4] << " "
-					<< PAIR_QUADRUPLETS[i].S_MAXIM_4B[5] << endl;							
+		  PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MAXIM" ) ;
+
 	}	
 	
 	 
@@ -1293,8 +1266,8 @@ int main(int argc, char* argv[])
 				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X  << " ";
 				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Y  << " ";
 				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Z  << " ";
-				header << "       " << setw(8) << PAIR_TRIPLETS[i].EQUIV_INDICIES[j] << " ";
-				header << "       " << setw(8) << PAIR_TRIPLETS[i].PARAM_INDICIES[j] << endl; 
+				header << "       " << setw(8) << PAIR_TRIPLETS[i].EQUIV_INDICES[j] << " ";
+				header << "       " << setw(8) << PAIR_TRIPLETS[i].PARAM_INDICES[j] << endl; 
 	
 			}
 
@@ -1308,35 +1281,13 @@ int main(int argc, char* argv[])
 	else
 	{
 		header << "ATOM PAIR QUADRUPLETS: " << PAIR_QUADRUPLETS.size() << endl << endl;	
-
+		
+		
 		for(int i=0;i<PAIR_QUADRUPLETS.size(); i++)
 		{
-			header << PAIR_QUADRUPLETS[i].QUADINDX << "  ";
-			for(int m=0; m<6; m++)
-			{
-				header << PAIR_QUADRUPLETS[i].ATOM_PAIRS[m];
-				if(m<5)
-					header << " ";
-			}
-			header << ": " << PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS << " parameters, " << PAIR_QUADRUPLETS[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
-	
-			header << "     index  |  powers  |  equiv index  |  param index  " << endl;
-			header << "   ----------------------------------------------------" << endl;	
+		  PAIR_QUADRUPLETS[i].print_header(header) ;
+		}
 
-			for(int j=0; j<PAIR_QUADRUPLETS[i].ALLOWED_POWERS.size(); j++)
-			{
-				header << "      " << setw(6) << fixed << left << j << " ";
-				header << " ";
-				for(int m=0; m<6; m++)
-				 	header << setw(2) << fixed << left << PAIR_QUADRUPLETS[i].ALLOWED_POWERS[j][m] << " ";
-				header << "       " << setw(8) << PAIR_QUADRUPLETS[i].EQUIV_INDICIES[j] << " ";
-				header << "       " << setw(8) << PAIR_QUADRUPLETS[i].PARAM_INDICIES[j] << endl; 
-	
-			}
-
-			header << endl;
-		}	 
-		
 	}
 
 	header << endl;
@@ -2143,7 +2094,7 @@ if(RANK==0)
 									if( (PAIR_TRIPLETS[i].ATMPAIR1 != PAIR_TRIPLETS[i].ATMPAIR2) 
 									 && (PAIR_TRIPLETS[i].ATMPAIR1 != PAIR_TRIPLETS[i].ATMPAIR3) 
 									 && (PAIR_TRIPLETS[i].ATMPAIR2 != PAIR_TRIPLETS[i].ATMPAIR3) )
-										PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
+										PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
 
 								
 									// Case 2: each pair in the current pair triplet is identical... multiplicity should be 3 when all three powers are not the same
@@ -2201,12 +2152,12 @@ if(RANK==0)
 										{
 											STORED_SORTED_POWERS           .push_back(SORTED_POWERS);
 											STORED_SORTED_POWERS_EQVS      .push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
-											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);	// The current power	
+											PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);	// The current power	
 																			
 										}
 										else
 										{
-											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(STORED_SORTED_POWERS_EQVS[STORED_IDX]);											
+											PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(STORED_SORTED_POWERS_EQVS[STORED_IDX]);											
 										}
 										STORED = false;
 
@@ -2274,11 +2225,11 @@ if(RANK==0)
 										{
 											STORED_SORTED_POWERS           .push_back(SORTED_POWERS);
 											STORED_SORTED_POWERS_EQVS      .push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
-											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);	
+											PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);	
 										}
 										else
 										{										
-											PAIR_TRIPLETS[i].EQUIV_INDICIES.push_back(STORED_SORTED_POWERS_EQVS[STORED_IDX]);
+											PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(STORED_SORTED_POWERS_EQVS[STORED_IDX]);
 										}									
 										STORED = false;
 					
@@ -2293,21 +2244,21 @@ if(RANK==0)
 				
 					// Now all that's left to do is set the force field index for each set of powers
 				 
-					PAIR_TRIPLETS[i].PARAM_INDICIES.resize(PAIR_TRIPLETS[i].EQUIV_INDICIES.size());
+					PAIR_TRIPLETS[i].PARAM_INDICES.resize(PAIR_TRIPLETS[i].EQUIV_INDICES.size());
 				
-					PAIR_TRIPLETS[i].PARAM_INDICIES[0] = 0;
+					PAIR_TRIPLETS[i].PARAM_INDICES[0] = 0;
 					
 					bool FOUND_EQV;
 					int  USE_SET = 0;
 					int  MAX_SET = 0;
 					
-					for(int set1=1; set1<PAIR_TRIPLETS[i].EQUIV_INDICIES.size(); set1++)
+					for(int set1=1; set1<PAIR_TRIPLETS[i].EQUIV_INDICES.size(); set1++)
 					{
 						FOUND_EQV = false;
 						
 						for(int set2=0; set2<set1; set2++)
 						{
-							if(PAIR_TRIPLETS[i].EQUIV_INDICIES[set1] == PAIR_TRIPLETS[i].EQUIV_INDICIES[set2])
+							if(PAIR_TRIPLETS[i].EQUIV_INDICES[set1] == PAIR_TRIPLETS[i].EQUIV_INDICES[set2])
 							{
 								FOUND_EQV = true;
 								USE_SET   = set2;
@@ -2316,17 +2267,17 @@ if(RANK==0)
 						}
 						
 						if(FOUND_EQV)
-							PAIR_TRIPLETS[i].PARAM_INDICIES[set1] = PAIR_TRIPLETS[i].PARAM_INDICIES[USE_SET];
+							PAIR_TRIPLETS[i].PARAM_INDICES[set1] = PAIR_TRIPLETS[i].PARAM_INDICES[USE_SET];
 						else
 						{
 							MAX_SET++;
-							PAIR_TRIPLETS[i].PARAM_INDICIES[set1] = MAX_SET;	
+							PAIR_TRIPLETS[i].PARAM_INDICES[set1] = MAX_SET;	
 						}					
 
 					}
 
-					PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICIES[PAIR_TRIPLETS[i].PARAM_INDICIES.size()-1]+1;
-					PAIR_TRIPLETS[i].N_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICIES.size();
+					PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICES[PAIR_TRIPLETS[i].PARAM_INDICES.size()-1]+1;
+					PAIR_TRIPLETS[i].N_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICES.size();
 				}
 
 				// Set up triplet maps... Account for cases where triplet type is meaningless by setting mapped index to -1
@@ -2575,8 +2526,8 @@ if(RANK==0)
 							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X  << " ";
 							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Y  << " ";
 							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Z  << " ";
-							cout << "       " << setw(8) << PAIR_TRIPLETS[i].EQUIV_INDICIES[j] << " ";
-							cout << "       " << setw(8) << PAIR_TRIPLETS[i].PARAM_INDICIES[j] << endl; 
+							cout << "       " << setw(8) << PAIR_TRIPLETS[i].EQUIV_INDICES[j] << " ";
+							cout << "       " << setw(8) << PAIR_TRIPLETS[i].PARAM_INDICES[j] << endl; 
 						
 						}
 
@@ -3136,19 +3087,19 @@ if(RANK==0)
 			
 			if(TEMP_STR == "ALL" && NQUAD >0 )
 			{				
-				STREAM_PARSER >> PAIR_QUADRUPLETS[0].S_MAXIM_4B[0];
+				STREAM_PARSER >> PAIR_QUADRUPLETS[0].S_MAXIM[0];
 				
-				if(PAIR_QUADRUPLETS[0].S_MAXIM_4B[0] > NEIGHBOR_LIST.MAX_CUTOFF_4B)
-					NEIGHBOR_LIST.MAX_CUTOFF_4B = PAIR_QUADRUPLETS[0].S_MAXIM_4B[0];
+				if(PAIR_QUADRUPLETS[0].S_MAXIM[0] > NEIGHBOR_LIST.MAX_CUTOFF_4B)
+					NEIGHBOR_LIST.MAX_CUTOFF_4B = PAIR_QUADRUPLETS[0].S_MAXIM[0];
 
 				for(int i=0; i<NQUAD; i++)
 				{
 					for(int j=0; j<6; j++)
-						PAIR_QUADRUPLETS[i].S_MAXIM_4B[j] = PAIR_QUADRUPLETS[0].S_MAXIM_4B[0];
+						PAIR_QUADRUPLETS[i].S_MAXIM[j] = PAIR_QUADRUPLETS[0].S_MAXIM[0];
 				}
 				
 				#if VERBOSITY == 1
-				if ( RANK == 0 ) cout << "	Note: Setting all 4-body r_max values to " <<  PAIR_QUADRUPLETS[0].S_MAXIM_4B[0] << endl;
+				if ( RANK == 0 ) cout << "	Note: Setting all 4-body r_max values to " <<  PAIR_QUADRUPLETS[0].S_MAXIM[0] << endl;
 				#endif				
 			}
 			else if(TEMP_STR == "SPECIFIC" && NQUAD >0 )
@@ -3208,8 +3159,8 @@ if(RANK==0)
 					for(int j=0; j<6; j++)	// Iterate over TMP pair types
 					{
 						for(int k=0; k<6; k++)	// Iterate over TRG pair types
-							if( (TMP_PAIRTYPS[j] == TRG_PAIRTYPS[k]) && (PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[k] == -1))
-								PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[k] = TMP_CUTOFFS[j];
+							if( (TMP_PAIRTYPS[j] == TRG_PAIRTYPS[k]) && (PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM[k] == -1))
+								PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM[k] = TMP_CUTOFFS[j];
 						
 						// Reset the 4b max cutoff value
 						
@@ -3230,9 +3181,9 @@ if(RANK==0)
 						cout << TRG_PAIRTYPS[5] << "): ";
 							
 						for (int j=0; j<5; j++)
-							cout << PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[j] << ", ";
+							cout << PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM[j] << ", ";
 						
-						cout << PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM_4B[5] << endl;	
+						cout << PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM[5] << endl;	
 					}
 					#endif	
 					
@@ -3431,9 +3382,8 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 					for(int m=0; m<6; m++)
 						MPI_Reduce(&(PAIR_QUADRUPLETS[k].MIN_FOUND[m]), &(sum[m]), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 				#else	
-								
 					for(int m=0; m<6; m++)
-						sum = PAIR_QUADRUPLETS[k].MIN_FOUND[m];
+						sum[m] = PAIR_QUADRUPLETS[k].MIN_FOUND[m];
 				#endif
 					
 				if ( RANK == 0 ) 
