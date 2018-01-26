@@ -2489,7 +2489,7 @@ int main(int argc, char* argv[])
 				
 				FF_3BODY[i].ALLOWED_POWERS.resize(FF_3BODY[i].N_ALLOWED_POWERS);
 				for ( int j = 0 ; j  < FF_3BODY[i].N_ALLOWED_POWERS ; j++ ) 
-				  FF_3BODY[i][j].resize(3) ;
+				  FF_3BODY[i].ALLOWED_POWERS[j].resize(3) ;
 				  
 				FF_3BODY[i].EQUIV_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
 				FF_3BODY[i].PARAM_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
