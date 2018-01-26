@@ -19,18 +19,6 @@ static bool check_pairs(test a, test b)
 }
 
 
-void QUADRUPLETS::init()
-// Set initial values for the QUADRUPLETS struct.
-{
-  for(int j=0; j<6; j++)
-  {
-	 S_MINIM[j] = -1;
-	 S_MAXIM[j] = -1;
-  }
-				
-  FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;	
-}	
-
 void QUADRUPLETS::build(int cheby_4b_order)
 // Build a set of interactions for a quad.
 // Figure out the allowed pair quadruplet powers. Here are some rules and considerations:
@@ -239,12 +227,12 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
   }
 }
 
-void QUADRUPLETS::print()
+void CLUSTER::print()
 {
   if ( RANK == 0 ) 
   {
 	 cout << "		" <<  INDX;
-	 for(int j=0; j<6; j++)
+	 for(int j=0; j < NPAIRS ; j++)
 		cout  << "  " << ATOM_PAIRS[j];					
 	 cout<< ": Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
 
@@ -256,7 +244,7 @@ void QUADRUPLETS::print()
 
 		cout << "		      " << setw(6) << fixed << left << j << " ";
 		
-		for(int k=0; k<6; k++)
+		for(int k=0; k<NPAIRS; k++)
 		  cout << " " << setw(2) << fixed << left << ALLOWED_POWERS[j][k] << " ";
 						
 		cout << "       " << setw(8) << EQUIV_INDICES[j] << " ";
@@ -266,44 +254,35 @@ void QUADRUPLETS::print()
   }
 }
 
-void QUADRUPLETS::print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode)
+void CLUSTER::print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode)
 {
-  int i = INDX ;
   if ( output_mode == "S_MINIM" ) 
   {
-	 if(S_MINIM[0] >= 0) 
-		header << i << " " << QUAD_MAP_REVERSE << " " 
-					<< ATOM_PAIRS[0] << " " 
-					<< ATOM_PAIRS[1] << " " 
-					<< ATOM_PAIRS[2] << " " 
-					<< ATOM_PAIRS[3] << " " 
-					<< ATOM_PAIRS[4] << " " 
-					<< ATOM_PAIRS[5] << " " 
-					<< fixed << setprecision(5) 
-		            << S_MINIM[0] << " "
-				 	<< S_MINIM[1] << " "
-					<< S_MINIM[2] << " "
-					<< S_MINIM[3] << " "
-					<< S_MINIM[4] << " "
-					<< S_MINIM[5] << endl;						
+	 if( S_MINIM[0] >= 0) 
+		header << INDX << " " << QUAD_MAP_REVERSE << " " ;
+	 for ( int i = 0 ; i < NPAIRS ; i++ ) 
+		header << ATOM_PAIRS[i] << " " ;
+
+	 header << fixed << setprecision(5) ;
+
+	 for ( int i = 0 ; i < NPAIRS ; i++ ) 
+		header << S_MINIM[i] << " " ;
+
+	 header << endl;						
   } 
   else if ( output_mode == "S_MAXIM" ) 
   {
 	 if ( S_MAXIM[0] >= 0)
-		header << i << " " << QUAD_MAP_REVERSE[i] << " " 
-				 << ATOM_PAIRS[0] << " " 
-				 << ATOM_PAIRS[1] << " " 
-				 << ATOM_PAIRS[2] << " " 
-				 << ATOM_PAIRS[3] << " " 
-				 << ATOM_PAIRS[4] << " " 
-				 << ATOM_PAIRS[5] << " " 
-				 << fixed << setprecision(5) 
-				 << S_MAXIM[0] << " "
-				 << S_MAXIM[1] << " "
-				 << S_MAXIM[2] << " "
-				 << S_MAXIM[3] << " "
-				 << S_MAXIM[4] << " "
-				 << S_MAXIM[5] << endl;	
+		header << INDX << " " << QUAD_MAP_REVERSE << " " ;
+	 for ( int i = 0 ; i < NPAIRS ; i++ ) 
+		header << ATOM_PAIRS[i] << " " ;
+
+	 header << fixed << setprecision(5) ;
+
+	 for ( int i = 0 ; i < NPAIRS ; i++ ) 
+		header << S_MAXIM[i] << " " ;
+
+	 header << endl;						
   }						
   else 
   {
@@ -313,13 +292,13 @@ void QUADRUPLETS::print_special(ofstream &header, string QUAD_MAP_REVERSE, strin
 	 
 }
 
-void QUADRUPLETS::print_header(ofstream &header)
+void CLUSTER::print_header(ofstream &header)
 {
   header << INDX << "  ";
-  for(int m=0; m<6; m++)
+  for(int m=0; m<NPAIRS; m++)
   {
 	 header << ATOM_PAIRS[m];
-	 if(m<5)
+	 if(m<NPAIRS-1)
 		header << " ";
   }
   header << ": " << N_TRUE_ALLOWED_POWERS << " parameters, " << N_ALLOWED_POWERS << " total parameters "<< endl;	
@@ -331,7 +310,7 @@ void QUADRUPLETS::print_header(ofstream &header)
   {
 	 header << "      " << setw(6) << fixed << left << j << " ";
 	 header << " ";
-	 for(int m=0; m<6; m++)
+	 for(int m=0; m<NPAIRS; m++)
 		header << setw(2) << fixed << left << ALLOWED_POWERS[j][m] << " ";
 	 header << "       " << setw(8) << EQUIV_INDICES[j] << " ";
 	 header << "       " << setw(8) << PARAM_INDICES[j] << endl; 

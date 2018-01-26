@@ -1848,10 +1848,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			PAIR_QUADRUPLETS.resize(NQUAD);		
 			
-			for (int i=0; i<NQUAD; i++)
-			{	
-			  PAIR_QUADRUPLETS[i].init() ;
-			}
 		}
 
 		else if(LINE.find("# TYPEIDX #")!= string::npos)

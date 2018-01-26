@@ -36,16 +36,15 @@ public:
   vector<int>	PARAM_INDICES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
 		
   // Pure virtual (overridable) functions.
-  virtual void init() = 0 ;  // Initialize values to defaults.
   virtual void build(int cheby_4b_order) = 0 ; // The the ALLOWED_POWERS, etc. for an interaction.
   void store_permutations(vector<int> &unsorted_powers) ; // Store all the permutations.
-  virtual void print() = 0 ;  // Print the quad powers and element types.
+  void print()  ;  // Print the quad powers and element types.
 
   // Print special parameters to the header file.
-  virtual void print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode) = 0 ;
+  void print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode) ;
 
-  // Print the params file header for a quad interaction.
-  virtual void print_header(ofstream &header) = 0 ;
+  // Print the params file header for a cluster
+  void print_header(ofstream &header) ;
 
   CLUSTER() {} 
   virtual ~CLUSTER() {} 
@@ -59,6 +58,12 @@ CLUSTER(int natom, int npair): ATOM_NAMES(natom), ATOM_PAIRS(npair), S_MAXIM(npa
 	 for ( int j = 0 ; j < npair ; j++ ) {
 		MIN_FOUND[j] = -1 ;
 	 }
+	 for (int j=0; j < npair ; j++)
+	 {
+		S_MINIM[j] = -1;
+		S_MAXIM[j] = -1;
+	 }
+	 FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;	
   }
 private:
   // Recursively permute atom indices for each element type.
@@ -82,15 +87,8 @@ public:
 	 }
 
   // Virtual (overridable) functions.
-  virtual void init() {}  // Initialize values to defaults.
   virtual void build(int cheby_4b_order) {} // The the ALLOWED_POWERS, etc. for an interaction.
-  virtual void print() {}  // Print the quad powers and element types.
 
-  // Print special parameters to the header file.
-  virtual void print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode) {} 
-
-  // Print the params file header for a quad interaction.
-  virtual void print_header(ofstream &header) {}
 };
 
 
@@ -104,15 +102,7 @@ QUADRUPLETS():CLUSTER(4,6) { }
 ~QUADRUPLETS() { } 
 		
   // Member functions.
-  void init() ;  // Initialize values to defaults.
   void build(int cheby_4b_order) ; // The the ALLOWED_POWERS, etc. for an interaction.
-  void print() ;  // Print the quad powers and element types.
-
-  // Print special parameters to the header file.
-  void print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode) ;
-
-  // Print the params file header for a quad interaction.
-  void print_header(ofstream &header) ;
 };
 
 
