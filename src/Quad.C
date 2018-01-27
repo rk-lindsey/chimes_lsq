@@ -405,9 +405,25 @@ void CLUSTER_LIST::build_maps_loop(int index, vector<int> pair_index, vector<str
   }
 }
 				
-void CLUSTER_LIST::build_fast_maps(vector<string>& ATOM_CHEMS)
+void CLUSTER_LIST::build_fast_maps(vector<PAIRS>& ATOM_PAIRS)
 {
   int natoms = VEC[0]->NATOMS ;
+  vector<string>ATOM_CHEMS;
+
+  for(int p=0; p<ATOM_PAIRS.size(); p++)
+  {
+	 string TMP_CHEM = ATOM_PAIRS[p].ATM1TYP;
+	 bool   IN_LIST  = false;
+	 
+	 for(int a=0; a<ATOM_CHEMS.size(); a++)
+	 {
+		if(ATOM_CHEMS[a] == TMP_CHEM)
+		  IN_LIST = true;
+	 }
+	 
+	 if(!IN_LIST)
+		ATOM_CHEMS.push_back(TMP_CHEM);
+  }
 
   if(RANK == 0) 
   {
@@ -509,12 +525,30 @@ int CLUSTER_LIST::make_id_int(vector<int>& index)
   return(sum) ;
 }
 
-void CLUSTER_LIST::build_pairs(vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP)
+void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP)
 // Build the pair variables for all of the clusters
 {
 			
   int TEMP_INT = 0;				// Will hold pair quadruplet index
-  
+  			// First, extract the atom types
+
+  vector<string>ATOM_CHEMS;
+
+  for(int p=0; p<ATOM_PAIRS.size(); p++)
+  {
+	 string TMP_CHEM = ATOM_PAIRS[p].ATM1TYP;
+	 bool   IN_LIST  = false;
+	 
+	 for(int a=0; a<ATOM_CHEMS.size(); a++)
+	 {
+		if(ATOM_CHEMS[a] == TMP_CHEM)
+		  IN_LIST = true;
+	 }
+	 
+	 if(!IN_LIST)
+		ATOM_CHEMS.push_back(TMP_CHEM);
+  }
+				
   int natoms = VEC[0]->NATOMS ;
   vector<int> atom_index(natoms) ;
   int count = 0 ;
@@ -571,4 +605,77 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 }
 	 count++;	
   }			
+}
+
+bool TRIPLETS::init_histogram(vector<PAIRS> &pairs, map<string,int>& pair_map)
+// Sets up the histogram for TRIPLETS.  Returns TRUE on success, FALSE otherwise.
+{
+		
+  double tmp_max, tmp_min;
+		
+  NBINS[0] = pairs[ pair_map[ ATOM_PAIRS[0]] ].NBINS[0];
+  NBINS[1] = pairs[ pair_map[ ATOM_PAIRS[0]] ].NBINS[1];
+  NBINS[2] = pairs[ pair_map[ ATOM_PAIRS[0]] ].NBINS[2];
+		
+  if(NBINS[0] == 0 || NBINS[1] == 0 || NBINS[0] == 0)
+  {
+#if VERBOSITY == 1
+	 if ( RANK == 0 ) cout << "Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramming. " << endl << endl << endl ;
+#endif
+				
+	 return false ;
+  }
+		
+  tmp_max = S_MAXIM[0];
+  tmp_min = S_MINIM[0];
+  if(tmp_min == -1)
+	 tmp_min = pairs[ pair_map[ ATOM_PAIRS[0]] ].S_MINIM;
+  if(tmp_max == -1)
+	 tmp_max = pairs[ pair_map[ ATOM_PAIRS[0]] ].S_MAXIM;
+  BINWS[0] = (tmp_max - tmp_min)/NBINS[0];
+		
+  tmp_max = S_MAXIM[1];
+  tmp_min = S_MINIM[1];
+  if(tmp_min == -1)
+	 tmp_min = pairs[ pair_map[ ATOM_PAIRS[1]] ].S_MINIM;
+  if(tmp_max == -1)
+	 tmp_max = pairs[ pair_map[ ATOM_PAIRS[1]] ].S_MAXIM;
+  BINWS[1] = (tmp_max - tmp_min)/NBINS[1];
+		
+  tmp_max = S_MAXIM[2];
+  tmp_min = S_MINIM[2];
+  if(tmp_min == -1)
+	 tmp_min = pairs[ pair_map[ ATOM_PAIRS[2]] ].S_MINIM;
+  if(tmp_max == -1)
+	 tmp_max = pairs[ pair_map[ ATOM_PAIRS[2]] ].S_MAXIM;
+  BINWS[2] = (tmp_max - tmp_min)/NBINS[2];
+		
+  POP_HIST.resize(NBINS[0]);
+		
+  for(int x=0; x<NBINS[0]; x++)
+  {
+	 POP_HIST[x].resize(NBINS[1]);
+			
+	 for(int y=0; y<NBINS[1]; y++)
+	 {
+		POP_HIST[x][y].resize(NBINS[2]);
+
+		for(int z=0; z<NBINS[2]; z++)
+		{
+		  POP_HIST[x][y][z] = 0;
+		}
+				
+	 }
+  }
+			
+  if ( RANK == 0 ) cout << "	" << INDX << " " << fixed << setprecision(1) << NBINS[0] << " " << NBINS[1] << " " << NBINS[2] << endl;
+
+		
+#if VERBOSITY == 1
+  if ( RANK == 0 ) 
+  {
+	 cout << "...Initial histogram setup complete!" << endl << endl;
+	 return(true) ;
+}
+#endif
 }

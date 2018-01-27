@@ -30,10 +30,11 @@ using namespace std;
 #include <mpi.h>
 #endif 
 
-static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, vector<QUADRUPLETS> &PAIR_QUADRUPLETS, 
-									CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, 
-									map<int,string> & TRIAD_MAP_REVERSE, map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, 
-									vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, NEIGHBORS & NEIGHBOR_LIST);
+static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, 
+									CLUSTER_LIST &TRIPS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
+									map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, 
+									map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
+									NEIGHBORS & NEIGHBOR_LIST) ;
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_TRIPLETS, vector<QUADRUPLETS> &PAIR_QUADRUPLETS, bool use_3b_cheby, bool use_4b_cheby);
 
@@ -101,9 +102,10 @@ int main(int argc, char* argv[])
 	
 	vector<PAIRS> 		ATOM_PAIRS;			// Will store relevant info regarding atom interaction pair types.. 
 	vector<TRIPLETS> 	PAIR_TRIPLETS;		// Will store relevant info regarding atom interaction triplet types.. i.e. { [OO,OO,OO], [OO,HH,HH], ... }
-	CLUSTER_LIST QUADS ;                // Quadruplet interaction.
+	CLUSTER_LIST TRIPS ;                // Triplet interaction: generic cluster interface.
+	CLUSTER_LIST QUADS ;                // Quadruplet interaction: generic cluster interface.
 	vector<QUADRUPLETS> PAIR_QUADRUPLETS ;
-
+	
 	vector<FRAME> 		TRAJECTORY;			// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
 	NEIGHBORS        	 NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
 	vector<int>   		ATOM_PAIR_TYPES;	// Fore use in double loop over atom pairs. Index corresponds to the overall double loop count. 
@@ -141,7 +143,7 @@ int main(int argc, char* argv[])
 	}
 #endif
 
-	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, PAIR_QUADRUPLETS, QUADS, PAIR_MAP, 
+	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, TRIPS, PAIR_QUADRUPLETS, QUADS, PAIR_MAP, 
 						PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, QUAD_MAP, QUAD_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
 
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
@@ -568,83 +570,14 @@ int main(int argc, char* argv[])
 		#if VERBOSITY == 1
 		if ( RANK == 0 ) cout << "Setting up the histograms to handle sparse 3b-distance populations..." << endl;
 		#endif
-		
-		double tmp_max, tmp_min;
 	
-		bool ANY_ZERO = false;
-		
 		for (int i=0; i<PAIR_TRIPLETS.size(); i++)
 		{
-
-			PAIR_TRIPLETS[i].NBINS[0] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].NBINS[0];
-			PAIR_TRIPLETS[i].NBINS[1] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].NBINS[1];
-			PAIR_TRIPLETS[i].NBINS[2] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].NBINS[2];
-		
-			if(PAIR_TRIPLETS[i].NBINS[0] == 0 || PAIR_TRIPLETS[i].NBINS[1] == 0 || PAIR_TRIPLETS[i].NBINS[0] == 0)
-			{
-				ANY_ZERO = true;
-			
-				#if VERBOSITY == 1
-				if ( RANK == 0 ) cout << "Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramming. " << endl;
-				#endif
-				
-				break;
-			}
-		
-			tmp_max = PAIR_TRIPLETS[i].S_MAXIM[0];
-			tmp_min = PAIR_TRIPLETS[i].S_MINIM[0];
-			if(tmp_min == -1)
-				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].S_MINIM;
-			if(tmp_max == -1)
-				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]] ].S_MAXIM;
-			PAIR_TRIPLETS[i].BINWS[0] = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS[0];
-		
-			tmp_max = PAIR_TRIPLETS[i].S_MAXIM[1];
-			tmp_min = PAIR_TRIPLETS[i].S_MINIM[1];
-			if(tmp_min == -1)
-				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[1]] ].S_MINIM;
-			if(tmp_max == -1)
-				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[1]] ].S_MAXIM;
-			PAIR_TRIPLETS[i].BINWS[1] = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS[1];
-		
-			tmp_max = PAIR_TRIPLETS[i].S_MAXIM[2];
-			tmp_min = PAIR_TRIPLETS[i].S_MINIM[2];
-			if(tmp_min == -1)
-				tmp_min = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[2]] ].S_MINIM;
-			if(tmp_max == -1)
-				tmp_max = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[2]] ].S_MAXIM;
-			PAIR_TRIPLETS[i].BINWS[2] = (tmp_max - tmp_min)/PAIR_TRIPLETS[i].NBINS[2];
-		
-			PAIR_TRIPLETS[i].POP_HIST.resize(PAIR_TRIPLETS[i].NBINS[0]);
-		
-			for(int x=0; x<PAIR_TRIPLETS[i].NBINS[0]; x++)
-			{
-				PAIR_TRIPLETS[i].POP_HIST[x].resize(PAIR_TRIPLETS[i].NBINS[1]);
-			
-				for(int y=0; y<PAIR_TRIPLETS[i].NBINS[1]; y++)
-				{
-					PAIR_TRIPLETS[i].POP_HIST[x][y].resize(PAIR_TRIPLETS[i].NBINS[2]);
-
-					for(int z=0; z<PAIR_TRIPLETS[i].NBINS[2]; z++)
-					{
-						PAIR_TRIPLETS[i].POP_HIST[x][y][z] = 0;
-					}
-				
-				}
-			}
-			
-			if ( RANK == 0 ) cout << "	" << i << " " << fixed << setprecision(1) << PAIR_TRIPLETS[i].NBINS[0] << " " << PAIR_TRIPLETS[i].NBINS[1] << " " << PAIR_TRIPLETS[i].NBINS[2] << endl;
-		}	
-		
-		#if VERBOSITY == 1
-		if ( RANK == 0 ) 
-		{
-			if(!ANY_ZERO)
-				cout << "...Initial histogram setup complete!" << endl << endl;
-			else
-				cout << endl << endl;
+	     if ( ! PAIR_TRIPLETS[i].init_histogram(ATOM_PAIRS, PAIR_MAP) ) 
+		  {
+			 break ;
+		  }
 		}
-		#endif
 	}
 		
 
@@ -1187,14 +1120,7 @@ int main(int argc, char* argv[])
 		
 		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
 			if(PAIR_TRIPLETS[i].S_MINIM[0] >= 0)
-				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
-					<< PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " 
-					<< PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " 
-					<< PAIR_TRIPLETS[i].ATOM_PAIRS[2] << " " 
-					<< fixed << setprecision(5) 
-		            << PAIR_TRIPLETS[i].S_MINIM[0] << " "
-				 	<< PAIR_TRIPLETS[i].S_MINIM[1] << " "
-					<< PAIR_TRIPLETS[i].S_MINIM[2] << endl;						
+			  PAIR_TRIPLETS[i].print_special(header, TRIAD_MAP_REVERSE[i], "S_MINIM") ;
 	}
 		
 	FOUND_SPECIAL = 0;
@@ -1208,15 +1134,8 @@ int main(int argc, char* argv[])
 		header << endl << "SPECIAL 3B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-			if(PAIR_TRIPLETS[i].S_MAXIM[0] >= 0)
-				header << i << " " << TRIAD_MAP_REVERSE[i] << " " 
-					<< PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " 
-					<< PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " 
-					<< PAIR_TRIPLETS[i].ATOM_PAIRS[2] << " " 
-					<< fixed << setprecision(5) 
-		            << PAIR_TRIPLETS[i].S_MAXIM[0] << " "
-				 	<< PAIR_TRIPLETS[i].S_MAXIM[1] << " "
-					<< PAIR_TRIPLETS[i].S_MAXIM[2] << endl;						
+		  if(PAIR_TRIPLETS[i].S_MAXIM[0] >= 0)
+			 PAIR_TRIPLETS[i].print_special(header, TRIAD_MAP_REVERSE[i], "S_MAXIM") ;
 	}	
 
 	// Print out special cutoffs for 4-body interactions
@@ -1234,7 +1153,8 @@ int main(int argc, char* argv[])
 		header << endl << "SPECIAL 4B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 		for(int i=0; i< PAIR_QUADRUPLETS.size(); i++)
-		  PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MINIM") ;
+		  if ( PAIR_QUADRUPLETS[i].S_MINIM[0] >= 0 ) 
+			 PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MINIM") ;
 	}
 		
 	FOUND_SPECIAL = 0;
@@ -1248,7 +1168,8 @@ int main(int argc, char* argv[])
 		header << endl << "SPECIAL 4B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 		for(int i=0; i< PAIR_QUADRUPLETS.size(); i++)
-		  PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MAXIM" ) ;
+		  if ( PAIR_QUADRUPLETS[i].S_MAXIM[0] >= 0 )
+			 PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MAXIM" ) ;
 
 	}	
 	
@@ -1261,23 +1182,7 @@ int main(int argc, char* argv[])
 
 		for(int i=0;i<PAIR_TRIPLETS.size(); i++)
 		{
-			header << "" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[2] << ": ";
-			header << PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS << " parameters, " << PAIR_TRIPLETS[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
-			header << "     index  |  powers  |  equiv index  |  param index  " << endl;
-			header << "   ----------------------------------------------------" << endl;	
-
-			for(int j=0; j<PAIR_TRIPLETS[i].ALLOWED_POWERS.size(); j++)
-			{
-				header << "      " << setw(6) << fixed << left << j << " ";
-				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][0]  << " ";
-				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][1]  << " ";
-				header << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][2]  << " ";
-				header << "       " << setw(8) << PAIR_TRIPLETS[i].EQUIV_INDICES[j] << " ";
-				header << "       " << setw(8) << PAIR_TRIPLETS[i].PARAM_INDICES[j] << endl; 
-	
-			}
-
-			header << endl;
+		  PAIR_TRIPLETS[i].print_header(header) ;
 		}	 
 		
 	}
@@ -1364,7 +1269,7 @@ return 0;
 
 // Read program input from the file "splines_ls.in".
 static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, 
-									vector<QUADRUPLETS> & PAIR_QUADRUPLETS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
+									CLUSTER_LIST &TRIPS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
 									map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, 
 									map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 									NEIGHBORS & NEIGHBOR_LIST)
@@ -1838,20 +1743,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			// Account for excluded types:
 			
 			PAIR_TRIPLETS.resize(NTRIP);
+			TRIPS.link( PAIR_TRIPLETS ) ;
 			
-			for (int i=0; i<NTRIP; i++)
-			{	
-				PAIR_TRIPLETS[i].S_MINIM[0] = -1;
-				PAIR_TRIPLETS[i].S_MINIM[1] = -1;
-				PAIR_TRIPLETS[i].S_MINIM[2] = -1;
-				
-				PAIR_TRIPLETS[i].S_MAXIM[0] = -1;
-				PAIR_TRIPLETS[i].S_MAXIM[1] = -1;
-				PAIR_TRIPLETS[i].S_MAXIM[2] = -1;
-				
-				PAIR_TRIPLETS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;
-			}	
-
 			// Set up quadruplets
 			
 			NQUAD = factorial(CONTROLS.NATMTYP+4-1)/factorial(4)/factorial(CONTROLS.NATMTYP-1);
@@ -2000,296 +1893,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			if(CONTROLS.USE_3B_CHEBY)
 			{
 				// Generate unique triplets
-			
-				TRIPLETS TRIP_ATOMS;		// Each item is an atom type
-				TEMP_INT = 0;				// Will hold pair triplet index
-			
-				for(int i=0; i<CONTROLS.NATMTYP; i++)
-				{
-					for(int j=i; j<CONTROLS.NATMTYP; j++)
-					{
-						for(int k=j; k<CONTROLS.NATMTYP; k++)
-						{
-							// Get the three atoms that will define the 3-body interaction
-						
-							TRIP_ATOMS.ATOM_PAIRS[0] = ATOM_PAIRS[i].ATM1TYP;	// The first N_ATMTYP pairs are of type AA, BB, CC ... N_ATMTYP
-							TRIP_ATOMS.ATOM_PAIRS[1] = ATOM_PAIRS[j].ATM1TYP;
-							TRIP_ATOMS.ATOM_PAIRS[2] = ATOM_PAIRS[k].ATM1TYP;
+			  TRIPS.build_pairs(ATOM_PAIRS, PAIR_MAP) ;
+			  
+			  for ( int i = 0 ; i < NTRIP ; i++ ) 
+				 PAIR_TRIPLETS[i].build(CONTROLS.CHEBY_3B_ORDER) ;
 
-							// Construct the triplet atom pairs from those atoms
-						
-							PAIR_TRIPLETS[TEMP_INT].INDX = TEMP_INT;
-						
-							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0] = TRIP_ATOMS.ATOM_PAIRS[0];	// ij
-							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1] = TRIP_ATOMS.ATOM_PAIRS[0];	// ik
-							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2] = TRIP_ATOMS.ATOM_PAIRS[1];	// jk
-
-							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0].append(TRIP_ATOMS.ATOM_PAIRS[1]);	// ij
-							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1].append(TRIP_ATOMS.ATOM_PAIRS[2]);	// ik
-							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2].append(TRIP_ATOMS.ATOM_PAIRS[2]);	// jk		
-
-							// Now save the "proper" (ordered) name of the pair			
-
-							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0]] ].PRPR_NM;
-							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1]] ].PRPR_NM;
-							PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2] = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2]] ].PRPR_NM;
-							
-//cout << "ADDED TRIPLET: " << TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2] << endl;	
-if(RANK==0)
-{							
-	cout << "Made the following triplets: ";
-	cout <<TEMP_INT << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[TEMP_INT].ATOM_PAIRS[2] << endl;		
-}
-	
-
-							TEMP_INT++;						
-						}
-					}
-				}
-				
-							
-			
-				// Figure out the allowed pair triplet powers. Here are some rules and considerations:
-				//
-				// 1. Powers start from zero. So, if order is specified to be 2, polynomial powers range
-				//    from 0 to n-1, NOT 1 to n!
-				//
-				// 2. At least two pairs must have non-zero powers for the interaction to truly correspond
-				//    to 3-body interactions
-				//
-				// 3. Non-uniqueness upon power sorting must be taken into consideration. For example, for
-				//    the pair (OO, OH, OH), powers of (1,1,0) are identical to (1,0,1)
-				// 
-				// NOTE: We need to also take into consideration the corresponding parameter multiplicities.
-			 
-				XYZ_INT UNSORTED_POWERS;
-				XYZ_INT SORTED_POWERS;
-				vector<int> unsorted_vec(3) ;
-			
-				vector<XYZ_INT> STORED_SORTED_POWERS;//(CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER*CONTROLS.CHEBY_3B_ORDER);		// Make this the max possible size... it will be destroyed later anyway.
-			
-				int TOP, BOT;
-			
-				bool STORED = false;
-				int  STORED_IDX;
-				int  RUNNING_IDX = 0;
-			
-				for(int i=0; i<NTRIP; i++)
-				{
-					vector<int> STORED_SORTED_POWERS_EQVS;
-					
-					for(int pair1_pow=0; pair1_pow<CONTROLS.CHEBY_3B_ORDER; pair1_pow++)
-					{
-						for(int pair2_pow=0; pair2_pow<CONTROLS.CHEBY_3B_ORDER; pair2_pow++)
-						{
-							for(int pair3_pow=0; pair3_pow<CONTROLS.CHEBY_3B_ORDER; pair3_pow++)
-							{
-								// Check number 1: Are at least two powers greater than 0?
-								if( (pair1_pow>0 && pair2_pow>0) || (pair1_pow>0 && pair3_pow>0) || (pair2_pow>0 && pair3_pow>0) )
-								{								
-									UNSORTED_POWERS.X = pair1_pow;
-									UNSORTED_POWERS.Y = pair2_pow;
-									UNSORTED_POWERS.Z = pair3_pow;		
-								
-									// Store all triplet powers that meet the above criteria.
-
-									unsorted_vec[0] = UNSORTED_POWERS.X ;
-									unsorted_vec[1] = UNSORTED_POWERS.Y ;
-									unsorted_vec[2] = UNSORTED_POWERS.Z ;
-									PAIR_TRIPLETS[i].ALLOWED_POWERS.push_back(unsorted_vec) ;
-								
-									// Now, we need to figure out which of these sets of powers is truly unique. This will depend on a few things.
-	
-									// Case 1: each pair in the current pair triplet is unique ... multiplicities will be one for each item
-								
-									if( (PAIR_TRIPLETS[i].ATOM_PAIRS[0] != PAIR_TRIPLETS[i].ATOM_PAIRS[1]) 
-									 && (PAIR_TRIPLETS[i].ATOM_PAIRS[0] != PAIR_TRIPLETS[i].ATOM_PAIRS[2]) 
-									 && (PAIR_TRIPLETS[i].ATOM_PAIRS[1] != PAIR_TRIPLETS[i].ATOM_PAIRS[2]) )
-										PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
-
-								
-									// Case 2: each pair in the current pair triplet is identical... multiplicity should be 3 when all three powers are not the same
-								 
-									else if( (PAIR_TRIPLETS[i].ATOM_PAIRS[0] == PAIR_TRIPLETS[i].ATOM_PAIRS[1]) && (PAIR_TRIPLETS[i].ATOM_PAIRS[0] == PAIR_TRIPLETS[i].ATOM_PAIRS[2]))
-									{
-										// Sort the powers in ascending order
-
-										if (pair1_pow>pair2_pow)
-										{
-											TOP = pair1_pow;
-											BOT = pair2_pow;
-										}
-										else
-										{
-											TOP = pair2_pow;
-											BOT = pair1_pow;
-										}
-										if(pair3_pow>TOP)
-										{
-											SORTED_POWERS.X = pair3_pow;
-											SORTED_POWERS.Y = TOP;
-											SORTED_POWERS.Z = BOT;										
-										}
-										else if(pair3_pow>BOT)
-										{
-											SORTED_POWERS.X = TOP;
-											SORTED_POWERS.Y = pair3_pow;
-											SORTED_POWERS.Z = BOT;											
-										}
-										else
-										{
-											SORTED_POWERS.X = TOP;
-											SORTED_POWERS.Y = BOT;
-											SORTED_POWERS.Z = pair3_pow;											
-										}
-
-										// Check if sorted powers have already been saved
-									
-										STORED = false;
-									
-										for(int j=0; j<STORED_SORTED_POWERS.size(); j++)
-										{
-											if( (STORED_SORTED_POWERS[j].X == SORTED_POWERS.X) &&  (STORED_SORTED_POWERS[j].Y == SORTED_POWERS.Y) &&  (STORED_SORTED_POWERS[j].Z == SORTED_POWERS.Z))
-											{
-												STORED = true;
-												STORED_IDX = j;
-												break;
-											}										
-										}
-									
-										// Save them, if they have not been already
-									
-										if(!STORED)
-										{
-											STORED_SORTED_POWERS           .push_back(SORTED_POWERS);
-											STORED_SORTED_POWERS_EQVS      .push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
-											PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);	// The current power	
-																			
-										}
-										else
-										{
-											PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(STORED_SORTED_POWERS_EQVS[STORED_IDX]);											
-										}
-										STORED = false;
-
-									} 
-								
-									// Case 3: two pairs in the current pair triplet are identical... multiplicities will be 2 whenever power differs on the two identical pairs
-								
-									else
-									{
-										// Sort the powers as if the pair types were arranged A != B == C
-
-										// Case 3a.: A == B != C
-									
-										if(PAIR_TRIPLETS[i].ATOM_PAIRS[0] == PAIR_TRIPLETS[i].ATOM_PAIRS[1])
-										{
-											SORTED_POWERS.X = pair3_pow;
-											SORTED_POWERS.Y = pair1_pow;
-											SORTED_POWERS.Z = pair2_pow;										
-										}
-									
-										// Case 3b.: A != B == C
-									
-										if(PAIR_TRIPLETS[i].ATOM_PAIRS[1] == PAIR_TRIPLETS[i].ATOM_PAIRS[2])
-										{
-											SORTED_POWERS.X = pair1_pow;
-											SORTED_POWERS.Y = pair2_pow;
-											SORTED_POWERS.Z = pair3_pow;										
-										}			
-									
-										// Case 3c.: A == C != B
-									
-										if(PAIR_TRIPLETS[i].ATOM_PAIRS[0] == PAIR_TRIPLETS[i].ATOM_PAIRS[2])
-										{
-											SORTED_POWERS.X = pair2_pow;
-											SORTED_POWERS.Y = pair1_pow;
-											SORTED_POWERS.Z = pair3_pow;										
-										}		
-									
-										// Now arrange the last two powers in ascending order Z>Y
-									
-										if(SORTED_POWERS.Y > SORTED_POWERS.Z)
-										{
-											BOT = SORTED_POWERS.Z;
-											SORTED_POWERS.Z = SORTED_POWERS.Y;
-											SORTED_POWERS.Y = BOT;
-										}
-									
-										// Finally, check whether these sorted powers have already been saved
-									
-										STORED = false;
-									
-										for(int j=0; j<STORED_SORTED_POWERS.size(); j++)
-										{
-											if( (STORED_SORTED_POWERS[j].X == SORTED_POWERS.X) &&  (STORED_SORTED_POWERS[j].Y == SORTED_POWERS.Y) &&  (STORED_SORTED_POWERS[j].Z == SORTED_POWERS.Z))
-											{
-												STORED = true;
-												STORED_IDX = j;
-												break;
-											}
-										}
-									
-										// Save them, if they have not been already
-									
-										if(!STORED)
-										{
-											STORED_SORTED_POWERS           .push_back(SORTED_POWERS);
-											STORED_SORTED_POWERS_EQVS      .push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);
-											PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(PAIR_TRIPLETS[i].ALLOWED_POWERS.size()-1);	
-										}
-										else
-										{										
-											PAIR_TRIPLETS[i].EQUIV_INDICES.push_back(STORED_SORTED_POWERS_EQVS[STORED_IDX]);
-										}									
-										STORED = false;
-					
-									}
-								}
-							}
-						}
-					}
-				
-					STORED_SORTED_POWERS.clear();
-					vector<XYZ_INT>().swap(STORED_SORTED_POWERS);
-				
-					// Now all that's left to do is set the force field index for each set of powers
-				 
-					PAIR_TRIPLETS[i].PARAM_INDICES.resize(PAIR_TRIPLETS[i].EQUIV_INDICES.size());
-				
-					PAIR_TRIPLETS[i].PARAM_INDICES[0] = 0;
-					
-					bool FOUND_EQV;
-					int  USE_SET = 0;
-					int  MAX_SET = 0;
-					
-					for(int set1=1; set1<PAIR_TRIPLETS[i].EQUIV_INDICES.size(); set1++)
-					{
-						FOUND_EQV = false;
-						
-						for(int set2=0; set2<set1; set2++)
-						{
-							if(PAIR_TRIPLETS[i].EQUIV_INDICES[set1] == PAIR_TRIPLETS[i].EQUIV_INDICES[set2])
-							{
-								FOUND_EQV = true;
-								USE_SET   = set2;
-								break;
-							}
-						}
-						
-						if(FOUND_EQV)
-							PAIR_TRIPLETS[i].PARAM_INDICES[set1] = PAIR_TRIPLETS[i].PARAM_INDICES[USE_SET];
-						else
-						{
-							MAX_SET++;
-							PAIR_TRIPLETS[i].PARAM_INDICES[set1] = MAX_SET;	
-						}					
-
-					}
-
-					PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICES[PAIR_TRIPLETS[i].PARAM_INDICES.size()-1]+1;
-					PAIR_TRIPLETS[i].N_ALLOWED_POWERS = PAIR_TRIPLETS[i].PARAM_INDICES.size();
-				}
 
 				// Set up triplet maps... Account for cases where triplet type is meaningless by setting mapped index to -1
 					
@@ -2453,31 +2061,11 @@ if(RANK==0)
 								
 			if(CONTROLS.USE_4B_CHEBY)
 			{
-				// First, extract the atom types
-
-				vector<string>ATOM_CHEMS;
-
-				for(int p=0; p<ATOM_PAIRS.size(); p++)
-				{
-					string TMP_CHEM = ATOM_PAIRS[p].ATM1TYP;
-					bool   IN_LIST  = false;
-
-					for(int a=0; a<ATOM_CHEMS.size(); a++)
-					{
-						if(ATOM_CHEMS[a] == TMP_CHEM)
-							IN_LIST = true;
-					}
-	
-					if(!IN_LIST)
-						ATOM_CHEMS.push_back(TMP_CHEM);
-				}
-				
-				assert(ATOM_CHEMS.size() == CONTROLS.NATMTYP) ;
-				//////////////////////////////////////////////////////////////////////
+			  //////////////////////////////////////////////////////////////////////
 				// Generate unique quadruplets and thier corresponding sets of powers
 				//////////////////////////////////////////////////////////////////////
 
-				QUADS.build_pairs(ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP) ;
+				QUADS.build_pairs(ATOM_PAIRS, PAIR_MAP) ;
 				// build_quad_pairs(PAIR_QUADRUPLETS, CONTROLS.NATMTYP, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP) ;
 			
 				for(int i=0; i<NQUAD; i++)
@@ -2503,7 +2091,7 @@ if(RANK==0)
 				// atom types in a simulation
 				//////////////////////////////////////////////////////////////////////
 
-				QUADS.build_fast_maps(ATOM_CHEMS) ;
+				QUADS.build_fast_maps(ATOM_PAIRS) ;
 				INT_QUAD_MAP = QUADS.INT_MAP ;
 				INT_QUAD_MAP_REVERSE = QUADS.INT_MAP_REVERSE ;
 

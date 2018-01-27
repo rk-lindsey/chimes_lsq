@@ -264,53 +264,6 @@ struct FRAME
 	
 };
 
-struct PAIRS	// NEEDS UPDATING
-{
-	
-	int    PAIRIDX;			// Index for the specific pair type (triplet type)
-	string PRPR_NM;			// The order-specific atom pair. For example, OH, never HO, or something similiar "proper name"
-	string PAIRTYP;			// Allowed values are CHEBYSHEV, DFTBPOLY, SPLINE, INVERSE_R, LJ, and STILLINGER
-	string ATM1TYP;			// Atom chemistry (i.e. C, H, N, O...)
-	string ATM2TYP;
-	double ATM1CHG;			// Atom partial charge... used when charges are fixed
-	double ATM2CHG;
-	string CHRGSGN;			// Should the fitted charge on a given atom be negative or positive?
-	double ATM1MAS;			// Atomic mass (i.e. 12.011 for C)
-	double ATM2MAS;	
-	double OLD_S_MINIM;		// Used for smoothing functions when 3B and 2B inner cutoffs differ. This should be the inner cutoffs used for the actual SVD
-	double S_MINIM;			// Minimum allowed pair distance for fitting
-	double S_MAXIM;			// Maximum allowed pair distance for fitting
-	double S_DELTA;			// Fitting "grid" spacing (width)
-
-	int N_CFG_CONTRIB;		// How many configurations actually contribute to fitting this pair??
-
-	double CHEBY_RANGE_LOW;	//	When fitting to Cheby polynomials, pair distances are typically transformed to exist defined on range -1 to 1 (where Cheby poly's are defined), 
-	double CHEBY_RANGE_HIGH;//  but under certain circumstances, it can be advantagous to only fit some sub range (i.e. -1 to 0). These variables define the transformation range
-							//  and arr, by default, set to -1 and 1 for low and high, respectively.
-
-	int    SNUM;			// Number of fitting parameters for pair ... WHY WOULD THIS BE DIFFERENT FOR DIFFERENT PAIR TYPES?***
-	int    SNUM_3B_CHEBY;	// Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
-	int    SNUM_4B_CHEBY;	// Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
-	
-	string CHEBY_TYPE;		// Are distances transformed into inverse-r type or morse-type distances?... or not at all? (default)
-	double PENALTY_SCALE;	// For 2B Cheby potentials... "a" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 1.0e8
-	double PENALTY_DIST;	// For 2B Cheby potentials... "penalty_dist" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 0.01
-	double CUBIC_SCALE;		// Factor to multiply to the cubic penalty function, (1-rlen/smax)^3... default value is 1
-	
-	double LAMBDA;			// Morse lambda for CHEBYSHEV type pairs
-	double MIN_FOUND_DIST;	// Minimum distance between pairs
-	
-	bool   USE_OVRPRMS;		// Should overbonding even be computed pair type
-	string OVER_TO_ATM;		// Which atom is overbonding *to* being defined for... for example, overbonding to oxygen
-	vector<double> OVRPRMS;	// [0] = P_OVERB; [1] = R_0_VAL; [2] = P_1_VAL; [3] = P_2_VAL; [4] = LAMBDA6
-	
-   vector<double> NBINS;				// Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
-
-	FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
-	
-   PAIRS():OVRPRMS(5),N_CFG_CONTRIB(0), NBINS(3) {}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
-};
-
 struct PAIR_FF : public PAIRS
 {
 	vector<double> 	PARAMS;
