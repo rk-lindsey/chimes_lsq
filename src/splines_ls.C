@@ -2472,12 +2472,13 @@ if(RANK==0)
 						ATOM_CHEMS.push_back(TMP_CHEM);
 				}
 				
-				
+				assert(ATOM_CHEMS.size() == CONTROLS.NATMTYP) ;
 				//////////////////////////////////////////////////////////////////////
 				// Generate unique quadruplets and thier corresponding sets of powers
 				//////////////////////////////////////////////////////////////////////
 
-				build_quad_pairs(PAIR_QUADRUPLETS, CONTROLS.NATMTYP, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP) ;
+				QUADS.build_pairs(ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP) ;
+				// build_quad_pairs(PAIR_QUADRUPLETS, CONTROLS.NATMTYP, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP) ;
 			
 				for(int i=0; i<NQUAD; i++)
 				{

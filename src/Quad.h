@@ -127,6 +127,8 @@ public:
 
   void build_fast_maps(vector<string>& ATOM_CHEMS) ;
 
+  void build_pairs(vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP) ;
+
   void link(vector<CLUSTER> &cluster) ;
 
   void link(vector<TRIPLETS> &cluster) ;
@@ -137,6 +139,8 @@ private:
   void build_maps_loop(int index, vector<int> pair_index, vector<struct PAIRS> &atom_pairs) ;
   void build_fast_maps_loop(int index, vector<int> atom_index, vector<string>& ATOM_CHEMS) ;
   int make_id_int(vector<int>& index) ;
+  void build_pairs_loop(int index, vector<int> atom_index, 
+								vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count) ;
 } ;
 
 
@@ -145,10 +149,6 @@ struct QUAD_FF : public QUADRUPLETS
 	vector<double> 	PARAMS;
 };
 
-void build_fast_quad_maps(map<string,int> QUAD_MAP, map<int,int> INT_QUAD_MAP, 
-								  map<int,int> INT_QUAD_MAP_REVERSE, vector<string> ATOM_CHEMS) ;
-void build_quad_pairs(vector<QUADRUPLETS>& PAIR_QUADRUPLETS, int NATMTYP, vector<string> ATOM_CHEMS, 
-							 vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP) ;
 #define _Quad_h
 #endif // ifndef _Quad_h
 
