@@ -529,9 +529,7 @@ void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MA
 // Build the pair variables for all of the clusters
 {
 			
-  int TEMP_INT = 0;				// Will hold pair quadruplet index
-  			// First, extract the atom types
-
+  // First, extract the atom types
   vector<string>ATOM_CHEMS;
 
   for(int p=0; p<ATOM_PAIRS.size(); p++)
@@ -607,7 +605,106 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
   }			
 }
 
-bool TRIPLETS::init_histogram(vector<PAIRS> &pairs, map<string,int>& pair_map)
+
+void CLUSTER_LIST::exclude()
+{				
+  // Now that we've got the maps and the 3b ff structures created, we can go back an remove triplet types
+  // that the user requested to exclude
+
+  if ( EXCLUDE.size() == 0 ) 
+	 return ;
+
+  vector<int>EXCL_IDX;
+  bool FOUND = false;
+  map<string, int>::iterator it2, it2a,itrem;
+  map<string, int>::iterator it, ita, itb;
+  ita = MAP.begin();
+  itb = MAP.end();
+  advance(itb,-1);
+  int TARGET;
+				
+/*				
+//	Sanity check	
+cout << "YOUR OLD MAPS: " << endl;	
+for(it = MAP.begin(); it != MAP.end(); it++)
+cout <<"		" << it->first << " : " << it->second << endl;
+*/				
+				
+  // Start by making all removed type indicies negative
+  // ALSO, THIS IS WHERE WE POP OFF ELEMENTS OF OUR PAIR TRIPLET VECTOR
+				 
+  vector<int> POPPED; 
+
+  for(int j=0; j<EXCLUDE.size(); j++)
+  {
+	 EXCL_IDX.push_back(MAP[EXCLUDE[j]]);
+
+	 NCLUSTERS--;
+					
+	 for(it = MAP.begin(); it != MAP.end(); it++)				
+	 {
+		if(it->second == EXCL_IDX[j])	// Then we need to exclude it!
+		{		
+		  POPPED.push_back(it->second);
+		  it->second = -1*it->second - 1;	
+		}
+	 }				
+  }	
+				
+  // Sort the popoff list in ascending order
+				
+  sort (POPPED.begin(), POPPED.end());
+				
+/*				
+//	Sanity check	
+cout << "YOUR ~~ MAPS: " << endl;	
+for(it = MAP.begin(); it != MAP.end(); it++)
+cout <<"		" << it->first << " : " << it->second << endl;
+				
+*/
+								
+  for(int i=0; i<POPPED.size(); i++)
+  {
+	 for(it = MAP.begin(); it != MAP.end(); it++)
+	 {
+		if(it->second>POPPED[i])
+		  it->second -= 1;
+	 }
+  }
+/*				
+//	Sanity check	
+cout << "YOUR NEW MAPS: " << endl;	
+for(it = MAP.begin(); it != MAP.end(); it++)
+cout <<"		" << it->first << " : " << it->second << endl;
+*/				
+				
+  // Finally, rebuild the reverse maps
+				
+  MAP_REVERSE.clear();
+
+  for(it = MAP.begin(); it != MAP.end(); it++)
+	 MAP_REVERSE.insert(make_pair(it->second,it->first));
+
+/*				
+//	Sanity check	
+							
+cout << "YOUR NEW REV MAPS: " << endl;
+
+map<int, string>::iterator itc;
+				
+for(itc = MAP_REVERSE.begin(); itc != MAP_REVERSE.end(); itc++)
+cout <<"		" << itc->first << " : " << itc->second << endl;
+*/				
+/*				
+// Sanity check
+				
+cout << "Triplet types (force field): " << endl;
+for(int i=0;i<NCLUSTER; i++)
+cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[2] << endl;
+*/
+}
+
+bool CLUSTER::init_histogram(vector<PAIRS> &pairs, map<string,int>& pair_map)
 // Sets up the histogram for TRIPLETS.  Returns TRUE on success, FALSE otherwise.
 {
 		

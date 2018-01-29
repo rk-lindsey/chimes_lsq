@@ -24,8 +24,6 @@ using namespace std;
 	#define VERBOSITY 1 
 #endif
 
-// For now, keep the lsq code in serial.
-
 #ifdef USE_MPI
 #include <mpi.h>
 #endif 
@@ -1286,8 +1284,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 	double SUM_OF_CHARGES = 0;
 	stringstream	STREAM_PARSER;
 	
-	vector<string> EXCLUDE_3B;
-	
 	// Set some defaults
 	
 	double TMP_CHEBY_RANGE_LOW  = -1;
@@ -1699,12 +1695,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			for(int i=0; i<TEMP_INT; i++)
 			{
 				cin >> LINE;
-				EXCLUDE_3B.push_back(LINE);
+				TRIPS.EXCLUDE.push_back(LINE);
 			}
 			
 			// Sort the vector into ascending order
 			
-			sort (EXCLUDE_3B.begin(), EXCLUDE_3B.end());
+			sort (TRIPS.EXCLUDE.begin(), TRIPS.EXCLUDE.end());
 			
 			STREAM_PARSER.str("");
 			STREAM_PARSER.clear();	
@@ -1740,8 +1736,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			NTRIP = factorial(CONTROLS.NATMTYP+3-1)/factorial(3)/factorial(CONTROLS.NATMTYP-1);
 	
-			// Account for excluded types:
-			
+			// Link the PAIR_TRIPLETS into the generic TRIPS structure.
 			PAIR_TRIPLETS.resize(NTRIP);
 			TRIPS.link( PAIR_TRIPLETS ) ;
 			
@@ -1898,167 +1893,18 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			  for ( int i = 0 ; i < NTRIP ; i++ ) 
 				 PAIR_TRIPLETS[i].build(CONTROLS.CHEBY_3B_ORDER) ;
 
+				TRIPS.exclude() ;
 
-				// Set up triplet maps... Account for cases where triplet type is meaningless by setting mapped index to -1
-					
-				bool REAL_TRIPLET = false;
-			
-				string TEMP_STR_A, TEMP_STR_B, TEMP_STR_C;
-				
-			
-/*			
-				cout << "SANITY CHECK: These are your triplets:" << endl;
-				for(int m=0; m<NTRIP; m++)
-				{
-					cout << m << " " << PAIR_TRIPLETS[m].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[m].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[m].ATOM_PAIRS[2] << endl;
-				}
-*/			
-				
-				for(int i=0; i<NPAIR; i++)
-				{
-					for(int j=0; j<NPAIR; j++)
-					{
-						for(int k=0; k<NPAIR; k++)
-						{	
-							TEMP_STR_A = ATOM_PAIRS[i].ATM1TYP;
-							TEMP_STR_A.append(ATOM_PAIRS[i].ATM2TYP);
-							
-							TEMP_STR_B = ATOM_PAIRS[j].ATM1TYP;
-							TEMP_STR_B.append(ATOM_PAIRS[j].ATM2TYP);	
-						
-							TEMP_STR_C = ATOM_PAIRS[k].ATM1TYP;
-							TEMP_STR_C.append(ATOM_PAIRS[k].ATM2TYP);	
-						
-							REAL_TRIPLET = false;	
-						
-							for(int m=0; m<NTRIP; m++)
-							{
-								if ((TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
-									(TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
-									(TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
-									(TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
-									(TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) ||
-									(TEMP_STR_C == PAIR_TRIPLETS[m].ATOM_PAIRS[0]) && (TEMP_STR_B == PAIR_TRIPLETS[m].ATOM_PAIRS[1]) && (TEMP_STR_A == PAIR_TRIPLETS[m].ATOM_PAIRS[2]) )
-									
-								{
-									TEMP_STR = TEMP_STR_A;
-									TEMP_STR.append(TEMP_STR_B);	
-									TEMP_STR.append(TEMP_STR_C);
+				TRIPS.build_maps(ATOM_PAIRS) ;
+				TRIAD_MAP = TRIPS.MAP ;
 
-									TRIAD_MAP        .insert(make_pair(TEMP_STR,m));	
-									TRIAD_MAP_REVERSE.insert(make_pair(m,TEMP_STR));
-									REAL_TRIPLET = true;									
-								
-								}
-								if(!REAL_TRIPLET)	// Then this is not an allowed triplet type!
-									TRIAD_MAP        .insert(make_pair(TEMP_STR,-1*m-1));	
-							}
-						}
-					}
-				}
-				
+				TRIAD_MAP_REVERSE = TRIPS.MAP_REVERSE ;
+				for (unsigned j = TRIPS.EXCLUDE.size(); j-- > 0; ) // Since we're popping off by index, iterate over vector (ascending sorted) in reverse
+				  PAIR_TRIPLETS.erase (PAIR_TRIPLETS.begin() + TRIPS.MAP[TRIPS.EXCLUDE[j]]);
 				
 
-				
-				
-				// Now that we've got the maps and the 3b ff structures created, we can go back an remove triplet types
-				// that the user requested to exclude
-
-
-				TEMP_INT = NTRIP;
-				vector<int>EXCL_IDX;
-				bool FOUND = false;
-				map<string, int>::iterator it2, it2a,itrem;
-				map<string, int>::iterator it, ita, itb;
-				ita = TRIAD_MAP.begin();
-				itb = TRIAD_MAP.end();
-				advance(itb,-1);
-				int TARGET;
-				
-/*				
-				//	Sanity check	
-				cout << "YOUR OLD MAPS: " << endl;	
-				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
-					cout <<"		" << it->first << " : " << it->second << endl;
-*/				
-				
-				// Start by making all removed type indicies negative
-				// ALSO, THIS IS WHERE WE POP OFF ELEMENTS OF OUR PAIR TRIPLET VECTOR
-				 
-				vector<int> POPPED; 
-
-				for (unsigned j = EXCLUDE_3B.size(); j-- > 0; ) // Since we're popping off by index, iterate over vector (ascending sorted) in reverse
-					PAIR_TRIPLETS.erase (PAIR_TRIPLETS.begin() + TRIAD_MAP[EXCLUDE_3B[j]]);
-				
-				for(int j=0; j<EXCLUDE_3B.size(); j++)
-				{
-					EXCL_IDX.push_back(TRIAD_MAP[EXCLUDE_3B[j]]);
-
-					NTRIP--;
-					
-					for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)				
-					{
-						if(it->second == EXCL_IDX[j])	// Then we need to exclude it!
-						{		
-							POPPED.push_back(it->second);
-							it->second = -1*it->second - 1;	
-						}
-					}				
-				}	
-				
-				// Sort the popoff list in ascending order
-				
-				sort (POPPED.begin(), POPPED.end());
-				
-/*				
-				//	Sanity check	
-				cout << "YOUR ~~ MAPS: " << endl;	
-				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
-					cout <<"		" << it->first << " : " << it->second << endl;
-				
-*/
-								
-				for(int i=0; i<POPPED.size(); i++)
-				{
-					for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
-					{
-						if(it->second>POPPED[i])
-							it->second -= 1;
-					}
-				}
-/*				
-				//	Sanity check	
-				cout << "YOUR NEW MAPS: " << endl;	
-				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
-					cout <<"		" << it->first << " : " << it->second << endl;
-*/				
-				
-				// Finally, rebuild the reverse maps
-				
-				TRIAD_MAP_REVERSE.clear();
-
-				for(it = TRIAD_MAP.begin(); it != TRIAD_MAP.end(); it++)
-					TRIAD_MAP_REVERSE.insert(make_pair(it->second,it->first));
-
-/*				
-				//	Sanity check	
-							
-				cout << "YOUR NEW REV MAPS: " << endl;
-
-				map<int, string>::iterator itc;
-				
-				for(itc = TRIAD_MAP_REVERSE.begin(); itc != TRIAD_MAP_REVERSE.end(); itc++)
-					cout <<"		" << itc->first << " : " << itc->second << endl;
-*/				
-/*				
-				// Sanity check
-				
-				cout << "Triplet types (force field): " << endl;
-				for(int i=0;i<NTRIP; i++)
-					cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[2] << endl;
-*/
 			}
-								
+
 			if(CONTROLS.USE_4B_CHEBY)
 			{
 			  //////////////////////////////////////////////////////////////////////
@@ -2116,8 +1962,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 					cout << "	The following unique triplets of pair types and thier allowed pair polynomial powers have been identified:" << endl;
 					cout << "	Note: The following types have been removed, if present: " << endl;
 					
-					for(int i=0;i<EXCLUDE_3B.size(); i++)
-						cout << "		" << EXCLUDE_3B[i] << endl;
+					for(int i=0;i<TRIPS.EXCLUDE.size(); i++)
+						cout << "		" << TRIPS.EXCLUDE[i] << endl;
 					cout << "	" << endl;
 					for(int i=0;i<NTRIP; i++)
 					{

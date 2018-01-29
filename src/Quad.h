@@ -72,6 +72,12 @@ public:
   // Values need to be specified for each contributing pair
   // [0] -> ij, [1] -> ik, [2] -> il, [3] -> jk, [4] -> jl, [5] -> kl 
 
+  vector<vector<vector< int > > > POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
+	 
+  vector<double> NBINS ;				// Number of bins to use for ij, ik, and jk distances when building the population histograms 
+  vector<double> BINWS; 				// Binwidths to use for ij, ik, and jk distances when building the population histograms 
+	
+
 	
   int N_TRUE_ALLOWED_POWERS;	// How many UNIQUE sets of powers do we have?
   int N_ALLOWED_POWERS;		// How many total sets of powers do we have?
@@ -96,7 +102,10 @@ public:
   CLUSTER() {} 
   virtual ~CLUSTER() {} 
 
-CLUSTER(int natom, int npair): ATOM_NAMES(natom), ATOM_PAIRS(npair), S_MAXIM(npair), S_MINIM(npair), MIN_FOUND(npair) // Default constructor
+  bool init_histogram(vector<struct PAIRS> & pairs, map<string,int>& pair_map) ;
+
+CLUSTER(int natom, int npair): ATOM_NAMES(natom), ATOM_PAIRS(npair), S_MAXIM(npair), S_MINIM(npair), MIN_FOUND(npair),
+	 NBINS(npair), BINWS(npair)
   {
 	 NATOMS = natom ;
 	 NPAIRS = npair ;
@@ -125,16 +134,9 @@ class TRIPLETS : public CLUSTER
 {
 public:
 	
-  vector<vector<vector< int > > > POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
-	 
-  vector<double> NBINS ;				// Number of bins to use for ij, ik, and jk distances when building the population histograms 
-  vector<double> BINWS; 				// Binwidths to use for ij, ik, and jk distances when building the population histograms 
-	
-  TRIPLETS(): CLUSTER(3,3), NBINS(3), BINWS(3)
+  TRIPLETS(): CLUSTER(3,3)
   {
   }
-  bool init_histogram(vector<struct PAIRS> & pairs, map<string,int>& pair_map) ;
-
 };
 
 
@@ -151,6 +153,7 @@ QUADRUPLETS():CLUSTER(4,6) { }
 
 
 class CLUSTER_LIST
+// A group of clusters that represents an N-body interaction.
 {
 public:
   // The number of CLUSTERS in the list.
@@ -170,6 +173,8 @@ public:
 
   map<int,int> INT_MAP_REVERSE ;
 
+  vector<string> EXCLUDE ;
+
   void build_maps(vector<struct PAIRS> &atom_pairs) ;
 
   void build_fast_maps(vector<struct PAIRS>& atom_pairs) ;
@@ -181,6 +186,8 @@ public:
   void link(vector<TRIPLETS> &cluster) ;
 
   void link(vector<QUADRUPLETS> &cluster) ;
+
+  void exclude() ;
 
 private:
   void build_maps_loop(int index, vector<int> pair_index, vector<struct PAIRS> &atom_pairs) ;
