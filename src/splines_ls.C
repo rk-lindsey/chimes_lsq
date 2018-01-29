@@ -28,13 +28,13 @@ using namespace std;
 #include <mpi.h>
 #endif 
 
-static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, 
-									CLUSTER_LIST &TRIPS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
-									map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, 
-									map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
+static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, 
+									CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
+									map<int,string> & PAIR_MAP_REVERSE, 
+									vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 									NEIGHBORS & NEIGHBOR_LIST) ;
 
-static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_TRIPLETS, vector<QUADRUPLETS> &PAIR_QUADRUPLETS, bool use_3b_cheby, bool use_4b_cheby);
+static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby) ;
 
 void store_quad_permutations(QUADRUPLETS &quad, vector<int> &unsorted_powers)  ;
 void permute_atom_indices(int idx, vector<string> names, QUADRUPLETS &quad, vector<int> &unsorted_powers, vector<int> perm, int unique_index,
@@ -99,10 +99,8 @@ int main(int argc, char* argv[])
 	// 2. Atom ordering in trajectory file does not change over frames ( should also always be true)
 	
 	vector<PAIRS> 		ATOM_PAIRS;			// Will store relevant info regarding atom interaction pair types.. 
-	vector<TRIPLETS> 	PAIR_TRIPLETS;		// Will store relevant info regarding atom interaction triplet types.. i.e. { [OO,OO,OO], [OO,HH,HH], ... }
 	CLUSTER_LIST TRIPS ;                // Triplet interaction: generic cluster interface.
 	CLUSTER_LIST QUADS ;                // Quadruplet interaction: generic cluster interface.
-	vector<QUADRUPLETS> PAIR_QUADRUPLETS ;
 	
 	vector<FRAME> 		TRAJECTORY;			// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
 	NEIGHBORS        	 NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
@@ -113,12 +111,6 @@ int main(int argc, char* argv[])
 	
 	map<string,int> PAIR_MAP;			// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
 	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
-	
-	map<string,int> TRIAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
-	map<int,string> TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
-	
-	map<string,int> QUAD_MAP;			// maps for collections of 4 atoms
-	map<int,string> QUAD_MAP_REVERSE;	// corresponding reverse-maps
 	
 	vector<CHARGE_CONSTRAINT> CHARGE_CONSTRAINTS;	// Specifies how we constrain charge fitting
 
@@ -141,8 +133,8 @@ int main(int argc, char* argv[])
 	}
 #endif
 
-	read_lsq_input(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, TRIPS, PAIR_QUADRUPLETS, QUADS, PAIR_MAP, 
-						PAIR_MAP_REVERSE, TRIAD_MAP, TRIAD_MAP_REVERSE, QUAD_MAP, QUAD_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
+	read_lsq_input(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, 
+						PAIR_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
 
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
 	{
@@ -220,8 +212,8 @@ int main(int argc, char* argv[])
 	{
 		CONTROLS.NUM_3B_CHEBY = 0;
 		
-		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-			CONTROLS.NUM_3B_CHEBY += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;
+		for(int i=0; i< TRIPS.VEC.size(); i++)
+			CONTROLS.NUM_3B_CHEBY += TRIPS.VEC[i].N_TRUE_ALLOWED_POWERS;
 
 #if VERBOSITY == 1
 		if ( RANK == 0 ) cout << "The number of three-body Chebyshev parameters is: " << CONTROLS.NUM_3B_CHEBY << endl;
@@ -232,8 +224,8 @@ int main(int argc, char* argv[])
 	{
 		CONTROLS.NUM_4B_CHEBY = 0;
 		
-		for(int i=0; i< PAIR_QUADRUPLETS.size(); i++)
-			CONTROLS.NUM_4B_CHEBY += PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS;
+		for(int i=0; i< QUADS.VEC.size(); i++)
+			CONTROLS.NUM_4B_CHEBY += QUADS.VEC[i].N_TRUE_ALLOWED_POWERS;
 
 #if VERBOSITY == 1
 		if ( RANK == 0 ) cout << "The number of four-body  Chebyshev parameters is: " << CONTROLS.NUM_4B_CHEBY << endl;
@@ -255,14 +247,14 @@ int main(int argc, char* argv[])
 	XYZ MAX_RMIN;
 	MAX_RMIN.X = MAX_RMIN.Y = MAX_RMIN.Z = 0;
 	
-	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+	for(int i=0; i<TRIPS.VEC.size(); i++)
 	{
-		if(PAIR_TRIPLETS[i].S_MINIM[0] > MAX_RMIN.X)
-			MAX_RMIN.X = PAIR_TRIPLETS[i].S_MINIM[0];
-		if(PAIR_TRIPLETS[i].S_MINIM[1] > MAX_RMIN.Y)
-			MAX_RMIN.Y = PAIR_TRIPLETS[i].S_MINIM[1];
-		if(PAIR_TRIPLETS[i].S_MINIM[2] > MAX_RMIN.Z) 
-			MAX_RMIN.Z = PAIR_TRIPLETS[i].S_MINIM[2];
+		if(TRIPS.VEC[i].S_MINIM[0] > MAX_RMIN.X)
+			MAX_RMIN.X = TRIPS.VEC[i].S_MINIM[0];
+		if(TRIPS.VEC[i].S_MINIM[1] > MAX_RMIN.Y)
+			MAX_RMIN.Y = TRIPS.VEC[i].S_MINIM[1];
+		if(TRIPS.VEC[i].S_MINIM[2] > MAX_RMIN.Z) 
+			MAX_RMIN.Z = TRIPS.VEC[i].S_MINIM[2];
 	}
 			
 	// Read in the trajectory
@@ -569,9 +561,9 @@ int main(int argc, char* argv[])
 		if ( RANK == 0 ) cout << "Setting up the histograms to handle sparse 3b-distance populations..." << endl;
 		#endif
 	
-		for (int i=0; i<PAIR_TRIPLETS.size(); i++)
+		for (int i=0; i<TRIPS.VEC.size(); i++)
 		{
-	     if ( ! PAIR_TRIPLETS[i].init_histogram(ATOM_PAIRS, PAIR_MAP) ) 
+	     if ( ! TRIPS.VEC[i].init_histogram(ATOM_PAIRS, PAIR_MAP) ) 
 		  {
 			 break ;
 		  }
@@ -637,7 +629,7 @@ int main(int argc, char* argv[])
 		NEIGHBOR_LIST.INITIALIZE(TRAJECTORY[i], NEIGHBOR_PADDING);
 		NEIGHBOR_LIST.DO_UPDATE(TRAJECTORY[i], CONTROLS);		
 
-		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, PAIR_QUADRUPLETS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, TRIAD_MAP, INT_QUAD_MAP, NEIGHBOR_LIST);
+		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS.VEC, QUADS.VEC, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, TRIPS.MAP, QUADS.INT_MAP, NEIGHBOR_LIST);
 		
 		if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
 			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
@@ -682,10 +674,10 @@ int main(int argc, char* argv[])
 		}
 	} 
 	
-	if(CONTROLS.USE_3B_CHEBY && PAIR_TRIPLETS[0].NBINS[0]>0) // Set the 3b-population-histogram based constraints 
+	if(CONTROLS.USE_3B_CHEBY && TRIPS.VEC[0].NBINS[0]>0) // Set the 3b-population-histogram based constraints 
 	{
 		if ( RANK == 0 ) cout << "Setting constraints based on 3b-population histogram constraints " << endl << endl;
-		ZCalc_3B_Cheby_Deriv_HIST(CONTROLS, ATOM_PAIRS, PAIR_TRIPLETS, A_MATRIX, PAIR_MAP, TRIAD_MAP);	
+		ZCalc_3B_Cheby_Deriv_HIST(CONTROLS, ATOM_PAIRS, TRIPS.VEC, A_MATRIX, PAIR_MAP, TRIPS.MAP);	
 	}
 	
 	
@@ -807,7 +799,7 @@ int main(int argc, char* argv[])
 			
 			if(N>CONTROLS.NFRAMES-1) // then this is the 3b histogram stuff. All b values (energies) should be zero. -- assumes we're using 3b!!
 			{
-				if(PAIR_TRIPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBIC)
+				if(TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBIC)
 				{	
 					fileb << 1500.0 << endl;
 					fileb << 1500.0 << endl;
@@ -1088,12 +1080,12 @@ int main(int argc, char* argv[])
 	
 	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0 || ATOM_PAIRS[0].SNUM_4B_CHEBY> 0)
 	{
-		header << endl << "FCUT TYPE: " << PAIR_TRIPLETS[0].FORCE_CUTOFF.to_string();
+		header << endl << "FCUT TYPE: " << TRIPS.VEC[0].FORCE_CUTOFF.to_string();
 		
-		if (PAIR_TRIPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGMOID || PAIR_TRIPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBSIG || PAIR_TRIPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBESTRETCH || PAIR_TRIPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-			header << " " << PAIR_TRIPLETS[0].FORCE_CUTOFF.STEEPNESS << " " << PAIR_TRIPLETS[0].FORCE_CUTOFF.OFFSET;
-		if(PAIR_TRIPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-			header << " " << PAIR_TRIPLETS[0].FORCE_CUTOFF.HEIGHT;
+		if (TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGMOID || TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBSIG || TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBESTRETCH || TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
+			header << " " << TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS << " " << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
+		if(TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
+			header << " " << TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
 
 		 header << endl;
 	 }
@@ -1106,9 +1098,9 @@ int main(int argc, char* argv[])
 	
 	int FOUND_SPECIAL = 0;
 
-	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
+	for(int i=0; i<TRIPS.VEC.size(); i++)
 	{
-		if(PAIR_TRIPLETS[i].S_MINIM[0] >= 0)
+		if(TRIPS.VEC[i].S_MINIM[0] >= 0)
 			FOUND_SPECIAL++;
 	}
 	
@@ -1116,33 +1108,33 @@ int main(int argc, char* argv[])
 	{
 		header << endl << "SPECIAL 3B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
-		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-			if(PAIR_TRIPLETS[i].S_MINIM[0] >= 0)
-			  PAIR_TRIPLETS[i].print_special(header, TRIAD_MAP_REVERSE[i], "S_MINIM") ;
+		for(int i=0; i<TRIPS.VEC.size(); i++)
+			if(TRIPS.VEC[i].S_MINIM[0] >= 0)
+			  TRIPS.VEC[i].print_special(header, TRIPS.MAP_REVERSE[i], "S_MINIM") ;
 	}
 		
 	FOUND_SPECIAL = 0;
 	
-	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-		if(PAIR_TRIPLETS[i].S_MAXIM[0] >= 0)
+	for(int i=0; i<TRIPS.VEC.size(); i++)
+		if(TRIPS.VEC[i].S_MAXIM[0] >= 0)
 			FOUND_SPECIAL++;
 	
 	if(FOUND_SPECIAL>0)
 	{
 		header << endl << "SPECIAL 3B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
-		for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-		  if(PAIR_TRIPLETS[i].S_MAXIM[0] >= 0)
-			 PAIR_TRIPLETS[i].print_special(header, TRIAD_MAP_REVERSE[i], "S_MAXIM") ;
+		for(int i=0; i<TRIPS.VEC.size(); i++)
+		  if(TRIPS.VEC[i].S_MAXIM[0] >= 0)
+			 TRIPS.VEC[i].print_special(header, TRIPS.MAP_REVERSE[i], "S_MAXIM") ;
 	}	
 
 	// Print out special cutoffs for 4-body interactions
 	
 	FOUND_SPECIAL = 0;
 
-	for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
+	for(int i=0; i<QUADS.VEC.size(); i++)
 	{
-		if(PAIR_QUADRUPLETS[i].S_MINIM[0] >= 0)
+		if(QUADS.VEC[i].S_MINIM[0] >= 0)
 			FOUND_SPECIAL++;
 	}
 	
@@ -1150,24 +1142,24 @@ int main(int argc, char* argv[])
 	{
 		header << endl << "SPECIAL 4B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
-		for(int i=0; i< PAIR_QUADRUPLETS.size(); i++)
-		  if ( PAIR_QUADRUPLETS[i].S_MINIM[0] >= 0 ) 
-			 PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MINIM") ;
+		for(int i=0; i< QUADS.VEC.size(); i++)
+		  if ( QUADS.VEC[i].S_MINIM[0] >= 0 ) 
+			 QUADS.VEC[i].print_special(header, QUADS.MAP_REVERSE[i], "S_MINIM") ;
 	}
 		
 	FOUND_SPECIAL = 0;
 	
-	for(int i=0; i < PAIR_QUADRUPLETS.size(); i++)
-		if( PAIR_QUADRUPLETS[i].S_MAXIM[0] >= 0)
+	for(int i=0; i < QUADS.VEC.size(); i++)
+		if( QUADS.VEC[i].S_MAXIM[0] >= 0)
 			FOUND_SPECIAL++;
 	
 	if(FOUND_SPECIAL>0)
 	{
 		header << endl << "SPECIAL 4B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
-		for(int i=0; i< PAIR_QUADRUPLETS.size(); i++)
-		  if ( PAIR_QUADRUPLETS[i].S_MAXIM[0] >= 0 )
-			 PAIR_QUADRUPLETS[i].print_special(header, QUAD_MAP_REVERSE[i], "S_MAXIM" ) ;
+		for(int i=0; i< QUADS.VEC.size(); i++)
+		  if ( QUADS.VEC[i].S_MAXIM[0] >= 0 )
+			 QUADS.VEC[i].print_special(header, QUADS.MAP_REVERSE[i], "S_MAXIM" ) ;
 
 	}	
 	
@@ -1176,11 +1168,11 @@ int main(int argc, char* argv[])
 		header << endl << "ATOM PAIR TRIPLETS: " << 0 << endl;
 	else
 	{
-		header << endl << "ATOM PAIR TRIPLETS: " << PAIR_TRIPLETS.size() << endl << endl;	
+		header << endl << "ATOM PAIR TRIPLETS: " << TRIPS.VEC.size() << endl << endl;	
 
-		for(int i=0;i<PAIR_TRIPLETS.size(); i++)
+		for(int i=0;i<TRIPS.VEC.size(); i++)
 		{
-		  PAIR_TRIPLETS[i].print_header(header) ;
+		  TRIPS.VEC[i].print_header(header) ;
 		}	 
 		
 	}
@@ -1189,12 +1181,12 @@ int main(int argc, char* argv[])
 		header << "ATOM PAIR QUADRUPLETS: " << 0 << endl << endl;
 	else
 	{
-		header << "ATOM PAIR QUADRUPLETS: " << PAIR_QUADRUPLETS.size() << endl << endl;	
+		header << "ATOM PAIR QUADRUPLETS: " << QUADS.VEC.size() << endl << endl;	
 		
 		
-		for(int i=0; i < PAIR_QUADRUPLETS.size(); i++)
+		for(int i=0; i < QUADS.VEC.size(); i++)
 		{
-		  PAIR_QUADRUPLETS[i].print_header(header) ;
+		  QUADS.VEC[i].print_header(header) ;
 		}
 
 	}
@@ -1219,23 +1211,23 @@ int main(int argc, char* argv[])
 		MAPFILE << i->second << " " << i->first << endl;
 	}
 
-	if(TRIAD_MAP.size() > 0)
+	if(TRIPS.MAP.size() > 0)
 	{
 		MAPFILE << endl;
 		
-		MAPFILE << "TRIPMAPS: " << TRIAD_MAP.size() << endl;
+		MAPFILE << "TRIPMAPS: " << TRIPS.MAP.size() << endl;
 		
-		for(map<string,int>::iterator i=TRIAD_MAP.begin(); i!=TRIAD_MAP.end(); i++)
+		for(map<string,int>::iterator i=TRIPS.MAP.begin(); i!=TRIPS.MAP.end(); i++)
 			MAPFILE << i->second << " " << i->first << endl;
 	}
 	
-	if(QUAD_MAP.size() > 0)
+	if(QUADS.MAP.size() > 0)
 	{
 		MAPFILE << endl;
 		
-		MAPFILE << "QUADMAPS: " << QUAD_MAP.size() << endl;
+		MAPFILE << "QUADMAPS: " << QUADS.MAP.size() << endl;
 		
-		for(map<string,int>::iterator i=QUAD_MAP.begin(); i!=QUAD_MAP.end(); i++)
+		for(map<string,int>::iterator i=QUADS.MAP.begin(); i!=QUADS.MAP.end(); i++)
 			MAPFILE << i->second << " " << i->first << endl;
 	}
 	
@@ -1248,7 +1240,7 @@ int main(int argc, char* argv[])
 	//////////////////////////////////////////////////	  
 
 	#if VERBOSITY == 1
-	print_bond_stats(ATOM_PAIRS, PAIR_TRIPLETS, PAIR_QUADRUPLETS, CONTROLS.USE_3B_CHEBY, CONTROLS.USE_4B_CHEBY) ;
+	print_bond_stats(ATOM_PAIRS, TRIPS, QUADS, CONTROLS.USE_3B_CHEBY, CONTROLS.USE_4B_CHEBY) ;
 	#endif
 	  
 return 0;		  
@@ -1266,10 +1258,9 @@ return 0;
 
 
 // Read program input from the file "splines_ls.in".
-static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, vector<TRIPLETS> & PAIR_TRIPLETS, 
-									CLUSTER_LIST &TRIPS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
-									map<int,string> & PAIR_MAP_REVERSE, map<string,int> & TRIAD_MAP, map<int,string> & TRIAD_MAP_REVERSE, 
-									map<string,int> & QUAD_MAP, map<int,string> & QUAD_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
+static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, 
+									CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
+									map<int,string> & PAIR_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 									NEIGHBORS & NEIGHBOR_LIST)
 {
 	bool   FOUND_END = false;
@@ -1736,16 +1727,13 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			NTRIP = factorial(CONTROLS.NATMTYP+3-1)/factorial(3)/factorial(CONTROLS.NATMTYP-1);
 	
-			// Link the PAIR_TRIPLETS into the generic TRIPS structure.
-			PAIR_TRIPLETS.resize(NTRIP);
-			TRIPS.link( PAIR_TRIPLETS ) ;
+			TRIPS.VEC.resize(NTRIP, CLUSTER(3,3) );
 			
 			// Set up quadruplets
 			
 			NQUAD = factorial(CONTROLS.NATMTYP+4-1)/factorial(4)/factorial(CONTROLS.NATMTYP-1);
 			
-			PAIR_QUADRUPLETS.resize(NQUAD) ;
-			QUADS.link( PAIR_QUADRUPLETS ) ;
+			QUADS.VEC.resize(NQUAD, CLUSTER(4, 6) ) ;
 			
 		}
 
@@ -1891,18 +1879,13 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			  TRIPS.build_pairs(ATOM_PAIRS, PAIR_MAP) ;
 			  
 			  for ( int i = 0 ; i < NTRIP ; i++ ) 
-				 PAIR_TRIPLETS[i].build(CONTROLS.CHEBY_3B_ORDER) ;
+				 TRIPS.VEC[i].build(CONTROLS.CHEBY_3B_ORDER) ;
 
-				TRIPS.exclude() ;
+			  TRIPS.build_maps(ATOM_PAIRS) ;
 
-				TRIPS.build_maps(ATOM_PAIRS) ;
-				TRIAD_MAP = TRIPS.MAP ;
+			  TRIPS.exclude() ;
 
-				TRIAD_MAP_REVERSE = TRIPS.MAP_REVERSE ;
-				for (unsigned j = TRIPS.EXCLUDE.size(); j-- > 0; ) // Since we're popping off by index, iterate over vector (ascending sorted) in reverse
-				  PAIR_TRIPLETS.erase (PAIR_TRIPLETS.begin() + TRIPS.MAP[TRIPS.EXCLUDE[j]]);
-				
-
+			  TRIPS.build_fast_maps(ATOM_PAIRS) ;
 			}
 
 			if(CONTROLS.USE_4B_CHEBY)
@@ -1912,11 +1895,10 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 				//////////////////////////////////////////////////////////////////////
 
 				QUADS.build_pairs(ATOM_PAIRS, PAIR_MAP) ;
-				// build_quad_pairs(PAIR_QUADRUPLETS, CONTROLS.NATMTYP, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP) ;
 			
 				for(int i=0; i<NQUAD; i++)
 				{
-				  PAIR_QUADRUPLETS[i].build(CONTROLS.CHEBY_4B_ORDER) ;
+				  QUADS.VEC[i].build(CONTROLS.CHEBY_4B_ORDER) ;
 				}
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1925,11 +1907,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 
 
 				QUADS.build_maps(ATOM_PAIRS) ;
-				QUAD_MAP.clear() ;
-				QUAD_MAP = QUADS.MAP ;
-				QUAD_MAP_REVERSE = QUADS.MAP_REVERSE ;
-
-				//build_quad_maps(QUAD_MAP, QUAD_MAP_REVERSE, ATOM_PAIRS, NPAIR, PAIR_QUADRUPLETS, NQUAD) ;
 
 				//////////////////////////////////////////////////////////////////////
 				// Since there are so many pairs in an atom quadruplet, we'll use "fast" maps here.
@@ -1967,23 +1944,23 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 					cout << "	" << endl;
 					for(int i=0;i<NTRIP; i++)
 					{
-						cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[2] << ":";
-						cout << " Number of unique sets of powers: " << PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS << " (" << PAIR_TRIPLETS[i].N_ALLOWED_POWERS << " total)..." << endl;	
+						cout << "		" << TRIPS.VEC[i].INDX << "  " << TRIPS.VEC[i].ATOM_PAIRS[0] << " " << TRIPS.VEC[i].ATOM_PAIRS[1] << " " << TRIPS.VEC[i].ATOM_PAIRS[2] << ":";
+						cout << " Number of unique sets of powers: " << TRIPS.VEC[i].N_TRUE_ALLOWED_POWERS << " (" << TRIPS.VEC[i].N_ALLOWED_POWERS << " total)..." << endl;	
 						cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
 						cout << "		   ----------------------------------------------------" << endl;					
 					
-						for(int j=0; j<PAIR_TRIPLETS[i].ALLOWED_POWERS.size(); j++)
+						for(int j=0; j<TRIPS.VEC[i].ALLOWED_POWERS.size(); j++)
 						{
-							//						cout << "		   " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].X << " " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Y << " " << PAIR_TRIPLETS[i].ALLOWED_POWERS[j].Z << endl;		
+							//						cout << "		   " << TRIPS.VEC[i].ALLOWED_POWERS[j].X << " " << TRIPS.VEC[i].ALLOWED_POWERS[j].Y << " " << TRIPS.VEC[i].ALLOWED_POWERS[j].Z << endl;		
 						 
 										
 
 							cout << "		      " << setw(6) << fixed << left << j << " ";
-							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][0]  << " ";
-							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][1]  << " ";
-							cout << " " << setw(2) << fixed << left << PAIR_TRIPLETS[i].ALLOWED_POWERS[j][2]  << " ";
-							cout << "       " << setw(8) << PAIR_TRIPLETS[i].EQUIV_INDICES[j] << " ";
-							cout << "       " << setw(8) << PAIR_TRIPLETS[i].PARAM_INDICES[j] << endl; 
+							cout << " " << setw(2) << fixed << left << TRIPS.VEC[i].ALLOWED_POWERS[j][0]  << " ";
+							cout << " " << setw(2) << fixed << left << TRIPS.VEC[i].ALLOWED_POWERS[j][1]  << " ";
+							cout << " " << setw(2) << fixed << left << TRIPS.VEC[i].ALLOWED_POWERS[j][2]  << " ";
+							cout << "       " << setw(8) << TRIPS.VEC[i].EQUIV_INDICES[j] << " ";
+							cout << "       " << setw(8) << TRIPS.VEC[i].PARAM_INDICES[j] << endl; 
 						
 						}
 
@@ -2001,7 +1978,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 
 					for(int i=0;i<NQUAD; i++)
 					{
-					  PAIR_QUADRUPLETS[i].print() ;
+					  QUADS.VEC[i].print() ;
 					}
 				}
 				#endif		
@@ -2240,20 +2217,20 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			if(TEMP_STR == "ALL" && NTRIP >0 )
 			{				
-				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MAXIM[0];
+				STREAM_PARSER >> TRIPS.VEC[0].S_MAXIM[0];
 				
-				if(PAIR_TRIPLETS[0].S_MAXIM[0]>NEIGHBOR_LIST.MAX_CUTOFF_3B)
-					NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM[0];
+				if(TRIPS.VEC[0].S_MAXIM[0]>NEIGHBOR_LIST.MAX_CUTOFF_3B)
+					NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.VEC[0].S_MAXIM[0];
 				
 				for(int i=0; i<NTRIP; i++)
 				{
-					PAIR_TRIPLETS[i].S_MAXIM[0] = PAIR_TRIPLETS[0].S_MAXIM[0];
-					PAIR_TRIPLETS[i].S_MAXIM[1] = PAIR_TRIPLETS[0].S_MAXIM[0];
-					PAIR_TRIPLETS[i].S_MAXIM[2] = PAIR_TRIPLETS[0].S_MAXIM[0];
+					TRIPS.VEC[i].S_MAXIM[0] = TRIPS.VEC[0].S_MAXIM[0];
+					TRIPS.VEC[i].S_MAXIM[1] = TRIPS.VEC[0].S_MAXIM[0];
+					TRIPS.VEC[i].S_MAXIM[2] = TRIPS.VEC[0].S_MAXIM[0];
 				}
 				
 				#if VERBOSITY == 1
-				if ( RANK == 0 ) cout << "	Note: Setting all 3-body r_max values to " <<  PAIR_TRIPLETS[0].S_MAXIM[0] << endl;
+				if ( RANK == 0 ) cout << "	Note: Setting all 3-body r_max values to " <<  TRIPS.VEC[0].S_MAXIM[0] << endl;
 				#endif				
 			}
 			else if(TEMP_STR == "SPECIFIC" && NTRIP >0 )
@@ -2316,58 +2293,58 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 						cout << "		First distance, pair type: " << TMP_JK << endl;
 					}
 					
-					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
-					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
-					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
+					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ TRIPS.VEC[TRIPS.MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
+					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ TRIPS.VEC[TRIPS.MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
+					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ TRIPS.VEC[TRIPS.MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
 					
 					// Read the first inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_IJ == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
+					if      ( (TMP_IJ == TARG_IJ) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
 					
-					else if ( (TMP_IJ == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
+					else if ( (TMP_IJ == TARG_IK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
 					
-					else if ( (TMP_IJ == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
+					else if ( (TMP_IJ == TARG_JK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 
 
 					// Read the second inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_IK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
+					if      ( (TMP_IK == TARG_IJ) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
 					
-					else if ( (TMP_IK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
+					else if ( (TMP_IK == TARG_IK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
 					
-					else if ( (TMP_IK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
+					else if ( (TMP_IK == TARG_JK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 
 					
 					// Read the third inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_JK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
+					if      ( (TMP_JK == TARG_IJ) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
 					
-					else if ( (TMP_JK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
+					else if ( (TMP_JK == TARG_IK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
 					
-					else if ( (TMP_JK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
+					else if ( (TMP_JK == TARG_JK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 					
 					
-					if(PAIR_TRIPLETS[0].S_MAXIM[0] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
-						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM[0];
-					if(PAIR_TRIPLETS[0].S_MAXIM[1] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
-						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM[1];
-					if(PAIR_TRIPLETS[0].S_MAXIM[2] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
-						NEIGHBOR_LIST.MAX_CUTOFF_3B = PAIR_TRIPLETS[0].S_MAXIM[2];
+					if(TRIPS.VEC[0].S_MAXIM[0] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
+						NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.VEC[0].S_MAXIM[0];
+					if(TRIPS.VEC[0].S_MAXIM[1] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
+						NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.VEC[0].S_MAXIM[1];
+					if(TRIPS.VEC[0].S_MAXIM[2] > NEIGHBOR_LIST.MAX_CUTOFF_3B)
+						NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.VEC[0].S_MAXIM[2];
 					
 					
 					STREAM_PARSER.str("");
@@ -2377,9 +2354,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 					if ( RANK == 0 ) 
 					{
 						cout << "		" << TEMP_STR << "(" <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-							              << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] << ", "
-									 	  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] << ", "
-										  << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] << endl;
+							              << TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[0] << ", "
+									 	  << TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[1] << ", "
+										  << TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MAXIM[2] << endl;
 					}
 					#endif	
 				}
@@ -2397,17 +2374,17 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			if(TEMP_STR == "ALL" && NTRIP >0 )
 			{				
-				STREAM_PARSER >> PAIR_TRIPLETS[0].S_MINIM[0];
+				STREAM_PARSER >> TRIPS.VEC[0].S_MINIM[0];
 				
 				for(int i=0; i<NTRIP; i++)
 				{
-					PAIR_TRIPLETS[i].S_MINIM[0] = PAIR_TRIPLETS[0].S_MINIM[0];
-					PAIR_TRIPLETS[i].S_MINIM[1] = PAIR_TRIPLETS[0].S_MINIM[0];
-					PAIR_TRIPLETS[i].S_MINIM[2] = PAIR_TRIPLETS[0].S_MINIM[0];
+					TRIPS.VEC[i].S_MINIM[0] = TRIPS.VEC[0].S_MINIM[0];
+					TRIPS.VEC[i].S_MINIM[1] = TRIPS.VEC[0].S_MINIM[0];
+					TRIPS.VEC[i].S_MINIM[2] = TRIPS.VEC[0].S_MINIM[0];
 				}
 				
 				#if VERBOSITY == 1
-				if ( RANK == 0 ) cout << "	Note: Setting all 3-body r_min values to " <<  PAIR_TRIPLETS[0].S_MINIM[0] << endl;
+				if ( RANK == 0 ) cout << "	Note: Setting all 3-body r_min values to " <<  TRIPS.VEC[0].S_MINIM[0] << endl;
 				#endif				
 			}
 			else if(TEMP_STR == "SPECIFIC" && NTRIP >0 )
@@ -2469,50 +2446,50 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 						cout << "		First distance, pair type: " << TMP_JK << endl;
 					}
 					
-					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
-					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
-					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
+					TARG_IJ = ATOM_PAIRS[ PAIR_MAP[ TRIPS.VEC[TRIPS.MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
+					TARG_IK = ATOM_PAIRS[ PAIR_MAP[ TRIPS.VEC[TRIPS.MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
+					TARG_JK = ATOM_PAIRS[ PAIR_MAP[ TRIPS.VEC[TRIPS.MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
 					
 					// Read the first inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_IJ == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
+					if      ( (TMP_IJ == TARG_IJ) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[0] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
 					
-					else if ( (TMP_IJ == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
+					else if ( (TMP_IJ == TARG_IK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[1] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
 					
-					else if ( (TMP_IJ == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
+					else if ( (TMP_IJ == TARG_JK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[2] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 
 
 					// Read the second inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_IK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
+					if      ( (TMP_IK == TARG_IJ) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[0] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
 					
-					else if ( (TMP_IK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
+					else if ( (TMP_IK == TARG_IK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[1] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
 					
-					else if ( (TMP_IK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
+					else if ( (TMP_IK == TARG_JK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[2] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 
 					
 					// Read the third inner cutoff
 
 					STREAM_PARSER >> TMP_VAL;
 					
-					if      ( (TMP_JK == TARG_IJ) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
+					if      ( (TMP_JK == TARG_IJ) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[0] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
 					
-					else if ( (TMP_JK == TARG_IK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
+					else if ( (TMP_JK == TARG_IK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[1] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
 					
-					else if ( (TMP_JK == TARG_JK) && (PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
-						PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
+					else if ( (TMP_JK == TARG_JK) && (TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[2] == -1) )
+						TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 					
 					
 					
@@ -2522,9 +2499,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 					#if VERBOSITY == 1
 					if ( RANK == 0 ) 
 						cout << "		" << TEMP_STR << "(" <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-							  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[0] << ", "
-							  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[1] << ", "
-							  << setw(10) << fixed << right << setprecision(4) << PAIR_TRIPLETS[TRIAD_MAP[TEMP_STR]].S_MINIM[2] << endl;
+							  << setw(10) << fixed << right << setprecision(4) << TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[0] << ", "
+							  << setw(10) << fixed << right << setprecision(4) << TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[1] << ", "
+							  << setw(10) << fixed << right << setprecision(4) << TRIPS.VEC[TRIPS.MAP[TEMP_STR]].S_MINIM[2] << endl;
 					#endif	
 				}
 			}
@@ -2541,19 +2518,19 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			if(TEMP_STR == "ALL" && NQUAD >0 )
 			{				
-				STREAM_PARSER >> PAIR_QUADRUPLETS[0].S_MAXIM[0];
+				STREAM_PARSER >> QUADS.VEC[0].S_MAXIM[0];
 				
-				if( PAIR_QUADRUPLETS[0].S_MAXIM[0] > NEIGHBOR_LIST.MAX_CUTOFF_4B)
-					NEIGHBOR_LIST.MAX_CUTOFF_4B = PAIR_QUADRUPLETS[0].S_MAXIM[0];
+				if( QUADS.VEC[0].S_MAXIM[0] > NEIGHBOR_LIST.MAX_CUTOFF_4B)
+					NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.VEC[0].S_MAXIM[0];
 
 				for(int i=0; i<NQUAD; i++)
 				{
 					for(int j=0; j<6; j++)
-						PAIR_QUADRUPLETS[i].S_MAXIM[j] = PAIR_QUADRUPLETS[0].S_MAXIM[0];
+						QUADS.VEC[i].S_MAXIM[j] = QUADS.VEC[0].S_MAXIM[0];
 				}
 				
 				#if VERBOSITY == 1
-				if ( RANK == 0 ) cout << "	Note: Setting all 4-body r_max values to " <<  PAIR_QUADRUPLETS[0].S_MAXIM[0] << endl;
+				if ( RANK == 0 ) cout << "	Note: Setting all 4-body r_max values to " <<  QUADS.VEC[0].S_MAXIM[0] << endl;
 				#endif				
 			}
 			else if(TEMP_STR == "SPECIFIC" && NQUAD >0 )
@@ -2599,7 +2576,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 							cout << "		First distance, pair type: " << TMP_PAIRTYPS[j] << endl;
 						}
 						
-						TRG_PAIRTYPS[j] = ATOM_PAIRS[ PAIR_MAP[ PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].ATOM_PAIRS[j] ] ].PRPR_NM;
+						TRG_PAIRTYPS[j] = ATOM_PAIRS[ PAIR_MAP[ QUADS.VEC[QUADS.MAP[TEMP_STR]].ATOM_PAIRS[j] ] ].PRPR_NM;
 
 					}
 					
@@ -2613,8 +2590,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 					for(int j=0; j<6; j++)	// Iterate over TMP pair types
 					{
 						for(int k=0; k<6; k++)	// Iterate over TRG pair types
-							if( (TMP_PAIRTYPS[j] == TRG_PAIRTYPS[k]) && (PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM[k] == -1))
-								PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM[k] = TMP_CUTOFFS[j];
+							if( (TMP_PAIRTYPS[j] == TRG_PAIRTYPS[k]) && (QUADS.VEC[QUADS.MAP[TEMP_STR]].S_MAXIM[k] == -1))
+								QUADS.VEC[QUADS.MAP[TEMP_STR]].S_MAXIM[k] = TMP_CUTOFFS[j];
 						
 						// Reset the 4b max cutoff value
 						
@@ -2635,9 +2612,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 						cout << TRG_PAIRTYPS[5] << "): ";
 							
 						for (int j=0; j<5; j++)
-							cout << PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM[j] << ", ";
+							cout << QUADS.VEC[QUADS.MAP[TEMP_STR]].S_MAXIM[j] << ", ";
 						
-						cout << PAIR_QUADRUPLETS[QUAD_MAP[TEMP_STR]].S_MAXIM[5] << endl;	
+						cout << QUADS.VEC[QUADS.MAP[TEMP_STR]].S_MAXIM[5] << endl;	
 					}
 					#endif	
 					
@@ -2660,11 +2637,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			for(int i=0; i<ATOM_PAIRS.size(); i++)
 				ATOM_PAIRS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
 			
-			for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-				PAIR_TRIPLETS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
+			for(int i=0; i<TRIPS.VEC.size(); i++)
+				TRIPS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
 			
-			for(int i=0; i<PAIR_QUADRUPLETS.size(); i++)
-				PAIR_QUADRUPLETS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
+			for(int i=0; i<QUADS.VEC.size(); i++)
+				QUADS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
 			
 			#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# FCUTTYP #: " << TEMP_TYPE << "	... for 3-body and 4-body Chebyshev interactions" << endl;	
@@ -2672,45 +2649,45 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, v
 			
 			if(TEMP_TYPE=="SIGMOID" || TEMP_TYPE=="CUBSIG" || TEMP_TYPE=="CUBESTRETCH" || TEMP_TYPE == "SIGFLT")
 			{
-				cin >> PAIR_TRIPLETS[0].FORCE_CUTOFF.STEEPNESS;
-				cin >> PAIR_TRIPLETS[0].FORCE_CUTOFF.OFFSET;
+				cin >> TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS;
+				cin >> TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
 				
-				if(PAIR_TRIPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-					cin >> PAIR_TRIPLETS[0].FORCE_CUTOFF.HEIGHT;
+				if(TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
+					cin >> TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
 				
 				#if VERBOSITY == 1
 				if ( RANK == 0 ) cout << "			With steepness, offset, and height of: " 
 											 << fixed << setprecision(3) 
-											 << PAIR_TRIPLETS[0].FORCE_CUTOFF.STEEPNESS 
-											 << ",	" << PAIR_TRIPLETS[0].FORCE_CUTOFF.OFFSET 
-											 << ", and  " << PAIR_TRIPLETS[0].FORCE_CUTOFF.HEIGHT << endl;	
+											 << TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS 
+											 << ",	" << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET 
+											 << ", and  " << TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT << endl;	
 				#endif					
 			}
 			cin.ignore();
 			
-			PAIR_TRIPLETS[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
+			TRIPS.VEC[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
 
-			for(int i=1; i<PAIR_TRIPLETS.size(); i++)	// Copy all class elements
+			for(int i=1; i<TRIPS.VEC.size(); i++)	// Copy all class elements
 			{
-//				PAIR_TRIPLETS[i].FORCE_CUTOFF = PAIR_TRIPLETS[0].FORCE_CUTOFF;
-				PAIR_TRIPLETS[i].FORCE_CUTOFF.BODIEDNESS = PAIR_TRIPLETS[0].FORCE_CUTOFF.BODIEDNESS;
+//				TRIPS.VEC[i].FORCE_CUTOFF = TRIPS.VEC[0].FORCE_CUTOFF;
+				TRIPS.VEC[i].FORCE_CUTOFF.BODIEDNESS = TRIPS.VEC[0].FORCE_CUTOFF.BODIEDNESS;
 			}
 			
 			if(CONTROLS.USE_4B_CHEBY)
 			{
-//				PAIR_QUADRUPLETS[0].FORCE_CUTOFF           =  PAIR_TRIPLETS[0].FORCE_CUTOFF;
-				PAIR_QUADRUPLETS[0].FORCE_CUTOFF.STEEPNESS =  PAIR_TRIPLETS[0].FORCE_CUTOFF.STEEPNESS;
-				PAIR_QUADRUPLETS[0].FORCE_CUTOFF.OFFSET    =  PAIR_TRIPLETS[0].FORCE_CUTOFF.OFFSET;
+//				QUADS.VEC[0].FORCE_CUTOFF           =  TRIPS.VEC[0].FORCE_CUTOFF;
+				QUADS.VEC[0].FORCE_CUTOFF.STEEPNESS =  TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS;
+				QUADS.VEC[0].FORCE_CUTOFF.OFFSET    =  TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
 			
-				if(PAIR_QUADRUPLETS[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-					PAIR_QUADRUPLETS[0].FORCE_CUTOFF.HEIGHT = PAIR_TRIPLETS[0].FORCE_CUTOFF.HEIGHT;
+				if(QUADS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
+					QUADS.VEC[0].FORCE_CUTOFF.HEIGHT = TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
 			
-				PAIR_QUADRUPLETS[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
+				QUADS.VEC[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
 
-				for(int i=1; i<PAIR_QUADRUPLETS.size(); i++)	// Copy all class elements
+				for(int i=1; i<QUADS.VEC.size(); i++)	// Copy all class elements
 				{
-//					PAIR_QUADRUPLETS[i].FORCE_CUTOFF = PAIR_QUADRUPLETS[0].FORCE_CUTOFF;
-					PAIR_QUADRUPLETS[i].FORCE_CUTOFF.BODIEDNESS = PAIR_QUADRUPLETS[0].FORCE_CUTOFF.BODIEDNESS;
+//					QUADS.VEC[i].FORCE_CUTOFF = QUADS.VEC[0].FORCE_CUTOFF;
+					QUADS.VEC[i].FORCE_CUTOFF.BODIEDNESS = QUADS.VEC[0].FORCE_CUTOFF.BODIEDNESS;
 				}
 			}
 
@@ -2735,7 +2712,7 @@ void exit_run(int value)
 
 }
 
-static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_TRIPLETS, vector<QUADRUPLETS> &PAIR_QUADRUPLETS, bool use_3b_cheby, bool use_4b_cheby)
+static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby)
 // Print statistics on bonding.
 {
 
@@ -2780,46 +2757,46 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 		{
 			if ( RANK == 0 ) cout << "	Minimum distances between atoms triplet pairs: (Angstr.)" << endl;
 			
-			for (int k=0; k<PAIR_TRIPLETS.size(); k++) 
+			for (int k=0; k<TRIPS.VEC.size(); k++) 
 			{
 				XYZ sum = {0.0, 0.0, 0.0} ;
 #ifdef USE_MPI
-				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND[0]), &(sum.X), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND[1]), &(sum.Y), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-				MPI_Reduce(&(PAIR_TRIPLETS[k].MIN_FOUND[2]), &(sum.Z), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+				MPI_Reduce(&(TRIPS.VEC[k].MIN_FOUND[0]), &(sum.X), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+				MPI_Reduce(&(TRIPS.VEC[k].MIN_FOUND[1]), &(sum.Y), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+				MPI_Reduce(&(TRIPS.VEC[k].MIN_FOUND[2]), &(sum.Z), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 #else				
-				sum.X = PAIR_TRIPLETS[k].MIN_FOUND[0] ;
-				sum.Y = PAIR_TRIPLETS[k].MIN_FOUND[1] ;
-				sum.Z = PAIR_TRIPLETS[k].MIN_FOUND[1] ;
+				sum.X = TRIPS.VEC[k].MIN_FOUND[0] ;
+				sum.Y = TRIPS.VEC[k].MIN_FOUND[1] ;
+				sum.Z = TRIPS.VEC[k].MIN_FOUND[1] ;
 #endif
 				if ( RANK == 0 ) cout << "		" << k << "	" 					
-											 << PAIR_TRIPLETS[k].ATOM_PAIRS[0]    << " " 
-											 << PAIR_TRIPLETS[k].ATOM_PAIRS[1]    << " " 
-											 << PAIR_TRIPLETS[k].ATOM_PAIRS[2]    << " "
+											 << TRIPS.VEC[k].ATOM_PAIRS[0]    << " " 
+											 << TRIPS.VEC[k].ATOM_PAIRS[1]    << " " 
+											 << TRIPS.VEC[k].ATOM_PAIRS[2]    << " "
 											 /* 
 											 << sum.X << " " 
 											 << sum.Y << " " 
 											 << sum.Z << endl;
 											 */
-											 << PAIR_TRIPLETS[k].MIN_FOUND[0] << " " 
-											 << PAIR_TRIPLETS[k].MIN_FOUND[1] << " " 
-											 << PAIR_TRIPLETS[k].MIN_FOUND[2] << endl;
+											 << TRIPS.VEC[k].MIN_FOUND[0] << " " 
+											 << TRIPS.VEC[k].MIN_FOUND[1] << " " 
+											 << TRIPS.VEC[k].MIN_FOUND[2] << endl;
 			
 			}
 			if ( RANK == 0 ) cout << "	Total number of configurations contributing to each triplet type:" << endl;
 		
-			for (int k=0; k<PAIR_TRIPLETS.size(); k++)
+			for (int k=0; k<TRIPS.VEC.size(); k++)
 			{
 				int sum = 0 ;
 #ifdef USE_MPI
-				MPI_Reduce(&(PAIR_TRIPLETS[k].N_CFG_CONTRIB), &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+				MPI_Reduce(&(TRIPS.VEC[k].N_CFG_CONTRIB), &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 #else
-				sum = PAIR_TRIPLETS[k].N_CFG_CONTRIB ;
+				sum = TRIPS.VEC[k].N_CFG_CONTRIB ;
 #endif				
 				if ( RANK == 0 ) cout << "		" << k << "	" 					
-											 << PAIR_TRIPLETS[k].ATOM_PAIRS[0] << " " 
-											 << PAIR_TRIPLETS[k].ATOM_PAIRS[1] << " " 
-											 << PAIR_TRIPLETS[k].ATOM_PAIRS[2] << " " 
+											 << TRIPS.VEC[k].ATOM_PAIRS[0] << " " 
+											 << TRIPS.VEC[k].ATOM_PAIRS[1] << " " 
+											 << TRIPS.VEC[k].ATOM_PAIRS[2] << " " 
 											 << sum << endl;
 			}
 		}
@@ -2829,24 +2806,24 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 			
 			if ( RANK == 0 ) cout << "	Minimum distances between atoms quadruplet pairs: (Angstr.)" << endl;
 			
-			for (int k=0; k<PAIR_TRIPLETS.size(); k++) 
+			for (int k=0; k<TRIPS.VEC.size(); k++) 
 			{
 				vector<double> sum(6,0.0);
 				
 				#ifdef USE_MPI
 			
 					for(int m=0; m<6; m++)
-						MPI_Reduce(&(PAIR_QUADRUPLETS[k].MIN_FOUND[m]), &(sum[m]), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+						MPI_Reduce(&(QUADS.VEC[k].MIN_FOUND[m]), &(sum[m]), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 				#else	
 					for(int m=0; m<6; m++)
-						sum[m] = PAIR_QUADRUPLETS[k].MIN_FOUND[m];
+						sum[m] = QUADS.VEC[k].MIN_FOUND[m];
 				#endif
 					
 				if ( RANK == 0 ) 
 				{
 					cout << "		" << k << "	" ;	
 					for(int m=0; m<6; m++)
-						cout << PAIR_QUADRUPLETS[k].ATOM_PAIRS[m] << " ";
+						cout << QUADS.VEC[k].ATOM_PAIRS[m] << " ";
 					for(int m=0; m<6; m++)
 						cout << sum[m] << " ";
 					cout << endl;
@@ -2855,21 +2832,21 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, vector<TRIPLETS> &PAIR_T
 			
 			if ( RANK == 0 ) cout << "	Total number of configurations contributing to each quadruplet type:" << endl;
 		
-			for (int k=0; k<PAIR_QUADRUPLETS.size(); k++)
+			for (int k=0; k<QUADS.VEC.size(); k++)
 			{
 				int sum = 0 ;
 				
 				#ifdef USE_MPI
-					MPI_Reduce(&(PAIR_QUADRUPLETS[k].N_CFG_CONTRIB), &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+					MPI_Reduce(&(QUADS.VEC[k].N_CFG_CONTRIB), &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 				#else
-					sum = PAIR_QUADRUPLETS[k].N_CFG_CONTRIB ;
+					sum = QUADS.VEC[k].N_CFG_CONTRIB ;
 				#endif	
 								
 				if ( RANK == 0 ) 
 				{
 					cout << "		" << k << "	" ;	
 					for(int m=0; m<6; m++)
-						cout << PAIR_QUADRUPLETS[k].ATOM_PAIRS[m] << " ";
+						cout << QUADS.VEC[k].ATOM_PAIRS[m] << " ";
 					cout << sum << endl;
 				}	
 			}

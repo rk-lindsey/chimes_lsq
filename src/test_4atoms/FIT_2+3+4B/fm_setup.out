@@ -20,6 +20,9 @@ Reading input file...
 Made the following pairs: 
 0 CC
 Made the following triplets: 0 CC CC CC 
+
+Generating fast maps for atom triplets: 
+		Atom type idxs:  0 0 0 Triplet name:       CCCCCC Unique triplet index:    0
 Made the following quadruplets: 0 CC CC CC CC CC CC 
 
 Generating fast maps for atom quadruplets: 

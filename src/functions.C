@@ -638,44 +638,6 @@ void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, ma
 	}
 }
 
-double SET_SMAXIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE)	// Overloaded. One for 3B data structures, and one for 4B
-// Used for 3-body interactions. Decides whether outer cutoff should be set by 2-body value or 3-body value. Returns the cutoff value.
-{	
-	double VAL;
-	
-	if(PAIR_TRIPLETS.S_MAXIM[0] == -1)
-		VAL =  FF_2BODY.S_MAXIM;
-	else
-	{
-		if      (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[0])
-			VAL =  PAIR_TRIPLETS.S_MAXIM[0];
-		else if (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[1])
-			VAL =  PAIR_TRIPLETS.S_MAXIM[1];
-		else if (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[2])
-			VAL =  PAIR_TRIPLETS.S_MAXIM[2];
-	}
-	return VAL;	
-}
-
-double SET_SMINIM(PAIRS & FF_2BODY, TRIPLETS & PAIR_TRIPLETS, string TYPE) // Overloaded. One for 3B data structures, and one for 4B
-// Used for 3-body interactions. Decides whether outer cutoff should be set by 2-body value or 3-body value. Returns the cutoff value.
-{
-	double VAL;
-	
-	if(PAIR_TRIPLETS.S_MINIM[0] == -1)
-		VAL =  FF_2BODY.S_MINIM;
-	else
-	{
-		if      (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[0])
-			VAL =  PAIR_TRIPLETS.S_MINIM[0];
-		else if (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[1])
-			VAL =  PAIR_TRIPLETS.S_MINIM[1];
-		else if (TYPE == PAIR_TRIPLETS.ATOM_PAIRS[2])
-			VAL =  PAIR_TRIPLETS.S_MINIM[2];
-	}
-	return VAL;
-}
-
 //////////////////////////////////////////
 // 4B Cheby functions
 //////////////////////////////////////////
@@ -706,39 +668,6 @@ void SET_4B_CHEBY_POWERS(QUADRUPLETS & PAIR_QUADRUPLET, vector<string> & PAIR_TY
 		//powers[PAIR_TYPE_AND_INDEX[m].second] = PAIR_TYPE_AND_POWER[m].second;
 		pow_map[PAIR_TYPE_AND_INDEX[m].second] = PAIR_TYPE_AND_POWER[m].second;
 	}
-}
-
-double SET_SMAXIM(PAIRS & FF_2BODY, QUADRUPLETS & PAIR_QUADRUPLETS, string TYPE)	// Overloaded. One for 3B data structures, and one for 4B
-// Used for 4-body interactions. Decides whether outer cutoff should be set by 2-body value or 4-body value. Returns the cutoff value.
-{	
-	double VAL;
-	
-	if(PAIR_QUADRUPLETS.S_MAXIM[0] == -1)
-		VAL =  FF_2BODY.S_MAXIM;
-	else
-	{
-		for (int i=0; i<6; i++)
-			if(TYPE == PAIR_QUADRUPLETS.ATOM_PAIRS[i])
-				VAL =  PAIR_QUADRUPLETS.S_MAXIM[i];
-	}
-	return VAL;	
-}
-
-double SET_SMINIM(PAIRS & FF_2BODY, QUADRUPLETS & PAIR_QUADRUPLETS, string TYPE) // Overloaded. One for 3B data structures, and one for 4B
-// Used for 4-body interactions. Decides whether outer cutoff should be set by 2-body value or 4-body value. Returns the cutoff value.
-{
-	double VAL;
-	
-	
-	if(PAIR_QUADRUPLETS.S_MINIM[0] == -1)
-		VAL =  FF_2BODY.S_MINIM;
-	else
-	{
-		for (int i=0; i<6; i++)
-			if(TYPE == PAIR_QUADRUPLETS.ATOM_PAIRS[i])
-				VAL =  PAIR_QUADRUPLETS.S_MINIM[i];
-	}
-	return VAL;	
 }
 
 //////////////////////////////////////////
@@ -1739,13 +1668,13 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 				rlen_ik = get_dist(SYSTEM, RAB_IK, a1, a3);	// Updates RAB!
 				rlen_jk = get_dist(SYSTEM, RAB_JK, a2, a3);	// Updates RAB!
 	
-				S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ij], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
-				S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
-				S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+				S_MAXIM_IJ = PAIR_TRIPLETS[curr_triple_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx_ij], FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+				S_MAXIM_IK = PAIR_TRIPLETS[curr_triple_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx_ik], FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+				S_MAXIM_JK = PAIR_TRIPLETS[curr_triple_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx_jk], FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
 				
-				S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
-				S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
-				S_MINIM_JK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_jk], PAIR_TRIPLETS[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+				S_MINIM_IJ = PAIR_TRIPLETS[curr_triple_type_index].get_sminim(FF_2BODY[curr_pair_type_idx_ij], FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+				S_MINIM_IK = PAIR_TRIPLETS[curr_triple_type_index].get_sminim(FF_2BODY[curr_pair_type_idx_ik], FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+				S_MINIM_JK = PAIR_TRIPLETS[curr_triple_type_index].get_sminim(FF_2BODY[curr_pair_type_idx_jk], FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
 				
 				// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 				// within the allowed range.
@@ -2331,8 +2260,8 @@ static void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 				
 					for (int f=0; f<6; f++)
 					{
-						S_MAXIM[f] = SET_SMAXIM(FF_2BODY[curr_pair_type_idx[f]], PAIR_QUADRUPLETS[curr_quad_type_index],FF_2BODY[curr_pair_type_idx[f]].PRPR_NM);
-						S_MINIM[f] = SET_SMINIM(FF_2BODY[curr_pair_type_idx[f]], PAIR_QUADRUPLETS[curr_quad_type_index],FF_2BODY[curr_pair_type_idx[f]].PRPR_NM);
+					  S_MAXIM[f] = PAIR_QUADRUPLETS[curr_quad_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx[f]], FF_2BODY[curr_pair_type_idx[f]].PRPR_NM);
+					  S_MINIM[f] = PAIR_QUADRUPLETS[curr_quad_type_index].get_sminim(FF_2BODY[curr_pair_type_idx[f]], FF_2BODY[curr_pair_type_idx[f]].PRPR_NM);
 					}
 						
 					// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are within the allowed range.
@@ -3812,13 +3741,13 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 			rlen_ik = get_dist(SYSTEM, RAB_IK, a1, a3);	// Updates RAB!
 			rlen_jk = get_dist(SYSTEM, RAB_JK, a2, a3);	// Updates RAB!
 
-			S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
-			S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
-			S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+			S_MAXIM_IJ =  FF_3BODY[curr_triple_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx_ij], FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+			S_MAXIM_IK =  FF_3BODY[curr_triple_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx_ik], FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+			S_MAXIM_JK =  FF_3BODY[curr_triple_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx_jk], FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
 	      
-			S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
-			S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
-			S_MINIM_JK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+			S_MINIM_IJ =  FF_3BODY[curr_triple_type_index].get_sminim(FF_2BODY[curr_pair_type_idx_ij],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+			S_MINIM_IK =  FF_3BODY[curr_triple_type_index].get_sminim(FF_2BODY[curr_pair_type_idx_ik], FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+			S_MINIM_JK =  FF_3BODY[curr_triple_type_index].get_sminim(FF_2BODY[curr_pair_type_idx_jk], FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
 					
 			// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 			// within the allowed range.
@@ -4085,9 +4014,9 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 		
 			for (int f=0; f<6; f++)
 			{
-				PAIR_TYPE[f] = FF_2BODY[curr_pair_type_idx[f]].PRPR_NM;
-				S_MAXIM  [f] = SET_SMAXIM(FF_2BODY[curr_pair_type_idx[f]], FF_4BODY[curr_quad_type_index],PAIR_TYPE[f]);
-				S_MINIM  [f] = SET_SMINIM(FF_2BODY[curr_pair_type_idx[f]], FF_4BODY[curr_quad_type_index],PAIR_TYPE[f]);
+			  PAIR_TYPE[f] = FF_2BODY[curr_pair_type_idx[f]].PRPR_NM;
+			  S_MAXIM  [f] = FF_4BODY[curr_quad_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx[f]],PAIR_TYPE[f]);
+			  S_MINIM  [f] = FF_4BODY[curr_quad_type_index].get_sminim(FF_2BODY[curr_pair_type_idx[f]],PAIR_TYPE[f]);
 			}
 			
 			// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are within the allowed range.
@@ -4905,13 +4834,13 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 	
 	// NOTE: CURRENTLY, THIS DOES NOT ALLOW SCAN TO GO BELOW THE THREE BODY CUTOFF DISTANCES!
 	
-	S_MAXIM_IJ = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
-	S_MAXIM_IK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
-	S_MAXIM_JK = SET_SMAXIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+	S_MAXIM_IJ =  FF_3BODY[curr_triple_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx_ij], FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+	S_MAXIM_IK =  FF_3BODY[curr_triple_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx_ik], FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+	S_MAXIM_JK =  FF_3BODY[curr_triple_type_index].get_smaxim(FF_2BODY[curr_pair_type_idx_jk], FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
 
-	S_MINIM_IJ = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ij], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
-	S_MINIM_IK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_ik], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
-	S_MINIM_JK = SET_SMINIM(FF_2BODY[curr_pair_type_idx_jk], FF_3BODY[curr_triple_type_index],FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+	S_MINIM_IJ =  FF_3BODY[curr_triple_type_index].get_sminim(FF_2BODY[curr_pair_type_idx_ij], FF_2BODY[curr_pair_type_idx_ij].PRPR_NM);
+	S_MINIM_IK =  FF_3BODY[curr_triple_type_index].get_sminim(FF_2BODY[curr_pair_type_idx_ik], FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);
+	S_MINIM_JK =  FF_3BODY[curr_triple_type_index].get_sminim(FF_2BODY[curr_pair_type_idx_jk], FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
 
 
 	// Set the number of slices and steps

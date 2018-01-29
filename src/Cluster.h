@@ -111,6 +111,12 @@ public:
   // Get the value of the histogram with the given index vector.  Return 0 if no entry is found.
   int get_histogram(vector<int> &index) ;
 
+  // Return the maximum cutoff distance for the specified pair.
+  double get_smaxim(PAIRS & FF_2BODY, string TYPE)  ;  
+
+  // Return the minimum inner cutoff distance for the specified pair.
+  double get_sminim(PAIRS & FF_2BODY, string TYPE) ;
+
 CLUSTER(int natom, int npair): ATOM_NAMES(natom), ATOM_PAIRS(npair), S_MAXIM(npair), S_MINIM(npair), MIN_FOUND(npair),
 	 NBINS(npair), BINWS(npair)
   {
@@ -137,27 +143,8 @@ private:
   void build_loop(int indx, int cheby_order, vector<int> powers) ;
 };
 
-class TRIPLETS : public CLUSTER
-{
-public:
-	
-  TRIPLETS(): CLUSTER(3,3)
-  {
-  }
-};
-
-
-class QUADRUPLETS : public CLUSTER
-{
-	
-public:	
-QUADRUPLETS():CLUSTER(4,6) { }
-
-
-~QUADRUPLETS() { } 
-		
-};
-
+typedef CLUSTER TRIPLETS ;
+typedef CLUSTER QUADRUPLETS ;
 
 class CLUSTER_LIST
 // A group of clusters that represents an N-body interaction.
@@ -168,7 +155,7 @@ public:
 
   // A vector containing all clusters.
   // Need to store cluster pointers so that polymorphism with different cluster types works.
-  vector<CLUSTER*> VEC ;
+  vector<CLUSTER> VEC ;
 
   // A map from pair types into the VEC index.
   map<string,int> MAP ;
@@ -187,12 +174,6 @@ public:
   void build_fast_maps(vector<struct PAIRS>& atom_pairs) ;
 
   void build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP) ;
-
-  void link(vector<CLUSTER> &cluster) ;
-
-  void link(vector<TRIPLETS> &cluster) ;
-
-  void link(vector<QUADRUPLETS> &cluster) ;
 
   void exclude() ;
 

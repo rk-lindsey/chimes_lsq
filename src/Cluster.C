@@ -298,49 +298,46 @@ void CLUSTER::print_header(ofstream &header)
   header << endl;
 }
 
-void CLUSTER_LIST::link(vector<CLUSTER>& cluster_vec) 
-// Link a CLUSTER_LIST to an allocated vector of clusters.
-{
-  VEC.resize(cluster_vec.size() ) ;
-  
-  NCLUSTERS = VEC.size() ;
 
-  for ( int j = 0 ; j < VEC.size() ; j++ ) {
-	 VEC[j] = &cluster_vec[j] ;
-  }
-}
-
-void CLUSTER_LIST::link(vector<QUADRUPLETS>& quad_vec) 
-// Link a CLUSTER_LIST to an allocated vector of quadruplets
-{
-  VEC.resize(quad_vec.size() ) ;
-
-  NCLUSTERS = VEC.size() ;
-
-  for ( int j = 0 ; j < VEC.size() ; j++ ) {
-	 VEC[j] = &quad_vec[j] ;
-  }
+double CLUSTER::get_smaxim(PAIRS & FF_2BODY, string TYPE)	
+// Decides whether outer cutoff should be set by 2-body value or cluster value. Returns the cutoff value.
+{	
+	double VAL;
+	
+	if(S_MAXIM[0] == -1)
+		VAL =  FF_2BODY.S_MAXIM;
+	else
+	{
+		for (int i=0; i< NPAIRS ; i++)
+			if(TYPE == ATOM_PAIRS[i])
+				VAL =  S_MAXIM[i];
+	}
+	return VAL;	
 }
 
 
-void CLUSTER_LIST::link(vector<TRIPLETS>& trip_vec) 
-// Link a CLUSTER_LIST to an allocated vector of triplets
+double CLUSTER::get_sminim(PAIRS & FF_2BODY, string TYPE) 
+// Decides whether outer cutoff should be set by 2-body value or 4-body value. Returns the cutoff value.
 {
-  VEC.resize(trip_vec.size() ) ;
-
-  NCLUSTERS = VEC.size() ;
-
-  for ( int j = 0 ; j < VEC.size() ; j++ ) {
-	 VEC[j] = &trip_vec[j] ;
-  }
+	double VAL;
+	
+	
+	if(S_MINIM[0] == -1)
+		VAL =  FF_2BODY.S_MINIM;
+	else
+	{
+		for (int i=0; i<NPAIRS; i++)
+			if(TYPE == ATOM_PAIRS[i])
+				VAL =  S_MINIM[i];
+	}
+	return VAL;	
 }
-
   
 void CLUSTER_LIST::build_maps(vector<struct PAIRS> &atom_pairs)
 {
   int npair = atom_pairs.size() ;
 
-  int cluster_npair = VEC[0]->NPAIRS ;
+  int cluster_npair = VEC[0].NPAIRS ;
   vector<int> pair_index(cluster_npair) ;
 
   build_maps_loop(0, pair_index, atom_pairs) ;
@@ -355,7 +352,7 @@ void CLUSTER_LIST::build_maps(vector<struct PAIRS> &atom_pairs)
 
 void CLUSTER_LIST::build_maps_loop(int index, vector<int> pair_index, vector<struct PAIRS> &atom_pairs)
 {
-  int cluster_npair = VEC[0]->NPAIRS ;
+  int cluster_npair = VEC[0].NPAIRS ;
 
   if ( index < cluster_npair ) 
   {
@@ -389,7 +386,7 @@ void CLUSTER_LIST::build_maps_loop(int index, vector<int> pair_index, vector<str
 
 		  for (int s = 0 ; s< cluster_npair ; s++)
 		  {
-			 if(temp_str[s] != VEC[p]->ATOM_PAIRS[s])
+			 if(temp_str[s] != VEC[p].ATOM_PAIRS[s])
 				real_cluster = false;
 			 
 			 full_tmp_str += temp_str[s];
@@ -407,7 +404,7 @@ void CLUSTER_LIST::build_maps_loop(int index, vector<int> pair_index, vector<str
 				
 void CLUSTER_LIST::build_fast_maps(vector<PAIRS>& ATOM_PAIRS)
 {
-  int natoms = VEC[0]->NATOMS ;
+  int natoms = VEC[0].NATOMS ;
   vector<string>ATOM_CHEMS;
 
   for(int p=0; p<ATOM_PAIRS.size(); p++)
@@ -452,7 +449,7 @@ void CLUSTER_LIST::build_fast_maps_loop(int index, vector<int> atom_index, vecto
 {
   // Create a list of each posible combination of atom quadruplets, i through
   // l are given in ascending order
-  int natoms = VEC[0]->NATOMS ;
+  int natoms = VEC[0].NATOMS ;
   
   if ( index < natoms ) 
   {
@@ -547,7 +544,7 @@ void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MA
 		ATOM_CHEMS.push_back(TMP_CHEM);
   }
 				
-  int natoms = VEC[0]->NATOMS ;
+  int natoms = VEC[0].NATOMS ;
   vector<int> atom_index(natoms) ;
   int count = 0 ;
 
@@ -569,17 +566,17 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
   }
   else 
   {
-	 VEC[count]->INDX = count ;	// Index for current triplet type
+	 VEC[count].INDX = count ;	// Index for current triplet type
 								
 	 // Save the names of each atom type in the pair.
-	 int natoms = VEC[0]->NATOMS ;
+	 int natoms = VEC[0].NATOMS ;
 	 int count2 = 0 ;
 	 for ( int i = 0 ; i < natoms ; i++ ) {
-		VEC[count]->ATOM_NAMES[i] = ATOM_CHEMS[ atom_index[i] ] ;
+		VEC[count].ATOM_NAMES[i] = ATOM_CHEMS[ atom_index[i] ] ;
 		for ( int j = i + 1 ; j < natoms ; j++ ) {
-		  VEC[count]->ATOM_PAIRS[count2] = ATOM_CHEMS[ atom_index[i] ] 
+		  VEC[count].ATOM_PAIRS[count2] = ATOM_CHEMS[ atom_index[i] ] 
 			 + ATOM_CHEMS[ atom_index[j] ] ;
-		  VEC[count]->ATOM_PAIRS[count2] = ATOM_PAIRS[ PAIR_MAP[ VEC[count]->ATOM_PAIRS[count2] ] ].PRPR_NM ;
+		  VEC[count].ATOM_PAIRS[count2] = ATOM_PAIRS[ PAIR_MAP[ VEC[count].ATOM_PAIRS[count2] ] ].PRPR_NM ;
 		  count2++ ;
 		}
 	 }
@@ -596,9 +593,9 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		{
 		  cout << "Made the following quintuplets: " << count << " ";
 		}
-		int npairs = VEC[0]->NPAIRS ;
+		int npairs = VEC[0].NPAIRS ;
 		for(int m=0; m< npairs; m++) 
-		  cout << VEC[count]->ATOM_PAIRS[m] << " ";
+		  cout << VEC[count].ATOM_PAIRS[m] << " ";
 		cout << endl;		
 	 }
 	 count++;	
@@ -634,6 +631,9 @@ cout <<"		" << it->first << " : " << it->second << endl;
   // ALSO, THIS IS WHERE WE POP OFF ELEMENTS OF OUR PAIR TRIPLET VECTOR
 				 
   vector<int> POPPED; 
+
+  for (unsigned j = EXCLUDE.size(); j-- > 0; ) // Since we're popping off by index, iterate over vector (ascending sorted) in reverse
+	 VEC.erase (VEC.begin() + MAP[EXCLUDE[j]]);
 
   for(int j=0; j<EXCLUDE.size(); j++)
   {
