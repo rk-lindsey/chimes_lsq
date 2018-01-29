@@ -1876,16 +1876,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			if(CONTROLS.USE_3B_CHEBY)
 			{
 				// Generate unique triplets
-			  TRIPS.build_pairs(ATOM_PAIRS, PAIR_MAP) ;
-			  
-			  for ( int i = 0 ; i < NTRIP ; i++ ) 
-				 TRIPS.VEC[i].build(CONTROLS.CHEBY_3B_ORDER) ;
+			  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
 
-			  TRIPS.build_maps(ATOM_PAIRS) ;
-
-			  TRIPS.exclude() ;
-
-			  TRIPS.build_fast_maps(ATOM_PAIRS) ;
 			}
 
 			if(CONTROLS.USE_4B_CHEBY)
@@ -1894,32 +1886,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				// Generate unique quadruplets and thier corresponding sets of powers
 				//////////////////////////////////////////////////////////////////////
 
-				QUADS.build_pairs(ATOM_PAIRS, PAIR_MAP) ;
+			  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
 			
-				for(int i=0; i<NQUAD; i++)
-				{
-				  QUADS.VEC[i].build(CONTROLS.CHEBY_4B_ORDER) ;
-				}
-
-				///////////////////////////////////////////////////////////////////////////////////////////////////////////
-				// Set up quadruplet maps... Account for cases where quadruplet type is meaningless by setting mapped index to -1
-				///////////////////////////////////////////////////////////////////////////////////////////////////////////					
-
-
-				QUADS.build_maps(ATOM_PAIRS) ;
-
-				//////////////////////////////////////////////////////////////////////
-				// Since there are so many pairs in an atom quadruplet, we'll use "fast" maps here.
-				// Generate "fast" maps for 4-body interactions. Assumes never more than MAX_ATOM_TYPES
-				// atom types in a simulation
-				//////////////////////////////////////////////////////////////////////
-
-				QUADS.build_fast_maps(ATOM_PAIRS) ;
-				INT_QUAD_MAP = QUADS.INT_MAP ;
-				INT_QUAD_MAP_REVERSE = QUADS.INT_MAP_REVERSE ;
-
-				//build_fast_quad_maps(QUAD_MAP, INT_QUAD_MAP, INT_QUAD_MAP_REVERSE, ATOM_CHEMS) ;
-			}  // CONTROLS.USE_4B_CHEBY
+			  INT_QUAD_MAP = QUADS.INT_MAP ;
+			  INT_QUAD_MAP_REVERSE = QUADS.INT_MAP_REVERSE ;
+			}  
 
 #if VERBOSITY == 1						
 			if ( RANK == 0 ) 

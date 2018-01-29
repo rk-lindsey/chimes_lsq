@@ -332,6 +332,22 @@ double CLUSTER::get_sminim(PAIRS & FF_2BODY, string TYPE)
 	}
 	return VAL;	
 }
+
+void CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+// Build all triplets and associated maps for the cluster list.
+{
+  build_pairs(ATOM_PAIRS, PAIR_MAP) ;
+			  
+  for ( int i = 0 ; i < VEC.size() ; i++ ) 
+	 VEC[i].build(cheby_order) ;
+
+  build_maps(ATOM_PAIRS) ;
+
+  exclude() ;
+
+  build_fast_maps(ATOM_PAIRS) ;
+}
+
   
 void CLUSTER_LIST::build_maps(vector<struct PAIRS> &atom_pairs)
 {

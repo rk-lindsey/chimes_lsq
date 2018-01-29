@@ -175,6 +175,8 @@ public:
 
   void build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP) ;
 
+  void build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+
   void exclude() ;
 
 private:
