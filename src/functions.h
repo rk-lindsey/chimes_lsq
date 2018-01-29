@@ -43,7 +43,7 @@
 using namespace std;
 
 #include "Fcut.h"
-#include "Quad.h"
+#include "Cluster.h"
 
 // For the LAMMPS version of the MD Code
 

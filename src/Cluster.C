@@ -705,69 +705,44 @@ cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] 
 }
 
 bool CLUSTER::init_histogram(vector<PAIRS> &pairs, map<string,int>& pair_map)
-// Sets up the histogram for TRIPLETS.  Returns TRUE on success, FALSE otherwise.
+// Sets up the histogram for TRIPLETS.  Returns true on success, false otherwise.
 {
 		
   double tmp_max, tmp_min;
 		
-  NBINS[0] = pairs[ pair_map[ ATOM_PAIRS[0]] ].NBINS[0];
-  NBINS[1] = pairs[ pair_map[ ATOM_PAIRS[0]] ].NBINS[1];
-  NBINS[2] = pairs[ pair_map[ ATOM_PAIRS[0]] ].NBINS[2];
-		
-  if(NBINS[0] == 0 || NBINS[1] == 0 || NBINS[0] == 0)
+  for ( int j = 0 ; j < NPAIRS ; j++ ) 
   {
+	 NBINS[j] = pairs[ pair_map[ ATOM_PAIRS[0]] ].NBINS[j];
+	 if(NBINS[j] == 0 ) 
+	 {
 #if VERBOSITY == 1
-	 if ( RANK == 0 ) cout << "Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramming. " << endl << endl << endl ;
+		if ( RANK == 0 ) cout << "Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramming. " << endl << endl << endl ;
 #endif
-				
-	 return false ;
+		
+		return false ;
+	 }
+	 tmp_max = S_MAXIM[j];
+	 tmp_min = S_MINIM[j];
+	 if(tmp_min == -1)
+		tmp_min = pairs[ pair_map[ ATOM_PAIRS[j]] ].S_MINIM;
+	 if(tmp_max == -1)
+		tmp_max = pairs[ pair_map[ ATOM_PAIRS[j]] ].S_MAXIM;
+	 BINWS[0] = (tmp_max - tmp_min)/NBINS[0];
   }
 		
-  tmp_max = S_MAXIM[0];
-  tmp_min = S_MINIM[0];
-  if(tmp_min == -1)
-	 tmp_min = pairs[ pair_map[ ATOM_PAIRS[0]] ].S_MINIM;
-  if(tmp_max == -1)
-	 tmp_max = pairs[ pair_map[ ATOM_PAIRS[0]] ].S_MAXIM;
-  BINWS[0] = (tmp_max - tmp_min)/NBINS[0];
 		
-  tmp_max = S_MAXIM[1];
-  tmp_min = S_MINIM[1];
-  if(tmp_min == -1)
-	 tmp_min = pairs[ pair_map[ ATOM_PAIRS[1]] ].S_MINIM;
-  if(tmp_max == -1)
-	 tmp_max = pairs[ pair_map[ ATOM_PAIRS[1]] ].S_MAXIM;
-  BINWS[1] = (tmp_max - tmp_min)/NBINS[1];
-		
-  tmp_max = S_MAXIM[2];
-  tmp_min = S_MINIM[2];
-  if(tmp_min == -1)
-	 tmp_min = pairs[ pair_map[ ATOM_PAIRS[2]] ].S_MINIM;
-  if(tmp_max == -1)
-	 tmp_max = pairs[ pair_map[ ATOM_PAIRS[2]] ].S_MAXIM;
-  BINWS[2] = (tmp_max - tmp_min)/NBINS[2];
-		
-  POP_HIST.resize(NBINS[0]);
-		
-  for(int x=0; x<NBINS[0]; x++)
-  {
-	 POP_HIST[x].resize(NBINS[1]);
-			
-	 for(int y=0; y<NBINS[1]; y++)
-	 {
-		POP_HIST[x][y].resize(NBINS[2]);
+  // Note:  pop_hist is now implemented as a map to allow arbitrary dimensional histograms.
+  // No allocation of pop_hist is necessary.  
 
-		for(int z=0; z<NBINS[2]; z++)
-		{
-		  POP_HIST[x][y][z] = 0;
-		}
-				
+  if ( RANK == 0 ) 
+  {
+	 cout << "	" << INDX << " " << fixed << setprecision(1) ;
+	 for ( int j = 0 ; j < NPAIRS ; j++ ) 
+	 {
+		cout << NBINS[j] << " " ;
 	 }
   }
-			
-  if ( RANK == 0 ) cout << "	" << INDX << " " << fixed << setprecision(1) << NBINS[0] << " " << NBINS[1] << " " << NBINS[2] << endl;
 
-		
 #if VERBOSITY == 1
   if ( RANK == 0 ) 
   {
@@ -775,4 +750,24 @@ bool CLUSTER::init_histogram(vector<PAIRS> &pairs, map<string,int>& pair_map)
 	 return(true) ;
 }
 #endif
+}
+
+void CLUSTER::increment_histogram(vector<int>& index)
+// Increment the histogram with the given index vector.
+{
+
+  if ( POP_HIST.find(index) != POP_HIST.end() ) 
+	 POP_HIST[index]++ ;
+  else
+	 POP_HIST.insert(make_pair(index, 1)) ;
+}
+
+int CLUSTER::get_histogram(vector<int>& index)
+// Get the value of the histogram with the given index vector.  Return 0 if no entry is found.
+{
+
+  if ( POP_HIST.find(index) != POP_HIST.end() ) 
+	 return(POP_HIST[index]) ;
+  else
+	 return(0) ;
 }

@@ -72,7 +72,7 @@ public:
   // Values need to be specified for each contributing pair
   // [0] -> ij, [1] -> ik, [2] -> il, [3] -> jk, [4] -> jl, [5] -> kl 
 
-  vector<vector<vector< int > > > POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
+  map<vector<int>,int> POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
 	 
   vector<double> NBINS ;				// Number of bins to use for ij, ik, and jk distances when building the population histograms 
   vector<double> BINWS; 				// Binwidths to use for ij, ik, and jk distances when building the population histograms 
@@ -102,7 +102,14 @@ public:
   CLUSTER() {} 
   virtual ~CLUSTER() {} 
 
+  // Sets up the histogram for TRIPLETS.  Returns true on success, false otherwise.
   bool init_histogram(vector<struct PAIRS> & pairs, map<string,int>& pair_map) ;
+
+  // Increment the histogram with the given index vector.
+  void increment_histogram(vector<int> &index) ;
+
+  // Get the value of the histogram with the given index vector.  Return 0 if no entry is found.
+  int get_histogram(vector<int> &index) ;
 
 CLUSTER(int natom, int npair): ATOM_NAMES(natom), ATOM_PAIRS(npair), S_MAXIM(npair), S_MINIM(npair), MIN_FOUND(npair),
 	 NBINS(npair), BINWS(npair)

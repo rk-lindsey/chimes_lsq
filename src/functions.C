@@ -1845,7 +1845,11 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 									exit_run(0);
 								}
 							
-								PAIR_TRIPLETS[curr_triple_type_index].POP_HIST[ij_bin][ik_bin][jk_bin]++;
+								vector<int> bin_vecs(3) ;
+								bin_vecs[0] = ij_bin ;
+								bin_vecs[1] = ik_bin ;
+								bin_vecs[2] = jk_bin ;
+								PAIR_TRIPLETS[curr_triple_type_index].increment_histogram(bin_vecs) ;
 							}
 							
 						
@@ -2765,7 +2769,11 @@ TMP_HIST_OUT.open(TEMP_NAME);
 					rlen_jk = z*PAIR_TRIPLETS[i].BINWS[2]+0.5*PAIR_TRIPLETS[i].BINWS[2]+S_MINIM_JK;
 					
 					//OUTFILE_3B_POP_HIST << rlen_ij << " " << rlen_ik << " " << rlen_jk << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
-					OUTFILE_3B_POP_HIST << rlen_ik << " " << rlen_jk << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
+					vector<int> index(3) ;
+					index[0] = x ;
+					index[1] = y ; 
+					index[2] = z ;
+					OUTFILE_3B_POP_HIST << rlen_ik << " " << rlen_jk << " " << PAIR_TRIPLETS[i].get_histogram(index) << endl;
 /* TO WRITE OUT BINS					
 TMP_HIST_OUT << x << " " << y << " " << z << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
 */	
@@ -2776,8 +2784,11 @@ TMP_HIST_OUT >> xx >> yy >> zz >> pop;
 PAIR_TRIPLETS[i].POP_HIST[xx][yy][zz] += pop;
 */					
 										
-									
-					if(PAIR_TRIPLETS[i].POP_HIST[x][y][z] == 0)	// Then we need to add an entry to the A matrix
+					
+					index[0] = x ;
+					index[1] = y ; 
+					index[2] = z ;				
+					if(PAIR_TRIPLETS[i].get_histogram(index) == 0)	// Then we need to add an entry to the A matrix
 					{						
 						// Begin setting up the derivative calculation
 
