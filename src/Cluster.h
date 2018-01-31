@@ -169,10 +169,6 @@ public:
 
   vector<string> EXCLUDE ;
 
-  void build_maps(vector<struct PAIRS> &atom_pairs) ;
-
-  void build_fast_maps(vector<struct PAIRS>& atom_pairs) ;
-
   void build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP) ;
 
   void build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
@@ -180,8 +176,6 @@ public:
   void exclude() ;
 
 private:
-  void build_maps_loop(int index, vector<int> pair_index, vector<struct PAIRS> &atom_pairs) ;
-  void build_fast_maps_loop(int index, vector<int> atom_index, vector<string>& ATOM_CHEMS) ;
   int make_id_int(vector<int>& index) ;
   void build_pairs_loop(int index, vector<int> atom_index, 
 								vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count) ;

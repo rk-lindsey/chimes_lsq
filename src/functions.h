@@ -204,7 +204,21 @@ struct JOB_CONTROL
 	string	CHEBY_TYPE;			// How will distance be transformed?
 	string	INFILE;				// Input trajectory file
 	
-	JOB_CONTROL():N_LAYERS(0), WRAP_COORDS(false),IF_SUBTRACT_COORD(false),IF_SUBTRACT_COUL(false),FIT_COUL(false),USE_PARTIAL_CHARGES(false),COUL_CONSV(false),FIT_POVER(false),USE_3B_CHEBY(false),USE_4B_CHEBY(false),TOT_SNUM(0){}
+	JOB_CONTROL():N_LAYERS(0), WRAP_COORDS(false),IF_SUBTRACT_COORD(false),IF_SUBTRACT_COUL(false),FIT_COUL(false),USE_PARTIAL_CHARGES(false),COUL_CONSV(false),FIT_POVER(false),USE_3B_CHEBY(false),USE_4B_CHEBY(false),TOT_SNUM(0)
+	 {
+	
+		NFRAMES = 0;			// Number of frames in the movie file
+		CHEBY_ORDER = 0 ;		// Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
+		CHEBY_3B_ORDER = 0 ;	
+		CHEBY_4B_ORDER = 0 ;		// how many polynomials for 4b cheby?
+		NUM_3B_CHEBY = 0 ;		// How many parameters are associated with cheby order CHEBY_3B_ORDER?
+		NUM_4B_CHEBY = 0 ;		// How many parameters are associated with cheby order CHEBY_4B_ORDER?
+		TOT_SNUM = 0 ;			// total number of force field parameters
+		TOT_SHORT_RANGE = 0 ;	// Number of short tranged FF params... i.e. not Ewald
+
+		USE_3B_CHEBY = false ;		// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
+		USE_4B_CHEBY = false ;		//If true, calculate 4-Body Chebyshev interaction.
+	 }
 };
 
 struct XYZ
@@ -585,6 +599,9 @@ inline int make_triplet_id_int(int i, int j, int k)
 {
   return(MAX_ATOM_TYPES2 * i + MAX_ATOM_TYPES * j + k) ;
 }
+
+bool operator==(const vector<int>& lhs, const vector<int>& rhs)  ;
+bool operator==(const vector<string>& lhs, const vector<string>& rhs)  ;
 
 #endif
 

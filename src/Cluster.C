@@ -12,6 +12,9 @@ using namespace std;
 
 #include "functions.h"
 
+// define for extra output
+// #define DEBUG_CLUSTER
+
 typedef pair<string,int> test;
 static bool check_pairs(test a, test b)
 {
@@ -35,12 +38,38 @@ void CLUSTER::build(int cheby_order)
   vector<int> powers(NPAIRS);
 					
   // Loops start at zero for a trick to speed up check for powers > 0
-
+  
+#ifdef DEBUG_CLUSTER
+  cout << "Building interactions for atoms: " ;
+  for ( int j = 0 ; j < ATOM_NAMES.size() ; j++ ) {
+	 cout << ATOM_NAMES[j] << " " ;
+  }
+  cout << endl ;
+#endif
 
   build_loop(0, cheby_order, powers) ;
 				
   N_TRUE_ALLOWED_POWERS = UNIQUE_POWERS.size() ;
   N_ALLOWED_POWERS = PARAM_INDICES.size();
+
+#ifdef DEBUG_CLUSTER
+  cout << "Number of unique powers = " << N_TRUE_ALLOWED_POWERS << endl ;
+  cout << "Number of allowed powers = " << N_ALLOWED_POWERS << endl ;
+
+  cout << "UNIQUE_POWERS " << endl ;
+  for ( int j = 0 ; j < UNIQUE_POWERS.size() ; j++ ) {
+	 for ( int k = 0 ; k < NPAIRS ; k++ ) {
+		cout << UNIQUE_POWERS[j][k] << " " ;
+	 }
+	 cout << endl ;
+  }
+
+  cout << "PARAM_INDICES " << endl ;
+  for ( int j = 0 ; j < PARAM_INDICES.size() ; j++ ) {
+	 cout << PARAM_INDICES[j] << endl ;
+  }
+#endif
+
 }
 
 void CLUSTER::build_loop(int indx, int cheby_order, vector<int> powers)
@@ -100,15 +129,35 @@ void CLUSTER::store_permutations(vector<int> &unsorted_powers)
   if ( it != ALLOWED_POWERS_MAP.end() ) 
   {
 	 // This interaction is already handled.
+#ifdef DEBUG_CLUSTER
+	 cout << "Found the following powers already stored:\n" ;
+	 for ( int i = 0 ; i < unsorted_powers.size() ; i++ ) {
+		cout << unsorted_powers[i] << " " ;
+	 }
+	 cout << endl ;
+#endif
+
 	 return ;
   } 
   else 
   {
+#ifdef DEBUG_CLUSTER
+	 if ( RANK == 0 ) 
+	 {
+		cout << "Adding new unique set of powers" << endl ;
+		for ( int i = 0 ; i < unsorted_powers.size() ; i++ ) 
+		{
+		  cout << unsorted_powers[i] << " " ;
+		}
+		cout << endl ;
+	 }
+#endif
 	 UNIQUE_POWERS.push_back(unsorted_powers) ;	 
   }
 
+
   // Recursively permute each element and added to the ALLOWED_POWERS.
-#if( VERBOSITY > 1)
+#ifdef DEBUG_CLUSTER
   if ( RANK == 0 ) 
   {
 	 cout << "Permuting atom indices for " ;
@@ -129,6 +178,12 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
 											  vector<int> perm, int unique_index, int equiv_index) 
 {
 
+  // Sort the element names.
+  // sort( names.begin(), names.end() ) ;
+
+  // Reverse to make order of interactions similar to 3-body code version.
+  // reverse( names.begin(), names.end() ) ;
+
   if ( idx < names.size() ) {
 	 // Count up the number of identical atoms.
 	 int count = 1 ;
@@ -143,6 +198,11 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
 	 }
 	 do {
 		// Recursive call to generate permutations for identical atoms.
+
+		// DEBUG
+#ifdef DEBUG_CLUSTER
+		cout << "Number of identical atoms of element " << names[idx] << " = " << count ;
+#endif
 		permute_atom_indices(idx + count, names, unsorted_powers, perm,
 									unique_index, equiv_index) ;
 	 } while ( std::next_permutation(perm.data() +idx, perm.data() + idx+count) ) ;
@@ -176,9 +236,15 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
 		}
 	 }
 
-#if(VERBOSITY > 1)
+#ifdef DEBUG_CLUSTER
 	 if ( RANK == 0 ) 
 	 {
+		cout << "Atom names: " 
+		for ( int j = 0 ; j < NATOMS ; j++ ) {
+		  cout << names[ perm[j] ] << " " ;
+		}
+		cout << endl ;
+
 		cout << "Permutation: " 
 		for ( int j = 0 ; j < NATOMS ; j++ ) {
 		  cout << perm[j] << " " ;
@@ -197,6 +263,15 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
 	 it = ALLOWED_POWERS_MAP.find(perm_powers) ;
 
 	 if ( it == ALLOWED_POWERS_MAP.end() ) {
+
+#ifdef DEBUG_CLUSTER
+		cout << "Adding new allowed powers" << endl ;
+		for ( int i = 0 ; i < perm_powers.size() ; i++ ) {
+		  cout << perm_powers[i] << " " ;
+		}
+		cout << endl ;
+#endif
+
 		ALLOWED_POWERS.push_back(perm_powers) ;
 		ALLOWED_POWERS_MAP.insert( std::pair<vector<int>,int>(perm_powers, 1) ) ;
 		PARAM_INDICES.push_back(unique_index) ;
@@ -341,188 +416,7 @@ void CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<st
   for ( int i = 0 ; i < VEC.size() ; i++ ) 
 	 VEC[i].build(cheby_order) ;
 
-  build_maps(ATOM_PAIRS) ;
-
-  exclude() ;
-
-  build_fast_maps(ATOM_PAIRS) ;
-}
-
-  
-void CLUSTER_LIST::build_maps(vector<struct PAIRS> &atom_pairs)
-{
-  int npair = atom_pairs.size() ;
-
-  int cluster_npair = VEC[0].NPAIRS ;
-  vector<int> pair_index(cluster_npair) ;
-
-  build_maps_loop(0, pair_index, atom_pairs) ;
-				
-  MAP_REVERSE.clear();
-
-  map<string, int>::iterator it;
-
-  for(it = MAP.begin(); it != MAP.end(); it++)
-	 MAP_REVERSE.insert(make_pair(it->second,it->first));
-}
-
-void CLUSTER_LIST::build_maps_loop(int index, vector<int> pair_index, vector<struct PAIRS> &atom_pairs)
-{
-  int cluster_npair = VEC[0].NPAIRS ;
-
-  if ( index < cluster_npair ) 
-  {
-	 for(int i=0; i< atom_pairs.size() ; i++) 
-	 {
-		pair_index[index] = i ;
-		build_maps_loop(index+1, pair_index, atom_pairs) ;
-	 }
-  } 
-  else
-  {
-	 // Done looping.  Actually build the loop
-	 vector<string> temp_str(cluster_npair);	
-	 bool real_cluster ;
-	 string full_tmp_str;	
-
-	 for ( int j = 0 ; j < cluster_npair ; j++ ) 
-	 {
-		temp_str[j] = atom_pairs[ pair_index[j] ].ATM1TYP; 
-		temp_str[j].append(atom_pairs[ pair_index[j] ].ATM2TYP) ;
-	 }										
-										
-	 for(int p=0; p < NCLUSTERS ; p++)
-	 {
-		sort(temp_str.begin(),temp_str.end());
-		do
-		{
-		  real_cluster = true;
-												
-		  full_tmp_str = "";
-
-		  for (int s = 0 ; s< cluster_npair ; s++)
-		  {
-			 if(temp_str[s] != VEC[p].ATOM_PAIRS[s])
-				real_cluster = false;
-			 
-			 full_tmp_str += temp_str[s];
-		  }
-												
-		  if( real_cluster )
-		  {													
-			 MAP.insert(make_pair(full_tmp_str,p));	
-			 break;
-		  }
-		} while (next_permutation(temp_str.begin(),temp_str.end()));
-	 }
-  }
-}
-				
-void CLUSTER_LIST::build_fast_maps(vector<PAIRS>& ATOM_PAIRS)
-{
-  int natoms = VEC[0].NATOMS ;
-  vector<string>ATOM_CHEMS;
-
-  for(int p=0; p<ATOM_PAIRS.size(); p++)
-  {
-	 string TMP_CHEM = ATOM_PAIRS[p].ATM1TYP;
-	 bool   IN_LIST  = false;
-	 
-	 for(int a=0; a<ATOM_CHEMS.size(); a++)
-	 {
-		if(ATOM_CHEMS[a] == TMP_CHEM)
-		  IN_LIST = true;
-	 }
-	 
-	 if(!IN_LIST)
-		ATOM_CHEMS.push_back(TMP_CHEM);
-  }
-
-  if(RANK == 0) 
-  {
-	 if ( natoms == 4 ) 
-		cout << endl << "Generating fast maps for atom quadruplets: " << endl;
-	 else if ( natoms == 3 ) 
-		cout << endl << "Generating fast maps for atom triplets: " << endl;
-	 else if ( natoms == 5 ) 
-		cout << endl << "Generating fast maps for atom quintuplets: " << endl;
-				
-  string 	TMP_QUAD_SIXLET = "";
-  string 	TMP_QUAD_PAIR   = "";
-				
-  int 	ATOM_QUAD_ID_INT;
-  int		CURR_QUAD_IDX = 0;
-
-  vector<int> TMP_QUAD_SET(4);
-
-  vector<int> atom_index(natoms) ;
-
-  build_fast_maps_loop(0, atom_index, ATOM_CHEMS) ;
-  }
-}
-
-void CLUSTER_LIST::build_fast_maps_loop(int index, vector<int> atom_index, vector<string>& ATOM_CHEMS)
-{
-  // Create a list of each posible combination of atom quadruplets, i through
-  // l are given in ascending order
-  int natoms = VEC[0].NATOMS ;
-  
-  if ( index < natoms ) 
-  {
-	 for ( int i = 0 ; i < ATOM_CHEMS.size() ; i++ ) {
-		atom_index[index] = i ;
-		build_fast_maps_loop(index+1, atom_index, ATOM_CHEMS) ;
-	 }
-  }
-  else
-  {
-	 string tmp_pair = "" ;
-	 vector<int> tmp_set(natoms) ;
-
-	 for ( int i = 0 ; i < natoms ; i++ ) {
-		for ( int j = i + 1 ; j < natoms ; j++ ) {
-			 // Determine the corresponding quadruplet force field type
-
-		  tmp_pair += ATOM_CHEMS[ atom_index[i] ] + ATOM_CHEMS[ atom_index[j] ] ;
-		}
-		tmp_set[i] = atom_index[i] ;
-	 }
-	
-	 // Always construct ATOM_QUAD_ID_INT lookup key based on atom types in decending order
-	 sort(tmp_set.begin(), tmp_set.end());
-	 reverse(tmp_set.begin(), tmp_set.end());
-
-	 int atom_id_int = make_id_int(tmp_set) ;
-	 
-	 INT_MAP.insert(make_pair(atom_id_int,MAP[tmp_pair]));	
-	 INT_MAP_REVERSE.insert(make_pair(MAP[tmp_pair], atom_id_int));	
-								
-	 if(RANK == 0)
-	 {
-		cout << "		";
-		cout<< "Atom type idxs: ";
-
-		for ( int i = 0 ; i < natoms ; i++ ) {
-		  cout<< fixed << setw(2) << right << atom_index[i] ;
-		}
-		
-		if ( natoms == 4 ) 
-		{
-		  cout<< " Quadruplet name: "           << setw(12) << right << tmp_pair ;
-		  cout<< " Unique quadruplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
-		} 
-		else if ( natoms == 3 ) 
-		{
-		  cout<< " Triplet name: "           << setw(12) << right << tmp_pair ;
-		  cout<< " Unique triplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
-		}
-		else if ( natoms == 5 ) 
-		{
-		  cout<< " Quintuplet name: "           << setw(12) << right << tmp_pair ;
-		  cout<< " Unique quintuplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
-		}
-	 }
-  }
+   exclude() ;
 }
 
 
@@ -561,10 +455,16 @@ void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MA
   }
 				
   int natoms = VEC[0].NATOMS ;
+
+  //sort( ATOM_CHEMS.begin(), ATOM_CHEMS.end() ) ;
+
   vector<int> atom_index(natoms) ;
   int count = 0 ;
+  
 
   build_pairs_loop(0, atom_index, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP, count) ;
+
+  NCLUSTERS = VEC.size() ;
 }
 
 void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index, 
@@ -573,7 +473,8 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 {
   int NATMTYP = ATOM_CHEMS.size() ;
 
-  if ( index < NATMTYP ) {
+  if ( index < atom_index.size() ) {
+	 // Keep on looping.
 	 for ( int i = 0 ; i < NATMTYP ; i++ ) 
 	 {
 		atom_index[index] = i ;
@@ -582,40 +483,147 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
   }
   else 
   {
+	 // Perform a calculation based on the index values.
 	 VEC[count].INDX = count ;	// Index for current triplet type
 								
 	 // Save the names of each atom type in the pair.
 	 int natoms = VEC[0].NATOMS ;
+	 int npairs = VEC[0].NPAIRS ;
+
 	 int count2 = 0 ;
+	 vector<string> pair_names(npairs) ;
+	 vector<string> pair_names_unsorted(npairs) ;
+	 vector<string> atom_names(natoms) ;
+	 vector<int> atom_index_rev(natoms) ;
+
+	 // Sort the atom names, not the pair names.  All interactions
+	 // must be based on atom names.
 	 for ( int i = 0 ; i < natoms ; i++ ) {
-		VEC[count].ATOM_NAMES[i] = ATOM_CHEMS[ atom_index[i] ] ;
+		atom_names[i] = ATOM_CHEMS[ atom_index[i] ] ;
+	 }
+	 sort(atom_names.begin(), atom_names.end() ) ;
+
+	 // Now get the reverse index:  the ith sorted atom name is the jth ATOM type.
+	 for ( int i = 0 ; i < natoms ; i++ ) {
+		atom_index_rev[i] = -1; 
+		for ( int j = 0 ; j < NATMTYP ; j++ ) {
+		  if ( ATOM_CHEMS[j] == atom_names[i] ) {
+			 atom_index_rev[i] = j ;
+			 break ;
+		  }
+		}
+	 }
+	 for ( int i = 0 ; i < natoms ; i++ ) {
 		for ( int j = i + 1 ; j < natoms ; j++ ) {
-		  VEC[count].ATOM_PAIRS[count2] = ATOM_CHEMS[ atom_index[i] ] 
-			 + ATOM_CHEMS[ atom_index[j] ] ;
-		  VEC[count].ATOM_PAIRS[count2] = ATOM_PAIRS[ PAIR_MAP[ VEC[count].ATOM_PAIRS[count2] ] ].PRPR_NM ;
+		  pair_names[count2] = atom_names[i] + atom_names[j] ;
+		  pair_names_unsorted[count2] = ATOM_CHEMS[ atom_index[i] ] + ATOM_CHEMS[ atom_index[j] ] ;
+		  // Get the proper (ordered) name for each pair type.
+		  pair_names[count2] = ATOM_PAIRS[ PAIR_MAP[ pair_names[count2] ] ].PRPR_NM ;
+		  pair_names_unsorted[count2] = ATOM_PAIRS[ PAIR_MAP[ pair_names_unsorted[count2] ] ].PRPR_NM ;
 		  count2++ ;
 		}
 	 }
 
-	 if(RANK==0)
-	 {							
+	 // See if this is a new pair interaction.
+	 bool new_pair = true ;
+	 int map_index = -1 ;
+	 for ( int i = 0 ; i < count ; i++ ) {
+		int k ;
+		for ( k = 0 ; k < npairs ; k++ ) {
+		  if ( VEC[i].ATOM_PAIRS[k] != pair_names[k] ) {
+			 break ;
+		  }
+		}
+		if ( k == npairs ) {
+		  // Found a match.
+		  new_pair = false ;
+		  map_index = i ;
+		  break ;
+		}
+	 }
+
+		
+	 if ( new_pair ) 
+	 {
+		// This is a new set of pairs
+		if(RANK==0)
+		{							
+		  if ( natoms == 4 ) 
+		  {
+			 cout << "Made the following quadruplets: " << count << " ";
+		  } else if ( natoms == 3 ) 
+		  {
+			 cout << "Made the following triplets: " << count << " ";
+		  } else if ( natoms == 5 )
+		  {
+			 cout << "Made the following quintuplets: " << count << " ";
+		  }
+		  int npairs = VEC[0].NPAIRS ;
+		  for(int m=0; m< npairs; m++) 
+			 cout << VEC[count].ATOM_PAIRS[m] << " ";
+		  cout << endl;		
+		}
+
+		if ( count >= VEC.size() ) {
+		  VEC.resize(VEC.size()+1) ;
+		  if ( RANK == 0 ) {
+			 cout << "Resizing CLUSTER_LIST VEC to " << VEC.size() << endl ;
+		  }
+		}
+		count2 = 0 ;
+		for ( int i = 0 ; i < natoms ; i++ ) {
+		  VEC[count].ATOM_NAMES[i] = atom_names[i] ;
+		  for ( int j = i + 1 ; j < natoms ; j++ ) {
+			 VEC[count].ATOM_PAIRS[count2] = pair_names[count2++] ;
+		  }
+		}
+		map_index = count ;
+		count++;	
+	 }
+
+	 // Set up a mapping between pair name and cluster index, and vice versa.
+	 string all_pairs = accumulate(pair_names_unsorted.begin(), pair_names_unsorted.end(), string("")) ;
+
+
+	 MAP.insert(make_pair(all_pairs,map_index)) ;
+
+#ifdef DEBUG_CLUSTER
+	 cout << "MAP[ " << all_pairs << "] = " << map_index << endl ;
+#endif
+	 
+	 MAP_REVERSE.insert(make_pair(map_index,all_pairs)) ;
+
+	 // Construct a unique integer ID for the atom set and store it in the INT_MAP.
+	 int atom_id_int = make_id_int(atom_index_rev) ;
+	 INT_MAP.insert( make_pair(atom_id_int,map_index) ) ;
+	 INT_MAP_REVERSE.insert( make_pair(map_index, atom_id_int) ) ;
+								
+	 if(RANK == 0)
+	 {
+		cout << "		";
+		cout<< "Atom type idxs: ";
+
+		for ( int i = 0 ; i < natoms ; i++ ) {
+		  cout<< fixed << setw(2) << right << atom_index[i] ;
+		}
+		
 		if ( natoms == 4 ) 
 		{
-		  cout << "Made the following quadruplets: " << count << " ";
-		} else if ( natoms == 3 ) 
+		  cout<< " Quadruplet name: "           << setw(12) << right << all_pairs ;
+		  cout<< " Unique quadruplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
+		} 
+		else if ( natoms == 3 ) 
 		{
-		  cout << "Made the following triplets: " << count << " ";
-		} else if ( natoms == 5 )
-		{
-		  cout << "Made the following quintuplets: " << count << " ";
+		  cout<< " Triplet name: "           << setw(12) << right << all_pairs ;
+		  cout<< " Unique triplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
 		}
-		int npairs = VEC[0].NPAIRS ;
-		for(int m=0; m< npairs; m++) 
-		  cout << VEC[count].ATOM_PAIRS[m] << " ";
-		cout << endl;		
+		else if ( natoms == 5 ) 
+		{
+		  cout<< " Quintuplet name: "           << setw(12) << right << all_pairs ;
+		  cout<< " Unique quintuplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
+		}
 	 }
-	 count++;	
-  }			
+  } // End of calculation.
 }
 
 

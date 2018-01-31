@@ -39,7 +39,6 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLU
 void store_quad_permutations(QUADRUPLETS &quad, vector<int> &unsorted_powers)  ;
 void permute_atom_indices(int idx, vector<string> names, QUADRUPLETS &quad, vector<int> &unsorted_powers, vector<int> perm, int unique_index,
 								  int equiv_index) ;
-bool operator==(const vector<int>& lhs, const vector<int>& rhs)  ;
 
 int factorial(int input)
 {
@@ -1867,12 +1866,10 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				}
 			}
 			
-			cout << "Made the following pairs: " << endl;
-			for(map<string,int>::iterator i=PAIR_MAP.begin(); i!=PAIR_MAP.end(); i++)
-				cout << i->second << " " << i->first << endl;			
-			
-				
-			
+			//cout << "Made the following pairs: " << endl;
+			//for(map<string,int>::iterator i=PAIR_MAP.begin(); i!=PAIR_MAP.end(); i++)
+			//cout << i->second << " " << i->first << endl;			
+						
 			if(CONTROLS.USE_3B_CHEBY)
 			{
 				// Generate unique triplets
@@ -2825,15 +2822,4 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLU
 
 		if ( RANK == 0 ) cout << "...matrix printing complete: " << endl << endl;
 
-}
-  
-bool operator==(const vector<int>& lhs, const vector<int>& rhs) 
-{
-  if ( lhs.size() != rhs.size() ) return false ;
-
-  for ( int i = 0 ; i < lhs.size() ; i++ ) 
-  {
-	 if ( lhs[i] != rhs[i] ) return false ;
-  }
-  return true ;
 }

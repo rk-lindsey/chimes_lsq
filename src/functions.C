@@ -1655,7 +1655,13 @@ static void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 
 				TEMP_STR =      FF_2BODY[curr_pair_type_idx_ij].PRPR_NM;
 				TEMP_STR.append(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);	
-				TEMP_STR.append(FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);	
+				TEMP_STR.append(FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+
+				if ( TRIAD_MAP.find(TEMP_STR) == TRIAD_MAP.end() ) 
+				{
+				  cout << "Could not find triad map for " << TEMP_STR << endl ;
+				  exit_run(0) ;
+				}
 
 				curr_triple_type_index = TRIAD_MAP[TEMP_STR];
 				
@@ -4975,3 +4981,28 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 	
 	return;
 } 
+
+  
+bool operator==(const vector<int>& lhs, const vector<int>& rhs) 
+{
+  if ( lhs.size() != rhs.size() ) return false ;
+
+  for ( int i = 0 ; i < lhs.size() ; i++ ) 
+  {
+	 if ( lhs[i] != rhs[i] ) return false ;
+  }
+  return true ;
+}
+
+
+  
+bool operator==(const vector<string>& lhs, const vector<string>& rhs) 
+{
+  if ( lhs.size() != rhs.size() ) return false ;
+
+  for ( int i = 0 ; i < lhs.size() ; i++ ) 
+  {
+	 if ( lhs[i] != rhs[i] ) return false ;
+  }
+  return true ;
+}
