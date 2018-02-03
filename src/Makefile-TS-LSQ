@@ -52,8 +52,9 @@ CXX=mpicxx  -std=c++11  -O3 -D USE_MPI
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C
-CXX_LSQ_HEADER=functions.h Fcut.h
+
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C
+CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h
 
 house_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
 	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq
@@ -73,8 +74,9 @@ build_tests_lsq:
 # MAKE THE MD CODE
 ##################################
 
-CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C
-CXX_MD_HEADER=functions.h lmppath.h
+
+CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C
+CXX_MD_HEADER=functions.h lmppath.h Fcut.h Cluster.h
 
 FLAGLMP=-D LINK_LAMMPS
 LAMMPS_LIB=$(LAMMPSDIR)/src/liblammps.a

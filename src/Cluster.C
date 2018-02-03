@@ -13,13 +13,7 @@ using namespace std;
 #include "functions.h"
 
 // define for extra output
-// #define DEBUG_CLUSTER
-
-typedef pair<string,int> test;
-static bool check_pairs(test a, test b)
-{
-	return (a.first == b.first);
-}
+#define DEBUG_CLUSTER
 
 
 void CLUSTER::build(int cheby_order)
@@ -87,7 +81,6 @@ void CLUSTER::build_loop(int indx, int cheby_order, vector<int> powers)
   } 
   else 
   {
-	 int THRESHOLD = 0;
 	 vector<bool> represented(NATOMS,false) ;
 	 int count = 0 ;
 	 for ( int i = 0 ; i < NATOMS ; i++ ) 
@@ -201,7 +194,8 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
 
 		// DEBUG
 #ifdef DEBUG_CLUSTER
-		cout << "Number of identical atoms of element " << names[idx] << " = " << count ;
+		if ( RANK == 0 ) 
+		  cout << "Number of identical atoms of element " << names[idx] << " = " << count << endl ;
 #endif
 		permute_atom_indices(idx + count, names, unsorted_powers, perm,
 									unique_index, equiv_index) ;
@@ -239,13 +233,13 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
 #ifdef DEBUG_CLUSTER
 	 if ( RANK == 0 ) 
 	 {
-		cout << "Atom names: " 
+		cout << "Atom names: " ;
 		for ( int j = 0 ; j < NATOMS ; j++ ) {
 		  cout << names[ perm[j] ] << " " ;
 		}
 		cout << endl ;
 
-		cout << "Permutation: " 
+		cout << "Permutation: " ;
 		for ( int j = 0 ; j < NATOMS ; j++ ) {
 		  cout << perm[j] << " " ;
 		}
@@ -284,10 +278,19 @@ void CLUSTER::print()
 {
   if ( RANK == 0 ) 
   {
-	 cout << "		" <<  INDX;
+	 cout << "    Cluster index       : " <<  INDX << endl ;
+	 cout << "    Atoms in the cluster: " ;
+	 for ( int j = 0 ; j < NATOMS ; j++ ) 
+		cout << ATOM_NAMES[j] << " " ;
+	 cout << endl ;
+	 cout << "    Pairs in the cluster: " ;
 	 for(int j=0; j < NPAIRS ; j++)
-		cout  << "  " << ATOM_PAIRS[j];					
-	 cout<< ": Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
+	 {
+		cout  << ATOM_PAIRS[j] << " " ;					
+	 }
+	 cout << endl ;
+
+	 cout<< "    Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
 
 	 cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
 	 cout << "		   ----------------------------------------------------" << endl;					
@@ -408,7 +411,7 @@ double CLUSTER::get_sminim(PAIRS & FF_2BODY, string TYPE)
 	return VAL;	
 }
 
-void CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
 // Build all triplets and associated maps for the cluster list.
 {
   build_pairs(ATOM_PAIRS, PAIR_MAP) ;
@@ -417,6 +420,8 @@ void CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<st
 	 VEC[i].build(cheby_order) ;
 
    exclude() ;
+	
+	return( VEC.size() ) ;
 }
 
 
@@ -574,7 +579,8 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		for ( int i = 0 ; i < natoms ; i++ ) {
 		  VEC[count].ATOM_NAMES[i] = atom_names[i] ;
 		  for ( int j = i + 1 ; j < natoms ; j++ ) {
-			 VEC[count].ATOM_PAIRS[count2] = pair_names[count2++] ;
+			 VEC[count].ATOM_PAIRS[count2] = pair_names[count2] ;
+			 count2++ ;
 		  }
 		}
 		map_index = count ;
@@ -582,8 +588,9 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 }
 
 	 // Set up a mapping between pair name and cluster index, and vice versa.
-	 string all_pairs = accumulate(pair_names_unsorted.begin(), pair_names_unsorted.end(), string("")) ;
-
+	 string all_pairs = "" ;
+	 for ( int i = 0 ; i < pair_names_unsorted.size() ; i++ )
+		all_pairs += pair_names_unsorted[i] ;
 
 	 MAP.insert(make_pair(all_pairs,map_index)) ;
 
@@ -636,13 +643,11 @@ void CLUSTER_LIST::exclude()
 	 return ;
 
   vector<int>EXCL_IDX;
-  bool FOUND = false;
   map<string, int>::iterator it2, it2a,itrem;
   map<string, int>::iterator it, ita, itb;
   ita = MAP.begin();
   itb = MAP.end();
   advance(itb,-1);
-  int TARGET;
 				
 /*				
 //	Sanity check	
@@ -771,9 +776,9 @@ bool CLUSTER::init_histogram(vector<PAIRS> &pairs, map<string,int>& pair_map)
   if ( RANK == 0 ) 
   {
 	 cout << "...Initial histogram setup complete!" << endl << endl;
-	 return(true) ;
 }
 #endif
+  return(true) ;
 }
 
 void CLUSTER::increment_histogram(vector<int>& index)

@@ -39,8 +39,6 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	const int     maxk =10000;
 	int           kmax =10;
 	int           ksq;
-	double        Kfac;
-	XYZ			  R_K;//        rkx,rky,rkz;
 	double        rksq;
 	static XYZ    LAST_BOXDIMS;
 
@@ -234,13 +232,10 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
   const double SQRT_PI = sqrt(PI);
 
   double 		tempd,tempy;
-  double 		dx,dy,dz;
   double 		rlen_mi;
   static double alphasq;
-  int 			totk = 0;
   static double r_cut;
   static int	k_cut;
-  bool 			if_old_k_space = false;
   static bool 	called_before = false;
   static double alpha;
   const double 	accuracy = EWALD_ACCURACY;
@@ -323,8 +318,6 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 	}
 
 	// Main loop Ewald Coulomb energy/forces:
-	
-	int    curr_pair_type_idx;
 	
 	for(int a1 = a1start; a1 <= a1end; a1++)	// Double sum over atom pairs (outer loop is MPI'd over TRAJECTORY.ATOMS)
 	{
@@ -448,7 +441,6 @@ void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, 
 void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS)	
 {
 	XYZ RVEC; // Replaces  Rvec[3];
-	double rlen;
 
 	// Main loop Ewald Coulomb:
   
@@ -617,8 +609,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 			}
 		}
 	}
-	
-	int kx, ky, kz;
 	
     for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++) //Ewald K-space sum.	// -- this is where the slow down occurs
     {

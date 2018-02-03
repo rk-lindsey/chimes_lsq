@@ -46,12 +46,14 @@ using namespace std;
 // Define function headers -- general
 
 static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
-void        numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, vector<QUAD_FF> & FF_4BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, map<int,int> & INT_QUAD_MAP, NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
 
 // Define function headers -- MPI
 
+#ifdef USE_MPI
 static void sum_forces         (vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
 static void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
+#endif
+
 static void write_xyzv         (FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
 static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
 
@@ -170,8 +172,9 @@ int main(int argc, char* argv[])
 		// Data objects to hold coefficients for different force field types, and for FF printing (if requested)
 
 		vector<PAIR_FF> FF_2BODY;			// Holds all 2-body parameters
-		vector<TRIP_FF> FF_3BODY; 			// Holds all 3-body parameters
-		vector<QUAD_FF> FF_4BODY; 			// Holds all 4-body parameters
+
+		CLUSTER_LIST TRIPS ;             // Holds all 3-body parameters
+		CLUSTER_LIST QUADS;      			// Holds all 4-body parameters
 		
 		// Define the mapping variables that let us figure out which FF params to use for a given pair/triplet of pairs
 		
@@ -183,8 +186,9 @@ int main(int argc, char* argv[])
 		map<int,string> QUAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
 		
 
-		
-		// For parameter file parsing
+		vector<TRIP_FF> FF_3BODY = TRIPS.VEC ;
+		vector<QUAD_FF>  FF_4BODY = QUADS.VEC ;
+// For parameter file parsing
 		
 		vector<string> TMP_ATOMTYPE;
 
@@ -199,8 +203,6 @@ int main(int argc, char* argv[])
     double dens_mol;
     double dens_mass;
 	
-	double vscale;
-
 	bool   	FOUND_END = false;
 	string 	LINE;
 	string  TEMP_STR;
@@ -221,7 +223,6 @@ int main(int argc, char* argv[])
 	int CURR_ATOM = -1;
 	
 	string FIRST_EXT;
-	XYZ_INT TEMP_LAYER;
 
 	ofstream GENFILE;			// Holds dftbgen info output.. whatever that is
 	ifstream CMPR_FORCEFILE;	// Holds the forces that were read in for comparison purposes
@@ -2897,9 +2898,6 @@ int main(int argc, char* argv[])
 			ofstream SCAN_OUTFILE_3B;
 			ofstream SCAN_OUTFILE_2B;			
 
-			XYZ 	TMP_DISTS;
-			double 	TMP_PES;
-		
 			vector<double> IJ_DIST_3B;
 			vector<double> IK_DIST_3B;
 			vector<double> JK_DIST_3B;
@@ -3079,8 +3077,9 @@ int main(int argc, char* argv[])
 
 				
 					SORT_THREE_DESCEND(idx1, idx2, idx3);
-				
-               idx1 = make_triplet_id_int(idx1, idx2, idx3) ;
+					vector<int> index(3) ;
+					index[0] = idx1 ; index[1] = idx2 ; index[2] = idx3 ;
+               idx1 = TRIPS.make_id_int(index) ;
 					INT_TRIAD_MAP[idx1] = TRIAD_MAP[int_map_3b_str];
 				
 					if(RANK == 0)
@@ -3143,8 +3142,13 @@ int main(int argc, char* argv[])
 						
 						TMP_QUAD_PAIR    = TMP_ATOMTYPE[k] + TMP_ATOMTYPE[l]; 	
 						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
-						
-						ATOM_QUAD_ID_INT = make_quad_id_int(i, j, k, l) ;
+
+						vector<int> index(4) ;
+						index[0] = i ;
+						index[1] = j ;
+						index[2] = k ;
+						index[3] = l ;
+						ATOM_QUAD_ID_INT = QUADS.make_id_int(index) ;
 						
 						INT_QUAD_MAP        .insert(make_pair(ATOM_QUAD_ID_INT,QUAD_MAP[TMP_QUAD_SIXLET]));	
 						//INT_QUAD_MAP_REVERSE.insert(make_pair(QUAD_MAP[TMP_QUAD_SIXLET], ATOM_QUAD_ID_INT));	
@@ -3280,8 +3284,6 @@ int main(int argc, char* argv[])
 	if (RANK==0)
 		cout << "BEGIN SIMULATION:" << endl;
 	
-	double ke; // A temporary variable used when updating thermostatting 
-	
 	int FIRST_STEP = 0;
 	
 	if(CONTROLS.RESTART)
@@ -3326,7 +3328,7 @@ int main(int argc, char* argv[])
 		////////////////////////////////////////////////////////////
 
 		// Do the actual force calculation
-		ZCalc(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, FF_4BODY, PAIR_MAP, TRIAD_MAP, INT_QUAD_MAP, NEIGHBOR_LIST);
+		ZCalc(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST);
 
 		// FOR MPI:		Synchronize forces, energy, and pressure.
 		
@@ -3530,7 +3532,8 @@ int main(int argc, char* argv[])
 		{
 			double PE_1, PE_2, dV; 
 			
-			numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, FF_3BODY, FF_4BODY, PAIR_MAP, TRIAD_MAP, INT_QUAD_MAP, NEIGHBOR_LIST, PE_1, PE_2, dV);
+			numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP,
+									 NEIGHBOR_LIST, PE_1, PE_2, dV);
 			
 			#ifdef USE_MPI
 				MPI_Barrier(MPI_COMM_WORLD);
@@ -3823,11 +3826,7 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	bool   			FOUND_END = false;
 	string 			LINE;
 	string			TEMP_STR,TEMP_STR_2;
-	double			TEMP_DOUB;
-	int				TEMP_INT;
-	int				TMP_NSCAN;
 	stringstream	LINE_PARSER;
-	int				ITEM_NO;
 	int				ADD_TO_NPLOTS = 0;
 	
 	// Set some defaults
@@ -4828,6 +4827,7 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 
 // MPI -- Related functions -- See headers at top of file
 
+#ifdef USE_MPI
 static void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z)
 // Add up forces, potential energy, and pressure from all processes.  
 {
@@ -4887,6 +4887,8 @@ static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector
 			
 	#endif
 }
+
+#endif // USE_MPI
 
 void exit_run(int value)
 // Call this instead of exit(1) to properly terminate all MPI processes.

@@ -46,7 +46,7 @@ struct PAIRS	// NEEDS UPDATING
 
 	FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
 	
-   PAIRS():OVRPRMS(5),N_CFG_CONTRIB(0), NBINS(3) {}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
+PAIRS(): N_CFG_CONTRIB(0),OVRPRMS(5), NBINS(3) {}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 };
 
 class CLUSTER 
@@ -77,6 +77,7 @@ public:
   vector<double> NBINS ;				// Number of bins to use for ij, ik, and jk distances when building the population histograms 
   vector<double> BINWS; 				// Binwidths to use for ij, ik, and jk distances when building the population histograms 
 	
+  vector<double> 	PARAMS;
 
 	
   int N_TRUE_ALLOWED_POWERS;	// How many UNIQUE sets of powers do we have?
@@ -117,8 +118,8 @@ public:
   // Return the minimum inner cutoff distance for the specified pair.
   double get_sminim(PAIRS & FF_2BODY, string TYPE) ;
 
-CLUSTER(int natom, int npair): ATOM_NAMES(natom), ATOM_PAIRS(npair), S_MAXIM(npair), S_MINIM(npair), MIN_FOUND(npair),
-	 NBINS(npair), BINWS(npair)
+CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), MIN_FOUND(npair),
+	 S_MAXIM(npair), S_MINIM(npair), NBINS(npair), BINWS(npair)
   {
 	 NATOMS = natom ;
 	 NPAIRS = npair ;
@@ -171,21 +172,22 @@ public:
 
   void build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP) ;
 
-  void build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+  int build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
 
   void exclude() ;
 
-private:
   int make_id_int(vector<int>& index) ;
+
+private:
   void build_pairs_loop(int index, vector<int> atom_index, 
 								vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count) ;
 } ;
 
 
-struct QUAD_FF : public QUADRUPLETS
-{
-	vector<double> 	PARAMS;
-};
+// These are no longer inherited from CLUSTER so that CLUSTER_LIST works correctly.
+typedef QUADRUPLETS QUAD_FF ;
+typedef TRIPLETS TRIP_FF ;
+
 
 #define _Quad_h
 #endif // ifndef _Quad_h

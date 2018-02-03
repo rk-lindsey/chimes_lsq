@@ -204,7 +204,11 @@ struct JOB_CONTROL
 	string	CHEBY_TYPE;			// How will distance be transformed?
 	string	INFILE;				// Input trajectory file
 	
-	JOB_CONTROL():N_LAYERS(0), WRAP_COORDS(false),IF_SUBTRACT_COORD(false),IF_SUBTRACT_COUL(false),FIT_COUL(false),USE_PARTIAL_CHARGES(false),COUL_CONSV(false),FIT_POVER(false),USE_3B_CHEBY(false),USE_4B_CHEBY(false),TOT_SNUM(0)
+JOB_CONTROL(): FIT_COUL(false), FIT_POVER(false),
+	  USE_3B_CHEBY(false), 
+	  USE_4B_CHEBY(false), N_LAYERS(0), WRAP_COORDS(false),
+	  TOT_SNUM(0), COUL_CONSV(false), IF_SUBTRACT_COORD(false),
+	  IF_SUBTRACT_COUL(false), USE_PARTIAL_CHARGES(false)
 	 {
 	
 		NFRAMES = 0;			// Number of frames in the movie file
@@ -285,12 +289,6 @@ struct PAIR_FF : public PAIRS
 	double			PAIR_CHRG;
 };
 
-struct TRIP_FF : public TRIPLETS
-{
-	vector<double> 	PARAMS;
-};
-
-
 struct PES_PLOTS
 {
 	int N_PLOTS;
@@ -328,7 +326,7 @@ struct PES_PLOTS
 	vector<XYZ_INT>	IJ_IK_JK_TYPE;
 		
 	
-	PES_PLOTS():N_PLOTS(0), N_SCAN(0), INCLUDE_2B(0), DO_4D(1){}
+   PES_PLOTS(): N_PLOTS(0), INCLUDE_2B(0), DO_4D(1), N_SCAN(0) {} 
 		
 };
 
@@ -538,7 +536,9 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 //
 //////////////////////////////////////////
 
-void ZCalc_Deriv         (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  vector<TRIPLETS> & PAIR_TRIPLETS, vector<QUADRUPLETS> & PAIR_QUADRUPLETS,FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  map<string,int> & TRIAD_MAP, map<int,int> & INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST);
+void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, 
+						FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, 
+						const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  NEIGHBORS &NEIGHBOR_LIST) ;
 void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
 
 void SubtractEwaldForces (FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
@@ -555,7 +555,7 @@ void ZCalc_Ewald_Deriv   (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, 
 //
 //////////////////////////////////////////
 
-void   ZCalc                    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, vector<QUAD_FF> & FF_4BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, map<int,int> & INT_QUAD_MAP, NEIGHBORS & NEIGHBOR_LIST);
+void   ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
 void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
 double get_dist                 (const FRAME & SYSTEM, XYZ & RAB, int a1, int a2);
 
@@ -586,19 +586,9 @@ void SORT_THREE_DESCEND(int & a, int & b, int & c);
 void enable_fp_exceptions();
 void exit_run(int val);
 
-
-
-inline int make_quad_id_int(int i, int j, int k, int l)
-// Returns a unique ID number for a quadruple of 4 atom types.
-{
-  return(MAX_ATOM_TYPES3 * (i+1) + MAX_ATOM_TYPES2 * (j+1) + MAX_ATOM_TYPES * (k+1) + l + 1) ;
-}
-
-inline int make_triplet_id_int(int i, int j, int k) 
-// Returns a unique ID number for a triplet of 3 atom types.
-{
-  return(MAX_ATOM_TYPES2 * i + MAX_ATOM_TYPES * j + k) ;
-}
+void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
+								CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
+								NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV) ;
 
 bool operator==(const vector<int>& lhs, const vector<int>& rhs)  ;
 bool operator==(const vector<string>& lhs, const vector<string>& rhs)  ;

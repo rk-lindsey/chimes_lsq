@@ -276,7 +276,6 @@ int main(int argc, char* argv[])
 	// Prepare for layering
 		
 	vector<XYZ_INT> LAYER_MATRX;
-	int             N_LAYER_ELEM = 0;		
 
 	for (int i=0; i<CONTROLS.NFRAMES; i++)
 	{
@@ -290,8 +289,6 @@ int main(int argc, char* argv[])
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Y;
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Z;
 		
-		bool IFANY = false;
-	
 		if(CONTROLS.FIT_STRESS)
 		{
 				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.X;
@@ -628,7 +625,8 @@ int main(int argc, char* argv[])
 		NEIGHBOR_LIST.INITIALIZE(TRAJECTORY[i], NEIGHBOR_PADDING);
 		NEIGHBOR_LIST.DO_UPDATE(TRAJECTORY[i], CONTROLS);		
 
-		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS.VEC, QUADS.VEC, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, TRIPS.MAP, QUADS.INT_MAP, NEIGHBOR_LIST);
+		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, 
+						CONTROLS.USE_3B_CHEBY, PAIR_MAP, NEIGHBOR_LIST);
 		
 		if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
 			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
@@ -1011,7 +1009,6 @@ int main(int argc, char* argv[])
 			header << i << "		" << ATOM_PAIRS[i].ATM1TYP << "		" << ATOM_PAIRS[i].ATM1CHG << "		" << ATOM_PAIRS[i].ATM1MAS << endl;		
 	}
 	
-	bool PRINT_OVR = false;
 	int NPAIR =  ATOM_PAIRS.size();	
 	
 	header << endl << "ATOM PAIRS: " << NPAIR << endl << endl;
@@ -1873,7 +1870,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			if(CONTROLS.USE_3B_CHEBY)
 			{
 				// Generate unique triplets
-			  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
+			  NTRIP = TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
 
 			}
 
@@ -1883,7 +1880,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				// Generate unique quadruplets and thier corresponding sets of powers
 				//////////////////////////////////////////////////////////////////////
 
-			  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
+			  NQUAD = QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
 			
 			  INT_QUAD_MAP = QUADS.INT_MAP ;
 			  INT_QUAD_MAP_REVERSE = QUADS.INT_MAP_REVERSE ;
@@ -1909,29 +1906,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					
 					for(int i=0;i<TRIPS.EXCLUDE.size(); i++)
 						cout << "		" << TRIPS.EXCLUDE[i] << endl;
+
 					cout << "	" << endl;
 					for(int i=0;i<NTRIP; i++)
 					{
-						cout << "		" << TRIPS.VEC[i].INDX << "  " << TRIPS.VEC[i].ATOM_PAIRS[0] << " " << TRIPS.VEC[i].ATOM_PAIRS[1] << " " << TRIPS.VEC[i].ATOM_PAIRS[2] << ":";
-						cout << " Number of unique sets of powers: " << TRIPS.VEC[i].N_TRUE_ALLOWED_POWERS << " (" << TRIPS.VEC[i].N_ALLOWED_POWERS << " total)..." << endl;	
-						cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
-						cout << "		   ----------------------------------------------------" << endl;					
-					
-						for(int j=0; j<TRIPS.VEC[i].ALLOWED_POWERS.size(); j++)
-						{
-							//						cout << "		   " << TRIPS.VEC[i].ALLOWED_POWERS[j].X << " " << TRIPS.VEC[i].ALLOWED_POWERS[j].Y << " " << TRIPS.VEC[i].ALLOWED_POWERS[j].Z << endl;		
-						 
-										
-
-							cout << "		      " << setw(6) << fixed << left << j << " ";
-							cout << " " << setw(2) << fixed << left << TRIPS.VEC[i].ALLOWED_POWERS[j][0]  << " ";
-							cout << " " << setw(2) << fixed << left << TRIPS.VEC[i].ALLOWED_POWERS[j][1]  << " ";
-							cout << " " << setw(2) << fixed << left << TRIPS.VEC[i].ALLOWED_POWERS[j][2]  << " ";
-							cout << "       " << setw(8) << TRIPS.VEC[i].EQUIV_INDICES[j] << " ";
-							cout << "       " << setw(8) << TRIPS.VEC[i].PARAM_INDICES[j] << endl; 
-						
-						}
-
+					  TRIPS.VEC[i].print() ;
 					}
 				}
 				#endif	
@@ -2512,7 +2491,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				if ( RANK == 0 ) cout << "	Note: Setting specific 4-body r_max values: " << endl;
 				#endif	
 
-				double TMP_VAL;
 				vector<string>TMP_PAIRTYPS(6);
 				vector<double>TMP_CUTOFFS(6);
 				vector<string>TRG_PAIRTYPS(6);

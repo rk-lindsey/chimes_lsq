@@ -152,10 +152,6 @@ void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
 
 	XYZ RAB;
-	XYZ TMP_BOX;
-	
-	double MAX = 0;
-	double rlen = 0;
 	
 	if(!FIRST_CALL)	// Clear out the second dimension so we can start over again
 	{
@@ -177,7 +173,7 @@ void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			if(a2 == a1)
 				continue;
 			
-			rlen = get_dist(SYSTEM, RAB, a1, a2);
+			double rlen = get_dist(SYSTEM, RAB, a1, a2);
 			
 			if (rlen < MAX_CUTOFF + RCUT_PADDING)
 				LIST_UNORDERED[a1].push_back(a2);	
@@ -1100,7 +1096,6 @@ void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 	INTERACTION_4B inter;
 	LIST_4B_INT.clear();
 	int ai, aj, ak, al;
-	double rlen;
 	
 	for (int i=0; i<SYSTEM.ATOMS; i++)	// Loop over all real atoms
 	{
