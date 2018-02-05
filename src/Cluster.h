@@ -178,6 +178,10 @@ public:
 
   int make_id_int(vector<int>& index) ;
 
+  void print_min_distances() ;
+
+  static string tuplet_name(int natom, bool plural, bool caps) ;
+
 private:
   void build_pairs_loop(int index, vector<int> atom_index, 
 								vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count) ;

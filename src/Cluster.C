@@ -18,7 +18,7 @@ using namespace std;
 
 void CLUSTER::build(int cheby_order)
 // Build a set of interactions for a quad.
-// Figure out the allowed pair quadruplet powers. Here are some rules and considerations:
+// Figure out the allowed pair powers. Here are some rules and considerations:
 //
 // 1. Powers start from zero. So, if order is specified to be 2, polynomial powers range
 //    from 0 to n-1, NOT 1 to n!
@@ -349,6 +349,7 @@ void CLUSTER::print_special(ofstream &header, string QUAD_MAP_REVERSE, string ou
 }
 
 void CLUSTER::print_header(ofstream &header)
+// Print the header file for the force field definition
 {
   header << INDX << "  ";
   for(int m=0; m<NPAIRS; m++)
@@ -472,6 +473,8 @@ void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MA
   NCLUSTERS = VEC.size() ;
 }
 
+
+
 void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index, 
 												vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count)
 // Loop over atom types in building the CLUSTER ATOM_PAIRS list.
@@ -553,16 +556,7 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		// This is a new set of pairs
 		if(RANK==0)
 		{							
-		  if ( natoms == 4 ) 
-		  {
-			 cout << "Made the following quadruplets: " << count << " ";
-		  } else if ( natoms == 3 ) 
-		  {
-			 cout << "Made the following triplets: " << count << " ";
-		  } else if ( natoms == 5 )
-		  {
-			 cout << "Made the following quintuplets: " << count << " ";
-		  }
+		  cout << "Made the following " << tuplet_name(natoms, true, false) << ": " << count << " ";
 		  int npairs = VEC[0].NPAIRS ;
 		  for(int m=0; m< npairs; m++) 
 			 cout << VEC[count].ATOM_PAIRS[m] << " ";
@@ -576,13 +570,25 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		  }
 		}
 		count2 = 0 ;
+
+		// DEBUG !!
+#ifdef DEBUG_CLUSTER		
+		cout << "ADDING ATOM_PAIRS = " ;
+#endif
+		  
+
 		for ( int i = 0 ; i < natoms ; i++ ) {
 		  VEC[count].ATOM_NAMES[i] = atom_names[i] ;
 		  for ( int j = i + 1 ; j < natoms ; j++ ) {
 			 VEC[count].ATOM_PAIRS[count2] = pair_names[count2] ;
+#ifdef DEBUG_CLUSTER			 
+			 cout << VEC[count].ATOM_PAIRS[count2] << " " ;
+#endif
 			 count2++ ;
 		  }
 		}
+		cout << endl ;
+		
 		map_index = count ;
 		count++;	
 	 }
@@ -614,21 +620,10 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		  cout<< fixed << setw(2) << right << atom_index[i] ;
 		}
 		
-		if ( natoms == 4 ) 
-		{
-		  cout<< " Quadruplet name: "           << setw(12) << right << all_pairs ;
-		  cout<< " Unique quadruplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
-		} 
-		else if ( natoms == 3 ) 
-		{
-		  cout<< " Triplet name: "           << setw(12) << right << all_pairs ;
-		  cout<< " Unique triplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
-		}
-		else if ( natoms == 5 ) 
-		{
-		  cout<< " Quintuplet name: "           << setw(12) << right << all_pairs ;
-		  cout<< " Unique quintuplet index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
-		}
+		string tuplet = tuplet_name(natoms, false, true) ;
+		cout<< "  " << tuplet << " name: "           << setw(12) << right << all_pairs ;
+		tuplet = tuplet_name(natoms, false, false) ;
+		cout<< " Unique " << tuplet <<  " index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
 	 }
   } // End of calculation.
 }
@@ -733,8 +728,110 @@ cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] 
 */
 }
 
+
+void CLUSTER_LIST::print_min_distances()
+{
+  string tuplet = tuplet_name(VEC[0].NATOMS, false, false) ;
+
+  if ( RANK == 0 ) cout << "	Minimum distances between atoms " << tuplet << " pairs: (Angstr.)" << endl;
+			
+  for (int k=0; k< VEC.size(); k++) 
+  {
+	 vector<double> sum(VEC[k].NPAIRS,0.0);
+			
+#ifdef USE_MPI
+			
+	 for (int m=0 ; m< VEC[k].NPAIRS ; m++)
+		MPI_Reduce(&(VEC[k].MIN_FOUND[m]), &(sum[m]), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+#else	
+	 for(int m=0; m< VEC[k].NPAIRS; m++)
+		sum[m] = VEC[k].MIN_FOUND[m];
+#endif
+					
+	 if ( RANK == 0 ) 
+	 {
+		cout << "		" << k << "	" ;	
+		for(int m=0; m < VEC[k].NPAIRS ; m++)
+		  cout << VEC[k].ATOM_PAIRS[m] << " ";
+		for(int m=0; m < VEC[k].NPAIRS ; m++)
+		  cout << sum[m] << " ";
+		cout << endl;
+	 }
+  }
+			
+  if ( RANK == 0 ) cout << "	Total number of configurations contributing to each "
+								<< tuplet << " type:" << endl;
+		
+  for (int k=0; k<VEC.size(); k++)
+  {
+	 int sum = 0 ;
+				
+#ifdef USE_MPI
+	 MPI_Reduce(&(VEC[k].N_CFG_CONTRIB), &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+#else
+	 sum = VEC[k].N_CFG_CONTRIB ;
+#endif	
+								
+	 if ( RANK == 0 ) 
+	 {
+		cout << "		" << k << "	" ;	
+		for(int m=0; m<6; m++)
+		  cout << VEC[k].ATOM_PAIRS[m] << " ";
+		cout << sum << endl;
+	 }	
+  }
+}
+
+string CLUSTER_LIST::tuplet_name(int natom, bool plural, bool caps)
+{
+  string tuplet ;
+
+  switch(natom) 
+  {
+  case 1:
+	 tuplet = "singlet" ;
+	 break ;
+  case 2:
+	 tuplet = "pair" ;
+	 break ;
+  case 3:
+	 tuplet = "triplet" ;
+	 break ;
+  case 4:
+	 tuplet = "quadruplet" ;
+	 break ;
+  case 5:
+	 tuplet = "quintuplet" ;
+	 break ;
+  case 6:
+	 tuplet = "sextuplet" ;
+	 break ;
+  case 7:
+	 tuplet = "septuplet" ;
+	 break ;
+  case 8:
+	 tuplet = "octuplet" ;
+	 break ;
+  case 9:
+	 tuplet = "nontuplet" ;
+	 break ;
+  default:
+	 tuplet = to_string(natom) + "-tuplet" ;
+	 break ;
+  } ;
+
+  if ( plural ) 
+	 tuplet += "s" ;
+
+  if ( caps )
+	 tuplet[0] = toupper(tuplet[0]) ;
+
+  return tuplet ;
+}
+
 bool CLUSTER::init_histogram(vector<PAIRS> &pairs, map<string,int>& pair_map)
-// Sets up the histogram for TRIPLETS.  Returns true on success, false otherwise.
+// Sets up the histogram for CLUSTER.  Returns true on success,
+// false otherwise.
 {
 		
   double tmp_max, tmp_min;

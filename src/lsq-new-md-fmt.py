@@ -380,7 +380,11 @@ if TOTAL_QUADS > 0:
     
         PREV_QUADIDX = 0
                 
-        P1 = hf[ATOM_QUADS_LINE+2].split()
+        print "ATOM_QUADS_LINE" + str(ATOM_QUADS_LINE+2+ADD_LINES)
+
+        P1 = hf[ATOM_QUADS_LINE+2+ADD_LINES].split()
+
+        print "P1 " + P1[1] + P1[2] + P1[3] + P1[4] + P1[5] + P1[6]
         
         UNIQ = P1[7]
         TOTL = P1[9]
@@ -393,6 +397,9 @@ if TOTAL_QUADS > 0:
         P1 = P1[1]
         
         print "QUADRUPLETYPE PARAMS: " +`t` + " " + P1 + " " + P2 + " " + P3 + " " + P4 + " " + P5 + " " + P6 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL + "\n"
+
+        print "UNIQUE: ", str(UNIQ)
+        
         print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
         print "   ----------------------------------------------------------------------------"
         
@@ -405,6 +412,9 @@ if TOTAL_QUADS > 0:
             ADD_LINES += 1
             LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
             LINE_SPLIT = LINE.split()
+
+            print "LINE_SPLIT", LINE_SPLIT
+            print "X ", x
 
             print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX+int(LINE_SPLIT[8])]`
             #print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS]`

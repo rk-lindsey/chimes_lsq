@@ -2247,7 +2247,22 @@ static void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 			
 					ATOM_QUAD_ID_INT       = QUADS.make_id_int(TMP_QUAD_SET) ;
 
-					curr_quad_type_index = INT_QUAD_MAP[ATOM_QUAD_ID_INT];				
+					map<int,int>::iterator it ;
+					it = INT_QUAD_MAP.find(ATOM_QUAD_ID_INT) ;
+
+					if ( it == INT_QUAD_MAP.end() ) 
+					{
+					  cout << "Missing quad index " << ATOM_QUAD_ID_INT << endl ;
+					  for ( int i = 0 ; i < TMP_QUAD_SET.size() ; i++ )
+					  {
+						 cout << TMP_QUAD_SET[i] << " " ;
+					  }
+					  cout << endl ;
+					  exit_run(0) ;
+					} else
+					{
+					  curr_quad_type_index = INT_QUAD_MAP[ATOM_QUAD_ID_INT];
+					}
 
 					// If this type has been excluded, then skip to the next iteration of the loop
 

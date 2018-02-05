@@ -2701,103 +2701,13 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLU
 
 		if( use_3b_cheby ) 
 		{
-			if ( RANK == 0 ) cout << "	Minimum distances between atoms triplet pairs: (Angstr.)" << endl;
-			
-			for (int k=0; k<TRIPS.VEC.size(); k++) 
-			{
-				XYZ sum = {0.0, 0.0, 0.0} ;
-#ifdef USE_MPI
-				MPI_Reduce(&(TRIPS.VEC[k].MIN_FOUND[0]), &(sum.X), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-				MPI_Reduce(&(TRIPS.VEC[k].MIN_FOUND[1]), &(sum.Y), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-				MPI_Reduce(&(TRIPS.VEC[k].MIN_FOUND[2]), &(sum.Z), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-#else				
-				sum.X = TRIPS.VEC[k].MIN_FOUND[0] ;
-				sum.Y = TRIPS.VEC[k].MIN_FOUND[1] ;
-				sum.Z = TRIPS.VEC[k].MIN_FOUND[1] ;
-#endif
-				if ( RANK == 0 ) cout << "		" << k << "	" 					
-											 << TRIPS.VEC[k].ATOM_PAIRS[0]    << " " 
-											 << TRIPS.VEC[k].ATOM_PAIRS[1]    << " " 
-											 << TRIPS.VEC[k].ATOM_PAIRS[2]    << " "
-											 /* 
-											 << sum.X << " " 
-											 << sum.Y << " " 
-											 << sum.Z << endl;
-											 */
-											 << TRIPS.VEC[k].MIN_FOUND[0] << " " 
-											 << TRIPS.VEC[k].MIN_FOUND[1] << " " 
-											 << TRIPS.VEC[k].MIN_FOUND[2] << endl;
-			
-			}
-			if ( RANK == 0 ) cout << "	Total number of configurations contributing to each triplet type:" << endl;
-		
-			for (int k=0; k<TRIPS.VEC.size(); k++)
-			{
-				int sum = 0 ;
-#ifdef USE_MPI
-				MPI_Reduce(&(TRIPS.VEC[k].N_CFG_CONTRIB), &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-#else
-				sum = TRIPS.VEC[k].N_CFG_CONTRIB ;
-#endif				
-				if ( RANK == 0 ) cout << "		" << k << "	" 					
-											 << TRIPS.VEC[k].ATOM_PAIRS[0] << " " 
-											 << TRIPS.VEC[k].ATOM_PAIRS[1] << " " 
-											 << TRIPS.VEC[k].ATOM_PAIRS[2] << " " 
-											 << sum << endl;
-			}
+		  TRIPS.print_min_distances() ;
 		}
-		
+
 		if( use_4b_cheby ) 
 		{
-			
-			if ( RANK == 0 ) cout << "	Minimum distances between atoms quadruplet pairs: (Angstr.)" << endl;
-			
-			for (int k=0; k<TRIPS.VEC.size(); k++) 
-			{
-				vector<double> sum(6,0.0);
-				
-				#ifdef USE_MPI
-			
-					for(int m=0; m<6; m++)
-						MPI_Reduce(&(QUADS.VEC[k].MIN_FOUND[m]), &(sum[m]), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-				#else	
-					for(int m=0; m<6; m++)
-						sum[m] = QUADS.VEC[k].MIN_FOUND[m];
-				#endif
-					
-				if ( RANK == 0 ) 
-				{
-					cout << "		" << k << "	" ;	
-					for(int m=0; m<6; m++)
-						cout << QUADS.VEC[k].ATOM_PAIRS[m] << " ";
-					for(int m=0; m<6; m++)
-						cout << sum[m] << " ";
-					cout << endl;
-				}
-			}
-			
-			if ( RANK == 0 ) cout << "	Total number of configurations contributing to each quadruplet type:" << endl;
-		
-			for (int k=0; k<QUADS.VEC.size(); k++)
-			{
-				int sum = 0 ;
-				
-				#ifdef USE_MPI
-					MPI_Reduce(&(QUADS.VEC[k].N_CFG_CONTRIB), &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-				#else
-					sum = QUADS.VEC[k].N_CFG_CONTRIB ;
-				#endif	
-								
-				if ( RANK == 0 ) 
-				{
-					cout << "		" << k << "	" ;	
-					for(int m=0; m<6; m++)
-						cout << QUADS.VEC[k].ATOM_PAIRS[m] << " ";
-					cout << sum << endl;
-				}	
-			}
+		  QUADS.print_min_distances() ;
 		}
-
+			
 		if ( RANK == 0 ) cout << "...matrix printing complete: " << endl << endl;
-
 }
