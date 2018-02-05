@@ -1,4 +1,4 @@
-# ! /usr/bin/python
+#! /usr/bin/python
 
 import sys
 import numpy
@@ -283,8 +283,8 @@ if TOTAL_QUADS > 0:
 
         P1 = hf[ATOM_QUADS_LINE+2+ADD_LINES].split()
         
-        #print P1
-        
+        #print "QUAD HEADER", P1
+
         SNUM_4B +=  int(P1[7])
         
         TOTL = P1[9]
@@ -293,6 +293,8 @@ if TOTAL_QUADS > 0:
 
         for i in xrange(0,int(TOTL)):
             ADD_LINES += 1
+
+#print "TOTAL 4B PARAMETERS ", SNUM_4B            
 
 for i in range(0,TOTAL_PAIRS):
     
@@ -363,7 +365,8 @@ if TOTAL_TRIPS > 0:
             print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]`
 
         TRIP_PAR_IDX += int(UNIQ)
-        COUNTED_TRIP_PARAMS += TRIP_PAR_IDX
+        COUNTED_TRIP_PARAMS += int(UNIQ)
+        #print "COUNTED_TRIP_PARAMS", COUNTED_TRIP_PARAMS
             
         print ""
         
@@ -380,11 +383,11 @@ if TOTAL_QUADS > 0:
     
         PREV_QUADIDX = 0
                 
-        print "ATOM_QUADS_LINE" + str(ATOM_QUADS_LINE+2+ADD_LINES)
+        #print "ATOM_QUADS_LINE " + str(ATOM_QUADS_LINE+2+ADD_LINES)
 
         P1 = hf[ATOM_QUADS_LINE+2+ADD_LINES].split()
 
-        print "P1 " + P1[1] + P1[2] + P1[3] + P1[4] + P1[5] + P1[6]
+        #print "P1 " + P1[1] + P1[2] + P1[3] + P1[4] + P1[5] + P1[6]
         
         UNIQ = P1[7]
         TOTL = P1[9]
@@ -398,7 +401,7 @@ if TOTAL_QUADS > 0:
         
         print "QUADRUPLETYPE PARAMS: " +`t` + " " + P1 + " " + P2 + " " + P3 + " " + P4 + " " + P5 + " " + P6 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL + "\n"
 
-        print "UNIQUE: ", str(UNIQ)
+        #print "UNIQUE: ", str(UNIQ)
         
         print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
         print "   ----------------------------------------------------------------------------"
@@ -413,8 +416,8 @@ if TOTAL_QUADS > 0:
             LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
             LINE_SPLIT = LINE.split()
 
-            print "LINE_SPLIT", LINE_SPLIT
-            print "X ", x
+            #print "LINE_SPLIT", LINE_SPLIT
+            #print "QUAD_PAR_IDX", QUAD_PAR_IDX
 
             print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX+int(LINE_SPLIT[8])]`
             #print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS]`

@@ -1013,7 +1013,7 @@ int main(int argc, char* argv[])
 	
 	header << endl << "ATOM PAIRS: " << NPAIR << endl << endl;
 	
-	header << "!# PAIRIDX #	";
+	header << "# PAIRIDX #	";
 	header << "# ATM_TY1 #	";
 	header << "# ATM_TY1 #	";
 	header << "# S_MINIM #	";
