@@ -1977,12 +1977,25 @@ int main(int argc, char* argv[])
 			}
 			else if(TEMP_TYPE =="CHEBYSHEV")
 			{
-				STREAM_PARSER >> TMP_TERMS1;
-				STREAM_PARSER >> TMP_TERMS2;
-				STREAM_PARSER >> TMP_TERMS3;
+			  
+			  vector<string> tokens ;
 
-				if (STREAM_PARSER >>  TMP_LOW)
+			  // Tokenize the input.
+			  copy(istream_iterator<string>(STREAM_PARSER),
+					 istream_iterator<string>(),
+					 back_inserter(tokens) ) ;
+
+			  TMP_TERMS1 = TMP_TERMS2 = TMP_TERMS3 = 0 ;
+			  if ( tokens.size() > 0 )
+				 TMP_TERMS1 = stoi(tokens[0]) ;
+			  if ( tokens.size() > 1 )
+				 TMP_TERMS2 = stoi(tokens[1]) ;
+			  if ( tokens.size() > 2 )
+				 TMP_TERMS3 = stoi(tokens[2]) ;
+
+			  if ( tokens.size() > 3 )
 				{
+				  TMP_LOW = stoi(tokens[3]) ;
 					if( TMP_LOW < -1.0 ||  TMP_LOW > +1.0 )
 					{
 						cout << "ERROR: CHEBY_RANGE_LOW must be betwee -1 and 1" << endl;
@@ -1991,8 +2004,9 @@ int main(int argc, char* argv[])
 				}
 				
 				
-				if (STREAM_PARSER >>  TMP_HIGH)
+			  if ( tokens.size() > 4 )
 				{
+				  TMP_HIGH = stoi(tokens[4]) ;
 					if( TMP_HIGH < -1.0 ||  TMP_HIGH > +1.0 )
 					{
 						cout << "ERROR: CHEBY_RANGE_HIGH must be betwee -1 and 1" << endl;
