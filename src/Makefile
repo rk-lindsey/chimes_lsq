@@ -47,7 +47,8 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 #
 # Below: Other debugging/optimiazation options
 #
-CXX=clang++ -g -std=c++11 -g -Wall
+#CXX=clang++ -g -std=c++11 -g -Wall
+CXX=g++ -g -std=c++11 -Wall -Wno-sign-compare
 
 #CXX=icpc -fast -Wall
 
@@ -57,8 +58,8 @@ CXX=clang++ -g -std=c++11 -g -Wall
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C
-CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C
+CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h
 
 house_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
 	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq
@@ -78,8 +79,8 @@ build_tests_lsq:
 # MAKE THE MD CODE
 ##################################
 
-CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C
-CXX_MD_HEADER=functions.h lmppath.h Fcut.h Cluster.h
+CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C
+CXX_MD_HEADER=functions.h lmppath.h Fcut.h Cluster.h util.h
 
 FLAGLMP=-D LINK_LAMMPS
 LAMMPS_LIB=$(LAMMPSDIR)/src/liblammps.a

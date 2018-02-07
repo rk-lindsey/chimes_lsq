@@ -12,6 +12,7 @@ using namespace std;
 
 #include "Fcut.h"
 #include "functions.h"
+#include "util.h"
 
 void FCUT::get_fcut(double & fcut, double & fcut_deriv, 
 						  const double rlen, const double rmin, const double rmax) 
@@ -72,7 +73,7 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv,
 				a_prime = STEEPNESS*A/(1.0+A)/(1.0+A);
 			}
 			
-			fcut0    = fcut0 = (1.0 - rlen/rmax);
+			fcut0 = (1.0 - rlen/rmax);
 			b        = pow(fcut0, POWER);
 			b_prime  = pow(fcut0,POWER-1);
 			b_prime *= -1.0 * POWER /rmax;
@@ -185,14 +186,19 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv,
 FCUT::FCUT() 
 {
 #ifndef FPENALTY_POWER
-	POWER = 3.0;
+	POWER = 3;
 #else
 	POWER = FPENALTY_POWER;
 #endif
 
 	BODIEDNESS = 2;
 	
-//	TYPE = FCUT_TYPE::CUBIC;
+	TYPE = FCUT_TYPE::CUBIC;
+
+	// More or less random defaults.
+	STEEPNESS = 2.0 ;
+	OFFSET = 0.0 ;
+	HEIGHT = 1.0 ;
 
 }
 

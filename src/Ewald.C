@@ -1,5 +1,6 @@
 #include<iomanip>
 #include "functions.h"
+#include "util.h"
 
 #define EWALD_ACCURACY 1.0e-06
 
@@ -458,12 +459,10 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 	double 			rksq;
 	double 			alpha 		= sqrt(alphasq);
 	static double 	r_cut;						
-	static double   r_cut_squared;				// so we don't need to do an r_cut*r_cut calculation inside of a loop
 	const  double 	accuracy	 = EWALD_ACCURACY;
 	double 			tempd, tempd2, tempd3, tempd4;
 	
 	double 			Volume;
-	static bool 	called_before = false;
 	XYZ 			D_XYZ; 						
 	double 			rlen_mi;
 	static vector<XYZ> SIN_XYZ; 				
@@ -496,7 +495,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 		NEIGHBOR_LIST.DO_UPDATE(FRAME_TRAJECTORY,CONTROLS) ;
 		
 		alphasq = alpha * alpha;
-		r_cut_squared = r_cut*r_cut;
 		
 		#if VERBOSITY == 1
 		if ( RANK == 0 ) 
@@ -508,9 +506,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 		}
 		#endif
 
-	    called_before = true;
-
-    
 	    Kfac_v = new double [maxk];	// DECLARING STUFF LIKE THIS IN A FUNCTION A MILLION TIMES WILL KILL EFFICIENCY... CAN WE MAKE THESE GLOBAL-ISH?		
 		SIN_XYZ.resize(maxk); // Replaces sinx, siny, sinz
 		COS_XYZ.resize(maxk);

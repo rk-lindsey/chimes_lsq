@@ -6,6 +6,7 @@
 #include<unistd.h>	// Used to detect whether i/o is going to terminal or is piped... will help us decide whether to use ANSI color codes
 
 #include "functions.h"
+#include "util.h"
 
 using namespace std;
 

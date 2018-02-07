@@ -1,0 +1,119 @@
+
+// Setup with typical headers
+
+#include<iostream>
+#include<iomanip>
+#include<fstream>
+#include<vector>
+#include<math.h>
+#include<stdlib.h>
+#include<time.h>
+#include<cstring>
+#include<string>
+#include<sstream>
+#include<map>
+#include<algorithm> 
+
+// Utility functions.
+#include "functions.h"
+#include "util.h"
+
+int parse_space(string line, vector<string>& tokens)
+// Break a line up into tokens based on space separators.
+// Returns the number of tokens parsed.
+{
+  string buf ;
+  
+  stringstream stream_parser ;
+  stream_parser.str(line);
+  tokens.clear() ;
+
+  while ( stream_parser >> buf )
+	 tokens.push_back(buf) ;
+
+  return(tokens.size() ) ;
+}
+
+bool is_true(string s) 
+// Return true if the string has a recognized spelling of the word "TRUE".
+{
+  return (s=="true"  || s=="True"  || s=="TRUE"  || s == "T" || s == "t") ;
+}
+
+
+int factorial(int input)
+{
+	int result = 1;
+	for(int i=input; i>0; i--)
+		result *= i;
+	
+	return result;
+}
+
+
+void SORT_THREE_DESCEND(int & a, int & b, int & c)
+{
+	static int tmp;
+	
+	tmp = a;
+	
+	if(b>a)
+	{
+		tmp = a;
+		a = b;
+		b = tmp;
+	}
+	
+	tmp = a;
+	
+	if(c>a)
+	{
+		tmp = a;
+		a = c;
+		c = tmp;
+	}
+	
+	tmp = b;
+	
+	if(c>b)
+	{
+		tmp = b;
+		b = c;
+		c = tmp;
+	}
+} 
+
+
+void exit_run(int value)
+// Call this instead of exit(1) to properly terminate all MPI processes.
+{
+	#ifdef USE_MPI
+		MPI_Abort(MPI_COMM_WORLD,value);
+	#else
+		exit(value);
+	#endif
+
+}
+
+  
+bool operator==(const vector<int>& lhs, const vector<int>& rhs) 
+{
+  if ( lhs.size() != rhs.size() ) return false ;
+
+  for ( int i = 0 ; i < lhs.size() ; i++ ) 
+  {
+	 if ( lhs[i] != rhs[i] ) return false ;
+  }
+  return true ;
+}
+
+bool operator==(const vector<string>& lhs, const vector<string>& rhs) 
+{
+  if ( lhs.size() != rhs.size() ) return false ;
+
+  for ( int i = 0 ; i < lhs.size() ; i++ ) 
+  {
+	 if ( lhs[i] != rhs[i] ) return false ;
+  }
+  return true ;
+}

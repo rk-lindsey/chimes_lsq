@@ -337,31 +337,6 @@ struct CHARGE_CONSTRAINT
 	vector<double> CONSTRAINTS;
 	double		   FORCE;
 };
-
-struct ANSI_COLORS
-{
-	string MAGENTA;  
-	string BLUE;	
-	string GREEN;	
-	string PINK;	
-	string RED;	
-	string BOLD;	
-	string UNDERLINE;
-	string ENDSTYLE; 
-};
-
-static const ANSI_COLORS COUT_STYLE  = 
-{
-	"\033[95m",    // MAGENTA  
-	"\033[94m",    // BLUE     
-	"\033[92m",    // GREEN    
-	"\033[93m",    // PINK     
-	"\033[91m",    // RED	   
-	"\033[1m ",    // BOLD     
-	"\033[4m ",    // UNDERLINE
-	"\033[0m ",    // ENDSTYLE 
-
-};
 	
 class INTERACTION_3B
 // A 3-body interaction.
@@ -581,17 +556,10 @@ double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// Overloaded
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// Overloaded.. compute differentely if for main or new velocities
 
 void build_layers      (FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
-void SORT_THREE_DESCEND(int & a, int & b, int & c);
-
-void enable_fp_exceptions();
-void exit_run(int val);
 
 void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 								CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
 								NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV) ;
-
-bool operator==(const vector<int>& lhs, const vector<int>& rhs)  ;
-bool operator==(const vector<string>& lhs, const vector<string>& rhs)  ;
 
 #endif
 

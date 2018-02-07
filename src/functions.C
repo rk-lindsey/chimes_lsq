@@ -8,6 +8,7 @@
 #include<limits>	// Help with handling of over/underflow
 #include<algorithm> // Used for sorting, etc.
 #include "functions.h"
+#include "util.h"
 
 #ifdef USE_MPI
 	#include <mpi.h>
@@ -310,9 +311,9 @@ double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)					// UPDATED -- 
 		if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))
 			continue;
 		
-			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].X;
-			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Y * SYSTEM.VELOCITY[a1].Y;
-			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Z * SYSTEM.VELOCITY[a1].Z;
+		Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].X;
+		Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Y * SYSTEM.VELOCITY[a1].Y;
+		Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Z * SYSTEM.VELOCITY[a1].Z;
 	}
 
   return(Ktot);
@@ -330,9 +331,9 @@ double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS)		// U
 			if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))
 				continue;
 			
-				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].X * SYSTEM.VELOCITY_NEW[a1].X;
-				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Y * SYSTEM.VELOCITY_NEW[a1].Y;
-				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Z * SYSTEM.VELOCITY_NEW[a1].Z;
+			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].X * SYSTEM.VELOCITY_NEW[a1].X;
+			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Y * SYSTEM.VELOCITY_NEW[a1].Y;
+			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Z * SYSTEM.VELOCITY_NEW[a1].Z;
 		}		
 	}
 	else
@@ -349,39 +350,7 @@ double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS)		// U
 //////////////////////////////////////////
 // 3B Cheby functions
 //////////////////////////////////////////
- 
-void SORT_THREE_DESCEND(int & a, int & b, int & c)
-{
-	static int tmp;
-	
-	tmp = a;
-	
-	if(b>a)
-	{
-		tmp = a;
-		a = b;
-		b = tmp;
-	}
-	
-	tmp = a;
-	
-	if(c>a)
-	{
-		tmp = a;
-		a = c;
-		c = tmp;
-	}
-	
-	tmp = b;
-	
-	if(c>b)
-	{
-		tmp = b;
-		b = c;
-		c = tmp;
-	}
-} 
- 
+  
 void SET_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rlen, double & xdiff, double SMAX, double SMIN, double SNUM)	//  FF_2BODY.SNUM_3B_CHEBY
 // Sets the value of the Chebyshev polynomials (Tn) and thier derivatives (Tnd)
 {
@@ -3741,7 +3710,7 @@ static void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_
 
 		SORT_THREE_DESCEND(idx1, idx2, idx3);
 
-		vector<int> index ;
+		vector<int> index(3) ;
 		index[0] = idx1 ; index[1] = idx2 ; index[2] = idx3 ;
 		idx1 = TRIPS.make_id_int(index) ;
 		curr_triple_type_index = INT_TRIAD_MAP[idx1];
@@ -4611,11 +4580,6 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCL
 	{
 		tempx = 0;
 		
-		double SWITCH, DSWITCH;
-	
-		SWITCH  = 1.0;
-		DSWITCH = 1.0;
-		
 		rlen = FF_2BODY[ij].S_MINIM + a * FF_2BODY[ij].S_DELTA;
 
 		if(rlen > FF_2BODY[ij].S_MINIM and rlen < FF_2BODY[ij].S_MAXIM)	
@@ -4977,27 +4941,3 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 	return;
 } 
 
-  
-bool operator==(const vector<int>& lhs, const vector<int>& rhs) 
-{
-  if ( lhs.size() != rhs.size() ) return false ;
-
-  for ( int i = 0 ; i < lhs.size() ; i++ ) 
-  {
-	 if ( lhs[i] != rhs[i] ) return false ;
-  }
-  return true ;
-}
-
-
-  
-bool operator==(const vector<string>& lhs, const vector<string>& rhs) 
-{
-  if ( lhs.size() != rhs.size() ) return false ;
-
-  for ( int i = 0 ; i < lhs.size() ; i++ ) 
-  {
-	 if ( lhs[i] != rhs[i] ) return false ;
-  }
-  return true ;
-}

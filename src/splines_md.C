@@ -33,6 +33,7 @@
 // Include our own custom header
 
 #include "functions.h"
+#include "util.h"
 
 // For LAMMPS linking
 
@@ -46,6 +47,16 @@ using namespace std;
 // Define function headers -- general
 
 static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
+static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NATMTYP, vector<string>& TMP_ATOMTYPE,
+									 vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES, 
+									 vector<double>& TMP_MASS, vector<int> &TMP_SIGN) ;
+static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY,
+									vector<TRIP_FF>& FF_3BODY, vector<QUAD_FF>& FF_4BODY, map<string,int> &PAIR_MAP, 
+									map<string,int> &TRIAD_MAP, map<string,int> &QUAD_MAP,
+									NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP,
+                           const vector<string>& TMP_ATOMTYPE, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
+									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE, map<int,string>& TRIAD_MAP_REVERSE,
+									map<int,string>& QUAD_MAP_REVERSE) ;
 
 // Define function headers -- MPI
 
@@ -56,6 +67,7 @@ static void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, 
 
 static void write_xyzv         (FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
 static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
+static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CONTROLS ) ;
 
 // Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
 
@@ -186,8 +198,8 @@ int main(int argc, char* argv[])
 		map<int,string> QUAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
 		
 
-		vector<TRIP_FF> FF_3BODY = TRIPS.VEC ;
-		vector<QUAD_FF>  FF_4BODY = QUADS.VEC ;
+		vector<TRIP_FF>&  FF_3BODY = TRIPS.VEC ;
+		vector<QUAD_FF>&  FF_4BODY = QUADS.VEC ;
 // For parameter file parsing
 		
 		vector<string> TMP_ATOMTYPE;
@@ -203,7 +215,6 @@ int main(int argc, char* argv[])
     double dens_mol;
     double dens_mass;
 	
-	bool   	FOUND_END = false;
 	string 	LINE;
 	string  TEMP_STR;
 	int     TEMP_INT;
@@ -496,8 +507,8 @@ int main(int argc, char* argv[])
 
 	        if(CONTROLS.FIT_STRESS)                                                                                           
 	                COORDFILE >>  SYSTEM.PRESSURE_TENSORS.X >>  SYSTEM.PRESSURE_TENSORS.Y >>  SYSTEM.PRESSURE_TENSORS.Z;      
-	        if(CONTROLS.FIT_ENER)                                                                                             
-	                COORDFILE >> SYSTEM.QM_POT_ENER;   
+
+	        if(CONTROLS.FIT_ENER)                                                  				 COORDFILE >> SYSTEM.QM_POT_ENER;   
 
 			////////////////////////////////////////////////////////////
 			// Read in the initial system coordinates, and if requested,
@@ -691,133 +702,9 @@ int main(int argc, char* argv[])
 		cout << "Reading atom info from parameter file..." << endl; 
 	
 	// Read in the possible atom types and thier features	
-	
-	PARAMFILE.open(CONTROLS.PARAM_FILE.data());
-	if(!PARAMFILE.is_open())
-	{
-		cout << "ERROR: Cannot open paramter file: " << CONTROLS.PARAM_FILE << endl;
-		exit_run(0);
-	}
-	
-	FOUND_END = false;
-	NATMTYP = 0;
-	
-	while (FOUND_END == false)
-	{
-		getline(PARAMFILE,LINE);
-	
-		if(LINE.find("# PAIRIDX #") != string::npos)
-		{
-			FOUND_END = true;
-			
-			if(NATMTYP == 0)
-			{
-				cout << "ERROR: ATOM TYPES section not found in parameter file: " << CONTROLS.PARAM_FILE << endl;
-				exit_run(0);
-			}
-			
-			PARAMFILE.close();
-			break;
-		}
-		
-		else if(LINE.find("ATOM TYPES:") != string::npos)
-		{
-			STREAM_PARSER.str(LINE);
-			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> NATMTYP;
-			CONTROLS.NATMTYP = NATMTYP;
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();
-		
-			if ( NATMTYP > MAX_ATOM_TYPES ) 
-			{
-			  cout << "ERROR: TOO MANY ATOM TYPES DEFINED\n" ;
-			  exit_run(0) ;
-			}
-  
-			// We need a globally-defined data object to hold charges for passing into LAMMPS
-			#if defined(USE_MPI) && defined(LINK_LAMMPS)
-				LMP_CHARGE         .resize(NATMTYP);
-			#endif
-			
-			TMP_ATOMTYPE   .resize(NATMTYP);
-			TMP_NATOMTYPE  .resize(NATMTYP);
-			TMP_ATOMTYPEIDX.resize(NATMTYP);
-			TMP_CHARGES    .resize(NATMTYP);
-			TMP_MASS       .resize(NATMTYP);	
-			TMP_SIGN	   .resize(NATMTYP);
-			
-			for(int i=0; i<TMP_NATOMTYPE.size(); i++)
-				TMP_NATOMTYPE[i] = 0;
-			
-			if(RANK==0)
-				cout << "	Read " << NATMTYP << " atom types:" << endl;			
-		}	
-		
-		// Quickly figure out if we're fitting charges... note this process gets repeated more 
-		// comprehensively below.. Here it's just needed to figure out charge signs
-		
-		else if(LINE.find("USECOUL: ") != string::npos) 
-		{
-			STREAM_PARSER.str(LINE);
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER.str(""); 
-			STREAM_PARSER.clear();
 
-			PARAMFILE >> TEMP_STR >> TEMP_STR;
-			if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
-				CONTROLS.FIT_COUL = true;
-			else
-				CONTROLS.FIT_COUL = false;
-
-			PARAMFILE.ignore();
-		}				
-		
-		else if(LINE.find("# TYPEIDX #") != string::npos)
-		{
-			for (int i=0; i<NATMTYP; i++)
-			{
-				getline(PARAMFILE,LINE);
-				STREAM_PARSER.str(LINE);
-				
-				STREAM_PARSER >> TEMP_STR;
-				TMP_ATOMTYPEIDX[i] = int(atof(TEMP_STR.data()));
-				STREAM_PARSER >> TMP_ATOMTYPE[i];
-				if(CONTROLS.FIT_COUL)
-					STREAM_PARSER >> TEMP_STR;
-				else
-					STREAM_PARSER >> TMP_CHARGES[i];
-				STREAM_PARSER >> TMP_MASS[i];
-				
-				STREAM_PARSER.str("");
-				STREAM_PARSER.clear();
-				
-				if(RANK==0)
-					cout << "		" 	<< setw(5) << left << i << " " << setw(2) << left << TMP_ATOMTYPE[i] << ", q (e): ";
-				
-				if(CONTROLS.FIT_COUL)
-				{
-					if(TEMP_STR == "+")
-					{
-						if(RANK==0)
-							cout << "POSITIVE";
-						TMP_SIGN[i] = 1;
-					}
-					else
-					{
-						if(RANK==0)
-							cout << "NEGATIVE";
-						TMP_SIGN[i] = -1;
-					}
-				}
-				else
-					if(RANK==0)
-						cout << setw(6) << fixed << setprecision(3) << right << TMP_CHARGES[i];
-				if(RANK==0)
-					cout  << ", mass (amu): " << setw(8) << fixed << setprecision(4) << right << TMP_MASS[i] << endl;
-			}
-		}	
-	}
+	read_atom_types(PARAMFILE, CONTROLS, NATMTYP, TMP_ATOMTYPE, TMP_NATOMTYPE, TMP_ATOMTYPEIDX,
+	 TMP_CHARGES, TMP_MASS, TMP_SIGN) ;
 	
 	if (FF_PLOTS.N_PLOTS > 0)
 
@@ -1207,1509 +1094,8 @@ int main(int argc, char* argv[])
 
 	FF_SETUP_2:
 
-	PARAMFILE.open(CONTROLS.PARAM_FILE.data());
-	if(!PARAMFILE.is_open())
-	{
-		cout << "ERROR: Cannot open paramter file: " << CONTROLS.PARAM_FILE << endl;
-		exit_run(0);
-	}
-	
-	if(RANK==0)
-		cout << endl << "Reading force field parameters..." << endl;
-	
-	FOUND_END = false;
-
-	string  TEMP_SEARCH_2B = "some default text";
-	string  TEMP_SEARCH_3B = "some default text";
-	string  TEMP_SEARCH_4B = "some default text";
-	string	TEMP_TYPE;
-	int     NO_PAIRS, NO_TRIPS, NO_QUADS;
-	int		TMP_TERMS1, TMP_TERMS2, TMP_TERMS3;
-	double	TMP_LOW  = -1;
-	double 	TMP_HIGH =  1;
-	
-	while (FOUND_END == false)
-	{
-		getline(PARAMFILE,LINE);
-
-		// Break out of loop
-
-		if(LINE.find("ENDFILE") != string::npos)
-		{			
-			// Rewind so we can set the special 3-body cutoffs
-			
-			PARAMFILE.seekg(0);
-			
-			while (FOUND_END == false)		
-			{
-				getline(PARAMFILE,LINE);
-				
-				if(LINE.find("ENDFILE") != string::npos)
-					break;	
-				
-				if((FF_2BODY[0].SNUM_3B_CHEBY>0) && (LINE.find("FCUT TYPE:") != string::npos))
-				{
-					STREAM_PARSER.str(LINE);	
-					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-					
-					// Setup force cutoff type for 3-body
-					
-					FF_3BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
-					FCUT_TYPE cutoff_type = FF_3BODY[0].FORCE_CUTOFF.TYPE ;
-					
-					if( cutoff_type == FCUT_TYPE::SIGMOID 
-						 || cutoff_type == FCUT_TYPE::CUBSIG 
-						 || cutoff_type == FCUT_TYPE::CUBESTRETCH 
-						 || cutoff_type == FCUT_TYPE::SIGFLT)
-					{
-						STREAM_PARSER >> FF_3BODY[0].FORCE_CUTOFF.STEEPNESS;
-						STREAM_PARSER >> FF_3BODY[0].FORCE_CUTOFF.OFFSET;
-						
-						if(TEMP_STR == "SIGFLT")
-							cin >> FF_3BODY[0].FORCE_CUTOFF.HEIGHT;
-					}
-					
-					STREAM_PARSER.str("");
-					STREAM_PARSER.clear();	
-					
-					FF_3BODY[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
-					
-					// Copy all class members.
-					for(int i=1; i<FF_3BODY.size(); i++)
-						FF_3BODY[i].FORCE_CUTOFF = FF_3BODY[0].FORCE_CUTOFF;
-					
-					if(FF_2BODY[0].SNUM_4B_CHEBY>0)
-					{
-						// Setup force cutoff type for 4-body
-					
-						FF_4BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
-						cutoff_type = FF_4BODY[0].FORCE_CUTOFF.TYPE ;
-					
-						if( cutoff_type == FCUT_TYPE::SIGMOID 
-							 || cutoff_type == FCUT_TYPE::CUBSIG 
-							 || cutoff_type == FCUT_TYPE::CUBESTRETCH 
-							 || cutoff_type == FCUT_TYPE::SIGFLT)
-						{
-							STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.STEEPNESS;
-							STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.OFFSET;
-						
-							if(TEMP_STR == "SIGFLT")
-								cin >> FF_4BODY[0].FORCE_CUTOFF.HEIGHT;
-						}
-					
-						STREAM_PARSER.str("");
-						STREAM_PARSER.clear();	
-					
-						FF_4BODY[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
-					
-						// Copy all class members.
-						for(int i=1; i<FF_4BODY.size(); i++)
-							FF_4BODY[i].FORCE_CUTOFF = FF_4BODY[0].FORCE_CUTOFF;							
-					}
-				}
-				if((FF_2BODY[0].SNUM_4B_CHEBY>0) && (LINE.find("FCUT TYPE:") != string::npos))
-				{	
-					STREAM_PARSER.str(LINE);	
-					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-					
-					// Setup force cutoff type for 4-body
-				
-					FF_4BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
-					FCUT_TYPE cutoff_type = FF_4BODY[0].FORCE_CUTOFF.TYPE ;
-				
-					if( cutoff_type == FCUT_TYPE::SIGMOID 
-						 || cutoff_type == FCUT_TYPE::CUBSIG 
-						 || cutoff_type == FCUT_TYPE::CUBESTRETCH 
-						 || cutoff_type == FCUT_TYPE::SIGFLT)
-					{
-						STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.STEEPNESS;
-						STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.OFFSET;
-					
-						if(TEMP_STR == "SIGFLT")
-							cin >> FF_4BODY[0].FORCE_CUTOFF.HEIGHT;
-					}
-				
-					STREAM_PARSER.str("");
-					STREAM_PARSER.clear();	
-				
-					FF_4BODY[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
-				
-					// Copy all class members.
-					for(int i=1; i<FF_4BODY.size(); i++)
-						FF_4BODY[i].FORCE_CUTOFF = FF_4BODY[0].FORCE_CUTOFF;	
-				}
-				
-				else if(LINE.find("SPECIAL 2B OLD_S_MINIM: ") != string::npos)
-				{
-					STREAM_PARSER.str(LINE);			
-					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
-					STREAM_PARSER.str("");
-					STREAM_PARSER.clear();	
-					
-					#if VERBOSITY == 1
-						if(RANK==0)
-						{
-							cout << "	Note: Storing original 2-body r_min values for 2/3-body switching: " << endl;
-							cout << "   WARINGING!!!! ...This feature isn't tested and may be incompatible with neighbor lists." << endl;
-						}
-					#endif	
-			
-					for(int i=0;i<TMP_TERMS1; i++)
-					{
-						getline(PARAMFILE,LINE);
-	
-						STREAM_PARSER.str(LINE);
-						STREAM_PARSER >> TMP_TERMS2 >> TEMP_STR;	// We could use the integer, but this way is probably safer
-						STREAM_PARSER >> FF_2BODY[TMP_TERMS2].OLD_S_MINIM;
-						
-						STREAM_PARSER.str("");
-						STREAM_PARSER.clear();	
-						
-						#if VERBOSITY == 1
-							if(RANK==0)
-								cout << "		" << TEMP_STR << "   " <<  FF_2BODY[TMP_TERMS2].OLD_S_MINIM << endl;
-						#endif	
-					}
-				}	
-				
-				else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
-				{
-					if (FF_3BODY.size()<1)
-					{
-						cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Special inner cutoffs specified for 3-body chebyshev interactions,"  << COUT_STYLE.ENDSTYLE << endl;
-						cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: expected number of pair triplets is zero. Did you forget to set "  << COUT_STYLE.ENDSTYLE << endl;
-						cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: the \'ATOM PAIR TRIPLETS:\' line in the parameter file?"  << COUT_STYLE.ENDSTYLE << endl;
-						exit_run(0);
-					}
-					
-					
-					STREAM_PARSER.str(LINE);
-	
-					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
-	
-					#if VERBOSITY == 1
-						if(RANK==0)
-							cout << "	Note: Setting specific 3-body r_min values: " << endl;
-					#endif	
-
-					double TMP_VAL;
-					
-					string  TMP_IJ,  TMP_IK,  TMP_JK;	
-					string TARG_IJ, TARG_IK, TARG_JK;
-		
-					for(int i=0; i<TMP_TERMS1; i++)
-					{
-						getline(PARAMFILE,LINE);
-						
-						STREAM_PARSER.str("");
-						STREAM_PARSER.clear();
-						
-						STREAM_PARSER.str(LINE);
-						STREAM_PARSER >> TEMP_STR;	// Just and index for the pair type
-						STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
-
-						STREAM_PARSER >> TMP_IJ;	// What is the IJ?
-						STREAM_PARSER >> TMP_IK;	// What is the IK?
-						STREAM_PARSER >> TMP_JK;	// What is the JK?
-
-						// Check that triplet pair types are correct						
-						
-						if ( PAIR_MAP.count(TMP_IJ) == 1 ) 
-						{
-							TMP_IJ = FF_2BODY[ PAIR_MAP[ TMP_IJ ] ].PRPR_NM;
-						}
-						else
-						{
-							cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
-							cout << "		Triplet type:              " << TEMP_STR << endl;
-							cout << "		First distance, pair type: " << TMP_IJ << endl;
-							exit_run(0);
-						}
-						if ( PAIR_MAP.count(TMP_IK) == 1 ) 
-						{
-							TMP_IK = FF_2BODY[ PAIR_MAP[ TMP_IK ] ].PRPR_NM;
-						}
-						else
-						{
-							cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
-							cout << "		Triplet type:              " << TEMP_STR << endl;
-							cout << "		First distance, pair type: " << TMP_IK << endl;
-							exit_run(0);
-						}
-						if ( PAIR_MAP.count(TMP_JK) == 1 ) 
-						{
-							TMP_JK = FF_2BODY[ PAIR_MAP[ TMP_JK ] ].PRPR_NM;
-						}
-						else
-						{
-							cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
-							cout << "		Triplet type:              " << TEMP_STR << endl;
-							cout << "		First distance, pair type: " << TMP_JK << endl;
-							exit_run(0);
-						}
-		
-						TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
-						TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
-						TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
-						
-						STREAM_PARSER >> TMP_VAL;
-
-						// Read the first inner cutoff
-
-						if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
-		
-						else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
-		
-						else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
-
-
-						// Read the second inner cutoff
-
-						STREAM_PARSER >> TMP_VAL;
-		
-						if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
-		
-						else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
-		
-						else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
-
-		
-						// Read the third inner cutoff
-
-						STREAM_PARSER >> TMP_VAL;
-		
-						if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
-		
-						else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
-		
-						else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
-
-						#if VERBOSITY == 1
-							if(RANK==0)
-							{
-								cout << "		" << TEMP_STR << " ( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-								     << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] << ", "
-									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] << ", "
-									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] << endl;
-							}
-						#endif	
-					}
-					
-					STREAM_PARSER.str("");
-					STREAM_PARSER.clear();
-	
-				}
-
-				else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
-				{
-					STREAM_PARSER.str(LINE);
-	
-					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
-	
-					#if VERBOSITY == 1
-						if(RANK==0)
-							cout << "	Note: Setting specific 3-body r_max values: " << endl;
-					#endif	
-
-					double TMP_VAL;
-					
-					string  TMP_IJ,  TMP_IK,  TMP_JK;	
-					string TARG_IJ, TARG_IK, TARG_JK;
-		
-					for(int i=0; i<TMP_TERMS1; i++)
-					{
-						getline(PARAMFILE,LINE);
-						
-						STREAM_PARSER.str("");
-						STREAM_PARSER.clear();
-						
-						STREAM_PARSER.str(LINE);
-						STREAM_PARSER >> TEMP_STR;	// Just and index for the pair type
-						STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
-
-						STREAM_PARSER >> TMP_IJ;	// What is the IJ?
-						STREAM_PARSER >> TMP_IK;	// What is the IK?
-						STREAM_PARSER >> TMP_JK;	// What is the JK?
-
-						// Check that triplet pair types are correct
-		
-						try
-						{
-							TMP_IJ = FF_2BODY[ PAIR_MAP[ TMP_IJ ] ].PRPR_NM;
-						}
-						catch(...)
-						{
-							cout << "ERROR: Unknown triplet pair for special outer cutoff." << endl;
-							cout << "		Triplet type:              " << TEMP_STR << endl;
-							cout << "		First distance, pair type: " << TMP_IJ << endl;
-						}
-						try
-						{
-							TMP_IK = FF_2BODY[ PAIR_MAP[ TMP_IK ] ].PRPR_NM;
-						}
-						catch(...)
-						{
-							cout << "ERROR: Unknown triplet pair for special outer cutoff." << endl;
-							cout << "		Triplet type:              " << TEMP_STR << endl;
-							cout << "		First distance, pair type: " << TMP_IK << endl;
-						}
-						try
-						{
-							TMP_JK = FF_2BODY[ PAIR_MAP[ TMP_JK ] ].PRPR_NM;
-						}
-						catch(...)
-						{
-							cout << "ERROR: Unknown triplet pair for special outer cutoff." << endl;
-							cout << "		Triplet type:              " << TEMP_STR << endl;
-							cout << "		First distance, pair type: " << TMP_JK << endl;
-						}
-		
-						TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
-						TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
-						TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
-	
-						// Read the first outer cutoff
-
-						STREAM_PARSER >> TMP_VAL;
-		
-						if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
-		
-						else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
-		
-						else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
-
-
-						// Read the second outer cutoff
-
-						STREAM_PARSER >> TMP_VAL;
-		
-						if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
-		
-						else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
-		
-						else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
-
-		
-						// Read the third outer cutoff
-
-						STREAM_PARSER >> TMP_VAL;
-		
-						if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
-		
-						else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
-		
-						else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
-							FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
-
-						#if VERBOSITY == 1
-							if(RANK==0)
-							{
-								cout << "		" << TEMP_STR << " ( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
-								     << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] << ", "
-									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] << ", "
-									 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] << endl;
-							}
-						#endif	
-							
-						
-					}
-					
-					STREAM_PARSER.str("");
-					STREAM_PARSER.clear();
-	
-				}
-				
-				else if(LINE.find("SPECIAL 4B S_MINIM:") != string::npos)
-				{
-					STREAM_PARSER.str(LINE);
-	
-					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
-	
-					#if VERBOSITY == 1
-						if(RANK==0)
-							cout << "	Note: Setting specific 4-body r_min values: " << endl;
-					#endif	
-
-					double TMP_VAL;
-					
-					vector<string>  TMPS(6);	
-					vector<string> TARGS(6);
-		
-					for(int i=0; i<TMP_TERMS1; i++)
-					{
-						getline(PARAMFILE,LINE);
-						
-						STREAM_PARSER.str("");
-						STREAM_PARSER.clear();
-						
-						STREAM_PARSER.str(LINE);
-						STREAM_PARSER >> TEMP_STR;	// Just an index for the pair type
-						STREAM_PARSER >> TEMP_STR;	// Which 4-body type is it?
-						
-						for(int j=0; j<6; j++)
-							STREAM_PARSER >> TMPS[j]; // What are the constituent atom pair types?
-
-						// Check that triplet pair types are correct
-						
-						for(int j=0; j<6; j++)
-						{
-							try
-							{
-								TMPS[j] = FF_2BODY[ PAIR_MAP[ TMPS[j] ] ].PRPR_NM;
-							}
-							catch(...)
-							{
-								cout << "ERROR: Unknown quadruplet pair for special outer cutoff." << endl;
-								cout << "		quadruplet type:           " << TEMP_STR << endl;
-								cout << "		First distance, pair type: " << TMPS[j] << endl;
-							}
-						}
-						
-						for(int j=0; j<6; j++)
-							TARGS[j] = FF_2BODY[ PAIR_MAP[ FF_4BODY[QUAD_MAP[TEMP_STR]].ATOM_PAIRS[j] ] ].PRPR_NM;
-						
-						// Read and store the cutoffs
-						
-						for(int j=0; j<6; j++)
-						{
-							STREAM_PARSER >> TMP_VAL;
-							
-							for(int k=0; k<6; k++)
-								if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[k] == -1) )
-									FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[k] = TMP_VAL;
-								
-						}
-
-
-						#if VERBOSITY == 1
-							if(RANK==0)
-							{
-								cout << "		" << TEMP_STR << " ( " 
-									 << TARGS[0] << ", " 
-								     << TARGS[1] << ", " 
-									 << TARGS[2] << ", " 
-									 << TARGS[3] << ", " 
-									 << TARGS[4] << ", " 
-									 << TARGS[5] << "): " 
-								     << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[0] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[1] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[2] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[3] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[4] << ", "										 										 
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[5] << endl;
-							}
-						#endif	
-					}
-					
-					STREAM_PARSER.str("");
-					STREAM_PARSER.clear();
-	
-				}
-				
-				else if(LINE.find("SPECIAL 4B S_MAXIM:") != string::npos)
-				{
-					STREAM_PARSER.str(LINE);
-	
-					STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
-	
-					#if VERBOSITY == 1
-						if(RANK==0)
-							cout << "	Note: Setting specific 4-body r_max values: " << endl;
-					#endif	
-
-					double TMP_VAL;
-					
-					vector<string>  TMPS(6);	
-					vector<string> TARGS(6);
-		
-					for(int i=0; i<TMP_TERMS1; i++)
-					{
-						getline(PARAMFILE,LINE);
-						
-						STREAM_PARSER.str("");
-						STREAM_PARSER.clear();
-						
-						STREAM_PARSER.str(LINE);
-						STREAM_PARSER >> TEMP_STR;	// Just an index for the pair type
-						STREAM_PARSER >> TEMP_STR;	// Which 4-body type is it?
-						
-						for(int j=0; j<6; j++)
-							STREAM_PARSER >> TMPS[j]; // What are the constituent atom pair types?
-
-						// Check that triplet pair types are correct
-						
-						for(int j=0; j<6; j++)
-						{
-							try
-							{
-								TMPS[j] = FF_2BODY[ PAIR_MAP[ TMPS[j] ] ].PRPR_NM;
-							}
-							catch(...)
-							{
-								cout << "ERROR: Unknown quadruplet pair for special outer cutoff." << endl;
-								cout << "		quadruplet type:           " << TEMP_STR << endl;
-								cout << "		First distance, pair type: " << TMPS[j] << endl;
-							}
-						}
-						
-						for(int j=0; j<6; j++)
-							TARGS[j] = FF_2BODY[ PAIR_MAP[ FF_4BODY[QUAD_MAP[TEMP_STR]].ATOM_PAIRS[j] ] ].PRPR_NM;
-						
-						// Read and store the cutoffs
-						
-						for(int j=0; j<6; j++)
-						{
-							STREAM_PARSER >> TMP_VAL;
-							
-							for(int k=0; k<6; k++)
-								if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[k] == -1) )
-									FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[k] = TMP_VAL;
-								
-						}
-
-
-						#if VERBOSITY == 1
-							if(RANK==0)
-							{
-								cout << "		" << TEMP_STR << " ( " 
-									 << TARGS[0] << ", " 
-								     << TARGS[1] << ", " 
-									 << TARGS[2] << ", " 
-									 << TARGS[3] << ", " 
-									 << TARGS[4] << ", " 
-									 << TARGS[5] << "): " 
-								     << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[0] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[1] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[2] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[3] << ", "
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[4] << ", "										 										 
-									 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[5] << endl;
-							}
-						#endif	
-					}
-					
-					STREAM_PARSER.str("");
-					STREAM_PARSER.clear();
-	
-				}
-			}
-			
-			FOUND_END = true;
-			
-			if(RANK==0)
-			{
-				cout << "   ...read complete." << endl << endl;
-				cout << "Notes on simulation: " << endl;
-				cout << "	Using fpenalty power " << FPENALTY_POWER << endl;	
-				
-				if(FF_3BODY.size()>0)
-				{
-					cout << "	Using the following fcut style for 3B Chebyshev interactions: " << 
-						FF_3BODY[0].FORCE_CUTOFF.to_string() << endl;
-					cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << FF_3BODY[0].FORCE_CUTOFF.STEEPNESS << " " << FF_3BODY[0].FORCE_CUTOFF.OFFSET << endl;
-				}
-				if(FF_4BODY.size()>0)
-				{
-					cout << "	Using the following fcut style for 4B Chebyshev interactions: " << 
-						FF_4BODY[0].FORCE_CUTOFF.to_string() << endl;
-					cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << FF_4BODY[0].FORCE_CUTOFF.STEEPNESS << " " << FF_4BODY[0].FORCE_CUTOFF.OFFSET << endl;
-				}
-			}
-
-			if(CONTROLS.USE_COULOMB)
-			{
-				if(RANK==0)
-				{
-					cout << "	Ewald summations will be used ";
-					if(CONTROLS.FIT_COUL)
-						cout << "and charges will be taken from fit values" << endl;
-					else
-						cout << "and charges will be taken from user-specified values" << endl;
-				}
-
-			}
-			else
-			{
-				if(RANK==0)
-					cout << "	Electrostatics will not be computed." << endl;
-			}
-			
-			if(CONTROLS.USE_OVERCOORD)
-			{
-				if(RANK==0)
-				{
-					cout << "	Overbonding contributions will be considered." << endl;
-				
-					if(CONTROLS.FIT_POVER)
-						cout << "		p-over will be read from fit parameters." << endl;
-					else
-						cout << "		p-over will be read from specified parameters." << endl;
-				}
-			}
-			
-			if(RANK==0)
-				cout << endl;
-			
-			
-			// Update neighbor list cutoffs for 3- and 4-body interactions
-			
-			double MAX_FOUND_3B = 0;
-			double MAX_FOUND_4B = 0;
-			
-			for (int i=0; i<FF_3BODY.size(); i++)
-			{
-				if(FF_3BODY[i].S_MAXIM[0] > MAX_FOUND_3B)
-					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[0];
-				if(FF_3BODY[i].S_MAXIM[1] > MAX_FOUND_3B)
-					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[1];
-				if(FF_3BODY[i].S_MAXIM[2] > MAX_FOUND_3B)
-					MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[2];
-			}
-			
-			for (int i=0; i<FF_4BODY.size(); i++)
-			{
-				for(int j=0; j<6; j++)
-					if(FF_4BODY[i].S_MAXIM[j] > MAX_FOUND_4B)
-						MAX_FOUND_4B = FF_4BODY[i].S_MAXIM[j];
-			}
-			
-			
-			
-			PARAMFILE.close();
-			break;
-		}
-		
-		// Determine what parameters we're actually reading
-		
-		else if(LINE.find("USECOUL: ") != string::npos)
-		{
-			STREAM_PARSER.str(LINE);
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER.str(""); 
-			STREAM_PARSER.clear();
-				
-			if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
-				CONTROLS.USE_COULOMB = true;
-			else
-				CONTROLS.USE_COULOMB = false;
-
-			PARAMFILE >> TEMP_STR >> TEMP_STR;
-			if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
-				CONTROLS.FIT_COUL = true;
-			else
-				CONTROLS.FIT_COUL = false;
-			
-			PARAMFILE >> TEMP_STR >> TEMP_STR;
-			if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
-				CONTROLS.USE_OVERCOORD = true;
-			else
-				CONTROLS.USE_OVERCOORD = false;
-			
-			PARAMFILE >> TEMP_STR >> TEMP_STR;
-			if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
-				CONTROLS.FIT_POVER = true;
-			else
-				CONTROLS.FIT_POVER = false;
-			
-			PARAMFILE >> TEMP_STR >> TEMP_STR;
-			if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
-				CONTROLS.USE_3B_CHEBY = true;
-			else
-				CONTROLS.USE_3B_CHEBY = false;
-			
-			PARAMFILE >> TEMP_STR >> TEMP_STR;
-			if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
-				CONTROLS.USE_4B_CHEBY = true;
-			else
-				CONTROLS.USE_4B_CHEBY = false;
-			
-			
-			if(RANK==0)
-			{
-				cout << "		...Compute electrostatics?      " << boolalpha << CONTROLS.USE_COULOMB << endl;
-				cout << "		...Use fit charges?             " << boolalpha << CONTROLS.FIT_COUL << endl;
-				cout << "		...Compute ReaxFF overbonding?  " << boolalpha << CONTROLS.USE_OVERCOORD << endl;
-				cout << "		...Use fit overbonding param?   " << boolalpha << CONTROLS.FIT_POVER << endl;
-				cout << "		...Use 3-body Cheby params?     " << boolalpha << CONTROLS.USE_3B_CHEBY << endl;
-				cout << "		...Use 4-body Cheby params?     " << boolalpha << CONTROLS.USE_4B_CHEBY << endl;
-			
-				cout << "	...Read FF controls..." << endl;	
-			}
-
-			
-			PARAMFILE.ignore();
-		}
-		
-		// Determine the pair type and corresponding orders, etc
-		
-		else if(LINE.find("PAIRTYP: ") != string::npos)
-		{
-
-			if(RANK==0)
-				cout << "Attempting to read pairtype..." << endl;
-			
-			STREAM_PARSER.str(LINE);
-			
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TEMP_TYPE;
-			
-			if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "INVRSE_R")
-			{
-				STREAM_PARSER >> TMP_TERMS1;
-			}
-			else if(TEMP_TYPE =="CHEBYSHEV")
-			{
-			  
-			  vector<string> tokens ;
-
-			  // Tokenize the input.
-			  copy(istream_iterator<string>(STREAM_PARSER),
-					 istream_iterator<string>(),
-					 back_inserter(tokens) ) ;
-
-			  TMP_TERMS1 = TMP_TERMS2 = TMP_TERMS3 = 0 ;
-			  if ( tokens.size() > 0 )
-				 TMP_TERMS1 = stoi(tokens[0]) ;
-			  if ( tokens.size() > 1 )
-				 TMP_TERMS2 = stoi(tokens[1]) ;
-			  if ( tokens.size() > 2 )
-				 TMP_TERMS3 = stoi(tokens[2]) ;
-
-			  if ( tokens.size() > 3 )
-				{
-				  TMP_LOW = stoi(tokens[3]) ;
-					if( TMP_LOW < -1.0 ||  TMP_LOW > +1.0 )
-					{
-						cout << "ERROR: CHEBY_RANGE_LOW must be betwee -1 and 1" << endl;
-						exit_run(0);
-					}
-				}
-				
-				
-			  if ( tokens.size() > 4 )
-				{
-				  TMP_HIGH = stoi(tokens[4]) ;
-					if( TMP_HIGH < -1.0 ||  TMP_HIGH > +1.0 )
-					{
-						cout << "ERROR: CHEBY_RANGE_HIGH must be betwee -1 and 1" << endl;
-						exit_run(0);
-					}
-				}
-
-				if(TMP_LOW > TMP_HIGH || TMP_LOW == TMP_HIGH)
-				{
-					cout << "ERROR: CHEBY_RANGE_LOW must be smaller than CHEBY_RANGE_HIGH" << endl;
-					exit_run(0);
-				}
-
-			}			
-			
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-			
-			if(RANK==0)
-				cout << "	...Read FF interaction type..." << endl;	
-		}
-
-		// Read in pair potential info
-
-		else if(LINE.find("ATOM PAIRS: ") != string::npos)
-		{	
-			// Determine the number of pairs
-
-			STREAM_PARSER.str(LINE);
-			
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> NO_PAIRS;
-			
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-			
-			// Resize pair parameter object
-			
-			FF_2BODY.resize(NO_PAIRS);		
-			
-			// Set any defaults for that pair style
-			
-			if(TEMP_TYPE == "CHEBYSHEV")
-			{
-				for(int i=0; i<NO_PAIRS; i++)
-				{
-					FF_2BODY[i].PENALTY_DIST     = 0.01;
-					FF_2BODY[i].PENALTY_SCALE    = 1.0e4;
-					FF_2BODY[i].CUBIC_SCALE      = 1.0;
-					FF_2BODY[i].CHEBY_RANGE_HIGH = TMP_HIGH;
-					FF_2BODY[i].CHEBY_RANGE_LOW  = TMP_LOW;
-				}
-
-			}
-			
-			// Read in general pair parameters
-			
-			getline(PARAMFILE,LINE);
-			getline(PARAMFILE,LINE);
-			
-			for(int i=0; i<NO_PAIRS; i++)
-			{
-				FF_2BODY[i].PAIRTYP = TEMP_TYPE;
-	
-				PARAMFILE >> FF_2BODY[i].PAIRIDX;
-				PARAMFILE >> FF_2BODY[i].ATM1TYP;
-				PARAMFILE >> FF_2BODY[i].ATM2TYP;	
-				PARAMFILE >> FF_2BODY[i].S_MINIM;	
-				PARAMFILE >> FF_2BODY[i].S_MAXIM;
-				
-				FF_2BODY[i].OLD_S_MINIM = FF_2BODY[i].S_MINIM;
-				
-				if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
-				{
-					 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
-					 NEIGHBOR_LIST.MAX_CUTOFF_3B = FF_2BODY[i].S_MAXIM;
-					 NEIGHBOR_LIST.MAX_CUTOFF_4B = FF_2BODY[i].S_MAXIM;
-				}
-				 	
-				PARAMFILE >> FF_2BODY[i].S_DELTA;
-				
-				if((FF_PLOTS.N_PLOTS == 0) &&
-				   (  FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.X
-				   || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.Y
-				   || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.Z ) )
-				{
-					#if WARN == TRUE
-						if(RANK==0)
-						{
-							if (isatty(fileno(stdout)))
-							{
-								cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
-								cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
-								cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD <<  SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
-							}
-							else
-							{
-								cout << "WARNING: Outer cutoff greater than half at least one box length" << endl;
-								cout << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP  << endl;
-								cout << " " <<  SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
-							}								
-						}
-
-					#else
-						if (isatty(fileno(stdout)))
-						{
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
-							exit_run(0);
-						}
-						else
-						{
-							cout << "ERROR: Outer cutoff greater than half at least one box length" << endl;
-							cout << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << endl;
-							exit_run(0);							
-						}
-					#endif
-				}
-
-				
-				FF_2BODY[i].PRPR_NM = FF_2BODY[i].ATM1TYP;
-				FF_2BODY[i].PRPR_NM.append(FF_2BODY[i].ATM2TYP);	
-
-				if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "INVRSE_R")
-				{
-					FF_2BODY[i].SNUM = TMP_TERMS1;
-				}
-				else if(TEMP_TYPE =="CHEBYSHEV")
-				{
-					PARAMFILE >> FF_2BODY[i].CHEBY_TYPE;	// How does the user want distance transformed?
-
-					if(FF_2BODY[i].CHEBY_TYPE == "MORSE")
-						PARAMFILE >> FF_2BODY[i].LAMBDA;	
-					
-					FF_2BODY[i].SNUM          = TMP_TERMS1;
-					FF_2BODY[i].SNUM_3B_CHEBY = TMP_TERMS2;
-					FF_2BODY[i].SNUM_4B_CHEBY = TMP_TERMS3;
-					
-					// Setup force cutoff type for 2-body
-					
-					FF_2BODY[0].FORCE_CUTOFF.set_type("CUBIC");
-					FF_2BODY[0].FORCE_CUTOFF.BODIEDNESS = 2 ;
-					
-					// Copy all class members.
-					for(int i=1; i<FF_2BODY.size(); i++)
-						FF_2BODY[i].FORCE_CUTOFF = FF_2BODY[0].FORCE_CUTOFF;										
-				}
-				else if(TEMP_TYPE =="LJ")
-				{
-					FF_2BODY[i].SNUM = 2;
-				}
-				else // Splines type
-				{
-					FF_2BODY[i].SNUM = (2+floor((FF_2BODY[i].S_MAXIM - FF_2BODY[i].S_MINIM)/FF_2BODY[i].S_DELTA))*2;
-				}				
-			}
-			
-			if(CONTROLS.USE_OVERCOORD)
-			{		
-				getline(PARAMFILE,LINE);
-				getline(PARAMFILE,LINE);
-				getline(PARAMFILE,LINE);
-								
-				for(int i=0; i<NO_PAIRS; i++)
-				{
-					PARAMFILE >> TEMP_STR >> TEMP_STR >> TEMP_STR;	
-					PARAMFILE >> FF_2BODY[i].USE_OVRPRMS;	
-					PARAMFILE >> FF_2BODY[i].OVER_TO_ATM;				
-					PARAMFILE >> FF_2BODY[i].OVRPRMS[0];	
-					PARAMFILE >> FF_2BODY[i].OVRPRMS[1];
-					PARAMFILE >> FF_2BODY[i].OVRPRMS[2];
-					PARAMFILE >> FF_2BODY[i].OVRPRMS[3];
-					PARAMFILE >> FF_2BODY[i].OVRPRMS[4];	
-				}
-			}
-			
-			TEMP_SEARCH_2B = "PAIR ";
-			TEMP_SEARCH_2B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type
-			TEMP_SEARCH_2B.append(" PARAMS");	
-			
-			if(RANK==0)
-				cout << "	...Read general FF params..." << endl;
-		}
-		
-		// Read any special controls for the pair potential
-
-		else if(LINE.find("PAIR CHEBYSHEV PENALTY DIST: ") != string::npos)
-		{
-			STREAM_PARSER.str(LINE);
-			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-			for(int i=0; i<NO_PAIRS; i++)
-				FF_2BODY[i].PENALTY_DIST = double(atof(TEMP_STR.data()));
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-		}
-		
-		else if(LINE.find("PAIR CHEBYSHEV PENALTY SCALING: ") != string::npos)
-		{
-			STREAM_PARSER.str(LINE);
-			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-			for(int i=0; i<NO_PAIRS; i++)
-				FF_2BODY[i].PENALTY_SCALE = double(atof(TEMP_STR.data()));
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-		}
-		
-		else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING: ") != string::npos)
-		{
-			STREAM_PARSER.str(LINE);
-			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-			for(int i=0; i<NO_PAIRS; i++)
-				FF_2BODY[i].CUBIC_SCALE = double(atof(TEMP_STR.data()));
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-		}		
-		
-		// Setup triplets
-		
-		else if(LINE.find("ATOM PAIR TRIPLETS: ") != string::npos)
-		{	
-			// Determine the number of pairs
-
-			STREAM_PARSER.str(LINE);
-			
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> NO_TRIPS;
-			
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-			
-			// Resize pair parameter object
-			
-			FF_3BODY.resize(NO_TRIPS);	
-			
-			for (int i=0; i<NO_TRIPS; i++)
-			{	
-				FF_3BODY[i].S_MINIM[0] = -1;
-				FF_3BODY[i].S_MINIM[1] = -1;
-				FF_3BODY[i].S_MINIM[2] = -1;
-				
-				FF_3BODY[i].S_MAXIM[0] = -1;
-				FF_3BODY[i].S_MAXIM[1] = -1;
-				FF_3BODY[i].S_MAXIM[2] = -1;
-			}	
-
-			TEMP_SEARCH_3B = "TRIPLET ";
-			TEMP_SEARCH_3B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type, and 2b and 3b are same pair type
-			TEMP_SEARCH_3B.append(" PARAMS");	
-			
-			if(RANK==0)
-				cout << "	...Read FF triplet specifications..." << endl;
-			
-		}
-		
-		// Setup quadruplets
-		
-		else if(LINE.find("ATOM PAIR QUADRUPLETS: ") != string::npos)
-		{	
-			// Determine the number of pairs
-
-			STREAM_PARSER.str(LINE);
-			
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> NO_QUADS;
-			
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-			
-			// Resize pair parameter object
-			
-			FF_4BODY.resize(NO_QUADS);	
-			
-			for (int i=0; i<NO_QUADS; i++)
-			{	
-				for(int j=0; j<6; j++)
-				{
-					FF_4BODY[i].S_MINIM[j] = -1;
-					FF_4BODY[i].S_MAXIM[j] = -1;
-				}
-			}	
-
-			TEMP_SEARCH_4B = "QUADRUPLET ";
-			TEMP_SEARCH_4B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type, and 2b and 3b are same pair type
-			TEMP_SEARCH_4B.append(" PARAMS");	
-			
-			if(RANK==0)
-				cout << "	...Read FF quadruplet specifications..." << endl;
-			
-		}
-		
-		// Read in pair parameters
-		
-		else if(LINE.find(TEMP_SEARCH_2B) != string::npos) // "PAIR <PAIRTYPE> PARAMS"
-		{	
-
-			// Read in the specific atom pair parameters
-			
-			if(RANK==0)
-				cout << "	...Reading all remaining force field parameters..." << endl;
-
-			for(int i=0; i<NO_PAIRS; i++)
-			{
-				getline(PARAMFILE,LINE);	// Blank line
-				getline(PARAMFILE,LINE);	// "PAIRTYPE PARAMS: <index> <atom1> <atom2>"	
-				getline(PARAMFILE,LINE);	// Blank line
-				
-				FF_2BODY[i].PARAMS.resize(FF_2BODY[i].SNUM);
-				
-				for(int j=0; j<FF_2BODY[i].SNUM; j++)
-				{
-					// Read the short range potential parameters
-					
-					PARAMFILE >> TEMP_STR;
-					PARAMFILE >> FF_2BODY[i].PARAMS[j];
-				}
-				
-				// If this is a spline type, we will over-write parameter coefficients with 
-				// a value less than 1.
-
-				int 	STOP_FILL_IDX = -1;
-				double 	slope          = -10.0;
-				
-				if(FF_2BODY[i].PAIRTYP == "SPLINE")
-				{
-					if(i==0 && RANK ==0)
-					{
-						cout << "		Will use a simple linear force model for poorly sampled positions" << endl;
-						cout << "			i.e. for |spline coefficients| < 1.0 at close separation distance..." << endl;					
-					}
-					
-					STOP_FILL_IDX = -1;
-										
-					for(int j=0; j<FF_2BODY[i].SNUM; j++)
-					{
-						if(fabs(FF_2BODY[i].PARAMS[j])>1.0)
-						{
-							STOP_FILL_IDX = j;
-							if(RANK==0)
-								cout << "			...Generating linear params for pair idx " << i << " for params 0 through " << STOP_FILL_IDX-1 << endl;
-							break;
-						}
-					}
-								
-					if(STOP_FILL_IDX != -1)
-					{
-						for(int j=0; j<STOP_FILL_IDX; j+=2)
-						{
-							FF_2BODY[i].PARAMS[j  ] = slope * (STOP_FILL_IDX-j) + FF_2BODY[i].PARAMS[STOP_FILL_IDX];
-							FF_2BODY[i].PARAMS[j+1] = slope/FF_2BODY[i].S_DELTA;	
-							if(RANK==0)
-								cout << "			   " << j << " " << FF_2BODY[i].PARAMS[j] << endl << "			   " << FF_2BODY[i].PARAMS[j+1] << endl;
-						}
-					}
-					
-					// Compute the integral of the spline equation for use in analytical pressure
-					// calculations...
-					//  We are computing an integral, so we will only have half as many points
-					
-					
-					FF_2BODY[i].POT_PARAMS.resize(FF_2BODY[i].SNUM/2);
-					
-					for(int j=0; j<FF_2BODY[i].POT_PARAMS.size(); j++) 
-						FF_2BODY[i].POT_PARAMS[j] = 0;
-					
-					for(int j=FF_2BODY[i].SNUM/2-2; j>=0; j--) 
-					{
-						FF_2BODY[i].POT_PARAMS[j] = FF_2BODY[i].POT_PARAMS[j+1] - FF_2BODY[i].S_DELTA *
-							(FF_2BODY[i].PARAMS[j*2]/2 + FF_2BODY[i].S_DELTA * FF_2BODY[i].PARAMS[j*2+1]/12 + FF_2BODY[i].PARAMS[j*2+2]/2 - FF_2BODY[i].S_DELTA * FF_2BODY[i].PARAMS[j*2+3]/12);
-					}
-				}
-
-				
-				// If applicable, read the charge parameter
-				
-				if(CONTROLS.FIT_COUL)
-				{
-					PARAMFILE >> TEMP_STR >> TEMP_STR >> TEMP_STR >> FF_2BODY[i].PAIR_CHRG;
-					// NOTE: Fit charges are in stillinger units.. convert to e:
-					FF_2BODY[i].PAIR_CHRG /= ke;
-				}
-			}	
-			
-			// At this point we have all the info needed to set the charges...
-			//
-			// Case 1: FITCOUL is false. Take charges from the individual charges specified by the user
-			//        ("ATOM TYPES/TYPEIDX" section of the parameter file)	
-			//
-			// Case 2: FITCOUL is true. Determine individual charges from charges of type Qxx
-
-			
-			if(!CONTROLS.FIT_COUL)
-			{
-				for(int i=0; i<NO_PAIRS; i++)
-				{
-					for(int j=0; j<NATMTYP; j++)
-					{
-						if( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] )
-							FF_2BODY[i].ATM1CHG =  TMP_CHARGES [j];
-					
-						if( FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] )
-							FF_2BODY[i].ATM2CHG =  TMP_CHARGES [j];
-					}	
-				
-					FF_2BODY[i].PAIR_CHRG = FF_2BODY[i].ATM1CHG*FF_2BODY[i].ATM2CHG;
-				
-				}
-			}
-			else
-			{				
-				for(int j=0; j<NATMTYP; j++)
-				{
-					for(int i=0; i<NO_PAIRS; i++)
-					{
-						if( (FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j]) || (FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j]) )
-						{
-							TMP_CHARGES[j] = sqrt(fabs(FF_2BODY[i].PAIR_CHRG))*TMP_SIGN[j];
-							
-							#if defined(USE_MPI) && defined(LINK_LAMMPS)
-								LMP_CHARGE[j] = TMP_CHARGES[j]; // save charges to global variable for LAMMPS
-							#endif
-
-							FF_2BODY[i].ATM1CHG = TMP_CHARGES[j];
-							FF_2BODY[i].ATM2CHG = TMP_CHARGES[j];
-					
-							break;
-						}
-					}
-				}
-			
-			
-				if(!CONTROLS.PLOT_PES)
-				{
-				    for(int a=0; a<SYSTEM.ATOMS;a++)
-					{
-						for(int i=0; i<NATMTYP; i++)
-						{
-							if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
-							{
-								SYSTEM.CHARGES[a] = TMP_CHARGES[i];
-								break;
-							}			
-						}
-					}
-				}
-
-			
-				if(RANK==0)
-				{
-					cout << "		Re-setting individual atom charges based on pair charges :" << endl;
-				
-					for(int j=0; j<NATMTYP; j++)
-					{
-						cout << "		"<<	j << "     "
-										<< setw(2) << left << TMP_ATOMTYPE[j] << ", q (e): " 
-										<< setw(6) << fixed << setprecision(3) << right << TMP_CHARGES[j] << ", mass (amu): " 
-										<< setw(8) << fixed << setprecision(4) << right << TMP_MASS[j] << endl;
-					}
-				}
-			}
-			
-			if(RANK==0)			
-				cout << "	...Read 2-body FF params..." << endl;
-		}		
-		
-		// Read 3B parameters
-		
-		else if( (LINE.find(TEMP_SEARCH_3B) != string::npos) && CONTROLS.USE_3B_CHEBY) // "PAIR <PAIRTYPE> PARAMS"
-		{	
-			for(int i=0; i<NO_TRIPS; i++)
-			{
-				getline(PARAMFILE,LINE);	// Blank line
-				getline(PARAMFILE,LINE);	// "TRIPLETYP PARAMS: <index> <pair1> <pair2> <pair3>"
-				 
-				STREAM_PARSER.str(LINE);
-				
-				STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
-				STREAM_PARSER >> FF_3BODY[i].INDX;				
-				STREAM_PARSER >> FF_3BODY[i].ATOM_PAIRS[0];
-				STREAM_PARSER >> FF_3BODY[i].ATOM_PAIRS[1];
-				STREAM_PARSER >> FF_3BODY[i].ATOM_PAIRS[2];	
-
-				// Get rid of the colon at the end of the atom pair:
-				
-				FF_3BODY[i].ATOM_PAIRS[2] = FF_3BODY[i].ATOM_PAIRS[2].substr(0,FF_3BODY[i].ATOM_PAIRS[2].length()-1);
-							
-				STREAM_PARSER >> TEMP_STR;
-				STREAM_PARSER >> FF_3BODY[i].N_TRUE_ALLOWED_POWERS;
-				STREAM_PARSER >> TEMP_STR;
-				STREAM_PARSER >> FF_3BODY[i].N_ALLOWED_POWERS;
-				
-				FF_3BODY[i].ALLOWED_POWERS.resize(FF_3BODY[i].N_ALLOWED_POWERS);
-				for ( int j = 0 ; j  < FF_3BODY[i].N_ALLOWED_POWERS ; j++ ) 
-				  FF_3BODY[i].ALLOWED_POWERS[j].resize(3) ;
-				  
-				FF_3BODY[i].EQUIV_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
-				FF_3BODY[i].PARAM_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
-				FF_3BODY[i].PARAMS        .resize(FF_3BODY[i].N_ALLOWED_POWERS);
-				
-				STREAM_PARSER.str("");
-				STREAM_PARSER.clear();	
-
-				getline(PARAMFILE,LINE);	// Blank line
-				getline(PARAMFILE,LINE);	// header line
-
-				
-				getline(PARAMFILE,LINE);	// dashes line
-				 
-				for(int j=0; j<FF_3BODY[i].N_ALLOWED_POWERS; j++)
-				{
-					PARAMFILE >> TEMP_STR;
-					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j][0];
-					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j][1];
-					PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j][2];
-					PARAMFILE >> FF_3BODY[i].EQUIV_INDICES[j];
-					PARAMFILE >> FF_3BODY[i].PARAM_INDICES[j];
-					PARAMFILE >> FF_3BODY[i].PARAMS        [j];
-					PARAMFILE.ignore();
-
-				} 
-			}
-			
-			if (RANK==0)
-				cout << "	...Read 3-body FF params..." << endl;;				
-		}
-		
-		// Read 4B parameters
-		
-		else if( (LINE.find(TEMP_SEARCH_4B) != string::npos) && CONTROLS.USE_4B_CHEBY) // "PAIR <PAIRTYPE> PARAMS"
-		{	
-			for(int i=0; i<NO_QUADS; i++)
-			{
-				getline(PARAMFILE,LINE);	// Blank line
-				getline(PARAMFILE,LINE);	// "QUADRUPLETYPE PARAMS: <index> <pair1> <pair2> <pair3> <pair4> <pair5> <pair6>"
-				 
-				STREAM_PARSER.str(LINE);
-				
-				STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
-				STREAM_PARSER >> FF_4BODY[i].INDX;
-				
-				for(int j=0; j<6; j++)
-					STREAM_PARSER >> FF_4BODY[i].ATOM_PAIRS[j];
-
-				// Get rid of the colon at the end of the atom pair:
-				
-				FF_4BODY[i].ATOM_PAIRS[5] = FF_4BODY[i].ATOM_PAIRS[5].substr(0,FF_4BODY[i].ATOM_PAIRS[5].length()-1);
-							
-				STREAM_PARSER >> TEMP_STR;
-				STREAM_PARSER >> FF_4BODY[i].N_TRUE_ALLOWED_POWERS;
-				STREAM_PARSER >> TEMP_STR;
-				STREAM_PARSER >> FF_4BODY[i].N_ALLOWED_POWERS;
-				
-				FF_4BODY[i].ALLOWED_POWERS.resize(FF_4BODY[i].N_ALLOWED_POWERS);
-				FF_4BODY[i].EQUIV_INDICES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
-				FF_4BODY[i].PARAM_INDICES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
-				FF_4BODY[i].PARAMS        .resize(FF_4BODY[i].N_ALLOWED_POWERS);
-				
-				for(int j=0; j<FF_4BODY[i].ALLOWED_POWERS.size(); j++)
-					FF_4BODY[i].ALLOWED_POWERS[j].resize(6);
-					
-				
-				STREAM_PARSER.str("");
-				STREAM_PARSER.clear();	
-
-				getline(PARAMFILE,LINE);	// Blank line
-				getline(PARAMFILE,LINE);	// header line
-
-				
-				getline(PARAMFILE,LINE);	// dashes line
-				 
-				for(int j=0; j<FF_4BODY[i].N_ALLOWED_POWERS; j++)
-				{
-					PARAMFILE >> TEMP_STR;
-					
-					for (int k=0; k<6; k++)
-						PARAMFILE >> FF_4BODY[i].ALLOWED_POWERS[j][k];
-
-
-					PARAMFILE >> FF_4BODY[i].EQUIV_INDICES[j];
-					PARAMFILE >> FF_4BODY[i].PARAM_INDICES[j];
-					PARAMFILE >> FF_4BODY[i].PARAMS        [j];
-					PARAMFILE.ignore();
-
-				} 
-			}
-			
-			if (RANK==0)
-				cout << "	...Read 4-body FF params..." << endl << endl;;				
-		}		
-		
-		// Read in the fit overbonding parameter
-		
-		else if(LINE.find("P OVER: ") != string::npos)
-		{
-			if(CONTROLS.USE_OVERCOORD && CONTROLS.FIT_POVER)
-			{
-				STREAM_PARSER.str(LINE);
-				STREAM_PARSER >> TEMP_STR >> TEMP_STR;
-				STREAM_PARSER >> FF_2BODY[0].OVRPRMS[0];
-				STREAM_PARSER.str("");
-				STREAM_PARSER.clear();	
-			
-				for(int i=1; i<NO_PAIRS; i++)
-					FF_2BODY[i].OVRPRMS[0] = FF_2BODY[0].OVRPRMS[0];				
-			}
-			
-			if (RANK==0)
-				cout << "	...Read ReaxFF overbonding FF params..." << endl;
-		}
-		
-		// Read the pair maps
-		
-		else if(LINE.find("PAIRMAPS: ") != string::npos)
-		{
-			STREAM_PARSER.str(LINE);			
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TMP_TERMS1;	
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-			
-			if (RANK==0)
-				cout << "	Reading  " << TMP_TERMS1 << " pairs for mapping" << endl;
-			
-			for(int i=0; i<TMP_TERMS1; i++)
-			{
-				PARAMFILE >> TMP_TERMS2;
-				PARAMFILE >> TEMP_TYPE;
-				
-				if (RANK==0)
-					cout << "	........Reading pair: " << TEMP_TYPE << " with mapped index: " << TMP_TERMS2 << endl; 
-				
-				PAIR_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
-				PAIR_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
-					
-			}					
-						
-			if (RANK==0)
-				cout << "	...Read FF pairmaps..." << endl << endl;					
-		}	
-		
-		// Read the triplet maps
-		
-		else if(LINE.find("TRIPMAPS: ") != string::npos)
-		{
-			STREAM_PARSER.str(LINE);			
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TMP_TERMS1;	
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-			
-			if (RANK==0)
-				cout << "	Reading  " << TMP_TERMS1 << " triplets for mapping" << endl;
-			
-			for(int i=0; i<TMP_TERMS1; i++)
-			{
-				PARAMFILE >> TMP_TERMS2;
-				PARAMFILE >> TEMP_TYPE;
-				
-				if (RANK==0)
-					cout << "	........Reading triplet: " << TEMP_TYPE << " with mapped index: " << TMP_TERMS2 << endl; 
-				
-				TRIAD_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
-				TRIAD_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
-					
-			}
-			if (RANK==0)
-				cout << "	...Read FF triadmaps..." << endl;					
-		}	
-		
-		// Read the quadruplet maps
-
-		else if(LINE.find("QUADMAPS: ") != string::npos)
-		{
-			STREAM_PARSER.str(LINE);			
-			STREAM_PARSER >> TEMP_STR;
-			STREAM_PARSER >> TMP_TERMS1;	
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
-			
-			if (RANK==0)
-				cout << "	Reading  " << TMP_TERMS1 << " quadruplets for mapping" << endl;
-			
-			for(int i=0; i<TMP_TERMS1; i++)
-			{
-				PARAMFILE >> TMP_TERMS2;
-				PARAMFILE >> TEMP_TYPE;
-				
-				if (RANK==0)
-					cout << "	........Reading quadruplet: " << TEMP_TYPE << " with mapped index: " << TMP_TERMS2 << endl; 
-				
-				QUAD_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
-				QUAD_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
-					
-			}
-			if (RANK==0)
-				cout << "	...Read FF quadmaps..." << endl;					
-		}	
-
-	}	
+	read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, FF_3BODY, FF_4BODY, PAIR_MAP, TRIAD_MAP, QUAD_MAP, NEIGHBOR_LIST, SYSTEM,
+	 FF_PLOTS.N_PLOTS, NATMTYP, TMP_ATOMTYPE, TMP_CHARGES, TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE, TRIAD_MAP_REVERSE, QUAD_MAP_REVERSE) ;
 	
 	// Set the atom charges
 	
@@ -3104,8 +1490,8 @@ int main(int argc, char* argv[])
 						cout<< fixed << setw(2) << right << j;
 						cout<< fixed << setw(2) << right << k;
 						cout<< " Triplet name: "           << setw(12) << right << int_map_3b_str;
-						cout<< " Explicit Triplet index: " << setw(4) << right << int_map_idx;
-						cout<< " Unique Triplet index: "   << setw(4) << right << INT_PAIR_MAP[int_map_idx] << endl;
+						cout<< " Explicit Triplet index: " << setw(4) << right << idx1 ;
+						cout<< " Unique Triplet index: "   << setw(4) << right << INT_TRIAD_MAP[idx1] << endl;
 					}
 				}
 			}
@@ -3124,6 +1510,9 @@ int main(int argc, char* argv[])
 
 		// Create a list of each posible combination of atom quadruplets, i through
 		// l are given in ascending order
+
+		if(RANK==0)
+			cout << endl << "	Quadruplet maps:" << endl;
 		
 		for(int i=0; i<NATMTYP; i++)
 		{
@@ -3445,7 +1834,7 @@ int main(int argc, char* argv[])
 				
 				STATISTICS << "# Step	Time	Ktot/N	Vtot/N	Etot/N	T	P";
 	  
-				if ( ENSEMBLE_CONTROL.STYLE == "NVE-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
+				if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
 				{
 					printf(" %15s\n", "Econs/N");
 					STATISTICS << "	Econs/N" << endl;
@@ -3458,7 +1847,7 @@ int main(int argc, char* argv[])
 			
 				printf("%8s %9s %15s %15s %15s %15s %15s", " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
 				STATISTICS << "#	(fs)	(kcal/mol)	(kcal/mol)	(kcal/mol)	(K)	(GPa)";
-				if ( ENSEMBLE_CONTROL.STYLE == "NVE-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
+				if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
 				{
 					printf(" %15s\n", "(kcal/mol)");
 					STATISTICS << "	(kcal/mol)" << endl;
@@ -4904,18 +3293,6 @@ static void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector
 
 #endif // USE_MPI
 
-void exit_run(int value)
-// Call this instead of exit(1) to properly terminate all MPI processes.
-{
-	#ifdef USE_MPI
-		MPI_Abort(MPI_COMM_WORLD,value);
-	#else
-		exit(value);
-	#endif
-
-}
-
-
 	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
 	//
@@ -5294,12 +3671,1713 @@ void exit_run(int value)
 	
 #endif
 
+static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NATMTYP, vector<string>& TMP_ATOMTYPE,
+									 vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES, 
+									 vector<double>& TMP_MASS, vector<int> &TMP_SIGN)
+// Read in the atom types.  Set properties for each atom type.
+{
+
+  bool FOUND_END = false ;
+  string 	LINE;
+  stringstream	STREAM_PARSER;
+  string TEMP_STR ;
+
+  PARAMFILE.open(CONTROLS.PARAM_FILE.data());
+  if(!PARAMFILE.is_open())
+  {
+	 cout << "ERROR: Cannot open paramter file: " << CONTROLS.PARAM_FILE << endl;
+	 exit_run(0);
+  }
+	
+  FOUND_END = false;
+  NATMTYP = 0;
+	
+  while (FOUND_END == false)
+  {
+	 getline(PARAMFILE,LINE);
+	
+	 if(LINE.find("# PAIRIDX #") != string::npos)
+	 {
+		FOUND_END = true;
+			
+		if(NATMTYP == 0)
+		{
+		  cout << "ERROR: ATOM TYPES section not found in parameter file: " << CONTROLS.PARAM_FILE << endl;
+		  exit_run(0);
+		}
+			
+		PARAMFILE.close();
+		break;
+	 }
+		
+	 else if(LINE.find("ATOM TYPES:") != string::npos)
+	 {
+		STREAM_PARSER.str(LINE);
+		STREAM_PARSER >> TEMP_STR >> TEMP_STR >> NATMTYP;
+		CONTROLS.NATMTYP = NATMTYP;
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();
+		
+		if ( NATMTYP > MAX_ATOM_TYPES ) 
+		{
+		  cout << "ERROR: TOO MANY ATOM TYPES DEFINED\n" ;
+		  exit_run(0) ;
+		}
+  
+		// We need a globally-defined data object to hold charges for passing into LAMMPS
+#if defined(USE_MPI) && defined(LINK_LAMMPS)
+		LMP_CHARGE         .resize(NATMTYP);
+#endif
+			
+		TMP_ATOMTYPE   .resize(NATMTYP);
+		TMP_NATOMTYPE  .resize(NATMTYP);
+		TMP_ATOMTYPEIDX.resize(NATMTYP);
+		TMP_CHARGES    .resize(NATMTYP);
+		TMP_MASS       .resize(NATMTYP);	
+		TMP_SIGN	   .resize(NATMTYP);
+			
+		for(int i=0; i<TMP_NATOMTYPE.size(); i++)
+		  TMP_NATOMTYPE[i] = 0;
+			
+		if(RANK==0)
+		  cout << "	Read " << NATMTYP << " atom types:" << endl;			
+	 }	
+		
+	 // Quickly figure out if we're fitting charges... note this process gets repeated more 
+	 // comprehensively below.. Here it's just needed to figure out charge signs
+		
+	 else if(LINE.find("USECOUL: ") != string::npos) 
+	 {
+		STREAM_PARSER.str(LINE);
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER.str(""); 
+		STREAM_PARSER.clear();
+
+		PARAMFILE >> TEMP_STR >> TEMP_STR;
+		if (TEMP_STR=="true"  || TEMP_STR=="True"  || TEMP_STR=="TRUE"  || TEMP_STR == "T" || TEMP_STR == "t")
+		  CONTROLS.FIT_COUL = true;
+		else
+		  CONTROLS.FIT_COUL = false;
+
+		PARAMFILE.ignore();
+	 }				
+		
+	 else if(LINE.find("# TYPEIDX #") != string::npos)
+	 {
+		for (int i=0; i<NATMTYP; i++)
+		{
+		  getline(PARAMFILE,LINE);
+		  STREAM_PARSER.str(LINE);
+				
+		  STREAM_PARSER >> TEMP_STR;
+		  TMP_ATOMTYPEIDX[i] = int(atof(TEMP_STR.data()));
+		  STREAM_PARSER >> TMP_ATOMTYPE[i];
+		  if(CONTROLS.FIT_COUL)
+			 STREAM_PARSER >> TEMP_STR;
+		  else
+			 STREAM_PARSER >> TMP_CHARGES[i];
+		  STREAM_PARSER >> TMP_MASS[i];
+				
+		  STREAM_PARSER.str("");
+		  STREAM_PARSER.clear();
+				
+		  if(RANK==0)
+			 cout << "		" 	<< setw(5) << left << i << " " << setw(2) << left << TMP_ATOMTYPE[i] << ", q (e): ";
+				
+		  if(CONTROLS.FIT_COUL)
+		  {
+			 if(TEMP_STR == "+")
+			 {
+				if(RANK==0)
+				  cout << "POSITIVE";
+				TMP_SIGN[i] = 1;
+			 }
+			 else
+			 {
+				if(RANK==0)
+				  cout << "NEGATIVE";
+				TMP_SIGN[i] = -1;
+			 }
+		  }
+		  else
+			 if(RANK==0)
+				cout << setw(6) << fixed << setprecision(3) << right << TMP_CHARGES[i];
+		  if(RANK==0)
+			 cout  << ", mass (amu): " << setw(8) << fixed << setprecision(4) << right << TMP_MASS[i] << endl;
+		}
+	 }	
+  }
+}
+
+static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY,
+									vector<TRIP_FF>& FF_3BODY, vector<QUAD_FF>& FF_4BODY, map<string,int> &PAIR_MAP, 
+									map<string,int> &TRIAD_MAP, map<string,int> &QUAD_MAP,
+									NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP,
+                           const vector<string>& TMP_ATOMTYPE, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
+									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE, map<int,string>& TRIAD_MAP_REVERSE,
+									map<int,string>& QUAD_MAP_REVERSE)
+// Read in the force field parameters.
+{
+  bool   	FOUND_END = false;
+  string 	LINE;
+  stringstream	STREAM_PARSER;
+  string TEMP_STR ;
+
+  PARAMFILE.open(CONTROLS.PARAM_FILE.data());
+  if(!PARAMFILE.is_open())
+  {
+	 cout << "ERROR: Cannot open parameter file: " << CONTROLS.PARAM_FILE << endl;
+	 exit_run(0);
+  }
+	
+  if(RANK==0)
+	 cout << endl << "Reading force field parameters..." << endl;
+	
+  FOUND_END = false;
+
+  string  TEMP_SEARCH_2B = "some default text";
+  string  TEMP_SEARCH_3B = "some default text";
+  string  TEMP_SEARCH_4B = "some default text";
+  string	TEMP_TYPE;
+  int     NO_PAIRS, NO_TRIPS, NO_QUADS;
+  int		TMP_TERMS1, TMP_TERMS2, TMP_TERMS3;
+  double	TMP_LOW  = -1;
+  double 	TMP_HIGH =  1;
+	
+  while (FOUND_END == false)
+  {
+	 getline(PARAMFILE,LINE);
+
+	 if ( ! PARAMFILE.good() ) {
+		cout << "Input error found\n" ; FOUND_END = true ;
+		break ;
+	 }
+
+	 // Break out of loop
+
+	 if(LINE.find("ENDFILE") != string::npos)
+	 {			
+		// Rewind so we can set the special 3-body cutoffs
+			
+		PARAMFILE.seekg(0);
+			
+		while (FOUND_END == false)		
+		{
+		  getline(PARAMFILE,LINE);
+
+		  if ( ! PARAMFILE.good() ) {
+			 cout << "Input error found\n" ; FOUND_END = true ;
+			 break ;
+		  }
+		  
+				
+		  if(LINE.find("ENDFILE") != string::npos)
+			 break;	
+				
+		  if((FF_2BODY[0].SNUM_3B_CHEBY>0) && (LINE.find("FCUT TYPE:") != string::npos))
+		  {
+			 STREAM_PARSER.str(LINE);	
+			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+					
+			 // Setup force cutoff type for 3-body
+					
+			 FF_3BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
+			 FCUT_TYPE cutoff_type = FF_3BODY[0].FORCE_CUTOFF.TYPE ;
+					
+			 if( cutoff_type == FCUT_TYPE::SIGMOID 
+				  || cutoff_type == FCUT_TYPE::CUBSIG 
+				  || cutoff_type == FCUT_TYPE::CUBESTRETCH 
+				  || cutoff_type == FCUT_TYPE::SIGFLT)
+			 {
+				STREAM_PARSER >> FF_3BODY[0].FORCE_CUTOFF.STEEPNESS;
+				STREAM_PARSER >> FF_3BODY[0].FORCE_CUTOFF.OFFSET;
+						
+				if(TEMP_STR == "SIGFLT")
+				  cin >> FF_3BODY[0].FORCE_CUTOFF.HEIGHT;
+			 }
+					
+			 STREAM_PARSER.str("");
+			 STREAM_PARSER.clear();	
+					
+			 FF_3BODY[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
+					
+			 // Copy all class members.
+			 for(int i=1; i<FF_3BODY.size(); i++)
+				FF_3BODY[i].FORCE_CUTOFF = FF_3BODY[0].FORCE_CUTOFF;
+					
+			 if(FF_2BODY[0].SNUM_4B_CHEBY>0)
+			 {
+				// Setup force cutoff type for 4-body
+					
+				FF_4BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
+				cutoff_type = FF_4BODY[0].FORCE_CUTOFF.TYPE ;
+					
+				if( cutoff_type == FCUT_TYPE::SIGMOID 
+					 || cutoff_type == FCUT_TYPE::CUBSIG 
+					 || cutoff_type == FCUT_TYPE::CUBESTRETCH 
+					 || cutoff_type == FCUT_TYPE::SIGFLT)
+				{
+				  STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.STEEPNESS;
+				  STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.OFFSET;
+						
+				  if(TEMP_STR == "SIGFLT")
+					 cin >> FF_4BODY[0].FORCE_CUTOFF.HEIGHT;
+				}
+					
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();	
+					
+				FF_4BODY[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
+					
+				// Copy all class members.
+				for(int i=1; i<FF_4BODY.size(); i++)
+				  FF_4BODY[i].FORCE_CUTOFF = FF_4BODY[0].FORCE_CUTOFF;							
+			 }
+		  }
+		  if((FF_2BODY[0].SNUM_4B_CHEBY>0) && (LINE.find("FCUT TYPE:") != string::npos))
+		  {	
+			 STREAM_PARSER.str(LINE);	
+			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+					
+			 // Setup force cutoff type for 4-body
+				
+			 FF_4BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
+			 FCUT_TYPE cutoff_type = FF_4BODY[0].FORCE_CUTOFF.TYPE ;
+				
+			 if( cutoff_type == FCUT_TYPE::SIGMOID 
+				  || cutoff_type == FCUT_TYPE::CUBSIG 
+				  || cutoff_type == FCUT_TYPE::CUBESTRETCH 
+				  || cutoff_type == FCUT_TYPE::SIGFLT)
+			 {
+				STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.STEEPNESS;
+				STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.OFFSET;
+					
+				if(TEMP_STR == "SIGFLT")
+				  cin >> FF_4BODY[0].FORCE_CUTOFF.HEIGHT;
+			 }
+				
+			 STREAM_PARSER.str("");
+			 STREAM_PARSER.clear();	
+				
+			 FF_4BODY[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
+				
+			 // Copy all class members.
+			 for(int i=1; i<FF_4BODY.size(); i++)
+				FF_4BODY[i].FORCE_CUTOFF = FF_4BODY[0].FORCE_CUTOFF;	
+		  }
+				
+		  else if(LINE.find("SPECIAL 2B OLD_S_MINIM: ") != string::npos)
+		  {
+			 STREAM_PARSER.str(LINE);			
+			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+			 STREAM_PARSER.str("");
+			 STREAM_PARSER.clear();	
+					
+#if VERBOSITY == 1
+			 if(RANK==0)
+			 {
+				cout << "	Note: Storing original 2-body r_min values for 2/3-body switching: " << endl;
+				cout << "   WARINGING!!!! ...This feature isn't tested and may be incompatible with neighbor lists." << endl;
+			 }
+#endif	
+			
+			 for(int i=0;i<TMP_TERMS1; i++)
+			 {
+				getline(PARAMFILE,LINE);
+
+				if ( ! PARAMFILE.good() ) {
+				  cout << "Input error found\n" ; FOUND_END = true ;
+				  break ;
+				}
+				STREAM_PARSER.str(LINE);
+				STREAM_PARSER >> TMP_TERMS2 >> TEMP_STR;	// We could use the integer, but this way is probably safer
+				STREAM_PARSER >> FF_2BODY[TMP_TERMS2].OLD_S_MINIM;
+						
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();	
+						
+#if VERBOSITY == 1
+				if(RANK==0)
+				  cout << "		" << TEMP_STR << "   " <<  FF_2BODY[TMP_TERMS2].OLD_S_MINIM << endl;
+#endif	
+			 }
+		  }	
+				
+		  else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
+		  {
+			 if (FF_3BODY.size()<1)
+			 {
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Special inner cutoffs specified for 3-body chebyshev interactions,"  << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: expected number of pair triplets is zero. Did you forget to set "  << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: the \'ATOM PAIR TRIPLETS:\' line in the parameter file?"  << COUT_STYLE.ENDSTYLE << endl;
+				exit_run(0);
+			 }
+					
+					
+			 STREAM_PARSER.str(LINE);
+	
+			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+	
+#if VERBOSITY == 1
+			 if(RANK==0)
+				cout << "	Note: Setting specific 3-body r_min values: " << endl;
+#endif	
+
+			 double TMP_VAL;
+					
+			 string  TMP_IJ,  TMP_IK,  TMP_JK;	
+			 string TARG_IJ, TARG_IK, TARG_JK;
+		
+			 for(int i=0; i<TMP_TERMS1; i++)
+			 {
+				getline(PARAMFILE,LINE);
+				if ( ! PARAMFILE.good() ) {
+				  cout << "Input error found\n" ; FOUND_END = true ;
+				  break ;
+				}
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();
+						
+				STREAM_PARSER.str(LINE);
+				STREAM_PARSER >> TEMP_STR;	// Just and index for the pair type
+				STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
+
+				STREAM_PARSER >> TMP_IJ;	// What is the IJ?
+				STREAM_PARSER >> TMP_IK;	// What is the IK?
+				STREAM_PARSER >> TMP_JK;	// What is the JK?
+
+				// Check that triplet pair types are correct						
+						
+				if ( PAIR_MAP.count(TMP_IJ) == 1 ) 
+				{
+				  TMP_IJ = FF_2BODY[ PAIR_MAP[ TMP_IJ ] ].PRPR_NM;
+				}
+				else
+				{
+				  cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+				  cout << "		Triplet type:              " << TEMP_STR << endl;
+				  cout << "		First distance, pair type: " << TMP_IJ << endl;
+				  exit_run(0);
+				}
+				if ( PAIR_MAP.count(TMP_IK) == 1 ) 
+				{
+				  TMP_IK = FF_2BODY[ PAIR_MAP[ TMP_IK ] ].PRPR_NM;
+				}
+				else
+				{
+				  cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+				  cout << "		Triplet type:              " << TEMP_STR << endl;
+				  cout << "		First distance, pair type: " << TMP_IK << endl;
+				  exit_run(0);
+				}
+				if ( PAIR_MAP.count(TMP_JK) == 1 ) 
+				{
+				  TMP_JK = FF_2BODY[ PAIR_MAP[ TMP_JK ] ].PRPR_NM;
+				}
+				else
+				{
+				  cout << "ERROR: Unknown triplet pair for special inner cutoff." << endl;
+				  cout << "		Triplet type:              " << TEMP_STR << endl;
+				  cout << "		First distance, pair type: " << TMP_JK << endl;
+				  exit_run(0);
+				}
+		
+				TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
+				TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
+				TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
+						
+				STREAM_PARSER >> TMP_VAL;
+
+				// Read the first inner cutoff
+
+				if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
+		
+				else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
+		
+				else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
 
 
+				// Read the second inner cutoff
+
+				STREAM_PARSER >> TMP_VAL;
+		
+				if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
+		
+				else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
+		
+				else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
+
+		
+				// Read the third inner cutoff
+
+				STREAM_PARSER >> TMP_VAL;
+		
+				if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] = TMP_VAL;
+		
+				else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] = TMP_VAL;
+		
+				else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] = TMP_VAL;
+
+#if VERBOSITY == 1
+				if(RANK==0)
+				{
+				  cout << "		" << TEMP_STR << " ( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
+						 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[0] << ", "
+						 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[1] << ", "
+						 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MINIM[2] << endl;
+				}
+#endif	
+			 }
+					
+			 STREAM_PARSER.str("");
+			 STREAM_PARSER.clear();
+	
+		  }
+
+		  else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
+		  {
+			 STREAM_PARSER.str(LINE);
+	
+			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+	
+#if VERBOSITY == 1
+			 if(RANK==0)
+				cout << "	Note: Setting specific 3-body r_max values: " << endl;
+#endif	
+
+			 double TMP_VAL;
+					
+			 string  TMP_IJ,  TMP_IK,  TMP_JK;	
+			 string TARG_IJ, TARG_IK, TARG_JK;
+		
+			 for(int i=0; i<TMP_TERMS1; i++)
+			 {
+				getline(PARAMFILE,LINE);
+				if ( ! PARAMFILE.good() ) {
+				  cout << "Input error found\n" ; FOUND_END = true ;
+				  break ;
+				}
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();
+						
+				STREAM_PARSER.str(LINE);
+				STREAM_PARSER >> TEMP_STR;	// Just and index for the pair type
+				STREAM_PARSER >> TEMP_STR;	// Which 3-body type is it?
+
+				STREAM_PARSER >> TMP_IJ;	// What is the IJ?
+				STREAM_PARSER >> TMP_IK;	// What is the IK?
+				STREAM_PARSER >> TMP_JK;	// What is the JK?
+
+				// Check that triplet pair types are correct
+		
+				try
+				{
+				  TMP_IJ = FF_2BODY[ PAIR_MAP[ TMP_IJ ] ].PRPR_NM;
+				}
+				catch(...)
+				{
+				  cout << "ERROR: Unknown triplet pair for special outer cutoff." << endl;
+				  cout << "		Triplet type:              " << TEMP_STR << endl;
+				  cout << "		First distance, pair type: " << TMP_IJ << endl;
+				}
+				try
+				{
+				  TMP_IK = FF_2BODY[ PAIR_MAP[ TMP_IK ] ].PRPR_NM;
+				}
+				catch(...)
+				{
+				  cout << "ERROR: Unknown triplet pair for special outer cutoff." << endl;
+				  cout << "		Triplet type:              " << TEMP_STR << endl;
+				  cout << "		First distance, pair type: " << TMP_IK << endl;
+				}
+				try
+				{
+				  TMP_JK = FF_2BODY[ PAIR_MAP[ TMP_JK ] ].PRPR_NM;
+				}
+				catch(...)
+				{
+				  cout << "ERROR: Unknown triplet pair for special outer cutoff." << endl;
+				  cout << "		Triplet type:              " << TEMP_STR << endl;
+				  cout << "		First distance, pair type: " << TMP_JK << endl;
+				}
+		
+				TARG_IJ = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[0] ] ].PRPR_NM;
+				TARG_IK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[1] ] ].PRPR_NM;
+				TARG_JK = FF_2BODY[ PAIR_MAP[ FF_3BODY[TRIAD_MAP[TEMP_STR]].ATOM_PAIRS[2] ] ].PRPR_NM;
+	
+				// Read the first outer cutoff
+
+				STREAM_PARSER >> TMP_VAL;
+		
+				if      ( (TMP_IJ == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
+		
+				else if ( (TMP_IJ == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
+		
+				else if ( (TMP_IJ == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
 
 
+				// Read the second outer cutoff
+
+				STREAM_PARSER >> TMP_VAL;
+		
+				if      ( (TMP_IK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
+		
+				else if ( (TMP_IK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
+		
+				else if ( (TMP_IK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
+
+		
+				// Read the third outer cutoff
+
+				STREAM_PARSER >> TMP_VAL;
+		
+				if      ( (TMP_JK == TARG_IJ) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] = TMP_VAL;
+		
+				else if ( (TMP_JK == TARG_IK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] = TMP_VAL;
+		
+				else if ( (TMP_JK == TARG_JK) && (FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] == -1) )
+				  FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] = TMP_VAL;
+
+#if VERBOSITY == 1
+				if(RANK==0)
+				{
+				  cout << "		" << TEMP_STR << " ( " <<  TARG_IJ << ", " << TARG_IK << ", " << TARG_JK << "): " 
+						 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[0] << ", "
+						 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[1] << ", "
+						 << FF_3BODY[TRIAD_MAP[TEMP_STR]].S_MAXIM[2] << endl;
+				}
+#endif	
+							
+						
+			 }
+					
+			 STREAM_PARSER.str("");
+			 STREAM_PARSER.clear();
+	
+		  }
+				
+		  else if(LINE.find("SPECIAL 4B S_MINIM:") != string::npos)
+		  {
+			 STREAM_PARSER.str(LINE);
+	
+			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+	
+#if VERBOSITY == 1
+			 if(RANK==0)
+				cout << "	Note: Setting specific 4-body r_min values: " << endl;
+#endif	
+
+			 double TMP_VAL;
+					
+			 vector<string>  TMPS(6);	
+			 vector<string> TARGS(6);
+		
+			 for(int i=0; i<TMP_TERMS1; i++)
+			 {
+				getline(PARAMFILE,LINE);
+				if ( ! PARAMFILE.good() ) {
+				  cout << "Input error found\n" ; FOUND_END = true ;
+				  break ;
+				}
+						
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();
+						
+				STREAM_PARSER.str(LINE);
+				STREAM_PARSER >> TEMP_STR;	// Just an index for the pair type
+				STREAM_PARSER >> TEMP_STR;	// Which 4-body type is it?
+						
+				for(int j=0; j<6; j++)
+				  STREAM_PARSER >> TMPS[j]; // What are the constituent atom pair types?
+
+				// Check that triplet pair types are correct
+						
+				for(int j=0; j<6; j++)
+				{
+				  try
+				  {
+					 TMPS[j] = FF_2BODY[ PAIR_MAP[ TMPS[j] ] ].PRPR_NM;
+				  }
+				  catch(...)
+				  {
+					 cout << "ERROR: Unknown quadruplet pair for special outer cutoff." << endl;
+					 cout << "		quadruplet type:           " << TEMP_STR << endl;
+					 cout << "		First distance, pair type: " << TMPS[j] << endl;
+				  }
+				}
+						
+				for(int j=0; j<6; j++)
+				  TARGS[j] = FF_2BODY[ PAIR_MAP[ FF_4BODY[QUAD_MAP[TEMP_STR]].ATOM_PAIRS[j] ] ].PRPR_NM;
+						
+				// Read and store the cutoffs
+						
+				for(int j=0; j<6; j++)
+				{
+				  STREAM_PARSER >> TMP_VAL;
+							
+				  for(int k=0; k<6; k++)
+					 if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[k] == -1) )
+						FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[k] = TMP_VAL;
+								
+				}
 
 
+#if VERBOSITY == 1
+				if(RANK==0)
+				{
+				  cout << "		" << TEMP_STR << " ( " 
+						 << TARGS[0] << ", " 
+						 << TARGS[1] << ", " 
+						 << TARGS[2] << ", " 
+						 << TARGS[3] << ", " 
+						 << TARGS[4] << ", " 
+						 << TARGS[5] << "): " 
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[0] << ", "
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[1] << ", "
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[2] << ", "
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[3] << ", "
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[4] << ", "										 										 
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MINIM[5] << endl;
+				}
+#endif	
+			 }
+					
+			 STREAM_PARSER.str("");
+			 STREAM_PARSER.clear();
+	
+		  }
+				
+		  else if(LINE.find("SPECIAL 4B S_MAXIM:") != string::npos)
+		  {
+			 STREAM_PARSER.str(LINE);
+	
+			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
+	
+#if VERBOSITY == 1
+			 if(RANK==0)
+				cout << "	Note: Setting specific 4-body r_max values: " << endl;
+#endif	
+
+			 double TMP_VAL;
+					
+			 vector<string>  TMPS(6);	
+			 vector<string> TARGS(6);
+		
+			 for(int i=0; i<TMP_TERMS1; i++)
+			 {
+				getline(PARAMFILE,LINE);
+				if ( ! PARAMFILE.good() ) {
+				  cout << "Input error found\n" ; FOUND_END = true ;
+				  break ;
+				}
+
+				STREAM_PARSER.str("");
+				STREAM_PARSER.clear();
+						
+				STREAM_PARSER.str(LINE);
+				STREAM_PARSER >> TEMP_STR;	// Just an index for the pair type
+				STREAM_PARSER >> TEMP_STR;	// Which 4-body type is it?
+						
+				for(int j=0; j<6; j++)
+				  STREAM_PARSER >> TMPS[j]; // What are the constituent atom pair types?
+
+				// Check that triplet pair types are correct
+						
+				for(int j=0; j<6; j++)
+				{
+				  try
+				  {
+					 TMPS[j] = FF_2BODY[ PAIR_MAP[ TMPS[j] ] ].PRPR_NM;
+				  }
+				  catch(...)
+				  {
+					 cout << "ERROR: Unknown quadruplet pair for special outer cutoff." << endl;
+					 cout << "		quadruplet type:           " << TEMP_STR << endl;
+					 cout << "		First distance, pair type: " << TMPS[j] << endl;
+				  }
+				}
+						
+				for(int j=0; j<6; j++)
+				  TARGS[j] = FF_2BODY[ PAIR_MAP[ FF_4BODY[QUAD_MAP[TEMP_STR]].ATOM_PAIRS[j] ] ].PRPR_NM;
+						
+				// Read and store the cutoffs
+						
+				for(int j=0; j<6; j++)
+				{
+				  STREAM_PARSER >> TMP_VAL;
+							
+				  for(int k=0; k<6; k++)
+					 if ( (TMPS[j] == TARGS[k]) && (FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[k] == -1) )
+						FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[k] = TMP_VAL;
+								
+				}
+
+
+#if VERBOSITY == 1
+				if(RANK==0)
+				{
+				  cout << "		" << TEMP_STR << " ( " 
+						 << TARGS[0] << ", " 
+						 << TARGS[1] << ", " 
+						 << TARGS[2] << ", " 
+						 << TARGS[3] << ", " 
+						 << TARGS[4] << ", " 
+						 << TARGS[5] << "): " 
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[0] << ", "
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[1] << ", "
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[2] << ", "
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[3] << ", "
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[4] << ", "										 										 
+						 << FF_4BODY[QUAD_MAP[TEMP_STR]].S_MAXIM[5] << endl;
+				}
+#endif	
+			 }
+					
+			 STREAM_PARSER.str("");
+			 STREAM_PARSER.clear();
+	
+		  }
+		}
+			
+		FOUND_END = true;
+			
+		if(RANK==0)
+		{
+		  cout << "   ...read complete." << endl << endl;
+		  cout << "Notes on simulation: " << endl;
+		  cout << "	Using fpenalty power " << FPENALTY_POWER << endl;	
+				
+		  if(FF_3BODY.size()>0)
+		  {
+			 cout << "	Using the following fcut style for 3B Chebyshev interactions: " << 
+				FF_3BODY[0].FORCE_CUTOFF.to_string() << endl;
+			 cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << FF_3BODY[0].FORCE_CUTOFF.STEEPNESS << " " << FF_3BODY[0].FORCE_CUTOFF.OFFSET << endl;
+		  }
+		  if(FF_4BODY.size()>0)
+		  {
+			 cout << "	Using the following fcut style for 4B Chebyshev interactions: " << 
+				FF_4BODY[0].FORCE_CUTOFF.to_string() << endl;
+			 cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << FF_4BODY[0].FORCE_CUTOFF.STEEPNESS << " " << FF_4BODY[0].FORCE_CUTOFF.OFFSET << endl;
+		  }
+		}
+
+		if(CONTROLS.USE_COULOMB)
+		{
+		  if(RANK==0)
+		  {
+			 cout << "	Ewald summations will be used ";
+			 if(CONTROLS.FIT_COUL)
+				cout << "and charges will be taken from fit values" << endl;
+			 else
+				cout << "and charges will be taken from user-specified values" << endl;
+		  }
+
+		}
+		else
+		{
+		  if(RANK==0)
+			 cout << "	Electrostatics will not be computed." << endl;
+		}
+			
+		if(CONTROLS.USE_OVERCOORD)
+		{
+		  if(RANK==0)
+		  {
+			 cout << "	Overbonding contributions will be considered." << endl;
+				
+			 if(CONTROLS.FIT_POVER)
+				cout << "		p-over will be read from fit parameters." << endl;
+			 else
+				cout << "		p-over will be read from specified parameters." << endl;
+		  }
+		}
+			
+		if(RANK==0)
+		  cout << endl;
+			
+			
+		// Update neighbor list cutoffs for 3- and 4-body interactions
+			
+		double MAX_FOUND_3B = 0;
+		double MAX_FOUND_4B = 0;
+			
+		for (int i=0; i<FF_3BODY.size(); i++)
+		{
+		  if(FF_3BODY[i].S_MAXIM[0] > MAX_FOUND_3B)
+			 MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[0];
+		  if(FF_3BODY[i].S_MAXIM[1] > MAX_FOUND_3B)
+			 MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[1];
+		  if(FF_3BODY[i].S_MAXIM[2] > MAX_FOUND_3B)
+			 MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[2];
+		}
+			
+		for (int i=0; i<FF_4BODY.size(); i++)
+		{
+		  for(int j=0; j<6; j++)
+			 if(FF_4BODY[i].S_MAXIM[j] > MAX_FOUND_4B)
+				MAX_FOUND_4B = FF_4BODY[i].S_MAXIM[j];
+		}
+			
+			
+			
+		PARAMFILE.close();
+		break;
+	 }
+		
+	 // Determine what parameters we're actually reading
+		
+	 else if(LINE.find("USECOUL: ") != string::npos)
+	 {
+		parse_ff_controls(LINE, PARAMFILE, CONTROLS) ;
+	 }
+		
+	 // Determine the pair type and corresponding orders, etc
+		
+	 else if(LINE.find("PAIRTYP: ") != string::npos)
+	 {
+
+		if(RANK==0)
+		  cout << "Attempting to read pairtype..." << endl;
+			
+		STREAM_PARSER.str(LINE);
+			
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TEMP_TYPE;
+			
+		if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "INVRSE_R")
+		{
+		  STREAM_PARSER >> TMP_TERMS1;
+		}
+		else if(TEMP_TYPE =="CHEBYSHEV")
+		{
+			  
+		  vector<string> tokens ;
+		  string buf ;
+
+		  // Tokenize the input.
+		  while ( STREAM_PARSER >> buf ) 
+			 tokens.push_back(buf) ;
+
+		  TMP_TERMS1 = TMP_TERMS2 = TMP_TERMS3 = 0 ;
+		  if ( tokens.size() > 0 )
+			 TMP_TERMS1 = stoi(tokens[0]) ;
+		  if ( tokens.size() > 1 )
+			 TMP_TERMS2 = stoi(tokens[1]) ;
+		  if ( tokens.size() > 2 )
+			 TMP_TERMS3 = stoi(tokens[2]) ;
+
+		  if ( tokens.size() > 3 )
+		  {
+			 TMP_LOW = stoi(tokens[3]) ;
+			 if( TMP_LOW < -1.0 ||  TMP_LOW > +1.0 )
+			 {
+				cout << "ERROR: CHEBY_RANGE_LOW must be betwee -1 and 1" << endl;
+				exit_run(0);
+			 }
+		  }
+				
+				
+		  if ( tokens.size() > 4 )
+		  {
+			 TMP_HIGH = stoi(tokens[4]) ;
+			 if( TMP_HIGH < -1.0 ||  TMP_HIGH > +1.0 )
+			 {
+				cout << "ERROR: CHEBY_RANGE_HIGH must be betwee -1 and 1" << endl;
+				exit_run(0);
+			 }
+		  }
+
+		  if(TMP_LOW > TMP_HIGH || TMP_LOW == TMP_HIGH)
+		  {
+			 cout << "ERROR: CHEBY_RANGE_LOW must be smaller than CHEBY_RANGE_HIGH" << endl;
+			 exit_run(0);
+		  }
+
+		}			
+			
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+			
+		if(RANK==0)
+		  cout << "	...Read FF interaction type..." << endl;	
+	 }
+
+	 // Read in pair potential info
+
+	 else if(LINE.find("ATOM PAIRS: ") != string::npos)
+	 {	
+		// Determine the number of pairs
+
+		STREAM_PARSER.str(LINE);
+			
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> NO_PAIRS;
+			
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+			
+		// Resize pair parameter object
+			
+		FF_2BODY.resize(NO_PAIRS);		
+			
+		// Set any defaults for that pair style
+			
+		if(TEMP_TYPE == "CHEBYSHEV")
+		{
+		  for(int i=0; i<NO_PAIRS; i++)
+		  {
+			 FF_2BODY[i].PENALTY_DIST     = 0.01;
+			 FF_2BODY[i].PENALTY_SCALE    = 1.0e4;
+			 FF_2BODY[i].CUBIC_SCALE      = 1.0;
+			 FF_2BODY[i].CHEBY_RANGE_HIGH = TMP_HIGH;
+			 FF_2BODY[i].CHEBY_RANGE_LOW  = TMP_LOW;
+		  }
+
+		}
+			
+		// Read in general pair parameters
+			
+		getline(PARAMFILE,LINE);
+		getline(PARAMFILE,LINE);
+		if ( ! PARAMFILE.good() ) {
+		  FOUND_END = true ;
+		  break ;
+		}
+			
+		for(int i=0; i<NO_PAIRS; i++)
+		{
+		  FF_2BODY[i].PAIRTYP = TEMP_TYPE;
+	
+		  PARAMFILE >> FF_2BODY[i].PAIRIDX;
+		  PARAMFILE >> FF_2BODY[i].ATM1TYP;
+		  PARAMFILE >> FF_2BODY[i].ATM2TYP;	
+		  PARAMFILE >> FF_2BODY[i].S_MINIM;	
+		  PARAMFILE >> FF_2BODY[i].S_MAXIM;
+				
+		  FF_2BODY[i].OLD_S_MINIM = FF_2BODY[i].S_MINIM;
+				
+		  if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
+		  {
+			 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
+			 NEIGHBOR_LIST.MAX_CUTOFF_3B = FF_2BODY[i].S_MAXIM;
+			 NEIGHBOR_LIST.MAX_CUTOFF_4B = FF_2BODY[i].S_MAXIM;
+		  }
+				 	
+		  PARAMFILE >> FF_2BODY[i].S_DELTA;
+				
+		  if((N_PLOTS == 0) &&
+			  (  FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.X
+				  || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.Y
+				  || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.Z ) )
+		  {
+#if WARN == TRUE
+			 if(RANK==0)
+			 {
+				if (isatty(fileno(stdout)))
+				{
+				  cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
+				  cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
+				  cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD <<  SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
+				}
+				else
+				{
+				  cout << "WARNING: Outer cutoff greater than half at least one box length" << endl;
+				  cout << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP  << endl;
+				  cout << " " <<  SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+				}								
+			 }
+
+#else
+			 if (isatty(fileno(stdout)))
+			 {
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
+				exit_run(0);
+			 }
+			 else
+			 {
+				cout << "ERROR: Outer cutoff greater than half at least one box length" << endl;
+				cout << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << endl;
+				exit_run(0);							
+			 }
+#endif
+		  }
+
+				
+		  FF_2BODY[i].PRPR_NM = FF_2BODY[i].ATM1TYP;
+		  FF_2BODY[i].PRPR_NM.append(FF_2BODY[i].ATM2TYP);	
+
+		  if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "INVRSE_R")
+		  {
+			 FF_2BODY[i].SNUM = TMP_TERMS1;
+		  }
+		  else if(TEMP_TYPE =="CHEBYSHEV")
+		  {
+			 PARAMFILE >> FF_2BODY[i].CHEBY_TYPE;	// How does the user want distance transformed?
+
+			 if(FF_2BODY[i].CHEBY_TYPE == "MORSE")
+				PARAMFILE >> FF_2BODY[i].LAMBDA;	
+					
+			 FF_2BODY[i].SNUM          = TMP_TERMS1;
+			 FF_2BODY[i].SNUM_3B_CHEBY = TMP_TERMS2;
+			 FF_2BODY[i].SNUM_4B_CHEBY = TMP_TERMS3;
+					
+			 // Setup force cutoff type for 2-body
+					
+			 FF_2BODY[0].FORCE_CUTOFF.set_type("CUBIC");
+			 FF_2BODY[0].FORCE_CUTOFF.BODIEDNESS = 2 ;
+					
+			 // Copy all class members.
+			 for(int i=1; i<FF_2BODY.size(); i++)
+				FF_2BODY[i].FORCE_CUTOFF = FF_2BODY[0].FORCE_CUTOFF;										
+		  }
+		  else if(TEMP_TYPE =="LJ")
+		  {
+			 FF_2BODY[i].SNUM = 2;
+		  }
+		  else // Splines type
+		  {
+			 FF_2BODY[i].SNUM = (2+floor((FF_2BODY[i].S_MAXIM - FF_2BODY[i].S_MINIM)/FF_2BODY[i].S_DELTA))*2;
+		  }				
+		}
+			
+		if(CONTROLS.USE_OVERCOORD)
+		{		
+		  getline(PARAMFILE,LINE);
+		  getline(PARAMFILE,LINE);
+		  getline(PARAMFILE,LINE);
+		  if ( ! PARAMFILE.good() ) {
+			 FOUND_END = true ;
+			 break ;
+		  }
+
+		  for(int i=0; i<NO_PAIRS; i++)
+		  {
+			 PARAMFILE >> TEMP_STR >> TEMP_STR >> TEMP_STR;	
+			 PARAMFILE >> FF_2BODY[i].USE_OVRPRMS;	
+			 PARAMFILE >> FF_2BODY[i].OVER_TO_ATM;				
+			 PARAMFILE >> FF_2BODY[i].OVRPRMS[0];	
+			 PARAMFILE >> FF_2BODY[i].OVRPRMS[1];
+			 PARAMFILE >> FF_2BODY[i].OVRPRMS[2];
+			 PARAMFILE >> FF_2BODY[i].OVRPRMS[3];
+			 PARAMFILE >> FF_2BODY[i].OVRPRMS[4];	
+		  }
+		}
+			
+		TEMP_SEARCH_2B = "PAIR ";
+		TEMP_SEARCH_2B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type
+		TEMP_SEARCH_2B.append(" PARAMS");	
+			
+		if(RANK==0)
+		  cout << "	...Read general FF params..." << endl;
+	 }
+		
+	 // Read any special controls for the pair potential
+
+	 else if(LINE.find("PAIR CHEBYSHEV PENALTY DIST: ") != string::npos)
+	 {
+		STREAM_PARSER.str(LINE);
+		STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+		for(int i=0; i<NO_PAIRS; i++)
+		  FF_2BODY[i].PENALTY_DIST = double(atof(TEMP_STR.data()));
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+	 }
+		
+	 else if(LINE.find("PAIR CHEBYSHEV PENALTY SCALING: ") != string::npos)
+	 {
+		STREAM_PARSER.str(LINE);
+		STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+		for(int i=0; i<NO_PAIRS; i++)
+		  FF_2BODY[i].PENALTY_SCALE = double(atof(TEMP_STR.data()));
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+	 }
+		
+	 else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING: ") != string::npos)
+	 {
+		STREAM_PARSER.str(LINE);
+		STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
+		for(int i=0; i<NO_PAIRS; i++)
+		  FF_2BODY[i].CUBIC_SCALE = double(atof(TEMP_STR.data()));
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+	 }		
+		
+	 // Setup triplets
+		
+	 else if(LINE.find("ATOM PAIR TRIPLETS: ") != string::npos)
+	 {	
+		// Determine the number of pairs
+
+		STREAM_PARSER.str(LINE);
+			
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> NO_TRIPS;
+			
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+			
+		// Resize pair parameter object
+			
+		FF_3BODY.resize(NO_TRIPS, CLUSTER(3,3) );	
+			
+		for (int i=0; i<NO_TRIPS; i++)
+		{	
+		  FF_3BODY[i].S_MINIM[0] = -1;
+		  FF_3BODY[i].S_MINIM[1] = -1;
+		  FF_3BODY[i].S_MINIM[2] = -1;
+				
+		  FF_3BODY[i].S_MAXIM[0] = -1;
+		  FF_3BODY[i].S_MAXIM[1] = -1;
+		  FF_3BODY[i].S_MAXIM[2] = -1;
+		}	
+
+		TEMP_SEARCH_3B = "TRIPLET ";
+		TEMP_SEARCH_3B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type, and 2b and 3b are same pair type
+		TEMP_SEARCH_3B.append(" PARAMS");	
+			
+		if(RANK==0)
+		  cout << "	...Read FF triplet specifications..." << endl;
+			
+	 }
+		
+	 // Setup quadruplets
+		
+	 else if(LINE.find("ATOM PAIR QUADRUPLETS: ") != string::npos)
+	 {	
+		// Determine the number of pairs
+
+		STREAM_PARSER.str(LINE);
+			
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> NO_QUADS;
+			
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+			
+		// Resize pair parameter object
+			
+		FF_4BODY.resize(NO_QUADS, CLUSTER(4,6) );	
+			
+		for (int i=0; i<NO_QUADS; i++)
+		{	
+		  for(int j=0; j<6; j++)
+		  {
+			 FF_4BODY[i].S_MINIM[j] = -1;
+			 FF_4BODY[i].S_MAXIM[j] = -1;
+		  }
+		}	
+
+		TEMP_SEARCH_4B = "QUADRUPLET ";
+		TEMP_SEARCH_4B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type, and 2b and 3b are same pair type
+		TEMP_SEARCH_4B.append(" PARAMS");	
+			
+		if(RANK==0)
+		  cout << "	...Read FF quadruplet specifications..." << endl;
+			
+	 }
+		
+	 // Read in pair parameters
+		
+	 else if(LINE.find(TEMP_SEARCH_2B) != string::npos) // "PAIR <PAIRTYPE> PARAMS"
+	 {	
+
+		// Read in the specific atom pair parameters
+			
+		if(RANK==0)
+		  cout << "	...Reading all remaining force field parameters..." << endl;
+
+		for(int i=0; i<NO_PAIRS; i++)
+		{
+		  getline(PARAMFILE,LINE);	// Blank line
+		  getline(PARAMFILE,LINE);	// "PAIRTYPE PARAMS: <index> <atom1> <atom2>"	
+		  getline(PARAMFILE,LINE);	// Blank line
+
+		  if ( ! PARAMFILE.good() ) {
+			 FOUND_END = true ;
+			 break ;
+		  }
+
+				
+		  FF_2BODY[i].PARAMS.resize(FF_2BODY[i].SNUM);
+				
+		  for(int j=0; j<FF_2BODY[i].SNUM; j++)
+		  {
+			 // Read the short range potential parameters
+					
+			 PARAMFILE >> TEMP_STR;
+			 PARAMFILE >> FF_2BODY[i].PARAMS[j];
+		  }
+				
+		  // If this is a spline type, we will over-write parameter coefficients with 
+		  // a value less than 1.
+
+		  int 	STOP_FILL_IDX = -1;
+		  double 	slope          = -10.0;
+				
+		  if(FF_2BODY[i].PAIRTYP == "SPLINE")
+		  {
+			 if(i==0 && RANK ==0)
+			 {
+				cout << "		Will use a simple linear force model for poorly sampled positions" << endl;
+				cout << "			i.e. for |spline coefficients| < 1.0 at close separation distance..." << endl;					
+			 }
+					
+			 STOP_FILL_IDX = -1;
+										
+			 for(int j=0; j<FF_2BODY[i].SNUM; j++)
+			 {
+				if(fabs(FF_2BODY[i].PARAMS[j])>1.0)
+				{
+				  STOP_FILL_IDX = j;
+				  if(RANK==0)
+					 cout << "			...Generating linear params for pair idx " << i << " for params 0 through " << STOP_FILL_IDX-1 << endl;
+				  break;
+				}
+			 }
+								
+			 if(STOP_FILL_IDX != -1)
+			 {
+				for(int j=0; j<STOP_FILL_IDX; j+=2)
+				{
+				  FF_2BODY[i].PARAMS[j  ] = slope * (STOP_FILL_IDX-j) + FF_2BODY[i].PARAMS[STOP_FILL_IDX];
+				  FF_2BODY[i].PARAMS[j+1] = slope/FF_2BODY[i].S_DELTA;	
+				  if(RANK==0)
+					 cout << "			   " << j << " " << FF_2BODY[i].PARAMS[j] << endl << "			   " << FF_2BODY[i].PARAMS[j+1] << endl;
+				}
+			 }
+					
+			 // Compute the integral of the spline equation for use in analytical pressure
+			 // calculations...
+			 //  We are computing an integral, so we will only have half as many points
+					
+					
+			 FF_2BODY[i].POT_PARAMS.resize(FF_2BODY[i].SNUM/2);
+					
+			 for(int j=0; j<FF_2BODY[i].POT_PARAMS.size(); j++) 
+				FF_2BODY[i].POT_PARAMS[j] = 0;
+					
+			 for(int j=FF_2BODY[i].SNUM/2-2; j>=0; j--) 
+			 {
+				FF_2BODY[i].POT_PARAMS[j] = FF_2BODY[i].POT_PARAMS[j+1] - FF_2BODY[i].S_DELTA *
+				  (FF_2BODY[i].PARAMS[j*2]/2 + FF_2BODY[i].S_DELTA * FF_2BODY[i].PARAMS[j*2+1]/12 + FF_2BODY[i].PARAMS[j*2+2]/2 - FF_2BODY[i].S_DELTA * FF_2BODY[i].PARAMS[j*2+3]/12);
+			 }
+		  }
+
+				
+		  // If applicable, read the charge parameter
+				
+		  if(CONTROLS.FIT_COUL)
+		  {
+			 PARAMFILE >> TEMP_STR >> TEMP_STR >> TEMP_STR >> FF_2BODY[i].PAIR_CHRG;
+			 // NOTE: Fit charges are in stillinger units.. convert to e:
+			 FF_2BODY[i].PAIR_CHRG /= ke;
+		  }
+		}	
+			
+		// At this point we have all the info needed to set the charges...
+		//
+		// Case 1: FITCOUL is false. Take charges from the individual charges specified by the user
+		//        ("ATOM TYPES/TYPEIDX" section of the parameter file)	
+		//
+		// Case 2: FITCOUL is true. Determine individual charges from charges of type Qxx
+
+			
+		if(!CONTROLS.FIT_COUL)
+		{
+		  for(int i=0; i<NO_PAIRS; i++)
+		  {
+			 for(int j=0; j<NATMTYP; j++)
+			 {
+				if( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] )
+				  FF_2BODY[i].ATM1CHG =  TMP_CHARGES [j];
+					
+				if( FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] )
+				  FF_2BODY[i].ATM2CHG =  TMP_CHARGES [j];
+			 }	
+				
+			 FF_2BODY[i].PAIR_CHRG = FF_2BODY[i].ATM1CHG*FF_2BODY[i].ATM2CHG;
+				
+		  }
+		}
+		else
+		{				
+		  for(int j=0; j<NATMTYP; j++)
+		  {
+			 for(int i=0; i<NO_PAIRS; i++)
+			 {
+				if( (FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j]) || (FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j]) )
+				{
+				  TMP_CHARGES[j] = sqrt(fabs(FF_2BODY[i].PAIR_CHRG))*TMP_SIGN[j];
+							
+#if defined(USE_MPI) && defined(LINK_LAMMPS)
+				  LMP_CHARGE[j] = TMP_CHARGES[j]; // save charges to global variable for LAMMPS
+#endif
+
+				  FF_2BODY[i].ATM1CHG = TMP_CHARGES[j];
+				  FF_2BODY[i].ATM2CHG = TMP_CHARGES[j];
+					
+				  break;
+				}
+			 }
+		  }
+			
+			
+		  if(!CONTROLS.PLOT_PES)
+		  {
+			 for(int a=0; a<SYSTEM.ATOMS;a++)
+			 {
+				for(int i=0; i<NATMTYP; i++)
+				{
+				  if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
+				  {
+					 SYSTEM.CHARGES[a] = TMP_CHARGES[i];
+					 break;
+				  }			
+				}
+			 }
+		  }
+
+			
+		  if(RANK==0)
+		  {
+			 cout << "		Re-setting individual atom charges based on pair charges :" << endl;
+				
+			 for(int j=0; j<NATMTYP; j++)
+			 {
+				cout << "		"<<	j << "     "
+					  << setw(2) << left << TMP_ATOMTYPE[j] << ", q (e): " 
+					  << setw(6) << fixed << setprecision(3) << right << TMP_CHARGES[j] << ", mass (amu): " 
+					  << setw(8) << fixed << setprecision(4) << right << TMP_MASS[j] << endl;
+			 }
+		  }
+		}
+			
+		if(RANK==0)			
+		  cout << "	...Read 2-body FF params..." << endl;
+	 }		
+		
+	 // Read 3B parameters
+		
+	 else if( (LINE.find(TEMP_SEARCH_3B) != string::npos) && CONTROLS.USE_3B_CHEBY) // "PAIR <PAIRTYPE> PARAMS"
+	 {	
+		for(int i=0; i<NO_TRIPS; i++)
+		{
+		  getline(PARAMFILE,LINE);	// Blank line
+		  getline(PARAMFILE,LINE);	// "TRIPLETYP PARAMS: <index> <pair1> <pair2> <pair3>"
+
+		  if ( ! PARAMFILE.good() ) {
+			 FOUND_END = true ;
+			 break ;
+		  }
+				 
+		  STREAM_PARSER.str(LINE);
+				
+		  STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
+		  STREAM_PARSER >> FF_3BODY[i].INDX;				
+		  STREAM_PARSER >> FF_3BODY[i].ATOM_PAIRS[0];
+		  STREAM_PARSER >> FF_3BODY[i].ATOM_PAIRS[1];
+		  STREAM_PARSER >> FF_3BODY[i].ATOM_PAIRS[2];	
+
+		  // Get rid of the colon at the end of the atom pair:
+				
+		  FF_3BODY[i].ATOM_PAIRS[2] = FF_3BODY[i].ATOM_PAIRS[2].substr(0,FF_3BODY[i].ATOM_PAIRS[2].length()-1);
+							
+		  STREAM_PARSER >> TEMP_STR;
+		  STREAM_PARSER >> FF_3BODY[i].N_TRUE_ALLOWED_POWERS;
+		  STREAM_PARSER >> TEMP_STR;
+		  STREAM_PARSER >> FF_3BODY[i].N_ALLOWED_POWERS;
+				
+		  FF_3BODY[i].ALLOWED_POWERS.resize(FF_3BODY[i].N_ALLOWED_POWERS);
+		  for ( int j = 0 ; j  < FF_3BODY[i].N_ALLOWED_POWERS ; j++ ) 
+			 FF_3BODY[i].ALLOWED_POWERS[j].resize(3) ;
+				  
+		  FF_3BODY[i].EQUIV_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
+		  FF_3BODY[i].PARAM_INDICES.resize(FF_3BODY[i].N_ALLOWED_POWERS);
+		  FF_3BODY[i].PARAMS        .resize(FF_3BODY[i].N_ALLOWED_POWERS);
+				
+		  STREAM_PARSER.str("");
+		  STREAM_PARSER.clear();	
+
+		  getline(PARAMFILE,LINE);	// Blank line
+		  getline(PARAMFILE,LINE);	// header line
+
+				
+		  getline(PARAMFILE,LINE);	// dashes line
+
+		  if ( ! PARAMFILE.good() ) {
+			 FOUND_END = true ;
+			 break ;
+		  }
+
+		  for(int j=0; j<FF_3BODY[i].N_ALLOWED_POWERS; j++)
+		  {
+			 PARAMFILE >> TEMP_STR;
+			 PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j][0];
+			 PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j][1];
+			 PARAMFILE >> FF_3BODY[i].ALLOWED_POWERS[j][2];
+			 PARAMFILE >> FF_3BODY[i].EQUIV_INDICES[j];
+			 PARAMFILE >> FF_3BODY[i].PARAM_INDICES[j];
+			 PARAMFILE >> FF_3BODY[i].PARAMS        [j];
+			 PARAMFILE.ignore();
+
+		  } 
+		}
+			
+		if (RANK==0)
+		  cout << "	...Read 3-body FF params..." << endl;;				
+	 }
+		
+	 // Read 4B parameters
+		
+	 else if( (LINE.find(TEMP_SEARCH_4B) != string::npos) && CONTROLS.USE_4B_CHEBY) // "PAIR <PAIRTYPE> PARAMS"
+	 {	
+		for(int i=0; i<NO_QUADS; i++)
+		{
+		  getline(PARAMFILE,LINE);	// Blank line
+		  getline(PARAMFILE,LINE);	// "QUADRUPLETYPE PARAMS: <index> <pair1> <pair2> <pair3> <pair4> <pair5> <pair6>"
+
+		  if ( ! PARAMFILE.good() ) {
+			 FOUND_END = true ;
+			 break ;
+		  }
+
+				 
+		  STREAM_PARSER.str(LINE);
+				
+		  STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
+		  STREAM_PARSER >> FF_4BODY[i].INDX;
+				
+		  for(int j=0; j<6; j++)
+			 STREAM_PARSER >> FF_4BODY[i].ATOM_PAIRS[j];
+
+		  // Get rid of the colon at the end of the atom pair:
+				
+		  FF_4BODY[i].ATOM_PAIRS[5] = FF_4BODY[i].ATOM_PAIRS[5].substr(0,FF_4BODY[i].ATOM_PAIRS[5].length()-1);
+							
+		  STREAM_PARSER >> TEMP_STR;
+		  STREAM_PARSER >> FF_4BODY[i].N_TRUE_ALLOWED_POWERS;
+		  STREAM_PARSER >> TEMP_STR;
+		  STREAM_PARSER >> FF_4BODY[i].N_ALLOWED_POWERS;
+				
+		  FF_4BODY[i].ALLOWED_POWERS.resize(FF_4BODY[i].N_ALLOWED_POWERS);
+		  FF_4BODY[i].EQUIV_INDICES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
+		  FF_4BODY[i].PARAM_INDICES.resize(FF_4BODY[i].N_ALLOWED_POWERS);
+		  FF_4BODY[i].PARAMS        .resize(FF_4BODY[i].N_ALLOWED_POWERS);
+				
+		  for(int j=0; j<FF_4BODY[i].ALLOWED_POWERS.size(); j++)
+			 FF_4BODY[i].ALLOWED_POWERS[j].resize(6);
+					
+				
+		  STREAM_PARSER.str("");
+		  STREAM_PARSER.clear();	
+
+		  getline(PARAMFILE,LINE);	// Blank line
+		  getline(PARAMFILE,LINE);	// header line
+
+				
+		  getline(PARAMFILE,LINE);	// dashes line
+
+		  if ( ! PARAMFILE.good() ) {
+			 FOUND_END = true ;
+			 break ;
+		  }
+
+		  for(int j=0; j<FF_4BODY[i].N_ALLOWED_POWERS; j++)
+		  {
+			 PARAMFILE >> TEMP_STR;
+					
+			 for (int k=0; k<6; k++)
+				PARAMFILE >> FF_4BODY[i].ALLOWED_POWERS[j][k];
+
+
+			 PARAMFILE >> FF_4BODY[i].EQUIV_INDICES[j];
+			 PARAMFILE >> FF_4BODY[i].PARAM_INDICES[j];
+			 PARAMFILE >> FF_4BODY[i].PARAMS        [j];
+			 PARAMFILE.ignore();
+
+		  } 
+		}
+			
+		if (RANK==0)
+		  cout << "	...Read 4-body FF params..." << endl << endl;;				
+	 }		
+		
+	 // Read in the fit overbonding parameter
+		
+	 else if(LINE.find("P OVER: ") != string::npos)
+	 {
+		if(CONTROLS.USE_OVERCOORD && CONTROLS.FIT_POVER)
+		{
+		  STREAM_PARSER.str(LINE);
+		  STREAM_PARSER >> TEMP_STR >> TEMP_STR;
+		  STREAM_PARSER >> FF_2BODY[0].OVRPRMS[0];
+		  STREAM_PARSER.str("");
+		  STREAM_PARSER.clear();	
+			
+		  for(int i=1; i<NO_PAIRS; i++)
+			 FF_2BODY[i].OVRPRMS[0] = FF_2BODY[0].OVRPRMS[0];				
+		}
+			
+		if (RANK==0)
+		  cout << "	...Read ReaxFF overbonding FF params..." << endl;
+	 }
+		
+	 // Read the pair maps
+		
+	 else if(LINE.find("PAIRMAPS: ") != string::npos)
+	 {
+		STREAM_PARSER.str(LINE);			
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TMP_TERMS1;	
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+			
+		if (RANK==0)
+		  cout << "	Reading  " << TMP_TERMS1 << " pairs for mapping" << endl;
+			
+		for(int i=0; i<TMP_TERMS1; i++)
+		{
+		  PARAMFILE >> TMP_TERMS2;
+		  PARAMFILE >> TEMP_TYPE;
+				
+		  if (RANK==0)
+			 cout << "	........Reading pair: " << TEMP_TYPE << " with mapped index: " << TMP_TERMS2 << endl; 
+				
+		  PAIR_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
+		  PAIR_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
+					
+		}					
+						
+		if (RANK==0)
+		  cout << "	...Read FF pairmaps..." << endl << endl;					
+	 }	
+		
+	 // Read the triplet maps
+		
+	 else if(LINE.find("TRIPMAPS: ") != string::npos)
+	 {
+		STREAM_PARSER.str(LINE);			
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TMP_TERMS1;	
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+			
+		if (RANK==0)
+		  cout << "	Reading  " << TMP_TERMS1 << " triplets for mapping" << endl;
+			
+		for(int i=0; i<TMP_TERMS1; i++)
+		{
+		  PARAMFILE >> TMP_TERMS2;
+		  PARAMFILE >> TEMP_TYPE;
+				
+		  if (RANK==0)
+			 cout << "	........Reading triplet: " << TEMP_TYPE << " with mapped index: " << TMP_TERMS2 << endl; 
+				
+		  TRIAD_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
+		  TRIAD_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
+					
+		}
+		if (RANK==0)
+		  cout << "	...Read FF triadmaps..." << endl;					
+	 }	
+		
+	 // Read the quadruplet maps
+
+	 else if(LINE.find("QUADMAPS: ") != string::npos)
+	 {
+		STREAM_PARSER.str(LINE);			
+		STREAM_PARSER >> TEMP_STR;
+		STREAM_PARSER >> TMP_TERMS1;	
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
+			
+		if (RANK==0)
+		  cout << "	Reading  " << TMP_TERMS1 << " quadruplets for mapping" << endl;
+			
+		for(int i=0; i<TMP_TERMS1; i++)
+		{
+		  PARAMFILE >> TMP_TERMS2;
+		  PARAMFILE >> TEMP_TYPE;
+				
+		  if (RANK==0)
+			 cout << "	........Reading quadruplet: " << TEMP_TYPE << " with mapped index: " << TMP_TERMS2 << endl; 
+				
+		  QUAD_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
+		  QUAD_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
+					
+		}
+		if (RANK==0)
+		  cout << "	...Read FF quadmaps..." << endl;					
+	 }	
+
+  }	
+}
+
+static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CONTROLS )
+// Parse force field CONTROL flags.
+{
+  vector<string> tokens ;
+
+  while ( parse_space(LINE, tokens) > 1 ) {
+	 if ( tokens[0] == "USECOUL:" ) 
+		CONTROLS.USE_COULOMB = is_true(tokens[1]) ;
+	 else if ( tokens[0] == "FITCOUL:" ) 
+		CONTROLS.FIT_COUL = is_true(tokens[1]) ;
+	 else if ( tokens[0] == "USEPOVR:" )
+		CONTROLS.USE_OVERCOORD = is_true(tokens[1]) ;
+	 else if ( tokens[0] == "FITPOVR:" )
+		CONTROLS.FIT_POVER = is_true(tokens[1]) ;
+	 else if ( tokens[0] == "USE3BCH:" )
+		CONTROLS.USE_3B_CHEBY = is_true(tokens[1]) ;
+	 else if ( tokens[0] == "USE4BCH:" )
+		CONTROLS.USE_4B_CHEBY = is_true(tokens[1]) ;
+
+	 getline(PARAMFILE, LINE) ;
+	 if ( ! PARAMFILE.good() )
+	 {
+		cout << "Error reading job controls in paramfile\n" ;
+		exit_run(0) ;
+	 }
+  }
+
+  if(RANK==0)
+  {
+	 cout << "		...Compute electrostatics?      " << boolalpha << CONTROLS.USE_COULOMB << endl;
+	 cout << "		...Use fit charges?             " << boolalpha << CONTROLS.FIT_COUL << endl;
+	 cout << "		...Compute ReaxFF overbonding?  " << boolalpha << CONTROLS.USE_OVERCOORD << endl;
+	 cout << "		...Use fit overbonding param?   " << boolalpha << CONTROLS.FIT_POVER << endl;
+	 cout << "		...Use 3-body Cheby params?     " << boolalpha << CONTROLS.USE_3B_CHEBY << endl;
+	 cout << "		...Use 4-body Cheby params?     " << boolalpha << CONTROLS.USE_4B_CHEBY << endl;
+			
+	 cout << "	...Read FF controls..." << endl;	
+  }
+
+}
 
 
 

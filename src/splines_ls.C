@@ -16,7 +16,7 @@
 // User-defined headers
 
 #include "functions.h"
-
+#include "util.h"
 
 using namespace std;
 
@@ -35,19 +35,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 									NEIGHBORS & NEIGHBOR_LIST) ;
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby) ;
-
-void store_quad_permutations(QUADRUPLETS &quad, vector<int> &unsorted_powers)  ;
-void permute_atom_indices(int idx, vector<string> names, QUADRUPLETS &quad, vector<int> &unsorted_powers, vector<int> perm, int unique_index,
-								  int equiv_index) ;
-
-int factorial(int input)
-{
-	int result = 1;
-	for(int i=input; i>0; i--)
-		result *= i;
-	
-	return result;
-}
 
 string FULL_FILE_3B;		// Global variables declared as externs in functions.h, and declared in functions.C
 string SCAN_FILE_3B;
@@ -1063,15 +1050,15 @@ int main(int argc, char* argv[])
 			if(ATOM_PAIRS[i].USE_OVRPRMS)
 				header	<< setw(16) << left << ATOM_PAIRS[i].OVER_TO_ATM;
 			else
-				header	<< setw(16) << left << "NONE";
-				header
-				 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
-				 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
-				 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
-				 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
-				 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
-		}		
+			  header	<< setw(16) << left << "NONE";
 			
+			header
+			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
+			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
+			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
+			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
+			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
+		}		
 	}
 	
 	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0 || ATOM_PAIRS[0].SNUM_4B_CHEBY> 0)
@@ -2645,17 +2632,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 	#if VERBOSITY == 1			
 	if ( RANK == 0 ) cout << endl << "Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl;; // All types use same scaling
 	#endif	
-}
-
-void exit_run(int value)
-// Call this instead of exit(1) to properly terminate all MPI processes.
-{
-	#ifdef USE_MPI
-		MPI_Abort(MPI_COMM_WORLD,value);
-	#else
-		exit(value);
-	#endif
-
 }
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby)
