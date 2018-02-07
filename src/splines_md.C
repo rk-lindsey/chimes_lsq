@@ -1490,8 +1490,8 @@ int main(int argc, char* argv[])
 						cout<< fixed << setw(2) << right << j;
 						cout<< fixed << setw(2) << right << k;
 						cout<< " Triplet name: "           << setw(12) << right << int_map_3b_str;
-						cout<< " Explicit Triplet index: " << setw(4) << right << idx1 ;
-						cout<< " Unique Triplet index: "   << setw(4) << right << INT_TRIAD_MAP[idx1] << endl;
+						cout<< " Explicit index: " << setw(4) << right << idx1 ;
+						cout<< " Unique index: "   << setw(4) << right << INT_TRIAD_MAP[idx1] << endl;
 					}
 				}
 			}
@@ -1508,19 +1508,18 @@ int main(int argc, char* argv[])
 		int 	ATOM_QUAD_ID_INT;
 		int		CURR_QUAD_IDX = 0;
 
-		// Create a list of each posible combination of atom quadruplets, i through
-		// l are given in ascending order
+		// Create a list of each posible combination of atom quadruplets
 
 		if(RANK==0)
 			cout << endl << "	Quadruplet maps:" << endl;
 		
 		for(int i=0; i<NATMTYP; i++)
 		{
-			for(int j=i; j<NATMTYP; j++)
+			for(int j=0; j<NATMTYP; j++)
 			{
-				for(int k=j; k<NATMTYP; k++)
+			  for(int k=0 ; k<NATMTYP; k++)
 				{
-					for(int l=k; l<NATMTYP; l++)
+					for(int l=0 ; l<NATMTYP; l++)
 					{
 						// A given set of i-through-l defines a unique set of 4 atoms.
 						// Determine the corresponding quadruplet force field type
@@ -1551,6 +1550,9 @@ int main(int argc, char* argv[])
 						index[1] = j ;
 						index[2] = k ;
 						index[3] = l ;
+
+						sort(index.begin(), index.end() ) ;
+						reverse(index.begin(), index.end() ) ;
 						ATOM_QUAD_ID_INT = QUADS.make_id_int(index) ;
 						
 						INT_QUAD_MAP        .insert(make_pair(ATOM_QUAD_ID_INT,QUAD_MAP[TMP_QUAD_SIXLET]));	
@@ -1565,7 +1567,8 @@ int main(int argc, char* argv[])
 							cout<< fixed << setw(2) << right << k;
 							cout<< fixed << setw(2) << right << l;
 							cout<< " Quadruplet name: "           << setw(12) << right << TMP_QUAD_SIXLET;
-							cout<< " Unique quadruplet index: "   << setw(4)  << right << INT_QUAD_MAP[CURR_QUAD_IDX] << endl;
+							cout<< " Explicit index:"           << setw(12) << right << ATOM_QUAD_ID_INT ;
+							cout<< " Unique index: "   << setw(4)  << right << INT_QUAD_MAP[ATOM_QUAD_ID_INT] << endl;
 						}
 						
 						CURR_QUAD_IDX++;
