@@ -47,6 +47,13 @@ bool operator==(const vector<string>& lhs, const vector<string>& rhs)  ;
 
 void enable_fp_exceptions();
 
+// Single error message
+void EXIT_MSG(string EXIT_STRING) ; 
 
+// error message: var
+void EXIT_MSG(string EXIT_STRING, string EXIT_VAR) ;
+
+ // error message: var
+void EXIT_MSG(string EXIT_STRING, double EXIT_VAR) ;
 
 #endif // defined(_util_h)

@@ -57,6 +57,7 @@ map<int,int>   INT_QUAD_MAP;			// maps for collections of 4 atoms
 map<int,int>   INT_QUAD_MAP_REVERSE;	// corresponding reverse-maps
 vector<int>    TMP_ATOMTYPEIDX;			// Used to construct the quadruplet type index
 vector<string> TMP_ATOMTYPE;			// Used to construct the quadruplet type index
+ofstream BAD_CONFIGS ;
 
 int main(int argc, char* argv[])
 {

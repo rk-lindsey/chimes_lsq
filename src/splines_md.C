@@ -33,6 +33,7 @@
 // Include our own custom header
 
 #include "functions.h"
+#include "Cheby.h"
 #include "util.h"
 
 // For LAMMPS linking
@@ -98,6 +99,7 @@ string SCAN_FILE_2B;
  
 int NPROCS;		// Number of processors
 int RANK;		// Index of current processor
+ofstream BAD_CONFIGS ;
 
 
 // Variables that are defined locally for house_md which need to be global for LAMMPS linking

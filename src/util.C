@@ -14,6 +14,11 @@
 #include<map>
 #include<algorithm> 
 
+
+#ifdef USE_MPI
+#include <mpi.h>
+#endif 
+
 // Utility functions.
 #include "functions.h"
 #include "util.h"
@@ -116,4 +121,27 @@ bool operator==(const vector<string>& lhs, const vector<string>& rhs)
 	 if ( lhs[i] != rhs[i] ) return false ;
   }
   return true ;
+}
+
+
+//////////////////////////////////////////
+// Overloaded error message exit functions
+//////////////////////////////////////////
+ 
+void EXIT_MSG(string EXIT_STRING) // Single error message
+{
+	cout << EXIT_STRING << endl;
+	exit_run(0);
+}
+
+void EXIT_MSG(string EXIT_STRING, string EXIT_VAR) // error message: var
+{
+	cout << EXIT_STRING << ": " << EXIT_VAR << endl;
+	exit_run(0);
+}
+
+void EXIT_MSG(string EXIT_STRING, double EXIT_VAR) // error message: var
+{
+	cout << EXIT_STRING << ": " << EXIT_VAR << endl;
+	exit_run(0);
 }

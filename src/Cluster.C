@@ -8,6 +8,11 @@
 #include<limits>	// Help with handling of over/underflow
 #include <algorithm> // For specials vector-related functions (i.e. permute)
 
+
+#ifdef USE_MPI
+#include <mpi.h>
+#endif 
+
 using namespace std;
 
 #include "functions.h"
@@ -775,7 +780,7 @@ void CLUSTER_LIST::print_min_distances()
 	 if ( RANK == 0 ) 
 	 {
 		cout << "		" << k << "	" ;	
-		for(int m=0; m<6; m++)
+		for(int m=0; m< VEC[0].NPAIRS ; m++)
 		  cout << VEC[k].ATOM_PAIRS[m] << " ";
 		cout << sum << endl;
 	 }	

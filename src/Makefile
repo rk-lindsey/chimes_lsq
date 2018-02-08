@@ -37,7 +37,7 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 #CXX=mpicxx  -std=c++11  -g -pg -D USE_MPI 
 
 #CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
-#CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
+CXX=mpicc  -std=c++11  -g -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=mpicxx -std=c++11 -g -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> house_md < run_md.in
 #CXX=icc -g				# Serial, for debugging
@@ -48,7 +48,7 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 # Below: Other debugging/optimiazation options
 #
 #CXX=clang++ -g -std=c++11 -g -Wall
-CXX=g++ -g -std=c++11 -Wall -Wno-sign-compare
+#CXX=g++ -g -std=c++11 -Wall -Wno-sign-compare
 
 #CXX=icpc -fast -Wall
 
@@ -58,8 +58,8 @@ CXX=g++ -g -std=c++11 -Wall -Wno-sign-compare
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C
-CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h
+CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C
+CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h Cheby.h
 
 house_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
 	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq
@@ -79,8 +79,8 @@ build_tests_lsq:
 # MAKE THE MD CODE
 ##################################
 
-CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C
-CXX_MD_HEADER=functions.h lmppath.h Fcut.h Cluster.h util.h
+CXX_MD_SRC=splines_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C
+CXX_MD_HEADER=functions.h lmppath.h Fcut.h Cluster.h util.h Cheby.h
 
 FLAGLMP=-D LINK_LAMMPS
 LAMMPS_LIB=$(LAMMPSDIR)/src/liblammps.a
