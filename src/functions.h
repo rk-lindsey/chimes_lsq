@@ -524,7 +524,10 @@ void ZCalc_Ewald_Deriv   (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, 
 //
 //////////////////////////////////////////
 
-void   ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+void   ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+				 map<string,int> &PAIR_MAP, vector<int> &INT_PAIR_MAP,
+				 CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, 
+				 NEIGHBORS & NEIGHBOR_LIST);
 void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
 double get_dist                 (const FRAME & SYSTEM, XYZ & RAB, int a1, int a2);
 
@@ -542,6 +545,7 @@ void build_layers      (FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
 
 void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 								CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
+								vector<int> &INT_PAIR_MAP,
 								NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV) ;
 
 void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS) ;

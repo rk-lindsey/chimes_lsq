@@ -19,8 +19,6 @@
 using namespace std;
 
 
-extern 	vector<int>	INT_PAIR_MAP;
-
 //////////////////////////////////////////
 //
 //	SMALL UTILITY FUNCTION
@@ -293,6 +291,7 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 
 void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 								CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
+								vector<int> &INT_PAIR_MAP,
 								NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV)
 // Evaluates the configurational part of the pressure numerically by -dU/dV.
 // Essentially, we are taking the system and expanding/contracting it a bit (lscale) to get the change in potential energy 
@@ -336,7 +335,8 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 	
 	REPLICATE.TOT_POT_ENER = 0;
 	
-	ZCalc(REPLICATE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST);
+	ZCalc(REPLICATE, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP,
+			TRIPS, QUADS, NEIGHBOR_LIST);
 	
 	Vtot1 = REPLICATE.TOT_POT_ENER;
 	
@@ -368,7 +368,8 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 	
 	REPLICATE.TOT_POT_ENER = 0;
 	
-	ZCalc(REPLICATE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST);
+	ZCalc(REPLICATE, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP,
+			TRIPS, QUADS, NEIGHBOR_LIST);
 	
 	Vtot2 = REPLICATE.TOT_POT_ENER;
 
@@ -441,11 +442,14 @@ static void ZCalc_InvR_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 //
 //////////////////////////////////////////
 
-static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+							map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST) ;
 
-static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+								 map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST) ;
 
-static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+								 map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
 ////////////////////////////////////////////////////////////
 //
@@ -1289,8 +1293,10 @@ void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_F
 ////////////////////////////////////////////////////////////
  
 
-void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, 
-			  map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
+void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
+			  map<string,int> & PAIR_MAP, vector<int>& INT_PAIR_MAP,
+			  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, 
+			  NEIGHBORS & NEIGHBOR_LIST)
 {
   
 	for(int a=0;a<SYSTEM.ATOMS;a++)
@@ -1310,12 +1316,12 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, C
 	SYSTEM.PRESSURE_TENSORS_XYZ.Z = 0;
 
 	if      ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" ) 
-		ZCalc_Cheby_ALL(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST);
+	  ZCalc_Cheby_ALL(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
 	else if ( FF_2BODY[0].PAIRTYP == "LJ" ) 
-		ZCalc_Lj(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, NEIGHBOR_LIST);
+	  ZCalc_Lj(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
 	
 	else if ( FF_2BODY[0].PAIRTYP == "SPLINE" ) 
-		ZCalc_Spline(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, NEIGHBOR_LIST);	
+	  ZCalc_Spline(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);	
 	
     else 
     {
@@ -1327,7 +1333,7 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, C
 		ZCalc_Ewald(SYSTEM, CONTROLS, NEIGHBOR_LIST);
 		
 	if ( CONTROLS.USE_OVERCOORD ) 	
-		ZCalcSR_Over(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, NEIGHBOR_LIST);
+	  ZCalcSR_Over(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
 
 	// FUNCTIONS THAT NEED UPDATING:
 
@@ -1351,7 +1357,7 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, C
   return;
 }
 
-static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
+static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
 // Calculate LJ interaction.. first parameter is epsilon, second parameter is sigma. ...eventually SMAX should be used for the pair distance cutoff value...
 {
   XYZ	RVEC ;
@@ -1422,7 +1428,7 @@ static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 	}
 }
 
-static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
+static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
 // Calculate spline forces.
 {
 	XYZ RAB;
@@ -1561,7 +1567,7 @@ static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 }
 
 // UPDATED AND VERIFIED
-static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
+static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
 // Calculate short-range overcoordination forces... See SubtractCoordForces for more info
 {
 

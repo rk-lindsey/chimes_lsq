@@ -114,6 +114,9 @@ public:
   // Print the params file header for a cluster
   void print_header(ofstream &header) ;
 
+// Read the force field parameters for a cluster.
+  void read_ff_params(ifstream &paramfile, const vector<string> &atomtype) ;
+
   CLUSTER() {} 
   virtual ~CLUSTER() {} 
 

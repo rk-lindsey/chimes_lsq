@@ -19,9 +19,6 @@
 using namespace std;
 
 
-extern 	vector<int>	INT_PAIR_MAP;
-extern   vector<int> INT_QUAD_MAP ;
-
 //////////////////////////////////////////
 // Cheby transformation functions
 //////////////////////////////////////////
@@ -1937,8 +1934,8 @@ TMP_HIST_OUT.close();
 }
 
 
-void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, CLUSTER_LIST &TRIPS,
-									 CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
+void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> PAIR_MAP, vector<int> &INT_PAIR_MAP,
+							CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS & NEIGHBOR_LIST)
 // Calculate short-range forces using a Chebyshev polynomial expansion. Can use morse variables similar to the work of Bowman.
 {
   vector<QUAD_FF> & FF_4BODY = QUADS.VEC ;

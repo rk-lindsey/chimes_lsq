@@ -1,6 +1,7 @@
 #include<iomanip>
 #include<iostream>
 #include<fstream>
+#include<sstream>
 #include<vector>
 #include<cmath>
 #include<unistd.h>	// Used to detect whether i/o is going to terminal or is piped... will help us decide whether to use ANSI color codes
@@ -429,6 +430,67 @@ void CLUSTER::print_header(ofstream &header)
   header << endl;
 }
 
+
+void CLUSTER::read_ff_params(ifstream &paramfile, const vector<string> &atomtype)
+// Read the force field parameters for a cluster.
+{
+  string LINE ;
+  stringstream	STREAM_PARSER;
+  string TEMP_STR ;
+
+  LINE = get_next_line(paramfile) ; // Blank line
+  LINE = get_next_line(paramfile) ; // "TRIPLETYP PARAMS: <index> <pair1> <pair2> <pair3>"
+				 
+  STREAM_PARSER.str(LINE);
+				
+  STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
+  STREAM_PARSER >> INDX;				
+  
+  for ( int j = 0 ; j < NPAIRS ; j++ ) 
+	 STREAM_PARSER >> ATOM_PAIRS[j];
+
+  // Get rid of the colon at the end of the atom pair:
+				
+  ATOM_PAIRS[NPAIRS-1] = ATOM_PAIRS[NPAIRS-1].substr(0,ATOM_PAIRS[NPAIRS-1].length()-1);
+
+  // Set the names of each atom in the cluster from the pair names.
+  atom_names_from_pairs(atomtype) ;
+
+  STREAM_PARSER >> TEMP_STR;
+  STREAM_PARSER >> N_TRUE_ALLOWED_POWERS;
+  STREAM_PARSER >> TEMP_STR;
+  STREAM_PARSER >> N_ALLOWED_POWERS;
+				
+  ALLOWED_POWERS.resize(N_ALLOWED_POWERS);
+  for ( int j = 0 ; j  < N_ALLOWED_POWERS ; j++ ) 
+	 ALLOWED_POWERS[j].resize(3) ;
+				  
+  EQUIV_INDICES.resize(N_ALLOWED_POWERS);
+  PARAM_INDICES.resize(N_ALLOWED_POWERS);
+  PARAMS        .resize(N_ALLOWED_POWERS);
+				
+  STREAM_PARSER.str("");
+  STREAM_PARSER.clear();	
+
+  LINE = get_next_line(paramfile) ; // Blank line
+  LINE = get_next_line(paramfile) ; // header line
+  LINE = get_next_line(paramfile) ;	// dashes line
+
+  for(int j=0; j<N_ALLOWED_POWERS; j++)
+  {
+	 paramfile >> TEMP_STR;
+	 for ( int k = 0 ; k < NPAIRS ; k++ ) 
+		paramfile >> ALLOWED_POWERS[j][k];
+
+	 paramfile >> EQUIV_INDICES[j];
+	 paramfile >> PARAM_INDICES[j];
+	 paramfile >> PARAMS        [j];
+	 paramfile.ignore();
+
+  } 
+  if (RANK==0)
+	 cout << "	...Read " << NATOMS << "-body FF params..." << endl;;				
+}
 
 double CLUSTER::get_smaxim(PAIRS & FF_2BODY, string TYPE)	
 // Decides whether outer cutoff should be set by 2-body value or cluster value. Returns the cutoff value.
