@@ -16,10 +16,57 @@
 using namespace std;
 
 #include "functions.h"
+#include "util.h"
 
 // define for extra output
 #define DEBUG_CLUSTER
 
+
+void CLUSTER::atom_names_from_pairs(const vector<string> &atom_types) 
+// Build a list of atom names from the pair names and atom types.
+{
+  int type1_len ;
+
+  // Search for the first atom type in the pair
+  int j ;
+  for ( j = 0 ; j < atom_types.size() ; j++ ) 
+  {
+	 if ( ATOM_PAIRS[0].find(atom_types[j]) == 0 ) 
+	 {
+		type1_len = atom_types[j].length() ;
+		ATOM_NAMES[0] = ATOM_PAIRS[0].substr(0, atom_types[j].length() ) ;
+		break ;
+	 }
+  }
+  if ( j == atom_types.size() ) 
+	 EXIT_MSG("The first element was not found in " + ATOM_PAIRS[0]) ;
+
+  // Other atom names are taken from the 1 : NATOMS - 1 pairs.
+  for ( int k = 0 ; k < NATOMS - 1 ; k++ ) {
+	 string ele2 = ATOM_PAIRS[k].substr(type1_len, string::npos) ;
+	 int j ;
+	 for ( j = 0 ; j < atom_types.size() ; j++ ) 
+	 {
+		if ( ele2 == atom_types[j] ) 
+		{
+		  ATOM_NAMES[k+1] = ele2 ;
+		  break ;
+		}
+	 }
+	 if ( j == atom_types.size() ) 
+		EXIT_MSG("The element match was not found in " + ele2) ;
+  }
+  if ( RANK == 0 ) 
+  {
+	 cout << "Set cluster atom names from pair names " << endl ;
+	 for ( int k = 0 ; k < NATOMS ; k++ ) 
+		cout << ATOM_NAMES[k] << " " ;
+
+	 cout << endl ;
+  }
+}
+
+	 
 
 void CLUSTER::build(int cheby_order)
 // Build a set of interactions for a quad.
@@ -417,6 +464,135 @@ double CLUSTER::get_sminim(PAIRS & FF_2BODY, string TYPE)
 	return VAL;	
 }
 
+
+void CLUSTER_LIST::read_maps(ifstream& paramfile, string line)
+// Read the maps from the parameter file.
+{
+  vector<string> tokens ;
+  
+  if ( parse_space(line, tokens) < 2 ) 
+	 EXIT_MSG("Not enough tokens while reading maps: " + line) ;
+  else
+	 NCLUSTERS = stoi(tokens[1]) ;
+
+  string tuplets = tuplet_name(VEC[0].NATOMS, false, false) ;
+
+  if (RANK==0)
+	 cout << "	Reading  " << NCLUSTERS << " " << tuplets << " for mapping" << endl;
+			
+  for(int i=0 ; i< NCLUSTERS ; i++)
+  {
+	 line = get_next_line(paramfile) ;
+	 int index ;
+	 string cluster_pairs ;
+	 if ( parse_space(line,tokens) >= 2 ) 
+	 {
+		index = stoi(tokens[0]) ;
+		cluster_pairs = tokens[1] ;
+
+		if ( cluster_pairs.length() != 2 * VEC[0].NPAIRS )
+		  EXIT_MSG("Incorrect cluster length: " + line) ;
+
+		if (RANK==0)
+		  cout << "	........Reading " << tuplets << ": " << cluster_pairs << " with mapped index: " << index << endl; 
+				
+		MAP.insert( make_pair(cluster_pairs, index) );
+		MAP_REVERSE.insert( make_pair(index, cluster_pairs) );				
+		
+	 }
+	 else
+		EXIT_MSG("Not enough tokens while parsing: " + line) ;
+  }
+
+  if (RANK==0)
+	 cout << "	...Read FF " << tuplets << " maps..." << endl;					
+}
+
+void CLUSTER_LIST::build_int_maps(vector<string> ATOMTYPE, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+// Build the fast integer maps for the cluster list.  Used by the MD code.
+{
+  // Find the dimension of the map vector.
+  
+  int NATOMS = VEC[0].NATOMS ;
+  
+  int dim = 1 ;
+  for ( int i = 0 ; i < NATOMS ; i++ ) 
+	 dim *= MAX_ATOM_TYPES ;
+  
+  INT_MAP.resize(dim, -1) ;
+  INT_MAP_REVERSE.resize(NCLUSTERS, -1) ;
+
+  string tuplet = tuplet_name(NATOMS, false, true) ;
+  if(RANK==0)
+	 cout << endl << "	" << tuplet << " maps:" << endl;
+
+  vector<int> atom_index(NATOMS) ;
+
+  build_int_maps_loop(0, atom_index, ATOMTYPE, ATOM_PAIRS, PAIR_MAP) ;
+
+}
+
+void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector<string> ATOMTYPE,
+													vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+// Loop across atom types for each atom in the cluster, and build a corresponding loop.
+{
+  int NATMTYP = ATOMTYPE.size() ;
+  int NATOMS = VEC[0].NATOMS ;
+  int NPAIRS = VEC[0].NPAIRS ;
+
+  if ( index < NATOMS ) {
+	 for ( int j = 0 ; j < NATMTYP ; j++ ) 
+	 {
+		atom_index[index] = j ;
+		build_int_maps_loop(index+1, atom_index, ATOMTYPE, ATOM_PAIRS, PAIR_MAP) ;
+	 }
+  } else {
+	 vector<string> pairs(NPAIRS) ;
+
+	 int count = 0 ;
+	 // Build up permuted pair names.
+	 for ( int j = 0 ; j < NATOMS ; j++ ) 
+	 {
+		for ( int k = j + 1 ; k < NATOMS ; k++ ) 
+		{
+		  pairs[count] = ATOMTYPE[atom_index[j]] + ATOMTYPE[atom_index[k]];
+		  pairs[count] = ATOM_PAIRS[ PAIR_MAP[ pairs[count] ] ].PRPR_NM ;
+		  count++ ;
+		}
+	 }
+
+	 // Sort each entry in descending order.
+	 sort(pairs.begin(), pairs.end()) ;
+	 reverse(pairs.begin(), pairs.end() ) ;
+
+	 // Get the integer ID for this triplet.
+	 int idx1 = make_id_int(atom_index) ;
+
+	 // Get the string for the triplet.
+	 string int_map_str = "" ;
+	 for ( int j = 0 ; j < NPAIRS ; j++ ) {
+		int_map_str += pairs[j] ;
+	 }
+		
+	 INT_MAP[idx1] = MAP[int_map_str];
+	 INT_MAP_REVERSE[MAP[int_map_str]] = idx1 ;
+
+	 if(RANK == 0)
+	 {
+		string tuplet = tuplet_name(NATOMS, false, true) ;
+		cout << "		";
+		cout<< "Atom type idxs: ";
+		for ( int j = 0 ; j < NATOMS ; j++ ) 
+		{
+		  cout<< fixed << setw(2) << right << atom_index[j] ;
+		}
+		cout<< " " << tuplet << " name: "           << setw(12) << right << int_map_str;
+		cout<< " Explicit index: " << setw(4) << right << idx1 ;
+		cout<< " Unique index: "   << setw(4) << right << INT_MAP[idx1] << endl;
+	 }
+  }
+}
+
 int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
 // Build all triplets and associated maps for the cluster list.
 {
@@ -450,6 +626,7 @@ void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MA
   // First, extract the atom types
   vector<string>ATOM_CHEMS;
 
+  NCLUSTERS = VEC.size() ;
   for(int p=0; p<ATOM_PAIRS.size(); p++)
   {
 	 string TMP_CHEM = ATOM_PAIRS[p].ATM1TYP;
@@ -472,10 +649,16 @@ void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MA
   vector<int> atom_index(natoms) ;
   int count = 0 ;
   
+  
+  int dim = 1 ;
+  for ( int i = 0 ; i < natoms ; i++ ) 
+	 dim *= MAX_ATOM_TYPES ;
+  
+  INT_MAP.resize(dim, -1) ;
+  INT_MAP_REVERSE.resize(NCLUSTERS, -1) ;
 
   build_pairs_loop(0, atom_index, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP, count) ;
 
-  NCLUSTERS = VEC.size() ;
 }
 
 
@@ -613,8 +796,8 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 
 	 // Construct a unique integer ID for the atom set and store it in the INT_MAP.
 	 int atom_id_int = make_id_int(atom_index_rev) ;
-	 INT_MAP.insert( make_pair(atom_id_int,map_index) ) ;
-	 INT_MAP_REVERSE.insert( make_pair(map_index, atom_id_int) ) ;
+	 INT_MAP[atom_id_int] = map_index ;
+	 INT_MAP_REVERSE[map_index] = atom_id_int ;
 								
 	 if(RANK == 0)
 	 {

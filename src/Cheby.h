@@ -6,7 +6,7 @@ void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 
 void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, CLUSTER_LIST TRIPS,
 								  CLUSTER_LIST QUADS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP ,
-								  map<int,int>  INT_QUAD_MAP, NEIGHBORS & NEIGHBOR_LIST) ;
+								  NEIGHBORS & NEIGHBOR_LIST) ;
 
 void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, CLUSTER_LIST &TRIPS,
 							CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST) ;

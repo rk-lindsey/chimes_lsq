@@ -49,13 +49,12 @@ int RANK;		// Index of current processor
 // to functions.C... only used in MD part right now
 
 vector<int>	INT_PAIR_MAP;
-vector<int>	INT_TRIAD_MAP;
 
 // For 4-body interactions, these are used for both the lsq and md parts:
 
-map<int,int>   INT_QUAD_MAP;			// maps for collections of 4 atoms
-map<int,int>   INT_QUAD_MAP_REVERSE;	// corresponding reverse-maps
-vector<int>    TMP_ATOMTYPEIDX;			// Used to construct the quadruplet type index
+vector<int>   INT_QUAD_MAP;			// maps for collections of 4 atoms
+vector<int>   INT_QUAD_MAP_REVERSE;	// corresponding reverse-maps
+vector<int>   TMP_ATOMTYPEIDX;			// Used to construct the quadruplet type index
 vector<string> TMP_ATOMTYPE;			// Used to construct the quadruplet type index
 ofstream BAD_CONFIGS ;
 

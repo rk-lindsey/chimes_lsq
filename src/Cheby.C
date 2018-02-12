@@ -20,7 +20,7 @@ using namespace std;
 
 
 extern 	vector<int>	INT_PAIR_MAP;
-extern	vector<int>	INT_TRIAD_MAP;	
+extern   vector<int> INT_QUAD_MAP ;
 
 //////////////////////////////////////////
 // Cheby transformation functions
@@ -217,62 +217,6 @@ void SET_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rl
 }
 
 // FUNCTION IS OVERLOADED
-void SET_3B_CHEBY_POWERS(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) // LSQ version
-// Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
-{
-	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
-	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
-		{
-			// Then jk = z
-			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-		}
-		else
-		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-		}
-
-	}
-	else if(FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
-	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
-		{
-			// Then jk = z
-			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-		}
-		else
-		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-		}										
-	}
-	else // PAIR_TYPE_IJ matches alloweD[i].z
-	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
-		{
-			// Then jk = z
-			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-		}
-		else
-		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-		}										
-	}
-}
 
 void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) // MD version - 1
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
@@ -1243,8 +1187,8 @@ void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 }
 
 void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, CLUSTER_LIST TRIPS,
-											CLUSTER_LIST QUADS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP ,
-											map<int,int>  INT_QUAD_MAP, NEIGHBORS & NEIGHBOR_LIST)		
+								  CLUSTER_LIST QUADS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP ,
+								  NEIGHBORS & NEIGHBOR_LIST)		
 // Calculate derivatives of the forces wrt the 3-body Chebyshev parameters. 
 {
 	// BECKY: DON'T FORGET TO UPDATE THIS DESCRIPTION FOR 4-BODY INTERACTIONS
@@ -1300,6 +1244,7 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 
 	vector<QUADRUPLETS>& PAIR_QUADRUPLETS = QUADS.VEC ;
 	vector<TRIPLETS> & PAIR_TRIPLETS = TRIPS.VEC ;
+	vector<int>& INT_QUAD_MAP = QUADS.INT_MAP ;
 
 	if (!called_before) 
 	{
@@ -1394,7 +1339,8 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 				{			
 					a4 = NEIGHBOR_LIST.LIST_4B[a1][a4idx];
 				
-					if ( a4 == a2  || a4 == a3 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a4] || SYSTEM.PARENT[a3] > SYSTEM.PARENT[a4] ) 
+					// Already checked a2 == a3 and SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] in a3idx loop.
+					if ( a2 == a4  || a3 == a4 || SYSTEM.PARENT[a3] > SYSTEM.PARENT[a4] ) 
 						continue;
 				
 					// Determine the pair types and the triplet type
@@ -1433,10 +1379,9 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 			
 					ATOM_QUAD_ID_INT       = QUADS.make_id_int(TMP_QUAD_SET) ;
 
-					map<int,int>::iterator it ;
-					it = INT_QUAD_MAP.find(ATOM_QUAD_ID_INT) ;
+					int idxqm = INT_QUAD_MAP[ATOM_QUAD_ID_INT] ;
 
-					if ( it == INT_QUAD_MAP.end() ) 
+					if ( idxqm < 0 ) 
 					{
 					  cout << "Missing quad index " << ATOM_QUAD_ID_INT << endl ;
 					  for ( int i = 0 ; i < TMP_QUAD_SET.size() ; i++ )
@@ -1998,7 +1943,6 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 {
   vector<QUAD_FF> & FF_4BODY = QUADS.VEC ;
   vector<TRIP_FF> & FF_3BODY = TRIPS.VEC ;
-  map<int,int> & INT_QUAD_MAP = QUADS.INT_MAP ;
 
   // Variables exclusive to 2-body
 
@@ -2360,7 +2304,7 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		vector<int> index(3) ;
 		index[0] = idx1 ; index[1] = idx2 ; index[2] = idx3 ;
 		idx1 = TRIPS.make_id_int(index) ;
-		curr_triple_type_index = INT_TRIAD_MAP[idx1];
+		curr_triple_type_index = TRIPS.INT_MAP[idx1];
 					
 		if(curr_triple_type_index<0)
 		  continue;
@@ -2623,7 +2567,7 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		reverse(TMP_QUAD_SET.begin(), TMP_QUAD_SET.end());
 			
 		ATOM_QUAD_ID_INT       = QUADS.make_id_int(TMP_QUAD_SET) ;
-		curr_quad_type_index = INT_QUAD_MAP[ATOM_QUAD_ID_INT];
+		curr_quad_type_index = QUADS.INT_MAP[ATOM_QUAD_ID_INT];
 
 		if(curr_quad_type_index<0)
 		  continue;

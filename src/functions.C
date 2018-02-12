@@ -20,7 +20,6 @@ using namespace std;
 
 
 extern 	vector<int>	INT_PAIR_MAP;
-extern	vector<int>	INT_TRIAD_MAP;	
 
 //////////////////////////////////////////
 //
@@ -139,6 +138,15 @@ double get_dist(const FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 void divide_atoms(int &a1start, int &a1end, int atoms) 
 {
 	int procs_used;
+
+	// Deal with no tasks to perform.
+	if ( atoms <= 0 ) 
+	{
+
+	  a1start = 1 ;
+	  a1end = 0 ;
+	  return ;
+	}
 
 	// Deal gracefully with more tasks than processors.
 	if ( NPROCS <= atoms ) 
@@ -456,10 +464,7 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
   vector<TRIPLETS> & PAIR_TRIPLETS = TRIPS.VEC ;
   map<string,int> &TRIAD_MAP = TRIPS.MAP ;
 
-  map<int,int> &INT_QUAD_MAP = QUADS.INT_MAP ;
-
-
-	if((CONTROLS.FIT_ENER) && (FF_2BODY[0].PAIRTYP == "SPLINE"))
+  if((CONTROLS.FIT_ENER) && (FF_2BODY[0].PAIRTYP == "SPLINE"))
 	{
 		cout << "ERROR: Energy fititng has not been implemented for potential type " << FF_2BODY[0].PAIRTYP << endl;
 		exit_run(0);
@@ -504,7 +509,7 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 			ZCalc_3B_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, PAIR_TRIPLETS, FRAME_A_MATRIX,  nlayers, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);	
 			
 		if (CONTROLS.USE_4B_CHEBY)
-		  ZCalc_4B_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, TRIPS, QUADS, FRAME_A_MATRIX,  nlayers, PAIR_MAP, INT_QUAD_MAP, NEIGHBOR_LIST);		
+		  ZCalc_4B_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, TRIPS, QUADS, FRAME_A_MATRIX,  nlayers, PAIR_MAP, NEIGHBOR_LIST);		
 	}			
 
     else if ( FF_2BODY[0].PAIRTYP == "DFTBPOLY" )	

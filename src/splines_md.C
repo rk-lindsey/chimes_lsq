@@ -52,12 +52,10 @@ static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NAT
 									 vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES, 
 									 vector<double>& TMP_MASS, vector<int> &TMP_SIGN) ;
 static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY,
-									vector<TRIP_FF>& FF_3BODY, vector<QUAD_FF>& FF_4BODY, map<string,int> &PAIR_MAP, 
-									map<string,int> &TRIAD_MAP, map<string,int> &QUAD_MAP,
+									CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, 
 									NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP,
                            const vector<string>& TMP_ATOMTYPE, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
-									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE, map<int,string>& TRIAD_MAP_REVERSE,
-									map<int,string>& QUAD_MAP_REVERSE) ;
+									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
 
 // Define function headers -- MPI
 
@@ -129,9 +127,7 @@ ofstream BAD_CONFIGS ;
 	
 	// Define my new integer maps
 	
-	vector<int>	 INT_PAIR_MAP;
-	vector<int>	 INT_TRIAD_MAP;	
-	map<int,int> INT_QUAD_MAP;	// maps for collections of 4 atoms
+	vector<int>	INT_PAIR_MAP;
 	
 
 ////////////////////////////////////////////////////////////
@@ -1096,8 +1092,9 @@ int main(int argc, char* argv[])
 
 	FF_SETUP_2:
 
-	read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, FF_3BODY, FF_4BODY, PAIR_MAP, TRIAD_MAP, QUAD_MAP, NEIGHBOR_LIST, SYSTEM,
-	 FF_PLOTS.N_PLOTS, NATMTYP, TMP_ATOMTYPE, TMP_CHARGES, TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE, TRIAD_MAP_REVERSE, QUAD_MAP_REVERSE) ;
+	read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, 
+						SYSTEM, FF_PLOTS.N_PLOTS, NATMTYP, TMP_ATOMTYPE, TMP_CHARGES, 
+						TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE) ;
 	
 	// Set the atom charges
 	
@@ -1394,7 +1391,7 @@ int main(int argc, char* argv[])
 	
 	// Build the 2-body  and 3-body int-atomtype-ff-maps
 
-	INT_PAIR_MAP.resize(NATMTYP*NATMTYP);
+	INT_PAIR_MAP.resize(NATMTYP*NATMTYP, -1);
 
 	int    int_map_idx;
 	string int_map_str, int_map_3b_str;
@@ -1438,151 +1435,17 @@ int main(int argc, char* argv[])
 	
 	// Build 3-body fast maps
 	
-	if(FF_2BODY[0].SNUM_3B_CHEBY > 0)
+	if ( FF_2BODY[0].SNUM_3B_CHEBY > 0 ) 
 	{
-	  INT_TRIAD_MAP.resize(MAX_ATOM_TYPES3) ;
-
-		int idx1, idx2, idx3;
-
-
-		if(RANK==0)
-			cout << endl << "	Triplet maps:" << endl;
-
-		for(int i=0; i<NATMTYP; i++)
-		{
-			for (int j=0; j<NATMTYP; j++)
-			{
-				for(int k=0; k<NATMTYP; k++)
-				{
-					idx1 = i;
-					idx2 = j;
-					idx3 = k;
-				
-					int_map_str =      TMP_ATOMTYPE[i];
-					int_map_str.append(TMP_ATOMTYPE[j]);
-					int_map_idx = TMP_ATOMTYPEIDX[i]*NATMTYP + TMP_ATOMTYPEIDX[j];
-				
-					int_map_3b_str =      FF_2BODY[INT_PAIR_MAP[int_map_idx]].PRPR_NM;
-				
-					int_map_str =      TMP_ATOMTYPE[i];
-					int_map_str.append(TMP_ATOMTYPE[k]);
-					int_map_idx = TMP_ATOMTYPEIDX[i]*NATMTYP + TMP_ATOMTYPEIDX[k];
-				
-					int_map_3b_str.append(FF_2BODY[INT_PAIR_MAP[int_map_idx]].PRPR_NM);
-				
-					int_map_str =      TMP_ATOMTYPE[j];
-					int_map_str.append(TMP_ATOMTYPE[k]);
-					int_map_idx = TMP_ATOMTYPEIDX[j]*NATMTYP + TMP_ATOMTYPEIDX[k];
-				
-					int_map_3b_str.append(FF_2BODY[INT_PAIR_MAP[int_map_idx]].PRPR_NM);
-				
-
-				
-					SORT_THREE_DESCEND(idx1, idx2, idx3);
-					vector<int> index(3) ;
-					index[0] = idx1 ; index[1] = idx2 ; index[2] = idx3 ;
-               idx1 = TRIPS.make_id_int(index) ;
-					INT_TRIAD_MAP[idx1] = TRIAD_MAP[int_map_3b_str];
-				
-					if(RANK == 0)
-					{
-						cout << "		";
-						cout<< "Atom type idxs: ";
-					    cout<< fixed << setw(2) << right << i;
-						cout<< fixed << setw(2) << right << j;
-						cout<< fixed << setw(2) << right << k;
-						cout<< " Triplet name: "           << setw(12) << right << int_map_3b_str;
-						cout<< " Explicit index: " << setw(4) << right << idx1 ;
-						cout<< " Unique index: "   << setw(4) << right << INT_TRIAD_MAP[idx1] << endl;
-					}
-				}
-			}
-		}
+     TRIPS.build_int_maps(TMP_ATOMTYPE, FF_2BODY, PAIR_MAP) ;
 	}
 	
 	// Build 4-body fast maps
 	
 	if(FF_2BODY[0].SNUM_4B_CHEBY > 0)
 	{
-		string 	TMP_QUAD_SIXLET = "";
-		string 	TMP_QUAD_PAIR   = "";
-		
-		int 	ATOM_QUAD_ID_INT;
-		int		CURR_QUAD_IDX = 0;
-
-		// Create a list of each posible combination of atom quadruplets
-
-		if(RANK==0)
-			cout << endl << "	Quadruplet maps:" << endl;
-		
-		for(int i=0; i<NATMTYP; i++)
-		{
-			for(int j=0; j<NATMTYP; j++)
-			{
-			  for(int k=0 ; k<NATMTYP; k++)
-				{
-					for(int l=0 ; l<NATMTYP; l++)
-					{
-						// A given set of i-through-l defines a unique set of 4 atoms.
-						// Determine the corresponding quadruplet force field type
-						
-						TMP_QUAD_SIXLET = "";
-						TMP_QUAD_PAIR   = "";
-						
-						TMP_QUAD_PAIR    = TMP_ATOMTYPE[i] + TMP_ATOMTYPE[j]; 	// Define an ij pair
-						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    // Append pair to string
-						
-						TMP_QUAD_PAIR    = TMP_ATOMTYPE[i] + TMP_ATOMTYPE[k]; 	
-						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
-						
-						TMP_QUAD_PAIR    = TMP_ATOMTYPE[i] + TMP_ATOMTYPE[l]; 	
-						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
-						
-						TMP_QUAD_PAIR    = TMP_ATOMTYPE[j] + TMP_ATOMTYPE[k]; 	
-						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
-						
-						TMP_QUAD_PAIR    = TMP_ATOMTYPE[j] + TMP_ATOMTYPE[l]; 	
-						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
-						
-						TMP_QUAD_PAIR    = TMP_ATOMTYPE[k] + TMP_ATOMTYPE[l]; 	
-						TMP_QUAD_SIXLET += TMP_QUAD_PAIR;					    
-
-						vector<int> index(4) ;
-						index[0] = i ;
-						index[1] = j ;
-						index[2] = k ;
-						index[3] = l ;
-
-						sort(index.begin(), index.end() ) ;
-						reverse(index.begin(), index.end() ) ;
-						ATOM_QUAD_ID_INT = QUADS.make_id_int(index) ;
-						
-						INT_QUAD_MAP        .insert(make_pair(ATOM_QUAD_ID_INT,QUAD_MAP[TMP_QUAD_SIXLET]));	
-						//INT_QUAD_MAP_REVERSE.insert(make_pair(QUAD_MAP[TMP_QUAD_SIXLET], ATOM_QUAD_ID_INT));	
-						
-						if(RANK == 0)
-						{
-							cout << "		";
-							cout<< "Atom type idxs: ";
-						    cout<< fixed << setw(2) << right << i;
-							cout<< fixed << setw(2) << right << j;
-							cout<< fixed << setw(2) << right << k;
-							cout<< fixed << setw(2) << right << l;
-							cout<< " Quadruplet name: "           << setw(12) << right << TMP_QUAD_SIXLET;
-							cout<< " Explicit index:"           << setw(12) << right << ATOM_QUAD_ID_INT ;
-							cout<< " Unique index: "   << setw(4)  << right << INT_QUAD_MAP[ATOM_QUAD_ID_INT] << endl;
-						}
-						
-						CURR_QUAD_IDX++;
-
-					}
-				}
-			}
-		}
-		
+     QUADS.build_int_maps(TMP_ATOMTYPE, FF_2BODY, PAIR_MAP) ;
 	}
-	
-		
 
 	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
@@ -3816,18 +3679,22 @@ static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NAT
 }
 
 static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY,
-									vector<TRIP_FF>& FF_3BODY, vector<QUAD_FF>& FF_4BODY, map<string,int> &PAIR_MAP, 
-									map<string,int> &TRIAD_MAP, map<string,int> &QUAD_MAP,
+									CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, 
 									NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP,
                            const vector<string>& TMP_ATOMTYPE, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
-									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE, map<int,string>& TRIAD_MAP_REVERSE,
-									map<int,string>& QUAD_MAP_REVERSE)
+									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE)
 // Read in the force field parameters.
 {
   bool   	FOUND_END = false;
   string 	LINE;
   stringstream	STREAM_PARSER;
   string TEMP_STR ;
+
+  vector<TRIP_FF> &FF_3BODY = TRIPS.VEC ;
+  map<string,int> &TRIAD_MAP = TRIPS.MAP ;
+
+  vector<QUAD_FF> &FF_4BODY = QUADS.VEC ;
+  map<string,int> &QUAD_MAP  = QUADS.MAP ;
 
   PARAMFILE.open(CONTROLS.PARAM_FILE.data());
   if(!PARAMFILE.is_open())
@@ -3852,12 +3719,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 	
   while (FOUND_END == false)
   {
-	 getline(PARAMFILE,LINE);
-
-	 if ( ! PARAMFILE.good() ) {
-		cout << "Input error found\n" ; FOUND_END = true ;
-		break ;
-	 }
+	 LINE = get_next_line(PARAMFILE) ;
 
 	 // Break out of loop
 
@@ -3869,14 +3731,8 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 			
 		while (FOUND_END == false)		
 		{
-		  getline(PARAMFILE,LINE);
+		  LINE = get_next_line(PARAMFILE) ;
 
-		  if ( ! PARAMFILE.good() ) {
-			 cout << "Input error found\n" ; FOUND_END = true ;
-			 break ;
-		  }
-		  
-				
 		  if(LINE.find("ENDFILE") != string::npos)
 			 break;	
 				
@@ -3989,12 +3845,8 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 			
 			 for(int i=0;i<TMP_TERMS1; i++)
 			 {
-				getline(PARAMFILE,LINE);
+				LINE = get_next_line(PARAMFILE) ;
 
-				if ( ! PARAMFILE.good() ) {
-				  cout << "Input error found\n" ; FOUND_END = true ;
-				  break ;
-				}
 				STREAM_PARSER.str(LINE);
 				STREAM_PARSER >> TMP_TERMS2 >> TEMP_STR;	// We could use the integer, but this way is probably safer
 				STREAM_PARSER >> FF_2BODY[TMP_TERMS2].OLD_S_MINIM;
@@ -4036,11 +3888,8 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		
 			 for(int i=0; i<TMP_TERMS1; i++)
 			 {
-				getline(PARAMFILE,LINE);
-				if ( ! PARAMFILE.good() ) {
-				  cout << "Input error found\n" ; FOUND_END = true ;
-				  break ;
-				}
+				LINE = get_next_line(PARAMFILE) ;
+
 				STREAM_PARSER.str("");
 				STREAM_PARSER.clear();
 						
@@ -4167,11 +4016,8 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		
 			 for(int i=0; i<TMP_TERMS1; i++)
 			 {
-				getline(PARAMFILE,LINE);
-				if ( ! PARAMFILE.good() ) {
-				  cout << "Input error found\n" ; FOUND_END = true ;
-				  break ;
-				}
+				LINE = get_next_line(PARAMFILE) ;
+
 				STREAM_PARSER.str("");
 				STREAM_PARSER.clear();
 						
@@ -4297,11 +4143,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		
 			 for(int i=0; i<TMP_TERMS1; i++)
 			 {
-				getline(PARAMFILE,LINE);
-				if ( ! PARAMFILE.good() ) {
-				  cout << "Input error found\n" ; FOUND_END = true ;
-				  break ;
-				}
+				LINE = get_next_line(PARAMFILE) ;
 						
 				STREAM_PARSER.str("");
 				STREAM_PARSER.clear();
@@ -4388,11 +4230,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		
 			 for(int i=0; i<TMP_TERMS1; i++)
 			 {
-				getline(PARAMFILE,LINE);
-				if ( ! PARAMFILE.good() ) {
-				  cout << "Input error found\n" ; FOUND_END = true ;
-				  break ;
-				}
+				LINE = get_next_line(PARAMFILE) ;
 
 				STREAM_PARSER.str("");
 				STREAM_PARSER.clear();
@@ -4661,13 +4499,9 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 			
 		// Read in general pair parameters
 			
-		getline(PARAMFILE,LINE);
-		getline(PARAMFILE,LINE);
-		if ( ! PARAMFILE.good() ) {
-		  FOUND_END = true ;
-		  break ;
-		}
-			
+		LINE = get_next_line(PARAMFILE) ;
+		LINE = get_next_line(PARAMFILE) ;
+
 		for(int i=0; i<NO_PAIRS; i++)
 		{
 		  FF_2BODY[i].PAIRTYP = TEMP_TYPE;
@@ -4767,13 +4601,9 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 			
 		if(CONTROLS.USE_OVERCOORD)
 		{		
-		  getline(PARAMFILE,LINE);
-		  getline(PARAMFILE,LINE);
-		  getline(PARAMFILE,LINE);
-		  if ( ! PARAMFILE.good() ) {
-			 FOUND_END = true ;
-			 break ;
-		  }
+		  LINE = get_next_line(PARAMFILE) ;
+		  LINE = get_next_line(PARAMFILE) ;
+		  LINE = get_next_line(PARAMFILE) ;
 
 		  for(int i=0; i<NO_PAIRS; i++)
 		  {
@@ -4918,15 +4748,9 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 
 		for(int i=0; i<NO_PAIRS; i++)
 		{
-		  getline(PARAMFILE,LINE);	// Blank line
-		  getline(PARAMFILE,LINE);	// "PAIRTYPE PARAMS: <index> <atom1> <atom2>"	
-		  getline(PARAMFILE,LINE);	// Blank line
-
-		  if ( ! PARAMFILE.good() ) {
-			 FOUND_END = true ;
-			 break ;
-		  }
-
+		  LINE = get_next_line(PARAMFILE) ; // Blank line
+		  LINE = get_next_line(PARAMFILE) ; // "PAIRTYPE PARAMS: <index> <atom1> <atom2>"	
+		  LINE = get_next_line(PARAMFILE) ; // Blank line
 				
 		  FF_2BODY[i].PARAMS.resize(FF_2BODY[i].SNUM);
 				
@@ -5092,13 +4916,8 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 	 {	
 		for(int i=0; i<NO_TRIPS; i++)
 		{
-		  getline(PARAMFILE,LINE);	// Blank line
-		  getline(PARAMFILE,LINE);	// "TRIPLETYP PARAMS: <index> <pair1> <pair2> <pair3>"
-
-		  if ( ! PARAMFILE.good() ) {
-			 FOUND_END = true ;
-			 break ;
-		  }
+		  LINE = get_next_line(PARAMFILE) ; // Blank line
+		  LINE = get_next_line(PARAMFILE) ; // "TRIPLETYP PARAMS: <index> <pair1> <pair2> <pair3>"
 				 
 		  STREAM_PARSER.str(LINE);
 				
@@ -5111,6 +4930,10 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  // Get rid of the colon at the end of the atom pair:
 				
 		  FF_3BODY[i].ATOM_PAIRS[2] = FF_3BODY[i].ATOM_PAIRS[2].substr(0,FF_3BODY[i].ATOM_PAIRS[2].length()-1);
+
+		  // Set the names of each atom in the cluster from the pair names.
+		  FF_3BODY[i].atom_names_from_pairs(TMP_ATOMTYPE) ;
+
 							
 		  STREAM_PARSER >> TEMP_STR;
 		  STREAM_PARSER >> FF_3BODY[i].N_TRUE_ALLOWED_POWERS;
@@ -5128,16 +4951,9 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  STREAM_PARSER.str("");
 		  STREAM_PARSER.clear();	
 
-		  getline(PARAMFILE,LINE);	// Blank line
-		  getline(PARAMFILE,LINE);	// header line
-
-				
-		  getline(PARAMFILE,LINE);	// dashes line
-
-		  if ( ! PARAMFILE.good() ) {
-			 FOUND_END = true ;
-			 break ;
-		  }
+		  LINE = get_next_line(PARAMFILE) ; // Blank line
+		  LINE = get_next_line(PARAMFILE) ; // header line
+		  LINE = get_next_line(PARAMFILE) ;	// dashes line
 
 		  for(int j=0; j<FF_3BODY[i].N_ALLOWED_POWERS; j++)
 		  {
@@ -5163,15 +4979,9 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 	 {	
 		for(int i=0; i<NO_QUADS; i++)
 		{
-		  getline(PARAMFILE,LINE);	// Blank line
-		  getline(PARAMFILE,LINE);	// "QUADRUPLETYPE PARAMS: <index> <pair1> <pair2> <pair3> <pair4> <pair5> <pair6>"
+		  LINE = get_next_line(PARAMFILE) ; // Blank line
+		  LINE = get_next_line(PARAMFILE) ; // "QUADRUPLETYPE PARAMS: <index> <pair1> <pair2> <pair3> <pair4> <pair5> <pair6>"
 
-		  if ( ! PARAMFILE.good() ) {
-			 FOUND_END = true ;
-			 break ;
-		  }
-
-				 
 		  STREAM_PARSER.str(LINE);
 				
 		  STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
@@ -5183,6 +4993,10 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  // Get rid of the colon at the end of the atom pair:
 				
 		  FF_4BODY[i].ATOM_PAIRS[5] = FF_4BODY[i].ATOM_PAIRS[5].substr(0,FF_4BODY[i].ATOM_PAIRS[5].length()-1);
+
+		  // Set the names of each atom in the cluster from the pair names.
+		  FF_4BODY[i].atom_names_from_pairs(TMP_ATOMTYPE) ;
+
 							
 		  STREAM_PARSER >> TEMP_STR;
 		  STREAM_PARSER >> FF_4BODY[i].N_TRUE_ALLOWED_POWERS;
@@ -5201,16 +5015,9 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  STREAM_PARSER.str("");
 		  STREAM_PARSER.clear();	
 
-		  getline(PARAMFILE,LINE);	// Blank line
-		  getline(PARAMFILE,LINE);	// header line
-
-				
-		  getline(PARAMFILE,LINE);	// dashes line
-
-		  if ( ! PARAMFILE.good() ) {
-			 FOUND_END = true ;
-			 break ;
-		  }
+		  LINE = get_next_line(PARAMFILE) ; // Blank line
+		  LINE = get_next_line(PARAMFILE) ; // header line
+		  LINE = get_next_line(PARAMFILE) ;	// dashes line
 
 		  for(int j=0; j<FF_4BODY[i].N_ALLOWED_POWERS; j++)
 		  {
@@ -5286,60 +5093,15 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		
 	 else if(LINE.find("TRIPMAPS: ") != string::npos)
 	 {
-		STREAM_PARSER.str(LINE);			
-		STREAM_PARSER >> TEMP_STR;
-		STREAM_PARSER >> TMP_TERMS1;	
-		STREAM_PARSER.str("");
-		STREAM_PARSER.clear();	
-			
-		if (RANK==0)
-		  cout << "	Reading  " << TMP_TERMS1 << " triplets for mapping" << endl;
-			
-		for(int i=0; i<TMP_TERMS1; i++)
-		{
-		  PARAMFILE >> TMP_TERMS2;
-		  PARAMFILE >> TEMP_TYPE;
-				
-		  if (RANK==0)
-			 cout << "	........Reading triplet: " << TEMP_TYPE << " with mapped index: " << TMP_TERMS2 << endl; 
-				
-		  TRIAD_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
-		  TRIAD_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
-					
-		}
-		if (RANK==0)
-		  cout << "	...Read FF triadmaps..." << endl;					
+		TRIPS.read_maps(PARAMFILE, LINE) ;
 	 }	
 		
 	 // Read the quadruplet maps
 
 	 else if(LINE.find("QUADMAPS: ") != string::npos)
 	 {
-		STREAM_PARSER.str(LINE);			
-		STREAM_PARSER >> TEMP_STR;
-		STREAM_PARSER >> TMP_TERMS1;	
-		STREAM_PARSER.str("");
-		STREAM_PARSER.clear();	
-			
-		if (RANK==0)
-		  cout << "	Reading  " << TMP_TERMS1 << " quadruplets for mapping" << endl;
-			
-		for(int i=0; i<TMP_TERMS1; i++)
-		{
-		  PARAMFILE >> TMP_TERMS2;
-		  PARAMFILE >> TEMP_TYPE;
-				
-		  if (RANK==0)
-			 cout << "	........Reading quadruplet: " << TEMP_TYPE << " with mapped index: " << TMP_TERMS2 << endl; 
-				
-		  QUAD_MAP.insert(make_pair(TEMP_TYPE,TMP_TERMS2));
-		  QUAD_MAP_REVERSE.insert(make_pair(TMP_TERMS2,TEMP_TYPE));				
-					
-		}
-		if (RANK==0)
-		  cout << "	...Read FF quadmaps..." << endl;					
-	 }	
-
+		QUADS.read_maps(PARAMFILE, LINE) ;
+	 }
   }	
 }
 

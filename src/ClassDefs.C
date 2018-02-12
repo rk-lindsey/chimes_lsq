@@ -1087,6 +1087,10 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 			}
 		}
 	}
+#if VERBOSITY >= 1 
+	if ( RANK == 0 ) 
+	  cout << "Number of 3-body interactions = " << LIST_3B_INT.size() << endl ;
+#endif
 }
 
 void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) 
@@ -1108,27 +1112,35 @@ void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 			
 			for (int k=0; k<LIST_3B[i].size(); k++) // Loop over all neighbors of i to get atom k
 			{
-				ak = LIST_4B[i][k];
+
+			  ak = LIST_4B[i][k];
 				
+			  if (aj == ak )
+				 continue;
+
+			  if( SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] )
+				 continue;
+
+			  if( get_dist(SYSTEM, RAB, aj, ak) >  MAX_CUTOFF_4B + RCUT_PADDING)
+				 continue;
+
 				for (int l=0; l<LIST_3B[i].size(); l++) // Loop over all neighbors of i to get atom l
 				{
 					al = LIST_4B[i][l];
 				
 					// Check that this is a valid quadruplet
 
-					if (aj == ak || aj == al || ak == al)
+					if (aj == al || ak == al)
 						continue;
 					
-					if(SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] || SYSTEM.PARENT[aj] > SYSTEM.PARENT[al] || SYSTEM.PARENT[ak] > SYSTEM.PARENT[al])
+					if( SYSTEM.PARENT[ak] > SYSTEM.PARENT[al] || SYSTEM.PARENT[aj] > SYSTEM.PARENT[al] )
 						continue;
 					
-					// We know ij, ik, and il distances are within the allowed cutoffs, but we still need to check jk, jl, and kl
+					// We know ij, ik, il, and jk distances are within the allowed cutoffs, but we still need to check jl, and kl
 
-					if(get_dist(SYSTEM, RAB, aj, ak) >  MAX_CUTOFF_4B + RCUT_PADDING)
+					if( get_dist(SYSTEM, RAB, aj, al) >=  MAX_CUTOFF_4B + RCUT_PADDING)
 						continue;
-					if(get_dist(SYSTEM, RAB, aj, al) >  MAX_CUTOFF_4B + RCUT_PADDING)
-						continue;
-					if(get_dist(SYSTEM, RAB, ak, al) >  MAX_CUTOFF_4B + RCUT_PADDING)
+					if( get_dist(SYSTEM, RAB, ak, al) >=  MAX_CUTOFF_4B + RCUT_PADDING)
 						continue;
 					
 					inter.a1 = ai;
@@ -1141,6 +1153,10 @@ void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 			}
 		}
 	}
+#if VERBOSITY >= 1 
+	if ( RANK == 0 ) 
+	  cout << "Number of 4-body interactions = " << LIST_4B_INT.size() << endl ;
+#endif
 }
 
 void THERMO_AVG::WRITE(ofstream &fout)

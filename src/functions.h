@@ -64,10 +64,11 @@ using namespace std;
 #endif
 
 
-// Maximum number of atom types.
+// Maximum number of atom types and powers.
 #define MAX_ATOM_TYPES 10 
 #define MAX_ATOM_TYPES2 (MAX_ATOM_TYPES  * MAX_ATOM_TYPES)
 #define MAX_ATOM_TYPES3 (MAX_ATOM_TYPES2 * MAX_ATOM_TYPES) 
+#define MAX_ATOM_TYPES4 (MAX_ATOM_TYPES3 * MAX_ATOM_TYPES) 
 
 // Unit converters 
 static const double ke      = 332.0637157615209;	// Converter between electron units and Stillinger units for Charge*Charge.
@@ -280,13 +281,6 @@ struct FRAME
 	vector<XYZ>		VELOCITY_NEW;
 	vector<XYZ>		VELOCITY_ITER;
 	
-};
-
-struct PAIR_FF : public PAIRS
-{
-	vector<double> 	PARAMS;
-	vector<double>	POT_PARAMS;		// Used by splines to compute pressure by integrating spline eq's
-	double			PAIR_CHRG;
 };
 
 struct PES_PLOTS

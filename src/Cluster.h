@@ -45,9 +45,21 @@ struct PAIRS	// NEEDS UPDATING
    vector<double> NBINS;				// Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
 
 	FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
+
+  // Only used in force field
+	vector<double> 	PARAMS;
+	vector<double>	POT_PARAMS;		// Used by splines to compute pressure by integrating spline eq's
+	double			PAIR_CHRG;
 	
 PAIRS(): N_CFG_CONTRIB(0),OVRPRMS(5), NBINS(3) {}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 };
+
+
+// We are not deriving PAIR_FF from PAIRS, because in that case vector<PAIR_FF> does not inheriting from vector<PAIRS>.
+// This leads to awkwardness in functions that want vector<PAIR_FF> as an argument.  If PAIR_FF is simply a typedef,
+// vector<PAIR_FF> and vector<PAIRS> can be used interchangably, which improves code reuse.  An alternative would
+// be to use vector<PAIRS*>, but we are not using pointers much in the current code.
+typedef PAIRS PAIR_FF ;
 
 class CLUSTER 
 // Structure for a generic cluster of interacting atoms.
@@ -88,8 +100,10 @@ public:
   vector<vector<int> > UNIQUE_POWERS ;  // This is a list of unique polynomial powers for each coefficient
   vector<int> EQUIV_INDICES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
   vector<int>	PARAM_INDICES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
-		
-  // Pure virtual (overridable) functions.
+
+  // Build a list of atom names from the pair names and atom types.
+  void atom_names_from_pairs(const vector<string> &atom_types) ;
+
   void build(int cheby_4b_order) ; // The the ALLOWED_POWERS, etc. for an interaction.
   void store_permutations(vector<int> &unsorted_powers) ; // Store all the permutations.
   void print()  ;  // Print the quad powers and element types.
@@ -164,9 +178,9 @@ public:
   // A map from the VEC index into the pair types.
   map<int,string> MAP_REVERSE ;
 
-  map<int,int> INT_MAP ;
+  vector<int> INT_MAP ;
 
-  map<int,int> INT_MAP_REVERSE ;
+  vector<int> INT_MAP_REVERSE ;
 
   vector<string> EXCLUDE ;
 
@@ -182,9 +196,19 @@ public:
 
   static string tuplet_name(int natom, bool plural, bool caps) ;
 
+  // Build the fast integer maps for the cluster list.  Used by the MD code.
+  void build_int_maps(vector<string> ATOMTYPE, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+
+  // Read the maps from the force field file (MD only).
+  void read_maps(ifstream& paramfile, string line) ;
+
 private:
   void build_pairs_loop(int index, vector<int> atom_index, 
 								vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count) ;
+
+  // Loop across atom types for each atom in the cluster, and build a corresponding loop.
+  void build_int_maps_loop(int index, vector<int> atom_index, vector<string> ATOMTYPE,
+									vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
 } ;
 
 

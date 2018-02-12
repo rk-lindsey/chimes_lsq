@@ -39,6 +39,19 @@ int parse_space(string line, vector<string>& tokens)
   return(tokens.size() ) ;
 }
 
+string get_next_line(ifstream& str)
+// Read a line and return it, with error checking.
+{
+  string line ;
+
+  getline(str, line) ;
+  if ( ! str.good() )
+	 EXIT_MSG("Error reading line") ;
+  
+  return line ;
+}
+
+	 
 bool is_true(string s) 
 // Return true if the string has a recognized spelling of the word "TRUE".
 {
