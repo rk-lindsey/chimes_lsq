@@ -22,55 +22,8 @@ using namespace std;
 // define for extra output
 #define DEBUG_CLUSTER
 
-
-void CLUSTER::atom_names_from_pairs(const vector<string> &atom_types) 
-// Build a list of atom names from the pair names and atom types.
-{
-  int type1_len ;
-
-  // Search for the first atom type in the pair
-  int j ;
-  for ( j = 0 ; j < atom_types.size() ; j++ ) 
-  {
-	 if ( ATOM_PAIRS[0].find(atom_types[j]) == 0 ) 
-	 {
-		type1_len = atom_types[j].length() ;
-		ATOM_NAMES[0] = ATOM_PAIRS[0].substr(0, atom_types[j].length() ) ;
-		break ;
-	 }
-  }
-  if ( j == atom_types.size() ) 
-	 EXIT_MSG("The first element was not found in " + ATOM_PAIRS[0]) ;
-
-  // Other atom names are taken from the 1 : NATOMS - 1 pairs.
-  for ( int k = 0 ; k < NATOMS - 1 ; k++ ) {
-	 string ele2 = ATOM_PAIRS[k].substr(type1_len, string::npos) ;
-	 int j ;
-	 for ( j = 0 ; j < atom_types.size() ; j++ ) 
-	 {
-		if ( ele2 == atom_types[j] ) 
-		{
-		  ATOM_NAMES[k+1] = ele2 ;
-		  break ;
-		}
-	 }
-	 if ( j == atom_types.size() ) 
-		EXIT_MSG("The element match was not found in " + ele2) ;
-  }
-  if ( RANK == 0 ) 
-  {
-	 cout << "Set cluster atom names from pair names " << endl ;
-	 for ( int k = 0 ; k < NATOMS ; k++ ) 
-		cout << ATOM_NAMES[k] << " " ;
-
-	 cout << endl ;
-  }
-}
-
-	 
-
 void CLUSTER::build(int cheby_order)
-// Build a set of interactions for a quad.
+// Build a set of interactions for a cluster.
 // Figure out the allowed pair powers. Here are some rules and considerations:
 //
 // 1. Powers start from zero. So, if order is specified to be 2, polynomial powers range
@@ -327,7 +280,8 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
   }
 }
 
-void CLUSTER::print()
+void CLUSTER::print(bool md_mode) const
+// Print parameters for the cluster.  If md_mode is true, print the potential parameters.
 {
   if ( RANK == 0 ) 
   {
@@ -345,7 +299,11 @@ void CLUSTER::print()
 
 	 cout<< "    Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
 
-	 cout << "		     index  |  powers  |  equiv index  |  param index  " << endl;
+	 cout << "		     index  |  powers  |  equiv index  |  param index  " ;
+	 if ( md_mode ) 
+		cout << " | parameter " ;
+	 cout << endl ;
+
 	 cout << "		   ----------------------------------------------------" << endl;					
 				
 	 for(int j=0; j<ALLOWED_POWERS.size(); j++)
@@ -357,7 +315,12 @@ void CLUSTER::print()
 		  cout << " " << setw(2) << fixed << left << ALLOWED_POWERS[j][k] << " ";
 						
 		cout << "       " << setw(8) << EQUIV_INDICES[j] << " ";
-		cout << "       " << setw(8) << PARAM_INDICES[j] << endl; 
+		cout << "       " << setw(8) << PARAM_INDICES[j] ; 
+		
+		if ( md_mode ) 
+		  cout << PARAMS[j] ;
+
+		cout << endl ;
 		
 	 }
   }
@@ -404,14 +367,22 @@ void CLUSTER::print_special(ofstream &header, string QUAD_MAP_REVERSE, string ou
 void CLUSTER::print_header(ofstream &header)
 // Print the header file for the force field definition
 {
-  header << INDX << "  ";
+  header << " INDEX: " << INDX << " ATOMS: ";
+  for ( int m = 0 ; m < NATOMS ; m++ ) 
+  {
+	 header << ATOM_NAMES[m] ;
+	 if ( m < NPAIRS - 1 ) 
+		header << " " ;
+  }
+  header << endl ;
+  header << " PAIRS: " ;
   for(int m=0; m<NPAIRS; m++)
   {
 	 header << ATOM_PAIRS[m];
 	 if(m<NPAIRS-1)
 		header << " ";
   }
-  header << ": " << N_TRUE_ALLOWED_POWERS << " parameters, " << N_ALLOWED_POWERS << " total parameters "<< endl;	
+  header << "  " << N_TRUE_ALLOWED_POWERS << " parameters, " << N_ALLOWED_POWERS << " total parameters "<< endl;	
 	
   header << "     index  |  powers  |  equiv index  |  param index  " << endl;
   header << "   ----------------------------------------------------" << endl;	
@@ -439,31 +410,49 @@ void CLUSTER::read_ff_params(ifstream &paramfile, const vector<string> &atomtype
   string TEMP_STR ;
 
   LINE = get_next_line(paramfile) ; // Blank line
-  LINE = get_next_line(paramfile) ; // "TRIPLETYP PARAMS: <index> <pair1> <pair2> <pair3>"
+  LINE = get_next_line(paramfile) ; // "TRIPLETYP PARAMS:"
+  LINE = get_next_line(paramfile) ; // "INDEX: <indx> ATOMS: <a1> <a2> <a3>"
 				 
-  STREAM_PARSER.str(LINE);
-				
-  STREAM_PARSER >> TEMP_STR  >> TEMP_STR;				
-  STREAM_PARSER >> INDX;				
+  vector<string> tokens ;
+  int ntokens = parse_space(LINE, tokens) ;
+
+  if ( ntokens != NATOMS + 3 ) 
+	 EXIT_MSG("Error reading ff: wrong number of arguments: " + LINE) ;
+
+  if ( tokens[0] != "INDEX:" ) 
+	 EXIT_MSG("Error reading ff: INDEX: not found: " + LINE) ;
+
+  INDX = stoi(tokens[1]) ;
+
+  for ( int j = 0 ; j < NATOMS ; j++ ) 
+	 ATOM_NAMES[j] = tokens[j+3] ;
+
+  LINE = get_next_line(paramfile) ;  // PAIRS: <p1> <p2> <p3> UNIQUE: <uniq> TOTAL: <TOTAL>
   
-  for ( int j = 0 ; j < NPAIRS ; j++ ) 
-	 STREAM_PARSER >> ATOM_PAIRS[j];
+  ntokens = parse_space(LINE, tokens) ;
+  
+  if ( ntokens != NPAIRS + 5 )
+	 EXIT_MSG("Error reading ff: wrong number of arguments: " + LINE) ;
 
-  // Get rid of the colon at the end of the atom pair:
-				
-  ATOM_PAIRS[NPAIRS-1] = ATOM_PAIRS[NPAIRS-1].substr(0,ATOM_PAIRS[NPAIRS-1].length()-1);
+  if ( tokens[0] != "PAIRS:" ) 
+	 EXIT_MSG("Error reading ff: PAIRS: not found: " + LINE) ;
 
-  // Set the names of each atom in the cluster from the pair names.
-  atom_names_from_pairs(atomtype) ;
+  for ( int j = 0 ; j < NPAIRS ; j++ )
+	 ATOM_PAIRS[j] = tokens[j+1] ;
 
-  STREAM_PARSER >> TEMP_STR;
-  STREAM_PARSER >> N_TRUE_ALLOWED_POWERS;
-  STREAM_PARSER >> TEMP_STR;
-  STREAM_PARSER >> N_ALLOWED_POWERS;
+  if ( tokens[1+NPAIRS] != "UNIQUE:" )
+	 EXIT_MSG("Error reading ff: UNIQUE: not found: " + LINE) ;
+
+  N_TRUE_ALLOWED_POWERS = stoi(tokens[2+NPAIRS]) ;
+
+  if ( tokens[3+NPAIRS] != "TOTAL:" ) 
+	 EXIT_MSG("Error reading ff: TOTAL: not found: " + LINE) ;
+  
+  N_ALLOWED_POWERS = stoi(tokens[4+NPAIRS]) ;
 				
   ALLOWED_POWERS.resize(N_ALLOWED_POWERS);
   for ( int j = 0 ; j  < N_ALLOWED_POWERS ; j++ ) 
-	 ALLOWED_POWERS[j].resize(3) ;
+	 ALLOWED_POWERS[j].resize(NPAIRS) ;
 				  
   EQUIV_INDICES.resize(N_ALLOWED_POWERS);
   PARAM_INDICES.resize(N_ALLOWED_POWERS);
@@ -472,7 +461,6 @@ void CLUSTER::read_ff_params(ifstream &paramfile, const vector<string> &atomtype
   STREAM_PARSER.str("");
   STREAM_PARSER.clear();	
 
-  LINE = get_next_line(paramfile) ; // Blank line
   LINE = get_next_line(paramfile) ; // header line
   LINE = get_next_line(paramfile) ;	// dashes line
 
@@ -484,7 +472,12 @@ void CLUSTER::read_ff_params(ifstream &paramfile, const vector<string> &atomtype
 
 	 paramfile >> EQUIV_INDICES[j];
 	 paramfile >> PARAM_INDICES[j];
-	 paramfile >> PARAMS        [j];
+	 paramfile >> PARAMS[j];
+
+	 if ( RANK == 0 ) 
+	 {
+		cout << EQUIV_INDICES[j] << " " << PARAM_INDICES[j] << " " << PARAMS[j] << endl ;
+	 }
 	 paramfile.ignore();
 
   } 
@@ -752,7 +745,7 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 vector<string> pair_names(npairs) ;
 	 vector<string> pair_names_unsorted(npairs) ;
 	 vector<string> atom_names(natoms) ;
-	 vector<int> atom_index_rev(natoms) ;
+	 //vector<int> atom_index_rev(natoms) ;
 
 	 // Sort the atom names, not the pair names.  All interactions
 	 // must be based on atom names.
@@ -762,15 +755,15 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 sort(atom_names.begin(), atom_names.end() ) ;
 
 	 // Now get the reverse index:  the ith sorted atom name is the jth ATOM type.
-	 for ( int i = 0 ; i < natoms ; i++ ) {
-		atom_index_rev[i] = -1; 
-		for ( int j = 0 ; j < NATMTYP ; j++ ) {
-		  if ( ATOM_CHEMS[j] == atom_names[i] ) {
-			 atom_index_rev[i] = j ;
-			 break ;
-		  }
-		}
-	 }
+	 // for ( int i = 0 ; i < natoms ; i++ ) {
+	 // 	atom_index_rev[i] = -1; 
+	 // 	for ( int j = 0 ; j < NATMTYP ; j++ ) {
+	 // 	  if ( ATOM_CHEMS[j] == atom_names[i] ) {
+	 // 		 atom_index_rev[i] = j ;
+	 // 		 break ;
+	 // 	  }
+	 // 	}
+	 // }
 	 for ( int i = 0 ; i < natoms ; i++ ) {
 		for ( int j = i + 1 ; j < natoms ; j++ ) {
 		  pair_names[count2] = atom_names[i] + atom_names[j] ;
@@ -857,7 +850,12 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 MAP_REVERSE.insert(make_pair(map_index,all_pairs)) ;
 
 	 // Construct a unique integer ID for the atom set and store it in the INT_MAP.
-	 int atom_id_int = make_id_int(atom_index_rev) ;
+	 vector<int> atom_index_2 = atom_index ;
+	 sort( atom_index_2.begin(), atom_index_2.end() ) ;
+	 reverse( atom_index_2.begin(), atom_index_2.end() ) ;
+
+	 int atom_id_int = make_id_int(atom_index) ;
+	 //int atom_id_int = make_id_int(atom_index_2) ;
 	 INT_MAP[atom_id_int] = map_index ;
 	 INT_MAP_REVERSE[map_index] = atom_id_int ;
 								
@@ -873,7 +871,7 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		string tuplet = tuplet_name(natoms, false, true) ;
 		cout<< "  " << tuplet << " name: "           << setw(12) << right << all_pairs ;
 		tuplet = tuplet_name(natoms, false, false) ;
-		cout<< " Unique " << tuplet <<  " index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
+		cout<< " Unique " << tuplet <<  " ID " << atom_id_int << " index: "   << setw(4)  << right << INT_MAP[atom_id_int] << endl;
 	 }
   } // End of calculation.
 }

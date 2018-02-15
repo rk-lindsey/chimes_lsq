@@ -101,12 +101,11 @@ public:
   vector<int> EQUIV_INDICES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
   vector<int>	PARAM_INDICES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
 
-  // Build a list of atom names from the pair names and atom types.
-  void atom_names_from_pairs(const vector<string> &atom_types) ;
-
   void build(int cheby_4b_order) ; // The the ALLOWED_POWERS, etc. for an interaction.
   void store_permutations(vector<int> &unsorted_powers) ; // Store all the permutations.
-  void print()  ;  // Print the quad powers and element types.
+
+// Print parameters for the cluster.  If md_mode is true, print the potential parameters.
+  void print(bool md_mode) const ;
 
   // Print special parameters to the header file.
   void print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode) ;

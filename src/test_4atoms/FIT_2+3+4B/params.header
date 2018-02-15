@@ -21,7 +21,8 @@ FCUT TYPE: CUBIC
 
 ATOM PAIR TRIPLETS: 1
 
-0  CC CC CC: 30 parameters, 112 total parameters 
+ INDEX: 0 ATOMS: C C C
+ PAIRS: CC CC CC  30 parameters, 112 total parameters 
      index  |  powers  |  equiv index  |  param index  
    ----------------------------------------------------
       0       0  1  1         0               0       
@@ -139,7 +140,8 @@ ATOM PAIR TRIPLETS: 1
 
 ATOM PAIR QUADRUPLETS: 1
 
-0  CC CC CC CC CC CC: 865 parameters, 15152 total parameters 
+ INDEX: 0 ATOMS: C C C C 
+ PAIRS: CC CC CC CC CC CC  865 parameters, 15152 total parameters 
      index  |  powers  |  equiv index  |  param index  
    ----------------------------------------------------
       0       0  0  1  0  1  1         0               0       

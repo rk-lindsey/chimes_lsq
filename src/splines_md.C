@@ -4870,24 +4870,7 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, const vector<CLUST
 
 	 for(int i=0;i<FF_3BODY.size(); i++)
 	 {
-		cout << "	" << FF_3BODY[i].INDX << "  " << FF_3BODY[i].ATOM_PAIRS[0] << " " << FF_3BODY[i].ATOM_PAIRS[1] << " " << FF_3BODY[i].ATOM_PAIRS[2] << ": ";
-		cout << FF_3BODY[i].N_TRUE_ALLOWED_POWERS << " parameters, " << FF_3BODY[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
-		cout << "	     index  |  powers  |  equiv index  |  param index  | parameter " << endl;
-		cout << "	   --------------------------------------------------------------------" << endl;	
-
-		for(int j=0; j<FF_3BODY[i].ALLOWED_POWERS.size(); j++)
-		{
-		  cout << "	      " << setw(6) << fixed << left << j << " ";
-		  cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j][0]  << " ";
-		  cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j][1]  << " ";
-		  cout << " " << setw(2) << fixed << left << FF_3BODY[i].ALLOWED_POWERS[j][2] << " ";
-		  cout << "       " << setw(8) << FF_3BODY[i].EQUIV_INDICES[j] << " ";
-		  cout << "       " << setw(8) << FF_3BODY[i].PARAM_INDICES[j] << " "; 
-		  cout << "       " << setw(8) << FF_3BODY[i].PARAMS[j] << endl; 
-	
-		}
-
-		cout << endl;
+		FF_3BODY[i].print(true) ;
 	 }	 	
   }
 		
@@ -4898,31 +4881,10 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, const vector<CLUST
 			
 	 cout << "	Interaction parameters for each triplet type: " << endl;
 
-	 for(int i=0;i<FF_3BODY.size(); i++)
+	 for(int i=0;i<FF_4BODY.size(); i++)
 	 {
-		cout << "	" << FF_4BODY[i].INDX;
-		for(int j=0; j<6; j++)
-		  cout << " " << FF_4BODY[i].ATOM_PAIRS[j];
-				
-		cout << ": " << FF_4BODY[i].N_TRUE_ALLOWED_POWERS << " parameters, " << FF_4BODY[i].N_ALLOWED_POWERS << " total parameters "<< endl;	
-		cout << "	     index  |  powers         |  equiv index  |  param index  | parameter " << endl;
-		cout << "	   ---------------------------------------------------------------------------" << endl;	
-
-		for(int j=0; j<FF_4BODY[i].ALLOWED_POWERS.size(); j++)
-		{
-		  cout << "	      " << setw(6) << fixed << left << j << " ";
-					
-		  for(int k=0; k<6; k++)
-			 cout << " " << setw(2) << fixed << left << FF_4BODY[i].ALLOWED_POWERS[j][k]  << " ";					
-					
-		  cout << "       " << setw(8) << FF_4BODY[i].EQUIV_INDICES[j] << " ";
-		  cout << "       " << setw(8) << FF_4BODY[i].PARAM_INDICES[j] << " "; 
-		  cout << "       " << setw(8) << FF_4BODY[i].PARAMS[j] << endl; 
-	
-		}
-
-		cout << endl;
-	 }	 	
+		FF_4BODY[i].print(true) ;
+	 }
   }
 	
   if(CONTROLS.FIT_COUL)

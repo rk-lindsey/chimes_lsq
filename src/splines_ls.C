@@ -52,8 +52,6 @@ vector<int>	INT_PAIR_MAP;
 
 // For 4-body interactions, these are used for both the lsq and md parts:
 
-vector<int>   INT_QUAD_MAP;			// maps for collections of 4 atoms
-vector<int>   INT_QUAD_MAP_REVERSE;	// corresponding reverse-maps
 vector<int>   TMP_ATOMTYPEIDX;			// Used to construct the quadruplet type index
 vector<string> TMP_ATOMTYPE;			// Used to construct the quadruplet type index
 ofstream BAD_CONFIGS ;
@@ -1869,8 +1867,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 			  NQUAD = QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
 			
-			  INT_QUAD_MAP = QUADS.INT_MAP ;
-			  INT_QUAD_MAP_REVERSE = QUADS.INT_MAP_REVERSE ;
 			}  
 
 #if VERBOSITY == 1						
@@ -1897,7 +1893,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					cout << "	" << endl;
 					for(int i=0;i<NTRIP; i++)
 					{
-					  TRIPS.VEC[i].print() ;
+					  TRIPS.VEC[i].print(false) ;
 					}
 				}
 				#endif	
@@ -1912,7 +1908,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 					for(int i=0;i<NQUAD; i++)
 					{
-					  QUADS.VEC[i].print() ;
+					  QUADS.VEC[i].print(false) ;
 					}
 				}
 				#endif		

@@ -33,8 +33,18 @@ int parse_space(string line, vector<string>& tokens)
   stream_parser.str(line);
   tokens.clear() ;
 
-  while ( stream_parser >> buf )
+  while ( stream_parser >> buf ) 
 	 tokens.push_back(buf) ;
+
+  // Strip off trailing newline.
+  int last = tokens.size() - 1 ;
+  int pos ;
+  if ( last >= 0 ) 
+  {
+	 pos = tokens[last].find('\n') ;
+	 if ( pos != string::npos ) 
+		tokens[last].erase(pos, 1) ;
+  }
 
   return(tokens.size() ) ;
 }

@@ -9,6 +9,16 @@ from numpy import *
 from numpy.linalg import lstsq
 from datetime import *
 
+def is_number(s):
+# Test if s is a number.
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+
 TEST_SUITE_RUN = False
 DO_WEIGHTING   = False
 WEIGHTS        = None
@@ -55,6 +65,12 @@ if ( nlines != nlines2 ):
     exit(1) 
 
 np=len(af[0].split())
+
+if np > nlines:
+    print "Error: number of variables > number of equations"
+    exit(1)
+
+
 print "! Date ", date.today() ;
 print "!"
 print "! Number of variables = ", np
@@ -64,15 +80,33 @@ A=zeros((nlines,np))
 b=zeros((nlines))
 
 for i in range(0,nlines):
-    af[i]=af[i].split()
+    afs=af[i].split()
     
+    if len(afs) != np:
+        print "Inconsistent number of columns found in A"
+        exit(1)
+
     for n in range(0,np):
-        A[i][n]=float(af[i][n])
+        if is_number(afs[n]) :
+            A[i][n]=float(afs[n])
+            #print str(i) + " " + str(n) + " " + str(A[i][n]) 
+        else:
+            print "Non-number found in A"
+            exit(1)
         
-    b[i]=float(bf[i])
+    if is_number(bf[i]):
+        b[i]=float(bf[i])
+    else:
+        print "Non-number found in b"
+        exit(1)
     
     if DO_WEIGHTING:
-        WEIGHTS[i] = float(WEIGHTS[i])
+        if is_number(WEIGHTS[i]):
+            WEIGHTS[i] = float(WEIGHTS[i])
+        else:
+            print "Non-number found in WEIGHTS"
+            exit(1)
+
 
 af = 0
 bf = 0
@@ -256,21 +290,19 @@ P3 = ""
 
 SNUM_3B   = 0
 ADD_LINES = 0
+COUNTED_COUL_PARAMS = 0 
 
 if TOTAL_TRIPS > 0:
     for t in xrange(0, int(TOTAL_TRIPS)):
 
-        P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
-        
-        #print P1
-        
+        P1 = hf[ATOM_TRIPS_LINE+3+ADD_LINES].split()
+
         SNUM_3B +=  int(P1[4])
         
         TOTL = P1[6]
-
-        ADD_LINES += 4
+        ADD_LINES += 5
         
-        for i in xrange(0,int(TOTL)):
+        for i in xrange(0, int(TOTL)):
             ADD_LINES += 1
             
 # Figure out how many 4B parameters there are
@@ -281,7 +313,7 @@ ADD_LINES = 0
 if TOTAL_QUADS > 0:
     for t in xrange(0, int(TOTAL_QUADS)):
 
-        P1 = hf[ATOM_QUADS_LINE+2+ADD_LINES].split()
+        P1 = hf[ATOM_QUADS_LINE+3+ADD_LINES].split()
         
         #print "QUAD HEADER", P1
 
@@ -289,7 +321,7 @@ if TOTAL_QUADS > 0:
         
         TOTL = P1[9]
         
-        ADD_LINES += 4
+        ADD_LINES += 5
 
         for i in xrange(0,int(TOTL)):
             ADD_LINES += 1
@@ -319,7 +351,8 @@ for i in range(0,TOTAL_PAIRS):
         print `j` + " " + `x[i*SNUM_2B+j]`
     
     if FIT_COUL == "true":
-        print "q_" + A1 + " x q_" + A2 + " " + `x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + i]`
+        print "q_" + A1 + " x q_" + A2 + " " + `x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + SNUM_4B + i]`
+        COUNTED_COUL_PARAMS += 1
     
     print " "
 
@@ -339,20 +372,22 @@ if TOTAL_TRIPS > 0:
     
         PREV_TRIPIDX = 0
 
-        P1 = hf[ATOM_TRIPS_LINE+2+ADD_LINES].split()
-        
+        print "TRIPLETTYPE PARAMS:"
+        print "  " + hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip() 
+
+        P1 = hf[ATOM_TRIPS_LINE+3+ADD_LINES].split()
+
+        V0 = P1[1] 
+        V1 = P1[2]
+        V2 = P1[3]
         UNIQ = P1[4]
-        TOTL = P1[6]
-        
-        P2 = P1[2]
-        P3 = P1[3]
-        P1 = P1[1]
-        
-        print "TRIPLETTYPE PARAMS: " +`t` + " " + P1 + " " + P2 + " " + P3 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL + "\n"
+        TOTL = P1[6].rstrip() 
+
+        print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL 
         print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
         print "   ----------------------------------------------------------------------------"
         
-        ADD_LINES += 2
+        ADD_LINES += 3
         
         if(t>0):
             ADD_PARAM += 1
@@ -374,6 +409,7 @@ if TOTAL_TRIPS > 0:
 
 ADD_LINES = 0
 
+COUNTED_QUAD_PARAMS = 0
 if TOTAL_QUADS > 0:
     print "QUADRUPLET " + POTENTIAL + " PARAMS \n"
     
@@ -389,24 +425,29 @@ if TOTAL_QUADS > 0:
 
         #print "P1 " + P1[1] + P1[2] + P1[3] + P1[4] + P1[5] + P1[6]
         
-        UNIQ = P1[7]
-        TOTL = P1[9]
-        
-        P2 = P1[2]
-        P3 = P1[3]
-        P4 = P1[4]
-        P5 = P1[5]
-        P6 = P1[6]
-        P1 = P1[1]
-        
-        print "QUADRUPLETYPE PARAMS: " +`t` + " " + P1 + " " + P2 + " " + P3 + " " + P4 + " " + P5 + " " + P6 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL + "\n"
+        print "QUADRUPLETYPE PARAMS: " 
+        print "  " + hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip() 
 
+        P1 = hf[ATOM_QUADS_LINE+3+ADD_LINES].split()
+
+        #print P1 
+
+        V0 = P1[1] 
+        V1 = P1[2]
+        V2 = P1[3]
+        V3 = P1[4] 
+        V4 = P1[5]
+        V5 = P1[6]
+
+        UNIQ = P1[7]
         #print "UNIQUE: ", str(UNIQ)
+        TOTL = P1[9].rstrip() 
         
+        print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " " + V3 + " " + V4 + " " + V5 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL 
         print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
         print "   ----------------------------------------------------------------------------"
         
-        ADD_LINES += 2
+        ADD_LINES += 3
         
         if(t>0):
             ADD_PARAM += 1
@@ -416,20 +457,25 @@ if TOTAL_QUADS > 0:
             LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
             LINE_SPLIT = LINE.split()
 
-            #print "LINE_SPLIT", LINE_SPLIT
-            #print "QUAD_PAR_IDX", QUAD_PAR_IDX
+            UNIQ_QUAD_IDX = int(LINE_SPLIT[8])
+            #print 'UNIQ_QUAD_IDX', str(UNIQ_QUAD_IDX)
 
-            print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX+int(LINE_SPLIT[8])]`
-            #print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS]`
+            print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]`
 
         QUAD_PAR_IDX += int(UNIQ)
+        COUNTED_QUAD_PARAMS += int(UNIQ)
+        #print "COUNTED_QUAD_PARAMS", COUNTED_QUAD_PARAMS
             
         print ""
         
-        ADD_LINES += 2        
+        ADD_LINES += 2
+        
 
 if FIT_POVER == "true":
-	print "P OVER: " + `x[len(x)-1]`
+    print "P OVER: " + `x[len(x)-1]`
+    OVERCOORD_PARAMS = 1
+else:
+    OVERCOORD_PARAMS = 0
 	
 mapsfile=open(sys.argv[4],"r").readlines()
 
@@ -441,7 +487,10 @@ for i in range(0,len(mapsfile)):
 print ""
 			
 print "ENDFILE"		
-		
+
+if TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS != len(x) :
+    print "Error in counting parameters"
+    exit(1)
 		
 if TEST_SUITE_RUN == "do":
 	test_suite_params=open("test_suite_params.txt","w")		
@@ -453,9 +502,6 @@ if TEST_SUITE_RUN == "do":
 # OLD WAY:
 #for i in range(0,len(x)):
 #    print i,x[i]
-
-
-
 
 
 

@@ -57,8 +57,8 @@ CXX_LSQ_SRC=splines_ls.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C
 CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h Cheby.h
 
 house_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
-	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq Cheby.C Cheby.C
- Cheby.h
+	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o house_lsq
+
 clean_lsq:
 	/bin/rm -f splines_ls.o functions.o Ewald.o
 
