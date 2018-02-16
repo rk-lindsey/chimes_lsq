@@ -120,6 +120,28 @@ int main(int argc, char* argv[])
 	read_lsq_input(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, 
 						PAIR_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
 
+						
+	if(CONTROLS.USE_3B_CHEBY)
+	{
+	  // Generate unique triplets
+	  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
+#if VERBOSITY == 1	
+	  TRIPS.print(false) ;
+#endif	
+	}
+
+	if(CONTROLS.USE_4B_CHEBY)
+	{
+	  //////////////////////////////////////////////////////////////////////
+	  // Generate unique quadruplets and thier corresponding sets of powers
+	  //////////////////////////////////////////////////////////////////////
+	  
+	  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
+#if VERBOSITY == 1	
+	  QUADS.print(false) ;
+#endif		
+	}  
+
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
 	{
 		cout << "ERROR: Inclusion of stress tensors currently not compatible with use of ZCalc_Ewald_Deriv." << endl;
@@ -1661,21 +1683,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		
 		else if(LINE.find("EXCLUDE 3B INTERACTION:")!= string::npos)
 		{
-			STREAM_PARSER.str(LINE);
-			STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_INT;
+		  TRIPS.read_exclude(cin, LINE) ;
+		}	
 
-			for(int i=0; i<TEMP_INT; i++)
-			{
-				cin >> LINE;
-				TRIPS.EXCLUDE.push_back(LINE);
-			}
-			
-			// Sort the vector into ascending order
-			
-			sort (TRIPS.EXCLUDE.begin(), TRIPS.EXCLUDE.end());
-			
-			STREAM_PARSER.str("");
-			STREAM_PARSER.clear();	
+		else if(LINE.find("EXCLUDE 4B INTERACTION:")!= string::npos)
+		{
+		  QUADS.read_exclude(cin, LINE) ;
 		}	
 		
 		else if(LINE.find("# NATMTYP #")!= string::npos)
@@ -1851,23 +1864,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			//cout << "Made the following pairs: " << endl;
 			//for(map<string,int>::iterator i=PAIR_MAP.begin(); i!=PAIR_MAP.end(); i++)
 			//cout << i->second << " " << i->first << endl;			
-						
-			if(CONTROLS.USE_3B_CHEBY)
-			{
-				// Generate unique triplets
-			  NTRIP = TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
-
-			}
-
-			if(CONTROLS.USE_4B_CHEBY)
-			{
-			  //////////////////////////////////////////////////////////////////////
-				// Generate unique quadruplets and thier corresponding sets of powers
-				//////////////////////////////////////////////////////////////////////
-
-			  NQUAD = QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
-			
-			}  
 
 #if VERBOSITY == 1						
 			if ( RANK == 0 ) 
@@ -1879,45 +1875,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			}
 #endif
 					
-			if(CONTROLS.USE_3B_CHEBY)
-			{
-				#if VERBOSITY == 1	
-				if ( RANK == 0 ) 
-				{
-					cout << "	The following unique triplets of pair types and thier allowed pair polynomial powers have been identified:" << endl;
-					cout << "	Note: The following types have been removed, if present: " << endl;
-					
-					for(int i=0;i<TRIPS.EXCLUDE.size(); i++)
-						cout << "		" << TRIPS.EXCLUDE[i] << endl;
 
-					cout << "	" << endl;
-					for(int i=0;i<NTRIP; i++)
-					{
-					  TRIPS.VEC[i].print(false) ;
-					}
-				}
-				#endif	
-			}	
-
-			if(CONTROLS.USE_4B_CHEBY)
-			{
-				#if VERBOSITY == 1	
-				if ( RANK == 0 ) 
-				{
-					cout << "	The following unique six-lets of pair types and thier allowed pair polynomial powers have been identified:" << endl;
-
-					for(int i=0;i<NQUAD; i++)
-					{
-					  QUADS.VEC[i].print(false) ;
-					}
-				}
-				#endif		
-				
-			} // CONTROLS.USE_4B_CHEBY
-			
 		}
-	
-		
 
 		else if(LINE.find("# PAIRIDX #")!= string::npos) // Read the topology part. For now, ignoring index and atom types..
 		{

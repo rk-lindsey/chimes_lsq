@@ -57,6 +57,6 @@ void EXIT_MSG(string EXIT_STRING, string EXIT_VAR) ;
 void EXIT_MSG(string EXIT_STRING, double EXIT_VAR) ;
 
 // Read the next input line, with error checking.
-string get_next_line(ifstream& str) ;
+string get_next_line(istream& str) ;
 
 #endif // defined(_util_h)

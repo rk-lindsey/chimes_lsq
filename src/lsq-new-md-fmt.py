@@ -230,15 +230,12 @@ print "PAIR " + POTENTIAL + " PARAMS \n"
 CASE_BY_CASE = False
 
 SNUM_2B = 0
-SNUM_3B = 0
 SNUM_4B = 0
 
 if POTENTIAL == "CHEBYSHEV" or POTENTIAL == "DFTBPOLY":
     TMP = hf[7].split()
     
     if len(TMP) >= 4:
-        SNUM_3B = int(TMP[3])
-        
         if len(TMP) >= 5:
             SNUM_4B = int(TMP[4])
         
@@ -297,13 +294,14 @@ if TOTAL_TRIPS > 0:
 
         P1 = hf[ATOM_TRIPS_LINE+3+ADD_LINES].split()
 
-        SNUM_3B +=  int(P1[4])
+        if P1[4] != "EXCLUDED:":
+            SNUM_3B +=  int(P1[4])
         
-        TOTL = P1[6]
-        ADD_LINES += 5
+            TOTL = P1[6]
+            ADD_LINES += 5
         
-        for i in xrange(0, int(TOTL)):
-            ADD_LINES += 1
+            for i in xrange(0, int(TOTL)):
+                ADD_LINES += 1
             
 # Figure out how many 4B parameters there are
 
@@ -316,15 +314,16 @@ if TOTAL_QUADS > 0:
         P1 = hf[ATOM_QUADS_LINE+3+ADD_LINES].split()
         
         #print "QUAD HEADER", P1
+        if P1[7] != "EXCLUDED:":
 
-        SNUM_4B +=  int(P1[7])
+            SNUM_4B +=  int(P1[7])
         
-        TOTL = P1[9]
+            TOTL = P1[9]
         
-        ADD_LINES += 5
+            ADD_LINES += 5
 
-        for i in xrange(0,int(TOTL)):
-            ADD_LINES += 1
+            for i in xrange(0,int(TOTL)):
+                ADD_LINES += 1
 
 #print "TOTAL 4B PARAMETERS ", SNUM_4B            
 
@@ -376,33 +375,40 @@ if TOTAL_TRIPS > 0:
         print "  " + hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip() 
 
         P1 = hf[ATOM_TRIPS_LINE+3+ADD_LINES].split()
+        
+        #print "HEADER: ", P1
 
         V0 = P1[1] 
         V1 = P1[2]
         V2 = P1[3]
-        UNIQ = P1[4]
-        TOTL = P1[6].rstrip() 
 
-        print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL 
-        print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
-        print "   ----------------------------------------------------------------------------"
-        
-        ADD_LINES += 3
-        
-        if(t>0):
-            ADD_PARAM += 1
-        
-        for i in xrange(0,int(TOTL)):
+        if P1[4] == "EXCLUDED:" :
+            print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " EXCLUDED:"
             ADD_LINES += 1
-            LINE       = hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip('\n')
-            LINE_SPLIT = LINE.split()
+        else:
+            UNIQ = P1[4]
+            TOTL = P1[6].rstrip() 
 
-            print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]`
+            print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL 
+            print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
+            print "   ----------------------------------------------------------------------------"
+        
+            ADD_LINES += 3
+        
+            if(t>0):
+                ADD_PARAM += 1
+        
+            for i in xrange(0,int(TOTL)):
+                ADD_LINES += 1
+                LINE       = hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip('\n')
+                LINE_SPLIT = LINE.split()
+                    
+                print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]`
 
-        TRIP_PAR_IDX += int(UNIQ)
-        COUNTED_TRIP_PARAMS += int(UNIQ)
-        #print "COUNTED_TRIP_PARAMS", COUNTED_TRIP_PARAMS
-            
+            TRIP_PAR_IDX += int(UNIQ)
+            COUNTED_TRIP_PARAMS += int(UNIQ)
+                #print "COUNTED_TRIP_PARAMS", COUNTED_TRIP_PARAMS
+                
         print ""
         
         ADD_LINES += 2
@@ -439,31 +445,37 @@ if TOTAL_QUADS > 0:
         V4 = P1[5]
         V5 = P1[6]
 
-        UNIQ = P1[7]
         #print "UNIQUE: ", str(UNIQ)
-        TOTL = P1[9].rstrip() 
-        
-        print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " " + V3 + " " + V4 + " " + V5 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL 
-        print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
-        print "   ----------------------------------------------------------------------------"
-        
-        ADD_LINES += 3
-        
-        if(t>0):
-            ADD_PARAM += 1
-        
-        for i in xrange(0,int(TOTL)):
+        if P1[7] == "EXCLUDED:" :
+            print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " " + V3 + " " + V4 + " " + V5 + " EXCLUDED: " 
             ADD_LINES += 1
-            LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
-            LINE_SPLIT = LINE.split()
 
-            UNIQ_QUAD_IDX = int(LINE_SPLIT[8])
-            #print 'UNIQ_QUAD_IDX', str(UNIQ_QUAD_IDX)
+        else:
+            UNIQ = P1[7]
+            TOTL = P1[9].rstrip() 
 
-            print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]`
+            print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " " + V3 + " " + V4 + " " + V5 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL 
+            print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
+            print "   ----------------------------------------------------------------------------"
+        
+            ADD_LINES += 3
+        
+            if(t>0):
+                ADD_PARAM += 1
+        
+                for i in xrange(0,int(TOTL)):
+                    ADD_LINES += 1
+                    LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
+                    LINE_SPLIT = LINE.split()
 
-        QUAD_PAR_IDX += int(UNIQ)
-        COUNTED_QUAD_PARAMS += int(UNIQ)
+                    UNIQ_QUAD_IDX = int(LINE_SPLIT[8])
+                    #print 'UNIQ_QUAD_IDX', str(UNIQ_QUAD_IDX)
+
+                    print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]`
+
+                QUAD_PAR_IDX += int(UNIQ)
+                COUNTED_QUAD_PARAMS += int(UNIQ)
+
         #print "COUNTED_QUAD_PARAMS", COUNTED_QUAD_PARAMS
             
         print ""

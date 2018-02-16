@@ -47,7 +47,8 @@ void CLUSTER::build(int cheby_order)
   cout << endl ;
 #endif
 
-  build_loop(0, cheby_order, powers) ;
+  if ( ! EXCLUDED ) 
+	 build_loop(0, cheby_order, powers) ;
 				
   N_TRUE_ALLOWED_POWERS = UNIQUE_POWERS.size() ;
   N_ALLOWED_POWERS = PARAM_INDICES.size();
@@ -297,32 +298,40 @@ void CLUSTER::print(bool md_mode) const
 	 }
 	 cout << endl ;
 
-	 cout<< "    Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
-
-	 cout << "		     index  |  powers  |  equiv index  |  param index  " ;
-	 if ( md_mode ) 
-		cout << " | parameter " ;
-	 cout << endl ;
-
-	 cout << "		   ----------------------------------------------------" << endl;					
-				
-	 for(int j=0; j<ALLOWED_POWERS.size(); j++)
+	 if ( EXCLUDED ) 
 	 {
-
-		cout << "		      " << setw(6) << fixed << left << j << " ";
-		
-		for(int k=0; k<NPAIRS; k++)
-		  cout << " " << setw(2) << fixed << left << ALLOWED_POWERS[j][k] << " ";
-						
-		cout << "       " << setw(8) << EQUIV_INDICES[j] << " ";
-		cout << "       " << setw(8) << PARAM_INDICES[j] ; 
-		
-		if ( md_mode ) 
-		  cout << PARAMS[j] ;
-
-		cout << endl ;
-		
+		cout << "   Interaction is excluded by the user" << endl ;
 	 }
+	 else 
+	 {
+		cout<< "    Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
+
+		cout << "		     index  |  powers  |  equiv index  |  param index  " ;
+		if ( md_mode ) 
+		  cout << " | parameter " ;
+		cout << endl ;
+
+		cout << "		   ----------------------------------------------------" << endl;					
+				
+		for(int j=0; j<ALLOWED_POWERS.size(); j++)
+		{
+
+		  cout << "		      " << setw(6) << fixed << left << j << " ";
+		
+		  for(int k=0; k<NPAIRS; k++)
+			 cout << " " << setw(2) << fixed << left << ALLOWED_POWERS[j][k] << " ";
+						
+		  cout << "       " << setw(8) << EQUIV_INDICES[j] << " ";
+		  cout << "       " << setw(8) << PARAM_INDICES[j] ; 
+		
+		  if ( md_mode ) 
+			 cout << PARAMS[j] ;
+
+		  cout << endl ;
+		
+		}
+	 }
+	 cout << endl ;
   }
 }
 
@@ -382,22 +391,27 @@ void CLUSTER::print_header(ofstream &header)
 	 if(m<NPAIRS-1)
 		header << " ";
   }
-  header << "  " << N_TRUE_ALLOWED_POWERS << " parameters, " << N_ALLOWED_POWERS << " total parameters "<< endl;	
-	
-  header << "     index  |  powers  |  equiv index  |  param index  " << endl;
-  header << "   ----------------------------------------------------" << endl;	
-
-  for(int j=0; j<ALLOWED_POWERS.size(); j++)
+  if ( EXCLUDED )
   {
-	 header << "      " << setw(6) << fixed << left << j << " ";
-	 header << " ";
-	 for(int m=0; m<NPAIRS; m++)
-		header << setw(2) << fixed << left << ALLOWED_POWERS[j][m] << " ";
-	 header << "       " << setw(8) << EQUIV_INDICES[j] << " ";
-	 header << "       " << setw(8) << PARAM_INDICES[j] << endl; 
-	
-  }
+	 header << " EXCLUDED:\n" ;
+  } 
+  else 
+  {
+	 header << "  " << N_TRUE_ALLOWED_POWERS << " parameters, " << N_ALLOWED_POWERS << " total parameters "<< endl;	
+	 header << "     index  |  powers  |  equiv index  |  param index  " << endl;
+	 header << "   ----------------------------------------------------" << endl;	
 
+	 for(int j=0; j<ALLOWED_POWERS.size(); j++)
+	 {
+		header << "      " << setw(6) << fixed << left << j << " ";
+		header << " ";
+		for(int m=0; m<NPAIRS; m++)
+		  header << setw(2) << fixed << left << ALLOWED_POWERS[j][m] << " ";
+		header << "       " << setw(8) << EQUIV_INDICES[j] << " ";
+		header << "       " << setw(8) << PARAM_INDICES[j] << endl; 
+		
+	 }
+  }
   header << endl;
 }
 
@@ -430,15 +444,24 @@ void CLUSTER::read_ff_params(ifstream &paramfile, const vector<string> &atomtype
   LINE = get_next_line(paramfile) ;  // PAIRS: <p1> <p2> <p3> UNIQUE: <uniq> TOTAL: <TOTAL>
   
   ntokens = parse_space(LINE, tokens) ;
-  
-  if ( ntokens != NPAIRS + 5 )
+
+  if ( ntokens > NPAIRS ) {
+	 if ( tokens[0] != "PAIRS:" ) 
+		EXIT_MSG("Error reading ff: PAIRS: not found: " + LINE) ;
+
+	 for ( int j = 0 ; j < NPAIRS ; j++ )
+		ATOM_PAIRS[j] = tokens[j+1] ;
+
+	 if ( tokens.size() == NPAIRS + 2 && tokens[NPAIRS+1] == "EXCLUDED:" )
+	 {
+		EXCLUDED = true ;
+		N_TRUE_ALLOWED_POWERS = 0 ;
+		N_ALLOWED_POWERS = 0 ;
+		return ;
+	 }
+  }
+  else if ( ntokens != NPAIRS + 5 )
 	 EXIT_MSG("Error reading ff: wrong number of arguments: " + LINE) ;
-
-  if ( tokens[0] != "PAIRS:" ) 
-	 EXIT_MSG("Error reading ff: PAIRS: not found: " + LINE) ;
-
-  for ( int j = 0 ; j < NPAIRS ; j++ )
-	 ATOM_PAIRS[j] = tokens[j+1] ;
 
   if ( tokens[1+NPAIRS] != "UNIQUE:" )
 	 EXIT_MSG("Error reading ff: UNIQUE: not found: " + LINE) ;
@@ -630,7 +653,10 @@ void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector
 	 }
 		
 	 INT_MAP[idx1] = MAP[int_map_str];
-	 INT_MAP_REVERSE[MAP[int_map_str]] = idx1 ;
+
+	 // MAP[int_map_str] is -1 for excluded interaction.
+	 if ( INT_MAP[idx1] >= 0 ) 
+		INT_MAP_REVERSE[MAP[int_map_str]] = idx1 ;
 
 	 if(RANK == 0)
 	 {
@@ -656,8 +682,6 @@ int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<str
   for ( int i = 0 ; i < VEC.size() ; i++ ) 
 	 VEC[i].build(cheby_order) ;
 
-   exclude() ;
-	
 	return( VEC.size() ) ;
 }
 
@@ -793,6 +817,7 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		}
 	 }
 
+	 bool excluded = is_excluded(atom_names) ;
 		
 	 if ( new_pair ) 
 	 {
@@ -819,7 +844,6 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		cout << "ADDING ATOM_PAIRS = " ;
 #endif
 		  
-
 		for ( int i = 0 ; i < natoms ; i++ ) {
 		  VEC[count].ATOM_NAMES[i] = atom_names[i] ;
 		  for ( int j = i + 1 ; j < natoms ; j++ ) {
@@ -832,7 +856,11 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		}
 		cout << endl ;
 		
-		map_index = count ;
+		if ( ! excluded )
+		  map_index = count ;
+		else
+		  VEC[count].EXCLUDED = true ;
+
 		count++;	
 	 }
 
@@ -841,6 +869,9 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 for ( int i = 0 ; i < pair_names_unsorted.size() ; i++ )
 		all_pairs += pair_names_unsorted[i] ;
 
+	 if ( excluded )
+		map_index = -1 ;
+	 
 	 MAP.insert(make_pair(all_pairs,map_index)) ;
 
 #ifdef DEBUG_CLUSTER
@@ -857,8 +888,11 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 int atom_id_int = make_id_int(atom_index) ;
 	 //int atom_id_int = make_id_int(atom_index_2) ;
 	 INT_MAP[atom_id_int] = map_index ;
-	 INT_MAP_REVERSE[map_index] = atom_id_int ;
-								
+
+	 // Negative map index for excluded interaction.
+	 if ( map_index >= 0 )
+		INT_MAP_REVERSE[map_index] = atom_id_int ;
+
 	 if(RANK == 0)
 	 {
 		cout << "		";
@@ -876,106 +910,86 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
   } // End of calculation.
 }
 
+bool CLUSTER_LIST::is_excluded(vector<string> atom_names)
+// Returns true if the cluster list is excluded from the interaction.
+{
+  bool excluded = false ;
 
-void CLUSTER_LIST::exclude()
-{				
-  // Now that we've got the maps and the 3b ff structures created, we can go back an remove triplet types
-  // that the user requested to exclude
+  // Pass by value of atom_names makes the sorting safe.
+  sort( atom_names.begin(), atom_names.end() ) ;
 
-  if ( EXCLUDE.size() == 0 ) 
-	 return ;
-
-  vector<int>EXCL_IDX;
-  map<string, int>::iterator it2, it2a,itrem;
-  map<string, int>::iterator it, ita, itb;
-  ita = MAP.begin();
-  itb = MAP.end();
-  advance(itb,-1);
-				
-/*				
-//	Sanity check	
-cout << "YOUR OLD MAPS: " << endl;	
-for(it = MAP.begin(); it != MAP.end(); it++)
-cout <<"		" << it->first << " : " << it->second << endl;
-*/				
-				
-  // Start by making all removed type indicies negative
-  // ALSO, THIS IS WHERE WE POP OFF ELEMENTS OF OUR PAIR TRIPLET VECTOR
-				 
-  vector<int> POPPED; 
-
-  for (unsigned j = EXCLUDE.size(); j-- > 0; ) // Since we're popping off by index, iterate over vector (ascending sorted) in reverse
-	 VEC.erase (VEC.begin() + MAP[EXCLUDE[j]]);
-
-  for(int j=0; j<EXCLUDE.size(); j++)
+  for ( int j = 0 ; j < EXCLUDE.size() ; j++ ) 
   {
-	 EXCL_IDX.push_back(MAP[EXCLUDE[j]]);
-
-	 NCLUSTERS--;
-					
-	 for(it = MAP.begin(); it != MAP.end(); it++)				
+	 int k ;
+	 for ( k = 0 ; k < VEC[0].NATOMS ; k++ )
 	 {
-		if(it->second == EXCL_IDX[j])	// Then we need to exclude it!
-		{		
-		  POPPED.push_back(it->second);
-		  it->second = -1*it->second - 1;	
-		}
-	 }				
-  }	
-				
-  // Sort the popoff list in ascending order
-				
-  sort (POPPED.begin(), POPPED.end());
-				
-/*				
-//	Sanity check	
-cout << "YOUR ~~ MAPS: " << endl;	
-for(it = MAP.begin(); it != MAP.end(); it++)
-cout <<"		" << it->first << " : " << it->second << endl;
-				
-*/
-								
-  for(int i=0; i<POPPED.size(); i++)
-  {
-	 for(it = MAP.begin(); it != MAP.end(); it++)
-	 {
-		if(it->second>POPPED[i])
-		  it->second -= 1;
+		if ( EXCLUDE[j][k] != atom_names[k] ) 
+		  break ;
 	 }
+	 // See if we found a match from the exclude list.
+	 if ( k == VEC[0].NATOMS ) 
+		return(true) ;
   }
-/*				
-//	Sanity check	
-cout << "YOUR NEW MAPS: " << endl;	
-for(it = MAP.begin(); it != MAP.end(); it++)
-cout <<"		" << it->first << " : " << it->second << endl;
-*/				
-				
-  // Finally, rebuild the reverse maps
-				
-  MAP_REVERSE.clear();
 
-  for(it = MAP.begin(); it != MAP.end(); it++)
-	 MAP_REVERSE.insert(make_pair(it->second,it->first));
-
-/*				
-//	Sanity check	
-							
-cout << "YOUR NEW REV MAPS: " << endl;
-
-map<int, string>::iterator itc;
-				
-for(itc = MAP_REVERSE.begin(); itc != MAP_REVERSE.end(); itc++)
-cout <<"		" << itc->first << " : " << itc->second << endl;
-*/				
-/*				
-// Sanity check
-				
-cout << "Triplet types (force field): " << endl;
-for(int i=0;i<NCLUSTER; i++)
-cout << "		" << PAIR_TRIPLETS[i].INDX << "  " << PAIR_TRIPLETS[i].ATOM_PAIRS[0] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[1] << " " << PAIR_TRIPLETS[i].ATOM_PAIRS[2] << endl;
-*/
+  return(false) ;
 }
 
+
+void CLUSTER_LIST::read_exclude(istream &input, string line)
+// Read the excluded interactions from the input stream.
+{
+  int nexclude ;
+
+  vector<string> tokens ;
+
+  parse_space(line, tokens) ;
+  if ( tokens.size() < 4 ) 
+	 EXIT_MSG("Wrong number of parameters in EXCLUDE command: " + line) ;
+
+  nexclude = stoi(tokens[3]) ;
+
+  for(int i=0; i< nexclude; i++)
+  {
+	 line = get_next_line(input) ;
+	 vector<string> elements ;
+	 
+	 parse_space(line, elements) ;
+	 if ( elements.size() != VEC[0].NATOMS )
+		EXIT_MSG("Wrong number of atoms in exclude command: " + line) ;
+
+	 sort(elements.begin(), elements.end() ) ;
+	 EXCLUDE.push_back(elements);
+  }
+			
+}
+
+void CLUSTER_LIST::print(bool md_mode)
+{
+  if ( RANK == 0 ) 
+  {
+	 string tuplet = tuplet_name(VEC[0].NATOMS,true,false) ;
+
+	 cout << "	The following unique " << tuplet << " of atoms have been identified:" << endl;
+
+	 if ( EXCLUDE.size() > 0 )
+		cout << "	Note: The following types have been removed, if present: " << endl;
+					
+	 for(int i=0;i<EXCLUDE.size(); i++)
+	 {
+		for ( int j = 0 ; j < EXCLUDE[i].size() ; j++ )
+		{
+		  cout << "		" << EXCLUDE[i][j] ;
+		}
+		cout << endl ;
+	 }
+	 cout << endl;
+
+	 for(int i=0;i < VEC.size() ; i++)
+	 {
+		VEC[i].print(md_mode) ;
+	 }
+  }
+}
 
 void CLUSTER_LIST::print_min_distances()
 {

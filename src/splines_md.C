@@ -56,8 +56,8 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 									NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP,
                            const vector<string>& TMP_ATOMTYPE, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
 									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
-static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, const vector<CLUSTER> &FF_3BODY, 
-                             const vector<CLUSTER> &FF_4BODY, const JOB_CONTROL &CONTROLS) ;
+static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST &TRIPS,
+									  CLUSTER_LIST &QUADS, const JOB_CONTROL &CONTROLS) ;
 static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE,
 							 CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS) ;
 
@@ -1118,7 +1118,7 @@ FF_SETUP_2:
 	
   if(RANK==0)
   {
-	 print_ff_summary(FF_2BODY, FF_3BODY, FF_4BODY, CONTROLS) ;
+	 print_ff_summary(FF_2BODY, TRIPS, QUADS, CONTROLS) ;
   }
 	
   ////////////////////////////////////////////////////////////
@@ -4803,10 +4803,13 @@ static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CO
 
 }
 
-static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, const vector<CLUSTER> &FF_3BODY, 
-                             const vector<CLUSTER> &FF_4BODY, const JOB_CONTROL &CONTROLS)
+static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIPS,
+									  CLUSTER_LIST& QUADS, const JOB_CONTROL &CONTROLS)
 // Print out a summary of the force field.
 {
+
+  vector<CLUSTER> &FF_3BODY = TRIPS.VEC ;
+  vector<CLUSTER> &FF_4BODY = QUADS.VEC ;
 
   cout << "Force field summary: " << endl;
 	
@@ -4863,28 +4866,12 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, const vector<CLUST
 
   if(FF_2BODY[0].SNUM_3B_CHEBY > 0)
   {
-	 cout << "	Triplet type and polynomial order per triplet: " << endl;
-	 cout << "		" << FF_2BODY[0].PAIRTYP << " " << FF_2BODY[0].SNUM_3B_CHEBY << endl << endl;	
-			
-	 cout << "	Interaction parameters for each triplet type: " << endl;
-
-	 for(int i=0;i<FF_3BODY.size(); i++)
-	 {
-		FF_3BODY[i].print(true) ;
-	 }	 	
+	 TRIPS.print(true) ;
   }
 		
   if(FF_2BODY[0].SNUM_4B_CHEBY > 0)
   {
-	 cout << "	Quadruplet type and polynomial order per quadruplet: " << endl;
-	 cout << "		" << FF_2BODY[0].PAIRTYP << " " << FF_2BODY[0].SNUM_4B_CHEBY << endl << endl;	
-			
-	 cout << "	Interaction parameters for each triplet type: " << endl;
-
-	 for(int i=0;i<FF_4BODY.size(); i++)
-	 {
-		FF_4BODY[i].print(true) ;
-	 }
+	 QUADS.print(true) ;
   }
 	
   if(CONTROLS.FIT_COUL)

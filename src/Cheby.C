@@ -337,29 +337,30 @@ void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, ma
 
 void SET_4B_CHEBY_POWERS(QUADRUPLETS & PAIR_QUADRUPLET, vector<string> & ATOM_TYPE, vector<int> & pow_map) // LSQ version
 // Matches the allowed powers to the ij, ik, il... type pairs formed from the atom sixlet ai, aj, ak, al
+// This is based on reordering atoms, not pairs.  Pairs can't be interchanged independently, but atoms can.
 // "pow_map" serves as the map between the powers in the quadruplet and the powers between the atoms.
 {
 	typedef pair<string,int> 		PAIR_STR_INT;
 	
 	vector <PAIR_STR_INT> 	ATOM_TYPE_AND_INDEX(4);	// [a1/a2/a3/a4 atom pair chemistry][index of pair (from 1-6)]
 	vector <PAIR_STR_INT> 	ATOM_TYPE_AND_POWER(4);	// [power set pair type chemistry][value of pair's power]
-	static int atom_map[4][4] ;
+	static int pair_index[4][4] ;
 	static bool called_before = false ;
 	
 	if ( ! called_before ) 
 	{
-	  atom_map[0][0] = -1 ;
-	  atom_map[1][1] = -1 ;
-	  atom_map[2][2] = -1 ;
-	  atom_map[0][1] = 0 ;
-	  atom_map[0][2] = 1 ;
-	  atom_map[0][3] = 2 ;
-	  atom_map[1][2] = 3 ;
-	  atom_map[1][3] = 4 ;
-	  atom_map[2][3] = 5 ;
+	  pair_index[0][0] = -1 ;
+	  pair_index[1][1] = -1 ;
+	  pair_index[2][2] = -1 ;
+	  pair_index[0][1] = 0 ;
+	  pair_index[0][2] = 1 ;
+	  pair_index[0][3] = 2 ;
+	  pair_index[1][2] = 3 ;
+	  pair_index[1][3] = 4 ;
+	  pair_index[2][3] = 5 ;
 	  for ( int i = 0 ; i < 4 ; i++ ) {
 		 for ( int j = i + 1 ; j < 4 ; j++ ) {
-			atom_map[j][i] = atom_map[i][j] ;
+			pair_index[j][i] = pair_index[i][j] ;
 		 }
 	  }
 	  called_before = true ;
@@ -380,7 +381,7 @@ void SET_4B_CHEBY_POWERS(QUADRUPLETS & PAIR_QUADRUPLET, vector<string> & ATOM_TY
 	  {
 		 int ii = ATOM_TYPE_AND_INDEX[i].second ;
 		 int jj = ATOM_TYPE_AND_INDEX[j].second ;
-		 pow_map[m] = atom_map[ii][jj] ;
+		 pow_map[m] = pair_index[ii][jj] ;
 
 		 if ( pow_map[m] < 0 || pow_map[m] > 5 ) 
 			EXIT_MSG("Permutation power map has a bad value") ;
@@ -828,8 +829,12 @@ void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 				
 				// If this type has been excluded, then skip to the next iteration of the loop
 
-				if(curr_triple_type_index<0)
-					continue;
+				if(curr_triple_type_index<0) 
+				{
+				  // DEBUG !!
+				  //cout << "Interaction " << TEMP_STR << " is excluded\n" ;
+				  continue;
+				}
 
 				rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
 				rlen_ik = get_dist(SYSTEM, RAB_IK, a1, a3);	// Updates RAB!
@@ -1418,24 +1423,8 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 			
 					ATOM_QUAD_ID_INT       = QUADS.make_id_int(TMP_QUAD_SET) ;
 
-					int idxqm = INT_QUAD_MAP[ATOM_QUAD_ID_INT] ;
-
-					if ( idxqm < 0 ) 
-					{
-					  cout << "Missing quad index " << ATOM_QUAD_ID_INT << endl ;
-					  for ( int i = 0 ; i < TMP_QUAD_SET.size() ; i++ )
-					  {
-						 cout << TMP_QUAD_SET[i] << " " ;
-					  }
-					  cout << endl ;
-					  exit_run(0) ;
-					} else
-					{
-					  curr_quad_type_index = INT_QUAD_MAP[ATOM_QUAD_ID_INT];
-					}
-
+					curr_quad_type_index = INT_QUAD_MAP[ATOM_QUAD_ID_INT];
 					// If this type has been excluded, then skip to the next iteration of the loop
-
 					if(curr_quad_type_index<0)
 						continue;
 					
@@ -2346,9 +2335,12 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		idx1 = TRIPS.make_id_int(index) ;
 		curr_triple_type_index = TRIPS.INT_MAP[idx1];
 					
-		if(curr_triple_type_index<0)
+		if(curr_triple_type_index<0) 
+		{
+		  //cout << "Excluded interaction: " << idx1 << endl ;
 		  continue;
-				
+		}
+
 		rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
 		rlen_ik = get_dist(SYSTEM, RAB_IK, a1, a3);	// Updates RAB!
 		rlen_jk = get_dist(SYSTEM, RAB_JK, a2, a3);	// Updates RAB!

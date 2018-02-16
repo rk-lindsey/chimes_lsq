@@ -76,6 +76,8 @@ public:
 	
   int    N_CFG_CONTRIB;		// How many configurations actually contribute to fitting this cluster ??
 	
+  bool EXCLUDED ;          // If true, this is an excluded interaction.
+
   vector<double> MIN_FOUND;	// Testing two cases: 1. 
 	
   vector<double> S_MAXIM ;	// A unique outer cutoff for 4B interactions... by default, is set to S_MAXIM
@@ -137,6 +139,7 @@ public:
 CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), MIN_FOUND(npair),
 	 S_MAXIM(npair), S_MINIM(npair), NBINS(npair), BINWS(npair)
   {
+	 EXCLUDED = false ;
 	 NATOMS = natom ;
 	 NPAIRS = npair ;
 	 N_CFG_CONTRIB = 0 ;
@@ -184,17 +187,20 @@ public:
 
   vector<int> INT_MAP_REVERSE ;
 
-  vector<string> EXCLUDE ;
+  vector<vector<string>> EXCLUDE ;
 
   void build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP) ;
 
   int build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
 
-  void exclude() ;
-
   int make_id_int(vector<int>& index) ;
 
+  void print(bool md_mode) ;
+
   void print_min_distances() ;
+
+  // Read the excluded interactions from the input stream.
+  void read_exclude(istream &input, string line) ;
 
   static string tuplet_name(int natom, bool plural, bool caps) ;
 
@@ -211,6 +217,9 @@ private:
   // Loop across atom types for each atom in the cluster, and build a corresponding loop.
   void build_int_maps_loop(int index, vector<int> atom_index, vector<string> ATOMTYPE,
 									vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+
+  // Determine whether a particular cluster is excluded.
+  bool is_excluded(vector<string> atom_names) ;
 } ;
 
 

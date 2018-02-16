@@ -49,7 +49,7 @@ int parse_space(string line, vector<string>& tokens)
   return(tokens.size() ) ;
 }
 
-string get_next_line(ifstream& str)
+string get_next_line(istream& str)
 // Read a line and return it, with error checking.
 {
   string line ;
