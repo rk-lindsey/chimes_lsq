@@ -36,7 +36,7 @@ echo "SETTING UP FOR MD CODE..."
 echo " "
 
 cd ../src
-rm -rf *o *dSYM house_md
+rm -rf *o *dSYM chimes_md
 
 if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
 	 source /usr/local/tools/dotkit/init.sh
@@ -47,12 +47,12 @@ else
 fi
 
 
-#make -f Makefile-TS-MD house_md
-#mv house_md ../test_suite-md/house_md-serial
+#make -f Makefile-TS-MD chimes_md
+#mv chimes_md ../test_suite-md/chimes_md-serial
 #module load intel impi
 
-make -f Makefile-TS-MD house_md;  
-rm -f ../test_suite-lsq/house_md;  mv house_md  ../test_suite-md/
+make -f Makefile-TS-MD chimes_md;  
+rm -f ../test_suite-lsq/chimes_md;  mv chimes_md  ../test_suite-md/
 cd ../test_suite-md
 
 
@@ -65,10 +65,10 @@ do
 	cd $i
 	
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		../house_md < run_md.in > run_md.out
+		../chimes_md < run_md.in > run_md.out
 			
 	else
-		srun -n $NP ../house_md < run_md.in > run_md.out
+		srun -n $NP ../chimes_md < run_md.in > run_md.out
 	fi		
 		
 	cp *.* current_output
@@ -85,7 +85,7 @@ echo " "
 echo " ...Beginning by running the lsq test suite... "
 
 cd ../src
-rm -rf *o *dSYM house_lsq house_md
+rm -rf *o *dSYM chimes_lsq chimes_md
 cd ../test_suite-md
 
 cd ../test_suite-lsq 
@@ -110,7 +110,7 @@ do
 	cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
 	cp ../../test_suite-lsq/$i/current_output/force.txt     .
 	
-	../house_md < run_md.in > run_md.out		
+	../chimes_md < run_md.in > run_md.out		
 	
 	cp *.* current_output
 	cp *.* correct_output
