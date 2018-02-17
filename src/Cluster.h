@@ -15,7 +15,6 @@ struct PAIRS	// NEEDS UPDATING
 	string CHRGSGN;			// Should the fitted charge on a given atom be negative or positive?
 	double ATM1MAS;			// Atomic mass (i.e. 12.011 for C)
 	double ATM2MAS;	
-	double OLD_S_MINIM;		// Used for smoothing functions when 3B and 2B inner cutoffs differ. This should be the inner cutoffs used for the actual SVD
 	double S_MINIM;			// Minimum allowed pair distance for fitting
 	double S_MAXIM;			// Maximum allowed pair distance for fitting
 	double S_DELTA;			// Fitting "grid" spacing (width)
@@ -115,7 +114,7 @@ public:
   // Print the params file header for a cluster
   void print_header(ofstream &header) ;
 
-// Read the force field parameters for a cluster.
+  // Read the force field parameters for a cluster.
   void read_ff_params(ifstream &paramfile, const vector<string> &atomtype) ;
 
   CLUSTER() {} 
@@ -209,6 +208,9 @@ public:
 
   // Read the maps from the force field file (MD only).
   void read_maps(ifstream& paramfile, string line) ;
+
+  // Parse the force cutoff parameters for a cluster.
+  void parse_fcut(string LINE) ;
 
 private:
   void build_pairs_loop(int index, vector<int> atom_index, 

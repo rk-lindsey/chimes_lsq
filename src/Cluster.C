@@ -20,7 +20,7 @@ using namespace std;
 #include "util.h"
 
 // define for extra output
-#define DEBUG_CLUSTER
+//#define DEBUG_CLUSTER
 
 void CLUSTER::build(int cheby_order)
 // Build a set of interactions for a cluster.
@@ -584,6 +584,19 @@ void CLUSTER_LIST::read_maps(ifstream& paramfile, string line)
 
   if (RANK==0)
 	 cout << "	...Read FF " << tuplets << " maps..." << endl;					
+}
+
+
+void CLUSTER_LIST::parse_fcut(string LINE)
+// Parse the force cutoff parameters for a cluster.
+{
+  VEC[0].FORCE_CUTOFF.parse_input(LINE) ;
+  VEC[0].FORCE_CUTOFF.BODIEDNESS = VEC[0].NATOMS ;
+
+  // Copy all class members.
+  for(int i=1; i<VEC.size(); i++)
+	 VEC[i].FORCE_CUTOFF = VEC[0].FORCE_CUTOFF;
+
 }
 
 void CLUSTER_LIST::build_int_maps(vector<string> ATOMTYPE, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)

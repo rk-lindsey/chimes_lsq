@@ -49,6 +49,13 @@ int parse_space(string line, vector<string>& tokens)
   return(tokens.size() ) ;
 }
 
+void validate_num_args(int nargs, int required, string line)
+// Validate that there are the required number of arguments in the line.  nargs is the current number of arguments (tokens).
+{
+  if ( nargs < required )
+	 EXIT_MSG("Wrong number of input parameters: " + line) ;
+}
+
 string get_next_line(istream& str)
 // Read a line and return it, with error checking.
 {

@@ -288,3 +288,33 @@ bool FCUT::PROCEED(const double & rlen, const double & rmin, const double & rmax
 		else
 			return false;
 }
+
+
+void FCUT::parse_input(string line)
+// Parse the input string and set parameters for the force cutoff
+{
+  vector<string> tokens ;
+
+  int nargs = parse_space(line, tokens) ;
+
+  validate_num_args(nargs, 3, line) ;
+
+  set_type(tokens[2]) ;
+
+  if( TYPE == FCUT_TYPE::SIGMOID 
+		|| TYPE == FCUT_TYPE::CUBSIG 
+		|| TYPE == FCUT_TYPE::CUBESTRETCH 
+		|| TYPE == FCUT_TYPE::SIGFLT)
+  {
+	 validate_num_args(nargs, 5, line) ;
+
+	 STEEPNESS = atof(tokens[3].data()) ;
+	 OFFSET = atof(tokens[4].data()) ;
+	 
+	 if ( TYPE == FCUT_TYPE::SIGFLT )
+	 {
+		validate_num_args(nargs, 6, line) ;
+		HEIGHT = atof(tokens[5].data()) ;
+	 }
+  }
+}

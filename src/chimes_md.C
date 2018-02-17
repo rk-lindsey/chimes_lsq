@@ -3502,130 +3502,15 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  if(LINE.find("ENDFILE") != string::npos)
 			 break;	
 				
-		  if((FF_2BODY[0].SNUM_3B_CHEBY>0) && (LINE.find("FCUT TYPE:") != string::npos))
+		  if(LINE.find("FCUT TYPE:") != string::npos )
 		  {
-			 STREAM_PARSER.str(LINE);	
-			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-					
-			 // Setup force cutoff type for 3-body
-					
-			 FF_3BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
-			 FCUT_TYPE cutoff_type = FF_3BODY[0].FORCE_CUTOFF.TYPE ;
-					
-			 if( cutoff_type == FCUT_TYPE::SIGMOID 
-				  || cutoff_type == FCUT_TYPE::CUBSIG 
-				  || cutoff_type == FCUT_TYPE::CUBESTRETCH 
-				  || cutoff_type == FCUT_TYPE::SIGFLT)
-			 {
-				STREAM_PARSER >> FF_3BODY[0].FORCE_CUTOFF.STEEPNESS;
-				STREAM_PARSER >> FF_3BODY[0].FORCE_CUTOFF.OFFSET;
-						
-				if(TEMP_STR == "SIGFLT")
-				  cin >> FF_3BODY[0].FORCE_CUTOFF.HEIGHT;
-			 }
-					
-			 STREAM_PARSER.str("");
-			 STREAM_PARSER.clear();	
-					
-			 FF_3BODY[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
-					
-			 // Copy all class members.
-			 for(int i=1; i<FF_3BODY.size(); i++)
-				FF_3BODY[i].FORCE_CUTOFF = FF_3BODY[0].FORCE_CUTOFF;
-					
-			 if(FF_2BODY[0].SNUM_4B_CHEBY>0)
-			 {
-				// Setup force cutoff type for 4-body
-					
-				FF_4BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
-				cutoff_type = FF_4BODY[0].FORCE_CUTOFF.TYPE ;
-					
-				if( cutoff_type == FCUT_TYPE::SIGMOID 
-					 || cutoff_type == FCUT_TYPE::CUBSIG 
-					 || cutoff_type == FCUT_TYPE::CUBESTRETCH 
-					 || cutoff_type == FCUT_TYPE::SIGFLT)
-				{
-				  STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.STEEPNESS;
-				  STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.OFFSET;
-						
-				  if(TEMP_STR == "SIGFLT")
-					 cin >> FF_4BODY[0].FORCE_CUTOFF.HEIGHT;
-				}
-					
-				STREAM_PARSER.str("");
-				STREAM_PARSER.clear();	
-					
-				FF_4BODY[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
-					
-				// Copy all class members.
-				for(int i=1; i<FF_4BODY.size(); i++)
-				  FF_4BODY[i].FORCE_CUTOFF = FF_4BODY[0].FORCE_CUTOFF;							
-			 }
-		  }
-		  if((FF_2BODY[0].SNUM_4B_CHEBY>0) && (LINE.find("FCUT TYPE:") != string::npos))
-		  {	
-			 STREAM_PARSER.str(LINE);	
-			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-					
-			 // Setup force cutoff type for 4-body
-				
-			 FF_4BODY[0].FORCE_CUTOFF.set_type(TEMP_STR) ;
-			 FCUT_TYPE cutoff_type = FF_4BODY[0].FORCE_CUTOFF.TYPE ;
-				
-			 if( cutoff_type == FCUT_TYPE::SIGMOID 
-				  || cutoff_type == FCUT_TYPE::CUBSIG 
-				  || cutoff_type == FCUT_TYPE::CUBESTRETCH 
-				  || cutoff_type == FCUT_TYPE::SIGFLT)
-			 {
-				STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.STEEPNESS;
-				STREAM_PARSER >> FF_4BODY[0].FORCE_CUTOFF.OFFSET;
-					
-				if(TEMP_STR == "SIGFLT")
-				  cin >> FF_4BODY[0].FORCE_CUTOFF.HEIGHT;
-			 }
-				
-			 STREAM_PARSER.str("");
-			 STREAM_PARSER.clear();	
-				
-			 FF_4BODY[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
-				
-			 // Copy all class members.
-			 for(int i=1; i<FF_4BODY.size(); i++)
-				FF_4BODY[i].FORCE_CUTOFF = FF_4BODY[0].FORCE_CUTOFF;	
-		  }
-				
-		  else if(LINE.find("SPECIAL 2B OLD_S_MINIM: ") != string::npos)
-		  {
-			 STREAM_PARSER.str(LINE);			
-			 STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TMP_TERMS1;
-			 STREAM_PARSER.str("");
-			 STREAM_PARSER.clear();	
-					
-#if VERBOSITY == 1
-			 if(RANK==0)
-			 {
-				cout << "	Note: Storing original 2-body r_min values for 2/3-body switching: " << endl;
-				cout << "   WARINGING!!!! ...This feature isn't tested and may be incompatible with neighbor lists." << endl;
-			 }
-#endif	
-			
-			 for(int i=0;i<TMP_TERMS1; i++)
-			 {
-				LINE = get_next_line(PARAMFILE) ;
+			 if ( FF_2BODY[0].SNUM_3B_CHEBY>0 ) 
+				TRIPS.parse_fcut(LINE) ;
 
-				STREAM_PARSER.str(LINE);
-				STREAM_PARSER >> TMP_TERMS2 >> TEMP_STR;	// We could use the integer, but this way is probably safer
-				STREAM_PARSER >> FF_2BODY[TMP_TERMS2].OLD_S_MINIM;
-						
-				STREAM_PARSER.str("");
-				STREAM_PARSER.clear();	
-						
-#if VERBOSITY == 1
-				if(RANK==0)
-				  cout << "		" << TEMP_STR << "   " <<  FF_2BODY[TMP_TERMS2].OLD_S_MINIM << endl;
-#endif	
-			 }
-		  }	
+			 if(FF_2BODY[0].SNUM_4B_CHEBY>0)
+				QUADS.parse_fcut(LINE) ;
+
+		  }
 				
 		  else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
 		  {
@@ -4277,8 +4162,6 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  PARAMFILE >> FF_2BODY[i].ATM2TYP;	
 		  PARAMFILE >> FF_2BODY[i].S_MINIM;	
 		  PARAMFILE >> FF_2BODY[i].S_MAXIM;
-				
-		  FF_2BODY[i].OLD_S_MINIM = FF_2BODY[i].S_MINIM;
 				
 		  if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
 		  {
