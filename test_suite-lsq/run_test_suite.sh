@@ -61,9 +61,9 @@ RUN_LSQ_PYTHON_CODE="$PYTHON $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_g
 ###############################################################
 
 cd ../src
-rm -f *o house_lsq
-make -f Makefile-TS-LSQ house_lsq
-mv house_lsq ../test_suite-lsq/
+rm -f *o chimes_lsq
+make -f Makefile-TS-LSQ chimes_lsq
+mv chimes_lsq ../test_suite-lsq/
 cd ../test_suite-lsq
 
 ###############################################################
@@ -91,9 +91,9 @@ do
 	rm -rf *diff*
 
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		 ../house_lsq < fm_setup.in > fm_setup.out
+		 ../chimes_lsq < fm_setup.in > fm_setup.out
 	else
-		 srun -n $NP ../house_lsq < fm_setup.in > fm_setup.out
+		 srun -n $NP ../chimes_lsq < fm_setup.in > fm_setup.out
 	fi
 	
 	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
