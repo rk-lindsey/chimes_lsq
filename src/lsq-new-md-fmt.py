@@ -463,18 +463,18 @@ if TOTAL_QUADS > 0:
             if(t>0):
                 ADD_PARAM += 1
         
-                for i in xrange(0,int(TOTL)):
-                    ADD_LINES += 1
-                    LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
-                    LINE_SPLIT = LINE.split()
+            for i in xrange(0,int(TOTL)):
+                ADD_LINES += 1
+                LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
+                LINE_SPLIT = LINE.split()
 
-                    UNIQ_QUAD_IDX = int(LINE_SPLIT[8])
+                UNIQ_QUAD_IDX = int(LINE_SPLIT[8])
                     #print 'UNIQ_QUAD_IDX', str(UNIQ_QUAD_IDX)
 
-                    print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]`
+                print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]`
 
-                QUAD_PAR_IDX += int(UNIQ)
-                COUNTED_QUAD_PARAMS += int(UNIQ)
+            QUAD_PAR_IDX += int(UNIQ)
+            COUNTED_QUAD_PARAMS += int(UNIQ)
 
         #print "COUNTED_QUAD_PARAMS", COUNTED_QUAD_PARAMS
             
