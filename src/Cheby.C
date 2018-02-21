@@ -119,6 +119,7 @@ inline double cheby_var_deriv(double xdiff, double rlen, double lambda, string& 
     
   else
   {
+	 dx_dr = 0 ;
 	 cout << "Error: bad cheby_type: " << cheby_type << endl;
 	 exit_run(1);
   }
@@ -370,6 +371,12 @@ void SET_4B_CHEBY_POWERS(QUADRUPLETS & PAIR_QUADRUPLET, vector<string> & ATOM_TY
 	{ 				
 		ATOM_TYPE_AND_INDEX[m].first  = ATOM_TYPE[m];					// 
 		ATOM_TYPE_AND_INDEX[m].second = m;	
+	}
+
+	// Code currently assumes ordering of atom names.
+	for(int m=0; m < 3 ; m++) {
+	  if ( PAIR_QUADRUPLET.ATOM_NAMES[m] > PAIR_QUADRUPLET.ATOM_NAMES[m+1] )
+		 EXIT_MSG("ATOM NAMES are out of order") ;
 	}
 
 	sort (ATOM_TYPE_AND_INDEX.begin(), ATOM_TYPE_AND_INDEX.end());	// Sort the vector contents... automatically does on the basis of the .first element, preserving "link" between .first and .second
@@ -2524,7 +2531,10 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
   /////////////////////////////////////////////
   // EVALUATE THE 4-BODY INTERACTIONS
   /////////////////////////////////////////////
-		
+
+  // DEBUG !!
+  // cout << "SNUM_4B " << FF_2BODY[0].SNUM_4B_CHEBY << endl ;
+  
   if(FF_2BODY[0].SNUM_4B_CHEBY>0)
   {
 	 // Prepare iterators for outermost loop
@@ -2543,6 +2553,10 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 	 int a1;
 		
 	 // Loop over a1, a2, a3, a4 interaction quadruplets, not atoms
+
+	 // DEBUG !!
+	 // cout << "i_start = " << i_start << "i_end = " << i_end << endl ;
+	 
 	 for ( int ii = i_start; ii <= i_end; ii++ ) 
 	 {
 
@@ -2607,7 +2621,10 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		ATOM_TYPE[3] = SYSTEM.ATOMTYPE[a4] ;
 
 		if(curr_quad_type_index<0)
+		{
+		  cout << "Skipping QUAD " << ATOM_QUAD_ID_INT << endl ;
 		  continue;
+		}
 
 		// Get the atom distances
 
@@ -2644,7 +2661,10 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		if( !FF_4BODY[curr_quad_type_index].FORCE_CUTOFF.PROCEED(rlen[5], S_MINIM[5], S_MAXIM[5]))
 		  continue;	
 
-		// At this point, all distances are within allowed ranges. We can now proceed to the force derivative calculation
+		// DEBUG !
+		// cout << "A bond distances in range " << endl ;
+
+// At this point, all distances are within allowed ranges. We can now proceed to the force derivative calculation
 			
 		// For all types, if r < rcut, then the potential is constant, thus the force  must be zero.
 		// Additionally, the potential is then taken to be the potential at r_cut.
@@ -2679,18 +2699,24 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 
 		SET_4B_CHEBY_POWERS( FF_4BODY[curr_quad_type_index],ATOM_TYPE, pow_map);	
 
+		// DEBUG !!
+		// cout << "N_ALLOWED_POWERS = " << FF_4BODY[curr_quad_type_index].N_ALLOWED_POWERS << endl ;
+		
 		for(int i=0; i<FF_4BODY[curr_quad_type_index].N_ALLOWED_POWERS; i++) 
 		{
 		  coeff = FF_4BODY[curr_quad_type_index].PARAMS[i];
 
+		  // DEBUG !!
+		  // cout << "COEFF = " << coeff << endl ;
+		  
 		  SYSTEM.TOT_POT_ENER += coeff * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ij[powers[0]] * Tn_4b_ik[powers[1]] * Tn_4b_il[powers[2]] * Tn_4b_jk[powers[3]] * Tn_4b_jl[powers[4]] * Tn_4b_kl[powers[5]]; 			
 
-		  deriv_4b[0] = fcut_4b[0] * Tnd_4b_ij[powers[pow_map[0]]] * dx_dr_4b[0] + fcut_deriv_4b[0] * Tn[powers[pow_map[0]]];
-		  deriv_4b[1] = fcut_4b[1] * Tnd_4b_ij[powers[pow_map[1]]] * dx_dr_4b[1] + fcut_deriv_4b[1] * Tn[powers[pow_map[1]]];
-		  deriv_4b[2] = fcut_4b[2] * Tnd_4b_ij[powers[pow_map[2]]] * dx_dr_4b[2] + fcut_deriv_4b[2] * Tn[powers[pow_map[2]]];
-		  deriv_4b[3] = fcut_4b[3] * Tnd_4b_ij[powers[pow_map[3]]] * dx_dr_4b[3] + fcut_deriv_4b[3] * Tn[powers[pow_map[3]]];
-		  deriv_4b[4] = fcut_4b[4] * Tnd_4b_ij[powers[pow_map[4]]] * dx_dr_4b[4] + fcut_deriv_4b[4] * Tn[powers[pow_map[4]]];
-		  deriv_4b[5] = fcut_4b[5] * Tnd_4b_ij[powers[pow_map[5]]] * dx_dr_4b[5] + fcut_deriv_4b[5] * Tn[powers[pow_map[5]]];
+		  deriv_4b[0] = fcut_4b[0] * Tnd_4b_ij[powers[pow_map[0]]] * dx_dr_4b[0] + fcut_deriv_4b[0] * Tn_4b_ij[powers[pow_map[0]]];
+		  deriv_4b[1] = fcut_4b[1] * Tnd_4b_ik[powers[pow_map[1]]] * dx_dr_4b[1] + fcut_deriv_4b[1] * Tn_4b_ik[powers[pow_map[1]]];
+		  deriv_4b[2] = fcut_4b[2] * Tnd_4b_il[powers[pow_map[2]]] * dx_dr_4b[2] + fcut_deriv_4b[2] * Tn_4b_il[powers[pow_map[2]]];
+		  deriv_4b[3] = fcut_4b[3] * Tnd_4b_jk[powers[pow_map[3]]] * dx_dr_4b[3] + fcut_deriv_4b[3] * Tn_4b_jk[powers[pow_map[3]]];
+		  deriv_4b[4] = fcut_4b[4] * Tnd_4b_jl[powers[pow_map[4]]] * dx_dr_4b[4] + fcut_deriv_4b[4] * Tn_4b_jl[powers[pow_map[4]]];
+		  deriv_4b[5] = fcut_4b[5] * Tnd_4b_kl[powers[pow_map[5]]] * dx_dr_4b[5] + fcut_deriv_4b[5] * Tn_4b_kl[powers[pow_map[5]]];
 				
 		  force_4b[0]  = coeff * deriv_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]]  * Tn_4b_kl[powers[pow_map[5]]];
 		  force_4b[1]  = coeff * deriv_4b[1] * fcut_4b[0] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]]  * Tn_4b_kl[powers[pow_map[5]]];
@@ -2699,6 +2725,9 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		  force_4b[4]  = coeff * deriv_4b[4] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_kl[powers[pow_map[5]]];
 		  force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]];
 
+		  // DEBUG !!
+		  // cout << "Force_4b[0] = " << force_4b[0] << endl ;
+		  
 		  for(int j=0; j<6; j++)
 		  {
 			 SYSTEM.PRESSURE_XYZ -= force_4b[j] * rlen[j];

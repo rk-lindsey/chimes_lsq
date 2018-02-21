@@ -19,7 +19,7 @@
 # FITPOVR # ! Use ReaxFF linear overcoordination parameters? If this is false and parameters are provided below, those parameters will be subtracted from forces
 	false
 # PAIRTYP # ! Short-range interaction type. See manual for accepted types. Case sensitive #.. 3b order 5 eventually
-	CHEBYSHEV 12 5 5 -1 1
+	CHEBYSHEV 12 2 2 -1 1
 # CHBTYPE # ! Are we transforming distance in terms of inverse distance(INVRSE_R), a morse-type function? (MORSE)? .. "DEFAULT" for no transformation.
 	MORSE
 

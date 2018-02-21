@@ -926,8 +926,6 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 bool CLUSTER_LIST::is_excluded(vector<string> atom_names)
 // Returns true if the cluster list is excluded from the interaction.
 {
-  bool excluded = false ;
-
   // Pass by value of atom_names makes the sorting safe.
   sort( atom_names.begin(), atom_names.end() ) ;
 

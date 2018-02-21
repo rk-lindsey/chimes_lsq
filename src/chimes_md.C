@@ -159,6 +159,7 @@ int main(int argc, char* argv[])
 	 cout << "Code compiled in serial mode."; 
 #endif
 
+
   if (RANK==0)
 	 cout <<" Will run on " << NPROCS << " processor(s)." << endl;
 
