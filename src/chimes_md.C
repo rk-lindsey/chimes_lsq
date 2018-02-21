@@ -71,6 +71,9 @@ static void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, 
 static void write_xyzv         (FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
 static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
 static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CONTROLS ) ;
+static void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, 
+								 map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, 
+								 CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST) ;
 
 // Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
 
@@ -192,9 +195,6 @@ int main(int argc, char* argv[])
   map<string,int> PAIR_MAP;			// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
   map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
   vector<int> INT_PAIR_MAP ;		
-
-  vector<TRIP_FF>&  FF_3BODY = TRIPS.VEC ;
-  vector<QUAD_FF>&  FF_4BODY = QUADS.VEC ;
 
   map<string,int> TRIAD_MAP		   = TRIPS.MAP ;
   map<int,string> TRIAD_MAP_REVERSE = TRIPS.MAP_REVERSE ;
@@ -1373,6 +1373,10 @@ FF_SETUP_2:
 	 sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
 #endif
 		
+	 if ( CONTROLS.CHECK_FORCE ) 
+		check_forces(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST) ;
+		
+
 	 ////////////////////////////////////////////////////////////
 	 // Print some info on new forces, compare to input forces if
 	 // requested
@@ -2200,6 +2204,26 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			else
 				if (RANK==0)
 					cout << "	# CMPRFRC #: false" << endl;	
+		}
+
+		else if(LINE.find("# CHECKFRC #") != string::npos)
+		{
+			getline(cin,LINE);
+			vector<string> tokens ;
+
+			parse_space(LINE, tokens) ;
+
+			if ( is_true(tokens[0]) ) 
+			{
+			  CONTROLS.CHECK_FORCE = true;
+			  cout << "\t# CHECKFRC #: true" << endl ;
+			}
+			else 
+			{
+			  CONTROLS.CHECK_FORCE = false ;
+			  cout << "\t# CHECKFRC #: false" << endl ;
+			}
+
 		}
 
 		else if(LINE.find("# SUBTFRC #") != string::npos)
@@ -4692,9 +4716,6 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 // Print out a summary of the force field.
 {
 
-  vector<CLUSTER> &FF_3BODY = TRIPS.VEC ;
-  vector<CLUSTER> &FF_4BODY = QUADS.VEC ;
-
   cout << "Force field summary: " << endl;
 	
   cout << "	Pair type and number of parameters per pair: " << endl;
@@ -4892,4 +4913,94 @@ static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,i
 }
 
 
+static void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, 
+								 map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, 
+								 CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST)
+// Check the forces by finite derivative of the energy.  This will be computationally
+// expensive, but an important check.
+{
+  vector<XYZ> coords(SYSTEM.ATOMS) ;
+  vector<XYZ> forces(SYSTEM.ATOMS) ;
+  const double eps = 1.0e-06 ;
+  const double pass = 1.0e-04 ;
+
+
+  for ( int a1 = 0 ; a1 < SYSTEM.ATOMS ; a1++ ) 
+  {
+	 coords[a1] = SYSTEM.COORDS[a1] ;
+	 forces[a1] = SYSTEM.ACCEL[a1] ;
+  }
+
+  for ( int a1 = 0 ; a1 < SYSTEM.ATOMS ; a1++ ) {
+	 for ( int j = 0 ; j < 3 ; j++ ) {
+
+		// Change position of atom.
+		if ( j == 0 ) 
+		  SYSTEM.COORDS[a1].X += eps ;
+		else if ( j == 1 ) 
+		  SYSTEM.COORDS[a1].Y += eps ;
+		else if ( j == 2 )
+		  SYSTEM.COORDS[a1].Z += eps ;
+
+		SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
+
+		// Recalculate the forces
+		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+
+		ZCalc(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
+
+		// FOR MPI:		Synchronize forces, energy, and pressure.
+#ifdef USE_MPI
+		sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
+#endif
+
+		double energy1 = SYSTEM.TOT_POT_ENER ;
+
+		// Move the atom again.
+		if ( j == 0 ) 
+		  SYSTEM.COORDS[a1].X = coords[a1].X - eps ;
+		else if ( j == 1 ) 
+		  SYSTEM.COORDS[a1].Y = coords[a1].Y - eps ;
+		else if ( j == 2 )
+		  SYSTEM.COORDS[a1].Z = coords[a1].Z - eps ;
+
+		SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
+
+		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+
+		ZCalc(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
+
+		// FOR MPI:		Synchronize forces, energy, and pressure.
+#ifdef USE_MPI
+		sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
+#endif
+
+ 		// Use symmetric difference for higher accuracy in numerical derivative.
+		double fcheck = (SYSTEM.TOT_POT_ENER - energy1) / (2.0 * eps) ;
+
+		double diff ;
+		if ( j == 0 )
+		  diff = fabs( (fcheck - forces[a1].X) / (1.0 + fabs(forces[a1].X) ) ) ;
+		else if ( j == 1 ) 
+		  diff = fabs( (fcheck - forces[a1].Y) / (1.0 + fabs(forces[a1].Y)) ) ;
+		else if ( j == 2 ) 
+		  diff = fabs( (fcheck - forces[a1].Z) / (1.0 + fabs(forces[a1].Z)) ) ;
+		
+		if ( RANK == 0 ) 
+		{
+      		if ( diff > pass ) 
+		      {
+		         cout << "Failed force check for atom " << a1 << " coordinate " << j ;
+					cout << " Error = " << diff << endl ;
+	         }
+				else 
+				{
+		         cout << "Passed force check for atom " << a1 << " coordinate " << j << endl ;
+	         }
+       }
+
+		SYSTEM.COORDS[a1] = coords[a1] ;
+	 }
+ }
+}
 

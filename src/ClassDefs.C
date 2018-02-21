@@ -85,52 +85,9 @@ void NEIGHBORS::FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		SYSTEM.WRAP_IDX[a].Y = floor(SYSTEM.COORDS[a].Y/SYSTEM.BOXDIM.Y);
 		SYSTEM.WRAP_IDX[a].Z = floor(SYSTEM.COORDS[a].Z/SYSTEM.BOXDIM.Z);
 		
-		SYSTEM.ALL_COORDS[a].X = SYSTEM.COORDS[a].X - SYSTEM.WRAP_IDX[a].X * SYSTEM.BOXDIM.X;
-		SYSTEM.ALL_COORDS[a].Y = SYSTEM.COORDS[a].Y - SYSTEM.WRAP_IDX[a].Y * SYSTEM.BOXDIM.Y;
-		SYSTEM.ALL_COORDS[a].Z = SYSTEM.COORDS[a].Z - SYSTEM.WRAP_IDX[a].Z * SYSTEM.BOXDIM.Z; 
 	}
-	
 	// Build the surrounding "cell's" ghost atoms based on the first NATOMS ghost atoms
-	
-	if(CONTROLS.N_LAYERS>0 )
-	{	
-		int TEMP_IDX = SYSTEM.ATOMS;	
-
-		for(int n1 = -CONTROLS.N_LAYERS; n1<=CONTROLS.N_LAYERS; n1++)
-		{
-			for(int n2 = -CONTROLS.N_LAYERS; n2<=CONTROLS.N_LAYERS; n2++)
-			{
-				for(int n3 = -CONTROLS.N_LAYERS; n3<=CONTROLS.N_LAYERS; n3++)
-				{	
-					if (n1 == 0 && n2 == 0 && n3 == 0 ) 
-						continue;
-					else
-					{
-						for(int a1=0; a1<SYSTEM.ATOMS; a1++)
-						{
-							SYSTEM.ALL_COORDS[TEMP_IDX].X = SYSTEM.ALL_COORDS[a1].X + n1 * SYSTEM.BOXDIM.X;
-							SYSTEM.ALL_COORDS[TEMP_IDX].Y = SYSTEM.ALL_COORDS[a1].Y + n2 * SYSTEM.BOXDIM.Y;
-							SYSTEM.ALL_COORDS[TEMP_IDX].Z = SYSTEM.ALL_COORDS[a1].Z + n3 * SYSTEM.BOXDIM.Z;
-				
-							if(SYSTEM.PARENT[TEMP_IDX] != a1)
-							{
-								cout << "ERROR: Wrong parent atom in found while updating layers" << endl;
-								exit_run(0);
-							}
-				
-							TEMP_IDX++;
-						}
-					}
-				}
-			}
-		}
-		
-		if ( TEMP_IDX != SYSTEM.ALL_ATOMS ) 
-		{
-			printf("Error updating layers\n");
-			exit(1);
-		}
-	}	
+	SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
 }
 
 void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
@@ -757,54 +714,7 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 	// Set the first NATOMS of ghost atoms to have the coordinates of the "real" coords
 
-	for (int a=0; a<SYSTEM.ATOMS; a++) 
-	{
-		SYSTEM.ALL_COORDS[a].X = SYSTEM.COORDS[a].X - SYSTEM.WRAP_IDX[a].X * SYSTEM.BOXDIM.X;
-		SYSTEM.ALL_COORDS[a].Y = SYSTEM.COORDS[a].Y - SYSTEM.WRAP_IDX[a].Y * SYSTEM.BOXDIM.Y;
-		SYSTEM.ALL_COORDS[a].Z = SYSTEM.COORDS[a].Z - SYSTEM.WRAP_IDX[a].Z * SYSTEM.BOXDIM.Z; 
-	}
-	
-	// Build the surrounding "cell's" ghost atoms based on the first NATOMS ghost atoms
-	
-	if(CONTROLS.N_LAYERS>0 )
-	{	
-		int TEMP_IDX = SYSTEM.ATOMS;	
-
-		for(int n1 = -CONTROLS.N_LAYERS; n1<=CONTROLS.N_LAYERS; n1++)
-		{
-			for(int n2 = -CONTROLS.N_LAYERS; n2<=CONTROLS.N_LAYERS; n2++)
-			{
-				for(int n3 = -CONTROLS.N_LAYERS; n3<=CONTROLS.N_LAYERS; n3++)
-				{	
-					if (n1 == 0 && n2 == 0 && n3 == 0 ) 
-						continue;
-					else
-					{
-						for(int a1=0; a1<SYSTEM.ATOMS; a1++)
-						{
-							SYSTEM.ALL_COORDS[TEMP_IDX].X = SYSTEM.ALL_COORDS[a1].X + n1 * SYSTEM.BOXDIM.X;
-							SYSTEM.ALL_COORDS[TEMP_IDX].Y = SYSTEM.ALL_COORDS[a1].Y + n2 * SYSTEM.BOXDIM.Y;
-							SYSTEM.ALL_COORDS[TEMP_IDX].Z = SYSTEM.ALL_COORDS[a1].Z + n3 * SYSTEM.BOXDIM.Z;
-				
-							if(SYSTEM.PARENT[TEMP_IDX] != a1)
-							{
-								cout << "ERROR: Wrong parent atom in found while updating layers" << endl;
-								exit_run(0);
-							}
-				
-							TEMP_IDX++;
-						}
-					}
-				}
-			}
-		}
-		
-		if ( TEMP_IDX != SYSTEM.ALL_ATOMS ) 
-		{
-			printf("Error updating layers\n");
-			exit(1);
-		}
-	}	
+	SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
 		
 }
 
@@ -1181,3 +1091,56 @@ void THERMO_AVG::READ(ifstream &fin)
 }
 
 
+void FRAME::update_ghost(int n_layers)
+// Update the ghost atoms using the given number of layers.
+{
+
+	for (int a=0; a<ATOMS; a++) 
+	{
+		ALL_COORDS[a].X = COORDS[a].X - WRAP_IDX[a].X * BOXDIM.X;
+		ALL_COORDS[a].Y = COORDS[a].Y - WRAP_IDX[a].Y * BOXDIM.Y;
+		ALL_COORDS[a].Z = COORDS[a].Z - WRAP_IDX[a].Z * BOXDIM.Z; 
+	}
+	
+	// Build the surrounding "cell's" ghost atoms based on the first NATOMS ghost atoms
+	
+	if(n_layers>0 )
+	{	
+		int TEMP_IDX = ATOMS;	
+
+		for(int n1 = -n_layers; n1<=n_layers; n1++)
+		{
+			for(int n2 = -n_layers; n2<=n_layers; n2++)
+			{
+				for(int n3 = -n_layers; n3<=n_layers; n3++)
+				{	
+					if (n1 == 0 && n2 == 0 && n3 == 0 ) 
+						continue;
+					else
+					{
+						for(int a1=0; a1<ATOMS; a1++)
+						{
+							ALL_COORDS[TEMP_IDX].X = ALL_COORDS[a1].X + n1 * BOXDIM.X;
+							ALL_COORDS[TEMP_IDX].Y = ALL_COORDS[a1].Y + n2 * BOXDIM.Y;
+							ALL_COORDS[TEMP_IDX].Z = ALL_COORDS[a1].Z + n3 * BOXDIM.Z;
+				
+							if(PARENT[TEMP_IDX] != a1)
+							{
+								cout << "ERROR: Wrong parent atom in found while updating layers" << endl;
+								exit_run(0);
+							}
+				
+							TEMP_IDX++;
+						}
+					}
+				}
+			}
+		}
+		
+		if ( TEMP_IDX != ALL_ATOMS ) 
+		{
+			printf("Error updating layers\n");
+			exit(1);
+		}
+	}	
+}

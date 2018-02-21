@@ -852,7 +852,6 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		}
 		count2 = 0 ;
 
-		// DEBUG !!
 #ifdef DEBUG_CLUSTER		
 		cout << "ADDING ATOM_PAIRS = " ;
 #endif
