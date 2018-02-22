@@ -13,9 +13,9 @@
 # TIMESTP # ! In fs
 	0.125
 # N_MDSTP # ! Total number of MD steps
-	1
+	3
 # CHECKFRC #
-   true
+   false
 # NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
 	1
 # USENEIG # ! Use a neighbor list? HIGHLY reccommended when NLAYERS > 0
@@ -24,7 +24,6 @@
 	params.new.txt
 # CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)
 	dump.xyzf
-	
 	
 ###################################
 ####    SIMULATION  OPTIONS    ####

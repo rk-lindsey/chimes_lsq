@@ -489,6 +489,14 @@ public:
 	XYZ STRESS_TENSOR_SUM;
 	void WRITE(ofstream &fout);
 	void READ(ifstream &fin);
+	THERMO_AVG() {
+	  // Zero the initial value of all sums.
+	  TEMP_SUM = 0.0 ;
+	  PRESS_SUM = 0.0 ;
+	  STRESS_TENSOR_SUM.X = 0.0 ;
+	  STRESS_TENSOR_SUM.Y = 0.0 ;
+	  STRESS_TENSOR_SUM.Z = 0.0 ;
+	}
 };
 
 
@@ -553,8 +561,16 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 								CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
 								vector<int> &INT_PAIR_MAP,
 								NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV) ;
+void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, 
+						map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, 
+						CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST) ;
 
 void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS) ;
+
+#ifdef USE_MPI
+void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
+void sum_forces         (vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
+#endif
 
 #endif
 

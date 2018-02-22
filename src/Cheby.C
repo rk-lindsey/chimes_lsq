@@ -1568,7 +1568,30 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 						force_wo_coeff[4] = deriv[4] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[5]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_kl[powers[pow_map[5]]];
 						force_wo_coeff[5] = deriv[5] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_jl[powers[pow_map[4]]];
 						
-								
+						// cout << "Force_wo_coeff: " ;
+						// for ( int ifl = 0 ; ifl < 6 ; ifl++ )
+						//   cout << " " << force_wo_coeff[ifl] ;
+						// cout << endl ;
+
+						// cout << "Deriv_4b: " ;
+						// for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+						// {
+						//   cout << " " << deriv[ifl] ;
+						// }
+						// cout << endl ;		  
+						  
+						// cout << "Tn_il " << Tn_il[1] << endl ;
+						// cout << "Tnd_il " << Tnd_il[1] << endl ;
+						// cout << "Fcut " << fcut[2] << endl ;
+						// cout << "Fcut_deriv " << fcut_deriv[2] << endl ;
+						// cout << "dx_dr " << dx_dr[2] << endl ;
+						// cout << "Powers " << powers[pow_map[2]] << endl ;
+						// cout << "Pow_map " << pow_map[2] << endl ;
+						// cout << "Allowed_powers" ;
+						// for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+						//   cout << PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][ifl] << " " ;
+						// cout << endl ;
+
 					    // ij pairs
 
 					    FRAME_A_MATRIX[a1     ][vstart+row_offset].X += force_wo_coeff[0] * RAB[0].X / rlen[0];
@@ -2706,6 +2729,10 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		{
 		  coeff = FF_4BODY[curr_quad_type_index].PARAMS[i];
 
+		  for ( int f = 0 ; f < 6 ; f++ ) 
+			 powers[f] = FF_4BODY[curr_quad_type_index].ALLOWED_POWERS[i][f] ;
+
+
 		  // DEBUG !!
 		  // cout << "COEFF = " << coeff << endl ;
 		  
@@ -2726,8 +2753,39 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		  force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]];
 
 		  // DEBUG !!
-		  // cout << "Force_4b[0] = " << force_4b[0] << endl ;
-		  
+		  // cout << "Force_wo_coeff: " ;
+		  // for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+		  // {
+		  // 	 if ( fabs(coeff) > 0.0 ) 
+		  // 	 {
+		  // 		cout << " " << force_4b[ifl] / coeff ;
+		  // 	 } 
+		  // 	 else
+		  // 	 {
+		  // 		cout << " " << 0.0  ;
+		  // 	 }
+		  // }
+		  // cout << endl ;		  
+
+		  // cout << "Deriv_4b: " ;
+		  // for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+		  // {
+		  // 	 cout << " " << deriv_4b[ifl] ;
+		  // }
+		  // cout << endl ;		  
+
+		  // cout << "Tn_il " << Tn_4b_il[1] << endl ;
+		  // cout << "Tnd_il " << Tnd_4b_il[1] << endl ;
+		  // cout << "Fcut " << fcut_4b[2] << endl ;
+		  // cout << "Fcut_deriv " << fcut_deriv_4b[2] << endl ;
+		  // cout << "dx_dr " << dx_dr_4b[2] << endl ;
+		  // cout << "Powers " << powers[pow_map[2]] << endl ;
+		  // cout << "Pow_map " << pow_map[2] << endl ;
+		  // cout << "Allowed_powers" ;
+		  // for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+		  // 	 cout << FF_4BODY[curr_quad_type_index].ALLOWED_POWERS[i][ifl] << " " ;
+		  // cout << endl ;
+
 		  for(int j=0; j<6; j++)
 		  {
 			 SYSTEM.PRESSURE_XYZ -= force_4b[j] * rlen[j];

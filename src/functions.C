@@ -383,6 +383,108 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 }
 
 
+void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, 
+						map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, 
+						CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST)
+// Check the forces by finite derivative of the energy.  This will be computationally
+// expensive, but an important check.
+{
+  vector<XYZ> coords(SYSTEM.ATOMS) ;
+  vector<XYZ> forces(SYSTEM.ATOMS) ;
+  const double eps = 1.0e-06 ;
+  const double pass = 1.0e-04 ;
+
+
+  for ( int a1 = 0 ; a1 < SYSTEM.ATOMS ; a1++ ) 
+  {
+	 coords[a1] = SYSTEM.COORDS[a1] ;
+	 forces[a1] = SYSTEM.ACCEL[a1] ;
+  }
+
+  for ( int a1 = 0 ; a1 < SYSTEM.ATOMS ; a1++ ) {
+	 for ( int j = 0 ; j < 3 ; j++ ) {
+
+		// Change position of atom.
+		if ( j == 0 ) 
+		  SYSTEM.COORDS[a1].X += eps ;
+		else if ( j == 1 ) 
+		  SYSTEM.COORDS[a1].Y += eps ;
+		else if ( j == 2 )
+		  SYSTEM.COORDS[a1].Z += eps ;
+
+		SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
+
+		// Recalculate the forces
+		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+
+		ZCalc(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
+
+		// FOR MPI:		Synchronize forces, energy, and pressure.
+#ifdef USE_MPI
+		sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
+#endif
+
+		double energy1 = SYSTEM.TOT_POT_ENER ;
+
+		// Move the atom again.
+		if ( j == 0 ) 
+		  SYSTEM.COORDS[a1].X = coords[a1].X - eps ;
+		else if ( j == 1 ) 
+		  SYSTEM.COORDS[a1].Y = coords[a1].Y - eps ;
+		else if ( j == 2 )
+		  SYSTEM.COORDS[a1].Z = coords[a1].Z - eps ;
+
+		SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
+
+		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+
+		ZCalc(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
+
+		// FOR MPI:		Synchronize forces, energy, and pressure.
+#ifdef USE_MPI
+		sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
+#endif
+
+ 		// Use symmetric difference for higher accuracy in numerical derivative.
+		double fcheck = (SYSTEM.TOT_POT_ENER - energy1) / (2.0 * eps) ;
+
+		double diff ;
+		if ( j == 0 )
+		  diff = fabs( (fcheck - forces[a1].X) / (1.0 + fabs(forces[a1].X) ) ) ;
+		else if ( j == 1 ) 
+		  diff = fabs( (fcheck - forces[a1].Y) / (1.0 + fabs(forces[a1].Y)) ) ;
+		else if ( j == 2 ) 
+		  diff = fabs( (fcheck - forces[a1].Z) / (1.0 + fabs(forces[a1].Z)) ) ;
+		
+		if ( RANK == 0 ) 
+		{
+      		if ( diff > pass ) 
+		      {
+		         cout << "Failed force check for atom " << a1 << " coordinate " << j ;
+					cout << " Error = " << diff << endl ;
+	         }
+				else 
+				{
+		         cout << "Passed force check for atom " << a1 << " coordinate " << j << endl ;
+	         }
+       }
+
+		SYSTEM.COORDS[a1] = coords[a1] ;
+	 }
+ }
+}
+
+
+//void calc_A_mat(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, 
+//						map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, 
+//						CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST)
+// Numerically calculate the "A" matrix, which is the derivative of the forces
+// with respect to the potential parameters.  Currently works only for 
+// chebyshev interactions.
+//{
+  
+
+
 //////////////////////////////////////////
 // Bad configuration tracking functions
 //////////////////////////////////////////
@@ -1710,3 +1812,68 @@ static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 }
 
 
+
+// MPI -- Related functions -- See headers at top of file
+
+#ifdef USE_MPI
+void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z)
+// Add up forces, potential energy, and pressure from all processes.  
+{
+	// Sum up the potential energy, pressure, tensors , and forces from all processors
+#ifdef USE_MPI	
+	double *accel = (double *) accel_vec .data();
+
+	MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_x,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_y,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, &tens_z,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+	MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+#endif	
+
+}
+
+void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 
+// Broadcast the position, neighborlists,  and optionally the velocity to all nodes.
+// Velocity-broadcast is only necessary for velocity-dependent forces (not currently implemented).
+{
+	#ifdef USE_MPI
+	
+		// Convert out vectors to arrays so they are MPI friendly
+	
+		double *coord = (double *) coord_vec.data();
+
+		if ( sizeof(XYZ) != 3*sizeof(double) ) 
+		{
+			printf("Error: compiler padding in XYZ structure detected\n");
+			exit_run(1);
+		}
+
+		MPI_Bcast(coord, 3*atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+		
+		#ifdef LOG_POS
+		
+			char buf[20];
+			sprintf(buf, "%d.%d", RANK,NPROCS);
+			string pos_out = string("pos.") + string(buf) + string(".out");
+			ofstream outx;
+			outx.open(pos_out.c_str());
+			outx.precision(15);
+
+			for (int i=0; i<3*atoms; i++)
+				outx << i << " " << coord[i] << " " << endl;
+
+			outx.close();
+		
+		#endif
+
+			if ( sync_vel )
+			{
+				double *velocity = (double *) velocity_vec.data();
+				MPI_Bcast(velocity, 3 * atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+			}
+			
+	#endif
+}
+
+#endif // USE_MPI

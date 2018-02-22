@@ -497,10 +497,10 @@ void CLUSTER::read_ff_params(ifstream &paramfile, const vector<string> &atomtype
 	 paramfile >> PARAM_INDICES[j];
 	 paramfile >> PARAMS[j];
 
-	 if ( RANK == 0 ) 
-	 {
-		cout << EQUIV_INDICES[j] << " " << PARAM_INDICES[j] << " " << PARAMS[j] << endl ;
-	 }
+	 // if ( RANK == 0 ) 
+	 // {
+	 // 	cout << EQUIV_INDICES[j] << " " << PARAM_INDICES[j] << " " << PARAMS[j] << endl ;
+	 // }
 	 paramfile.ignore();
 
   } 
@@ -693,7 +693,17 @@ int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<str
   build_pairs(ATOM_PAIRS, PAIR_MAP) ;
 			  
   for ( int i = 0 ; i < VEC.size() ; i++ ) 
+  {
 	 VEC[i].build(cheby_order) ;
+
+
+	 // DEBUG !! Allow just 1 interaction.
+	 // VEC[i].N_TRUE_ALLOWED_POWERS = 1 ;
+	 // VEC[i].N_ALLOWED_POWERS = 1 ;
+	 // VEC[i].UNIQUE_POWERS.resize(1) ;
+	 // VEC[i].PARAM_INDICES.resize(1) ;
+	 // VEC[i].ALLOWED_POWERS.resize(1) ;
+  }
 
 	return( VEC.size() ) ;
 }
