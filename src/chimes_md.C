@@ -705,7 +705,8 @@ FF_SETUP_1:
 	
 
   // Assign atom features to atoms in SYSTEM data object, and the PAIR_FF object
-	
+
+  
   for(int a=0; a<SYSTEM.ATOMS;a++)
   {
 	 for(int i=0; i<NATMTYP; i++)
@@ -720,7 +721,6 @@ FF_SETUP_1:
 		}			
 	 }
   }
-	
 
   if(RANK==0)
 	 cout << "   ...read complete" << endl << endl;
@@ -2208,12 +2208,14 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			if ( is_true(tokens[0]) ) 
 			{
 			  CONTROLS.CHECK_FORCE = true;
-			  cout << "\t# CHECKFRC #: true" << endl ;
+			  if ( RANK == 0 )
+				 cout << "\t# CHECKFRC #: true" << endl ;
 			}
 			else 
 			{
 			  CONTROLS.CHECK_FORCE = false ;
-			  cout << "\t# CHECKFRC #: false" << endl ;
+			  if ( RANK == 0 )
+				 cout << "\t# CHECKFRC #: false" << endl ;
 			}
 
 		}
@@ -3434,7 +3436,8 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
   int		TMP_TERMS1, TMP_TERMS2, TMP_TERMS3;
   double	TMP_LOW  = -1;
   double 	TMP_HIGH =  1;
-	
+  const double eps_charge = 1.0e-04 ;
+
   while (FOUND_END == false)
   {
 	 LINE = get_next_line(PARAMFILE) ;
@@ -4456,11 +4459,15 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		}
 		else
 		{				
+		  if ( RANK == 0 )
+			 cout << "		Re-setting individual atom charges based on pair charges :" << endl;
+				
 		  for(int j=0; j<NATMTYP; j++)
 		  {
 			 for(int i=0; i<NO_PAIRS; i++)
 			 {
-				if( (FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j]) || (FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j]) )
+				if( (FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j]) 
+					 || (FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j]) )
 				{
 				  TMP_CHARGES[j] = sqrt(fabs(FF_2BODY[i].PAIR_CHRG))*TMP_SIGN[j];
 							
@@ -4468,15 +4475,33 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 				  LMP_CHARGE[j] = TMP_CHARGES[j]; // save charges to global variable for LAMMPS
 #endif
 
-				  FF_2BODY[i].ATM1CHG = TMP_CHARGES[j];
-				  FF_2BODY[i].ATM2CHG = TMP_CHARGES[j];
+				  //FF_2BODY[i].ATM1CHG = TMP_CHARGES[j];
+				  //FF_2BODY[i].ATM2CHG = TMP_CHARGES[j];
 					
 				  break;
 				}
 			 }
 		  }
-			
-			
+		  // Consistency check for charges.
+		  for(int i=0; i<NO_PAIRS; i++)
+		  {
+			 for ( int j = 0 ; j < NATMTYP ; j++ ) 
+			 {
+				if ( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] ) 
+				{
+				  for ( int k = 0 ; k < NATMTYP ; k++ ) 
+				  {
+					 if ( FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[k] ) 
+					 {
+						if ( fabs(TMP_CHARGES[j]*TMP_CHARGES[k] - FF_2BODY[i].PAIR_CHRG)  > eps_charge )
+						{
+						  EXIT_MSG("Error: Inconsistent pair charges for pair: " + FF_2BODY[i].ATM1TYP + FF_2BODY[i].ATM2TYP) ;
+						}
+					 }
+				  }
+				}
+			 }
+		  }
 		  if(!CONTROLS.PLOT_PES)
 		  {
 			 for(int a=0; a<SYSTEM.ATOMS;a++)
@@ -4491,12 +4516,11 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 				}
 			 }
 		  }
-
+		  check_charges(SYSTEM, TMP_CHARGES, TMP_ATOMTYPE, FF_2BODY, NATMTYP) ;
 			
 		  if(RANK==0)
 		  {
-			 cout << "		Re-setting individual atom charges based on pair charges :" << endl;
-				
+			 cout << "Atom properties:" << endl ;
 			 for(int j=0; j<NATMTYP; j++)
 			 {
 				cout << "		"<<	j << "     "

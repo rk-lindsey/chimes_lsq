@@ -124,14 +124,21 @@ if DO_WEIGHTING:
 # Do the SVD, process output
 #################################
 
-if DO_WEIGHTING:
-    #U,D,VT=numpy.linalg.svd(weightedA)
-    U,D,VT=scipy.linalg.svd(weightedA,overwrite_a=True)
-    Dmat=array((transpose(weightedA)))
-else:
-    #U,D,VT=numpy.linalg.svd(A)
-    U,D,VT=scipy.linalg.svd(A,overwrite_a=True)
-    Dmat=array((transpose(A)))  
+try:
+    if DO_WEIGHTING:
+        #U,D,VT=numpy.linalg.svd(weightedA)
+        # OK to overwrite weightedA.  It is not used to calculate y (predicted forces) below.
+        U,D,VT=scipy.linalg.svd(weightedA,overwrite_a=True)
+        Dmat=array((transpose(weightedA)))
+    else:
+        #U,D,VT=numpy.linalg.svd(A)
+        # Do not overwrite A.  It is used to calculate y (predicted forces) below.
+        U,D,VT=scipy.linalg.svd(A,overwrite_a=False)
+        Dmat=array((transpose(A)))  
+except LinAlgError:
+    sys.stderr.write("SVD algorithm failed")
+    exit(1)
+
 
 dmax = 0.0
 
@@ -500,8 +507,9 @@ print ""
 			
 print "ENDFILE"		
 
-if TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS != len(x) :
-    print "Error in counting parameters"
+total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS 
+if total_params != len(x) :
+    sys.stderr.write( "Error in counting parameters") ;
     exit(1)
 		
 if TEST_SUITE_RUN == "do":
@@ -510,7 +518,7 @@ if TEST_SUITE_RUN == "do":
 		phrase = `i` + " " + `x[i]` + '\n'
 		test_suite_params.write(phrase)
 	test_suite_params.close()
-		
+
 # OLD WAY:
 #for i in range(0,len(x)):
 #    print i,x[i]

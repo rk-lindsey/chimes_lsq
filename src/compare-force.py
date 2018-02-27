@@ -13,6 +13,8 @@ err = 0
 
 nf = min( len(af), len(bf) )
 
+print "Number of force components = ", nf
+
 for i in range (0,nf):
     aff = float(af[i])
     bff = float(bf[i])

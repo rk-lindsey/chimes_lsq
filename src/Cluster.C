@@ -698,11 +698,19 @@ int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<str
 
 
 	 // DEBUG !! Allow just 1 interaction.
-	 // VEC[i].N_TRUE_ALLOWED_POWERS = 1 ;
-	 // VEC[i].N_ALLOWED_POWERS = 1 ;
-	 // VEC[i].UNIQUE_POWERS.resize(1) ;
-	 // VEC[i].PARAM_INDICES.resize(1) ;
-	 // VEC[i].ALLOWED_POWERS.resize(1) ;
+	 // if ( VEC[i].N_ALLOWED_POWERS > 1 && VEC[i].NATOMS == 4 ) 
+	 // {
+	 // 	VEC[i].N_TRUE_ALLOWED_POWERS = 1 ;
+	 // 	VEC[i].N_ALLOWED_POWERS = 1 ;
+	 // 	VEC[i].UNIQUE_POWERS.resize(1) ;
+	 // 	VEC[i].PARAM_INDICES.resize(1) ;
+	 // 	VEC[i].ALLOWED_POWERS.resize(1) ;
+	 // 	for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ ) 
+	 // 	{
+	 // 	  if ( VEC[i].ALLOWED_POWERS[0][j] == 1 )
+	 // 		 VEC[i].ALLOWED_POWERS[0][j] = 2 ;
+	 // 	}
+	 // }
   }
 
 	return( VEC.size() ) ;

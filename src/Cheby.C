@@ -1568,30 +1568,47 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 						force_wo_coeff[4] = deriv[4] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[5]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_kl[powers[pow_map[5]]];
 						force_wo_coeff[5] = deriv[5] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_jl[powers[pow_map[4]]];
 						
-						// cout << "Force_wo_coeff: " ;
-						// for ( int ifl = 0 ; ifl < 6 ; ifl++ )
-						//   cout << " " << force_wo_coeff[ifl] ;
-						// cout << endl ;
+						// DEBUG !!
+#if(0)
+						if ( a1 == 0 || fidx_a2 == 0 || fidx_a3 == 0 || fidx_a4 == 0 )
+						{
+						  cout << "Target atom found\n" ;
 
-						// cout << "Deriv_4b: " ;
-						// for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
-						// {
-						//   cout << " " << deriv[ifl] ;
-						// }
-						// cout << endl ;		  
-						  
-						// cout << "Tn_il " << Tn_il[1] << endl ;
-						// cout << "Tnd_il " << Tnd_il[1] << endl ;
-						// cout << "Fcut " << fcut[2] << endl ;
-						// cout << "Fcut_deriv " << fcut_deriv[2] << endl ;
-						// cout << "dx_dr " << dx_dr[2] << endl ;
-						// cout << "Powers " << powers[pow_map[2]] << endl ;
-						// cout << "Pow_map " << pow_map[2] << endl ;
-						// cout << "Allowed_powers" ;
-						// for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
-						//   cout << PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][ifl] << " " ;
-						// cout << endl ;
+						  cout << std::scientific ;
+						  cout.precision(10) ;
+						  cout << "A1 = " << a1 << " A2 = " << fidx_a2 << " A3 = " << fidx_a3 << " A4 = " << fidx_a4 << endl ;
 
+						  cout << "Force_wo_coeff: " ;
+						  for ( int ifl = 0 ; ifl < 6 ; ifl++ )
+							 cout << " " << force_wo_coeff[ifl] ;
+						  cout << endl ;
+
+						  cout << "Deriv_4b: " ;
+						  for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+						  {
+							 cout << " " << deriv[ifl] ;
+						  }
+						  cout << endl ;		  
+
+						  cout << "Tn_il " << Tn_il[1] << endl ;
+						  cout << "Tnd_il " << Tnd_il[1] << endl ;
+
+						  for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+						  {
+							 cout << "Index = " << ifl << endl ;
+							 cout << "Fcut " << fcut[ifl] << endl ;
+							 cout << "Fcut_deriv " << fcut_deriv[ifl] << endl ;
+							 cout << "dx_dr " << dx_dr[ifl] << endl ;
+							 cout << "Powers " << powers[pow_map[ifl]] << endl ;
+							 cout << "Pow_map " << pow_map[ifl] << endl ;
+						  }						  
+						  cout << "Allowed_powers" ;
+						  for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+							 cout << PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][ifl] << " " ;
+						  cout << endl ;
+						  cout.unsetf(ios_base::scientific) ;
+						}
+#endif
 					    // ij pairs
 
 					    FRAME_A_MATRIX[a1     ][vstart+row_offset].X += force_wo_coeff[0] * RAB[0].X / rlen[0];
@@ -2215,7 +2232,12 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		  a2 = NEIGHBOR_LIST.LIST[a1][a2idx];			
 			
 #ifndef LINK_LAMMPS
-		  curr_pair_type_idx_ij =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+		  int idx = SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]] ;
+		  if ( idx < 0 || idx >= INT_PAIR_MAP.size() ) 
+		  {
+			 cout << "Index out of range" << endl ;
+		  }
+		  curr_pair_type_idx_ij =  INT_PAIR_MAP[idx] ;
 #else
 		  curr_pair_type_idx_ij =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
 #endif
@@ -2645,7 +2667,7 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 
 		if(curr_quad_type_index<0)
 		{
-		  cout << "Skipping QUAD " << ATOM_QUAD_ID_INT << endl ;
+		  // cout << "Skipping QUAD " << ATOM_QUAD_ID_INT << endl ;
 		  continue;
 		}
 
@@ -2736,7 +2758,9 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		  // DEBUG !!
 		  // cout << "COEFF = " << coeff << endl ;
 		  
-		  SYSTEM.TOT_POT_ENER += coeff * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ij[powers[0]] * Tn_4b_ik[powers[1]] * Tn_4b_il[powers[2]] * Tn_4b_jk[powers[3]] * Tn_4b_jl[powers[4]] * Tn_4b_kl[powers[5]]; 			
+		  SYSTEM.TOT_POT_ENER += coeff * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] 
+			 * Tn_4b_ij[powers[pow_map[0]]] * Tn_4b_ik[powers[pow_map[1]]] * Tn_4b_il[powers[pow_map[2]]] 
+			 * Tn_4b_jk[powers[pow_map[3]]] * Tn_4b_jl[powers[pow_map[4]]] * Tn_4b_kl[powers[pow_map[5]]]; 			
 
 		  deriv_4b[0] = fcut_4b[0] * Tnd_4b_ij[powers[pow_map[0]]] * dx_dr_4b[0] + fcut_deriv_4b[0] * Tn_4b_ij[powers[pow_map[0]]];
 		  deriv_4b[1] = fcut_4b[1] * Tnd_4b_ik[powers[pow_map[1]]] * dx_dr_4b[1] + fcut_deriv_4b[1] * Tn_4b_ik[powers[pow_map[1]]];
@@ -2753,38 +2777,54 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		  force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]];
 
 		  // DEBUG !!
-		  // cout << "Force_wo_coeff: " ;
-		  // for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
-		  // {
-		  // 	 if ( fabs(coeff) > 0.0 ) 
-		  // 	 {
-		  // 		cout << " " << force_4b[ifl] / coeff ;
-		  // 	 } 
-		  // 	 else
-		  // 	 {
-		  // 		cout << " " << 0.0  ;
-		  // 	 }
-		  // }
-		  // cout << endl ;		  
+#if(0)
+		  if ( a1 == 0 || fidx_a2 == 0 || fidx_a3 == 0 || fidx_a4 == 0 )
+		  {
+			 cout << "Target atom found\n" ;
 
-		  // cout << "Deriv_4b: " ;
-		  // for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
-		  // {
-		  // 	 cout << " " << deriv_4b[ifl] ;
-		  // }
-		  // cout << endl ;		  
+			 cout << std::scientific ;
+			 cout.precision(10) ;
+			 cout << "A1 = " << a1 << " A2 = " << fidx_a2 << " A3 = " << fidx_a3 << " A4 = " << fidx_a4 << endl ;
+			 cout << "Force_wo_coeff: " ;
+			 for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+			 {
+				if ( fabs(coeff) > 0.0 ) 
+				{
+				  cout << " " << force_4b[ifl] / coeff ;
+				} 
+				else
+				{
+				  cout << " " << 0.0  ;
+				}
+			 }
+			 cout << endl ;		  
 
-		  // cout << "Tn_il " << Tn_4b_il[1] << endl ;
-		  // cout << "Tnd_il " << Tnd_4b_il[1] << endl ;
-		  // cout << "Fcut " << fcut_4b[2] << endl ;
-		  // cout << "Fcut_deriv " << fcut_deriv_4b[2] << endl ;
-		  // cout << "dx_dr " << dx_dr_4b[2] << endl ;
-		  // cout << "Powers " << powers[pow_map[2]] << endl ;
-		  // cout << "Pow_map " << pow_map[2] << endl ;
-		  // cout << "Allowed_powers" ;
-		  // for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
-		  // 	 cout << FF_4BODY[curr_quad_type_index].ALLOWED_POWERS[i][ifl] << " " ;
-		  // cout << endl ;
+			 cout << "Deriv_4b: " ;
+			 for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+			 {
+				cout << " " << deriv_4b[ifl] ;
+			 }
+			 cout << endl ;		  
+
+			 cout << "Tn_il " << Tn_4b_il[1] << endl ;
+			 cout << "Tnd_il " << Tnd_4b_il[1] << endl ;
+
+			 for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+			 {
+				cout << "Index = " << ifl << endl ;
+				cout << "Fcut " << fcut_4b[ifl] << endl ;
+				cout << "Fcut_deriv " << fcut_deriv_4b[ifl] << endl ;
+				cout << "dx_dr " << dx_dr_4b[ifl] << endl ;
+				cout << "Powers " << powers[pow_map[ifl]] << endl ;
+				cout << "Pow_map " << pow_map[ifl] << endl ;
+			 }
+			 cout << "Allowed_powers" ;
+			 for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+				cout << FF_4BODY[curr_quad_type_index].ALLOWED_POWERS[i][ifl] << " " ;
+			 cout << endl ;
+			 cout.unsetf(ios_base::scientific) ;
+		  }
+#endif
 
 		  for(int j=0; j<6; j++)
 		  {

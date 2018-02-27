@@ -461,7 +461,7 @@ void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BOD
       		if ( diff > pass ) 
 		      {
 		         cout << "Failed force check for atom " << a1 << " coordinate " << j ;
-					cout << " Error = " << diff << endl ;
+					cout << " Error = " << setprecision(6) << setw(10) << diff << endl ;
 	         }
 				else 
 				{
@@ -469,9 +469,19 @@ void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BOD
 	         }
        }
 
-		SYSTEM.COORDS[a1] = coords[a1] ;
+		SYSTEM.COORDS[a1].X = coords[a1].X ;
+		SYSTEM.COORDS[a1].Y = coords[a1].Y ;
+		SYSTEM.COORDS[a1].Z = coords[a1].Z ;
 	 }
- }
+  }
+  // Reset original values.
+  for ( int a1 = 0 ; a1 < SYSTEM.ATOMS ; a1++ ) 
+  {
+	 SYSTEM.COORDS[a1] = coords[a1] ;
+	 SYSTEM.ACCEL[a1] = forces[a1] ;
+  }
+  SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
+
 }
 
 
@@ -1811,6 +1821,68 @@ static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 		
 }
 
+
+void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<string>& TMP_ATOMTYPE, vector<PAIR_FF> &FF_2BODY, int NATMTYP)
+// Check the charges and adjust values to enforce charge neutrality if necessary.
+{
+  double eps_charge = 1.0e-03 ;
+
+  double total_charge = 0.0 ;
+  for(int a=0; a<SYSTEM.ATOMS;a++)
+	 total_charge += SYSTEM.CHARGES[a] ;
+
+  if ( total_charge > eps_charge * SYSTEM.ATOMS ) 
+	 EXIT_MSG("System total charge is too large: " + to_string(total_charge) ) ;
+
+  if ( RANK == 0 ) 
+	 cout << "      Total system charge = " << total_charge << endl ;
+
+  // // Enforce exact charge neutrality.
+  vector<int> count(SYSTEM.ATOMS, 0) ;
+  for(int a=0; a<SYSTEM.ATOMS;a++)
+  {
+	 SYSTEM.CHARGES[a]  -= total_charge / SYSTEM.ATOMS ;
+	 count[SYSTEM.ATOMTYPE_IDX[a]]++ ;
+  }
+
+  if ( RANK == 0 ) 
+	 cout << "      Charges modified for exact neutrality (e):\n" ;
+  for ( int i = 0 ; i < NATMTYP ; i++ ) 
+  {
+	 TMP_CHARGES[i] -= (total_charge * count[i]) / SYSTEM.ATOMS ;
+	 if ( RANK == 0 ) cout << "       " << SYSTEM.ATOMTYPE[i] << " " << fixed << setprecision(9) << TMP_CHARGES[i] << endl ;
+#if defined(USE_MPI) && defined(LINK_LAMMPS)
+	 LMP_CHARGE[i] = TMP_CHARGES[i]; // save charges to global variable for LAMMPS
+#endif
+
+  }
+  if ( RANK == 0 )
+	 cout << endl ;
+  
+  if ( RANK == 0 ) 
+  {
+	 cout << "     \n" ;
+	 cout << "     Pair charges modified for exact neutrality:\n" ;
+  }
+
+  int NO_PAIRS = FF_2BODY.size() ;
+
+  for(int i=0; i<NO_PAIRS; i++)
+  {
+	 for(int j=0; j<NATMTYP; j++)
+	 {
+		for(int k=0; k<NATMTYP; k++)
+		{
+		  if( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[k] ) {
+			 FF_2BODY[i].PAIR_CHRG = TMP_CHARGES[j] * TMP_CHARGES[k] ;
+			 if ( RANK == 0 ) 
+				cout << "       " << FF_2BODY[i].PRPR_NM << " " << FF_2BODY[i].PAIR_CHRG * ke << endl ;
+			 break ;
+		  }
+		}
+	 }
+  }
+}
 
 
 // MPI -- Related functions -- See headers at top of file

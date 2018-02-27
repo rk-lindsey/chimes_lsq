@@ -634,7 +634,7 @@ int main(int argc, char* argv[])
 
 		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, 
 						CONTROLS.USE_3B_CHEBY, PAIR_MAP, NEIGHBOR_LIST);
-		
+
 		if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
 			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
 		
@@ -731,8 +731,11 @@ int main(int argc, char* argv[])
 	ofstream fileb_labeled(nameBlab);
 
 	fileA.precision(16);	//  Reduced precision to 6 for code testing.
+   fileA << std::scientific ;
+
 	fileb.precision(16);	//  Usual precision set to 16.
-	
+	fileb << std::scientific ;
+
 	if ( RANK == 0 ) cout << "	...A matrix length: " << A_MATRIX.size() << endl << endl;
 	  
 	// Print only the assigned frames.
