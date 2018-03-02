@@ -1,0 +1,515 @@
+Code compiled in MPI mode. Will run on 36 processor(s).
+
+Reading the simulation control input file...
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: false
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 50
+	# NLAYERS #: 1
+	# PRMFILE #: params.4b.txt
+	# CRDFILE #: input.xyz
+	# VELINIT #: READ ... reading velocities from coordinate file
+	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
+	# PRSCALC #: ANALYTICAL
+	# WRPCRDS #: false
+	# FRQDFTB #: 20
+		... printing every 2.5 fs, 
+		... printing 2 frames. 
+	# FRQENER #: 1
+	# PRNTFRC #: false
+   ...read complete.
+
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+	...Read the following coordinate file extension: xyz
+   ...Read the following number of atoms: 96
+	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+	...Reading velocities from last three fields of atom info lines in xyzf file... 
+	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+   ...read complete for file input.xyz
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e): NEGATIVE, mass (amu):  15.9994
+		1     H , q (e): POSITIVE, mass (amu):   1.0079
+   ...read complete
+
+	Real atoms:                   96
+	Total atoms (ghost):          2592
+	Real box dimesntions:         8.6091 8.6091 8.6091
+	Total box dimensions (ghost): 25.8274 25.8274 25.8274
+
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVT-MTK simulation.
+	...Setting thermostat time constant to: 10.0000
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
+	Total Mass     = 576.4864 au
+	Volume         = 638.0841 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      true
+		...Use fit charges?             true
+		...Compute ReaxFF overbonding?  false
+		...Use fit overbonding param?   false
+		...Use 3-body Cheby params?     true
+		...Use 4-body Cheby params?     true
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Read FF quadruplet specifications...
+	...Reading all remaining force field parameters...
+		Re-setting individual atom charges based on pair charges :
+		0     O , q (e): -0.405, mass (amu):  15.9994
+		1     H , q (e):  0.820, mass (amu):   1.0079
+	...Read 2-body FF params...
+	...Read 3-body FF params...
+	...Read 4-body FF params...
+
+	Reading  4 pairs for mapping
+	........Reading pair: HH with mapped index: 1
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: OO with mapped index: 0
+	...Read FF pairmaps...
+
+	Reading  8 triplets for mapping
+	........Reading triplet: HHHHHH with mapped index: 3
+	........Reading triplet: HHOHOH with mapped index: 2
+	........Reading triplet: OHHHOH with mapped index: 2
+	........Reading triplet: OHOHHH with mapped index: 2
+	........Reading triplet: OHOHOO with mapped index: 1
+	........Reading triplet: OHOOOH with mapped index: 1
+	........Reading triplet: OOOHOH with mapped index: 1
+	........Reading triplet: OOOOOO with mapped index: 0
+	...Read FF triadmaps...
+	Reading  16 quadruplets for mapping
+	........Reading quadruplet: HHHHHHHHHHHH with mapped index: 4
+	........Reading quadruplet: HHHHOHHHOHOH with mapped index: 3
+	........Reading quadruplet: HHOHHHOHHHOH with mapped index: 3
+	........Reading quadruplet: HHOHOHOHOHOO with mapped index: 2
+	........Reading quadruplet: OHHHHHOHOHHH with mapped index: 3
+	........Reading quadruplet: OHHHOHOHOOOH with mapped index: 2
+	........Reading quadruplet: OHOHHHOOOHOH with mapped index: 2
+	........Reading quadruplet: OHOHOHHHHHHH with mapped index: 3
+	........Reading quadruplet: OHOHOHOOOOOO with mapped index: 1
+	........Reading quadruplet: OHOHOOHHOHOH with mapped index: 2
+	........Reading quadruplet: OHOOOHOHHHOH with mapped index: 2
+	........Reading quadruplet: OHOOOOOHOHOO with mapped index: 1
+	........Reading quadruplet: OOOHOHOHOHHH with mapped index: 2
+	........Reading quadruplet: OOOHOOOHOOOH with mapped index: 1
+	........Reading quadruplet: OOOOOHOOOHOH with mapped index: 1
+	........Reading quadruplet: OOOOOOOOOOOO with mapped index: 0
+	...Read FF quadmaps...
+   ...read complete.
+
+Notes on simulation: 
+	Using fpenalty power 3.0000
+	Using the following fcut style for 3B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
+	Using the following fcut style for 4B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
+	Ewald summations will be used and charges will be taken from fit values
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		CHEBYSHEV 10
+	Performing pair distance transformations over range: 
+		-1.0000 to 1.0000
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00
+		Parameters: 
+		0 -7.8146e+01
+		1 1.2308e+01
+		2 4.3045e+01
+		3 -2.7952e+01
+		4 -3.4971e+01
+		5 3.9132e+01
+		6 3.5454e+01
+		7 -4.0028e+01
+		8 -7.4672e+01
+		9 -3.3096e+01
+
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		Parameters: 
+		0 -5.5786e+01
+		1 -2.3357e+01
+		2 -1.0848e+01
+		3 4.8766e+00
+		4 1.6941e+01
+		5 1.1706e+01
+		6 4.2011e-01
+		7 -5.6966e+00
+		8 -6.5077e+00
+		9 -2.3332e+00
+
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		Parameters: 
+		0 5.3906e+01
+		1 -4.2500e+00
+		2 5.2372e+01
+		3 -2.3852e-01
+		4 1.4054e+01
+		5 -3.6657e+00
+		6 3.2709e+00
+		7 -2.8086e+00
+		8 2.9027e+00
+		9 9.7346e-02
+
+	Triplet type and polynomial order per triplet: 
+		CHEBYSHEV 2
+
+	Interaction parameters for each triplet type: 
+	0  OO OO OO: 2 parameters, 4 total parameters 
+	     index  |  powers  |  equiv index  |  param index  | parameter 
+	   --------------------------------------------------------------------
+	      0       0   1   1         0               0               -4.5222 
+	      1       1   0   1         0               0               -4.5222 
+	      2       1   1   0         0               0               -4.5222 
+	      3       1   1   1         3               1               -1.6335 
+
+	1  OH OH OO: 3 parameters, 4 total parameters 
+	     index  |  powers  |  equiv index  |  param index  | parameter 
+	   --------------------------------------------------------------------
+	      0       0   1   1         0               0               -185.6608
+	      1       1   0   1         0               0               -185.6608
+	      2       1   1   0         2               1               414.4042
+	      3       1   1   1         3               2               -205.5273
+
+	2  HH OH OH: 3 parameters, 4 total parameters 
+	     index  |  powers  |  equiv index  |  param index  | parameter 
+	   --------------------------------------------------------------------
+	      0       0   1   1         0               0               100.2166
+	      1       1   0   1         1               1               -226.6480
+	      2       1   1   0         1               1               -226.6480
+	      3       1   1   1         3               2               -80.9084
+
+	3  HH HH HH: 2 parameters, 4 total parameters 
+	     index  |  powers  |  equiv index  |  param index  | parameter 
+	   --------------------------------------------------------------------
+	      0       0   1   1         0               0               22.7311 
+	      1       1   0   1         0               0               22.7311 
+	      2       1   1   0         0               0               22.7311 
+	      3       1   1   1         3               1               -9.4131 
+
+	Quadruplet type and polynomial order per quadruplet: 
+		CHEBYSHEV 2
+
+	Interaction parameters for each triplet type: 
+	0 OO OO OO OO OO OO: 7 parameters, 41 total parameters 
+	     index  |  powers         |  equiv index  |  param index  | parameter 
+	   ---------------------------------------------------------------------------
+	      0       0   0   1   0   1   1         0               0               0.0000  
+	      1       0   1   0   1   0   1         0               0               0.0000  
+	      2       1   0   0   1   1   0         0               0               0.0000  
+	      3       1   1   1   0   0   0         0               0               0.0000  
+	      4       0   0   1   1   0   0         4               1               0.0000  
+	      5       0   1   0   0   1   0         4               1               0.0000  
+	      6       1   0   0   0   0   1         4               1               0.0000  
+	      7       0   0   1   1   0   1         7               2               0.0000  
+	      8       0   1   0   0   1   1         7               2               0.0000  
+	      9       0   0   1   1   1   0         7               2               0.0000  
+	      10      0   1   0   1   1   0         7               2               0.0000  
+	      11      1   0   0   0   1   1         7               2               0.0000  
+	      12      1   0   0   1   0   1         7               2               0.0000  
+	      13      0   1   1   0   1   0         7               2               0.0000  
+	      14      0   1   1   1   0   0         7               2               0.0000  
+	      15      1   0   1   0   0   1         7               2               0.0000  
+	      16      1   1   0   0   0   1         7               2               0.0000  
+	      17      1   0   1   1   0   0         7               2               0.0000  
+	      18      1   1   0   0   1   0         7               2               0.0000  
+	      19      0   0   1   1   1   1         19              3               0.0000  
+	      20      0   1   0   1   1   1         19              3               0.0000  
+	      21      1   0   0   1   1   1         19              3               0.0000  
+	      22      0   1   1   0   1   1         19              3               0.0000  
+	      23      0   1   1   1   0   1         19              3               0.0000  
+	      24      1   0   1   0   1   1         19              3               0.0000  
+	      25      1   1   0   1   0   1         19              3               0.0000  
+	      26      1   0   1   1   1   0         19              3               0.0000  
+	      27      1   1   0   1   1   0         19              3               0.0000  
+	      28      1   1   1   0   0   1         19              3               0.0000  
+	      29      1   1   1   0   1   0         19              3               0.0000  
+	      30      1   1   1   1   0   0         19              3               0.0000  
+	      31      0   1   1   1   1   0         31              4               0.0000  
+	      32      1   0   1   1   0   1         31              4               0.0000  
+	      33      1   1   0   0   1   1         31              4               0.0000  
+	      34      0   1   1   1   1   1         34              5               0.0000  
+	      35      1   0   1   1   1   1         34              5               0.0000  
+	      36      1   1   0   1   1   1         34              5               0.0000  
+	      37      1   1   1   0   1   1         34              5               0.0000  
+	      38      1   1   1   1   0   1         34              5               0.0000  
+	      39      1   1   1   1   1   0         34              5               0.0000  
+	      40      1   1   1   1   1   1         40              6               0.0000  
+
+	1 OO OO OO OO OO OO: 7 parameters, 41 total parameters 
+	     index  |  powers         |  equiv index  |  param index  | parameter 
+	   ---------------------------------------------------------------------------
+	      0       0   0   1   0   1   1         0               0               0.0000  
+	      1       0   1   0   1   0   1         0               0               0.0000  
+	      2       1   0   0   1   1   0         0               0               0.0000  
+	      3       0   0   1   1   0   0         3               1               0.0000  
+	      4       0   1   0   0   1   0         3               1               0.0000  
+	      5       1   0   0   0   0   1         3               1               0.0000  
+	      6       0   0   1   1   0   1         6               2               0.0000  
+	      7       0   1   0   0   1   1         6               2               0.0000  
+	      8       0   0   1   1   1   0         6               2               0.0000  
+	      9       0   1   0   1   1   0         6               2               0.0000  
+	      10      1   0   0   0   1   1         6               2               0.0000  
+	      11      1   0   0   1   0   1         6               2               0.0000  
+	      12      0   0   1   1   1   1         12              3               0.0000  
+	      13      0   1   0   1   1   1         12              3               0.0000  
+	      14      1   0   0   1   1   1         12              3               0.0000  
+	      15      0   1   1   0   1   0         15              4               0.0000  
+	      16      0   1   1   1   0   0         15              4               0.0000  
+	      17      1   0   1   0   0   1         15              4               0.0000  
+	      18      1   1   0   0   0   1         15              4               0.0000  
+	      19      1   0   1   1   0   0         15              4               0.0000  
+	      20      1   1   0   0   1   0         15              4               0.0000  
+	      21      0   1   1   0   1   1         21              5               0.0000  
+	      22      0   1   1   1   0   1         21              5               0.0000  
+	      23      1   0   1   0   1   1         21              5               0.0000  
+	      24      1   1   0   1   0   1         21              5               0.0000  
+	      25      1   0   1   1   1   0         21              5               0.0000  
+	      26      1   1   0   1   1   0         21              5               0.0000  
+	      27      0   1   1   1   1   0         27              6               0.0000  
+	      28      1   0   1   1   0   1         27              6               0.0000  
+	      29      1   1   0   0   1   1         27              6               0.0000  
+	      30      0   1   1   1   1   1         30              7               0.0000  
+	      31      1   0   1   1   1   1         30              7               0.0000  
+	      32      1   1   0   1   1   1         30              7               0.0000  
+	      33      1   1   1   0   0   0         33              8               0.0000  
+	      34      1   1   1   0   0   1         34              9               0.0000  
+	      35      1   1   1   0   1   0         34              9               0.0000  
+	      36      1   1   1   1   0   0         34              9               0.0000  
+	      37      1   1   1   0   1   1         37              10              0.0000  
+	      38      1   1   1   1   0   1         37              10              0.0000  
+	      39      1   1   1   1   1   0         37              10              0.0000  
+	      40      1   1   1   1   1   1         40              11              0.0000  
+
+	2 OO OO OO OO OO OO: 7 parameters, 41 total parameters 
+	     index  |  powers         |  equiv index  |  param index  | parameter 
+	   ---------------------------------------------------------------------------
+	      0       0   0   1   0   1   1         0               0               0.0000  
+	      1       0   1   0   1   0   1         0               0               0.0000  
+	      2       0   0   1   1   0   0         2               1               0.0000  
+	      3       0   1   0   0   1   0         2               1               0.0000  
+	      4       0   0   1   1   0   1         4               2               0.0000  
+	      5       0   1   0   0   1   1         4               2               0.0000  
+	      6       0   0   1   1   1   0         6               3               0.0000  
+	      7       0   1   0   1   1   0         6               3               0.0000  
+	      8       0   1   1   0   1   0         6               3               0.0000  
+	      9       0   1   1   1   0   0         6               3               0.0000  
+	      10      0   0   1   1   1   1         10              4               0.0000  
+	      11      0   1   0   1   1   1         10              4               0.0000  
+	      12      0   1   1   0   1   1         10              4               0.0000  
+	      13      0   1   1   1   0   1         10              4               0.0000  
+	      14      0   1   1   1   1   0         14              5               0.0000  
+	      15      0   1   1   1   1   1         15              6               0.0000  
+	      16      1   0   0   0   0   1         16              7               0.0000  
+	      17      1   0   0   0   1   1         17              8               0.0000  
+	      18      1   0   0   1   0   1         17              8               0.0000  
+	      19      1   0   1   0   0   1         17              8               0.0000  
+	      20      1   1   0   0   0   1         17              8               0.0000  
+	      21      1   0   0   1   1   0         21              9               0.0000  
+	      22      1   1   1   0   0   0         21              9               0.0000  
+	      23      1   0   0   1   1   1         23              10              0.0000  
+	      24      1   1   1   0   0   1         23              10              0.0000  
+	      25      1   0   1   0   1   1         25              11              0.0000  
+	      26      1   1   0   1   0   1         25              11              0.0000  
+	      27      1   0   1   1   0   0         27              12              0.0000  
+	      28      1   1   0   0   1   0         27              12              0.0000  
+	      29      1   0   1   1   0   1         29              13              0.0000  
+	      30      1   1   0   0   1   1         29              13              0.0000  
+	      31      1   0   1   1   1   0         31              14              0.0000  
+	      32      1   1   0   1   1   0         31              14              0.0000  
+	      33      1   1   1   0   1   0         31              14              0.0000  
+	      34      1   1   1   1   0   0         31              14              0.0000  
+	      35      1   0   1   1   1   1         35              15              0.0000  
+	      36      1   1   0   1   1   1         35              15              0.0000  
+	      37      1   1   1   0   1   1         35              15              0.0000  
+	      38      1   1   1   1   0   1         35              15              0.0000  
+	      39      1   1   1   1   1   0         39              16              0.0000  
+	      40      1   1   1   1   1   1         40              17              0.0000  
+
+	3 OO OO OO OO OO OO: 7 parameters, 41 total parameters 
+	     index  |  powers         |  equiv index  |  param index  | parameter 
+	   ---------------------------------------------------------------------------
+	      0       0   0   1   0   1   1         0               0               0.0000  
+	      1       0   0   1   1   0   0         1               1               0.0000  
+	      2       0   1   0   0   1   0         1               1               0.0000  
+	      3       1   0   0   0   0   1         1               1               0.0000  
+	      4       0   0   1   1   0   1         4               2               0.0000  
+	      5       0   0   1   1   1   0         4               2               0.0000  
+	      6       0   1   0   0   1   1         4               2               0.0000  
+	      7       1   0   0   0   1   1         4               2               0.0000  
+	      8       0   1   1   0   1   0         4               2               0.0000  
+	      9       1   0   1   0   0   1         4               2               0.0000  
+	      10      0   0   1   1   1   1         10              3               0.0000  
+	      11      0   1   1   0   1   1         10              3               0.0000  
+	      12      1   0   1   0   1   1         10              3               0.0000  
+	      13      0   1   0   1   0   1         13              4               0.0000  
+	      14      1   0   0   1   1   0         13              4               0.0000  
+	      15      1   1   1   0   0   0         13              4               0.0000  
+	      16      0   1   0   1   1   0         16              5               0.0000  
+	      17      1   0   0   1   0   1         16              5               0.0000  
+	      18      0   1   1   1   0   0         16              5               0.0000  
+	      19      1   0   1   1   0   0         16              5               0.0000  
+	      20      1   1   0   0   0   1         16              5               0.0000  
+	      21      1   1   0   0   1   0         16              5               0.0000  
+	      22      0   1   0   1   1   1         22              6               0.0000  
+	      23      1   0   0   1   1   1         22              6               0.0000  
+	      24      0   1   1   1   0   1         22              6               0.0000  
+	      25      1   0   1   1   1   0         22              6               0.0000  
+	      26      1   1   1   0   0   1         22              6               0.0000  
+	      27      1   1   1   0   1   0         22              6               0.0000  
+	      28      0   1   1   1   1   0         28              7               0.0000  
+	      29      1   0   1   1   0   1         28              7               0.0000  
+	      30      1   1   0   0   1   1         28              7               0.0000  
+	      31      0   1   1   1   1   1         31              8               0.0000  
+	      32      1   0   1   1   1   1         31              8               0.0000  
+	      33      1   1   1   0   1   1         31              8               0.0000  
+	      34      1   1   0   1   0   1         34              9               0.0000  
+	      35      1   1   0   1   1   0         34              9               0.0000  
+	      36      1   1   1   1   0   0         34              9               0.0000  
+	      37      1   1   0   1   1   1         37              10              0.0000  
+	      38      1   1   1   1   0   1         37              10              0.0000  
+	      39      1   1   1   1   1   0         37              10              0.0000  
+	      40      1   1   1   1   1   1         40              11              0.0000  
+
+	Fitted charges read from parameter file:
+		OO -0.1639 (-54.4140)
+		HH -0.6732 (-223.5317)
+		OH 0.4682 (155.4702)
+
+
+Initializing the neighbor list...
+NEIGHBOR LIST MAX CUTOFF IS: 6.00000
+USING PADDING: 0.300
+
+Generating fast maps 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+
+	Triplet maps:
+		Atom type idxs:  0 0 0 Triplet name:       OOOOOO Explicit index:  111 Unique index:    0
+		Atom type idxs:  0 0 1 Triplet name:       OOOHOH Explicit index:  112 Unique index:    1
+		Atom type idxs:  0 1 0 Triplet name:       OHOOOH Explicit index:  112 Unique index:    1
+		Atom type idxs:  0 1 1 Triplet name:       OHOHHH Explicit index:  122 Unique index:    2
+		Atom type idxs:  1 0 0 Triplet name:       OHOHOO Explicit index:  112 Unique index:    1
+		Atom type idxs:  1 0 1 Triplet name:       OHHHOH Explicit index:  122 Unique index:    2
+		Atom type idxs:  1 1 0 Triplet name:       HHOHOH Explicit index:  122 Unique index:    2
+		Atom type idxs:  1 1 1 Triplet name:       HHHHHH Explicit index:  222 Unique index:    3
+
+	Quadruplet maps:
+		Atom type idxs:  0 0 0 0 Quadruplet name: OOOOOOOOOOOO Explicit index:        1111 Unique index:    0
+		Atom type idxs:  0 0 0 1 Quadruplet name: OOOOOHOOOHOH Explicit index:        1112 Unique index:    1
+		Atom type idxs:  0 0 1 0 Quadruplet name: OOOHOOOHOOHO Explicit index:        1112 Unique index:    1
+		Atom type idxs:  0 0 1 1 Quadruplet name: OOOHOHOHOHHH Explicit index:        1122 Unique index:    2
+		Atom type idxs:  0 1 0 0 Quadruplet name: OHOOOOHOHOOO Explicit index:        1112 Unique index:    1
+		Atom type idxs:  0 1 0 1 Quadruplet name: OHOOOHHOHHOH Explicit index:        1122 Unique index:    2
+		Atom type idxs:  0 1 1 0 Quadruplet name: OHOHOOHHHOHO Explicit index:        1122 Unique index:    2
+		Atom type idxs:  0 1 1 1 Quadruplet name: OHOHOHHHHHHH Explicit index:        1222 Unique index:    3
+		Atom type idxs:  1 0 0 0 Quadruplet name: HOHOHOOOOOOO Explicit index:        1112 Unique index:    1
+		Atom type idxs:  1 0 0 1 Quadruplet name: HOHOHHOOOHOH Explicit index:        1122 Unique index:    2
+		Atom type idxs:  1 0 1 0 Quadruplet name: HOHHHOOHOOHO Explicit index:        1122 Unique index:    2
+		Atom type idxs:  1 0 1 1 Quadruplet name: HOHHHHOHOHHH Explicit index:        1222 Unique index:    3
+		Atom type idxs:  1 1 0 0 Quadruplet name: HHHOHOHOHOOO Explicit index:        1122 Unique index:    2
+		Atom type idxs:  1 1 0 1 Quadruplet name: HHHOHHHOHHOH Explicit index:        1222 Unique index:    3
+		Atom type idxs:  1 1 1 0 Quadruplet name: HHHHHOHHHOHO Explicit index:        1222 Unique index:    3
+		Atom type idxs:  1 1 1 1 Quadruplet name: HHHHHHHHHHHH Explicit index:        2222 Unique index:    4
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.3776337432
+
+Ewald parameters: 
+	Requested Ewald accuracy  =  1.000000e-06
+	Ewald alpha               =  7.723233e-01
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-Space accuracy estimate =  6.801448e-07
+
+	Cutting off K-vectors with magnitude less than 7
+	Number of Ewald K-vectors = 1364
+	K-space accuracy estimate = 0.00000086798168
+
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
+       1      0.12       3.9703342     -57.0559761     -53.0856419          1346.1     13.88152532    -53.0856419
+       2      0.25       3.9921300     -57.0777366     -53.0856066          1353.5     14.19703950    -53.0855825
+       3      0.38       4.0284436     -57.1137378     -53.0852942          1365.8     14.55257909    -53.0856761
+       4      0.50       4.0780165     -57.1626038     -53.0845873          1382.6     14.94545065    -53.0857815
+       5      0.62       4.1392151     -57.2227091     -53.0834940          1403.4     15.37255754    -53.0859081
+       6      0.75       4.2101746     -57.2921738     -53.0819992          1427.4     15.83062904    -53.0860422
+       7      0.88       4.2888570     -57.3689629     -53.0801060          1454.1     16.31637677    -53.0861873
+       8      1.00       4.3731274     -57.4509349     -53.0778075          1482.7     16.82662329    -53.0863356
+       9      1.12       4.4608471     -57.5359427     -53.0750957          1512.4     17.35828316    -53.0864761
+      10      1.25       4.5499788     -57.6219437     -53.0719649          1542.7     17.90828786    -53.0865979
+      11      1.38       4.6386957     -57.7071170     -53.0684213          1572.7     18.47342666    -53.0866992
+      12      1.50       4.7254819     -57.7899510     -53.0644691          1602.2     19.05014882    -53.0867739
+      13      1.62       4.8092146     -57.8693380     -53.0601234          1630.5     19.63432719    -53.0868247
+      14      1.75       4.8892182     -57.9446105     -53.0553923          1657.7     20.22112021    -53.0868453
+      15      1.88       4.9652841     -58.0155684     -53.0502843          1683.5     20.80489036    -53.0868289
+RANK: 0 UPDATING ON STEP: 15, WITH PADDING: 0.438
+      16      2.00       5.0376536     -58.0824873     -53.0448337          1708.0     21.37918700    -53.0867938
+      17      2.12       5.1069667     -58.1460202     -53.0390536          1731.5     21.93694486    -53.0867373
+      18      2.25       5.1741815     -58.2071508     -53.0329693          1754.3     22.47074117    -53.0866691
+      19      2.38       5.2404754     -58.2670770     -53.0266016          1776.8     22.97309638    -53.0865956
+      20      2.50       5.3071357     -58.3270986     -53.0199630          1799.4     23.43685846    -53.0865153
+      21      2.62       5.3754505     -58.3885372     -53.0130867          1822.5     23.85558481    -53.0864487
+      22      2.75       5.4466051     -58.4525868     -53.0059817          1846.6     24.22385239    -53.0863924
+      23      2.88       5.5215896     -58.5202656     -52.9986759          1872.1     24.53748063    -53.0863617
+      24      3.00       5.6011269     -58.5923038     -52.9911769          1899.0     24.79362968    -53.0863513
+      25      3.12       5.6856365     -58.6691389     -52.9835024          1927.7     24.99062239    -53.0863650
+      26      3.25       5.7752624     -58.7509153     -52.9756529          1958.1     25.12755646    -53.0863868
+      27      3.38       5.8699806     -58.8376217     -52.9676411          1990.2     25.20354749    -53.0864111
+      28      3.50       5.9697650     -58.9292425     -52.9594775          2024.0     25.21675759    -53.0864267
+      29      3.62       6.0747327     -59.0259125     -52.9511798          2059.6     25.16364275    -53.0864269
+RANK: 0 UPDATING ON STEP: 29, WITH PADDING: 0.521
+      30      3.75       6.1851491     -59.1279336     -52.9427844          2097.0     25.03896377    -53.0864205
+      31      3.88       6.3011935     -59.2355492     -52.9343557          2136.4     24.83696849    -53.0864409
+      32      4.00       6.4225053     -59.3484784     -52.9259731          2177.5     24.55350162    -53.0865323
+      33      4.12       6.5477017     -59.4653868     -52.9176851          2220.0     24.18840131    -53.0867023
+      34      4.25       6.6741405     -59.5836702     -52.9095297          2262.8     23.74684872    -53.0869416
+      35      4.38       6.7981065     -59.6996275     -52.9015210          2304.9     23.23898484    -53.0872098
+      36      4.50       6.9153618     -59.8090390     -52.8936771          2344.6     22.67803048    -53.0874643
+      37      4.62       7.0218140     -59.9078492     -52.8860352          2380.7     22.07784709    -53.0876776
+      38      4.75       7.1140431     -59.9926712     -52.8786281          2412.0     21.45099313    -53.0878173
+      39      4.88       7.1895702     -60.0610953     -52.8715250          2437.6     20.80776192    -53.0878905
+      40      5.00       7.2468942     -60.1116847     -52.8647905          2457.0     20.15612378    -53.0879055
+      41      5.12       7.2853969     -60.1438875     -52.8584906          2470.1     19.50219002    -53.0878814
+      42      5.25       7.3052047     -60.1578665     -52.8526618          2476.8     18.85078318    -53.0878182
+      43      5.38       7.3070525     -60.1543880     -52.8473356          2477.4     18.20593229    -53.0877220
+RANK: 0 UPDATING ON STEP: 43, WITH PADDING: 0.630
+      44      5.50       7.2921606     -60.1346989     -52.8425383          2472.4     17.57117311    -53.0876060
+      45      5.62       7.2621156     -60.1003906     -52.8382750          2462.2     16.94972092    -53.0874726
+      46      5.75       7.2187493     -60.0532899     -52.8345406          2447.5     16.34463300    -53.0873247
+      47      5.88       7.1640178     -59.9953533     -52.8313355          2428.9     15.75895401    -53.0871791
+      48      6.00       7.0998943     -59.9285333     -52.8286389          2407.2     15.19584832    -53.0870389
+      49      6.12       7.0282903     -59.8547115     -52.8264211          2382.9     14.65851239    -53.0869037
+      50      6.25       6.9510150     -59.7756644     -52.8246493          2356.7     14.15012673    -53.0867745
+END SIMULATION
+	Average temperature over run = 1963.9977 K
+	Average pressure    over run = 20.2129 GPa
+	Pressures from diagonal stress tensors over run: 35.7802
+	Average diagonal stress tensors over run: 
+		sigma_xx: 36.6435 GPa
+		sigma_yy: 34.9676 GPa
+		sigma_zz: 35.7296 GPa
