@@ -381,13 +381,33 @@ void SET_4B_CHEBY_POWERS(QUADRUPLETS & PAIR_QUADRUPLET, vector<string> & ATOM_TY
 
 	sort (ATOM_TYPE_AND_INDEX.begin(), ATOM_TYPE_AND_INDEX.end());	// Sort the vector contents... automatically does on the basis of the .first element, preserving "link" between .first and .second
 
+	vector<int> rev_index(4, -1) ;
+	for ( int j = 0 ; j < 4 ; j++ ) 
+	{
+	  for ( int i = 0 ; i < 4 ; i++ ) 
+	  {
+		 if ( ATOM_TYPE_AND_INDEX[i].second == j ) 
+		 {
+			rev_index[j] = i ;
+			break ;
+		 }
+	  }
+	}
+
+	for ( int j = 0 ; j < 4 ; j++ ) 
+	{
+	  if ( rev_index[j] < 0 ) 
+		 EXIT_MSG("Bad reverse index") ;
+	}
+		 
 	int m = 0 ;
 	for(int i = 0 ; i < 4 ; i++)
 	{
+	  int ii = rev_index[i] ;
 	  for ( int j = i + 1 ; j < 4 ; j++ ) 
 	  {
-		 int ii = ATOM_TYPE_AND_INDEX[i].second ;
-		 int jj = ATOM_TYPE_AND_INDEX[j].second ;
+
+		 int jj = rev_index[j] ;
 		 pow_map[m] = pair_index[ii][jj] ;
 
 		 if ( pow_map[m] < 0 || pow_map[m] > 5 ) 
@@ -838,7 +858,6 @@ void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 
 				if(curr_triple_type_index<0) 
 				{
-				  // DEBUG !!
 				  //cout << "Interaction " << TEMP_STR << " is excluded\n" ;
 				  continue;
 				}
@@ -1568,9 +1587,8 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 						force_wo_coeff[4] = deriv[4] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[5]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_kl[powers[pow_map[5]]];
 						force_wo_coeff[5] = deriv[5] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_jl[powers[pow_map[4]]];
 						
-						// DEBUG !!
 #if(0)
-						if ( a1 == 0 || fidx_a2 == 0 || fidx_a3 == 0 || fidx_a4 == 0 )
+						if ( a1 == 1 || fidx_a2 == 1 || fidx_a3 == 1 || fidx_a4 == 1 )
 						{
 						  cout << "Target atom found\n" ;
 
@@ -2577,9 +2595,6 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
   // EVALUATE THE 4-BODY INTERACTIONS
   /////////////////////////////////////////////
 
-  // DEBUG !!
-  // cout << "SNUM_4B " << FF_2BODY[0].SNUM_4B_CHEBY << endl ;
-  
   if(FF_2BODY[0].SNUM_4B_CHEBY>0)
   {
 	 // Prepare iterators for outermost loop
@@ -2599,9 +2614,6 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		
 	 // Loop over a1, a2, a3, a4 interaction quadruplets, not atoms
 
-	 // DEBUG !!
-	 // cout << "i_start = " << i_start << "i_end = " << i_end << endl ;
-	 
 	 for ( int ii = i_start; ii <= i_end; ii++ ) 
 	 {
 
@@ -2706,9 +2718,6 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		if( !FF_4BODY[curr_quad_type_index].FORCE_CUTOFF.PROCEED(rlen[5], S_MINIM[5], S_MAXIM[5]))
 		  continue;	
 
-		// DEBUG !
-		// cout << "A bond distances in range " << endl ;
-
 // At this point, all distances are within allowed ranges. We can now proceed to the force derivative calculation
 			
 		// For all types, if r < rcut, then the potential is constant, thus the force  must be zero.
@@ -2744,9 +2753,6 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 
 		SET_4B_CHEBY_POWERS( FF_4BODY[curr_quad_type_index],ATOM_TYPE, pow_map);	
 
-		// DEBUG !!
-		// cout << "N_ALLOWED_POWERS = " << FF_4BODY[curr_quad_type_index].N_ALLOWED_POWERS << endl ;
-		
 		for(int i=0; i<FF_4BODY[curr_quad_type_index].N_ALLOWED_POWERS; i++) 
 		{
 		  coeff = FF_4BODY[curr_quad_type_index].PARAMS[i];
@@ -2755,9 +2761,6 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 			 powers[f] = FF_4BODY[curr_quad_type_index].ALLOWED_POWERS[i][f] ;
 
 
-		  // DEBUG !!
-		  // cout << "COEFF = " << coeff << endl ;
-		  
 		  SYSTEM.TOT_POT_ENER += coeff * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] 
 			 * Tn_4b_ij[powers[pow_map[0]]] * Tn_4b_ik[powers[pow_map[1]]] * Tn_4b_il[powers[pow_map[2]]] 
 			 * Tn_4b_jk[powers[pow_map[3]]] * Tn_4b_jl[powers[pow_map[4]]] * Tn_4b_kl[powers[pow_map[5]]]; 			
@@ -2776,15 +2779,20 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 		  force_4b[4]  = coeff * deriv_4b[4] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_kl[powers[pow_map[5]]];
 		  force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]];
 
-		  // DEBUG !!
 #if(0)
-		  if ( a1 == 0 || fidx_a2 == 0 || fidx_a3 == 0 || fidx_a4 == 0 )
+		  if ( a1 == 1 || fidx_a2 == 1 || fidx_a3 == 1 || fidx_a4 == 1 )
 		  {
 			 cout << "Target atom found\n" ;
 
 			 cout << std::scientific ;
 			 cout.precision(10) ;
 			 cout << "A1 = " << a1 << " A2 = " << fidx_a2 << " A3 = " << fidx_a3 << " A4 = " << fidx_a4 << endl ;
+			 cout << "rlen_dummy: " ;
+			 for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
+			 {
+				cout << " " << rlen_dummy[ifl] ;
+			 }
+			 cout << endl ;
 			 cout << "Force_wo_coeff: " ;
 			 for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
 			 {
