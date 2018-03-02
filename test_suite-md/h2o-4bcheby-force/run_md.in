@@ -21,7 +21,7 @@
 # PRMFILE # ! Parameter file (i.e. params.txt)
 	params.txt
 # CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)
-	input.xyz	
+	input.xyzf	
 	
 	
 ###################################
@@ -29,7 +29,7 @@
 ###################################
 
 # VELINIT # (options are READ or GEN)
-	READ
+	GEN
 # CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>
 	NVT-MTK HOOVER 10
 # PRSCALC # (options are ANALYTICAL or NUMERICAL)
@@ -44,9 +44,11 @@
 # FRQDFTB # ! Frequency to output the DFTB gen file
 	20
 # FRQENER # ! Frequency to output energies
-	10	
+	1	
 # PRNTFRC # ! Print computed forces? Forces are printed to force_out.txt 
 	true 1
 	
+# CHECKFRC #
+   false
 	
 # ENDFILE #
