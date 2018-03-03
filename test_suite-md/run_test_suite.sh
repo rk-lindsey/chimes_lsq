@@ -12,7 +12,7 @@ NP=16
 #module load intel impi
 
 cd ../src
-rm -rf *o *dSYM house_md
+rm -rf *o *dSYM chimes_md
 if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
 	 source /usr/local/tools/dotkit/init.sh
 	 use ic-17.0.174
@@ -21,8 +21,8 @@ else
     module load intel impi
 fi
 
-make -f Makefile-TS-MD house_md;  
-rm -f ../test_suite-lsq/house_md;  mv house_md  ../test_suite-md/
+make -f Makefile-TS-MD chimes_md;  
+rm -f ../test_suite-lsq/chimes_md;  mv chimes_md  ../test_suite-md/
 cd ../test_suite-md
 
 
@@ -32,18 +32,18 @@ cd ../test_suite-md
 
 # Tests specifically for the MD code
 
-MD_TESTS[0]="h2o-2bcheby"
-MD_TESTS[1]="h2o-3bcheby" 
-MD_TESTS[2]="h2o-splines"
-MD_TESTS[3]="generic-lj"
-MD_TESTS[4]="h2o-2bcheby-genvel" 
-MD_TESTS[5]="h2o-2bcheby-numpress"
-MD_TESTS[6]="h2o-2bcheby-velscale"
+#MD_TESTS[0]="h2o-2bcheby"
+#MD_TESTS[1]="h2o-3bcheby" 
+#MD_TESTS[2]="h2o-splines"
+#MD_TESTS[3]="generic-lj"
+#MD_TESTS[4]="h2o-2bcheby-genvel" 
+#MD_TESTS[5]="h2o-2bcheby-numpress"
+#MD_TESTS[6]="h2o-2bcheby-velscale"
 
 #LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-LSQ_TESTS[1]="h2o-2bcheby"
-LSQ_TESTS[2]="h2o-3bcheby"
-LSQ_TESTS[3]="h2o-splines"
+#LSQ_TESTS[1]="h2o-2bcheby"
+#LSQ_TESTS[2]="h2o-3bcheby"
+#LSQ_TESTS[3]="h2o-splines"
 #LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
 #LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
 
@@ -52,7 +52,12 @@ LSQ_TESTS[3]="h2o-splines"
 ##
 
 MD_JOBS="${MD_TESTS[@]}"
-LSQ_JOBS="${LSQ_TESTS[@]}"
+
+if [ -n $LSQ_TESTS[0] ] ; then
+	 LSQ_JOBS="${LSQ_TESTS[@]}"
+fi
+
+MAKE_TESTS=( verify-invert verify-translate verify-scramble h2o-4bcheby-numforce )
 
 if [ $# -gt 0 ] ; then
 
@@ -93,10 +98,10 @@ do
 	cd $i
 
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		../house_md < run_md.in > run_md.out
+		../chimes_md < run_md.in > run_md.out
 			
 	else
-		srun -n $NP ../house_md < run_md.in > run_md.out
+		srun -n $NP ../chimes_md < run_md.in > run_md.out
 	fi
 	
 	cp *.* current_output
@@ -140,74 +145,87 @@ done
 ########################################
 
 
-echo " "
-echo "VALIDATING FOR LSQ/MD CODE COMPATIBILITY..."
-echo " "
-echo " ...Beginning by running the lsq test suite... "
+if [ -n "${LSQ_JOBS[0]}" ] ; then
+	 echo " "
+	 echo "VALIDATING FOR LSQ/MD CODE COMPATIBILITY..."
+	 echo " "
+	 echo " ...Beginning by running the lsq test suite... "
 
-cd ../src
-rm -rf *o *dSYM house_lsq
-cd ../test_suite-md
+	 cd ../src
+	 rm -rf *o *dSYM chimes_lsq
+	 cd ../test_suite-md
 
-cd ../test_suite-lsq 
-./run_test_suite.sh $LSQ_JOBS
+	 cd ../test_suite-lsq 
+	 ./run_test_suite.sh $LSQ_JOBS
+	 
+	 cd ../test_suite-md
 
-cd ../test_suite-md
-
-echo " "
-echo " ...Now running the force comparison tests... "
-for i in $LSQ_JOBS
-do
-
-	echo " "
-	echo "Running $i test..."
-
-	PASS=true
-	
-	cd ${TAG}${i}
+	 echo " "
+	 echo " ...Now running the force comparison tests... "
+	 for i in $LSQ_JOBS
+	 do
+		  
+		  echo " "
+		  echo "Running $i test..."
+		  
+		  PASS=true
+		  
+		  cd ${TAG}${i}
 	
 	# Grab the parameter and force files from the lsq test suite output
 	
-	cp ../../test_suite-lsq/$i/current_output/params.txt    .
-	cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
-	cp ../../test_suite-lsq/$i/current_output/force.txt     .
+		  cp ../../test_suite-lsq/$i/current_output/params.txt    .
+		  cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
+		  cp ../../test_suite-lsq/$i/current_output/force.txt     .
 
-	../house_md < run_md.in > run_md.out		
+		  ../chimes_md < run_md.in > run_md.out		
 
-	cp *.* current_output
+		  cp *.* current_output
 
 	
-	for j in run_md.out traj.gen output.xyz forceout.txt
-	do
-		if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-			diff current_output/$j correct_output/$j > $j-diff.txt
-			
-			LINES=`wc -l $j-diff.txt | awk '{print $1}'`
-			
-			if [ $LINES -gt 0 ] ; then
-				echo " "
-				echo "		Differences found in $j files:"
-				echo " "
+		  for j in run_md.out traj.gen output.xyz forceout.txt
+		  do
+				if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
+					 diff current_output/$j correct_output/$j > $j-diff.txt
+					 
+					 LINES=`wc -l $j-diff.txt | awk '{print $1}'`
+					 
+					 if [ $LINES -gt 0 ] ; then
+						  echo " "
+						  echo "		Differences found in $j files:"
+						  echo " "
+						  
+						  PASS=false
+						  ALL_PASS=false
+					 fi
+				fi
 				
-				PASS=false
-				ALL_PASS=false
-			fi
-		fi
-
-	done	
+		  done	
 	
-	if [ "$PASS" = true ] ; then
-		echo "		...Test passed."
-		rm -f ../diff-*
-	else
-		echo "		...Test failed."
-	fi	
+		  if [ "$PASS" = true ] ; then
+				echo "		...Test passed."
+				rm -f ../diff-*
+		  else
+				echo "		...Test failed."
+		  fi	
+		  
+		  
+		  cd ..
+	 done
+fi
 
-	
-	cd ..
+echo "PERFORMING FORCE CONSISTENCY CHECKS "
+for i in ${MAKE_TESTS[@]}
+do
+	 cd $i ; make NP=${NP}
+	 echo "Testing $i"
+	 if [ $? -ne 0 ] ; then
+		  echo "Test $i failed"
+		  ALL_PASS=false ;
+	 fi
+	 echo " "
+	 cd ../
 done
-
-echo " "
 
 if   [ "$ALL_PASS" = true ] ; then
 	echo "ALL TESTS PASSED"
