@@ -21,10 +21,10 @@ else
 fi
 
 # Number of MPI tasks.
-NP=16
+NP=36
 
 # Number of threads for SVD decomposition
-NUM_THREADS=16
+NUM_THREADS=36
 
 # SVD regularization factor.
 
@@ -64,7 +64,7 @@ if [ $# -eq 0 ]
 # Use default JOBS.  
 then
 #  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
-JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald' 
+JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald h2o-4bcheby test_4atoms test_4atoms.2' 
 else
 # Take JOBS from command line.
   JOBS=$*

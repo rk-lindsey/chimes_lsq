@@ -9,6 +9,7 @@ Reading input file...
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 10
 	             Will use 3-body order: 0
+	             Will use 4-body order: 0
 	             Will transform Chebyshev pair distances to range -1 to 1
 	# CHBTYPE #: MORSE
 	# NATMTYP #: 2
@@ -61,6 +62,11 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 
 ...Populating the matricies for A, Coulomb forces, and overbonding...
 
+	Ewald_Deriv:
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-space accuracy estimate =  6.801448e-07
+	Number of Ewald K-vectors = 238
 	Ewald_Deriv:
 	R-Space Ewald cutoff      =  4.304565e+00
 	R-Space accuracy estimate =  5.997380e-07

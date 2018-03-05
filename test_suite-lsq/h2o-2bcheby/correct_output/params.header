@@ -3,8 +3,9 @@ FITCOUL: true
 USEPOVR: true
 FITPOVR: true
 USE3BCH: false
+USE4BCH: false
 
-PAIRTYP: CHEBYSHEV  8 0 -1 1
+PAIRTYP: CHEBYSHEV  8 0 0 -1 1
 
 ATOM TYPES: 2
 
@@ -14,7 +15,7 @@ ATOM TYPES: 2
 
 ATOM PAIRS: 3
 
-!# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
 	0               O               O               0.6             6               0.1             MORSE           1.25            
 	1               H               H               0.6             6               0.1             MORSE           1.25            
 	2               O               H               0.6             6               0.1             MORSE           1.25            
@@ -25,5 +26,6 @@ ATOM PAIRS: 3
 	2               O               H               1               O               50              1.0165          -0.0657         5.0451          -3.6141         
 
 ATOM PAIR TRIPLETS: 0
+ATOM PAIR QUADRUPLETS: 0
 
 

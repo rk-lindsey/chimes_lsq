@@ -1,7 +1,8 @@
-! Date  2017-09-03
+! Date  2018-03-05
 !
 ! Number of variables =  13
 ! Number of equations    =  28512
+! eps (= eps_fac*dmax) =   1.16935274789
 ! RMS force error =  12.3258183454
 ! max abs variable =  13.9424247098
 ! SVD regularization factor =  1e-05
@@ -13,6 +14,7 @@ FITCOUL: false
 USEPOVR: true
 FITPOVR: true
 USE3BCH: false
+USE4BCH: false
 
 PAIRTYP: INVRSE_R  4
 
@@ -24,7 +26,7 @@ ATOM TYPES: 2
 
 ATOM PAIRS: 3
 
-!# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
 	0               O               O               0.6             6               0.1                             
 	1               H               H               0.6             6               0.1                             
 	2               O               H               0.6             6               0.1                             
@@ -35,31 +37,36 @@ ATOM PAIRS: 3
 	2               O               H               1               O               50              1.0165          -0.0657         5.0451          -3.6141         
 
 ATOM PAIR TRIPLETS: 0
+ATOM PAIR QUADRUPLETS: 0
 
 PAIR INVRSE_R PARAMS 
 
 PAIRTYPE PARAMS: 0 O O
 
-0 -5.83277806987806
-1 13.942424709757987
-2 7.4490093457502748
-3 1.565710512019745
+0 -5.832778069878735
+1 13.942424709759482
+2 7.4490093457506354
+3 1.5657105120190651
  
 PAIRTYPE PARAMS: 1 H H
 
-0 0.37087371217994025
-1 1.1163584585584598
-2 -3.6549895945451918
-3 2.5668677510208897
+0 0.37087371217923126
+1 1.1163584585632726
+2 -3.6549895945544693
+3 2.5668677510261713
  
 PAIRTYPE PARAMS: 2 O H
 
-0 2.1649183852798437
-1 -8.4438700302146099
-2 7.8806400832015981
-3 -2.0970986757368011
+0 2.1649183852796829
+1 -8.4438700302140912
+2 7.8806400832011345
+3 -2.0970986757366568
  
-P OVER: 13.489623315812082
+TRIPLET INVRSE_R PARAMS 
+
+QUADRUPLET INVRSE_R PARAMS 
+
+P OVER: 13.489623315812137
 
 PAIRMAPS: 4
 1 HH

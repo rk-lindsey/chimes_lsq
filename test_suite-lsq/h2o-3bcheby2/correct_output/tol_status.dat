@@ -1,2 +1,1 @@
-	Parameter index 3  differences exceeded tolerance(+/- 1e-09 ):  -2.00437e-09
-	Parameter index 4  differences exceeded tolerance(+/- 1e-09 ):  -1.52359e-09
+	No parameters differ by more than tol ( 1e-07 ).

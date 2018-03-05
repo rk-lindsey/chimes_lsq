@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # NOTE: The path below needs to point to the "lsq-new-md-fmt.py" version of the lsq code.
 #       If you want to use other versions, you'll probably need to modify the inputs that
 #       are sent to the script (down below)
@@ -31,7 +31,7 @@ fi
 
 if [ $# -eq 0 ] 
 then
-JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald' 
+JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald h2o-4bcheby test_4atoms test_4atoms.2' 
 else
   JOBS=$*
 fi
