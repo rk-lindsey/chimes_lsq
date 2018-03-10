@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-NP=16
+NP=36
 
 ###############################################################
 #
@@ -32,20 +32,27 @@ cd ../test_suite-md
 
 # Tests specifically for the MD code
 
-#MD_TESTS[0]="h2o-2bcheby"
-#MD_TESTS[1]="h2o-3bcheby" 
-#MD_TESTS[2]="h2o-splines"
-#MD_TESTS[3]="generic-lj"
-#MD_TESTS[4]="h2o-2bcheby-genvel" 
-#MD_TESTS[5]="h2o-2bcheby-numpress"
-#MD_TESTS[6]="h2o-2bcheby-velscale"
+MD_TESTS[0]="h2o-2bcheby"
+MD_TESTS[1]="h2o-3bcheby" 
+MD_TESTS[2]="h2o-splines"
+MD_TESTS[3]="generic-lj"
+MD_TESTS[4]="h2o-2bcheby-genvel" 
+MD_TESTS[5]="h2o-2bcheby-numpress"
+MD_TESTS[6]="h2o-2bcheby-velscale"
+MD_TESTS[7]="h2o-4bcheby"
+MD_TESTS[8]="h2o-4bcheby-numforce"
 
-#LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-#LSQ_TESTS[1]="h2o-2bcheby"
-#LSQ_TESTS[2]="h2o-3bcheby"
-#LSQ_TESTS[3]="h2o-splines"
-#LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
-#LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
+# Tests of LSQ/MD code compatibility.
+LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
+LSQ_TESTS[1]="h2o-2bcheby"
+LSQ_TESTS[2]="h2o-3bcheby"
+LSQ_TESTS[3]="h2o-splines"
+LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
+LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
+LSQ_TESTS[0]="h2o-4bcheby"
+
+# Tests with a makefile.
+MAKE_TESTS=( verify-invert verify-translate verify-scramble h2o-4bcheby-numforce verify-relabel verify-relabel.2 )
 
 ## Allow command line arguments of jobs to test.  MD jobs should be single-quoted in a string followed 
 ## by LSQ jobs single quoted. (LEF)
@@ -56,8 +63,6 @@ MD_JOBS="${MD_TESTS[@]}"
 if [ -n $LSQ_TESTS[0] ] ; then
 	 LSQ_JOBS="${LSQ_TESTS[@]}"
 fi
-
-MAKE_TESTS=( verify-invert verify-translate verify-scramble h2o-4bcheby-numforce )
 
 if [ $# -gt 0 ] ; then
 

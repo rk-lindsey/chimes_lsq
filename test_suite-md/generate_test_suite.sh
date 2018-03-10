@@ -1,6 +1,6 @@
+#! /usr/bin/bash
 
-
-NP=16
+NP=1
 
 ########################################
 # Define tests within the test suite
@@ -15,18 +15,19 @@ MD_TESTS[3]="generic-lj"
 MD_TESTS[4]="h2o-2bcheby-genvel"
 MD_TESTS[5]="h2o-2bcheby-numpress"
 MD_TESTS[6]="h2o-2bcheby-velscale"
+MD_TESTS[7]="h2o-4bcheby"
 
 # Tests for compatibility between LSQ C++/python codes with the MD code
 TAG="verify-lsq-forces-"
 
-#LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
+LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
 LSQ_TESTS[1]="h2o-2bcheby"
 LSQ_TESTS[2]="h2o-3bcheby"
 LSQ_TESTS[3]="h2o-splines"
-#LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
-#LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
+LSQ_TESTS[4]="h2o-4bcheby"
+LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
+LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
 
-LSQ_JOBS="${LSQ_TESTS[@]}"
 
 # Iterate through the tests
 
@@ -47,16 +48,22 @@ else
 fi
 
 
-#make -f Makefile-TS-MD chimes_md
-#mv chimes_md ../test_suite-md/chimes_md-serial
-#module load intel impi
-
-make -f Makefile-TS-MD chimes_md;  
+make -f Makefile-TS-MD chimes_md
 rm -f ../test_suite-lsq/chimes_md;  mv chimes_md  ../test_suite-md/
 cd ../test_suite-md
 
+if [ $# -gt 0 ] ; then
+	 MD_JOBS=$1
+else
+	 MD_JOBS="${MD_TESTS[@]}"
+fi
+echo "MD JOBS = $MD_JOBS"
 
-for i in "${MD_TESTS[@]}"
+if [ -n $LSQ_TESTS[0] ] ; then
+	 LSQ_JOBS="${LSQ_TESTS[@]}"
+fi
+
+for i in "$MD_JOBS"
 do
 
 	echo " "
@@ -79,6 +86,8 @@ do
 done
 
 
+if [ -n "$LSQ_JOBS" ] ; then
+
 echo " "
 echo "SETTING UP FOR LSQ/MD CODE COMPATIBILITY..."
 echo " "
@@ -96,7 +105,7 @@ cd ../test_suite-md
 
 echo " "
 echo " ...Now running the force comparison tests... "
-for i in "${LSQ_TESTS[@]}"
+for i in "${LSQ_JOBS}"
 do
 
 	echo " "
@@ -121,5 +130,6 @@ done
 
 echo " "
 
+fi # -n LSQ_JOBS
 	
 exit 0
