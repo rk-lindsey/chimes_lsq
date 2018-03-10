@@ -9,6 +9,7 @@ FITCOUL: true
 USEPOVR: true
 FITPOVR: true
 USE3BCH: false
+USE4BCH: false
 
 PAIRTYP: CHEBYSHEV  10 0
 

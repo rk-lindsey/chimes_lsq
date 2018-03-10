@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 16 processor(s).
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357
@@ -27,7 +27,7 @@ Reading initial coordinates and forces...
    ...Read the following number of atoms: 96
 	...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
-	... Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyz
 
 Reading atom info from parameter file...
@@ -63,6 +63,7 @@ Reading force field parameters...
 		...Compute ReaxFF overbonding?  false
 		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     false
+		...Use 4-body Cheby params?     false
 	...Read FF controls...
 Attempting to read pairtype...
 	...Read FF interaction type...
@@ -287,11 +288,3 @@ RANK: 0 UPDATING ON STEP: 990, WITH PADDING: 0.476
 END SIMULATION
 	Average temperature over run = 1952.6251 K
 	Average pressure    over run = 5.0508 GPa
-	Pressure from diagonal stress tensors over run: 5.0508
-	Average stress tensor over run: 
-		sigma_xx: 5.1008 GPa
-		sigma_yy: 4.9961 GPa
-		sigma_zz: 5.0553 GPa
-		sigma_xy: -0.0241 GPa
-		sigma_xz: 0.1373 GPa
-		sigma_yz: -0.1347 GPa
