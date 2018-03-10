@@ -19,7 +19,7 @@
 # USENEIG # ! Use a neighbor list? HIGHLY reccommended when NLAYERS > 0
 	true
 # PRMFILE # ! Parameter file (i.e. params.txt)
-	params.new.txt
+	params.3b.nodate.txt
 # CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)
 	input.xyz	
 	

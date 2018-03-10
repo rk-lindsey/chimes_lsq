@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 16 processor(s).
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357
@@ -28,13 +28,13 @@ Reading initial coordinates and forces...
    ...Read the following number of atoms: 96
 	...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
-	... Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyz
 
 Reading atom info from parameter file...
 	Read 2 atom types:
-		0     O , q (e): NEGATIVE, mass (amu):  15.9990
-		1     H , q (e): POSITIVE, mass (amu):   1.0080
+		0     O , q (e): NEGATIVE, mass (amu):  15.9994
+		1     H , q (e): POSITIVE, mass (amu):   1.0079
    ...read complete
 
 	Real atoms:                   96
@@ -49,8 +49,8 @@ Setting up thermostats/barostats/velocities...
 
 Running velocity sanity checks...
 	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
-	Final   velocity center of mass: (    0.0000,     0.0000,     0.0000) 
-	Total Mass     = 576.4800 au
+	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
+	Total Mass     = 576.4864 au
 	Volume         = 638.0841 Ang^3
 	Number density = 0.2498 mol atm/cm^3
 	Mass density   = 1.5002 g/cm^3
@@ -63,18 +63,33 @@ Reading force field parameters...
 		...Compute ReaxFF overbonding?  false
 		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     true
+		...Use 4-body Cheby params?     false
 	...Read FF controls...
 Attempting to read pairtype...
 	...Read FF interaction type...
 	...Read general FF params...
 	...Read FF triplet specifications...
+	...Read FF quadruplet specifications...
 	...Reading all remaining force field parameters...
 		Re-setting individual atom charges based on pair charges :
-		0     O , q (e): -0.491, mass (amu):  15.9990
-		1     H , q (e):  0.246, mass (amu):   1.0080
+      Total system charge = 0.0000
+      Charges modified for exact neutrality (e):
+       O -0.516457241
+       H 0.258228241
+
+     
+     Pair charges modified for exact neutrality:
+       OO 88.570717764
+       HH 22.142614347
+       OH -44.285293788
+Atom properties:
+		0     O , q (e): -0.516, mass (amu):  15.9994
+		1     H , q (e):  0.258, mass (amu):   1.0079
 	...Read 2-body FF params...
 	...Read 3-body FF params...
-
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
 	Reading  4 pairs for mapping
 	........Reading pair: HH with mapped index: 1
 	........Reading pair: HO with mapped index: 2
@@ -82,7 +97,7 @@ Attempting to read pairtype...
 	........Reading pair: OO with mapped index: 0
 	...Read FF pairmaps...
 
-	Reading  8 triplets for mapping
+	Reading  8 triplet for mapping
 	........Reading triplet: HHHHHH with mapped index: 3
 	........Reading triplet: HHOHOH with mapped index: 2
 	........Reading triplet: OHHHOH with mapped index: 2
@@ -91,13 +106,13 @@ Attempting to read pairtype...
 	........Reading triplet: OHOOOH with mapped index: 1
 	........Reading triplet: OOOHOH with mapped index: 1
 	........Reading triplet: OOOOOO with mapped index: 0
-	...Read FF triadmaps...
+	...Read FF triplet maps...
    ...read complete.
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
 	Using the following fcut style for 3B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 0.0000 0.0000
+		...with steepness and offsets of: 2.0000 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
@@ -110,90 +125,101 @@ Force field summary:
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00
 		Parameters: 
-		0 -1.5379e+01
-		1 -1.6756e+01
-		2 2.4209e+01
-		3 1.3053e+00
-		4 -1.8491e+01
-		5 -5.2665e+00
-		6 3.0967e+01
-		7 -6.9275e+00
-		8 -1.8105e+01
-		9 -1.5832e+01
+		0 -1.3987e+02
+		1 -2.1691e+01
+		2 6.5046e+01
+		3 5.1310e+00
+		4 -3.4236e+01
+		5 -2.0680e+01
+		6 3.9208e+01
+		7 1.3341e+01
+		8 -1.9457e+00
+		9 -1.0552e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
 		Parameters: 
-		0 -5.0063e+01
-		1 -7.0398e+01
-		2 -7.6867e+01
-		3 -7.9348e+01
-		4 -5.8654e+01
-		5 -4.3572e+01
-		6 -2.9135e+01
-		7 -1.8405e+01
-		8 -9.0317e+00
-		9 -3.0507e+00
+		0 -4.7756e+01
+		1 -7.1332e+01
+		2 -8.6123e+01
+		3 -9.2798e+01
+		4 -7.4298e+01
+		5 -5.6911e+01
+		6 -3.8608e+01
+		7 -2.3590e+01
+		8 -1.1113e+01
+		9 -3.6734e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
 		Parameters: 
-		0 4.1453e-01
-		1 1.7308e+01
-		2 3.1747e+01
-		3 1.2724e+01
-		4 3.3322e+00
-		5 2.1607e+00
-		6 -1.3015e+00
-		7 4.1198e-01
-		8 5.8764e-01
-		9 3.7916e-01
+		0 3.4743e+00
+		1 1.3627e+01
+		2 3.3354e+01
+		3 1.2382e+01
+		4 3.0787e+00
+		5 2.2237e+00
+		6 -1.4606e+00
+		7 4.2968e-01
+		8 5.6414e-01
+		9 3.0770e-01
 
-	Triplet type and polynomial order per triplet: 
-		CHEBYSHEV 2
+	The following unique triplets of atoms have been identified:
 
-	Interaction parameters for each triplet type: 
-	0  OO OO OO: 2 parameters, 4 total parameters 
-	     index  |  powers  |  equiv index  |  param index  | parameter 
-	   --------------------------------------------------------------------
-	      0       0   1   1         0               0               559.7442
-	      1       1   0   1         0               0               559.7442
-	      2       1   1   0         0               0               559.7442
-	      3       1   1   1         3               1               -116.7854
+    Cluster index       : 0
+    Atoms in the cluster: O O O 
+    Pairs in the cluster: OO OO OO 
+    Number of unique sets of powers: 2 (4 total)...
+		     index  |  powers  |  equiv index  |  param index   | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0       55.3868
+		      1       1   0   1         0               0       55.3868
+		      2       1   1   0         0               0       55.3868
+		      3       1   1   1         3               1       0.0186
 
-	1  OO OH OH: 3 parameters, 4 total parameters 
-	     index  |  powers  |  equiv index  |  param index  | parameter 
-	   --------------------------------------------------------------------
-	      0       0   1   1         0               0               1137.8927
-	      1       1   0   1         1               1               -340.5460
-	      2       1   1   0         1               1               -340.5460
-	      3       1   1   1         3               2               1429.3389
+    Cluster index       : 1
+    Atoms in the cluster: H O O 
+    Pairs in the cluster: OH OH OO 
+    Number of unique sets of powers: 3 (4 total)...
+		     index  |  powers  |  equiv index  |  param index   | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0       -372.5592
+		      1       1   0   1         0               0       -372.5592
+		      2       1   1   0         2               1       1171.4165
+		      3       1   1   1         3               2       1492.3809
 
-	2  OH OH HH: 3 parameters, 4 total parameters 
-	     index  |  powers  |  equiv index  |  param index  | parameter 
-	   --------------------------------------------------------------------
-	      0       0   1   1         0               0               -87.8077
-	      1       1   0   1         0               0               -87.8077
-	      2       1   1   0         2               1               55.8155 
-	      3       1   1   1         3               2               -230.6116
+    Cluster index       : 2
+    Atoms in the cluster: H H O 
+    Pairs in the cluster: HH OH OH 
+    Number of unique sets of powers: 3 (4 total)...
+		     index  |  powers  |  equiv index  |  param index   | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0       57.3174
+		      1       1   0   1         1               1       -91.4834
+		      2       1   1   0         1               1       -91.4834
+		      3       1   1   1         3               2       -223.9685
 
-	3  HH HH HH: 2 parameters, 4 total parameters 
-	     index  |  powers  |  equiv index  |  param index  | parameter 
-	   --------------------------------------------------------------------
-	      0       0   1   1         0               0               -12.8669
-	      1       1   0   1         0               0               -12.8669
-	      2       1   1   0         0               0               -12.8669
-	      3       1   1   1         3               1               41.4986 
+    Cluster index       : 3
+    Atoms in the cluster: H H H 
+    Pairs in the cluster: HH HH HH 
+    Number of unique sets of powers: 2 (4 total)...
+		     index  |  powers  |  equiv index  |  param index   | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0       -4.7590
+		      1       1   0   1         0               0       -4.7590
+		      2       1   1   0         0               0       -4.7590
+		      3       1   1   1         3               1       68.8044
 
 	Fitted charges read from parameter file:
-		OO 0.2413 (80.1137)
-		HH 0.0603 (20.0284)
-		OH -0.1206 (-40.0568)
+		OO 0.2667 (88.5707)
+		HH 0.0667 (22.1426)
+		OH -0.1334 (-44.2853)
 
 
 Initializing the neighbor list...
 NEIGHBOR LIST MAX CUTOFF IS: 6.00000
 USING PADDING: 0.300
+Number of 3-body interactions = 182650
 
 Generating fast maps 
 	Pair maps:
@@ -203,16 +229,18 @@ Generating fast maps
 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
 
 	Triplet maps:
-		Atom type idxs:  0 0 0 Triplet name:       OOOOOO Explicit Triplet index:    0 Unique Triplet index:    0
-		Atom type idxs:  0 0 1 Triplet name:       OOOHOH Explicit Triplet index:    1 Unique Triplet index:    2
-		Atom type idxs:  0 1 0 Triplet name:       OHOOOH Explicit Triplet index:    2 Unique Triplet index:    2
-		Atom type idxs:  0 1 1 Triplet name:       OHOHHH Explicit Triplet index:    3 Unique Triplet index:    1
-		Atom type idxs:  1 0 0 Triplet name:       OHOHOO Explicit Triplet index:    0 Unique Triplet index:    0
-		Atom type idxs:  1 0 1 Triplet name:       OHHHOH Explicit Triplet index:    1 Unique Triplet index:    2
-		Atom type idxs:  1 1 0 Triplet name:       HHOHOH Explicit Triplet index:    2 Unique Triplet index:    2
-		Atom type idxs:  1 1 1 Triplet name:       HHHHHH Explicit Triplet index:    3 Unique Triplet index:    1
+		Atom type idxs:  0 0 0 Triplet name:       OOOOOO Explicit index:  111 Unique index:    0
+		Atom type idxs:  0 0 1 Triplet name:       OOOHOH Explicit index:  211 Unique index:    1
+		Atom type idxs:  0 1 0 Triplet name:       OHOOOH Explicit index:  121 Unique index:    1
+		Atom type idxs:  0 1 1 Triplet name:       OHOHHH Explicit index:  221 Unique index:    2
+		Atom type idxs:  1 0 0 Triplet name:       OHOHOO Explicit index:  112 Unique index:    1
+		Atom type idxs:  1 0 1 Triplet name:       OHHHOH Explicit index:  212 Unique index:    2
+		Atom type idxs:  1 1 0 Triplet name:       HHOHOH Explicit index:  122 Unique index:    2
+		Atom type idxs:  1 1 1 Triplet name:       HHHHHH Explicit index:  222 Unique index:    3
 BEGIN SIMULATION:
-RANK: 0 RESET RCUT_PADDING TO: 0.3776339900
+RANK: 0 RESET RCUT_PADDING TO: 0.3776337432
+Number of 3-body interactions = 197665
+Number of 3-body interactions = 197665
 
 Ewald parameters: 
 	Requested Ewald accuracy  =  1.000000e-06
@@ -227,177 +255,237 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-      10      1.25       3.8820585     -14.6628258     -10.7807673          1316.2     26.64036735    -10.7952930
-RANK: 0 UPDATING ON STEP: 16, WITH PADDING: 0.378
-      20      2.50       3.8024855     -14.5284562     -10.7259707          1289.2     27.01981825    -10.7950548
-      30      3.75       3.9685762     -14.5967293     -10.6281531          1345.5     25.11811823    -10.7952631
-RANK: 0 UPDATING ON STEP: 31, WITH PADDING: 0.423
-      40      5.00       4.1279609     -14.6118503     -10.4838894          1399.6     22.22346867    -10.7951730
-RANK: 0 UPDATING ON STEP: 46, WITH PADDING: 0.424
-      50      6.25       4.2985719     -14.5935613     -10.2949894          1457.4     19.95168112    -10.7950782
-      60      7.50       4.5629670     -14.6217251     -10.0587580          1547.1     19.19883869    -10.7950810
-RANK: 0 UPDATING ON STEP: 62, WITH PADDING: 0.413
-      70      8.75       4.9036542     -14.6770556      -9.7734014          1662.6     20.24720154    -10.7950785
-RANK: 0 UPDATING ON STEP: 77, WITH PADDING: 0.457
-      80     10.00       5.3160347     -14.7542185      -9.4381838          1802.4     22.78125691    -10.7951748
-      90     11.25       5.6947284     -14.7541437      -9.0594153          1930.8     25.32257370    -10.7950561
-RANK: 0 UPDATING ON STEP: 92, WITH PADDING: 0.483
-     100     12.50       6.0967326     -14.7451461      -8.6484136          2067.1     26.28040256    -10.7950855
-RANK: 0 UPDATING ON STEP: 107, WITH PADDING: 0.528
-     110     13.75       6.3781960     -14.5958398      -8.2176438          2162.5     25.27132308    -10.7951259
-     120     15.00       6.4553026     -14.2469784      -7.7916759          2188.6     22.74622220    -10.7947602
-RANK: 0 UPDATING ON STEP: 123, WITH PADDING: 0.546
-     130     16.25       6.5947520     -13.9731118      -7.3783598          2235.9     20.80549278    -10.7948572
-RANK: 0 UPDATING ON STEP: 138, WITH PADDING: 0.587
-     140     17.50       6.6679457     -13.6499628      -6.9820172          2260.7     21.04644384    -10.7946206
-     150     18.75       6.9003685     -13.5070403      -6.6066718          2339.5     23.10326439    -10.7946288
-RANK: 0 UPDATING ON STEP: 153, WITH PADDING: 0.644
-     160     20.00       7.2777189     -13.5287487      -6.2510298          2467.5     25.91207881    -10.7949937
-RANK: 0 UPDATING ON STEP: 168, WITH PADDING: 0.662
-     170     21.25       7.4563666     -13.3899377      -5.9335711          2528.1     28.34320320    -10.7946299
-     180     22.50       7.7979829     -13.4688336      -5.6708507          2643.9     28.41736740    -10.7949459
-RANK: 0 UPDATING ON STEP: 185, WITH PADDING: 0.619
-     190     23.75       7.8710814     -13.3471285      -5.4760471          2668.7     27.25984277    -10.7952020
-     200     25.00       7.3070446     -12.6705986      -5.3635540          2477.4     25.66012903    -10.7939838
-RANK: 0 UPDATING ON STEP: 202, WITH PADDING: 0.552
-     210     26.25       7.4571946     -12.7730811      -5.3158865          2528.3     23.34303733    -10.7950752
-RANK: 0 UPDATING ON STEP: 217, WITH PADDING: 0.552
-     220     27.50       7.4692130     -12.7949157      -5.3257027          2532.4     23.15724779    -10.7945191
-     230     28.75       7.3366223     -12.7343314      -5.3977091          2487.5     25.56216851    -10.7948572
-RANK: 0 UPDATING ON STEP: 231, WITH PADDING: 0.643
-     240     30.00       7.2327137     -12.7553361      -5.5226223          2452.2     28.83584825    -10.7947294
-     250     31.25       7.2725821     -12.9724347      -5.6998526          2465.7     30.39443576    -10.7946549
-RANK: 0 UPDATING ON STEP: 250, WITH PADDING: 0.541
-     260     32.50       7.3717504     -13.3039955      -5.9322451          2499.4     29.87764176    -10.7950193
-RANK: 0 UPDATING ON STEP: 265, WITH PADDING: 0.559
-     270     33.75       7.1221001     -13.3419503      -6.2198502          2414.7     28.16765773    -10.7951327
-     280     35.00       6.4569531     -12.9853190      -6.5283659          2189.2     26.28738843    -10.7944831
-RANK: 0 UPDATING ON STEP: 280, WITH PADDING: 0.590
-     290     36.25       6.0809945     -12.9138179      -6.8328233          2061.7     24.44921799    -10.7945781
-RANK: 0 UPDATING ON STEP: 296, WITH PADDING: 0.589
-     300     37.50       5.9618249     -13.0935042      -7.1316793          2021.3     23.26340905    -10.7946014
-     310     38.75       5.9620607     -13.3937762      -7.4317155          2021.4     23.85998126    -10.7949514
-RANK: 0 UPDATING ON STEP: 313, WITH PADDING: 0.583
-     320     40.00       5.7411991     -13.4692857      -7.7280866          1946.5     26.38071030    -10.7950274
-RANK: 0 UPDATING ON STEP: 328, WITH PADDING: 0.589
-     330     41.25       5.5269996     -13.5321218      -8.0051222          1873.9     28.75167261    -10.7946221
-     340     42.50       5.7043456     -13.9790562      -8.2747105          1934.0     28.60021637    -10.7952845
-RANK: 0 UPDATING ON STEP: 348, WITH PADDING: 0.495
-     350     43.75       5.7693252     -14.3116219      -8.5422967          1956.1     26.34593343    -10.7951008
-     360     45.00       5.6493522     -14.4571986      -8.8078465          1915.4     23.93070780    -10.7956441
-RANK: 0 UPDATING ON STEP: 363, WITH PADDING: 0.500
-     370     46.25       4.9266746     -13.9691062      -9.0424316          1670.4     22.76538337    -10.7947437
-RANK: 0 UPDATING ON STEP: 379, WITH PADDING: 0.483
-     380     47.50       4.5580516     -13.7854048      -9.2273532          1545.4     22.28745049    -10.7948319
-     390     48.75       4.4957089     -13.8704995      -9.3747906          1524.3     22.35024141    -10.7951917
-RANK: 0 UPDATING ON STEP: 396, WITH PADDING: 0.451
-     400     50.00       4.3445680     -13.8293760      -9.4848080          1473.0     23.37351981    -10.7950253
-     410     51.25       4.2748695     -13.8320777      -9.5572082          1449.4     24.85738716    -10.7952109
-RANK: 0 UPDATING ON STEP: 411, WITH PADDING: 0.482
-     420     52.50       4.2342002     -13.8258513      -9.5916510          1435.6     25.87674190    -10.7950462
-RANK: 0 UPDATING ON STEP: 427, WITH PADDING: 0.475
-     430     53.75       4.4592049     -14.0486291      -9.5894242          1511.9     25.87864846    -10.7953192
-     440     55.00       4.6569451     -14.2088493      -9.5519042          1578.9     25.47667326    -10.7954476
-RANK: 0 UPDATING ON STEP: 444, WITH PADDING: 0.437
-     450     56.25       4.6420628     -14.1244644      -9.4824016          1573.9     25.12218939    -10.7950696
-     460     57.50       4.7642044     -14.1459255      -9.3817211          1615.3     24.75692138    -10.7950568
-RANK: 0 UPDATING ON STEP: 460, WITH PADDING: 0.495
-     470     58.75       4.9856566     -14.2337066      -9.2480500          1690.4     24.34208351    -10.7951412
-RANK: 0 UPDATING ON STEP: 475, WITH PADDING: 0.517
-     480     60.00       5.1213629     -14.2056718      -9.0843089          1736.4     24.14039200    -10.7951893
-     490     61.25       5.1434606     -14.0404077      -8.8969471          1743.9     24.16559470    -10.7948801
-RANK: 0 UPDATING ON STEP: 492, WITH PADDING: 0.478
-     500     62.50       5.3861134     -14.0714069      -8.6852935          1826.1     23.88063260    -10.7948729
-RANK: 0 UPDATING ON STEP: 506, WITH PADDING: 0.573
-     510     63.75       5.8404029     -14.2847720      -8.4443691          1980.2     23.45721229    -10.7951033
-     520     65.00       6.1786605     -14.3615546      -8.1828941          2094.8     23.47119989    -10.7950529
-RANK: 0 UPDATING ON STEP: 521, WITH PADDING: 0.612
-     530     66.25       6.4308808     -14.3497787      -7.9188979          2180.4     24.12838816    -10.7949158
-RANK: 0 UPDATING ON STEP: 536, WITH PADDING: 0.636
-     540     67.50       6.6578436     -14.3201403      -7.6622967          2257.3     25.13947158    -10.7950582
-     550     68.75       6.8406854     -14.2667952      -7.4261097          2319.3     25.54639957    -10.7949538
-RANK: 0 UPDATING ON STEP: 552, WITH PADDING: 0.625
-     560     70.00       7.0411022     -14.2577236      -7.2166214          2387.3     25.62890776    -10.7950149
-     570     71.25       6.9708555     -14.0175849      -7.0467294          2363.4     26.00457396    -10.7952944
-RANK: 0 UPDATING ON STEP: 571, WITH PADDING: 0.506
-     580     72.50       6.4587531     -13.3784225      -6.9196694          2189.8     26.44328049    -10.7945562
-RANK: 0 UPDATING ON STEP: 586, WITH PADDING: 0.511
-     590     73.75       6.2625279     -13.0837176      -6.8211897          2123.3     26.04606539    -10.7944754
-     600     75.00       6.5248658     -13.2607120      -6.7358463          2212.2     24.87646598    -10.7949067
-RANK: 0 UPDATING ON STEP: 601, WITH PADDING: 0.556
-     610     76.25       6.6839059     -13.3519833      -6.6680775          2266.2     24.37402460    -10.7946790
-RANK: 0 UPDATING ON STEP: 616, WITH PADDING: 0.556
-     620     77.50       6.8137622     -13.4415917      -6.6278295          2310.2     25.59888339    -10.7951088
-     630     78.75       6.5321710     -13.1501047      -6.6179338          2214.7     27.97235957    -10.7947614
-RANK: 0 UPDATING ON STEP: 632, WITH PADDING: 0.557
-     640     80.00       6.3643894     -12.9948769      -6.6304874          2157.8     29.18184229    -10.7945630
-RANK: 0 UPDATING ON STEP: 647, WITH PADDING: 0.598
-     650     81.25       6.6315666     -13.2928646      -6.6612980          2248.4     28.33461924    -10.7949098
-     660     82.50       6.7077881     -13.4261017      -6.7183136          2274.2     26.81523568    -10.7951201
-RANK: 0 UPDATING ON STEP: 663, WITH PADDING: 0.571
-     670     83.75       6.3529504     -13.1531696      -6.8002192          2153.9     25.79097077    -10.7947985
-RANK: 0 UPDATING ON STEP: 679, WITH PADDING: 0.568
-     680     85.00       6.0613188     -12.9529708      -6.8916519          2055.1     25.06194845    -10.7941487
-     690     86.25       6.4194573     -13.4128409      -6.9933836          2176.5     24.40486619    -10.7951803
-RANK: 0 UPDATING ON STEP: 695, WITH PADDING: 0.540
-     700     87.50       6.3062395     -13.4201362      -7.1138967          2138.1     25.07442117    -10.7952930
-     710     88.75       5.6492160     -12.8847975      -7.2355815          1915.3     26.71323194    -10.7942749
-RANK: 0 UPDATING ON STEP: 712, WITH PADDING: 0.498
-     720     90.00       5.6571816     -13.0030673      -7.3458857          1918.0     27.50267899    -10.7950184
-RANK: 0 UPDATING ON STEP: 728, WITH PADDING: 0.506
-     730     91.25       5.6687748     -13.1194705      -7.4506958          1922.0     27.50504205    -10.7952131
-     740     92.50       5.4240735     -12.9677936      -7.5437202          1839.0     26.72220136    -10.7945977
-RANK: 0 UPDATING ON STEP: 743, WITH PADDING: 0.508
-     750     93.75       5.5320383     -13.1561767      -7.6241384          1875.6     25.22282065    -10.7950704
-RANK: 0 UPDATING ON STEP: 757, WITH PADDING: 0.608
-     760     95.00       5.5133892     -13.2070607      -7.6936715          1869.3     24.14004646    -10.7948165
-     770     96.25       5.5226091     -13.2743490      -7.7517399          1872.4     24.05416299    -10.7947028
-RANK: 0 UPDATING ON STEP: 772, WITH PADDING: 0.618
-     780     97.50       5.6957234     -13.4963952      -7.8006718          1931.1     25.03321333    -10.7950647
-     790     98.75       5.7046044     -13.5478193      -7.8432149          1934.1     26.33762434    -10.7947957
-RANK: 0 UPDATING ON STEP: 792, WITH PADDING: 0.500
-     800    100.00       5.8179489     -13.6990314      -7.8810825          1972.6     26.72382129    -10.7951167
-RANK: 0 UPDATING ON STEP: 807, WITH PADDING: 0.518
-     810    101.25       5.8745883     -13.7911933      -7.9166050          1991.8     26.06033757    -10.7951147
-     820    102.50       5.7578516     -13.7084711      -7.9506195          1952.2     25.29054288    -10.7949861
-RANK: 0 UPDATING ON STEP: 822, WITH PADDING: 0.537
-     830    103.75       5.5755231     -13.5550009      -7.9794778          1890.4     25.08404317    -10.7949773
-RANK: 0 UPDATING ON STEP: 837, WITH PADDING: 0.556
-     840    105.00       5.4003680     -13.3980912      -7.9977232          1831.0     25.15458082    -10.7947420
-     850    106.25       5.4448102     -13.4472227      -8.0024125          1846.0     25.07502489    -10.7949086
-RANK: 0 UPDATING ON STEP: 852, WITH PADDING: 0.566
-     860    107.50       5.5129029     -13.5068910      -7.9939881          1869.1     25.14989517    -10.7950552
-RANK: 0 UPDATING ON STEP: 867, WITH PADDING: 0.584
-     870    108.75       5.5432959     -13.5167827      -7.9734868          1879.4     25.22419960    -10.7946351
-     880    110.00       5.9006673     -13.8443696      -7.9437022          2000.6     25.10502393    -10.7953538
-RANK: 0 UPDATING ON STEP: 882, WITH PADDING: 0.619
-     890    111.25       5.9352618     -13.8458126      -7.9105508          2012.3     25.07062963    -10.7950282
-RANK: 0 UPDATING ON STEP: 897, WITH PADDING: 0.642
-     900    112.50       5.8295897     -13.7087368      -7.8791471          1976.5     25.13731109    -10.7951208
-     910    113.75       5.6147305     -13.4602739      -7.8455435          1903.7     25.03225358    -10.7947022
-RANK: 0 UPDATING ON STEP: 912, WITH PADDING: 0.643
-     920    115.00       5.7072477     -13.5126016      -7.8053539          1935.0     24.49405842    -10.7946462
-RANK: 0 UPDATING ON STEP: 928, WITH PADDING: 0.635
-     930    116.25       6.1176068     -13.8761856      -7.7585788          2074.1     24.13289032    -10.7952928
-     940    117.50       5.9888388     -13.7038523      -7.7150135          2030.5     25.09213457    -10.7952140
-RANK: 0 UPDATING ON STEP: 947, WITH PADDING: 0.524
-     950    118.75       5.5162256     -13.1913520      -7.6751264          1870.3     26.64381037    -10.7943403
-     960    120.00       5.7853526     -13.4137421      -7.6283894          1961.5     26.42664245    -10.7948766
-RANK: 0 UPDATING ON STEP: 964, WITH PADDING: 0.466
-     970    121.25       6.2139690     -13.7885396      -7.5745706          2106.8     24.94557223    -10.7954199
-RANK: 0 UPDATING ON STEP: 978, WITH PADDING: 0.562
-     980    122.50       6.0131338     -13.5403083      -7.5271745          2038.7     24.38579516    -10.7950352
-     990    123.75       5.6441561     -13.1296947      -7.4855386          1913.6     24.75129117    -10.7946841
-RANK: 0 UPDATING ON STEP: 994, WITH PADDING: 0.559
-    1000    125.00       5.6223350     -13.0611356      -7.4388006          1906.2     24.53841913    -10.7943733
+      10      1.25       3.8811924       1.0761927       4.9573851          1315.9     39.91817540      4.9428577
+Number of 3-body interactions = 198060
+RANK: 0 UPDATING ON STEP: 16, WITH PADDING: 0.379
+      20      2.50       3.8029183       1.2092765       5.0121949          1289.4     40.32066015      4.9430934
+      30      3.75       3.9701658       1.1398857       5.1100515          1346.1     38.36607913      4.9428859
+Number of 3-body interactions = 208712
+RANK: 0 UPDATING ON STEP: 30, WITH PADDING: 0.426
+      40      5.00       4.1315373       1.1228413       5.2543786          1400.8     35.37515902      4.9429796
+Number of 3-body interactions = 207389
+RANK: 0 UPDATING ON STEP: 45, WITH PADDING: 0.427
+      50      6.25       4.3099613       1.1335134       5.4434747          1461.3     33.02348918      4.9430740
+      60      7.50       4.5849127       1.0952966       5.6802093          1554.5     32.25699119      4.9430528
+Number of 3-body interactions = 202560
+RANK: 0 UPDATING ON STEP: 61, WITH PADDING: 0.410
+      70      8.75       4.9176807       1.0481630       5.9658437          1667.3     33.37557712      4.9430572
+Number of 3-body interactions = 211258
+RANK: 0 UPDATING ON STEP: 76, WITH PADDING: 0.452
+      80     10.00       5.3102125       0.9897409       6.2999534          1800.4     35.98967367      4.9430104
+      90     11.25       5.7212423       0.9562762       6.6775185          1939.8     38.43966398      4.9430984
+Number of 3-body interactions = 216495
+RANK: 0 UPDATING ON STEP: 91, WITH PADDING: 0.486
+     100     12.50       6.1547425       0.9348229       7.0895654          2086.7     39.27088272      4.9429956
+Number of 3-body interactions = 231479
+RANK: 0 UPDATING ON STEP: 105, WITH PADDING: 0.562
+     110     13.75       6.3675721       1.1507422       7.5183143          2158.9     38.22955505      4.9430631
+     120     15.00       6.4073940       1.5303908       7.9377847          2172.4     35.68117257      4.9434633
+Number of 3-body interactions = 231819
+RANK: 0 UPDATING ON STEP: 121, WITH PADDING: 0.555
+     130     16.25       6.5997746       1.7470578       8.3468324          2237.6     33.67797212      4.9432607
+Number of 3-body interactions = 237308
+RANK: 0 UPDATING ON STEP: 137, WITH PADDING: 0.586
+     140     17.50       6.7168010       2.0251796       8.7419806          2277.3     33.86574605      4.9434682
+     150     18.75       6.9014347       2.2137147       9.1151494          2339.9     36.05147496      4.9434885
+Number of 3-body interactions = 250087
+RANK: 0 UPDATING ON STEP: 152, WITH PADDING: 0.643
+     160     20.00       7.2015879       2.2623968       9.4639847          2441.7     39.22999030      4.9432123
+Number of 3-body interactions = 253318
+RANK: 0 UPDATING ON STEP: 167, WITH PADDING: 0.662
+     170     21.25       7.3914472       2.3848881       9.7763353          2506.0     41.60693050      4.9435028
+     180     22.50       7.7332358       2.3041516      10.0373874          2621.9     41.60594151      4.9432351
+Number of 3-body interactions = 244408
+RANK: 0 UPDATING ON STEP: 184, WITH PADDING: 0.619
+     190     23.75       7.8068852       2.4270029      10.2338881          2646.9     40.56654672      4.9429377
+     200     25.00       7.2129265       3.1381348      10.3510613          2445.5     39.16969356      4.9441543
+Number of 3-body interactions = 234151
+RANK: 0 UPDATING ON STEP: 201, WITH PADDING: 0.580
+     210     26.25       7.2425740       3.1650791      10.4076530          2455.6     37.17451663      4.9434444
+Number of 3-body interactions = 235449
+RANK: 0 UPDATING ON STEP: 217, WITH PADDING: 0.580
+     220     27.50       7.4331009       2.9810905      10.4141914          2520.2     36.65445943      4.9435909
+     230     28.75       7.4830217       2.8764665      10.3594882          2537.1     39.10231939      4.9429519
+Number of 3-body interactions = 255962
+RANK: 0 UPDATING ON STEP: 231, WITH PADDING: 0.671
+     240     30.00       7.1166855       3.1321710      10.2488564          2412.9     42.70176824      4.9439006
+Number of 3-body interactions = 237390
+RANK: 0 UPDATING ON STEP: 249, WITH PADDING: 0.589
+     250     31.25       7.2001765       2.8906697      10.0908462          2441.2     43.73630556      4.9435501
+     260     32.50       7.4371072       2.4402114       9.8773186          2521.5     42.67835496      4.9430137
+Number of 3-body interactions = 238997
+RANK: 0 UPDATING ON STEP: 265, WITH PADDING: 0.596
+     270     33.75       7.1341498       2.4718140       9.6059638          2418.8     40.83423278      4.9431485
+     280     35.00       6.4581614       2.8550615       9.3132230          2189.6     39.17761900      4.9437744
+Number of 3-body interactions = 239669
+RANK: 0 UPDATING ON STEP: 280, WITH PADDING: 0.597
+     290     36.25       6.1314187       2.8904626       9.0218812          2078.8     37.77259162      4.9435956
+Number of 3-body interactions = 234337
+RANK: 0 UPDATING ON STEP: 296, WITH PADDING: 0.574
+     300     37.50       6.0113777       2.7211333       8.7325110          2038.1     37.13048956      4.9435741
+     310     38.75       6.0181134       2.4230912       8.4412046          2040.4     37.80271596      4.9433516
+Number of 3-body interactions = 220520
+RANK: 0 UPDATING ON STEP: 313, WITH PADDING: 0.517
+     320     40.00       5.9768237       2.1695099       8.1463336          2026.4     39.96522813      4.9430633
+Number of 3-body interactions = 242843
+RANK: 0 UPDATING ON STEP: 327, WITH PADDING: 0.612
+     330     41.25       5.6525899       2.2052591       7.8578490          1916.5     42.40861968      4.9429794
+     340     42.50       5.4166843       2.1793767       7.5960610          1836.5     42.55291007      4.9435833
+Number of 3-body interactions = 232730
+RANK: 0 UPDATING ON STEP: 344, WITH PADDING: 0.562
+     350     43.75       5.7585503       1.5799582       7.3385085          1952.4     39.79425036      4.9425205
+     360     45.00       5.5420455       1.5420761       7.0841216          1879.0     37.23679616      4.9429799
+Number of 3-body interactions = 228739
+RANK: 0 UPDATING ON STEP: 360, WITH PADDING: 0.545
+     370     46.25       5.1063041       1.7504398       6.8567439          1731.3     36.06139188      4.9432421
+Number of 3-body interactions = 214839
+RANK: 0 UPDATING ON STEP: 378, WITH PADDING: 0.480
+     380     47.50       4.8488940       1.8163892       6.6652832          1644.0     35.88100451      4.9433125
+     390     48.75       4.7711185       1.7342946       6.5054132          1617.6     36.39546254      4.9430699
+Number of 3-body interactions = 212242
+RANK: 0 UPDATING ON STEP: 394, WITH PADDING: 0.465
+     400     50.00       4.6407659       1.7368260       6.3775919          1573.4     37.36407913      4.9431243
+     410     51.25       4.5131721       1.7704697       6.2836417          1530.2     38.11650630      4.9431169
+Number of 3-body interactions = 211284
+RANK: 0 UPDATING ON STEP: 410, WITH PADDING: 0.460
+     420     52.50       4.5242216       1.7001715       6.2243931          1533.9     38.09522622      4.9432241
+Number of 3-body interactions = 205568
+RANK: 0 UPDATING ON STEP: 426, WITH PADDING: 0.433
+     430     53.75       4.7806258       1.4151131       6.1957389          1620.9     37.69853474      4.9426517
+     440     55.00       4.6673536       1.5287298       6.1960834          1582.4     37.98378777      4.9428330
+Number of 3-body interactions = 209629
+RANK: 0 UPDATING ON STEP: 441, WITH PADDING: 0.449
+     450     56.25       4.4918040       1.7347875       6.2265915          1522.9     38.41392219      4.9434494
+Number of 3-body interactions = 217342
+RANK: 0 UPDATING ON STEP: 456, WITH PADDING: 0.483
+     460     57.50       4.8500731       1.4402378       6.2903108          1644.4     37.92625506      4.9427609
+     470     58.75       4.9262845       1.4603193       6.3866038          1670.2     37.55850100      4.9428849
+Number of 3-body interactions = 215049
+RANK: 0 UPDATING ON STEP: 472, WITH PADDING: 0.471
+     480     60.00       4.7808406       1.7260236       6.5068642          1620.9     37.67103336      4.9434377
+Number of 3-body interactions = 207595
+RANK: 0 UPDATING ON STEP: 489, WITH PADDING: 0.440
+     490     61.25       5.0443022       1.6110389       6.6553410          1710.2     37.12663606      4.9430816
+     500     62.50       5.3782813       1.4599527       6.8382339          1823.5     35.95284211      4.9430327
+Number of 3-body interactions = 213424
+RANK: 0 UPDATING ON STEP: 504, WITH PADDING: 0.467
+     510     63.75       5.6461936       1.4001215       7.0463151          1914.3     35.18077434      4.9432845
+Number of 3-body interactions = 224022
+RANK: 0 UPDATING ON STEP: 519, WITH PADDING: 0.523
+     520     65.00       6.0311609       1.2430812       7.2742421          2044.8     35.33905583      4.9431506
+     530     66.25       6.4305499       1.0822308       7.5127807          2180.3     36.50424088      4.9430437
+Number of 3-body interactions = 234821
+RANK: 0 UPDATING ON STEP: 534, WITH PADDING: 0.569
+     540     67.50       6.6866628       1.0604693       7.7471322          2267.1     38.22161359      4.9429854
+     550     68.75       6.7056539       1.2529448       7.9585987          2273.5     39.31794848      4.9430124
+Number of 3-body interactions = 234831
+RANK: 0 UPDATING ON STEP: 550, WITH PADDING: 0.572
+     560     70.00       6.6777478       1.4634736       8.1412213          2264.1     39.21646385      4.9433223
+Number of 3-body interactions = 236018
+RANK: 0 UPDATING ON STEP: 565, WITH PADDING: 0.579
+     570     71.25       6.7668974       1.5293176       8.2962150          2294.3     38.07509422      4.9429818
+     580     72.50       6.5928395       1.8286350       8.4214744          2235.3     37.00521786      4.9434352
+Number of 3-body interactions = 230411
+RANK: 0 UPDATING ON STEP: 582, WITH PADDING: 0.549
+     590     73.75       6.5135050       2.0051174       8.5186224          2208.4     36.53619466      4.9432936
+Number of 3-body interactions = 235880
+RANK: 0 UPDATING ON STEP: 597, WITH PADDING: 0.581
+     600     75.00       6.4515851       2.1426742       8.5942593          2187.4     36.56649398      4.9433369
+     610     76.25       6.4339830       2.2162648       8.6502478          2181.4     37.12085679      4.9435174
+Number of 3-body interactions = 241095
+RANK: 0 UPDATING ON STEP: 612, WITH PADDING: 0.599
+     620     77.50       6.7654541       1.9214840       8.6869381          2293.8     38.33554275      4.9429361
+Number of 3-body interactions = 241945
+RANK: 0 UPDATING ON STEP: 627, WITH PADDING: 0.605
+     630     78.75       6.7899643       1.9058549       8.6958193          2302.1     39.79866204      4.9431788
+     640     80.00       6.7515838       1.9213347       8.6729185          2289.1     40.11751124      4.9433515
+Number of 3-body interactions = 245814
+RANK: 0 UPDATING ON STEP: 642, WITH PADDING: 0.625
+     650     81.25       6.8280993       1.7893993       8.6174986          2315.0     38.98028930      4.9428232
+Number of 3-body interactions = 244541
+RANK: 0 UPDATING ON STEP: 658, WITH PADDING: 0.623
+     660     82.50       6.3894608       2.1444882       8.5339490          2166.3     38.26281335      4.9432684
+     670     83.75       5.9194419       2.5211370       8.4405790          2007.0     38.09486911      4.9436256
+Number of 3-body interactions = 243315
+RANK: 0 UPDATING ON STEP: 673, WITH PADDING: 0.623
+     680     85.00       5.8701589       2.4787900       8.3489489          1990.3     38.03242720      4.9432972
+     690     86.25       5.8902225       2.3673534       8.2575759          1997.1     38.50141615      4.9431580
+Number of 3-body interactions = 242699
+RANK: 0 UPDATING ON STEP: 690, WITH PADDING: 0.621
+     700     87.50       5.7378235       2.4306567       8.1684802          1945.4     39.41406023      4.9432587
+Number of 3-body interactions = 238436
+RANK: 0 UPDATING ON STEP: 706, WITH PADDING: 0.595
+     710     88.75       5.5886704       2.4979115       8.0865819          1894.8     39.86801681      4.9433307
+     720     90.00       5.6066656       2.4078048       8.0144704          1900.9     38.93556047      4.9432139
+Number of 3-body interactions = 222760
+RANK: 0 UPDATING ON STEP: 724, WITH PADDING: 0.518
+     730     91.25       5.5609683       2.3894437       7.9504120          1885.4     37.31028929      4.9429644
+     740     92.50       5.1802491       2.7201512       7.9004002          1756.3     36.19887949      4.9434752
+Number of 3-body interactions = 216826
+RANK: 0 UPDATING ON STEP: 741, WITH PADDING: 0.484
+     750     93.75       5.0151772       2.8563958       7.8715730          1700.4     35.64154378      4.9435288
+Number of 3-body interactions = 223708
+RANK: 0 UPDATING ON STEP: 757, WITH PADDING: 0.522
+     760     95.00       5.1118277       2.7538619       7.8656896          1733.1     35.55999170      4.9433154
+     770     96.25       5.1968750       2.6847403       7.8816153          1762.0     36.07969483      4.9434407
+Number of 3-body interactions = 226808
+RANK: 0 UPDATING ON STEP: 772, WITH PADDING: 0.538
+     780     97.50       5.4256691       2.4915380       7.9172071          1839.6     36.76561230      4.9434903
+Number of 3-body interactions = 231959
+RANK: 0 UPDATING ON STEP: 788, WITH PADDING: 0.563
+     790     98.75       5.8757708       2.0924082       7.9681791          1992.2     37.59719715      4.9429465
+     800    100.00       6.0748704       1.9497832       8.0246535          2059.7     38.09549888      4.9432375
+Number of 3-body interactions = 231371
+RANK: 0 UPDATING ON STEP: 804, WITH PADDING: 0.557
+     810    101.25       6.2582502       1.8181110       8.0763612          2121.8     37.50023743      4.9431817
+     820    102.50       6.3927710       1.7247149       8.1174859          2167.4     36.20315051      4.9429682
+Number of 3-body interactions = 224792
+RANK: 0 UPDATING ON STEP: 821, WITH PADDING: 0.522
+     830    103.75       6.2226305       1.9209341       8.1435646          2109.8     35.34595553      4.9432873
+Number of 3-body interactions = 221789
+RANK: 0 UPDATING ON STEP: 837, WITH PADDING: 0.508
+     840    105.00       5.9675494       2.1904862       8.1580356          2023.3     35.34831190      4.9432891
+     850    106.25       5.9931022       2.1762462       8.1693485          2031.9     35.41511538      4.9433187
+Number of 3-body interactions = 221206
+RANK: 0 UPDATING ON STEP: 853, WITH PADDING: 0.503
+     860    107.50       6.2747011       1.9024182       8.1771193          2127.4     35.37942645      4.9431350
+Number of 3-body interactions = 233371
+RANK: 0 UPDATING ON STEP: 867, WITH PADDING: 0.572
+     870    108.75       6.4107253       1.7625797       8.1733050          2173.5     35.71305370      4.9432702
+     880    110.00       6.5136028       1.6376414       8.1512442          2208.4     36.29414571      4.9428546
+Number of 3-body interactions = 232134
+RANK: 0 UPDATING ON STEP: 884, WITH PADDING: 0.561
+     890    111.25       6.4009864       1.7089310       8.1099174          2170.2     36.41716577      4.9432090
+Number of 3-body interactions = 246915
+RANK: 0 UPDATING ON STEP: 899, WITH PADDING: 0.619
+     900    112.50       6.4182357       1.6325942       8.0508299          2176.1     35.97129189      4.9430293
+     910    113.75       6.2653312       1.7097637       7.9750949          2124.2     35.63681115      4.9430155
+Number of 3-body interactions = 252931
+RANK: 0 UPDATING ON STEP: 914, WITH PADDING: 0.650
+     920    115.00       5.9732646       1.9187361       7.8920008          2025.2     35.52471273      4.9435716
+     930    116.25       6.0175042       1.7881952       7.8056994          2040.2     35.33164955      4.9430570
+Number of 3-body interactions = 233539
+RANK: 0 UPDATING ON STEP: 932, WITH PADDING: 0.559
+     940    117.50       5.9297785       1.7871750       7.7169534          2010.5     35.23203753      4.9432498
+Number of 3-body interactions = 235504
+RANK: 0 UPDATING ON STEP: 947, WITH PADDING: 0.571
+     950    118.75       5.8684075       1.7599431       7.6283506          1989.7     35.76898084      4.9431958
+     960    120.00       5.8136262       1.7270836       7.5407098          1971.1     37.28038998      4.9428445
+Number of 3-body interactions = 222054
+RANK: 0 UPDATING ON STEP: 964, WITH PADDING: 0.509
+     970    121.25       5.7263540       1.7320161       7.4583702          1941.5     38.78117145      4.9431309
+     980    122.50       5.9111983       1.4673636       7.3785619          2004.2     38.94433943      4.9426937
+Number of 3-body interactions = 218231
+RANK: 0 UPDATING ON STEP: 981, WITH PADDING: 0.486
+     990    123.75       5.8000176       1.4985454       7.2985630          1966.5     38.24599627      4.9426558
+Number of 3-body interactions = 223559
+RANK: 0 UPDATING ON STEP: 996, WITH PADDING: 0.509
+    1000    125.00       5.3270548       1.9006311       7.2276859          1806.1     36.97433888      4.9433397
 END SIMULATION
-	Average temperature over run = 1993.4547 K
-	Average pressure    over run = 25.2019 GPa
-	Pressure from diagonal stress tensors over run: 25.2026
-	Average stress tensor over run: 
-		sigma_xx: 26.5839 GPa
-		sigma_yy: 23.9248 GPa
-		sigma_zz: 25.0991 GPa
-		sigma_xy: -0.3651 GPa
-		sigma_xz: 0.1634 GPa
-		sigma_yz: -0.5497 GPa
+	Average temperature over run = 2006.7631 K
+	Average pressure    over run = 37.6362 GPa
+	Pressures from diagonal stress tensors over run: 37.6370
+	Average diagonal stress tensors over run: 
+		sigma_xx: 38.9456 GPa
+		sigma_yy: 36.4883 GPa
+		sigma_zz: 37.4769 GPa
