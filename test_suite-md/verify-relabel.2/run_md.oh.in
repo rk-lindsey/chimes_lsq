@@ -1,0 +1,50 @@
+
+###################################
+#### GENERAL CONTROL VARIABLES ####
+###################################
+
+
+# RNDSEED # ! Seed. If not specified, default value 123457 is used
+	12357
+# TEMPERA # ! In K
+	0.0
+# TIMESTP # ! In fs
+	0.0001
+# N_MDSTP # ! Total number of MD steps
+	1
+# NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
+	1
+# USENEIG # ! Use a neighbor list? HIGHLY reccommended when NLAYERS > 0
+	true
+# PRMFILE # ! Parameter file (i.e. params.txt)
+	params.OH.txt
+# CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)
+	inputOH.xyz
+
+# WRPCRDS # 
+	false		
+	
+###################################
+####    SIMULATION  OPTIONS    ####
+###################################
+
+# VELINIT # (options are READ or GEN)
+	GEN
+# CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>
+	NVT-MTK HOOVER 10
+# PRSCALC # (options are ANALYTICAL or NUMERICAL)
+	ANALYTICAL
+	
+###################################
+####      OUTPUT  CONTROL      ####
+###################################	
+	
+# FRQDFTB # ! Frequency to output the DFTB gen file
+	20
+# FRQENER # ! Frequency to output energies
+	1	
+# PRNTFRC # ! Print computed forces? Forces are printed to force_out.txt 
+	true 1
+	
+	
+# ENDFILE #
