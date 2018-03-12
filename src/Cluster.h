@@ -50,7 +50,17 @@ struct PAIRS	// NEEDS UPDATING
 	vector<double>	POT_PARAMS;		// Used by splines to compute pressure by integrating spline eq's
 	double			PAIR_CHRG;
 	
-PAIRS(): N_CFG_CONTRIB(0),OVRPRMS(5), NBINS(3) {}	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
+PAIRS(): N_CFG_CONTRIB(0),OVRPRMS(5), NBINS(3) 
+	 {
+		N_CFG_CONTRIB = 0 ;
+		SNUM = 0 ;
+		SNUM_3B_CHEBY = 0 ;
+		SNUM_4B_CHEBY = 0 ;
+		CHEBY_RANGE_HIGH = 1.0 ;
+		CHEBY_RANGE_LOW  = -1.0 ;
+		CUBIC_SCALE = 1.0 ;
+		USE_OVRPRMS = false ;
+	 }	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 };
 
 

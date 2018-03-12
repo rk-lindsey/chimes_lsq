@@ -254,7 +254,7 @@ if POTENTIAL == "CHEBYSHEV" or POTENTIAL == "DFTBPOLY":
         #print SNUM_4B        
 
 elif POTENTIAL == "INVRSE_R":
-    TMP = hf[6].split()
+    TMP = hf[7].split()
     SNUM_2B = int(TMP[2])
 else:
     CASE_BY_CASE = True # We'll need to do it per atom pair type.	

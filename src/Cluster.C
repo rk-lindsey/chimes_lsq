@@ -20,7 +20,7 @@ using namespace std;
 #include "util.h"
 
 // define for extra output
-//#define DEBUG_CLUSTER
+// #define DEBUG_CLUSTER
 
 void CLUSTER::build(int cheby_order)
 // Build a set of interactions for a cluster.
@@ -653,8 +653,8 @@ void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector
 	 }
 
 	 // Sort each entry in descending order.
-	 sort(pairs.begin(), pairs.end()) ;
-	 reverse(pairs.begin(), pairs.end() ) ;
+	 //sort(pairs.begin(), pairs.end()) ;
+	 //reverse(pairs.begin(), pairs.end() ) ;
 
 	 // Get the integer ID for this triplet.
 	 int idx1 = make_id_int(atom_index) ;
@@ -665,7 +665,10 @@ void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector
 		int_map_str += pairs[j] ;
 	 }
 		
-	 INT_MAP[idx1] = MAP[int_map_str];
+	 if ( MAP.find(int_map_str) != MAP.end() )
+		INT_MAP[idx1] = MAP[int_map_str];
+	 else
+		EXIT_MSG("Map for " + int_map_str + " was not found\n") ;
 
 	 // MAP[int_map_str] is -1 for excluded interaction.
 	 if ( INT_MAP[idx1] >= 0 ) 

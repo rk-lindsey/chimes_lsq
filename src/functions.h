@@ -556,6 +556,7 @@ double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// Overloaded
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// Overloaded.. compute differentely if for main or new velocities
 
 void build_layers      (FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
+void build_real_replicates(FRAME &SYSTEM, const JOB_CONTROL &CONTROLS) ;
 
 void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 								CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
