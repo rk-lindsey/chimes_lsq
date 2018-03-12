@@ -1,6 +1,6 @@
 #! /usr/bin/bash
 
-NP=1
+NP=36
 
 ########################################
 # Define tests within the test suite
@@ -20,13 +20,13 @@ MD_TESTS[7]="h2o-4bcheby"
 # Tests for compatibility between LSQ C++/python codes with the MD code
 TAG="verify-lsq-forces-"
 
-LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-LSQ_TESTS[1]="h2o-2bcheby"
-LSQ_TESTS[2]="h2o-3bcheby"
-LSQ_TESTS[3]="h2o-splines"
-LSQ_TESTS[4]="h2o-4bcheby"
-LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
-LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
+#LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
+#LSQ_TESTS[1]="h2o-2bcheby"
+#LSQ_TESTS[2]="h2o-3bcheby"
+#LSQ_TESTS[3]="h2o-splines"
+#LSQ_TESTS[4]="h2o-4bcheby"
+#LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
+#LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
 
 
 # Iterate through the tests
