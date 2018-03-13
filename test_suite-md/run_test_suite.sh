@@ -39,17 +39,17 @@ MD_TESTS[1]="h2o-3bcheby"
 # MD_TESTS[4]="h2o-2bcheby-genvel" 
 # MD_TESTS[5]="h2o-2bcheby-numpress"
 # MD_TESTS[6]="h2o-2bcheby-velscale"
-# MD_TESTS[7]="h2o-4bcheby"
+MD_TESTS[7]="h2o-4bcheby"
 # MD_TESTS[8]="h2o-4bcheby-numforce"
 
 # Tests of LSQ/MD code compatibility.
-#LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-#LSQ_TESTS[1]="h2o-2bcheby"
-LSQ_TESTS[2]="h2o-3bcheby"
+# LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
+# LSQ_TESTS[1]="h2o-2bcheby"
+# LSQ_TESTS[2]="h2o-3bcheby"
 # LSQ_TESTS[3]="h2o-splines"
 # LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
 # LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-# LSQ_TESTS[0]="h2o-4bcheby"
+LSQ_TESTS[6]="h2o-4bcheby"
 
 # Tests with a makefile.
 #MAKE_TESTS=( verify-invert verify-translate verify-scramble h2o-4bcheby-numforce verify-relabel verify-relabel.2 )
