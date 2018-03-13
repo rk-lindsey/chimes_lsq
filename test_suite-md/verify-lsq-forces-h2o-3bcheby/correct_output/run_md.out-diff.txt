@@ -1,2 +1,149 @@
-33a34
-> 	...Ignoring last three fields of atom info lines in xyzf file... 
+34c34
+< 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+---
+> 	... Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+52d51
+< Initializing velocities via box Muller...
+71d69
+< 		...Use 4-body Cheby params?     false
+77d74
+< 	...Read FF quadruplet specifications...
+80,90d76
+<       Total system charge = 0.0000
+<       Charges modified for exact neutrality (e):
+<        O -0.516457241
+<        H 0.258228241
+< 
+<      
+<      Pair charges modified for exact neutrality:
+<        OO 88.570717764
+<        HH 22.142614347
+<        OH -44.285293788
+< Atom properties:
+95,97c81
+< 	...Read 3-body FF params...
+< 	...Read 3-body FF params...
+< 	...Read 3-body FF params...
+---
+> 
+105c89
+< 	Reading  8 triplet for mapping
+---
+> 	Reading  8 triplets for mapping
+114c98
+< 	...Read FF triplet maps...
+---
+> 	...Read FF triadmaps...
+120c104
+< 		...with steepness and offsets of: 2.0000 0.0000
+---
+> 		...with steepness and offsets of: 0.0000 0.0000
+172c156,157
+< 	The following unique triplets of atoms have been identified:
+---
+> 	Triplet type and polynomial order per triplet: 
+> 		CHEBYSHEV 2
+174,216c159,190
+<     Cluster index       : 0
+<     Atoms in the cluster: O O O 
+<     Pairs in the cluster: OO OO OO 
+<     Number of unique sets of powers: 2 (4 total)...
+< 		     index  |  powers  |  equiv index  |  param index   | parameter 
+< 		   ----------------------------------------------------
+< 		      0       0   1   1         0               0       55.3868
+< 		      1       1   0   1         0               0       55.3868
+< 		      2       1   1   0         0               0       55.3868
+< 		      3       1   1   1         3               1       0.0186
+< 
+<     Cluster index       : 1
+<     Atoms in the cluster: H O O 
+<     Pairs in the cluster: OH OH OO 
+<     Number of unique sets of powers: 3 (4 total)...
+< 		     index  |  powers  |  equiv index  |  param index   | parameter 
+< 		   ----------------------------------------------------
+< 		      0       0   1   1         0               0       -372.5592
+< 		      1       1   0   1         0               0       -372.5592
+< 		      2       1   1   0         2               1       1171.4165
+< 		      3       1   1   1         3               2       1492.3809
+< 
+<     Cluster index       : 2
+<     Atoms in the cluster: H H O 
+<     Pairs in the cluster: HH OH OH 
+<     Number of unique sets of powers: 3 (4 total)...
+< 		     index  |  powers  |  equiv index  |  param index   | parameter 
+< 		   ----------------------------------------------------
+< 		      0       0   1   1         0               0       57.3174
+< 		      1       1   0   1         1               1       -91.4834
+< 		      2       1   1   0         1               1       -91.4834
+< 		      3       1   1   1         3               2       -223.9685
+< 
+<     Cluster index       : 3
+<     Atoms in the cluster: H H H 
+<     Pairs in the cluster: HH HH HH 
+<     Number of unique sets of powers: 2 (4 total)...
+< 		     index  |  powers  |  equiv index  |  param index   | parameter 
+< 		   ----------------------------------------------------
+< 		      0       0   1   1         0               0       -4.7590
+< 		      1       1   0   1         0               0       -4.7590
+< 		      2       1   1   0         0               0       -4.7590
+< 		      3       1   1   1         3               1       68.8044
+---
+> 	Interaction parameters for each triplet type: 
+> 	0  OO OO OO: 2 parameters, 4 total parameters 
+> 	     index  |  powers  |  equiv index  |  param index  | parameter 
+> 	   --------------------------------------------------------------------
+> 	      0       0   1   1         0               0               55.3868 
+> 	      1       1   0   1         0               0               55.3868 
+> 	      2       1   1   0         0               0               55.3868 
+> 	      3       1   1   1         3               1               0.0186  
+> 
+> 	1  OO OH OH: 3 parameters, 4 total parameters 
+> 	     index  |  powers  |  equiv index  |  param index  | parameter 
+> 	   --------------------------------------------------------------------
+> 	      0       0   1   1         0               0               1171.4165
+> 	      1       1   0   1         1               1               -372.5592
+> 	      2       1   1   0         1               1               -372.5592
+> 	      3       1   1   1         3               2               1492.3809
+> 
+> 	2  OH OH HH: 3 parameters, 4 total parameters 
+> 	     index  |  powers  |  equiv index  |  param index  | parameter 
+> 	   --------------------------------------------------------------------
+> 	      0       0   1   1         0               0               -91.4834
+> 	      1       1   0   1         0               0               -91.4834
+> 	      2       1   1   0         2               1               57.3174 
+> 	      3       1   1   1         3               2               -223.9685
+> 
+> 	3  HH HH HH: 2 parameters, 4 total parameters 
+> 	     index  |  powers  |  equiv index  |  param index  | parameter 
+> 	   --------------------------------------------------------------------
+> 	      0       0   1   1         0               0               -4.7590 
+> 	      1       1   0   1         0               0               -4.7590 
+> 	      2       1   1   0         0               0               -4.7590 
+> 	      3       1   1   1         3               1               68.8044 
+220c194
+< 		HH 0.0667 (22.1426)
+---
+> 		HH 0.0667 (22.1427)
+227d200
+< Number of 3-body interactions = 180048
+237,244c210,217
+< 		Atom type idxs:  0 0 0 Triplet name:       OOOOOO Explicit index:  111 Unique index:    0
+< 		Atom type idxs:  0 0 1 Triplet name:       OOOHOH Explicit index:  211 Unique index:    1
+< 		Atom type idxs:  0 1 0 Triplet name:       OHOOOH Explicit index:  121 Unique index:    1
+< 		Atom type idxs:  0 1 1 Triplet name:       OHOHHH Explicit index:  221 Unique index:    2
+< 		Atom type idxs:  1 0 0 Triplet name:       OHOHOO Explicit index:  112 Unique index:    1
+< 		Atom type idxs:  1 0 1 Triplet name:       OHHHOH Explicit index:  212 Unique index:    2
+< 		Atom type idxs:  1 1 0 Triplet name:       HHOHOH Explicit index:  122 Unique index:    2
+< 		Atom type idxs:  1 1 1 Triplet name:       HHHHHH Explicit index:  222 Unique index:    3
+---
+> 		Atom type idxs:  0 0 0 Triplet name:       OOOOOO Explicit Triplet index:    0 Unique Triplet index:    0
+> 		Atom type idxs:  0 0 1 Triplet name:       OOOHOH Explicit Triplet index:    1 Unique Triplet index:    2
+> 		Atom type idxs:  0 1 0 Triplet name:       OHOOOH Explicit Triplet index:    2 Unique Triplet index:    2
+> 		Atom type idxs:  0 1 1 Triplet name:       OHOHHH Explicit Triplet index:    3 Unique Triplet index:    1
+> 		Atom type idxs:  1 0 0 Triplet name:       OHOHOO Explicit Triplet index:    0 Unique Triplet index:    0
+> 		Atom type idxs:  1 0 1 Triplet name:       OHHHOH Explicit Triplet index:    1 Unique Triplet index:    2
+> 		Atom type idxs:  1 1 0 Triplet name:       HHOHOH Explicit Triplet index:    2 Unique Triplet index:    2
+> 		Atom type idxs:  1 1 1 Triplet name:       HHHHHH Explicit Triplet index:    3 Unique Triplet index:    1
+247,248d219
+< Number of 3-body interactions = 209395
+< Number of 3-body interactions = 209395

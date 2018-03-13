@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 1 processor(s).
+Code compiled in MPI mode. Will run on 36 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357
@@ -477,7 +477,7 @@ RANK: 0 UPDATING ON STEP: 964, WITH PADDING: 0.509
      980    122.50       5.9111983       1.4673636       7.3785619          2004.2     38.94433943      4.9426937
 Number of 3-body interactions = 218231
 RANK: 0 UPDATING ON STEP: 981, WITH PADDING: 0.486
-     990    123.75       5.8000176       1.4985454       7.2985630          1966.5     38.24599627      4.9426558
+     990    123.75       5.8000176       1.4985454       7.2985630          1966.5     38.24599628      4.9426558
 Number of 3-body interactions = 223559
 RANK: 0 UPDATING ON STEP: 996, WITH PADDING: 0.509
     1000    125.00       5.3270548       1.9006311       7.2276859          1806.1     36.97433888      4.9433397

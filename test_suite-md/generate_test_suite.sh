@@ -8,14 +8,15 @@ NP=36
 
 # Tests specifically for the MD code
 
-MD_TESTS[0]="h2o-2bcheby"
-MD_TESTS[1]="h2o-3bcheby" 
-MD_TESTS[2]="h2o-splines"
-MD_TESTS[3]="generic-lj"
-MD_TESTS[4]="h2o-2bcheby-genvel"
-MD_TESTS[5]="h2o-2bcheby-numpress"
-MD_TESTS[6]="h2o-2bcheby-velscale"
+#MD_TESTS[0]="h2o-2bcheby"
+#MD_TESTS[1]="h2o-3bcheby" 
+#MD_TESTS[2]="h2o-splines"
+#MD_TESTS[3]="generic-lj"
+#MD_TESTS[4]="h2o-2bcheby-genvel"
+#MD_TESTS[5]="h2o-2bcheby-numpress"
+#MD_TESTS[6]="h2o-2bcheby-velscale"
 MD_TESTS[7]="h2o-4bcheby"
+#MD_TESTS[8]="h2o-4bcheby-numpress"
 
 # Tests for compatibility between LSQ C++/python codes with the MD code
 TAG="verify-lsq-forces-"
@@ -24,10 +25,9 @@ TAG="verify-lsq-forces-"
 #LSQ_TESTS[1]="h2o-2bcheby"
 #LSQ_TESTS[2]="h2o-3bcheby"
 #LSQ_TESTS[3]="h2o-splines"
-#LSQ_TESTS[4]="h2o-4bcheby"
-#LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
-#LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-
+LSQ_TESTS[4]="h2o-4bcheby"
+#LSQ_TESTS[5]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
+#LSQ_TESTS[6]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
 
 # Iterate through the tests
 

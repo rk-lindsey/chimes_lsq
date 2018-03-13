@@ -29,7 +29,7 @@ Reading initial coordinates and forces...
 	...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead: force.txt
-	... Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyzf
 
 Reading atom info from parameter file...
@@ -65,13 +65,26 @@ Reading force field parameters...
 		...Compute ReaxFF overbonding?  true
 		...Use fit overbonding param?   true
 		...Use 3-body Cheby params?     false
+		...Use 4-body Cheby params?     false
 	...Read FF controls...
 Attempting to read pairtype...
 	...Read FF interaction type...
 	...Read general FF params...
 	...Read FF triplet specifications...
+	...Read FF quadruplet specifications...
 	...Reading all remaining force field parameters...
 		Re-setting individual atom charges based on pair charges :
+      Total system charge = 0.0000
+      Charges modified for exact neutrality (e):
+       O -0.544046893
+       H 0.272022325
+
+     
+     Pair charges modified for exact neutrality:
+       OO 98.286550295
+       HH 24.571434872
+       OH -49.143072446
+Atom properties:
 		0     O , q (e): -0.544, mass (amu):  15.9994
 		1     H , q (e):  0.272, mass (amu):   1.0079
 	...Read 2-body FF params...
@@ -135,8 +148,8 @@ Force field summary:
 		7 -8.1716e-01
 
 	Fitted charges read from parameter file:
-		OO 2.9599e-01 (9.8286e+01)
-		HH 7.3997e-02 (2.4572e+01)
+		OO 2.9599e-01 (9.8287e+01)
+		HH 7.3996e-02 (2.4571e+01)
 		OH -1.4799e-01 (-4.9143e+01)
 
 	ReaxFF over-coordination parameters: 
