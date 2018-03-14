@@ -599,6 +599,143 @@ void CLUSTER_LIST::parse_fcut(string LINE)
 
 }
 
+double CLUSTER_LIST::read_lsq_cutoff_params(string LINE, string input_type,
+														  vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+// Read the lsq cutoff parameters (S_MAXIM, S_MINIM).
+// Returns the largest outer cutoff or the smallest inner cutoff found.
+{
+
+  // Use the data_vec reference so the same code can change minimum and maximum values.
+  using doublevec = vector<double> ;
+
+  vector<doublevec*> data_vec(NCLUSTERS) ;
+  
+  if ( input_type == "S_MAXIM" )
+  {
+	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
+		data_vec[i] = &(VEC[i].S_MAXIM) ;
+  }
+  else if ( input_type == "S_MINIM" ) 
+  {
+	 for ( int i = 0 ; i < NCLUSTERS ; i++ )
+		data_vec[i] = &(VEC[i].S_MINIM) ;
+  }
+  else
+  {
+	 EXIT_MSG("UNKNOWN INPUT type: " + input_type + " " + LINE) ;
+  }
+
+  vector<string> tokens ;
+
+  if ( parse_space(LINE, tokens) < 5 ) 
+	 EXIT_MSG("Not enough tokens: " + LINE) ;
+
+  string TEMP_STR = tokens[3] ;
+			
+  if(TEMP_STR == "ALL" )
+  {				
+	 for(int i=0; i < NCLUSTERS ; i++)
+	 {
+		for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ )
+		{
+		  (*data_vec[i])[j] = stod(tokens[4]) ;
+		}
+	 }
+#if VERBOSITY == 1
+	 if ( RANK == 0 ) cout << "	Note: Setting all " << VEC[0].NATOMS << "-body " + input_type + " values to " 
+								  <<  (*data_vec[0])[0] << endl;
+#endif				
+  }
+  else if(TEMP_STR == "SPECIFIC" )
+  {
+	 int n_spec = stoi(tokens[4]) ;
+				
+#if VERBOSITY == 1
+	 if ( RANK == 0 ) cout << "	Note: Setting specific " << VEC[0].NATOMS << "-body " 
+							  + input_type + " values: " << endl;
+#endif	
+
+	 string cluster_name ;
+	 vector<string> pair_names(VEC[0].NPAIRS) ;
+	 vector<double> cutoff_vals(VEC[0].NPAIRS) ;
+
+	 for(int i=0; i< n_spec ; i++)
+	 {
+		LINE = get_next_line(cin) ;
+
+		if ( parse_space(LINE, tokens) != 2 * VEC[0].NPAIRS + 1 )
+		  EXIT_MSG("Wrong number of arguments: " + LINE) ;
+
+		cluster_name = tokens[0] ;
+		int cluster_index = 0 ;
+		if ( MAP.find(cluster_name) != MAP.end() ) 
+		  cluster_index = MAP[cluster_name] ;
+		else
+		  EXIT_MSG("Did not find a map for " + cluster_name) ;
+
+		for ( int i = 0 ; i < VEC[cluster_index].NPAIRS ; i++ ) 
+		{
+		  pair_names[i] = tokens[i+1] ;
+		  cutoff_vals[i] = stod(tokens[i + VEC[0].NPAIRS + 1]) ;
+
+		  try
+		  {
+			 pair_names[i] = ATOM_PAIRS[ PAIR_MAP[ pair_names[i] ] ].PRPR_NM;
+		  }
+		  catch(...)
+		  {
+			 cout << "ERROR: Unknown pair: " + LINE ;
+		  }
+		  for ( int j = 0 ; j < VEC[cluster_index].NPAIRS ; j++ ) 
+		  {
+			 // Set the cutoff to be the same for all matching pairs.
+			 // This enforces consistency between pair cutoffs with the same name.
+			 if ( pair_names[i] == VEC[cluster_index].ATOM_PAIRS[j] )
+				(*data_vec[cluster_index])[j] = cutoff_vals[i] ;
+		  }
+		}
+	 }
+	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
+	 {
+		for ( int j = 0 ; j < VEC[i].NATOMS ; j++ ) 
+		{
+		  cout << "  " << VEC[i].ATOM_NAMES[j] ;
+		}
+		for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ ) 
+		{
+		  cout << "  " << VEC[i].ATOM_PAIRS[j] << (*data_vec[i])[j] ;
+		}
+		cout << endl ;
+	 }
+  }
+  double val = 0 ;
+  if ( input_type == "S_MAXIM" ) 
+  {
+	 val = -1.0 ;
+	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
+	 {
+		for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ ) 
+		{
+		  if ( VEC[i].S_MAXIM[j] > val ) 
+			 val = VEC[i].S_MAXIM[j] ;
+		}
+	 }
+  }
+  else if ( input_type == "S_MINIM" ) 
+  {
+  	 val = 1.0e10 ;
+	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
+	 {
+		for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ ) 
+		{
+		  if ( VEC[i].S_MINIM[j] < val ) 
+			 val = VEC[i].S_MINIM[j] ;
+		}
+	 }
+  }
+  return val ;
+}
+
 void CLUSTER_LIST::build_int_maps(vector<string> ATOMTYPE, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
 // Build the fast integer maps for the cluster list.  Used by the MD code.
 {

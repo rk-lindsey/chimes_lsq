@@ -1016,11 +1016,11 @@ void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 	{
 		ai = i;
 		
-		for (int j=0; j<LIST_3B[i].size(); j++) // Loop over all neighbors of i to get atom j
+		for (int j=0; j<LIST_4B[i].size(); j++) // Loop over all neighbors of i to get atom j
 		{
 			aj = LIST_4B[i][j];
 			
-			for (int k=0; k<LIST_3B[i].size(); k++) // Loop over all neighbors of i to get atom k
+			for (int k=0; k<LIST_4B[i].size(); k++) // Loop over all neighbors of i to get atom k
 			{
 
 			  ak = LIST_4B[i][k];
@@ -1034,7 +1034,7 @@ void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 			  if( get_dist(SYSTEM, RAB, aj, ak) >  MAX_CUTOFF_4B + RCUT_PADDING)
 				 continue;
 
-				for (int l=0; l<LIST_3B[i].size(); l++) // Loop over all neighbors of i to get atom l
+				for (int l=0; l<LIST_4B[i].size(); l++) // Loop over all neighbors of i to get atom l
 				{
 					al = LIST_4B[i][l];
 				

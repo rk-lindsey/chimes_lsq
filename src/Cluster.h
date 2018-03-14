@@ -219,6 +219,10 @@ public:
   // Read the maps from the force field file (MD only).
   void read_maps(ifstream& paramfile, string line) ;
 
+  // Read smaxim, sminim for the cluster list.
+  double read_lsq_cutoff_params(string LINE, string input_type,
+										  vector<PAIRS> & PAIRS_LIST, map<string,int> &PAIR_MAP) ;
+
   // Parse the force cutoff parameters for a cluster.
   void parse_fcut(string LINE) ;
 
