@@ -2103,27 +2103,23 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
 		{
 		  NEIGHBOR_LIST.MAX_CUTOFF_3B = 
-			 TRIPS.read_lsq_cutoff_params(LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
-		  if ( RANK == 0 ) 
-			 cout << "Max 3 body cutoff = " << NEIGHBOR_LIST.MAX_CUTOFF_3B << endl ;
+			 TRIPS.read_cutoff_params(cin, LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
 		}
 		
 		else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
 		{
-		  TRIPS.read_lsq_cutoff_params(LINE, "S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
+		  TRIPS.read_cutoff_params(cin, LINE, "S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
 		}
 		
 		else if(LINE.find("SPECIAL 4B S_MAXIM:") != string::npos)
 		{
 		  NEIGHBOR_LIST.MAX_CUTOFF_4B = 
-			 QUADS.read_lsq_cutoff_params(LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
-		  if ( RANK == 0 ) 
-			 cout << "Max 4 body cutoff = " << NEIGHBOR_LIST.MAX_CUTOFF_4B << endl ;
+			 QUADS.read_cutoff_params(cin, LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
 		}
 
 		else if(LINE.find("SPECIAL 4B S_MINIM:") != string::npos)
 		{
-		  QUADS.read_lsq_cutoff_params(LINE, "S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
+		  QUADS.read_cutoff_params(cin, LINE, "S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
 		}
 		
 		else if (LINE.find("# FCUTTYP #") != string::npos)

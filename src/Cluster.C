@@ -335,12 +335,12 @@ void CLUSTER::print(bool md_mode) const
   }
 }
 
-void CLUSTER::print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode)
+void CLUSTER::print_special(ofstream &header, string MAP_REVERSE, string output_mode)
 {
   if ( output_mode == "S_MINIM" ) 
   {
 	 if( S_MINIM[0] >= 0) 
-		header << INDX << " " << QUAD_MAP_REVERSE << " " ;
+		header << " " << MAP_REVERSE << " " ;
 	 for ( int i = 0 ; i < NPAIRS ; i++ ) 
 		header << ATOM_PAIRS[i] << " " ;
 
@@ -354,7 +354,7 @@ void CLUSTER::print_special(ofstream &header, string QUAD_MAP_REVERSE, string ou
   else if ( output_mode == "S_MAXIM" ) 
   {
 	 if ( S_MAXIM[0] >= 0)
-		header << INDX << " " << QUAD_MAP_REVERSE << " " ;
+		header << MAP_REVERSE << " " ;
 	 for ( int i = 0 ; i < NPAIRS ; i++ ) 
 		header << ATOM_PAIRS[i] << " " ;
 
@@ -547,18 +547,19 @@ void CLUSTER_LIST::read_maps(ifstream& paramfile, string line)
 // Read the maps from the parameter file.
 {
   vector<string> tokens ;
-  
+  int nmaps = 0 ;
+
   if ( parse_space(line, tokens) < 2 ) 
 	 EXIT_MSG("Not enough tokens while reading maps: " + line) ;
   else
-	 NCLUSTERS = stoi(tokens[1]) ;
+	 nmaps = stoi(tokens[1]) ;
 
   string tuplets = tuplet_name(VEC[0].NATOMS, false, false) ;
 
   if (RANK==0)
-	 cout << "	Reading  " << NCLUSTERS << " " << tuplets << " for mapping" << endl;
+	 cout << "	Reading  " << nmaps << " " << tuplets << " for mapping" << endl;
 			
-  for(int i=0 ; i< NCLUSTERS ; i++)
+  for(int i=0 ; i< nmaps ; i++)
   {
 	 line = get_next_line(paramfile) ;
 	 int index ;
@@ -599,8 +600,8 @@ void CLUSTER_LIST::parse_fcut(string LINE)
 
 }
 
-double CLUSTER_LIST::read_lsq_cutoff_params(string LINE, string input_type,
-														  vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string input_type,
+													 vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
 // Read the lsq cutoff parameters (S_MAXIM, S_MINIM).
 // Returns the largest outer cutoff or the smallest inner cutoff found.
 {
@@ -610,6 +611,9 @@ double CLUSTER_LIST::read_lsq_cutoff_params(string LINE, string input_type,
 
   vector<doublevec*> data_vec(NCLUSTERS) ;
   
+  int npairs = VEC[0].NPAIRS ;
+  int natoms = VEC[0].NATOMS ;
+
   if ( input_type == "S_MAXIM" )
   {
 	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
@@ -636,13 +640,13 @@ double CLUSTER_LIST::read_lsq_cutoff_params(string LINE, string input_type,
   {				
 	 for(int i=0; i < NCLUSTERS ; i++)
 	 {
-		for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ )
+		for ( int j = 0 ; j < npairs ; j++ )
 		{
 		  (*data_vec[i])[j] = stod(tokens[4]) ;
 		}
 	 }
 #if VERBOSITY == 1
-	 if ( RANK == 0 ) cout << "	Note: Setting all " << VEC[0].NATOMS << "-body " + input_type + " values to " 
+	 if ( RANK == 0 ) cout << "	Note: Setting all " << natoms << "-body " + input_type + " values to " 
 								  <<  (*data_vec[0])[0] << endl;
 #endif				
   }
@@ -651,19 +655,19 @@ double CLUSTER_LIST::read_lsq_cutoff_params(string LINE, string input_type,
 	 int n_spec = stoi(tokens[4]) ;
 				
 #if VERBOSITY == 1
-	 if ( RANK == 0 ) cout << "	Note: Setting specific " << VEC[0].NATOMS << "-body " 
+	 if ( RANK == 0 ) cout << "	Note: Setting specific " << natoms << "-body " 
 							  + input_type + " values: " << endl;
 #endif	
 
 	 string cluster_name ;
-	 vector<string> pair_names(VEC[0].NPAIRS) ;
-	 vector<double> cutoff_vals(VEC[0].NPAIRS) ;
+	 vector<string> pair_names(npairs) ;
+	 vector<double> cutoff_vals(npairs) ;
 
 	 for(int i=0; i< n_spec ; i++)
 	 {
-		LINE = get_next_line(cin) ;
+		LINE = get_next_line(input) ;
 
-		if ( parse_space(LINE, tokens) != 2 * VEC[0].NPAIRS + 1 )
+		if ( parse_space(LINE, tokens) != 2 * npairs + 1 )
 		  EXIT_MSG("Wrong number of arguments: " + LINE) ;
 
 		cluster_name = tokens[0] ;
@@ -673,10 +677,10 @@ double CLUSTER_LIST::read_lsq_cutoff_params(string LINE, string input_type,
 		else
 		  EXIT_MSG("Did not find a map for " + cluster_name) ;
 
-		for ( int i = 0 ; i < VEC[cluster_index].NPAIRS ; i++ ) 
+		for ( int i = 0 ; i < npairs ; i++ ) 
 		{
 		  pair_names[i] = tokens[i+1] ;
-		  cutoff_vals[i] = stod(tokens[i + VEC[0].NPAIRS + 1]) ;
+		  cutoff_vals[i] = stod(tokens[i + npairs + 1]) ;
 
 		  try
 		  {
@@ -686,7 +690,7 @@ double CLUSTER_LIST::read_lsq_cutoff_params(string LINE, string input_type,
 		  {
 			 cout << "ERROR: Unknown pair: " + LINE ;
 		  }
-		  for ( int j = 0 ; j < VEC[cluster_index].NPAIRS ; j++ ) 
+		  for ( int j = 0 ; j < npairs ; j++ ) 
 		  {
 			 // Set the cutoff to be the same for all matching pairs.
 			 // This enforces consistency between pair cutoffs with the same name.
@@ -697,13 +701,13 @@ double CLUSTER_LIST::read_lsq_cutoff_params(string LINE, string input_type,
 	 }
 	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
 	 {
-		for ( int j = 0 ; j < VEC[i].NATOMS ; j++ ) 
+		for ( int j = 0 ; j < natoms ; j++ ) 
 		{
-		  cout << "  " << VEC[i].ATOM_NAMES[j] ;
+		  cout << " " << VEC[i].ATOM_NAMES[j] ;
 		}
-		for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ ) 
+		for ( int j = 0 ; j < npairs ; j++ ) 
 		{
-		  cout << "  " << VEC[i].ATOM_PAIRS[j] << (*data_vec[i])[j] ;
+		  cout << " " << VEC[i].ATOM_PAIRS[j] << " " << (*data_vec[i])[j] ;
 		}
 		cout << endl ;
 	 }
@@ -714,24 +718,28 @@ double CLUSTER_LIST::read_lsq_cutoff_params(string LINE, string input_type,
 	 val = -1.0 ;
 	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
 	 {
-		for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ ) 
+		for ( int j = 0 ; j < npairs ; j++ ) 
 		{
 		  if ( VEC[i].S_MAXIM[j] > val ) 
 			 val = VEC[i].S_MAXIM[j] ;
 		}
 	 }
+	 if ( RANK == 0 ) 
+		cout << "     Max " << natoms << "-body cutoff = " << val << endl ;
   }
   else if ( input_type == "S_MINIM" ) 
   {
   	 val = 1.0e10 ;
 	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
 	 {
-		for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ ) 
+		for ( int j = 0 ; j < npairs ; j++ ) 
 		{
 		  if ( VEC[i].S_MINIM[j] < val ) 
 			 val = VEC[i].S_MINIM[j] ;
 		}
 	 }
+	 if ( RANK == 0 ) 
+		cout << "     Min " << natoms << "-body cutoff = " << val << endl ;
   }
   return val ;
 }
