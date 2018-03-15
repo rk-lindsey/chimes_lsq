@@ -3723,8 +3723,13 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 	 {
 		STREAM_PARSER.str(LINE);
 		STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-		for(int i=0; i<NO_PAIRS; i++)
-		  FF_2BODY[i].PENALTY_DIST = double(atof(TEMP_STR.data()));
+		for(int i=0; i<NO_PAIRS; i++) 
+		{
+		  FF_2BODY[i].PENALTY_DIST = stod(TEMP_STR) ;
+		}
+		if ( RANK == 0 ) 
+		  cout << "PAIR CHEBYSHEV PENALTY DIST: " << FF_2BODY[0].PENALTY_DIST << endl ;
+
 		STREAM_PARSER.str("");
 		STREAM_PARSER.clear();	
 	 }
@@ -3734,7 +3739,11 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		STREAM_PARSER.str(LINE);
 		STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
 		for(int i=0; i<NO_PAIRS; i++)
-		  FF_2BODY[i].PENALTY_SCALE = double(atof(TEMP_STR.data()));
+		{
+		  FF_2BODY[i].PENALTY_SCALE = stod(TEMP_STR) ;
+		}
+		if ( RANK == 0 ) 
+		  cout << "PAIR CHEBYSHEV PENALTY SCALING: " << FF_2BODY[0].PENALTY_SCALE << endl ;
 		STREAM_PARSER.str("");
 		STREAM_PARSER.clear();	
 	 }

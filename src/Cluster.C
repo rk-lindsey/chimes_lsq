@@ -40,11 +40,14 @@ void CLUSTER::build(int cheby_order)
   // Loops start at zero for a trick to speed up check for powers > 0
   
 #ifdef DEBUG_CLUSTER
-  cout << "Building interactions for atoms: " ;
-  for ( int j = 0 ; j < ATOM_NAMES.size() ; j++ ) {
-	 cout << ATOM_NAMES[j] << " " ;
+  if ( RANK == 0 ) 
+  {
+	 cout << "Building interactions for atoms: " ;
+	 for ( int j = 0 ; j < ATOM_NAMES.size() ; j++ ) {
+		cout << ATOM_NAMES[j] << " " ;
+	 }
+	 cout << endl ;
   }
-  cout << endl ;
 #endif
 
   if ( ! EXCLUDED ) 
@@ -54,20 +57,23 @@ void CLUSTER::build(int cheby_order)
   N_ALLOWED_POWERS = PARAM_INDICES.size();
 
 #ifdef DEBUG_CLUSTER
-  cout << "Number of unique powers = " << N_TRUE_ALLOWED_POWERS << endl ;
-  cout << "Number of allowed powers = " << N_ALLOWED_POWERS << endl ;
+  if ( RANK == 0 ) 
+  {
+	 cout << "Number of unique powers = " << N_TRUE_ALLOWED_POWERS << endl ;
+	 cout << "Number of allowed powers = " << N_ALLOWED_POWERS << endl ;
 
-  cout << "UNIQUE_POWERS " << endl ;
-  for ( int j = 0 ; j < UNIQUE_POWERS.size() ; j++ ) {
-	 for ( int k = 0 ; k < NPAIRS ; k++ ) {
-		cout << UNIQUE_POWERS[j][k] << " " ;
+	 cout << "UNIQUE_POWERS " << endl ;
+	 for ( int j = 0 ; j < UNIQUE_POWERS.size() ; j++ ) {
+		for ( int k = 0 ; k < NPAIRS ; k++ ) {
+		  cout << UNIQUE_POWERS[j][k] << " " ;
+		}
+		cout << endl ;
 	 }
-	 cout << endl ;
-  }
 
-  cout << "PARAM_INDICES " << endl ;
-  for ( int j = 0 ; j < PARAM_INDICES.size() ; j++ ) {
-	 cout << PARAM_INDICES[j] << endl ;
+	 cout << "PARAM_INDICES " << endl ;
+	 for ( int j = 0 ; j < PARAM_INDICES.size() ; j++ ) {
+		cout << PARAM_INDICES[j] << endl ;
+	 }
   }
 #endif
 
@@ -130,11 +136,14 @@ void CLUSTER::store_permutations(vector<int> &unsorted_powers)
   {
 	 // This interaction is already handled.
 #ifdef DEBUG_CLUSTER
-	 cout << "Found the following powers already stored:\n" ;
-	 for ( int i = 0 ; i < unsorted_powers.size() ; i++ ) {
-		cout << unsorted_powers[i] << " " ;
+	 if ( RANK == 0 ) 
+	 {
+		cout << "Found the following powers already stored:\n" ;
+		for ( int i = 0 ; i < unsorted_powers.size() ; i++ ) {
+		  cout << unsorted_powers[i] << " " ;
+		}
+		cout << endl ;
 	 }
-	 cout << endl ;
 #endif
 
 	 return ;
@@ -266,11 +275,14 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
 	 if ( it == ALLOWED_POWERS_MAP.end() ) {
 
 #ifdef DEBUG_CLUSTER
-		cout << "Adding new allowed powers" << endl ;
-		for ( int i = 0 ; i < perm_powers.size() ; i++ ) {
-		  cout << perm_powers[i] << " " ;
+		if ( RANK == 0 ) 
+		{
+		  cout << "Adding new allowed powers" << endl ;
+		  for ( int i = 0 ; i < perm_powers.size() ; i++ ) {
+			 cout << perm_powers[i] << " " ;
+		  }
+		  cout << endl ;
 		}
-		cout << endl ;
 #endif
 
 		ALLOWED_POWERS.push_back(perm_powers) ;
@@ -699,17 +711,20 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 		  }
 		}
 	 }
-	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
+	 if ( RANK == 0 ) 
 	 {
-		for ( int j = 0 ; j < natoms ; j++ ) 
+		for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
 		{
-		  cout << " " << VEC[i].ATOM_NAMES[j] ;
+		  for ( int j = 0 ; j < natoms ; j++ ) 
+		  {
+			 cout << " " << VEC[i].ATOM_NAMES[j] ;
+		  }
+		  for ( int j = 0 ; j < npairs ; j++ ) 
+		  {
+			 cout << " " << VEC[i].ATOM_PAIRS[j] << " " << (*data_vec[i])[j] ;
+		  }
+		  cout << endl ;
 		}
-		for ( int j = 0 ; j < npairs ; j++ ) 
-		{
-		  cout << " " << VEC[i].ATOM_PAIRS[j] << " " << (*data_vec[i])[j] ;
-		}
-		cout << endl ;
 	 }
   }
   double val = 0 ;
@@ -1019,7 +1034,8 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		count2 = 0 ;
 
 #ifdef DEBUG_CLUSTER		
-		cout << "ADDING ATOM_PAIRS = " ;
+		if (RANK == 0 )
+		  cout << "ADDING ATOM_PAIRS = " ;
 #endif
 		  
 		for ( int i = 0 ; i < natoms ; i++ ) {
@@ -1027,12 +1043,14 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		  for ( int j = i + 1 ; j < natoms ; j++ ) {
 			 VEC[count].ATOM_PAIRS[count2] = pair_names[count2] ;
 #ifdef DEBUG_CLUSTER			 
-			 cout << VEC[count].ATOM_PAIRS[count2] << " " ;
+			 if ( RANK == 0 ) cout << VEC[count].ATOM_PAIRS[count2] << " " ;
 #endif
 			 count2++ ;
 		  }
 		}
-		cout << endl ;
+#ifdef DEBUG_CLUSTER
+		if ( RANK == 0 ) cout << endl ;
+#endif
 		
 		if ( ! excluded )
 		  map_index = count ;
@@ -1053,7 +1071,7 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 MAP.insert(make_pair(all_pairs,map_index)) ;
 
 #ifdef DEBUG_CLUSTER
-	 cout << "MAP[ " << all_pairs << "] = " << map_index << endl ;
+	 if ( RANK == 0 ) cout << "MAP[ " << all_pairs << "] = " << map_index << endl ;
 #endif
 	 
 	 MAP_REVERSE.insert(make_pair(map_index,all_pairs)) ;
