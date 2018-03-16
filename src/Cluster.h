@@ -208,6 +208,14 @@ public:
 
   void print_min_distances() ;
 
+  // print the force field file header for the cluster list.
+  void print_header(ofstream &header, int natoms, int cheby_order) ;
+
+  // Allocate the cluster list according to the number of clusters and the number
+  // of atoms.  Return a string to search for in the params file that describes
+  // the cluster list.
+  string allocate(int nclusters, int natoms, string pair_type) ;
+
   // Read the excluded interactions from the input stream.
   void read_exclude(istream &input, string line) ;
 
@@ -219,12 +227,18 @@ public:
   // Read the maps from the force field file (MD only).
   void read_maps(ifstream& paramfile, string line) ;
 
+// Read the force field parameters for a cluster list.
+  void read_ff_params(ifstream &PARAMFILE, const vector<string>& TMP_ATOMTYPE) ;
+
   // Read smaxim, sminim for the cluster list.
   double read_cutoff_params(istream &input, string LINE, string input_type,
 									 vector<PAIRS> & PAIRS_LIST, map<string,int> &PAIR_MAP) ;
 
   // Parse the force cutoff parameters for a cluster.
   void parse_fcut(string LINE) ;
+
+  // Print out special 3 and 4 body force parameters.
+  void print_special(ofstream &header) ;
 
 private:
   void build_pairs_loop(int index, vector<int> atom_index, 

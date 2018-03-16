@@ -118,8 +118,10 @@ ofstream BAD_CONFIGS ;
 	map<int,string>& QUAD_MAP_REVERSE;	// Input/output is the reverse of QUAD_MAP
 	
 	vector<PAIR_FF> FF_2BODY;			// Holds all 2-body parameters
-	vector<TRIP_FF> FF_3BODY; 			// Holds all 3-body parameters
-	vector<QUAD_FF> FF_4BODY; 			// Holds all 3-body parameters
+
+// FF_3BODY and FF_4BODY are no longer used.
+// vector<TRIP_FF> FF_3BODY; 			// Holds all 3-body parameters
+// vector<QUAD_FF> FF_4BODY; 			// Holds all 3-body parameters
 	NEIGHBORS		NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
 	
 #endif
@@ -3329,9 +3331,6 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
   stringstream	STREAM_PARSER;
   string TEMP_STR ;
 
-  vector<TRIP_FF> &FF_3BODY = TRIPS.VEC ;
-  vector<QUAD_FF> &FF_4BODY = QUADS.VEC ;
-
   PARAMFILE.open(CONTROLS.PARAM_FILE.data());
   if(!PARAMFILE.is_open())
   {
@@ -3385,16 +3384,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 				
 		  else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
 		  {
-			 if (FF_3BODY.size()<1)
-			 {
-				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Special inner cutoffs specified for 3-body chebyshev interactions,"  << COUT_STYLE.ENDSTYLE << endl;
-				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: expected number of pair triplets is zero. Did you forget to set "  << COUT_STYLE.ENDSTYLE << endl;
-				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: the \'ATOM PAIR TRIPLETS:\' line in the parameter file?"  << COUT_STYLE.ENDSTYLE << endl;
-				exit_run(0);
-			 }
-			 
 			 TRIPS.read_cutoff_params(PARAMFILE, LINE, "S_MINIM", FF_2BODY, PAIR_MAP) ;
-	
 		  }
 
 		  else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
@@ -3412,6 +3402,20 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  {
 			 NEIGHBOR_LIST.MAX_CUTOFF_4B = 
 				QUADS.read_cutoff_params(PARAMFILE, LINE, "S_MAXIM", FF_2BODY, PAIR_MAP) ;
+		  }
+		}
+
+		if(RANK==0)
+		{
+		  cout << "   ...read complete." << endl << endl;
+		  cout << "Notes on simulation: " << endl;
+		  cout << "	Using fpenalty power " << FPENALTY_POWER << endl;	
+				
+		  if( CONTROLS.USE_3B_CHEBY )
+		  {
+			 cout << "	Using the following fcut style for 3B Chebyshev interactions: " << 
+				TRIPS.VEC[0].FORCE_CUTOFF.to_string() << endl;
+			 cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS << " " << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET << endl;
 		  }
 		}
 
@@ -3448,31 +3452,6 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 			
 		if(RANK==0)
 		  cout << endl;
-			
-			
-		// Update neighbor list cutoffs for 3- and 4-body interactions
-			
-		double MAX_FOUND_3B = 0;
-		double MAX_FOUND_4B = 0;
-			
-		for (int i=0; i<FF_3BODY.size(); i++)
-		{
-		  if(FF_3BODY[i].S_MAXIM[0] > MAX_FOUND_3B)
-			 MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[0];
-		  if(FF_3BODY[i].S_MAXIM[1] > MAX_FOUND_3B)
-			 MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[1];
-		  if(FF_3BODY[i].S_MAXIM[2] > MAX_FOUND_3B)
-			 MAX_FOUND_3B = FF_3BODY[i].S_MAXIM[2];
-		}
-			
-		for (int i=0; i<FF_4BODY.size(); i++)
-		{
-		  for(int j=0; j<6; j++)
-			 if(FF_4BODY[i].S_MAXIM[j] > MAX_FOUND_4B)
-				MAX_FOUND_4B = FF_4BODY[i].S_MAXIM[j];
-		}
-			
-			
 			
 		PARAMFILE.close();
 		break;
@@ -3776,23 +3755,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 			
 		// Resize pair parameter object
 			
-		TRIPS.NCLUSTERS = NO_TRIPS ;
-		FF_3BODY.resize(NO_TRIPS, CLUSTER(3,3) );	
-			
-		for (int i=0; i<NO_TRIPS; i++)
-		{	
-		  FF_3BODY[i].S_MINIM[0] = -1;
-		  FF_3BODY[i].S_MINIM[1] = -1;
-		  FF_3BODY[i].S_MINIM[2] = -1;
-				
-		  FF_3BODY[i].S_MAXIM[0] = -1;
-		  FF_3BODY[i].S_MAXIM[1] = -1;
-		  FF_3BODY[i].S_MAXIM[2] = -1;
-		}	
-
-		TEMP_SEARCH_3B = "TRIPLET ";
-		TEMP_SEARCH_3B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type, and 2b and 3b are same pair type
-		TEMP_SEARCH_3B.append(" PARAMS");	
+		TEMP_SEARCH_3B = TRIPS.allocate(NO_TRIPS,3,FF_2BODY[0].PAIRTYP) ;
 			
 		if(RANK==0)
 		  cout << "	...Read FF triplet specifications..." << endl;
@@ -3816,22 +3779,8 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		STREAM_PARSER.clear();	
 			
 		// Resize pair parameter object
-			
-		QUADS.NCLUSTERS = NO_QUADS ;
-		FF_4BODY.resize(NO_QUADS, CLUSTER(4,6) );	
-			
-		for (int i=0; i<NO_QUADS; i++)
-		{	
-		  for(int j=0; j<6; j++)
-		  {
-			 FF_4BODY[i].S_MINIM[j] = -1;
-			 FF_4BODY[i].S_MAXIM[j] = -1;
-		  }
-		}	
 
-		TEMP_SEARCH_4B = "QUADRUPLET ";
-		TEMP_SEARCH_4B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type, and 2b and 3b are same pair type
-		TEMP_SEARCH_4B.append(" PARAMS");	
+		TEMP_SEARCH_4B = QUADS.allocate(NO_QUADS, 4, FF_2BODY[0].PAIRTYP) ;
 			
 		if(RANK==0)
 		  cout << "	...Read FF quadruplet specifications..." << endl;
@@ -4037,20 +3986,14 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		
 	 else if( (LINE.find(TEMP_SEARCH_3B) != string::npos) && CONTROLS.USE_3B_CHEBY) // "PAIR <PAIRTYPE> PARAMS"
 	 {	
-		for(int i=0; i<NO_TRIPS; i++)
-		{
-		  FF_3BODY[i].read_ff_params(PARAMFILE, TMP_ATOMTYPE) ;
-		}
+		TRIPS.read_ff_params(PARAMFILE, TMP_ATOMTYPE) ;
 	 }
 		
 	 // Read 4B parameters
 		
 	 else if( (LINE.find(TEMP_SEARCH_4B) != string::npos) && CONTROLS.USE_4B_CHEBY) // "PAIR <PAIRTYPE> PARAMS"
 	 {	
-		for(int i=0; i<NO_QUADS; i++)
-		{
-		  FF_4BODY[i].read_ff_params(PARAMFILE, TMP_ATOMTYPE) ;
-		}
+		QUADS.read_ff_params(PARAMFILE, TMP_ATOMTYPE) ;
 	 }		
 		
 	 // Read in the fit overbonding parameter

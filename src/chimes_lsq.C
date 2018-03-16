@@ -250,19 +250,6 @@ int main(int argc, char* argv[])
 	// won't be necessary once Larry's ghost atom fix 
 	// is implemented in the MD code
 	
-	XYZ MAX_RMIN;
-	MAX_RMIN.X = MAX_RMIN.Y = MAX_RMIN.Z = 0;
-	
-	for(int i=0; i<TRIPS.VEC.size(); i++)
-	{
-		if(TRIPS.VEC[i].S_MINIM[0] > MAX_RMIN.X)
-			MAX_RMIN.X = TRIPS.VEC[i].S_MINIM[0];
-		if(TRIPS.VEC[i].S_MINIM[1] > MAX_RMIN.Y)
-			MAX_RMIN.Y = TRIPS.VEC[i].S_MINIM[1];
-		if(TRIPS.VEC[i].S_MINIM[2] > MAX_RMIN.Z) 
-			MAX_RMIN.Z = TRIPS.VEC[i].S_MINIM[2];
-	}
-			
 	// Read in the trajectory
 					 
 	ifstream TRAJ_INPUT;
@@ -1100,105 +1087,16 @@ int main(int argc, char* argv[])
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
 	
 	
-	// Print out special cutoffs for 3-body interaction
-	
-	int FOUND_SPECIAL = 0;
-
-	for(int i=0; i<TRIPS.VEC.size(); i++)
-	{
-		if(TRIPS.VEC[i].S_MINIM[0] >= 0)
-			FOUND_SPECIAL++;
-	}
-	
-	if(FOUND_SPECIAL>0)
-	{
-		header << endl << "SPECIAL 3B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
-		
-		for(int i=0; i<TRIPS.VEC.size(); i++)
-			if(TRIPS.VEC[i].S_MINIM[0] >= 0)
-			  TRIPS.VEC[i].print_special(header, TRIPS.MAP_REVERSE[i], "S_MINIM") ;
-	}
-		
-	FOUND_SPECIAL = 0;
-	
-	for(int i=0; i<TRIPS.VEC.size(); i++)
-		if(TRIPS.VEC[i].S_MAXIM[0] >= 0)
-			FOUND_SPECIAL++;
-	
-	if(FOUND_SPECIAL>0)
-	{
-		header << endl << "SPECIAL 3B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
-		
-		for(int i=0; i<TRIPS.VEC.size(); i++)
-		  if(TRIPS.VEC[i].S_MAXIM[0] >= 0)
-			 TRIPS.VEC[i].print_special(header, TRIPS.MAP_REVERSE[i], "S_MAXIM") ;
-	}	
-
-	// Print out special cutoffs for 4-body interactions
-	
-	FOUND_SPECIAL = 0;
-
-	for(int i=0; i<QUADS.VEC.size(); i++)
-	{
-		if(QUADS.VEC[i].S_MINIM[0] >= 0)
-			FOUND_SPECIAL++;
-	}
-	
-	if(FOUND_SPECIAL>0)
-	{
-		header << endl << "SPECIAL 4B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
-		
-		for(int i=0; i< QUADS.VEC.size(); i++)
-		  if ( QUADS.VEC[i].S_MINIM[0] >= 0 ) 
-			 QUADS.VEC[i].print_special(header, QUADS.MAP_REVERSE[i], "S_MINIM") ;
-	}
-		
-	FOUND_SPECIAL = 0;
-	
-	for(int i=0; i < QUADS.VEC.size(); i++)
-		if( QUADS.VEC[i].S_MAXIM[0] >= 0)
-			FOUND_SPECIAL++;
-	
-	if(FOUND_SPECIAL>0)
-	{
-		header << endl << "SPECIAL 4B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
-		
-		for(int i=0; i< QUADS.VEC.size(); i++)
-		  if ( QUADS.VEC[i].S_MAXIM[0] >= 0 )
-			 QUADS.VEC[i].print_special(header, QUADS.MAP_REVERSE[i], "S_MAXIM" ) ;
-
-	}	
-	
+	// Print out special cutoffs 
+	TRIPS.print_special(header) ;
+	QUADS.print_special(header) ;
 	 
-	if(!CONTROLS.USE_3B_CHEBY)
-		header << endl << "ATOM PAIR TRIPLETS: " << 0 << endl;
-	else
-	{
-		header << endl << "ATOM PAIR TRIPLETS: " << TRIPS.VEC.size() << endl << endl;	
 
-		for(int i=0;i<TRIPS.VEC.size(); i++)
-		{
-		  TRIPS.VEC[i].print_header(header) ;
-		}	 
-		
-	}
-	
-	if(!CONTROLS.USE_4B_CHEBY)
-		header << "ATOM PAIR QUADRUPLETS: " << 0 << endl << endl;
-	else
-	{
-		header << "ATOM PAIR QUADRUPLETS: " << QUADS.VEC.size() << endl << endl;	
-		
-		
-		for(int i=0; i < QUADS.VEC.size(); i++)
-		{
-		  QUADS.VEC[i].print_header(header) ;
-		}
-
-	}
+	// Print out cluster parameters into the header.
+	TRIPS.print_header(header,3,CONTROLS.CHEBY_3B_ORDER) ;
+	QUADS.print_header(header,4,CONTROLS.CHEBY_4B_ORDER) ;
 
 	header << endl;
-
 	header.close();
 	
 	//////////////////////////////////////////////////
@@ -1723,17 +1621,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			// Set up triplets
 			
 			NTRIP = factorial(CONTROLS.NATMTYP+3-1)/factorial(3)/factorial(CONTROLS.NATMTYP-1);
-	
-			TRIPS.VEC.resize(NTRIP, CLUSTER(3,3) );
-			TRIPS.NCLUSTERS = NTRIP ;
+			TRIPS.allocate(NTRIP, 3, TEMP_TYPE) ;
 			
 			// Set up quadruplets
 			
 			NQUAD = factorial(CONTROLS.NATMTYP+4-1)/factorial(4)/factorial(CONTROLS.NATMTYP-1);
-			
-			QUADS.VEC.resize(NQUAD, CLUSTER(4, 6) ) ;
-			QUADS.NCLUSTERS = NQUAD ;
-			
+			QUADS.allocate(NQUAD, 4, TEMP_TYPE) ;
 		}
 
 		else if(LINE.find("# TYPEIDX #")!= string::npos)

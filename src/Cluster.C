@@ -554,6 +554,33 @@ double CLUSTER::get_sminim(PAIRS & FF_2BODY, string TYPE)
 	return VAL;	
 }
 
+string CLUSTER_LIST::allocate(int nclusters, int natoms, string pair_type)
+// Allocate the cluster list according to the number of clusters and the number
+// of atoms.  Return a string to search for in the params file that describes
+// the cluster list.
+{
+  NCLUSTERS = nclusters ;
+  int npairs = natoms * ( natoms - 1 ) / 2 ;
+  VEC.resize(nclusters, CLUSTER(natoms,npairs) );	
+			
+  for (int i=0; i < NCLUSTERS; i++)
+  {	
+	 for ( int j = 0 ; j < npairs ; j++ ) {
+		VEC[i].S_MINIM[j] = -1;
+		VEC[i].S_MAXIM[j] = -1;
+	 }
+  }	
+
+  string tuplet = tuplet_name(natoms, false, false) ;
+  for ( auto & c: tuplet ) c = toupper(c) ;
+
+  string search = tuplet + " " ;
+  search.append(pair_type); // Syntax ok b/c all pairs have same FF type, and 2b and 3b are same pair type
+  search.append(" PARAMS");	
+
+  return search ;
+}
+
 
 void CLUSTER_LIST::read_maps(ifstream& paramfile, string line)
 // Read the maps from the parameter file.
@@ -612,6 +639,16 @@ void CLUSTER_LIST::parse_fcut(string LINE)
 
 }
 
+void CLUSTER_LIST::read_ff_params(ifstream &PARAMFILE, const vector<string>& TMP_ATOMTYPE)
+// Read the force field parameters for a cluster list.
+{
+  for(int i=0; i< NCLUSTERS ; i++)
+  {
+	 VEC[i].read_ff_params(PARAMFILE, TMP_ATOMTYPE) ;
+  }
+}
+
+
 double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string input_type,
 													 vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
 // Read the lsq cutoff parameters (S_MAXIM, S_MINIM).
@@ -623,6 +660,14 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 
   vector<doublevec*> data_vec(NCLUSTERS) ;
   
+  if ( VEC.size()<1)
+  {
+	 cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Special inner cutoffs specified for many-body chebyshev interactions,"  << COUT_STYLE.ENDSTYLE << endl;
+	 cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: expected number of pair triplets is zero. Did you forget to set "  << COUT_STYLE.ENDSTYLE << endl;
+	 cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: the \'ATOM PAIR ****PLETS:\' line in the parameter file?"  << COUT_STYLE.ENDSTYLE << endl;
+	 exit_run(0);
+  }
+
   int npairs = VEC[0].NPAIRS ;
   int natoms = VEC[0].NATOMS ;
 
@@ -1022,7 +1067,7 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		  int npairs = VEC[0].NPAIRS ;
 		  for(int m=0; m< npairs; m++) 
 			 cout << VEC[count].ATOM_PAIRS[m] << " ";
-		  cout << endl;		
+		  cout << endl << endl ;
 		}
 
 		if ( count >= VEC.size() ) {
@@ -1236,6 +1281,69 @@ void CLUSTER_LIST::print_min_distances()
 		cout << sum << endl;
 	 }	
   }
+}
+
+
+void CLUSTER_LIST::print_header(ofstream &header, int natoms, int cheby_order)
+// print the force field file header for the cluster list.
+// The number of atoms in the cluster is specified in case the
+// cluster is not initialized (used).
+{
+  string tuplet = tuplet_name(natoms, true, false) ;
+  for ( auto & c: tuplet ) c = toupper(c) ;
+
+  header << endl << "ATOM PAIR " << tuplet << ": " ;
+  if( cheby_order == 0 || NCLUSTERS == 0 )
+	 header << 0 << endl;
+  else
+  {
+	 header << VEC.size() << endl << endl ;
+	 for(int i=0;i < VEC.size(); i++)
+	 {
+		VEC[i].print_header(header) ;
+	 }	 
+  }
+}
+
+void CLUSTER_LIST::print_special(ofstream &header)
+// Print out special 3 and 4 body force parameters.
+{
+
+  if ( NCLUSTERS == 0 ) 
+	 return ;
+
+  int FOUND_SPECIAL = 0 ;
+  int NATOMS = VEC[0].NATOMS ;
+
+  for(int i=0; i<VEC.size(); i++)
+  {
+	 if(VEC[i].S_MINIM[0] >= 0)
+		FOUND_SPECIAL++;
+  }
+	
+  if(FOUND_SPECIAL>0)
+  {
+	 header << endl << "SPECIAL " << NATOMS << "B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
+		
+	 for(int i=0; i<VEC.size(); i++)
+		if(VEC[i].S_MINIM[0] >= 0)
+		  VEC[i].print_special(header, MAP_REVERSE[i], "S_MINIM") ;
+  }
+		
+  FOUND_SPECIAL = 0;
+	
+  for(int i=0; i<VEC.size(); i++)
+	 if(VEC[i].S_MAXIM[0] >= 0)
+		FOUND_SPECIAL++;
+	
+  if(FOUND_SPECIAL>0)
+  {
+	 header << endl << "SPECIAL " << NATOMS << "B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
+		
+	 for(int i=0; i<VEC.size(); i++)
+		if(VEC[i].S_MAXIM[0] >= 0)
+		  VEC[i].print_special(header, MAP_REVERSE[i], "S_MAXIM") ;
+  }	
 }
 
 string CLUSTER_LIST::tuplet_name(int natom, bool plural, bool caps)
