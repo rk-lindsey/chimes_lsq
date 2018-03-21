@@ -22,10 +22,6 @@
 	#define PESFORMAT GNUPLOT
 #endif
 
-#ifndef CHECK_CHEBY_RANGE 
-	#define CHECK_CHEBY_RANGE 1	// (true)
-#endif
-
 #ifndef _HELPERS_
 #define _HELPERS_
 

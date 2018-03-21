@@ -1103,6 +1103,7 @@ FF_SETUP_2:
   if ( FF_2BODY[0].SNUM_3B_CHEBY > 0 ) 
   {
 	 TRIPS.build_int_maps(TMP_ATOMTYPE, FF_2BODY, PAIR_MAP) ;
+	 TRIPS.set_default_cutoffs(FF_2BODY) ;
   }
 	
   // Build 4-body fast maps
@@ -1110,6 +1111,7 @@ FF_SETUP_2:
   if(FF_2BODY[0].SNUM_4B_CHEBY > 0)
   {
 	 QUADS.build_int_maps(TMP_ATOMTYPE, FF_2BODY, PAIR_MAP) ;
+	 QUADS.set_default_cutoffs(FF_2BODY) ;
   }
 
 
@@ -3671,6 +3673,9 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 			 FF_2BODY[i].SNUM = (2+floor((FF_2BODY[i].S_MAXIM - FF_2BODY[i].S_MINIM)/FF_2BODY[i].S_DELTA))*2;
 		  }				
 		}
+
+		TRIPS.set_default_cutoffs(FF_2BODY) ;
+		QUADS.set_default_cutoffs(FF_2BODY) ;
 			
 		if(CONTROLS.USE_OVERCOORD)
 		{		
@@ -3758,7 +3763,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 			
 		// Resize pair parameter object
 			
-		TEMP_SEARCH_3B = TRIPS.allocate(NO_TRIPS,3,FF_2BODY[0].PAIRTYP) ;
+		TEMP_SEARCH_3B = TRIPS.allocate(NO_TRIPS,3,FF_2BODY) ;
 			
 		if(RANK==0)
 		  cout << "	...Read FF triplet specifications..." << endl;
@@ -3783,7 +3788,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 			
 		// Resize pair parameter object
 
-		TEMP_SEARCH_4B = QUADS.allocate(NO_QUADS, 4, FF_2BODY[0].PAIRTYP) ;
+		TEMP_SEARCH_4B = QUADS.allocate(NO_QUADS, 4, FF_2BODY) ;
 			
 		if(RANK==0)
 		  cout << "	...Read FF quadruplet specifications..." << endl;

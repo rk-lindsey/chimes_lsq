@@ -125,9 +125,7 @@ int main(int argc, char* argv[])
 	{
 	  // Generate unique triplets
 	  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
-#if VERBOSITY == 1	
 	  TRIPS.print(false) ;
-#endif	
 	}
 
 	if(CONTROLS.USE_4B_CHEBY)
@@ -137,9 +135,7 @@ int main(int argc, char* argv[])
 	  //////////////////////////////////////////////////////////////////////
 	  
 	  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
-#if VERBOSITY == 1	
 	  QUADS.print(false) ;
-#endif		
 	}  
 
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
@@ -1608,18 +1604,19 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					ATOM_PAIRS[i].CHEBY_RANGE_LOW  = TMP_CHEBY_RANGE_LOW;
 					ATOM_PAIRS[i].CHEBY_RANGE_HIGH = TMP_CHEBY_RANGE_HIGH;
 					ATOM_PAIRS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;
+					ATOM_PAIRS[i].PAIRTYP = TEMP_TYPE ;
 				}
 			}	
 			
 			// Set up triplets
 			
 			NTRIP = factorial(CONTROLS.NATMTYP+3-1)/factorial(3)/factorial(CONTROLS.NATMTYP-1);
-			TRIPS.allocate(NTRIP, 3, TEMP_TYPE) ;
+			TRIPS.allocate(NTRIP, 3, ATOM_PAIRS) ;
 			
 			// Set up quadruplets
 			
 			NQUAD = factorial(CONTROLS.NATMTYP+4-1)/factorial(4)/factorial(CONTROLS.NATMTYP-1);
-			QUADS.allocate(NQUAD, 4, TEMP_TYPE) ;
+			QUADS.allocate(NQUAD, 4, ATOM_PAIRS) ;
 		}
 
 		else if(LINE.find("# TYPEIDX #")!= string::npos)
@@ -1838,7 +1835,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					ATOM_PAIRS[TEMP_INT].NBINS[2] = 0;
 				}	
 			}
-			
+
 			#if VERBOSITY == 1			
 			if ( RANK == 0 ) 
 			{

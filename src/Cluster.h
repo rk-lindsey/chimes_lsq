@@ -1,5 +1,5 @@
 
-#ifndef _Quad_h  // Protects against double-inclusion.
+#ifndef _Cluster_h  // Protects against double-inclusion.
 
 
 struct PAIRS	// NEEDS UPDATING
@@ -91,6 +91,12 @@ public:
 	
   vector<double> S_MAXIM ;	// A unique outer cutoff for 4B interactions... by default, is set to S_MAXIM
   vector<double> S_MINIM ;	// Similar for inner cutoff. This is useful when the 2-body 
+
+  // Determine whether s_maxim was set via user input.
+  bool SPECIAL_S_MINIM ;
+
+  // Determine whether s_maxim was set via user input.
+  bool SPECIAL_S_MAXIM ;
   // is refit/extrapolated, thus has a s_min lower than the original fitted value
   // Values need to be specified for each contributing pair
   // [0] -> ij, [1] -> ik, [2] -> il, [3] -> jk, [4] -> jl, [5] -> kl 
@@ -140,15 +146,23 @@ public:
   int get_histogram(vector<int> &index) ;
 
   // Return the maximum cutoff distance for the specified pair.
-  double get_smaxim(PAIRS & FF_2BODY, string TYPE)  ;  
+  inline double get_smaxim(string TYPE)  ;  
 
   // Return the minimum inner cutoff distance for the specified pair.
-  double get_sminim(PAIRS & FF_2BODY, string TYPE) ;
+  inline double get_sminim(string TYPE) ;
+
+  // Set defaults for outer polynomial ranges
+  void set_default_smaxim(const vector<PAIRS> & FF_2BODY) ;
+
+  // Set defaults for inner polynomial ranges
+  void set_default_sminim(const vector<PAIRS> & FF_2BODY) ;
 
 CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), MIN_FOUND(npair,1.0e10),
 	 S_MAXIM(npair,-1), S_MINIM(npair,-1), NBINS(npair,0), BINWS(npair,0.1)
   {
 	 EXCLUDED = false ;
+	 SPECIAL_S_MAXIM = false ;
+	 SPECIAL_S_MINIM = false ;
 	 NATOMS = natom ;
 	 NPAIRS = npair ;
 	 N_CFG_CONTRIB = 0 ;
@@ -212,7 +226,7 @@ public:
   // Allocate the cluster list according to the number of clusters and the number
   // of atoms.  Return a string to search for in the params file that describes
   // the cluster list.
-  string allocate(int nclusters, int natoms, string pair_type) ;
+  string allocate(int nclusters, int natoms, const vector<PAIRS> &FF_2BODY) ;
 
   // Read the excluded interactions from the input stream.
   void read_exclude(istream &input, string line) ;
@@ -238,6 +252,9 @@ public:
   // Print out special 3 and 4 body force parameters.
   void print_special(ofstream &header) ;
 
+  // Set defaults for force cutoffs.
+  void set_default_cutoffs(const vector<PAIRS>& FF_2BODY) ;
+
 private:
   void build_pairs_loop(int index, vector<int> atom_index, 
 								vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count) ;
@@ -256,6 +273,43 @@ typedef QUADRUPLETS QUAD_FF ;
 typedef TRIPLETS TRIP_FF ;
 
 
-#define _Quad_h
-#endif // ifndef _Quad_h
+
+inline double CLUSTER::get_smaxim(string TYPE)	
+// Decides whether outer cutoff should be set by 2-body value or cluster value. Returns the cutoff value.
+{	
+	double VAL = 0.0 ;
+	
+	for (int i=0; i< NPAIRS ; i++)
+	{
+	  if(TYPE == ATOM_PAIRS[i]) 
+	  {
+		 VAL =  S_MAXIM[i];
+		 break ;
+	  }
+	}
+
+	return VAL;	
+}
+
+
+double CLUSTER::get_sminim(string TYPE) 
+// Decides whether outer cutoff should be set by 2-body value or 4-body value. Returns the cutoff value.
+{
+	double VAL = 0.0 ;
+	
+	
+	for (int i=0; i<NPAIRS; i++) 
+	{
+	  if(TYPE == ATOM_PAIRS[i])
+	  {
+		 VAL =  S_MINIM[i];
+		 break ;
+	  }
+	}
+
+	return VAL;	
+}
+
+#define _Cluster_h
+#endif // ifndef _Cluster_h
 

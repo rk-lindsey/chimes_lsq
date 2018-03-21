@@ -700,8 +700,6 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 	// Check for control option compatability:
 	
   vector<TRIPLETS> & PAIR_TRIPLETS = TRIPS.VEC ;
-  map<string,int> &TRIAD_MAP = TRIPS.MAP ;
-
   
   if((CONTROLS.FIT_ENER) && (FF_2BODY[0].PAIRTYP == "SPLINE"))
 	{

@@ -351,7 +351,7 @@ void CLUSTER::print_special(ofstream &header, string MAP_REVERSE, string output_
 {
   if ( output_mode == "S_MINIM" ) 
   {
-	 if( S_MINIM[0] >= 0) 
+	 if( SPECIAL_S_MINIM ) 
 		header << " " << MAP_REVERSE << " " ;
 	 for ( int i = 0 ; i < NPAIRS ; i++ ) 
 		header << ATOM_PAIRS[i] << " " ;
@@ -365,7 +365,7 @@ void CLUSTER::print_special(ofstream &header, string MAP_REVERSE, string output_
   } 
   else if ( output_mode == "S_MAXIM" ) 
   {
-	 if ( S_MAXIM[0] >= 0)
+	 if ( SPECIAL_S_MAXIM )
 		header << MAP_REVERSE << " " ;
 	 for ( int i = 0 ; i < NPAIRS ; i++ ) 
 		header << ATOM_PAIRS[i] << " " ;
@@ -520,41 +520,57 @@ void CLUSTER::read_ff_params(ifstream &paramfile, const vector<string> &atomtype
 	 cout << "	...Read " << NATOMS << "-body FF params..." << endl;;				
 }
 
-double CLUSTER::get_smaxim(PAIRS & FF_2BODY, string TYPE)	
+
+void CLUSTER::set_default_smaxim(const vector<PAIRS> & FF_2BODY)
 // Decides whether outer cutoff should be set by 2-body value or cluster value. Returns the cutoff value.
 {	
-	double VAL;
-	
-	if(S_MAXIM[0] == -1)
-		VAL =  FF_2BODY.S_MAXIM;
-	else
+	for (int i=0; i< NPAIRS ; i++)
 	{
-		for (int i=0; i< NPAIRS ; i++)
-			if(TYPE == ATOM_PAIRS[i])
-				VAL =  S_MAXIM[i];
+	  if ( ! SPECIAL_S_MAXIM )
+	  {
+		 int j ;
+		 for ( j = 0 ; j < FF_2BODY.size() ; j++ ) 
+		 {
+			if(  FF_2BODY[j].PRPR_NM == ATOM_PAIRS[i] )
+			{
+			  S_MAXIM[i] = FF_2BODY[j].S_MAXIM ;
+			  break ;
+			}
+		 }
+		 if ( j == FF_2BODY.size() ) 
+		 {
+			EXIT_MSG("A default smaxim could not be set for " + ATOM_PAIRS[i]) ;
+		 }
+	  }
 	}
-	return VAL;	
 }
 
 
-double CLUSTER::get_sminim(PAIRS & FF_2BODY, string TYPE) 
-// Decides whether outer cutoff should be set by 2-body value or 4-body value. Returns the cutoff value.
-{
-	double VAL;
-	
-	
-	if(S_MINIM[0] == -1)
-		VAL =  FF_2BODY.S_MINIM;
-	else
+void CLUSTER::set_default_sminim(const vector<PAIRS> & FF_2BODY)
+// Decides whether outer cutoff should be set by 2-body value or cluster value. Returns the cutoff value.
+{	
+	for (int i=0; i< NPAIRS ; i++)
 	{
-		for (int i=0; i<NPAIRS; i++)
-			if(TYPE == ATOM_PAIRS[i])
-				VAL =  S_MINIM[i];
+	  if ( ! SPECIAL_S_MINIM )
+	  {
+		 int j ;
+		 for ( j = 0 ; j < FF_2BODY.size() ; j++ ) 
+		 {
+			if(  FF_2BODY[j].PRPR_NM == ATOM_PAIRS[i] )
+			{
+			  S_MINIM[i] = FF_2BODY[j].S_MINIM ;
+			  break ;
+			}
+		 }
+		 if ( j == FF_2BODY.size() ) 
+		 {
+			EXIT_MSG("A default sminim could not be set for " + ATOM_PAIRS[i]) ;
+		 }
+	  }
 	}
-	return VAL;	
 }
 
-string CLUSTER_LIST::allocate(int nclusters, int natoms, string pair_type)
+string CLUSTER_LIST::allocate(int nclusters, int natoms, const vector<PAIRS> &FF_2BODY)
 // Allocate the cluster list according to the number of clusters and the number
 // of atoms.  Return a string to search for in the params file that describes
 // the cluster list.
@@ -563,13 +579,7 @@ string CLUSTER_LIST::allocate(int nclusters, int natoms, string pair_type)
   int npairs = natoms * ( natoms - 1 ) / 2 ;
   VEC.resize(nclusters, CLUSTER(natoms,npairs) );	
 			
-  for (int i=0; i < NCLUSTERS; i++)
-  {	
-	 for ( int j = 0 ; j < npairs ; j++ ) {
-		VEC[i].S_MINIM[j] = -1;
-		VEC[i].S_MAXIM[j] = -1;
-	 }
-  }	
+  string pair_type = FF_2BODY[0].PAIRTYP ;
 
   string tuplet = tuplet_name(natoms, false, false) ;
   for ( auto & c: tuplet ) c = toupper(c) ;
@@ -581,6 +591,16 @@ string CLUSTER_LIST::allocate(int nclusters, int natoms, string pair_type)
   return search ;
 }
 
+void CLUSTER_LIST::set_default_cutoffs(const vector<PAIRS>& FF_2BODY)
+// Set default values for cutoffs.
+{
+
+  for (int i=0; i < NCLUSTERS; i++)
+  {	
+	 VEC[i].set_default_sminim(FF_2BODY) ;
+	 VEC[i].set_default_smaxim(FF_2BODY) ;
+  }	
+}
 
 void CLUSTER_LIST::read_maps(ifstream& paramfile, string line)
 // Read the maps from the parameter file.
@@ -659,7 +679,8 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
   using doublevec = vector<double> ;
 
   vector<doublevec*> data_vec(NCLUSTERS) ;
-  
+  vector<bool *> special_flag(NCLUSTERS) ;
+
   if ( VEC.size()<1)
   {
 	 cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Special inner cutoffs specified for many-body chebyshev interactions,"  << COUT_STYLE.ENDSTYLE << endl;
@@ -674,12 +695,18 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
   if ( input_type == "S_MAXIM" )
   {
 	 for ( int i = 0 ; i < NCLUSTERS ; i++ ) 
+	 {
 		data_vec[i] = &(VEC[i].S_MAXIM) ;
+		special_flag[i] = &(VEC[i].SPECIAL_S_MAXIM) ;
+	 }
   }
   else if ( input_type == "S_MINIM" ) 
   {
 	 for ( int i = 0 ; i < NCLUSTERS ; i++ )
+	 {
 		data_vec[i] = &(VEC[i].S_MINIM) ;
+		special_flag[i] = &(VEC[i].SPECIAL_S_MINIM) ;
+	 }
   }
   else
   {
@@ -700,6 +727,7 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 		for ( int j = 0 ; j < npairs ; j++ )
 		{
 		  (*data_vec[i])[j] = stod(tokens[4]) ;
+		  *special_flag[i] = true ;
 		}
 	 }
 #if VERBOSITY == 1
@@ -753,6 +781,7 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 			 // This enforces consistency between pair cutoffs with the same name.
 			 if ( pair_names[i] == VEC[cluster_index].ATOM_PAIRS[j] )
 				(*data_vec[cluster_index])[j] = cutoff_vals[i] ;
+			 *special_flag[cluster_index] = true ;
 		  }
 		}
 	 }
@@ -921,7 +950,9 @@ int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<str
 	 // }
   }
 
-	return( VEC.size() ) ;
+  set_default_cutoffs(ATOM_PAIRS) ;
+  
+  return( VEC.size() ) ;
 }
 
 
@@ -1272,8 +1303,6 @@ void CLUSTER_LIST::print_min_distances()
 			
 	 for (int m=0 ; m< VEC[k].NPAIRS ; m++)
 	 {
-		if ( VEC[k].MIN_FOUND[m] > 1.0e9 ) 
-		  cout << "BAD MIN FOUND on PROCESSOR " << RANK << " " << VEC[k].MIN_FOUND[m] << endl ;
 		MPI_Reduce(&(VEC[k].MIN_FOUND[m]), &(min[m]), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 	 }
 #else	
@@ -1357,7 +1386,7 @@ void CLUSTER_LIST::print_special(ofstream &header)
 
   for(int i=0; i<VEC.size(); i++)
   {
-	 if(VEC[i].S_MINIM[0] >= 0)
+	 if( VEC[i].SPECIAL_S_MINIM ) 
 		FOUND_SPECIAL++;
   }
 	
@@ -1366,14 +1395,14 @@ void CLUSTER_LIST::print_special(ofstream &header)
 	 header << endl << "SPECIAL " << NATOMS << "B S_MINIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 	 for(int i=0; i<VEC.size(); i++)
-		if(VEC[i].S_MINIM[0] >= 0)
+		if(VEC[i].SPECIAL_S_MINIM)
 		  VEC[i].print_special(header, MAP_REVERSE[i], "S_MINIM") ;
   }
 		
   FOUND_SPECIAL = 0;
 	
   for(int i=0; i<VEC.size(); i++)
-	 if(VEC[i].S_MAXIM[0] >= 0)
+	 if(VEC[i].SPECIAL_S_MAXIM) 
 		FOUND_SPECIAL++;
 	
   if(FOUND_SPECIAL>0)
@@ -1381,7 +1410,7 @@ void CLUSTER_LIST::print_special(ofstream &header)
 	 header << endl << "SPECIAL " << NATOMS << "B S_MAXIM: SPECIFIC " << FOUND_SPECIAL << endl;
 		
 	 for(int i=0; i<VEC.size(); i++)
-		if(VEC[i].S_MAXIM[0] >= 0)
+		if(VEC[i].SPECIAL_S_MAXIM) 
 		  VEC[i].print_special(header, MAP_REVERSE[i], "S_MAXIM") ;
   }	
 }
