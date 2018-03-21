@@ -59,7 +59,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST &TRIPS,
 									  CLUSTER_LIST &QUADS, const JOB_CONTROL &CONTROLS) ;
 static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE,
-							 CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS) ;
+							 CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby) ;
 
 // Define function headers -- MPI
 
@@ -1048,20 +1048,6 @@ FF_SETUP_2:
 	 NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
   }
 	
-
-  ////////////////////////////////////////////////////////////
-  // If PES printing is requested, do so here and then 
-  // exit the program
-  ////////////////////////////////////////////////////////////  	
-	
-  if(RANK==0)
-  {
-	 if (FF_PLOTS.N_PLOTS > 0)
-	 {
-		print_pes(FF_PLOTS, FF_2BODY, PAIR_MAP, PAIR_MAP_REVERSE, TRIPS, QUADS, CONTROLS) ;
-		exit_run(0);
-	 }
-  }	
 	
   ////////////////////////////////////////////////////////////
   // Rebuild maps into a faster data structure
@@ -1125,6 +1111,23 @@ FF_SETUP_2:
   {
 	 QUADS.build_int_maps(TMP_ATOMTYPE, FF_2BODY, PAIR_MAP) ;
   }
+
+
+  ////////////////////////////////////////////////////////////
+  // If PES printing is requested, do so here and then 
+  // exit the program
+  ////////////////////////////////////////////////////////////  	
+	
+  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, PAIR_MAP, INT_PAIR_MAP} ;
+
+  if(RANK==0)
+  {
+	 if (FF_PLOTS.N_PLOTS > 0)
+	 {
+		print_pes(FF_PLOTS, FF_2BODY, PAIR_MAP, PAIR_MAP_REVERSE, TRIPS, QUADS, CONTROLS, cheby) ;
+		exit_run(0);
+	 }
+  }	
 
   ////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////
@@ -3412,11 +3415,11 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  cout << "	Using fpenalty power " << FPENALTY_POWER << endl;	
 				
 		  if( CONTROLS.USE_3B_CHEBY )
-		  {
-			 cout << "	Using the following fcut style for 3B Chebyshev interactions: " << 
-				TRIPS.VEC[0].FORCE_CUTOFF.to_string() << endl;
-			 cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS << " " << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET << endl;
-		  }
+			 TRIPS.print_fcut() ;
+
+		  if ( CONTROLS.USE_4B_CHEBY )
+			 QUADS.print_fcut() ;
+
 		}
 
 		if(CONTROLS.USE_COULOMB)
@@ -4201,7 +4204,7 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 }
 
 static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE,
-							 CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS)
+							 CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby)
 // Print the potential energy surface.
 // The quads argument is unused for now.
 {
@@ -4280,7 +4283,7 @@ static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,i
 		  exit_run(0);
 		}
 
-		Print_Ternary_Cheby_Scan(CONTROLS, FF_2BODY, FF_3BODY, PAIR_MAP, TRIPS.MAP, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk, FF_PLOTS, i);	
+		cheby.Print_3B(TRIPS, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk, FF_PLOTS, i);	
 				
 		scan_2b_idx++;				
 	 }
@@ -4290,7 +4293,7 @@ static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,i
 		cout << "	Will work with pair types: " << PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]] << endl;
 		cout << "	and atom types:            " << FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << endl;
 					
-		Print_Cheby(FF_2BODY, FF_PLOTS.TYPE_INDEX[i], PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]], FF_PLOTS.INCLUDE_FCUT, FF_PLOTS.INCLUDE_CHARGES, FF_PLOTS.INCLUDE_PENALTY, "");
+		cheby.Print_2B(FF_PLOTS.TYPE_INDEX[i], PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]], FF_PLOTS.INCLUDE_FCUT, FF_PLOTS.INCLUDE_CHARGES, FF_PLOTS.INCLUDE_PENALTY, "");
 	 }
 	 else
 	 {

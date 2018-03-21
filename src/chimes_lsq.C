@@ -665,11 +665,12 @@ int main(int argc, char* argv[])
 		}
 	} 
 	
-	if(CONTROLS.USE_3B_CHEBY && TRIPS.VEC[0].NBINS[0]>0) // Set the 3b-population-histogram based constraints 
-	{
-		if ( RANK == 0 ) cout << "Setting constraints based on 3b-population histogram constraints " << endl << endl;
-		ZCalc_3B_Cheby_Deriv_HIST(CONTROLS, ATOM_PAIRS, TRIPS.VEC, A_MATRIX, PAIR_MAP, TRIPS.MAP);	
-	}
+	// No longer used. (LEF)
+	// if(CONTROLS.USE_3B_CHEBY && TRIPS.VEC[0].NBINS[0]>0) // Set the 3b-population-histogram based constraints 
+	// {
+	// 	if ( RANK == 0 ) cout << "Setting constraints based on 3b-population histogram constraints " << endl << endl;
+	// 	ZCalc_3B_Cheby_Deriv_HIST(CONTROLS, ATOM_PAIRS, TRIPS.VEC, A_MATRIX, PAIR_MAP, TRIPS.MAP);	
+	// }
 	
 	
 #if VERBOSITY == 1
@@ -1070,22 +1071,14 @@ int main(int argc, char* argv[])
 			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
 		}		
 	}
-	
-	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0 || ATOM_PAIRS[0].SNUM_4B_CHEBY> 0)
-	{
-		header << endl << "FCUT TYPE: " << TRIPS.VEC[0].FORCE_CUTOFF.to_string();
-		
-		if (TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGMOID || TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBSIG || TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBESTRETCH || TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-			header << " " << TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS << " " << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
-		if(TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-			header << " " << TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
 
-		 header << endl;
-	 }
+	// Quads and triplets both have the same cutoff function parameters.
+	// Print out only once.
+	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0 || ATOM_PAIRS[0].SNUM_4B_CHEBY> 0)
+	  TRIPS.print_fcut_header(header) ;
 		
 	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
-	
 	
 	// Print out special cutoffs 
 	TRIPS.print_special(header) ;

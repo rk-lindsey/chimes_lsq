@@ -702,6 +702,7 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
   vector<TRIPLETS> & PAIR_TRIPLETS = TRIPS.VEC ;
   map<string,int> &TRIAD_MAP = TRIPS.MAP ;
 
+  
   if((CONTROLS.FIT_ENER) && (FF_2BODY[0].PAIRTYP == "SPLINE"))
 	{
 		cout << "ERROR: Energy fititng has not been implemented for potential type " << FF_2BODY[0].PAIRTYP << endl;
@@ -739,15 +740,25 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 	{
 		// Only enter if 2B are requested. For example, skip if user wants to fit ONLY 3B cheby
 		// i.e. PAIRTYP: CHEBYSHEV  0 6 or similar
-		
-		if ( FF_2BODY[0].SNUM > 0)
-			ZCalc_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
+
+	  // INT_PAIR_MAP not used in LSQ.
+	  vector<int> INT_PAIR_MAP{0} ;
+	  Cheby cheby{CONTROLS,FRAME_SYSTEM,NEIGHBOR_LIST,FF_2BODY,PAIR_MAP,INT_PAIR_MAP} ;
+
+	  if ( FF_2BODY[0].SNUM > 0)
+		 cheby.Deriv_2B(FRAME_A_MATRIX) ;
 	
-		if (if_3b_cheby)
-			ZCalc_3B_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, PAIR_TRIPLETS, FRAME_A_MATRIX,  nlayers, PAIR_MAP, TRIAD_MAP, NEIGHBOR_LIST);	
+	  if (if_3b_cheby)
+		 cheby.Deriv_3B(FRAME_A_MATRIX, TRIPS) ;
 			
-		if (CONTROLS.USE_4B_CHEBY)
-		  ZCalc_4B_Cheby_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, TRIPS, QUADS, FRAME_A_MATRIX,  nlayers, PAIR_MAP, NEIGHBOR_LIST);		
+		if (CONTROLS.USE_4B_CHEBY) 
+		{
+		  int n_3b_cheby_terms = 0 ;
+		  for (int i=0; i<PAIR_TRIPLETS.size(); i++) 
+			 n_3b_cheby_terms += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;
+
+		  cheby.Deriv_4B(FRAME_A_MATRIX, n_3b_cheby_terms, QUADS) ;
+		}
 	}			
 
     else if ( FF_2BODY[0].PAIRTYP == "DFTBPOLY" )	
@@ -1550,7 +1561,10 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 	SYSTEM.PRESSURE_TENSORS_XYZ.Z = 0;
 
 	if      ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" ) 
-	  ZCalc_Cheby_ALL(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
+	{
+	  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, PAIR_MAP, INT_PAIR_MAP} ;
+	  cheby.Force_all(TRIPS, QUADS);
+	}
 	else if ( FF_2BODY[0].PAIRTYP == "LJ" ) 
 	  ZCalc_Lj(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
 	

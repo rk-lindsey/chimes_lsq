@@ -48,6 +48,9 @@ public:
    // Parse the input string and set parameters for the force cutoff
 	void parse_input(string line) ;
 
+	// Print out force cutoff parameters.
+	void print_params() ;
+
 } ;
 
 #endif

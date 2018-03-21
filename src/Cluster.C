@@ -1230,6 +1230,31 @@ void CLUSTER_LIST::print(bool md_mode)
   }
 }
 
+void CLUSTER_LIST::print_fcut()
+// Print the cutoff function parameters controlling the CLUSTER_LIST.
+{
+
+  if ( NCLUSTERS <= 0 ) 
+	 return ;
+
+  cout << "	Using the following fcut style for " << VEC[0].NATOMS << "B Chebyshev interactions: " ;
+
+  VEC[0].FORCE_CUTOFF.print_params() ;
+}
+
+void CLUSTER_LIST::print_fcut_header(ostream &header)
+// Print force cutoff function parameters to the header file.
+{
+  header << endl << "FCUT TYPE: " << VEC[0].FORCE_CUTOFF.to_string();
+		
+  if (VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGMOID || VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBSIG || VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBESTRETCH || VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
+	 header << " " << VEC[0].FORCE_CUTOFF.STEEPNESS << " " << VEC[0].FORCE_CUTOFF.OFFSET;
+  if(VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
+	 header << " " << VEC[0].FORCE_CUTOFF.HEIGHT;
+
+  header << endl;
+}
+
 void CLUSTER_LIST::print_min_distances()
 {
   string tuplet = tuplet_name(VEC[0].NATOMS, false, false) ;
@@ -1238,26 +1263,38 @@ void CLUSTER_LIST::print_min_distances()
 			
   for (int k=0; k< VEC.size(); k++) 
   {
-	 vector<double> sum(VEC[k].NPAIRS,0.0);
+	 if ( VEC[k].EXCLUDED ) 
+		continue ;
+
+	 vector<double> min(VEC[k].NPAIRS,2.0e10) ;
 			
 #ifdef USE_MPI
 			
 	 for (int m=0 ; m< VEC[k].NPAIRS ; m++)
-		MPI_Reduce(&(VEC[k].MIN_FOUND[m]), &(sum[m]), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+	 {
+		if ( VEC[k].MIN_FOUND[m] > 1.0e9 ) 
+		  cout << "BAD MIN FOUND on PROCESSOR " << RANK << " " << VEC[k].MIN_FOUND[m] << endl ;
+		MPI_Reduce(&(VEC[k].MIN_FOUND[m]), &(min[m]), 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+	 }
 #else	
 	 for(int m=0; m< VEC[k].NPAIRS; m++)
-		sum[m] = VEC[k].MIN_FOUND[m];
+		min[m] = VEC[k].MIN_FOUND[m];
 #endif
 					
-	 if ( RANK == 0 ) 
+	 if ( RANK == 0 )
 	 {
 		cout << "		" << k << "	" ;	
-		for(int m=0; m < VEC[k].NPAIRS ; m++)
-		  cout << VEC[k].ATOM_PAIRS[m] << " ";
-		for(int m=0; m < VEC[k].NPAIRS ; m++)
-		  cout << sum[m] << " ";
-		cout << endl;
-	 }
+		  for(int m=0; m < VEC[k].NPAIRS ; m++)
+			 cout << VEC[k].ATOM_PAIRS[m] << " ";
+		  for(int m=0; m < VEC[k].NPAIRS ; m++)
+		  {
+			 if ( min[m] < 1.0e9 ) 
+				cout << min[m] << " ";
+			 else
+				cout << "NOT FOUND  " ;
+		  }
+		  cout << endl;
+		}
   }
 			
   if ( RANK == 0 ) cout << "	Total number of configurations contributing to each "
@@ -1278,7 +1315,10 @@ void CLUSTER_LIST::print_min_distances()
 		cout << "		" << k << "	" ;	
 		for(int m=0; m< VEC[0].NPAIRS ; m++)
 		  cout << VEC[k].ATOM_PAIRS[m] << " ";
-		cout << sum << endl;
+		if ( ! VEC[k].EXCLUDED )
+		  cout << sum << endl;
+		else
+		  cout << "excluded\n" ;
 	 }	
   }
 }

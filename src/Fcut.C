@@ -318,3 +318,11 @@ void FCUT::parse_input(string line)
 	 }
   }
 }
+
+void FCUT::print_params()
+// Print the force cutoff parameters
+{
+
+  cout << to_string() << endl;
+  cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << STEEPNESS << " " << OFFSET << endl;
+}

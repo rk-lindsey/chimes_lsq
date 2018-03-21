@@ -50,7 +50,7 @@ struct PAIRS	// NEEDS UPDATING
 	vector<double>	POT_PARAMS;		// Used by splines to compute pressure by integrating spline eq's
 	double			PAIR_CHRG;
 	
-PAIRS(): N_CFG_CONTRIB(0),OVRPRMS(5), NBINS(3) 
+PAIRS(): OVRPRMS(5,0.0), NBINS(3,0.0) 
 	 {
 		N_CFG_CONTRIB = 0 ;
 		SNUM = 0 ;
@@ -145,22 +145,14 @@ public:
   // Return the minimum inner cutoff distance for the specified pair.
   double get_sminim(PAIRS & FF_2BODY, string TYPE) ;
 
-CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), MIN_FOUND(npair),
-	 S_MAXIM(npair), S_MINIM(npair), NBINS(npair), BINWS(npair)
+CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), MIN_FOUND(npair,1.0e10),
+	 S_MAXIM(npair,-1), S_MINIM(npair,-1), NBINS(npair,0), BINWS(npair,0.1)
   {
 	 EXCLUDED = false ;
 	 NATOMS = natom ;
 	 NPAIRS = npair ;
 	 N_CFG_CONTRIB = 0 ;
 	 N_TRUE_ALLOWED_POWERS = 0 ;
-	 for ( int j = 0 ; j < npair ; j++ ) {
-		MIN_FOUND[j] = -1 ;
-	 }
-	 for (int j=0; j < npair ; j++)
-	 {
-		S_MINIM[j] = -1;
-		S_MAXIM[j] = -1;
-	 }
 	 FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;	
   }
 private:
@@ -210,6 +202,12 @@ public:
 
   // print the force field file header for the cluster list.
   void print_header(ofstream &header, int natoms, int cheby_order) ;
+
+  // Print the cutoff function parameters controlling the CLUSTER_LIST.
+  void print_fcut() ;
+
+  // Print the cutoff function parameters to the force field header file.
+  void print_fcut_header(ostream &header) ;
 
   // Allocate the cluster list according to the number of clusters and the number
   // of atoms.  Return a string to search for in the params file that describes

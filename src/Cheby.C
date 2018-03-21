@@ -11,6 +11,7 @@
 #include<algorithm> // Used for sorting, etc.
 #include "functions.h"
 #include "util.h"
+#include "Cheby.h"
 
 #ifdef USE_MPI
 	#include <mpi.h>
@@ -214,9 +215,53 @@ void SET_CHEBY_POLYS( PAIRS & FF_2BODY, double *Tn, double *Tnd, const double rl
 	Tnd[0] = 0.0;
 }
 
-// FUNCTION IS OVERLOADED
+static void map_3b_indices(const vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  
+									const string & PAIR_TYPE_IJ, const string &PAIR_TYPE_IK, const string &PAIR_TYPE_JK, 
+									vector<int>& pair_index) // MD version - 1
+// Matches pair indices to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
+{
+  if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
+	{
+		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
+		{
+			// Then jk = z
+			
+			pair_index = {0,1,2} ;
+		}
+		else
+		{
+			pair_index = {0,2,1} ;
+		}
 
-void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) // MD version - 1
+	}
+	else if(FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
+	{
+		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
+		{
+			// Then jk = z
+			pair_index = {1,0,2} ;
+		}
+		else
+		{
+			pair_index = {1,2,0} ;
+		}										
+	}
+	else // PAIR_TYPE_IJ matches alloweD[i].z
+	{
+		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
+		{
+			// Then jk = z
+			pair_index = {2,0,1} ;
+		}
+		else
+		{
+			pair_index = {2,1,0} ;
+		}										
+	}	
+}
+
+
+void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) 
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
 {
 	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
@@ -272,6 +317,8 @@ void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<stri
 		}										
 	}	
 }
+
+// FUNCTION IS OVERLOADED
 
 void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, int PAIR_TYPE_IJ, int PAIR_TYPE_IK, int PAIR_TYPE_JK, int POWER_SET) // MD version - 2
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
@@ -430,7 +477,7 @@ void SET_4B_CHEBY_POWERS(QUADRUPLETS & PAIR_QUADRUPLET, vector<string> & ATOM_TY
 
 
 // FUNCTION UPDATED
-void ZCalc_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)	
+void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
 // Calculate derivatives of the forces wrt the Chebyshev parameters. Stores minimum distance between a pair of atoms in minD[i].
 {
 	XYZ RAB; 		// Replaces  Rab[3];
@@ -697,7 +744,8 @@ void ZCalc_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & F
   return;
 }
 
-void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP, NEIGHBORS & NEIGHBOR_LIST)		
+void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIPS) 
+							
 // Calculate derivatives of the forces wrt the 3-body Chebyshev parameters. 
 {
 	// This three body interaction stems from: C_n^ij *  C_n^ik * C_n^jk * T_n(x_ij) * T_n(x_ik) * T_n(x_jk)
@@ -747,8 +795,13 @@ void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
 	
 	double VOL = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
-	
+
+	vector<CLUSTER> &PAIR_TRIPLETS{TRIPS.VEC} ;
+	map<string,int> &TRIAD_MAP{TRIPS.MAP} ;
+
 	bool FORCE_IS_ZERO_IJ, FORCE_IS_ZERO_IK, FORCE_IS_ZERO_JK;
+
+	vector<int> pair_index(3) ;
 
 	if ( ! called_before ) 
 	{
@@ -891,6 +944,10 @@ void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 					{
 						if( PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_jk, S_MINIM_JK, S_MAXIM_JK))
 						{		
+
+						  map_3b_indices(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP, 
+											  PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, 
+											  pair_index) ;
 										
 							// Populate the appropriate histogram
 							
@@ -1011,23 +1068,23 @@ void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 							
 							if (PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[0] == -1) 	// Then this is our first check. Just set all equal to current distances
 							{
-								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[0] = rlen_ij;
-								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[1] = rlen_ik;
-								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[2] = rlen_jk;
+								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[pair_index[0]] = rlen_ij;
+								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[pair_index[1]] = rlen_ik;
+								PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[pair_index[2]] = rlen_jk;
 							}
 							
 							// Case 2: If any distance is smaller than a previous distance
 							
 							else 
 							{
-								if (rlen_ij<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[0])
-									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[0] = rlen_ij;
+								if (rlen_ij<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[pair_index[0]])
+									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[pair_index[0]] = rlen_ij;
 								
-								if (rlen_ik<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[1])
-									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[1] = rlen_ik;
+								if (rlen_ik<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[pair_index[1]])
+									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[pair_index[1]] = rlen_ik;
 								
-								if (rlen_jk<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[2])
-									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[2] = rlen_jk;
+								if (rlen_jk<PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[pair_index[2]])
+									PAIR_TRIPLETS[curr_triple_type_index].MIN_FOUND[pair_index[2]] = rlen_jk;
 									
 							}
 				
@@ -1074,6 +1131,8 @@ void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 							
 							fidx_a2 = SYSTEM.PARENT[a2];
 							fidx_a3 = SYSTEM.PARENT[a3];
+
+							vector<int> pair_idx(3) ;
 
 							for(int i=0; i<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 							{
@@ -1251,9 +1310,7 @@ void ZCalc_3B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 	}	
 }
 
-void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, CLUSTER_LIST TRIPS,
-								  CLUSTER_LIST QUADS, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP ,
-								  NEIGHBORS & NEIGHBOR_LIST)		
+void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS)		
 // Calculate derivatives of the forces wrt the 3-body Chebyshev parameters. 
 {
 	// BECKY: DON'T FORGET TO UPDATE THIS DESCRIPTION FOR 4-BODY INTERACTIONS
@@ -1271,7 +1328,7 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 	vector<double> rlen_dummy(6);	// Replaces rlen_ij_dummy, rlen_ik_dummy
 
 	int vstart;
-    static int n_2b_cheby_terms, n_3b_cheby_terms, n_4b_cheby_terms;
+	static int n_2b_cheby_terms, n_4b_cheby_terms;
 	static double *Tn_ij,  *Tn_ik,  *Tn_il,  *Tn_jk,  *Tn_jl,  *Tn_kl;
 	static double *Tnd_ij, *Tnd_ik, *Tnd_il, *Tnd_jk, *Tnd_jl, *Tnd_kl;
 	static bool called_before = false;
@@ -1308,7 +1365,6 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 	vector<int> pow_map(6);
 
 	vector<QUADRUPLETS>& PAIR_QUADRUPLETS = QUADS.VEC ;
-	vector<TRIPLETS> & PAIR_TRIPLETS = TRIPS.VEC ;
 	vector<int>& INT_QUAD_MAP = QUADS.INT_MAP ;
 
 	if (!called_before) 
@@ -1316,7 +1372,6 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 		called_before = true;
 		int dim = 0;
 		n_2b_cheby_terms = 0;
-		n_3b_cheby_terms = 0;
 		n_4b_cheby_terms = 0;
 		
 
@@ -1328,9 +1383,6 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 			
 			n_2b_cheby_terms += FF_2BODY[i].SNUM;
 		}
-		for (int i=0; i<PAIR_TRIPLETS.size(); i++) 
-			n_3b_cheby_terms += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;
-			
 		
 		for (int i=0; i<PAIR_QUADRUPLETS.size(); i++) 
 			n_4b_cheby_terms += PAIR_QUADRUPLETS[i].N_TRUE_ALLOWED_POWERS;
@@ -1506,20 +1558,22 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 						}
 					}
 
+					SET_4B_CHEBY_POWERS(PAIR_QUADRUPLETS[curr_quad_type_index],ATOM_TYPE, pow_map);					
+
 					// Track the minimum quadruplet distances for each given pair
 					
 					if (PAIR_QUADRUPLETS[curr_quad_type_index].MIN_FOUND[0] == -1) 	// Then this is our first check. Just set all equal to current distances
 					{
 						for (int f=0; f<6; f++)
-							PAIR_QUADRUPLETS[curr_quad_type_index].MIN_FOUND[f] = rlen[f];
+							PAIR_QUADRUPLETS[curr_quad_type_index].MIN_FOUND[pow_map[f]] = rlen[f];
 					}
 
 					else // Case 2: If any distance is smaller than a previous distance
 					{
 						for (int f=0; f<6; f++)
 						{
-							if (rlen[f]<PAIR_QUADRUPLETS[curr_quad_type_index].MIN_FOUND[f])
-								PAIR_QUADRUPLETS[curr_quad_type_index].MIN_FOUND[f] = rlen[f];
+							if (rlen[f]<PAIR_QUADRUPLETS[curr_quad_type_index].MIN_FOUND[pow_map[f]])
+								PAIR_QUADRUPLETS[curr_quad_type_index].MIN_FOUND[pow_map[f]] = rlen[f];
 						}
 					}
 		
@@ -1564,8 +1618,6 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 					for (int f=0; f<6; f++)
 						dx_dr[f] = CHEBY_DERIV_CONST*cheby_var_deriv(xdiff[f], rlen_dummy[f], FF_2BODY[curr_pair_type_idx[f]].LAMBDA, FF_2BODY[curr_pair_type_idx[f]].CHEBY_TYPE);
 					
-					SET_4B_CHEBY_POWERS(PAIR_QUADRUPLETS[curr_quad_type_index],ATOM_TYPE, pow_map);					
-
 					for(int i=0; i<PAIR_QUADRUPLETS[curr_quad_type_index].N_ALLOWED_POWERS; i++) 
 					{
 					    row_offset = PAIR_QUADRUPLETS[curr_quad_type_index].PARAM_INDICES[i];
@@ -1768,270 +1820,7 @@ void ZCalc_4B_Cheby_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> 
 	}	
 }
 
-void ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP)		
-// Constrains the ENERGY (not force) for specific distances and triplet types were no observations are made in the fitting trajectory
-{
-
-	// This three body interaction stems from: C_n^ij *  C_n^ik * C_n^jk * T_n(x_ij) * T_n(x_ik) * T_n(x_jk)
-	//	The logic:
-	//	+ Run a triple loop over all atoms in the system.
-	//	+ Compute C_ij, C_ik, and C_jk coeffiecients independently as you would do for a normal 2 body 
-	
-	if (CONTROLS.FIT_STRESS)// || CONTROLS.FIT_ENER)
-	{
-	   	cout << "ERROR: 3B histogram constraints not compatible with stress or energy fitting!" << endl;
-		exit_run(0);
-	}
-	
-	double rlen_ij,  rlen_ik,  rlen_jk;
-	int vstart;
-    static int n_2b_cheby_terms, n_3b_cheby_terms;
-	static double *Tn_ij,  *Tn_ik,  *Tn_jk;
-	static double *Tnd_ij, *Tnd_ik, *Tnd_jk;
-	static bool called_before = false;
-	
-	static int pow_ij, pow_ik, pow_jk;
-	double xdiff_ij, xdiff_ik, xdiff_jk; 
-	double fcut_ij,  fcut_ik,  fcut_jk; 	
-	double fcutderiv_ij, fcutderiv_ik, fcutderiv_jk; 			
-	
-	static string TEMP_STR;
-	static string PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK;
-	static int curr_triple_type_index;
-	static int curr_pair_type_idx_ij;
-	static int curr_pair_type_idx_ik;
-	static int curr_pair_type_idx_jk;
-	static int row_offset;	
-	
-	static double CHEBY_DERIV_CONST;	// Accounts for when cheby range is changed from -1:1 to x:y
-
-	double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
-	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
-
-	if ( ! called_before ) 
-	{
-		called_before = true;
-		int dim = 0;
-
-		for ( int i = 0; i < FF_2BODY.size(); i++ ) 
-		{
-			if (FF_2BODY[i].SNUM_3B_CHEBY > dim ) 
-				dim = FF_2BODY[i].SNUM_3B_CHEBY;	
-			
-			n_2b_cheby_terms += FF_2BODY[i].SNUM;
-		}
-		for ( int i = 0; i < PAIR_TRIPLETS.size(); i++ ) 
-			n_3b_cheby_terms += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;;
-		
-		dim++;
-		
-		Tn_ij   = new double [dim];
-		Tn_ik   = new double [dim];
-		Tn_jk   = new double [dim];
-
-		Tnd_ij  = new double [dim];
-		Tnd_ik  = new double [dim];
-		Tnd_jk  = new double [dim];
-		
-		CHEBY_DERIV_CONST = FF_2BODY[0].CHEBY_RANGE_HIGH - FF_2BODY[0].CHEBY_RANGE_LOW;	// Ranges should be the same for all types
-		CHEBY_DERIV_CONST /= 2.0; // i.e the width of the default cheby range		
-
-	}
-	
-	
-	vector< vector< XYZ> > TEMP;	// Will hold A-matrix entries for current 3b type. To be appended to actual a matrix
-	TEMP.resize(1);					// One entry for each "atom" in the triplet type
-
-	TEMP[0].resize(CONTROLS.TOT_SHORT_RANGE);
-	
-	int ADDED_LINES = 0;
-	int TOTAL_LINES = 0;
-
-	for(int i=0; i<PAIR_TRIPLETS.size(); i++)
-	{
-		int COUNTER = 1;
-		int COMBINE = int(PAIR_TRIPLETS[i].NBINS[0])/6;
-		
-		for(int j=0; j<CONTROLS.TOT_SHORT_RANGE; j++)
-		{
-				TEMP[0][j].X = 0;
-				TEMP[0][j].Y = 0;
-				TEMP[0][j].Z = 0;
-		}
-
-		curr_pair_type_idx_ij = PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[0]];
-		curr_pair_type_idx_ik = PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[1]];
-		curr_pair_type_idx_jk = PAIR_MAP[ PAIR_TRIPLETS[i].ATOM_PAIRS[2]];
-
-/* TO WRITE OUT BINS		
-string TEMP_NAME = 	PAIR_TRIPLETS[i].ATOM_PAIRS[0];
-TEMP_NAME.append(   PAIR_TRIPLETS[i].ATOM_PAIRS[1]);
-TEMP_NAME.append(   PAIR_TRIPLETS[i].ATOM_PAIRS[2]);
-TEMP_NAME.append("temp_hist_out.dat");
-ofstream TMP_HIST_OUT;
-TMP_HIST_OUT.open(TEMP_NAME);
-*/
-		
-/* TO READ IN BINS 	
-string TEMP_NAME = 	PAIR_TRIPLETS[i].ATOM_PAIRS[0];
-TEMP_NAME.append(   PAIR_TRIPLETS[i].ATOM_PAIRS[1]);
-TEMP_NAME.append(   PAIR_TRIPLETS[i].ATOM_PAIRS[2]);
-TEMP_NAME.append("temp_hist_out.dat");
-ifstream TMP_HIST_OUT;
-TMP_HIST_OUT.open(TEMP_NAME);	
-*/		
-		for(int x=0; x<PAIR_TRIPLETS[i].NBINS[0]; x++)
-		{
-			if( ((x+1)<6*COMBINE) && ((x+1)%COMBINE==0))
-				COUNTER++;
-			
-			string TEMPSTR = PAIR_TRIPLETS[i].ATOM_PAIRS[0];
-			TEMPSTR  .append(PAIR_TRIPLETS[i].ATOM_PAIRS[1]);
-			TEMPSTR  .append(PAIR_TRIPLETS[i].ATOM_PAIRS[2]);
-			string OUTFILE = "3b_Cheby_Pot-pop_hist-";
-			OUTFILE.append(TEMPSTR);
-			OUTFILE.append("-scan-");
-			OUTFILE.append(to_string(static_cast<long long>(COUNTER)));
-			OUTFILE.append(".dat");
-			
-			ofstream OUTFILE_3B_POP_HIST;
-			OUTFILE_3B_POP_HIST.open(OUTFILE.data());
-			
-			
-			S_MINIM_IJ = PAIR_TRIPLETS[i].S_MINIM[0];
-			S_MAXIM_IJ = PAIR_TRIPLETS[i].S_MAXIM[0];
-			
-			if(S_MINIM_IJ == -1)
-				S_MINIM_IJ = FF_2BODY[curr_pair_type_idx_ij].S_MINIM;
-			if(S_MAXIM_IJ == -1)
-				S_MAXIM_IJ = FF_2BODY[curr_pair_type_idx_ij].S_MAXIM;
-			
-			rlen_ij = x*PAIR_TRIPLETS[i].BINWS[0]+0.5*PAIR_TRIPLETS[i].BINWS[0]+S_MINIM_IJ;
-			
-			OUTFILE_3B_POP_HIST << "#IJ DIST: " << fixed << setprecision(3) << rlen_ij << endl;
-			
-			for(int y=0;y<PAIR_TRIPLETS[i].NBINS[1]; y++)
-			{
-				for (int z=0;z<PAIR_TRIPLETS[i].NBINS[2]; z++)
-				{	
-					// Print out the histograms
-					
-
-					
-					S_MINIM_IK = PAIR_TRIPLETS[i].S_MINIM[1];
-					S_MAXIM_IK = PAIR_TRIPLETS[i].S_MAXIM[1];
-					
-					if(S_MINIM_IK == -1)
-						S_MINIM_IK = FF_2BODY[curr_pair_type_idx_ik].S_MINIM;
-					if(S_MAXIM_IK == -1)
-						S_MAXIM_IK = FF_2BODY[curr_pair_type_idx_ik].S_MAXIM;
-					
-					S_MINIM_JK = PAIR_TRIPLETS[i].S_MINIM[2];
-					S_MAXIM_JK = PAIR_TRIPLETS[i].S_MAXIM[2];
-					
-					if(S_MINIM_JK == -1)
-						S_MINIM_JK = FF_2BODY[curr_pair_type_idx_jk].S_MINIM;
-					if(S_MAXIM_JK == -1)
-						S_MAXIM_JK = FF_2BODY[curr_pair_type_idx_jk].S_MAXIM;
-
-
-					rlen_ik = y*PAIR_TRIPLETS[i].BINWS[1]+0.5*PAIR_TRIPLETS[i].BINWS[1]+S_MINIM_IK;
-					rlen_jk = z*PAIR_TRIPLETS[i].BINWS[2]+0.5*PAIR_TRIPLETS[i].BINWS[2]+S_MINIM_JK;
-					
-					//OUTFILE_3B_POP_HIST << rlen_ij << " " << rlen_ik << " " << rlen_jk << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
-					vector<int> index(3) ;
-					index[0] = x ;
-					index[1] = y ; 
-					index[2] = z ;
-					OUTFILE_3B_POP_HIST << rlen_ik << " " << rlen_jk << " " << PAIR_TRIPLETS[i].get_histogram(index) << endl;
-/* TO WRITE OUT BINS					
-TMP_HIST_OUT << x << " " << y << " " << z << " " << PAIR_TRIPLETS[i].POP_HIST[x][y][z] << endl;
-*/	
-
-/* TO READ IN BINS
-int xx, yy, zz, pop; 
-TMP_HIST_OUT >> xx >> yy >> zz >> pop;
-PAIR_TRIPLETS[i].POP_HIST[xx][yy][zz] += pop;
-*/					
-										
-					
-					index[0] = x ;
-					index[1] = y ; 
-					index[2] = z ;				
-					if(PAIR_TRIPLETS[i].get_histogram(index) == 0)	// Then we need to add an entry to the A matrix
-					{						
-						// Begin setting up the derivative calculation
-
-						// Set up the polynomials
-		
-						SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ij], Tn_ij, Tnd_ij, rlen_ij, xdiff_ij, S_MAXIM_IJ, S_MINIM_IJ, FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY);
-		
-						SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_ik], Tn_ik, Tnd_ik, rlen_ik, xdiff_ik, S_MAXIM_IK, S_MINIM_IK, FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY);
-		
-						SET_CHEBY_POLYS(FF_2BODY[curr_pair_type_idx_jk], Tn_jk, Tnd_jk, rlen_jk, xdiff_jk, S_MAXIM_JK, S_MINIM_JK, FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY);			
-
-						// At this point we've completed all pre-calculations needed to populate the A matrix. Now we need to figure out 
-						// where within the matrix to put the data, and to do so. 
-
-						// Note: This syntax is safe since there is only one possible SNUM_3B_CHEBY value for all interactions
-
-						vstart = n_2b_cheby_terms;
-		
-						for (int p=0; p<curr_triple_type_index; p++)
-							vstart += PAIR_TRIPLETS[p].N_TRUE_ALLOWED_POWERS;	
-									
-						PAIR_TRIPLETS[i].FORCE_CUTOFF.get_fcut(fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ);
-						PAIR_TRIPLETS[i].FORCE_CUTOFF.get_fcut(fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK);
-						PAIR_TRIPLETS[i].FORCE_CUTOFF.get_fcut(fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK);
-
-						/////////////////////////////////////////////////////////////////////
-						// Consider special restrictions on allowed triplet types and powers
-						/////////////////////////////////////////////////////////////////////
-		
-						row_offset = 0;
-		
-						for(int p=0; p<PAIR_TRIPLETS[curr_triple_type_index].N_ALLOWED_POWERS; p++) 
-						{
-						    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICES[p];
-
-						    SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP, pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, p);
-
-							TEMP[0][vstart+row_offset].X += fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
-							TEMP[0][vstart+row_offset].Y += fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
-							TEMP[0][vstart+row_offset].Z += fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
-						}
-						
-						A_MATRIX.push_back(TEMP);
-						ADDED_LINES++;
-					}
-				}
-				OUTFILE_3B_POP_HIST << endl;
-			}
-			
-			OUTFILE_3B_POP_HIST.close();
-		}
-/* TO WRITE OUT BINS		
-TMP_HIST_OUT.close();	
-*/	
-		
-/* TO READ IN BINS	
-TMP_HIST_OUT.close();
-*/
-		cout << "For pair triplet " << i << " added " << ADDED_LINES << " elements of the " << fixed << setprecision(0) << PAIR_TRIPLETS[i].NBINS[0] << "*" << PAIR_TRIPLETS[i].NBINS[1] <<"*"<< PAIR_TRIPLETS[i].NBINS[2] << " = "<< 
-			PAIR_TRIPLETS[i].NBINS[0]*PAIR_TRIPLETS[i].NBINS[1]*PAIR_TRIPLETS[i].NBINS[2] << " possible bins " << endl;
-		
-		TOTAL_LINES += ADDED_LINES;
-		ADDED_LINES = 0;
-		
-	}
-	
-	cout << "Added " << TOTAL_LINES << " total lines." << endl << endl;
-	
-}
-
-
-void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> PAIR_MAP, vector<int> &INT_PAIR_MAP,
-							CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS & NEIGHBOR_LIST)
+void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS) 
 // Calculate short-range forces using a Chebyshev polynomial expansion. Can use morse variables similar to the work of Bowman.
 {
   vector<QUAD_FF> & FF_4BODY = QUADS.VEC ;
@@ -2928,7 +2717,7 @@ void ZCalc_Cheby_ALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 //
 ////////////////////////////////////////////////////////////
 
-void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_CHARGES, bool INCLUDE_PENALTY, string FILE_TAG)
+void Cheby::Print_2B(int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_CHARGES, bool INCLUDE_PENALTY, string FILE_TAG)
 // Generating pair distance scans for the 2-b potential.
 // pair distances will range from smin to smax, incremented by sdelta
 {
@@ -3103,7 +2892,8 @@ void Print_Cheby(vector<PAIR_FF> & FF_2BODY, int ij, string PAIR_NAME, bool INCL
 }  
 
 // NEW
-void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, vector<TRIP_FF> & FF_3BODY, map<string,int> & PAIR_MAP, map<string,int> & TRIAD_MAP, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan)	
+void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, 
+							int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan)	
 	// Print heat map slices for 2+3-body cheby potentials
 {
 	
@@ -3137,6 +2927,8 @@ void Print_Ternary_Cheby_Scan(JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY
 	double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
 	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
 	
+	vector<TRIP_FF> & FF_3BODY = TRIPS.VEC ;
+	map<string,int> & TRIAD_MAP = TRIPS.MAP ;
 	
 	////////////////////////////////////////////////////////////////////////////////////////
 	
