@@ -51,15 +51,29 @@ Cheby(JOB_CONTROL &controls, FRAME &system, NEIGHBORS &neighbor_list, vector<PAI
   void Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, 
 					 int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan)	;
 
+  // Return the transformation corresponding to the given string.
+  // static member functions do not depend on a particular instance of the class.
+  static Cheby_trans get_trans_type(string cheby_type) ;
+
+  // Return a string corresponding to the Chebyshev transformation type.
+  static string get_trans_string(Cheby_trans trans) ;
+
+  static void set_cheby_params(double sminim, double smaxim, double lambda, Cheby_trans cheby_type,
+										 double &xminim, double &xmaxim, double &xdiff, double &xavg) ;
 private:
 
   // Return a range-limited copy of x.
   inline double fix_val(double x) ;
 
   // Evaluate Chebyshev polynomials.
-  void set_polys(int index, double *Tn, double *Tnd, const double rlen, double & xdiff, 
-						 double SMAX, double SMIN, double SNUM) ;
+  void set_polys(int index, double *Tn, double *Tnd, const double rlen, double x_diff, double x_avg, 
+							 double SNUM) ;
 
+  // Does the cheby distance transformation										
+  inline void transform(double rlen, double s_minim, double s_maxim, double lambda, 
+										 Cheby_trans cheby_type, double & x, double & xdiff) ;
+  // Does the cheby distance transformation with pre-calculated limits.										
+  inline void transform2(double rlen, double x_diff, double x_avg, double lambda, Cheby_trans cheby_type, double & x) ;
 
 } ;
 

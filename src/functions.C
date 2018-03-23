@@ -193,32 +193,6 @@ void build_real_replicates(FRAME &SYSTEM, const JOB_CONTROL &CONTROLS)
 
 
 //////////////////////////////////////////
-// Distance calculation and smoothing functions
-//////////////////////////////////////////
-
-double get_dist(const FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
-// Calculates distance as a2 - a1... This function modifies RAB!
-{
-	if(SYSTEM.ATOMS == SYSTEM.ALL_ATOMS) // Then we're not using ghost atoms. Need to use MIC
-	{
-		RAB.X = SYSTEM.COORDS[a2].X - SYSTEM.COORDS[a1].X;
-		RAB.Y = SYSTEM.COORDS[a2].Y - SYSTEM.COORDS[a1].Y;
-		RAB.Z = SYSTEM.COORDS[a2].Z - SYSTEM.COORDS[a1].Z;
-		
-		RAB.X -= floor( 0.5 + RAB.X/SYSTEM.BOXDIM.X )  * SYSTEM.BOXDIM.X;
-		RAB.Y -= floor( 0.5 + RAB.Y/SYSTEM.BOXDIM.Y )  * SYSTEM.BOXDIM.Y;
-		RAB.Z -= floor( 0.5 + RAB.Z/SYSTEM.BOXDIM.Z )  * SYSTEM.BOXDIM.Z;
-	}
-	else
-	{
-		RAB.X = SYSTEM.ALL_COORDS[a2].X - SYSTEM.ALL_COORDS[a1].X;
-		RAB.Y = SYSTEM.ALL_COORDS[a2].Y - SYSTEM.ALL_COORDS[a1].Y;
-		RAB.Z = SYSTEM.ALL_COORDS[a2].Z - SYSTEM.ALL_COORDS[a1].Z;
-	}
-	return sqrt( RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z );
-}
-
-//////////////////////////////////////////
 // MPI compatibility functions
 //////////////////////////////////////////
  

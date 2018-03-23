@@ -1103,7 +1103,6 @@ FF_SETUP_2:
   if ( FF_2BODY[0].SNUM_3B_CHEBY > 0 ) 
   {
 	 TRIPS.build_int_maps(TMP_ATOMTYPE, FF_2BODY, PAIR_MAP) ;
-	 TRIPS.set_default_cutoffs(FF_2BODY) ;
   }
 	
   // Build 4-body fast maps
@@ -1111,7 +1110,6 @@ FF_SETUP_2:
   if(FF_2BODY[0].SNUM_4B_CHEBY > 0)
   {
 	 QUADS.build_int_maps(TMP_ATOMTYPE, FF_2BODY, PAIR_MAP) ;
-	 QUADS.set_default_cutoffs(FF_2BODY) ;
   }
 
 
@@ -3588,7 +3586,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  PARAMFILE >> FF_2BODY[i].ATM2TYP;	
 		  PARAMFILE >> FF_2BODY[i].S_MINIM;	
 		  PARAMFILE >> FF_2BODY[i].S_MAXIM;
-				
+
 		  if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
 		  {
 			 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
@@ -3646,15 +3644,21 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  }
 		  else if(TEMP_TYPE =="CHEBYSHEV")
 		  {
-			 PARAMFILE >> FF_2BODY[i].CHEBY_TYPE;	// How does the user want distance transformed?
+			 string cheby_type ;
+			 PARAMFILE >> cheby_type ;
 
-			 if(FF_2BODY[i].CHEBY_TYPE == "MORSE")
+			 FF_2BODY[i].CHEBY_TYPE = Cheby::get_trans_type(cheby_type) ;
+
+			 if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE)
 				PARAMFILE >> FF_2BODY[i].LAMBDA;	
 					
 			 FF_2BODY[i].SNUM          = TMP_TERMS1;
 			 FF_2BODY[i].SNUM_3B_CHEBY = TMP_TERMS2;
 			 FF_2BODY[i].SNUM_4B_CHEBY = TMP_TERMS3;
 					
+			 // Set Cheby parameters based on S_MINIM and S_MAXIM.
+			 FF_2BODY[i].set_cheby_vals() ;
+
 			 // Setup force cutoff type for 2-body
 					
 			 FF_2BODY[0].FORCE_CUTOFF.set_type("CUBIC");
@@ -3674,9 +3678,6 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  }				
 		}
 
-		TRIPS.set_default_cutoffs(FF_2BODY) ;
-		QUADS.set_default_cutoffs(FF_2BODY) ;
-			
 		if(CONTROLS.USE_OVERCOORD)
 		{		
 		  LINE = get_next_line(PARAMFILE) ;
@@ -4137,7 +4138,7 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 	 cout << "		pair type...smin...smax...sdelta...";
 	 if(FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
 		cout << "cheby type";
-	 if(FF_2BODY[i].CHEBY_TYPE == "MORSE")
+	 if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE)
 		cout << "...cheby lambda";
 	 if(FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
 		cout << "...penalty dist...penalty scaling...cubic scaling";
@@ -4151,9 +4152,10 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 		
 	 if(FF_2BODY[i].PAIRTYP == "CHEBYSHEV")
 	 {
-		cout << FF_2BODY[i].CHEBY_TYPE << " ";
+		string cheby_type = Cheby::get_trans_string(FF_2BODY[i].CHEBY_TYPE) ;
+		cout << cheby_type << " ";
 			
-		if(FF_2BODY[i].CHEBY_TYPE == "MORSE")
+		if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE )
 		  cout << FF_2BODY[i].LAMBDA << " ";
 		cout << FF_2BODY[i].PENALTY_DIST << " " << scientific << FF_2BODY[i].PENALTY_SCALE<< " ";
 		cout << FF_2BODY[i].CUBIC_SCALE;

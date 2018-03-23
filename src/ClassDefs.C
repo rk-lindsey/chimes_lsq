@@ -7,6 +7,7 @@
 
 #include "functions.h"
 #include "util.h"
+#include "Cheby.h"
 
 using namespace std;
 
@@ -1143,4 +1144,10 @@ void FRAME::update_ghost(int n_layers)
 			exit(1);
 		}
 	}	
+}
+
+void PAIRS::set_cheby_vals()
+// Calculate Chebyshev xmin, xmax, xavg.
+{
+  Cheby::set_cheby_params(S_MINIM, S_MAXIM, LAMBDA, CHEBY_TYPE, X_MINIM, X_MAXIM, X_DIFF, X_AVG) ;
 }

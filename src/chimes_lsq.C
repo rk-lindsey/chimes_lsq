@@ -17,6 +17,7 @@
 
 #include "functions.h"
 #include "util.h"
+#include "Cheby.h"
 
 using namespace std;
 
@@ -120,7 +121,13 @@ int main(int argc, char* argv[])
 	read_lsq_input(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, 
 						PAIR_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
 
-						
+
+	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" )
+	{
+	  for ( int i = 0 ; i < ATOM_PAIRS.size() ; i++ )
+		 ATOM_PAIRS[i].set_cheby_vals() ;
+	}
+
 	if(CONTROLS.USE_3B_CHEBY)
 	{
 	  // Generate unique triplets
@@ -1019,14 +1026,15 @@ int main(int argc, char* argv[])
 	for(int i=0; i<NPAIR; i++)
 	{
 
+	  string chtype = Cheby::get_trans_string(ATOM_PAIRS[i].CHEBY_TYPE) ;
 		header << "	" << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
 			 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
 			 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
 			 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
 			 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
 			 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
-			 << setw(16) << left << ATOM_PAIRS[i].CHEBY_TYPE;
-		if(ATOM_PAIRS[i].CHEBY_TYPE == "MORSE")
+				 << setw(16) << left << chtype ;
+		if(ATOM_PAIRS[i].CHEBY_TYPE == Cheby_trans::MORSE )
 			header << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl; 
 		else
 			header << endl;
@@ -1557,11 +1565,16 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 		else if( (TEMP_TYPE == "CHEBYSHEV") && (LINE.find("# CHBTYPE #") != string::npos))
 		{
-			cin >> LINE; cin.ignore();
-			CONTROLS.CHEBY_TYPE = LINE;
+
+		  cin >> LINE ;
+		  vector<string> tokens ;
+		  if ( parse_space(LINE,tokens) >= 1 ) 
+			CONTROLS.CHEBY_TYPE = Cheby::get_trans_type(tokens[0]);
+		  else 
+			 EXIT_MSG("BAD CHBTYPE" + LINE) ;
 
 			#if VERBOSITY == 1
-			if ( RANK == 0 ) cout << "	# CHBTYPE #: " << CONTROLS.CHEBY_TYPE << endl;	
+			if ( RANK == 0 ) cout << "	# CHBTYPE #: " << tokens[0] << endl;	
 			#endif
 		}		
 		

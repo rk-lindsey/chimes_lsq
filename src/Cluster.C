@@ -18,6 +18,7 @@ using namespace std;
 
 #include "functions.h"
 #include "util.h"
+#include "Cheby.h"
 
 // define for extra output
 // #define DEBUG_CLUSTER
@@ -855,6 +856,9 @@ void CLUSTER_LIST::build_int_maps(vector<string> ATOMTYPE, vector<PAIRS> & ATOM_
 
   build_int_maps_loop(0, atom_index, ATOMTYPE, ATOM_PAIRS, PAIR_MAP) ;
 
+  set_default_cutoffs(ATOM_PAIRS) ;
+  for ( int i = 0 ; i < VEC.size() ; i++ ) 
+	 VEC[i].set_cheby_vals(ATOM_PAIRS) ;
 }
 
 void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector<string> ATOMTYPE,
@@ -932,26 +936,12 @@ int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<str
   for ( int i = 0 ; i < VEC.size() ; i++ ) 
   {
 	 VEC[i].build(cheby_order) ;
-
-
-	 // DEBUG !! Allow just 1 interaction.
-	 // if ( VEC[i].N_ALLOWED_POWERS > 1 && VEC[i].NATOMS == 4 ) 
-	 // {
-	 // 	VEC[i].N_TRUE_ALLOWED_POWERS = 1 ;
-	 // 	VEC[i].N_ALLOWED_POWERS = 1 ;
-	 // 	VEC[i].UNIQUE_POWERS.resize(1) ;
-	 // 	VEC[i].PARAM_INDICES.resize(1) ;
-	 // 	VEC[i].ALLOWED_POWERS.resize(1) ;
-	 // 	for ( int j = 0 ; j < VEC[i].NPAIRS ; j++ ) 
-	 // 	{
-	 // 	  if ( VEC[i].ALLOWED_POWERS[0][j] == 1 )
-	 // 		 VEC[i].ALLOWED_POWERS[0][j] = 2 ;
-	 // 	}
-	 // }
   }
 
   set_default_cutoffs(ATOM_PAIRS) ;
-  
+  for ( int i = 0 ; i < VEC.size() ; i++ ) 
+	 VEC[i].set_cheby_vals(ATOM_PAIRS) ;
+
   return( VEC.size() ) ;
 }
 
@@ -1530,3 +1520,26 @@ int CLUSTER::get_histogram(vector<int>& index)
   else
 	 return(0) ;
 }
+
+void CLUSTER::set_cheby_vals(vector<PAIRS> &FF_2BODY)
+// Calculate Chebyshev xmin, xmax, xavg.
+{
+  for ( int i = 0 ; i < NPAIRS ; i++ ) 
+  {
+	 int j ;
+	 for ( j = 0 ; j < FF_2BODY.size() ; j++ ) 
+	 {
+		if ( ATOM_PAIRS[i] == FF_2BODY[j].PRPR_NM ) 
+		  break ;
+	 }
+	 double lambda = 0.0 ;
+	 if ( j < FF_2BODY.size() )
+		lambda = FF_2BODY[j].LAMBDA ;
+	 else
+		EXIT_MSG("Could not find a match for pair " + ATOM_PAIRS[i]) ;
+
+	 Cheby::set_cheby_params(S_MINIM[i], S_MAXIM[i], lambda, FF_2BODY[0].CHEBY_TYPE, 
+									 X_MINIM[i], X_MAXIM[i], X_DIFF[i], X_AVG[i]) ;
+  }
+}
+
