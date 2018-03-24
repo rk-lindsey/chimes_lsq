@@ -94,8 +94,9 @@ inline void Cheby::transform(double rlen, double s_minim, double s_maxim, double
 }
 
 
-inline void Cheby::transform2(double rlen, double x_diff, double x_avg, double lambda, Cheby_trans cheby_type, double & x)
+inline void Cheby::transform2(double rlen, double x_diff, double x_avg, double lambda, Cheby_trans cheby_type, double & x, double &exprlen)
 // Does the actual cheby distance transformation with precalculated limits.										
+// Calculates the transformed variable (x) and the exponential term (exprlen) for Morse interactions.
 {
 	// Given the atomic distance rlen, the fitting minimum and maximum, the Morse lambda variable,
 	//	and the type of Chebyshev approximant, calculate:
@@ -103,12 +104,15 @@ inline void Cheby::transform2(double rlen, double x_diff, double x_avg, double l
 	switch ( cheby_type ) 
 	{
 	case Cheby_trans::MORSE:
-	  x = (exp(-rlen/lambda)-x_avg)/x_diff;					// pair distances in morse space, normalized to fit over [-1,1]
+	  exprlen = exp(-rlen/lambda) ;
+	  x = (exprlen-x_avg)/x_diff;					// pair distances in morse space, normalized to fit over [-1,1]
 	  break ;
 	case Cheby_trans::INVRSE_R:
+	  exprlen = 0.0 ;
 	  x     = (1.0/rlen-x_avg) / x_diff;			// pair distances in r^-1 space, normalized to fit over [-1,1]
 	  break ;
 	case Cheby_trans::NONE:
+	  exprlen = 0.0 ;
 	  x = (rlen-x_avg) / x_diff;	
 	  break ;
 	default:
@@ -157,15 +161,16 @@ void Cheby::set_cheby_params(double s_minim, double s_maxim, double lambda, Cheb
 }
 
 
-inline double cheby_var_deriv(double xdiff, double rlen, double lambda, Cheby_trans cheby_type)
+inline double cheby_var_deriv(double xdiff, double rlen, double lambda, Cheby_trans cheby_type, double exprlen)
 // Calculate the derivative of the cheby variable x with respect to rlen.
+// exprlen in the exponential in the morse term.
 {
   double dx_dr;
 	
   switch ( cheby_type ) 
   {
   case Cheby_trans::MORSE:
-	 dx_dr =  (-exp(-rlen/lambda)/lambda)/xdiff;
+	 dx_dr =  (-exprlen/lambda)/xdiff;
 	 break ;
   case Cheby_trans::INVRSE_R:
 	 dx_dr = -1.0/(rlen * rlen * xdiff);
@@ -221,78 +226,82 @@ string Cheby::get_trans_string(Cheby_trans trans)
 
 void Cheby::set_polys(int index, double *Tn, double *Tnd, const double rlen, double x_diff, double x_avg, 
 							 double SNUM)	//  FF_2BODY.SNUM_3B_CHEBY
-// Sets the value of the Chebyshev polynomials (Tn) and thier derivatives (Tnd)
+// Sets the value of the Chebyshev polynomials (Tn) and their derivatives (Tnd).  Tnd is the derivative
+// with respect to the interatomic distance, not the transformed distance (x).
 {
   double x ;
+  double exprlen ;
 
-	// Do the Cheby distance transformation
+  // Do the Cheby distance transformation
 
-	PAIRS & ff_2body = FF_2BODY[index] ;
+  PAIRS & ff_2body = FF_2BODY[index] ;
 
-	transform2(
-		rlen, 
-		x_diff, 
-		x_avg, 
-		ff_2body.LAMBDA, 
-		ff_2body.CHEBY_TYPE, 
-		x) ;
-
+  transform2(
+	 rlen, 
+	 x_diff, 
+	 x_avg, 
+	 ff_2body.LAMBDA, 
+	 ff_2body.CHEBY_TYPE, 
+	 x,
+	 exprlen) ;
 		
-		
-	#if CHECK_CHEBY_RANGE == 1	
-	   x = fix_val(x) ;
+#if CHECK_CHEBY_RANGE == 1	
+  x = fix_val(x) ;
 
-		// Now change the range, if the user requested
+  // Now change the range, if the user requested
 	
-		x = x*DERIV_CONST + ff_2body.CHEBY_RANGE_LOW - -1.0*DERIV_CONST;
+  x = x*DERIV_CONST + ff_2body.CHEBY_RANGE_LOW - -1.0*DERIV_CONST;
 		
-		// Sanity check
+  // Sanity check
 	
-		if ( x < ff_2body.CHEBY_RANGE_LOW || x > ff_2body.CHEBY_RANGE_HIGH )
-		{
-			cout << "ERROR: transformed (3B) x falls outside user-defined range." << endl;
-			cout << "x: " << x << endl;
-			cout << "high/low: " << ff_2body.CHEBY_RANGE_HIGH << " " << ff_2body.CHEBY_RANGE_LOW  << endl;
-			exit_run(0);
-		}	
+  if ( x < ff_2body.CHEBY_RANGE_LOW || x > ff_2body.CHEBY_RANGE_HIGH )
+  {
+	 cout << "ERROR: transformed (3B) x falls outside user-defined range." << endl;
+	 cout << "x: " << x << endl;
+	 cout << "high/low: " << ff_2body.CHEBY_RANGE_HIGH << " " << ff_2body.CHEBY_RANGE_LOW  << endl;
+	 exit_run(0);
+  }	
 		
-	#endif
+#endif
 		
-	// Generate Chebyshev polynomials by recursion. 
-	// 
-	// What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
-	// We need to calculate the derivative of these polynomials.
-	// Derivatives are defined through use of Cheby polynomials of the 2nd kind "U_n(x)", as:
-	//
-	// d/dx[ T_n(x) = n * U_n-1(x)] 
-	// 
-	// So we need to first set up the 1st-kind polynomials ("Tn[]")
-	// Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
+  // Generate Chebyshev polynomials by recursion. 
+  // 
+  // What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
+  // We need to calculate the derivative of these polynomials.
+  // Derivatives are defined through use of Cheby polynomials of the 2nd kind "U_n(x)", as:
+  //
+  // d/dx[ T_n(x) = n * U_n-1(x)] 
+  // 
+  // So we need to first set up the 1st-kind polynomials ("Tn[]")
+  // Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
 	 
-	// First two 1st-kind Chebys:
+  // First two 1st-kind Chebys:
 		
-	Tn[0] = 1.0;
-	Tn[1] = x;
+  Tn[0] = 1.0;
+  Tn[1] = x;
 	
-	// Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
+  // Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
 
-	Tnd[0] = 1.0;
-	Tnd[1] = 2.0 * x;
+  Tnd[0] = 1.0;
+  Tnd[1] = 2.0 * x;
 	
-	// Use recursion to set up the higher n-value Tn and Tnd's
+  // Use recursion to set up the higher n-value Tn and Tnd's
 
-	for ( int i = 2; i <= SNUM; i++ ) 
-	{
-	  Tn[i]  = 2.0 * x *  Tn[i-1] -  Tn[i-2];
-	  Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
-	}
+  for ( int i = 2; i <= SNUM; i++ ) 
+  {
+	 Tn[i]  = 2.0 * x *  Tn[i-1] -  Tn[i-2];
+	 Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
+  }
 	
-	// Now multiply by n to convert Tnd's to actual derivatives of Tn
+  // Now multiply by n to convert Tnd's to actual derivatives of Tn
 
-	for ( int i = SNUM; i >= 1; i-- ) 
-	  Tnd[i] = i * Tnd[i-1];
+  double dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, rlen, ff_2body.LAMBDA, ff_2body.CHEBY_TYPE, exprlen);
 
-	Tnd[0] = 0.0;
+  for ( int i = SNUM; i >= 1; i-- ) 
+	 Tnd[i] = i * dx_dr * Tnd[i-1];
+
+  Tnd[0] = 0.0;
+
 }
 
 static void map_3b_indices(const vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  
@@ -571,7 +580,6 @@ void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
 	double fcutderiv; 				
 	double deriv;
 	double tmp_doub; 	
-	double dx_dr;
 	
 	double VOL = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
 	
@@ -657,13 +665,11 @@ void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
 				// 1. Chain rule to account for transformation from morse-type pair distance to x
 				// 2. Product rule coming from pair distance dependence of fcut, the penalty function
 				
-			 	dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, rlen, FF_2BODY[curr_pair_type_idx].LAMBDA, FF_2BODY[curr_pair_type_idx].CHEBY_TYPE);
-				
 				fidx_a2 = SYSTEM.PARENT[a2];
 				
 				for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 				{
-					tmp_doub = (fcut * Tnd[i+1] * dx_dr + fcutderiv * Tn[i+1] );
+					tmp_doub = (fcut * Tnd[i+1] + fcutderiv * Tn[i+1] );
 					
 					// Finally, account for the x, y, and z unit vectors
 					
@@ -772,7 +778,6 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 	static bool called_before = false;
 	
 	static int pow_ij, pow_ik, pow_jk;
-	double dx_dr_ij, dx_dr_jk, dx_dr_ik;
 
 	double fcut_ij,  fcut_ik,  fcut_jk; 			
 	double deriv_ij, deriv_ik, deriv_jk;
@@ -1125,9 +1130,6 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 			
 							// --- THE KEY HERE IS TO UNDERSTAND THAT THE IJ, IK, AND JK HERE IS BASED ON ATOM PAIRS, AND DOESN'T NECESSARILY MATCH THE TRIPLET'S EXPECTED ORDER!
 			
-							dx_dr_ij = DERIV_CONST*cheby_var_deriv(x_diff[0], rlen_ij_dummy, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
-							dx_dr_ik = DERIV_CONST*cheby_var_deriv(x_diff[1], rlen_ik_dummy, FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
-							dx_dr_jk = DERIV_CONST*cheby_var_deriv(x_diff[2], rlen_jk_dummy, FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
 							
 							fidx_a2 = SYSTEM.PARENT[a2];
 							fidx_a3 = SYSTEM.PARENT[a3];
@@ -1140,9 +1142,9 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 								
 							    SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP, pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
 
-							    deriv_ij =  fcut_ij * Tnd_ij[pow_ij] * dx_dr_ij + fcutderiv_ij * Tn_ij[pow_ij];
-							    deriv_ik =  fcut_ik * Tnd_ik[pow_ik] * dx_dr_ik + fcutderiv_ik * Tn_ik[pow_ik];
-							    deriv_jk =  fcut_jk * Tnd_jk[pow_jk] * dx_dr_jk + fcutderiv_jk * Tn_jk[pow_jk];	
+							    deriv_ij =  fcut_ij * Tnd_ij[pow_ij] + fcutderiv_ij * Tn_ij[pow_ij];
+							    deriv_ik =  fcut_ik * Tnd_ik[pow_ik] + fcutderiv_ik * Tn_ik[pow_ik];
+							    deriv_jk =  fcut_jk * Tnd_jk[pow_jk] + fcutderiv_jk * Tn_jk[pow_jk];	
 								
 								if(FORCE_IS_ZERO_IJ)
 									force_wo_coeff_ij = 0;
@@ -1334,7 +1336,6 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 	static bool called_before = false;
 	
 	static vector<int> powers(6);	// replaces pow_ij, pow_ik, pow_jk;
-	vector<double> dx_dr(6);		// replaces dx_dr_ij, dx_dr_jk, dx_dr_ik;
 	vector<double> fcut0(6);		// replaces fcut0_ij, fcut0_ik, fcut0_jk; 
 	vector<double> fcut(6);			// replaces cut_ij,  fcut_ik,  fcut_jk;
 	vector<double> fcut_deriv(6);	// replaces fcutderiv_ij, fcutderiv_ik, fcutderiv_jk; 
@@ -1613,9 +1614,6 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 	
 					// --- THE KEY HERE IS TO UNDERSTAND THAT THE IJ, IK, AND JK HERE IS BASED ON ATOM PAIRS, AND DOESN'T NECESSARILY MATCH THE QUAD'S EXPECTED ORDER!
 	
-					for (int f=0; f<6; f++)
-						dx_dr[f] = DERIV_CONST*cheby_var_deriv(x_diff[f], rlen_dummy[f], FF_2BODY[curr_pair_type_idx[f]].LAMBDA, FF_2BODY[curr_pair_type_idx[f]].CHEBY_TYPE);
-					
 					for(int i=0; i<PAIR_QUADRUPLETS[curr_quad_type_index].N_ALLOWED_POWERS; i++) 
 					{
 					    row_offset = PAIR_QUADRUPLETS[curr_quad_type_index].PARAM_INDICES[i];
@@ -1623,12 +1621,12 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 						for (int f=0; f<6; f++)	// This isn't necessary, but it makes the code cleaner to read. We can worry about efficiency a bit later.
 							powers[f] = PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][f];
 
-					    deriv[0] =  fcut[0] * Tnd_ij[powers[pow_map[0]]] * dx_dr[0] + fcut_deriv[0] * Tn_ij[powers[pow_map[0]]];
-						deriv[1] =  fcut[1] * Tnd_ik[powers[pow_map[1]]] * dx_dr[1] + fcut_deriv[1] * Tn_ik[powers[pow_map[1]]];
-						deriv[2] =  fcut[2] * Tnd_il[powers[pow_map[2]]] * dx_dr[2] + fcut_deriv[2] * Tn_il[powers[pow_map[2]]];
-						deriv[3] =  fcut[3] * Tnd_jk[powers[pow_map[3]]] * dx_dr[3] + fcut_deriv[3] * Tn_jk[powers[pow_map[3]]];
-						deriv[4] =  fcut[4] * Tnd_jl[powers[pow_map[4]]] * dx_dr[4] + fcut_deriv[4] * Tn_jl[powers[pow_map[4]]];
-						deriv[5] =  fcut[5] * Tnd_kl[powers[pow_map[5]]] * dx_dr[5] + fcut_deriv[5] * Tn_kl[powers[pow_map[5]]];
+					    deriv[0] =  fcut[0] * Tnd_ij[powers[pow_map[0]]] + fcut_deriv[0] * Tn_ij[powers[pow_map[0]]];
+						 deriv[1] =  fcut[1] * Tnd_ik[powers[pow_map[1]]] + fcut_deriv[1] * Tn_ik[powers[pow_map[1]]];
+						 deriv[2] =  fcut[2] * Tnd_il[powers[pow_map[2]]] + fcut_deriv[2] * Tn_il[powers[pow_map[2]]];
+						 deriv[3] =  fcut[3] * Tnd_jk[powers[pow_map[3]]] + fcut_deriv[3] * Tn_jk[powers[pow_map[3]]];
+						 deriv[4] =  fcut[4] * Tnd_jl[powers[pow_map[4]]] + fcut_deriv[4] * Tn_jl[powers[pow_map[4]]];
+						 deriv[5] =  fcut[5] * Tnd_kl[powers[pow_map[5]]] + fcut_deriv[5] * Tn_kl[powers[pow_map[5]]];
 
 						force_wo_coeff[0] = deriv[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4] * fcut[5]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_jl[powers[pow_map[4]]]  * Tn_kl[powers[pow_map[5]]];
 						force_wo_coeff[1] = deriv[1] * fcut[0] * fcut[2] * fcut[3] * fcut[4] * fcut[5]  * Tn_ij[powers[pow_map[0]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_jl[powers[pow_map[4]]]  * Tn_kl[powers[pow_map[5]]];
@@ -1666,7 +1664,6 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 							 cout << "Index = " << ifl << endl ;
 							 cout << "Fcut " << fcut[ifl] << endl ;
 							 cout << "Fcut_deriv " << fcut_deriv[ifl] << endl ;
-							 cout << "dx_dr " << dx_dr[ifl] << endl ;
 							 cout << "Powers " << powers[pow_map[ifl]] << endl ;
 							 cout << "Pow_map " << pow_map[ifl] << endl ;
 						  }						  
@@ -1825,7 +1822,7 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 
   double xdiff_2b, xavg_2b;
   static double *Tn, *Tnd;
-  static double fcut_2b, fcutderiv_2b, deriv, dx_dr;
+  static double fcut_2b, fcutderiv_2b, deriv;
   static double rpenalty, Vpenalty;
   static bool called_before = false ;
 
@@ -1943,15 +1940,13 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 			 FF_2BODY[curr_pair_type_idx_ij].FORCE_CUTOFF.get_fcut(fcut_2b, fcutderiv_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].S_MINIM,
 																					 FF_2BODY[curr_pair_type_idx_ij].S_MAXIM);
 
-			 dx_dr = DERIV_CONST*cheby_var_deriv(xdiff_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
-
 			 fidx_a2 = SYSTEM.PARENT[a2];
 				
 			 for ( int i = 0; i < FF_2BODY[curr_pair_type_idx_ij].SNUM; i++ ) 
 			 {
 				double coeff                = FF_2BODY[curr_pair_type_idx_ij].PARAMS[i]; // This is the Cheby FF param for the given power
 				SYSTEM.TOT_POT_ENER += coeff * fcut_2b * Tn[i+1];
-				deriv                = (fcut_2b * Tnd[i+1] * dx_dr + fcutderiv_2b * Tn[i+1]);
+				deriv                = (fcut_2b * Tnd[i+1] + fcutderiv_2b * Tn[i+1]);
 				SYSTEM.PRESSURE_XYZ -= coeff * deriv * rlen_ij;				
 					
 				SYSTEM.PRESSURE_TENSORS_XYZ.X -= coeff * deriv * RAB_IJ.X * RAB_IJ.X / rlen_ij;
@@ -2063,7 +2058,6 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
   int curr_pair_type_idx_ij;
   int curr_pair_type_idx_ik;
   int curr_pair_type_idx_jk;
-  double dx_dr_ij, dx_dr_ik, dx_dr_jk;	
   double coeff;
 	
   vector<double> s_maxim(3), s_minim(3), x_avg(3), x_diff(3) ;
@@ -2219,12 +2213,6 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 			 FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ik, fcutderiv_ik, rlen_ik, s_minim[1], s_maxim[1]);
 			 FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_jk, fcutderiv_jk, rlen_jk, s_minim[2], s_maxim[2]);
 
-			 // Set up terms for derivatives
-		
-			 dx_dr_ij = DERIV_CONST*cheby_var_deriv(x_diff[0], rlen_ij_dummy, FF_2BODY[curr_pair_type_idx_ij].LAMBDA, FF_2BODY[curr_pair_type_idx_ij].CHEBY_TYPE);
-			 dx_dr_ik = DERIV_CONST*cheby_var_deriv(x_diff[1], rlen_ik_dummy, FF_2BODY[curr_pair_type_idx_ik].LAMBDA, FF_2BODY[curr_pair_type_idx_ik].CHEBY_TYPE);
-			 dx_dr_jk = DERIV_CONST*cheby_var_deriv(x_diff[2], rlen_jk_dummy, FF_2BODY[curr_pair_type_idx_jk].LAMBDA, FF_2BODY[curr_pair_type_idx_jk].CHEBY_TYPE);
-		
 			 // Now compute the forces for each set of allowed powers for pairs ij, ik, and jk		
 			 // Keep in mind that the order in which allowed powers are stored may not match the
 			 // ordering of pairs resulting from the present atom triplet. Thus, we need to order
@@ -2246,9 +2234,9 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 			      
 				SYSTEM.TOT_POT_ENER += coeff * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]; 
 
-				deriv_ij  = fcut_ij * Tnd_ij[pow_ij] * dx_dr_ij + fcutderiv_ij * Tn_ij [pow_ij];
-				deriv_ik  = fcut_ik * Tnd_ik[pow_ik] * dx_dr_ik + fcutderiv_ik * Tn_ik [pow_ik];
-				deriv_jk  = fcut_jk * Tnd_jk[pow_jk] * dx_dr_jk + fcutderiv_jk * Tn_jk [pow_jk];
+				deriv_ij  = fcut_ij * Tnd_ij[pow_ij] + fcutderiv_ij * Tn_ij [pow_ij];
+				deriv_ik  = fcut_ik * Tnd_ik[pow_ik] + fcutderiv_ik * Tn_ik [pow_ik];
+				deriv_jk  = fcut_jk * Tnd_jk[pow_jk] + fcutderiv_jk * Tn_jk [pow_jk];
 									
 				force_ij  = coeff * deriv_ij * fcut_ik * fcut_jk * Tn_ik [pow_ik] * Tn_jk [pow_jk];
 				force_ik  = coeff * deriv_ik * fcut_ij * fcut_jk * Tn_ij [pow_ij] * Tn_jk [pow_jk];
@@ -2371,7 +2359,6 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
   static double *Tnd_4b_ij, *Tnd_4b_ik, *Tnd_4b_il, *Tnd_4b_jk, *Tnd_4b_jl, *Tnd_4b_kl;
 	
   static vector<int> powers(6);	// replaces pow_ij, pow_ik, pow_jk;
-  vector<double> dx_dr_4b(6);		// replaces dx_dr_ij, dx_dr_jk, dx_dr_ik;
   vector<double> x_diff(6), x_avg(6);		// replaces xdiff_ij, xdiff_ik, xdiff_jk; 
 //	vector<double> fcut0_4b(6);		// replaces fcut0_ij, fcut0_ik, fcut0_jk; 
   vector<double> fcut_4b(6);		// replaces cut_ij,  fcut_ik,  fcut_jk;
@@ -2585,10 +2572,6 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 			
 	 // Set up terms for derivatives
 			
-	 for (int f=0; f<6; f++)
-		dx_dr_4b[f] = DERIV_CONST*cheby_var_deriv(x_diff[f], rlen_dummy[f], FF_2BODY[curr_pair_type_idx[f]].LAMBDA, FF_2BODY[curr_pair_type_idx[f]].CHEBY_TYPE);
-
-
 	 for(int i=0; i<FF_4BODY[curr_quad_type_index].N_ALLOWED_POWERS; i++) 
 	 {
 		double coeff = FF_4BODY[curr_quad_type_index].PARAMS[i];
@@ -2601,12 +2584,12 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		  * Tn_4b_ij[powers[pow_map[0]]] * Tn_4b_ik[powers[pow_map[1]]] * Tn_4b_il[powers[pow_map[2]]] 
 		  * Tn_4b_jk[powers[pow_map[3]]] * Tn_4b_jl[powers[pow_map[4]]] * Tn_4b_kl[powers[pow_map[5]]]; 			
 
-		deriv_4b[0] = fcut_4b[0] * Tnd_4b_ij[powers[pow_map[0]]] * dx_dr_4b[0] + fcut_deriv_4b[0] * Tn_4b_ij[powers[pow_map[0]]];
-		deriv_4b[1] = fcut_4b[1] * Tnd_4b_ik[powers[pow_map[1]]] * dx_dr_4b[1] + fcut_deriv_4b[1] * Tn_4b_ik[powers[pow_map[1]]];
-		deriv_4b[2] = fcut_4b[2] * Tnd_4b_il[powers[pow_map[2]]] * dx_dr_4b[2] + fcut_deriv_4b[2] * Tn_4b_il[powers[pow_map[2]]];
-		deriv_4b[3] = fcut_4b[3] * Tnd_4b_jk[powers[pow_map[3]]] * dx_dr_4b[3] + fcut_deriv_4b[3] * Tn_4b_jk[powers[pow_map[3]]];
-		deriv_4b[4] = fcut_4b[4] * Tnd_4b_jl[powers[pow_map[4]]] * dx_dr_4b[4] + fcut_deriv_4b[4] * Tn_4b_jl[powers[pow_map[4]]];
-		deriv_4b[5] = fcut_4b[5] * Tnd_4b_kl[powers[pow_map[5]]] * dx_dr_4b[5] + fcut_deriv_4b[5] * Tn_4b_kl[powers[pow_map[5]]];
+		deriv_4b[0] = fcut_4b[0] * Tnd_4b_ij[powers[pow_map[0]]] + fcut_deriv_4b[0] * Tn_4b_ij[powers[pow_map[0]]];
+		deriv_4b[1] = fcut_4b[1] * Tnd_4b_ik[powers[pow_map[1]]] + fcut_deriv_4b[1] * Tn_4b_ik[powers[pow_map[1]]];
+		deriv_4b[2] = fcut_4b[2] * Tnd_4b_il[powers[pow_map[2]]] + fcut_deriv_4b[2] * Tn_4b_il[powers[pow_map[2]]];
+		deriv_4b[3] = fcut_4b[3] * Tnd_4b_jk[powers[pow_map[3]]] + fcut_deriv_4b[3] * Tn_4b_jk[powers[pow_map[3]]];
+		deriv_4b[4] = fcut_4b[4] * Tnd_4b_jl[powers[pow_map[4]]] + fcut_deriv_4b[4] * Tn_4b_jl[powers[pow_map[4]]];
+		deriv_4b[5] = fcut_4b[5] * Tnd_4b_kl[powers[pow_map[5]]] + fcut_deriv_4b[5] * Tn_4b_kl[powers[pow_map[5]]];
 				
 		force_4b[0]  = coeff * deriv_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]]  * Tn_4b_kl[powers[pow_map[5]]];
 		force_4b[1]  = coeff * deriv_4b[1] * fcut_4b[0] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]]  * Tn_4b_kl[powers[pow_map[5]]];
@@ -2658,7 +2641,6 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 			 cout << "Index = " << ifl << endl ;
 			 cout << "Fcut " << fcut_4b[ifl] << endl ;
 			 cout << "Fcut_deriv " << fcut_deriv_4b[ifl] << endl ;
-			 cout << "dx_dr " << dx_dr_4b[ifl] << endl ;
 			 cout << "Powers " << powers[pow_map[ifl]] << endl ;
 			 cout << "Pow_map " << pow_map[ifl] << endl ;
 		  }
@@ -2757,8 +2739,7 @@ void Cheby::Print_2B(int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_C
 {
 
 	double rlen;
-	double x;
-	static double *Tn;
+	static double *Tn, *Tnd;
 	static bool called_before = false;
 	
 	double rpenalty;
@@ -2766,7 +2747,7 @@ void Cheby::Print_2B(int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_C
 	double fcut0; 
 	double fcut; 				
 	double Vpenalty;
-	
+
 	string OUTFILE = "2b_Cheby_Pot-";
 	OUTFILE.append(PAIR_NAME);
 	
@@ -2795,6 +2776,7 @@ void Cheby::Print_2B(int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_C
 		
 		dim++;
 		Tn   = new double [dim];
+		Tnd   = new double [dim];
 		
 	}
   
@@ -2818,59 +2800,10 @@ void Cheby::Print_2B(int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_C
 			if ( rlen - penalty_dist < FF_2BODY[ij].S_MINIM ) 
 				rpenalty = FF_2BODY[ij].S_MINIM + penalty_dist - rlen;
 
-			// Do the distance transfomration
+			// Calculate Cheby polys.
 
-			transform2(rlen, 
-						FF_2BODY[ij].X_DIFF,
-						FF_2BODY[ij].X_AVG,
-						FF_2BODY[ij].LAMBDA,
-						FF_2BODY[ij].CHEBY_TYPE,
-						  x) ;
-
-			#if CHECK_CHEBY_RANGE == 1			 
-
-				// Make sure our newly transformed distance falls between the bound of -1 to 1 allowed to Cheby polynomials
-						 
-       		x = fix_val(x) ;
-				
-				// Now change the range, if the user requested
-			
-				x = x*DERIV_CONST + FF_2BODY[0].CHEBY_RANGE_LOW - -1.0*DERIV_CONST;	
-
-				// Sanity check
-	
-				if ( x < FF_2BODY[0].CHEBY_RANGE_LOW || x > FF_2BODY[0].CHEBY_RANGE_HIGH )
-				{	
-					cout << "ERROR: transformed x falls outside user-defined range." << endl;
-					cout << "x: " << x << endl;
-					cout << "high/low: " << FF_2BODY[0].CHEBY_RANGE_HIGH << " " << FF_2BODY[0].CHEBY_RANGE_LOW  << endl;
-					exit_run(0);
-				}
-			
-			#endif
-				
-
-
-			// Generate Chebyshev polynomials by recursion. 
-			// 
-			// What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
-			// We need to calculate the derivative of these polynomials.
-			// Derivatives are defined through use of Cheby polynomials of the 2nd kind "U_n(x)", as:
-			//
-			// d/dx[ T_n(x) = n * U_n-1(x)] 
-			// 
-			// So we need to first set up the 1st-kind polynomials ("Tn[]")
-			// Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
-		  
-			// First two 1st-kind Chebys:
-		  
-			Tn[0] = 1.0;
-			Tn[1] = x;
-			
-			// Use recursion to set up the higher n-value Tn and Tnd's
-		  
-			for ( int i = 2; i <= FF_2BODY[ij].SNUM; i++ ) 
-				Tn[i] =  2.0 * x * Tn[i-1] - Tn[i-2];
+			set_polys(ij, Tn, Tnd, rlen, FF_2BODY[ij].X_DIFF,
+						 FF_2BODY[ij].X_AVG, FF_2BODY[ij].SNUM) ; 
 	
 			// Now compute the force/potential... Coulomb 
 			// Ewald sum not required for a scan-type ("cluster") calculation

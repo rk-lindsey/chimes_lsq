@@ -73,7 +73,8 @@ private:
   inline void transform(double rlen, double s_minim, double s_maxim, double lambda, 
 										 Cheby_trans cheby_type, double & x, double & xdiff) ;
   // Does the cheby distance transformation with pre-calculated limits.										
-  inline void transform2(double rlen, double x_diff, double x_avg, double lambda, Cheby_trans cheby_type, double & x) ;
+  inline void transform2(double rlen, double x_diff, double x_avg, double lambda, 
+								 Cheby_trans cheby_type, double & x, double &exprlen) ;
 
 } ;
 
