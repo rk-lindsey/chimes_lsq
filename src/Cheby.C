@@ -563,12 +563,10 @@ void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
 {
 	XYZ RAB; 		// Replaces  Rab[3];
 	double rlen;
-	double x;
 	int vstart;
 	static double *Tn, *Tnd;
 	static bool called_before = false;
 
-	double xdiff ;
 	double fcut; 
 	double fcutderiv; 				
 	double deriv;
@@ -634,79 +632,10 @@ void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
 				FF_2BODY[curr_pair_type_idx].N_CFG_CONTRIB++;
 			
 				// Do the distance transformation
-				
-				transform2(rlen, 
-							  FF_2BODY[curr_pair_type_idx].X_DIFF,
-							  FF_2BODY[curr_pair_type_idx].X_AVG,
-							  FF_2BODY[curr_pair_type_idx].LAMBDA,
-							  FF_2BODY[curr_pair_type_idx].CHEBY_TYPE,
-							  x) ;
-				xdiff = FF_2BODY[curr_pair_type_idx].X_DIFF ;
-							
-				#if CHECK_CHEBY_RANGE == 1				
-				
-			   		// Why are we setting it as -1? shouldn't something else be done here instead? ...since we're outside the range of the fit??
-			    	// This is mostly defensive programming against bad behavior of the Cheby polynomial
-			    	// outside of the fitting range.  If r < rmin, the repulsive potential should take over.
-			    	// If r > rmax, the cutoff function will set the total force to 0. (LEF)							
+				double x_diff = FF_2BODY[curr_pair_type_idx].X_DIFF ;
+				double x_avg  = FF_2BODY[curr_pair_type_idx].X_AVG ;
+				set_polys(curr_pair_type_idx, Tn, Tnd, rlen, x_diff, x_avg, FF_2BODY[curr_pair_type_idx].SNUM ) ;
 
-   				x = fix_val(x) ;
-				
-					// Now change the range, if the user requested
-
-					x = x*DERIV_CONST + FF_2BODY[0].CHEBY_RANGE_LOW - -1.0*DERIV_CONST;							
-				
-					// Sanity check
-				
-					if ( x < FF_2BODY[0].CHEBY_RANGE_LOW || x > FF_2BODY[0].CHEBY_RANGE_HIGH )
-					{
-						cout << "ERROR: transformed x falls outside user-defined range." << endl;
-						cout << "x: " << x << endl;
-						cout << "high/low: " << FF_2BODY[0].CHEBY_RANGE_HIGH << " " << FF_2BODY[0].CHEBY_RANGE_LOW  << endl;
-						exit_run(0);
-					}
-				#endif
-
-				// Generate Chebyshev polynomials by recursion. 
-				// 
-				// What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
-				// We need to calculate the derivative of these polynomials.
-				// Derivatives are defined through use of Cheby polynomials of the 2nd kind "U_n(x)", as:
-				//
-				// d/dx[ T_n(x) = n * U_n-1(x)] 
-				// 
-				// So we need to first set up the 1st-kind polynomials ("Tn[]")
-				// Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
-			  
-				// First two 1st-kind Chebys:
-			  
-				Tn[0] = 1.0;
-				Tn[1] = x;
-				
-				// Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
-			  
-				Tnd[0] = 1.0;
-				Tnd[1] = 2.0 * x;
-				
-				// Use recursion to set up the higher n-value Tn and Tnd's
-			  
-				for ( int i = 2; i <= FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
-				{
-					Tn[i] =  2.0 * x * Tn[i-1] - Tn[i-2];
-					Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
-				}
-				
-				// Now multiply by n to convert Tnd's to actual derivatives of Tn
-
-				for ( int i = FF_2BODY[curr_pair_type_idx].SNUM; i >= 1; i-- ) 
-					Tnd[i] = i * Tnd[i-1];
-
-				Tnd[0] = 0.0;
-				
-				// Define/setup a penalty function to deal with the cases where the pair distance is close to rmin.. to discourage
-				// the SYSTEM from heading towards though poorly sampled regions of the PES, but also to ensure that the PES goes to
-				// zero at rcut
-				
 			  	// fcut and fcutderv are the cutoff functions (1-r/rcut)**3 and its
 			  	// derivative -3 (1-r/rcut)**2/rcut.  This ensures that
 			 	// the force goes to 0 as r goes to rcut.
@@ -723,14 +652,12 @@ void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
 																					FF_2BODY[curr_pair_type_idx].S_MAXIM);
 				
 				// Compute part of the derivative
-				
-			 	// Added missing code for other cheby types (LEF).
 				// NOTE: All these extra terms are coming from:
 				//
 				// 1. Chain rule to account for transformation from morse-type pair distance to x
 				// 2. Product rule coming from pair distance dependence of fcut, the penalty function
 				
-			 	dx_dr = DERIV_CONST*cheby_var_deriv(xdiff, rlen, FF_2BODY[curr_pair_type_idx].LAMBDA, FF_2BODY[curr_pair_type_idx].CHEBY_TYPE);
+			 	dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, rlen, FF_2BODY[curr_pair_type_idx].LAMBDA, FF_2BODY[curr_pair_type_idx].CHEBY_TYPE);
 				
 				fidx_a2 = SYSTEM.PARENT[a2];
 				
