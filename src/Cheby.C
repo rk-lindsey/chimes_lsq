@@ -46,56 +46,7 @@ inline double Cheby::fix_val(double x)
 	  return x;  
 }
 
-inline void Cheby::transform(double rlen, double s_minim, double s_maxim, double lambda, Cheby_trans cheby_type, double & x, double & xdiff)
-// Does the cheby distance transformation										
-{
-	// Given the atomic distance rlen, the fitting minimum and maximum, the Morse lambda variable,
-	//	and the type of Chebyshev approximant, calculate:
-	// the chebyshev variable x, 
-	// the difference between maximum and minimum variable randes (xdiff)
-	// the exponential of the len variable if appropriate.
-	//
-	// Chebyshev polynomials are only defined on the range [-1,1], so transorm the pair distance
-	// in a way that allows it to fall along that range. Options are:
-	//
-	// x = 1/pair_dist				// Inverse r, 
-	// x = exp(pair_dist/lambda)	// Morse-type
-	// x = pair_dist				// default type
-	// 
-	// All types are normalized by s_min to s_max range to fall along [-1,1]	
-	
-	
-  double xavg, xmin, xmax, exprlen;
-
-	switch ( cheby_type ) 
-	{
-	case Cheby_trans::MORSE:
-		xmin  = exp(-s_maxim/lambda); 
-		xmax  = exp(-s_minim/lambda); 
-		xavg  = 0.5 * (xmin + xmax);				// midpoint of possible pair distances in morse space
-		xdiff = 0.5 * (xmax - xmin);				// width of possible pair distances in morse space
-		exprlen = exp(-rlen/lambda);
-		x = (exprlen-xavg)/xdiff;					// pair distances in morse space, normalized to fit over [-1,1]
-		break ;
-	case Cheby_trans::INVRSE_R:
-	  xavg  =  0.5 * (1.0/s_minim + 1.0/s_maxim); // midpoint of possible pair distances in r^-1 space
-	  xdiff =  0.5 * (1.0/s_minim - 1.0/s_maxim); // width of possible pair distances in r^-1 space
-	  x     = (1.0/rlen-xavg) / xdiff;			// pair distances in r^-1 space, normalized to fit over [-1,1]
-	  break ;
-	case Cheby_trans::NONE:
-		xavg  = 0.5 * (s_minim + s_maxim); 			// midpoint of possible pair distances
-		xdiff = 0.5 * (s_maxim - s_minim); 			// width of possible pair distances
-		x = (rlen-xavg) / xdiff;	
-		break ;
-	default:
-	  cout << "ERROR: Undefined CHBTYPE: " << endl ;
-	  cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
-	  exit_run(1);
-	}
-}
-
-
-inline void Cheby::transform2(double rlen, double x_diff, double x_avg, double lambda, Cheby_trans cheby_type, double & x, double &exprlen)
+inline void Cheby::transform(double rlen, double x_diff, double x_avg, double lambda, Cheby_trans cheby_type, double & x, double &exprlen)
 // Does the actual cheby distance transformation with precalculated limits.										
 // Calculates the transformed variable (x) and the exponential term (exprlen) for Morse interactions.
 {
@@ -124,20 +75,20 @@ inline void Cheby::transform2(double rlen, double x_diff, double x_avg, double l
 }
 
 inline int Cheby::get_pair_index(int a1, int a2, const vector<int> &atomtype_idx, int natmtyp, 
-											const vector<int> &int_pair_map, const vector<int> &parent)
+											const vector<int> &parent)
 // Return the pair type index corresponding to atom a1 and atom a2
 {
   int curr_pair_type_idx ;
 
 #ifndef LINK_LAMMPS
   int idx = atomtype_idx[parent[a1]]*natmtyp + atomtype_idx[parent[a2]] ;
-  if ( idx < 0 || idx >= int_pair_map.size() ) 
+  if ( idx < 0 || idx >= INT_PAIR_MAP.size() ) 
   {
 	 cout << "Index out of range" << endl ;
   }
-  curr_pair_type_idx =  int_pair_map[idx] ;
+  curr_pair_type_idx =  INT_PAIR_MAP[idx] ;
 #else
-  curr_pair_type_idx =  int_pair_map[(atomtype_idx[a1]-1)*natmtyp + (atomtype_idx[SYSTEM.PARENT[a2]]-1)];
+  curr_pair_type_idx =  INT_PAIR_MAP[(atomtype_idx[a1]-1)*natmtyp + (atomtype_idx[SYSTEM.PARENT[a2]]-1)];
 #endif
   
   return curr_pair_type_idx ;
@@ -255,7 +206,7 @@ void Cheby::set_polys(int index, double *Tn, double *Tnd, const double rlen, dou
 
   PAIRS & ff_2body = FF_2BODY[index] ;
 
-  transform2(
+  transform(
 	 rlen, 
 	 x_diff, 
 	 x_avg, 
@@ -382,73 +333,14 @@ void Cheby::map_3b_indices(TRIPLETS & FF_3BODY,
 }
 
 
-void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) 
+inline void Cheby::set_3b_powers(const TRIPLETS & FF_3BODY, const vector<int> &pair_index, int POWER_SET,
+											int & pow_ij, int & pow_ik, int & pow_jk ) 
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
+// given the index transformation given in pair_index.
 {
-
-#ifdef DEBUG_CHEBY
-  if ( PAIR_MAP.find(PAIR_TYPE_IJ) == PAIR_MAP.end() ) 
-	 EXIT_MSG("Could not find " + PAIR_TYPE_IJ ) ;
-
-  if ( PAIR_MAP.find(PAIR_TYPE_IK) == PAIR_MAP.end() ) 
-	 EXIT_MSG("Could not find " + PAIR_TYPE_IK ) ;
-
-  if ( PAIR_MAP.find(PAIR_TYPE_JK) == PAIR_MAP.end() ) 
-	 EXIT_MSG("Could not find " + PAIR_TYPE_JK ) ;
-#endif
-
-	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
-	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
-		{
-			// Then jk = z
-			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-		}
-		else
-		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-		}
-
-	}
-	else if(FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
-	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
-		{
-			// Then jk = z
-			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-		}
-		else
-		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-		}										
-	}
-	else // PAIR_TYPE_IJ matches alloweD[i].z
-	{
-		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
-		{
-			// Then jk = z
-			
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-		}
-		else
-		{
-			pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][2];
-			pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][1];
-			pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][0];
-		}										
-	}	
+  pow_ij = FF_3BODY.ALLOWED_POWERS[POWER_SET][pair_index[0]];
+  pow_ik = FF_3BODY.ALLOWED_POWERS[POWER_SET][pair_index[1]];
+  pow_jk = FF_3BODY.ALLOWED_POWERS[POWER_SET][pair_index[2]];
 }
 
 // FUNCTION IS OVERLOADED
@@ -663,13 +555,8 @@ void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
 		{			
 			a2 = NEIGHBOR_LIST.LIST[a1][a2idx];		
 			
-			TEMP_STR = SYSTEM.ATOMTYPE[a1];
-			TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);
-							
-			if ( PAIR_MAP.find(TEMP_STR) == PAIR_MAP.end() ) 
-			  EXIT_MSG("Could not find pair map for " + TEMP_STR) ;
-
-			curr_pair_type_idx = PAIR_MAP[TEMP_STR];
+			curr_pair_type_idx = get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																	 SYSTEM.PARENT) ;
 		  
 			//calculate vstart: (index for populating OO, OH, or HH column block of A).
 		
@@ -923,28 +810,12 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 				if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) 
 					continue;
 
-
-
-				curr_pair_type_idx_ij =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,INT_PAIR_MAP,
+				curr_pair_type_idx_ij =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
 																	 SYSTEM.PARENT) ;
-				curr_pair_type_idx_ik =  get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,INT_PAIR_MAP,
+				curr_pair_type_idx_ik =  get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
 																	 SYSTEM.PARENT) ;
-				curr_pair_type_idx_jk =  get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,INT_PAIR_MAP,
+				curr_pair_type_idx_jk =  get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
 																	 SYSTEM.PARENT) ;
-
-
-				TEMP_STR = SYSTEM.ATOMTYPE[a1];
-				TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);		
-				string PAIR_TYPE_IJ = TEMP_STR;					
-
-				TEMP_STR = SYSTEM.ATOMTYPE[a1];
-				TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
-				string PAIR_TYPE_IK = TEMP_STR;							
-
-				TEMP_STR = SYSTEM.ATOMTYPE[a2];
-				TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
-				string PAIR_TYPE_JK = TEMP_STR;							
-
 				// Determine the FF type for the given triplet
 
 				TEMP_STR =      FF_2BODY[curr_pair_type_idx_ij].PRPR_NM;
@@ -1193,12 +1064,13 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 							{
 							    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICES[i];
 								
-								 SET_3B_CHEBY_POWERS_NEW(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], 
-																 pow_ij, pow_ik, pow_jk, 
-																 curr_pair_type_idx_ij, curr_pair_type_idx_ik, 
-																 curr_pair_type_idx_jk, i);
+								 set_3b_powers(PAIR_TRIPLETS[curr_triple_type_index], pair_index, i,
+													pow_ij, pow_ik, pow_jk) ;
 
-							    //SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP, pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
+								 //SET_3B_CHEBY_POWERS_NEW(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], 
+								 //pow_ij, pow_ik, pow_jk, 
+								 //curr_pair_type_idx_ij, curr_pair_type_idx_ik, 
+								 //curr_pair_type_idx_jk, i);
 
 							    deriv_ij =  fcut_ij * Tnd_ij[pow_ij] + fcutderiv_ij * Tn_ij[pow_ij];
 							    deriv_ik =  fcut_ik * Tnd_ik[pow_ik] + fcutderiv_ik * Tn_ik[pow_ik];
@@ -1968,16 +1840,7 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 		{
 		  a2 = NEIGHBOR_LIST.LIST[a1][a2idx];			
 			
-#ifndef LINK_LAMMPS
-		  int idx = SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]] ;
-		  if ( idx < 0 || idx >= INT_PAIR_MAP.size() ) 
-		  {
-			 cout << "Index out of range" << endl ;
-		  }
-		  int curr_pair_type_idx_ij =  INT_PAIR_MAP[idx] ;
-#else
-		  curr_pair_type_idx_ij =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
-#endif
+		  int curr_pair_type_idx_ij =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP, SYSTEM.PARENT) ;
 		
 		  double rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
 								
@@ -2111,7 +1974,6 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
   double deriv_ij, deriv_ik, deriv_jk;
   double force_ij, force_ik, force_jk;
   double fcutderiv_ij, fcutderiv_ik, fcutderiv_jk; 		
-  string PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK;
   int curr_triple_type_index;
   int curr_pair_type_idx_ij;
   int curr_pair_type_idx_ik;
@@ -2178,23 +2040,22 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 	 }
 			
 #ifndef LINK_LAMMPS
-	 curr_pair_type_idx_ij =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]               *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
-	 curr_pair_type_idx_ik =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]               *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]];
-	 curr_pair_type_idx_jk =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]];
-	
 	 int idx1 = SYSTEM.ATOMTYPE_IDX[a1];
 	 int idx2 = SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]];
 	 int idx3 = SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]];
 #else
-	 curr_pair_type_idx_ij =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)               *CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
-	 curr_pair_type_idx_ik =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)               *CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]-1)];
-	 curr_pair_type_idx_jk =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]-1)];
-
 	 int idx1 = SYSTEM.ATOMTYPE_IDX[a1]-1;
 	 int idx2 = SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1;
 	 int idx3 = SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a3]]-1;
 #endif
 
+
+	 curr_pair_type_idx_ij =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+														  SYSTEM.PARENT) ;
+	 curr_pair_type_idx_ik =  get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+														  SYSTEM.PARENT) ;
+	 curr_pair_type_idx_jk =  get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+														  SYSTEM.PARENT) ;
 
 	 SORT_THREE_DESCEND(idx1, idx2, idx3);
 
@@ -2213,10 +2074,6 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 	 rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
 	 rlen_ik = get_dist(SYSTEM, RAB_IK, a1, a3);	// Updates RAB!
 	 rlen_jk = get_dist(SYSTEM, RAB_JK, a2, a3);	// Updates RAB!
-
-	 string PAIR_TYPE_IJ = FF_2BODY[curr_pair_type_idx_ij].PRPR_NM ;
-	 string PAIR_TYPE_IK = FF_2BODY[curr_pair_type_idx_ik].PRPR_NM ;
-	 string PAIR_TYPE_JK = FF_2BODY[curr_pair_type_idx_jk].PRPR_NM ;
 
 	 map_3b_indices(FF_3BODY[curr_triple_type_index], 
 						  curr_pair_type_idx_ij, curr_pair_type_idx_ik, curr_pair_type_idx_jk,
@@ -2286,8 +2143,10 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 			 for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 			 {
 				//SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
-				SET_3B_CHEBY_POWERS_NEW(FF_2BODY, FF_3BODY[curr_triple_type_index], 
-												pow_ij, pow_ik, pow_jk, curr_pair_type_idx_ij, curr_pair_type_idx_ik, curr_pair_type_idx_jk, i);
+				set_3b_powers(FF_3BODY[curr_triple_type_index], pair_index, i,
+								  pow_ij, pow_ik, pow_jk) ;
+				//SET_3B_CHEBY_POWERS_NEW(FF_2BODY, FF_3BODY[curr_triple_type_index], 
+				//pow_ij, pow_ik, pow_jk, curr_pair_type_idx_ij, curr_pair_type_idx_ik, curr_pair_type_idx_jk, i);
 			      
 				coeff = FF_3BODY[curr_triple_type_index].PARAMS[i];
 			      
@@ -2934,7 +2793,6 @@ void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2
   double fcut_ij,  fcut_ik,  fcut_jk; 			
 	
   static string TEMP_STR;
-  static string PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK;
   static int curr_triple_type_index;
   static int curr_pair_type_idx_ij;
   static int curr_pair_type_idx_ik;
@@ -2993,16 +2851,6 @@ void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2
 	
   double TMP_DOUB;
 
-  // Set the pair types
-	
-  PAIR_TYPE_IJ = ATM_TYP_1;
-  PAIR_TYPE_IK = ATM_TYP_1;
-  PAIR_TYPE_JK = ATM_TYP_2;
-
-  PAIR_TYPE_IJ.append(ATM_TYP_2);
-  PAIR_TYPE_IK.append(ATM_TYP_3);
-  PAIR_TYPE_JK.append(ATM_TYP_3);
-	
   // Determine the FF type for the given triplet
 
   TEMP_STR =      FF_2BODY[ij].PRPR_NM;
@@ -3158,8 +3006,8 @@ void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2
 			
 		  for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 		  {
-			 SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
-					
+			 set_3b_powers(FF_3BODY[curr_triple_type_index], pair_index, i,
+								pow_ij, pow_ik, pow_jk) ;
 			 if( rlen_ij<S_MAXIM_IJ && rlen_ik<S_MAXIM_IK && rlen_jk<S_MAXIM_JK )
 				POT_ENER += FF_3BODY[curr_triple_type_index].PARAMS[i] * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]; 	
 		  }

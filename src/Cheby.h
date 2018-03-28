@@ -76,16 +76,17 @@ private:
   void set_polys(int index, double *Tn, double *Tnd, const double rlen, double x_diff, double x_avg, 
 							 double SNUM) ;
 
-  // Does the cheby distance transformation										
-  inline void transform(double rlen, double s_minim, double s_maxim, double lambda, 
-										 Cheby_trans cheby_type, double & x, double & xdiff) ;
   // Does the cheby distance transformation with pre-calculated limits.										
-  inline void transform2(double rlen, double x_diff, double x_avg, double lambda, 
-								 Cheby_trans cheby_type, double & x, double &exprlen) ;
+  inline void transform(double rlen, double x_diff, double x_avg, double lambda, 
+								Cheby_trans cheby_type, double & x, double &exprlen) ;
 
-  inline int get_pair_index(int a1, int a2, const vector<int> &atomtype_idx, int natmtype, 
-									 const vector<int> &int_pair_map, const vector<int> &parent) ;
+  // Get the index of an atom pair given the two atom numbers.
+  inline int get_pair_index(int a1, int a2, const vector<int> &atomtype_idx, int natmtyp, 
+									 const vector<int> &parent) ;
 
+  // Set the chebyshev power for each atom pair in the triplet.
+  inline void set_3b_powers(const TRIPLETS & FF_3BODY, const vector<int> &pair_index, int POWER_SET,
+									 int & pow_ij, int & pow_ik, int & pow_jk )  ;
 } ;
 
 #endif // defined(_Cheby_h)
