@@ -36,6 +36,11 @@ public:
   // Calculate the 4-body Chebyshev force
   void Force_4B(CLUSTER_LIST &QUADS) ;
 
+// Matches pair indices to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
+  void map_3b_indices(TRIPLETS & FF_3BODY, 
+							 int TYPE_IJ, int TYPE_IK, int TYPE_JK, 
+							 vector<int>& pair_index) ;
+
 Cheby(JOB_CONTROL &controls, FRAME &system, NEIGHBORS &neighbor_list, vector<PAIRS> &ff_2body, map<string,int> &pair_map, vector<int> &int_pair_map ) :
   CONTROLS(controls), SYSTEM(system), NEIGHBOR_LIST(neighbor_list), FF_2BODY(ff_2body), PAIR_MAP(pair_map), INT_PAIR_MAP(int_pair_map)
   {
