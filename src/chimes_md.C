@@ -695,7 +695,7 @@ FF_SETUP_1:
   if(RANK==0) 
 	 cout << "Reading atom info from parameter file..." << endl; 
 	
-  // Read in the possible atom types and thier features	
+  // Read in the possible atom types and their features	
 
   read_atom_types(PARAMFILE, CONTROLS, NATMTYP, TMP_ATOMTYPE, TMP_NATOMTYPE, TMP_ATOMTYPEIDX,
 						TMP_CHARGES, TMP_MASS, TMP_SIGN) ;
@@ -1056,9 +1056,6 @@ FF_SETUP_2:
 	
   // Build the 2-body  and 3-body int-atomtype-ff-maps
 
-  INT_PAIR_MAP.resize(NATMTYP*NATMTYP, -1);
-
-  int    int_map_idx;
   string int_map_str, int_map_3b_str;
 
   // Sanity checks on fast maps: 
@@ -1073,30 +1070,7 @@ FF_SETUP_2:
 	
   // Build 2-body fast maps
 
-  for(int i=0; i<NATMTYP; i++)
-  {
-	 for (int j=0; j<NATMTYP; j++)
-	 {
-		int_map_str =      TMP_ATOMTYPE[i];
-		int_map_str.append(TMP_ATOMTYPE[j]);
-		
-		int_map_idx = TMP_ATOMTYPEIDX[i]*NATMTYP + TMP_ATOMTYPEIDX[j];
-		
-		INT_PAIR_MAP[int_map_idx] = PAIR_MAP[int_map_str];
-		
-		if(RANK == 0)
-		{
-		  cout << "		";
-		  cout<< "Atom type idxs: ";
-		  cout<< fixed << setw(2) << right << i;
-		  cout<< fixed << setw(2) << right << j;
-		  cout<< " Pair name: "           << setw(4) << right << int_map_str;
-		  cout<< " Explicit pair index: " << setw(4) << right << int_map_idx;
-		  cout<< " Unique pair index: "   << setw(4) << right << INT_PAIR_MAP[int_map_idx] << endl;		
-		}
-
-	 }
-  }
+  build_int_pair_map(NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX, PAIR_MAP, INT_PAIR_MAP) ;
 	
   // Build 3-body fast maps
 	
@@ -3283,7 +3257,7 @@ static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NAT
 		  STREAM_PARSER.str(LINE);
 				
 		  STREAM_PARSER >> TEMP_STR;
-		  TMP_ATOMTYPEIDX[i] = int(atof(TEMP_STR.data()));
+		  TMP_ATOMTYPEIDX[i] = stoi(TEMP_STR) ;
 		  STREAM_PARSER >> TMP_ATOMTYPE[i];
 		  if(CONTROLS.FIT_COUL)
 			 STREAM_PARSER >> TEMP_STR;

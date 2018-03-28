@@ -668,7 +668,7 @@ static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, 
 						FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, 
 						vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, 
-						map<string,int> & PAIR_MAP,  NEIGHBORS &NEIGHBOR_LIST)
+						map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST)
 // Controls which functions are used to calculate derivatives
 {
 	// Check for control option compatability:
@@ -713,8 +713,6 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 		// Only enter if 2B are requested. For example, skip if user wants to fit ONLY 3B cheby
 		// i.e. PAIRTYP: CHEBYSHEV  0 6 or similar
 
-	  // INT_PAIR_MAP not used in LSQ.
-	  vector<int> INT_PAIR_MAP{0} ;
 	  Cheby cheby{CONTROLS,FRAME_SYSTEM,NEIGHBOR_LIST,FF_2BODY,PAIR_MAP,INT_PAIR_MAP} ;
 
 	  if ( FF_2BODY[0].SNUM > 0)
@@ -1993,6 +1991,49 @@ void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<stri
 }
 
 
+void build_int_pair_map(int natmtyp, const vector<string> &atomtype, 
+								const vector<int> &atomtype_idx,
+								map<string,int> &pair_map, vector<int> &int_pair_map)
+// Build an integer-valued mapping between the int map index and values in the pair map.
+// This determines which element in ATOM_PAIRS or FF_2BODY a particular pair of atom
+// types belongs to.
+{
+  int_pair_map.resize(natmtyp*natmtyp, -1);
+
+  for(int i=0; i<natmtyp; i++)
+  {
+	 for (int j=0; j<natmtyp; j++)
+	 {
+		string int_map_str =      atomtype[i];
+		int_map_str.append(atomtype[j]);
+		
+		int int_map_idx = atomtype_idx[i]*natmtyp + atomtype_idx[j];
+		
+		int_pair_map[int_map_idx] = pair_map[int_map_str];
+		
+		if(RANK == 0)
+		{
+		  // Save cout format state.
+		  ofstream init ;
+		  init.copyfmt(std::cout) ;
+
+		  cout << "		";
+		  cout<< "Atom type idxs: ";
+		  cout<< fixed << setw(2) << right << i;
+		  cout<< fixed << setw(2) << right << j;
+		  cout<< " Pair name: "           << setw(4) << right << int_map_str;
+		  cout<< " Explicit pair index: " << setw(4) << right << int_map_idx;
+		  cout<< " Unique pair index: "   << setw(4) << right << int_pair_map[int_map_idx] << endl;		
+
+		  // Restore cout format state.
+		  std::cout.copyfmt(init) ;
+		}
+
+	 }
+  }
+}
+
+
 // MPI -- Related functions -- See headers at top of file
 
 #ifdef USE_MPI
@@ -2057,3 +2098,4 @@ void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& 
 }
 
 #endif // USE_MPI
+

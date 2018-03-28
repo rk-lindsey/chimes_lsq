@@ -19,6 +19,7 @@
 
 using namespace std;
 
+#define DEBUG_CHEBY
 
 //////////////////////////////////////////
 // Cheby transformation functions
@@ -122,7 +123,25 @@ inline void Cheby::transform2(double rlen, double x_diff, double x_avg, double l
 	}
 }
 
+inline int Cheby::get_pair_index(int a1, int a2, const vector<int> &atomtype_idx, int natmtyp, 
+											const vector<int> &int_pair_map, const vector<int> &parent)
+// Return the pair type index corresponding to atom a1 and atom a2
+{
+  int curr_pair_type_idx ;
 
+#ifndef LINK_LAMMPS
+  int idx = atomtype_idx[parent[a1]]*natmtyp + atomtype_idx[parent[a2]] ;
+  if ( idx < 0 || idx >= int_pair_map.size() ) 
+  {
+	 cout << "Index out of range" << endl ;
+  }
+  curr_pair_type_idx =  int_pair_map[idx] ;
+#else
+  curr_pair_type_idx =  int_pair_map[(atomtype_idx[a1]-1)*natmtyp + (atomtype_idx[SYSTEM.PARENT[a2]]-1)];
+#endif
+  
+  return curr_pair_type_idx ;
+}
 
 void Cheby::set_cheby_params(double s_minim, double s_maxim, double lambda, Cheby_trans cheby_type, 
 									  double &xmin, double &xmax, double &xdiff, double &xavg)
@@ -309,6 +328,18 @@ static void map_3b_indices(const vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, 
 									vector<int>& pair_index) // MD version - 1
 // Matches pair indices to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
 {
+
+#ifdef DEBUG_CHEBY
+  if ( PAIR_MAP.find(PAIR_TYPE_IJ) == PAIR_MAP.end() ) 
+	 EXIT_MSG("Could not find " + PAIR_TYPE_IJ ) ;
+
+  if ( PAIR_MAP.find(PAIR_TYPE_IK) == PAIR_MAP.end() ) 
+	 EXIT_MSG("Could not find " + PAIR_TYPE_IK ) ;
+
+  if ( PAIR_MAP.find(PAIR_TYPE_JK) == PAIR_MAP.end() ) 
+	 EXIT_MSG("Could not find " + PAIR_TYPE_JK ) ;
+#endif
+
   if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 	{
 		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
@@ -353,6 +384,18 @@ static void map_3b_indices(const vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, 
 void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, string PAIR_TYPE_IJ, string PAIR_TYPE_IK, string PAIR_TYPE_JK, int POWER_SET) 
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
 {
+
+#ifdef DEBUG_CHEBY
+  if ( PAIR_MAP.find(PAIR_TYPE_IJ) == PAIR_MAP.end() ) 
+	 EXIT_MSG("Could not find " + PAIR_TYPE_IJ ) ;
+
+  if ( PAIR_MAP.find(PAIR_TYPE_IK) == PAIR_MAP.end() ) 
+	 EXIT_MSG("Could not find " + PAIR_TYPE_IK ) ;
+
+  if ( PAIR_MAP.find(PAIR_TYPE_JK) == PAIR_MAP.end() ) 
+	 EXIT_MSG("Could not find " + PAIR_TYPE_JK ) ;
+#endif
+
 	if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IJ] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
 	{
 		if    (FF_2BODY[ PAIR_MAP[PAIR_TYPE_IK] ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
@@ -409,7 +452,7 @@ void SET_3B_CHEBY_POWERS(vector<PAIRS> & FF_2BODY, TRIPLETS & FF_3BODY, map<stri
 
 // FUNCTION IS OVERLOADED
 
-void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, map<string,int> & PAIR_MAP,  int & pow_ij, int & pow_ik, int & pow_jk, int PAIR_TYPE_IJ, int PAIR_TYPE_IK, int PAIR_TYPE_JK, int POWER_SET) // MD version - 2
+void SET_3B_CHEBY_POWERS_NEW(vector<PAIR_FF> & FF_2BODY, TRIPLETS & FF_3BODY, int & pow_ij, int & pow_ik, int & pow_jk, int PAIR_TYPE_IJ, int PAIR_TYPE_IK, int PAIR_TYPE_JK, int POWER_SET) // MD version - 2
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
 {
 	
@@ -622,6 +665,9 @@ void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
 			TEMP_STR = SYSTEM.ATOMTYPE[a1];
 			TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);
 							
+			if ( PAIR_MAP.find(TEMP_STR) == PAIR_MAP.end() ) 
+			  EXIT_MSG("Could not find pair map for " + TEMP_STR) ;
+
 			curr_pair_type_idx = PAIR_MAP[TEMP_STR];
 		  
 			//calculate vstart: (index for populating OO, OH, or HH column block of A).
@@ -784,13 +830,13 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 	double fcutderiv_ij, fcutderiv_ik, fcutderiv_jk; 	
 	double force_wo_coeff_ij, force_wo_coeff_ik, force_wo_coeff_jk;
 	
-	static string TEMP_STR;
-	static string PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK;
-	static int curr_triple_type_index;
-	static int curr_pair_type_idx_ij;
-	static int curr_pair_type_idx_ik;
-	static int curr_pair_type_idx_jk;
-	static int row_offset;	
+	string TEMP_STR;
+	string PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK;
+	int curr_triple_type_index;
+	int curr_pair_type_idx_ij;
+	int curr_pair_type_idx_ik;
+	int curr_pair_type_idx_jk;
+	int row_offset;	
 	
 	double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
 	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
@@ -877,21 +923,31 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 				if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) 
 					continue;
 
+
+
+				curr_pair_type_idx_ij =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,INT_PAIR_MAP,
+																	 SYSTEM.PARENT) ;
+				curr_pair_type_idx_ik =  get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,INT_PAIR_MAP,
+																	 SYSTEM.PARENT) ;
+				curr_pair_type_idx_jk =  get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,INT_PAIR_MAP,
+																	 SYSTEM.PARENT) ;
+
+
 				TEMP_STR = SYSTEM.ATOMTYPE[a1];
 				TEMP_STR.append(SYSTEM.ATOMTYPE[a2]);		
 				PAIR_TYPE_IJ = TEMP_STR;					
 				curr_pair_type_idx_ij = PAIR_MAP[TEMP_STR];
-	
+
 				TEMP_STR = SYSTEM.ATOMTYPE[a1];
 				TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
 				PAIR_TYPE_IK = TEMP_STR;							
 				curr_pair_type_idx_ik = PAIR_MAP[TEMP_STR];	
-			
+
 				TEMP_STR = SYSTEM.ATOMTYPE[a2];
 				TEMP_STR.append(SYSTEM.ATOMTYPE[a3]);	
 				PAIR_TYPE_JK = TEMP_STR;							
 				curr_pair_type_idx_jk = PAIR_MAP[TEMP_STR];		
-		
+
 				// Determine the FF type for the given triplet
 
 				TEMP_STR =      FF_2BODY[curr_pair_type_idx_ij].PRPR_NM;
@@ -1140,7 +1196,12 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 							{
 							    row_offset = PAIR_TRIPLETS[curr_triple_type_index].PARAM_INDICES[i];
 								
-							    SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP, pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
+								 SET_3B_CHEBY_POWERS_NEW(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], 
+																 pow_ij, pow_ik, pow_jk, 
+																 curr_pair_type_idx_ij, curr_pair_type_idx_ik, 
+																 curr_pair_type_idx_jk, i);
+
+							    //SET_3B_CHEBY_POWERS(FF_2BODY, PAIR_TRIPLETS[curr_triple_type_index], PAIR_MAP, pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
 
 							    deriv_ij =  fcut_ij * Tnd_ij[pow_ij] + fcutderiv_ij * Tn_ij[pow_ij];
 							    deriv_ik =  fcut_ik * Tnd_ik[pow_ik] + fcutderiv_ik * Tn_ik[pow_ik];
@@ -2228,7 +2289,8 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 			 for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 			 {
 				//SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
-				SET_3B_CHEBY_POWERS_NEW(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, curr_pair_type_idx_ij, curr_pair_type_idx_ik, curr_pair_type_idx_jk, i);
+				SET_3B_CHEBY_POWERS_NEW(FF_2BODY, FF_3BODY[curr_triple_type_index], 
+												pow_ij, pow_ik, pow_jk, curr_pair_type_idx_ij, curr_pair_type_idx_ik, curr_pair_type_idx_jk, i);
 			      
 				coeff = FF_3BODY[curr_triple_type_index].PARAMS[i];
 			      
@@ -3119,3 +3181,4 @@ void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2
 	
   return;
 } 
+

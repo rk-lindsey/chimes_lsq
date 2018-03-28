@@ -60,6 +60,8 @@ Cheby(JOB_CONTROL &controls, FRAME &system, NEIGHBORS &neighbor_list, vector<PAI
 
   static void set_cheby_params(double sminim, double smaxim, double lambda, Cheby_trans cheby_type,
 										 double &xminim, double &xmaxim, double &xdiff, double &xavg) ;
+
+
 private:
 
   // Return a range-limited copy of x.
@@ -75,6 +77,9 @@ private:
   // Does the cheby distance transformation with pre-calculated limits.										
   inline void transform2(double rlen, double x_diff, double x_avg, double lambda, 
 								 Cheby_trans cheby_type, double & x, double &exprlen) ;
+
+  inline int get_pair_index(int a1, int a2, const vector<int> &atomtype_idx, int natmtype, 
+									 const vector<int> &int_pair_map, const vector<int> &parent) ;
 
 } ;
 

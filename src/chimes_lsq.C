@@ -31,7 +31,7 @@ using namespace std;
 
 static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, 
 									CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
-									map<int,string> & PAIR_MAP_REVERSE, 
+									map<int,string> & PAIR_MAP_REVERSE, vector<int> &INT_PAIR_MAP,
 									vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 									NEIGHBORS & NEIGHBOR_LIST) ;
 
@@ -45,11 +45,6 @@ string SCAN_FILE_2B;
  
 int NPROCS;		// Number of processors
 int RANK;		// Index of current processor
-
-// Define my new integer maps.. Only needed here to prevent compiler errors related 
-// to functions.C... only used in MD part right now
-
-vector<int>	INT_PAIR_MAP;
 
 // For 4-body interactions, these are used for both the lsq and md parts:
 
@@ -100,6 +95,8 @@ int main(int argc, char* argv[])
 	vector<CHARGE_CONSTRAINT> CHARGE_CONSTRAINTS;	// Specifies how we constrain charge fitting
 
 	JOB_CONTROL 	CONTROLS;			// Will hold job controls shared by both lsq and md
+	
+	vector<int>	INT_PAIR_MAP;
 
 	//////////////////////////////////////////////////
 	//
@@ -119,7 +116,8 @@ int main(int argc, char* argv[])
 #endif
 
 	read_lsq_input(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, 
-						PAIR_MAP_REVERSE, CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
+						PAIR_MAP_REVERSE, INT_PAIR_MAP, 
+						CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
 
 
 	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" )
@@ -623,7 +621,7 @@ int main(int argc, char* argv[])
 		NEIGHBOR_LIST.DO_UPDATE(TRAJECTORY[i], CONTROLS);		
 
 		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, 
-						CONTROLS.USE_3B_CHEBY, PAIR_MAP, NEIGHBOR_LIST);
+						CONTROLS.USE_3B_CHEBY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
 
 		if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
 			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
@@ -1161,7 +1159,8 @@ return 0;
 // Read program input from the file "splines_ls.in".
 static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, 
 									CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
-									map<int,string> & PAIR_MAP_REVERSE, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
+									map<int,string> & PAIR_MAP_REVERSE, vector<int> &INT_PAIR_MAP,
+									vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 									NEIGHBORS & NEIGHBOR_LIST)
 {
 	bool   FOUND_END = false;
@@ -1657,9 +1656,13 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				ATOM_PAIRS[i].PAIRIDX	 = i; 
 				ATOM_PAIRS[i].CHEBY_TYPE = CONTROLS.CHEBY_TYPE;
 				
-				cin >> LINE >> ATOM_PAIRS[i].ATM1TYP >> LINE;
+				cin >> LINE ;
+				TMP_ATOMTYPEIDX[i] = stoi(LINE) - 1 ;
+				if ( TMP_ATOMTYPEIDX[i] < 0 || TMP_ATOMTYPEIDX[i] >= CONTROLS.NATMTYP )
+				  EXIT_MSG("Bad atom index: " + LINE ) ;
+
+				cin >> ATOM_PAIRS[i].ATM1TYP >> LINE;
 				
-				//TMP_ATOMTYPEIDX = i;
 				TMP_ATOMTYPE[i]    = ATOM_PAIRS[i].ATM1TYP;
 				
 				if(!CONTROLS.FIT_COUL)
@@ -1934,7 +1937,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					cout << "		" << ATOM_PAIRS[i].PRPR_NM  << ": " << ATOM_PAIRS[i].NBINS[0] << " " << ATOM_PAIRS[i].NBINS[1] << " " << ATOM_PAIRS[i].NBINS[2] << endl;					
 				cout << endl;
 			}
-	
+
+			build_int_pair_map(CONTROLS.NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX, PAIR_MAP, INT_PAIR_MAP) ;
+
 		}
 		
 		else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING")!= string::npos)

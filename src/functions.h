@@ -527,7 +527,8 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 
 void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, 
 						FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, 
-						const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  NEIGHBORS &NEIGHBOR_LIST) ;
+						const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP,
+						NEIGHBORS &NEIGHBOR_LIST) ;
 void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
 
 void SubtractEwaldForces (FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
@@ -596,7 +597,9 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, 
 						map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, 
 						CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST) ;
-
+void build_int_pair_map(int natmtyp, const vector<string> &atomtype, 
+								const vector<int> &atomtype_idx,
+								map<string,int> &pair_map, vector<int> &int_pair_map) ;
 void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS) ;
 void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<string>& TMP_ATOMTYPE, vector<PAIR_FF> &FF_2BODY, int NATMTYP) ;
 #ifdef USE_MPI
