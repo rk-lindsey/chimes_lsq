@@ -13,7 +13,6 @@ public:
   FRAME &SYSTEM ;
   NEIGHBORS &NEIGHBOR_LIST ;
   vector<PAIRS> &FF_2BODY ;
-  map<string,int> &PAIR_MAP ;
   vector<int> &INT_PAIR_MAP ;
 
   double DERIV_CONST ;
@@ -41,8 +40,8 @@ public:
 							 int TYPE_IJ, int TYPE_IK, int TYPE_JK, 
 							 vector<int>& pair_index) ;
 
-Cheby(JOB_CONTROL &controls, FRAME &system, NEIGHBORS &neighbor_list, vector<PAIRS> &ff_2body, map<string,int> &pair_map, vector<int> &int_pair_map ) :
-  CONTROLS(controls), SYSTEM(system), NEIGHBOR_LIST(neighbor_list), FF_2BODY(ff_2body), PAIR_MAP(pair_map), INT_PAIR_MAP(int_pair_map)
+Cheby(JOB_CONTROL &controls, FRAME &system, NEIGHBORS &neighbor_list, vector<PAIRS> &ff_2body, vector<int> &int_pair_map ) :
+  CONTROLS(controls), SYSTEM(system), NEIGHBOR_LIST(neighbor_list), FF_2BODY(ff_2body), INT_PAIR_MAP(int_pair_map)
   {
 	 // Constructor initializes references.
 	 DERIV_CONST = FF_2BODY[0].CHEBY_RANGE_HIGH - FF_2BODY[0].CHEBY_RANGE_LOW;	// Ranges should be the same for all types

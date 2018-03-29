@@ -33,7 +33,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 									CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
 									map<int,string> & PAIR_MAP_REVERSE, vector<int> &INT_PAIR_MAP,
 									vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
-									NEIGHBORS & NEIGHBOR_LIST) ;
+									NEIGHBORS & NEIGHBOR_LIST,
+									vector<int>& TMP_ATOMTYPEIDX, vector<string> &TMP_ATOMTYPE) ;
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby) ;
 
@@ -48,8 +49,6 @@ int RANK;		// Index of current processor
 
 // For 4-body interactions, these are used for both the lsq and md parts:
 
-vector<int>   TMP_ATOMTYPEIDX;			// Used to construct the quadruplet type index
-vector<string> TMP_ATOMTYPE;			// Used to construct the quadruplet type index
 ofstream BAD_CONFIGS ;
 
 int main(int argc, char* argv[])
@@ -98,6 +97,9 @@ int main(int argc, char* argv[])
 	
 	vector<int>	INT_PAIR_MAP;
 
+	vector<int>   TMP_ATOMTYPEIDX;			// Used to construct the quadruplet type index
+	vector<string> TMP_ATOMTYPE;			// Used to construct the quadruplet type index
+
 	//////////////////////////////////////////////////
 	//
 	// Read and print input to screen
@@ -117,7 +119,7 @@ int main(int argc, char* argv[])
 
 	read_lsq_input(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, 
 						PAIR_MAP_REVERSE, INT_PAIR_MAP, 
-						CHARGE_CONSTRAINTS, NEIGHBOR_LIST);
+						CHARGE_CONSTRAINTS, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
 
 
 	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" )
@@ -1161,7 +1163,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 									CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
 									map<int,string> & PAIR_MAP_REVERSE, vector<int> &INT_PAIR_MAP,
 									vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
-									NEIGHBORS & NEIGHBOR_LIST)
+									NEIGHBORS & NEIGHBOR_LIST,
+									vector<int>& TMP_ATOMTYPEIDX,
+									vector<string>& TMP_ATOMTYPE)
 {
 	bool   FOUND_END = false;
 	string LINE;

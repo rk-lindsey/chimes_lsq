@@ -1092,7 +1092,7 @@ FF_SETUP_2:
   // exit the program
   ////////////////////////////////////////////////////////////  	
 	
-  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, PAIR_MAP, INT_PAIR_MAP} ;
+  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP} ;
 
   if(RANK==0)
   {

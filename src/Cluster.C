@@ -91,7 +91,6 @@ void CLUSTER::build_loop(int indx, int cheby_order, vector<int> powers)
 		powers[indx] = pair_pow ;
 		build_loop(indx+1, cheby_order, powers) ;
 	 }
-
   } 
   else 
   {

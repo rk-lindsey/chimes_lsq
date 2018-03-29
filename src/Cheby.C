@@ -1389,23 +1389,23 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 				
 					// Determine the pair types and the triplet type
 	
-					TEMP_STR = SYSTEM.ATOMTYPE[a1]; TEMP_STR.append(SYSTEM.ATOMTYPE[a2]); 
-					curr_pair_type_idx[0] = PAIR_MAP[TEMP_STR];
+					curr_pair_type_idx[0] = get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
 					
-					TEMP_STR = SYSTEM.ATOMTYPE[a1]; TEMP_STR.append(SYSTEM.ATOMTYPE[a3]); 
-					curr_pair_type_idx[1] = PAIR_MAP[TEMP_STR];
+					curr_pair_type_idx[1] = get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
 					
-					TEMP_STR = SYSTEM.ATOMTYPE[a1]; TEMP_STR.append(SYSTEM.ATOMTYPE[a4]); 
-					curr_pair_type_idx[2] = PAIR_MAP[TEMP_STR];
+					curr_pair_type_idx[2] = get_pair_index(a1, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
 					
-					TEMP_STR = SYSTEM.ATOMTYPE[a2]; TEMP_STR.append(SYSTEM.ATOMTYPE[a3]); 
-					curr_pair_type_idx[3] = PAIR_MAP[TEMP_STR];
+					curr_pair_type_idx[3] = get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
 					
-					TEMP_STR = SYSTEM.ATOMTYPE[a2]; TEMP_STR.append(SYSTEM.ATOMTYPE[a4]); 
-					curr_pair_type_idx[4] = PAIR_MAP[TEMP_STR];
+					curr_pair_type_idx[4] = get_pair_index(a2, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
 					
-					TEMP_STR = SYSTEM.ATOMTYPE[a3]; TEMP_STR.append(SYSTEM.ATOMTYPE[a4]); 
-					curr_pair_type_idx[5] = PAIR_MAP[TEMP_STR];
+					curr_pair_type_idx[5] = get_pair_index(a3, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
 
 					ATOM_TYPE[0] = SYSTEM.ATOMTYPE[a1] ;
 					ATOM_TYPE[1] = SYSTEM.ATOMTYPE[a2] ;
@@ -2142,11 +2142,8 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 							
 			 for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
 			 {
-				//SET_3B_CHEBY_POWERS(FF_2BODY, FF_3BODY[curr_triple_type_index], PAIR_MAP,  pow_ij, pow_ik, pow_jk, PAIR_TYPE_IJ, PAIR_TYPE_IK, PAIR_TYPE_JK, i);
 				set_3b_powers(FF_3BODY[curr_triple_type_index], pair_index, i,
 								  pow_ij, pow_ik, pow_jk) ;
-				//SET_3B_CHEBY_POWERS_NEW(FF_2BODY, FF_3BODY[curr_triple_type_index], 
-				//pow_ij, pow_ik, pow_jk, curr_pair_type_idx_ij, curr_pair_type_idx_ik, curr_pair_type_idx_jk, i);
 			      
 				coeff = FF_3BODY[curr_triple_type_index].PARAMS[i];
 			      
@@ -2373,23 +2370,18 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 	 int fidx_a3 = SYSTEM.PARENT[a3];
 	 int fidx_a4 = SYSTEM.PARENT[a4];
 			
-#ifndef LINK_LAMMPS
-	 curr_pair_type_idx[0] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[     a1] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a2]];
-	 curr_pair_type_idx[1] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[     a1] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a3]];
-	 curr_pair_type_idx[2] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[     a1] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a4]];
-	 curr_pair_type_idx[3] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[fidx_a2] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a3]];
-	 curr_pair_type_idx[4] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[fidx_a2] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a4]];
-	 curr_pair_type_idx[5] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[fidx_a3] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a4]];
-
-#else
-	 curr_pair_type_idx[0] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[     a1-1] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a2-1]];
-	 curr_pair_type_idx[1] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[     a1-1] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a3-1]];
-	 curr_pair_type_idx[2] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[     a1-1] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a4-1]];
-	 curr_pair_type_idx[3] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[fidx_a2-1] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a3-1]];
-	 curr_pair_type_idx[4] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[fidx_a2-1] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a4-1]];
-	 curr_pair_type_idx[5] =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[fidx_a3-1] *CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[fidx_a4-1]];
-#endif
-				
+	 curr_pair_type_idx[0] =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
+	 curr_pair_type_idx[1] =  get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
+	 curr_pair_type_idx[2] =  get_pair_index(a1, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
+	 curr_pair_type_idx[3] =  get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
+	 curr_pair_type_idx[4] =  get_pair_index(a2, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
+	 curr_pair_type_idx[5] =  get_pair_index(a3, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
+																		SYSTEM.PARENT) ;
 	 TMP_QUAD_SET[0] = SYSTEM.ATOMTYPE_IDX[     a1];
 	 TMP_QUAD_SET[1] = SYSTEM.ATOMTYPE_IDX[fidx_a2];
 	 TMP_QUAD_SET[2] = SYSTEM.ATOMTYPE_IDX[fidx_a3];

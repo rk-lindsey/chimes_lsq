@@ -713,7 +713,7 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 		// Only enter if 2B are requested. For example, skip if user wants to fit ONLY 3B cheby
 		// i.e. PAIRTYP: CHEBYSHEV  0 6 or similar
 
-	  Cheby cheby{CONTROLS,FRAME_SYSTEM,NEIGHBOR_LIST,FF_2BODY,PAIR_MAP,INT_PAIR_MAP} ;
+	  Cheby cheby{CONTROLS,FRAME_SYSTEM,NEIGHBOR_LIST,FF_2BODY,INT_PAIR_MAP} ;
 
 	  if ( FF_2BODY[0].SNUM > 0)
 		 cheby.Deriv_2B(FRAME_A_MATRIX) ;
@@ -1532,7 +1532,7 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 
 	if      ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" ) 
 	{
-	  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, PAIR_MAP, INT_PAIR_MAP} ;
+	  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP} ;
 	  cheby.Force_all(TRIPS, QUADS);
 	}
 	else if ( FF_2BODY[0].PAIRTYP == "LJ" ) 

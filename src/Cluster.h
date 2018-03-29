@@ -86,8 +86,15 @@ public:
   int    INDX;
   int NATOMS ;
   int NPAIRS ;
-  vector<string> ATOM_PAIRS; 	// Contains the different atom pair string names
-  vector<string> ATOM_NAMES ; // Names of each atom in the quad
+
+  // Contains the different atom pair string names
+  vector<string> ATOM_PAIRS; 	
+
+  // Names of each atom in the cluster
+  vector<string> ATOM_NAMES ; 
+
+  // Index (element type) of each atom
+  vector<int> ATOM_INDICES ;  
 
   FCUT FORCE_CUTOFF;		// "CUBIC" "COSINE" or "SIGMOID" currently supported
 	
@@ -173,7 +180,7 @@ public:
   // Calculate Chebyshev xmin, xmax, xavg.
   void set_cheby_vals(vector<PAIRS> &FF_2BODY) ;
 
-CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), MIN_FOUND(npair,1.0e10),
+CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), ATOM_INDICES(natom,-1), MIN_FOUND(npair,1.0e10),
 	 S_MAXIM(npair,-1), S_MINIM(npair,-1), 
     X_MINIM(npair), X_MAXIM(npair), X_AVG(npair), X_DIFF(npair), 
 	 NBINS(npair,0), BINWS(npair,0.1)
