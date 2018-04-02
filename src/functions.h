@@ -293,6 +293,8 @@ public:
 
 	// Update ghost atom positions.
 	void update_ghost(int n_layers) ;
+	inline int get_atomtype_idx(int atom) ;
+
 };
 
 struct PES_PLOTS
@@ -577,6 +579,16 @@ inline double get_dist(const FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 	}
 	return sqrt( RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z );
 }
+
+inline int FRAME::get_atomtype_idx(int atom)
+{
+#ifndef LINK_LAMMPS
+  return(ATOMTYPE_IDX[atom]) ;
+#else
+  ATOMTYPE_IDX[a1]-1;
+#endif
+}
+
 
 //////////////////////////////////////////
 //

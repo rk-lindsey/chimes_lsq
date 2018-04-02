@@ -54,7 +54,8 @@ static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NAT
 static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY,
 									CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, 
 									NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP,
-                           const vector<string>& TMP_ATOMTYPE, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
+                           const vector<string>& TMP_ATOMTYPE, const vector<int>& TMP_ATOMTYPEIDX,
+									vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
 									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
 static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST &TRIPS,
 									  CLUSTER_LIST &QUADS, const JOB_CONTROL &CONTROLS) ;
@@ -1009,7 +1010,8 @@ FF_SETUP_1:
 FF_SETUP_2:
 
   read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, 
-					  SYSTEM, FF_PLOTS.N_PLOTS, NATMTYP, TMP_ATOMTYPE, TMP_CHARGES, 
+					  SYSTEM, FF_PLOTS.N_PLOTS, NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX,
+					  TMP_CHARGES, 
 					  TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE) ;
 	
   // Set the atom charges
@@ -1073,17 +1075,17 @@ FF_SETUP_2:
   build_int_pair_map(NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX, PAIR_MAP, INT_PAIR_MAP) ;
 	
   // Build 3-body fast maps
-	
   if ( FF_2BODY[0].SNUM_3B_CHEBY > 0 ) 
   {
-	 TRIPS.build_int_maps(TMP_ATOMTYPE, FF_2BODY, PAIR_MAP) ;
+	 TRIPS.build_int_maps(TMP_ATOMTYPE, TMP_ATOMTYPEIDX, FF_2BODY, PAIR_MAP) ;
+	 //TRIPS.print(true) ;
   }
-	
+		
   // Build 4-body fast maps
-	
   if(FF_2BODY[0].SNUM_4B_CHEBY > 0)
   {
-	 QUADS.build_int_maps(TMP_ATOMTYPE, FF_2BODY, PAIR_MAP) ;
+	 QUADS.build_int_maps(TMP_ATOMTYPE, TMP_ATOMTYPEIDX, FF_2BODY, PAIR_MAP) ;
+	 //QUADS.print(true) ;
   }
 
 
@@ -3299,7 +3301,8 @@ static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NAT
 static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY,
 									CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, 
 									NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP,
-                           const vector<string>& TMP_ATOMTYPE, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
+                           const vector<string>& TMP_ATOMTYPE, const vector<int>& TMP_ATOMTYPEIDX,
+									vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
 									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE)
 // Read in the force field parameters.
 {
@@ -3325,7 +3328,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
   string  TEMP_SEARCH_4B = "some default text";
   string	TEMP_TYPE;
   int     NO_PAIRS, NO_TRIPS, NO_QUADS;
-  int		TMP_TERMS1, TMP_TERMS2, TMP_TERMS3;
+  int		TMP_TERMS1{0}, TMP_TERMS2{0}, TMP_TERMS3{0};
   double	TMP_LOW  = -1;
   double 	TMP_HIGH =  1;
   const double eps_charge = 1.0e-04 ;
@@ -3468,7 +3471,9 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  while ( STREAM_PARSER >> buf ) 
 			 tokens.push_back(buf) ;
 
-		  TMP_TERMS1 = TMP_TERMS2 = TMP_TERMS3 = 0 ;
+		  TMP_TERMS1 = 0 ;
+		  TMP_TERMS2 = 0 ;
+		  TMP_TERMS3 = 0 ;
 		  if ( tokens.size() > 0 )
 			 TMP_TERMS1 = stoi(tokens[0]) ;
 		  if ( tokens.size() > 1 )
@@ -3561,6 +3566,21 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  PARAMFILE >> FF_2BODY[i].S_MINIM;	
 		  PARAMFILE >> FF_2BODY[i].S_MAXIM;
 
+		  // Set the atom type index.
+		  FF_2BODY[i].ATM1TYPE_IDX = -1 ;
+		  FF_2BODY[i].ATM2TYPE_IDX = -1 ;
+		  for ( int j = 0 ; j < TMP_ATOMTYPE.size() ; j++ ) {
+			 if ( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] ) 
+				FF_2BODY[i].ATM1TYPE_IDX = TMP_ATOMTYPEIDX[j] ;
+			 if ( FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] ) 
+				FF_2BODY[i].ATM2TYPE_IDX = TMP_ATOMTYPEIDX[j] ;
+		  }
+		  if ( FF_2BODY[i].ATM1TYPE_IDX < 0 )
+			 EXIT_MSG("Could not find a match for " + FF_2BODY[i].ATM1TYP ) ;
+
+		  if ( FF_2BODY[i].ATM2TYPE_IDX < 0 )
+			 EXIT_MSG("Could not find a match for " + FF_2BODY[i].ATM2TYP ) ;
+		  
 		  if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
 		  {
 			 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
@@ -4144,7 +4164,7 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 		
 	 cout << endl; 
   }
-
+	
   if(FF_2BODY[0].SNUM_3B_CHEBY > 0)
   {
 	 TRIPS.print(true) ;
@@ -4154,7 +4174,7 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
   {
 	 QUADS.print(true) ;
   }
-	
+
   if(CONTROLS.FIT_COUL)
   {
 	 cout << "	Fitted charges read from parameter file:" << endl;

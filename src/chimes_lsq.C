@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 	if(CONTROLS.USE_3B_CHEBY)
 	{
 	  // Generate unique triplets
-	  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
+	  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ;
 	  TRIPS.print(false) ;
 	}
 
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 	  // Generate unique quadruplets and thier corresponding sets of powers
 	  //////////////////////////////////////////////////////////////////////
 	  
-	  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP) ;
+	  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX) ;
 	  QUADS.print(false) ;
 	}  
 
@@ -1662,6 +1662,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				
 				cin >> LINE ;
 				TMP_ATOMTYPEIDX[i] = stoi(LINE) - 1 ;
+				ATOM_PAIRS[i].ATM1TYPE_IDX = TMP_ATOMTYPEIDX[i] ;
+
 				if ( TMP_ATOMTYPEIDX[i] < 0 || TMP_ATOMTYPEIDX[i] >= CONTROLS.NATMTYP )
 				  EXIT_MSG("Bad atom index: " + LINE ) ;
 
@@ -1685,6 +1687,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				ATOM_PAIRS[i].ATM1MAS = double(atof(LINE.data()));
 				
 				ATOM_PAIRS[i].ATM2TYP = ATOM_PAIRS[i].ATM1TYP;
+				ATOM_PAIRS[i].ATM2TYPE_IDX = ATOM_PAIRS[i].ATM1TYPE_IDX ;
+
 				ATOM_PAIRS[i].ATM2CHG = ATOM_PAIRS[i].ATM1CHG;
 				ATOM_PAIRS[i].ATM2MAS = ATOM_PAIRS[i].ATM1MAS;
 				
@@ -1731,8 +1735,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					ATOM_PAIRS[TEMP_INT].CHEBY_TYPE = ATOM_PAIRS[i].CHEBY_TYPE;
 														
 					ATOM_PAIRS[TEMP_INT].ATM1TYP = ATOM_PAIRS[i].ATM1TYP;
+					ATOM_PAIRS[TEMP_INT].ATM1TYPE_IDX = ATOM_PAIRS[i].ATM1TYPE_IDX ;
+
 					ATOM_PAIRS[TEMP_INT].ATM2TYP = ATOM_PAIRS[j].ATM1TYP;
-					
+					ATOM_PAIRS[TEMP_INT].ATM2TYPE_IDX = ATOM_PAIRS[j].ATM1TYPE_IDX ;
+
 					ATOM_PAIRS[TEMP_INT].ATM1CHG = ATOM_PAIRS[i].ATM1CHG;
 					ATOM_PAIRS[TEMP_INT].ATM2CHG = ATOM_PAIRS[j].ATM1CHG;
 					

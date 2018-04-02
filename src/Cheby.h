@@ -39,6 +39,12 @@ public:
   void map_3b_indices(TRIPLETS & FF_3BODY, 
 							 int TYPE_IJ, int TYPE_IK, int TYPE_JK, 
 							 vector<int>& pair_index) ;
+  // General function to Matches pair indices to the ij. ik, jk type pairs formed from the atoms in the cluster.
+  void map_indices(CLUSTER & cluster, vector<string> & atom_type, vector<int> & pair_map) ;
+
+  // General function to Matches pair indices to the ij. ik, jk type pairs formed from the atoms in the cluster.
+  // Based on integer atom indices
+  void map_indices_int(CLUSTER & cluster, vector<int> & atom_type_idx, vector<int> & pair_map) ;
 
 Cheby(JOB_CONTROL &controls, FRAME &system, NEIGHBORS &neighbor_list, vector<PAIRS> &ff_2body, vector<int> &int_pair_map ) :
   CONTROLS(controls), SYSTEM(system), NEIGHBOR_LIST(neighbor_list), FF_2BODY(ff_2body), INT_PAIR_MAP(int_pair_map)

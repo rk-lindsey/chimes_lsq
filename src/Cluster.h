@@ -10,6 +10,8 @@ public:
   string PAIRTYP;			// Allowed values are CHEBYSHEV, DFTBPOLY, SPLINE, INVERSE_R, LJ, and STILLINGER
   string ATM1TYP;			// Atom chemistry (i.e. C, H, N, O...)
   string ATM2TYP;
+  int    ATM1TYPE_IDX;  // The type index of atom 1
+  int    ATM2TYPE_IDX;  // The type index of atom 2
   double ATM1CHG;			// Atom partial charge... used when charges are fixed
   double ATM2CHG;
   string CHRGSGN;			// Should the fitted charge on a given atom be negative or positive?
@@ -156,6 +158,9 @@ public:
   CLUSTER() {} 
   virtual ~CLUSTER() {} 
 
+  // Return the atom type index of an atom in the cluster with the given name.
+  int match_atom_type_idx(string atm_typ) ;
+
   // Sets up the histogram for TRIPLETS.  Returns true on success, false otherwise.
   bool init_histogram(vector<struct PAIRS> & pairs, map<string,int>& pair_map) ;
 
@@ -180,6 +185,9 @@ public:
   // Calculate Chebyshev xmin, xmax, xavg.
   void set_cheby_vals(vector<PAIRS> &FF_2BODY) ;
 
+  // Set the ATOM_INDICES based on the given atomtype names and atomtype_idx indices.
+  void set_atom_indices(vector<string> ATOMTYPE, vector<int> ATOMTYPE_IDX) ;
+
 CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), ATOM_INDICES(natom,-1), MIN_FOUND(npair,1.0e10),
 	 S_MAXIM(npair,-1), S_MINIM(npair,-1), 
     X_MINIM(npair), X_MAXIM(npair), X_AVG(npair), X_DIFF(npair), 
@@ -194,6 +202,10 @@ CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), ATOM_INDICE
 	 N_TRUE_ALLOWED_POWERS = 0 ;
 	 FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;	
   }
+
+  // Matches the allowed powers to the ij, ik, il... type pairs formed from the atoms  ai, aj, ak, al
+  void map_indices_int(vector<int> & atom_type_idx, vector<int> & pair_map) ;
+
 private:
   // Recursively permute atom indices for each element type.
   void permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
@@ -201,6 +213,7 @@ private:
 
   // Interate over a power index in constructing the powers vector.
   void build_loop(int indx, int cheby_order, vector<int> powers) ;
+
 };
 
 typedef CLUSTER TRIPLETS ;
@@ -225,18 +238,28 @@ public:
 
   vector<int> INT_MAP ;
 
+  // Store indices for ordering of pair properties (Cheby powers, s_minim, etc.) 
+  // corresponding to a particular atom ordering.
+  vector<vector<int>> PAIR_INDICES ;
+
   vector<int> INT_MAP_REVERSE ;
 
   vector<vector<string>> EXCLUDE ;
 
-  void build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP) ;
+  // Build the pair variables for all of the clusters
+  void build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, vector<string> atom_types,
+										 vector<int> atom_typeidx) ;
 
-  int build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+  // Build all triplets and associated maps for the cluster list.
+  int build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP, 
+									 vector<string> atom_types, vector<int> atomtype_idx) ;
 
+  // Returns a unique ID number for a cluster of atoms.
   int make_id_int(vector<int>& index) ;
 
   void print(bool md_mode) ;
 
+  // Print minimum distances found for the cluster.
   void print_min_distances() ;
 
   // print the force field file header for the cluster list.
@@ -259,7 +282,8 @@ public:
   static string tuplet_name(int natom, bool plural, bool caps) ;
 
   // Build the fast integer maps for the cluster list.  Used by the MD code.
-  void build_int_maps(vector<string> ATOMTYPE, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+  void build_int_maps(vector<string> ATOMTYPE, vector<int> ATOMTYPE_IDX,
+							 vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
 
   // Read the maps from the force field file (MD only).
   void read_maps(ifstream& paramfile, string line) ;
@@ -282,7 +306,8 @@ public:
 
 private:
   void build_pairs_loop(int index, vector<int> atom_index, 
-								vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count) ;
+								vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count,
+								vector<string> atom_types, vector<int> atom_typeidx) ;
 
   // Loop across atom types for each atom in the cluster, and build a corresponding loop.
   void build_int_maps_loop(int index, vector<int> atom_index, vector<string> ATOMTYPE,
@@ -290,6 +315,7 @@ private:
 
   // Determine whether a particular cluster is excluded.
   bool is_excluded(vector<string> atom_names) ;
+
 } ;
 
 

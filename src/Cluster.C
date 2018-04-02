@@ -123,7 +123,25 @@ void CLUSTER::build_loop(int indx, int cheby_order, vector<int> powers)
   }
 }
 
+void CLUSTER::set_atom_indices(vector<string> atomtype, vector<int> atomtype_idx)
+// Set the ATOM_INDICES based on the given atomtype names and atomtype_idx indices.
+{
+  for ( int i = 0 ; i < NATOMS ; i++ ) 
+  {
+	 int j ;
+	 for ( j = 0 ; j < atomtype.size() ; j++ )
+	 {
+		if ( atomtype[j] == ATOM_NAMES[i] ) 
+		  break ;
+	 }
+	 if ( j == atomtype.size() ) 
+		EXIT_MSG("Could not set atom indices for " + ATOM_NAMES[i] ) ;
+	 else
+		ATOM_INDICES[i] = atomtype_idx[j] ;
+  }
+}
 
+  
 void CLUSTER::store_permutations(vector<int> &unsorted_powers) 
 {
   map<vector<int>,int>::iterator it ;
@@ -451,7 +469,9 @@ void CLUSTER::read_ff_params(ifstream &paramfile, const vector<string> &atomtype
   INDX = stoi(tokens[1]) ;
 
   for ( int j = 0 ; j < NATOMS ; j++ ) 
+  {
 	 ATOM_NAMES[j] = tokens[j+3] ;
+  }
 
   LINE = get_next_line(paramfile) ;  // PAIRS: <p1> <p2> <p3> UNIQUE: <uniq> TOTAL: <TOTAL>
   
@@ -568,6 +588,23 @@ void CLUSTER::set_default_sminim(const vector<PAIRS> & FF_2BODY)
 		 }
 	  }
 	}
+}
+
+
+int CLUSTER::match_atom_type_idx(string atm_typ)
+// Return the atom type index of an atom in the cluster with the given name.
+{
+  int type = -1 ;
+
+  for ( int j = 0 ; j < NATOMS ; j++ ) 
+  {
+	 if ( ATOM_NAMES[j] == atm_typ ) 
+	 {
+		type = ATOM_INDICES[j] ;
+		break ;
+	 }
+  }
+  return type ;
 }
 
 string CLUSTER_LIST::allocate(int nclusters, int natoms, const vector<PAIRS> &FF_2BODY)
@@ -833,18 +870,20 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
   return val ;
 }
 
-void CLUSTER_LIST::build_int_maps(vector<string> ATOMTYPE, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+void CLUSTER_LIST::build_int_maps(vector<string> ATOMTYPE, vector<int> ATOMTYPE_IDX,
+											 vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
 // Build the fast integer maps for the cluster list.  Used by the MD code.
 {
   // Find the dimension of the map vector.
-  
   int NATOMS = VEC[0].NATOMS ;
-  
+
   int dim = 1 ;
   for ( int i = 0 ; i < NATOMS ; i++ ) 
 	 dim *= MAX_ATOM_TYPES ;
   
   INT_MAP.resize(dim, -1) ;
+  PAIR_INDICES.resize(dim) ;
+
   INT_MAP_REVERSE.resize(NCLUSTERS, -1) ;
 
   string tuplet = tuplet_name(NATOMS, false, true) ;
@@ -853,11 +892,16 @@ void CLUSTER_LIST::build_int_maps(vector<string> ATOMTYPE, vector<PAIRS> & ATOM_
 
   vector<int> atom_index(NATOMS) ;
 
+  for ( int i = 0 ; i < VEC.size() ; i++ ) 
+	 VEC[i].set_atom_indices(ATOMTYPE, ATOMTYPE_IDX) ;
+	 
   build_int_maps_loop(0, atom_index, ATOMTYPE, ATOM_PAIRS, PAIR_MAP) ;
 
   set_default_cutoffs(ATOM_PAIRS) ;
   for ( int i = 0 ; i < VEC.size() ; i++ ) 
+  {
 	 VEC[i].set_cheby_vals(ATOM_PAIRS) ;
+  }
 }
 
 void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector<string> ATOMTYPE,
@@ -903,7 +947,13 @@ void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector
 	 }
 		
 	 if ( MAP.find(int_map_str) != MAP.end() )
+	 {
 		INT_MAP[idx1] = MAP[int_map_str];
+
+		// Store the mapping of pair indices for later use in force evaluation.
+		PAIR_INDICES[idx1].resize(NPAIRS) ;
+		VEC[INT_MAP[idx1]].map_indices_int(atom_index, PAIR_INDICES[idx1]) ;
+	 }
 	 else
 		EXIT_MSG("Map for " + int_map_str + " was not found\n") ;
 
@@ -927,10 +977,11 @@ void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector
   }
 }
 
-int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP, 
+									 vector<string> atom_types, vector<int> atomtype_idx)
 // Build all triplets and associated maps for the cluster list.
 {
-  build_pairs(ATOM_PAIRS, PAIR_MAP) ;
+  build_pairs(ATOM_PAIRS, PAIR_MAP, atom_types, atomtype_idx) ;
 			  
   for ( int i = 0 ; i < VEC.size() ; i++ ) 
   {
@@ -957,7 +1008,8 @@ int CLUSTER_LIST::make_id_int(vector<int>& index)
   return(sum) ;
 }
 
-void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP)
+void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, vector<string> atom_types,
+										 vector<int> atom_typeidx)
 // Build the pair variables for all of the clusters
 {
 			
@@ -981,6 +1033,7 @@ void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MA
   }
 				
   int natoms = VEC[0].NATOMS ;
+  int npairs = VEC[0].NPAIRS ;
 
   //sort( ATOM_CHEMS.begin(), ATOM_CHEMS.end() ) ;
 
@@ -994,25 +1047,31 @@ void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MA
   
   INT_MAP.resize(dim, -1) ;
   INT_MAP_REVERSE.resize(NCLUSTERS, -1) ;
+  PAIR_INDICES.resize(dim, vector<int>(npairs,-1)) ;
 
-  build_pairs_loop(0, atom_index, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP, count) ;
+  build_pairs_loop(0, atom_index, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP, count,
+						 atom_types, atom_typeidx) ;
 
 }
 
 
 
 void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index, 
-												vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count)
+												vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count,
+												vector<string> atom_types, vector<int> atom_typeidx)
 // Loop over atom types in building the CLUSTER ATOM_PAIRS list.
 {
   int NATMTYP = ATOM_CHEMS.size() ;
+  int natoms = VEC[0].NATOMS ;
+  int npairs = VEC[0].NPAIRS ;
 
   if ( index < atom_index.size() ) {
 	 // Keep on looping.
 	 for ( int i = 0 ; i < NATMTYP ; i++ ) 
 	 {
 		atom_index[index] = i ;
-		build_pairs_loop(index+1, atom_index, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP, count) ;
+		build_pairs_loop(index+1, atom_index, ATOM_CHEMS, ATOM_PAIRS, PAIR_MAP, count,
+							  atom_types, atom_typeidx) ;
 	 }
   }
   else 
@@ -1021,9 +1080,6 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 VEC[count].INDX = count ;	// Index for current triplet type
 								
 	 // Save the names of each atom type in the pair.
-	 int natoms = VEC[0].NATOMS ;
-	 int npairs = VEC[0].NPAIRS ;
-
 	 int count2 = 0 ;
 	 vector<string> pair_names(npairs) ;
 	 vector<string> pair_names_unsorted(npairs) ;
@@ -1105,6 +1161,22 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		  
 		for ( int i = 0 ; i < natoms ; i++ ) {
 		  VEC[count].ATOM_NAMES[i] = atom_names[i] ;
+		  int j ;
+		  for ( j = 0 ; j < atom_types.size() ; j++ ) 
+		  {
+			 if ( VEC[count].ATOM_NAMES[i] == atom_types[j] )
+				break ;
+		  }
+		  if ( j == atom_types.size() )
+			 EXIT_MSG("Could not find an element type for " + VEC[count].ATOM_NAMES[i]) ;
+		  else
+		  {
+			 VEC[count].ATOM_INDICES[i] = atom_typeidx[j] ;
+#ifdef DEBUG_CLUSTER
+			 cout << "The index of cluster atom " << i << "is" << VEC[count].ATOM_INDICES[i] << endl ;
+#endif
+		  }
+			 
 		  for ( int j = i + 1 ; j < natoms ; j++ ) {
 			 VEC[count].ATOM_PAIRS[count2] = pair_names[count2] ;
 #ifdef DEBUG_CLUSTER			 
@@ -1142,13 +1214,18 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 	 MAP_REVERSE.insert(make_pair(map_index,all_pairs)) ;
 
 	 // Construct a unique integer ID for the atom set and store it in the INT_MAP.
-	 vector<int> atom_index_2 = atom_index ;
-	 sort( atom_index_2.begin(), atom_index_2.end() ) ;
-	 reverse( atom_index_2.begin(), atom_index_2.end() ) ;
+	 //vector<int> atom_index_2 = atom_index ;
+	 //sort( atom_index_2.begin(), atom_index_2.end() ) ;
+	 //reverse( atom_index_2.begin(), atom_index_2.end() ) ;
 
+	 // Make a unique ID for this ordering of atoms.
 	 int atom_id_int = make_id_int(atom_index) ;
 	 //int atom_id_int = make_id_int(atom_index_2) ;
 	 INT_MAP[atom_id_int] = map_index ;
+
+	 // Create a mapping for pair properties like Cheby powers.
+	 PAIR_INDICES[atom_id_int].resize(npairs) ;
+	 VEC[map_index].map_indices_int(atom_index, PAIR_INDICES[atom_id_int]) ;
 
 	 // Negative map index for excluded interaction.
 	 if ( map_index >= 0 )
@@ -1539,6 +1616,129 @@ void CLUSTER::set_cheby_vals(vector<PAIRS> &FF_2BODY)
 
 	 Cheby::set_cheby_params(S_MINIM[i], S_MAXIM[i], lambda, FF_2BODY[0].CHEBY_TYPE, 
 									 X_MINIM[i], X_MAXIM[i], X_DIFF[i], X_AVG[i]) ;
+  }
+}
+
+
+void CLUSTER::map_indices_int(vector<int> & atom_type_idx, vector<int> & pair_map) 
+// Matches the allowed powers to the ij, ik, il... type pairs formed from the atoms  ai, aj, ak, al
+// This is based on reordering atoms, not pairs.  Pairs can't be interchanged independently, but atoms can.
+// "pair_index" serves as the map between the powers in the cluster and the powers between the atoms.
+{
+  using Pair_int_int = pair<int,int> ;
+
+  static vector <Pair_int_int> 	ATOM_TYPE_AND_INDEX;	// [a1/a2/a3/a4 atom pair chemistry][index of pair (from 1-6)]
+  //vector <Pair_int_int> 	sorted_index(natoms);	// Sorted to match atom_type_idx.
+  static vector<bool> used ;
+  static vector<int> rev_index ;
+  static vector<vector<int>> pair_index ;
+  //static bool called_before = false ;
+
+  int npairs = NPAIRS ;
+  int natoms = NATOMS ;
+
+  //if ( ! called_before )
+  {
+	 // called_before = true ;
+	 pair_index.resize(natoms) ;
+	 used.resize(natoms) ;
+	 rev_index.resize(natoms) ;
+	 ATOM_TYPE_AND_INDEX.resize(natoms) ;
+
+	 for ( int j = 0 ; j < natoms ; j++ ) 
+	 {
+		pair_index[j].resize(natoms) ;
+	 }
+  }
+	
+  if ( pair_map.size() != npairs )
+	 EXIT_MSG("Wrong dimension for pair map") ;
+
+  if ( atom_type_idx.size() != natoms ) 
+	 EXIT_MSG("Wrong dimension for natoms") ;
+
+  vector<int> &indices = ATOM_INDICES ;
+	  
+  int count = 0 ;
+  for ( int j = 0 ; j < natoms ; j++ ) 
+  {
+	 pair_index[j][j] = -1 ;
+	 for ( int k = j + 1 ; k < natoms ; k++ ) 
+	 {
+		pair_index[j][k] = count ;
+		pair_index[k][j] = count ;
+		count++ ;
+	 }
+  }
+
+  for(int m = 0 ; m< natoms ; m++)
+  { 				
+	 ATOM_TYPE_AND_INDEX[m].first  = atom_type_idx[m];					// 
+	 ATOM_TYPE_AND_INDEX[m].second = m;	
+  }
+
+  // Match the permutation of the atom indices in atom_type_idx to
+  // those in the cluster indices[]
+  fill(used.begin(), used.end(), false) ;
+  fill(rev_index.begin(), rev_index.end(), -1) ;
+
+  for ( int m = 0 ; m < natoms ; m++ )
+	 for ( int n = 0 ; n < natoms ; n++ ) 
+	 {
+		if ( ATOM_TYPE_AND_INDEX[m].first == indices[n] && ! used[n] ) 
+		{
+		  //sorted_index[n] = ATOM_TYPE_AND_INDEX[m] ;
+		  rev_index[ATOM_TYPE_AND_INDEX[m].second] = n ;
+		  used[n] = true ;
+		  break ;
+		}
+	 }
+
+  // Find the reverse of the sorted index.
+  // vector<int> rev_index(natoms, -1) ;
+  // for ( int j = 0 ; j < natoms ; j++ ) 
+  // {
+  // 	 for ( int i = 0 ; i < natoms ; i++ ) 
+  // 	 {
+  // 		if ( sorted_index[i].second == j ) 
+  // 		{
+  // 		  rev_index[j] = i ;
+  // 		  break ;
+  // 		}
+  // 	 }
+  // }
+
+  for ( int j = 0 ; j < natoms ; j++ ) 
+  {
+	 if ( rev_index[j] < 0 ) 
+		EXIT_MSG("Bad reverse index") ;
+  }
+		 
+  int m = 0 ;
+  for(int i = 0 ; i < natoms ; i++)
+  {
+	 int ii = rev_index[i] ;
+	 for ( int j = i + 1 ; j < natoms ; j++ ) 
+	 {
+
+		int jj = rev_index[j] ;
+		pair_map[m] = pair_index[ii][jj] ;
+
+		if ( pair_map[m] < 0 || pair_map[m] > npairs - 1 ) 
+		  EXIT_MSG("Permutation power map has a bad value") ;
+		++m ;
+	 }
+  }
+
+  // Double check uniqueness of each value in pair_map.
+  for ( int m = 0 ; m < npairs ; m++ ) 
+  {
+	 for ( int m1 = 0 ; m1 < npairs ; m1++ ) 
+	 {
+		if ( m1 == m ) continue ;
+		if ( pair_map[m1] == pair_map[m] )
+		  EXIT_MSG("Permutation power map had a repeated value" ) ;
+	 }
   }
 }
 
