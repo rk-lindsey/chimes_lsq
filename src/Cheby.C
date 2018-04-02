@@ -278,165 +278,6 @@ void Cheby::set_polys(int index, double *Tn, double *Tnd, const double rlen, dou
 
 }
 
-void Cheby::map_3b_indices(TRIPLETS & FF_3BODY, 
-									int TYPE_IJ, int TYPE_IK, int TYPE_JK, 
-									vector<int>& pair_index) 
-// Matches pair indices to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
-{
-  const PAIRS &pair_ij = FF_2BODY[TYPE_IJ] ;
-  const PAIRS &pair_jk = FF_2BODY[TYPE_JK] ;
-  const vector<int>& atom_indices = FF_3BODY.ATOM_INDICES ;
-
-  // Identify atoms i and j from the pair_ij.  The kth atom is identified by elimination.
-  // Pair index corresponds to standard ij, ik, jk pairs, not the atom numbers.
-  // Values for pair_index were worked out by hand by permuting atom indices.
-  if    (pair_ij.ATM1TYPE_IDX == atom_indices[0])
-	{
-		if    (pair_ij.ATM2TYPE_IDX == atom_indices[1])
-		{
-		  if ( pair_jk.ATM2TYPE_IDX == atom_indices[2] ||
-				 pair_jk.ATM1TYPE_IDX == atom_indices[2] )
-			 pair_index = {0,1,2} ;
-		  else
-			 EXIT_MSG("Inconsistent mapping") ;
-		}
-		else if ( pair_ij.ATM2TYPE_IDX == atom_indices[2])
-		{
-		  if ( pair_jk.ATM2TYPE_IDX == atom_indices[1] ||
-				 pair_jk.ATM1TYPE_IDX == atom_indices[1] )
-			 pair_index = {1,0,2} ;
-		  else
-			 EXIT_MSG("Inconsistent mapping") ;
-		} else 
-		{
-		  EXIT_MSG("No match found for " + FF_2BODY[ TYPE_IK].PRPR_NM ) ;
-		}
-
-	}
-	else if( pair_ij.ATM1TYPE_IDX == atom_indices[1])
-	{
-		if    (pair_ij.ATM2TYPE_IDX == atom_indices[0])
-		{
-		  if ( pair_jk.ATM2TYPE_IDX == atom_indices[2] ||
-				 pair_jk.ATM1TYPE_IDX == atom_indices[2] )
-			 pair_index = {0,2,1} ;
-		  else
-			 EXIT_MSG("Inconsistent mapping") ;
-		}
-		else if ( pair_ij.ATM2TYPE_IDX == atom_indices[2] )
-		{
-		  if ( pair_jk.ATM2TYPE_IDX == atom_indices[0] ||
-				 pair_jk.ATM1TYPE_IDX == atom_indices[0] )
-			 pair_index = {2,0,1} ;
-		  else
-			 EXIT_MSG("Inconsistent mapping") ;
-		}
-		else
-		{
-		  EXIT_MSG("No match found for " + FF_2BODY[ TYPE_IK].PRPR_NM ) ;
-		}
-	}
-	else if ( pair_ij.ATM1TYPE_IDX == atom_indices[2] ) 
-	{
-		if    (pair_ij.ATM2TYPE_IDX == atom_indices[0])
-		{
-		  if ( pair_jk.ATM2TYPE_IDX == atom_indices[1] ||
-				 pair_jk.ATM1TYPE_IDX == atom_indices[1] )
-			 pair_index = {1,2,0} ;
-		  else
-			 EXIT_MSG("Inconsistent mapping") ;
-		}
-		else if ( pair_ij.ATM2TYPE_IDX == atom_indices[1] )
-		{
-		  if ( pair_jk.ATM2TYPE_IDX == atom_indices[0] ||
-				 pair_jk.ATM1TYPE_IDX == atom_indices[0] )
-			pair_index = {2,1,0} ;
-		  else
-			 EXIT_MSG("Inconsistent mapping") ;
-		}										
-		else
-		{
-		  EXIT_MSG("No match found for " + FF_2BODY[ TYPE_IK].PRPR_NM ) ;
-		} 
-	}	
-	else 
-	{
-	  EXIT_MSG("No match found for " + FF_2BODY[TYPE_IJ].PRPR_NM ) ;
-	}
-
-#if(0)
-  vector<int> pair_index_2(3) ;
-  map_3b_indices_old(FF_3BODY, FF_2BODY, TYPE_IJ, TYPE_IK, TYPE_JK, pair_index_2) ;
-  for ( int j = 0 ; j < 3 ; j++ ) 
-  {
-	 if ( pair_index[j] != pair_index_2[j] )
-		EXIT_MSG("Pair index did not match") ;
-  }
-#endif
-}
-
-
-#if(1)
-// Not used.  Kept for testing purposes.
-void map_3b_indices_old(TRIPLETS & FF_3BODY, vector<PAIRS>& FF_2BODY,
-										 int TYPE_IJ, int TYPE_IK, int TYPE_JK, 
-										 vector<int>& pair_index) 
-// Matches pair indices to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
-{
-
-  
-  if    (FF_2BODY[ TYPE_IJ ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
-	{
-		if    (FF_2BODY[ TYPE_IK ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
-		{
-			// Then jk = z
-			
-			pair_index = {0,1,2} ;
-		}
-		else if ( FF_2BODY[ TYPE_IK ].PRPR_NM == FF_3BODY.ATOM_PAIRS[2])
-		{
-			pair_index = {0,2,1} ;
-		} else 
-		{
-		  EXIT_MSG("No match found for " + FF_2BODY[ TYPE_IK].PRPR_NM ) ;
-		}
-
-	}
-	else if(FF_2BODY[ TYPE_IJ ].PRPR_NM == FF_3BODY.ATOM_PAIRS[1])
-	{
-		if    (FF_2BODY[ TYPE_IK ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
-		{
-			// Then jk = z
-			pair_index = {1,0,2} ;
-		}
-		else if ( FF_2BODY[ TYPE_IK ].PRPR_NM == FF_3BODY.ATOM_PAIRS[2] )
-		{
-			pair_index = {1,2,0} ;
-		}
-		else
-		{
-		  EXIT_MSG("No match found for " + FF_2BODY[ TYPE_IK].PRPR_NM ) ;
-		}
-	}
-	else if ( FF_2BODY[ TYPE_IJ ].PRPR_NM == FF_3BODY.ATOM_PAIRS[2] )  // TYPE_IJ matches alloweD[i].z
-	{
-		if    (FF_2BODY[ TYPE_IK ].PRPR_NM == FF_3BODY.ATOM_PAIRS[0])
-		{
-			// Then jk = z
-			pair_index = {2,0,1} ;
-		}
-		else
-		{
-			pair_index = {2,1,0} ;
-		}										
-	}	
-	else 
-	{
-	  EXIT_MSG("No match found for " + FF_2BODY[TYPE_IJ].PRPR_NM ) ;
-	}
-}
-#endif
-
 inline void Cheby::set_3b_powers(const TRIPLETS & FF_3BODY, const vector<int> &pair_index, int POWER_SET,
 											int & pow_ij, int & pow_ik, int & pow_jk ) 
 // Matches the allowed powers to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
@@ -697,104 +538,9 @@ void Cheby::map_indices_int(CLUSTER & cluster, vector<int> & atom_type_idx, vect
 	 }
   }
 #endif
- }
+}
 
- #if(0)
- // Not currently used.  Retained for testing purposes.
-
- void SET_4B_CHEBY_POWERS(QUADRUPLETS & PAIR_QUADRUPLET, vector<string> & ATOM_TYPE, vector<int> & pow_map) 
- // Matches the allowed powers to the ij, ik, il... type pairs formed from the atom sixlet ai, aj, ak, al
- // This is based on reordering atoms, not pairs.  Pairs can't be interchanged independently, but atoms can.
- // "pow_map" serves as the map between the powers in the quadruplet and the powers between the atoms.
- {
-	 typedef pair<string,int> 		PAIR_STR_INT;
-
-	 vector <PAIR_STR_INT> 	ATOM_TYPE_AND_INDEX(4);	// [a1/a2/a3/a4 atom pair chemistry][index of pair (from 1-6)]
-	 static int pair_index[4][4] ;
-	 static bool called_before = false ;
-
-	 if ( ! called_before ) 
-	 {
-		pair_index[0][0] = -1 ;
-		pair_index[1][1] = -1 ;
-		pair_index[2][2] = -1 ;
-		pair_index[0][1] = 0 ;
-		pair_index[0][2] = 1 ;
-		pair_index[0][3] = 2 ;
-		pair_index[1][2] = 3 ;
-		pair_index[1][3] = 4 ;
-		pair_index[2][3] = 5 ;
-		for ( int i = 0 ; i < 4 ; i++ ) {
-		  for ( int j = i + 1 ; j < 4 ; j++ ) {
-			 pair_index[j][i] = pair_index[i][j] ;
-		  }
-		}
-		called_before = true ;
-	 }
-
-	 for(int m=0; m<4 ; m++)
-	 { 				
-		 ATOM_TYPE_AND_INDEX[m].first  = ATOM_TYPE[m];					// 
-		 ATOM_TYPE_AND_INDEX[m].second = m;	
-	 }
-
-	 // Code currently assumes ordering of atom names.
-	 for(int m=0; m < 3 ; m++) {
-		if ( PAIR_QUADRUPLET.ATOM_NAMES[m] > PAIR_QUADRUPLET.ATOM_NAMES[m+1] )
-		  EXIT_MSG("ATOM NAMES are out of order") ;
-	 }
-
-	 sort (ATOM_TYPE_AND_INDEX.begin(), ATOM_TYPE_AND_INDEX.end());	// Sort the vector contents... automatically does on the basis of the .first element, preserving "link" between .first and .second
-
-	 vector<int> rev_index(4, -1) ;
-	 for ( int j = 0 ; j < 4 ; j++ ) 
-	 {
-		for ( int i = 0 ; i < 4 ; i++ ) 
-		{
-		  if ( ATOM_TYPE_AND_INDEX[i].second == j ) 
-		  {
-			 rev_index[j] = i ;
-			 break ;
-		  }
-		}
-	 }
-
-	 for ( int j = 0 ; j < 4 ; j++ ) 
-	 {
-		if ( rev_index[j] < 0 ) 
-		  EXIT_MSG("Bad reverse index") ;
-	 }
-
-	 int m = 0 ;
-	 for(int i = 0 ; i < 4 ; i++)
-	 {
-		int ii = rev_index[i] ;
-		for ( int j = i + 1 ; j < 4 ; j++ ) 
-		{
-
-		  int jj = rev_index[j] ;
-		  pow_map[m] = pair_index[ii][jj] ;
-
-		  if ( pow_map[m] < 0 || pow_map[m] > 5 ) 
-			 EXIT_MSG("Permutation power map has a bad value") ;
-		  ++m ;
-		}
-	 }
-
-	 // Double check uniqueness of each value in pow_map.
-	 for ( int m = 0 ; m < 6 ; m++ ) 
-	 {
-		for ( int m1 = 0 ; m1 < 6 ; m1++ ) 
-		{
-		  if ( m1 == m ) continue ;
-		  if ( pow_map[m1] == pow_map[m] )
-			 EXIT_MSG("Permutation power map had a repeated value" ) ;
-		}
-	 }
- }
- #endif
-
- void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
+void Cheby::Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX)
  // Calculate derivatives of the forces wrt the Chebyshev parameters. Stores minimum distance between a pair of atoms in minD[i].
  {
 	 XYZ RAB; 		// Replaces  Rab[3];
@@ -808,7 +554,7 @@ void Cheby::map_indices_int(CLUSTER & cluster, vector<int> & atom_type_idx, vect
 	 double deriv;
 	 double tmp_doub; 	
 
-	 double VOL = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
+	 double inv_vol = 1.0 / (SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z) ;
 
 	 if ( ! called_before ) 
 	 {
@@ -950,26 +696,26 @@ void Cheby::map_indices_int(CLUSTER & cluster, vector<int> & atom_type_idx, vect
 
 		 for ( int i = 0; i < CONTROLS.TOT_SNUM; i++ ) 
 		 {
-			 FRAME_A_MATRIX[SYSTEM.ATOMS][i].X /= VOL;
-			 FRAME_A_MATRIX[SYSTEM.ATOMS][i].Y /= VOL;
-			 FRAME_A_MATRIX[SYSTEM.ATOMS][i].Z /= VOL;	 
+			 FRAME_A_MATRIX[SYSTEM.ATOMS][i].X *= inv_vol;
+			 FRAME_A_MATRIX[SYSTEM.ATOMS][i].Y *= inv_vol;
+			 FRAME_A_MATRIX[SYSTEM.ATOMS][i].Z *= inv_vol;	 
 		 }
 	 }
 	 else if (CONTROLS.FIT_STRESS_ALL)
 	 {		
 		 for ( int i = 0; i < CONTROLS.TOT_SNUM; i++ ) 
 				{
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][i].Z /= VOL;	 
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][i].Z *= inv_vol;	 
 			
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][i].Z /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][i].Z *= inv_vol;
 			
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][i].Z /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][i].Z *= inv_vol;
 		}
 		
 	}
@@ -1019,16 +765,15 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 	double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
 	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
 	
-	double VOL = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
+	double inv_vol = 1.0 / (SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z) ;
 
 	vector<CLUSTER> &PAIR_TRIPLETS = TRIPS.VEC ;
-	map<string,int> &TRIAD_MAP= TRIPS.MAP ;
 
 	bool FORCE_IS_ZERO_IJ, FORCE_IS_ZERO_IK, FORCE_IS_ZERO_JK;
 
 	vector<int> pair_index(3) ;
 	vector<double> x_diff(3), x_avg(3) ;
-	vector<int> atom_type_idx(3) ;
+	vector<int> atom_type_index(3) ;
 
 	if ( ! called_before ) 
 	{
@@ -1108,19 +853,13 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 																	 SYSTEM.PARENT) ;
 				curr_pair_type_idx_jk =  get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
 																	 SYSTEM.PARENT) ;
-				// Determine the FF type for the given triplet
 
-				TEMP_STR =      FF_2BODY[curr_pair_type_idx_ij].PRPR_NM;
-				TEMP_STR.append(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM);	
-				TEMP_STR.append(FF_2BODY[curr_pair_type_idx_jk].PRPR_NM);
+				atom_type_index[0] = SYSTEM.get_atomtype_idx(a1) ;
+				atom_type_index[1] = SYSTEM.get_atomtype_idx(a2) ;
+				atom_type_index[2] = SYSTEM.get_atomtype_idx(a3) ;
 
-				if ( TRIAD_MAP.find(TEMP_STR) == TRIAD_MAP.end() ) 
-				{
-				  cout << "Could not find triad map for " << TEMP_STR << endl ;
-				  exit_run(0) ;
-				}
-
-				curr_triple_type_index = TRIAD_MAP[TEMP_STR];
+				int tidx = TRIPS.make_id_int(atom_type_index) ;
+				curr_triple_type_index = TRIPS.INT_MAP[tidx];
 				
 				// If this type has been excluded, then skip to the next iteration of the loop
 
@@ -1128,6 +867,11 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 				{
 				  //cout << "Interaction " << TEMP_STR << " is excluded\n" ;
 				  continue;
+				}
+
+				for ( int j = 0 ; j < 3 ; j++ ) 
+				{
+				  pair_index[j] = TRIPS.PAIR_INDICES[tidx][j] ;
 				}
 
 				rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
@@ -1139,12 +883,6 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 										 // curr_pair_type_idx_ij,
 										 // curr_pair_type_idx_ik, curr_pair_type_idx_jk,
 										 // pair_index) ;
-
-				atom_type_idx[0] = SYSTEM.get_atomtype_idx(a1) ;
-				atom_type_idx[1] = SYSTEM.get_atomtype_idx(a2) ;
-				atom_type_idx[2] = SYSTEM.get_atomtype_idx(a3) ;
-
-				map_indices_int(PAIR_TRIPLETS[curr_triple_type_index], atom_type_idx, pair_index) ;
 
 				S_MAXIM_IJ = PAIR_TRIPLETS[curr_triple_type_index].S_MAXIM[pair_index[0]] ;
 				S_MAXIM_IK = PAIR_TRIPLETS[curr_triple_type_index].S_MAXIM[pair_index[1]] ;
@@ -1512,9 +1250,9 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 	{
 		for(int i=0; i<CONTROLS.NUM_3B_CHEBY; i++) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms+i].Z /= VOL;	
+			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms+i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms+i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms+i].Z *= inv_vol;	
 		}
 	}
 	
@@ -1522,17 +1260,17 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 	{
 		for(int i=0; i<CONTROLS.NUM_3B_CHEBY; i++) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms+i].Z /= VOL;	
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms+i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms+i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms+i].Z *= inv_vol;	
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms+i].Z /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms+i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms+i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms+i].Z *= inv_vol;
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms+i].Z /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms+i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms+i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms+i].Z *= inv_vol;
 		}
 	}	
 }
@@ -1579,7 +1317,7 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 	vector<double> x_avg(6) ;
 	vector<double> x_diff(6) ;
 
-	double VOL = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
+	double inv_vol = 1.0 / ( SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z ) ;
 	
 	vector<bool> FORCE_IS_ZERO(6);	// replaces FORCE_IS_ZERO_IJ, FORCE_IS_ZERO_IK, FORCE_IS_ZERO_JK;
 	
@@ -1590,7 +1328,6 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 	vector<int> pow_map(6);
 
 	vector<QUADRUPLETS>& PAIR_QUADRUPLETS = QUADS.VEC ;
-	vector<int>& INT_QUAD_MAP = QUADS.INT_MAP ;
 
 	if (!called_before) 
 	{
@@ -1718,7 +1455,7 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 			
 					ATOM_QUAD_ID_INT       = QUADS.make_id_int(atom_type_index) ;
 
-					curr_quad_type_index = INT_QUAD_MAP[ATOM_QUAD_ID_INT];
+					curr_quad_type_index = QUADS.INT_MAP[ATOM_QUAD_ID_INT];
 					// If this type has been excluded, then skip to the next iteration of the loop
 					if(curr_quad_type_index<0)
 						continue;
@@ -1750,9 +1487,6 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 					// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are within the allowed range.
 					// Unlike the 2-body Cheby, extrapolation/refitting to handle behavior outside of fitting regime is not straightforward.
 					
-					for (int f=0; f<6; f++)
-						FORCE_IS_ZERO[f] = false;
-					
 					if( !PAIR_QUADRUPLETS[curr_quad_type_index].FORCE_CUTOFF.PROCEED(rlen[0], S_MINIM[0], S_MAXIM[0]))
 						continue;
 					if( !PAIR_QUADRUPLETS[curr_quad_type_index].FORCE_CUTOFF.PROCEED(rlen[1], S_MINIM[1], S_MAXIM[1]))
@@ -1773,12 +1507,13 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 					
 					for (int f=0; f<6; f++)
 					{
-						rlen_dummy[f] = rlen[f];
-						
 						if(rlen[f] < S_MINIM[f])
 						{
 							rlen_dummy[f] = S_MINIM[f];
 							FORCE_IS_ZERO[f] = true;
+						} else {
+						  rlen_dummy[f] = rlen[f];
+						  FORCE_IS_ZERO[f] = false;
 						}
 					}
 
@@ -2013,9 +1748,9 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 	{
 		for(int i=0; i<CONTROLS.NUM_4B_CHEBY; i++) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms + n_3b_cheby_terms+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms + n_3b_cheby_terms+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms + n_3b_cheby_terms+i].Z /= VOL;	
+			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms + n_3b_cheby_terms+i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms + n_3b_cheby_terms+i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS][n_2b_cheby_terms + n_3b_cheby_terms+i].Z *= inv_vol;	
 		}
 	}
 	
@@ -2023,17 +1758,17 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 	{
 		for(int i=0; i<CONTROLS.NUM_4B_CHEBY; i++) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms + n_3b_cheby_terms+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms + n_3b_cheby_terms+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms + n_3b_cheby_terms+i].Z /= VOL;	
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms + n_3b_cheby_terms+i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms + n_3b_cheby_terms+i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS  ][n_2b_cheby_terms + n_3b_cheby_terms+i].Z *= inv_vol;	
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms + n_3b_cheby_terms+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms + n_3b_cheby_terms+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms + n_3b_cheby_terms+i].Z /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms + n_3b_cheby_terms+i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms + n_3b_cheby_terms+i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+1][n_2b_cheby_terms + n_3b_cheby_terms+i].Z *= inv_vol;
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms + n_3b_cheby_terms+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms + n_3b_cheby_terms+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms + n_3b_cheby_terms+i].Z /= VOL;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms + n_3b_cheby_terms+i].X *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms + n_3b_cheby_terms+i].Y *= inv_vol;
+			FRAME_A_MATRIX[SYSTEM.ATOMS+2][n_2b_cheby_terms + n_3b_cheby_terms+i].Z *= inv_vol;
 		}
 	}	
 }
@@ -2359,12 +2094,9 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 	 rlen_ik = get_dist(SYSTEM, RAB_IK, a1, a3);	// Updates RAB!
 	 rlen_jk = get_dist(SYSTEM, RAB_JK, a2, a3);	// Updates RAB!
 
-	 for ( int j = 0 ; j < 3 ; j++ ) {
-		pair_index[j] = TRIPS.PAIR_INDICES[tidx][j] ;
-	 }
-
 	 for ( int j = 0 ; j < 3 ; j++ ) 
 	 {
+		pair_index[j] = TRIPS.PAIR_INDICES[tidx][j] ;
 		s_maxim[j] = FF_3BODY[curr_triple_type_index].S_MAXIM[pair_index[j]] ;
 		s_minim[j] = FF_3BODY[curr_triple_type_index].S_MINIM[pair_index[j]] ;
 		x_diff[j]  = FF_3BODY[curr_triple_type_index].X_DIFF[pair_index[j]] ;
@@ -2445,21 +2177,22 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 				SYSTEM.PRESSURE_XYZ    -= force_ik * rlen_ik;
 				SYSTEM.PRESSURE_XYZ    -= force_jk * rlen_jk;
 							
-				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
-							
-				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ik * RAB_IK.X * RAB_IK.X / rlen_ik;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ik * RAB_IK.Y * RAB_IK.Y / rlen_ik;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ik * RAB_IK.Z * RAB_IK.Z / rlen_ik;
-							
-				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_jk * RAB_JK.X * RAB_JK.X / rlen_jk;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_jk * RAB_JK.Y * RAB_JK.Y / rlen_jk;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;
-							
 				force_ij /= rlen_ij;
 				force_ik /= rlen_ik;
 				force_jk /= rlen_jk;
+
+				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ij * RAB_IJ.X * RAB_IJ.X ;
+				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ij * RAB_IJ.Y * RAB_IJ.Y ;
+				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ij * RAB_IJ.Z * RAB_IJ.Z ;
+							
+				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ik * RAB_IK.X * RAB_IK.X ;
+				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ik * RAB_IK.Y * RAB_IK.Y ;
+				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ik * RAB_IK.Z * RAB_IK.Z ;
+							
+				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_jk * RAB_JK.X * RAB_JK.X ;
+				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_jk * RAB_JK.Y * RAB_JK.Y ;
+				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_jk * RAB_JK.Z * RAB_JK.Z ;
+							
 
 				// Apply forces to ij pair
 			      
@@ -2832,12 +2565,12 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		for(int j=0; j<6; j++)
 		{
 		  SYSTEM.PRESSURE_XYZ -= force_4b[j] * rlen[j];
-					
-		  SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_4b[j] * RAB[j].X * RAB[j].X / rlen[j];
-		  SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_4b[j] * RAB[j].Y * RAB[j].Y / rlen[j];
-		  SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_4b[j] * RAB[j].Z * RAB[j].Z / rlen[j];
-					
+
 		  force_4b[j] /= rlen[j];
+					
+		  SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_4b[j] * RAB[j].X * RAB[j].X ;
+		  SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_4b[j] * RAB[j].Y * RAB[j].Y ;
+		  SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_4b[j] * RAB[j].Z * RAB[j].Z ;
 		}
 
 		// Apply forces to ij pair

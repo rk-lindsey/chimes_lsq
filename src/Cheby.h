@@ -35,10 +35,6 @@ public:
   // Calculate the 4-body Chebyshev force
   void Force_4B(CLUSTER_LIST &QUADS) ;
 
-// Matches pair indices to the ij. ik, jk type pairs formed from the atom triplet ai, aj, ak 
-  void map_3b_indices(TRIPLETS & FF_3BODY, 
-							 int TYPE_IJ, int TYPE_IK, int TYPE_JK, 
-							 vector<int>& pair_index) ;
   // General function to Matches pair indices to the ij. ik, jk type pairs formed from the atoms in the cluster.
   void map_indices(CLUSTER & cluster, vector<string> & atom_type, vector<int> & pair_map) ;
 
