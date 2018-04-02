@@ -28,9 +28,6 @@ using namespace std;
 // Note: "Inline" tells the compiler to replace function calls with the actual contents of the function
 //       to enhance efficiency.. "undoes" modularity at runtime to speed things up.
 
-//static void map_3b_indices_old(TRIPLETS & FF_3BODY, vector<PAIRS>& FF_2BODY,
-//										 int TYPE_IJ, int TYPE_IK, int TYPE_JK, 
-//										 vector<int>& pair_index)  ;
 
 inline double Cheby::fix_val(double x)
 //Takes care of cheby xformed dist behavior outside of allowed range
@@ -1576,22 +1573,22 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 					{
 					    row_offset = PAIR_QUADRUPLETS[curr_quad_type_index].PARAM_INDICES[i];
 						
-						for (int f=0; f<6; f++)	// This isn't necessary, but it makes the code cleaner to read. We can worry about efficiency a bit later.
-							powers[f] = PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][f];
+						for (int f=0; f<6; f++)	
+							powers[f] = PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][pow_map[f]];
 
-					    deriv[0] =  fcut[0] * Tnd_ij[powers[pow_map[0]]] + fcut_deriv[0] * Tn_ij[powers[pow_map[0]]];
-						 deriv[1] =  fcut[1] * Tnd_ik[powers[pow_map[1]]] + fcut_deriv[1] * Tn_ik[powers[pow_map[1]]];
-						 deriv[2] =  fcut[2] * Tnd_il[powers[pow_map[2]]] + fcut_deriv[2] * Tn_il[powers[pow_map[2]]];
-						 deriv[3] =  fcut[3] * Tnd_jk[powers[pow_map[3]]] + fcut_deriv[3] * Tn_jk[powers[pow_map[3]]];
-						 deriv[4] =  fcut[4] * Tnd_jl[powers[pow_map[4]]] + fcut_deriv[4] * Tn_jl[powers[pow_map[4]]];
-						 deriv[5] =  fcut[5] * Tnd_kl[powers[pow_map[5]]] + fcut_deriv[5] * Tn_kl[powers[pow_map[5]]];
+					    deriv[0] =  fcut[0] * Tnd_ij[powers[0]] + fcut_deriv[0] * Tn_ij[powers[0]];
+						 deriv[1] =  fcut[1] * Tnd_ik[powers[1]] + fcut_deriv[1] * Tn_ik[powers[1]];
+						 deriv[2] =  fcut[2] * Tnd_il[powers[2]] + fcut_deriv[2] * Tn_il[powers[2]];
+						 deriv[3] =  fcut[3] * Tnd_jk[powers[3]] + fcut_deriv[3] * Tn_jk[powers[3]];
+						 deriv[4] =  fcut[4] * Tnd_jl[powers[4]] + fcut_deriv[4] * Tn_jl[powers[4]];
+						 deriv[5] =  fcut[5] * Tnd_kl[powers[5]] + fcut_deriv[5] * Tn_kl[powers[5]];
 
-						force_wo_coeff[0] = deriv[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4] * fcut[5]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_jl[powers[pow_map[4]]]  * Tn_kl[powers[pow_map[5]]];
-						force_wo_coeff[1] = deriv[1] * fcut[0] * fcut[2] * fcut[3] * fcut[4] * fcut[5]  * Tn_ij[powers[pow_map[0]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_jl[powers[pow_map[4]]]  * Tn_kl[powers[pow_map[5]]];
-						force_wo_coeff[2] = deriv[2] * fcut[0] * fcut[1] * fcut[3] * fcut[4] * fcut[5]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_jl[powers[pow_map[4]]]  * Tn_kl[powers[pow_map[5]]];
-						force_wo_coeff[3] = deriv[3] * fcut[0] * fcut[1] * fcut[2] * fcut[4] * fcut[5]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jl[powers[pow_map[4]]]  * Tn_kl[powers[pow_map[5]]];
-						force_wo_coeff[4] = deriv[4] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[5]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_kl[powers[pow_map[5]]];
-						force_wo_coeff[5] = deriv[5] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4]  * Tn_ij[powers[pow_map[0]]]  * Tn_ik[powers[pow_map[1]]]  * Tn_il[powers[pow_map[2]]]  * Tn_jk[powers[pow_map[3]]]  * Tn_jl[powers[pow_map[4]]];
+						force_wo_coeff[0] = deriv[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4] * fcut[5]  * Tn_ik[powers[1]]  * Tn_il[powers[2]]  * Tn_jk[powers[3]]  * Tn_jl[powers[4]]  * Tn_kl[powers[5]];
+						force_wo_coeff[1] = deriv[1] * fcut[0] * fcut[2] * fcut[3] * fcut[4] * fcut[5]  * Tn_ij[powers[0]]  * Tn_il[powers[2]]  * Tn_jk[powers[3]]  * Tn_jl[powers[4]]  * Tn_kl[powers[5]];
+						force_wo_coeff[2] = deriv[2] * fcut[0] * fcut[1] * fcut[3] * fcut[4] * fcut[5]  * Tn_ij[powers[0]]  * Tn_ik[powers[1]]  * Tn_jk[powers[3]]  * Tn_jl[powers[4]]  * Tn_kl[powers[5]];
+						force_wo_coeff[3] = deriv[3] * fcut[0] * fcut[1] * fcut[2] * fcut[4] * fcut[5]  * Tn_ij[powers[0]]  * Tn_ik[powers[1]]  * Tn_il[powers[2]]  * Tn_jl[powers[4]]  * Tn_kl[powers[5]];
+						force_wo_coeff[4] = deriv[4] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[5]  * Tn_ij[powers[0]]  * Tn_ik[powers[1]]  * Tn_il[powers[2]]  * Tn_jk[powers[3]]  * Tn_kl[powers[5]];
+						force_wo_coeff[5] = deriv[5] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4]  * Tn_ij[powers[0]]  * Tn_ik[powers[1]]  * Tn_il[powers[2]]  * Tn_jk[powers[3]]  * Tn_jl[powers[4]];
 						
 #if(0)
 						if ( a1 == 1 || fidx_a2 == 1 || fidx_a3 == 1 || fidx_a4 == 1 )
@@ -1622,7 +1619,7 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 							 cout << "Index = " << ifl << endl ;
 							 cout << "Fcut " << fcut[ifl] << endl ;
 							 cout << "Fcut_deriv " << fcut_deriv[ifl] << endl ;
-							 cout << "Powers " << powers[pow_map[ifl]] << endl ;
+							 cout << "Powers " << powers[ifl]] << endl ;
 							 cout << "Pow_map " << pow_map[ifl] << endl ;
 						  }						  
 						  cout << "Allowed_powers" ;
@@ -2487,26 +2484,38 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		double coeff = FF_4BODY[curr_quad_type_index].PARAMS[i];
 
 		for ( int f = 0 ; f < 6 ; f++ ) 
-		  powers[f] = FF_4BODY[curr_quad_type_index].ALLOWED_POWERS[i][f] ;
+		  powers[f] = FF_4BODY[curr_quad_type_index].ALLOWED_POWERS[i][pow_map[f]] ;
 
 
 		SYSTEM.TOT_POT_ENER += coeff * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] 
-		  * Tn_4b_ij[powers[pow_map[0]]] * Tn_4b_ik[powers[pow_map[1]]] * Tn_4b_il[powers[pow_map[2]]] 
-		  * Tn_4b_jk[powers[pow_map[3]]] * Tn_4b_jl[powers[pow_map[4]]] * Tn_4b_kl[powers[pow_map[5]]]; 			
+		  * Tn_4b_ij[powers[0]] * Tn_4b_ik[powers[1]] * Tn_4b_il[powers[2]] 
+		  * Tn_4b_jk[powers[3]] * Tn_4b_jl[powers[4]] * Tn_4b_kl[powers[5]]; 			
 
-		deriv_4b[0] = fcut_4b[0] * Tnd_4b_ij[powers[pow_map[0]]] + fcut_deriv_4b[0] * Tn_4b_ij[powers[pow_map[0]]];
-		deriv_4b[1] = fcut_4b[1] * Tnd_4b_ik[powers[pow_map[1]]] + fcut_deriv_4b[1] * Tn_4b_ik[powers[pow_map[1]]];
-		deriv_4b[2] = fcut_4b[2] * Tnd_4b_il[powers[pow_map[2]]] + fcut_deriv_4b[2] * Tn_4b_il[powers[pow_map[2]]];
-		deriv_4b[3] = fcut_4b[3] * Tnd_4b_jk[powers[pow_map[3]]] + fcut_deriv_4b[3] * Tn_4b_jk[powers[pow_map[3]]];
-		deriv_4b[4] = fcut_4b[4] * Tnd_4b_jl[powers[pow_map[4]]] + fcut_deriv_4b[4] * Tn_4b_jl[powers[pow_map[4]]];
-		deriv_4b[5] = fcut_4b[5] * Tnd_4b_kl[powers[pow_map[5]]] + fcut_deriv_4b[5] * Tn_4b_kl[powers[pow_map[5]]];
+		deriv_4b[0] = fcut_4b[0] * Tnd_4b_ij[powers[0]] + fcut_deriv_4b[0] * Tn_4b_ij[powers[0]];
+		deriv_4b[1] = fcut_4b[1] * Tnd_4b_ik[powers[1]] + fcut_deriv_4b[1] * Tn_4b_ik[powers[1]];
+		deriv_4b[2] = fcut_4b[2] * Tnd_4b_il[powers[2]] + fcut_deriv_4b[2] * Tn_4b_il[powers[2]];
+		deriv_4b[3] = fcut_4b[3] * Tnd_4b_jk[powers[3]] + fcut_deriv_4b[3] * Tn_4b_jk[powers[3]];
+		deriv_4b[4] = fcut_4b[4] * Tnd_4b_jl[powers[4]] + fcut_deriv_4b[4] * Tn_4b_jl[powers[4]];
+		deriv_4b[5] = fcut_4b[5] * Tnd_4b_kl[powers[5]] + fcut_deriv_4b[5] * Tn_4b_kl[powers[5]];
 				
-		force_4b[0]  = coeff * deriv_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]]  * Tn_4b_kl[powers[pow_map[5]]];
-		force_4b[1]  = coeff * deriv_4b[1] * fcut_4b[0] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]]  * Tn_4b_kl[powers[pow_map[5]]];
-		force_4b[2]  = coeff * deriv_4b[2] * fcut_4b[0] * fcut_4b[1] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]]  * Tn_4b_kl[powers[pow_map[5]]];
-		force_4b[3]  = coeff * deriv_4b[3] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[4] * fcut_4b[5]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jl[powers[pow_map[4]]]  * Tn_4b_kl[powers[pow_map[5]]];
-		force_4b[4]  = coeff * deriv_4b[4] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_kl[powers[pow_map[5]]];
-		force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4]  * Tn_4b_ij[powers[pow_map[0]]]  * Tn_4b_ik[powers[pow_map[1]]]  * Tn_4b_il[powers[pow_map[2]]]  * Tn_4b_jk[powers[pow_map[3]]]  * Tn_4b_jl[powers[pow_map[4]]];
+		force_4b[0]  = coeff * deriv_4b[0] 
+		  * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  
+		  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[1]  = coeff * deriv_4b[1] 
+		  * fcut_4b[0] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  
+		  * Tn_4b_ij[powers[0]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[2]  = coeff * deriv_4b[2] 
+		  * fcut_4b[0] * fcut_4b[1] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  
+		  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[3]  = coeff * deriv_4b[3] 
+		  * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[4] * fcut_4b[5]  
+		  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[4]  = coeff * deriv_4b[4] 
+		  * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5]  
+		  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_kl[powers[5]];
+		force_4b[5]  = coeff * deriv_4b[5] 
+		  * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4]  
+		  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]];
 
 #if(0)
 		if ( a1 == 1 || fidx_a2 == 1 || fidx_a3 == 1 || fidx_a4 == 1 )
@@ -2551,7 +2560,7 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 			 cout << "Index = " << ifl << endl ;
 			 cout << "Fcut " << fcut_4b[ifl] << endl ;
 			 cout << "Fcut_deriv " << fcut_deriv_4b[ifl] << endl ;
-			 cout << "Powers " << powers[pow_map[ifl]] << endl ;
+			 cout << "Powers " << powers[ifl]] << endl ;
 			 cout << "Pow_map " << pow_map[ifl] << endl ;
 		  }
 		  cout << "Allowed_powers" ;
