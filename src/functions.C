@@ -643,7 +643,6 @@ static void ZCalc_Poly_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 
 static void ZCalc_InvR_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
-
 //////////////////////////////////////////
 //
 //	FUNCTION HEADERS -- FORCE CALCULATION
@@ -658,6 +657,9 @@ static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 
 static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
 								 map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+
+static void ZCalc_Cluster(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST) ;
+
 
 ////////////////////////////////////////////////////////////
 //
@@ -1541,7 +1543,9 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 	else if ( FF_2BODY[0].PAIRTYP == "SPLINE" ) 
 	  ZCalc_Spline(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);	
 	
-    else 
+	else if ( FF_2BODY[0].PAIRTYP == "CLUSTER" )
+	  	  ZCalc_Cluster(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);	
+	else 
     {
 		cout << "Error: bad pairtype in ZCalc: " << FF_2BODY[0].PAIRTYP << endl;
 		exit_run(1);
@@ -1574,6 +1578,7 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 
   return;
 }
+
 
 static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
 // Calculate LJ interaction.. first parameter is epsilon, second parameter is sigma. ...eventually SMAX should be used for the pair distance cutoff value...
@@ -1644,6 +1649,151 @@ static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 			}			
 		}
 	}
+}
+
+
+
+static void ZCalc_Cluster(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
+// Many-body Cluster interaction model used for testing purposes.
+{
+  XYZ	RVEC ;
+  double	rlen_mi;
+  double	fac;
+  string	TEMP_STR;
+	
+  // Set up for MPI
+	
+  int a1start, a1end;
+  int a2start, a2end;
+  int fidx_a2;
+  int curr_pair_type_idx ;
+  double neighbors = 0.0 ;
+
+#ifndef LINK_LAMMPS
+  divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+#else
+  a1start = SYSTEM.MY_ATOMS_START;
+  a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
+#endif
+
+  double rcutoff2 = 2.0 ;   // Cutoff of the many-body interaction.
+  double poten_pow = 3.0 ;  // Power used in calculating the many-body interaction.
+  double cluster_rmin = 0.5 ;  // Prevent large cluster forces as small distances.
+  
+  for(int a1= a1start;a1 <= a1end; a1++ ) 
+  {
+	 double poten = 1.0 ;
+
+	 a2start = 0;
+	 a2end   = a1end ;
+
+	 neighbors = 0.0 ;		
+	 for(int a2idx =a2start; a2idx <= a2end ; a2idx++)
+	 {			
+		int a2 = a2idx ;
+		
+		if ( a2 == a1 )
+		  continue ;
+
+#ifndef LINK_LAMMPS
+		curr_pair_type_idx =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+#else
+		curr_pair_type_idx =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
+#endif
+		
+		// pair interaction cutoff distance.
+		double rcutoff = FF_2BODY[curr_pair_type_idx].S_MAXIM;
+		double eps = 0.05 ;
+		
+		rlen_mi = get_dist(SYSTEM, RVEC, a1, a2);
+
+		if ( rlen_mi < rcutoff )
+		{
+		  // Lennard-Jones Interaction with cubic cutoff.
+		  double poten2 = 4.0 * eps * ( pow(1.0/rlen_mi,12.0) - pow(1.0/rlen_mi,6.0) )
+			 * pow(rcutoff - rlen_mi,3.0) ;
+			 //* pow(rcutoff-rlen_mi, 3.0) ;
+
+		  SYSTEM.TOT_POT_ENER += poten2 ;
+		  fac = 4.0 * eps * ( -12.0 * pow(1.0/rlen_mi,14.0) + 6.0 * pow(1.0/rlen_mi,8.0) )
+			 * pow(rcutoff - rlen_mi,3.0) 
+			 - 3.0 * poten2 / ((rcutoff - rlen_mi) * rlen_mi); // * pow(rcutoff-rlen_mi, 2.0) / rlen_mi ;
+		  
+		  SYSTEM.PRESSURE_XYZ -= fac * (rlen_mi*rlen_mi);
+				
+		  SYSTEM.PRESSURE_TENSORS_XYZ.X -= fac * rlen_mi * RVEC.X * RVEC.X / rlen_mi;
+		  SYSTEM.PRESSURE_TENSORS_XYZ.Y -= fac * rlen_mi * RVEC.Y * RVEC.Y / rlen_mi;
+		  SYSTEM.PRESSURE_TENSORS_XYZ.Z -= fac * rlen_mi * RVEC.Z * RVEC.Z / rlen_mi;
+	
+		  SYSTEM.ACCEL[a1].X += RVEC.X*fac;
+		  SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
+		  SYSTEM.ACCEL[a1].Z += RVEC.Z*fac;
+
+		  fidx_a2 = SYSTEM.PARENT[a2];
+
+		  SYSTEM.ACCEL[fidx_a2].X -= RVEC.X*fac;
+		  SYSTEM.ACCEL[fidx_a2].Y -= RVEC.Y*fac;
+		  SYSTEM.ACCEL[fidx_a2].Z -= RVEC.Z*fac;
+		}
+
+		// Many-body cluster term.  Includes a regularization for small r (cluster_rmin)
+		// and a force cutoff at rcutoff2.
+		if ( rlen_mi < rcutoff2 )
+		{
+		  poten *= pow(1.0/(rlen_mi+cluster_rmin), poten_pow) * pow(rcutoff2-rlen_mi, 3.0) ;
+		}
+	 }
+
+	 poten = -160.0 * poten ;
+	 SYSTEM.TOT_POT_ENER += poten ;
+	 
+	 for(int a2idx =a2start; a2idx <= a2end; a2idx++)
+	 {			
+		int a2 = a2idx ;
+
+		if ( a2 == a1 )
+		  continue ;
+		
+#ifndef LINK_LAMMPS
+		curr_pair_type_idx =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+#else
+		curr_pair_type_idx =  INT_PAIR_MAP[(SYSTEM.ATOMTYPE_IDX[a1]-1)*CONTROLS.NATMTYP + (SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]-1)];
+#endif
+
+
+		rlen_mi = get_dist(SYSTEM, RVEC, a1, a2);
+
+		cout << "Distance between atom " << a1 << " and " << a2 << " = " << rlen_mi << endl ;
+
+ 		if ( rlen_mi < rcutoff2 )
+ 		{
+ 		  double term = -poten_pow / ( (rlen_mi+cluster_rmin) * rlen_mi ) -
+			 3.0 / ( (rcutoff2 - rlen_mi) * rlen_mi ) ;
+		  
+ 		  fac = poten * term ;
+		  
+ 		  SYSTEM.PRESSURE_XYZ -= fac * (rlen_mi*rlen_mi);
+			
+ 		  SYSTEM.PRESSURE_TENSORS_XYZ.X -= fac * rlen_mi * RVEC.X * RVEC.X / rlen_mi;
+ 		  SYSTEM.PRESSURE_TENSORS_XYZ.Y -= fac * rlen_mi * RVEC.Y * RVEC.Y / rlen_mi;
+ 		  SYSTEM.PRESSURE_TENSORS_XYZ.Z -= fac * rlen_mi * RVEC.Z * RVEC.Z / rlen_mi;
+	
+ 		  SYSTEM.ACCEL[a1].X += RVEC.X*fac;
+ 		  SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
+ 		  SYSTEM.ACCEL[a1].Z += RVEC.Z*fac;
+
+ 		  fidx_a2 = SYSTEM.PARENT[a2];
+
+ 		  SYSTEM.ACCEL[fidx_a2].X -= RVEC.X*fac;
+ 		  SYSTEM.ACCEL[fidx_a2].Y -= RVEC.Y*fac;
+ 		  SYSTEM.ACCEL[fidx_a2].Z -= RVEC.Z*fac;
+
+		  //cout << "Found neighbor between atom " << a1 << " and " << a2 << endl ;
+		  neighbors += 1.0 ;
+		}	
+	 }
+	 cout << "Coordination for atom " << a1 << " = " << neighbors << endl ;
+  }
 }
 
 static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)

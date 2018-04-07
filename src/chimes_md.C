@@ -234,6 +234,7 @@ int main(int argc, char* argv[])
   ifstream CMPR_FORCEFILE;	// Holds the forces that were read in for comparison purposes
   ofstream OUT_FORCEFILE;		// Holds the forces that are computed and are to be printed out
   ofstream OUT_FORCELABL;		// Holds the forces that are computed and are to be printed out.. has atom labels
+  ofstream OUT_XYZF ;        // Print out positions and forces in same format as for force matching.
   ofstream OUT_VELOCFILE;		// Holds the velocities that are computed and are to be printed out
   ofstream STATISTICS;		// Holds a copy of the "Step      Time          Ktot/N          Vtot/N ..." part of the output file.. uninterrupted by warnings
 	
@@ -268,6 +269,7 @@ int main(int argc, char* argv[])
   {
 	 OUT_FORCEFILE.open("forceout.txt");	
 	 OUT_FORCELABL.open("forceout-labeled.txt");		
+	 OUT_XYZF.open("forceout.xyzf") ;
   }
 
   // velocity
@@ -1277,6 +1279,23 @@ FF_SETUP_2:
 
 	 if ( CONTROLS.PRINT_FORCE && (CONTROLS.STEP+1)%CONTROLS.FREQ_FORCE == 0 && RANK == 0 ) 
 	 {
+			// xyzf output allows to test force-matching against an MD run.
+			OUT_XYZF.precision(10) ;
+
+			OUT_XYZF << SYSTEM.ATOMS << endl ;
+			OUT_XYZF << scientific << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " " ;
+// 			if ( CONTROLS.PRINT_STRESS ) 
+// 			{
+// 				for ( int i = 0 ; i < 6 ; i++ ) 
+// 				{
+// 					OUT_XYZF << scientific << SYSTEM.VIRIAL_CALC[i] * GPa << " " ;
+// 				}
+//			}
+			OUT_XYZF << endl ;
+
+			// convert xyzf forces to Hartree per Bohr
+		double fconv = Hartree*Bohr;
+
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 		{
 		  OUT_FORCEFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].X << endl;
@@ -1286,6 +1305,9 @@ FF_SETUP_2:
 		  OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].X << endl;
 		  OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Y << endl;
 		  OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Z << endl;
+
+		  OUT_XYZF << SYSTEM.ATOMTYPE[a1] << " " << SYSTEM.COORDS[a1].X << " " << SYSTEM.COORDS[a1].Y << " " << SYSTEM.COORDS[a1].Z << " " ;
+		  OUT_XYZF << SYSTEM.ACCEL[a1].X / fconv << " " << SYSTEM.ACCEL[a1].Y / fconv << " " << SYSTEM.ACCEL[a1].Z / fconv << endl ;
 		}
 	 }
 
@@ -3664,7 +3686,11 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  }
 		  else if(TEMP_TYPE =="LJ")
 		  {
-			 FF_2BODY[i].SNUM = 2;
+			 FF_2BODY[i].SNUM = 2 ;
+		  }
+		  else if ( TEMP_TYPE == "CLUSTER" )
+		  {
+			 FF_2BODY[i].SNUM = 0 ;
 		  }
 		  else // Splines type
 		  {

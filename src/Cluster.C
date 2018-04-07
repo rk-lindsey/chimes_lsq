@@ -945,7 +945,11 @@ void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector
 	 for ( int j = 0 ; j < NPAIRS ; j++ ) {
 		int_map_str += pairs[j] ;
 	 }
-		
+
+#ifdef DEBUG_CLUSTER
+	 cout << "MAP[ " << int_map_str << " = " << MAP[int_map_str] << endl ;
+#endif
+	 
 	 if ( MAP.find(int_map_str) != MAP.end() )
 	 {
 		INT_MAP[idx1] = MAP[int_map_str];

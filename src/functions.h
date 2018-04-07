@@ -66,6 +66,7 @@ using namespace std;
 // Unit converters 
 static const double ke      = 332.0637157615209;	// Converter between electron units and Stillinger units for Charge*Charge.
 static const double Hartree = 627.50961; 			// 1 Hartree in kcal/mol.
+static const double Bohr    = 1.889725989 ;     // 1 Angstrom in Bohr.
 static const double Kb      = 0.001987; 			// Boltzmann constant in kcal/mol-K.
 static const double Tfs     = 48.888;   			// Internal time unit in fs.
 static const double GPa     = 6.9479;				// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa

@@ -162,7 +162,7 @@ public:
   int match_atom_type_idx(string atm_typ) ;
 
   // Sets up the histogram for TRIPLETS.  Returns true on success, false otherwise.
-  bool init_histogram(vector<struct PAIRS> & pairs, map<string,int>& pair_map) ;
+  bool init_histogram(vector<PAIRS> & pairs, map<string,int>& pair_map) ;
 
   // Increment the histogram with the given index vector.
   void increment_histogram(vector<int> &index) ;
