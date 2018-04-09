@@ -367,6 +367,9 @@ void CLUSTER::print(bool md_mode) const
 
 void CLUSTER::print_special(ofstream &header, string MAP_REVERSE, string output_mode)
 {
+  if ( EXCLUDED ) 
+	 return ;
+
   if ( output_mode == "S_MINIM" ) 
   {
 	 if( SPECIAL_S_MINIM ) 
@@ -1229,11 +1232,12 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 
 	 // Create a mapping for pair properties like Cheby powers.
 	 PAIR_INDICES[atom_id_int].resize(npairs) ;
-	 VEC[map_index].map_indices_int(atom_index, PAIR_INDICES[atom_id_int]) ;
 
 	 // Negative map index for excluded interaction.
-	 if ( map_index >= 0 )
+	 if ( map_index >= 0 ) {
+		VEC[map_index].map_indices_int(atom_index, PAIR_INDICES[atom_id_int]) ;
 		INT_MAP_REVERSE[map_index] = atom_id_int ;
+	 }
 
 	 if(RANK == 0)
 	 {
