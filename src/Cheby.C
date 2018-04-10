@@ -2429,8 +2429,8 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		j = pow_map[f] ;
 		S_MAXIM[f] = FF_4BODY[curr_quad_type_index].S_MAXIM[j] ;
 		S_MINIM[f] = FF_4BODY[curr_quad_type_index].S_MINIM[j] ;
-		x_diff[j] = FF_4BODY[curr_quad_type_index].X_DIFF[j] ;
-		x_avg[j]  = FF_4BODY[curr_quad_type_index].X_AVG[j] ;
+		x_diff[f] = FF_4BODY[curr_quad_type_index].X_DIFF[j] ;
+		x_avg[f]  = FF_4BODY[curr_quad_type_index].X_AVG[j] ;
 	 }
 
 	 // Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are within the allowed range.

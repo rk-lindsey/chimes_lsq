@@ -39,7 +39,7 @@ if(len (sys.argv) == 7):
 if(len (sys.argv) == 8): 
     # Then this run is being used for the test suite... 
     # print out parameters without any fanciness so tolerances can be checked  
-    WEIGHTS=open(sys.argv[7],"r").readlines()
+    WEIGHTS= numpy.genfromtxt(sys.argv[7],dtype='float')
     DO_WEIGHTING = True
 
 #################################
@@ -53,18 +53,20 @@ if(len (sys.argv) == 8):
 #   Process input, setup output
 #################################
 
-af=open(sys.argv[1],"r").readlines()
-bf=open(sys.argv[2],"r").readlines()
+# Use genfromtxt to avoid parsing large files.
+A = numpy.genfromtxt(sys.argv[1], dtype='float')
+nlines = A.shape[0] 
+np = A.shape[1] 
+
+b = numpy.genfromtxt(sys.argv[2], dtype='float') 
+nlines2 = b.shape[0] 
+
 hf=open(sys.argv[3],"r").readlines()
 eps_fac = float(sys.argv[5]) ;
 
-nlines=len(af)
-nlines2=len(bf)
 if ( nlines != nlines2 ):
     print "Error: the number of lines in the input files do not match\n"
     exit(1) 
-
-np=len(af[0].split())
 
 if np > nlines:
     print "Error: number of variables > number of equations"
@@ -76,40 +78,13 @@ print "!"
 print "! Number of variables = ", np
 print "! Number of equations    = ", nlines
 
-A=zeros((nlines,np))
-b=zeros((nlines))
+#A=zeros((nlines,np))
+#b=zeros((nlines))
 
-for i in range(0,nlines):
-    afs=af[i].split()
-    
-    if len(afs) != np:
-        print "Inconsistent number of columns found in A"
+if DO_WEIGHTING:
+    if ( WEIGHTS.shape[0] != nlines ):
+        print "Wrong number of lines in WEIGHTS file"
         exit(1)
-
-    for n in range(0,np):
-        if is_number(afs[n]) :
-            A[i][n]=float(afs[n])
-            #print str(i) + " " + str(n) + " " + str(A[i][n]) 
-        else:
-            print "Non-number found in A"
-            exit(1)
-        
-    if is_number(bf[i]):
-        b[i]=float(bf[i])
-    else:
-        print "Non-number found in b"
-        exit(1)
-    
-    if DO_WEIGHTING:
-        if is_number(WEIGHTS[i]):
-            WEIGHTS[i] = float(WEIGHTS[i])
-        else:
-            print "Non-number found in WEIGHTS"
-            exit(1)
-
-
-af = 0
-bf = 0
 
 #################################
 # Apply weighting to A and b
