@@ -135,10 +135,13 @@ public:
   int N_ALLOWED_POWERS;		// How many total sets of powers do we have?
 	
   vector<vector<int> > ALLOWED_POWERS;	// This will keep a list of the allowed polynomial powers for each coefficient
-  map<vector<int>,int> ALLOWED_POWERS_MAP ;  // Use a map for searching efficiency of allowed polynomial powers.
+  map<vector<int>,int> ALLOWED_POWERS_MAP ;  // Use a map for searching efficiency of allowed polynomial powers.  Stores the
+                                             // index of a set of powers in the ALLOWED_POWERS vector.
   vector<vector<int> > UNIQUE_POWERS ;  // This is a list of unique polynomial powers for each coefficient
   vector<int> EQUIV_INDICES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
   vector<int>	PARAM_INDICES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
+
+  vector<int> POWER_COUNT ;  // This counts how many times a set of powers occurs due to permutations.
 
   void build(int cheby_4b_order) ; // The the ALLOWED_POWERS, etc. for an interaction.
   void store_permutations(vector<int> &unsorted_powers) ; // Store all the permutations.

@@ -21,7 +21,7 @@ using namespace std;
 #include "Cheby.h"
 
 // define for extra output
-// #define DEBUG_CLUSTER
+//#define DEBUG_CLUSTER
 
 void CLUSTER::build(int cheby_order)
 // Build a set of interactions for a cluster.
@@ -30,11 +30,12 @@ void CLUSTER::build(int cheby_order)
 // 1. Powers start from zero. So, if order is specified to be 2, polynomial powers range
 //    from 0 to n-1, NOT 1 to n!
 //
-// 2. At least three pairs must have non-zero powers for the interaction to truly correspond
-//    to 4-body interactions
+// 2. All four atoms must contribute to the interaction.  For instance, a polynomial with only
+//    one non-zero polynomial power would not contribute.
 //
 // 3. Non-uniqueness upon atom permutation must be taken into consideration. 
 //    Pairs permutations occur as a consequence of atom permutations.
+//    We explicitly build symmetry-related interactions by permuting atom indices.
 {
   vector<int> powers(NPAIRS);
 					
@@ -78,6 +79,33 @@ void CLUSTER::build(int cheby_order)
   }
 #endif
 
+  if ( PARAM_INDICES.size() != ALLOWED_POWERS.size() ) 
+  {
+	 EXIT_MSG("Inconsistent size for PARAM_INDICES and ALLOWED_POWERS") ;
+  }
+
+  // Check that the power count is the same for interactions with the same PARAM_INDICES value.
+  // If this is not true, the code will need to be generalized to support permutation sets
+  // with differing POWER_COUNT values.
+  //
+  for ( int j = 0, k = 0 ; j < ALLOWED_POWERS.size() ; ) 
+  {
+	 for (  ; k < ALLOWED_POWERS.size() && PARAM_INDICES[j] == PARAM_INDICES[k] ; k++ ) {
+		if ( POWER_COUNT[k] != POWER_COUNT[j] ) 
+		{
+		  cout << "j = " << j << " k = " << k << endl ;
+		  EXIT_MSG("Assumption of equal power counts was incorrect") ;
+		}
+		else 
+		{
+		  ;
+#ifdef DEBUG_CLUSTER		  
+		  cout << "Power count of " << j << " and " << k << "are equal to " << POWER_COUNT[j] << endl ;
+#endif
+		}
+	 }
+	 j = k ;
+  }
 }
 
 void CLUSTER::build_loop(int indx, int cheby_order, vector<int> powers)
@@ -163,7 +191,6 @@ void CLUSTER::store_permutations(vector<int> &unsorted_powers)
 		cout << endl ;
 	 }
 #endif
-
 	 return ;
   } 
   else 
@@ -176,9 +203,13 @@ void CLUSTER::store_permutations(vector<int> &unsorted_powers)
 		{
 		  cout << unsorted_powers[i] << " " ;
 		}
-		cout << endl ;
+	 } 
+	 else 
+	 {
+		EXIT_MSG("Could not find the unsorted powers in the ALLOWED_POWERS") ;
 	 }
 #endif
+	 // This is the first time that a combination of powers has been found.
 	 UNIQUE_POWERS.push_back(unsorted_powers) ;	 
   }
 
@@ -198,6 +229,10 @@ void CLUSTER::store_permutations(vector<int> &unsorted_powers)
 
   int equiv_index = ALLOWED_POWERS.size() ;
   permute_atom_indices(0, ATOM_NAMES, unsorted_powers, perm, UNIQUE_POWERS.size()-1, equiv_index ) ;
+
+#ifdef DEBUG_CLUSTER  
+  cout << "Done permuting atom indices\n\n" ;
+#endif
 
 }
 
@@ -304,10 +339,37 @@ void CLUSTER::permute_atom_indices(int idx, vector<string> names, vector<int> &u
 #endif
 
 		ALLOWED_POWERS.push_back(perm_powers) ;
-		ALLOWED_POWERS_MAP.insert( std::pair<vector<int>,int>(perm_powers, 1) ) ;
+		POWER_COUNT.push_back(1) ;
+		if ( ALLOWED_POWERS.size() != POWER_COUNT.size() )
+		  EXIT_MSG("Inconsistent size for ALLOWED_POWERS and POWER_COUNT\n") ;
+
+		// Store the index of perm_powers in the ALLOWED_POWERS vector in the
+		// ALLOWED_POWERS_MAP.
+		ALLOWED_POWERS_MAP.insert( std::pair<vector<int>,int>(perm_powers, 
+																				ALLOWED_POWERS.size()-1) ) ;
 		PARAM_INDICES.push_back(unique_index) ;
 		EQUIV_INDICES.push_back(equiv_index) ;
-	 } 
+#ifdef DEBUG_CLUSTER
+		cout << "Power count = " << POWER_COUNT[POWER_COUNT.size() - 1] << endl ;
+#endif
+	 }
+	 else 
+	 {
+		//auto itt = std::find(ALLOWED_POWERS.begin(), ALLOWED_POWERS.end(), perm_powers) ;
+		//int idx_itt = itt - ALLOWED_POWERS.begin() ;
+		int idx_itt = it->second ;
+
+		++POWER_COUNT[idx_itt] ;
+#ifdef DEBUG_CLUSTER
+		cout << "Found existing powers\n" ;
+		for ( int l = 0 ; l < ALLOWED_POWERS[idx_itt].size() ; l++ )
+		{
+		  cout << ALLOWED_POWERS[idx_itt][l] << " " ;
+		}
+		cout << endl ;
+		cout << "Power count = " << POWER_COUNT[idx_itt] << endl << endl ;
+#endif
+	 }
   }
 }
 
@@ -336,7 +398,7 @@ void CLUSTER::print(bool md_mode) const
 	 {
 		cout<< "    Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
 
-		cout << "		     index  |  powers  |  equiv index  |  param index  " ;
+		cout << "		     index  |  powers  |  equiv index  |  param index  | count  " ;
 		if ( md_mode ) 
 		  cout << " | parameter " ;
 		cout << endl ;
@@ -352,7 +414,8 @@ void CLUSTER::print(bool md_mode) const
 			 cout << " " << setw(2) << fixed << left << ALLOWED_POWERS[j][k] << " ";
 						
 		  cout << "       " << setw(8) << EQUIV_INDICES[j] << " ";
-		  cout << "       " << setw(8) << PARAM_INDICES[j] ; 
+		  cout << "       " << setw(8) << PARAM_INDICES[j] << " " ; 
+		  cout << "       " << setw(8) << POWER_COUNT[j] << " " ;
 		
 		  if ( md_mode ) 
 			 cout << PARAMS[j] ;
