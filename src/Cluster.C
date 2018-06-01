@@ -398,9 +398,12 @@ void CLUSTER::print(bool md_mode) const
 	 {
 		cout<< "    Number of unique sets of powers: " << N_TRUE_ALLOWED_POWERS << " (" << N_ALLOWED_POWERS << " total)..." << endl; 
 
-		cout << "		     index  |  powers  |  equiv index  |  param index  | count  " ;
+		cout << "		     index  |  powers  |  equiv index  |  param index " ;
+
 		if ( md_mode ) 
 		  cout << " | parameter " ;
+		else
+		  cout << " | count " ;
 		cout << endl ;
 
 		cout << "		   ----------------------------------------------------" << endl;					
@@ -415,10 +418,11 @@ void CLUSTER::print(bool md_mode) const
 						
 		  cout << "       " << setw(8) << EQUIV_INDICES[j] << " ";
 		  cout << "       " << setw(8) << PARAM_INDICES[j] << " " ; 
-		  cout << "       " << setw(8) << POWER_COUNT[j] << " " ;
-		
+
 		  if ( md_mode ) 
 			 cout << PARAMS[j] ;
+		  else
+			 cout << "       " << setw(8) << POWER_COUNT[j] << " " ;
 
 		  cout << endl ;
 		
