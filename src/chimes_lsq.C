@@ -38,6 +38,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby) ;
 
+static void add_col_of_ones(int item, bool DO_ENER, bool DO_STRESS, bool DO_STRESS_ALL, int NATOMS, ofstream & OUTFILE);
+
 string FULL_FILE_3B;		// Global variables declared as externs in functions.h, and declared in functions.C
 string SCAN_FILE_3B;
 string SCAN_FILE_2B;
@@ -122,19 +124,24 @@ int main(int argc, char* argv[])
 						CHARGE_CONSTRAINTS, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
 
 
-	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" )
+// had to move "ATOM_PAIRS[i].set_cheby_vals(), TRIPS.build_all, and QUADS.build_all into the read_lsq_input function
+// because placement here breaks SPECIFIC *" functionality (but works for "SPECIAL *B S_M**IM: ALL *")
+
+/*	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" )
 	{
 	  for ( int i = 0 ; i < ATOM_PAIRS.size() ; i++ )
 		 ATOM_PAIRS[i].set_cheby_vals() ;
 	}
-
+*/	
+/*
 	if(CONTROLS.USE_3B_CHEBY)
 	{
 	  // Generate unique triplets
 	  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ;
 	  TRIPS.print(false) ;
 	}
-
+*/	
+/*
 	if(CONTROLS.USE_4B_CHEBY)
 	{
 	  //////////////////////////////////////////////////////////////////////
@@ -144,6 +151,8 @@ int main(int argc, char* argv[])
 	  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX) ;
 	  QUADS.print(false) ;
 	}  
+*/	
+	 
 
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
 	{
@@ -316,8 +325,8 @@ int main(int argc, char* argv[])
 		{
 			TRAJ_INPUT >> TRAJECTORY[i].QM_POT_ENER;
 			
-			if(i>0)
-				TRAJECTORY[i].QM_POT_ENER -= TRAJECTORY[0].QM_POT_ENER;
+			//if(i>0)	// -- no longer need this, but will need to add a row of 1's to the a-matrix for energies, 0 for stresses and forces.
+			//	TRAJECTORY[i].QM_POT_ENER -= TRAJECTORY[0].QM_POT_ENER;
 		}
 			
 		// Check that outer cutoffs do not exceed half of the boxlength
@@ -464,7 +473,9 @@ int main(int argc, char* argv[])
 		}
 	}
 	
-	TRAJECTORY[0].QM_POT_ENER = 0;
+	// No longer needed
+	//TRAJECTORY[0].QM_POT_ENER = 0;
+	
 	
 	#if VERBOSITY == 1
 	if ( RANK == 0 ) cout << "...trajectory file read successful: " << endl << endl;
@@ -607,9 +618,9 @@ int main(int argc, char* argv[])
 			CONTROLS.FIT_STRESS_ALL = false;
 		}
 		
-		if(i >= CONTROLS.FIT_ENER)
+		if(i >= CONTROLS.NENER)
 		{
-			CONTROLS.FIT_STRESS     = false;	
+			CONTROLS.FIT_ENER     = false;	
 		}		
 	
 		// This output is specific to the number of processors.
@@ -633,19 +644,7 @@ int main(int argc, char* argv[])
 
 		if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
 			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
-		
-		// If we're including the energy in the fit, we need to subtract off the A matrix entries from the first frame from all the rest
-		if((CONTROLS.FIT_ENER) &&(i>0))
-		{
-			FRAME_MATRX_SIZE = A_MATRIX[i].size()-1;
-				
-			for (int j=0; j<A_MATRIX[i][FRAME_MATRX_SIZE].size(); j++)
-			{
-				A_MATRIX[i][FRAME_MATRX_SIZE][j].X -= A_MATRIX[0][FRAME_MATRX_SIZE][j].X;
-				A_MATRIX[i][FRAME_MATRX_SIZE][j].Y -= A_MATRIX[0][FRAME_MATRX_SIZE][j].Y;
-				A_MATRIX[i][FRAME_MATRX_SIZE][j].Z -= A_MATRIX[0][FRAME_MATRX_SIZE][j].Z;
-			}
-		}	
+			
 	}
 
 	// Because we need to know later whether stress/energy data were included:
@@ -654,26 +653,6 @@ int main(int argc, char* argv[])
 	CONTROLS.FIT_STRESS_ALL = DO_STRESS_ALL;
 	
 	CONTROLS.FIT_ENER       = DO_ENER;   
-	
-	// If we're including the energy in the fit, we need to subtract off the A matrix entries from the first frame from itself too!
-	if(CONTROLS.FIT_ENER)
-	{
-		FRAME_MATRX_SIZE = A_MATRIX[0].size()-1;
-				
-		for (int j=0; j<A_MATRIX[0][FRAME_MATRX_SIZE].size(); j++)
-		{
-			A_MATRIX[0][FRAME_MATRX_SIZE][j].X -= A_MATRIX[0][FRAME_MATRX_SIZE][j].X;
-			A_MATRIX[0][FRAME_MATRX_SIZE][j].Y -= A_MATRIX[0][FRAME_MATRX_SIZE][j].Y;
-			A_MATRIX[0][FRAME_MATRX_SIZE][j].Z -= A_MATRIX[0][FRAME_MATRX_SIZE][j].Z;
-		}
-	} 
-	
-	// No longer used. (LEF)
-	// if(CONTROLS.USE_3B_CHEBY && TRIPS.VEC[0].NBINS[0]>0) // Set the 3b-population-histogram based constraints 
-	// {
-	// 	if ( RANK == 0 ) cout << "Setting constraints based on 3b-population histogram constraints " << endl << endl;
-	// 	ZCalc_3B_Cheby_Deriv_HIST(CONTROLS, ATOM_PAIRS, TRIPS.VEC, A_MATRIX, PAIR_MAP, TRIPS.MAP);	
-	// }
 	
 	
 #if VERBOSITY == 1
@@ -761,6 +740,8 @@ int main(int argc, char* argv[])
 
 			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << P_OVER_FORCES[N][a].X;
+			
+			add_col_of_ones(a,DO_ENER, DO_STRESS, DO_STRESS_ALL, TRAJECTORY[N].ATOMS, fileA);
 			  
 			fileA << endl;	
 		  
@@ -776,6 +757,8 @@ int main(int argc, char* argv[])
 			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << P_OVER_FORCES[N][a].Y;
 			  
+			add_col_of_ones(a,DO_ENER, DO_STRESS, DO_STRESS_ALL, TRAJECTORY[N].ATOMS, fileA);
+			  
 			fileA << endl;	
 
 
@@ -790,6 +773,8 @@ int main(int argc, char* argv[])
 			  
 			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << P_OVER_FORCES[N][a].Z;
+			  
+			add_col_of_ones(a,DO_ENER, DO_STRESS, DO_STRESS_ALL, TRAJECTORY[N].ATOMS, fileA);
 			  
 			fileA << endl;		
 			
@@ -1548,14 +1533,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				 cin.ignore();
 			
 			// Do some error checks
-/*			
-			if(CONTROLS.USE_3B_CHEBY && CONTROLS.N_LAYERS > 1)
-			{
-				cout << "ERROR: Use of layers is not supported with 3-body Chebyshev potentials." << endl;
-				cout << "       Set # N_LAYERS # to 1." << endl;
-				exit(0); 
-			}
-*/			
+	
 			if(CONTROLS.USE_3B_CHEBY && CONTROLS.FIT_POVER)
 			{
 				cout << "ERROR: Overbonding is not compatible with 3-body Chebyshev potentials." << endl;
@@ -1951,6 +1929,22 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 			build_int_pair_map(CONTROLS.NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX, PAIR_MAP, INT_PAIR_MAP) ;
 
+for ( int i = 0 ; i < ATOM_PAIRS.size() ; i++ )
+		 ATOM_PAIRS[i].set_cheby_vals() ;
+if(CONTROLS.USE_3B_CHEBY)
+{
+  // Generate unique triplets
+  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ;
+  TRIPS.print(false) ;
+}	
+			
+if(CONTROLS.USE_4B_CHEBY)	// WORKS
+{
+  // Generate unique quadruplets and thier corresponding sets of powers
+  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX) ;
+  QUADS.print(false) ;
+}			
+
 		}
 		
 		else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING")!= string::npos)
@@ -2157,4 +2151,38 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLU
 		}
 			
 		if ( RANK == 0 ) cout << "...matrix printing complete: " << endl << endl;
+}
+
+
+static void add_col_of_ones(int item, bool DO_ENER, bool DO_STRESS, bool DO_STRESS_ALL, int NATOMS, ofstream & OUTFILE)
+{
+	// Determine if: Energies are being included in the fit
+	// If so, is this A-matrix row is for a force or stress (then print an additional a 0.0)
+	// or if it is for an energy (then print an additional 1.0)?
+	
+	if (DO_ENER)
+	{
+		if(DO_STRESS)
+		{
+			if(item<NATOMS+1)
+				OUTFILE << " 0.0";
+			else
+				OUTFILE << " 1.0";
+		}
+		else if(DO_STRESS_ALL)
+		{
+			if(item<NATOMS+3)
+				OUTFILE << " 0.0";
+			else
+				OUTFILE << " 1.0";					
+		}
+		else
+		{
+			if(item<NATOMS)
+				OUTFILE << " 0.0";
+			else
+				OUTFILE << " 1.0";
+		}
+			
+	}
 }

@@ -21,10 +21,10 @@ public:
   double S_MAXIM;			// Maximum allowed pair distance for fitting
   double S_DELTA;			// Fitting "grid" spacing (width)
 
-  double X_MINIM ;         // Minimum transformed Cheby
-  double X_MAXIM ;         // Maximum transformed Cheby
-  double X_AVG ;           // Average of transformed Cheby limits.
-  double X_DIFF ;          // Difference between transformed cheby limits.
+  double X_MINIM;         // Minimum transformed Cheby
+  double X_MAXIM;         // Maximum transformed Cheby
+  double X_AVG;           // Average of transformed Cheby limits.
+  double X_DIFF;          // Difference between transformed cheby limits.
 
   int N_CFG_CONTRIB;		// How many configurations actually contribute to fitting this pair??
 
@@ -59,18 +59,18 @@ public:
 	
 PAIRS(): OVRPRMS(5,0.0), NBINS(3,0.0) 
 	 {
-		N_CFG_CONTRIB = 0 ;
-		SNUM = 0 ;
-		SNUM_3B_CHEBY = 0 ;
-		SNUM_4B_CHEBY = 0 ;
-		CHEBY_RANGE_HIGH = 1.0 ;
-		CHEBY_RANGE_LOW  = -1.0 ;
-		CUBIC_SCALE = 1.0 ;
-		USE_OVRPRMS = false ;
+		N_CFG_CONTRIB = 0;
+		SNUM = 0;
+		SNUM_3B_CHEBY = 0;
+		SNUM_4B_CHEBY = 0;
+		CHEBY_RANGE_HIGH = 1.0;
+		CHEBY_RANGE_LOW  = -1.0;
+		CUBIC_SCALE = 1.0;
+		USE_OVRPRMS = false;
 	 }	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 
   // Set Chebyshev min/max vals.
-  void set_cheby_vals() ;
+  void set_cheby_vals();
 };
 
 
@@ -78,267 +78,236 @@ PAIRS(): OVRPRMS(5,0.0), NBINS(3,0.0)
 // This leads to awkwardness in functions that want vector<PAIR_FF> as an argument.  If PAIR_FF is simply a typedef,
 // vector<PAIR_FF> and vector<PAIRS> can be used interchangably, which improves code reuse.  An alternative would
 // be to use vector<PAIRS*>, but we are not using pointers much in the current code.
-typedef PAIRS PAIR_FF ;
+typedef PAIRS PAIR_FF;
 
 class CLUSTER 
 // Structure for a generic cluster of interacting atoms.
 // This is a generic class that specific clusters derive from.
 {
 public:
-  int    INDX;
-  int NATOMS ;
-  int NPAIRS ;
+  int INDX;
+  int NATOMS;
+  int NPAIRS;
 
-  // Contains the different atom pair string names
-  vector<string> ATOM_PAIRS; 	
 
-  // Names of each atom in the cluster
-  vector<string> ATOM_NAMES ; 
+  vector<string> ATOM_PAIRS; 	// Contains the different atom pair string names
+  vector<string> ATOM_NAMES; 	// Names of each atom in the cluster
 
-  // Index (element type) of each atom
-  vector<int> ATOM_INDICES ;  
+  
+  vector<int> ATOM_INDICES;  	// Index (element type) of each atom
 
   FCUT FORCE_CUTOFF;		// "CUBIC" "COSINE" or "SIGMOID" currently supported
 	
-  int    N_CFG_CONTRIB;		// How many configurations actually contribute to fitting this cluster ??
+  int N_CFG_CONTRIB;		// How many configurations actually contribute to fitting this cluster ??
 	
-  bool EXCLUDED ;          // If true, this is an excluded interaction.
+  bool EXCLUDED;          	// If true, this is an excluded interaction.
 
   vector<double> MIN_FOUND;	// Testing two cases: 1. 
 	
-  vector<double> S_MAXIM ;	// A unique outer cutoff for 4B interactions... by default, is set to S_MAXIM
-  vector<double> S_MINIM ;	// Similar for inner cutoff. This is useful when the 2-body 
+  vector<double> S_MAXIM;	// A unique outer cutoff for 4B interactions... by default, is set to S_MAXIM
+  vector<double> S_MINIM;	// Similar for inner cutoff. This is useful when the 2-body 
 
-  vector<double> X_MINIM ;         // Minimum transformed Cheby
-  vector<double> X_MAXIM ;         // Maximum transformed Cheby
-  vector<double> X_AVG ;           // Average of transformed Cheby limits.
-  vector<double> X_DIFF ;          // Difference between transformed cheby limits.
+  vector<double> X_MINIM;	// Minimum transformed Cheby
+  vector<double> X_MAXIM;	// Maximum transformed Cheby
+  vector<double> X_AVG;		// Average of transformed Cheby limits.
+  vector<double> X_DIFF;	// Difference between transformed cheby limits.
 
-  // Determine whether s_maxim was set via user input.
-  bool SPECIAL_S_MINIM ;
+  bool SPECIAL_S_MINIM;		// Determine whether s_maxim was set via user input.	  
+  bool SPECIAL_S_MAXIM;		// Determine whether s_maxim was set via user input.
+  				// Values need to be specified for each contributing pair
+  				// [0] -> ij, [1] -> ik, [2] -> il, [3] -> jk, [4] -> jl, [5] -> kl 
 
-  // Determine whether s_maxim was set via user input.
-  bool SPECIAL_S_MAXIM ;
-  // is refit/extrapolated, thus has a s_min lower than the original fitted value
-  // Values need to be specified for each contributing pair
-  // [0] -> ij, [1] -> ik, [2] -> il, [3] -> jk, [4] -> jl, [5] -> kl 
-
-  map<vector<int>,int> POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
+  map<vector<int>,int>POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
 	 
-  vector<double> NBINS ;				// Number of bins to use for ij, ik, and jk distances when building the population histograms 
-  vector<double> BINWS; 				// Binwidths to use for ij, ik, and jk distances when building the population histograms 
+  vector<double> NBINS;		// Number of bins to use for ij, ik, and jk distances when building the population histograms 
+  vector<double> BINWS;		// Binwidths to use for ij, ik, and jk distances when building the population histograms 
 	
-  vector<double> 	PARAMS;
-
+  vector<double> PARAMS;
 	
   int N_TRUE_ALLOWED_POWERS;	// How many UNIQUE sets of powers do we have?
   int N_ALLOWED_POWERS;		// How many total sets of powers do we have?
 	
-  vector<vector<int> > ALLOWED_POWERS;	// This will keep a list of the allowed polynomial powers for each coefficient
-  map<vector<int>,int> ALLOWED_POWERS_MAP ;  // Use a map for searching efficiency of allowed polynomial powers.  Stores the
-                                             // index of a set of powers in the ALLOWED_POWERS vector.
-  vector<vector<int> > UNIQUE_POWERS ;  // This is a list of unique polynomial powers for each coefficient
-  vector<int> EQUIV_INDICES;	// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
-  vector<int>	PARAM_INDICES;	// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
+  vector<vector<int> > ALLOWED_POWERS;		// This will keep a list of the allowed polynomial powers for each coefficient
+  map<vector<int>,int> ALLOWED_POWERS_MAP;	// Use a map for searching efficiency of allowed polynomial powers.
+  vector<vector<int> > UNIQUE_POWERS;		// This is a list of unique polynomial powers for each coefficient
+  vector<int>          EQUIV_INDICES;		// For each set of allowed powers, what is the index of the first equivalent set? For example, for the set (OO, OH, OH), (1,0,1) and (1,1,0) are is equivalent
+  vector<int>	       PARAM_INDICES;		// For each of the set of allowed powers, what would be the index in the FF? for example, for a set of EQUIV_INDICES {0,0,2,3}, PARAM_INDICES would be {0, 0, 1, 2}
 
-  vector<int> POWER_COUNT ;  // This counts how many times a set of powers occurs due to permutations.
+  vector<int> POWER_COUNT;  // This counts how many times a set of powers occurs due to permutations.
 
-  void build(int cheby_4b_order) ; // The the ALLOWED_POWERS, etc. for an interaction.
-  void store_permutations(vector<int> &unsorted_powers) ; // Store all the permutations.
+	////////////////////////
+  	//    MEMBER FUNCTIONS
+	////////////////////////
 
-// Print parameters for the cluster.  If md_mode is true, print the potential parameters.
-  void print(bool md_mode) const ;
+  void build(int cheby_4b_order); 				// The the ALLOWED_POWERS, etc. for an interaction.
+  void store_permutations(vector<int> &unsorted_powers); 	// Store all the permutations.
+  void print(bool md_mode) const;				// Print parameters for the cluster.  If md_mode is true, print the potential parameters.
 
-  // Print special parameters to the header file.
-  void print_special(ofstream &header, string QUAD_MAP_REVERSE, string output_mode) ;
-
-  // Print the params file header for a cluster
-  void print_header(ofstream &header) ;
-
-  // Read the force field parameters for a cluster.
-  void read_ff_params(ifstream &paramfile, const vector<string> &atomtype) ;
+  void print_special (ofstream &header, string QUAD_MAP_REVERSE, string output_mode);	// Print special parameters to the header file.
+  void print_header  (ofstream &header);					// Print the params file header for a cluster
+  void read_ff_params(ifstream &paramfile, const vector<string> &atomtype);	// Read the force field parameters for a cluster.
 
   CLUSTER() {} 
   virtual ~CLUSTER() {} 
 
-  // Return the atom type index of an atom in the cluster with the given name.
-  int match_atom_type_idx(string atm_typ) ;
+  
+  int match_atom_type_idx(string atm_typ);			// Return the atom type index of an atom in the cluster with the given name.
 
-  // Sets up the histogram for TRIPLETS.  Returns true on success, false otherwise.
-  bool init_histogram(vector<PAIRS> & pairs, map<string,int>& pair_map) ;
 
-  // Increment the histogram with the given index vector.
-  void increment_histogram(vector<int> &index) ;
+  bool init_histogram     (vector<PAIRS> & pairs, map<string,int>& pair_map);	// Sets up the histogram for TRIPLETS.  Returns true on success, false otherwise.
+  void increment_histogram(vector<int> &index);			// Increment the histogram with the given index vector.
+  int get_histogram       (vector<int> &index);			// Get the value of the histogram with the given index vector.  Return 0 if no entry is found.
 
-  // Get the value of the histogram with the given index vector.  Return 0 if no entry is found.
-  int get_histogram(vector<int> &index) ;
 
-  // Return the maximum cutoff distance for the specified pair.
-  inline double get_smaxim(string TYPE)  ;  
+  inline double get_smaxim(string TYPE);			// Return the maximum cutoff distance for the specified pair.
+  inline double get_sminim(string TYPE);			// Return the minimum inner cutoff distance for the specified pair.
 
-  // Return the minimum inner cutoff distance for the specified pair.
-  inline double get_sminim(string TYPE) ;
+  void set_default_smaxim(const vector<PAIRS> & FF_2BODY);	// Set defaults for outer polynomial ranges
+  void set_default_sminim(const vector<PAIRS> & FF_2BODY);	// Set defaults for inner polynomial ranges
 
-  // Set defaults for outer polynomial ranges
-  void set_default_smaxim(const vector<PAIRS> & FF_2BODY) ;
+  void set_cheby_vals(vector<PAIRS> &FF_2BODY);			// Calculate Chebyshev xmin, xmax, xavg.
 
-  // Set defaults for inner polynomial ranges
-  void set_default_sminim(const vector<PAIRS> & FF_2BODY) ;
+  void set_atom_indices(vector<string> ATOMTYPE, vector<int> ATOMTYPE_IDX);	// Set the ATOM_INDICES based on the given atomtype names and atomtype_idx indices.
 
-  // Calculate Chebyshev xmin, xmax, xavg.
-  void set_cheby_vals(vector<PAIRS> &FF_2BODY) ;
-
-  // Set the ATOM_INDICES based on the given atomtype names and atomtype_idx indices.
-  void set_atom_indices(vector<string> ATOMTYPE, vector<int> ATOMTYPE_IDX) ;
-
-CLUSTER(int natom, int npair): ATOM_PAIRS(npair), ATOM_NAMES(natom), ATOM_INDICES(natom,-1), MIN_FOUND(npair,1.0e10),
-	 S_MAXIM(npair,-1), S_MINIM(npair,-1), 
-    X_MINIM(npair), X_MAXIM(npair), X_AVG(npair), X_DIFF(npair), 
-	 NBINS(npair,0), BINWS(npair,0.1)
+CLUSTER(int natom, int npair): 
+	ATOM_PAIRS(npair), 
+	ATOM_NAMES(natom), 
+	ATOM_INDICES(natom,-1), 
+	MIN_FOUND(npair,1.0e10),
+	S_MAXIM(npair,-1), 
+	S_MINIM(npair,-1), 
+    	X_MINIM(npair), 
+	X_MAXIM(npair), 
+	X_AVG(npair), 
+	X_DIFF(npair), 
+	NBINS(npair,0), 
+	BINWS(npair,0.1)
   {
-	 EXCLUDED = false ;
-	 SPECIAL_S_MAXIM = false ;
-	 SPECIAL_S_MINIM = false ;
-	 NATOMS = natom ;
-	 NPAIRS = npair ;
-	 N_CFG_CONTRIB = 0 ;
-	 N_TRUE_ALLOWED_POWERS = 0 ;
+	 EXCLUDED = false;
+	 SPECIAL_S_MAXIM = false;
+	 SPECIAL_S_MINIM = false;
+	 NATOMS = natom;
+	 NPAIRS = npair;
+	 N_CFG_CONTRIB = 0;
+	 N_TRUE_ALLOWED_POWERS = 0;
 	 FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;	
   }
 
-  // Matches the allowed powers to the ij, ik, il... type pairs formed from the atoms  ai, aj, ak, al
-  void map_indices_int(vector<int> & atom_type_idx, vector<int> & pair_map) ;
+  
+  void map_indices_int(vector<int> & atom_type_idx, vector<int> & pair_map);	// Matches the allowed powers to the ij, ik, il... type pairs formed from the atoms  ai, aj, ak, al
 
 private:
   // Recursively permute atom indices for each element type.
-  void permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, 
-									 vector<int> perm, int unique_index, int equiv_index) ;
+  void permute_atom_indices(int idx, vector<string> names, vector<int> &unsorted_powers, vector<int> perm, int unique_index, int equiv_index);
 
   // Interate over a power index in constructing the powers vector.
-  void build_loop(int indx, int cheby_order, vector<int> powers) ;
+  void build_loop(int indx, int cheby_order, vector<int> powers);
 
 };
 
-typedef CLUSTER TRIPLETS ;
-typedef CLUSTER QUADRUPLETS ;
+typedef CLUSTER TRIPLETS;
+typedef CLUSTER QUADRUPLETS;
 
 class CLUSTER_LIST
 // A group of clusters that represents an N-body interaction.
 {
 public:
-  // The number of CLUSTERS in the list.
-  int NCLUSTERS ;        
 
-  // A vector containing all clusters.
-  // Need to store cluster pointers so that polymorphism with different cluster types works.
-  vector<CLUSTER> VEC ;
+  int NCLUSTERS;			// The number of CLUSTERS in the list.
+  vector<CLUSTER> VEC;			// A vector containing all clusters ... Need to store cluster pointers so that polymorphism with different cluster types works.
+  map<string,int> MAP;			// A map from pair types into the VEC index.
+  map<int,string> MAP_REVERSE;		// A map from the VEC index into the pair types.
+  vector<int> INT_MAP;
+  vector<vector<int>> PAIR_INDICES;	// Store indices for ordering of pair properties (Cheby powers, s_minim, etc.)  corresponding to a particular atom ordering.
+  vector<int> INT_MAP_REVERSE;
 
-  // A map from pair types into the VEC index.
-  map<string,int> MAP ;
+  vector<vector<string>> EXCLUDE;
 
-  // A map from the VEC index into the pair types.
-  map<int,string> MAP_REVERSE ;
-
-  vector<int> INT_MAP ;
-
-  // Store indices for ordering of pair properties (Cheby powers, s_minim, etc.) 
-  // corresponding to a particular atom ordering.
-  vector<vector<int>> PAIR_INDICES ;
-
-  vector<int> INT_MAP_REVERSE ;
-
-  vector<vector<string>> EXCLUDE ;
+  	////////////////////////
+  	//    MEMBER FUNCTIONS
+	////////////////////////
 
   // Build the pair variables for all of the clusters
-  void build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, vector<string> atom_types,
-										 vector<int> atom_typeidx) ;
+  void build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, vector<string> atom_types, vector<int> atom_typeidx);
 
   // Build all triplets and associated maps for the cluster list.
-  int build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP, 
-									 vector<string> atom_types, vector<int> atomtype_idx) ;
+  int build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP,  vector<string> atom_types, vector<int> atomtype_idx);
 
   // Returns a unique ID number for a cluster of atoms.
-  int make_id_int(vector<int>& index) ;
+  int make_id_int(vector<int>& index);
 
-  void print(bool md_mode) ;
+  void print(bool md_mode);
 
   // Print minimum distances found for the cluster.
-  void print_min_distances() ;
+  void print_min_distances();
 
   // print the force field file header for the cluster list.
-  void print_header(ofstream &header, int natoms, int cheby_order) ;
+  void print_header(ofstream &header, int natoms, int cheby_order);
 
   // Print the cutoff function parameters controlling the CLUSTER_LIST.
-  void print_fcut() ;
+  void print_fcut();
 
   // Print the cutoff function parameters to the force field header file.
-  void print_fcut_header(ostream &header) ;
+  void print_fcut_header(ostream &header);
 
-  // Allocate the cluster list according to the number of clusters and the number
-  // of atoms.  Return a string to search for in the params file that describes
-  // the cluster list.
-  string allocate(int nclusters, int natoms, const vector<PAIRS> &FF_2BODY) ;
+  // Allocate the cluster list according to the number of clusters and the number of atoms.  Return a string to search for in the params file that describes the cluster list.
+  string allocate(int nclusters, int natoms, const vector<PAIRS> &FF_2BODY);
 
   // Read the excluded interactions from the input stream.
-  void read_exclude(istream &input, string line) ;
+  void read_exclude(istream &input, string line);
 
-  static string tuplet_name(int natom, bool plural, bool caps) ;
+  static string tuplet_name(int natom, bool plural, bool caps);
 
   // Build the fast integer maps for the cluster list.  Used by the MD code.
-  void build_int_maps(vector<string> ATOMTYPE, vector<int> ATOMTYPE_IDX,
-							 vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+  void build_int_maps(vector<string> ATOMTYPE, vector<int> ATOMTYPE_IDX, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP);
 
   // Read the maps from the force field file (MD only).
-  void read_maps(ifstream& paramfile, string line) ;
+  void read_maps(ifstream& paramfile, string line);
 
 // Read the force field parameters for a cluster list.
-  void read_ff_params(ifstream &PARAMFILE, const vector<string>& TMP_ATOMTYPE) ;
+  void read_ff_params(ifstream &PARAMFILE, const vector<string>& TMP_ATOMTYPE);
 
   // Read smaxim, sminim for the cluster list.
-  double read_cutoff_params(istream &input, string LINE, string input_type,
-									 vector<PAIRS> & PAIRS_LIST, map<string,int> &PAIR_MAP) ;
+  double read_cutoff_params(istream &input, string LINE, string input_type, vector<PAIRS> & PAIRS_LIST, map<string,int> &PAIR_MAP);
 
   // Parse the force cutoff parameters for a cluster.
-  void parse_fcut(string LINE) ;
+  void parse_fcut(string LINE);
 
   // Print out special 3 and 4 body force parameters.
-  void print_special(ofstream &header) ;
+  void print_special(ofstream &header);
 
   // Set defaults for force cutoffs.
-  void set_default_cutoffs(const vector<PAIRS>& FF_2BODY) ;
+  void set_default_cutoffs(const vector<PAIRS>& FF_2BODY);
 
 private:
-  void build_pairs_loop(int index, vector<int> atom_index, 
-								vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count,
-								vector<string> atom_types, vector<int> atom_typeidx) ;
+  void build_pairs_loop(int index, vector<int> atom_index, vector<string> ATOM_CHEMS, vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, int &count, vector<string> atom_types, vector<int> atom_typeidx);
 
   // Loop across atom types for each atom in the cluster, and build a corresponding loop.
-  void build_int_maps_loop(int index, vector<int> atom_index, vector<string> ATOMTYPE,
-									vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+  void build_int_maps_loop(int index, vector<int> atom_index, vector<string> ATOMTYPE, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP);
 
   // Determine whether a particular cluster is excluded.
-  bool is_excluded(vector<string> atom_names) ;
+  bool is_excluded(vector<string> atom_names);
 
-} ;
+};
 
 
 // These are no longer inherited from CLUSTER so that CLUSTER_LIST works correctly.
-typedef QUADRUPLETS QUAD_FF ;
-typedef TRIPLETS TRIP_FF ;
+typedef QUADRUPLETS QUAD_FF;
+typedef TRIPLETS TRIP_FF;
 
 
 
 inline double CLUSTER::get_smaxim(string TYPE)	
 // Decides whether outer cutoff should be set by 2-body value or cluster value. Returns the cutoff value.
 {	
-	double VAL = 0.0 ;
+	double VAL = 0.0;
 	
-	for (int i=0; i< NPAIRS ; i++)
+	for (int i=0; i< NPAIRS; i++)
 	{
 	  if(TYPE == ATOM_PAIRS[i]) 
 	  {
 		 VAL =  S_MAXIM[i];
-		 break ;
+		 break;
 	  }
 	}
 
@@ -349,7 +318,7 @@ inline double CLUSTER::get_smaxim(string TYPE)
 inline double CLUSTER::get_sminim(string TYPE) 
 // Decides whether outer cutoff should be set by 2-body value or 4-body value. Returns the cutoff value.
 {
-	double VAL = 0.0 ;
+	double VAL = 0.0;
 	
 	
 	for (int i=0; i<NPAIRS; i++) 
@@ -357,7 +326,7 @@ inline double CLUSTER::get_sminim(string TYPE)
 	  if(TYPE == ATOM_PAIRS[i])
 	  {
 		 VAL =  S_MINIM[i];
-		 break ;
+		 break;
 	  }
 	}
 
