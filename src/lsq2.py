@@ -1,4 +1,3 @@
-#! /usr/bin/python
 
 import sys
 import numpy
@@ -209,7 +208,7 @@ elif algorithm == 'ridgecv':
 elif algorithm == 'lasso':
     print '! Lasso regression used'
     print '! Lasso alpha = ' + str(alpha_val)
-    reg = linear_model.Lasso(alpha=alpha_val,fit_intercept=False)
+    reg = linear_model.Lasso(alpha=alpha_val,fit_intercept=False,max_iter=1.0E5)
     reg.fit(A,b)
     x = reg.coef_
     np = 0 
@@ -250,6 +249,8 @@ print "! RMS force error = " , sqrt(Z/float(nlines))
 print "! max abs variable = ",  max(abs(x))
 print "! number of fitting vars = ", nvars
 print "! Bayesian Information Criterion =  ", bic
+if args.weights !="None":
+	print '! Using weighting file: ',weights_file
 print "!"
 
 

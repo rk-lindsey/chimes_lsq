@@ -1279,21 +1279,14 @@ FF_SETUP_2:
 
 	 if ( CONTROLS.PRINT_FORCE && (CONTROLS.STEP+1)%CONTROLS.FREQ_FORCE == 0 && RANK == 0 ) 
 	 {
-			// xyzf output allows to test force-matching against an MD run.
-			OUT_XYZF.precision(10) ;
+		// xyzf output allows to test force-matching against an MD run.
+		OUT_XYZF.precision(10) ;
 
-			OUT_XYZF << SYSTEM.ATOMS << endl ;
-			OUT_XYZF << scientific << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " " ;
-// 			if ( CONTROLS.PRINT_STRESS ) 
-// 			{
-// 				for ( int i = 0 ; i < 6 ; i++ ) 
-// 				{
-// 					OUT_XYZF << scientific << SYSTEM.VIRIAL_CALC[i] * GPa << " " ;
-// 				}
-//			}
-			OUT_XYZF << endl ;
+		OUT_XYZF << SYSTEM.ATOMS << endl ;
+		OUT_XYZF << scientific << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " " ;
+		OUT_XYZF << endl ;
 
-			// convert xyzf forces to Hartree per Bohr
+		// convert xyzf forces to Hartree per Bohr
 		double fconv = Hartree*Bohr;
 
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
@@ -1349,6 +1342,10 @@ FF_SETUP_2:
 		  ferr += (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X) * (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X);
 		  ferr += (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y) * (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y);
 		  ferr += (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z) * (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z);
+		  
+		  cout << "#CATCH: " << SYSTEM.ACCEL[a1].X << endl;
+		  cout << "#CATCH: " << SYSTEM.ACCEL[a1].Y << endl;
+		  cout << "#CATCH: " << SYSTEM.ACCEL[a1].Z << endl;
 /*				
 				cout << SYSTEM.ACCEL[a1].X << "		" << SYSTEM.ACCEL[a1].Y << "	" << SYSTEM.ACCEL[a1].Z << endl;
 				cout << SYSTEM.FORCES[a1].X << "	" << SYSTEM.FORCES[a1].Y << "	" << SYSTEM.FORCES[a1].Z << endl;
@@ -1360,10 +1357,10 @@ FF_SETUP_2:
 
 
 		  FORCE_SUBTRACTED_OUTPUT << SYSTEM.ATOMTYPE[a1] << "	"
-										  << SYSTEM.COORDS[a1].X << "	" << SYSTEM.COORDS[a1].Y << "	" << SYSTEM.COORDS[a1].Z << "	"										
-										  << (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(627.50960803*1.889725989) << "	"
-										  << (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(627.50960803*1.889725989) << "	"
-										  << (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(627.50960803*1.889725989) << endl;				
+					  << SYSTEM.COORDS[a1].X << "   " << SYSTEM.COORDS[a1].Y << "   " << SYSTEM.COORDS[a1].Z << "   "						
+					  << (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(627.50960803*1.889725989) << " "
+					  << (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(627.50960803*1.889725989) << " "
+					  << (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(627.50960803*1.889725989) << endl;			       
 		}
 			
 		if(CONTROLS.SUBTRACT_FORCE)

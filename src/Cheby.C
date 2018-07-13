@@ -56,22 +56,22 @@ inline void Cheby::transform(double rlen, double x_diff, double x_avg, double la
 	// the chebyshev variable x, 
 	switch ( cheby_type ) 
 	{
-	case Cheby_trans::MORSE:
-	  exprlen = exp(-rlen/lambda) ;
-	  x = (exprlen-x_avg)/x_diff;					// pair distances in morse space, normalized to fit over [-1,1]
-	  break ;
-	case Cheby_trans::INVRSE_R:
-	  exprlen = 0.0 ;
-	  x     = (1.0/rlen-x_avg) / x_diff;			// pair distances in r^-1 space, normalized to fit over [-1,1]
-	  break ;
-	case Cheby_trans::NONE:
-	  exprlen = 0.0 ;
-	  x = (rlen-x_avg) / x_diff;	
-	  break ;
-	default:
-	  cout << "ERROR: Undefined CHBTYPE: " << endl ;
-	  cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
-	  exit_run(1);
+		case Cheby_trans::MORSE:
+	  		exprlen = exp(-rlen/lambda) ;
+	  		x = (exprlen-x_avg)/x_diff;					// pair distances in morse space, normalized to fit over [-1,1]
+	  		break ;
+		case Cheby_trans::INVRSE_R:
+	  		exprlen = 0.0 ;
+	  		x     = (1.0/rlen-x_avg) / x_diff;			// pair distances in r^-1 space, normalized to fit over [-1,1]
+	  		break ;
+		case Cheby_trans::NONE:
+	  		exprlen = 0.0 ;
+	  		x = (rlen-x_avg) / x_diff;	
+	  		break ;
+		default:
+	  		cout << "ERROR: Undefined CHBTYPE: " << endl ;
+	  		cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
+	  		exit_run(1);
 	}
 }
 
@@ -95,8 +95,7 @@ inline int Cheby::get_pair_index(int a1, int a2, const vector<int> &atomtype_idx
   return curr_pair_type_idx ;
 }
 
-void Cheby::set_cheby_params(double s_minim, double s_maxim, double lambda, Cheby_trans cheby_type, 
-									  double &xmin, double &xmax, double &xdiff, double &xavg)
+void Cheby::set_cheby_params(double s_minim, double s_maxim, double lambda, Cheby_trans cheby_type, double &xmin, double &xmax, double &xdiff, double &xavg)
 // Calculate Cheby-parameters that do not depend on the interatomic distance.
 {
 	// Chebyshev polynomials are only defined on the range [-1,1], so transorm the pair distance
@@ -110,23 +109,27 @@ void Cheby::set_cheby_params(double s_minim, double s_maxim, double lambda, Cheb
 	
 	switch ( cheby_type ) 
 	{
-	case Cheby_trans::MORSE:
-		xmin  = exp(-s_maxim/lambda); 
-		xmax  = exp(-s_minim/lambda); 
-		break ;
-	case Cheby_trans::INVRSE_R:
-	  xmin = 1.0 / s_maxim ;
-	  xmax = 1.0 / s_minim ;
-	  break ;
-	case Cheby_trans::NONE:
-	  xmin = s_minim ;
-	  xmax = s_maxim ;
-	  break ;
-	default:
-	  cout << "ERROR: Undefined CHBTYPE: " << endl ;
-	  cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
-	  exit_run(1);
+		case Cheby_trans::MORSE:
+			xmin  = exp(-s_maxim/lambda); 
+			xmax  = exp(-s_minim/lambda); 
+			break ;
+			
+		case Cheby_trans::INVRSE_R:
+	  		xmin = 1.0 / s_maxim ;
+	  		xmax = 1.0 / s_minim ;
+	  		break ;
+			
+		case Cheby_trans::NONE:
+	  		xmin = s_minim ;
+	  		xmax = s_maxim ;
+	  		break ;
+			
+		default:
+	  		cout << "ERROR: Undefined CHBTYPE: " << endl ;
+	  		cout << "       Excepted values are \"DEFAULT\", \"INVRSE_R\", or \"MORSE\". " << endl;
+	  		exit_run(1);
 	}
+	
 	xavg  = 0.5 * (xmin + xmax);				// midpoint of possible pair distances in morse space
 	xdiff = 0.5 * (xmax - xmin);				// width of possible pair distances in morse space
 }
@@ -195,8 +198,7 @@ string Cheby::get_trans_string(Cheby_trans trans)
 }
 
 
-void Cheby::set_polys(int index, double *Tn, double *Tnd, const double rlen, double x_diff, double x_avg, 
-							 double SNUM)
+void Cheby::set_polys(int index, double *Tn, double *Tnd, const double rlen, double x_diff, double x_avg, double SNUM)
 // Sets the value of the Chebyshev polynomials (Tn) and their derivatives (Tnd).  Tnd is the derivative
 // with respect to the interatomic distance, not the transformed distance (x).
 {
@@ -844,12 +846,9 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 				if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) 
 					continue;
 
-				curr_pair_type_idx_ij =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
-																	 SYSTEM.PARENT) ;
-				curr_pair_type_idx_ik =  get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
-																	 SYSTEM.PARENT) ;
-				curr_pair_type_idx_jk =  get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
-																	 SYSTEM.PARENT) ;
+				curr_pair_type_idx_ij =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,SYSTEM.PARENT) ;
+				curr_pair_type_idx_ik =  get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,SYSTEM.PARENT) ;
+				curr_pair_type_idx_jk =  get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,SYSTEM.PARENT) ;
 
 				atom_type_index[0] = SYSTEM.get_atomtype_idx(a1) ;
 				atom_type_index[1] = SYSTEM.get_atomtype_idx(a2) ;
@@ -867,19 +866,11 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 				}
 
 				for ( int j = 0 ; j < 3 ; j++ ) 
-				{
 				  pair_index[j] = TRIPS.PAIR_INDICES[tidx][j] ;
-				}
 
 				rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
 				rlen_ik = get_dist(SYSTEM, RAB_IK, a1, a3);	// Updates RAB!
 				rlen_jk = get_dist(SYSTEM, RAB_JK, a2, a3);	// Updates RAB!
-
-				// map_indices(PAIR_TRIPLETS[curr_triple_type_index], atom_type, pair_index) ;
-				//map_3b_indices_old(PAIR_TRIPLETS[curr_triple_type_index], FF_2BODY, 
-										 // curr_pair_type_idx_ij,
-										 // curr_pair_type_idx_ik, curr_pair_type_idx_jk,
-										 // pair_index) ;
 
 				S_MAXIM_IJ = PAIR_TRIPLETS[curr_triple_type_index].S_MAXIM[pair_index[0]] ;
 				S_MAXIM_IK = PAIR_TRIPLETS[curr_triple_type_index].S_MAXIM[pair_index[1]] ;
@@ -888,6 +879,8 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 				S_MINIM_IJ = PAIR_TRIPLETS[curr_triple_type_index].S_MINIM[pair_index[0]] ;
 				S_MINIM_IK = PAIR_TRIPLETS[curr_triple_type_index].S_MINIM[pair_index[1]] ;
 				S_MINIM_JK = PAIR_TRIPLETS[curr_triple_type_index].S_MINIM[pair_index[2]] ;
+				
+
 				
 				// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 				// within the allowed range.
@@ -1056,14 +1049,12 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 			
 							for ( int jj = 0 ; jj < 3 ; jj++ ) 
 							{
-							  x_avg[jj] = PAIR_TRIPLETS[curr_triple_type_index].X_AVG[pair_index[jj]] ;
+							  x_avg [jj] = PAIR_TRIPLETS[curr_triple_type_index].X_AVG [pair_index[jj]] ;
 							  x_diff[jj] = PAIR_TRIPLETS[curr_triple_type_index].X_DIFF[pair_index[jj]] ;
-							}
+							}							
 							
-							set_polys(curr_pair_type_idx_ij, Tn_ij, Tnd_ij, rlen_ij_dummy, x_diff[0], x_avg[0], FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY);
-			
-							set_polys(curr_pair_type_idx_ik, Tn_ik, Tnd_ik, rlen_ik_dummy, x_diff[1], x_avg[1], FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY);
-			
+							set_polys(curr_pair_type_idx_ij, Tn_ij, Tnd_ij, rlen_ij_dummy, x_diff[0], x_avg[0], FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY);			
+							set_polys(curr_pair_type_idx_ik, Tn_ik, Tnd_ik, rlen_ik_dummy, x_diff[1], x_avg[1], FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY);			
 							set_polys(curr_pair_type_idx_jk, Tn_jk, Tnd_jk, rlen_jk_dummy, x_diff[2], x_avg[2], FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY);			
 
 							// At this point we've completed all pre-calculations needed to populate the A matrix. Now we need to figure out 
@@ -1078,7 +1069,8 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 							
 							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ);
 							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK);
-							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK);							
+							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK);	
+													
 							/////////////////////////////////////////////////////////////////////
 							/////////////////////////////////////////////////////////////////////
 							// Consider special restrictions on allowed triplet types and powers
@@ -1159,9 +1151,9 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 								{
 								    // ij pairs
 
-									FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
 								    FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Y -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
-									FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;	
+								    FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;	
 
 
 								    // ik pairs
@@ -1181,17 +1173,17 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 								{
 								    // ij pairs: 
 
-									FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.X / rlen_ij;
 								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Y -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.Y / rlen_ij;
-									FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.Z / rlen_ij;	
+								    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.Z / rlen_ij;	
 									
-									FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.X / rlen_ij;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.X / rlen_ij;
 								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Y -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
-									FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.Z / rlen_ij;	
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.Z / rlen_ij;	
 									
-									FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.X / rlen_ij;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].X -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.X / rlen_ij;
 								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Y -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.Y / rlen_ij;
-									FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
+								    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Z -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
 									
 								    // ik pairs
 
@@ -1418,23 +1410,12 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 				
 					// Determine the pair types and the triplet type
 	
-					curr_pair_type_idx[0] = get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
-																		SYSTEM.PARENT) ;
-					
-					curr_pair_type_idx[1] = get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
-																		SYSTEM.PARENT) ;
-					
-					curr_pair_type_idx[2] = get_pair_index(a1, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
-																		SYSTEM.PARENT) ;
-					
-					curr_pair_type_idx[3] = get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
-																		SYSTEM.PARENT) ;
-					
-					curr_pair_type_idx[4] = get_pair_index(a2, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
-																		SYSTEM.PARENT) ;
-					
-					curr_pair_type_idx[5] = get_pair_index(a3, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,
-																		SYSTEM.PARENT) ;
+					curr_pair_type_idx[0] = get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP, SYSTEM.PARENT) ;			
+					curr_pair_type_idx[1] = get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP, SYSTEM.PARENT) ;
+					curr_pair_type_idx[2] = get_pair_index(a1, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP, SYSTEM.PARENT) ;
+					curr_pair_type_idx[3] = get_pair_index(a2, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP, SYSTEM.PARENT) ;
+					curr_pair_type_idx[4] = get_pair_index(a2, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP, SYSTEM.PARENT) ;
+					curr_pair_type_idx[5] = get_pair_index(a3, a4, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP, SYSTEM.PARENT) ;
 
 					fidx_a2 = SYSTEM.PARENT[a2];
 					fidx_a3 = SYSTEM.PARENT[a3];
@@ -1453,6 +1434,7 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 					ATOM_QUAD_ID_INT       = QUADS.make_id_int(atom_type_index) ;
 
 					curr_quad_type_index = QUADS.INT_MAP[ATOM_QUAD_ID_INT];
+					
 					// If this type has been excluded, then skip to the next iteration of the loop
 					if(curr_quad_type_index<0)
 						continue;
@@ -1477,8 +1459,8 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 					  pow_map[f] = QUADS.PAIR_INDICES[ATOM_QUAD_ID_INT][f] ;
 					  S_MAXIM[f] = PAIR_QUADRUPLETS[curr_quad_type_index].S_MAXIM[pow_map[f]] ;
 					  S_MINIM[f] = PAIR_QUADRUPLETS[curr_quad_type_index].S_MINIM[pow_map[f]] ;
-					  x_diff[f]  = PAIR_QUADRUPLETS[curr_quad_type_index].X_DIFF[pow_map[f]] ;
-					  x_avg[f]  = PAIR_QUADRUPLETS[curr_quad_type_index].X_AVG[pow_map[f]] ;
+					  x_diff [f] = PAIR_QUADRUPLETS[curr_quad_type_index].X_DIFF [pow_map[f]] ;
+					  x_avg  [f] = PAIR_QUADRUPLETS[curr_quad_type_index].X_AVG  [pow_map[f]] ;
 					}
 						
 					// Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are within the allowed range.
@@ -1576,7 +1558,7 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 						for (int f=0; f<6; f++)	
 							powers[f] = PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][pow_map[f]];
 
-					    deriv[0] =  fcut[0] * Tnd_ij[powers[0]] + fcut_deriv[0] * Tn_ij[powers[0]];
+					    	 deriv[0] =  fcut[0] * Tnd_ij[powers[0]] + fcut_deriv[0] * Tn_ij[powers[0]];
 						 deriv[1] =  fcut[1] * Tnd_ik[powers[1]] + fcut_deriv[1] * Tn_ik[powers[1]];
 						 deriv[2] =  fcut[2] * Tnd_il[powers[2]] + fcut_deriv[2] * Tn_il[powers[2]];
 						 deriv[3] =  fcut[3] * Tnd_jk[powers[3]] + fcut_deriv[3] * Tn_jk[powers[3]];
@@ -1589,45 +1571,7 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 						force_wo_coeff[3] = deriv[3] * fcut[0] * fcut[1] * fcut[2] * fcut[4] * fcut[5]  * Tn_ij[powers[0]]  * Tn_ik[powers[1]]  * Tn_il[powers[2]]  * Tn_jl[powers[4]]  * Tn_kl[powers[5]];
 						force_wo_coeff[4] = deriv[4] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[5]  * Tn_ij[powers[0]]  * Tn_ik[powers[1]]  * Tn_il[powers[2]]  * Tn_jk[powers[3]]  * Tn_kl[powers[5]];
 						force_wo_coeff[5] = deriv[5] * fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4]  * Tn_ij[powers[0]]  * Tn_ik[powers[1]]  * Tn_il[powers[2]]  * Tn_jk[powers[3]]  * Tn_jl[powers[4]];
-						
 #if(0)
-						if ( a1 == 1 || fidx_a2 == 1 || fidx_a3 == 1 || fidx_a4 == 1 )
-						{
-						  cout << "Target atom found\n" ;
-
-						  cout << std::scientific ;
-						  cout.precision(10) ;
-						  cout << "A1 = " << a1 << " A2 = " << fidx_a2 << " A3 = " << fidx_a3 << " A4 = " << fidx_a4 << endl ;
-
-						  cout << "Force_wo_coeff: " ;
-						  for ( int ifl = 0 ; ifl < 6 ; ifl++ )
-							 cout << " " << force_wo_coeff[ifl] ;
-						  cout << endl ;
-
-						  cout << "Deriv_4b: " ;
-						  for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
-						  {
-							 cout << " " << deriv[ifl] ;
-						  }
-						  cout << endl ;		  
-
-						  cout << "Tn_il " << Tn_il[1] << endl ;
-						  cout << "Tnd_il " << Tnd_il[1] << endl ;
-
-						  for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
-						  {
-							 cout << "Index = " << ifl << endl ;
-							 cout << "Fcut " << fcut[ifl] << endl ;
-							 cout << "Fcut_deriv " << fcut_deriv[ifl] << endl ;
-							 cout << "Powers " << powers[ifl]] << endl ;
-							 cout << "Pow_map " << pow_map[ifl] << endl ;
-						  }						  
-						  cout << "Allowed_powers" ;
-						  for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
-							 cout << PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][ifl] << " " ;
-						  cout << endl ;
-						  cout.unsetf(ios_base::scientific) ;
-						}
 #endif
 					    // ij pairs
 
@@ -1701,7 +1645,7 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 							for (int f=0; f<6; f++)
 							{
 								FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].X -= force_wo_coeff[f] * RAB[f].X * RAB[f].X / rlen[f];
-							    FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Y -= force_wo_coeff[f] * RAB[f].Y * RAB[f].Y / rlen[f];
+							    	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Y -= force_wo_coeff[f] * RAB[f].Y * RAB[f].Y / rlen[f];
 								FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+row_offset].Z -= force_wo_coeff[f] * RAB[f].Z * RAB[f].Z / rlen[f];	
 							}								
 						}
@@ -1711,23 +1655,34 @@ void Cheby::Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_ter
 							for (int f=0; f<6; f++)
 							{
 								FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].X -= force_wo_coeff[f] * RAB[f].X * RAB[f].X / rlen[f];
-							    FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Y -= force_wo_coeff[f] * RAB[f].X * RAB[f].Y / rlen[f];
+							    	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Y -= force_wo_coeff[f] * RAB[f].X * RAB[f].Y / rlen[f];
 								FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+row_offset].Z -= force_wo_coeff[f] * RAB[f].X * RAB[f].Z / rlen[f];	
 							
 								FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].X -= force_wo_coeff[f] * RAB[f].Y * RAB[f].X / rlen[f];
-							    FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Y -= force_wo_coeff[f] * RAB[f].Y * RAB[f].Y / rlen[f];
+							    	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Y -= force_wo_coeff[f] * RAB[f].Y * RAB[f].Y / rlen[f];
 								FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+row_offset].Z -= force_wo_coeff[f] * RAB[f].Y * RAB[f].Z / rlen[f];	
 							
 								FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].X -= force_wo_coeff[f] * RAB[f].Z * RAB[f].X / rlen[f];
-							    FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Y -= force_wo_coeff[f] * RAB[f].Z * RAB[f].Y / rlen[f];
+							    	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Y -= force_wo_coeff[f] * RAB[f].Z * RAB[f].Y / rlen[f];
 								FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+row_offset].Z -= force_wo_coeff[f] * RAB[f].Z * RAB[f].Z / rlen[f];
 							}	
 						}
 						
 						if(CONTROLS.FIT_ENER) 
 						{
-							TMP_ENER  = fcut[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4] * fcut[4];
-							TMP_ENER *=  Tn_ij[powers[0]] * Tn_ik[powers[1]] * Tn_il[powers[2]] * Tn_jk[powers[3]] * Tn_jl[powers[4]] * Tn_kl[powers[5]];
+							TMP_ENER  = fcut[0] 
+							          * fcut[1] 
+								  * fcut[2] 
+								  * fcut[3] 
+								  * fcut[4] 
+								  * fcut[5];
+								  
+							TMP_ENER *=  Tn_ij[powers[0]] 
+							           * Tn_ik[powers[1]] 
+								   * Tn_il[powers[2]] 
+								   * Tn_jk[powers[3]] 
+								   * Tn_jl[powers[4]] 
+								   * Tn_kl[powers[5]];
 							
 							FRAME_A_MATRIX[MATR_SIZE-1][vstart+row_offset].X += TMP_ENER;
 							FRAME_A_MATRIX[MATR_SIZE-1][vstart+row_offset].Y += TMP_ENER;
@@ -2354,7 +2309,7 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 
   for ( int ii = i_start; ii <= i_end; ii++ ) 
   {
-
+  
 	 a1 = NEIGHBOR_LIST.LIST_4B_INT[ii].a1;
 
 #ifdef LINK_LAMMPS
@@ -2402,7 +2357,7 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 	 //sort   (atom_type_index.begin(), atom_type_index.end());
 	 //reverse(atom_type_index.begin(), atom_type_index.end());
 			
-	 quad_id_int       = QUADS.make_id_int(atom_type_index) ;
+	 quad_id_int         = QUADS.make_id_int(atom_type_index) ;
 	 curr_quad_type_index = QUADS.INT_MAP[quad_id_int];
 
 	 if(curr_quad_type_index<0)
@@ -2487,9 +2442,19 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		  powers[f] = FF_4BODY[curr_quad_type_index].ALLOWED_POWERS[i][pow_map[f]] ;
 
 
-		SYSTEM.TOT_POT_ENER += coeff * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] 
-		  * Tn_4b_ij[powers[0]] * Tn_4b_ik[powers[1]] * Tn_4b_il[powers[2]] 
-		  * Tn_4b_jk[powers[3]] * Tn_4b_jl[powers[4]] * Tn_4b_kl[powers[5]]; 			
+		SYSTEM.TOT_POT_ENER += coeff 
+		                     * fcut_4b[0] 
+				     * fcut_4b[1] 
+				     * fcut_4b[2] 
+				     * fcut_4b[3] 
+				     * fcut_4b[4] 
+				     * fcut_4b[5] 
+		  * Tn_4b_ij[powers[0]] 
+		  * Tn_4b_ik[powers[1]] 
+		  * Tn_4b_il[powers[2]] 
+		  * Tn_4b_jk[powers[3]] 
+		  * Tn_4b_jl[powers[4]] 
+		  * Tn_4b_kl[powers[5]]; 			
 
 		deriv_4b[0] = fcut_4b[0] * Tnd_4b_ij[powers[0]] + fcut_deriv_4b[0] * Tn_4b_ij[powers[0]];
 		deriv_4b[1] = fcut_4b[1] * Tnd_4b_ik[powers[1]] + fcut_deriv_4b[1] * Tn_4b_ik[powers[1]];
@@ -2498,24 +2463,12 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		deriv_4b[4] = fcut_4b[4] * Tnd_4b_jl[powers[4]] + fcut_deriv_4b[4] * Tn_4b_jl[powers[4]];
 		deriv_4b[5] = fcut_4b[5] * Tnd_4b_kl[powers[5]] + fcut_deriv_4b[5] * Tn_4b_kl[powers[5]];
 				
-		force_4b[0]  = coeff * deriv_4b[0] 
-		  * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  
-		  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
-		force_4b[1]  = coeff * deriv_4b[1] 
-		  * fcut_4b[0] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  
-		  * Tn_4b_ij[powers[0]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
-		force_4b[2]  = coeff * deriv_4b[2] 
-		  * fcut_4b[0] * fcut_4b[1] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]  
-		  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
-		force_4b[3]  = coeff * deriv_4b[3] 
-		  * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[4] * fcut_4b[5]  
-		  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
-		force_4b[4]  = coeff * deriv_4b[4] 
-		  * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5]  
-		  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_kl[powers[5]];
-		force_4b[5]  = coeff * deriv_4b[5] 
-		  * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4]  
-		  * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]];
+		force_4b[0]  = coeff * deriv_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[1]  = coeff * deriv_4b[1] * fcut_4b[0] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ij[powers[0]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[2]  = coeff * deriv_4b[2] * fcut_4b[0] * fcut_4b[1] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[3]  = coeff * deriv_4b[3] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[4]  = coeff * deriv_4b[4] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_kl[powers[5]];
+		force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]];
 
 #if(0)
 		if ( a1 == 1 || fidx_a2 == 1 || fidx_a3 == 1 || fidx_a4 == 1 )

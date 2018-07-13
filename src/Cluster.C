@@ -607,6 +607,7 @@ void CLUSTER::set_default_smaxim(const vector<PAIRS> & FF_2BODY)
 {	
 	for (int i=0; i< NPAIRS; i++)
 	{
+
 	  if ( ! SPECIAL_S_MAXIM )
 	  {
 		 int j;
@@ -767,8 +768,7 @@ void CLUSTER_LIST::read_ff_params(ifstream &PARAMFILE, const vector<string>& TMP
 }
 
 
-double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string input_type,
-													 vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string input_type,vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
 // Read the lsq cutoff parameters (S_MAXIM, S_MINIM).
 // Returns the largest outer cutoff or the smallest inner cutoff found.
 {
@@ -796,6 +796,8 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 	 {
 		data_vec[i] = &(VEC[i].S_MAXIM);
 		special_flag[i] = &(VEC[i].SPECIAL_S_MAXIM);
+		
+		
 	 }
   }
   else if ( input_type == "S_MINIM" ) 
@@ -828,10 +830,10 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 		  *special_flag[i] = true;
 		}
 	 }
-#if VERBOSITY == 1
+	#if VERBOSITY == 1
 	 if ( RANK == 0 ) cout << "	Note: Setting all " << natoms << "-body " + input_type + " values to " 
 								  <<  (*data_vec[0])[0] << endl;
-#endif				
+	#endif				
   }
   else if(TEMP_STR == "SPECIFIC" )
   {
@@ -1063,8 +1065,7 @@ void CLUSTER_LIST::build_int_maps_loop(int index, vector<int> atom_index, vector
   }
 }
 
-int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP, 
-									 vector<string> atom_types, vector<int> atomtype_idx)
+int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP, vector<string> atom_types, vector<int> atomtype_idx)
 // Build all triplets and associated maps for the cluster list.
 {
   build_pairs(ATOM_PAIRS, PAIR_MAP, atom_types, atomtype_idx);
@@ -1075,8 +1076,10 @@ int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<str
   }
 
   set_default_cutoffs(ATOM_PAIRS);
-  for ( int i = 0; i < VEC.size(); i++ ) 
-	 VEC[i].set_cheby_vals(ATOM_PAIRS);
+  
+// This needed to be moved so that cheby parameters are built AFTER special cutoffs are read in
+//  for ( int i = 0; i < VEC.size(); i++ ) 
+//	 VEC[i].set_cheby_vals(ATOM_PAIRS);
 
   return( VEC.size() );
 }
@@ -1092,6 +1095,12 @@ int CLUSTER_LIST::make_id_int(vector<int>& index)
 	 weight *= MAX_ATOM_TYPES;
   }
   return(sum);
+}
+
+void CLUSTER_LIST::build_cheby_vals(vector<PAIRS> & ATOM_PAIRS)
+{
+  for ( int i = 0; i < VEC.size(); i++ ) 
+	 VEC[i].set_cheby_vals(ATOM_PAIRS);
 }
 
 void CLUSTER_LIST::build_pairs(vector<PAIRS> ATOM_PAIRS, map<string,int> PAIR_MAP, vector<string> atom_types,
@@ -1702,8 +1711,7 @@ void CLUSTER::set_cheby_vals(vector<PAIRS> &FF_2BODY)
 	 else
 		EXIT_MSG("Could not find a match for pair " + ATOM_PAIRS[i]);
 
-	 Cheby::set_cheby_params(S_MINIM[i], S_MAXIM[i], lambda, FF_2BODY[0].CHEBY_TYPE, 
-									 X_MINIM[i], X_MAXIM[i], X_DIFF[i], X_AVG[i]);
+	 Cheby::set_cheby_params(S_MINIM[i], S_MAXIM[i], lambda, FF_2BODY[0].CHEBY_TYPE, X_MINIM[i], X_MAXIM[i], X_DIFF[i], X_AVG[i]);
   }
 }
 

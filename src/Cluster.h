@@ -4,73 +4,73 @@
 
 class PAIRS	// NEEDS UPDATING
 {
-public:
-  int    PAIRIDX;			// Index for the specific pair type (triplet type)
-  string PRPR_NM;			// The order-specific atom pair. For example, OH, never HO, or something similiar "proper name"
-  string PAIRTYP;			// Allowed values are CHEBYSHEV, DFTBPOLY, SPLINE, INVERSE_R, LJ, and STILLINGER
-  string ATM1TYP;			// Atom chemistry (i.e. C, H, N, O...)
-  string ATM2TYP;
-  int    ATM1TYPE_IDX;  // The type index of atom 1
-  int    ATM2TYPE_IDX;  // The type index of atom 2
-  double ATM1CHG;			// Atom partial charge... used when charges are fixed
-  double ATM2CHG;
-  string CHRGSGN;			// Should the fitted charge on a given atom be negative or positive?
-  double ATM1MAS;			// Atomic mass (i.e. 12.011 for C)
-  double ATM2MAS;	
-  double S_MINIM;			// Minimum allowed pair distance for fitting
-  double S_MAXIM;			// Maximum allowed pair distance for fitting
-  double S_DELTA;			// Fitting "grid" spacing (width)
+	public:
+	  	int    PAIRIDX; 		      // Index for the specific pair type (triplet type)
+	  	string PRPR_NM; 		      // The order-specific atom pair. For example, OH, never HO, or something similiar "proper name"
+	  	string PAIRTYP; 		      // Allowed values are CHEBYSHEV, DFTBPOLY, SPLINE, INVERSE_R, LJ, and STILLINGER
+	  	string ATM1TYP; 		      // Atom chemistry (i.e. C, H, N, O...)
+	  	string ATM2TYP;
+	  	int    ATM1TYPE_IDX;		      // The type index of atom 1
+	  	int    ATM2TYPE_IDX;		      // The type index of atom 2
+	  	double ATM1CHG; 		      // Atom partial charge... used when charges are fixed
+	  	double ATM2CHG;
+	  	string CHRGSGN; 		      // Should the fitted charge on a given atom be negative or positive?
+	  	double ATM1MAS; 		      // Atomic mass (i.e. 12.011 for C)
+	  	double ATM2MAS;       
+	  	double S_MINIM; 		      // Minimum allowed pair distance for fitting
+	  	double S_MAXIM; 		      // Maximum allowed pair distance for fitting
+	  	double S_DELTA; 		      // Fitting "grid" spacing (width)
 
-  double X_MINIM;         // Minimum transformed Cheby
-  double X_MAXIM;         // Maximum transformed Cheby
-  double X_AVG;           // Average of transformed Cheby limits.
-  double X_DIFF;          // Difference between transformed cheby limits.
+	  	double X_MINIM; 		      // Minimum transformed Cheby
+	  	double X_MAXIM; 		      // Maximum transformed Cheby
+	  	double X_AVG;			      // Average of transformed Cheby limits.
+	  	double X_DIFF;  		      // Difference between transformed cheby limits.
 
-  int N_CFG_CONTRIB;		// How many configurations actually contribute to fitting this pair??
+	  	int N_CFG_CONTRIB;		      // How many configurations actually contribute to fitting this pair??
+		      
+	  	double CHEBY_RANGE_LOW; 	      //      When fitting to Cheby polynomials, pair distances are typically transformed to exist defined on range -1 to 1 (where Cheby poly's are defined), 
+	  	double CHEBY_RANGE_HIGH;	      //  but under certain circumstances, it can be advantagous to only fit some sub range (i.e. -1 to 0). These variables define the transformation range
+	  					      //  and arr, by default, set to -1 and 1 for low and high, respectively.
 
-  double CHEBY_RANGE_LOW;	//	When fitting to Cheby polynomials, pair distances are typically transformed to exist defined on range -1 to 1 (where Cheby poly's are defined), 
-  double CHEBY_RANGE_HIGH;//  but under certain circumstances, it can be advantagous to only fit some sub range (i.e. -1 to 0). These variables define the transformation range
-  //  and arr, by default, set to -1 and 1 for low and high, respectively.
+	  	int    SNUM;			      // Number of fitting parameters for pair ... WHY WOULD THIS BE DIFFERENT FOR DIFFERENT PAIR TYPES?***
+	  	int    SNUM_3B_CHEBY;		      // Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
+	  	int    SNUM_4B_CHEBY;		      // Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
+		      
+	  	Cheby_trans CHEBY_TYPE; 	      // Are distances transformed into inverse-r type or morse-type distances?... or not at all? (default)
+	  	double PENALTY_SCALE;		      // For 2B Cheby potentials... "a" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 1.0e8
+	  	double PENALTY_DIST;		      // For 2B Cheby potentials... "penalty_dist" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 0.01
+	  	double CUBIC_SCALE;		      // Factor to multiply to the cubic penalty function, (1-rlen/smax)^3... default value is 1
+		      
+	  	double LAMBDA;  		      // Morse lambda for CHEBYSHEV type pairs
+	  	double MIN_FOUND_DIST;  	      // Minimum distance between pairs
+		      
+	  	bool   USE_OVRPRMS;		      // Should overbonding even be computed pair type
+	  	string OVER_TO_ATM;		      // Which atom is overbonding *to* being defined for... for example, overbonding to oxygen
+	  	vector<double> OVRPRMS; 	      // [0] = P_OVERB; [1] = R_0_VAL; [2] = P_1_VAL; [3] = P_2_VAL; [4] = LAMBDA6
+		      
+	  	vector<double> NBINS;		      // Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
 
-  int    SNUM;			// Number of fitting parameters for pair ... WHY WOULD THIS BE DIFFERENT FOR DIFFERENT PAIR TYPES?***
-  int    SNUM_3B_CHEBY;	// Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
-  int    SNUM_4B_CHEBY;	// Number of fitting parameters for pair ... WHY WOULD YOU NEED BOTH SNUM AND THIS SPECIAL CHEBY ONE?***
-	
-  Cheby_trans CHEBY_TYPE;	  // Are distances transformed into inverse-r type or morse-type distances?... or not at all? (default)
-  double PENALTY_SCALE;	// For 2B Cheby potentials... "a" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 1.0e8
-  double PENALTY_DIST;	// For 2B Cheby potentials... "penalty_dist" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 0.01
-  double CUBIC_SCALE;		// Factor to multiply to the cubic penalty function, (1-rlen/smax)^3... default value is 1
-	
-  double LAMBDA;			// Morse lambda for CHEBYSHEV type pairs
-  double MIN_FOUND_DIST;	// Minimum distance between pairs
-	
-  bool   USE_OVRPRMS;		// Should overbonding even be computed pair type
-  string OVER_TO_ATM;		// Which atom is overbonding *to* being defined for... for example, overbonding to oxygen
-  vector<double> OVRPRMS;	// [0] = P_OVERB; [1] = R_0_VAL; [2] = P_1_VAL; [3] = P_2_VAL; [4] = LAMBDA6
-	
-  vector<double> NBINS;				// Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
+	  	FCUT FORCE_CUTOFF;		      // "CUBIC" "COSINE" or "SIGMOID" currently supported
 
-  FCUT FORCE_CUTOFF;	// "CUBIC" "COSINE" or "SIGMOID" currently supported
+	  	// Only used in force field
+	  	vector<double>        PARAMS;
+	  	vector<double>        POT_PARAMS;     // Used by splines to compute pressure by integrating spline eq's
+	  	double  	      PAIR_CHRG;
+		      
+	  	PAIRS(): OVRPRMS(5,0.0), NBINS(3,0.0) 
+	  	{
+			      N_CFG_CONTRIB = 0;
+			      SNUM = 0;
+			      SNUM_3B_CHEBY = 0;
+			      SNUM_4B_CHEBY = 0;
+			      CHEBY_RANGE_HIGH = 1.0;
+			      CHEBY_RANGE_LOW  = -1.0;
+			      CUBIC_SCALE = 1.0;
+			      USE_OVRPRMS = false;
+	  	}     // Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 
-  // Only used in force field
-  vector<double> 	PARAMS;
-  vector<double>	POT_PARAMS;		// Used by splines to compute pressure by integrating spline eq's
-  double			PAIR_CHRG;
-	
-PAIRS(): OVRPRMS(5,0.0), NBINS(3,0.0) 
-	 {
-		N_CFG_CONTRIB = 0;
-		SNUM = 0;
-		SNUM_3B_CHEBY = 0;
-		SNUM_4B_CHEBY = 0;
-		CHEBY_RANGE_HIGH = 1.0;
-		CHEBY_RANGE_LOW  = -1.0;
-		CUBIC_SCALE = 1.0;
-		USE_OVRPRMS = false;
-	 }	// Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
-
-  // Set Chebyshev min/max vals.
-  void set_cheby_vals();
+	  	// Set Chebyshev min/max vals.
+	  	void set_cheby_vals();
 };
 
 
@@ -84,6 +84,7 @@ class CLUSTER
 // Structure for a generic cluster of interacting atoms.
 // This is a generic class that specific clusters derive from.
 {
+
 public:
   int INDX;
   int NATOMS;
@@ -213,13 +214,13 @@ class CLUSTER_LIST
 {
 public:
 
-  int NCLUSTERS;			// The number of CLUSTERS in the list.
-  vector<CLUSTER> VEC;			// A vector containing all clusters ... Need to store cluster pointers so that polymorphism with different cluster types works.
-  map<string,int> MAP;			// A map from pair types into the VEC index.
-  map<int,string> MAP_REVERSE;		// A map from the VEC index into the pair types.
-  vector<int> INT_MAP;
-  vector<vector<int>> PAIR_INDICES;	// Store indices for ordering of pair properties (Cheby powers, s_minim, etc.)  corresponding to a particular atom ordering.
-  vector<int> INT_MAP_REVERSE;
+  int 			NCLUSTERS;		// The number of CLUSTERS in the list.
+  vector<CLUSTER> 	VEC;			// A vector containing all clusters ... Need to store cluster pointers so that polymorphism with different cluster types works.
+  map<string,int> 	MAP;			// A map from pair types into the VEC index.
+  map<int,string> 	MAP_REVERSE;		// A map from the VEC index into the pair types.
+  vector<int> 		INT_MAP;
+  vector<vector<int>> 	PAIR_INDICES;		// Store indices for ordering of pair properties (Cheby powers, s_minim, etc.)  corresponding to a particular atom ordering.
+  vector<int> 		INT_MAP_REVERSE;
 
   vector<vector<string>> EXCLUDE;
 
@@ -232,6 +233,9 @@ public:
 
   // Build all triplets and associated maps for the cluster list.
   int build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP,  vector<string> atom_types, vector<int> atomtype_idx);
+  
+  // Set up the cheby variables (xavg, xdiff, etc)
+  void build_cheby_vals(vector<PAIRS> & ATOM_PAIRS);
 
   // Returns a unique ID number for a cluster of atoms.
   int make_id_int(vector<int>& index);

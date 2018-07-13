@@ -122,37 +122,7 @@ int main(int argc, char* argv[])
 	read_lsq_input(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, 
 						PAIR_MAP_REVERSE, INT_PAIR_MAP, 
 						CHARGE_CONSTRAINTS, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
-
-
-// had to move "ATOM_PAIRS[i].set_cheby_vals(), TRIPS.build_all, and QUADS.build_all into the read_lsq_input function
-// because placement here breaks SPECIFIC *" functionality (but works for "SPECIAL *B S_M**IM: ALL *")
-
-/*	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" )
-	{
-	  for ( int i = 0 ; i < ATOM_PAIRS.size() ; i++ )
-		 ATOM_PAIRS[i].set_cheby_vals() ;
-	}
-*/	
-/*
-	if(CONTROLS.USE_3B_CHEBY)
-	{
-	  // Generate unique triplets
-	  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ;
-	  TRIPS.print(false) ;
-	}
-*/	
-/*
-	if(CONTROLS.USE_4B_CHEBY)
-	{
-	  //////////////////////////////////////////////////////////////////////
-	  // Generate unique quadruplets and thier corresponding sets of powers
-	  //////////////////////////////////////////////////////////////////////
-	  
-	  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX) ;
-	  QUADS.print(false) ;
-	}  
-*/	
-	 
+ 
 
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
 	{
@@ -811,9 +781,7 @@ int main(int argc, char* argv[])
 				else if ((a==TRAJECTORY[N].ATOMS)&& (CONTROLS.FIT_STRESS))
 				{
 					// Convert from GPa to internal units to match A-matrix elements
-					
 
-					 
 					fileb << TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
 					fileb << TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
 					fileb << TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
@@ -822,9 +790,9 @@ int main(int argc, char* argv[])
 					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
 					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
 				}
-				else if (CONTROLS.FIT_STRESS_ALL)
+				else if ((a>=TRAJECTORY[N].ATOMS)&& (a<(TRAJECTORY[N].ATOMS+3)) && CONTROLS.FIT_STRESS_ALL)
 				{
-				 	if(a==TRAJECTORY[N].ATOMS)
+					if(a==TRAJECTORY[N].ATOMS)
 					{
 						// Account for the symmetry of the off-diagonal (deviatoric) components
 				
@@ -839,24 +807,20 @@ int main(int argc, char* argv[])
 						fileb << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
 						fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
 						fileb << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
+					
+						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
+						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
+						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;
+
+						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
+						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
+						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
+
+						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
+						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
+						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
 					}
-				
-				
-					/*
-				
-					fileb << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;
-					
-					fileb << TRAJECTORY[N].STRESS_TENSORS_Y.X/GPa << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
-					
-					fileb << TRAJECTORY[N].STRESS_TENSORS_Z.X/GPa << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS_Z.Y/GPa << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
-					
-					*/
+
 				}
 				else
 				{			
@@ -864,9 +828,9 @@ int main(int argc, char* argv[])
 					fileb << TRAJECTORY[N].QM_POT_ENER << endl;
 					fileb << TRAJECTORY[N].QM_POT_ENER << endl;
 			
-					fileb_labeled << "-1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;
-					fileb_labeled << "-1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;
-					fileb_labeled << "-1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;	
+					fileb_labeled << "+1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;
+					fileb_labeled << "+1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;
+					fileb_labeled << "+1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;	
 				}	
 			}
 		}  	
@@ -1187,6 +1151,16 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 		if(LINE.find("# ENDFILE #") != string::npos)
 		{
+		
+			// Set up the Cheby variables
+			
+			if(CONTROLS.USE_3B_CHEBY)
+				TRIPS.build_cheby_vals(ATOM_PAIRS);
+
+			if(CONTROLS.USE_4B_CHEBY)
+				QUADS.build_cheby_vals(ATOM_PAIRS);
+			
+		
 			// Run a few checks to make sure logic is correct
 		 
 			if(CONTROLS.IF_SUBTRACT_COORD && CONTROLS.FIT_POVER)
@@ -1267,7 +1241,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			CONTROLS.N_LAYERS = int(atof(LINE.data()));
 			
 			#if VERBOSITY == 1
-			if ( RANK == 0 ) 	cout << "	# N_LAYERS #: " << CONTROLS.N_LAYERS << endl;
+			if ( RANK == 0 ) 	cout << "	# NLAYERS #: " << CONTROLS.N_LAYERS << endl;
 			#endif
 		}
 		
@@ -1308,15 +1282,20 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			{
 				CONTROLS.FIT_STRESS = true;
 				cin >> CONTROLS.NSTRESS;
-				cin >> LINE;
 				cin.ignore();
-			}
+			}			
 			else
 			{
 				if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
 					CONTROLS.FIT_STRESS = true;	
 				else if (LINE=="all"  || LINE=="All"  || LINE=="ALL"  || LINE == "A" || LINE == "a")
-					CONTROLS.FIT_STRESS_ALL = true;	
+					CONTROLS.FIT_STRESS_ALL = true;
+				else if(LINE=="firstall"  || LINE=="FirstAll"  || LINE=="FIRSTALL")
+				{
+					CONTROLS.FIT_STRESS_ALL = true;
+					cin >> CONTROLS.NSTRESS;
+					cin.ignore();
+				}	
 				else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
 					CONTROLS.FIT_STRESS = false;
 				else
@@ -1355,7 +1334,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			{
 				CONTROLS.FIT_ENER = true;
 				cin >> CONTROLS.NENER;
-				cin >> LINE;
 				cin.ignore();
 			}
 			else
@@ -1934,7 +1912,7 @@ for ( int i = 0 ; i < ATOM_PAIRS.size() ; i++ )
 if(CONTROLS.USE_3B_CHEBY)
 {
   // Generate unique triplets
-  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ;
+  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ; 
   TRIPS.print(false) ;
 }	
 			
@@ -2008,8 +1986,7 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 		
 		else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
 		{
-		  NEIGHBOR_LIST.MAX_CUTOFF_3B = 
-			 TRIPS.read_cutoff_params(cin, LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
+		  NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.read_cutoff_params(cin, LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
 		}
 		
 		else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
@@ -2019,8 +1996,7 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 		
 		else if(LINE.find("SPECIAL 4B S_MAXIM:") != string::npos)
 		{
-		  NEIGHBOR_LIST.MAX_CUTOFF_4B = 
-			 QUADS.read_cutoff_params(cin, LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
+		  NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.read_cutoff_params(cin, LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
 		}
 
 		else if(LINE.find("SPECIAL 4B S_MINIM:") != string::npos)

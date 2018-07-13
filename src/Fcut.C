@@ -14,8 +14,7 @@ using namespace std;
 #include "functions.h"
 #include "util.h"
 
-void FCUT::get_fcut(double & fcut, double & fcut_deriv, 
-						  const double rlen, const double rmin, const double rmax) 
+void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const double rmin, const double rmax) 
 // Calculates the fcut function and its derivative. Used to force the potential to zero at rcut max, 
 // and for 3-body interactions, to zero at rcut min
 {	
@@ -46,8 +45,8 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv,
 	{
 		if(TYPE == FCUT_TYPE::COSINE)
 		{
-			fcut0     = 2.0*pi*( (rlen - rmin) /(rmax - rmin) );
-			fcut      = -0.5*cos(fcut0) + 0.5;
+			fcut0      = 2.0*pi*( (rlen - rmin) /(rmax - rmin) );
+			fcut       = -0.5*cos(fcut0) + 0.5;
 			fcut_deriv =  0.5*sin(fcut0) * (2.0*pi/(rmax - rmin));
 
 			return;
