@@ -65,7 +65,8 @@ if ( weights_file == "None" ):
 else:
     DO_WEIGHTING = True
 
-if (algorithm.find("lasso") >= 0 or algorithm.find("ridge") >= 0) :
+if (algorithm.find("lasso") >= 0 or algorithm.find("ridge") >= 0
+    or algorithm.find("lassolars") >= 0 ) :
     from sklearn import linear_model
 
 # Regularization value.
@@ -76,6 +77,7 @@ alpha_ar = [1.0e-06, 3.2e-06, 1.0e-05, 3.2e-05, 1.0e-04, 3.2e-04, 1.0e-03, 3.2e-
 # Number of folds for cross-validation.
 folds = args.folds
 
+max_iter_num = 100000
 
 test_suite_run = False
 
@@ -208,7 +210,7 @@ elif algorithm == 'ridgecv':
 elif algorithm == 'lasso':
     print '! Lasso regression used'
     print '! Lasso alpha = ' + str(alpha_val)
-    reg = linear_model.Lasso(alpha=alpha_val,fit_intercept=False,max_iter=1.0E5)
+    reg = linear_model.Lasso(alpha=alpha_val,fit_intercept=False,max_iter=max_iter_num)
     reg.fit(A,b)
     x = reg.coef_
     np = 0 
@@ -223,6 +225,18 @@ elif algorithm == 'lassocv':
     print '! Lasso CV regression used'
     print '! Lasso CV alpha = ' + str(reg.alpha_)
     x = reg.coef_
+    np = 0 
+    for i in xrange(0, len(x)):
+        if ( abs(x[i]) > 1.0e-05 ):
+            np = np + 1
+    nvars = np
+
+elif algorithm == 'lassolars':
+    print '! LARS implementation of LASSO used'
+    print '! LASSO alpha = ', alpha_val
+    reg = linear_model.LassoLars(alpha=alpha_val,fit_intercept=False,fit_path=False,verbose=True,max_iter=max_iter_num)
+    reg.fit(A,b)
+    x = reg.coef_[0]
     np = 0 
     for i in xrange(0, len(x)):
         if ( abs(x[i]) > 1.0e-05 ):
