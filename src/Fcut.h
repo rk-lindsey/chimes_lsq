@@ -10,7 +10,8 @@ enum class FCUT_TYPE {
 	COSINE,
 	CUBSIG,
 	SIGMOID,
-	SIGFLT
+	SIGFLT,
+	TERSOFF
 } ;
 
 class FCUT {
@@ -45,7 +46,7 @@ public:
 	// Decide whether to proceed with a pair interaction.
 	bool PROCEED(const double & rlen, const double & rmin, const double & rmax) ;
 
-   // Parse the input string and set parameters for the force cutoff
+   	// Parse the input string and set parameters for the force cutoff
 	void parse_input(string line) ;
 
 	// Print out force cutoff parameters.

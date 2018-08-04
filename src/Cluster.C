@@ -840,8 +840,8 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 	 int n_spec = stoi(tokens[4]);
 				
 #if VERBOSITY == 1
-	 if ( RANK == 0 ) cout << "	Note: Setting specific " << natoms << "-body " 
-							  + input_type + " values: " << endl;
+	 if ( RANK == 0 ) 
+	 	cout << "	Note: Setting specific " << natoms << "-body " + input_type + " values: " << endl;
 #endif	
 
 	 string cluster_name;
@@ -897,16 +897,18 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 	 {
 		for ( int i = 0; i < NCLUSTERS; i++ ) 
 		{
+		  cout << "	";
 		  for ( int j = 0; j < natoms; j++ ) 
 		  {
-			 cout << " " << VEC[i].ATOM_NAMES[j];
+			 cout << VEC[i].ATOM_NAMES[j] << " ";
 		  }
 		  for ( int j = 0; j < npairs; j++ ) 
 		  {
-			 cout << " " << VEC[i].ATOM_PAIRS[j] << " " << (*data_vec[i])[j];
+			 cout << VEC[i].ATOM_PAIRS[j] << " " << (*data_vec[i])[j] << " ";
 		  }
 		  cout << endl;
 		}
+		cout << endl;
 	 }
   }
   double val = 0;
@@ -922,7 +924,7 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 		}
 	 }
 	 if ( RANK == 0 ) 
-		cout << "     Max " << natoms << "-body cutoff = " << val << endl;
+		cout << "     	Max " << natoms << "-body cutoff = " << val << endl << endl;
   }
   else if ( input_type == "S_MINIM" ) 
   {
@@ -1234,7 +1236,7 @@ void CLUSTER_LIST::build_pairs_loop(int index, vector<int> atom_index,
 		// This is a new set of pairs
 		if(RANK==0)
 		{							
-		  cout << "Made the following " << tuplet_name(natoms, true, false) << ": " << count << " ";
+		  cout << endl << "	Made the following " << tuplet_name(natoms, true, false) << ": " << count << " ";
 		  int npairs = VEC[0].NPAIRS;
 		  for(int m=0; m< npairs; m++) 
 			 cout << VEC[count].ATOM_PAIRS[m] << " ";
@@ -1401,7 +1403,7 @@ void CLUSTER_LIST::print(bool md_mode)
   {
 	 string tuplet = tuplet_name(VEC[0].NATOMS,true,false);
 
-	 cout << "	The following unique " << tuplet << " of atoms have been identified:" << endl;
+	 cout << endl << "	The following unique " << tuplet << " of atoms have been identified:" << endl;
 
 	 if ( EXCLUDE.size() > 0 )
 		cout << "	Note: The following types have been removed, if present: " << endl;
@@ -1444,6 +1446,8 @@ void CLUSTER_LIST::print_fcut_header(ostream &header)
 	 header << " " << VEC[0].FORCE_CUTOFF.STEEPNESS << " " << VEC[0].FORCE_CUTOFF.OFFSET;
   if(VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
 	 header << " " << VEC[0].FORCE_CUTOFF.HEIGHT;
+  if(VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::TERSOFF)
+	 header << " " << VEC[0].FORCE_CUTOFF.OFFSET;	 
 
   header << endl;
 }

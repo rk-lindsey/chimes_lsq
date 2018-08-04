@@ -143,6 +143,62 @@ if DO_WEIGHTING:
 else:
     x=dot(x,dot(transpose(U),b))
 
+
+
+
+
+
+############
+
+# Zero-out certain params.
+#
+# Assume: 12 unique 2-b and 111 unqiue 3-b params
+# Assume: Only keep 1000 4B params with largest magnitude
+#
+#strt  = 12+111-1 # 122
+#tmp_x = list(x[strt:])
+#tmp_i = []
+#
+#for i in xrange(len(tmp_x)):
+#	tmp_x[i] = abs(tmp_x[i])
+#	tmp_i.append(i+122)
+#	
+# Sort parameters in order of decreasing parameter magnitude
+#
+#tmp_i.sort(key=dict(zip(tmp_i,tmp_x)).get,reverse=True) # sort the indexes
+#
+#tmp_x.sort(reverse=True)				# Sort the parameters
+#
+# only keep largest 108 parameters
+#
+#for i in xrange(len(tmp_x)):
+#
+#
+#	if i+1 <= 1000:
+#		#print `tmp_i[i]` + "	" + `tmp_x[i]` + "	" + `x[tmp_i[i]]` + ":	KEEP"
+#		tmp_x[i] = 1.0 
+#	else:
+#		#print `tmp_i[i]` + "	" + `tmp_x[i]` + "	" + `x[tmp_i[i]]` + ":	LOSE"
+#		tmp_x[i] = -1.0
+#		
+#for i in xrange(len(tmp_x)):
+#
+#	if tmp_x[i] == -1.0:
+#		x[tmp_i[i]] = 0.0
+
+		
+	
+
+	
+
+
+
+
+
+
+
+
+
 y=dot(A,x)
 Z=0.0
 
@@ -161,7 +217,6 @@ print "! SVD regularization factor = ", eps_fac
 print "! number of SVD fitting vars = ", nvars
 print "! Bayesian Information Criterion =  ", bic
 print "!"
-
 
 ####################################
 # Actually process the header file...
@@ -453,7 +508,7 @@ if TOTAL_QUADS > 0:
                 UNIQ_QUAD_IDX = int(LINE_SPLIT[8])
                     #print 'UNIQ_QUAD_IDX', str(UNIQ_QUAD_IDX)
 
-                print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]`
+                print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]`, TOTL
 
             QUAD_PAR_IDX += int(UNIQ)
             COUNTED_QUAD_PARAMS += int(UNIQ)
@@ -494,12 +549,13 @@ if TEST_SUITE_RUN == "do":
 		test_suite_params.write(phrase)
 	test_suite_params.close()
 
-# OLD WAY:
-#for i in range(0,len(x)):
-#    print i,x[i]
 
-
-
+	
+#for i in xrange(0,len(D)):
+#    if abs(D[i]) > eps:
+#        print `i` + " " + `x[i]` + " KEPT" 
+#    else:
+#        print `i` + " " + `x[i]` + " REMOVED" 
 
 
 

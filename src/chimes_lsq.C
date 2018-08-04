@@ -264,41 +264,47 @@ int main(int argc, char* argv[])
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.X;
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Y;
 		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Z;
-		
-		if(CONTROLS.FIT_STRESS)
-		{
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.X;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Y;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Z;
-		}
-		else if(CONTROLS.FIT_STRESS_ALL)	// Expects as:xx yy zz xy xz yz // old: xx, xy, xz, yy, yx, yz, zx, zy, zz
-		{
-				// Read only the "upper" deviatoric components
-		
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.X;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.Y;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.Z;
-				
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.Y;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.Z;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.Z;
 
-				/*
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.X;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.X;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.Y;
-				*/
-				
-				
-		}
-		if(CONTROLS.FIT_ENER) // We're actually fitting to relative *differences* in energy
+		if((CONTROLS.NSTRESS < 0) || (i<CONTROLS.NSTRESS))
 		{
-			TRAJ_INPUT >> TRAJECTORY[i].QM_POT_ENER;
-			
-			//if(i>0)	// -- no longer need this, but will need to add a row of 1's to the a-matrix for energies, 0 for stresses and forces.
-			//	TRAJECTORY[i].QM_POT_ENER -= TRAJECTORY[0].QM_POT_ENER;
+			if(CONTROLS.FIT_STRESS)
+			{
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.X;
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Y;
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Z;
+			}
+			else if(CONTROLS.FIT_STRESS_ALL)	// Expects as:xx yy zz xy xz yz // old: xx, xy, xz, yy, yx, yz, zx, zy, zz
+			{
+					// Read only the "upper" deviatoric components
+		
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.X;
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.Y;
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.Z;
+					
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.Y;
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.Z;
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.Z;
+		
+					/*
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.X;
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.X;
+					TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.Y;
+					*/
+					
+					
+			}
 		}
-			
+		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
+		{
+			if(CONTROLS.FIT_ENER) // We're actually fitting to relative *differences* in energy
+			{
+				TRAJ_INPUT >> TRAJECTORY[i].QM_POT_ENER;
+				
+				//if(i>0)	// -- no longer need this, but will need to add a row of 1's to the a-matrix for energies, 0 for stresses and forces.
+				//	TRAJECTORY[i].QM_POT_ENER -= TRAJECTORY[0].QM_POT_ENER;
+			}		
+		}
+	
 		// Check that outer cutoffs do not exceed half of the boxlength
 		// with consideration of layering
 		
@@ -308,6 +314,8 @@ int main(int argc, char* argv[])
 				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (2*CONTROLS.N_LAYERS +1)
 				|| ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z * (2*CONTROLS.N_LAYERS +1) ))
 			{
+			
+			cout << "ON FRAME: " << i << endl;
 					#if WARN == TRUE
 						if (isatty(fileno(stdout)) && RANK == 0)
 						{
@@ -1573,10 +1581,10 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			{
 				for(int i=0; i<NPAIR; i++)
 				{
-					ATOM_PAIRS[i].CHEBY_RANGE_LOW  = TMP_CHEBY_RANGE_LOW;
-					ATOM_PAIRS[i].CHEBY_RANGE_HIGH = TMP_CHEBY_RANGE_HIGH;
+					ATOM_PAIRS[i].CHEBY_RANGE_LOW   = TMP_CHEBY_RANGE_LOW;
+					ATOM_PAIRS[i].CHEBY_RANGE_HIGH  = TMP_CHEBY_RANGE_HIGH;
 					ATOM_PAIRS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;
-					ATOM_PAIRS[i].PAIRTYP = TEMP_TYPE ;
+					ATOM_PAIRS[i].PAIRTYP           = TEMP_TYPE ;
 				}
 			}	
 			
@@ -2018,8 +2026,26 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 				QUADS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
 			
 			#if VERBOSITY == 1
-			if ( RANK == 0 ) cout << "	# FCUTTYP #: " << TEMP_TYPE << "	... for 3-body and 4-body Chebyshev interactions" << endl;	
+			if ( RANK == 0 ) 
+				cout << "	# FCUTTYP #: " << TEMP_TYPE << "	... for 3-body and 4-body Chebyshev interactions" << endl;	
 			#endif
+			
+			if(TEMP_TYPE=="TERSOFF")
+			{
+				cin >> TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
+				
+				#if VERBOSITY == 1
+				if ( RANK == 0 ) 
+					cout << "			With an offset of: " 
+					     << fixed << setprecision(3) 
+					     << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET*100.0 
+					     << "% of the pair outer cutoffs" << endl;      
+				#endif	
+				
+				for(int i=1; i<TRIPS.VEC.size(); i++)	// Copy all class elements
+					TRIPS.VEC[i].FORCE_CUTOFF.OFFSET = TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
+							
+			}
 			
 			if(TEMP_TYPE=="SIGMOID" || TEMP_TYPE=="CUBSIG" || TEMP_TYPE=="CUBESTRETCH" || TEMP_TYPE == "SIGFLT")
 			{
@@ -2035,7 +2061,8 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 											 << TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS 
 											 << ",	" << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET 
 											 << ", and  " << TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT << endl;	
-				#endif					
+				#endif
+									
 			}
 			cin.ignore();
 			
@@ -2045,6 +2072,9 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 			{
 //				TRIPS.VEC[i].FORCE_CUTOFF = TRIPS.VEC[0].FORCE_CUTOFF;
 				TRIPS.VEC[i].FORCE_CUTOFF.BODIEDNESS = TRIPS.VEC[0].FORCE_CUTOFF.BODIEDNESS;
+				TRIPS.VEC[i].FORCE_CUTOFF.STEEPNESS  = TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS; 
+				TRIPS.VEC[i].FORCE_CUTOFF.OFFSET     = TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
+				TRIPS.VEC[i].FORCE_CUTOFF.HEIGHT     = TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
 			}
 			
 			if(CONTROLS.USE_4B_CHEBY)
@@ -2062,6 +2092,9 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 				{
 //					QUADS.VEC[i].FORCE_CUTOFF = QUADS.VEC[0].FORCE_CUTOFF;
 					QUADS.VEC[i].FORCE_CUTOFF.BODIEDNESS = QUADS.VEC[0].FORCE_CUTOFF.BODIEDNESS;
+					TRIPS.VEC[i].FORCE_CUTOFF.STEEPNESS  = QUADS.VEC[0].FORCE_CUTOFF.STEEPNESS; 
+					TRIPS.VEC[i].FORCE_CUTOFF.OFFSET     = QUADS.VEC[0].FORCE_CUTOFF.OFFSET;
+					TRIPS.VEC[i].FORCE_CUTOFF.HEIGHT     = QUADS.VEC[0].FORCE_CUTOFF.HEIGHT;					
 				}
 			}
 

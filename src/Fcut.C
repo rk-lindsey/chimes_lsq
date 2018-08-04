@@ -19,6 +19,8 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const
 // and for 3-body interactions, to zero at rcut min
 {	
 	static double fcut0;
+	static double fcut0_deriv;
+	static double THRESH;
 	static double A, a, a_prime;
 	static double B, b, b_prime;
 	
@@ -32,7 +34,8 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const
 		exit_run(0);
 	}
 
-	if(BODIEDNESS==2 || (BODIEDNESS==3 && TYPE == FCUT_TYPE::CUBIC) || BODIEDNESS==4)
+	// Cubic cutoff
+	if(BODIEDNESS==2 || (BODIEDNESS==3 && TYPE == FCUT_TYPE::CUBIC) || (BODIEDNESS==4 && TYPE == FCUT_TYPE::CUBIC))
 	{		
 		fcut0 = (1.0 - rlen/rmax);
 		fcut        = pow(fcut0, POWER);
@@ -40,6 +43,41 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const
 		fcut_deriv *= -1.0 * POWER /rmax;
 
 		return;
+	}
+	else if(BODIEDNESS>2 && TYPE == FCUT_TYPE::TERSOFF)
+	{
+
+		// FYI: For this cutoff type, "OFFSET" is actually a fraction of the outer cutoff
+		
+		THRESH = rmax-OFFSET*rmax;
+/*		
+		cout << "*** " << rlen << endl;
+		cout << "*** " << rmax << endl; 
+		cout << "*** " << OFFSET << endl;
+		cout << "*** " << THRESH << endl;
+		cout << "*** " << rmax-THRESH << endl;
+		cout << "*** " << endl;
+*/		
+		
+		if      (rlen < THRESH)		// Case 1: Our pair distance is less than the fcut kick-in distance
+		{
+			fcut       = 1.0;
+			fcut_deriv = 0.0;
+		}
+		else if (rlen > rmax)		// Case 2: Our pair distance is greater than the cutoff
+		{
+			fcut       = 0.0;
+			fcut_deriv = 0.0;
+		}					
+		else				// Case 3: We'll use our modified sin function
+		{
+			fcut0       = (rlen-THRESH) / (rmax-THRESH) * pi + pi/2.0;
+			fcut0_deriv = pi / (rmax - THRESH);
+			
+			fcut        = 0.5 + 0.5 * sin( fcut0 );
+			fcut_deriv  = 0.5 * cos( fcut0 ) * fcut0_deriv; 
+		}
+		return;	
 	}
 	else if(BODIEDNESS==3)
 	{
@@ -195,9 +233,9 @@ FCUT::FCUT()
 	TYPE = FCUT_TYPE::CUBIC;
 
 	// More or less random defaults.
-	STEEPNESS = 2.0 ;
-	OFFSET = 0.0 ;
-	HEIGHT = 1.0 ;
+	STEEPNESS = 2.0;
+	OFFSET = 0.0;
+	HEIGHT = 1.0;
 
 }
 
@@ -230,7 +268,13 @@ void FCUT::set_type(string s)
 	{
 	
 		TYPE = FCUT_TYPE::SIGFLT;
-	} else 
+	} 
+	else if ( s == "TERSOFF" ) 
+	{
+	
+		TYPE = FCUT_TYPE::TERSOFF;
+	} 
+	else 
 	{
 		cout << "Error: unknown cutoff type " << s << endl;
 		exit(1);
@@ -261,6 +305,9 @@ string FCUT::to_string()
 	case FCUT_TYPE::SIGFLT:
 		str = "SIGFLT";
 		break;
+	case FCUT_TYPE::TERSOFF:
+		str = "TERSOFF";
+		break;		
 	default:
 		cout << "Error: unknown cutoff value " << (int) TYPE << endl;
 		exit(1);
@@ -276,7 +323,8 @@ bool FCUT::PROCEED(const double & rlen, const double & rmin, const double & rmax
 	if(TYPE == FCUT_TYPE::CUBIC 
 		|| TYPE == FCUT_TYPE::CUBSIG
 		|| TYPE == FCUT_TYPE::CUBESTRETCH 
-		|| TYPE == FCUT_TYPE::SIGFLT)
+		|| TYPE == FCUT_TYPE::SIGFLT
+		|| TYPE == FCUT_TYPE::TERSOFF)
 		if(rlen < rmax)
 			return true;
 		else
@@ -292,36 +340,41 @@ bool FCUT::PROCEED(const double & rlen, const double & rmin, const double & rmax
 void FCUT::parse_input(string line)
 // Parse the input string and set parameters for the force cutoff
 {
-  vector<string> tokens ;
+	vector<string> tokens;
 
-  int nargs = parse_space(line, tokens) ;
+	int nargs = parse_space(line, tokens);
 
-  validate_num_args(nargs, 3, line) ;
+	validate_num_args(nargs, 3, line);
 
-  set_type(tokens[2]) ;
+	set_type(tokens[2]);
+	
+	if (TYPE == FCUT_TYPE::TERSOFF)
+	{
+		validate_num_args(nargs, 4, line);
+		OFFSET = atof(tokens[3].data());
+	}
 
-  if( TYPE == FCUT_TYPE::SIGMOID 
+	else if(    TYPE == FCUT_TYPE::SIGMOID 
 		|| TYPE == FCUT_TYPE::CUBSIG 
 		|| TYPE == FCUT_TYPE::CUBESTRETCH 
 		|| TYPE == FCUT_TYPE::SIGFLT)
-  {
-	 validate_num_args(nargs, 5, line) ;
+	{
+		validate_num_args(nargs, 5, line);
 
-	 STEEPNESS = atof(tokens[3].data()) ;
-	 OFFSET = atof(tokens[4].data()) ;
+		STEEPNESS = atof(tokens[3].data());
+		OFFSET = atof(tokens[4].data());
 	 
-	 if ( TYPE == FCUT_TYPE::SIGFLT )
-	 {
-		validate_num_args(nargs, 6, line) ;
-		HEIGHT = atof(tokens[5].data()) ;
-	 }
-  }
+		if ( TYPE == FCUT_TYPE::SIGFLT )
+		{
+			validate_num_args(nargs, 6, line);
+			HEIGHT = atof(tokens[5].data());
+		}
+	}
 }
 
 void FCUT::print_params()
 // Print the force cutoff parameters
 {
-
   cout << to_string() << endl;
   cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << STEEPNESS << " " << OFFSET << endl;
 }

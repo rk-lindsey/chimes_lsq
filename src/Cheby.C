@@ -1070,7 +1070,13 @@ void Cheby::Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIP
 							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ);
 							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK);
 							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK);	
-													
+/*							
+							cout << PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.to_string() << " " << fcut_ij << " " << fcutderiv_ij << " " << rlen_ij << " " << S_MAXIM_IJ << endl;
+							cout << PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.to_string() << " " << fcut_ik << " " << fcutderiv_ik << " " << rlen_ik << " " << S_MAXIM_IK << endl;
+							cout << PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.to_string() << " " << fcut_jk << " " << fcutderiv_jk << " " << rlen_jk << " " << S_MAXIM_JK << endl;
+							cout << endl;
+*/							
+		
 							/////////////////////////////////////////////////////////////////////
 							/////////////////////////////////////////////////////////////////////
 							// Consider special restrictions on allowed triplet types and powers
