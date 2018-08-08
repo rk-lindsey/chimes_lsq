@@ -2012,12 +2012,23 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 		  QUADS.read_cutoff_params(cin, LINE, "S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
 		}
 		
-		else if (LINE.find("# FCUTTYP #") != string::npos)
+		else if ( (LINE.find("# FCUTTYP #") != string::npos) && ((CONTROLS.CHEBY_3B_ORDER >0)||(CONTROLS.CHEBY_4B_ORDER>0))
 		{
+			if( (CONTROLS.CHEBY_3B_ORDER > 0) && (CONTROLS.CHEBY_3B_ORDER == 0))
+			{
+				cout << "WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING " << endl;
+				cout << "WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING " << endl;
+				cout << "Check logic in ChIMES_lsq.C, near line 2020!s " << endl;
+				cout << "WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING " << endl;
+				cout << "WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING " << endl;
+		
 			cin >> TEMP_TYPE;
 			
-			for(int i=0; i<ATOM_PAIRS.size(); i++)
-				ATOM_PAIRS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
+			// The intended logic was to use cubic for 2-body, and special cutoffs for everything else (higher bodied)
+			// By default, 2-body is initialized for cubic.
+			//
+			//for(int i=0; i<ATOM_PAIRS.size(); i++)
+			//	ATOM_PAIRS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
 			
 			for(int i=0; i<TRIPS.VEC.size(); i++)
 				TRIPS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
@@ -2036,10 +2047,7 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 				
 				#if VERBOSITY == 1
 				if ( RANK == 0 ) 
-					cout << "			With an offset of: " 
-					     << fixed << setprecision(3) 
-					     << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET*100.0 
-					     << "% of the pair outer cutoffs" << endl;      
+					cout << "			With an offset of: " << fixed << setprecision(3) << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET*100.0 << "% of the pair outer cutoffs" << endl;      
 				#endif	
 				
 				for(int i=1; i<TRIPS.VEC.size(); i++)	// Copy all class elements
@@ -2057,10 +2065,10 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 				
 				#if VERBOSITY == 1
 				if ( RANK == 0 ) cout << "			With steepness, offset, and height of: " 
-											 << fixed << setprecision(3) 
-											 << TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS 
-											 << ",	" << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET 
-											 << ", and  " << TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT << endl;	
+						      << fixed << setprecision(3) 
+						      << TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS << ",   " 
+						      << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET    << ", and  " 
+						      << TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT << endl;   
 				#endif
 									
 			}
@@ -2070,7 +2078,6 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 
 			for(int i=1; i<TRIPS.VEC.size(); i++)	// Copy all class elements
 			{
-//				TRIPS.VEC[i].FORCE_CUTOFF = TRIPS.VEC[0].FORCE_CUTOFF;
 				TRIPS.VEC[i].FORCE_CUTOFF.BODIEDNESS = TRIPS.VEC[0].FORCE_CUTOFF.BODIEDNESS;
 				TRIPS.VEC[i].FORCE_CUTOFF.STEEPNESS  = TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS; 
 				TRIPS.VEC[i].FORCE_CUTOFF.OFFSET     = TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
@@ -2079,22 +2086,18 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 			
 			if(CONTROLS.USE_4B_CHEBY)
 			{
-//				QUADS.VEC[0].FORCE_CUTOFF           =  TRIPS.VEC[0].FORCE_CUTOFF;
+				QUADS.VEC[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
+			
 				QUADS.VEC[0].FORCE_CUTOFF.STEEPNESS =  TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS;
 				QUADS.VEC[0].FORCE_CUTOFF.OFFSET    =  TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
-			
-				if(QUADS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-					QUADS.VEC[0].FORCE_CUTOFF.HEIGHT = TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
-			
-				QUADS.VEC[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
+				QUADS.VEC[0].FORCE_CUTOFF.HEIGHT    =  TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
 
 				for(int i=1; i<QUADS.VEC.size(); i++)	// Copy all class elements
 				{
-//					QUADS.VEC[i].FORCE_CUTOFF = QUADS.VEC[0].FORCE_CUTOFF;
 					QUADS.VEC[i].FORCE_CUTOFF.BODIEDNESS = QUADS.VEC[0].FORCE_CUTOFF.BODIEDNESS;
-					TRIPS.VEC[i].FORCE_CUTOFF.STEEPNESS  = QUADS.VEC[0].FORCE_CUTOFF.STEEPNESS; 
-					TRIPS.VEC[i].FORCE_CUTOFF.OFFSET     = QUADS.VEC[0].FORCE_CUTOFF.OFFSET;
-					TRIPS.VEC[i].FORCE_CUTOFF.HEIGHT     = QUADS.VEC[0].FORCE_CUTOFF.HEIGHT;					
+					QUADS.VEC[i].FORCE_CUTOFF.STEEPNESS  = QUADS.VEC[0].FORCE_CUTOFF.STEEPNESS; 
+					QUADS.VEC[i].FORCE_CUTOFF.OFFSET     = QUADS.VEC[0].FORCE_CUTOFF.OFFSET;
+					QUADS.VEC[i].FORCE_CUTOFF.HEIGHT     = QUADS.VEC[0].FORCE_CUTOFF.HEIGHT;					
 				}
 			}
 
