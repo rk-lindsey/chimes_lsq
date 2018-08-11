@@ -35,7 +35,7 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const
 	}
 
 	// Cubic cutoff
-	if(BODIEDNESS==2 || (BODIEDNESS==3 && TYPE == FCUT_TYPE::CUBIC) || (BODIEDNESS==4 && TYPE == FCUT_TYPE::CUBIC))
+	if(TYPE == FCUT_TYPE::CUBIC)
 	{		
 		fcut0 = (1.0 - rlen/rmax);
 		fcut        = pow(fcut0, POWER);
@@ -44,20 +44,11 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const
 
 		return;
 	}
-	else if(BODIEDNESS>2 && TYPE == FCUT_TYPE::TERSOFF)
+	else if(TYPE == FCUT_TYPE::TERSOFF)
 	{
-
 		// FYI: For this cutoff type, "OFFSET" is actually a fraction of the outer cutoff
 		
-		THRESH = rmax-OFFSET*rmax;
-/*		
-		cout << "*** " << rlen << endl;
-		cout << "*** " << rmax << endl; 
-		cout << "*** " << OFFSET << endl;
-		cout << "*** " << THRESH << endl;
-		cout << "*** " << rmax-THRESH << endl;
-		cout << "*** " << endl;
-*/		
+		THRESH = rmax-OFFSET*rmax;		
 		
 		if      (rlen < THRESH)		// Case 1: Our pair distance is less than the fcut kick-in distance
 		{
@@ -81,6 +72,9 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const
 	}
 	else if(BODIEDNESS==3)
 	{
+		cout << "ERROR: Unsupported type... clean up code!" << endl;
+		exit(0);
+	
 		if(TYPE == FCUT_TYPE::COSINE)
 		{
 			fcut0      = 2.0*pi*( (rlen - rmin) /(rmax - rmin) );
@@ -354,7 +348,7 @@ void FCUT::parse_input(string line)
 		OFFSET = atof(tokens[3].data());
 	}
 
-	else if(    TYPE == FCUT_TYPE::SIGMOID 
+	else if(   TYPE == FCUT_TYPE::SIGMOID 
 		|| TYPE == FCUT_TYPE::CUBSIG 
 		|| TYPE == FCUT_TYPE::CUBESTRETCH 
 		|| TYPE == FCUT_TYPE::SIGFLT)
@@ -362,7 +356,7 @@ void FCUT::parse_input(string line)
 		validate_num_args(nargs, 5, line);
 
 		STEEPNESS = atof(tokens[3].data());
-		OFFSET = atof(tokens[4].data());
+		OFFSET    = atof(tokens[4].data());
 	 
 		if ( TYPE == FCUT_TYPE::SIGFLT )
 		{

@@ -91,13 +91,12 @@ string FULL_FILE_3B;
 string SCAN_FILE_3B;
 string SCAN_FILE_2B;
 
-//ifstream BAD_CONFIGS;
-
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  
 int NPROCS;		// Number of processors
 int RANK;		// Index of current processor
-ofstream BAD_CONFIGS ;
+ofstream BAD_CONFIGS_1;	// Configs where r_ij < r_cut,in 
+ofstream BAD_CONFIGS_2;	// Configs where r_ij < r_cut,in +d_penalty
 
 
 // Variables that are defined locally for house_md which need to be global for LAMMPS linking
@@ -191,9 +190,9 @@ int main(int argc, char* argv[])
   map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
   vector<int> INT_PAIR_MAP ;		
 
-  map<string,int> TRIAD_MAP		   = TRIPS.MAP ;
+  map<string,int> TRIAD_MAP	    = TRIPS.MAP ;
   map<int,string> TRIAD_MAP_REVERSE = TRIPS.MAP_REVERSE ;
-  map<string,int> QUAD_MAP			   = QUADS.MAP ;
+  map<string,int> QUAD_MAP	    = QUADS.MAP ;
   map<int,string> QUAD_MAP_REVERSE  = QUADS.MAP_REVERSE ;
 
 
@@ -212,10 +211,10 @@ int main(int argc, char* argv[])
   double dens_mol;
   double dens_mass;
 	
-  string 	LINE;
+  string  LINE;
   string  TEMP_STR;
   int     TEMP_INT;
-  int		NATMTYP = 0;
+  int     NATMTYP = 0;
 	
 	
   vector<int>		TMP_SIGN;
@@ -1210,7 +1209,8 @@ FF_SETUP_2:
   ////////////////////////////////////////////////////////////
 
   STATISTICS.open("md_statistics.out");
-  BAD_CONFIGS.open("traj_bad.xyz");
+  BAD_CONFIGS_1.open("traj_bad_r.lt.rin.xyz");
+  BAD_CONFIGS_2.open("traj_bad_r.lt.rin+dp.xyz");
 
   if (RANK==0)
 	 cout << "BEGIN SIMULATION:" << endl;
@@ -1718,7 +1718,8 @@ FF_SETUP_2:
 	   
   }//End big loop here.
     
-  BAD_CONFIGS.close();
+  BAD_CONFIGS_1.close();
+  BAD_CONFIGS_2.close();
     
   if (RANK==0)	
   {
@@ -2665,7 +2666,7 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				//cin >> LINE; cin.ignore();
 				
 				if (RANK==0)
-					cout << "	# PRNTBAD #: true ...will print out all bad configs (r < r_cut)" << endl;	
+					cout << "	# PRNTBAD #: true ...will print out all bad configs (r < r_cut and r_cut < r < [r_cut + d_penalty])" << endl;	
 
 			}
 			else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
@@ -3373,10 +3374,26 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 				
 		  if(LINE.find("FCUT TYPE:") != string::npos )
 		  {
-			 if ( FF_2BODY[0].SNUM_3B_CHEBY>0 ) 
+		  	// 2-body interactions use a separate data structure, so we need 
+			// to handle this differently than the manybody part
+			
+			double TMP_STEEPNESS = 0.0;
+		  	double TMP_OFFSET    = 0.0;
+			double TMP_HEIGHT    = 0.0;
+			
+			FF_2BODY[0].FORCE_CUTOFF.parse_input(LINE);
+			FF_2BODY[0].FORCE_CUTOFF.BODIEDNESS = 2;
+			
+			// Copy all class members.
+			for(int i=1; i<FF_2BODY.size(); i++)
+			       FF_2BODY[i].FORCE_CUTOFF = FF_2BODY[0].FORCE_CUTOFF;
+			
+			// Handle the many-body part
+		  
+			if ( FF_2BODY[0].SNUM_3B_CHEBY>0 ) 
 				TRIPS.parse_fcut(LINE) ;
 
-			 if(FF_2BODY[0].SNUM_4B_CHEBY>0)
+			if(FF_2BODY[0].SNUM_4B_CHEBY>0)
 				QUADS.parse_fcut(LINE) ;
 
 		  }
@@ -3408,7 +3425,10 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		{
 		  cout << "   ...read complete." << endl << endl;
 		  cout << "Notes on simulation: " << endl;
-		  cout << "	Using fpenalty power " << FPENALTY_POWER << endl;	
+		  cout << "	Using fpenalty power " << FPENALTY_POWER << endl;
+		  
+		  cout << "	Using the following fcut style for 2B Chebyshev interactions: ";
+		  FF_2BODY[0].FORCE_CUTOFF.print_params();	
 				
 		  if( CONTROLS.USE_3B_CHEBY )
 			 TRIPS.print_fcut() ;

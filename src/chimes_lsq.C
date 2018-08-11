@@ -43,6 +43,8 @@ static void add_col_of_ones(int item, bool DO_ENER, bool DO_STRESS, bool DO_STRE
 string FULL_FILE_3B;		// Global variables declared as externs in functions.h, and declared in functions.C
 string SCAN_FILE_3B;
 string SCAN_FILE_2B;
+ofstream BAD_CONFIGS_1;	// Configs where r_ij < r_cut,in 
+ofstream BAD_CONFIGS_2;	// Configs where r_ij < r_cut,in +d_penalty
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  
@@ -2012,93 +2014,89 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 		  QUADS.read_cutoff_params(cin, LINE, "S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
 		}
 		
-		else if ( (LINE.find("# FCUTTYP #") != string::npos) && ((CONTROLS.CHEBY_3B_ORDER >0)||(CONTROLS.CHEBY_4B_ORDER>0))
+		else if ( (LINE.find("# FCUTTYP #") != string::npos) && ((CONTROLS.CHEBY_3B_ORDER >0)||(CONTROLS.CHEBY_4B_ORDER>0)))
 		{
-			if( (CONTROLS.CHEBY_3B_ORDER > 0) && (CONTROLS.CHEBY_3B_ORDER == 0))
-			{
-				cout << "WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING " << endl;
-				cout << "WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING " << endl;
-				cout << "Check logic in ChIMES_lsq.C, near line 2020!s " << endl;
-				cout << "WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING " << endl;
-				cout << "WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING " << endl;
-		
+
 			cin >> TEMP_TYPE;
 			
-			// The intended logic was to use cubic for 2-body, and special cutoffs for everything else (higher bodied)
-			// By default, 2-body is initialized for cubic.
-			//
-			//for(int i=0; i<ATOM_PAIRS.size(); i++)
-			//	ATOM_PAIRS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
+			for(int i=0; i<ATOM_PAIRS.size(); i++)
+				ATOM_PAIRS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
 			
-			for(int i=0; i<TRIPS.VEC.size(); i++)
-				TRIPS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
-			
-			for(int i=0; i<QUADS.VEC.size(); i++)
-				QUADS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
-			
+			if (CONTROLS.USE_3B_CHEBY)
+				for(int i=0; i<TRIPS.VEC.size(); i++)
+					TRIPS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
+					
+			if (CONTROLS.USE_4B_CHEBY)
+				for(int i=0; i<QUADS.VEC.size(); i++)
+					QUADS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
+
 			#if VERBOSITY == 1
 			if ( RANK == 0 ) 
-				cout << "	# FCUTTYP #: " << TEMP_TYPE << "	... for 3-body and 4-body Chebyshev interactions" << endl;	
+				cout << "	# FCUTTYP #: " << TEMP_TYPE << "	... for all Chebyshev interactions" << endl;	
 			#endif
+			
+			double TMP_STEEPNESS = 0.0;
+			double TMP_OFFSET    = 0.0;
+			double TMP_HEIGHT    = 0.0;
 			
 			if(TEMP_TYPE=="TERSOFF")
 			{
-				cin >> TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
+				cin >> TMP_OFFSET;
 				
 				#if VERBOSITY == 1
-				if ( RANK == 0 ) 
-					cout << "			With an offset of: " << fixed << setprecision(3) << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET*100.0 << "% of the pair outer cutoffs" << endl;      
-				#endif	
-				
-				for(int i=1; i<TRIPS.VEC.size(); i++)	// Copy all class elements
-					TRIPS.VEC[i].FORCE_CUTOFF.OFFSET = TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
-							
+					if ( RANK == 0 ) 
+						cout << "			With an offset of: " << fixed << setprecision(3) << TMP_OFFSET*100.0 << "% of the pair outer cutoffs" << endl;      
+				#endif			
 			}
 			
 			if(TEMP_TYPE=="SIGMOID" || TEMP_TYPE=="CUBSIG" || TEMP_TYPE=="CUBESTRETCH" || TEMP_TYPE == "SIGFLT")
 			{
-				cin >> TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS;
-				cin >> TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
+				cin >> TMP_STEEPNESS;
+				cin >> TMP_OFFSET;
 				
-				if(TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-					cin >> TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
-				
+				if(TEMP_TYPE == "SIGFLT")
+					cin >> TMP_HEIGHT;
+					
 				#if VERBOSITY == 1
-				if ( RANK == 0 ) cout << "			With steepness, offset, and height of: " 
+				if ( RANK == 0 ) cout << "			With steepness, offset, and height of: "
 						      << fixed << setprecision(3) 
-						      << TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS << ",   " 
-						      << TRIPS.VEC[0].FORCE_CUTOFF.OFFSET    << ", and  " 
-						      << TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT << endl;   
-				#endif
-									
+						      << TMP_STEEPNESS << ",   " 
+						      << TMP_OFFSET    << ", and  " 
+						      << TMP_HEIGHT    << endl;   
+				#endif					
 			}
 			cin.ignore();
 			
-			TRIPS.VEC[0].FORCE_CUTOFF.BODIEDNESS = 3 ;
-
-			for(int i=1; i<TRIPS.VEC.size(); i++)	// Copy all class elements
-			{
-				TRIPS.VEC[i].FORCE_CUTOFF.BODIEDNESS = TRIPS.VEC[0].FORCE_CUTOFF.BODIEDNESS;
-				TRIPS.VEC[i].FORCE_CUTOFF.STEEPNESS  = TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS; 
-				TRIPS.VEC[i].FORCE_CUTOFF.OFFSET     = TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
-				TRIPS.VEC[i].FORCE_CUTOFF.HEIGHT     = TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
-			}
 			
-			if(CONTROLS.USE_4B_CHEBY)
+			if (ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV")
 			{
-				QUADS.VEC[0].FORCE_CUTOFF.BODIEDNESS = 4 ;
-			
-				QUADS.VEC[0].FORCE_CUTOFF.STEEPNESS =  TRIPS.VEC[0].FORCE_CUTOFF.STEEPNESS;
-				QUADS.VEC[0].FORCE_CUTOFF.OFFSET    =  TRIPS.VEC[0].FORCE_CUTOFF.OFFSET;
-				QUADS.VEC[0].FORCE_CUTOFF.HEIGHT    =  TRIPS.VEC[0].FORCE_CUTOFF.HEIGHT;
-
-				for(int i=1; i<QUADS.VEC.size(); i++)	// Copy all class elements
+				for(int i=0; i<ATOM_PAIRS.size(); i++)
 				{
-					QUADS.VEC[i].FORCE_CUTOFF.BODIEDNESS = QUADS.VEC[0].FORCE_CUTOFF.BODIEDNESS;
-					QUADS.VEC[i].FORCE_CUTOFF.STEEPNESS  = QUADS.VEC[0].FORCE_CUTOFF.STEEPNESS; 
-					QUADS.VEC[i].FORCE_CUTOFF.OFFSET     = QUADS.VEC[0].FORCE_CUTOFF.OFFSET;
-					QUADS.VEC[i].FORCE_CUTOFF.HEIGHT     = QUADS.VEC[0].FORCE_CUTOFF.HEIGHT;					
+					ATOM_PAIRS[i].FORCE_CUTOFF.BODIEDNESS = 2;
+					ATOM_PAIRS[i].FORCE_CUTOFF.STEEPNESS  = TMP_STEEPNESS; 
+					ATOM_PAIRS[i].FORCE_CUTOFF.OFFSET     = TMP_OFFSET;
+					ATOM_PAIRS[i].FORCE_CUTOFF.HEIGHT     = TMP_HEIGHT;
 				}
+			}
+			if (CONTROLS.USE_3B_CHEBY)
+			{
+				for(int i=0; i<ATOM_PAIRS.size(); i++)
+				{
+					TRIPS.VEC[i].FORCE_CUTOFF.BODIEDNESS = 3;
+					TRIPS.VEC[i].FORCE_CUTOFF.STEEPNESS  = TMP_STEEPNESS; 
+					TRIPS.VEC[i].FORCE_CUTOFF.OFFSET     = TMP_OFFSET;
+					TRIPS.VEC[i].FORCE_CUTOFF.HEIGHT     = TMP_HEIGHT;
+				}			
+			}
+			if (CONTROLS.USE_4B_CHEBY)
+			{
+				for(int i=0; i<ATOM_PAIRS.size(); i++)
+				{
+					QUADS.VEC[i].FORCE_CUTOFF.BODIEDNESS = 4;
+					QUADS.VEC[i].FORCE_CUTOFF.STEEPNESS  = TMP_STEEPNESS; 
+					QUADS.VEC[i].FORCE_CUTOFF.OFFSET     = TMP_OFFSET;
+					QUADS.VEC[i].FORCE_CUTOFF.HEIGHT     = TMP_HEIGHT;
+				}			
 			}
 
 		}	

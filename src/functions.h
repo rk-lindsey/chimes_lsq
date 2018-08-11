@@ -80,7 +80,8 @@ extern string FULL_FILE_3B;	// The 4D PES for 3B FF
 extern string SCAN_FILE_3B;	// The 2D PES scans for 3B
 extern string SCAN_FILE_2B;	// The 2D PES scans for 2B
 
-extern	ofstream 	BAD_CONFIGS;
+extern	ofstream BAD_CONFIGS_1;	// Configs where r_ij < r_cut,in 
+extern  ofstream BAD_CONFIGS_2;	// Configs where r_ij < r_cut,in +d_penalty
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  
@@ -613,7 +614,7 @@ void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BOD
 void build_int_pair_map(int natmtyp, const vector<string> &atomtype, 
 								const vector<int> &atomtype_idx,
 								map<string,int> &pair_map, vector<int> &int_pair_map) ;
-void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS) ;
+void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type) ;
 void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<string>& TMP_ATOMTYPE, vector<PAIR_FF> &FF_2BODY, int NATMTYP) ;
 #ifdef USE_MPI
 void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);

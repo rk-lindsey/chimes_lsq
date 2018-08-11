@@ -596,38 +596,82 @@ void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BOD
 //////////////////////////////////////////
 
 
-void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS)
+void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type)
 // Output the current configuration
 {
 	int PRINT_WIDTH     = 21; // Use 21 for testing
 	int PRINT_PRECISION = 14; // Use 14 for testing
 	
-	// Print out the file
-	
-	BAD_CONFIGS << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
-	BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.X << " ";
-	BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Y << " ";
-	BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Z << endl;
-	
-	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
+	if(type == 1)
 	{
-		XYZ tmp = SYSTEM.COORDS[ia];
-		
-		if ( CONTROLS.WRAP_COORDS ) 	// Wrap into the primitive cell
+		ofstream &BAD_CONFIGS = BAD_CONFIGS_1;
+	
+		// Print out the file
+	
+		BAD_CONFIGS << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
+		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.X << " ";
+		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Y << " ";
+		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Z << endl;
+	
+		for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
 		{
+			XYZ tmp = SYSTEM.COORDS[ia];
 			
-			tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
-			tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
-			tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+			if ( CONTROLS.WRAP_COORDS ) 	// Wrap into the primitive cell
+			{
+				
+				tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
+				tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
+				tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+			}
+	
+			BAD_CONFIGS << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
+			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.X << " ";
+			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Y << " ";
+			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Z << "    ";
+	
+			BAD_CONFIGS << endl;
 		}
-
-		BAD_CONFIGS << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
-		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.X << " ";
-		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Y << " ";
-		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Z << "    ";
-
-		BAD_CONFIGS << endl;
+	
 	}
+	else if (type == 2)
+	{
+		ofstream &BAD_CONFIGS = BAD_CONFIGS_2;
+	
+		// Print out the file
+	
+		BAD_CONFIGS << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
+		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.X << " ";
+		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Y << " ";
+		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Z << endl;
+	
+		for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
+		{
+			XYZ tmp = SYSTEM.COORDS[ia];
+			
+			if ( CONTROLS.WRAP_COORDS ) 	// Wrap into the primitive cell
+			{
+				
+				tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
+				tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
+				tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+			}
+	
+			BAD_CONFIGS << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
+			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.X << " ";
+			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Y << " ";
+			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Z << "    ";
+	
+			BAD_CONFIGS << endl;
+		}
+	
+	}
+	else
+	{
+		cout << "ERROR: Unknown print type. See PRINT_CONFIG()." << endl;
+		exit(1);
+	}	
+	
 }
 
 

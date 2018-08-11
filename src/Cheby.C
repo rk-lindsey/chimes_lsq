@@ -1809,7 +1809,8 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 	
   int a2start, a2end, a2;
 	
-  int BAD_CONFIG_FOUND = 0; // 0 == false, 1+ == true
+  int BAD_CONFIG_1_FOUND = 0; // 0 == false, 1+ == true
+  int BAD_CONFIG_2_FOUND = 0; // 0 == false, 1+ == true
 	
   /////////////////////////////////////////////
   // EVALUATE THE 2-BODY INTERACTIONS
@@ -1879,8 +1880,13 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 
 			 if ( rpenalty > 0.0 ) 
 			 {
-				if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MINIM) // Then we've found a config that should be useful for self-consistent fitting
-				  BAD_CONFIG_FOUND++;
+			 	if(rlen_ij < (FF_2BODY[curr_pair_type_idx_ij].S_MINIM+penalty_dist)) // Then we've found a config that should be useful for self-consistent fitting
+				{
+					BAD_CONFIG_2_FOUND++;
+					
+					if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MINIM) // Then we've found a config that should be useful for self-consistent fitting
+				  		BAD_CONFIG_1_FOUND++;
+				}
 				
 				Vpenalty = 0.0;
 					
@@ -1930,11 +1936,18 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 	
 #ifdef USE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Allreduce(MPI_IN_PLACE, &BAD_CONFIG_FOUND,1,MPI_INT, MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(MPI_IN_PLACE, &BAD_CONFIG_1_FOUND,1,MPI_INT, MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(MPI_IN_PLACE, &BAD_CONFIG_2_FOUND,1,MPI_INT, MPI_SUM,MPI_COMM_WORLD);
 #endif
-	
-  if(BAD_CONFIG_FOUND>0 && CONTROLS.PRINT_BAD_CFGS)
-	 PRINT_CONFIG(SYSTEM, CONTROLS);
+
+  // traj file for BAD_CONFIG_1 should only contain configs where rij<rcutin
+  // and BAD_CONFIG_2 should only contain configs where rcutin < rij < rcutin+dp.
+  
+  if  ((BAD_CONFIG_1_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
+  	PRINT_CONFIG(SYSTEM, CONTROLS,1);
+   else if ((BAD_CONFIG_2_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
+	PRINT_CONFIG(SYSTEM, CONTROLS,2);
+
 //cout << "COUNTED INTERACTIONS: " << COUNTED_INTERACTIONS << endl;	
 } 
 
