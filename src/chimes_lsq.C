@@ -2080,7 +2080,7 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 			}
 			if (CONTROLS.USE_3B_CHEBY)
 			{
-				for(int i=0; i<ATOM_PAIRS.size(); i++)
+				for(int i=0; i<TRIPS.VEC.size(); i++)
 				{
 					TRIPS.VEC[i].FORCE_CUTOFF.BODIEDNESS = 3;
 					TRIPS.VEC[i].FORCE_CUTOFF.STEEPNESS  = TMP_STEEPNESS; 
@@ -2090,7 +2090,7 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 			}
 			if (CONTROLS.USE_4B_CHEBY)
 			{
-				for(int i=0; i<ATOM_PAIRS.size(); i++)
+				for(int i=0; i<QUADS.VEC.size(); i++)
 				{
 					QUADS.VEC[i].FORCE_CUTOFF.BODIEDNESS = 4;
 					QUADS.VEC[i].FORCE_CUTOFF.STEEPNESS  = TMP_STEEPNESS; 

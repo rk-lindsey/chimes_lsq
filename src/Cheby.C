@@ -1906,6 +1906,25 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 				Vpenalty = rpenalty * rpenalty * rpenalty * penalty_scale;
 				SYSTEM.TOT_POT_ENER += Vpenalty;
 				cout << "	...Penalty potential = "<< Vpenalty << endl;
+
+				// Enforce penalty threshold
+				
+				if ((CONTROLS.PENALTY_THRESH > 0) && (CONTROLS.STEP > 0))
+				{
+					if( Vpenalty > (CONTROLS.PENALTY_THRESH * abs(CONTROLS.IO_ECONS_VAL)))
+					{
+						cout << endl;
+						cout << "	ERROR: Vpenalty > penalty-thresh * per-atom e-cons. Simulation is running away." << endl;
+						cout << "	Vpenalty:        " << Vpenalty << endl;
+						cout << "	Penalty-thresh:  " << CONTROLS.PENALTY_THRESH << endl;
+						cout << "	Per-atom e-cons: " << CONTROLS.IO_ECONS_VAL << endl;
+						cout << "	       Exiting." << endl;
+						cout << endl;
+						exit_run(0); 
+					}
+				}
+				
+				
 			 }					
 		  }			
 		}

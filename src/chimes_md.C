@@ -1259,10 +1259,10 @@ FF_SETUP_2:
 	 ////////////////////////////////////////////////////////////
 
 	 // Do the actual force calculation
+
 	 ZCalc(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
 
 	 // FOR MPI:		Synchronize forces, energy, and pressure.
-		
 #ifdef USE_MPI
 	 sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
 #endif
@@ -1270,7 +1270,8 @@ FF_SETUP_2:
 	 if ( CONTROLS.CHECK_FORCE ) 
 		check_forces(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST) ;
 		
-
+	// Set the econs value
+	
 	 ////////////////////////////////////////////////////////////
 	 // Print some info on new forces, compare to input forces if
 	 // requested
@@ -1434,8 +1435,6 @@ FF_SETUP_2:
 
 		if(CONTROLS.STEP>FIRST_STEP  && RANK==0)	
 		  ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_2(SYSTEM, CONTROLS, NEIGHBOR_LIST);	//update second half of velocity
-			
-
 	 }	
 		
 	 ////////////////////////////////////////////////////////////
@@ -1444,7 +1443,6 @@ FF_SETUP_2:
 
 	 if (RANK == 0)
 	 {
-
 		////////////////////////////////////////////////////////////
 		// Store statistics on the average simulation temperature
 		// to allow for thermostat verification
@@ -1484,8 +1482,7 @@ FF_SETUP_2:
 	 {
 		double PE_1, PE_2, dV; 
 			
-		numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, INT_PAIR_MAP,
-								 NEIGHBOR_LIST, PE_1, PE_2, dV);
+		numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST, PE_1, PE_2, dV);
 			
 #ifdef USE_MPI
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -1494,11 +1491,25 @@ FF_SETUP_2:
 #endif
 			
 		SYSTEM.PRESSURE_XYZ = -1.0*(PE_2 - PE_1)/dV;
-
 	 }
+	 
+	 
+	// Set the io econs value, sync across procs
+	if(RANK == 0)
+	{
+	 	if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT-MTK") 
+			CONTROLS.IO_ECONS_VAL = (Ktot + SYSTEM.TOT_POT_ENER + ENSEMBLE_CONTROL.CONSERVED_QUANT(SYSTEM, CONTROLS)) / SYSTEM.ATOMS;
+		else
+			CONTROLS.IO_ECONS_VAL = (Ktot + SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS;
+	}
+	#ifdef USE_MPI
+		MPI_Bcast(&CONTROLS.IO_ECONS_VAL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
+	#endif
+	 
+	 
+	 	 
 	 if(RANK==0)
 	 {
-
 		SYSTEM.PRESSURE = (SYSTEM.PRESSURE_XYZ + 2.0 * Ktot / (3.0 * Vol)) * GPa;	// GPa = Unit conversion factor to GPa.
 			
 		AVG_DATA.PRESS_SUM += SYSTEM.PRESSURE;
@@ -1510,27 +1521,21 @@ FF_SETUP_2:
 		AVG_DATA.STRESS_TENSOR_SUM.X += SYSTEM.PRESSURE_TENSORS.X;
 		AVG_DATA.STRESS_TENSOR_SUM.Y += SYSTEM.PRESSURE_TENSORS.Y;
 		AVG_DATA.STRESS_TENSOR_SUM.Z += SYSTEM.PRESSURE_TENSORS.Z;
-
+		
 		////////////////////////////////////////////////////////////
 		// Periodically print simulation output
 		////////////////////////////////////////////////////////////
 		
 		if ( (CONTROLS.STEP+1) % CONTROLS.FREQ_ENER == 0 && RANK == 0 ) 
 		{
-		  printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.8f", CONTROLS.STEP+1, (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS, Ktot/SYSTEM.ATOMS,SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,SYSTEM.TEMPERATURE, SYSTEM.PRESSURE);
-		  STATISTICS << CONTROLS.STEP+1<< "	" << (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS<< "	" << Ktot/SYSTEM.ATOMS<< "	" <<SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS<< "	" <<(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS<< "	" <<SYSTEM.TEMPERATURE<< "	" << SYSTEM.PRESSURE;
+		 	printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.8f", CONTROLS.STEP+1, (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS, Ktot/SYSTEM.ATOMS,SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,SYSTEM.TEMPERATURE, SYSTEM.PRESSURE);
+			STATISTICS << CONTROLS.STEP+1<< "     " << (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS<< "  " << Ktot/SYSTEM.ATOMS<< "      " <<SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS<< "        " <<(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS<< " " <<SYSTEM.TEMPERATURE<< "      " << SYSTEM.PRESSURE;
+			
+			// Print the econs value
 
-		  if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT-MTK") 
-		  {
-			 printf("%15.7f\n",   (Ktot + SYSTEM.TOT_POT_ENER + ENSEMBLE_CONTROL.CONSERVED_QUANT(SYSTEM, CONTROLS)) / SYSTEM.ATOMS);
-			 STATISTICS << "	" << (Ktot + SYSTEM.TOT_POT_ENER + ENSEMBLE_CONTROL.CONSERVED_QUANT(SYSTEM, CONTROLS)) / SYSTEM.ATOMS << endl;
-		  }
-		  else 
-		  {
-			 printf("%15.7f\n\n", (Ktot + SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS);
-			 STATISTICS << "	" << (Ktot + SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS << endl;
-		  }
-
+		  	printf("%15.7f\n", CONTROLS.IO_ECONS_VAL);
+		  	STATISTICS << "        " << CONTROLS.IO_ECONS_VAL << endl;
+			
 		  cout.flush();
 		}	
 		
@@ -1539,9 +1544,9 @@ FF_SETUP_2:
 		////////////////////////////////////////////////////////////	
 			
 		if((ENSEMBLE_CONTROL.STYLE=="NVT-SCALE") && ((CONTROLS.STEP+1) % int(CONTROLS.FREQ_UPDATE_THERMOSTAT) == 0) )
-		  ENSEMBLE_CONTROL.SCALE_VELOCITIES(SYSTEM, CONTROLS);
+			ENSEMBLE_CONTROL.SCALE_VELOCITIES(SYSTEM, CONTROLS);
 		else
-		  SYSTEM.AVG_TEMPERATURE += SYSTEM.TEMPERATURE;
+			SYSTEM.AVG_TEMPERATURE += SYSTEM.TEMPERATURE;
 	 }
 		
 	 if((ENSEMBLE_CONTROL.STYLE=="NVT-SCALE") && ((CONTROLS.STEP+1) % int(CONTROLS.FREQ_UPDATE_THERMOSTAT) == 0) )
@@ -1812,6 +1817,9 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	NEIGHBOR_LIST.USE               = true;
 	
 	CONTROLS.PRINT_BAD_CFGS         = false;
+	
+	CONTROLS.PENALTY_THRESH = -1.0;	// Default is to not enforce a max-allowed penalty
+	CONTROLS.IO_ECONS_VAL   =  0.0;
 	
 	
 	
@@ -2249,8 +2257,16 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			CONTROLS.N_MD_STEPS = int(atof(LINE.data()));
 			if (RANK==0)
 				cout << "	# N_MDSTP #: " << CONTROLS.N_MD_STEPS << endl;	
-		}	
+		}
 		
+		else if(LINE.find("# PENTHRS #") != string::npos)
+		{
+			cin >> LINE; cin.ignore();
+			CONTROLS.PENALTY_THRESH = double(atof(LINE.data()));
+			if (RANK==0)
+				cout << "	# PENTHRS #: " << CONTROLS.PENALTY_THRESH << endl;	
+		}		
+
 		else if(LINE.find("# NLAYERS #") != string::npos)
 		{
 			LINE_PARSER.str("");
@@ -3126,9 +3142,8 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 		
 		// Do the actual force calculation using our MD code
 
-		ZCalc(SYS, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP,
-				TRIPS, QUADS, NEIGHBOR_LIST);
-    	    
+		ZCalc(SYS, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
+
 		// Now we need to sync up all the forces, potential energy, and tensors with LAMMPS
 		//... but first, we need to sum the potential energy computed by each process, since 
 		// we're saving it directly to LAMMPS' PE which corresponds to the sum over all processes.

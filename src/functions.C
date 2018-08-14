@@ -1554,12 +1554,8 @@ void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_F
 ////////////////////////////////////////////////////////////
  
 
-void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-			  map<string,int> & PAIR_MAP, vector<int>& INT_PAIR_MAP,
-			  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, 
-			  NEIGHBORS & NEIGHBOR_LIST)
-{
-  
+void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int>& INT_PAIR_MAP,CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS & NEIGHBOR_LIST)
+{  
 	for(int a=0;a<SYSTEM.ATOMS;a++)
 	{
 		SYSTEM.ACCEL[a].X = 0;
@@ -1576,9 +1572,9 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 	SYSTEM.PRESSURE_TENSORS_XYZ.Y = 0;
 	SYSTEM.PRESSURE_TENSORS_XYZ.Z = 0;
 
-	if      ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" ) 
+	if ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" ) 
 	{
-	  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP} ;
+	  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP};
 	  cheby.Force_all(TRIPS, QUADS);
 	}
 	else if ( FF_2BODY[0].PAIRTYP == "LJ" ) 
