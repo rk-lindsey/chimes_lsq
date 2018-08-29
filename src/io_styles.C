@@ -1,0 +1,444 @@
+/*
+
+Functions for printing trajectories to different file formats.
+
+Current supported types include:
+1. .gen
+2. .xyz(f)
+3. .lammpstrj ()
+4. .pdb
+
+... Needs access to:
+
+1. SYSTEM (coords, forces, velocities, atom types, boxdim, etc)
+2. CONTROLS (step, frequency, timestep)
+
+*/
+
+#include<iomanip>
+#include<iostream>
+#include<fstream>
+#include<vector>
+#include<unistd.h>	// Used to detect whether i/o is going to terminal or is piped... will help us decide whether to use ANSI color codes
+#include<string>
+
+using namespace std;
+
+#include "functions.h"
+#include "util.h"
+#include "io_styles.h"
+
+
+// Constructor/deconstructor
+
+WRITE_TRAJ::WRITE_TRAJ(){};
+
+WRITE_TRAJ::WRITE_TRAJ(string CONTENTS_STR) // Default extension is .xyzf
+{
+	string EXTENSION_STR = "GEN";
+	
+	INIT(EXTENSION_STR, CONTENTS_STR);
+}
+
+WRITE_TRAJ::WRITE_TRAJ(string EXTENSION_STR, string CONTENTS_STR)
+{
+	INIT(EXTENSION_STR, CONTENTS_STR);
+}
+
+WRITE_TRAJ::~WRITE_TRAJ()
+{
+	TRAJFILE.close();
+	
+	cout << "* Closed trajfile " << FILENAME << endl;
+	
+	if (TRAJFRCF.is_open())
+	{
+		TRAJFRCF.close();
+		cout << "* Closed associated file forceout.txt" << endl;
+	}
+	
+	if (TRAJFRCL.is_open())
+	{
+		TRAJFRCL.close();
+		cout << "* Closed associated file forceout-labeled.txt" << endl;
+	}	
+}
+
+// Initializer called by constructor
+
+void WRITE_TRAJ::INIT(string EXTENSION_STR, string CONTENTS_STR)
+{
+
+	SET_EXTENSION(EXTENSION_STR);	
+	SET_CONTENTS (CONTENTS_STR);
+	SET_FILENAME();
+	
+	TRAJFILE.open(FILENAME.data());
+
+	if (TRAJFILE.is_open())
+		cout << "** Opened trajfile " << FILENAME << " for writing." << endl;
+	else
+		cout << "** Failed to open trajfile " << FILENAME << " for writing!" << endl;	
+
+	if (EXTENSION == TRAJ_EXT::XYZF_FORCE)
+	{ 
+		TRAJFRCL.open("forceout-labeled.txt");
+		
+		if (TRAJFRCL.is_open())
+			cout << "* Opened associated file forceout-labeled.txt for writing." << endl;
+		else
+			cout << "* Failed to open associated file forceout-labeled.txt for writing!" << endl;
+		
+		TRAJFRCF.open("forceout.txt");
+		
+		if (TRAJFRCL.is_open())
+			cout << "* Opened associated file forceout.txt for writing." << endl;
+		else
+			cout << "* Failed to open associated file forceout.txt for writing!" << endl;		
+	}
+}
+
+//  Setup the enum types for file extension and file type
+
+void WRITE_TRAJ::SET_EXTENSION(string EXTENSION_STR)
+{	
+	if(EXTENSION_STR == "GEN")
+		EXTENSION = TRAJ_EXT::GEN;
+	if(EXTENSION_STR == "XYZF")
+		EXTENSION = TRAJ_EXT::XYZF;
+	if(EXTENSION_STR == "XYZF_FORCE")
+		EXTENSION = TRAJ_EXT::XYZF_FORCE;		
+	if(EXTENSION_STR == "LAMMPSTRJ")
+		EXTENSION = TRAJ_EXT::LAMMPSTRJ;
+	if(EXTENSION_STR == "PDB")
+	{
+		EXTENSION = TRAJ_EXT::PDB;	
+		cout << "ERROR: File type .pdb has not been implemented yet." << endl;
+		exit_run(0);
+	}
+	
+	cout << "* Set file extension: " << RETURN_EXTENSION() << endl;
+		
+}
+
+void WRITE_TRAJ::SET_CONTENTS(string CONTENTS_STR)
+{	
+	if(CONTENTS_STR == "STANDARD")
+		CONTENTS = TRAJ_TYPE::STANDARD;
+	if(CONTENTS_STR == "BAD_1")
+		CONTENTS = TRAJ_TYPE::BAD_1;
+	if(CONTENTS_STR == "BAD_2")
+		CONTENTS = TRAJ_TYPE::BAD_2;
+	if(CONTENTS_STR == "FORCE")
+		CONTENTS = TRAJ_TYPE::FORCE;
+		
+	cout << "* Set file contents: " << RETURN_CONTENTS() << endl;
+}
+
+void WRITE_TRAJ::SET_FILENAME()
+{
+	switch (CONTENTS)
+	{
+		case TRAJ_TYPE::STANDARD:
+			FILENAME = "traj";
+			break;
+		case TRAJ_TYPE::BAD_1:
+			FILENAME = "traj_bad_r.lt.rin";
+			break;
+		case TRAJ_TYPE::BAD_2:
+			FILENAME = "traj_bad_r.lt.rin+dp";
+			break;
+		case TRAJ_TYPE::FORCE:
+			FILENAME = "forceout";
+			break;			
+		default:
+			cout << "Error: Unknown traj type " << RETURN_CONTENTS() << " In WRITE_TRAJ::SET_FILENAME()" << endl;
+			exit(1);		
+	}
+	
+	switch (EXTENSION)
+	{
+		case TRAJ_EXT::GEN:
+			FILENAME += ".gen";
+			break;
+		case TRAJ_EXT::XYZF:
+			FILENAME += ".xyzf";
+			break;
+		case TRAJ_EXT::XYZF_FORCE:
+			FILENAME += ".xyzf";
+			break;			
+		case TRAJ_EXT::LAMMPSTRJ:
+			FILENAME += ".lammpstrj";
+			break;
+		case TRAJ_EXT::PDB:
+			FILENAME += ".pdb";
+			break;	
+		default:
+			cout << "Error: Unknown extension type " << RETURN_EXTENSION() << " In WRITE_TRAJ::SET_FILENAME()" << endl;
+			exit(1);		
+	}
+
+	cout << "* Set filename " << FILENAME << endl;
+}
+
+// Set up enum-to-string mapping functions
+
+string WRITE_TRAJ::RETURN_CONTENTS()
+{
+	string RESULT;
+	
+	switch (CONTENTS)
+	{
+		case TRAJ_TYPE::STANDARD:
+			RESULT = "STANDARD";
+			break;
+		case TRAJ_TYPE::BAD_1:
+			RESULT = "BAD_1";
+			break;
+		case TRAJ_TYPE::BAD_2:
+			RESULT = "BAD_2";
+			break;
+		case TRAJ_TYPE::FORCE:
+			RESULT = "BAD_2";
+			break;			
+		default:
+			RESULT = "Unknown!";		
+	}
+		
+	return RESULT;	
+}
+
+string WRITE_TRAJ::RETURN_EXTENSION()
+{
+	
+	string RESULT;
+	
+	switch (EXTENSION)
+	{
+		case TRAJ_EXT::GEN:
+			RESULT = "GEN";
+			break;
+		case TRAJ_EXT::XYZF:
+			RESULT = "XYZF";
+			break;
+		case TRAJ_EXT::XYZF_FORCE:
+			RESULT = "XYZF_FORCE";
+			break;			
+		case TRAJ_EXT::LAMMPSTRJ:
+			RESULT = "LAMMPSTRJ";
+			break;
+		case TRAJ_EXT::PDB:
+			RESULT = "PDB";
+			break;	
+		default:
+			RESULT = "Unknown!";	
+	}
+	
+	return RESULT;		
+}
+
+// Define the public callable print function
+
+
+void WRITE_TRAJ::PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
+{
+
+	static bool called_before = false;
+	
+	if (!called_before)
+	{
+		bool FOUND = false;
+		
+		for (int i=0; i<SYSTEM.ATOMS; i++) 
+		{
+			FOUND = false;
+		
+			for (int j=0; j<ATOMTYPS.size(); j++)
+			{
+				if (ATOMTYPS[j] == SYSTEM.ATOMTYPE[i])
+				{
+					FOUND = true;
+					break;
+				}
+			}
+			
+			if (!FOUND)
+				ATOMTYPS.push_back(SYSTEM.ATOMTYPE[i]);
+		}
+		
+		if (ATOMTYPS.size() != CONTROLS.NATMTYP)
+		{
+			cout << "Error in atom type counting... see WRITE_TRAJ::PRINT_FRAME function." << endl;
+			cout << "Expected: " << CONTROLS.NATMTYP << endl;
+			cout << "Got:      " << ATOMTYPS.size() << endl;
+			exit(0);
+		}
+		
+		called_before = true;
+	}
+	
+	//cout << "* Printing for extension " << RETURN_EXTENSION() << " and type " << RETURN_CONTENTS() << endl;
+
+	switch (EXTENSION)
+	{
+		case TRAJ_EXT::GEN:
+			PRINT_FRAME_GEN(CONTROLS,SYSTEM);
+			break;
+		case TRAJ_EXT::XYZF:
+			PRINT_FRAME_XYZF(CONTROLS,SYSTEM);
+			break;
+		case TRAJ_EXT::XYZF_FORCE:
+			PRINT_FRAME_XYZF_FORCE(CONTROLS,SYSTEM);
+			break;			
+		case TRAJ_EXT::LAMMPSTRJ:
+			PRINT_FRAME_LAMMPSTRJ(CONTROLS,SYSTEM);
+			break;
+		case TRAJ_EXT::PDB:
+			cout << "Error in WRITE_TRAJ::PRINT_FRAME: PDB not implemented yet!" << endl;
+			//PRINT_FRAME_PDB(CONTROLS,SYSTEM);
+			break;	
+		default:
+			cout << "Error in WRITE_TRAJ::PRINT_FRAME" << endl;
+			exit(1);	
+	}
+
+}
+
+// Define the private print functions
+
+void WRITE_TRAJ::PRINT_FRAME_GEN(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
+{
+	TRAJFILE << setw(5) << right << SYSTEM.ATOMS << " S #Step " << CONTROLS.STEP+1 << " Time " << (CONTROLS.STEP+1) * CONTROLS.DELTA_T_FS << " (fs) Temp " << SYSTEM.TEMPERATURE << " (k)" << endl;
+
+	for(int i=0; i<CONTROLS.NATMTYP; i++)
+		TRAJFILE << ATOMTYPS[i] << " ";
+	TRAJFILE << endl;
+		
+	for (int i=0; i<SYSTEM.ATOMS; i++) 
+	{
+			
+		XYZ tmp = SYSTEM.COORDS[i] ;
+
+		if ( CONTROLS.WRAP_COORDS ) 
+		{
+			// Wrap into the primitive cell
+			tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
+			tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
+			tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+		}
+			
+		TRAJFILE << right << setw(4) << i+1 << " " << setw(2) << SYSTEM.ATOMTYPE_IDX[i]+1 << " " 
+				<< fixed << setprecision(5) << setw(8) << tmp.X << " "
+				<< fixed << setprecision(5) << setw(8) << tmp.Y << " " 	
+				<< fixed << setprecision(5) << setw(8) << tmp.Z << endl;    	
+	}
+	   
+	TRAJFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
+			 << fixed << setprecision(5) << setw(8) << 0.0 << " "
+			 << fixed << setprecision(5) << setw(8) << 0.0 << endl;
+		
+	TRAJFILE << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.X << " "
+			 << fixed << setprecision(5) << setw(8) << 0.0 << " "
+			 << fixed << setprecision(5) << setw(8) << 0.0 << endl;
+		
+	TRAJFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
+			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.Y << " "
+			 << fixed << setprecision(5) << setw(8) << 0.0 << endl;
+		
+	TRAJFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
+			 << fixed << setprecision(5) << setw(8) << 0.0 << " "
+			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.Z << endl;
+}
+
+void WRITE_TRAJ::PRINT_FRAME_XYZF(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
+{
+	TRAJFILE << SYSTEM.ATOMS << endl;
+	TRAJFILE << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+		
+	for (int a1=0; a1<SYSTEM.ATOMS; a1++) 
+	{
+		XYZ tmp = SYSTEM.COORDS[a1] ;
+
+		if ( CONTROLS.WRAP_COORDS ) 
+		{
+			// Wrap into the primitive cell
+			tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
+			tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
+			tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
+		}
+			
+		TRAJFILE << right << setw(4) << SYSTEM.ATOMTYPE[a1] << " "  
+				<< fixed << setprecision(5) << setw(15) << tmp.X << " "
+				<< fixed << setprecision(5) << setw(15) << tmp.Y << " " 	
+				<< fixed << setprecision(5) << setw(15) << tmp.Z << endl;    	
+	}
+}
+
+void WRITE_TRAJ::PRINT_FRAME_LAMMPSTRJ(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
+{
+	TRAJFILE << "ITEM: TIMESTEP" << endl;
+	TRAJFILE << (CONTROLS.STEP+1) * CONTROLS.DELTA_T_FS << endl;
+	TRAJFILE << "ITEM: NUMBER OF ATOMS" << endl;
+	TRAJFILE << SYSTEM.ATOMS << endl;
+	TRAJFILE << "ITEM: BOX BOUNDS xy xz yz pp pp pp" << endl;
+	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.X << " 0.0" << endl;
+	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.Y << " 0.0" << endl;
+	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.Z << " 0.0" << endl;
+	
+	
+	// FYI, can get fancy and control what gets printed to the lammps-format files using:
+	// CONTROLS.PRINT_VELOC
+	// CONTROLS.PRINT_FORCE 
+	// ... but for now, just print coords and velocs
+	
+	TRAJFILE << "ITEM: ATOMS id type element xu yu zu vx vy vz" << endl;
+	
+	for (int i=0; i<SYSTEM.ATOMS; i++) 
+	{
+		TRAJFILE 
+			<< right << setw(20) << i+1 
+			<< right << setw(4 ) << SYSTEM.ATOMTYPE_IDX[i]+1 
+			<< right << setw(4 ) << SYSTEM.ATOMTYPE[i]
+			<< fixed << setprecision(5) << setw(15) << SYSTEM.COORDS[i].X
+			<< fixed << setprecision(5) << setw(15) << SYSTEM.COORDS[i].Y
+			<< fixed << setprecision(5) << setw(15) << SYSTEM.COORDS[i].Z
+			<< fixed << setprecision(5) << setw(15) << SYSTEM.VELOCITY[i].X
+			<< fixed << setprecision(5) << setw(15) << SYSTEM.VELOCITY[i].Y
+			<< fixed << setprecision(5) << setw(15) << SYSTEM.VELOCITY[i].Z
+			<< endl;
+	}	
+}
+
+void WRITE_TRAJ::PRINT_FRAME_XYZF_FORCE(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
+{
+	// this style output allows to test force-matching against an MD run.
+		
+	double fconv = Hartree*Bohr;	// convert xyzf forces to Hartree per Bohr
+
+	TRAJFILE.precision(10);	
+
+	TRAJFILE << SYSTEM.ATOMS << endl;
+	TRAJFILE << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+
+	for(int i=0;i<SYSTEM.ATOMS;i++)
+	{
+	
+	 	TRAJFILE << right << setw(4) << SYSTEM.ATOMTYPE[i] 
+	        	 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.COORDS[i].X 
+			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.COORDS[i].Y
+			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.COORDS[i].Z
+			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].X / fconv
+			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].Y / fconv
+			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].Z / fconv << endl ;
+
+		TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].X << endl;
+	  	TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Y << endl;
+	  	TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Z << endl;
+			
+	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].X << endl;
+	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Y << endl;
+	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Z << endl;
+
+	}
+}
+

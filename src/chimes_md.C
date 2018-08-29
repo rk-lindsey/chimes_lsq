@@ -35,6 +35,7 @@
 #include "functions.h"
 #include "Cheby.h"
 #include "util.h"
+#include "io_styles.h"
 
 // For LAMMPS linking
 
@@ -47,26 +48,17 @@ using namespace std;
 	
 // Define function headers -- general
 
-static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);	// UPDATED
-static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NATMTYP, vector<string>& TMP_ATOMTYPE,
-									 vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES, 
-									 vector<double>& TMP_MASS, vector<int> &TMP_SIGN) ;
-static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY,
-									CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, 
-									NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP,
-                           const vector<string>& TMP_ATOMTYPE, const vector<int>& TMP_ATOMTYPEIDX,
-									vector<double> &TMP_CHARGES, vector<double> &TMP_MASS,
-									const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
-static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST &TRIPS,
-									  CLUSTER_LIST &QUADS, const JOB_CONTROL &CONTROLS) ;
-static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE,
-							 CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby) ;
+static void read_input        (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);
+static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NATMTYP, vector<string>& TMP_ATOMTYPE, vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES,  vector<double>& TMP_MASS, vector<int> &TMP_SIGN) ;
+static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP, const vector<string>& TMP_ATOMTYPE, const vector<int>& TMP_ATOMTYPEIDX, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS, const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
+static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, const JOB_CONTROL &CONTROLS) ;
+static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE, CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby) ;
 
 // Define function headers -- MPI
 
 static void write_xyzv         (FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
 static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
-static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CONTROLS ) ;
+static void parse_ff_controls  (string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CONTROLS ) ;
 
 // Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
 
@@ -84,7 +76,6 @@ static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CO
 #endif 
 
 
-
 // Global variables declared as externs in functions.h, and declared in functions.C -- general
 
 string FULL_FILE_3B;		
@@ -95,9 +86,9 @@ string SCAN_FILE_2B;
  
 int NPROCS;		// Number of processors
 int RANK;		// Index of current processor
-ofstream BAD_CONFIGS_1;	// Configs where r_ij < r_cut,in 
-ofstream BAD_CONFIGS_2;	// Configs where r_ij < r_cut,in +d_penalty
 
+WRITE_TRAJ BAD_CONFIGS_1("XYZF","BAD_1"); // Configs where r_ij < r_cut,in 
+WRITE_TRAJ BAD_CONFIGS_2("XYZF","BAD_2"); // Configs where r_ij < r_cut,in +d_penalty
 
 // Variables that are defined locally for house_md which need to be global for LAMMPS linking
  
@@ -106,23 +97,20 @@ ofstream BAD_CONFIGS_2;	// Configs where r_ij < r_cut,in +d_penalty
 	// Gloabl variables needed by callback function for LAMMPS  
 	
 	int TOTAL_ATOMS;
-	vector<double>	LMP_CHARGE;			// Global data object to hold charges for the LAMMPS input files     
+	vector<double>	LMP_CHARGE;		// Global data object to hold charges for the LAMMPS input files     
 	vector<string>  TMP_ATOMTYPE;		// Will be used by lammps to map lammps atom types (int's) back to chemical symbols
-	JOB_CONTROL	CONTROLS;				// Declare the data object that will hold the main simulation control variables
-	map<string,int> PAIR_MAP;			// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
-  vector<int> INT_PAIR_MAP ;		
+	JOB_CONTROL	CONTROLS;		// Declare the data object that will hold the main simulation control variables
+	map<string,int> PAIR_MAP;		// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
+  	vector<int> INT_PAIR_MAP ;		
 	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
-	map<string,int>& TRIAD_MAP;			// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
+	map<string,int>& TRIAD_MAP;		// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
 	map<int,string>& TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
-	map<string,int>& QUAD_MAP;			// Input is 6 of any ATOM_PAIRS.PRPR_NM pairs, output is a quadruplet type index
+	map<string,int>& QUAD_MAP;		// Input is 6 of any ATOM_PAIRS.PRPR_NM pairs, output is a quadruplet type index
 	map<int,string>& QUAD_MAP_REVERSE;	// Input/output is the reverse of QUAD_MAP
 	
-	vector<PAIR_FF> FF_2BODY;			// Holds all 2-body parameters
+	vector<PAIR_FF> FF_2BODY;		// Holds all 2-body parameters
 
-// FF_3BODY and FF_4BODY are no longer used.
-// vector<TRIP_FF> FF_3BODY; 			// Holds all 3-body parameters
-// vector<QUAD_FF> FF_4BODY; 			// Holds all 3-body parameters
-	NEIGHBORS		NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
+	NEIGHBORS NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
 	
 #endif
 	
@@ -156,7 +144,6 @@ int main(int argc, char* argv[])
 	 cout << "Code compiled in serial mode."; 
 #endif
 
-
   if (RANK==0)
 	 cout <<" Will run on " << NPROCS << " processor(s)." << endl;
 
@@ -165,8 +152,8 @@ int main(int argc, char* argv[])
   // Define/initialize important variables
   ////////////////////////////////////////////////////////////
 	
-  PES_PLOTS FF_PLOTS;					// Declare the data object that will help set up PES plots
-  FRAME      SYSTEM;					// Declare the data object that will hold the system coordinates, velocities, accelrations, etc.
+  PES_PLOTS FF_PLOTS;			// Declare the data object that will help set up PES plots
+  FRAME      SYSTEM;			// Declare the data object that will hold the system coordinates, velocities, accelrations, etc.
   CONSTRAINT ENSEMBLE_CONTROL;		// Declare the class that will handle integration/constraints
   THERMO_AVG AVG_DATA ;
 	
@@ -174,19 +161,19 @@ int main(int argc, char* argv[])
 	
 #if not defined(LINK_LAMMPS)
 	
-  JOB_CONTROL CONTROLS;				// Declare the data object that will hold the main simulation control variables
-  NEIGHBORS  NEIGHBOR_LIST;			// Declare the class that will handle the neighbor list
+  JOB_CONTROL CONTROLS;			// Declare the data object that will hold the main simulation control variables
+  NEIGHBORS   NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
 	
   // Data objects to hold coefficients for different force field types, and for FF printing (if requested)
 
-  vector<PAIR_FF> FF_2BODY;			// Holds all 2-body parameters
+  vector<PAIR_FF> FF_2BODY;		// Holds all 2-body parameters
 
-  CLUSTER_LIST TRIPS ;             // Holds all 3-body parameters
-  CLUSTER_LIST QUADS;      			// Holds all 4-body parameters
+  CLUSTER_LIST TRIPS;			// Holds all 3-body parameters
+  CLUSTER_LIST QUADS;      		// Holds all 4-body parameters
 		
   // Define the mapping variables that let us figure out which FF params to use for a given pair/triplet of pairs
 		
-  map<string,int> PAIR_MAP;			// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
+  map<string,int> PAIR_MAP;		// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
   map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
   vector<int> INT_PAIR_MAP ;		
 
@@ -217,11 +204,11 @@ int main(int argc, char* argv[])
   int     NATMTYP = 0;
 	
 	
-  vector<int>		TMP_SIGN;
-  vector<int>		TMP_NATOMTYPE;
+  vector<int>	TMP_SIGN;
+  vector<int>	TMP_NATOMTYPE;
   vector<int> 	TMP_ATOMTYPEIDX;
-  vector<double> 	TMP_CHARGES;
-  vector<double> 	TMP_MASS;
+  vector<double>TMP_CHARGES;
+  vector<double>TMP_MASS;
   stringstream	STREAM_PARSER;
 	
   XYZ TMP_BOX;
@@ -229,52 +216,47 @@ int main(int argc, char* argv[])
 	
   string FIRST_EXT;
 
-  ofstream GENFILE;			// Holds dftbgen info output.. whatever that is
   ifstream CMPR_FORCEFILE;	// Holds the forces that were read in for comparison purposes
-  ofstream OUT_FORCEFILE;		// Holds the forces that are computed and are to be printed out
-  ofstream OUT_FORCELABL;		// Holds the forces that are computed and are to be printed out.. has atom labels
-  ofstream OUT_XYZF ;        // Print out positions and forces in same format as for force matching.
-  ofstream OUT_VELOCFILE;		// Holds the velocities that are computed and are to be printed out
+  ofstream OUT_VELOCFILE;	// Holds the velocities that are computed and are to be printed out
   ofstream STATISTICS;		// Holds a copy of the "Step      Time          Ktot/N          Vtot/N ..." part of the output file.. uninterrupted by warnings
 	
-  string EXTENSION;			// Holds the input xyz/xyzf file extension, so we know how many fields to read on each atom line
+  string EXTENSION;		// Holds the input xyz/xyzf file extension, so we know how many fields to read on each atom line
 	
   ifstream PARAMFILE;
   ifstream COORDFILE;
 
   read_input(CONTROLS, FF_PLOTS,NEIGHBOR_LIST);		// Populate object with user defined values
 	
-  cout.precision(15);			// Set output precision
+  cout.precision(15);		// Set output precision
 	
+
+	
+  ////////////////////////////////////////////////////////////
+  // Setup optional output files 
+  ////////////////////////////////////////////////////////////
+
+  // trajectory
+
+  WRITE_TRAJ GENFILE(CONTROLS.TRAJ_FORMAT,"STANDARD");	// This is our usual output file
+
+  // force 
+  
+  WRITE_TRAJ FORCEFILE;
+
+  if ( CONTROLS.PRINT_FORCE ) 
+	WRITE_TRAJ FORCEFILE("XYZF_FORCE","FORCE");	// This is the forcout* files
+
+  // velocity
+
+  if ( CONTROLS.PRINT_VELOC ) 
+	 OUT_VELOCFILE.open("velocout.txt");	
+	 
   ////////////////////////////////////////////////////////////
   // Hop to PES printing, if requested 
   ////////////////////////////////////////////////////////////
 	
   if (FF_PLOTS.N_PLOTS > 0)
 	 goto FF_SETUP_1; 
-	
-  ////////////////////////////////////////////////////////////
-  // Setup optional output files 
-  ////////////////////////////////////////////////////////////
-
-  // dftbgen
-	
-  if ( CONTROLS.FREQ_DFTB_GEN > 0 ) 
-	 GENFILE.open("traj.gen");
-	
-  // force 
-
-  if ( CONTROLS.PRINT_FORCE ) 
-  {
-	 OUT_FORCEFILE.open("forceout.txt");	
-	 OUT_FORCELABL.open("forceout-labeled.txt");		
-	 OUT_XYZF.open("forceout.xyzf") ;
-  }
-
-  // velocity
-
-  if ( CONTROLS.PRINT_VELOC ) 
-	 OUT_VELOCFILE.open("velocout.txt");	
 
   ////////////////////////////////////////////////////////////
   // Open all input files and count the total number of expected atoms
@@ -300,9 +282,7 @@ int main(int argc, char* argv[])
 		}
 	 }
 	
-	
 
-	
 	 ////////////////////////////////////////////////////////////
 	 // Set up the system data object... Do so by assuming a 
 	 // constant number of atoms in the system (almost always
@@ -365,14 +345,12 @@ int main(int argc, char* argv[])
 		
 	 // Get the coordinates for the molecule to be inserted
 		
-	 vector<XYZ>	 BASE;
-	 XYZ				TMP;
-	 int				TMP_NAT;
-	 string			TMP_STR;
+	 vector<XYZ>	BASE;
+	 XYZ		TMP;
+	 int		TMP_NAT;
+	 string		TMP_STR;
 	 vector<string>	TMP_ATP;
-		
-		
-		
+
 	 if (RANK==0)
 		cout << "Building initial coordinates and forces..." << endl;
 			
@@ -498,13 +476,14 @@ int main(int argc, char* argv[])
 	 {
 		COORDFILE.open(CONTROLS.COORD_FILE[i].data());
 	
-		COORDFILE >> TEMP_INT; 								// Store number of atoms in file in a temp var
+		COORDFILE >> TEMP_INT;	// Store number of atoms in file in a temp var
 		COORDFILE >> TMP_BOX.X >> TMP_BOX.Y >> TMP_BOX.Z;
 
 		if(CONTROLS.FIT_STRESS)                                                                                           
 		  COORDFILE >>  SYSTEM.PRESSURE_TENSORS.X >>  SYSTEM.PRESSURE_TENSORS.Y >>  SYSTEM.PRESSURE_TENSORS.Z;      
 
-		if(CONTROLS.FIT_ENER)                                                  				 COORDFILE >> SYSTEM.QM_POT_ENER;   
+		if(CONTROLS.FIT_ENER)
+			COORDFILE >> SYSTEM.QM_POT_ENER;   
 
 		////////////////////////////////////////////////////////////
 		// Read in the initial system coordinates, and if requested,
@@ -518,42 +497,41 @@ int main(int argc, char* argv[])
 
 		if ( CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE) 
 		{
-		  if (RANK==0)
-			 cout << "	Opening " << CONTROLS.COMPARE_FILE.data() << " to read forces for comparison\n";
-		  CMPR_FORCEFILE.open(CONTROLS.COMPARE_FILE.data());
+			if (RANK==0)
+			       cout << "      Opening " << CONTROLS.COMPARE_FILE.data() << " to read forces for comparison\n";
+			CMPR_FORCEFILE.open(CONTROLS.COMPARE_FILE.data());
 
-		  if(!CMPR_FORCEFILE.is_open())
-		  {
-			 cout << "ERROR: Cannot open force input file: " << CONTROLS.COMPARE_FILE << endl;
-			 exit_run(0);
-		  }
-
+			if(!CMPR_FORCEFILE.is_open())
+			{
+			       cout << "ERROR: Cannot open force input file: " << CONTROLS.COMPARE_FILE << endl;
+			       exit_run(0);
+			}
 		}
 	
 		EXTENSION = CONTROLS.COORD_FILE[i].substr(CONTROLS.COORD_FILE[i].find_last_of(".")+1);
 		
 		if(i==0)
-		  FIRST_EXT = EXTENSION;
+			FIRST_EXT = EXTENSION;
 		
 		if(EXTENSION != FIRST_EXT)
 		{
-		  cout << "ERROR: Extensions for all input coordinate files must match. " << endl;
-		  cout << "       Found extension "<< FIRST_EXT << " for coordinate file 0 " << endl;
-		  cout << "       and " << EXTENSION << " for coordinate file " << i << endl;
-		  exit_run(0);
+			cout << "ERROR: Extensions for all input coordinate files must match. " << endl;
+			cout << "	Found extension "<< FIRST_EXT << " for coordinate file 0 " << endl;
+			cout << "	and " << EXTENSION << " for coordinate file " << i << endl;
+			exit_run(0);
 		}
 	
 		if (RANK==0)
 		{
-		  cout << "	...Read the following coordinate file extension: " << EXTENSION << endl;
-		  cout << "   ...Read the following number of atoms: " << TEMP_INT << endl;
-		  cout << "	...Read box dimensions: " << TMP_BOX.X << " " << TMP_BOX.Y << " " << TMP_BOX.Z << endl;
-			
-		  if(CONTROLS.FIT_STRESS)
-			 cout << "       ...Read stress tensors: " << SYSTEM.PRESSURE_TENSORS.X << " " << SYSTEM.PRESSURE_TENSORS.Y << " " << SYSTEM.PRESSURE_TENSORS.Z << endl;
-		  if(CONTROLS.FIT_ENER)                                                                                                          
-			 cout << "       ...Read potential energy: " << SYSTEM.QM_POT_ENER << endl;                                             
-			
+		 	 cout << "     ...Read the following coordinate file extension: " << EXTENSION << endl;
+		 	 cout << "   ...Read the following number of atoms: " << TEMP_INT << endl;
+		 	 cout << "     ...Read box dimensions: " << TMP_BOX.X << " " << TMP_BOX.Y << " " << TMP_BOX.Z << endl;
+		
+		 	 if(CONTROLS.FIT_STRESS)
+		 	        cout << "	...Read stress tensors: " << SYSTEM.PRESSURE_TENSORS.X << " " << SYSTEM.PRESSURE_TENSORS.Y << " " << SYSTEM.PRESSURE_TENSORS.Z << endl;
+		 	 if(CONTROLS.FIT_ENER)  													
+		 	        cout << "	...Read potential energy: " << SYSTEM.QM_POT_ENER << endl;					       
+		
 		}
 	
 		getline(COORDFILE,LINE);
@@ -699,18 +677,24 @@ FF_SETUP_1:
 	
   // Read in the possible atom types and their features	
 
-  read_atom_types(PARAMFILE, CONTROLS, NATMTYP, TMP_ATOMTYPE, TMP_NATOMTYPE, TMP_ATOMTYPEIDX,
-						TMP_CHARGES, TMP_MASS, TMP_SIGN) ;
+  read_atom_types(PARAMFILE, CONTROLS, NATMTYP, TMP_ATOMTYPE, TMP_NATOMTYPE, TMP_ATOMTYPEIDX, TMP_CHARGES, TMP_MASS, TMP_SIGN) ;
 	
   if (FF_PLOTS.N_PLOTS > 0)
 	 goto FF_SETUP_2; 
 	
 
   // Assign atom features to atoms in SYSTEM data object, and the PAIR_FF object
+  // Figure out how many atoms of each type we have... this can be useful for
+  // printing VASP POSCAR files
 
   
   for(int a=0; a<SYSTEM.ATOMS;a++)
   {
+  
+  	for(int j=0; j<TMP_ATOMTYPE.size(); j++)
+		if (SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[j])
+			TMP_NATOMTYPE[j]++;
+			
 	 for(int i=0; i<NATMTYP; i++)
 	 {
 		if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
@@ -754,10 +738,9 @@ FF_SETUP_1:
 	
   if ( (CONTROLS.N_LAYERS > 0) && (RANK == 0) )	// Then ghost atoms are used 
   {
-	 cout << "	Real atoms:                   " << SYSTEM.ATOMS << endl;
+	 cout << "	Real atoms:                   " << SYSTEM.ATOMS     << endl;
 	 cout << "	Total atoms (ghost):          " << SYSTEM.ALL_ATOMS << endl;
-	 cout << "	Real box dimesntions:         " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
-			
+	 cout << "	Real box dimesntions:         " << SYSTEM.BOXDIM.X  << " " << SYSTEM.BOXDIM.Y  << " " << SYSTEM.BOXDIM.Z  << endl;
 	 cout << "	Total box dimensions (ghost): " << SYSTEM.WRAPDIM.X << " " << SYSTEM.WRAPDIM.Y << " " << SYSTEM.WRAPDIM.Z << endl << endl;
 			
 	 if(CONTROLS.WRAP_COORDS)
@@ -771,7 +754,8 @@ FF_SETUP_1:
 	
   ////////////////////////////////////////////////////////////
   // Initialize velocities, if requested. Use the box Muller
-  // method, setup up thermostat if requested
+  // method, setup up thermostat if requested, verify velocity
+  // (momentum) COM is ~ zero
   ////////////////////////////////////////////////////////////
 
   if(RANK==0)
@@ -786,212 +770,34 @@ FF_SETUP_1:
 
   Vol = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
 
-  if ( CONTROLS.INIT_VEL ) 
+  if ( CONTROLS.INIT_VEL ) // Use box Muller to initialize velocities
   {
-	 // Declare some task-specific variables
-	 // Use box Muller to initialize velocities
-		
-	 if(RANK == 0)
+	if(RANK == 0)
 		cout << "Initializing velocities via box Muller..." << endl; 
-
-	 double x1, x2 , y1 ,y2;
-	 double sigma;
-	 int    counter = 0;
-		
-	 srand(CONTROLS.SEED);
-		
-	 for(int a=0; a<SYSTEM.ATOMS; a++)
-	 {
-		// Don't account for frozen atoms
-			
-		if((CONTROLS.FREEZE_IDX_START != -1) && ((a<CONTROLS.FREEZE_IDX_START) || (a>CONTROLS.FREEZE_IDX_STOP)))
-		{
-		  SYSTEM.VELOCITY[a].X = 0;
-		  SYSTEM.VELOCITY[a].Y = 0;
-		  SYSTEM.VELOCITY[a].Z = 0;
-				
-		  continue;
-		}
-			
-		sigma = sqrt(CONTROLS.TEMPERATURE * Kb / SYSTEM.MASS[a] );
-
-		// Do for x...
-			
-		x1    = double(rand())/double(RAND_MAX);
-		x2    = double(rand())/double(RAND_MAX);
-			
-		if ( (x1 < 0.0 || x1 > 1.0) || ( x2 < 0.0 || x2 > 1.0 ) )
-		{
-		  cout << "Bad random variable" << endl;
-		  exit_run(1);
-		}
-			
-		y1 = sqrt(-2.0 * log(x1)) * cos(2.0 * M_PI * x2);
-		y2 = sqrt(-2.0 * log(x1)) * sin(2.0 * M_PI * x2);
-		y1 *= sigma;
-		y2 *= sigma;			
-
-		if ( counter % 2 == 0 ) // Use either y2 or y1 here for maximum fun.
-		  SYSTEM.VELOCITY[a].X = y2; 
-		else 
-		  SYSTEM.VELOCITY[a].X = y1;
-			 
-		counter++;
-			 
-			 
-		// Do for y...
-			
-		x1    = double(rand())/double(RAND_MAX);
-		x2    = double(rand())/double(RAND_MAX);
-			
-		if ( (x1 < 0.0 || x1 > 1.0) || ( x2 < 0.0 || x2 > 1.0 ) )
-		{
-		  cout << "Bad random variable" << endl;
-		  exit_run(1);
-		}
-			
-		y1 = sqrt(-2.0 * log(x1)) * cos(2.0 * M_PI * x2);
-		y2 = sqrt(-2.0 * log(x1)) * sin(2.0 * M_PI * x2);
-		y1 *= sigma;
-		y2 *= sigma;			
-
-		if ( counter % 2 == 0 ) // Use either y2 or y1 here for maximum fun.
-		  SYSTEM.VELOCITY[a].Y = y2; 
-		else 
-		  SYSTEM.VELOCITY[a].Y = y1;
-			 
-		counter++;		
-				
-			 
-		// Do for z...
-			
-		x1    = double(rand())/double(RAND_MAX);
-		x2    = double(rand())/double(RAND_MAX);
-			
-		if ( (x1 < 0.0 || x1 > 1.0) || ( x2 < 0.0 || x2 > 1.0 ) )
-		{
-		  cout << "Bad random variable" << endl;
-		  exit_run(1);
-		}
-
-		y1 = sqrt(-2.0 * log(x1)) * cos(2.0 * M_PI * x2);
-		y2 = sqrt(-2.0 * log(x1)) * sin(2.0 * M_PI * x2);
-		y1 *= sigma;
-		y2 *= sigma;			
-
-		if ( counter % 2 == 0 ) // Use either y2 or y1 here for maximum fun.
-		  SYSTEM.VELOCITY[a].Z = y2; 
-		else 
-		  SYSTEM.VELOCITY[a].Z = y1;
-
-		counter++;				 
-	 }		
+	
+	 ENSEMBLE_CONTROL.INIT_VEL(SYSTEM,CONTROLS);
   }
 	
   if(RANK==0)
 	 cout << "   ...setup complete" << endl << endl;
 	
-	
-  ////////////////////////////////////////////////////////////
-  // Setup and test system velocity center of mass... For
-  // consevation of momentum, this number should zero (or
-  // VERY close)
-  ////////////////////////////////////////////////////////////  
-  // ... Also, figure out how many atoms of each type we have
-  // ... this becomes useful for printing VASP POSCAR files
-  // //////////////////////////////////////////////////////////// 
-
   if(RANK==0)
 	 cout << "Running velocity sanity checks..." << endl; 
   
   // Test/fix velocity center of mass here
-	
-  XYZ    TEMP_VEL;
-  double TEMP_MASS;
-	
-  TEMP_VEL.X = 0;
-  TEMP_VEL.Y = 0;
-  TEMP_VEL.Z = 0;
-  TEMP_MASS  = 0;
 
-  for(int a=0; a<SYSTEM.ATOMS; a++)
-  {
-	 for(int j=0; j<TMP_ATOMTYPE.size(); j++)
-		if (SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[j])
-		  TMP_NATOMTYPE[j]++;
-		
-	 // Don't account for frozen atoms
-		
-	 if((CONTROLS.FREEZE_IDX_START != -1) && ((a<CONTROLS.FREEZE_IDX_START) || (a>CONTROLS.FREEZE_IDX_STOP)))
-		continue;
-		
-	 TEMP_VEL.X += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].X;
-	 TEMP_VEL.Y += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Y;
-	 TEMP_VEL.Z += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Z;
-	 TEMP_MASS  += SYSTEM.MASS[a];
-  }
-	
-  // Check our velocity center of mass.. hopefully this is (or is very close to) zero
-	
-  if(RANK==0)  
-	 cout	<< "	Initial velocity center of mass: (" 
-			<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.X/TEMP_MASS << ", " 
-			<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.Y/TEMP_MASS << ", " 
-			<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.Z/TEMP_MASS << ") "
-			<< endl;
+  ENSEMBLE_CONTROL.CHECK_VEL(SYSTEM,CONTROLS);
   
-  // In case it isn't, correct velocities to make it so: 
-	 
-  for(int a=0; a<SYSTEM.ATOMS; a++)
-  {
-	 // Don't account for frozen atoms
-		
-	 if((CONTROLS.FREEZE_IDX_START != -1) && ((a<CONTROLS.FREEZE_IDX_START) || (a>CONTROLS.FREEZE_IDX_STOP)))
-		continue;
-		
-	 SYSTEM.VELOCITY[a].X -= TEMP_VEL.X/TEMP_MASS;
-	 SYSTEM.VELOCITY[a].Y -= TEMP_VEL.Y/TEMP_MASS;
-	 SYSTEM.VELOCITY[a].Z -= TEMP_VEL.Z/TEMP_MASS;
-  }
+  ////////////////////////////////////////////////////////////
+  // Print some info on density, etc. 
+  ////////////////////////////////////////////////////////////  
 
-  TEMP_VEL.X = 0;
-  TEMP_VEL.Y = 0;
-  TEMP_VEL.Z = 0;
-  TEMP_MASS  = 0;
-
-  // Now run a sanity check to make sure the new velocity center of mass is ~0
-	
-  for(int a=0; a<SYSTEM.ATOMS; a++)
-  {
-	 // Don't account for frozen atoms
-		
-	 if((CONTROLS.FREEZE_IDX_START != -1) && ((a<CONTROLS.FREEZE_IDX_START) || (a>CONTROLS.FREEZE_IDX_STOP)))
-		continue;
-		
-	 TEMP_VEL.X += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].X;
-	 TEMP_VEL.Y += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Y;
-	 TEMP_VEL.Z += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Z;
-	 TEMP_MASS  += SYSTEM.MASS[a];
-  }
-	
-  if(RANK==0)
-	 cout	<< "	Final   velocity center of mass: (" 
-			<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.X/TEMP_MASS << ", " 
-			<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.Y/TEMP_MASS << ", " 
-			<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.Z/TEMP_MASS << ") "
-			<< endl;
-  
-	
-  // Print some info on density, etc.
-
-  // Need to re-calculate masses in case atoms were frozen
-
-  TEMP_MASS = 0;
+  double TEMP_MASS = 0.0;
 	
   for(int a=0; a<SYSTEM.ATOMS; a++)
 	 TEMP_MASS  += SYSTEM.MASS[a];
 
-  dens_mol = (SYSTEM.ATOMS * 1.0e24) / (6.0221e23 * Vol);
+  dens_mol  = (SYSTEM.ATOMS * 1.0e24) / (6.0221e23 * Vol);
   dens_mass = (TEMP_MASS/Vol)*(1e24/6.0221e23);
 
   if(RANK==0)
@@ -1010,10 +816,7 @@ FF_SETUP_1:
 
 FF_SETUP_2:
 
-  read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, 
-					  SYSTEM, FF_PLOTS.N_PLOTS, NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX,
-					  TMP_CHARGES, 
-					  TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE) ;
+  read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, SYSTEM, FF_PLOTS.N_PLOTS, NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX,TMP_CHARGES, TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE) ;
 	
   // Set the atom charges
 	
@@ -1022,10 +825,10 @@ FF_SETUP_2:
 	 for(int i=0; i<NATMTYP; i++)
 	 {	
 		if(FF_2BODY[a].ATM1TYP == TMP_ATOMTYPE[i])
-		  FF_2BODY[a].ATM1CHG = TMP_CHARGES[i];
+			FF_2BODY[a].ATM1CHG = TMP_CHARGES[i];
 		
 		if(FF_2BODY[a].ATM2TYP == TMP_ATOMTYPE[i])
-		  FF_2BODY[a].ATM2CHG = TMP_CHARGES[i];	
+			FF_2BODY[a].ATM2CHG = TMP_CHARGES[i];	
 	 }	
   }
 
@@ -1034,9 +837,8 @@ FF_SETUP_2:
   ////////////////////////////////////////////////////////////  	
 	
   if(RANK==0)
-  {
 	 print_ff_summary(FF_2BODY, TRIPS, QUADS, CONTROLS) ;
-  }
+
 	
   ////////////////////////////////////////////////////////////
   // Set up the neighbor list
@@ -1065,9 +867,7 @@ FF_SETUP_2:
 	
   if(RANK==0)
   {
-
-	 cout << endl << "Generating fast maps " << endl;
-
+	 cout << endl << "Generating fast maps... " << endl;
 	 cout << "	Pair maps:" << endl;
   }
 	
@@ -1109,7 +909,7 @@ FF_SETUP_2:
   ////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////
   //
-  // 						LINK TO LAMMPS
+  // 			LINK TO LAMMPS
   //
   ////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////
@@ -1119,9 +919,8 @@ FF_SETUP_2:
   if(RANK==0)
 	 cout <<	"Running LAMMPS linked code! " << endl;
 	
-  // Note: All lammps stuff is handled by the first proc,
-  //      regardless of whether serial or not, however
-  //		force calculations (local) are run w/ nmpi procs
+  // Note: All lammps stuff is handled by the first proc, regardless of whether serial or not, however
+  //       force calculations (local) are run w/ nmpi procs
 		
   // Have LAMMPS handle Ewald sums; turn off here. 
   CONTROLS.USE_COULOMB = false;
@@ -1129,23 +928,18 @@ FF_SETUP_2:
   // Set the total number of atoms in the system 
 		
   TOTAL_ATOMS = SYSTEM.ATOMS;
-
-  // Only one rank does file writing
 		
-  if(RANK==0)
+  if(RANK==0)	// Only one rank does file writing
   {
 	 // Generate the LAMMPS input file based ENTIRELY on the house_md input. 
-	 // The user does not need to provide anything other than the usual house_md input!!!!
+	 // The user does not need to provide anything other than the usual chimes_md input!!!!
 
-	 Write_Lammps_datafile(SYSTEM, NATMTYP, TMP_MASS);
+	 Write_Lammps_datafile (SYSTEM, NATMTYP, TMP_MASS);
 	 Write_Lammps_inputfile(CONTROLS);
   }
-	
-  // Only the ranks in "comm_lammps" are allowed to deal with lammps
 
   // Create an instance of lammps
 
-  //LAMMPS *lmp = new LAMMPS(0,NULL,comm_lammps);
   LAMMPS *lmp = new LAMMPS(0,NULL,MPI_COMM_WORLD);
 		
   // Feed lammps the input file
@@ -1203,15 +997,13 @@ FF_SETUP_2:
   ////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////
   //
-  //					START THE SIMULATION
+  //			START THE SIMULATION
   //
   ////////////////////////////////////////////////////////////  
   ////////////////////////////////////////////////////////////
 
   STATISTICS.open("md_statistics.out");
-  BAD_CONFIGS_1.open("traj_bad_r.lt.rin.xyz");
-  BAD_CONFIGS_2.open("traj_bad_r.lt.rin+dp.xyz");
-
+  
   if (RANK==0)
 	 cout << "BEGIN SIMULATION:" << endl;
 	
@@ -1228,32 +1020,29 @@ FF_SETUP_2:
 
 	 if(CONTROLS.STEP>FIRST_STEP && RANK==0)	
 	 {
-		ENSEMBLE_CONTROL.UPDATE_COORDS(SYSTEM, CONTROLS);			// Update coordinates and ghost atoms
+		ENSEMBLE_CONTROL.UPDATE_COORDS(SYSTEM, CONTROLS);	// Update coordinates and ghost atoms
 			
-		if(CONTROLS.WRAP_COORDS)									// Wrap the coordinates:
+		if(CONTROLS.WRAP_COORDS)				// Wrap the coordinates:
 		{
-		  for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-		  {
-			 SYSTEM.COORDS[a1].X -= floor(SYSTEM.COORDS[a1].X / SYSTEM.BOXDIM.X) * SYSTEM.BOXDIM.X;
-			 SYSTEM.COORDS[a1].Y -= floor(SYSTEM.COORDS[a1].Y / SYSTEM.BOXDIM.Y) * SYSTEM.BOXDIM.Y;
-			 SYSTEM.COORDS[a1].Z -= floor(SYSTEM.COORDS[a1].Z / SYSTEM.BOXDIM.Z) * SYSTEM.BOXDIM.Z;
-		  }	
+		 	for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+		 	{
+			 	SYSTEM.COORDS[a1].X -= floor(SYSTEM.COORDS[a1].X / SYSTEM.BOXDIM.X) * SYSTEM.BOXDIM.X;
+			 	SYSTEM.COORDS[a1].Y -= floor(SYSTEM.COORDS[a1].Y / SYSTEM.BOXDIM.Y) * SYSTEM.BOXDIM.Y;
+			 	SYSTEM.COORDS[a1].Z -= floor(SYSTEM.COORDS[a1].Z / SYSTEM.BOXDIM.Z) * SYSTEM.BOXDIM.Z;
+		 	}	
 		} 
 
-		ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_1(SYSTEM, CONTROLS);	// Update first half of velocity and max velocity for neighbor lists:		
+		ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_1(SYSTEM, CONTROLS);// Update first half of velocity and max velocity for neighbor lists:		
 	 }
 		
 #ifdef USE_MPI
 	 sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
 	 sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-	 MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
+	 MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);				// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
 #endif
 
-	 NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);//	-- only commented for current 3b testing
-	
+	 NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
 
-	 cout.precision(14);			// Set output precision
-    
 	 ////////////////////////////////////////////////////////////
 	 // Calculate acceleration
 	 ////////////////////////////////////////////////////////////
@@ -1262,8 +1051,8 @@ FF_SETUP_2:
 
 	 ZCalc(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
 
-	 // FOR MPI:		Synchronize forces, energy, and pressure.
 #ifdef USE_MPI
+	// FOR MPI: Synchronize forces, energy, and pressure.
 	 sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
 #endif
 		
@@ -1273,37 +1062,13 @@ FF_SETUP_2:
 	// Set the econs value
 	
 	 ////////////////////////////////////////////////////////////
-	 // Print some info on new forces, compare to input forces if
+	 // Print some info on new forces, compare to input forces if 
 	 // requested
 	 ////////////////////////////////////////////////////////////
 
 
 	 if ( CONTROLS.PRINT_FORCE && (CONTROLS.STEP+1)%CONTROLS.FREQ_FORCE == 0 && RANK == 0 ) 
-	 {
-		// xyzf output allows to test force-matching against an MD run.
-		OUT_XYZF.precision(10) ;
-
-		OUT_XYZF << SYSTEM.ATOMS << endl ;
-		OUT_XYZF << scientific << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " " ;
-		OUT_XYZF << endl ;
-
-		// convert xyzf forces to Hartree per Bohr
-		double fconv = Hartree*Bohr;
-
-		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-		{
-		  OUT_FORCEFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].X << endl;
-		  OUT_FORCEFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Y << endl;
-		  OUT_FORCEFILE << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Z << endl;
-				
-		  OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].X << endl;
-		  OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Y << endl;
-		  OUT_FORCELABL <<  SYSTEM.ATOMTYPE[a1] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[a1].Z << endl;
-
-		  OUT_XYZF << SYSTEM.ATOMTYPE[a1] << " " << SYSTEM.COORDS[a1].X << " " << SYSTEM.COORDS[a1].Y << " " << SYSTEM.COORDS[a1].Z << " " ;
-		  OUT_XYZF << SYSTEM.ACCEL[a1].X / fconv << " " << SYSTEM.ACCEL[a1].Y / fconv << " " << SYSTEM.ACCEL[a1].Z / fconv << endl ;
-		}
-	 }
+		FORCEFILE.PRINT_FRAME(CONTROLS,SYSTEM);
 
 	 if ( (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE)&& RANK == 0 ) 
 	 {
@@ -1313,10 +1078,7 @@ FF_SETUP_2:
 		string   FORCE_SUBTRACTED_FILE   = CONTROLS.COORD_FILE[0];
 			
 		int END = SYSTEM.ATOMS;
-			
-		//if(CONTROLS.N_LAYERS>0)
-		//	END = SYSTEM.ATOMS/pow(CONTROLS.N_LAYERS+1,3.0);
-		
+
 		if(CONTROLS.SUBTRACT_FORCE)
 		{
 		  FORCE_SUBTRACTED_FILE  .append("_forces_subtracted.xyz");
@@ -1327,9 +1089,7 @@ FF_SETUP_2:
 				
 				
 		  if(CONTROLS.FIT_STRESS)
-			 FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS.X - SYSTEM.STRESS_TENSORS.X << " " << 
-				SYSTEM.PRESSURE_TENSORS.Y - SYSTEM.STRESS_TENSORS.Y << " " << 
-				SYSTEM.PRESSURE_TENSORS.Z - SYSTEM.STRESS_TENSORS.Z;
+			 FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS.X - SYSTEM.STRESS_TENSORS.X << " " << SYSTEM.PRESSURE_TENSORS.Y - SYSTEM.STRESS_TENSORS.Y << " " << SYSTEM.PRESSURE_TENSORS.Z - SYSTEM.STRESS_TENSORS.Z;
 		  if(CONTROLS.FIT_ENER)
 			 FORCE_SUBTRACTED_OUTPUT << SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER;
 					
@@ -1343,25 +1103,15 @@ FF_SETUP_2:
 		  ferr += (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X) * (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X);
 		  ferr += (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y) * (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y);
 		  ferr += (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z) * (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z);
-		  
-		  cout << "#CATCH: " << SYSTEM.ACCEL[a1].X << endl;
-		  cout << "#CATCH: " << SYSTEM.ACCEL[a1].Y << endl;
-		  cout << "#CATCH: " << SYSTEM.ACCEL[a1].Z << endl;
-/*				
-				cout << SYSTEM.ACCEL[a1].X << "		" << SYSTEM.ACCEL[a1].Y << "	" << SYSTEM.ACCEL[a1].Z << endl;
-				cout << SYSTEM.FORCES[a1].X << "	" << SYSTEM.FORCES[a1].Y << "	" << SYSTEM.FORCES[a1].Z << endl;
-				cout << endl;
-*/				
+				
 		  // Before printing force file with current ff forces subtracted, convert from simulation units (kca/mol/Ang)
 		  // to Hartree/bohr
 
-
-
 		  FORCE_SUBTRACTED_OUTPUT << SYSTEM.ATOMTYPE[a1] << "	"
 					  << SYSTEM.COORDS[a1].X << "   " << SYSTEM.COORDS[a1].Y << "   " << SYSTEM.COORDS[a1].Z << "   "						
-					  << (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(627.50960803*1.889725989) << " "
-					  << (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(627.50960803*1.889725989) << " "
-					  << (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(627.50960803*1.889725989) << endl;			       
+					  << (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(Hartree*Bohr) << " "
+					  << (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(Hartree*Bohr) << " "
+					  << (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(Hartree*Bohr) << endl; 			     
 		}
 			
 		if(CONTROLS.SUBTRACT_FORCE)
@@ -1569,49 +1319,8 @@ FF_SETUP_2:
 	 }
 
 	 if ( (CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0) && RANK == 0) 
-	 {
-		GENFILE << setw(5) << right << SYSTEM.ATOMS << " S #Step " << CONTROLS.STEP+1 << " Time " << (CONTROLS.STEP+1) * CONTROLS.DELTA_T_FS << " (fs) Temp " << SYSTEM.TEMPERATURE << " (k)" << endl;
+	 	GENFILE.PRINT_FRAME(CONTROLS,SYSTEM);
 
-		for(int i=0; i<NATMTYP; i++)				// Replaces GENFILE << "O H" << endl;
-		  GENFILE << TMP_ATOMTYPE[i] << " ";
-		GENFILE << endl;
-			
-		for (int a1=0; a1<SYSTEM.ATOMS; a1++) 
-		{
-				
-		  XYZ tmp = SYSTEM.COORDS[a1] ;
-
-		  if ( CONTROLS.WRAP_COORDS ) 
-		  {
-			 // Wrap into the primitive cell
-			 tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
-			 tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
-			 tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
-		  }
-				
-				
-		  GENFILE << right << setw(4) << a1+1 << " " << setw(2) << SYSTEM.ATOMTYPE_IDX[a1]+1 << " " 
-					 << fixed << setprecision(5) << setw(8) << tmp.X << " "
-					 << fixed << setprecision(5) << setw(8) << tmp.Y << " " 	
-					 << fixed << setprecision(5) << setw(8) << tmp.Z << endl;    	
-		}
-		   
-		GENFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
-				  << fixed << setprecision(5) << setw(8) << 0.0 << " "
-				  << fixed << setprecision(5) << setw(8) << 0.0 << endl;
-			
-		GENFILE << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.X << " "
-				  << fixed << setprecision(5) << setw(8) << 0.0 << " "
-				  << fixed << setprecision(5) << setw(8) << 0.0 << endl;
-			
-		GENFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
-				  << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.Y << " "
-				  << fixed << setprecision(5) << setw(8) << 0.0 << endl;
-			
-		GENFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
-				  << fixed << setprecision(5) << setw(8) << 0.0 << " "
-				  << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.Z << endl;
-	 }
 		
 	 ////////////////////////////////////////////////////////////
 	 // If requested, write the velocities
@@ -1628,92 +1337,6 @@ FF_SETUP_2:
 	 }		
 		
 	 ////////////////////////////////////////////////////////////
-	 // If requested, print out the VASP POSCAR file for self-consistent fitting
-	 ////////////////////////////////////////////////////////////
-	
-	 if(CONTROLS.SELF_CONSIST && ((CONTROLS.STEP+1) % CONTROLS.SELF_CONSIST_FREQ == 0) && RANK == 0)
-	 {
-		// Format is:
-		// Title
-		// Scaling factor (i.e. coords = boxlength * scaling_factor * scaled_cooords)
-		// Cell vectors (here we assume orthorhombic)
-		// Number of atoms of each type
-		// "Direct"
-		// Scaled coords, in the order of atoms listed above
-		// 
-		// In order to eventually set atoms back to original order, store a map
-		// ... map format is: <MD idx> <VASP idx> < atom type>
-	
-		int INSTANCE = int((CONTROLS.STEP+1) / CONTROLS.SELF_CONSIST_FREQ);
-		stringstream val_to_str;
-			
-		val_to_str << INSTANCE;
-		val_to_str >> TEMP_STR;
-		val_to_str.str("");
-		val_to_str.clear();
-			
-		string POSNAME = "POSCAR_";
-		POSNAME.append(TEMP_STR);
-		POSNAME.append(".mm_md");
-			
-		ofstream POSCAR_MAPPER;
-		static int VASP_IDX;
-			
-		if(INSTANCE == 1)	// Then this is the first time we're printing.. Need to write the map file
-		{
-		  VASP_IDX = 0;
-		  POSCAR_MAPPER.open("POSCAR_MAPPER.mm_md");
-		}	
-
-		ofstream POSCAR;
-		POSCAR.open(POSNAME.data());
-	
-		POSCAR << "MM MD SNAPSHOT - NATOMS: " << SYSTEM.ATOMS << endl;
-	
-		POSCAR << "1.0" << endl;
-	
-		POSCAR << SYSTEM.BOXDIM.X << " 0.0 0.0" << endl;
-		POSCAR << "0.0 " << SYSTEM.BOXDIM.Y << " 0.0" <<  endl;
-		POSCAR << "0.0 0.0 " << SYSTEM.BOXDIM.Z << endl;
-	
-		for(int i=0; i<TMP_NATOMTYPE.size(); i++)
-		  POSCAR << TMP_NATOMTYPE[i] << " ";
-		POSCAR << endl;
-	
-		POSCAR << "Direct" << endl;
-	
-		for(int i=0; i<TMP_NATOMTYPE.size(); i++)
-		{
-		  for(int j=0; j<SYSTEM.ATOMS; j++)
-		  {
-			 if(TMP_ATOMTYPE[i] == SYSTEM.ATOMTYPE[j])
-			 {
-				// Wrap into the primitive cell
-				XYZ tmp = SYSTEM.COORDS[j] ;
-
-				if ( CONTROLS.WRAP_COORDS ) 
-				{
-				  tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
-				  tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
-				  tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
-				}
-
-				POSCAR 	<< tmp.X/SYSTEM.BOXDIM.X << " " 
-							<< tmp.Y/SYSTEM.BOXDIM.Y << " " 
-							<< tmp.Z/SYSTEM.BOXDIM.Z << endl;
-					
-				if(INSTANCE == 1)
-				  POSCAR_MAPPER << j << " " << VASP_IDX++ << " " << SYSTEM.ATOMTYPE[j] << endl;
-			 }
-		  }
-		}
-
-		POSCAR.close();
-		if(INSTANCE == 1)
-		  POSCAR_MAPPER.close();
-	 }
-
-	 ////////////////////////////////////////////////////////////
 	 ////////////////////////////////////////////////////////////
 	 // 
 	 // 				END LOOP OVER MD STEPS
@@ -1722,19 +1345,10 @@ FF_SETUP_2:
 	 ////////////////////////////////////////////////////////////
 	   
   }//End big loop here.
-    
-  BAD_CONFIGS_1.close();
-  BAD_CONFIGS_2.close();
-    
+  
   if (RANK==0)	
   {
 	 cout << "END SIMULATION" << endl;
-	
-	 if(OUT_FORCEFILE.is_open())	// Close the force files 
-	 {
-		OUT_FORCEFILE.close();
-		OUT_FORCELABL.close();
-	 }
 
 	 TEMP_MASS = 0.0;
 	
@@ -1745,16 +1359,15 @@ FF_SETUP_2:
 	 cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
 	 cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
 		
+	// Why is this only for chebyshev?
 	 if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
-	 {
-		double Pavg = (AVG_DATA.STRESS_TENSOR_SUM.X 
-							+ AVG_DATA.STRESS_TENSOR_SUM.Y 
-							+ AVG_DATA.STRESS_TENSOR_SUM.Z)/3.0/ CONTROLS.N_MD_STEPS ;
+	 {	 
+		double Pavg = (AVG_DATA.STRESS_TENSOR_SUM.X + AVG_DATA.STRESS_TENSOR_SUM.Y + AVG_DATA.STRESS_TENSOR_SUM.Z)/3.0/ CONTROLS.N_MD_STEPS ;
 		cout << "	Pressures from diagonal stress tensors over run: " << Pavg << endl;
 		cout << "	Average diagonal stress tensors over run: " << endl;
-		cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM.X/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM.Y/ CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM.Z/ CONTROLS.N_MD_STEPS << " GPa" << endl;	
+		cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM.X/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM.Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM.Z/CONTROLS.N_MD_STEPS << " GPa" << endl;     
 	 }
 
 	 // Write the final configuration to file.
@@ -1762,8 +1375,7 @@ FF_SETUP_2:
 			
 	 STATISTICS.close();
   }
-	
-	
+
   // MPI -- End our setup
 	
 #ifdef USE_MPI
@@ -1781,11 +1393,11 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	
 	// Define some variable to help with reading
 	
-	bool   			FOUND_END = false;
-	string 			LINE;
-	string			TEMP_STR,TEMP_STR_2;
+	bool   		FOUND_END = false;
+	string 		LINE;
+	string		TEMP_STR,TEMP_STR_2;
 	stringstream	LINE_PARSER;
-	int				ADD_TO_NPLOTS = 0;
+	int		ADD_TO_NPLOTS = 0;
 	
 	// Set some defaults
 	
@@ -1817,6 +1429,7 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	NEIGHBOR_LIST.USE               = true;
 	
 	CONTROLS.PRINT_BAD_CFGS         = false;
+	CONTROLS.TRAJ_FORMAT		= "XYZF";
 	
 	CONTROLS.PENALTY_THRESH = -1.0;	// Default is to not enforce a max-allowed penalty
 	CONTROLS.IO_ECONS_VAL   =  0.0;
@@ -2029,15 +1642,8 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 		
 		else if(LINE.find("# SLFCNST #") != string::npos)
 		{
+			cout << "NOTE: Feature \"SLFCNST\" is no longer supported. Ignoring." << endl;
 			cin >> LINE; 
-			
-			if (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
-			{
-				CONTROLS.SELF_CONSIST = true;
-				cin >> CONTROLS.SELF_CONSIST_FREQ;
-				if (RANK==0)
-					cout << "	# SLFCNST #: true... will print POSCAR file every " << CONTROLS.SELF_CONSIST_FREQ << " md steps "<< endl;	
-			}
 			cin.ignore();
 		}
 
@@ -2368,23 +1974,22 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				
 				if (CONTROLS.BUILD_TYPE == "MOLECULAR")
 					LINE_PARSER >>  CONTROLS.BUILD_FILE;
+					
 				else if (CONTROLS.BUILD_TYPE == "ATOMIC")
 					LINE_PARSER >>  CONTROLS.BUILD_ATOM;
 				
 				LINE_PARSER >> LINE;
 				
 				if(LINE != "BOXL")
-				{
 					cout << "ERROR: Expected \'BOXL <value> NMOLEC <value>." << endl;
-				}
+					
 				LINE_PARSER >> CONTROLS.BUILD_BOXL;
 				
 				LINE_PARSER >> LINE;
 				
 				if(LINE != "NMOLEC")
-				{
 					cout << "ERROR: Expected \'BOXL <value> NMOLEC <value>." << endl;
-				}
+
 				LINE_PARSER >> CONTROLS.BUILD_NMOLEC;	
 				
 			}
@@ -2614,19 +2219,28 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			}
 		}			
 		
-		else if(LINE.find("# FRQDFTB #") != string::npos)
+		else if( (LINE.find("# FRQDFTB #") != string::npos) || (LINE.find("# FRQTRAJ #") != string::npos) )
 		{
 			cin >> LINE; cin.ignore();
 			CONTROLS.FREQ_DFTB_GEN = int(atof(LINE.data()));
 			if (RANK==0)
-				cout << "	# FRQDFTB #: " << CONTROLS.FREQ_DFTB_GEN << endl;	
+				cout << "	# FRQTRAJ #: " << CONTROLS.FREQ_DFTB_GEN << endl;	
 			
 			if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0 && RANK==0)
 			{
 				cout << "		... printing every " << CONTROLS.FREQ_DFTB_GEN*CONTROLS.DELTA_T_FS << " fs, " << endl;
-				cout << "		... printing " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_DFTB_GEN << " frames. " << endl; 
+				cout << "		... printing       " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_DFTB_GEN << " frames. " << endl; 
 			}
 		}
+		
+		
+		else if( LINE.find("# TRAJEXT #") != string::npos)
+		{
+			cin >> CONTROLS.TRAJ_FORMAT; cin.ignore();
+
+			if (RANK==0)
+				cout << "	# TRAJEXT #: " << CONTROLS.TRAJ_FORMAT << endl;	
+		}		
 
 		else if(LINE.find("# FRQENER #") != string::npos)
 		{
@@ -4262,10 +3876,8 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
   cout << endl;
 }
 
-static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE,
-							 CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby)
-// Print the potential energy surface.
-// The quads argument is unused for now.
+static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE, CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby)
+// Print the potential energy surface. The quads argument is unused for now.
 {
 
   vector<CLUSTER>& FF_3BODY = TRIPS.VEC ;

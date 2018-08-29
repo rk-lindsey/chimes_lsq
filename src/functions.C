@@ -11,6 +11,7 @@
 #include "functions.h"
 #include "util.h"
 #include "Cheby.h"
+#include "io_styles.h"
 
 #ifdef USE_MPI
 	#include <mpi.h>
@@ -581,20 +582,10 @@ void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BOD
 }
 
 
-//void calc_A_mat(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, 
-//						map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, 
-//						CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST)
-// Numerically calculate the "A" matrix, which is the derivative of the forces
-// with respect to the potential parameters.  Currently works only for 
-// chebyshev interactions.
-//{
-  
-
-
 //////////////////////////////////////////
 // Bad configuration tracking functions
 //////////////////////////////////////////
-
+/*
 
 void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type)
 // Output the current configuration
@@ -673,7 +664,7 @@ void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type)
 	}	
 	
 }
-
+*/
 
 //////////////////////////////////////////
 //
@@ -2227,65 +2218,66 @@ void build_int_pair_map(int natmtyp, const vector<string> &atomtype,
 // MPI -- Related functions -- See headers at top of file
 
 #ifdef USE_MPI
-void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z)
-// Add up forces, potential energy, and pressure from all processes.  
-{
-	// Sum up the potential energy, pressure, tensors , and forces from all processors
-#ifdef USE_MPI	
-	double *accel = (double *) accel_vec .data();
+	void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z)
+	// Add up forces, potential energy, and pressure from all processes.  
+	{
+		// Sum up the potential energy, pressure, tensors , and forces from all processors
+	#ifdef USE_MPI	
+		double *accel = (double *) accel_vec .data();
 
-	MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &tens_x,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &tens_y,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, &tens_z,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-	MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-#endif	
+		MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, &tens_x,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, &tens_y,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, &tens_z,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+	#endif	
 
-}
+	}
 
-void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 
-// Broadcast the position, neighborlists,  and optionally the velocity to all nodes.
-// Velocity-broadcast is only necessary for velocity-dependent forces (not currently implemented).
-{
-	#ifdef USE_MPI
+	void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 
+	// Broadcast the position, neighborlists,  and optionally the velocity to all nodes.
+	// Velocity-broadcast is only necessary for velocity-dependent forces (not currently implemented).
+	{
+		#ifdef USE_MPI
 	
-		// Convert out vectors to arrays so they are MPI friendly
+			// Convert out vectors to arrays so they are MPI friendly
 	
-		double *coord = (double *) coord_vec.data();
+			double *coord = (double *) coord_vec.data();
 
-		if ( sizeof(XYZ) != 3*sizeof(double) ) 
-		{
-			printf("Error: compiler padding in XYZ structure detected\n");
-			exit_run(1);
-		}
-
-		MPI_Bcast(coord, 3*atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-		
-		#ifdef LOG_POS
-		
-			char buf[20];
-			sprintf(buf, "%d.%d", RANK,NPROCS);
-			string pos_out = string("pos.") + string(buf) + string(".out");
-			ofstream outx;
-			outx.open(pos_out.c_str());
-			outx.precision(15);
-
-			for (int i=0; i<3*atoms; i++)
-				outx << i << " " << coord[i] << " " << endl;
-
-			outx.close();
-		
-		#endif
-
-			if ( sync_vel )
+			if ( sizeof(XYZ) != 3*sizeof(double) ) 
 			{
-				double *velocity = (double *) velocity_vec.data();
-				MPI_Bcast(velocity, 3 * atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+				printf("Error: compiler padding in XYZ structure detected\n");
+				exit_run(1);
 			}
+
+			MPI_Bcast(coord, 3*atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+		
+			#ifdef LOG_POS
+		
+				char buf[20];
+				sprintf(buf, "%d.%d", RANK,NPROCS);
+				string pos_out = string("pos.") + string(buf) + string(".out");
+				ofstream outx;
+				outx.open(pos_out.c_str());
+				outx.precision(15);
+	
+				for (int i=0; i<3*atoms; i++)
+					outx << i << " " << coord[i] << " " << endl;
+	
+				outx.close();
 			
-	#endif
-}
+			#endif
+	
+				if ( sync_vel )
+				{
+					double *velocity = (double *) velocity_vec.data();
+					MPI_Bcast(velocity, 3 * atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+				}
+				
+		#endif
+	}
 
 #endif // USE_MPI
+
 

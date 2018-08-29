@@ -12,6 +12,7 @@
 #include "functions.h"
 #include "util.h"
 #include "Cheby.h"
+#include "io_styles.h"
 
 #ifdef USE_MPI
 	#include <mpi.h>
@@ -20,6 +21,11 @@
 using namespace std;
 
 #define DEBUG_CHEBY
+
+
+extern WRITE_TRAJ BAD_CONFIGS_1; // Configs where r_ij < r_cut,in 
+extern WRITE_TRAJ BAD_CONFIGS_2; // Configs where r_ij < r_cut,in +d_penalty
+
 
 //////////////////////////////////////////
 // Cheby transformation functions
@@ -1962,10 +1968,18 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
   // traj file for BAD_CONFIG_1 should only contain configs where rij<rcutin
   // and BAD_CONFIG_2 should only contain configs where rcutin < rij < rcutin+dp.
   
+    if  ((BAD_CONFIG_1_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
+  	BAD_CONFIGS_1.PRINT_FRAME(CONTROLS, SYSTEM);
+   else if ((BAD_CONFIG_2_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
+	BAD_CONFIGS_2.PRINT_FRAME(CONTROLS, SYSTEM);
+  
+  /*
+  // PRE-CLASS
   if  ((BAD_CONFIG_1_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
   	PRINT_CONFIG(SYSTEM, CONTROLS,1);
    else if ((BAD_CONFIG_2_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
 	PRINT_CONFIG(SYSTEM, CONTROLS,2);
+   */
 
 //cout << "COUNTED INTERACTIONS: " << COUNTED_INTERACTIONS << endl;	
 } 
@@ -2644,8 +2658,7 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 ////////////////////////////////////////////////////////////
 
 void Cheby::Print_2B(int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_CHARGES, bool INCLUDE_PENALTY, string FILE_TAG)
-// Generating pair distance scans for the 2-b potential.
-// pair distances will range from smin to smax, incremented by sdelta
+// Generating pair distance scans for the 2-b potential. pair distances will range from smin to smax, incremented by sdelta
 {
 
 	double rlen;
@@ -2760,10 +2773,8 @@ void Cheby::Print_2B(int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_C
 	return;
 }  
 
-// NEW
-void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, 
-							int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan)	
-	// Print heat map slices for 2+3-body cheby potentials
+void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan)	
+// Print heat map slices for 2+3-body cheby potentials
 {
 	
   // Variables exclusive to 2-body

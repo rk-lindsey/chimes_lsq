@@ -3,8 +3,8 @@
 #ifndef _FCUT_H
 #define _FCUT_H
 
-enum class FCUT_TYPE {
-	// Contains allowed force cut-off types.
+enum class FCUT_TYPE // Contains allowed force cut-off types.
+{
 	CUBESTRETCH,
 	CUBIC,
 	COSINE,
@@ -14,7 +14,8 @@ enum class FCUT_TYPE {
 	TERSOFF
 } ;
 
-class FCUT {
+class FCUT 
+{
 public:
 
 	double STEEPNESS;
@@ -40,8 +41,7 @@ public:
 	string to_string() ;
 
 	// Evaluate the cut-off function.
-	void get_fcut(double & fcut, double & fcut_deriv, const double rlen, 
-								const double rmin, const double rmax) ;
+	void get_fcut(double & fcut, double & fcut_deriv, const double rlen, const double rmin, const double rmax) ;
 
 	// Decide whether to proceed with a pair interaction.
 	bool PROCEED(const double & rlen, const double & rmin, const double & rmax) ;

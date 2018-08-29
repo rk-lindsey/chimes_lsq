@@ -473,6 +473,180 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	
 }
 
+
+void CONSTRAINT::INIT_VEL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
+{
+	// Use box Muller to initialize velocities
+
+	double x1, x2 , y1 ,y2;
+	double sigma;
+	int    counter = 0;
+	       
+	srand(CONTROLS.SEED);
+	       
+	for(int a=0; a<SYSTEM.ATOMS; a++)
+	{
+	       // Don't account for frozen atoms
+		       
+	       if((CONTROLS.FREEZE_IDX_START != -1) && ((a<CONTROLS.FREEZE_IDX_START) || (a>CONTROLS.FREEZE_IDX_STOP)))
+	       {
+		 SYSTEM.VELOCITY[a].X = 0;
+		 SYSTEM.VELOCITY[a].Y = 0;
+		 SYSTEM.VELOCITY[a].Z = 0;
+			       
+		 continue;
+	       }
+		       
+	       sigma = sqrt(CONTROLS.TEMPERATURE * Kb / SYSTEM.MASS[a] );
+
+	       // Do for x...
+		       
+	       x1    = double(rand())/double(RAND_MAX);
+	       x2    = double(rand())/double(RAND_MAX);
+		       
+	       if ( (x1 < 0.0 || x1 > 1.0) || ( x2 < 0.0 || x2 > 1.0 ) )
+	       {
+		 cout << "Bad random variable" << endl;
+		 exit_run(1);
+	       }
+		       
+	       y1 = sqrt(-2.0 * log(x1)) * cos(2.0 * M_PI * x2);
+	       y2 = sqrt(-2.0 * log(x1)) * sin(2.0 * M_PI * x2);
+	       y1 *= sigma;
+	       y2 *= sigma;		       
+
+	       if ( counter % 2 == 0 ) // Use either y2 or y1 here for maximum fun.
+		 SYSTEM.VELOCITY[a].X = y2; 
+	       else 
+		 SYSTEM.VELOCITY[a].X = y1;
+			
+	       counter++;
+			
+			
+	       // Do for y...
+		       
+	       x1    = double(rand())/double(RAND_MAX);
+	       x2    = double(rand())/double(RAND_MAX);
+		       
+	       if ( (x1 < 0.0 || x1 > 1.0) || ( x2 < 0.0 || x2 > 1.0 ) )
+	       {
+		 cout << "Bad random variable" << endl;
+		 exit_run(1);
+	       }
+		       
+	       y1 = sqrt(-2.0 * log(x1)) * cos(2.0 * M_PI * x2);
+	       y2 = sqrt(-2.0 * log(x1)) * sin(2.0 * M_PI * x2);
+	       y1 *= sigma;
+	       y2 *= sigma;		       
+
+	       if ( counter % 2 == 0 ) // Use either y2 or y1 here for maximum fun.
+		 SYSTEM.VELOCITY[a].Y = y2; 
+	       else 
+		 SYSTEM.VELOCITY[a].Y = y1;
+			
+	       counter++;	       
+			       
+			
+	       // Do for z...
+		       
+	       x1    = double(rand())/double(RAND_MAX);
+	       x2    = double(rand())/double(RAND_MAX);
+		       
+	       if ( (x1 < 0.0 || x1 > 1.0) || ( x2 < 0.0 || x2 > 1.0 ) )
+	       {
+		 cout << "Bad random variable" << endl;
+		 exit_run(1);
+	       }
+
+	       y1 = sqrt(-2.0 * log(x1)) * cos(2.0 * M_PI * x2);
+	       y2 = sqrt(-2.0 * log(x1)) * sin(2.0 * M_PI * x2);
+	       y1 *= sigma;
+	       y2 *= sigma;		       
+
+	       if ( counter % 2 == 0 ) // Use either y2 or y1 here for maximum fun.
+		 SYSTEM.VELOCITY[a].Z = y2; 
+	       else 
+		 SYSTEM.VELOCITY[a].Z = y1;
+
+	       counter++;				
+	}	       
+}
+
+void CONSTRAINT::CHECK_VEL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
+{
+	  XYZ    TEMP_VEL;
+	  double TEMP_MASS;
+		
+	  TEMP_VEL.X = 0;
+	  TEMP_VEL.Y = 0;
+	  TEMP_VEL.Z = 0;
+	  TEMP_MASS  = 0;
+
+	  for(int a=0; a<SYSTEM.ATOMS; a++)
+	  {
+		 // Don't account for frozen atoms
+			
+		 if((CONTROLS.FREEZE_IDX_START != -1) && ((a<CONTROLS.FREEZE_IDX_START) || (a>CONTROLS.FREEZE_IDX_STOP)))
+			continue;
+			
+		 TEMP_VEL.X += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].X;
+		 TEMP_VEL.Y += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Y;
+		 TEMP_VEL.Z += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Z;
+		 TEMP_MASS  += SYSTEM.MASS[a];
+	  }
+		
+	  // Check our velocity center of mass.. hopefully this is (or is very close to) zero
+		
+	  if(RANK==0)  
+		 cout	<< "	Initial velocity center of mass: (" 
+				<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.X/TEMP_MASS << ", " 
+				<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.Y/TEMP_MASS << ", " 
+				<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.Z/TEMP_MASS << ") "
+				<< endl;
+	  
+	  // In case it isn't, correct velocities to make it so: 
+		 
+	  for(int a=0; a<SYSTEM.ATOMS; a++)
+	  {
+		 // Don't account for frozen atoms
+			
+		 if((CONTROLS.FREEZE_IDX_START != -1) && ((a<CONTROLS.FREEZE_IDX_START) || (a>CONTROLS.FREEZE_IDX_STOP)))
+			continue;
+			
+		 SYSTEM.VELOCITY[a].X -= TEMP_VEL.X/TEMP_MASS;
+		 SYSTEM.VELOCITY[a].Y -= TEMP_VEL.Y/TEMP_MASS;
+		 SYSTEM.VELOCITY[a].Z -= TEMP_VEL.Z/TEMP_MASS;
+	  }
+
+	  TEMP_VEL.X = 0;
+	  TEMP_VEL.Y = 0;
+	  TEMP_VEL.Z = 0;
+	  TEMP_MASS  = 0;
+
+	  // Now run a sanity check to make sure the new velocity center of mass is ~0
+		
+	  for(int a=0; a<SYSTEM.ATOMS; a++)
+	  {
+		 // Don't account for frozen atoms
+			
+		 if((CONTROLS.FREEZE_IDX_START != -1) && ((a<CONTROLS.FREEZE_IDX_START) || (a>CONTROLS.FREEZE_IDX_STOP)))
+			continue;
+			
+		 TEMP_VEL.X += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].X;
+		 TEMP_VEL.Y += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Y;
+		 TEMP_VEL.Z += SYSTEM.MASS[a] * SYSTEM.VELOCITY[a].Z;
+		 TEMP_MASS  += SYSTEM.MASS[a];
+	  }
+		
+	  if(RANK==0)
+		 cout	<< "	Final   velocity center of mass: (" 
+				<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.X/TEMP_MASS << ", " 
+				<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.Y/TEMP_MASS << ", " 
+				<< setw(10) << fixed << setprecision(4) << right << TEMP_VEL.Z/TEMP_MASS << ") "
+				<< endl;
+}
+
+
 void CONSTRAINT::WRITE(ofstream &output)
 // Write parameters for restart.
 {

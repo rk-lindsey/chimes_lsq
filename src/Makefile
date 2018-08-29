@@ -58,7 +58,7 @@ CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C
+CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C
 CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h Cheby.h
 
 chimes_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
@@ -79,8 +79,8 @@ build_tests_lsq:
 # MAKE THE MD CODE
 ##################################
 
-CXX_MD_SRC=chimes_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C
-CXX_MD_HEADER=functions.h lmppath.h Fcut.h Cluster.h util.h Cheby.h
+CXX_MD_SRC=chimes_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C
+CXX_MD_HEADER=functions.h lmppath.h Fcut.h Cluster.h util.h Cheby.h # io_styles.h 
 
 FLAGLMP=-D LINK_LAMMPS
 LAMMPS_LIB=$(LAMMPSDIR)/src/liblammps.a

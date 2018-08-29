@@ -29,6 +29,8 @@
 
 #include<stdio.h>
 #include<iostream>
+#include<fstream>
+#include<iomanip>
 #include<math.h>
 #include<stdlib.h>
 #include<string.h>
@@ -58,21 +60,22 @@ using namespace std;
 
 
 // Maximum number of atom types and powers.
-#define MAX_ATOM_TYPES 10 
+
+#define MAX_ATOM_TYPES   10 
 #define MAX_ATOM_TYPES2 (MAX_ATOM_TYPES  * MAX_ATOM_TYPES)
 #define MAX_ATOM_TYPES3 (MAX_ATOM_TYPES2 * MAX_ATOM_TYPES) 
 #define MAX_ATOM_TYPES4 (MAX_ATOM_TYPES3 * MAX_ATOM_TYPES) 
 
 // Unit converters 
-static const double ke      = 332.0637157615209;	// Converter between electron units and Stillinger units for Charge*Charge.
-static const double Hartree = 627.50961; 			// 1 Hartree in kcal/mol.
-static const double Bohr    = 1.889725989 ;     // 1 Angstrom in Bohr.
-static const double Kb      = 0.001987; 			// Boltzmann constant in kcal/mol-K.
-static const double Tfs     = 48.888;   			// Internal time unit in fs.
-static const double GPa     = 6.9479;				// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
-static const double atm     = GPa*9869.23266716;    // stress conversion to atm (for LAMMPS).
-static const double GPa2atm = 9869.23266716;		// x_GPa * GPa2atm = x_atm
-static const double pi		= 3.14159265359;		
+static const double ke      = 332.0637157615209;// Converter between electron units and Stillinger units for Charge*Charge.
+static const double Hartree = 627.50961;	// 1 Hartree in kcal/mol.
+static const double Bohr    = 1.889725989;     // 1 Angstrom in Bohr.
+static const double Kb      = 0.001987;		// Boltzmann constant in kcal/mol-K.
+static const double Tfs     = 48.888;		// Internal time unit in fs.
+static const double GPa     = 6.9479;		// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
+static const double atm     = GPa*9869.23266716;// stress conversion to atm (for LAMMPS).
+static const double GPa2atm = 9869.23266716;	// x_GPa * GPa2atm = x_atm
+static const double pi      = 3.14159265359;		
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- general
 
@@ -80,21 +83,19 @@ extern string FULL_FILE_3B;	// The 4D PES for 3B FF
 extern string SCAN_FILE_3B;	// The 2D PES scans for 3B
 extern string SCAN_FILE_2B;	// The 2D PES scans for 2B
 
-extern	ofstream BAD_CONFIGS_1;	// Configs where r_ij < r_cut,in 
-extern  ofstream BAD_CONFIGS_2;	// Configs where r_ij < r_cut,in +d_penalty
-
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  
 extern int NPROCS;		// Number of processors
 extern int RANK;		// Index of current processor
 
 // Enumerated classes.
-enum class Cheby_trans 
-// Supported variable transformations.
-{
-  MORSE, INVRSE_R, NONE
-} ;
 
+enum class Cheby_trans	// Supported variable transformations.
+{
+	MORSE, 
+	INVRSE_R, 
+	NONE
+};
 
 // Include Chimes files here.
 
@@ -115,7 +116,8 @@ struct JOB_CONTROL
   bool   USE_OVERCOORD;		// Replaces if_overcoord... If true, calculate ReaxFF-like overcoordination term.
   bool   FIT_POVER;		// Replaces fit_pover... If true, find linear overcoordination parameter from least-squares fitting. -- this needs to be updated for new handling
   bool   USE_3B_CHEBY;		// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
-  bool   USE_4B_CHEBY;		//If true, calculate 4-Body Chebyshev interaction.
+  bool   USE_4B_CHEBY;		// If true, calculate 4-Body Chebyshev interaction.
+  vector<string> ATOMTYPES;	// A list of atom types		
         
 	
   ///////////////////////////////////////////////
@@ -129,7 +131,7 @@ struct JOB_CONTROL
   double PRESSURE;		// Introduced for NPT
   string ENSEMBLE;		// NVE, NPT, NVT
   bool   PLOT_PES;		// Plot out the potential energy surfaces? IF so, nothing else will be done.
-  bool   CHECK_FORCE ;      	// If true, numerically check forces from derivatives of energy.
+  bool   CHECK_FORCE;      	// If true, numerically check forces from derivatives of energy.
   bool   COMPARE_FORCE;		// Replaces if_read_force... If TRUE, read in read in a set of forces from a file for comparison with those computed by this code
 
   bool   SUBTRACT_FORCE;	// Read frame, compute forces based on parameter file, print out frame where FF forces have been subtracted from input forces
@@ -168,6 +170,7 @@ struct JOB_CONTROL
   // "Output control" 
 
   int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
+  string    TRAJ_FORMAT;		// .gen, .xyzf, or .lammps (currently)
   int    FREQ_BACKUP;       	// How often to write backup files for restart.
   bool   PRINT_VELOC;		// If true, write out the velocities 
   bool   RESTART;          	// If true, read a restart file.
@@ -268,8 +271,8 @@ struct XYZ_INT
 class FRAME
 {
 public:
-    int ATOMS;                 		// Just the parent atoms.
-    int ALL_ATOMS;          	   	// All atoms, including ghosts. 
+    	int ATOMS;             		// Just the parent atoms.
+    	int ALL_ATOMS;         	   	// All atoms, including ghosts. 
 	
 	int MY_ATOMS;			// Used for lammps linking. Specify how many atoms in SYS the process owns
 	int MY_ATOMS_START;		// Used for lammps linking. Specify what index along SYS starts the process' atoms
@@ -307,8 +310,8 @@ public:
 	vector<XYZ>	VELOCITY_ITER;
 
 	// Update ghost atom positions.
-	void update_ghost(int n_layers) ;
-	inline int get_atomtype_idx(int atom) ;
+	void update_ghost(int n_layers);
+	inline int get_atomtype_idx(int atom);
 
 };
 
@@ -457,7 +460,6 @@ class CONSTRAINT
 		double BAROS_FORCE_0;
 		double BAROS_VELOC_0;	
 		
-
 		//Barostat variables
 
 		double BAROS_SCALE;
@@ -491,6 +493,11 @@ class CONSTRAINT
 		void READ(ifstream &STREAM);   // Read variables from file.
 
 		void INITIALIZE          (string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS); 
+		
+		void INIT_VEL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Use box Muller to initialize velocities
+		void CHECK_VEL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS); //Test/fix velocity center of mass
+		
+		
 		void UPDATE_COORDS       (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
 		void UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
 		void UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
@@ -514,11 +521,11 @@ public:
 	void READ(ifstream &fin);
 	THERMO_AVG() {
 	  // Zero the initial value of all sums.
-	  TEMP_SUM = 0.0 ;
-	  PRESS_SUM = 0.0 ;
-	  STRESS_TENSOR_SUM.X = 0.0 ;
-	  STRESS_TENSOR_SUM.Y = 0.0 ;
-	  STRESS_TENSOR_SUM.Z = 0.0 ;
+	  TEMP_SUM = 0.0;
+	  PRESS_SUM = 0.0;
+	  STRESS_TENSOR_SUM.X = 0.0;
+	  STRESS_TENSOR_SUM.Y = 0.0;
+	  STRESS_TENSOR_SUM.Z = 0.0;
 	}
 };
 
@@ -542,10 +549,10 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 //
 //////////////////////////////////////////
 
-void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, 
-						FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, 
-						const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP,
-						NEIGHBORS &NEIGHBOR_LIST) ;
+void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, 
+
+const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST);
+
 void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
 
 void SubtractEwaldForces (FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
@@ -562,10 +569,7 @@ void ZCalc_Ewald_Deriv   (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, 
 //
 //////////////////////////////////////////
 
-void   ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-				 map<string,int> &PAIR_MAP, vector<int> &INT_PAIR_MAP,
-				 CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, 
-				 NEIGHBORS & NEIGHBOR_LIST);
+void   ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> &PAIR_MAP, vector<int> &INT_PAIR_MAP, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS,  NEIGHBORS & NEIGHBOR_LIST);
 void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
 
 
@@ -597,11 +601,11 @@ inline double get_dist(const FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 
 inline int FRAME::get_atomtype_idx(int atom)
 {
-#ifndef LINK_LAMMPS
-  return(ATOMTYPE_IDX[atom]) ;
-#else
-  ATOMTYPE_IDX[a1]-1;
-#endif
+	#ifndef LINK_LAMMPS
+  		return(ATOMTYPE_IDX[atom]);
+	#else
+  		ATOMTYPE_IDX[a1]-1;
+	#endif
 }
 
 
@@ -611,28 +615,21 @@ inline int FRAME::get_atomtype_idx(int atom)
 //
 //////////////////////////////////////////
 
-double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);					// Overloaded.. compute differentely if for main or new velocities
-double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);		// Overloaded.. compute differentely if for main or new velocities
+double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);			// Overloaded.. compute differentely if for main or new velocities
+double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);	// Overloaded.. compute differentely if for main or new velocities
 
 void build_layers      (FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
-void build_real_replicates(FRAME &SYSTEM, const JOB_CONTROL &CONTROLS) ;
+void build_real_replicates(FRAME &SYSTEM, const JOB_CONTROL &CONTROLS);
 
-void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
-								CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
-								vector<int> &INT_PAIR_MAP,
-								NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV) ;
-void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, 
-						map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, 
-						CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST) ;
-void build_int_pair_map(int natmtyp, const vector<string> &atomtype, 
-								const vector<int> &atomtype_idx,
-								map<string,int> &pair_map, vector<int> &int_pair_map) ;
-void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type) ;
-void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<string>& TMP_ATOMTYPE, vector<PAIR_FF> &FF_2BODY, int NATMTYP) ;
+void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
+void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST);
+void build_int_pair_map(int natmtyp, const vector<string> &atomtype, const vector<int> &atomtype_idx, map<string,int> &pair_map, vector<int> &int_pair_map);
+void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type);
+void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<string>& TMP_ATOMTYPE, vector<PAIR_FF> &FF_2BODY, int NATMTYP);
+
 #ifdef USE_MPI
-void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
-void sum_forces         (vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
+	void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
+	void sum_forces         (vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
 #endif
 
 #endif
-
