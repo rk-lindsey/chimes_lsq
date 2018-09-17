@@ -17,8 +17,12 @@ if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
 	 source /usr/local/tools/dotkit/init.sh
 	 use ic-17.0.174
     use mvapich2-intel-2.2
-else
+    RUN_JOB="srun -n $NP"
+elsif [ "$SYS_TYPE" == "toss_3_x86_64_ib" ] 
     module load intel impi
+    RUN_JOB="srun -n $NP"
+else
+    RUN_JOB=""
 fi
 
 make -f Makefile-TS-MD chimes_md;  
@@ -106,7 +110,7 @@ do
 		../chimes_md < run_md.in > run_md.out
 			
 	else
-		srun -n $NP ../chimes_md < run_md.in > run_md.out
+		$RUN_JOB ../chimes_md < run_md.in > run_md.out
 	fi
 	
 	cp *.* current_output
