@@ -39,6 +39,7 @@ CXX=mpicxx  -std=c++11  -O3 -D USE_MPI
 #CXX=icc -std=c++11 -g				# Serial, for debugging
 #CXX=icc -std=c++11 -O3
 #CXX=g++ -std=c++11 -g			# Serial, let compiler optimize to a very high level (see also -O2)
+#CXX=g++ -std=c++11 -g -Wall			# Serial, let compiler optimize to a very high level (see also -O2)
 #CXX=g++ -std=c++11 -O3			# Serial, let compiler optimize to a very high level (see also -O2)
 #
 # Below: Other debugging/optimiazation options
@@ -53,7 +54,7 @@ CXX=mpicxx  -std=c++11  -O3 -D USE_MPI
 ##################################
 
 
-CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C
+CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C
 CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h Cheby.h
 
 chimes_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
