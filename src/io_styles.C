@@ -49,19 +49,12 @@ WRITE_TRAJ::~WRITE_TRAJ()
 {
 	TRAJFILE.close();
 	
-	cout << "* Closed trajfile " << FILENAME << endl;
-	
 	if (TRAJFRCF.is_open())
-	{
 		TRAJFRCF.close();
-		cout << "* Closed associated file forceout.txt" << endl;
-	}
 	
 	if (TRAJFRCL.is_open())
-	{
 		TRAJFRCL.close();
-		cout << "* Closed associated file forceout-labeled.txt" << endl;
-	}	
+
 }
 
 // Initializer called by constructor
@@ -75,26 +68,29 @@ void WRITE_TRAJ::INIT(string EXTENSION_STR, string CONTENTS_STR)
 	
 	TRAJFILE.open(FILENAME.data());
 
-	if (TRAJFILE.is_open())
-		cout << "** Opened trajfile " << FILENAME << " for writing." << endl;
-	else
-		cout << "** Failed to open trajfile " << FILENAME << " for writing!" << endl;	
+	if (!TRAJFILE.is_open())
+	{
+		cout << "Failed to open trajfile " << FILENAME << " for writing!" << endl;	
+		exit_run(0);
+	}
 
 	if (EXTENSION == TRAJ_EXT::XYZF_FORCE)
 	{ 
 		TRAJFRCL.open("forceout-labeled.txt");
 		
-		if (TRAJFRCL.is_open())
-			cout << "* Opened associated file forceout-labeled.txt for writing." << endl;
-		else
-			cout << "* Failed to open associated file forceout-labeled.txt for writing!" << endl;
+		if (!TRAJFRCL.is_open())
+		{
+			cout << " Failed to open associated file forceout-labeled.txt for writing!" << endl;
+			exit_run(0);
+		}
 		
 		TRAJFRCF.open("forceout.txt");
 		
-		if (TRAJFRCL.is_open())
-			cout << "* Opened associated file forceout.txt for writing." << endl;
-		else
-			cout << "* Failed to open associated file forceout.txt for writing!" << endl;		
+		if (!TRAJFRCL.is_open())
+		{
+			cout << " Failed to open associated file forceout.txt for writing!" << endl;	
+			exit_run(0);
+		}	
 	}
 }
 
@@ -116,9 +112,6 @@ void WRITE_TRAJ::SET_EXTENSION(string EXTENSION_STR)
 		cout << "ERROR: File type .pdb has not been implemented yet." << endl;
 		exit_run(0);
 	}
-	
-	cout << "* Set file extension: " << RETURN_EXTENSION() << endl;
-		
 }
 
 void WRITE_TRAJ::SET_CONTENTS(string CONTENTS_STR)
@@ -131,8 +124,6 @@ void WRITE_TRAJ::SET_CONTENTS(string CONTENTS_STR)
 		CONTENTS = TRAJ_TYPE::BAD_2;
 	if(CONTENTS_STR == "FORCE")
 		CONTENTS = TRAJ_TYPE::FORCE;
-		
-	cout << "* Set file contents: " << RETURN_CONTENTS() << endl;
 }
 
 void WRITE_TRAJ::SET_FILENAME()
@@ -177,8 +168,6 @@ void WRITE_TRAJ::SET_FILENAME()
 			cout << "Error: Unknown extension type " << RETURN_EXTENSION() << " In WRITE_TRAJ::SET_FILENAME()" << endl;
 			exit(1);		
 	}
-
-	cout << "* Set filename " << FILENAME << endl;
 }
 
 // Set up enum-to-string mapping functions
@@ -277,8 +266,6 @@ void WRITE_TRAJ::PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 		called_before = true;
 	}
 	
-	//cout << "* Printing for extension " << RETURN_EXTENSION() << " and type " << RETURN_CONTENTS() << endl;
-
 	switch (EXTENSION)
 	{
 		case TRAJ_EXT::GEN:
@@ -295,7 +282,7 @@ void WRITE_TRAJ::PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 			break;
 		case TRAJ_EXT::PDB:
 			cout << "Error in WRITE_TRAJ::PRINT_FRAME: PDB not implemented yet!" << endl;
-			//PRINT_FRAME_PDB(CONTROLS,SYSTEM);
+			exit_run(0);
 			break;	
 		default:
 			cout << "Error in WRITE_TRAJ::PRINT_FRAME" << endl;
