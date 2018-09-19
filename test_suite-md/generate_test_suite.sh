@@ -1,21 +1,19 @@
 #! /usr/bin/bash
 
-NP=36
-
 ########################################
 # Define tests within the test suite
 ########################################
 
 # Tests specifically for the MD code
 
-#MD_TESTS[0]="h2o-2bcheby"
+MD_TESTS[0]="h2o-2bcheby"
 #MD_TESTS[1]="h2o-3bcheby" 
 #MD_TESTS[2]="h2o-splines"
 #MD_TESTS[3]="generic-lj"
 #MD_TESTS[4]="h2o-2bcheby-genvel"
 #MD_TESTS[5]="h2o-2bcheby-numpress"
 #MD_TESTS[6]="h2o-2bcheby-velscale"
-MD_TESTS[7]="h2o-4bcheby"
+#MD_TESTS[7]="h2o-4bcheby"
 #MD_TESTS[8]="h2o-4bcheby-numpress"
 
 # Tests for compatibility between LSQ C++/python codes with the MD code
@@ -25,7 +23,7 @@ TAG="verify-lsq-forces-"
 #LSQ_TESTS[1]="h2o-2bcheby"
 #LSQ_TESTS[2]="h2o-3bcheby"
 #LSQ_TESTS[3]="h2o-splines"
-LSQ_TESTS[4]="h2o-4bcheby"
+#LSQ_TESTS[4]="h2o-4bcheby"
 #LSQ_TESTS[5]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
 #LSQ_TESTS[6]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
 
@@ -39,14 +37,11 @@ echo " "
 cd ../src
 rm -rf *o *dSYM chimes_md
 
-if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
-	 source /usr/local/tools/dotkit/init.sh
-	 use ic-17.0.174
-    use mvapich2-intel-2.2
-else
-    module load intel impi
-fi
 
+# Common function for test script initialization.
+source ../src/bash/init_vars.sh
+init_test_vars
+echo "NP = $NP"
 
 make -f Makefile-TS-MD chimes_md
 rm -f ../test_suite-lsq/chimes_md;  mv chimes_md  ../test_suite-md/
