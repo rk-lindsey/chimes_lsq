@@ -197,6 +197,7 @@ int main(int argc, char* argv[])
 		
   double dens_mol;
   double dens_mass;
+  double TEMP_MASS = 0.0;
 	
   string  LINE;
   string  TEMP_STR;
@@ -792,8 +793,6 @@ FF_SETUP_1:
   // Print some info on density, etc. 
   ////////////////////////////////////////////////////////////  
 
-  double TEMP_MASS = 0.0;
-	
   for(int a=0; a<SYSTEM.ATOMS; a++)
 	 TEMP_MASS  += SYSTEM.MASS[a];
 
@@ -3005,10 +3004,6 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  {
 		  	// 2-body interactions use a separate data structure, so we need 
 			// to handle this differently than the manybody part
-			
-			double TMP_STEEPNESS = 0.0;
-		  	double TMP_OFFSET    = 0.0;
-			double TMP_HEIGHT    = 0.0;
 			
 			FF_2BODY[0].FORCE_CUTOFF.parse_input(LINE);
 			FF_2BODY[0].FORCE_CUTOFF.BODIEDNESS = 2;

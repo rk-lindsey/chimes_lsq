@@ -539,7 +539,6 @@ int main(int argc, char* argv[])
 	#endif
 		
 
-	int 	FRAME_MATRX_SIZE; 
 	double 	NEIGHBOR_PADDING = 0.3;
 
 	int istart, iend ;

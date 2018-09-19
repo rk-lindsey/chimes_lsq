@@ -31,7 +31,7 @@ using namespace std;
 
 // Constructor/deconstructor
 
-WRITE_TRAJ::WRITE_TRAJ(){};
+WRITE_TRAJ::WRITE_TRAJ(){}
 
 WRITE_TRAJ::WRITE_TRAJ(string CONTENTS_STR) // Default extension is .xyzf
 {
@@ -130,43 +130,43 @@ void WRITE_TRAJ::SET_FILENAME()
 {
 	switch (CONTENTS)
 	{
-		case TRAJ_TYPE::STANDARD:
-			FILENAME = "traj";
-			break;
-		case TRAJ_TYPE::BAD_1:
-			FILENAME = "traj_bad_r.lt.rin";
-			break;
-		case TRAJ_TYPE::BAD_2:
-			FILENAME = "traj_bad_r.lt.rin+dp";
-			break;
-		case TRAJ_TYPE::FORCE:
-			FILENAME = "forceout";
-			break;			
-		default:
-			cout << "Error: Unknown traj type " << RETURN_CONTENTS() << " In WRITE_TRAJ::SET_FILENAME()" << endl;
-			exit(1);		
+	case TRAJ_TYPE::STANDARD:
+		FILENAME = "traj";
+		break;
+	case TRAJ_TYPE::BAD_1:
+		FILENAME = "traj_bad_r.lt.rin";
+		break;
+	case TRAJ_TYPE::BAD_2:
+		FILENAME = "traj_bad_r.lt.rin+dp";
+		break;
+	case TRAJ_TYPE::FORCE:
+		FILENAME = "forceout";
+		break;			
+	default:
+		cout << "Error: Unknown traj type " << RETURN_CONTENTS() << " In WRITE_TRAJ::SET_FILENAME()" << endl;
+		exit(1);		
 	}
 	
 	switch (EXTENSION)
 	{
-		case TRAJ_EXT::GEN:
-			FILENAME += ".gen";
-			break;
-		case TRAJ_EXT::XYZF:
-			FILENAME += ".xyzf";
-			break;
-		case TRAJ_EXT::XYZF_FORCE:
-			FILENAME += ".xyzf";
-			break;			
-		case TRAJ_EXT::LAMMPSTRJ:
-			FILENAME += ".lammpstrj";
-			break;
-		case TRAJ_EXT::PDB:
-			FILENAME += ".pdb";
-			break;	
-		default:
-			cout << "Error: Unknown extension type " << RETURN_EXTENSION() << " In WRITE_TRAJ::SET_FILENAME()" << endl;
-			exit(1);		
+	case TRAJ_EXT::GEN:
+		FILENAME += ".gen";
+		break;
+	case TRAJ_EXT::XYZF:
+		FILENAME += ".xyzf";
+		break;
+	case TRAJ_EXT::XYZF_FORCE:
+		FILENAME += ".xyzf";
+		break;			
+	case TRAJ_EXT::LAMMPSTRJ:
+		FILENAME += ".lammpstrj";
+		break;
+	case TRAJ_EXT::PDB:
+		FILENAME += ".pdb";
+		break;	
+	default:
+		cout << "Error: Unknown extension type " << RETURN_EXTENSION() << " In WRITE_TRAJ::SET_FILENAME()" << endl;
+		exit(1);		
 	}
 }
 
@@ -232,10 +232,8 @@ string WRITE_TRAJ::RETURN_EXTENSION()
 void WRITE_TRAJ::PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 {
 
-	static bool called_before = false;
-	
-	if (!called_before)
-	{
+  if ( ATOMTYPS.size() == 0 ) 
+  {
 		bool FOUND = false;
 		
 		for (int i=0; i<SYSTEM.ATOMS; i++) 
@@ -263,31 +261,30 @@ void WRITE_TRAJ::PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 			exit(0);
 		}
 		
-		called_before = true;
-	}
+  }
 	
-	switch (EXTENSION)
-	{
-		case TRAJ_EXT::GEN:
-			PRINT_FRAME_GEN(CONTROLS,SYSTEM);
-			break;
-		case TRAJ_EXT::XYZF:
-			PRINT_FRAME_XYZF(CONTROLS,SYSTEM);
-			break;
-		case TRAJ_EXT::XYZF_FORCE:
-			PRINT_FRAME_XYZF_FORCE(CONTROLS,SYSTEM);
-			break;			
-		case TRAJ_EXT::LAMMPSTRJ:
-			PRINT_FRAME_LAMMPSTRJ(CONTROLS,SYSTEM);
-			break;
-		case TRAJ_EXT::PDB:
-			cout << "Error in WRITE_TRAJ::PRINT_FRAME: PDB not implemented yet!" << endl;
-			exit_run(0);
-			break;	
-		default:
-			cout << "Error in WRITE_TRAJ::PRINT_FRAME" << endl;
-			exit(1);	
-	}
+  switch (EXTENSION)
+  {
+  case TRAJ_EXT::GEN:
+		PRINT_FRAME_GEN(CONTROLS,SYSTEM);
+		break;
+  case TRAJ_EXT::XYZF:
+		PRINT_FRAME_XYZF(CONTROLS,SYSTEM);
+		break;
+  case TRAJ_EXT::XYZF_FORCE:
+		PRINT_FRAME_XYZF_FORCE(CONTROLS,SYSTEM);
+		break;			
+  case TRAJ_EXT::LAMMPSTRJ:
+		PRINT_FRAME_LAMMPSTRJ(CONTROLS,SYSTEM);
+		break;
+  case TRAJ_EXT::PDB:
+		cout << "Error in WRITE_TRAJ::PRINT_FRAME: PDB not implemented yet!" << endl;
+		exit_run(0);
+		break;	
+  default:
+		cout << "Error in WRITE_TRAJ::PRINT_FRAME" << endl;
+		exit(1);	
+  }
 
 }
 
