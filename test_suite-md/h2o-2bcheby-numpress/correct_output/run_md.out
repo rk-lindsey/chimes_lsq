@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 1 processor(s).
+Code compiled in MPI mode. Will run on 36 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357
@@ -13,9 +13,9 @@ Reading the simulation control input file...
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: NUMERICAL
 	# WRPCRDS #: false
-	# FRQDFTB #: 20
+	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
-		... printing 50 frames. 
+		... printing       50 frames. 
 	# FRQENER #: 10
 	# PRNTFRC #: false
    ...read complete.
@@ -24,9 +24,9 @@ Setting up the data objects...
    ...setup complete
 
 Reading initial coordinates and forces...
-	...Read the following coordinate file extension: xyz
+     ...Read the following coordinate file extension: xyz
    ...Read the following number of atoms: 96
-	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+     ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyz
@@ -97,6 +97,8 @@ Atom properties:
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 	Overbonding contributions will be considered.
 		p-over will be read from fit parameters.
@@ -165,7 +167,7 @@ Initializing the neighbor list...
 NEIGHBOR LIST MAX CUTOFF IS: 6.00000
 USING PADDING: 0.300
 
-Generating fast maps 
+Generating fast maps... 
 	Pair maps:
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
@@ -183,7 +185,7 @@ Ewald parameters:
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
-	K-space accuracy estimate = 0.00000086798168
+	K-space accuracy estimate = 0.0000008680
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
@@ -202,7 +204,7 @@ RANK: 0 UPDATING ON STEP: 79, WITH PADDING: 0.423
       80     10.00       4.8937762     -54.7043357     -49.8105595          1659.2     11.49448224    -51.1792629
       90     11.25       5.0643952     -54.4744915     -49.4100963          1717.1     13.65962831    -51.1785912
 RANK: 0 UPDATING ON STEP: 94, WITH PADDING: 0.480
-     100     12.50       5.6338815     -54.5940536     -48.9601722          1910.1     13.71147554    -51.1790546
+     100     12.50       5.6338815     -54.5940536     -48.9601722          1910.1     13.71147553    -51.1790546
 RANK: 0 UPDATING ON STEP: 109, WITH PADDING: 0.517
      110     13.75       6.0506527     -54.5036708     -48.4530181          2051.4     12.32813501    -51.1790552
      120     15.00       6.0448491     -53.9790998     -47.9342507          2049.5     11.00035771    -51.1785420
@@ -301,7 +303,7 @@ RANK: 0 UPDATING ON STEP: 681, WITH PADDING: 0.522
      690     86.25       6.7259604     -53.1491254     -46.4231650          2280.4     10.84364838    -51.1789116
 RANK: 0 UPDATING ON STEP: 697, WITH PADDING: 0.515
      700     87.50       6.3181203     -52.7344223     -46.4163020          2142.1     10.18975658    -51.1787875
-     710     88.75       5.8906867     -52.3135004     -46.4228137          1997.2     10.54671933    -51.1783065
+     710     88.75       5.8906867     -52.3135004     -46.4228137          1997.2     10.54671934    -51.1783065
 RANK: 0 UPDATING ON STEP: 713, WITH PADDING: 0.511
      720     90.00       5.9672541     -52.3982590     -46.4310049          2023.2     10.43179107    -51.1784682
 RANK: 0 UPDATING ON STEP: 727, WITH PADDING: 0.576
@@ -319,7 +321,7 @@ RANK: 0 UPDATING ON STEP: 789, WITH PADDING: 0.699
      800    100.00       6.2160805     -53.1095339     -46.8934534          2107.5     10.98211466    -51.1787573
 RANK: 0 UPDATING ON STEP: 807, WITH PADDING: 0.643
      810    101.25       6.2223770     -53.2275621     -47.0051850          2109.7      9.61753713    -51.1787059
-     820    102.50       5.9691015     -53.0930380     -47.1239365          2023.8     10.96853175    -51.1785159
+     820    102.50       5.9691015     -53.0930380     -47.1239365          2023.8     10.96853176    -51.1785159
 RANK: 0 UPDATING ON STEP: 823, WITH PADDING: 0.634
      830    103.75       5.8390149     -53.0794490     -47.2404341          1979.7     12.75922989    -51.1782430
      840    105.00       6.1475891     -53.5068871     -47.3592980          2084.3     12.88039727    -51.1786982
@@ -334,7 +336,7 @@ RANK: 0 UPDATING ON STEP: 873, WITH PADDING: 0.553
 RANK: 0 UPDATING ON STEP: 890, WITH PADDING: 0.495
      900    112.50       5.4440996     -53.5703918     -48.1262921          1845.8      9.63270303    -51.1788969
 RANK: 0 UPDATING ON STEP: 908, WITH PADDING: 0.452
-     910    113.75       5.3717627     -53.5862816     -48.2145188          1821.3      9.77669886    -51.1787653
+     910    113.75       5.3717627     -53.5862816     -48.2145188          1821.3      9.77669885    -51.1787653
      920    115.00       5.2308494     -53.5163032     -48.2854538          1773.5     10.80135839    -51.1785107
 RANK: 0 UPDATING ON STEP: 924, WITH PADDING: 0.443
      930    116.25       5.4222064     -53.7610302     -48.3388238          1838.4     11.34344027    -51.1786621
@@ -351,7 +353,7 @@ RANK: 0 UPDATING ON STEP: 984, WITH PADDING: 0.518
     1000    125.00       5.1567875     -53.6493068     -48.4925192          1748.4      9.63502832    -51.1785892
 END SIMULATION
 	Average temperature over run = 1996.7272 K
-	Average pressure    over run = 11.6670 GPa
+	Average pressure    over run = 11.8552 GPa
 	Pressures from diagonal stress tensors over run: 11.8552
 	Average diagonal stress tensors over run: 
 		sigma_xx: 13.1763 GPa

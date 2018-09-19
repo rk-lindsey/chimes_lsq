@@ -9,24 +9,27 @@ Reading the simulation control input file...
 	# NLAYERS #: 1
 	# PRMFILE #: params.3b.nodate.txt
 	# CRDFILE #: input.xyz
+	# TRAJEXT #: GEN
 	# VELINIT #: READ ... reading velocities from coordinate file
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
 	# WRPCRDS #: false
-	# FRQDFTB #: 20
+	# FRQTRAJ #: 20
+		... printing every 2.5 fs, 
+		... printing       50 frames. 
+	# FRQENER #: 10
+	# PRNTFRC #: true ...and will be printed every 20 frames.
 		... printing every 2.5 fs, 
 		... printing 50 frames. 
-	# FRQENER #: 10
-	# PRNTFRC #: false
    ...read complete.
 
 Setting up the data objects...
    ...setup complete
 
 Reading initial coordinates and forces...
-	...Read the following coordinate file extension: xyz
+     ...Read the following coordinate file extension: xyz
    ...Read the following number of atoms: 96
-	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+     ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyz
@@ -111,6 +114,8 @@ Atom properties:
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
 	Using the following fcut style for 3B Chebyshev interactions: CUBIC
 		...with steepness and offsets of: 2.0000 0.0000
 	Ewald summations will be used and charges will be taken from fit values
@@ -164,51 +169,52 @@ Force field summary:
 		8 5.6414e-01
 		9 3.0770e-01
 
+
 	The following unique triplets of atoms have been identified:
 
     Cluster index       : 0
     Atoms in the cluster: O O O 
     Pairs in the cluster: OO OO OO 
     Number of unique sets of powers: 2 (4 total)...
-		     index  |  powers  |  equiv index  |  param index   | parameter 
+		     index  |  powers  |  equiv index  |  param index  | parameter 
 		   ----------------------------------------------------
-		      0       0   1   1         0               0       55.3868
-		      1       1   0   1         0               0       55.3868
-		      2       1   1   0         0               0       55.3868
-		      3       1   1   1         3               1       0.0186
+		      0       0   1   1         0               0        55.3868
+		      1       1   0   1         0               0        55.3868
+		      2       1   1   0         0               0        55.3868
+		      3       1   1   1         3               1        0.0186
 
     Cluster index       : 1
     Atoms in the cluster: H O O 
     Pairs in the cluster: OH OH OO 
     Number of unique sets of powers: 3 (4 total)...
-		     index  |  powers  |  equiv index  |  param index   | parameter 
+		     index  |  powers  |  equiv index  |  param index  | parameter 
 		   ----------------------------------------------------
-		      0       0   1   1         0               0       -372.5592
-		      1       1   0   1         0               0       -372.5592
-		      2       1   1   0         2               1       1171.4165
-		      3       1   1   1         3               2       1492.3809
+		      0       0   1   1         0               0        -372.5592
+		      1       1   0   1         0               0        -372.5592
+		      2       1   1   0         2               1        1171.4165
+		      3       1   1   1         3               2        1492.3809
 
     Cluster index       : 2
     Atoms in the cluster: H H O 
     Pairs in the cluster: HH OH OH 
     Number of unique sets of powers: 3 (4 total)...
-		     index  |  powers  |  equiv index  |  param index   | parameter 
+		     index  |  powers  |  equiv index  |  param index  | parameter 
 		   ----------------------------------------------------
-		      0       0   1   1         0               0       57.3174
-		      1       1   0   1         1               1       -91.4834
-		      2       1   1   0         1               1       -91.4834
-		      3       1   1   1         3               2       -223.9685
+		      0       0   1   1         0               0        57.3174
+		      1       1   0   1         1               1        -91.4834
+		      2       1   1   0         1               1        -91.4834
+		      3       1   1   1         3               2        -223.9685
 
     Cluster index       : 3
     Atoms in the cluster: H H H 
     Pairs in the cluster: HH HH HH 
     Number of unique sets of powers: 2 (4 total)...
-		     index  |  powers  |  equiv index  |  param index   | parameter 
+		     index  |  powers  |  equiv index  |  param index  | parameter 
 		   ----------------------------------------------------
-		      0       0   1   1         0               0       -4.7590
-		      1       1   0   1         0               0       -4.7590
-		      2       1   1   0         0               0       -4.7590
-		      3       1   1   1         3               1       68.8044
+		      0       0   1   1         0               0        -4.7590
+		      1       1   0   1         0               0        -4.7590
+		      2       1   1   0         0               0        -4.7590
+		      3       1   1   1         3               1        68.8044
 
 	Fitted charges read from parameter file:
 		OO 0.2667 (88.5707)
@@ -221,7 +227,7 @@ NEIGHBOR LIST MAX CUTOFF IS: 6.00000
 USING PADDING: 0.300
 Number of 3-body interactions = 182650
 
-Generating fast maps 
+Generating fast maps... 
 	Pair maps:
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
@@ -251,7 +257,7 @@ Ewald parameters:
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
-	K-space accuracy estimate = 0.00000086798168
+	K-space accuracy estimate = 0.0000008680
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
@@ -477,7 +483,7 @@ RANK: 0 UPDATING ON STEP: 964, WITH PADDING: 0.509
      980    122.50       5.9111983       1.4673636       7.3785619          2004.2     38.94433943      4.9426937
 Number of 3-body interactions = 218231
 RANK: 0 UPDATING ON STEP: 981, WITH PADDING: 0.486
-     990    123.75       5.8000176       1.4985454       7.2985630          1966.5     38.24599628      4.9426558
+     990    123.75       5.8000176       1.4985454       7.2985630          1966.5     38.24599627      4.9426558
 Number of 3-body interactions = 223559
 RANK: 0 UPDATING ON STEP: 996, WITH PADDING: 0.509
     1000    125.00       5.3270548       1.9006311       7.2276859          1806.1     36.97433888      4.9433397

@@ -9,13 +9,14 @@ Reading the simulation control input file...
 	# NLAYERS #: 1
 	# PRMFILE #: params.cheby.txt
 	# CRDFILE #: input.xyz
+	# TRAJEXT #: GEN
 	# VELINIT #: READ ... reading velocities from coordinate file
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
 	# WRPCRDS #: false
-	# FRQDFTB #: 20
+	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
-		... printing 50 frames. 
+		... printing       50 frames. 
 	# FRQENER #: 10
 	# PRNTFRC #: false
    ...read complete.
@@ -24,9 +25,9 @@ Setting up the data objects...
    ...setup complete
 
 Reading initial coordinates and forces...
-	...Read the following coordinate file extension: xyz
+     ...Read the following coordinate file extension: xyz
    ...Read the following number of atoms: 96
-	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+     ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyz
@@ -97,6 +98,8 @@ Atom properties:
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 	Overbonding contributions will be considered.
 		p-over will be read from fit parameters.
@@ -165,7 +168,7 @@ Initializing the neighbor list...
 NEIGHBOR LIST MAX CUTOFF IS: 6.00000
 USING PADDING: 0.300
 
-Generating fast maps 
+Generating fast maps... 
 	Pair maps:
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
@@ -183,7 +186,7 @@ Ewald parameters:
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
-	K-space accuracy estimate = 0.00000086798168
+	K-space accuracy estimate = 0.0000008680
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
@@ -311,7 +314,7 @@ RANK: 0 UPDATING ON STEP: 744, WITH PADDING: 0.524
      750     93.75       6.3342494     -52.8318729     -46.4976235          2147.6     14.01981288    -51.1787738
      760     95.00       6.2527844     -52.7986669     -46.5458825          2120.0     15.82633648    -51.1781462
 RANK: 0 UPDATING ON STEP: 760, WITH PADDING: 0.510
-     770     96.25       6.6567378     -53.2693543     -46.6126165          2256.9     15.87706993    -51.1797311
+     770     96.25       6.6567378     -53.2693543     -46.6126165          2256.9     15.87706992    -51.1797311
 RANK: 0 UPDATING ON STEP: 774, WITH PADDING: 0.674
      780     97.50       6.2377106     -52.9371515     -46.6994409          2114.9     15.44542281    -51.1785282
 RANK: 0 UPDATING ON STEP: 789, WITH PADDING: 0.699
@@ -319,7 +322,7 @@ RANK: 0 UPDATING ON STEP: 789, WITH PADDING: 0.699
      800    100.00       6.2160805     -53.1095339     -46.8934534          2107.5     10.98107099    -51.1787573
 RANK: 0 UPDATING ON STEP: 807, WITH PADDING: 0.643
      810    101.25       6.2223770     -53.2275621     -47.0051850          2109.7      9.61612778    -51.1787059
-     820    102.50       5.9691015     -53.0930380     -47.1239365          2023.8     10.96746696    -51.1785159
+     820    102.50       5.9691015     -53.0930380     -47.1239365          2023.8     10.96746697    -51.1785159
 RANK: 0 UPDATING ON STEP: 823, WITH PADDING: 0.634
      830    103.75       5.8390149     -53.0794490     -47.2404341          1979.7     12.75818641    -51.1782430
      840    105.00       6.1475891     -53.5068871     -47.3592980          2084.3     12.87786469    -51.1786982
@@ -340,11 +343,11 @@ RANK: 0 UPDATING ON STEP: 924, WITH PADDING: 0.443
      930    116.25       5.4222064     -53.7610302     -48.3388238          1838.4     11.34276313    -51.1786621
 RANK: 0 UPDATING ON STEP: 938, WITH PADDING: 0.505
      940    117.50       5.7813117     -54.1637640     -48.3824522          1960.1     11.84450070    -51.1793725
-     950    118.75       5.6636272     -54.0842868     -48.4206596          1920.2     12.94040224    -51.1787220
+     950    118.75       5.6636272     -54.0842867     -48.4206596          1920.2     12.94040224    -51.1787220
 RANK: 0 UPDATING ON STEP: 954, WITH PADDING: 0.488
      960    120.00       5.7210076     -54.1738516     -48.4528440          1939.7     13.45683049    -51.1790875
 RANK: 0 UPDATING ON STEP: 969, WITH PADDING: 0.516
-     970    121.25       5.6872247     -54.1666769     -48.4794522          1928.2     12.94870093    -51.1790971
+     970    121.25       5.6872247     -54.1666769     -48.4794522          1928.2     12.94870092    -51.1790971
      980    122.50       5.4338726     -53.9318132     -48.4979406          1842.3     12.06318993    -51.1787084
 RANK: 0 UPDATING ON STEP: 984, WITH PADDING: 0.518
      990    123.75       5.3242232     -53.8278387     -48.5036156          1805.2     10.90596291    -51.1788864

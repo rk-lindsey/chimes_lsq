@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 1 processor(s).
+Code compiled in MPI mode. Will run on 36 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357
@@ -13,9 +13,9 @@ Reading the simulation control input file...
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
 	# WRPCRDS #: false
-	# FRQDFTB #: 20
+	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
-		... printing 50 frames. 
+		... printing       50 frames. 
 	# FRQENER #: 10
 	# PRNTFRC #: false
    ...read complete.
@@ -24,9 +24,9 @@ Setting up the data objects...
    ...setup complete
 
 Reading initial coordinates and forces...
-	...Read the following coordinate file extension: xyzf
+     ...Read the following coordinate file extension: xyzf
    ...Read the following number of atoms: 96
-	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+     ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyzf
@@ -98,6 +98,8 @@ Atom properties:
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 	Overbonding contributions will be considered.
 		p-over will be read from fit parameters.
@@ -166,7 +168,7 @@ Initializing the neighbor list...
 NEIGHBOR LIST MAX CUTOFF IS: 6.00000
 USING PADDING: 0.300
 
-Generating fast maps 
+Generating fast maps... 
 	Pair maps:
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
@@ -184,7 +186,7 @@ Ewald parameters:
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
-	K-space accuracy estimate = 0.00000086798168
+	K-space accuracy estimate = 0.0000008680
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)

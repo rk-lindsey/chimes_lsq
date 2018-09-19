@@ -39,6 +39,7 @@ MD_TESTS[7]="h2o-4bcheby"
 MD_TESTS[8]="h2o-4bcheby-numforce"
 MD_TESTS[9]="h2o-3bcheby-numpress"
 MD_TESTS[10]="h2o-3bcheby3"
+MD_TESTS[11]="h2o-4bcheby-numpress"
 
 # Tests of LSQ/MD code compatibility.
 LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!

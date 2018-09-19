@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 1 processor(s).
+Code compiled in MPI mode. Will run on 36 processor(s).
 
 Reading the simulation control input file...
 	# RNDSEED #: 12357
@@ -12,9 +12,9 @@ Reading the simulation control input file...
 	# VELINIT #: READ ... reading velocities from coordinate file
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRESSUR #: 0 GPa
-	# FRQDFTB #: 20
+	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
-		... printing 50 frames. 
+		... printing       50 frames. 
 	# FRQENER #: 10
 	# PRNTFRC #: false
    ...read complete.
@@ -23,9 +23,9 @@ Setting up the data objects...
    ...setup complete
 
 Reading initial coordinates and forces...
-	...Read the following coordinate file extension: xyz
+     ...Read the following coordinate file extension: xyz
    ...Read the following number of atoms: 96
-	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+     ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyz
@@ -82,6 +82,8 @@ Attempting to read pairtype...
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
 	Electrostatics will not be computed.
 
 Force field summary: 
@@ -112,7 +114,7 @@ Initializing the neighbor list...
 NEIGHBOR LIST MAX CUTOFF IS: 6.00000
 USING PADDING: 0.300
 
-Generating fast maps 
+Generating fast maps... 
 	Pair maps:
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2

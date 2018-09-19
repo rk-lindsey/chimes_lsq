@@ -22,6 +22,8 @@
 	params.new.txt
 # CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)
 	input.xyz	
+# TRAJEXT # ! coordinate file type	
+	GEN
 	
 	
 ###################################
@@ -46,7 +48,7 @@
 # FRQENER # ! Frequency to output energies
 	1	
 # PRNTFRC # ! Print computed forces? Forces are printed to force_out.txt 
-	false
+	true 5
 	
 	
 # ENDFILE #
