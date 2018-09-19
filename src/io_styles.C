@@ -33,7 +33,7 @@ using namespace std;
 
 WRITE_TRAJ::WRITE_TRAJ(){}
 
-WRITE_TRAJ::WRITE_TRAJ(string CONTENTS_STR) // Default extension is .xyzf
+WRITE_TRAJ::WRITE_TRAJ(string CONTENTS_STR) // Default extension is .gen
 {
 	string EXTENSION_STR = "GEN";
 	
@@ -100,17 +100,23 @@ void WRITE_TRAJ::SET_EXTENSION(string EXTENSION_STR)
 {	
 	if(EXTENSION_STR == "GEN")
 		EXTENSION = TRAJ_EXT::GEN;
-	if(EXTENSION_STR == "XYZF")
-		EXTENSION = TRAJ_EXT::XYZF;
-	if(EXTENSION_STR == "XYZF_FORCE")
+	else if(EXTENSION_STR == "XYZ")
+		EXTENSION = TRAJ_EXT::XYZ;
+	else if(EXTENSION_STR == "XYZF_FORCE")
 		EXTENSION = TRAJ_EXT::XYZF_FORCE;		
-	if(EXTENSION_STR == "LAMMPSTRJ")
+	else if(EXTENSION_STR == "LAMMPSTRJ")
 		EXTENSION = TRAJ_EXT::LAMMPSTRJ;
-	if(EXTENSION_STR == "PDB")
+	else if(EXTENSION_STR == "PDB")
 	{
 		EXTENSION = TRAJ_EXT::PDB;	
 		cout << "ERROR: File type .pdb has not been implemented yet." << endl;
 		exit_run(0);
+	}
+	else
+	{
+		cout << "ERROR: Unknown extension type for output trajectory." << endl;
+		cout << "Allowed types are GEN, XYZ, XYZF_FORCE, and LAMMPSTRJ." << endl;
+		exit_run(0);	
 	}
 }
 
@@ -118,12 +124,18 @@ void WRITE_TRAJ::SET_CONTENTS(string CONTENTS_STR)
 {	
 	if(CONTENTS_STR == "STANDARD")
 		CONTENTS = TRAJ_TYPE::STANDARD;
-	if(CONTENTS_STR == "BAD_1")
+	else if(CONTENTS_STR == "BAD_1")
 		CONTENTS = TRAJ_TYPE::BAD_1;
-	if(CONTENTS_STR == "BAD_2")
+	else if(CONTENTS_STR == "BAD_2")
 		CONTENTS = TRAJ_TYPE::BAD_2;
-	if(CONTENTS_STR == "FORCE")
+	else if(CONTENTS_STR == "FORCE")
 		CONTENTS = TRAJ_TYPE::FORCE;
+	else
+	{
+		cout << "ERROR: Unknown contents type for output trajectory." << endl;
+		cout << "Allowed types are STANDARD, BAD_1, BAD_2, and FORCE." << endl;
+		exit_run(0);	
+	}	
 }
 
 void WRITE_TRAJ::SET_FILENAME()
@@ -152,8 +164,8 @@ void WRITE_TRAJ::SET_FILENAME()
 	case TRAJ_EXT::GEN:
 		FILENAME += ".gen";
 		break;
-	case TRAJ_EXT::XYZF:
-		FILENAME += ".xyzf";
+	case TRAJ_EXT::XYZ:
+		FILENAME += ".xyz";
 		break;
 	case TRAJ_EXT::XYZF_FORCE:
 		FILENAME += ".xyzf";
@@ -191,7 +203,7 @@ string WRITE_TRAJ::RETURN_CONTENTS()
 			RESULT = "BAD_2";
 			break;			
 		default:
-			RESULT = "Unknown!";		
+			RESULT = "Unknown!";					
 	}
 		
 	return RESULT;	
@@ -207,8 +219,8 @@ string WRITE_TRAJ::RETURN_EXTENSION()
 		case TRAJ_EXT::GEN:
 			RESULT = "GEN";
 			break;
-		case TRAJ_EXT::XYZF:
-			RESULT = "XYZF";
+		case TRAJ_EXT::XYZ:
+			RESULT = "XYZ";
 			break;
 		case TRAJ_EXT::XYZF_FORCE:
 			RESULT = "XYZF_FORCE";
@@ -268,8 +280,8 @@ void WRITE_TRAJ::PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
   case TRAJ_EXT::GEN:
 		PRINT_FRAME_GEN(CONTROLS,SYSTEM);
 		break;
-  case TRAJ_EXT::XYZF:
-		PRINT_FRAME_XYZF(CONTROLS,SYSTEM);
+  case TRAJ_EXT::XYZ:
+		PRINT_FRAME_XYZ(CONTROLS,SYSTEM);
 		break;
   case TRAJ_EXT::XYZF_FORCE:
 		PRINT_FRAME_XYZF_FORCE(CONTROLS,SYSTEM);
@@ -334,7 +346,7 @@ void WRITE_TRAJ::PRINT_FRAME_GEN(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.Z << endl;
 }
 
-void WRITE_TRAJ::PRINT_FRAME_XYZF(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
+void WRITE_TRAJ::PRINT_FRAME_XYZ(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 {
 	TRAJFILE << SYSTEM.ATOMS << endl;
 	TRAJFILE << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;

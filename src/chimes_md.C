@@ -87,8 +87,8 @@ string SCAN_FILE_2B;
 int NPROCS;		// Number of processors
 int RANK;		// Index of current processor
 
-WRITE_TRAJ BAD_CONFIGS_1("XYZF","BAD_1"); // Configs where r_ij < r_cut,in 
-WRITE_TRAJ BAD_CONFIGS_2("XYZF","BAD_2"); // Configs where r_ij < r_cut,in +d_penalty
+WRITE_TRAJ BAD_CONFIGS_1("XYZ","BAD_1"); // Configs where r_ij < r_cut,in 
+WRITE_TRAJ BAD_CONFIGS_2("XYZ","BAD_2"); // Configs where r_ij < r_cut,in +d_penalty
 
 // Variables that are defined locally for house_md which need to be global for LAMMPS linking
  
@@ -1428,7 +1428,7 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	NEIGHBOR_LIST.USE               = true;
 	
 	CONTROLS.PRINT_BAD_CFGS         = false;
-	CONTROLS.TRAJ_FORMAT		= "XYZF";
+	CONTROLS.TRAJ_FORMAT		= "GEN";
 	
 	CONTROLS.PENALTY_THRESH = -1.0;	// Default is to not enforce a max-allowed penalty
 	CONTROLS.IO_ECONS_VAL   =  0.0;
