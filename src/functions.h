@@ -238,6 +238,7 @@ JOB_CONTROL(): FIT_COUL(false),
 	 {
 		NFRAMES         = 0;	// Number of frames in the movie file
 		CHEBY_ORDER     = 0;	// Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
+		CHEBY_TYPE      = Cheby_trans::NONE ;
 		CHEBY_3B_ORDER  = 0;   
 		CHEBY_4B_ORDER  = 0;	// how many polynomials for 4b cheby?
 		NUM_3B_CHEBY    = 0;	// How many parameters are associated with cheby order CHEBY_3B_ORDER?

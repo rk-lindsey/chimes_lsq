@@ -66,6 +66,16 @@ class PAIRS	// NEEDS UPDATING
 			      CHEBY_RANGE_HIGH = 1.0;
 			      CHEBY_RANGE_LOW  = -1.0;
 			      CUBIC_SCALE = 1.0;
+
+						// Set simple defaults.
+						CHEBY_TYPE = Cheby_trans::NONE ;
+						X_MINIM = 0.8 ;
+						X_MAXIM = 5.0 ;
+						X_AVG = (X_MINIM + X_MAXIM)/2.0 ;
+						X_DIFF = (X_MAXIM-X_MINIM) ;
+						S_MINIM = X_MINIM ;
+						S_MAXIM = X_MAXIM ;
+
 			      USE_OVRPRMS = false;
 	  	}     // Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
 

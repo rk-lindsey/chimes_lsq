@@ -1155,27 +1155,27 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			}
 			
 
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 
-				if (CONTROLS.IF_SUBTRACT_COORD && RANK == 0)
-				{
-						cout << "Special feature: " << endl;
-						cout << " Will subtract contributions from user-specified overbonding " << endl;
-						cout << " parameters before generating A-matrix." << endl << endl;	
-				}					
+			if (CONTROLS.IF_SUBTRACT_COORD && RANK == 0)
+			{
+				cout << "Special feature: " << endl;
+				cout << " Will subtract contributions from user-specified overbonding " << endl;
+				cout << " parameters before generating A-matrix." << endl << endl;	
+			}					
 
-				if(CONTROLS.USE_PARTIAL_CHARGES && RANK == 0)
-				{
-					cout << "Special feature: " << endl;
-					cout << " Will subtract contributions stemming from user-specified " << endl;
-					cout << " charges before generating A-matrix" << endl << endl;	
-				}	
+			if(CONTROLS.USE_PARTIAL_CHARGES && RANK == 0)
+			{
+				cout << "Special feature: " << endl;
+				cout << " Will subtract contributions stemming from user-specified " << endl;
+				cout << " charges before generating A-matrix" << endl << endl;	
+			}	
 			
-			#endif
+#endif
 				
 				
-				if (CONTROLS.USE_PARTIAL_CHARGES || CONTROLS.FIT_COUL)
-					CONTROLS.CALL_EWALD = true;	
+			if (CONTROLS.USE_PARTIAL_CHARGES || CONTROLS.FIT_COUL)
+				CONTROLS.CALL_EWALD = true;	
 				
 			FOUND_END = true;
 			break;
@@ -1186,18 +1186,18 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		{
 			cin >> LINE; cin.ignore();
 			CONTROLS.WRAP_COORDS = bool(LINE.data());
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# WRAPTRJ #: " << CONTROLS.WRAP_COORDS << endl;	
-			#endif
+#endif
 		}
 		
 		else if(LINE.find("# TRJFILE #") != string::npos)
 		{
 			cin >> CONTROLS.INFILE; cin.ignore();
 
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# TRJFILE #: " << CONTROLS.INFILE << endl;	
-			#endif
+#endif
 		}			
 		
 		else if(LINE.find("# NFRAMES #") != string::npos)
@@ -1205,9 +1205,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			cin >> LINE; cin.ignore();
 			CONTROLS.NFRAMES = int(atof(LINE.data()));
 			
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# NFRAMES #: " << CONTROLS.NFRAMES << endl;			
-			#endif
+#endif
 		}
 		
 		else if(LINE.find("# NLAYERS #") != string::npos)
@@ -1215,9 +1215,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			cin >> LINE; cin.ignore();
 			CONTROLS.N_LAYERS = int(atof(LINE.data()));
 			
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 ) 	cout << "	# NLAYERS #: " << CONTROLS.N_LAYERS << endl;
-			#endif
+#endif
 		}
 		
 		else if(LINE.find("# FITCOUL #") != string::npos)
@@ -1234,7 +1234,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				exit(1);	
 			}	
 			
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			
 			if ( RANK == 0 ) 
 			{
@@ -1246,7 +1246,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					cout << "false" << endl;
 			}
 				
-			#endif
+#endif
 		}
 		
 		else if(LINE.find("# FITSTRS #") != string::npos)
@@ -1281,7 +1281,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				
 				cin.ignore();
 			}
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			
 			if ( RANK == 0 ) 
 			{
@@ -1298,7 +1298,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					cout << "    			 ...will only fit tensors for first " << CONTROLS.NSTRESS << " frames." << endl;
 			}
 				
-			#endif
+#endif
 		}
 		
 		else if(LINE.find("# FITENER #") != string::npos)
@@ -1327,7 +1327,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				cin.ignore();	
 			}
 			
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 )
 			{
 				cout << "	# FITENER #: ";
@@ -1342,7 +1342,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 								
 				
 			}
-			#endif
+#endif
 		}
 
 		else if(LINE.find("# FITPOVR #") != string::npos)
@@ -1359,7 +1359,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				exit(1);	
 			}	
 			
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 ) 
 			{
 				cout << "	# FITPOVR #: ";
@@ -1369,7 +1369,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				else
 					cout << "false" << endl;
 			}
-			#endif
+#endif
 		}
 		
 		else if(LINE.find("# PAIRTYP #") != string::npos)
@@ -1392,7 +1392,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				
 			}
 			
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 )
 			{
 				cout << "	# PAIRTYP #: " << LINE;
@@ -1402,17 +1402,17 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				else
 					cout << " ....NOTE: Forces reported in atomic units." << endl;
 			}
-			#endif
+#endif
 				
 			if(TEMP_TYPE == "INVRSE_R")
 			{
-					cin >> LINE;
-					cin.ignore();
-					CONTROLS.INVR_PARAMS = int(atof(LINE.data()));
+				cin >> LINE;
+				cin.ignore();
+				CONTROLS.INVR_PARAMS = int(atof(LINE.data()));
 					
-					#if VERBOSITY == 1
-					if ( RANK == 0 ) cout << "	             " << "Will use the following number of inverse-r params: " << CONTROLS.INVR_PARAMS << endl;
-					#endif
+#if VERBOSITY == 1
+				if ( RANK == 0 ) cout << "	             " << "Will use the following number of inverse-r params: " << CONTROLS.INVR_PARAMS << endl;
+#endif
 					
 			}
 
@@ -1424,26 +1424,26 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				
 				STREAM_PARSER >> CONTROLS.CHEBY_ORDER;				
 				
-				#if VERBOSITY == 1
+#if VERBOSITY == 1
 				if ( RANK == 0 ) cout << "	             " << "Will use 2-body order: " << CONTROLS.CHEBY_ORDER << endl;
-				#endif
+#endif
 				
 				if(TEMP_TYPE == "CHEBYSHEV")
 				{
 					STREAM_PARSER >> CONTROLS.CHEBY_3B_ORDER;
 
-					#if VERBOSITY == 1
+#if VERBOSITY == 1
 					if ( RANK == 0 ) cout << "	             " << "Will use 3-body order: " << CONTROLS.CHEBY_3B_ORDER << endl;
-					#endif
+#endif
 						
 					if(CONTROLS.CHEBY_3B_ORDER>0)
 						CONTROLS.USE_3B_CHEBY = true;
 					
 					STREAM_PARSER >> CONTROLS.CHEBY_4B_ORDER;
 
-					#if VERBOSITY == 1
+#if VERBOSITY == 1
 					if ( RANK == 0 ) cout << "	             " << "Will use 4-body order: " << CONTROLS.CHEBY_4B_ORDER << endl;
-					#endif
+#endif
 						
 					if(CONTROLS.CHEBY_4B_ORDER>0)
 						CONTROLS.USE_4B_CHEBY = true;
@@ -1470,20 +1470,20 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 						exit(0);
 					}					
 					
-					#if VERBOSITY == 1
+#if VERBOSITY == 1
 					if ( RANK == 0 ) cout << "	             " << "Will transform Chebyshev pair distances to range " << TMP_CHEBY_RANGE_LOW << " to " << TMP_CHEBY_RANGE_HIGH << endl;
-					#endif
+#endif
 				}
 				else
 					
-				cin.ignore();
+					cin.ignore();
 				
 				STREAM_PARSER.str("");
 				STREAM_PARSER.clear();		
 				
 			}
 			else
-				 cin.ignore();
+				cin.ignore();
 			
 			// Do some error checks
 	
@@ -1503,13 +1503,13 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		  cin >> LINE ;
 		  vector<string> tokens ;
 		  if ( parse_space(LINE,tokens) >= 1 ) 
-			CONTROLS.CHEBY_TYPE = Cheby::get_trans_type(tokens[0]);
+				CONTROLS.CHEBY_TYPE = Cheby::get_trans_type(tokens[0]);
 		  else 
-			 EXIT_MSG("BAD CHBTYPE" + LINE) ;
+				EXIT_MSG("BAD CHBTYPE" + LINE) ;
 
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# CHBTYPE #: " << tokens[0] << endl;	
-			#endif
+#endif
 		}		
 		
 		/////////////////////////////////////////////////////////////////////
@@ -1533,9 +1533,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			cin >> LINE; cin.ignore();
 			CONTROLS.NATMTYP = int(atof(LINE.data()));
 			
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# NATMTYP #: " << CONTROLS.NATMTYP << endl;	
-			#endif
+#endif
 			
 			// Set up pairs
 			
@@ -1569,9 +1569,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		else if(LINE.find("# TYPEIDX #")!= string::npos)
 		{
 			
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #" << endl;
-			#endif
+#endif
 			
 			// Figure out the number of non-unique pairs
 
@@ -1626,11 +1626,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				ATOM_PAIRS[i].PRPR_NM =      ATOM_PAIRS[i].ATM1TYP;
 				ATOM_PAIRS[i].PRPR_NM.append(ATOM_PAIRS[i].ATM2TYP);
 				
-				#if VERBOSITY == 1
+#if VERBOSITY == 1
 				if ( RANK == 0 ) 
 				{
 					cout << " 	" << setw(15) << left << i+1 
-						 << setw(15) << left << ATOM_PAIRS[i].ATM1TYP;
+							 << setw(15) << left << ATOM_PAIRS[i].ATM1TYP;
 					if(!CONTROLS.FIT_COUL) 
 						cout << setw(15) << left << ATOM_PAIRS[i].ATM1CHG;
 					else
@@ -1638,7 +1638,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					
 					cout << setw(15) << left << ATOM_PAIRS[i].ATM1MAS << endl;
 				}
-				#endif
+#endif
 			}
 			
 			if(!CONTROLS.FIT_COUL)
@@ -1696,7 +1696,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					for(int k=0;k<ATOM_PAIRS.size(); k++)
 					{
 						if((ATOM_PAIRS[i].ATM1TYP == ATOM_PAIRS[k].ATM1TYP && ATOM_PAIRS[j].ATM1TYP == ATOM_PAIRS[k].ATM2TYP)
-						 ||(ATOM_PAIRS[j].ATM1TYP == ATOM_PAIRS[k].ATM1TYP && ATOM_PAIRS[i].ATM1TYP == ATOM_PAIRS[k].ATM2TYP))
+							 ||(ATOM_PAIRS[j].ATM1TYP == ATOM_PAIRS[k].ATM1TYP && ATOM_PAIRS[i].ATM1TYP == ATOM_PAIRS[k].ATM2TYP))
 						{
 							TEMP_STR = ATOM_PAIRS[i].ATM1TYP;
 							TEMP_STR.append(ATOM_PAIRS[j].ATM2TYP);
@@ -1717,7 +1717,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				cout << endl;
 				cout << "	The following unique pair types have been identified:" << endl;
 				for(int i=0;i<NPAIR; i++)
-						cout << "		" << ATOM_PAIRS[i].PAIRIDX << "  " << ATOM_PAIRS[i].ATM1TYP << " " << ATOM_PAIRS[i].ATM2TYP << endl;
+					cout << "		" << ATOM_PAIRS[i].PAIRIDX << "  " << ATOM_PAIRS[i].ATM1TYP << " " << ATOM_PAIRS[i].ATM2TYP << endl;
 			}
 #endif
 					
@@ -1754,9 +1754,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				
 				if( ATOM_PAIRS[TEMP_INT].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
 				{
-					 NEIGHBOR_LIST.MAX_CUTOFF    = ATOM_PAIRS[TEMP_INT].S_MAXIM;
-					 NEIGHBOR_LIST.MAX_CUTOFF_3B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
-					 NEIGHBOR_LIST.MAX_CUTOFF_4B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
+					NEIGHBOR_LIST.MAX_CUTOFF    = ATOM_PAIRS[TEMP_INT].S_MAXIM;
+					NEIGHBOR_LIST.MAX_CUTOFF_3B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
+					NEIGHBOR_LIST.MAX_CUTOFF_4B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
 				}	
 				
 				cin >> LINE; cin.ignore();
@@ -1775,7 +1775,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				}
 				else
 				{
-						ATOM_PAIRS[TEMP_INT].USE_OVRPRMS = false;
+					ATOM_PAIRS[TEMP_INT].USE_OVRPRMS = false;
 				}		
 				
 				// Check if 3B bin widths are specified
@@ -1794,7 +1794,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				}	
 			}
 
-			#if VERBOSITY == 1			
+#if VERBOSITY == 1			
 			if ( RANK == 0 ) 
 			{
 				cout << "	# PAIRIDX #     ";
@@ -1806,28 +1806,28 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				cout << "# MORSE_LAMBDA #";	
 				cout << " # USEOVRP #     " << endl;
 			}
-			#endif
+#endif
 				
 			bool PRINT_OVR = false;
 			
 			for(int i=0; i<NPAIR; i++)
 			{
-				#if VERBOSITY == 1	
+#if VERBOSITY == 1	
 				if ( RANK == 0 ) 
 				{
 					cout << "	" << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-						 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-						 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-						 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
-						 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
-						 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
-						 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << " " 
-						 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS << endl;
+							 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
+							 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
+							 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
+							 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
+							 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
+							 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << " " 
+							 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS << endl;
 				}
-				#endif
+#endif
 					 
-				 if(ATOM_PAIRS[i].USE_OVRPRMS)
-					 PRINT_OVR = true;
+				if(ATOM_PAIRS[i].USE_OVRPRMS)
+					PRINT_OVR = true;
 			}
 		
 			// If overbonding parameters are provided, and they are not requested to be fit, 
@@ -1838,7 +1838,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 			if(PRINT_OVR)
 			{
-				#if VERBOSITY == 1
+#if VERBOSITY == 1
 				if ( RANK == 0 ) 
 				{
 					cout << "	# PAIRIDX #     ";
@@ -1850,23 +1850,23 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					cout << "# P_2_VAL #     ";
 					cout << "# LAMBDA6 #" << endl;						
 				}
-				#endif
+#endif
 
 				for(int i=0; i<NPAIR; i++)
 				{
-					#if VERBOSITY == 1					
+#if VERBOSITY == 1					
 					if ( RANK == 0 ) 
 					{
 						cout << "	" << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-							 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-							 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
-							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
-							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
-							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
-							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
+								 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
+								 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
+								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
+								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
+								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
+								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
+								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
 					}
-					#endif													
+#endif													
 				}											
 			}
 			
@@ -1882,21 +1882,23 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 			build_int_pair_map(CONTROLS.NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX, PAIR_MAP, INT_PAIR_MAP) ;
 
-for ( int i = 0 ; i < ATOM_PAIRS.size() ; i++ )
-		 ATOM_PAIRS[i].set_cheby_vals() ;
-if(CONTROLS.USE_3B_CHEBY)
-{
-  // Generate unique triplets
-  TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ; 
-  TRIPS.print(false) ;
-}	
+			for ( int i = 0 ; i < ATOM_PAIRS.size() ; i++ ) {
+				if ( ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) 
+					ATOM_PAIRS[i].set_cheby_vals() ;
+			}
+			if(CONTROLS.USE_3B_CHEBY)
+			{
+				// Generate unique triplets
+				TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ; 
+				TRIPS.print(false) ;
+			}	
 			
-if(CONTROLS.USE_4B_CHEBY)	// WORKS
-{
-  // Generate unique quadruplets and thier corresponding sets of powers
-  QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX) ;
-  QUADS.print(false) ;
-}			
+			if(CONTROLS.USE_4B_CHEBY)	// WORKS
+			{
+				// Generate unique quadruplets and thier corresponding sets of powers
+				QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX) ;
+				QUADS.print(false) ;
+			}			
 
 		}
 		
@@ -1913,9 +1915,9 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 		
 		else if(LINE.find("CHARGE CONSTRAINTS") != string::npos)
 		{
-			#if VERBOSITY == 1			
+#if VERBOSITY == 1			
 			if ( RANK == 0 ) cout << endl << "	Attempting to read " << NPAIR-1 << " charge constraints...:" << endl; 
-			#endif	
+#endif	
 			
 			CHARGE_CONSTRAINTS.resize(NPAIR-1);
 			for(int i=0; i<NPAIR-1; i++)
@@ -1942,7 +1944,7 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 				cin >> CHARGE_CONSTRAINTS[i].FORCE;				
 				cin.ignore();
 
-				#if VERBOSITY == 1			
+#if VERBOSITY == 1			
 				if ( RANK == 0 ) 
 				{
 					cout << "		" << i+1 << "	 ";
@@ -1952,7 +1954,7 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 						cout << CHARGE_CONSTRAINTS[i].CONSTRAINTS[j] << " ";
 					cout << CHARGE_CONSTRAINTS[i].FORCE << endl;	
 				}
-				#endif	
+#endif	
 					
 			}
 			
@@ -1995,10 +1997,10 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 				for(int i=0; i<QUADS.VEC.size(); i++)
 					QUADS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
 
-			#if VERBOSITY == 1
+#if VERBOSITY == 1
 			if ( RANK == 0 ) 
 				cout << "	# FCUTTYP #: " << TEMP_TYPE << "	... for all Chebyshev interactions" << endl;	
-			#endif
+#endif
 			
 			double TMP_STEEPNESS = 0.0;
 			double TMP_OFFSET    = 0.0;
@@ -2008,10 +2010,10 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 			{
 				cin >> TMP_OFFSET;
 				
-				#if VERBOSITY == 1
-					if ( RANK == 0 ) 
-						cout << "			With an offset of: " << fixed << setprecision(3) << TMP_OFFSET*100.0 << "% of the pair outer cutoffs" << endl;      
-				#endif			
+#if VERBOSITY == 1
+				if ( RANK == 0 ) 
+					cout << "			With an offset of: " << fixed << setprecision(3) << TMP_OFFSET*100.0 << "% of the pair outer cutoffs" << endl;      
+#endif			
 			}
 			
 			if(TEMP_TYPE=="SIGMOID" || TEMP_TYPE=="CUBSIG" || TEMP_TYPE=="CUBESTRETCH" || TEMP_TYPE == "SIGFLT")
@@ -2022,13 +2024,13 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 				if(TEMP_TYPE == "SIGFLT")
 					cin >> TMP_HEIGHT;
 					
-				#if VERBOSITY == 1
+#if VERBOSITY == 1
 				if ( RANK == 0 ) cout << "			With steepness, offset, and height of: "
-						      << fixed << setprecision(3) 
-						      << TMP_STEEPNESS << ",   " 
-						      << TMP_OFFSET    << ", and  " 
-						      << TMP_HEIGHT    << endl;   
-				#endif					
+															<< fixed << setprecision(3) 
+															<< TMP_STEEPNESS << ",   " 
+															<< TMP_OFFSET    << ", and  " 
+															<< TMP_HEIGHT    << endl;   
+#endif					
 			}
 			cin.ignore();
 			
@@ -2069,9 +2071,9 @@ if(CONTROLS.USE_4B_CHEBY)	// WORKS
 		
 	}	
 	
-	#if VERBOSITY == 1			
+#if VERBOSITY == 1			
 	if ( RANK == 0 ) cout << endl << "Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl;; // All types use same scaling
-	#endif	
+#endif	
 }
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby)
