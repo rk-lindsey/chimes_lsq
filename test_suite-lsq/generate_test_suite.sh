@@ -1,4 +1,4 @@
-# NOTE: The path below needs to point to the "lsq-new-md-fmt.py" version of the lsq code.
+# NOTE: The path below needs to point to the "lsq.py" version of the lsq code.
 #       If you want to use other versions, you'll probably need to modify the inputs that
 #       are sent to the script (way down below)
 #
@@ -11,37 +11,13 @@
 #
 ###############################################################
 
-
-if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
-	 source /usr/local/tools/dotkit/init.sh
-	 use ic-17.0.174
-    use mvapich2-intel-2.2
-else
-    module load intel impi
-fi
-
-# Number of MPI tasks.
-NP=36
-
-# Number of threads for SVD decomposition
-NUM_THREADS=36
-
-# SVD regularization factor.
-
-EPS_FAC=1.0e-5 # 1.0E-5 is the old default value... should match value used in gen test suite script.  1.0e-09
-
-TESTSU_BASE=`pwd -P` #`dirname $0`
-SOURCE_BASE="${TESTSU_BASE}/../src/"
-
-# Intel parallel python - supports thread parallelism.
-PYTHON=/collab/usr/global/tools/intel/chaos_5_x86_64_ib/python-2.7.10/bin/python
-# Default python
-# PYTHON=python
+# Common function for test script initialization.
+source ../src/bash/init_vars.sh
+init_test_vars
+echo "NP = $NP"
 
 # Run the job with the new version of the python code (Compatible with non-generalized md code)
 #
-PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq-new-md-fmt.py" # Path to the python code.
-
 ###############################################################
 #
 # Make a fresh compilation of the code
@@ -49,7 +25,7 @@ PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq-new-md-fmt.py" # Path to the python code
 ###############################################################
 
 cd ../src
-rm -f *o chimes_lsq
+rm -f *.o chimes_lsq
 make -f Makefile-TS-LSQ chimes_lsq
 mv chimes_lsq ../test_suite-lsq/
 cd ../test_suite-lsq
@@ -64,10 +40,10 @@ if [ $# -eq 0 ]
 # Use default JOBS.  
 then
 #  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
-JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald h2o-4bcheby test_4atoms test_4atoms.2' 
+	 JOBS=$LSQ_ALL_JOBS
 else
 # Take JOBS from command line.
-  JOBS=$*
+	 JOBS=$*
 fi
 
 echo ""
@@ -84,7 +60,7 @@ do
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
 		 ../chimes_lsq < fm_setup.in > fm_setup.out
 	else
-		 srun -n $NP ../chimes_lsq < fm_setup.in > fm_setup.out
+		 $RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out
 	fi	
  	cp A.txt b.txt params.header fm_setup.out ff_groups.map correct_output	
 	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
@@ -105,10 +81,11 @@ for i in  $JOBS
 do
 	echo " "
 	echo "Running $i test..."
+	echo "Using command $RUN_LSQ_PYTHON_CODE"
 
 	cd $i/current_output
-	export OMP_NUM_THREADS=$NUM_THREADS	
-	$PYTHON $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map $EPS_FAC TEST_SUITE_RUN > params.txt
+	
+	$RUN_LSQ_PYTHON_CODE > params.txt
 	
 	for j in params.txt force.txt
 	do

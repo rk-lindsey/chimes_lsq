@@ -11,54 +11,20 @@
 #
 ###############################################################
 
-# Number of MPI tasks.
-NP=16
-
-# Number of threads for SVD decomposition
-NUM_THREADS=16
-
-# SVD regularization factor.
-EPS_FAC=1.0e-5 # 1.0E-5 is the old default value... should match value used in gen test suite script. 
-
-
-if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
-	 source /usr/local/tools/dotkit/init.sh
-	 use ic-17.0.174
-    use mvapich2-intel-2.2
-    RUN_JOB="srun -n $NP"
-    elsif [ "$SYS_TYPE" == "toss_5_x86_64_ib" ] 
-    module load intel impi
-else
-    echo 'No module load'
-    RUN_JOB=''
-fi
-
-
+# Common function for test script initialization.
+source ../src/bash/init_vars.sh
+init_test_vars
+echo "NP = $NP"
 
 if [ $# -eq 0 ] 
 then
-JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald h2o-4bcheby test_4atoms test_4atoms.2' 
+	 JOBS=$LSQ_ALL_JOBS
 else
-  JOBS=$*
+	 JOBS=$*
 fi
 
 TESTSU_BASE=`pwd -P` #`dirname $0`
 SOURCE_BASE="${TESTSU_BASE}/../src/"
-
-# Intel parallel python - supports thread parallelism.
-#PYTHON=/collab/usr/global/tools/intel/chaos_5_x86_64_ib/python-2.7.10/bin/python
-# Default python
-PYTHON=python
-
-# Run the job with the new version of the python code (Compatible with non-generalized md code)
-#
-PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq.py" # Path to the python code.
-RUN_LSQ_PYTHON_CODE="$PYTHON $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map ${EPS_FAC} TEST_SUITE_RUN"
-
-# Run the job with the old version of the python code (Compatible with non-generalized md code)
-#
-#PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/lsq.py" # Path to the python code.
-#RUN_LSQ_PYTHON_CODE="python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header TEST_SUITE_RUN"
 
 ###############################################################
 #
@@ -97,46 +63,60 @@ do
 	rm -rf *diff*
 
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		 ../chimes_lsq < fm_setup.in > fm_setup.out
+		 if ../chimes_lsq < fm_setup.in > fm_setup.out ; then
+			  echo 'Chimes_lsq succeeded'
+			  SUCCESS=1
+		 else
+			  echo 'Chimes_lsq failed'
+			  SUCCESS=0
+		 fi
 	else
-		 $RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out
+		 if $RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out ; then
+			  echo 'Chimes_lsq succeeded'
+			  SUCCESS=1
+		 else
+			  echo 'Chimes_lsq failed'
+			  SUCCESS=0
+		 fi
 	fi
 	
-	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
+	if [[ $SUCCESS -eq 1 ]] ; then
+		 mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
 
-	for j in A.txt b.txt params.header fm_setup.out
-	do
+		 for j in A.txt b.txt params.header fm_setup.out
+		 do
 		
-		perl ../../contrib/compare/compare.pl correct_output/$j current_output/$j > diff-$j.out
+			  perl ../../contrib/compare/compare.pl correct_output/$j current_output/$j > diff-$j.out
 	
-		NO_DIFF_LINES=`cat diff-$j.out | wc -l`
+			  NO_DIFF_LINES=`cat diff-$j.out | wc -l`
 	
-		if [ $NO_DIFF_LINES -gt 0 ] ; then
-			echo " "
-			echo "Differences found in $j files... "
-			echo " "
+			  if [ $NO_DIFF_LINES -gt 0 ] ; then
+					echo " "
+					echo "Differences found in $j files... "
+					echo " "
 #		OLD WAY: 			
-			if [ "$j" = A.txt ] ; then
-				echo "	...differences are in file A.txt. Examine file by hand "
-				echo "     to determine whether differences are within reasonable"
-				echo "     amt (i.e. < 10**-10)"
-				echo "     Otherwise, see the *.diff file in ${i}/correct_output/"
-			else
-				diff correct_output/$j current_output/$j
-			fi
-			echo " "
-			PASS=false
-		fi
-	done
+					if [ "$j" = A.txt ] ; then
+						 echo "	...differences are in file A.txt. Examine file by hand "
+						 echo "     to determine whether differences are within reasonable"
+						 echo "     amt (i.e. < 10**-10)"
+						 echo "     Otherwise, see the *.diff file in ${i}/correct_output/"
+					else
+						 diff correct_output/$j current_output/$j
+					fi
+					echo " "
+					PASS=false
+			  fi
+		 done
 	
-	if [ "$PASS" = true ] ; then
-		echo "		...Test passed."
-		rm -f diff-*
-	else
-		SET_PASSED=false
-		ALL_PASSED=false
-		echo "		...Test failed."
-	fi
+		 if [ "$PASS" = true ] ; then
+			  echo "		...Test passed."
+			  rm -f diff-*
+		 else
+			  SET_PASSED=false
+			  ALL_PASSED=false
+			  echo "		...Test failed."
+		 fi
+	fi 
 	
 	cd ..
 done
@@ -160,12 +140,8 @@ do
 
 	cd $i/current_output
 	rm -rf diff-*
-#	python $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map TEST_SUITE_RUN > params.txt
-	export OMP_NUM_THREADS=$NUM_THREADS
 	$RUN_LSQ_PYTHON_CODE > params.txt
 
-#	cp params.txt force.txt current_output	
-	
 	for j in params.txt force.txt
 	do
 	
@@ -250,10 +226,5 @@ elif [ "$SET_PASSED" = false ] ; then
 else
 	echo "ERROR: BAD LOGIC IN TEST SUITE DRIVER (THIS SCRIPT)"
 fi
-
-
-	
-	
-	
 	
 exit 0

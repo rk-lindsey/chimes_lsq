@@ -3,7 +3,7 @@ Reading input file...
 	# TRJFILE #: input.xyzf
 	# WRAPTRJ #: 1
 	# NFRAMES #: 33
-	# N_LAYERS #: 1
+	# NLAYERS #: 1
 	# FITCOUL #: true
 	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
@@ -31,76 +31,85 @@ Reading input file...
 		HH: 0 0 0
 		OH: 0 0 0
 
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
 
-	Attempting to read 2 charge constraints...:
-		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
-		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
-
-	# FCUTTYP #: CUBIC	... for 3-body and 4-body Chebyshev interactions
-
-Note: Will use cubic scaling of: 1
-
-Made the following triplets: 0    
+	Made the following triplets: 0    
 
 		Atom type idxs:  0 0 0  Triplet name:       OOOOOO Unique triplet ID 111 index:    0
-Made the following triplets: 1    
+
+	Made the following triplets: 1    
 
 		Atom type idxs:  0 0 1  Triplet name:       OOOHOH Unique triplet ID 211 index:    1
 		Atom type idxs:  0 1 0  Triplet name:       OHOOOH Unique triplet ID 121 index:    1
-Made the following triplets: 2    
+
+	Made the following triplets: 2    
 
 		Atom type idxs:  0 1 1  Triplet name:       OHOHHH Unique triplet ID 221 index:    2
 		Atom type idxs:  1 0 0  Triplet name:       OHOHOO Unique triplet ID 112 index:    1
 		Atom type idxs:  1 0 1  Triplet name:       OHHHOH Unique triplet ID 212 index:    2
 		Atom type idxs:  1 1 0  Triplet name:       HHOHOH Unique triplet ID 122 index:    2
-Made the following triplets: 3    
+
+	Made the following triplets: 3    
 
 		Atom type idxs:  1 1 1  Triplet name:       HHHHHH Unique triplet ID 222 index:    3
+
 	The following unique triplets of atoms have been identified:
 
     Cluster index       : 0
     Atoms in the cluster: O O O 
     Pairs in the cluster: OO OO OO 
     Number of unique sets of powers: 2 (4 total)...
-		     index  |  powers  |  equiv index  |  param index  
+		     index  |  powers  |  equiv index  |  param index  | count 
 		   ----------------------------------------------------
-		      0       0   1   1         0               0       
-		      1       1   0   1         0               0       
-		      2       1   1   0         0               0       
-		      3       1   1   1         3               1       
+		      0       0   1   1         0               0               2        
+		      1       1   0   1         0               0               2        
+		      2       1   1   0         0               0               2        
+		      3       1   1   1         3               1               6        
 
     Cluster index       : 1
     Atoms in the cluster: H O O 
     Pairs in the cluster: OH OH OO 
     Number of unique sets of powers: 3 (4 total)...
-		     index  |  powers  |  equiv index  |  param index  
+		     index  |  powers  |  equiv index  |  param index  | count 
 		   ----------------------------------------------------
-		      0       0   1   1         0               0       
-		      1       1   0   1         0               0       
-		      2       1   1   0         2               1       
-		      3       1   1   1         3               2       
+		      0       0   1   1         0               0               1        
+		      1       1   0   1         0               0               1        
+		      2       1   1   0         2               1               2        
+		      3       1   1   1         3               2               2        
 
     Cluster index       : 2
     Atoms in the cluster: H H O 
     Pairs in the cluster: HH OH OH 
     Number of unique sets of powers: 3 (4 total)...
-		     index  |  powers  |  equiv index  |  param index  
+		     index  |  powers  |  equiv index  |  param index  | count 
 		   ----------------------------------------------------
-		      0       0   1   1         0               0       
-		      1       1   0   1         1               1       
-		      2       1   1   0         1               1       
-		      3       1   1   1         3               2       
+		      0       0   1   1         0               0               2        
+		      1       1   0   1         1               1               1        
+		      2       1   1   0         1               1               1        
+		      3       1   1   1         3               2               2        
 
     Cluster index       : 3
     Atoms in the cluster: H H H 
     Pairs in the cluster: HH HH HH 
     Number of unique sets of powers: 2 (4 total)...
-		     index  |  powers  |  equiv index  |  param index  
+		     index  |  powers  |  equiv index  |  param index  | count 
 		   ----------------------------------------------------
-		      0       0   1   1         0               0       
-		      1       1   0   1         0               0       
-		      2       1   1   0         0               0       
-		      3       1   1   1         3               1       
+		      0       0   1   1         0               0               2        
+		      1       1   0   1         0               0               2        
+		      2       1   1   0         0               0               2        
+		      3       1   1   1         3               1               6        
+
+
+	Attempting to read 2 charge constraints...:
+		1	 OO (0) HH (1) OH (2) 1000.000000 4000.000000 4000.000000 0.000000
+		2	 OO (0) HH (1) OH (2) 1000.000000 -4000.000000 0.000000 0.000000
+
+	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
+
+Note: Will use cubic scaling of: 1.000000
 
 ...input file read successful: 
 
@@ -138,42 +147,6 @@ Number of 3-body interactions = 180048
 Printing matricies...
 	...A matrix length: 33
 
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 35 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 34 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
-BAD MIN FOUND on PROCESSOR 33 10000000000
 	Minimum distances between atoms: (Angstr.)
 		0	O O	2.039
 		1	H H	1.082
