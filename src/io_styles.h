@@ -39,6 +39,7 @@ class WRITE_TRAJ
 		WRITE_TRAJ();
 		WRITE_TRAJ(string CONTENTS_STR);	
 		WRITE_TRAJ(string EXTENSION_STR, string CONTENTS_STR);
+		void INIT(string EXTENSION_STR, string CONTENTS_STR);
 		~WRITE_TRAJ();
 		
 		void PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM);
@@ -53,8 +54,6 @@ class WRITE_TRAJ
 		ofstream	TRAJFRCL;	// Same as TRAJFRCF, but forces are labeled by atom
 				
 		vector<string>	ATOMTYPS;	// A list of atom types. Used for .gen files
-		
-		void INIT(string EXTENSION_STR, string CONTENTS_STR);
 		
 		void SET_EXTENSION(string EXTENSION_STR);
 		void SET_CONTENTS (string CONTENTS_STR);

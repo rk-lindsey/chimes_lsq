@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
   WRITE_TRAJ FORCEFILE;
 
   if ( CONTROLS.PRINT_FORCE ) 
-	WRITE_TRAJ FORCEFILE("XYZF_FORCE","FORCE");	// This is the forcout* files
+		FORCEFILE.INIT("XYZF_FORCE","FORCE");	// This is the forcout* files
 
   // velocity
 
