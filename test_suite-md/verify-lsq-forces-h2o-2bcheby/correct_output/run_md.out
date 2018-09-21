@@ -12,21 +12,23 @@ Reading the simulation control input file...
 	# VELINIT #: READ ... reading velocities from coordinate file
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRESSUR #: 0 GPa
-	# FRQDFTB #: 20
+	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
-		... printing 50 frames. 
+		... printing       50 frames. 
 	# FRQENER #: 10
-	# PRNTFRC #: false
+	# PRNTFRC #: true ...and will be printed every 1 frames.
+		... printing every 0.125 fs, 
+		... printing 1000 frames. 
    ...read complete.
 
 Setting up the data objects...
    ...setup complete
 
 Reading initial coordinates and forces...
-	Opening force.txt to read forces for comparison
-	...Read the following coordinate file extension: xyzf
+      Opening force.txt to read forces for comparison
+     ...Read the following coordinate file extension: xyzf
    ...Read the following number of atoms: 96
-	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+     ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead: force.txt
 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
@@ -100,6 +102,8 @@ Atom properties:
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 	Overbonding contributions will be considered.
 		p-over will be read from fit parameters.
@@ -162,7 +166,7 @@ Initializing the neighbor list...
 NEIGHBOR LIST MAX CUTOFF IS: 6.00000
 USING PADDING: 0.300
 
-Generating fast maps 
+Generating fast maps... 
 	Pair maps:
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
@@ -180,6 +184,6 @@ Ewald parameters:
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
-	K-space accuracy estimate = 0.00000086798168
+	K-space accuracy estimate = 0.0000008680
 
 RMS force error = 0.000136

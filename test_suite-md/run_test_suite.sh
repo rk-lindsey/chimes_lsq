@@ -17,7 +17,13 @@ source ../src/bash/init_vars.sh
 init_test_vars
 echo "NP = $NP"
 
-make -f Makefile-TS-MD chimes_md;  
+if make -f Makefile-TS-MD chimes_md ; then
+	 echo "Succeeded in building chimes_md"
+else
+	 echo "Failed to build chimes_md"
+	 exit
+fi
+
 rm -f ../test_suite-lsq/chimes_md;  mv chimes_md  ../test_suite-md/
 cd ../test_suite-md
 
@@ -26,60 +32,15 @@ cd ../test_suite-md
 # Define tests within the test suite
 ########################################
 
-# Tests specifically for the MD code
-
-MD_TESTS[0]="h2o-2bcheby"
-MD_TESTS[1]="h2o-3bcheby" 
-MD_TESTS[2]="h2o-splines"
-MD_TESTS[3]="generic-lj"
-MD_TESTS[4]="h2o-2bcheby-genvel" 
-MD_TESTS[5]="h2o-2bcheby-numpress"
-MD_TESTS[6]="h2o-2bcheby-velscale"
-MD_TESTS[7]="h2o-4bcheby"
-MD_TESTS[8]="h2o-4bcheby-numforce"
-MD_TESTS[9]="h2o-3bcheby-numpress"
-MD_TESTS[10]="h2o-3bcheby3"
-MD_TESTS[11]="h2o-4bcheby-numpress"
-
-# Tests of LSQ/MD code compatibility.
-LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-LSQ_TESTS[1]="h2o-2bcheby"
-LSQ_TESTS[2]="h2o-3bcheby"
-LSQ_TESTS[3]="h2o-splines"
-LSQ_TESTS[4]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
-LSQ_TESTS[5]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-LSQ_TESTS[6]="h2o-4bcheby"
-
 ## Allow command line arguments of jobs to test.  MD jobs should be single-quoted in a string followed 
 ## by LSQ jobs single quoted. (LEF)
 ##
 
-MD_JOBS="${MD_TESTS[@]}"
-
-if [ -n $LSQ_TESTS[0] ] ; then
-	 LSQ_JOBS="${LSQ_TESTS[@]}"
-fi
-
 if [ $# -gt 0 ] ; then
-
-	if   [ "$1" == "NP" ] ; then
-		NP=$2
-	elif [ "$3" == "NP" ] ; then
-		MD_JOBS=$1
-		LSQ_JOBS=$2
-		MAKE_TESTS=""
-		NP=$4
-	else
-		MD_JOBS=$1
-		LSQ_JOBS=$2
-		MAKE_TESTS=""
-	fi
-else
-    # Tests with a makefile.
-	 MAKE_TESTS=( verify-invert verify-translate verify-scramble h2o-4bcheby-numforce verify-relabel verify-relabel.2 )
+	 MD_JOBS=$1
+	 LSQ_FORCE_JOBS=$2
+	 MD_MAKE_JOBS=$3
 fi
-
-echo "MAKE_TESTS = ${MAKE_TESTS[@]}"
 
 # Tests for compatibility between LSQ C++/python codes with the MD code
 TAG="verify-lsq-forces-"
@@ -94,6 +55,10 @@ echo " "
 
 ALL_PASS=true
 
+if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
+	 RUN_JOB=""
+fi
+
 for i in $MD_JOBS
 do
 
@@ -104,36 +69,36 @@ do
 	
 	cd $i
 
-	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		../chimes_md < run_md.in > run_md.out
-			
+	if $RUN_JOB ../chimes_md < run_md.in > run_md.out ; then
+		 SUCCESS=1 
 	else
-		$RUN_JOB ../chimes_md < run_md.in > run_md.out
+		 echo "Chimes_md failed"
+		 SUCCESS=0
+		 PASS=false
+		 ALL_PASS=false
 	fi
-	
 	cp *.* current_output
 
+	if [[ $SUCCESS -eq 1 ]] ; then
 	
-	for j in run_md.out traj.gen output.xyz 
-	do
-		if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-			diff current_output/$j correct_output/$j > $j-diff.txt
-			
-			LINES=`wc -l $j-diff.txt | awk '{print $1}'`
-			
-			if [ $LINES -gt 0 ] ; then
-				echo " "
-				echo "		Differences found in $j files:"
-				echo " "
-				
-				PASS=false
-				ALL_PASS=false
-			fi
-		fi
-	
-		
-	
-	done
+		 for j in run_md.out traj.gen output.xyz 
+		 do
+			  if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
+					diff current_output/$j correct_output/$j > $j-diff.txt
+					
+					LINES=`wc -l $j-diff.txt | awk '{print $1}'`
+					
+					if [ $LINES -gt 0 ] ; then
+						 echo " "
+						 echo "		Differences found in $j files:"
+						 echo " "
+						 
+						 PASS=false
+						 ALL_PASS=false
+					fi
+			  fi
+		 done
+	fi
 	
 	if [ "$PASS" = true ] ; then
 		echo "		...Test passed."
@@ -152,7 +117,7 @@ done
 ########################################
 
 
-if [ -n "${LSQ_JOBS[0]}" ] ; then
+if [ -n "$LSQ_FORCE_JOBS" ] ; then
 	 echo " "
 	 echo "VALIDATING FOR LSQ/MD CODE COMPATIBILITY..."
 	 echo " "
@@ -163,13 +128,13 @@ if [ -n "${LSQ_JOBS[0]}" ] ; then
 	 cd ../test_suite-md
 
 	 cd ../test_suite-lsq 
-	 ./run_test_suite.sh $LSQ_JOBS
+	 ./run_test_suite.sh $LSQ_FORCE_JOBS
 	 
 	 cd ../test_suite-md
 
 	 echo " "
 	 echo " ...Now running the force comparison tests... "
-	 for i in $LSQ_JOBS
+	 for i in $LSQ_FORCE_JOBS
 	 do
 		  
 		  echo " "
@@ -185,29 +150,36 @@ if [ -n "${LSQ_JOBS[0]}" ] ; then
 		  cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
 		  cp ../../test_suite-lsq/$i/current_output/force.txt     .
 
-		  ../chimes_md < run_md.in > run_md.out		
+		  if ../chimes_md < run_md.in > run_md.out ; then
+				SUCCESS=1
+		  else
+				echo "Chimes_MD failed"
+				SUCCESS=0
+				PASS=false
+				ALL_PASS=false
+		  fi
 
 		  cp *.* current_output
 
-	
-		  for j in run_md.out traj.gen output.xyz forceout.txt
-		  do
-				if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-					 diff current_output/$j correct_output/$j > $j-diff.txt
-					 
-					 LINES=`wc -l $j-diff.txt | awk '{print $1}'`
-					 
-					 if [ $LINES -gt 0 ] ; then
-						  echo " "
-						  echo "		Differences found in $j files:"
-						  echo " "
+		  if [[ $SUCCESS -eq 1 ]] ; then
+				for j in run_md.out forceout-labeled.txt
+				do
+					 if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
+						  diff current_output/$j correct_output/$j > $j-diff.txt
 						  
-						  PASS=false
-						  ALL_PASS=false
+						  LINES=`wc -l $j-diff.txt | awk '{print $1}'`
+						  
+						  if [ $LINES -gt 0 ] ; then
+								echo " "
+								echo "		Differences found in $j files:"
+								echo " "
+								
+								PASS=false
+								ALL_PASS=false
+						  fi
 					 fi
-				fi
-				
-		  done	
+				done	
+		  fi
 	
 		  if [ "$PASS" = true ] ; then
 				echo "		...Test passed."
@@ -221,8 +193,8 @@ if [ -n "${LSQ_JOBS[0]}" ] ; then
 	 done
 fi
 
-echo "PERFORMING FORCE CONSISTENCY CHECKS "
-for i in ${MAKE_TESTS[@]}
+echo "PERFORMING MAKEFILE TESTS"
+for i in $MD_MAKE_JOBS
 do
 	 cd $i ; make NP=${NP}
 	 echo "Testing $i"

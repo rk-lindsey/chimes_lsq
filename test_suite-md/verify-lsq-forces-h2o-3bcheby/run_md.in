@@ -46,5 +46,4 @@
 # PRNTFRC # ! Print computed forces? Forces are printed to force_out.txt 
 	true 1
 	
-	
 # ENDFILE #

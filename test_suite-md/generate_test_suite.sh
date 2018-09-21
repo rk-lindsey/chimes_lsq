@@ -6,29 +6,10 @@
 
 # Tests specifically for the MD code
 
-MD_TESTS[0]="h2o-2bcheby"
-MD_TESTS[1]="h2o-3bcheby" 
-MD_TESTS[2]="h2o-splines"
-MD_TESTS[3]="generic-lj"
-MD_TESTS[4]="h2o-2bcheby-genvel"
-MD_TESTS[5]="h2o-2bcheby-numpress"
-MD_TESTS[6]="h2o-2bcheby-velscale"
-MD_TESTS[7]="h2o-4bcheby"
-MD_TESTS[8]="h2o-4bcheby-numpress"
-
 # Tests for compatibility between LSQ C++/python codes with the MD code
 TAG="verify-lsq-forces-"
 
-#LSQ_TESTS[0]="chon-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-LSQ_TESTS[1]="h2o-2bcheby"
-LSQ_TESTS[2]="h2o-3bcheby"
-LSQ_TESTS[3]="h2o-splines"
-LSQ_TESTS[4]="h2o-4bcheby"
-#LSQ_TESTS[5]="h2o-invr" 	# -- DOESN'T EXIST IN ZCALC FOR MD!
-#LSQ_TESTS[6]="h2o-dftbpoly"	# -- DOESN'T EXIST IN ZCALC FOR MD!
-
 # Iterate through the tests
-
 
 echo " "
 echo "SETTING UP FOR MD CODE..."
@@ -49,12 +30,10 @@ cd ../test_suite-md
 
 if [ $# -gt 0 ] ; then
 	 MD_JOBS=$1
-    LSQ_JOBS=""
-else
-	 MD_JOBS="${MD_TESTS[@]}"
-    LSQ_JOBS="${LSQ_TESTS[@]}"
+    LSQ_FORCE_JOBS=$2
 fi
 echo "MD JOBS = $MD_JOBS"
+echo "LSQ_FORCE_JOBS = $LSQ_FORCE_JOBS"
 
 for i in "$MD_JOBS"
 do
@@ -65,21 +44,32 @@ do
 	cd $i
 	
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		../chimes_md < run_md.in > run_md.out
+		 if ../chimes_md < run_md.in > run_md.out ; then
+			  SUCCESS=1
+		 else
+			  echo "Chimes_md failed"
+			  SUCCESS=0
+		 fi
 			
 	else
-		srun -n $NP ../chimes_md < run_md.in > run_md.out
+		 if $RUN_JOB ../chimes_md < run_md.in > run_md.out ; then
+			  SUCCESS=1
+		 else
+			  echo "Chimes_md failed"
+			  SUCCESS=0
+		 fi
+			  
 	fi		
-		
 	cp *.* current_output
-	cp *.* correct_output
-
+	if [[ $SUCESS -eq 1 ]] ; then
+		 cp *.* correct_output
+	fi
 	
 	cd ..
 done
 
 
-if [ -n "$LSQ_JOBS" ] ; then
+if [ -n "$LSQ_FORCE_JOBS" ] ; then
 
 echo " "
 echo "SETTING UP FOR LSQ/MD CODE COMPATIBILITY..."
@@ -91,14 +81,14 @@ rm -rf *o *dSYM chimes_lsq chimes_md
 cd ../test_suite-md
 
 cd ../test_suite-lsq 
-./run_test_suite.sh $LSQ_JOBS
+./run_test_suite.sh $LSQ_FORCE_JOBS
 
 cd ../src
 cd ../test_suite-md
 
 echo " "
 echo " ...Now running the force comparison tests... "
-for i in "${LSQ_JOBS}"
+for i in "${LSQ_FORCE_JOBS}"
 do
 
 	echo " "
@@ -112,10 +102,18 @@ do
 	cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
 	cp ../../test_suite-lsq/$i/current_output/force.txt     .
 	
-	../chimes_md < run_md.in > run_md.out		
+	if ../chimes_md < run_md.in > run_md.out ; then
+		 echo 'Chimes_md succeeded'
+		 SUCCESS=1
+	else
+		 echo 'Chimes_md failed'
+		 SUCCESS=0
+	fi
 	
 	cp *.* current_output
-	cp *.* correct_output
+	if [[ $SUCCESS -eq 1 ]] ; then
+		 cp *.* correct_output
+	fi
 	
 	cd ..
 done	
