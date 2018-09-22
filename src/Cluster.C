@@ -768,8 +768,8 @@ void CLUSTER_LIST::read_ff_params(ifstream &PARAMFILE, const vector<string>& TMP
 }
 
 
-double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string input_type,vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
-// Read the lsq cutoff parameters (S_MAXIM, S_MINIM).
+void CLUSTER_LIST::process_cutoff_params(string input_type,vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
+// Process the stored special lsq cutoff parameters (S_MAXIM, S_MINIM).
 // Returns the largest outer cutoff or the smallest inner cutoff found.
 {
 
@@ -778,6 +778,9 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 
   vector<doublevec*> data_vec(NCLUSTERS);
   vector<bool *> special_flag(NCLUSTERS);
+
+	vector<string> *input_ptr ;
+	string LINE ;
 
   if ( VEC.size()<1)
   {
@@ -792,6 +795,7 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 
   if ( input_type == "S_MAXIM" )
   {
+		input_ptr = &S_MAXIM_INPUT ;
 	 for ( int i = 0; i < NCLUSTERS; i++ ) 
 	 {
 		data_vec[i] = &(VEC[i].S_MAXIM);
@@ -802,6 +806,7 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
   }
   else if ( input_type == "S_MINIM" ) 
   {
+		input_ptr = &S_MINIM_INPUT ;
 	 for ( int i = 0; i < NCLUSTERS; i++ )
 	 {
 		data_vec[i] = &(VEC[i].S_MINIM);
@@ -810,107 +815,112 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
   }
   else
   {
-	 EXIT_MSG("UNKNOWN INPUT type: " + input_type + " " + LINE);
+	 EXIT_MSG("UNKNOWN INPUT type: " + input_type);
   }
 
-  vector<string> tokens;
+	if ( input_ptr->size() > 0 ) {
+		vector<string> tokens;
+		LINE = (*input_ptr)[0] ;
+		int count = 0 ;
 
-  if ( parse_space(LINE, tokens) < 5 ) 
-	 EXIT_MSG("Not enough tokens: " + LINE);
+		if ( parse_space(LINE, tokens) < 5 ) 
+			EXIT_MSG("Not enough tokens: " + LINE);
 
-  string TEMP_STR = tokens[3];
+		string TEMP_STR = tokens[3];
 			
-  if(TEMP_STR == "ALL" )
-  {				
-	 for(int i=0; i < NCLUSTERS; i++)
-	 {
-		for ( int j = 0; j < npairs; j++ )
-		{
-		  (*data_vec[i])[j] = stod(tokens[4]);
-		  *special_flag[i] = true;
+		if(TEMP_STR == "ALL" )
+		{				
+			for(int i=0; i < NCLUSTERS; i++)
+			{
+				for ( int j = 0; j < npairs; j++ )
+				{
+					(*data_vec[i])[j] = stod(tokens[4]);
+					*special_flag[i] = true;
+				}
+			}
+#if VERBOSITY == 1
+			if ( RANK == 0 ) cout << "	Note: Setting all " << natoms << "-body " + input_type + " values to " 
+														<<  (*data_vec[0])[0] << endl;
+#endif				
 		}
-	 }
-	#if VERBOSITY == 1
-	 if ( RANK == 0 ) cout << "	Note: Setting all " << natoms << "-body " + input_type + " values to " 
-								  <<  (*data_vec[0])[0] << endl;
-	#endif				
-  }
-  else if(TEMP_STR == "SPECIFIC" )
-  {
-	 int n_spec = stoi(tokens[4]);
+		else if(TEMP_STR == "SPECIFIC" )
+		{
+			int n_spec = stoi(tokens[4]);
 				
 #if VERBOSITY == 1
-	 if ( RANK == 0 ) 
-	 	cout << "	Note: Setting specific " << natoms << "-body " + input_type + " values: " << endl;
+			if ( RANK == 0 ) 
+				cout << "	Note: Setting specific " << natoms << "-body " + input_type + " values: " << endl;
 #endif	
 
-	 string cluster_name;
-	 vector<string> pair_names(npairs);
-	 vector<double> cutoff_vals(npairs);
+			string cluster_name;
+			vector<string> pair_names(npairs);
+			vector<double> cutoff_vals(npairs);
 
-	 for(int i=0; i< n_spec; i++)
-	 {
-		LINE = get_next_line(input);
+			for(int i=0; i< n_spec; i++)
+			{
+				++count ;
+				LINE = (*input_ptr)[count] ;
 
-		if ( parse_space(LINE, tokens) != 2 * npairs + 1 )
-		  EXIT_MSG("Wrong number of arguments: " + LINE);
+				if ( parse_space(LINE, tokens) != 2 * npairs + 1 )
+					EXIT_MSG("Wrong number of arguments: " + LINE);
 
-		cluster_name = tokens[0];
-		int cluster_index = 0;
-		if ( MAP.find(cluster_name) != MAP.end() ) 
-		  cluster_index = MAP[cluster_name];
-		else
-		{
-		  cout << "Did not find a map for cluster named: " << cluster_name << endl;
-		  cout << "Possible choices are: " << endl;
-		  for(int m=0; i<MAP_REVERSE.size(); m++)
-		  	cout << MAP_REVERSE[m] << endl;
+				cluster_name = tokens[0];
+				int cluster_index = 0;
+				if ( MAP.find(cluster_name) != MAP.end() ) 
+					cluster_index = MAP[cluster_name];
+				else
+				{
+					cout << "Did not find a map for cluster named: " << cluster_name << endl;
+					cout << "Possible choices are: " << endl;
+					for(int m=0; i<MAP_REVERSE.size(); m++)
+						cout << MAP_REVERSE[m] << endl;
 		  
 		  
-		  EXIT_MSG("Did not find a map for " + cluster_name);
-		}
+					EXIT_MSG("Did not find a map for " + cluster_name);
+				}
 
-		for ( int i = 0; i < npairs; i++ ) 
-		{
-		  pair_names[i] = tokens[i+1];
-		  cutoff_vals[i] = stod(tokens[i + npairs + 1]);
+				for ( int i = 0; i < npairs; i++ ) 
+				{
+					pair_names[i] = tokens[i+1];
+					cutoff_vals[i] = stod(tokens[i + npairs + 1]);
 
-		  try
-		  {
-			 pair_names[i] = ATOM_PAIRS[ PAIR_MAP[ pair_names[i] ] ].PRPR_NM;
-		  }
-		  catch(...)
-		  {
-			 cout << "ERROR: Unknown pair: " + LINE;
-		  }
-		  for ( int j = 0; j < npairs; j++ ) 
-		  {
-			 // Set the cutoff to be the same for all matching pairs.
-			 // This enforces consistency between pair cutoffs with the same name.
-			 if ( pair_names[i] == VEC[cluster_index].ATOM_PAIRS[j] )
-				(*data_vec[cluster_index])[j] = cutoff_vals[i];
-			 *special_flag[cluster_index] = true;
-		  }
+					try
+					{
+						pair_names[i] = ATOM_PAIRS[ PAIR_MAP[ pair_names[i] ] ].PRPR_NM;
+					}
+					catch(...)
+					{
+						cout << "ERROR: Unknown pair: " + LINE;
+					}
+					for ( int j = 0; j < npairs; j++ ) 
+					{
+						// Set the cutoff to be the same for all matching pairs.
+						// This enforces consistency between pair cutoffs with the same name.
+						if ( pair_names[i] == VEC[cluster_index].ATOM_PAIRS[j] )
+							(*data_vec[cluster_index])[j] = cutoff_vals[i];
+						*special_flag[cluster_index] = true;
+					}
+				}
+			}
+			if ( RANK == 0 ) 
+			{
+				for ( int i = 0; i < NCLUSTERS; i++ ) 
+				{
+					cout << "	";
+					for ( int j = 0; j < natoms; j++ ) 
+					{
+						cout << VEC[i].ATOM_NAMES[j] << " ";
+					}
+					for ( int j = 0; j < npairs; j++ ) 
+					{
+						cout << VEC[i].ATOM_PAIRS[j] << " " << (*data_vec[i])[j] << " ";
+					}
+					cout << endl;
+				}
+				cout << endl;
+			}
 		}
-	 }
-	 if ( RANK == 0 ) 
-	 {
-		for ( int i = 0; i < NCLUSTERS; i++ ) 
-		{
-		  cout << "	";
-		  for ( int j = 0; j < natoms; j++ ) 
-		  {
-			 cout << VEC[i].ATOM_NAMES[j] << " ";
-		  }
-		  for ( int j = 0; j < npairs; j++ ) 
-		  {
-			 cout << VEC[i].ATOM_PAIRS[j] << " " << (*data_vec[i])[j] << " ";
-		  }
-		  cout << endl;
-		}
-		cout << endl;
-	 }
-  }
+	}
   double val = 0;
   if ( input_type == "S_MAXIM" ) 
   {
@@ -925,6 +935,7 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 	 }
 	 if ( RANK == 0 ) 
 		cout << "     	Max " << natoms << "-body cutoff = " << val << endl << endl;
+	 MAX_CUTOFF = val ;
   }
   else if ( input_type == "S_MINIM" ) 
   {
@@ -940,7 +951,45 @@ double CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string inpu
 	 if ( RANK == 0 ) 
 		cout << "     Min " << natoms << "-body cutoff = " << val << endl;
   }
-  return val;
+}
+
+
+void CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string input_type)
+// Read the lsq cutoff parameters (S_MAXIM, S_MINIM) and store for later processing by process_cutoff_params.
+{
+	vector<string> *line_ptr ;
+
+  if ( input_type == "S_MAXIM" )
+  {
+		line_ptr = &S_MAXIM_INPUT ;
+  }
+  else if ( input_type == "S_MINIM" ) 
+  {
+		line_ptr = &S_MINIM_INPUT ;
+  }
+  else
+  {
+	 EXIT_MSG("UNKNOWN INPUT type: " + input_type + " " + LINE);
+  }
+	line_ptr->push_back(LINE) ;
+
+  vector<string> tokens;
+
+  if ( parse_space(LINE, tokens) < 5 ) 
+	 EXIT_MSG("Not enough tokens: " + LINE);
+
+  string TEMP_STR = tokens[3];
+			
+  if ( TEMP_STR == "SPECIFIC" )
+  {
+	 int n_spec = stoi(tokens[4]);
+				
+	 for(int i=0; i< n_spec; i++)
+	 {
+		LINE = get_next_line(input);
+		line_ptr->push_back(LINE) ;
+	 }
+	}
 }
 
 void CLUSTER_LIST::build_int_maps(vector<string> ATOMTYPE, vector<int> ATOMTYPE_IDX, vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP)
@@ -1078,7 +1127,8 @@ int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<str
   }
 
   set_default_cutoffs(ATOM_PAIRS);
-  
+  process_cutoff_params("S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
+  process_cutoff_params("S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
 // This needed to be moved so that cheby parameters are built AFTER special cutoffs are read in
 //  for ( int i = 0; i < VEC.size(); i++ ) 
 //	 VEC[i].set_cheby_vals(ATOM_PAIRS);

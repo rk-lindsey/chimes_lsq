@@ -225,6 +225,9 @@ class CLUSTER_LIST
 public:
 
   int 			NCLUSTERS;		// The number of CLUSTERS in the list.
+	double MAX_CUTOFF ;   // The maximum interaction cutoff for all clusters.
+	vector<string> S_MAXIM_INPUT ; // Input for special smaxim values.
+	vector<string> S_MINIM_INPUT ; // Input for special sminim values.
   vector<CLUSTER> 	VEC;			// A vector containing all clusters ... Need to store cluster pointers so that polymorphism with different cluster types works.
   map<string,int> 	MAP;			// A map from pair types into the VEC index.
   map<int,string> 	MAP_REVERSE;		// A map from the VEC index into the pair types.
@@ -281,8 +284,11 @@ public:
 // Read the force field parameters for a cluster list.
   void read_ff_params(ifstream &PARAMFILE, const vector<string>& TMP_ATOMTYPE);
 
-  // Read smaxim, sminim for the cluster list.
-  double read_cutoff_params(istream &input, string LINE, string input_type, vector<PAIRS> & PAIRS_LIST, map<string,int> &PAIR_MAP);
+  // Read smaxim, sminim for the cluster list and store the input.
+  void read_cutoff_params(istream &input, string LINE, string input_type) ;
+
+	// Process cutoff parameter values from stored input.
+	void process_cutoff_params(string input_type,vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
 
   // Parse the force cutoff parameters for a cluster.
   void parse_fcut(string LINE);

@@ -3024,24 +3024,29 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 				
 		  else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
 		  {
-			 TRIPS.read_cutoff_params(PARAMFILE, LINE, "S_MINIM", FF_2BODY, PAIR_MAP) ;
+				TRIPS.read_cutoff_params(PARAMFILE, LINE, "S_MINIM") ;
+				TRIPS.process_cutoff_params("S_MINIM", FF_2BODY, PAIR_MAP) ;
 		  }
 
 		  else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
 		  {
-			 NEIGHBOR_LIST.MAX_CUTOFF_3B = 
-				TRIPS.read_cutoff_params(PARAMFILE, LINE, "S_MAXIM", FF_2BODY, PAIR_MAP) ;
+				TRIPS.read_cutoff_params(PARAMFILE, LINE, "S_MAXIM") ;
+				TRIPS.process_cutoff_params("S_MAXIM", FF_2BODY, PAIR_MAP) ;
+				NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF ;
+
 		  }
 				
 		  else if(LINE.find("SPECIAL 4B S_MINIM:") != string::npos)
 		  {
-			 QUADS.read_cutoff_params(PARAMFILE, LINE, "S_MINIM", FF_2BODY, PAIR_MAP) ;
+				QUADS.read_cutoff_params(PARAMFILE, LINE, "S_MINIM") ;
+				QUADS.process_cutoff_params("S_MINIM",FF_2BODY, PAIR_MAP) ;
 		  }
 				
 		  else if(LINE.find("SPECIAL 4B S_MAXIM:") != string::npos)
 		  {
-			 NEIGHBOR_LIST.MAX_CUTOFF_4B = 
-				QUADS.read_cutoff_params(PARAMFILE, LINE, "S_MAXIM", FF_2BODY, PAIR_MAP) ;
+				QUADS.read_cutoff_params(PARAMFILE, LINE, "S_MAXIM") ;
+				QUADS.process_cutoff_params("S_MAXIM",FF_2BODY, PAIR_MAP) ;
+				NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF ;
 		  }
 		}
 

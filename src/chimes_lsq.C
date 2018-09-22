@@ -35,6 +35,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, C
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby) ;
 
 static void add_col_of_ones(int item, bool DO_ENER, bool DO_STRESS, bool DO_STRESS_ALL, int NATOMS, ofstream & OUTFILE);
+static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, 
+													 CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
+													 NEIGHBORS & NEIGHBOR_LIST,
+													 vector<int>& TMP_ATOMTYPEIDX,
+													 vector<string>& TMP_ATOMTYPE) ;
 
 // Global variables declared as externs in functions.h, and declared in functions.C
 
@@ -121,6 +126,8 @@ int main(int argc, char* argv[])
 
 	read_lsq_input(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, PAIR_MAP_REVERSE, INT_PAIR_MAP,  CHARGE_CONSTRAINTS, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
  
+	// Build many-body interaction clusters if necessary.
+	build_clusters(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE) ;
 
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
 	{
@@ -1126,16 +1133,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 		if(LINE.find("# ENDFILE #") != string::npos)
 		{
-		
-			// Set up the Cheby variables
-			
-			if(CONTROLS.USE_3B_CHEBY)
-				TRIPS.build_cheby_vals(ATOM_PAIRS);
-
-			if(CONTROLS.USE_4B_CHEBY)
-				QUADS.build_cheby_vals(ATOM_PAIRS);
-			
-		
 			// Run a few checks to make sure logic is correct
 		 
 			if(CONTROLS.IF_SUBTRACT_COORD && CONTROLS.FIT_POVER)
@@ -1886,20 +1883,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				if ( ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) 
 					ATOM_PAIRS[i].set_cheby_vals() ;
 			}
-			if(CONTROLS.USE_3B_CHEBY)
-			{
-				// Generate unique triplets
-				TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ; 
-				TRIPS.print(false) ;
-			}	
-			
-			if(CONTROLS.USE_4B_CHEBY)	// WORKS
-			{
-				// Generate unique quadruplets and thier corresponding sets of powers
-				QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX) ;
-				QUADS.print(false) ;
-			}			
-
 		}
 		
 		else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING")!= string::npos)
@@ -1963,22 +1946,22 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		
 		else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
 		{
-		  NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.read_cutoff_params(cin, LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
+		  TRIPS.read_cutoff_params(cin, LINE, "S_MAXIM") ;
 		}
 		
 		else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
 		{
-		  TRIPS.read_cutoff_params(cin, LINE, "S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
+		  TRIPS.read_cutoff_params(cin, LINE, "S_MINIM") ;
 		}
 		
 		else if(LINE.find("SPECIAL 4B S_MAXIM:") != string::npos)
 		{
-		  NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.read_cutoff_params(cin, LINE, "S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
+		  QUADS.read_cutoff_params(cin, LINE, "S_MAXIM") ;
 		}
 
 		else if(LINE.find("SPECIAL 4B S_MINIM:") != string::npos)
 		{
-		  QUADS.read_cutoff_params(cin, LINE, "S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
+		  QUADS.read_cutoff_params(cin, LINE, "S_MINIM") ;
 		}
 		
 		else if ( (LINE.find("# FCUTTYP #") != string::npos) && ((CONTROLS.CHEBY_3B_ORDER >0)||(CONTROLS.CHEBY_4B_ORDER>0)))
@@ -2163,3 +2146,36 @@ static void add_col_of_ones(int item, bool DO_ENER, bool DO_STRESS, bool DO_STRE
 			
 	}
 }
+
+static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, 
+													 CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
+													 NEIGHBORS & NEIGHBOR_LIST,
+													 vector<int>& TMP_ATOMTYPEIDX,
+													 vector<string>& TMP_ATOMTYPE)
+// Build the many-body interaction clusters after the input has been read.
+{
+	if(CONTROLS.USE_3B_CHEBY)
+	{
+		// Generate unique triplets
+		TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ; 
+		TRIPS.print(false) ;
+		NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF ;
+	}	
+			
+	if(CONTROLS.USE_4B_CHEBY)
+	{
+		// Generate unique quadruplets and thier corresponding sets of powers
+		QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX) ;
+		QUADS.print(false) ;
+		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF ;
+	}			
+		
+	// Set up the Cheby variables
+			
+	if(CONTROLS.USE_3B_CHEBY)
+		TRIPS.build_cheby_vals(ATOM_PAIRS);
+
+	if(CONTROLS.USE_4B_CHEBY)
+		QUADS.build_cheby_vals(ATOM_PAIRS);
+}
+			
