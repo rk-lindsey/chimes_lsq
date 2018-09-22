@@ -61,7 +61,7 @@ do
 			  
 	fi		
 	cp *.* current_output
-	if [[ $SUCESS -eq 1 ]] ; then
+	if [[ $SUCCESS -eq 1 ]] ; then
 		 cp *.* correct_output
 	fi
 	
