@@ -1,0 +1,50 @@
+####### CONTROL VARIABLES #######
+
+# TRJFILE #
+        9350.combine-scs-2-a.fit.xyzf
+# WRAPTRJ # 
+        true
+# NFRAMES # 
+        100
+# NLAYERS #
+        1
+# FITCOUL #
+        false
+# CNSCOUL # 
+        false   
+# FITSTRS # 
+        false
+# FITENER #
+        false   
+# FITPOVR # 
+        false
+# PAIRTYP # 
+        CHEBYSHEV 12 5
+# CHBTYPE #
+        MORSE
+
+####### TOPOLOGY VARIABLES #######
+
+# NATMTYP # 
+        2
+
+# TYPEIDX #     # ATM_TYP #     # ATMCHRG #     # ATMMASS # 
+1               C                0.0            12.011
+2               O                0.0            15.999
+
+# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA #        # USEOVRP #     # NIJBINS #     # NIKBINS #     # NJKBINS #
+1               C               C               0.988           8.00            0.01            1.35                    false           0               0               0
+2               O               O               0.911           8.00            0.01            2.55                    false           0               0               0
+3               C               O               0.876           8.00            0.01            1.15                    false           0               0               0
+
+SPECIAL 3B S_MAXIM: SPECIFIC 4
+CCCCCC CC CC CC 4.4 4.4 4.4
+COCOCC CC CO CO 4.4 4.0 4.0
+OOCOCO CO CO OO 4.0 4.0 6.5
+OOOOOO OO OO OO 6.5 6.5 6.5
+
+# FCUTTYP #
+        CUBIC   
+
+# ENDFILE #
+

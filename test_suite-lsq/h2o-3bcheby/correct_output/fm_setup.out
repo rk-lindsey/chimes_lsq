@@ -36,6 +36,15 @@ Reading input file...
 		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
 
+	Attempting to read 2 charge constraints...:
+		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
+		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
+
+	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
+
+Note: Will use cubic scaling of: 1
+
+
 	Made the following triplets: 0    
 
 		Atom type idxs:  0 0 0  Triplet name:       OOOOOO Unique triplet ID 111 index:    0
@@ -55,6 +64,9 @@ Reading input file...
 	Made the following triplets: 3    
 
 		Atom type idxs:  1 1 1  Triplet name:       HHHHHH Unique triplet ID 222 index:    3
+     Max 3-body cutoff = 6.000000
+
+     Min 3-body cutoff = 0.750000
 
 	The following unique triplets of atoms have been identified:
 
@@ -101,15 +113,6 @@ Reading input file...
 		      1       1   0   1         0               0               2        
 		      2       1   1   0         0               0               2        
 		      3       1   1   1         3               1               6        
-
-
-	Attempting to read 2 charge constraints...:
-		1	 OO (0) HH (1) OH (2) 1000.000000 4000.000000 4000.000000 0.000000
-		2	 OO (0) HH (1) OH (2) 1000.000000 -4000.000000 0.000000 0.000000
-
-	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
-
-Note: Will use cubic scaling of: 1.000000
 
 ...input file read successful: 
 
