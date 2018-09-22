@@ -93,7 +93,6 @@ do
 		if [ "$j" == params.txt ]; then
 			j=params.txt-tailed
 			tail -n+2 params.txt > $j
-			tail -n+2 ../correct_output/params.txt > ../correct_output/$j
 		fi
 		
 	done
