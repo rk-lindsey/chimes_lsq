@@ -26,7 +26,13 @@ echo "NP = $NP"
 
 cd ../src
 rm -f *.o chimes_lsq
-make -f Makefile-TS-LSQ chimes_lsq
+if make -f Makefile-TS-LSQ chimes_lsq ; then
+	 echo "Compiling chimes_lsq succeeded"
+else
+	 echo "Compiling chimes_lsq failed"
+	 exit 1
+fi
+
 mv chimes_lsq ../test_suite-lsq/
 cd ../test_suite-lsq
 
@@ -49,6 +55,10 @@ fi
 echo ""
 echo "SETTING UP FOR SPLINES_LS..."
 
+if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
+	 RUN_JOB=""
+fi
+
 for i in $JOBS
 do
 
@@ -57,13 +67,19 @@ do
 
 	cd $i
 	
-	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		 ../chimes_lsq < fm_setup.in > fm_setup.out
+
+	if $RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out ; then
+		 echo "Chimes_lsq succeeded"
+		 SUCCESS=1
 	else
-		 $RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out
+		 echo "Chimes_lsq failed"
+		 SUCCESS=0
 	fi	
- 	cp A.txt b.txt params.header fm_setup.out ff_groups.map correct_output	
-	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
+
+	if [[ $SUCCESS -eq 1 ]] ; then
+ 		 cp A.txt b.txt params.header fm_setup.out ff_groups.map correct_output	
+		 mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
+	fi
 	
 	cd ..
 done
@@ -85,7 +101,13 @@ do
 
 	cd $i/current_output
 	
-	$RUN_LSQ_PYTHON_CODE > params.txt
+	if $RUN_LSQ_PYTHON_CODE > params.txt ; then
+		 echo "LSQ code succeeded"
+		 SUCCESS=1
+	else
+		 echo "LSQ code failed"
+		 SUCCESS=0
+	fi
 	
 	for j in params.txt force.txt
 	do
@@ -100,7 +122,9 @@ do
 
 	cd ../..
 	
-	cp $i/current_output/* $i/correct_output
+	if [[ $SUCCESS -eq 1 ]] ; then
+		 cp $i/current_output/* $i/correct_output
+	fi
 done
 
 exit 0

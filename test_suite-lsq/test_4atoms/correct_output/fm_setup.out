@@ -27,10 +27,17 @@ Reading input file...
 		CC: 0 0 0
 
 		Atom type idxs:  0 0 Pair name:   CC Explicit pair index:    0 Unique pair index:    0
+	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
+
+Note: Will use cubic scaling of: 1
+
 
 	Made the following triplets: 0    
 
 		Atom type idxs:  0 0 0  Triplet name:       CCCCCC Unique triplet ID 111 index:    0
+     Max 3-body cutoff = 20.000000
+
+     Min 3-body cutoff = 1.305000
 
 	The following unique triplets of atoms have been identified:
 
@@ -157,6 +164,9 @@ Reading input file...
 	Made the following quadruplets: 0       
 
 		Atom type idxs:  0 0 0 0  Quadruplet name: CCCCCCCCCCCC Unique quadruplet ID 1111 index:    0
+     Max 4-body cutoff = 20.000000
+
+     Min 4-body cutoff = 1.305000
 
 	The following unique quadruplets of atoms have been identified:
 
@@ -4027,10 +4037,6 @@ Reading input file...
 		      3858    3   3   3   3   2   3         3854            254             4        
 		      3859    3   3   3   3   3   2         3854            254             4        
 		      3860    3   3   3   3   3   3         3860            255             24       
-
-	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
-
-Note: Will use cubic scaling of: 1.000000
 
 ...input file read successful: 
 
