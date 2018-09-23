@@ -3,7 +3,7 @@ Reading input file...
 	# TRJFILE #: input.xyzf
 	# WRAPTRJ #: 1
 	# NFRAMES #: 63
-	# N_LAYERS #: 1
+	# NLAYERS #: 1
 	# FITCOUL #: false
 	# FITPOVR #: false
 	# PAIRTYP #: DFTBPOLY ....NOTE: Forces reported in atomic units.
@@ -27,6 +27,10 @@ Reading input file...
 		HH: 0 0 0
 		OH: 0 0 0
 
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
 
 Note: Will use cubic scaling of: 1
 
