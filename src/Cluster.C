@@ -934,7 +934,7 @@ void CLUSTER_LIST::process_cutoff_params(string input_type,vector<PAIRS> & ATOM_
 		}
 	 }
 	 if ( RANK == 0 ) 
-		cout << "     	Max " << natoms << "-body cutoff = " << val << endl << endl;
+		cout << "     Max " << natoms << "-body cutoff = " << val << endl << endl;
 	 MAX_CUTOFF = val ;
   }
   else if ( input_type == "S_MINIM" ) 

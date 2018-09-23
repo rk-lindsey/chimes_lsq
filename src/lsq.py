@@ -267,21 +267,20 @@ print "PAIR " + POTENTIAL + " PARAMS \n"
 CASE_BY_CASE = False
 
 SNUM_2B = 0
-SNUM_4B = 0
 
-if POTENTIAL == "CHEBYSHEV" or POTENTIAL == "DFTBPOLY":
+if POTENTIAL == "CHEBYSHEV" :
     TMP = hf[7].split()
     
     if len(TMP) >= 4:
-        if len(TMP) >= 5:
-            SNUM_4B = int(TMP[4])
-        
         SNUM_2B = int(TMP[2])
         
         #print "Expecting:"
         #print SNUM_2B
         #print SNUM_3B
         #print SNUM_4B        
+elif POTENTIAL == "DFTBPOLY" :
+    TMP = hf[7].split()
+    SNUM_2B = int(TMP[2])
 
 elif POTENTIAL == "INVRSE_R":
     TMP = hf[7].split()
@@ -539,7 +538,14 @@ print "ENDFILE"
 
 total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS 
 if total_params != len(x) :
-    sys.stderr.write( "Error in counting parameters") ;
+    sys.stderr.write( "Error in counting parameters\n") 
+    sys.stderr.write("len(x) " + str(len(x)) + "\n") 
+    sys.stderr.write("TOTAL_PAIRS " + str(TOTAL_PAIRS) + "\n") 
+    sys.stderr.write("SNUM_2B" + str(SNUM_2B) + "\n") 
+    sys.stderr.write("COUNTED_TRIP_PARAMS " + str(COUNTED_TRIP_PARAMS) + "\n") 
+    sys.stderr.write("COUNTED_QUAD_PARAMS " + str(COUNTED_QUAD_PARAMS) + "\n")
+    sys.stderr.write("COUNTED_COUL_PARAMS " + str(COUNTED_COUL_PARAMS) + "\n")
+    sys.stderr.write("OVERCOORD_PARAMS " + str(OVERCOORD_PARAMS) + "\n")
     exit(1)
 		
 if TEST_SUITE_RUN == "do":
