@@ -34,7 +34,13 @@ SOURCE_BASE="${TESTSU_BASE}/../src/"
 
 cd ../src
 rm -f *o chimes_lsq
-make -f Makefile-TS-LSQ chimes_lsq
+if make -f Makefile-TS-LSQ chimes_lsq ; then
+	 echo 'Succeeded in compiling chimes_lsq'
+else
+	 echo 'Compiling chimes_lsq failed'
+	 exit
+fi
+
 mv chimes_lsq ../test_suite-lsq/
 cd ../test_suite-lsq
 
@@ -77,11 +83,14 @@ do
 		 else
 			  echo 'Chimes_lsq failed'
 			  SUCCESS=0
+			  PASS=false
+			  ALL_PASSED=false
 		 fi
 	fi
-	
+
+	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output	
+
 	if [[ $SUCCESS -eq 1 ]] ; then
-		 mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
 
 		 for j in A.txt b.txt params.header fm_setup.out
 		 do
@@ -117,7 +126,6 @@ do
 			  echo "		...Test failed."
 		 fi
 	fi 
-	
 	cd ..
 done
 
@@ -140,76 +148,85 @@ do
 
 	cd $i/current_output
 	rm -rf diff-*
-	$RUN_LSQ_PYTHON_CODE > params.txt
-
-	for j in params.txt force.txt
-	do
-	
-		if [ "$j" == params.txt ]; then
-			j=params.txt-tailed
-			tail -n+2 params.txt > $j
-			tail -n+2 ../correct_output/params.txt > ../correct_output/$j
-		fi
-		
-		# Ignore the date when running diff...
-		
-		diff ../correct_output/$j $j | awk '!/#/{print}' > ../diff-$j.out
-	
-		NO_DIFF_LINES=`cat ../diff-$j.out | wc -l`
-	
-		if [ $NO_DIFF_LINES -gt 0 ] ; then
-			echo " "
-			echo "Differences found in $j files:"
-			echo " "
-			if [ "$j" == "force.txt" ] ; then
-				paste ../correct_output/force.txt force.txt > check_tol.dat
-				awk 'BEGIN{tol=10^-7;any=0}{val=$1-$2;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat | tee tol_status.dat
-				echo "	Check file ../diff-$j.out for any other (non-parameter) differences."
-				rm -f check_tol.dat			
-
-			else
-				# See if the differences exist between parameters... 
-				# if so, tell the user what the tolerance is, and
-				# direct them to the diff file to look at to make
-				# sure that is the only difference
-				
-				paste ../correct_output/test_suite_params.txt test_suite_params.txt > check_tol.dat
-				awk 'BEGIN{tol=10^-9;any=0}{val=$2-$4;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat  | tee tol_status.dat
-				rm -f check_tol.dat
-			fi
-			echo " "
-			
-			TECHNICAL_PASS_STATUS=`grep "No" tol_status.dat`
-
-			
-			if [[ "$TECHNICAL_PASS_STATUS" != *"No"* ]]; then
-				TECHNICAL_PASS=false
-			fi
-			
-			PASS=false
-		fi
-		
-		if [ "$j" == params.txt ]; then
-			rm -rf $j
-			rm -rf ../correct_output/$j
-		fi
-	done
-	
-	if [ "$PASS" = true ] ; then
-		echo "		...Test passed."
-		rm -f ../diff-*
+	if $RUN_LSQ_PYTHON_CODE > params.txt ; then
+		 echo "LSQ code succeeded"
+		 SUCCESS=1 
 	else
-		SVD_PASSED=false
-		ALL_PASSED=false
-		
-		if [ "$TECHNICAL_PASS" = true ]; then
-			echo "		...Technical test pass - all parameters within tolerances, but other aspects may differ."
-		else
-			echo "		...Test failed."
-		fi
+		 echo "LSQ code failed"
+		 SUCCESS=0
+		 PASS=false
+		 SVD_PASSED=false
 	fi
 
-	cd ../..
+	if [[ $SUCCESS -eq 1 ]] ; then
+		 for j in params.txt force.txt
+		 do
+	
+			  if [ "$j" == params.txt ]; then
+					j=params.txt-tailed
+					tail -n+2 params.txt > $j
+					tail -n+2 ../correct_output/params.txt > ../correct_output/$j
+			  fi
+		
+			  # Ignore the date when running diff...
+		
+			  diff ../correct_output/$j $j | awk '!/#/{print}' > ../diff-$j.out
+	
+			  NO_DIFF_LINES=`cat ../diff-$j.out | wc -l`
+	
+			  if [[ $NO_DIFF_LINES -gt 0 ]] ; then
+					echo " "
+					echo "Differences found in $j files:"
+					echo " "
+					if [ "$j" == "force.txt" ] ; then
+						 paste ../correct_output/force.txt force.txt > check_tol.dat
+						 awk 'BEGIN{tol=10^-7;any=0}{val=$1-$2;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat | tee tol_status.dat
+						 echo "	Check file ../diff-$j.out for any other (non-parameter) differences."
+						 rm -f check_tol.dat			
+					else
+						 # See if the differences exist between parameters... 
+						 # if so, tell the user what the tolerance is, and
+						 # direct them to the diff file to look at to make
+						 # sure that is the only difference
+				
+						 paste ../correct_output/test_suite_params.txt test_suite_params.txt > check_tol.dat
+						 awk 'BEGIN{tol=10^-9;any=0}{val=$2-$4;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat  | tee tol_status.dat
+						 rm -f check_tol.dat
+					fi
+					echo " "
+			
+					TECHNICAL_PASS_STATUS=`grep "No" tol_status.dat`
+
+			
+					if [[ "$TECHNICAL_PASS_STATUS" != *"No"* ]]; then
+						 TECHNICAL_PASS=false
+					fi
+					
+					PASS=false
+			  fi
+		
+			  if [ "$j" == params.txt ]; then
+					rm -rf $j
+					rm -rf ../correct_output/$j
+			  fi
+		 done
+	
+		 if [ "$PASS" = true ] ; then
+			  echo "		...Test passed."
+			  rm -f ../diff-*
+		 else
+			  SVD_PASSED=false
+			  ALL_PASSED=false
+		
+			  if [ "$TECHNICAL_PASS" = true ]; then
+					echo "		...Technical test pass - all parameters within tolerances, but other aspects may differ."
+			  else
+					echo "		...Test failed."
+			  fi
+		 fi
+
+		 cd ../..
+	fi
 done
 
 echo " "
