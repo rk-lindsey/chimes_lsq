@@ -959,16 +959,18 @@ int main(int argc, char* argv[])
 
 	  string chtype = Cheby::get_trans_string(ATOM_PAIRS[i].CHEBY_TYPE) ;
 		header << "	" << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-			 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-			 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-			 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
-			 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
-			 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
-				 << setw(16) << left << chtype ;
-		if(ATOM_PAIRS[i].CHEBY_TYPE == Cheby_trans::MORSE )
-			header << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl; 
-		else
-			header << endl;
+					 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
+					 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
+					 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
+					 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
+					 << setw(16) << left << ATOM_PAIRS[i].S_DELTA ;
+
+		if ( ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) {
+			header << setw(16) << left << chtype ;
+			if(ATOM_PAIRS[i].CHEBY_TYPE == Cheby_trans::MORSE )
+				header << setw(16) << left << ATOM_PAIRS[i].LAMBDA ;
+		}
+		header << endl;
 	}
 	
 
