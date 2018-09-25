@@ -75,7 +75,7 @@ build_tests_lsq:
 ##################################
 
 
-CXX_MD_SRC=chimes_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C
+CXX_MD_SRC=chimes_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C feexcept.C
 CXX_MD_HEADER=functions.h lmppath.h Fcut.h Cluster.h util.h Cheby.h
 
 FLAGLMP=-D LINK_LAMMPS

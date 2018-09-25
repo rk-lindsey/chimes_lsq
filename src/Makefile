@@ -38,7 +38,7 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 
 #CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
 #CXX=mpicxx  -std=c++11  -g -Wall -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
-CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
+#CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
 #CXX=mpicxx -std=c++11 -g -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
 #CXX=icc -g				# Serial, for debugging
 #CXX=icc -O3
@@ -48,7 +48,7 @@ CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines
 # Below: Other debugging/optimiazation options
 #
 #CXX=clang++ -g -std=c++11 -g -Wall
-#CXX=g++ -g -std=c++11 -Wall -Wno-sign-compare
+CXX=g++ -g -std=c++11 -Wall -Wno-sign-compare -DENABLE_FP_EXCEPT
 
 #CXX=icpc -fast -Wall
 
@@ -79,7 +79,7 @@ build_tests_lsq:
 # MAKE THE MD CODE
 ##################################
 
-CXX_MD_SRC=chimes_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C
+CXX_MD_SRC=chimes_md.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C feexcept.C
 CXX_MD_HEADER=functions.h lmppath.h Fcut.h Cluster.h util.h Cheby.h io_styles.h 
 
 FLAGLMP=-D LINK_LAMMPS

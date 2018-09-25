@@ -72,6 +72,9 @@ int main(int argc, char* argv[])
 		RANK   = 0;
 	#endif
 	
+#ifdef ENABLE_FP_EXCEPT
+	enable_fp_exceptions() ;
+#endif
 	
 	//////////////////////////////////////////////////
 	//

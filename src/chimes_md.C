@@ -148,6 +148,10 @@ int main(int argc, char* argv[])
 	 cout <<" Will run on " << NPROCS << " processor(s)." << endl;
 
 
+#ifdef ENABLE_FP_EXCEPT
+	enable_fp_exceptions() ;
+#endif
+
   ////////////////////////////////////////////////////////////
   // Define/initialize important variables
   ////////////////////////////////////////////////////////////
@@ -693,20 +697,25 @@ FF_SETUP_1:
   {
   
   	for(int j=0; j<TMP_ATOMTYPE.size(); j++)
-		if (SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[j])
-			TMP_NATOMTYPE[j]++;
-			
-	 for(int i=0; i<NATMTYP; i++)
-	 {
-		if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
+			if (SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[j])
+				TMP_NATOMTYPE[j]++;
+		int i ;
+		for( i=0; i<NATMTYP; i++)
 		{
+			if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
+			{
 				
-		  SYSTEM.CHARGES[a]      = TMP_CHARGES[i];
-		  SYSTEM.MASS[a]         = TMP_MASS[i];
-		  SYSTEM.ATOMTYPE_IDX[a] = TMP_ATOMTYPEIDX[i];
-		  break;
-		}			
-	 }
+				SYSTEM.CHARGES[a]      = TMP_CHARGES[i];
+				SYSTEM.MASS[a]         = TMP_MASS[i];
+				SYSTEM.ATOMTYPE_IDX[a] = TMP_ATOMTYPEIDX[i];
+				break;
+			}			
+		}
+		if ( i == NATMTYP ) 
+		{
+			cout << "A definition was not found for atom " << a << endl ;
+			exit_run(1) ;
+		}
   }
 
   if(RANK==0)
