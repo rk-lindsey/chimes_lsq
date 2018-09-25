@@ -10,7 +10,7 @@ check_translate:
 	mv forceout.txt forceout.translate.txt
 	srun -n $(NP)	../chimes_md < run_md.in > orig_4b_force.out	
 	mv forceout.txt forceout.orig.txt
-	diff forceout.orig.txt forceout.translate.txt
+	perl ../../contrib/compare/compare.pl forceout.orig.txt forceout.translate.txt
 
 clean :
 	rm -f force.txt *.out forceout*.txt *.sort.txt *.sort2.txt output.* traj.gen

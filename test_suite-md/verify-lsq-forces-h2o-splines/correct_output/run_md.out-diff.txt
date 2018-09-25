@@ -1,10 +1,63 @@
-33a34
-> 	...Ignoring last three fields of atom info lines in xyzf file... 
-260c261
+15c15
+< 	# FRQTRAJ #: 20
+---
+> 	# FRQDFTB #: 20
+17c17
+< 		... printing       50 frames. 
+---
+> 		... printing 50 frames. 
+28,29c28,29
+<       Opening force.txt to read forces for comparison
+<      ...Read the following coordinate file extension: xyzf
+---
+> 	Opening force.txt to read forces for comparison
+> 	...Read the following coordinate file extension: xyzf
+31c31
+<      ...Read box dimensions: 8.6091309 8.6091309 8.6091309
+---
+> 	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+34c34
+< 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+---
+> 	... Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+52d51
+< Initializing velocities via box Muller...
+71d69
+< 		...Use 4-body Cheby params?     false
+77d74
+< 	...Read FF quadruplet specifications...
+125,135d121
+<       Total system charge = -0.0000
+<       Charges modified for exact neutrality (e):
+<        O -0.537962753
+<        H 0.268981523
+< 
+<      
+<      Pair charges modified for exact neutrality:
+<        OO 96.100542105
+<        HH 24.025161746
+<        OH -48.050297272
+< Atom properties:
+151,152d136
+< 	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+< 		...with steepness and offsets of: 2.0000 0.0000
+391,392c375,376
+< 		110 0.0000
 < 		111 0.0000
 ---
+> 		110 -0.0000
 > 		111 -0.0000
-375c376
-< 		110 -0.0000
+511,512c495,496
+< 		OO 0.2894 (96.1005)
+< 		HH 0.0724 (24.0252)
 ---
-> 		110 0.0000
+> 		OO 0.2894 (96.1006)
+> 		HH 0.0724 (24.0251)
+525c509
+< Generating fast maps... 
+---
+> Generating fast maps 
+543c527
+< 	K-space accuracy estimate = 0.0000008680
+---
+> 	K-space accuracy estimate = 0.00000086798168

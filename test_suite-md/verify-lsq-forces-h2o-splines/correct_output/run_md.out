@@ -12,9 +12,9 @@ Reading the simulation control input file...
 	# VELINIT #: GEN ... generating velocites via box Muller
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRESSUR #: 0 GPa
-	# FRQDFTB #: 20
+	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
-		... printing 50 frames. 
+		... printing       50 frames. 
 	# FRQENER #: 10
 	# PRNTFRC #: true ...and will be printed every 1 frames.
 		... printing every 0.125 fs, 
@@ -25,13 +25,13 @@ Setting up the data objects...
    ...setup complete
 
 Reading initial coordinates and forces...
-	Opening force.txt to read forces for comparison
-	...Read the following coordinate file extension: xyzf
+      Opening force.txt to read forces for comparison
+     ...Read the following coordinate file extension: xyzf
    ...Read the following number of atoms: 96
-	...Read box dimensions: 8.6091309 8.6091309 8.6091309
+     ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead: force.txt
-	... Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
    ...read complete for file input.xyzf
 
 Reading atom info from parameter file...
@@ -49,6 +49,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 Setting up thermostats/barostats/velocities...
 	...Configuring constraints for a NVT-MTK simulation.
 	...Setting thermostat time constant to: 10.0000
+Initializing velocities via box Muller...
    ...setup complete
 
 Running velocity sanity checks...
@@ -67,11 +68,13 @@ Reading force field parameters...
 		...Compute ReaxFF overbonding?  true
 		...Use fit overbonding param?   true
 		...Use 3-body Cheby params?     false
+		...Use 4-body Cheby params?     false
 	...Read FF controls...
 Attempting to read pairtype...
 	...Read FF interaction type...
 	...Read general FF params...
 	...Read FF triplet specifications...
+	...Read FF quadruplet specifications...
 	...Reading all remaining force field parameters...
 		Will use a simple linear force model for poorly sampled positions
 			i.e. for |spline coefficients| < 1.0 at close separation distance...
@@ -119,6 +122,17 @@ Attempting to read pairtype...
 			   2 -360.3509
 			   -100.0000
 		Re-setting individual atom charges based on pair charges :
+      Total system charge = -0.0000
+      Charges modified for exact neutrality (e):
+       O -0.537962753
+       H 0.268981523
+
+     
+     Pair charges modified for exact neutrality:
+       OO 96.100542105
+       HH 24.025161746
+       OH -48.050297272
+Atom properties:
 		0     O , q (e): -0.538, mass (amu):  15.9994
 		1     H , q (e):  0.269, mass (amu):   1.0079
 	...Read 2-body FF params...
@@ -134,6 +148,8 @@ Attempting to read pairtype...
 
 Notes on simulation: 
 	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 	Overbonding contributions will be considered.
 		p-over will be read from fit parameters.
@@ -372,8 +388,8 @@ Force field summary:
 		107 -1.0271
 		108 -0.2236
 		109 -16.1343
-		110 -0.0000
-		111 -0.0000
+		110 0.0000
+		111 0.0000
 
 		pair type...smin...smax...sdelta...
 		OH 0.6000 6.0000 0.1000 
@@ -492,8 +508,8 @@ Force field summary:
 		111 0.0000
 
 	Fitted charges read from parameter file:
-		OO 0.2894 (96.1006)
-		HH 0.0724 (24.0251)
+		OO 0.2894 (96.1005)
+		HH 0.0724 (24.0252)
 		OH -0.1447 (-48.0503)
 
 	ReaxFF over-coordination parameters: 
@@ -506,7 +522,7 @@ Initializing the neighbor list...
 NEIGHBOR LIST MAX CUTOFF IS: 6.00000
 USING PADDING: 0.300
 
-Generating fast maps 
+Generating fast maps... 
 	Pair maps:
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
@@ -524,6 +540,6 @@ Ewald parameters:
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
-	K-space accuracy estimate = 0.00000086798168
+	K-space accuracy estimate = 0.0000008680
 
 RMS force error = 0.000132
