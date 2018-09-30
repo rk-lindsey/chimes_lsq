@@ -47,9 +47,11 @@ if [ $# -eq 0 ]
 then
 #  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
 	 JOBS=$LSQ_ALL_JOBS
+	 MAKE_JOBS=$LSQ_MAKE_JOBS
 else
 # Take JOBS from command line.
 	 JOBS=$*
+	 MAKE_JOBS=""
 fi
 
 echo ""
@@ -125,6 +127,17 @@ do
 	if [[ $SUCCESS -eq 1 ]] ; then
 		 cp $i/current_output/* $i/correct_output
 	fi
+done
+
+echo "Running Makefile jobs $MAKE_JOBS"
+
+for job in $MAKE_JOBS ; do
+	 cd $job
+	 if make generate ; then
+		  echo "$job succeeded"
+	 else
+		  echo "$job failed"
+	 fi
 done
 
 exit 0

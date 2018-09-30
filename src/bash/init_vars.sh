@@ -23,6 +23,8 @@ function init_test_vars
 
 	 LSQ_ALL_JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald h2o-4bcheby test_4atoms test_4atoms.2 special3b special4b' 
 
+	 LSQ_MAKE_JOBS='lsq2'
+
 	 MD_JOBS='h2o-2bcheby h2o-3bcheby h2o-4bcheby h2o-splines generic-lj h2o-2bcheby-genvel h2o-2bcheby-numpress h2o-3bcheby-numpress h2o-4bcheby-numpress h2o-2bcheby-velscale h2o-3bcheby3 special3b special4b'
 
 	 MD_MAKE_JOBS='verify-invert verify-translate verify-scramble h2o-4bcheby-numforce verify-relabel verify-relabel.2'

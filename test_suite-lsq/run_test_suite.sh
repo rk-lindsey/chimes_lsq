@@ -19,8 +19,10 @@ echo "NP = $NP"
 if [ $# -eq 0 ] 
 then
 	 JOBS=$LSQ_ALL_JOBS
+	 MAKE_JOBS=$LSQ_MAKE_JOBS
 else
 	 JOBS=$*
+	 MAKE_JOBS=""
 fi
 
 TESTSU_BASE=`pwd -P` #`dirname $0`
@@ -229,7 +231,18 @@ do
 	fi
 done
 
-echo " "
+echo "Running Makefile jobs"
+
+for job in $MAKE_JOBS ; do
+	 cd $job
+	 if make all ; then
+		  echo "$job succeeded"
+	 else
+		  echo "$job failed"
+		  ALL_PASSED=FALSE
+		  PASSED=FALSE
+	 fi
+done
 
 if   [ "$ALL_PASSED" = true ] ; then
 	echo "ALL TESTS PASSED"
