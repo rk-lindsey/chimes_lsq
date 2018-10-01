@@ -268,31 +268,56 @@ int main(int argc, char* argv[])
 		TRAJ_INPUT >> TRAJECTORY[i].ATOMS;
 		
 		// Read in line with box dimenstions
-		
-		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.X;
-		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Y;
-		TRAJ_INPUT >> TRAJECTORY[i].BOXDIM.Z;
+		string header ;
+		vector<string> tokens ;
+
+		// Read line twice to get through newline from last input.
+		std::getline(TRAJ_INPUT, header) ;
+		std::getline(TRAJ_INPUT, header) ;
+
+		int ntokens = parse_space(header, tokens) ;
+
+		if ( ntokens >= 3 ) {
+			TRAJECTORY[i].BOXDIM.X = stod(tokens[0]) ;
+			TRAJECTORY[i].BOXDIM.Y = stod(tokens[1]) ;
+			TRAJECTORY[i].BOXDIM.Z = stod(tokens[2]) ;
+		} else {
+			cout << "Error:  Not enough entries in the trajectory frame header" << endl ;
+			cout << header << endl ;
+			exit(1) ;
+		}
 
 		if((CONTROLS.NSTRESS < 0) || (i<CONTROLS.NSTRESS))
 		{
 			if(CONTROLS.FIT_STRESS)
 			{
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.X;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Y;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS.Z;
+				if ( ntokens >= 6 ) {
+					TRAJECTORY[i].STRESS_TENSORS.X = stod(tokens[3]) ;
+					TRAJECTORY[i].STRESS_TENSORS.Y = stod(tokens[4]) ;
+					TRAJECTORY[i].STRESS_TENSORS.Z = stod(tokens[5]) ;
+				} else {
+					cout << "Error:  Not enough entries in the trajectory frame header" << endl ;
+					cout << header << endl ;
+					exit(1) ;
+				}
 			}
 			else if(CONTROLS.FIT_STRESS_ALL)	// Expects as:xx yy zz xy xz yz // old: xx, xy, xz, yy, yx, yz, zx, zy, zz
 			{
 				// Read only the "upper" deviatoric components
 		
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.X;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.Y;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Z.Z;
+				if ( ntokens >= 9 ) {
+					TRAJECTORY[i].STRESS_TENSORS_X.X = stod(tokens[3]) ;
+					TRAJECTORY[i].STRESS_TENSORS_Y.Y = stod(tokens[4]) ;
+					TRAJECTORY[i].STRESS_TENSORS_Z.Z = stod(tokens[5]) ;
 					
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.Y;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_X.Z;
-				TRAJ_INPUT >> TRAJECTORY[i].STRESS_TENSORS_Y.Z;
-					
+					TRAJECTORY[i].STRESS_TENSORS_X.Y = stod(tokens[6]) ;
+					TRAJECTORY[i].STRESS_TENSORS_X.Z = stod(tokens[7]) ;
+					TRAJECTORY[i].STRESS_TENSORS_Y.Z = stod(tokens[8]) ;
+				} else {
+					cout << "Error:  Not enough entries in the trajectory frame header" << endl ;
+					cout << header << endl ;
+					exit(1) ;
+				}
 			}
 		}
 		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
@@ -771,9 +796,9 @@ int main(int argc, char* argv[])
 					fileb << TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
 					fileb << TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
 			
-					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
-					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
-					fileb_labeled << "-1 " <<  TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
+					fileb_labeled << "s_xx " <<  TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
+					fileb_labeled << "s_yy " <<  TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
+					fileb_labeled << "s_zz " <<  TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
 				}
 				else if ((a>=TRAJECTORY[N].ATOMS)&& (a<(TRAJECTORY[N].ATOMS+3)) && CONTROLS.FIT_STRESS_ALL)
 				{
@@ -793,17 +818,17 @@ int main(int argc, char* argv[])
 						fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
 						fileb << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
 					
-						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
-						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
-						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;
+						fileb_labeled << "s_xx " << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
+						fileb_labeled << "s_xy " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
+						fileb_labeled << "s_xz " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;
 
-						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
-						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
-						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
+						fileb_labeled << "s_yx " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
+						fileb_labeled << "s_yy" << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
+						fileb_labeled << "s_yz" << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
 
-						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
-						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
-						fileb_labeled << "-1 " << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
+						fileb_labeled << "s_zx " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
+						fileb_labeled << "s_zy " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
+						fileb_labeled << "s_zz " << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
 					}
 
 				}
