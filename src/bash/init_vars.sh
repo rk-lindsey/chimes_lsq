@@ -21,7 +21,7 @@ function init_test_vars
 
 	 RUN_LSQ_PYTHON_CODE="$PYTHON $PATH_TO_LSQ_PY_CODE A.txt b.txt params.header ff_groups.map ${EPS_FAC} TEST_SUITE_RUN"
 
-	 LSQ_ALL_JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald h2o-4bcheby test_4atoms test_4atoms.2 special3b special4b' 
+	 LSQ_ALL_JOBS='h2o-splines h2o-invr h2o-dftbpoly chon-dftbpoly h2o-2bcheby h2o-3bcheby h2o-2bcheby2 h2o-3bcheby2 h2o-3bcheby3 par-ewald h2o-4bcheby test_4atoms test_4atoms.2 special3b special4b fitstrs3b fitstrs' 
 
 	 LSQ_MAKE_JOBS='lsq2'
 
