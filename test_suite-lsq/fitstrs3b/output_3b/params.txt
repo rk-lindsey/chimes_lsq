@@ -1,0 +1,132 @@
+! Date  2018-10-01
+!
+! Number of variables =  40
+! Number of equations    =  9603
+! RMS force error =  7.45160562861
+! max abs variable =  1663.13643537
+! SVD regularization factor =  1e-05
+! number of SVD fitting vars =  37
+! Bayesian Information Criterion =   38913.1812898
+!
+USECOUL: false
+FITCOUL: false
+USEPOVR: false
+FITPOVR: false
+USE3BCH: true
+
+PAIRTYP: CHEBYSHEV  10 2 -1 1
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		0		15.9994
+1		H		0		1.0079
+
+ATOM PAIRS: 3
+
+!# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0.75            6               0.1             MORSE           1.25            
+	1               H               H               0.75            6               0.1             MORSE           1.25            
+	2               O               H               0.75            6               0.1             MORSE           1.25            
+
+FCUT TYPE: CUBIC
+
+ATOM PAIR TRIPLETS: 4
+
+PAIR CHEBYSHEV PARAMS 
+
+PAIRTYPE PARAMS: 0 O O
+
+0 -732.75543668006048
+1 -1471.9501294757076
+2 -284.38964729400146
+3 1233.5096790794778
+4 1024.3221962525149
+5 -615.93900613822018
+6 -1663.1364353690565
+7 -1383.9144641499188
+8 -583.29013264557545
+9 -113.41387482718864
+ 
+PAIRTYPE PARAMS: 1 H H
+
+0 -28.982892051241336
+1 -53.81149469045468
+2 -45.951141232441238
+3 -27.274412976252158
+4 -4.9735016886332346
+5 7.4922686491066113
+6 1.8534262854292827
+7 0.17682737980931806
+8 -3.1670463043146215
+9 0.014101953028385239
+ 
+PAIRTYPE PARAMS: 2 O H
+
+0 -55.657491714017439
+1 50.628391156045637
+2 15.30274958968563
+3 29.346082033060732
+4 0.043307404214881551
+5 11.600019606165937
+6 -3.942694779385115
+7 4.6572064974751317
+8 0.012796043621895681
+9 2.0747582199906565
+ 
+TRIPLET CHEBYSHEV PARAMS 
+
+TRIPLETTYPE PARAMS: 0 OO OO OO: UNIQUE: 2 TOTAL: 4
+
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0   1   1         0               0        397.86310919504075
+      1       1   0   1         0               0        397.86310919504075
+      2       1   1   0         0               0        397.86310919504075
+      3       1   1   1         3               1        142.56662197660117
+
+TRIPLETTYPE PARAMS: 1 OO OH OH: UNIQUE: 3 TOTAL: 4
+
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0   1   1         0               0        791.12260035795464
+      1       1   0   1         1               1        -260.56901444831192
+      2       1   1   0         1               1        -260.56901444831192
+      3       1   1   1         3               2        843.51743940063193
+
+TRIPLETTYPE PARAMS: 2 OH OH HH: UNIQUE: 3 TOTAL: 4
+
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0   1   1         0               0        -115.71766484310727
+      1       1   0   1         0               0        -115.71766484310727
+      2       1   1   0         2               1        -17.20695118675917
+      3       1   1   1         3               2        -263.33254989192562
+
+TRIPLETTYPE PARAMS: 3 HH HH HH: UNIQUE: 2 TOTAL: 4
+
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0   1   1         0               0        -1.9855218406680706
+      1       1   0   1         0               0        -1.9855218406680706
+      2       1   1   0         0               0        -1.9855218406680706
+      3       1   1   1         3               1        63.949509148611234
+
+
+PAIRMAPS: 4
+1 HH
+2 HO
+2 OH
+0 OO
+
+TRIPMAPS: 8
+3 HHHHHH
+2 HHOHOH
+2 OHHHOH
+2 OHOHHH
+1 OHOHOO
+1 OHOOOH
+1 OOOHOH
+0 OOOOOO
+
+ENDFILE
