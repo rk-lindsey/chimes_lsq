@@ -15,8 +15,6 @@
 	true
 # PAIRTYP # ! Short-range interaction type. See manual for accepted types. Case sensitive
 	INVRSE_R 4
-# CHBTYPE # ! Are we transforming distance in terms of inverse distance(INVRSE_R), a morse-type function? (MORSE)? .. "DEFAULT" for no transformation.
-	MORSE
 	
 ####### TOPOLOGY VARIABLES #######
 

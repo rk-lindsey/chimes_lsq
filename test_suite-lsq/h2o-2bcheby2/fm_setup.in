@@ -1,5 +1,6 @@
-# Corresponds to original code fmatch/example/h2o-lsq/cheby_ls2.in.
-# Tests 2-body chebyshev fitting with unequal smin and morse lambda.
+! Corresponds to original code fmatch/example/h2o-lsq/cheby_ls2.in.
+! Tests 2-body chebyshev fitting with unequal smin and morse lambda.
+!
 ####### CONTROL VARIABLES #######
 
 # TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force

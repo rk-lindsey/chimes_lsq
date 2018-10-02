@@ -1,32 +1,16 @@
-*** correct_output/fm_setup.out	Mon Mar  5 11:08:20 2018
---- current_output/fm_setup.out	Thu Sep 20 12:23:11 2018
+*** correct_output/fm_setup.out	Sat Sep 29 20:13:07 2018
+--- current_output/fm_setup.out	Tue Oct  2 14:11:57 2018
 ***************
-*** 3,9 ****
+*** 1,5 ****
+--- 1,11 ----
+  
+  Reading input file...
++ WARNING:  The following input line was ignored:
++  # This is a test of parallel Ewald force matching.
++ WARNING:  The following input line was ignored:
++  # The params.txt file generated should not depend on the number of processors used.
++ WARNING:  The following input line was ignored:
++  #
   	# TRJFILE #: input.xyzf
   	# WRAPTRJ #: 1
   	# NFRAMES #: 99
-! 	# N_LAYERS #: 1
-  	# FITCOUL #: true
-  	# FITPOVR #: true
-  	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
---- 3,9 ----
-  	# TRJFILE #: input.xyzf
-  	# WRAPTRJ #: 1
-  	# NFRAMES #: 99
-! 	# NLAYERS #: 1
-  	# FITCOUL #: true
-  	# FITPOVR #: true
-  	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
-***************
-*** 35,40 ****
---- 35,44 ----
-  		HH: 0 0 0
-  		OH: 0 0 0
-  
-+ 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
-+ 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
-+ 		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
-+ 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
-  
-  	Attempting to read 2 charge constraints...:
-  		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0

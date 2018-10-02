@@ -13,8 +13,6 @@
 	1
 # FITCOUL # ! Fit charges? If false, use user-specified fixed charges, and subtract them from the forces -- NOTE: FUNCTIONALITY CURRENTLY ONLY SUPPORTED FOR TRUE, AND FALSE WITH CHARGES = 0
 	false
-# CNSCOUL # ! Will we try to have consistent charges -- only used when FITCOUL is true?
-	false	
 # FITSTRS # ! Fit stress tensors?
 	false
 # FITENER # ! Fit stress tensors?

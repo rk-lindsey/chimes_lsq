@@ -1,9 +1,9 @@
-#
-# Test of force matching.  Use a cutoff of less than 1/2 box size to allow
-# checking against original code.  Corresponds to original code example/h2o-3b/cheby_ls_3b4.in.
-#
-# Set S_MINIM to minimum pair distance - 0.1 angstroms.
-# Set MORSE_LAMBDA to the first maximum of g(r).
+!
+! Test of force matching.  Use a cutoff of less than 1/2 box size to allow
+! checking against original code.  Corresponds to original code example/h2o-3b/cheby_ls_3b4.in.
+!
+! Set S_MINIM to minimum pair distance - 0.1 angstroms.
+! Set MORSE_LAMBDA to the first maximum of g(r).
 ####### CONTROL VARIABLES #######
 
 # TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force

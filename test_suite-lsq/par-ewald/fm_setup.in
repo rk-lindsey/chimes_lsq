@@ -1,6 +1,6 @@
-# This is a test of parallel Ewald force matching.
-# The params.txt file generated should not depend on the number of processors used.
-#
+! This is a test of parallel Ewald force matching.
+! The params.txt file generated should not depend on the number of processors used.
+!
 ####### CONTROL VARIABLES #######
 
 # TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force
