@@ -36,7 +36,7 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 #
 #CXX=mpicxx  -std=c++11  -g -pg -D USE_MPI 
 
-#CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
+CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
 #CXX=mpicxx  -std=c++11  -g -Wall -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
 #CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
 #CXX=mpicxx -std=c++11 -g -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
@@ -48,7 +48,7 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 # Below: Other debugging/optimiazation options
 #
 #CXX=clang++ -g -std=c++11 -g -Wall
-CXX=g++ -g -std=c++11 -Wall -Wno-sign-compare -DENABLE_FP_EXCEPT
+#CXX=g++ -g -std=c++11 -Wall -Wno-sign-compare -DENABLE_FP_EXCEPT
 
 #CXX=icpc -fast -Wall
 
@@ -58,7 +58,7 @@ CXX=g++ -g -std=c++11 -Wall -Wno-sign-compare -DENABLE_FP_EXCEPT
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C
+CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C feexcept.C
 CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h Cheby.h io_styles.h
 
 chimes_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
