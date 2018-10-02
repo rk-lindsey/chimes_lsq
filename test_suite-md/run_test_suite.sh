@@ -92,7 +92,8 @@ do
 						 echo " "
 						 echo "		Differences found in $j files:"
 						 echo " "
-						 
+						 cat $j-diff.txt
+
 						 PASS=false
 						 ALL_PASS=false
 					fi
@@ -173,7 +174,9 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 								echo " "
 								echo "		Differences found in $j files:"
 								echo " "
-								
+
+								cat $j-diff.txt
+
 								PASS=false
 								ALL_PASS=false
 						  fi
