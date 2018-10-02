@@ -1,0 +1,49 @@
+# Test takes < 1 minute on 1 proc (head node)
+
+####### CONTROL VARIABLES #######
+
+# TRJFILE # 
+        phen_res-300F_dt-0.1_diagstress5F.xyzf
+# WRAPTRJ # 
+        true
+# NFRAMES # 
+        36
+# NLAYERS # 
+        1
+# FITCOUL # 
+        false
+# CNSCOUL # 
+        false   
+# FITSTRS #
+        FIRST 5
+# FITENER # 
+        false  
+# FITPOVR # 
+        false
+# PAIRTYP # 
+        CHEBYSHEV 12 0 0 -1 1
+# CHBTYPE #
+        MORSE
+	
+####### TOPOLOGY VARIABLES #######
+
+# NATMTYP # 
+	3
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+1		C		0		12.011
+2		H		0		 1.0079
+3		O		0		15.9994
+
+# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #	# S_DELTA #     # MORSE_LAMBDA #        # USEOVRP #     # NIJBINS #     # NIKBINS #     # NJKBINS #		      
+1		C		C		1.296		8.0		0.01	       1.35		       false	       0	       0	       0
+2		H		H		1.321		8.0		0.01	       0.675		       false	       0	       0	       0
+3		O		O		2.708		8.0		0.01	       2.55		       false	       0	       0	       0
+4		C		H		0.952		8.0		0.01	       1.10		       false	       0	       0	       0
+5		C		O		1.318		8.0		0.01	       1.15		       false	       0	       0	       0
+6		H		O		0.914		8.0		0.01	       0.97		       false	       0	       0	       0
+
+# FCUTTYP #
+        TERSOFF 0.5
+
+# ENDFILE #

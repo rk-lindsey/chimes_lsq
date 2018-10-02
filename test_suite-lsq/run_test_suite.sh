@@ -69,8 +69,18 @@ do
 
 	cd $i
 	rm -rf *diff*
+	
+	# Strange things happen when NP >> NF. These below 4b
+	# test uses only 10 frames because otherwise the test
+	# would take forever 
 
-	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
+	TMP_NP=$NP
+	
+	if [[ $i == "stress-and-ener-4b" ]] ; then
+		TMP_NP=0
+	fi
+
+	if [[ $TMP_NP -eq 0 || $TMP_NP -eq 1 ]] ; then
 		 if ../chimes_lsq < fm_setup.in > fm_setup.out ; then
 			  echo 'Chimes_lsq succeeded'
 			  SUCCESS=1

@@ -1,0 +1,98 @@
+
+Reading input file...
+	# TRJFILE #: phen_res-300F_dt-0.1_fullstress_energy5F.xyzf
+	# WRAPTRJ #: 1
+	# NFRAMES #: 36
+	# NLAYERS #: 1
+	# FITCOUL #: false
+	# FITSTRS #: true ...will fit to all tensor components
+	# FITENER #: true
+    			 ...will only fit energies for first 5 frames.
+	# FITPOVR #: false
+	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
+	             Will use 2-body order: 12
+	             Will use 3-body order: 0
+	             Will use 4-body order: 0
+	             Will transform Chebyshev pair distances to range -1 to 1
+	# CHBTYPE #: MORSE
+	# NATMTYP #: 3
+	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
+ 	1              C              0              12.011         
+ 	2              H              0              1.0079         
+ 	3              O              0              15.9994        
+
+	The following unique pair types have been identified:
+		0  C C
+		1  H H
+		2  O O
+		3  C H
+		4  C O
+		5  H O
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
+	0               C               C               1.296           8               0.01            1.35             0               
+	1               H               H               1.321           8               0.01            0.675            0               
+	2               O               O               2.708           8               0.01            2.55             0               
+	3               C               H               0.952           8               0.01            1.1              0               
+	4               C               O               1.318           8               0.01            1.15             0               
+	5               H               O               0.914           8               0.01            0.97             0               
+
+	Read the following number of ij ik jk bins for pairs: 
+		CC: 0 0 0
+		HH: 0 0 0
+		OO: 0 0 0
+		CH: 0 0 0
+		CO: 0 0 0
+		HO: 0 0 0
+
+		Atom type idxs:  0 0 Pair name:   CC Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   CH Explicit pair index:    1 Unique pair index:    3
+		Atom type idxs:  0 2 Pair name:   CO Explicit pair index:    2 Unique pair index:    4
+		Atom type idxs:  1 0 Pair name:   HC Explicit pair index:    3 Unique pair index:    3
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    4 Unique pair index:    1
+		Atom type idxs:  1 2 Pair name:   HO Explicit pair index:    5 Unique pair index:    5
+		Atom type idxs:  2 0 Pair name:   OC Explicit pair index:    6 Unique pair index:    4
+		Atom type idxs:  2 1 Pair name:   OH Explicit pair index:    7 Unique pair index:    5
+		Atom type idxs:  2 2 Pair name:   OO Explicit pair index:    8 Unique pair index:    2
+
+Note: Will use cubic scaling of: 1
+
+...input file read successful: 
+
+The number of two-body non-coulomb parameters is: 72
+
+Reading in the trajectory file...
+	Reporting outcome of layering for first frame ONLY: 
+	Real atoms:                   132
+	Total atoms (ghost):          3564
+	Real box dimesntions:         10.65 10.65 10.65
+	Total box dimensions (ghost): 31.95 31.95 31.95
+
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+...trajectory file read successful: 
+
+Setting up the matricies for A, Coulomb forces, and overbonding...
+...matrix setup complete: 
+
+...Populating the matricies for A, Coulomb forces, and overbonding...
+
+...matrix population complete: 
+
+Printing matricies...
+	...A matrix length: 36
+
+	Minimum distances between atoms: (Angstr.)
+		0	C C	1.189
+		1	H H	0.860
+		2	O O	2.150
+		3	C H	0.860
+		4	C O	1.186
+		5	H O	0.838
+	Total number of configurations contributing to each pair type:
+		0	C C 113316
+		1	H H 129472
+		2	O O 1770
+		3	C H 245485
+		4	C O 30726
+		5	H O 32871
+...matrix printing complete: 
+

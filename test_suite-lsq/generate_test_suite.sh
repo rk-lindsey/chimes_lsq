@@ -63,14 +63,22 @@ fi
 
 for i in $JOBS
 do
+	# Strange things happen when NP >> NF. These below 4b
+	# test uses only 10 frames because otherwise the test
+	# would take forever 
+
+	TMP_RUN_JOB=$RUN_JOB
+	
+	if [[ $i == "stress-and-ener-4b" ]] ; then
+		TMP_RUN_JOB=""
+	fi
 
 	echo " "
 	echo "Running $i test..."
 
 	cd $i
-	
 
-	if $RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out ; then
+	if $TMP_RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out ; then
 		 echo "Chimes_lsq succeeded"
 		 SUCCESS=1
 	else
