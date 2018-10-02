@@ -11,6 +11,9 @@ bool is_true(string s)  ;
 // Returns the number of tokens parsed.
 int parse_space(string line, vector<string>& tokens) ;
 
+// Remove all comments from the line.  Does NOT remove terminal new line.
+void strip_comments(string &line) ;
+
 // Validate that there are the required number of arguments in the line. 
 void validate_num_args(int nargs, int required, string line) ;
 

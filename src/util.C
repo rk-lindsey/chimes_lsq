@@ -31,13 +31,11 @@ int parse_space(string line, vector<string>& tokens)
   
   stringstream stream_parser ;
 
-  // Strip comments beginining with !
-  int pos = line.find('!') ;
-  if ( pos != string::npos ) 
-	 line.erase(pos, line.length() - pos) ;
+  // Strip comments beginining with ! or ##
+	strip_comments(line) ;
 
   // Strip off terminal new line.
-  pos = line.find('\n') ;
+  int pos = line.find('\n') ;
   if ( pos != string::npos ) 
 	 line.erase(pos, 1) ;
 
@@ -50,6 +48,24 @@ int parse_space(string line, vector<string>& tokens)
 
   return(tokens.size() ) ;
 }
+
+
+
+void strip_comments(string &line)
+// Remove all comments from the line.  Does NOT remove terminal new line.
+{
+  // Strip comments beginining with !
+  int pos = line.find('!') ;
+  if ( pos != string::npos ) 
+	 line.erase(pos, line.length() - pos) ;
+
+	// Strip comments beginning with ## 
+	pos = line.find("##") ;
+	if ( pos != string::npos ) 
+		line.erase(pos, line.length()-pos) ;
+
+}
+
 
 void validate_num_args(int nargs, int required, string line)
 // Validate that there are the required number of arguments in the line.  nargs is the current number of arguments (tokens).

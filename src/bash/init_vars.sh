@@ -10,7 +10,7 @@ function init_test_vars
 	 #PYTHON=/collab/usr/global/tools/intel/chaos_5_x86_64_ib/python-2.7.10/bin/python
 	 # Default python
 
-	 PYTHON=python
+	 PYTHON=/usr/bin/python
 	 # Run the job with the new version of the python code (Compatible with non-generalized md code)
 	 #
 

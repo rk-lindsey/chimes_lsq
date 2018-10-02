@@ -304,6 +304,7 @@ int main(int argc, char* argv[])
 	 SYSTEM.VELOCITY_NEW .resize(SYSTEM.ATOMS);
 	 SYSTEM.VELOCITY_ITER.resize(SYSTEM.ATOMS);
 	 SYSTEM.ATOMTYPE_IDX .resize(SYSTEM.ATOMS);
+	 SYSTEM.REF_STRESS   .resize(9) ;
 
 	 if (RANK==0)
 		cout << "   ...setup complete" << endl << endl;
@@ -1213,7 +1214,9 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	string		TEMP_STR,TEMP_STR_2;
 	stringstream	LINE_PARSER;
 	int		ADD_TO_NPLOTS = 0;
-	
+	vector<string> tokens ;
+	int ntokens ;
+
 	// Set some defaults
 	
 	CONTROLS.IS_LSQ           = false;
@@ -1257,9 +1260,19 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	while (FOUND_END == false)
 	{
 		getline(cin,LINE);
-		
+		if ( cin.good() ) 
+		{
+			// Remove comments.
+			strip_comments(LINE) ;
+
+			ntokens = parse_space(LINE, tokens) ;
+			if ( ntokens == 0 ) continue ;
+
+		}
+		else
+			EXIT_MSG("Input file terminated without an # ENDFILE # command.") ;
+
 		// Break out of the loop
-		
 		if     (LINE.find("# ENDFILE #") != string::npos)
 		{
 			FOUND_END = true;
@@ -1285,6 +1298,17 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			
 			break;
 		}
+
+		else if ( LINE.find("# STRSNUM #") != string::npos ) 
+		{
+			getline(cin, LINE) ;
+			ntokens = parse_space(LINE, tokens) ;
+			if ( ntokens >= 1 ) 
+				CONTROLS.COMPARE_STRESS_NUM = stoi(tokens[0]) ;
+			else
+				EXIT_MSG("An argument is required for the STRSNUM parameter") ;
+		}
+
 		
 		// Variables for printing out PES for a given parameter file
 		
@@ -1712,7 +1736,6 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 						cout << "	             ... Creating " << CONTROLS.REAL_REPLICATES << " real replicates before ghost atom layering." << endl;	
 				}
 			}
-			cin.ignore();
 		}	
 		
 		else if(LINE.find("# USENEIG #") != string::npos)
@@ -2159,6 +2182,11 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				exit_run(1);	
 			}								
 		}			
+		else if ( RANK == 0 ) 
+		{
+			cout << "WARNING:  The following input line was ignored:\n" ;
+			cout << " " << LINE << endl ;
+		}
 	}
 }
 
@@ -3799,23 +3827,23 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 // Read coordinates,  and optionally velocities and forces.  There is support for more than one coordinate
 // input file, given by the index.
 {
-  ifstream COORDFILE;
-	int TEMP_INT ;
-	XYZ TMP_BOX ;
-  stringstream	STREAM_PARSER;
-	string FIRST_EXT;
-  string  LINE;
+  ifstream coordfile;
+	int natoms ;
+	XYZ tmp_box ;
+  stringstream	stream_parser;
+	string first_ext;
+  string  line;
 
-	COORDFILE.open(CONTROLS.COORD_FILE[index].data());
+	coordfile.open(CONTROLS.COORD_FILE[index].data());
 	
-	COORDFILE >> TEMP_INT;	// Store number of atoms in file in a temp var
-	COORDFILE >> TMP_BOX.X >> TMP_BOX.Y >> TMP_BOX.Z;
+	coordfile >> natoms;	// Store number of atoms in file in a temp var
+	coordfile >> tmp_box.X >> tmp_box.Y >> tmp_box.Z;
 
 	if(CONTROLS.FIT_STRESS)                                                                                           
-		COORDFILE >>  SYSTEM.PRESSURE_TENSORS.X >>  SYSTEM.PRESSURE_TENSORS.Y >>  SYSTEM.PRESSURE_TENSORS.Z;      
+		coordfile >>  SYSTEM.PRESSURE_TENSORS.X >>  SYSTEM.PRESSURE_TENSORS.Y >>  SYSTEM.PRESSURE_TENSORS.Z;      
 
 	if(CONTROLS.FIT_ENER)
-		COORDFILE >> SYSTEM.QM_POT_ENER;   
+		coordfile >> SYSTEM.QM_POT_ENER;   
 
 	////////////////////////////////////////////////////////////
 	// Read in the initial system coordinates, and if requested,
@@ -3843,12 +3871,12 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	string EXTENSION = CONTROLS.COORD_FILE[index].substr(CONTROLS.COORD_FILE[index].find_last_of(".")+1);
 
 	if(index==0)
-		FIRST_EXT = EXTENSION;
+		first_ext = EXTENSION;
 		
-	if(EXTENSION != FIRST_EXT)
+	if(EXTENSION != first_ext)
 	{
 		cout << "ERROR: Extensions for all input coordinate files must match. " << endl;
-		cout << "	Found extension "<< FIRST_EXT << " for coordinate file 0 " << endl;
+		cout << "	Found extension "<< first_ext << " for coordinate file 0 " << endl;
 		cout << "	and " << EXTENSION << " for coordinate file " << index << endl;
 		exit_run(0);
 	}
@@ -3856,8 +3884,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	if (RANK==0)
 	{
 		cout << "     ...Read the following coordinate file extension: " << EXTENSION << endl;
-		cout << "   ...Read the following number of atoms: " << TEMP_INT << endl;
-		cout << "     ...Read box dimensions: " << TMP_BOX.X << " " << TMP_BOX.Y << " " << TMP_BOX.Z << endl;
+		cout << "   ...Read the following number of atoms: " << natoms << endl;
+		cout << "     ...Read box dimensions: " << tmp_box.X << " " << tmp_box.Y << " " << tmp_box.Z << endl;
 		
 		if(CONTROLS.FIT_STRESS)
 			cout << "	...Read stress tensors: " << SYSTEM.PRESSURE_TENSORS.X << " " << SYSTEM.PRESSURE_TENSORS.Y << " " << SYSTEM.PRESSURE_TENSORS.Z << endl;
@@ -3866,46 +3894,46 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 		
 	}
 	
-	getline(COORDFILE,LINE);
+	getline(coordfile,line);
 
-	int CURR_ATOM = -1 ;
+	int curr_atom = -1 ;
 
-	for(int a=0; a<TEMP_INT;a++)
+	for(int a=0; a<natoms;a++)
 	{
 			
-		CURR_ATOM++;
+		curr_atom++;
 
-		getline(COORDFILE,LINE);
+		getline(coordfile,line);
 
-		STREAM_PARSER.str(LINE);
+		stream_parser.str(line);
 		
-		STREAM_PARSER >> SYSTEM.ATOMTYPE[CURR_ATOM];
+		stream_parser >> SYSTEM.ATOMTYPE[curr_atom];
 
 		// Read the coordinates
 
-		STREAM_PARSER >> SYSTEM.COORDS[CURR_ATOM].X >> SYSTEM.COORDS[CURR_ATOM].Y >> SYSTEM.COORDS[CURR_ATOM].Z;
+		stream_parser >> SYSTEM.COORDS[curr_atom].X >> SYSTEM.COORDS[curr_atom].Y >> SYSTEM.COORDS[curr_atom].Z;
 
 		// Wrap the coordinates, shift along Z
 
-		SYSTEM.COORDS[CURR_ATOM].X -= floor(SYSTEM.COORDS[CURR_ATOM].X/TMP_BOX.X)*TMP_BOX.X;
-		SYSTEM.COORDS[CURR_ATOM].Y -= floor(SYSTEM.COORDS[CURR_ATOM].Y/TMP_BOX.Y)*TMP_BOX.Y;
-		SYSTEM.COORDS[CURR_ATOM].Z -= floor(SYSTEM.COORDS[CURR_ATOM].Z/TMP_BOX.Z)*TMP_BOX.Z;
-		SYSTEM.COORDS[CURR_ATOM].Z += SYSTEM.BOXDIM.Z;
+		SYSTEM.COORDS[curr_atom].X -= floor(SYSTEM.COORDS[curr_atom].X/tmp_box.X)*tmp_box.X;
+		SYSTEM.COORDS[curr_atom].Y -= floor(SYSTEM.COORDS[curr_atom].Y/tmp_box.Y)*tmp_box.Y;
+		SYSTEM.COORDS[curr_atom].Z -= floor(SYSTEM.COORDS[curr_atom].Z/tmp_box.Z)*tmp_box.Z;
+		SYSTEM.COORDS[curr_atom].Z += SYSTEM.BOXDIM.Z;
 
 		// Prepare velocities
-		SYSTEM.VELOCITY[CURR_ATOM].X = 0;
-		SYSTEM.VELOCITY[CURR_ATOM].Y = 0;
-		SYSTEM.VELOCITY[CURR_ATOM].Z = 0;
+		SYSTEM.VELOCITY[curr_atom].X = 0;
+		SYSTEM.VELOCITY[curr_atom].Y = 0;
+		SYSTEM.VELOCITY[curr_atom].Z = 0;
 		
 		// Prepare forces
-		SYSTEM.FORCES[CURR_ATOM].X = 0;
-		SYSTEM.FORCES[CURR_ATOM].Y = 0;
-		SYSTEM.FORCES[CURR_ATOM].Z = 0;
+		SYSTEM.FORCES[curr_atom].X = 0;
+		SYSTEM.FORCES[curr_atom].Y = 0;
+		SYSTEM.FORCES[curr_atom].Z = 0;
 		
 		// Prepare accelerations
-		SYSTEM.ACCEL[CURR_ATOM].X = 0;
-		SYSTEM.ACCEL[CURR_ATOM].Y = 0;
-		SYSTEM.ACCEL[CURR_ATOM].Z = 0;		
+		SYSTEM.ACCEL[curr_atom].X = 0;
+		SYSTEM.ACCEL[curr_atom].Y = 0;
+		SYSTEM.ACCEL[curr_atom].Z = 0;		
 		
 
 		if ( CONTROLS.RESTART ) 
@@ -3913,8 +3941,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 			if(a==0 && RANK==0)
 				cout << "	...Reading positions, velocities, and forces from a restart file " << endl ;
 
-			STREAM_PARSER >> SYSTEM.VELOCITY[CURR_ATOM].X >> SYSTEM.VELOCITY[CURR_ATOM].Y  >> SYSTEM.VELOCITY[CURR_ATOM].Z;	
-			STREAM_PARSER >> SYSTEM.ACCEL   [CURR_ATOM].X >> SYSTEM.ACCEL   [CURR_ATOM].Y  >> SYSTEM.ACCEL   [CURR_ATOM].Z;	
+			stream_parser >> SYSTEM.VELOCITY[curr_atom].X >> SYSTEM.VELOCITY[curr_atom].Y  >> SYSTEM.VELOCITY[curr_atom].Z;	
+			stream_parser >> SYSTEM.ACCEL   [curr_atom].X >> SYSTEM.ACCEL   [curr_atom].Y  >> SYSTEM.ACCEL   [curr_atom].Z;	
 		} 
 		else if ( CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE ) // Reading positions from *.xyzf for force testing
 		{	
@@ -3926,11 +3954,11 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 				  cout << "	...will read from specified force file instead: " << CONTROLS.COMPARE_FILE << endl;
 				}
 
-				//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;			
+				//coordfile >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;			
 			}
 					
 			// Read forces from separate force file
-			CMPR_FORCEFILE >> SYSTEM.FORCES[CURR_ATOM].X >> SYSTEM.FORCES[CURR_ATOM].Y >> SYSTEM.FORCES[CURR_ATOM].Z;
+			CMPR_FORCEFILE >> SYSTEM.FORCES[curr_atom].X >> SYSTEM.FORCES[curr_atom].Y >> SYSTEM.FORCES[curr_atom].Z;
 			
 		}
 		else if (!CONTROLS.INIT_VEL) // Reading positions from *.xyz
@@ -3949,24 +3977,35 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 			if(a==0 && RANK==0)
 				cout << "	...Reading velocities from last three fields of atom info lines in xyzf file... " << endl;	
 
-			STREAM_PARSER >> SYSTEM.VELOCITY[CURR_ATOM].X >> SYSTEM.VELOCITY[CURR_ATOM].Y >> SYSTEM.VELOCITY[CURR_ATOM].Z;
+			stream_parser >> SYSTEM.VELOCITY[curr_atom].X >> SYSTEM.VELOCITY[curr_atom].Y >> SYSTEM.VELOCITY[curr_atom].Z;
 		}
 		else if(EXTENSION == "xyzf")
 		{
 			if(a==0 && RANK==0)
 				cout << "	...Ignoring last three fields of atom info lines in xyzf file... " << endl;
-			//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
+			//coordfile >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
 		}
 		
-		STREAM_PARSER.str("");
-		STREAM_PARSER.clear();	
+		stream_parser.str("");
+		stream_parser.clear();	
+	}
+
+	// Read in stress components for comparison to current values.
+	if ( CONTROLS.COMPARE_FORCE ) 
+	{
+		for ( int i = 0 ; i < CONTROLS.COMPARE_STRESS_NUM ; i++ ) 
+		{
+			CMPR_FORCEFILE >> SYSTEM.REF_STRESS[i] ;
+			if ( ! CMPR_FORCEFILE.good() ) 
+				EXIT_MSG("Reading force comparson file failed") ;
+		}
 	}
 
 	// Input configurations are added sequentially along z.
 		
-	SYSTEM.BOXDIM.X  = TMP_BOX.X;
-	SYSTEM.BOXDIM.Y  = TMP_BOX.Y;
-	SYSTEM.BOXDIM.Z += TMP_BOX.Z;
+	SYSTEM.BOXDIM.X  = tmp_box.X;
+	SYSTEM.BOXDIM.Y  = tmp_box.Y;
+	SYSTEM.BOXDIM.Z += tmp_box.Z;
 		
 	if(CONTROLS.SCALE_SYSTEM_BY != 1.0)
 	{
@@ -3987,8 +4026,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 
 	if ( ! CONTROLS.RESTART ) 
 	{
-		COORDFILE.close();
-		COORDFILE.clear();
+		coordfile.close();
+		coordfile.clear();
 	}
 	
 	if ( CONTROLS.COMPARE_FORCE ) 

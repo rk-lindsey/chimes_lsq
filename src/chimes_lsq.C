@@ -1139,7 +1139,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 	int    NQUAD;
 	double SUM_OF_CHARGES = 0;
 	stringstream	STREAM_PARSER;
-	
+	int ntokens ;
+	vector<string> tokens ;
+
 	// Set some defaults
 	
 	double TMP_CHEBY_RANGE_LOW  = -1;
@@ -1159,7 +1161,19 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 	while (FOUND_END == false)
 	{
 		getline(cin,LINE);
+		if ( cin.good() ) 
+		{
+			// Remove comments.
+			strip_comments(LINE) ;
 
+			ntokens = parse_space(LINE, tokens) ;
+			if ( ntokens == 0 ) continue ;
+
+		}
+		else
+			EXIT_MSG("Input file terminated without an # ENDFILE # command.") ;
+
+		//if ( RANK == 0 ) cout << "CURRENT LINE IS: " << LINE << endl ;
 
 		if(LINE.find("# ENDFILE #") != string::npos)
 		{
@@ -1401,7 +1415,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		
 		else if(LINE.find("# PAIRTYP #") != string::npos)
 		{
-			cin >> LINE; //cin.ignore();
+			cin >> LINE; // cin.ignore();
 			
 			TEMP_TYPE = LINE;
 
@@ -1434,8 +1448,8 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			if(TEMP_TYPE == "INVRSE_R")
 			{
 				cin >> LINE;
-				cin.ignore();
-				CONTROLS.INVR_PARAMS = int(atof(LINE.data()));
+				//cin.ignore();
+				CONTROLS.INVR_PARAMS = stoi(LINE);
 					
 #if VERBOSITY == 1
 				if ( RANK == 0 ) cout << "	             " << "Will use the following number of inverse-r params: " << CONTROLS.INVR_PARAMS << endl;
@@ -1524,19 +1538,26 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			
 		}
 
-		else if( (TEMP_TYPE == "CHEBYSHEV") && (LINE.find("# CHBTYPE #") != string::npos))
+		else if( LINE.find("# CHBTYPE #") != string::npos )
 		{
 
 		  cin >> LINE ;
-		  vector<string> tokens ;
-		  if ( parse_space(LINE,tokens) >= 1 ) 
-				CONTROLS.CHEBY_TYPE = Cheby::get_trans_type(tokens[0]);
-		  else 
-				EXIT_MSG("BAD CHBTYPE" + LINE) ;
-
+			if ( TEMP_TYPE == "CHEBYSHEV" ) 
+			{
+				vector<string> tokens ;
+		    if ( parse_space(LINE,tokens) >= 1 ) 
+				{
+					CONTROLS.CHEBY_TYPE = Cheby::get_trans_type(tokens[0]);
 #if VERBOSITY == 1
-			if ( RANK == 0 ) cout << "	# CHBTYPE #: " << tokens[0] << endl;	
+					if ( RANK == 0 ) cout << "	# CHBTYPE #: " << tokens[0] << endl;	
 #endif
+				}
+				else 
+					EXIT_MSG("BAD CHBTYPE" + LINE) ;
+			} 
+			else if ( RANK == 0 ) 
+				cout << "Warning: CHBTYPE given for a non-Chebyshev pair type (ignored)" ;
+
 		}		
 		
 		/////////////////////////////////////////////////////////////////////
@@ -2079,8 +2100,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				}			
 			}
 
-		}	
-		
+		}
+		else if ( RANK == 0 ) 
+		{
+			cout << "WARNING:  The following input line was ignored:\n" ;
+			cout << " " << LINE << endl ;
+		}
 		
 	}	
 	
