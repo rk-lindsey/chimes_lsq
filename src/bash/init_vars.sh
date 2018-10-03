@@ -10,7 +10,7 @@ function init_test_vars
 	 #PYTHON=/collab/usr/global/tools/intel/chaos_5_x86_64_ib/python-2.7.10/bin/python
 	 # Default python
 
-	 PYTHON=/usr/bin/python
+	 PYTHON=/usr/tce/bin/python
 	 # Run the job with the new version of the python code (Compatible with non-generalized md code)
 	 #
 
@@ -29,7 +29,7 @@ function init_test_vars
 
 	 MD_MAKE_JOBS='verify-invert verify-translate verify-scramble h2o-4bcheby-numforce verify-relabel verify-relabel.2'
 
-	 LSQ_FORCE_JOBS='h2o-2bcheby h2o-3bcheby h2o-splines h2o-4bcheby special3b special4b'
+	 LSQ_FORCE_JOBS='h2o-2bcheby h2o-3bcheby h2o-splines h2o-4bcheby special3b special4b fitstrs3b fitstrs'
 
 	 if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
 		  source /usr/local/tools/dotkit/init.sh
