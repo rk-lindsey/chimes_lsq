@@ -142,6 +142,9 @@ int main(int argc, char* argv[])
 		if ( RANK == 0 ) cout << "...input file read successful: " << endl << endl;
 	#endif
 
+		// Don't use unnecessary processors.
+		if ( NPROCS > CONTROLS.NFRAMES ) NPROCS = CONTROLS.NFRAMES ;
+
 
 	//////////////////////////////////////////////////
 	//
@@ -321,9 +324,30 @@ int main(int argc, char* argv[])
 			}
 		}
 		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
-			if(CONTROLS.FIT_ENER) // We're actually fitting to relative *differences* in energy
-				TRAJ_INPUT >> TRAJECTORY[i].QM_POT_ENER;
-
+		{
+			if(CONTROLS.FIT_ENER) 
+			{ 
+        // We're actually fitting to relative *differences* in energy
+				int e_index ;
+				if ( CONTROLS.FIT_STRESS_ALL ) {
+					e_index = 9 ;
+				} else if ( CONTROLS.FIT_STRESS ) {
+					e_index = 6 ;
+				} else {
+					e_index = 3 ;
+				}
+				if ( ntokens >= e_index + 1 ) 
+				{
+					TRAJECTORY[i].QM_POT_ENER = stod(tokens[e_index]) ;
+				} 
+				else 
+				{
+					cout << "Error:  Not enough entries in the trajectory frame header" << endl ;
+					cout << header << endl ;
+					exit(1) ;
+				}
+			}
+		}
 	
 		// Check that outer cutoffs do not exceed half of the boxlength
 		// with consideration of layering
