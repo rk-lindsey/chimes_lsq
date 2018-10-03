@@ -35,7 +35,7 @@ fi
 echo "MD JOBS = $MD_JOBS"
 echo "LSQ_FORCE_JOBS = $LSQ_FORCE_JOBS"
 
-for i in "$MD_JOBS"
+for i in $MD_JOBS
 do
 
 	echo " "
@@ -88,7 +88,7 @@ cd ../test_suite-md
 
 echo " "
 echo " ...Now running the force comparison tests... "
-for i in "${LSQ_FORCE_JOBS}"
+for i in ${LSQ_FORCE_JOBS}
 do
 
 	echo " "

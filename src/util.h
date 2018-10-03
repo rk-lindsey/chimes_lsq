@@ -45,6 +45,7 @@ static const ANSI_COLORS COUT_STYLE  =
 void SORT_THREE_DESCEND(int & a, int & b, int & c);
 
 void exit_run(int val);
+void normal_exit()  ;
 
 bool operator==(const vector<int>& lhs, const vector<int>& rhs)  ;
 bool operator==(const vector<string>& lhs, const vector<string>& rhs)  ;

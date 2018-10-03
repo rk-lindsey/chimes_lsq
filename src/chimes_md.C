@@ -60,6 +60,7 @@ static void write_xyzv         (FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT
 static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
 static void parse_ff_controls  (string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CONTROLS ) ;
 static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifstream &CMPR_FORCEFILE) ;
+static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
 
 // Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
 
@@ -198,8 +199,6 @@ int main(int argc, char* argv[])
   double Vol;
   SYSTEM.AVG_TEMPERATURE = 0.0;
 	
-  double ferr = 0.0;
-		
   double dens_mol;
   double dens_mass;
   double TEMP_MASS = 0.0;
@@ -304,7 +303,6 @@ int main(int argc, char* argv[])
 	 SYSTEM.VELOCITY_NEW .resize(SYSTEM.ATOMS);
 	 SYSTEM.VELOCITY_ITER.resize(SYSTEM.ATOMS);
 	 SYSTEM.ATOMTYPE_IDX .resize(SYSTEM.ATOMS);
-	 SYSTEM.REF_STRESS   .resize(9) ;
 
 	 if (RANK==0)
 		cout << "   ...setup complete" << endl << endl;
@@ -886,58 +884,11 @@ FF_SETUP_2:
 	 if ( CONTROLS.PRINT_FORCE && (CONTROLS.STEP+1)%CONTROLS.FREQ_FORCE == 0 && RANK == 0 ) 
 		FORCEFILE.PRINT_FRAME(CONTROLS,SYSTEM);
 
-	 if ( (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE)&& RANK == 0 ) 
+	 if ( (CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE) ) 
 	 {
-		// To print the modified frame, used if CONTROLS.SUBTRACT_FORCE true
-			
-		ofstream FORCE_SUBTRACTED_OUTPUT;
-		string   FORCE_SUBTRACTED_FILE   = CONTROLS.COORD_FILE[0];
-			
-		int END = SYSTEM.ATOMS;
-
-		if(CONTROLS.SUBTRACT_FORCE)
-		{
-		  FORCE_SUBTRACTED_FILE  .append("_forces_subtracted.xyz");
-		  FORCE_SUBTRACTED_OUTPUT.open(FORCE_SUBTRACTED_FILE.data());
-				
-		  FORCE_SUBTRACTED_OUTPUT << END << endl;
-		  FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " ";
-				
-				
-		  if(CONTROLS.FIT_STRESS)
-			 FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS.X - SYSTEM.STRESS_TENSORS.X << " " << SYSTEM.PRESSURE_TENSORS.Y - SYSTEM.STRESS_TENSORS.Y << " " << SYSTEM.PRESSURE_TENSORS.Z - SYSTEM.STRESS_TENSORS.Z;
-		  if(CONTROLS.FIT_ENER)
-			 FORCE_SUBTRACTED_OUTPUT << SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER;
-					
-		  FORCE_SUBTRACTED_OUTPUT << endl;
-		}
-
-		// Check against read-in forces for code verification... Note, ferr is initialized to zero.
-		
-		for(int a1=0;a1<END;a1++)
-		{
-		  ferr += (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X) * (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X);
-		  ferr += (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y) * (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y);
-		  ferr += (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z) * (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z);
-				
-		  // Before printing force file with current ff forces subtracted, convert from simulation units (kca/mol/Ang)
-		  // to Hartree/bohr
-
-		  FORCE_SUBTRACTED_OUTPUT << SYSTEM.ATOMTYPE[a1] << "	"
-					  << SYSTEM.COORDS[a1].X << "   " << SYSTEM.COORDS[a1].Y << "   " << SYSTEM.COORDS[a1].Z << "   "						
-					  << (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(Hartree*Bohr) << " "
-					  << (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(Hartree*Bohr) << " "
-					  << (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(Hartree*Bohr) << endl; 			     
-		}
-			
-		if(CONTROLS.SUBTRACT_FORCE)
-		  FORCE_SUBTRACTED_OUTPUT.close();
-			
-		ferr = sqrt(ferr/3.0/END);
-		cout << "RMS force error = " << fixed << setprecision(6) << ferr << endl;
-			
-		return 0;
-	 }
+		 subtract_force(SYSTEM, CONTROLS) ;
+		 normal_exit() ;
+	 } 
 	 else if (RANK == 0)	// Print main simulation header 
 	 {
 		////////////////////////////////////////////////////////////
@@ -1194,11 +1145,7 @@ FF_SETUP_2:
 
   // MPI -- End our setup
 	
-#ifdef USE_MPI
-  MPI_Finalize();
-#endif
- 
-  return 0; 
+	normal_exit() ;
 }       
 
 
@@ -1299,17 +1246,6 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			break;
 		}
 
-		else if ( LINE.find("# STRSNUM #") != string::npos ) 
-		{
-			getline(cin, LINE) ;
-			ntokens = parse_space(LINE, tokens) ;
-			if ( ntokens >= 1 ) 
-				CONTROLS.COMPARE_STRESS_NUM = stoi(tokens[0]) ;
-			else
-				EXIT_MSG("An argument is required for the STRSNUM parameter") ;
-		}
-
-		
 		// Variables for printing out PES for a given parameter file
 		
 		else if(LINE.find("# PLOTPES #") != string::npos)
@@ -2182,6 +2118,101 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				exit_run(1);	
 			}								
 		}			
+		else if(LINE.find("# FITSTRS #") != string::npos)
+		{
+			cin >> LINE;
+			
+			if (LINE=="first"  || LINE=="First"  || LINE=="FIRST")
+			{
+				CONTROLS.FIT_STRESS = true;
+				cin >> CONTROLS.NSTRESS;
+				cin.ignore();
+			}			
+			else
+			{
+				if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+					CONTROLS.FIT_STRESS = true;	
+				else if (LINE=="all"  || LINE=="All"  || LINE=="ALL"  || LINE == "A" || LINE == "a")
+					CONTROLS.FIT_STRESS_ALL = true;
+				else if(LINE=="firstall"  || LINE=="FirstAll"  || LINE=="FIRSTALL")
+				{
+					CONTROLS.FIT_STRESS_ALL = true;
+					cin >> CONTROLS.NSTRESS;
+					cin.ignore();
+				}	
+				else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
+					CONTROLS.FIT_STRESS = false;
+				else
+				{
+					cout << endl << "ERROR: # FITSTRS # must be specified as true or false." << endl;
+					exit(1);	
+				}
+				
+				cin.ignore();
+			}
+#if VERBOSITY == 1
+			
+			if ( RANK == 0 ) 
+			{
+				cout << "	# FITSTRS #: ";
+			
+				if (CONTROLS.FIT_STRESS)
+					cout << "true" << endl;							
+				else if (CONTROLS.FIT_STRESS_ALL)
+					cout << "true ...will fit to all tensor components" << endl;	
+				else
+					cout << "false" << endl;
+					
+				if(CONTROLS.NSTRESS>0)
+					cout << "    			 ...will only fit tensors for first " << CONTROLS.NSTRESS << " frames." << endl;
+			}
+				
+#endif
+		}
+		
+		else if(LINE.find("# FITENER #") != string::npos)
+		{
+			cin >> LINE; 
+			
+			if (LINE=="first"  || LINE=="First"  || LINE=="FIRST")
+			{
+				CONTROLS.FIT_ENER = true;
+				cin >> CONTROLS.NENER;
+				cin.ignore();
+			}
+			else
+			{
+
+				if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+					CONTROLS.FIT_ENER = true;
+				else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
+					CONTROLS.FIT_ENER = false;
+				else
+				{
+					cout << endl << "ERROR: # FITENER # must be specified as true or false." << endl;
+					exit(1);	
+				}
+				
+				cin.ignore();	
+			}
+			
+#if VERBOSITY == 1
+			if ( RANK == 0 )
+			{
+				cout << "	# FITENER #: ";
+			
+				if (CONTROLS.FIT_ENER)
+					cout << "true" << endl;				
+				else
+					cout << "false" << endl;
+					
+				if(CONTROLS.NENER>0)
+					cout << "    			 ...will only fit energies for first " << CONTROLS.NENER << " frames." << endl;
+								
+				
+			}
+#endif
+		}
 		else if ( RANK == 0 ) 
 		{
 			cout << "WARNING:  The following input line was ignored:\n" ;
@@ -3991,14 +4022,13 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	}
 
 	// Read in stress components for comparison to current values.
-	if ( CONTROLS.COMPARE_FORCE ) 
+	if ( CONTROLS.FIT_STRESS ) 
 	{
-		for ( int i = 0 ; i < CONTROLS.COMPARE_STRESS_NUM ; i++ ) 
-		{
-			CMPR_FORCEFILE >> SYSTEM.REF_STRESS[i] ;
-			if ( ! CMPR_FORCEFILE.good() ) 
-				EXIT_MSG("Reading force comparson file failed") ;
-		}
+		// Units read in are kcal/mol-Ang.^3.
+		CMPR_FORCEFILE >> SYSTEM.STRESS_TENSORS.X >> SYSTEM.STRESS_TENSORS.Y >> SYSTEM.STRESS_TENSORS.Z ;
+
+		if ( ! CMPR_FORCEFILE.good() ) 
+			EXIT_MSG("Reading force comparson file failed") ;
 	}
 
 	// Input configurations are added sequentially along z.
@@ -4037,3 +4067,75 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 		cout << "   ...read complete for file " << CONTROLS.COORD_FILE[index] << endl << endl;	
 }
 
+static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
+{
+	// To print the modified frame, used if CONTROLS.SUBTRACT_FORCE true
+			
+	ofstream FORCE_SUBTRACTED_OUTPUT;
+	string   FORCE_SUBTRACTED_FILE   = CONTROLS.COORD_FILE[0];
+			
+	int END = SYSTEM.ATOMS;
+
+	if ( RANK != 0 ) 
+		return ;
+
+	if(CONTROLS.SUBTRACT_FORCE)
+	{
+		FORCE_SUBTRACTED_FILE  .append("_forces_subtracted.xyz");
+		FORCE_SUBTRACTED_OUTPUT.open(FORCE_SUBTRACTED_FILE.data());
+				
+		FORCE_SUBTRACTED_OUTPUT << END << endl;
+		FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " ";
+				
+		// NOTE:  PRESSURE_TENSORS_XYZ hold the potential energy contribution to the current stress tensor.
+		// PRESSURE_TENSOR holds potential + kinetic energy to the current stress tensor in GPa units.
+		// PRESSURE_TENSORS_XYZ should be used here.
+		if(CONTROLS.FIT_STRESS)
+			FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS.X 
+															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS.Y 
+															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS.Z;
+		if(CONTROLS.FIT_ENER)
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER;
+					
+		FORCE_SUBTRACTED_OUTPUT << endl;
+	}
+
+	// Check against read-in forces for code verification... Note, ferr is initialized to zero.
+	double ferr = 0.0;
+		
+	for(int a1=0;a1<END;a1++)
+	{
+		ferr += (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X) * (SYSTEM.ACCEL[a1].X - SYSTEM.FORCES[a1].X);
+		ferr += (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y) * (SYSTEM.ACCEL[a1].Y - SYSTEM.FORCES[a1].Y);
+		ferr += (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z) * (SYSTEM.ACCEL[a1].Z - SYSTEM.FORCES[a1].Z);
+				
+		// Before printing force file with current ff forces subtracted, convert from simulation units (kca/mol/Ang)
+		// to Hartree/bohr
+
+		if ( CONTROLS.SUBTRACT_FORCE ) 
+		{
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.ATOMTYPE[a1] << "	"
+															<< SYSTEM.COORDS[a1].X << "   " << SYSTEM.COORDS[a1].Y << "   " << SYSTEM.COORDS[a1].Z << "   "						
+															<< (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(Hartree*Bohr) << " "
+															<< (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(Hartree*Bohr) << " "
+															<< (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(Hartree*Bohr) << endl; 			     
+		}
+	}
+			
+	if(CONTROLS.SUBTRACT_FORCE)
+		FORCE_SUBTRACTED_OUTPUT.close();
+			
+	ferr = sqrt(ferr/3.0/END);
+	cout << "RMS force error = " << fixed << setprecision(6) << ferr << endl;
+
+	ferr = 0.0 ;
+	if ( CONTROLS.FIT_STRESS ) {
+		ferr += (SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS.X) * (SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS.X) ;
+		ferr += (SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS.Y) * (SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS.Y) ;
+		ferr += (SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS.Z) * (SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS.Z) ;
+
+		ferr = sqrt(ferr/3.0) ;
+		ferr *= GPa ;
+		cout << "RMS stress error = " << ferr << " GPa " << endl ;
+	}
+}

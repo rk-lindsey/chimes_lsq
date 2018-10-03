@@ -133,7 +133,6 @@ struct JOB_CONTROL
   bool   PLOT_PES;		// Plot out the potential energy surfaces? IF so, nothing else will be done.
   bool   CHECK_FORCE;      	// If true, numerically check forces from derivatives of energy.
   bool   COMPARE_FORCE;		// Replaces if_read_force... If TRUE, read in read in a set of forces from a file for comparison with those computed by this code
-	int    COMPARE_STRESS_NUM ;  // The number of stress components to read if COMPARE_FORCE is true.
 
   bool   SUBTRACT_FORCE;	// Read frame, compute forces based on parameter file, print out frame where FF forces have been subtracted from input forces
   string COMPARE_FILE;		// Name of the file that holds the forces
@@ -251,7 +250,6 @@ JOB_CONTROL(): FIT_COUL(false),
 		USE_3B_CHEBY = false;	// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
 		USE_4B_CHEBY = false;	//If true, calculate 4-Body Chebyshev interaction.
 		
-		COMPARE_STRESS_NUM = 0 ;  // Number of stress components to read in and compare to.
 		//IO_ECONS_VAL = 0.0;
 	 }
 };
@@ -285,8 +283,6 @@ public:
 	XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested
 	XYZ STRESS_TENSORS_Y;
 	XYZ STRESS_TENSORS_Z;
-
-	vector<double> REF_STRESS ;   // Reference stress used to compare to current MD value.
 
 	double QM_POT_ENER;		// This is the potential energy of the QM calculation!
 	

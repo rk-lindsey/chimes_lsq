@@ -148,6 +148,16 @@ void exit_run(int value)
 
 }
 
+
+void normal_exit() 
+// Handles normal exit of the code.
+{
+#ifdef USE_MPI
+	MPI_Finalize() ;
+#endif
+	exit(0);
+}
+
   
 bool operator==(const vector<int>& lhs, const vector<int>& rhs) 
 {
