@@ -1121,8 +1121,8 @@ int main(int argc, char* argv[])
 
 	// Quads and triplets both have the same cutoff function parameters.
 	// Print out only once.
-	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0 || ATOM_PAIRS[0].SNUM_4B_CHEBY> 0)
-	  TRIPS.print_fcut_header(header);
+	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" ) 
+		ATOM_PAIRS[0].FORCE_CUTOFF.print_header(header) ;
 		
 	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
