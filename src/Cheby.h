@@ -18,13 +18,13 @@ public:
   double DERIV_CONST;
 
   // Derivatives of the force with respect to the coefficients - 2 BODY
-  void Deriv_2B(vector<vector <XYZ > > & FRAME_A_MATRIX);
+  void Deriv_2B(int FRAME, A_MAT & FRAME_A_MATRIX);
 
   // Derivatives of the force with respect to the coefficients - 3 BODY
-  void Deriv_3B(vector<vector <XYZ > > & FRAME_A_MATRIX, CLUSTER_LIST &TRIPS);
+  void Deriv_3B(int FRAME, A_MAT & FRAME_A_MATRIX, CLUSTER_LIST &TRIPS);
 
   // Derivatives of the force with respect to the coefficients - 4 BODY
-  void Deriv_4B(vector<vector <XYZ > > & FRAME_A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST &QUADS);
+  void Deriv_4B(int FRAME, A_MAT & FRAME_A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST &QUADS);
 
   // Calculate the many-body Chebyshev force
   void Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS);

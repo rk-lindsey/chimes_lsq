@@ -1,6 +1,7 @@
 #include<iomanip>
 #include "functions.h"
 #include "util.h"
+#include "A_Matrix.h"
 
 #define EWALD_ACCURACY 1.0e-06
 
@@ -439,7 +440,7 @@ void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, 
     r_acc = erfc(alpha * rc) / rc;
 }
 
-void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS)	
+void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, int FRAME, A_MAT & A_MATRIX, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS)
 {
 	XYZ RVEC; // Replaces  Rvec[3];
 
@@ -592,15 +593,14 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 				tempd *= 2.0;  // Sum a1 > a2, not all a2
 				tempd *= ke;
 				tempd *= 0.5 / rlen_mi;
+
+				A_MATRIX.CHARGES[FRAME][i_pair][a1].X += tempd * D_XYZ.X;//populate terms according to x,y,z component.
+				A_MATRIX.CHARGES[FRAME][i_pair][a1].Y += tempd * D_XYZ.Y;
+				A_MATRIX.CHARGES[FRAME][i_pair][a1].Z += tempd * D_XYZ.Z;
 				
-		
-				FRAME_COULOMB_FORCES[i_pair][a1].X += tempd * D_XYZ.X;//populate terms according to x,y,z component.
-				FRAME_COULOMB_FORCES[i_pair][a1].Y += tempd * D_XYZ.Y;
-				FRAME_COULOMB_FORCES[i_pair][a1].Z += tempd * D_XYZ.Z;
-				
-				FRAME_COULOMB_FORCES[i_pair][fidx_a2].X -= tempd * D_XYZ.X;//populate terms according to x,y,z component.
-				FRAME_COULOMB_FORCES[i_pair][fidx_a2].Y -= tempd * D_XYZ.Y;
-				FRAME_COULOMB_FORCES[i_pair][fidx_a2].Z -= tempd * D_XYZ.Z;					
+				A_MATRIX.CHARGES[FRAME][i_pair][fidx_a2].X -= tempd * D_XYZ.X;//populate terms according to x,y,z component.
+				A_MATRIX.CHARGES[FRAME][i_pair][fidx_a2].Y -= tempd * D_XYZ.Y;
+				A_MATRIX.CHARGES[FRAME][i_pair][fidx_a2].Z -= tempd * D_XYZ.Z;					
 			}
 		}
 	}
@@ -679,13 +679,13 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 					tempd4 *= 2.0; 
 				}
 
-				FRAME_COULOMB_FORCES[i_pair][a1].X += ( tempd + tempd2 + tempd3 + tempd4 ) * R_K.X;
-				FRAME_COULOMB_FORCES[i_pair][a1].Y += ( tempd - tempd2 - tempd3 + tempd4 ) * R_K.Y;
-				FRAME_COULOMB_FORCES[i_pair][a1].Z += ( tempd + tempd2 - tempd3 - tempd4 ) * R_K.Z;
+				A_MATRIX.CHARGES[FRAME][i_pair][a1].X += ( tempd + tempd2 + tempd3 + tempd4 ) * R_K.X;
+				A_MATRIX.CHARGES[FRAME][i_pair][a1].Y += ( tempd - tempd2 - tempd3 + tempd4 ) * R_K.Y;
+				A_MATRIX.CHARGES[FRAME][i_pair][a1].Z += ( tempd + tempd2 - tempd3 - tempd4 ) * R_K.Z;
 		
-				FRAME_COULOMB_FORCES[i_pair][a2].X -= ( tempd + tempd2 + tempd3 + tempd4 ) * R_K.X;
-				FRAME_COULOMB_FORCES[i_pair][a2].Y -= ( tempd - tempd2 - tempd3 + tempd4 ) * R_K.Y;
-				FRAME_COULOMB_FORCES[i_pair][a2].Z -= ( tempd + tempd2 - tempd3 - tempd4 ) * R_K.Z;	
+				A_MATRIX.CHARGES[FRAME][i_pair][a2].X -= ( tempd + tempd2 + tempd3 + tempd4 ) * R_K.X;
+				A_MATRIX.CHARGES[FRAME][i_pair][a2].Y -= ( tempd - tempd2 - tempd3 + tempd4 ) * R_K.Y;
+				A_MATRIX.CHARGES[FRAME][i_pair][a2].Z -= ( tempd + tempd2 - tempd3 - tempd4 ) * R_K.Z;	
 
 												
 		  	}		
@@ -696,9 +696,9 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vec
 	{
 		for(int i_pair=0; i_pair<ATOM_PAIRS.size(); i_pair++)
 		{				
-			FRAME_COULOMB_FORCES[i_pair][a1].X *= -1.0;
-			FRAME_COULOMB_FORCES[i_pair][a1].Y *= -1.0;
-			FRAME_COULOMB_FORCES[i_pair][a1].Z *= -1.0;		
+			A_MATRIX.CHARGES[FRAME][i_pair][a1].X *= -1.0;
+			A_MATRIX.CHARGES[FRAME][i_pair][a1].Y *= -1.0;
+			A_MATRIX.CHARGES[FRAME][i_pair][a1].Z *= -1.0;		
 		}
 	}
 	return;

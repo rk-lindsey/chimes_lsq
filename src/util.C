@@ -81,7 +81,7 @@ string get_next_line(istream& str)
 
   getline(str, line) ;
   if ( ! str.good() )
-	 EXIT_MSG("Error reading line") ;
+	 EXIT_MSG("Error reading line",line) ;
   
   return line ;
 }

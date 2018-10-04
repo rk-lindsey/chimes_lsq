@@ -40,8 +40,8 @@ CXX=g++ -std=c++11 -O3			# Serial, let compiler optimize to a very high level (s
 # MAKE THE LSQ CODE
 ##################################
 
-CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C Cheby.C
-CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h Cheby.h
+CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C Cheby.C A_Matrix.C
+CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h Cheby.h A_Matrix.h
 
 chimes_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
 	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o chimes_lsq

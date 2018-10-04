@@ -101,6 +101,7 @@ enum class Cheby_trans	// Supported variable transformations.
 
 #include "Fcut.h"
 #include "Cluster.h"
+#include "A_Matrix.h"
 
 struct JOB_CONTROL
 {
@@ -170,7 +171,7 @@ struct JOB_CONTROL
   // "Output control" 
 
   int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
-  string    TRAJ_FORMAT;		// .gen, .xyzf, or .lammps (currently)
+  string TRAJ_FORMAT;		// .gen, .xyzf, or .lammps (currently)
   int    FREQ_BACKUP;       	// How often to write backup files for restart.
   bool   PRINT_VELOC;		// If true, write out the velocities 
   bool   RESTART;          	// If true, read a restart file.
@@ -200,6 +201,7 @@ struct JOB_CONTROL
   bool FIT_STRESS_ALL;		// Should stress tensors be included in the fit? --> This is ONLY for ALL components, xx, xy, xz ... zz 
   int  NSTRESS;			// Only fit stresses for first NSTRESS frames of trajectory
   bool FIT_ENER;		// Should the total frame energy be included in the fit?
+  bool FIT_ENER_PER_ATOM;	// Should the energy of each atom be included in the fit?
   int  NENER;
   bool CALL_EWALD;		// Should ewald subroutines be called?
   bool USE_POVER;		// Should overbonding information be printed to the header file?
@@ -254,26 +256,12 @@ JOB_CONTROL(): FIT_COUL(false),
 	 }
 };
 
-struct XYZ
-{
-	double X;
-	double Y;
-	double Z;
-};
-
-struct XYZ_INT
-{
-	int X;
-	int Y;
-	int Z;
-};
-
 
 class FRAME
 {
 public:
-	int ATOMS;             		// Just the parent atoms.
-	int ALL_ATOMS;         	   	// All atoms, including ghosts. 
+    	int ATOMS;             		// Just the parent atoms.
+    	int ALL_ATOMS;         	   	// All atoms, including ghosts. 
 	
 	int MY_ATOMS;			// Used for lammps linking. Specify how many atoms in SYS the process owns
 	int MY_ATOMS_START;		// Used for lammps linking. Specify what index along SYS starts the process' atoms
@@ -283,8 +271,9 @@ public:
 	XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested
 	XYZ STRESS_TENSORS_Y;
 	XYZ STRESS_TENSORS_Z;
-
+	
 	double QM_POT_ENER;		// This is the potential energy of the QM calculation!
+	vector<double> QM_POT_ENER_PER_ATOM; // And this is for each atom in the frame, from QM
 	
 	double 	TEMPERATURE;		// This is the RUNNING temperature, not the set temperature!
 	double 	PRESSURE;		// This is the RUNNING pressure, not the set pressure!
@@ -550,11 +539,10 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 //
 //////////////////////////////////////////
 
-void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, vector<vector <XYZ > > & FRAME_COULOMB_FORCES, 
 
-const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST);
+void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, int FRAME, A_MAT & A_MATRIX, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST) ;
 
-void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
+void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, int FRAME, A_MAT & A_MATRIX,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
 
 void SubtractEwaldForces (FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
 
@@ -562,7 +550,7 @@ void ZCalc_Ewald         (FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS 
 
 void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc, XYZ boxdim);
 
-void ZCalc_Ewald_Deriv   (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, vector <vector <XYZ > > & FRAME_COULOMB_FORCES, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS);
+void ZCalc_Ewald_Deriv   (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, int FRAME, A_MAT & A_MATRIX, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS);
 
 //////////////////////////////////////////
 //
@@ -571,7 +559,7 @@ void ZCalc_Ewald_Deriv   (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, 
 //////////////////////////////////////////
 
 void   ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> &PAIR_MAP, vector<int> &INT_PAIR_MAP, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS,  NEIGHBORS & NEIGHBOR_LIST);
-void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
+//void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
 
 
 //////////////////////////////////////////

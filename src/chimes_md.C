@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
   double Ktot;
   double Vol;
   SYSTEM.AVG_TEMPERATURE = 0.0;
-	
+		
   double dens_mol;
   double dens_mass;
   double TEMP_MASS = 0.0;
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
   vector<double>TMP_MASS;
   stringstream	STREAM_PARSER;
 	
-  string FIRST_EXT;
+   string FIRST_EXT;
 
   ifstream CMPR_FORCEFILE;	// Holds the forces that were read in for comparison purposes
   ofstream OUT_VELOCFILE;	// Holds the velocities that are computed and are to be printed out
@@ -472,10 +472,8 @@ int main(int argc, char* argv[])
   else
   {
 	 for (int i=0; i<CONTROLS.COORD_FILE.size(); i++)
-	 {
 		 read_coord_file(i, CONTROLS, SYSTEM, CMPR_FORCEFILE) ;
-	 }
-	}
+  }
   ////////////////////////////////////////////////////////////
   // Figure out atom charges and masses, based on parameter 
   // file
@@ -503,25 +501,25 @@ FF_SETUP_1:
   {
   
   	for(int j=0; j<TMP_ATOMTYPE.size(); j++)
-			if (SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[j])
-				TMP_NATOMTYPE[j]++;
-		int i ;
-		for( i=0; i<NATMTYP; i++)
+		if (SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[j])
+			TMP_NATOMTYPE[j]++;
+	int i ;
+	for( i=0; i<NATMTYP; i++)
+	{
+		if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
 		{
-			if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
-			{
 				
-				SYSTEM.CHARGES[a]      = TMP_CHARGES[i];
-				SYSTEM.MASS[a]         = TMP_MASS[i];
-				SYSTEM.ATOMTYPE_IDX[a] = TMP_ATOMTYPEIDX[i];
-				break;
-			}			
-		}
-		if ( i == NATMTYP ) 
-		{
-			cout << "A definition was not found for atom " << a << endl ;
-			exit_run(1) ;
-		}
+		  SYSTEM.CHARGES[a]      = TMP_CHARGES[i];
+		  SYSTEM.MASS[a]         = TMP_MASS[i];
+		  SYSTEM.ATOMTYPE_IDX[a] = TMP_ATOMTYPEIDX[i];
+		  break;
+		}			
+	}
+	if ( i == NATMTYP ) 
+	{
+		cout << "A definition was not found for atom " << a << endl ;
+		exit_run(1) ;
+	}
   }
 
   if(RANK==0)
@@ -888,7 +886,7 @@ FF_SETUP_2:
 	 {
 		 subtract_force(SYSTEM, CONTROLS) ;
 		 normal_exit() ;
-	 } 
+	 }
 	 else if (RANK == 0)	// Print main simulation header 
 	 {
 		////////////////////////////////////////////////////////////
@@ -1149,7 +1147,7 @@ FF_SETUP_2:
 }       
 
 
-static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST) 				// UPDATED
+static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST)// UPDATED
 {
 	if (RANK==0)
 		cout << endl << "Reading the simulation control input file..." << endl;
@@ -1163,7 +1161,7 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 	int		ADD_TO_NPLOTS = 0;
 	vector<string> tokens ;
 	int ntokens ;
-
+	
 	// Set some defaults
 	
 	CONTROLS.IS_LSQ           = false;
@@ -1218,8 +1216,9 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 		}
 		else
 			EXIT_MSG("Input file terminated without an # ENDFILE # command.") ;
-
+		
 		// Break out of the loop
+		
 		if     (LINE.find("# ENDFILE #") != string::npos)
 		{
 			FOUND_END = true;
@@ -1245,7 +1244,7 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 			
 			break;
 		}
-
+		
 		// Variables for printing out PES for a given parameter file
 		
 		else if(LINE.find("# PLOTPES #") != string::npos)
@@ -2878,7 +2877,7 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  if(LINE.find("FCUT TYPE:") != string::npos )
 		  {
 				// Unified parsing of fcut for MD and LSQ code.
-
+			
 				LINE = LINE.substr(11) ; // Chop off "FCUT TYPE: ".
 				parse_fcut_input(LINE,FF_2BODY,TRIPS,QUADS) ;
 		  }
@@ -3098,17 +3097,18 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  // Set the atom type index.
 		  FF_2BODY[i].ATM1TYPE_IDX = -1 ;
 		  FF_2BODY[i].ATM2TYPE_IDX = -1 ;
-		  for ( int j = 0 ; j < TMP_ATOMTYPE.size() ; j++ ) {
+		  for ( int j = 0 ; j < TMP_ATOMTYPE.size() ; j++ ) 
+		  {
 			 if ( FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] ) 
 				FF_2BODY[i].ATM1TYPE_IDX = TMP_ATOMTYPEIDX[j] ;
 			 if ( FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] ) 
 				FF_2BODY[i].ATM2TYPE_IDX = TMP_ATOMTYPEIDX[j] ;
 		  }
 		  if ( FF_2BODY[i].ATM1TYPE_IDX < 0 )
-			 EXIT_MSG("Could not find a match for " + FF_2BODY[i].ATM1TYP ) ;
+			 EXIT_MSG("While reading the FF file, could not find a match for atom 1 in atom pair " + FF_2BODY[i].ATM1TYP ) ;
 
 		  if ( FF_2BODY[i].ATM2TYPE_IDX < 0 )
-			 EXIT_MSG("Could not find a match for " + FF_2BODY[i].ATM2TYP ) ;
+			 EXIT_MSG("While reading the FF file, could not find a match for atom 2 in atom pair " + FF_2BODY[i].ATM2TYP ) ;
 		  
 		  if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
 		  {
@@ -3165,6 +3165,23 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  {
 			 FF_2BODY[i].SNUM = TMP_TERMS1;
 		  }
+		  else if(TEMP_TYPE =="SPLINE")
+		  {
+		  	// Expects to read "NONE," since a direct 
+			// transformation style is hard-coded into the spline code 
+		  
+			 string cheby_type;
+			 PARAMFILE >> cheby_type;
+			 
+			 if(cheby_type != "NONE")
+			 {
+			 	cout << "ERROR: Expected to read \"NONE\" for CHBDIST in parameter file " << endl; 
+				cout << "       Read value: "  << cheby_type << endl;
+				exit_run(0);
+			 }
+			 
+			  FF_2BODY[i].SNUM = (2+floor((FF_2BODY[i].S_MAXIM - FF_2BODY[i].S_MINIM)/FF_2BODY[i].S_DELTA))*2;
+		  }		  
 		  else if(TEMP_TYPE =="CHEBYSHEV")
 		  {
 			 string cheby_type ;
@@ -3199,9 +3216,9 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 		  {
 			 FF_2BODY[i].SNUM = 0 ;
 		  }
-		  else // Splines type
+		  else // Unknown type
 		  {
-			 FF_2BODY[i].SNUM = (2+floor((FF_2BODY[i].S_MAXIM - FF_2BODY[i].S_MINIM)/FF_2BODY[i].S_DELTA))*2;
+			 cout << "ERROR: Unknown type: " << TEMP_TYPE << endl; 
 		  }				
 		}
 
@@ -3839,28 +3856,27 @@ static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,i
   }
 }
 
-
 static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifstream &CMPR_FORCEFILE)
 // Read coordinates,  and optionally velocities and forces.  There is support for more than one coordinate
 // input file, given by the index.
 {
-  ifstream coordfile;
-	int natoms ;
-	XYZ tmp_box ;
-  stringstream	stream_parser;
-	string first_ext;
-  string  line;
+  ifstream COORDFILE;
+	int TEMP_INT ;
+	XYZ TMP_BOX ;
+  stringstream	STREAM_PARSER;
+	string FIRST_EXT;
+  string  LINE;
 
-	coordfile.open(CONTROLS.COORD_FILE[index].data());
+	COORDFILE.open(CONTROLS.COORD_FILE[index].data());
 	
-	coordfile >> natoms;	// Store number of atoms in file in a temp var
-	coordfile >> tmp_box.X >> tmp_box.Y >> tmp_box.Z;
+	COORDFILE >> TEMP_INT;	// Store number of atoms in file in a temp var
+	COORDFILE >> TMP_BOX.X >> TMP_BOX.Y >> TMP_BOX.Z;
 
 	if(CONTROLS.FIT_STRESS)                                                                                           
-		coordfile >>  SYSTEM.PRESSURE_TENSORS.X >>  SYSTEM.PRESSURE_TENSORS.Y >>  SYSTEM.PRESSURE_TENSORS.Z;      
+		COORDFILE >>  SYSTEM.PRESSURE_TENSORS.X >>  SYSTEM.PRESSURE_TENSORS.Y >>  SYSTEM.PRESSURE_TENSORS.Z;      
 
 	if(CONTROLS.FIT_ENER)
-		coordfile >> SYSTEM.QM_POT_ENER;   
+		COORDFILE >> SYSTEM.QM_POT_ENER;   
 
 	////////////////////////////////////////////////////////////
 	// Read in the initial system coordinates, and if requested,
@@ -3888,12 +3904,12 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	string EXTENSION = CONTROLS.COORD_FILE[index].substr(CONTROLS.COORD_FILE[index].find_last_of(".")+1);
 
 	if(index==0)
-		first_ext = EXTENSION;
+		FIRST_EXT = EXTENSION;
 		
-	if(EXTENSION != first_ext)
+	if(EXTENSION != FIRST_EXT)
 	{
 		cout << "ERROR: Extensions for all input coordinate files must match. " << endl;
-		cout << "	Found extension "<< first_ext << " for coordinate file 0 " << endl;
+		cout << "	Found extension "<< FIRST_EXT << " for coordinate file 0 " << endl;
 		cout << "	and " << EXTENSION << " for coordinate file " << index << endl;
 		exit_run(0);
 	}
@@ -3901,8 +3917,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	if (RANK==0)
 	{
 		cout << "     ...Read the following coordinate file extension: " << EXTENSION << endl;
-		cout << "   ...Read the following number of atoms: " << natoms << endl;
-		cout << "     ...Read box dimensions: " << tmp_box.X << " " << tmp_box.Y << " " << tmp_box.Z << endl;
+		cout << "   ...Read the following number of atoms: " << TEMP_INT << endl;
+		cout << "     ...Read box dimensions: " << TMP_BOX.X << " " << TMP_BOX.Y << " " << TMP_BOX.Z << endl;
 		
 		if(CONTROLS.FIT_STRESS)
 			cout << "	...Read stress tensors: " << SYSTEM.PRESSURE_TENSORS.X << " " << SYSTEM.PRESSURE_TENSORS.Y << " " << SYSTEM.PRESSURE_TENSORS.Z << endl;
@@ -3911,46 +3927,46 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 		
 	}
 	
-	getline(coordfile,line);
+	getline(COORDFILE,LINE);
 
-	int curr_atom = -1 ;
+	int CURR_ATOM = -1 ;
 
-	for(int a=0; a<natoms;a++)
+	for(int a=0; a<TEMP_INT;a++)
 	{
 			
-		curr_atom++;
+		CURR_ATOM++;
 
-		getline(coordfile,line);
+		getline(COORDFILE,LINE);
 
-		stream_parser.str(line);
+		STREAM_PARSER.str(LINE);
 		
-		stream_parser >> SYSTEM.ATOMTYPE[curr_atom];
+		STREAM_PARSER >> SYSTEM.ATOMTYPE[CURR_ATOM];
 
 		// Read the coordinates
 
-		stream_parser >> SYSTEM.COORDS[curr_atom].X >> SYSTEM.COORDS[curr_atom].Y >> SYSTEM.COORDS[curr_atom].Z;
+		STREAM_PARSER >> SYSTEM.COORDS[CURR_ATOM].X >> SYSTEM.COORDS[CURR_ATOM].Y >> SYSTEM.COORDS[CURR_ATOM].Z;
 
 		// Wrap the coordinates, shift along Z
 
-		SYSTEM.COORDS[curr_atom].X -= floor(SYSTEM.COORDS[curr_atom].X/tmp_box.X)*tmp_box.X;
-		SYSTEM.COORDS[curr_atom].Y -= floor(SYSTEM.COORDS[curr_atom].Y/tmp_box.Y)*tmp_box.Y;
-		SYSTEM.COORDS[curr_atom].Z -= floor(SYSTEM.COORDS[curr_atom].Z/tmp_box.Z)*tmp_box.Z;
-		SYSTEM.COORDS[curr_atom].Z += SYSTEM.BOXDIM.Z;
+		SYSTEM.COORDS[CURR_ATOM].X -= floor(SYSTEM.COORDS[CURR_ATOM].X/TMP_BOX.X)*TMP_BOX.X;
+		SYSTEM.COORDS[CURR_ATOM].Y -= floor(SYSTEM.COORDS[CURR_ATOM].Y/TMP_BOX.Y)*TMP_BOX.Y;
+		SYSTEM.COORDS[CURR_ATOM].Z -= floor(SYSTEM.COORDS[CURR_ATOM].Z/TMP_BOX.Z)*TMP_BOX.Z;
+		SYSTEM.COORDS[CURR_ATOM].Z += SYSTEM.BOXDIM.Z;
 
 		// Prepare velocities
-		SYSTEM.VELOCITY[curr_atom].X = 0;
-		SYSTEM.VELOCITY[curr_atom].Y = 0;
-		SYSTEM.VELOCITY[curr_atom].Z = 0;
+		SYSTEM.VELOCITY[CURR_ATOM].X = 0;
+		SYSTEM.VELOCITY[CURR_ATOM].Y = 0;
+		SYSTEM.VELOCITY[CURR_ATOM].Z = 0;
 		
 		// Prepare forces
-		SYSTEM.FORCES[curr_atom].X = 0;
-		SYSTEM.FORCES[curr_atom].Y = 0;
-		SYSTEM.FORCES[curr_atom].Z = 0;
+		SYSTEM.FORCES[CURR_ATOM].X = 0;
+		SYSTEM.FORCES[CURR_ATOM].Y = 0;
+		SYSTEM.FORCES[CURR_ATOM].Z = 0;
 		
 		// Prepare accelerations
-		SYSTEM.ACCEL[curr_atom].X = 0;
-		SYSTEM.ACCEL[curr_atom].Y = 0;
-		SYSTEM.ACCEL[curr_atom].Z = 0;		
+		SYSTEM.ACCEL[CURR_ATOM].X = 0;
+		SYSTEM.ACCEL[CURR_ATOM].Y = 0;
+		SYSTEM.ACCEL[CURR_ATOM].Z = 0;		
 		
 
 		if ( CONTROLS.RESTART ) 
@@ -3958,8 +3974,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 			if(a==0 && RANK==0)
 				cout << "	...Reading positions, velocities, and forces from a restart file " << endl ;
 
-			stream_parser >> SYSTEM.VELOCITY[curr_atom].X >> SYSTEM.VELOCITY[curr_atom].Y  >> SYSTEM.VELOCITY[curr_atom].Z;	
-			stream_parser >> SYSTEM.ACCEL   [curr_atom].X >> SYSTEM.ACCEL   [curr_atom].Y  >> SYSTEM.ACCEL   [curr_atom].Z;	
+			STREAM_PARSER >> SYSTEM.VELOCITY[CURR_ATOM].X >> SYSTEM.VELOCITY[CURR_ATOM].Y  >> SYSTEM.VELOCITY[CURR_ATOM].Z;	
+			STREAM_PARSER >> SYSTEM.ACCEL   [CURR_ATOM].X >> SYSTEM.ACCEL   [CURR_ATOM].Y  >> SYSTEM.ACCEL   [CURR_ATOM].Z;	
 		} 
 		else if ( CONTROLS.COMPARE_FORCE || CONTROLS.SUBTRACT_FORCE ) // Reading positions from *.xyzf for force testing
 		{	
@@ -3971,11 +3987,11 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 				  cout << "	...will read from specified force file instead: " << CONTROLS.COMPARE_FILE << endl;
 				}
 
-				//coordfile >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;			
+				//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;			
 			}
 					
 			// Read forces from separate force file
-			CMPR_FORCEFILE >> SYSTEM.FORCES[curr_atom].X >> SYSTEM.FORCES[curr_atom].Y >> SYSTEM.FORCES[curr_atom].Z;
+			CMPR_FORCEFILE >> SYSTEM.FORCES[CURR_ATOM].X >> SYSTEM.FORCES[CURR_ATOM].Y >> SYSTEM.FORCES[CURR_ATOM].Z;
 			
 		}
 		else if (!CONTROLS.INIT_VEL) // Reading positions from *.xyz
@@ -3994,13 +4010,13 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 			if(a==0 && RANK==0)
 				cout << "	...Reading velocities from last three fields of atom info lines in xyzf file... " << endl;	
 
-			stream_parser >> SYSTEM.VELOCITY[curr_atom].X >> SYSTEM.VELOCITY[curr_atom].Y >> SYSTEM.VELOCITY[curr_atom].Z;
+			STREAM_PARSER >> SYSTEM.VELOCITY[CURR_ATOM].X >> SYSTEM.VELOCITY[CURR_ATOM].Y >> SYSTEM.VELOCITY[CURR_ATOM].Z;
 		}
 		else if(EXTENSION == "xyzf")
 		{
 			if(a==0 && RANK==0)
 				cout << "	...Ignoring last three fields of atom info lines in xyzf file... " << endl;
-			//coordfile >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
+			//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
 		}
 		
 		stream_parser.str("");
@@ -4019,9 +4035,9 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 
 	// Input configurations are added sequentially along z.
 		
-	SYSTEM.BOXDIM.X  = tmp_box.X;
-	SYSTEM.BOXDIM.Y  = tmp_box.Y;
-	SYSTEM.BOXDIM.Z += tmp_box.Z;
+	SYSTEM.BOXDIM.X  = TMP_BOX.X;
+	SYSTEM.BOXDIM.Y  = TMP_BOX.Y;
+	SYSTEM.BOXDIM.Z += TMP_BOX.Z;
 		
 	if(CONTROLS.SCALE_SYSTEM_BY != 1.0)
 	{
@@ -4042,8 +4058,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 
 	if ( ! CONTROLS.RESTART ) 
 	{
-		coordfile.close();
-		coordfile.clear();
+		COORDFILE.close();
+		COORDFILE.clear();
 	}
 	
 	if ( CONTROLS.COMPARE_FORCE ) 

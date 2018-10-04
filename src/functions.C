@@ -12,6 +12,7 @@
 #include "util.h"
 #include "Cheby.h"
 #include "io_styles.h"
+#include "A_Matrix.h"
 
 #ifdef USE_MPI
 	#include <mpi.h>
@@ -672,11 +673,11 @@ void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type)
 //
 //////////////////////////////////////////
 
-static void ZCalc_Spline_Deriv  (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+static void ZCalc_Spline_Deriv  (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, int FRAME, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
-static void ZCalc_Poly_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);	
+static void ZCalc_Poly_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, int FRAME, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);	
 
-static void ZCalc_InvR_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+static void ZCalc_InvR_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, int FRAME, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
 //////////////////////////////////////////
 //
@@ -684,14 +685,11 @@ static void ZCalc_InvR_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<
 //
 //////////////////////////////////////////
 
-static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-							map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST) ;
+static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST) ;
 
-static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-								 map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST) ;
+static void ZCalc_Spline(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST) ;
 
-static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, 
-								 map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
 static void ZCalc_Cluster(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST) ;
 
@@ -702,17 +700,14 @@ static void ZCalc_Cluster(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF
 //
 ////////////////////////////////////////////////////////////
 
-void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, 
-						FRAME & FRAME_SYSTEM, vector<vector <XYZ > > & FRAME_A_MATRIX, 
-						vector<vector <XYZ > > & FRAME_COULOMB_FORCES, const int nlayers, bool if_3b_cheby, 
-						map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST)
+void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, int FRAME, A_MAT & A_MATRIX, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST)
 // Controls which functions are used to calculate derivatives
 {
 	// Check for control option compatability:
 	
-  vector<TRIPLETS> & PAIR_TRIPLETS = TRIPS.VEC ;
+  	vector<TRIPLETS> & PAIR_TRIPLETS = TRIPS.VEC ;
   
-  if((CONTROLS.FIT_ENER) && (FF_2BODY[0].PAIRTYP == "SPLINE"))
+  	if((CONTROLS.FIT_ENER) && (FF_2BODY[0].PAIRTYP == "SPLINE"))
 	{
 		cout << "ERROR: Energy fititng has not been implemented for potential type " << FF_2BODY[0].PAIRTYP << endl;
 		exit_run(0);
@@ -731,19 +726,19 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 	
 	
   	// Will ewald calculations be needed? DFTB doesn't use the "default"
-    // Ewald calculation because it has its own special way of dealing with charges
+    	// Ewald calculation because it has its own special way of dealing with charges
   
-    if (FF_2BODY[0].PAIRTYP == "DFTBPOLY" && CONTROLS.FIT_COUL) 
+    	if (FF_2BODY[0].PAIRTYP == "DFTBPOLY" && CONTROLS.FIT_COUL) 
 	{
 		cout << "ERROR: Turn of FITCOUL and set charges to zero when using pairtype " << FF_2BODY[0].PAIRTYP << endl;
 		exit_run(0);
 	}	
 
 	if ( CONTROLS.FIT_COUL ) 
-		ZCalc_Ewald_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME_COULOMB_FORCES, PAIR_MAP, NEIGHBOR_LIST, CONTROLS);	
+		ZCalc_Ewald_Deriv(FRAME_SYSTEM, FF_2BODY, FRAME, A_MATRIX, PAIR_MAP, NEIGHBOR_LIST, CONTROLS);	
 	
-    if ( FF_2BODY[0].PAIRTYP == "SPLINE" )
-		 ZCalc_Spline_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
+    	if ( FF_2BODY[0].PAIRTYP == "SPLINE" )
+		 ZCalc_Spline_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, FRAME, A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
 	
 	else if ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" )
 	{
@@ -753,28 +748,28 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 	  Cheby cheby{CONTROLS,FRAME_SYSTEM,NEIGHBOR_LIST,FF_2BODY,INT_PAIR_MAP} ;
 
 	  if ( FF_2BODY[0].SNUM > 0)
-		 cheby.Deriv_2B(FRAME_A_MATRIX) ;
+		 cheby.Deriv_2B(FRAME, A_MATRIX) ;
 	
 	  if (if_3b_cheby)
-		 cheby.Deriv_3B(FRAME_A_MATRIX, TRIPS) ;
+		 cheby.Deriv_3B(FRAME, A_MATRIX, TRIPS) ;
 			
 		if (CONTROLS.USE_4B_CHEBY) 
 		{
-		  int n_3b_cheby_terms = 0 ;
-		  for (int i=0; i<PAIR_TRIPLETS.size(); i++) 
-			 n_3b_cheby_terms += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;
+			int n_3b_cheby_terms = 0 ;
+			for (int i=0; i<PAIR_TRIPLETS.size(); i++) 
+				n_3b_cheby_terms += PAIR_TRIPLETS[i].N_TRUE_ALLOWED_POWERS;
 
-		  cheby.Deriv_4B(FRAME_A_MATRIX, n_3b_cheby_terms, QUADS) ;
+		 	cheby.Deriv_4B(FRAME, A_MATRIX, n_3b_cheby_terms, QUADS) ;
 		}
 	}			
 
-    else if ( FF_2BODY[0].PAIRTYP == "DFTBPOLY" )	
-		 ZCalc_Poly_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
+    	else if ( FF_2BODY[0].PAIRTYP == "DFTBPOLY" )	
+		 ZCalc_Poly_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, FRAME, A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
 
-    else if ( FF_2BODY[0].PAIRTYP == "INVRSE_R" )	
-		 ZCalc_InvR_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, FRAME_A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
+    	else if ( FF_2BODY[0].PAIRTYP == "INVRSE_R" )	
+		 ZCalc_InvR_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, FRAME, A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
 
-    else 
+    	else 
     {
 		cout << "Error: bad pairtype in ZCalc_Deriv\n";
 		exit(1);
@@ -782,7 +777,7 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 }	
 
 // FUNCTION UPDATED
-static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)		   
+static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, int FRAME, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)		   
 {
 	// Original comment: Calculate derivatives of the forces wrt the spline parameters. Stores minimum distance between a pair of atoms in minD[i].
 	// New Note: This doesn't actually calcuate any derivatives.. it is just populating A with the cubic hermite basis polynomials needed for fitting
@@ -897,107 +892,107 @@ static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PA
 
 				fidx_a2 = SYSTEM.PARENT[a2];
 				
-			   	FRAME_A_MATRIX[a1][vstart+kstart+0].X += h00 * RAB.X / rlen;
-			   	FRAME_A_MATRIX[a1][vstart+kstart+1].X += h10 * RAB.X / rlen;
-			   	FRAME_A_MATRIX[a1][vstart+kstart+2].X += h01 * RAB.X / rlen;
-			   	FRAME_A_MATRIX[a1][vstart+kstart+3].X += h11 * RAB.X / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+0].X += h00 * RAB.X / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+1].X += h10 * RAB.X / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+2].X += h01 * RAB.X / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+3].X += h11 * RAB.X / rlen;
 			  
-			   	FRAME_A_MATRIX[a1][vstart+kstart+0].Y += h00 * RAB.Y / rlen;
-			   	FRAME_A_MATRIX[a1][vstart+kstart+1].Y += h10 * RAB.Y / rlen;
-			   	FRAME_A_MATRIX[a1][vstart+kstart+2].Y += h01 * RAB.Y / rlen;
-			   	FRAME_A_MATRIX[a1][vstart+kstart+3].Y += h11 * RAB.Y / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+0].Y += h00 * RAB.Y / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+1].Y += h10 * RAB.Y / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+2].Y += h01 * RAB.Y / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+3].Y += h11 * RAB.Y / rlen;
 				  
-			   	FRAME_A_MATRIX[a1][vstart+kstart+0].Z += h00 * RAB.Z / rlen;
-			   	FRAME_A_MATRIX[a1][vstart+kstart+1].Z += h10 * RAB.Z / rlen;
-			   	FRAME_A_MATRIX[a1][vstart+kstart+2].Z += h01 * RAB.Z / rlen;
-			   	FRAME_A_MATRIX[a1][vstart+kstart+3].Z += h11 * RAB.Z / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+0].Z += h00 * RAB.Z / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+1].Z += h10 * RAB.Z / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+2].Z += h01 * RAB.Z / rlen;
+			   	A_MATRIX.FORCES[FRAME][a1][vstart+kstart+3].Z += h11 * RAB.Z / rlen;
 				
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+0].X -= h00 * RAB.X / rlen;
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+1].X -= h10 * RAB.X / rlen;
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+2].X -= h01 * RAB.X / rlen;
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+3].X -= h11 * RAB.X / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+0].X -= h00 * RAB.X / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+1].X -= h10 * RAB.X / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+2].X -= h01 * RAB.X / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+3].X -= h11 * RAB.X / rlen;
 			  
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+0].Y -= h00 * RAB.Y / rlen;
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+1].Y -= h10 * RAB.Y / rlen;
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+2].Y -= h01 * RAB.Y / rlen;
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+3].Y -= h11 * RAB.Y / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+0].Y -= h00 * RAB.Y / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+1].Y -= h10 * RAB.Y / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+2].Y -= h01 * RAB.Y / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+3].Y -= h11 * RAB.Y / rlen;
 				  
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+0].Z -= h00 * RAB.Z / rlen;
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+1].Z -= h10 * RAB.Z / rlen;
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+2].Z -= h01 * RAB.Z / rlen;
-			   	FRAME_A_MATRIX[fidx_a2][vstart+kstart+3].Z -= h11 * RAB.Z / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+0].Z -= h00 * RAB.Z / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+1].Z -= h10 * RAB.Z / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+2].Z -= h01 * RAB.Z / rlen;
+			   	A_MATRIX.FORCES[FRAME][fidx_a2][vstart+kstart+3].Z -= h11 * RAB.Z / rlen;
 				
 				if (CONTROLS.FIT_STRESS)
 				{
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+0].X -= h00 * RAB.X * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+1].X -= h10 * RAB.X * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+2].X -= h01 * RAB.X * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+3].X -= h11 * RAB.X * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].XX -= h00 * RAB.X * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].XX -= h10 * RAB.X * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].XX -= h01 * RAB.X * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].XX -= h11 * RAB.X * RAB.X / rlen;
 			  
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+0].Y -= h00 * RAB.Y * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+1].Y -= h10 * RAB.Y * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+2].Y -= h01 * RAB.Y * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+3].Y -= h11 * RAB.Y * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].YY -= h00 * RAB.Y * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].YY -= h10 * RAB.Y * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].YY -= h01 * RAB.Y * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].YY -= h11 * RAB.Y * RAB.Y / rlen;
 				  
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+0].Z -= h00 * RAB.Z * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+1].Z -= h10 * RAB.Z * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+2].Z -= h01 * RAB.Z * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+kstart+3].Z -= h11 * RAB.Z * RAB.Z / rlen;					
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].ZZ -= h00 * RAB.Z * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].ZZ -= h10 * RAB.Z * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].ZZ -= h01 * RAB.Z * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].ZZ -= h11 * RAB.Z * RAB.Z / rlen;					  
 				}
 				else if (CONTROLS.FIT_STRESS_ALL)
 				{
 					// xx, xy, and xz
 					
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+0].X -= h00 * RAB.X * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+1].X -= h10 * RAB.X * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+2].X -= h01 * RAB.X * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+3].X -= h11 * RAB.X * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].XX -= h00 * RAB.X * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].XX -= h10 * RAB.X * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].XX -= h01 * RAB.X * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].XX -= h11 * RAB.X * RAB.X / rlen;
 			  
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+0].Y -= h00 * RAB.X * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+1].Y -= h10 * RAB.X * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+2].Y -= h01 * RAB.X * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+3].Y -= h11 * RAB.X * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].XY -= h00 * RAB.X * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].XY -= h10 * RAB.X * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].XY -= h01 * RAB.X * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].XY -= h11 * RAB.X * RAB.Y / rlen;
 				  
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+0].Z -= h00 * RAB.X * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+1].Z -= h10 * RAB.X * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+2].Z -= h01 * RAB.X * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+kstart+3].Z -= h11 * RAB.X * RAB.Z / rlen;	
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].XZ -= h00 * RAB.X * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].XZ -= h10 * RAB.X * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].XZ -= h01 * RAB.X * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].XZ -= h11 * RAB.X * RAB.Z / rlen;	
 					
 					
 					// yx, yy, and yz
 					
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+0].X -= h00 * RAB.Y * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+1].X -= h10 * RAB.Y * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+2].X -= h01 * RAB.Y * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+3].X -= h11 * RAB.Y * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].XY -= h00 * RAB.Y * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].XY -= h10 * RAB.Y * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].XY -= h01 * RAB.Y * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].XY -= h11 * RAB.Y * RAB.X / rlen;
 			  
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+0].Y -= h00 * RAB.Y * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+1].Y -= h10 * RAB.Y * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+2].Y -= h01 * RAB.Y * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+3].Y -= h11 * RAB.Y * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].YY -= h00 * RAB.Y * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].YY -= h10 * RAB.Y * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].YY -= h01 * RAB.Y * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].YY -= h11 * RAB.Y * RAB.Y / rlen;
 				  
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+0].Z -= h00 * RAB.Y * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+1].Z -= h10 * RAB.Y * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+2].Z -= h01 * RAB.Y * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+kstart+3].Z -= h11 * RAB.Y * RAB.Z / rlen;	
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].YZ -= h00 * RAB.Y * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].YZ -= h10 * RAB.Y * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].YZ -= h01 * RAB.Y * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].YZ -= h11 * RAB.Y * RAB.Z / rlen;	
 					
 					
 					// yx, yy, and yz
 					
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+0].X -= h00 * RAB.Z * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+1].X -= h10 * RAB.Z * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+2].X -= h01 * RAB.Z * RAB.X / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+3].X -= h11 * RAB.Z * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].XZ -= h00 * RAB.Z * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].XZ -= h10 * RAB.Z * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].XZ -= h01 * RAB.Z * RAB.X / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].XZ -= h11 * RAB.Z * RAB.X / rlen;
 			  
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+0].Y -= h00 * RAB.Z * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+1].Y -= h10 * RAB.Z * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+2].Y -= h01 * RAB.Z * RAB.Y / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+3].Y -= h11 * RAB.Z * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].YZ -= h00 * RAB.Z * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].YZ -= h10 * RAB.Z * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].YZ -= h01 * RAB.Z * RAB.Y / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].YZ -= h11 * RAB.Z * RAB.Y / rlen;
 				  
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+0].Z -= h00 * RAB.Z * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+1].Z -= h10 * RAB.Z * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+2].Z -= h01 * RAB.Z * RAB.Z / rlen;
-				   	FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+kstart+3].Z -= h11 * RAB.Z * RAB.Z / rlen;	
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+0].ZZ -= h00 * RAB.Z * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+1].ZZ -= h10 * RAB.Z * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+2].ZZ -= h01 * RAB.Z * RAB.Z / rlen;
+				   	A_MATRIX.STRESSES[FRAME][vstart+kstart+3].ZZ -= h11 * RAB.Z * RAB.Z / rlen;	
 				}							
 				
 			}
@@ -1008,9 +1003,9 @@ static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PA
 	{
 		for (int i=0; i<FF_2BODY[curr_pair_type_idx].SNUM; i++) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z /= VOL;	
+			 A_MATRIX.STRESSES[FRAME][i].XX /= VOL;
+			 A_MATRIX.STRESSES[FRAME][i].YY /= VOL;
+			 A_MATRIX.STRESSES[FRAME][i].ZZ /= VOL;     
 		}
 	}
 	
@@ -1018,17 +1013,17 @@ static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PA
 	{
 		for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z /= VOL;	
+			A_MATRIX.STRESSES[FRAME][i].XX /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XZ /= VOL;      
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YZ /= VOL;
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XZ /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YZ /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].ZZ /= VOL;
 		}
 	}
 	
@@ -1036,7 +1031,7 @@ static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PA
 }
 
 // FUNCTION UPDATED
-static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)		
+static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, int FRAME, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)		
 // Calculate derivatives of the forces wrt to inverse pair distance to various powers. Stores minimum distance between a pair of atoms in minD[i].
 {
 	XYZ RAB; 		// Replaces  Rab[3];
@@ -1103,34 +1098,34 @@ static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 					rfac = ( (i+2) / pow(rlen,i+3) )*fc;
 					rfac -= (1/pow(rlen,i+2))*dfc;
 
-					FRAME_A_MATRIX[a1][vstart+i].X += rfac * RAB.X/rlen;
-					FRAME_A_MATRIX[a1][vstart+i].Y += rfac * RAB.Y/rlen;
-					FRAME_A_MATRIX[a1][vstart+i].Z += rfac * RAB.Z/rlen;
+					A_MATRIX.FORCES[FRAME][a1][vstart+i].X += rfac * RAB.X/rlen;
+					A_MATRIX.FORCES[FRAME][a1][vstart+i].Y += rfac * RAB.Y/rlen;
+					A_MATRIX.FORCES[FRAME][a1][vstart+i].Z += rfac * RAB.Z/rlen;
 						
-					FRAME_A_MATRIX[fidx_a2][vstart+i].X -= rfac * RAB.X/rlen;
-					FRAME_A_MATRIX[fidx_a2][vstart+i].Y -= rfac * RAB.Y/rlen;
-					FRAME_A_MATRIX[fidx_a2][vstart+i].Z -= rfac * RAB.Z/rlen;		
+					A_MATRIX.FORCES[FRAME][fidx_a2][vstart+i].X -= rfac * RAB.X/rlen;
+					A_MATRIX.FORCES[FRAME][fidx_a2][vstart+i].Y -= rfac * RAB.Y/rlen;
+					A_MATRIX.FORCES[FRAME][fidx_a2][vstart+i].Z -= rfac * RAB.Z/rlen;		
 					
 					if (CONTROLS.FIT_STRESS)
 					{
-						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X -= rfac * RAB.X * RAB.X / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y -= rfac * RAB.Y * RAB.Y / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z -= rfac * RAB.Z * RAB.Z / rlen;	
+						A_MATRIX.STRESSES[FRAME][vstart+i].XX -= rfac * RAB.X * RAB.X / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].YY -= rfac * RAB.Y * RAB.Y / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].ZZ -= rfac * RAB.Z * RAB.Z / rlen;	     
 					}
 					
 					else if (CONTROLS.FIT_STRESS_ALL)
 					{
-						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X -= rfac * RAB.X * RAB.X / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y -= rfac * RAB.X * RAB.Y / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z -= rfac * RAB.X * RAB.Z / rlen;	
+						A_MATRIX.STRESSES[FRAME][vstart+i].XX -= rfac * RAB.X * RAB.X / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].XY -= rfac * RAB.X * RAB.Y / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].XZ -= rfac * RAB.X * RAB.Z / rlen;	   
 						
-						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X -= rfac * RAB.Y * RAB.X / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y -= rfac * RAB.Y * RAB.Y / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z -= rfac * RAB.Y * RAB.Z / rlen;	
+						A_MATRIX.STRESSES[FRAME][vstart+i].XY -= rfac * RAB.Y * RAB.X / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].YY -= rfac * RAB.Y * RAB.Y / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].YZ -= rfac * RAB.Y * RAB.Z / rlen;	   
 						
-						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X -= rfac * RAB.Z * RAB.X / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y -= rfac * RAB.Z * RAB.Y / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z -= rfac * RAB.Z * RAB.Z / rlen;	
+						A_MATRIX.STRESSES[FRAME][vstart+i].XZ -= rfac * RAB.Z * RAB.X / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].YZ -= rfac * RAB.Z * RAB.Y / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].ZZ -= rfac * RAB.Z * RAB.Z / rlen;	   
 					}						
 				}
 			}
@@ -1141,9 +1136,9 @@ static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	{
 		for (int i=0; i<FF_2BODY[curr_pair_type_idx].SNUM; i++) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z /= VOL;	
+			A_MATRIX.STRESSES[FRAME][i].XX /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].ZZ /= VOL;        
 		}
 	}
 	
@@ -1151,17 +1146,17 @@ static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	{
 		for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z /= VOL;	
+			A_MATRIX.STRESSES[FRAME][i].XX /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XZ /= VOL;      
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YZ /= VOL;
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XZ /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YZ /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].ZZ /= VOL;
 		}
 	}
 	
@@ -1170,7 +1165,7 @@ static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 }
 
 // FUNCTION UPDATED
-static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, vector<vector <XYZ > > & FRAME_A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)	
+static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, int FRAME, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)	
 // Calculate derivatives of the forces wrt the DFTB Erep parameters.
 {	
 	XYZ RAB; 		// Replaces  Rab[3];
@@ -1267,34 +1262,34 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 				{
 					rfac = -(i+2)*pow((rc[curr_pair_type_idx]-x),i+1);
 
-					FRAME_A_MATRIX[a1][vstart+i].X += rfac * RAB.X/rlen;
-					FRAME_A_MATRIX[a1][vstart+i].Y += rfac * RAB.Y/rlen;
-					FRAME_A_MATRIX[a1][vstart+i].Z += rfac * RAB.Z/rlen;
+					A_MATRIX.FORCES[FRAME][a1][vstart+i].X += rfac * RAB.X/rlen;
+					A_MATRIX.FORCES[FRAME][a1][vstart+i].Y += rfac * RAB.Y/rlen;
+					A_MATRIX.FORCES[FRAME][a1][vstart+i].Z += rfac * RAB.Z/rlen;
 						
-					FRAME_A_MATRIX[fidx_a2][vstart+i].X -= rfac * RAB.X/rlen;
-					FRAME_A_MATRIX[fidx_a2][vstart+i].Y -= rfac * RAB.Y/rlen;
-					FRAME_A_MATRIX[fidx_a2][vstart+i].Z -= rfac * RAB.Z/rlen;
+					A_MATRIX.FORCES[FRAME][fidx_a2][vstart+i].X -= rfac * RAB.X/rlen;
+					A_MATRIX.FORCES[FRAME][fidx_a2][vstart+i].Y -= rfac * RAB.Y/rlen;
+					A_MATRIX.FORCES[FRAME][fidx_a2][vstart+i].Z -= rfac * RAB.Z/rlen;
 					
 					if (CONTROLS.FIT_STRESS)
 					{
-						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X -= 29421.02407027691 * rfac * RAB.X * RAB.X / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y -= 29421.02407027691 * rfac * RAB.Y * RAB.Y / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z -= 29421.02407027691 * rfac * RAB.Z * RAB.Z / rlen;	
+						A_MATRIX.STRESSES[FRAME][vstart+i].XX -= 29421.02407027691 * rfac * RAB.X * RAB.X / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].YY -= 29421.02407027691 * rfac * RAB.Y * RAB.Y / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].ZZ -= 29421.02407027691 * rfac * RAB.Z * RAB.Z / rlen;    
 					}
 					
 					else if (CONTROLS.FIT_STRESS_ALL)
 					{
-						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X -= 29421.02407027691 * rfac * RAB.X * RAB.X / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y -= 29421.02407027691 * rfac * RAB.X * RAB.Y / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z -= 29421.02407027691 * rfac * RAB.X * RAB.Z / rlen;	
+						A_MATRIX.STRESSES[FRAME][vstart+i].XX -= 29421.02407027691 * rfac * RAB.X * RAB.X / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].XY -= 29421.02407027691 * rfac * RAB.X * RAB.Y / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].XZ -= 29421.02407027691 * rfac * RAB.X * RAB.Z / rlen;  
 						
-						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X -= 29421.02407027691 * rfac * RAB.Y * RAB.X / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y -= 29421.02407027691 * rfac * RAB.Y * RAB.Y / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z -= 29421.02407027691 * rfac * RAB.Y * RAB.Z / rlen;	
+						A_MATRIX.STRESSES[FRAME][vstart+i].XY -= 29421.02407027691 * rfac * RAB.Y * RAB.X / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].YY -= 29421.02407027691 * rfac * RAB.Y * RAB.Y / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].YZ -= 29421.02407027691 * rfac * RAB.Y * RAB.Z / rlen;  
 						
-						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X -= 29421.02407027691 * rfac * RAB.Z * RAB.X / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y -= 29421.02407027691 * rfac * RAB.Z * RAB.Y / rlen;
-						FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z -= 29421.02407027691 * rfac * RAB.Z * RAB.Z / rlen;	
+						A_MATRIX.STRESSES[FRAME][vstart+i].XZ -= 29421.02407027691 * rfac * RAB.Z * RAB.X / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].YZ -= 29421.02407027691 * rfac * RAB.Z * RAB.Y / rlen;
+						A_MATRIX.STRESSES[FRAME][vstart+i].ZZ -= 29421.02407027691 * rfac * RAB.Z * RAB.Z / rlen;  
 					}
 				}
 			}
@@ -1306,9 +1301,9 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	{
 		for (int i=0; i<FF_2BODY[curr_pair_type_idx].SNUM; i++) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS][vstart+i].Z /= VOL;	
+			A_MATRIX.STRESSES[FRAME][i].XX /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].ZZ /= VOL;        
 		}
 	}
 	
@@ -1316,17 +1311,17 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	{
 		for ( int i = 0; i < FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 		{
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS  ][vstart+i].Z /= VOL;	
+			A_MATRIX.STRESSES[FRAME][i].XX /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XZ /= VOL;      
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+1][vstart+i].Z /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YY /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YZ /= VOL;
 		
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].X /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Y /= VOL;
-			FRAME_A_MATRIX[SYSTEM.ATOMS+2][vstart+i].Z /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].XZ /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].YZ /= VOL;
+			A_MATRIX.STRESSES[FRAME][i].ZZ /= VOL;
 		}
 	}
 	
@@ -1336,9 +1331,7 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 }
 
 // FUNCTION UPDATED
-void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_FORCES,  
-								 vector<PAIRS> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST,
-								 bool lsq_mode)
+void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv,  int FRAME, A_MAT & A_MATRIX, vector<PAIRS> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode)
 // lsq_mode is true if this is a least-squares calculation.
 {
 	// this function subtracts the ReaxFF over-coordination term to re-fit 
@@ -1521,7 +1514,7 @@ void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_F
 	{ 
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 		{
-	        SYSTEM.FORCES[a1].X -= SForce[a1].X;
+	        	SYSTEM.FORCES[a1].X -= SForce[a1].X;
 			SYSTEM.FORCES[a1].Y -= SForce[a1].Y;
 			SYSTEM.FORCES[a1].Z -= SForce[a1].Z;	
 		}
@@ -1530,9 +1523,9 @@ void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, vector<XYZ> & P_OVER_F
 	{
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 		{
-	        P_OVER_FORCES[a1].X -= dFover[a1].X;
-			P_OVER_FORCES[a1].Y -= dFover[a1].Y;
-			P_OVER_FORCES[a1].Z -= dFover[a1].Z;		
+	        	A_MATRIX.OVERBONDING[FRAME][a1].X -= dFover[a1].X;
+			A_MATRIX.OVERBONDING[FRAME][a1].Y -= dFover[a1].Y;
+			A_MATRIX.OVERBONDING[FRAME][a1].Z -= dFover[a1].Z;		
 		}
 	} // VERIFIED FROM HERE UP
 }

@@ -42,6 +42,21 @@ static const ANSI_COLORS COUT_STYLE  =
 
 };
 
+struct XYZ
+{
+	double X;
+	double Y;
+	double Z;
+};
+
+struct XYZ_INT
+{
+	int X;
+	int Y;
+	int Z;
+};
+
+
 void SORT_THREE_DESCEND(int & a, int & b, int & c);
 
 void exit_run(int val);

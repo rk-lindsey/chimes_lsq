@@ -19,6 +19,7 @@
 #include "util.h"
 #include "Cheby.h"
 #include "io_styles.h"
+#include "A_Matrix.h"
 
 using namespace std;
 
@@ -32,14 +33,10 @@ using namespace std;
 
 static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, map<int,string> & PAIR_MAP_REVERSE, vector<int> &INT_PAIR_MAP, vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, NEIGHBORS & NEIGHBOR_LIST, vector<int>& TMP_ATOMTYPEIDX, vector<string> &TMP_ATOMTYPE);
 
-static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby) ;
+static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby);
 
-static void add_col_of_ones(int item, bool DO_ENER, bool DO_STRESS, bool DO_STRESS_ALL, int NATOMS, ofstream & OUTFILE);
-static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, 
-													 CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
-													 NEIGHBORS & NEIGHBOR_LIST,
-													 vector<int>& TMP_ATOMTYPEIDX,
-													 vector<string>& TMP_ATOMTYPE) ;
+static void add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE);
+static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, vector<int>& TMP_ATOMTYPEIDX, vector<string>& TMP_ATOMTYPE);
 
 // Global variables declared as externs in functions.h, and declared in functions.C
 
@@ -56,7 +53,7 @@ int RANK;		// Index of current processor
 
 // For 4-body interactions, these are used for both the lsq and md parts:
 
-ofstream BAD_CONFIGS ;
+ofstream BAD_CONFIGS;
 
 int main(int argc, char* argv[])
 {
@@ -72,9 +69,9 @@ int main(int argc, char* argv[])
 		RANK   = 0;
 	#endif
 	
-#ifdef ENABLE_FP_EXCEPT
-	enable_fp_exceptions() ;
-#endif
+	#ifdef ENABLE_FP_EXCEPT
+		enable_fp_exceptions();
+	#endif
 	
 	//////////////////////////////////////////////////
 	//
@@ -87,19 +84,19 @@ int main(int argc, char* argv[])
 	// 1. Number of atoms does not change over frames ( should always be true for MD)
 	// 2. Atom ordering in trajectory file does not change over frames ( should also always be true)
 	
-	vector<PAIRS> 		ATOM_PAIRS;			// Will store relevant info regarding atom interaction pair types.. 
-	CLUSTER_LIST TRIPS ;                // Triplet interaction: generic cluster interface.
-	CLUSTER_LIST QUADS ;                // Quadruplet interaction: generic cluster interface.
+	vector<PAIRS> 		ATOM_PAIRS;		// Will store relevant info regarding atom interaction pair types.. 
+	CLUSTER_LIST TRIPS;                		// Triplet interaction: generic cluster interface.
+	CLUSTER_LIST QUADS;                		// Quadruplet interaction: generic cluster interface.
 	
-	vector<FRAME> 		TRAJECTORY;			// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
-	NEIGHBORS        	 NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
+	vector<FRAME> 		TRAJECTORY;		// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
+	NEIGHBORS        	NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
 	vector<int>   		ATOM_PAIR_TYPES;	// Fore use in double loop over atom pairs. Index corresponds to the overall double loop count. 
 											// Provides an index that rells you the atom pair's ATOM_PAIRS's type index.. THIS IS FOR LOOPS OF TYPE
 											// 	for(int a1=0;a1<nat-1;a1++)	for(int a2=a1+1;a2<nat;a2++)
 	vector<int>   ATOM_PAIR_TYPES_ALL;		// THIS IS FOR LOOPS OF TYPE for(int ai=0; ai<nat; ai++), for(int ak=0; ak<nat; ak++)
 	
 	map<string,int> PAIR_MAP;			// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
-	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
+	map<int,string> PAIR_MAP_REVERSE; 		// Input/output the resverse of PAIR_MAP
 	
 	vector<CHARGE_CONSTRAINT> CHARGE_CONSTRAINTS;	// Specifies how we constrain charge fitting
 
@@ -122,15 +119,15 @@ int main(int argc, char* argv[])
 			cout << endl << "Reading input file..." << endl;
 	
 			// Delete temporary files if they exist.
-			system("rm -f A.[0-9]*.txt") ;
-			system("rm -f b.[0-9]*.txt") ;
+			system("rm -f A.[0-9]*.txt");
+			system("rm -f b.[0-9]*.txt");
 		}
 	#endif
 
 	read_lsq_input(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, PAIR_MAP_REVERSE, INT_PAIR_MAP,  CHARGE_CONSTRAINTS, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
- 
+
 	// Build many-body interaction clusters if necessary.
-	build_clusters(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE) ;
+	build_clusters(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
 
 	if((CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL) && CONTROLS.CALL_EWALD)
 	{
@@ -160,19 +157,15 @@ int main(int argc, char* argv[])
 	// 
 	// { (Param-1_O--O), (Param-2_O--O), (Param-3_O--O), (Param-4_O--O), 
 	//   (Param-1_O--H), (Param-2_O--H), (Param-3_O--H), (Param-4_O--H), 
-	//   (Param-1_H--H), (Param-2_H--H), (Param-3_H--H), (Param-4_H--H)	}	
-		
-	vector<vector <vector <XYZ > > > A_MATRIX;	    	// [ # frames ] [ # atoms ]      [ #fitting parameters ]  .. replaces Als
-	vector<vector <vector <XYZ > > > COULOMB_FORCES;	// [ # frames ] [ # pair types ] [ # atoms ]              .. replaces Coul_xx
-	vector<vector <XYZ > >           P_OVER_FORCES;  	// [ # frames ] [ # atoms ]                               .. replaces Pover
+	//   (Param-1_H--H), (Param-2_H--H), (Param-3_H--H), (Param-4_H--H)	}
+
 	
-	A_MATRIX      .resize(CONTROLS.NFRAMES);
-	COULOMB_FORCES.resize(CONTROLS.NFRAMES);
-	P_OVER_FORCES .resize(CONTROLS.NFRAMES);
+	A_MAT A_MATRIX(CONTROLS.NFRAMES); // Declare and initialize A-matrix object
+	
 
 	// Figure out necessary dimensions for the force/force derivative vectors
 	
-	CONTROLS.TOT_SNUM = 0; 
+	CONTROLS.TOT_SNUM     = 0; 
 	CONTROLS.NUM_3B_CHEBY = 0;
 	CONTROLS.NUM_4B_CHEBY = 0;
 
@@ -271,90 +264,91 @@ int main(int argc, char* argv[])
 		TRAJ_INPUT >> TRAJECTORY[i].ATOMS;
 		
 		// Read in line with box dimenstions
-		string header ;
-		vector<string> tokens ;
+		string header;
+		vector<string> tokens;
 
 		// Read line twice to get through newline from last input.
-		std::getline(TRAJ_INPUT, header) ;
-		std::getline(TRAJ_INPUT, header) ;
+		std::getline(TRAJ_INPUT, header);
+		std::getline(TRAJ_INPUT, header);
 
-		int ntokens = parse_space(header, tokens) ;
+		int ntokens = parse_space(header, tokens);
 
-		if ( ntokens >= 3 ) {
-			TRAJECTORY[i].BOXDIM.X = stod(tokens[0]) ;
-			TRAJECTORY[i].BOXDIM.Y = stod(tokens[1]) ;
-			TRAJECTORY[i].BOXDIM.Z = stod(tokens[2]) ;
-		} else {
-			cout << "Error:  Not enough entries in the trajectory frame header" << endl ;
-			cout << header << endl ;
-			exit(1) ;
+		// Make sure we at least have boxlengths
+
+		if ( ntokens >= 3 ) 
+		{
+			TRAJECTORY[i].BOXDIM.X = stod(tokens[0]);
+			TRAJECTORY[i].BOXDIM.Y = stod(tokens[1]);
+			TRAJECTORY[i].BOXDIM.Z = stod(tokens[2]);
+		} 
+		else 
+		{
+			cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
+			cout << "        Missing box length components." << endl;
+			cout << "        See offending line below." << endl;
+			cout << header << endl;
+			exit(1);			
 		}
+		
+		// If requested, check for stress tensors... keep in mind that the 
+		// number of tensors and the number of frames with tensors can vary
 
 		if((CONTROLS.NSTRESS < 0) || (i<CONTROLS.NSTRESS))
 		{
 			if(CONTROLS.FIT_STRESS)
 			{
-				if ( ntokens >= 6 ) {
-					TRAJECTORY[i].STRESS_TENSORS.X = stod(tokens[3]) ;
-					TRAJECTORY[i].STRESS_TENSORS.Y = stod(tokens[4]) ;
-					TRAJECTORY[i].STRESS_TENSORS.Z = stod(tokens[5]) ;
-				} else {
-					cout << "Error:  Not enough entries in the trajectory frame header" << endl ;
-					cout << header << endl ;
-					exit(1) ;
+				if ( ntokens >= 6 ) 
+				{
+					TRAJECTORY[i].STRESS_TENSORS.X = stod(tokens[3]);
+					TRAJECTORY[i].STRESS_TENSORS.Y = stod(tokens[4]);
+					TRAJECTORY[i].STRESS_TENSORS.Z = stod(tokens[5]);
+				} 
+				else 
+				{
+					cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
+					cout << "        Missing diagonal stress tensor components." << endl;
+					cout << "        See offending line below." << endl;
+					cout << header << endl;
+					exit(1);
 				}
 			}
 			else if(CONTROLS.FIT_STRESS_ALL)	// Expects as:xx yy zz xy xz yz // old: xx, xy, xz, yy, yx, yz, zx, zy, zz
 			{
 				// Read only the "upper" deviatoric components
 		
-				if ( ntokens >= 9 ) {
-					TRAJECTORY[i].STRESS_TENSORS_X.X = stod(tokens[3]) ;
-					TRAJECTORY[i].STRESS_TENSORS_Y.Y = stod(tokens[4]) ;
-					TRAJECTORY[i].STRESS_TENSORS_Z.Z = stod(tokens[5]) ;
+				if ( ntokens >= 9 ) 
+				{
+					TRAJECTORY[i].STRESS_TENSORS_X.X = stod(tokens[3]);
+					TRAJECTORY[i].STRESS_TENSORS_Y.Y = stod(tokens[4]);
+					TRAJECTORY[i].STRESS_TENSORS_Z.Z = stod(tokens[5]);
 					
-					TRAJECTORY[i].STRESS_TENSORS_X.Y = stod(tokens[6]) ;
-					TRAJECTORY[i].STRESS_TENSORS_X.Z = stod(tokens[7]) ;
-					TRAJECTORY[i].STRESS_TENSORS_Y.Z = stod(tokens[8]) ;
-				} else {
-					cout << "Error:  Not enough entries in the trajectory frame header" << endl ;
-					cout << header << endl ;
-					exit(1) ;
+					TRAJECTORY[i].STRESS_TENSORS_X.Y = stod(tokens[6]);
+					TRAJECTORY[i].STRESS_TENSORS_X.Z = stod(tokens[7]);
+					TRAJECTORY[i].STRESS_TENSORS_Y.Z = stod(tokens[8]);
+				} 
+				else 
+				{
+					cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
+					cout << "        Missing full stress tensor components." << endl;
+					cout << "        See offending line below." << endl;
+					cout << header << endl;
+					exit(1);
 				}
 			}
 		}
 		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
-		{
-			if(CONTROLS.FIT_ENER) 
-			{ 
-        // We're actually fitting to relative *differences* in energy
-				int e_index ;
-				if ( CONTROLS.FIT_STRESS_ALL ) {
-					e_index = 9 ;
-				} else if ( CONTROLS.FIT_STRESS ) {
-					e_index = 6 ;
-				} else {
-					e_index = 3 ;
-				}
-				if ( ntokens >= e_index + 1 ) 
-				{
-					TRAJECTORY[i].QM_POT_ENER = stod(tokens[e_index]) ;
-				} 
-				else 
-				{
-					cout << "Error:  Not enough entries in the trajectory frame header" << endl ;
-					cout << header << endl ;
-					exit(1) ;
-				}
-			}
-		}
+			if(CONTROLS.FIT_ENER) // We're fitting to the absolute energy, + an offset (column of 1's at end of A-matrix)
+				TRAJECTORY[i].QM_POT_ENER = stod(tokens[tokens.size()-1]);
+
 	
 		// Check that outer cutoffs do not exceed half of the boxlength
 		// with consideration of layering
 		
 		for(int j=0; j<ATOM_PAIRS.size(); j++)
 		{
-                        if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X * (2*CONTROLS.N_LAYERS +1) || ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (2*CONTROLS.N_LAYERS +1) || ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z * (2*CONTROLS.N_LAYERS +1) ))
+                        if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X * (2*CONTROLS.N_LAYERS +1) 
+			    || ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (2*CONTROLS.N_LAYERS +1) 
+			    || ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z * (2*CONTROLS.N_LAYERS +1) ))
 			{
 					#if WARN == TRUE
 						if (isatty(fileno(stdout)) && RANK == 0)
@@ -410,6 +404,10 @@ int main(int argc, char* argv[])
 		TRAJECTORY[i].ACCEL       .resize(TRAJECTORY[i].ATOMS); // Use for calculated forces in ZCalc_Ewald.
 		TRAJECTORY[i].CHARGES     .resize(TRAJECTORY[i].ATOMS);
 		TRAJECTORY[i].ATOMTYPE_IDX.resize(TRAJECTORY[i].ATOMS);
+		
+		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
+			if(CONTROLS.FIT_ENER_PER_ATOM)
+				TRAJECTORY[i].QM_POT_ENER_PER_ATOM.resize(TRAJECTORY[i].ATOMS);
 			
 		// Read trajectory, convert to proper units, and apply PBC
 			
@@ -428,6 +426,10 @@ int main(int argc, char* argv[])
 			TRAJ_INPUT >> TRAJECTORY[i].FORCES[j].X;
 			TRAJ_INPUT >> TRAJECTORY[i].FORCES[j].Y;
 			TRAJ_INPUT >> TRAJECTORY[i].FORCES[j].Z;
+
+			if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
+				if(CONTROLS.FIT_ENER_PER_ATOM) // We're fitting per-atom energies. Read one per line.
+					TRAJ_INPUT >> TRAJECTORY[i].QM_POT_ENER_PER_ATOM[j];
 
 			if (ATOM_PAIRS[0].PAIRTYP != "DFTBPOLY") // Convert forces to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
 			{
@@ -466,7 +468,7 @@ int main(int argc, char* argv[])
 		
 		// If layering requested, replicate the system
 
-		build_layers(TRAJECTORY[i], CONTROLS) ;
+		build_layers(TRAJECTORY[i], CONTROLS);
 		
 		if(i==0)
 		{
@@ -514,53 +516,11 @@ int main(int argc, char* argv[])
 	{	
 		// Set up the A "matrix"
 		
-		A_SIZE = TRAJECTORY[f].ATOMS;
-
-		if (CONTROLS.FIT_STRESS)
-			A_SIZE++;
-		else if (CONTROLS.FIT_STRESS_ALL)
-			A_SIZE +=3;
-
-		if (CONTROLS.FIT_ENER)
-			A_SIZE++; 
-
-		A_MATRIX[f].resize(A_SIZE);
-
-		for (int i=0; i<A_SIZE; i++)
-		{
-			A_MATRIX[f][i].resize(CONTROLS.TOT_SHORT_RANGE); 
-
-			for (int j=0; j<CONTROLS.TOT_SHORT_RANGE; j++)
-			{		
-				A_MATRIX[f][i][j].X = 0.0;
-				A_MATRIX[f][i][j].Y = 0.0;
-				A_MATRIX[f][i][j].Z = 0.0;
-			}
-		}
-
-		// Setup the Coulomb force "matrix"
-	 
-		COULOMB_FORCES[f].resize(ATOM_PAIRS.size());
-		P_OVER_FORCES[f] .resize(A_SIZE);
-		
-		for (int i=0; i<ATOM_PAIRS.size(); i++)
-		{
-			COULOMB_FORCES[f][i].resize(A_SIZE);		
-		
-			for (int j=0; j<A_SIZE; j++)
-			{			
-				COULOMB_FORCES[f][i][j].X = 0;
-				COULOMB_FORCES[f][i][j].Y = 0;
-				COULOMB_FORCES[f][i][j].Z = 0;	
-
-				if (i==0)	
-				{
-					P_OVER_FORCES[f][j].X = 0;
-					P_OVER_FORCES[f][j].Y = 0;
-					P_OVER_FORCES[f][j].Z = 0;						
-				}
-			}
-		}			
+		A_MATRIX.INITIALIZE_FORCES  (f, TRAJECTORY[f].ATOMS,CONTROLS.TOT_SHORT_RANGE);
+		A_MATRIX.INITIALIZE_ENERGIES(f, TRAJECTORY[f].ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER, CONTROLS.FIT_ENER_PER_ATOM);
+		A_MATRIX.INITIALIZE_STRESSES(f,                     CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_STRESS, CONTROLS.FIT_STRESS_ALL);
+		A_MATRIX.INITIALIZE_OVERBOND(f, TRAJECTORY[f].ATOMS);
+		A_MATRIX.INITIALIZE_CHARGES (f, ATOM_PAIRS.size(),TRAJECTORY[f].ATOMS);		
 	}
 
 	#if VERBOSITY == 1
@@ -581,7 +541,7 @@ int main(int argc, char* argv[])
 	
 		for (int i=0; i<TRIPS.VEC.size(); i++)
 	     		if ( ! TRIPS.VEC[i].init_histogram(ATOM_PAIRS, PAIR_MAP) ) 
-			 break ;
+			 break;
 	}
 		
 
@@ -598,24 +558,26 @@ int main(int argc, char* argv[])
 	#endif
 		
 
+	int 	FRAME_MATRX_SIZE; 
 	double 	NEIGHBOR_PADDING = 0.3;
 
-	int istart, iend ;
+	int istart, iend;
 
 	// Each processor only calculates certain frames.
-	divide_atoms(istart, iend, CONTROLS.NFRAMES) ;
+	divide_atoms(istart, iend, CONTROLS.NFRAMES);
 	
 	if((CONTROLS.FIT_STRESS  || CONTROLS.FIT_STRESS_ALL) && CONTROLS.NSTRESS == -1)
 		CONTROLS.NSTRESS = CONTROLS.NFRAMES;
 		
-	if(CONTROLS.FIT_ENER && CONTROLS.NENER == -1)
+	if((CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM) && CONTROLS.NENER == -1)
 		CONTROLS.NENER = CONTROLS.NFRAMES;		
 	
 	bool DO_STRESS     = CONTROLS.FIT_STRESS;    
 	bool DO_STRESS_ALL = CONTROLS.FIT_STRESS_ALL;
 	bool DO_ENER       = CONTROLS.FIT_ENER;
+	bool DO_ENER_ATM   = CONTROLS.FIT_ENER_PER_ATOM;
 
-	for(int i= istart ; i <= iend ; i++)
+	for(int i= istart; i <= iend; i++)
 	{
 		// Only include stress tensor data for first NSTRESS frames..
 		
@@ -627,7 +589,8 @@ int main(int argc, char* argv[])
 		
 		if(i >= CONTROLS.NENER)
 		{
-			CONTROLS.FIT_ENER     = false;	
+			CONTROLS.FIT_ENER          = false;	
+			CONTROLS.FIT_ENER_PER_ATOM = false;
 		}		
 	
 		// This output is specific to the number of processors.
@@ -638,26 +601,41 @@ int main(int argc, char* argv[])
 		// Use very little padding because we will update neighbor list for every frame.
 		
 		NEIGHBOR_LIST.INITIALIZE(TRAJECTORY[i], NEIGHBOR_PADDING);
-		NEIGHBOR_LIST.DO_UPDATE(TRAJECTORY[i], CONTROLS);		
+		NEIGHBOR_LIST.DO_UPDATE (TRAJECTORY[i], CONTROLS);		
 
-		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, TRAJECTORY[i], A_MATRIX[i], COULOMB_FORCES[i], CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
+		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, TRAJECTORY[i], i, A_MATRIX, CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
 
 		if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
-			SubtractCoordForces(TRAJECTORY[i], false, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
+		{
+			//SubtractCoordForces(TRAJECTORY[i], false, i, A_MATRIX,  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
+			cout << "Feature depreciated - exiting." << endl;
+			exit_run(0);
+		}
 		
 		if (CONTROLS.IF_SUBTRACT_COUL) 
-			SubtractEwaldForces(TRAJECTORY[i], NEIGHBOR_LIST, CONTROLS) ;
+			SubtractEwaldForces(TRAJECTORY[i], NEIGHBOR_LIST, CONTROLS);
 
 		if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
-			SubtractCoordForces(TRAJECTORY[i], true, P_OVER_FORCES[i],  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
+		{
+			SubtractCoordForces(TRAJECTORY[i], true, i,A_MATRIX,  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);			
+			//cout << "Feature depreciated - exiting." << endl;
+			//exit_run(0);
+		}				
 			
 	}
 
 	// Because we need to know later whether stress/energy data were included:
 	
-	CONTROLS.FIT_STRESS     = DO_STRESS;    
-	CONTROLS.FIT_STRESS_ALL = DO_STRESS_ALL;
-	CONTROLS.FIT_ENER       = DO_ENER;   
+	CONTROLS.FIT_STRESS        = DO_STRESS;    
+	CONTROLS.FIT_STRESS_ALL    = DO_STRESS_ALL;
+	CONTROLS.FIT_ENER          = DO_ENER;   
+	CONTROLS.FIT_ENER_PER_ATOM = DO_ENER_ATM;
+	
+	// What's below is only used to determine whether to add a col of ones to 
+	// the A-matrix (i.e. "are ANY energies included in the fit?")
+	
+	if(CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM)
+		DO_ENER = true;
 	
 	
 	#if VERBOSITY == 1
@@ -692,94 +670,67 @@ int main(int argc, char* argv[])
 	// charge constraints.
 	// (LEF)
 		
-	char nameA[20] ;
-	char nameB[20] ;
-	char nameBlab[20] ;
+	char nameA[20];
+	char nameB[20];
+	char nameBlab[20];
 
 	// Label output files by the processor rank
-	sprintf(nameA, "A.%04d.txt", RANK) ;
-	sprintf(nameB, "b.%04d.txt", RANK) ;
-	sprintf(nameBlab, "b-labeled.%04d.txt", RANK) ;
+	sprintf(nameA, "A.%04d.txt", RANK);
+	sprintf(nameB, "b.%04d.txt", RANK);
+	sprintf(nameBlab, "b-labeled.%04d.txt", RANK);
 
 	ofstream fileA(nameA);
 	ofstream fileb(nameB);
 	ofstream fileb_labeled(nameBlab);
 
 	fileA.precision(16);	//  Reduced precision to 6 for code testing.
-	fileA << std::scientific ;
+	fileA << std::scientific;
 
 	fileb.precision(16);	//  Usual precision set to 16.
-	fileb << std::scientific ;
+	fileb << std::scientific;
 
-	if ( RANK == 0 ) cout << "	...A matrix length: " << A_MATRIX.size() << endl << endl;
+	if ( RANK == 0 ) cout << "	...A matrix length (forces): " << A_MATRIX.FORCES.size()*A_MATRIX.FORCES[0].size()*3 << endl << endl;
 	  
 	// Print only the assigned frames.
-	for(int N= istart ; N <= iend ;N++)
+	for(int N= istart; N <= iend;N++) // Loop over frames
 	{
-		for(int a=0;a<A_MATRIX[N].size();a++)
+		for(int a=0;a<A_MATRIX.FORCES[N].size();a++) // Loop over atoms
 		{	
-			// Check if we need to exclude some tensor data from the A and b text files.
-			if((CONTROLS.FIT_STRESS  || CONTROLS.FIT_STRESS_ALL) && N >= CONTROLS.NSTRESS)
-			{
-				if((a==TRAJECTORY[N].ATOMS) || (a==TRAJECTORY[N].ATOMS+1) ||  (a==TRAJECTORY[N].ATOMS+2))
-					continue;
-			}
-		
-			// Check if we need to exclude some energy data from the A and b text files.
-			if(CONTROLS.FIT_ENER && N >= CONTROLS.NENER)
-			{
-				if(a==A_MATRIX[N].size()-1)
-					continue;
-			}		
-		
-			
 			// Print Afile: .../////////////// -- For X
 		  
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
-				fileA << A_MATRIX[N][a][n].X  << "   ";
-			  
+				fileA << A_MATRIX.FORCES[N][a][n].X  << "   ";
 			if ( CONTROLS.FIT_COUL ) 
-				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
-					fileA << COULOMB_FORCES[N][i][a].X << "   ";
-
+				for(int i=0; i<A_MATRIX.CHARGES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
+					fileA << A_MATRIX.CHARGES[N][i][a].X << "   ";
 			if ( CONTROLS.FIT_POVER ) 
-				fileA << " " << P_OVER_FORCES[N][a].X;
-			
-			add_col_of_ones(a,DO_ENER, DO_STRESS, DO_STRESS_ALL, TRAJECTORY[N].ATOMS, fileA);
-			  
+				fileA << " " << A_MATRIX.OVERBONDING[N][a].X;
+			add_col_of_ones("FORCE", DO_ENER, fileA);			  
 			fileA << endl;	
 		  
 			// Print Afile: .../////////////// -- For Y
 		  
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
-				fileA << A_MATRIX[N][a][n].Y  << "   ";
-			  
+				fileA << A_MATRIX.FORCES[N][a][n].Y  << "   ";
 			if ( CONTROLS.FIT_COUL ) 
-				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
-					fileA << COULOMB_FORCES[N][i][a].Y << "   ";
-			  
+				for(int i=0; i<A_MATRIX.CHARGES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
+					fileA << A_MATRIX.CHARGES[N][i][a].Y << "   ";
 			if ( CONTROLS.FIT_POVER ) 
-				fileA << " " << P_OVER_FORCES[N][a].Y;
-			  
-			add_col_of_ones(a,DO_ENER, DO_STRESS, DO_STRESS_ALL, TRAJECTORY[N].ATOMS, fileA);
-			  
+				fileA << " " << A_MATRIX.OVERBONDING[N][a].Y;
+			add_col_of_ones("FORCE", DO_ENER, fileA);				  
 			fileA << endl;	
 
 
 			// Print Afile: .../////////////// -- For Z
 		  
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
-				fileA << A_MATRIX[N][a][n].Z  << "   ";
-			  
+				fileA << A_MATRIX.FORCES[N][a][n].Z  << "   ";
 			if ( CONTROLS.FIT_COUL ) 
-				for(int i=0; i<COULOMB_FORCES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
-					fileA << COULOMB_FORCES[N][i][a].Z << "   ";
-			  
+				for(int i=0; i<A_MATRIX.CHARGES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
+					fileA << A_MATRIX.CHARGES[N][i][a].Z << "   ";
 			if ( CONTROLS.FIT_POVER ) 
-				fileA << " " << P_OVER_FORCES[N][a].Z;
-			  
-			add_col_of_ones(a,DO_ENER, DO_STRESS, DO_STRESS_ALL, TRAJECTORY[N].ATOMS, fileA);
-			  
+				fileA << " " << A_MATRIX.OVERBONDING[N][a].Z;
+			add_col_of_ones("FORCE", DO_ENER, fileA);				  
 			fileA << endl;		
 			
 			// Print Bfile: ...
@@ -787,85 +738,194 @@ int main(int argc, char* argv[])
 			if(N>CONTROLS.NFRAMES-1) // then this is the 3b histogram stuff. All b values (energies) should be zero. -- assumes we're using 3b!!
 			{
 				if(TRIPS.VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBIC)
-				{	
-					fileb << 1500.0 << endl;
-					fileb << 1500.0 << endl;
-					fileb << 1500.0 << endl;
-				}
+					fileb << 1500.0 << endl << 1500.0 << endl << 1500.0 << endl;
 				else		
-				{
-					fileb << 0.0 << endl;
-					fileb << 0.0 << endl;
-					fileb << 0.0 << endl;
-				}
+					fileb << 0.0    << endl << 0.0    << endl << 0.0    << endl;
 			}
-			else
+			else	// Print Forces
 			{
+				fileb << TRAJECTORY[N].FORCES[a].X << endl;
+				fileb << TRAJECTORY[N].FORCES[a].Y << endl;
+				fileb << TRAJECTORY[N].FORCES[a].Z << endl;
 			
-				if(a<TRAJECTORY[N].ATOMS)
-				{
-					fileb << TRAJECTORY[N].FORCES[a].X << endl;
-					fileb << TRAJECTORY[N].FORCES[a].Y << endl;
-					fileb << TRAJECTORY[N].FORCES[a].Z << endl;
-			
-					fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].X << endl;
-					fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Y << endl;
-					fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Z << endl;
-				}
-				else if ((a==TRAJECTORY[N].ATOMS)&& (CONTROLS.FIT_STRESS))
-				{
-					// Convert from GPa to internal units to match A-matrix elements
+				fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].X << endl;
+				fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Y << endl;
+				fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Z << endl;
 
-					fileb << TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
-					fileb << TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
+			}
+		} // End loop over atoms
+		
+		// Output the stresses and energies 
+		
+		if (CONTROLS.FIT_STRESS)
+		{
+
+			// Check if we need to exclude some tensor data from the A and b text files.
+			if( N >= CONTROLS.NSTRESS)
+				continue;
+
+			// Output A.txt 
 			
-					fileb_labeled << "s_xx " <<  TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
-					fileb_labeled << "s_yy " <<  TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
-					fileb_labeled << "s_zz " <<  TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
-				}
-				else if ((a>=TRAJECTORY[N].ATOMS)&& (a<(TRAJECTORY[N].ATOMS+3)) && CONTROLS.FIT_STRESS_ALL)
-				{
-					if(a==TRAJECTORY[N].ATOMS)
-					{
-						// Account for the symmetry of the off-diagonal (deviatoric) components
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].XX << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);
+			fileA << endl;	
+			
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].YY << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;
+			
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].ZZ << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);
+			fileA << endl;	
+			
+			
+			// Convert from GPa to internal units to match A-matrix elements
+
+			fileb << TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
+			fileb << TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
+			fileb << TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
+			
+			fileb_labeled << "s_xx " <<  TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
+			fileb_labeled << "s_yy " <<  TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
+			fileb_labeled << "s_zz " <<  TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
+		
+		}
+		else if (CONTROLS.FIT_STRESS_ALL)
+		{
+			// Check if we need to exclude some tensor data from the A and b text files.
+			if( N >= CONTROLS.NSTRESS)
+				continue;
+						
+			// Output A.txt
+			
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].XX << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;
+			
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].XY << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].XZ << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;	
+			
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].XY << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;	
+			
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].YY << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;	
+			
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].YZ << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;
+			
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].XZ << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;	
+			
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].YZ << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.STRESSES[N][n].ZZ << " ";
+			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			fileA << endl;		
+
+			// Account for the symmetry of the off-diagonal (deviatoric) components
+			
+			fileb << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
+			fileb << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
+			fileb << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;
+			
+			fileb << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
+			fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
+			fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
+			
+			fileb << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
+			fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
+			fileb << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;			
+			
+			// Convert from GPa to internal units to match A-matrix elements
+					
+			fileb_labeled << "s_xx " << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
+			fileb_labeled << "s_xy " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
+			fileb_labeled << "s_xz " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;	
+	
+			fileb_labeled << "s_yx " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
+			fileb_labeled << "s_yy " << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
+			fileb_labeled << "s_yz " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
+
+			fileb_labeled << "s_zx " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
+			fileb_labeled << "s_zy " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
+			fileb_labeled << "s_zz " << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
+		
+		}
+		if(CONTROLS.FIT_ENER)
+		{
+			// Check if we need to exclude some energy data from the A and b text files.
+			if(N >= CONTROLS.NENER)
+				continue;
+		
+			// Output A.txt 
+			
+			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.FRAME_ENERGIES[N][n] << " ";
+			add_col_of_ones("ENERGY", DO_ENER, fileA);				
+			fileA << endl;
+			
+			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.FRAME_ENERGIES[N][n] << " ";
+			add_col_of_ones("ENERGY", DO_ENER, fileA);				
+			fileA << endl;
+			
+			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << A_MATRIX.FRAME_ENERGIES[N][n] << " ";
+			add_col_of_ones("ENERGY", DO_ENER, fileA);				
+			fileA << endl;						
+			
+			// Output b.txt stuff
+			
+			fileb                  << TRAJECTORY[N].QM_POT_ENER << endl;
+			fileb_labeled << "+1 " << TRAJECTORY[N].QM_POT_ENER << endl;
+			
+			fileb                  << TRAJECTORY[N].QM_POT_ENER << endl;
+			fileb_labeled << "+1 " << TRAJECTORY[N].QM_POT_ENER << endl;
+			
+			fileb                  << TRAJECTORY[N].QM_POT_ENER << endl;
+			fileb_labeled << "+1 " << TRAJECTORY[N].QM_POT_ENER << endl;						
+		}
+		else if(CONTROLS.FIT_ENER_PER_ATOM)
+		{
+			// Check if we need to exclude some energy data from the A and b text files.
+			if(N >= CONTROLS.NENER)
+				continue;
+		
+			// Output A.txt 
+			
+			for(int a=0; a<A_MATRIX.ATOM_ENERGIES[N].size(); a++)
+			{
+				for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+					fileA << A_MATRIX.ATOM_ENERGIES[N][a][n] << " ";
+				add_col_of_ones("ENERGY", DO_ENER, fileA);
+				fileA << endl;
+
+				// Output b.txt stuff
 				
-						fileb << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
-						fileb << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
-						fileb << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;
-					
-						fileb << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
-						fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
-						fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
-					
-						fileb << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
-						fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
-						fileb << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
-					
-						fileb_labeled << "s_xx " << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
-						fileb_labeled << "s_xy " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
-						fileb_labeled << "s_xz " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;
-
-						fileb_labeled << "s_yx " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
-						fileb_labeled << "s_yy" << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
-						fileb_labeled << "s_yz" << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
-
-						fileb_labeled << "s_zx " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
-						fileb_labeled << "s_zy " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
-						fileb_labeled << "s_zz " << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
-					}
-
-				}
-				else
-				{			
-					fileb << TRAJECTORY[N].QM_POT_ENER << endl;
-					fileb << TRAJECTORY[N].QM_POT_ENER << endl;
-					fileb << TRAJECTORY[N].QM_POT_ENER << endl;
-			
-					fileb_labeled << "+1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;
-					fileb_labeled << "+1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;
-					fileb_labeled << "+1 " <<  TRAJECTORY[N].QM_POT_ENER << endl;	
-				}	
+				fileb                  << TRAJECTORY[N].QM_POT_ENER_PER_ATOM[a] << endl;
+				fileb_labeled << "+1 " << TRAJECTORY[N].QM_POT_ENER_PER_ATOM[a] << endl;
 			}
 		}  	
     }
@@ -875,9 +935,8 @@ int main(int argc, char* argv[])
 	// The order that charge constraints are printed needs to match
 	// the order atom pairs are expected...
 
-	if ( CONTROLS.FIT_COUL 
-		  && CHARGE_CONSTRAINTS.size()>0 
-		  && RANK == NPROCS - 1) 
+
+	if ( CONTROLS.FIT_COUL && (CHARGE_CONSTRAINTS.size()>0) && (RANK == NPROCS - 1)) 
 	{
 		for(int i=0; i<CHARGE_CONSTRAINTS.size(); i++)
 		{
@@ -898,27 +957,28 @@ int main(int argc, char* argv[])
 		}		
 	}
 	
+
 	fileA.close();
 	fileb.close();
 	fileb_labeled.close();
 
 	#ifdef USE_MPI
 		// Make sure that every process has closed its files.
-		MPI_Barrier(MPI_COMM_WORLD) ;
+		MPI_Barrier(MPI_COMM_WORLD);
 	#endif
 
 	if ( RANK == 0 ) {
 		// Serialize into a single A and b file for now.
 		// Could make the SVD program read multiple files.
-		system("cat A.[0-9]*.txt > A.txt") ;
-		system("rm A.[0-9]*.txt") ;
-		system("cat b.[0-9]*.txt > b.txt") ;
-		system("rm b.[0-9]*.txt") ;
-		system("cat b-labeled.[0-9]*.txt > b-labeled.txt") ;
-		system("rm b-labeled.[0-9]*.txt") ;
+		system("cat A.[0-9]*.txt > A.txt");
+		system("rm A.[0-9]*.txt");
+		system("cat b.[0-9]*.txt > b.txt");
+		system("rm b.[0-9]*.txt");
+		system("cat b-labeled.[0-9]*.txt > b-labeled.txt");
+		system("rm b-labeled.[0-9]*.txt");
 	}
 
-	  	  
+  	  
 	//////////////////////////////////////////////////
 	//
 	// Print out the params file header
@@ -1009,27 +1069,25 @@ int main(int argc, char* argv[])
 	for(int i=0; i<NPAIR; i++)
 	{
 
-	  string chtype = Cheby::get_trans_string(ATOM_PAIRS[i].CHEBY_TYPE) ;
+	  string chtype = Cheby::get_trans_string(ATOM_PAIRS[i].CHEBY_TYPE);
 		header << "	" << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-					 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-					 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-					 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
-					 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
-					 << setw(16) << left << ATOM_PAIRS[i].S_DELTA ;
-
-		if ( ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) {
-			header << setw(16) << left << chtype ;
-			if(ATOM_PAIRS[i].CHEBY_TYPE == Cheby_trans::MORSE )
-				header << setw(16) << left << ATOM_PAIRS[i].LAMBDA ;
-		}
-		header << endl;
+			 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
+			 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
+			 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
+			 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
+			 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
+			 << setw(16) << left << chtype;
+		if(ATOM_PAIRS[i].CHEBY_TYPE == Cheby_trans::MORSE )
+			header << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl; 
+		else
+			header << endl;
 	}
 	
 
 	if(CONTROLS.USE_POVER)
 	{
 		header << endl;
- 		header << "!# PAIRIDX #	";
+ 		header << "# PAIRIDX #	";
  		header << "# ATM_TY1 #	";
  		header << "# ATM_TY1 #	";				
 		header << "# USEOVRP #	";
@@ -1050,7 +1108,7 @@ int main(int argc, char* argv[])
 			if(ATOM_PAIRS[i].USE_OVRPRMS)
 				header	<< setw(16) << left << ATOM_PAIRS[i].OVER_TO_ATM;
 			else
-			  header	<< setw(16) << left << "NONE";
+				header	<< setw(16) << left << "NONE";
 			
 			header
 			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
@@ -1061,22 +1119,22 @@ int main(int argc, char* argv[])
 		}		
 	}
 
-	// Pairs, triplets, and quads all have the same cutoff function parameters.
+	// Quads and triplets both have the same cutoff function parameters.
 	// Print out only once.
-	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" ) 
-		ATOM_PAIRS[0].FORCE_CUTOFF.print_header(header) ;
+	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0 || ATOM_PAIRS[0].SNUM_4B_CHEBY> 0)
+	  TRIPS.print_fcut_header(header);
 		
 	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
 	
 	// Print out special cutoffs 
-	TRIPS.print_special(header) ;
-	QUADS.print_special(header) ;
+	TRIPS.print_special(header);
+	QUADS.print_special(header);
 	 
 
 	// Print out cluster parameters into the header.
-	TRIPS.print_header(header,3,CONTROLS.CHEBY_3B_ORDER) ;
-	QUADS.print_header(header,4,CONTROLS.CHEBY_4B_ORDER) ;
+	TRIPS.print_header(header,3,CONTROLS.CHEBY_3B_ORDER);
+	QUADS.print_header(header,4,CONTROLS.CHEBY_4B_ORDER);
 
 	header << endl;
 	header.close();
@@ -1126,7 +1184,7 @@ int main(int argc, char* argv[])
 	//////////////////////////////////////////////////	  
 
 	#if VERBOSITY == 1
-	print_bond_stats(ATOM_PAIRS, TRIPS, QUADS, CONTROLS.USE_3B_CHEBY, CONTROLS.USE_4B_CHEBY) ;
+	print_bond_stats(ATOM_PAIRS, TRIPS, QUADS, CONTROLS.USE_3B_CHEBY, CONTROLS.USE_4B_CHEBY);
 	#endif
 	  
 return 0;		  
@@ -1165,20 +1223,21 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 	stringstream	STREAM_PARSER;
 	int ntokens ;
 	vector<string> tokens ;
-
+	
 	// Set some defaults
 	
 	double TMP_CHEBY_RANGE_LOW  = -1;
 	double TMP_CHEBY_RANGE_HIGH =  1;
 	
-	CONTROLS.COMPARE_FORCE = true;	// is this variable really necessary for LSQ?
-	CONTROLS.IS_LSQ        = true; 
-	CONTROLS.CALL_EWALD    = false;
-	CONTROLS.FIT_ENER      = false;
-	CONTROLS.FIT_STRESS    = false;
-	CONTROLS.FIT_STRESS_ALL= false;
-	CONTROLS.NSTRESS       = -1;
-	CONTROLS.NENER         = -1;
+	CONTROLS.COMPARE_FORCE     = true;	// is this variable really necessary for LSQ?
+	CONTROLS.IS_LSQ            = true; 
+	CONTROLS.CALL_EWALD        = false;
+	CONTROLS.FIT_ENER          = false;
+	CONTROLS.FIT_ENER_PER_ATOM = false;
+	CONTROLS.FIT_STRESS        = false;
+	CONTROLS.FIT_STRESS_ALL    = false;
+	CONTROLS.NSTRESS           = -1;
+	CONTROLS.NENER             = -1;
 	
 	NEIGHBOR_LIST.USE	   = true;
 	
@@ -1220,7 +1279,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			}
 			
 
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 
 			if (CONTROLS.IF_SUBTRACT_COORD && RANK == 0)
 			{
@@ -1236,7 +1295,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				cout << " charges before generating A-matrix" << endl << endl;	
 			}	
 			
-#endif
+			#endif
 				
 				
 			if (CONTROLS.USE_PARTIAL_CHARGES || CONTROLS.FIT_COUL)
@@ -1251,18 +1310,18 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		{
 			cin >> LINE; cin.ignore();
 			CONTROLS.WRAP_COORDS = bool(LINE.data());
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# WRAPTRJ #: " << CONTROLS.WRAP_COORDS << endl;	
-#endif
+			#endif
 		}
 		
 		else if(LINE.find("# TRJFILE #") != string::npos)
 		{
 			cin >> CONTROLS.INFILE; cin.ignore();
 
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# TRJFILE #: " << CONTROLS.INFILE << endl;	
-#endif
+			#endif
 		}			
 		
 		else if(LINE.find("# NFRAMES #") != string::npos)
@@ -1270,9 +1329,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			cin >> LINE; cin.ignore();
 			CONTROLS.NFRAMES = int(atof(LINE.data()));
 			
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# NFRAMES #: " << CONTROLS.NFRAMES << endl;			
-#endif
+			#endif
 		}
 		
 		else if(LINE.find("# NLAYERS #") != string::npos)
@@ -1280,9 +1339,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			cin >> LINE; cin.ignore();
 			CONTROLS.N_LAYERS = int(atof(LINE.data()));
 			
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 ) 	cout << "	# NLAYERS #: " << CONTROLS.N_LAYERS << endl;
-#endif
+			#endif
 		}
 		
 		else if(LINE.find("# FITCOUL #") != string::npos)
@@ -1299,7 +1358,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				exit(1);	
 			}	
 			
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			
 			if ( RANK == 0 ) 
 			{
@@ -1311,7 +1370,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					cout << "false" << endl;
 			}
 				
-#endif
+			#endif
 		}
 		
 		else if(LINE.find("# FITSTRS #") != string::npos)
@@ -1346,7 +1405,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				
 				cin.ignore();
 			}
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			
 			if ( RANK == 0 ) 
 			{
@@ -1363,7 +1422,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					cout << "    			 ...will only fit tensors for first " << CONTROLS.NSTRESS << " frames." << endl;
 			}
 				
-#endif
+			#endif
 		}
 		
 		else if(LINE.find("# FITENER #") != string::npos)
@@ -1392,7 +1451,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				cin.ignore();	
 			}
 			
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 )
 			{
 				cout << "	# FITENER #: ";
@@ -1404,11 +1463,51 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					
 				if(CONTROLS.NENER>0)
 					cout << "    			 ...will only fit energies for first " << CONTROLS.NENER << " frames." << endl;
-								
-				
 			}
-#endif
+			#endif
 		}
+		
+		else if(LINE.find("# FITEATM #") != string::npos)
+		{
+			cin >> LINE; 
+			
+			if (LINE=="first"  || LINE=="First"  || LINE=="FIRST")
+			{
+				CONTROLS.FIT_ENER_PER_ATOM = true;
+				cin >> CONTROLS.NENER;
+				cin.ignore();
+			}
+			else
+			{
+
+				if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
+					CONTROLS.FIT_ENER_PER_ATOM = true;
+				else if (LINE=="false" || LINE=="False" || LINE=="FALSE" || LINE == "F" || LINE == "f")
+					CONTROLS.FIT_ENER_PER_ATOM = false;
+				else
+				{
+					cout << endl << "ERROR: # FITEATM # must be specified as true or false." << endl;
+					exit(1);	
+				}
+				
+				cin.ignore();	
+			}
+			
+			#if VERBOSITY == 1
+			if ( RANK == 0 )
+			{
+				cout << "	# FITEATM #: ";
+			
+				if (CONTROLS.FIT_ENER_PER_ATOM)
+					cout << "true" << endl;				
+				else
+					cout << "false" << endl;
+					
+				if(CONTROLS.NENER>0)
+					cout << "    			 ...will only fit energies for first " << CONTROLS.NENER << " frames." << endl;
+			}
+			#endif
+		}		
 
 		else if(LINE.find("# FITPOVR #") != string::npos)
 		{
@@ -1424,7 +1523,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				exit(1);	
 			}	
 			
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 ) 
 			{
 				cout << "	# FITPOVR #: ";
@@ -1434,7 +1533,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				else
 					cout << "false" << endl;
 			}
-#endif
+			#endif
 		}
 		
 		else if(LINE.find("# PAIRTYP #") != string::npos)
@@ -1457,7 +1556,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				
 			}
 			
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 )
 			{
 				cout << "	# PAIRTYP #: " << LINE;
@@ -1467,7 +1566,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				else
 					cout << " ....NOTE: Forces reported in atomic units." << endl;
 			}
-#endif
+			#endif
 				
 			if(TEMP_TYPE == "INVRSE_R")
 			{
@@ -1475,9 +1574,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				//cin.ignore();
 				CONTROLS.INVR_PARAMS = stoi(LINE);
 					
-#if VERBOSITY == 1
+				#if VERBOSITY == 1
 				if ( RANK == 0 ) cout << "	             " << "Will use the following number of inverse-r params: " << CONTROLS.INVR_PARAMS << endl;
-#endif
+				#endif
 					
 			}
 
@@ -1489,26 +1588,26 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				
 				STREAM_PARSER >> CONTROLS.CHEBY_ORDER;				
 				
-#if VERBOSITY == 1
+				#if VERBOSITY == 1
 				if ( RANK == 0 ) cout << "	             " << "Will use 2-body order: " << CONTROLS.CHEBY_ORDER << endl;
-#endif
+				#endif
 				
 				if(TEMP_TYPE == "CHEBYSHEV")
 				{
 					STREAM_PARSER >> CONTROLS.CHEBY_3B_ORDER;
 
-#if VERBOSITY == 1
+					#if VERBOSITY == 1
 					if ( RANK == 0 ) cout << "	             " << "Will use 3-body order: " << CONTROLS.CHEBY_3B_ORDER << endl;
-#endif
+					#endif
 						
 					if(CONTROLS.CHEBY_3B_ORDER>0)
 						CONTROLS.USE_3B_CHEBY = true;
 					
 					STREAM_PARSER >> CONTROLS.CHEBY_4B_ORDER;
 
-#if VERBOSITY == 1
+					#if VERBOSITY == 1
 					if ( RANK == 0 ) cout << "	             " << "Will use 4-body order: " << CONTROLS.CHEBY_4B_ORDER << endl;
-#endif
+					#endif
 						
 					if(CONTROLS.CHEBY_4B_ORDER>0)
 						CONTROLS.USE_4B_CHEBY = true;
@@ -1535,20 +1634,20 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 						exit(0);
 					}					
 					
-#if VERBOSITY == 1
+					#if VERBOSITY == 1
 					if ( RANK == 0 ) cout << "	             " << "Will transform Chebyshev pair distances to range " << TMP_CHEBY_RANGE_LOW << " to " << TMP_CHEBY_RANGE_HIGH << endl;
-#endif
+					#endif
 				}
 				else
 					
-					cin.ignore();
+				cin.ignore();
 				
 				STREAM_PARSER.str("");
 				STREAM_PARSER.clear();		
 				
 			}
 			else
-				cin.ignore();
+				 cin.ignore();
 			
 			// Do some error checks
 	
@@ -1569,13 +1668,13 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			if ( TEMP_TYPE == "CHEBYSHEV" ) 
 			{
 				vector<string> tokens ;
-		    if ( parse_space(LINE,tokens) >= 1 ) 
+		  if ( parse_space(LINE,tokens) >= 1 ) 
 				{
-					CONTROLS.CHEBY_TYPE = Cheby::get_trans_type(tokens[0]);
-#if VERBOSITY == 1
-					if ( RANK == 0 ) cout << "	# CHBTYPE #: " << tokens[0] << endl;	
-#endif
-				}
+			CONTROLS.CHEBY_TYPE = Cheby::get_trans_type(tokens[0]);
+			#if VERBOSITY == 1
+			if ( RANK == 0 ) cout << "	# CHBTYPE #: " << tokens[0] << endl;	
+			#endif
+		}		
 				else 
 					EXIT_MSG("BAD CHBTYPE" + LINE) ;
 			} 
@@ -1592,12 +1691,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		
 		else if(LINE.find("EXCLUDE 3B INTERACTION:")!= string::npos)
 		{
-		  TRIPS.read_exclude(cin, LINE) ;
+		  TRIPS.read_exclude(cin, LINE);
 		}	
 
 		else if(LINE.find("EXCLUDE 4B INTERACTION:")!= string::npos)
 		{
-		  QUADS.read_exclude(cin, LINE) ;
+		  QUADS.read_exclude(cin, LINE);
 		}	
 		
 		else if(LINE.find("# NATMTYP #")!= string::npos)
@@ -1605,9 +1704,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			cin >> LINE; cin.ignore();
 			CONTROLS.NATMTYP = int(atof(LINE.data()));
 			
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# NATMTYP #: " << CONTROLS.NATMTYP << endl;	
-#endif
+			#endif
 			
 			// Set up pairs
 			
@@ -1623,27 +1722,27 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					ATOM_PAIRS[i].CHEBY_RANGE_LOW   = TMP_CHEBY_RANGE_LOW;
 					ATOM_PAIRS[i].CHEBY_RANGE_HIGH  = TMP_CHEBY_RANGE_HIGH;
 					ATOM_PAIRS[i].FORCE_CUTOFF.TYPE = FCUT_TYPE::CUBIC;
-					ATOM_PAIRS[i].PAIRTYP           = TEMP_TYPE ;
+					ATOM_PAIRS[i].PAIRTYP           = TEMP_TYPE;
 				}
 			}	
 			
 			// Set up triplets
 			
 			NTRIP = factorial(CONTROLS.NATMTYP+3-1)/factorial(3)/factorial(CONTROLS.NATMTYP-1);
-			TRIPS.allocate(NTRIP, 3, ATOM_PAIRS) ;
+			TRIPS.allocate(NTRIP, 3, ATOM_PAIRS);
 			
 			// Set up quadruplets
 			
 			NQUAD = factorial(CONTROLS.NATMTYP+4-1)/factorial(4)/factorial(CONTROLS.NATMTYP-1);
-			QUADS.allocate(NQUAD, 4, ATOM_PAIRS) ;
+			QUADS.allocate(NQUAD, 4, ATOM_PAIRS);
 		}
 
 		else if(LINE.find("# TYPEIDX #")!= string::npos)
 		{
 			
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 ) cout << "	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #" << endl;
-#endif
+			#endif
 			
 			// Figure out the number of non-unique pairs
 
@@ -1663,12 +1762,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				ATOM_PAIRS[i].PAIRIDX	 = i; 
 				ATOM_PAIRS[i].CHEBY_TYPE = CONTROLS.CHEBY_TYPE;
 				
-				cin >> LINE ;
-				TMP_ATOMTYPEIDX[i] = stoi(LINE) - 1 ;
-				ATOM_PAIRS[i].ATM1TYPE_IDX = TMP_ATOMTYPEIDX[i] ;
+				cin >> LINE;
+				TMP_ATOMTYPEIDX[i] = stoi(LINE) - 1;
+				ATOM_PAIRS[i].ATM1TYPE_IDX = TMP_ATOMTYPEIDX[i];
 
 				if ( TMP_ATOMTYPEIDX[i] < 0 || TMP_ATOMTYPEIDX[i] >= CONTROLS.NATMTYP )
-				  EXIT_MSG("Bad atom index: " + LINE ) ;
+				  EXIT_MSG("Bad atom index: " + LINE );
 
 				cin >> ATOM_PAIRS[i].ATM1TYP >> LINE;
 				
@@ -1690,7 +1789,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				ATOM_PAIRS[i].ATM1MAS = double(atof(LINE.data()));
 				
 				ATOM_PAIRS[i].ATM2TYP = ATOM_PAIRS[i].ATM1TYP;
-				ATOM_PAIRS[i].ATM2TYPE_IDX = ATOM_PAIRS[i].ATM1TYPE_IDX ;
+				ATOM_PAIRS[i].ATM2TYPE_IDX = ATOM_PAIRS[i].ATM1TYPE_IDX;
 
 				ATOM_PAIRS[i].ATM2CHG = ATOM_PAIRS[i].ATM1CHG;
 				ATOM_PAIRS[i].ATM2MAS = ATOM_PAIRS[i].ATM1MAS;
@@ -1698,11 +1797,11 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				ATOM_PAIRS[i].PRPR_NM =      ATOM_PAIRS[i].ATM1TYP;
 				ATOM_PAIRS[i].PRPR_NM.append(ATOM_PAIRS[i].ATM2TYP);
 				
-#if VERBOSITY == 1
+				#if VERBOSITY == 1
 				if ( RANK == 0 ) 
 				{
 					cout << " 	" << setw(15) << left << i+1 
-							 << setw(15) << left << ATOM_PAIRS[i].ATM1TYP;
+						 << setw(15) << left << ATOM_PAIRS[i].ATM1TYP;
 					if(!CONTROLS.FIT_COUL) 
 						cout << setw(15) << left << ATOM_PAIRS[i].ATM1CHG;
 					else
@@ -1710,7 +1809,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					
 					cout << setw(15) << left << ATOM_PAIRS[i].ATM1MAS << endl;
 				}
-#endif
+				#endif
 			}
 			
 			if(!CONTROLS.FIT_COUL)
@@ -1738,10 +1837,10 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					ATOM_PAIRS[TEMP_INT].CHEBY_TYPE = ATOM_PAIRS[i].CHEBY_TYPE;
 														
 					ATOM_PAIRS[TEMP_INT].ATM1TYP = ATOM_PAIRS[i].ATM1TYP;
-					ATOM_PAIRS[TEMP_INT].ATM1TYPE_IDX = ATOM_PAIRS[i].ATM1TYPE_IDX ;
+					ATOM_PAIRS[TEMP_INT].ATM1TYPE_IDX = ATOM_PAIRS[i].ATM1TYPE_IDX;
 
 					ATOM_PAIRS[TEMP_INT].ATM2TYP = ATOM_PAIRS[j].ATM1TYP;
-					ATOM_PAIRS[TEMP_INT].ATM2TYPE_IDX = ATOM_PAIRS[j].ATM1TYPE_IDX ;
+					ATOM_PAIRS[TEMP_INT].ATM2TYPE_IDX = ATOM_PAIRS[j].ATM1TYPE_IDX;
 
 					ATOM_PAIRS[TEMP_INT].ATM1CHG = ATOM_PAIRS[i].ATM1CHG;
 					ATOM_PAIRS[TEMP_INT].ATM2CHG = ATOM_PAIRS[j].ATM1CHG;
@@ -1768,7 +1867,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					for(int k=0;k<ATOM_PAIRS.size(); k++)
 					{
 						if((ATOM_PAIRS[i].ATM1TYP == ATOM_PAIRS[k].ATM1TYP && ATOM_PAIRS[j].ATM1TYP == ATOM_PAIRS[k].ATM2TYP)
-							 ||(ATOM_PAIRS[j].ATM1TYP == ATOM_PAIRS[k].ATM1TYP && ATOM_PAIRS[i].ATM1TYP == ATOM_PAIRS[k].ATM2TYP))
+						 ||(ATOM_PAIRS[j].ATM1TYP == ATOM_PAIRS[k].ATM1TYP && ATOM_PAIRS[i].ATM1TYP == ATOM_PAIRS[k].ATM2TYP))
 						{
 							TEMP_STR = ATOM_PAIRS[i].ATM1TYP;
 							TEMP_STR.append(ATOM_PAIRS[j].ATM2TYP);
@@ -1783,7 +1882,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			//for(map<string,int>::iterator i=PAIR_MAP.begin(); i!=PAIR_MAP.end(); i++)
 			//cout << i->second << " " << i->first << endl;			
 
-#if VERBOSITY == 1						
+			#if VERBOSITY == 1						
 			if ( RANK == 0 ) 
 			{
 				cout << endl;
@@ -1791,7 +1890,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				for(int i=0;i<NPAIR; i++)
 					cout << "		" << ATOM_PAIRS[i].PAIRIDX << "  " << ATOM_PAIRS[i].ATM1TYP << " " << ATOM_PAIRS[i].ATM2TYP << endl;
 			}
-#endif
+			#endif
 					
 
 		}
@@ -1866,7 +1965,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				}	
 			}
 
-#if VERBOSITY == 1			
+			#if VERBOSITY == 1			
 			if ( RANK == 0 ) 
 			{
 				cout << "	# PAIRIDX #     ";
@@ -1878,25 +1977,25 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				cout << "# MORSE_LAMBDA #";	
 				cout << " # USEOVRP #     " << endl;
 			}
-#endif
+			#endif
 				
 			bool PRINT_OVR = false;
 			
 			for(int i=0; i<NPAIR; i++)
 			{
-#if VERBOSITY == 1	
+				#if VERBOSITY == 1	
 				if ( RANK == 0 ) 
 				{
 					cout << "	" << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-							 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-							 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-							 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
-							 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
-							 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
-							 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << " " 
-							 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS << endl;
+						 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
+						 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
+						 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
+						 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
+						 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
+						 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << " " 
+						 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS << endl;
 				}
-#endif
+				#endif
 					 
 				if(ATOM_PAIRS[i].USE_OVRPRMS)
 					PRINT_OVR = true;
@@ -1910,7 +2009,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 
 			if(PRINT_OVR)
 			{
-#if VERBOSITY == 1
+				#if VERBOSITY == 1
 				if ( RANK == 0 ) 
 				{
 					cout << "	# PAIRIDX #     ";
@@ -1922,23 +2021,23 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 					cout << "# P_2_VAL #     ";
 					cout << "# LAMBDA6 #" << endl;						
 				}
-#endif
+				#endif
 
 				for(int i=0; i<NPAIR; i++)
 				{
-#if VERBOSITY == 1					
+					#if VERBOSITY == 1					
 					if ( RANK == 0 ) 
 					{
 						cout << "	" << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-								 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-								 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
-								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
-								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
-								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
-								 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
+							 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
+							 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
+							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
+							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
+							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
+							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
+							 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
 					}
-#endif													
+					#endif													
 				}											
 			}
 			
@@ -1952,12 +2051,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				cout << endl;
 			}
 
-			build_int_pair_map(CONTROLS.NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX, PAIR_MAP, INT_PAIR_MAP) ;
+			build_int_pair_map(CONTROLS.NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX, PAIR_MAP, INT_PAIR_MAP);
 
-			for ( int i = 0 ; i < ATOM_PAIRS.size() ; i++ ) {
+			for ( int i = 0; i < ATOM_PAIRS.size(); i++ ) 
 				if ( ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) 
-					ATOM_PAIRS[i].set_cheby_vals() ;
-			}
+					ATOM_PAIRS[i].set_cheby_vals();
+
 		}
 		
 		else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING")!= string::npos)
@@ -1973,9 +2072,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		
 		else if(LINE.find("CHARGE CONSTRAINTS") != string::npos)
 		{
-#if VERBOSITY == 1			
+			#if VERBOSITY == 1			
 			if ( RANK == 0 ) cout << endl << "	Attempting to read " << NPAIR-1 << " charge constraints...:" << endl; 
-#endif	
+			#endif	
 			
 			CHARGE_CONSTRAINTS.resize(NPAIR-1);
 			for(int i=0; i<NPAIR-1; i++)
@@ -2002,7 +2101,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 				cin >> CHARGE_CONSTRAINTS[i].FORCE;				
 				cin.ignore();
 
-#if VERBOSITY == 1			
+				#if VERBOSITY == 1			
 				if ( RANK == 0 ) 
 				{
 					cout << "		" << i+1 << "	 ";
@@ -2012,7 +2111,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 						cout << CHARGE_CONSTRAINTS[i].CONSTRAINTS[j] << " ";
 					cout << CHARGE_CONSTRAINTS[i].FORCE << endl;	
 				}
-#endif	
+				#endif	
 					
 			}
 			
@@ -2021,22 +2120,22 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		
 		else if(LINE.find("SPECIAL 3B S_MAXIM:") != string::npos)
 		{
-		  TRIPS.read_cutoff_params(cin, LINE, "S_MAXIM") ;
+		  TRIPS.read_cutoff_params(cin, LINE, "S_MAXIM");
 		}
 		
 		else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
 		{
-		  TRIPS.read_cutoff_params(cin, LINE, "S_MINIM") ;
+		  TRIPS.read_cutoff_params(cin, LINE, "S_MINIM");
 		}
 		
 		else if(LINE.find("SPECIAL 4B S_MAXIM:") != string::npos)
 		{
-		  QUADS.read_cutoff_params(cin, LINE, "S_MAXIM") ;
+		  QUADS.read_cutoff_params(cin, LINE, "S_MAXIM");
 		}
 
 		else if(LINE.find("SPECIAL 4B S_MINIM:") != string::npos)
 		{
-		  QUADS.read_cutoff_params(cin, LINE, "S_MINIM") ;
+		  QUADS.read_cutoff_params(cin, LINE, "S_MINIM");
 		}
 		
 		else if ( (LINE.find("# FCUTTYP #") != string::npos) )
@@ -2059,9 +2158,9 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		
 	}	
 	
-#if VERBOSITY == 1			
-	if ( RANK == 0 ) cout << endl << "Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl;; // All types use same scaling
-#endif	
+	#if VERBOSITY == 1			
+	if ( RANK == 0 ) cout << endl << "Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl; // All types use same scaling
+	#endif	
 }
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby)
@@ -2070,15 +2169,15 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLU
 
 	if ( RANK == 0 ) cout << "	Minimum distances between atoms: (Angstr.)" << endl;
 
-	int NPAIR = ATOM_PAIRS.size() ;
+	int NPAIR = ATOM_PAIRS.size();
 
 		for (int k=0; k<NPAIR; k++)
 		{
-			double sum = 0.0 ;
+			double sum = 0.0;
 #ifdef USE_MPI
 			MPI_Reduce(&(ATOM_PAIRS[k].MIN_FOUND_DIST), &sum, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 #else
-			sum = ATOM_PAIRS[k].MIN_FOUND_DIST ;
+			sum = ATOM_PAIRS[k].MIN_FOUND_DIST;
 #endif
 			if ( RANK == 0 ) 
 			{
@@ -2091,13 +2190,13 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLU
 
 		if ( RANK == 0 ) cout << "	Total number of configurations contributing to each pair type:" << endl;
 		
-		for (int k = 0 ; k < NPAIR ; k++) 
+		for (int k = 0; k < NPAIR; k++) 
 		{
-			int sum = 0.0 ;
+			int sum = 0.0;
 #ifdef USE_MPI
 			MPI_Reduce(&(ATOM_PAIRS[k].N_CFG_CONTRIB), &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 #else
-			sum = ATOM_PAIRS[k].N_CFG_CONTRIB ;
+			sum = ATOM_PAIRS[k].N_CFG_CONTRIB;
 #endif
 			if ( RANK == 0 ) cout << "		" << k << "	" 					
 										 << ATOM_PAIRS[k].ATM1TYP << " " 
@@ -2107,19 +2206,19 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLU
 
 		if( use_3b_cheby ) 
 		{
-		  TRIPS.print_min_distances() ;
+		  TRIPS.print_min_distances();
 		}
 
 		if( use_4b_cheby ) 
 		{
-		  QUADS.print_min_distances() ;
+		  QUADS.print_min_distances();
 		}
 			
 		if ( RANK == 0 ) cout << "...matrix printing complete: " << endl << endl;
 }
 
 
-static void add_col_of_ones(int item, bool DO_ENER, bool DO_STRESS, bool DO_STRESS_ALL, int NATOMS, ofstream & OUTFILE)
+static void add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE)
 {
 	// Determine if: Energies are being included in the fit
 	// If so, is this A-matrix row is for a force or stress (then print an additional a 0.0)
@@ -2127,60 +2226,40 @@ static void add_col_of_ones(int item, bool DO_ENER, bool DO_STRESS, bool DO_STRE
 	
 	if (DO_ENER)
 	{
-		if(DO_STRESS)
-		{
-			if(item<NATOMS+1)
-				OUTFILE << " 0.0";
-			else
-				OUTFILE << " 1.0";
-		}
-		else if(DO_STRESS_ALL)
-		{
-			if(item<NATOMS+3)
-				OUTFILE << " 0.0";
-			else
-				OUTFILE << " 1.0";					
-		}
+		if( (item == "FORCE") || (item == "STRESS") )
+			OUTFILE << " 0.0";
 		else
-		{
-			if(item<NATOMS)
-				OUTFILE << " 0.0";
-			else
-				OUTFILE << " 1.0";
-		}
-			
+			OUTFILE << " 1.0";			
 	}
 }
 
-static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, 
-													 CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, 
-													 NEIGHBORS & NEIGHBOR_LIST,
-													 vector<int>& TMP_ATOMTYPEIDX,
-													 vector<string>& TMP_ATOMTYPE)
+static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, vector<int>& TMP_ATOMTYPEIDX, vector<string>& TMP_ATOMTYPE)
 // Build the many-body interaction clusters after the input has been read.
 {
 	if(CONTROLS.USE_3B_CHEBY)
 	{
 		// Generate unique triplets
-		TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX) ; 
-		TRIPS.print(false) ;
-		NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF ;
+		TRIPS.build_all(CONTROLS.CHEBY_3B_ORDER, ATOM_PAIRS, PAIR_MAP,TMP_ATOMTYPE,TMP_ATOMTYPEIDX); 
+		TRIPS.print(false);
+		NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF;
 	}	
 			
 	if(CONTROLS.USE_4B_CHEBY)
 	{
 		// Generate unique quadruplets and thier corresponding sets of powers
-		QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX) ;
-		QUADS.print(false) ;
-		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF ;
-	}			
-		
-	// Set up the Cheby variables
+		QUADS.build_all(CONTROLS.CHEBY_4B_ORDER, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX);
+		QUADS.print(false);
+		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
+	}
+	
+			// Set up the Cheby variables
 			
-	if(CONTROLS.USE_3B_CHEBY)
-		TRIPS.build_cheby_vals(ATOM_PAIRS);
+			if(CONTROLS.USE_3B_CHEBY)
+				TRIPS.build_cheby_vals(ATOM_PAIRS);
 
-	if(CONTROLS.USE_4B_CHEBY)
-		QUADS.build_cheby_vals(ATOM_PAIRS);
+			if(CONTROLS.USE_4B_CHEBY)
+				QUADS.build_cheby_vals(ATOM_PAIRS);				
+		
+
 }
 			

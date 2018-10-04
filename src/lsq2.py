@@ -133,9 +133,25 @@ if DO_WEIGHTING:
 # Apply weighting to A and b
 #################################
 
+weightedA = None
+weightedb = None
+
 if DO_WEIGHTING:
-    weightedA = dot(diag(WEIGHTS),A)
-    weightedb = dot(diag(WEIGHTS),b)
+
+    # This way requires too much memory for long A-mat's
+    # to avoid a memory error, we will do it the slow way instead:
+    #
+    #weightedA = dot(diag(WEIGHTS),A)
+    #weightedb = dot(diag(WEIGHTS),b)
+    
+    weightedA = numpy.zeros((A.shape[0],A.shape[1]),dtype=float)
+    weightedb = numpy.zeros((A.shape[0],),dtype=float)
+    
+    for i in xrange(A.shape[0]):     # Loop over rows (atom force components)
+        for j in xrange(A.shape[1]): # Loop over cols (variables in fit)
+	    weightedA[i][j] = A[i][j]*WEIGHTS[i]
+	weightedb[i] = b[i]*WEIGHTS[i]
+	    
     
 
 #################################
@@ -234,8 +250,13 @@ elif algorithm == 'lassocv':
 elif algorithm == 'lassolars':
     print '! LARS implementation of LASSO used'
     print '! LASSO alpha = ', alpha_val
-    reg = linear_model.LassoLars(alpha=alpha_val,fit_intercept=False,fit_path=False,verbose=True,max_iter=max_iter_num)
-    reg.fit(A,b)
+    
+    if DO_WEIGHTING:
+    	reg = linear_model.LassoLars(alpha=alpha_val,fit_intercept=False,fit_path=False,verbose=True,max_iter=max_iter_num, copy_X=False)
+    	reg.fit(weightedA,weightedb)
+    else:
+    	reg = linear_model.LassoLars(alpha=alpha_val,fit_intercept=False,fit_path=False,verbose=True,max_iter=max_iter_num)
+    	reg.fit(A,b)
     x = reg.coef_[0]
     np = 0 
     for i in xrange(0, len(x)):
@@ -588,7 +609,7 @@ print ""
 print "ENDFILE"		
 
 total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS 
-if total_params != len(x) :
+if (total_params != len(x)) and (total_params != (len(x)-1)) :
     sys.stderr.write( "Error in counting parameters")
     exit(1)
 		

@@ -67,14 +67,14 @@ class PAIRS	// NEEDS UPDATING
 			      CHEBY_RANGE_LOW  = -1.0;
 			      CUBIC_SCALE = 1.0;
 
-						// Set simple defaults.
-						CHEBY_TYPE = Cheby_trans::NONE ;
-						X_MINIM = 0.8 ;
-						X_MAXIM = 5.0 ;
-						X_AVG = (X_MINIM + X_MAXIM)/2.0 ;
-						X_DIFF = (X_MAXIM-X_MINIM) ;
-						S_MINIM = X_MINIM ;
-						S_MAXIM = X_MAXIM ;
+			      // Set simple defaults.
+			      CHEBY_TYPE = Cheby_trans::NONE ;
+			      X_MINIM = 0.8 ;
+			      X_MAXIM = 5.0 ;
+			      X_AVG = (X_MINIM + X_MAXIM)/2.0 ;
+			      X_DIFF = (X_MAXIM-X_MINIM) ;
+			      S_MINIM = X_MINIM ;
+			      S_MAXIM = X_MAXIM ;
 
 			      USE_OVRPRMS = false;
 	  	}     // Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
@@ -225,9 +225,9 @@ class CLUSTER_LIST
 public:
 
   int 			NCLUSTERS;		// The number of CLUSTERS in the list.
-	double MAX_CUTOFF ;   // The maximum interaction cutoff for all clusters.
-	vector<string> S_MAXIM_INPUT ; // Input for special smaxim values.
-	vector<string> S_MINIM_INPUT ; // Input for special sminim values.
+  double 		MAX_CUTOFF ;   		// The maximum interaction cutoff for all clusters.
+  vector<string> 	S_MAXIM_INPUT ;		// Input for special smaxim values.
+  vector<string> 	S_MINIM_INPUT ; 	// Input for special sminim values.
   vector<CLUSTER> 	VEC;			// A vector containing all clusters ... Need to store cluster pointers so that polymorphism with different cluster types works.
   map<string,int> 	MAP;			// A map from pair types into the VEC index.
   map<int,string> 	MAP_REVERSE;		// A map from the VEC index into the pair types.
@@ -264,6 +264,9 @@ public:
   // Print the cutoff function parameters controlling the CLUSTER_LIST.
   void print_fcut();
 
+  // Print the cutoff function parameters to the force field header file.
+  void print_fcut_header(ostream &header);
+
   // Allocate the cluster list according to the number of clusters and the number of atoms.  Return a string to search for in the params file that describes the cluster list.
   string allocate(int nclusters, int natoms, const vector<PAIRS> &FF_2BODY);
 
@@ -284,8 +287,8 @@ public:
   // Read smaxim, sminim for the cluster list and store the input.
   void read_cutoff_params(istream &input, string LINE, string input_type) ;
 
-	// Process cutoff parameter values from stored input.
-	void process_cutoff_params(string input_type,vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+  // Process cutoff parameter values from stored input.
+  void process_cutoff_params(string input_type,vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
 
   // Parse the force cutoff parameters for a cluster.
   void parse_fcut(string LINE);

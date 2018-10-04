@@ -818,7 +818,8 @@ void CLUSTER_LIST::process_cutoff_params(string input_type,vector<PAIRS> & ATOM_
 	 EXIT_MSG("UNKNOWN INPUT type: " + input_type);
   }
 
-	if ( input_ptr->size() > 0 ) {
+	if ( input_ptr->size() > 0 ) 
+	{
 		vector<string> tokens;
 		LINE = (*input_ptr)[0] ;
 		int count = 0 ;
@@ -838,19 +839,18 @@ void CLUSTER_LIST::process_cutoff_params(string input_type,vector<PAIRS> & ATOM_
 					*special_flag[i] = true;
 				}
 			}
-#if VERBOSITY == 1
-			if ( RANK == 0 ) cout << "	Note: Setting all " << natoms << "-body " + input_type + " values to " 
-														<<  (*data_vec[0])[0] << endl;
-#endif				
+			#if VERBOSITY == 1
+			if ( RANK == 0 ) cout << "	Note: Setting all " << natoms << "-body " + input_type + " values to " <<  (*data_vec[0])[0] << endl;
+			#endif				
 		}
 		else if(TEMP_STR == "SPECIFIC" )
 		{
 			int n_spec = stoi(tokens[4]);
 				
-#if VERBOSITY == 1
+			#if VERBOSITY == 1
 			if ( RANK == 0 ) 
 				cout << "	Note: Setting specific " << natoms << "-body " + input_type + " values: " << endl;
-#endif	
+			#endif	
 
 			string cluster_name;
 			vector<string> pair_names(npairs);
@@ -1122,16 +1122,11 @@ int CLUSTER_LIST::build_all(int cheby_order, vector<PAIRS> & ATOM_PAIRS, map<str
   build_pairs(ATOM_PAIRS, PAIR_MAP, atom_types, atomtype_idx);
 			  
   for ( int i = 0; i < VEC.size(); i++ ) 
-  {
 	 VEC[i].build(cheby_order);
-  }
 
   set_default_cutoffs(ATOM_PAIRS);
   process_cutoff_params("S_MAXIM", ATOM_PAIRS, PAIR_MAP) ;
   process_cutoff_params("S_MINIM", ATOM_PAIRS, PAIR_MAP) ;
-// This needed to be moved so that cheby parameters are built AFTER special cutoffs are read in
-//  for ( int i = 0; i < VEC.size(); i++ ) 
-//	 VEC[i].set_cheby_vals(ATOM_PAIRS);
 
   return( VEC.size() );
 }
@@ -1748,7 +1743,7 @@ void CLUSTER::set_cheby_vals(vector<PAIRS> &FF_2BODY)
 	 if ( j < FF_2BODY.size() )
 		lambda = FF_2BODY[j].LAMBDA;
 	 else
-		EXIT_MSG("Could not find a match for pair " + ATOM_PAIRS[i]);
+		EXIT_MSG("In function set_cheby_vals, could not find a match for atom pair " + ATOM_PAIRS[i]);
 
 	 Cheby::set_cheby_params(S_MINIM[i], S_MAXIM[i], lambda, FF_2BODY[0].CHEBY_TYPE, X_MINIM[i], X_MAXIM[i], X_DIFF[i], X_AVG[i]);
   }

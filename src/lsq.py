@@ -542,7 +542,7 @@ if abs(total_params - len(x)) > 1 :
     sys.stderr.write( "Error in counting parameters\n") 
     sys.stderr.write("len(x) " + str(len(x)) + "\n") 
     sys.stderr.write("TOTAL_PAIRS " + str(TOTAL_PAIRS) + "\n") 
-    sys.stderr.write("SNUM_2B" + str(SNUM_2B) + "\n") 
+    sys.stderr.write("SNUM_2B " + str(SNUM_2B) + "\n") 
     sys.stderr.write("COUNTED_TRIP_PARAMS " + str(COUNTED_TRIP_PARAMS) + "\n") 
     sys.stderr.write("COUNTED_QUAD_PARAMS " + str(COUNTED_QUAD_PARAMS) + "\n")
     sys.stderr.write("COUNTED_COUL_PARAMS " + str(COUNTED_COUL_PARAMS) + "\n")
