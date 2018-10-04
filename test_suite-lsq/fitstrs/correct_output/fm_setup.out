@@ -41,7 +41,7 @@ Reading input file...
 		1	 OO (0) HH (1) OH (2) 10000 40000 40000 0
 		2	 OO (0) HH (1) OH (2) 10000 -40000 0 0
 
-	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
+# FCUTTYP #: CUBIC      ... for all Chebyshev interactions
 
 Note: Will use cubic scaling of: 1
 

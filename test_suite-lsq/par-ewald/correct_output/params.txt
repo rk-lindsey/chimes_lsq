@@ -1,4 +1,4 @@
-! Date  2018-10-01
+! Date  2018-10-03
 !
 ! Number of variables =  28
 ! Number of equations    =  28514
@@ -35,6 +35,8 @@ ATOM PAIRS: 3
 	0               O               O               1               O               50              1.0165          -0.0657         5.0451          -3.6141         
 	1               H               H               0               NONE            0               0               0               0               0               
 	2               O               H               1               O               50              1.0165          -0.0657         5.0451          -3.6141         
+
+FCUT TYPE: CUBIC
 
 ATOM PAIR TRIPLETS: 0
 ATOM PAIR QUADRUPLETS: 0
