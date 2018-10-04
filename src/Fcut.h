@@ -52,6 +52,8 @@ public:
 	// Print out force cutoff parameters.
 	void print_params() ;
 
+	// Print an entry into the force field header file.
+	void print_header(ostream &header) ;
 } ;
 
 #endif

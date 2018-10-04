@@ -264,9 +264,6 @@ public:
   // Print the cutoff function parameters controlling the CLUSTER_LIST.
   void print_fcut();
 
-  // Print the cutoff function parameters to the force field header file.
-  void print_fcut_header(ostream &header);
-
   // Allocate the cluster list according to the number of clusters and the number of atoms.  Return a string to search for in the params file that describes the cluster list.
   string allocate(int nclusters, int natoms, const vector<PAIRS> &FF_2BODY);
 

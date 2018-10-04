@@ -1487,21 +1487,6 @@ void CLUSTER_LIST::print_fcut()
   VEC[0].FORCE_CUTOFF.print_params();
 }
 
-void CLUSTER_LIST::print_fcut_header(ostream &header)
-// Print force cutoff function parameters to the header file.
-{
-  header << endl << "FCUT TYPE: " << VEC[0].FORCE_CUTOFF.to_string();
-		
-  if (VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGMOID || VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBSIG || VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::CUBESTRETCH || VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-	 header << " " << VEC[0].FORCE_CUTOFF.STEEPNESS << " " << VEC[0].FORCE_CUTOFF.OFFSET;
-  if(VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::SIGFLT)
-	 header << " " << VEC[0].FORCE_CUTOFF.HEIGHT;
-  if(VEC[0].FORCE_CUTOFF.TYPE == FCUT_TYPE::TERSOFF)
-	 header << " " << VEC[0].FORCE_CUTOFF.OFFSET;	 
-
-  header << endl;
-}
-
 void CLUSTER_LIST::print_min_distances()
 {
   string tuplet = tuplet_name(VEC[0].NATOMS, false, false);

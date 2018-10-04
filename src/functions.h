@@ -627,6 +627,7 @@ void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BOD
 void build_int_pair_map(int natmtyp, const vector<string> &atomtype, const vector<int> &atomtype_idx, map<string,int> &pair_map, vector<int> &int_pair_map);
 void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type);
 void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<string>& TMP_ATOMTYPE, vector<PAIR_FF> &FF_2BODY, int NATMTYP);
+void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS) ;
 
 #ifdef USE_MPI
 	void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);

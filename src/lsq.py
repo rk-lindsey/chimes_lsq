@@ -537,7 +537,8 @@ print ""
 print "ENDFILE"		
 
 total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS 
-if total_params != len(x) :
+## Parameter count could be off by 1 if energy is fit.
+if abs(total_params - len(x)) > 1 :
     sys.stderr.write( "Error in counting parameters\n") 
     sys.stderr.write("len(x) " + str(len(x)) + "\n") 
     sys.stderr.write("TOTAL_PAIRS " + str(TOTAL_PAIRS) + "\n") 

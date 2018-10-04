@@ -338,14 +338,14 @@ void FCUT::parse_input(string line)
 
 	int nargs = parse_space(line, tokens);
 
-	validate_num_args(nargs, 3, line);
+	validate_num_args(nargs, 1, line);
 
-	set_type(tokens[2]);
+	set_type(tokens[0]);
 	
 	if (TYPE == FCUT_TYPE::TERSOFF)
 	{
-		validate_num_args(nargs, 4, line);
-		OFFSET = atof(tokens[3].data());
+		validate_num_args(nargs, 2, line);
+		OFFSET = stod(tokens[1]);
 	}
 
 	else if(   TYPE == FCUT_TYPE::SIGMOID 
@@ -353,15 +353,15 @@ void FCUT::parse_input(string line)
 		|| TYPE == FCUT_TYPE::CUBESTRETCH 
 		|| TYPE == FCUT_TYPE::SIGFLT)
 	{
-		validate_num_args(nargs, 5, line);
+		validate_num_args(nargs, 3, line);
 
-		STEEPNESS = atof(tokens[3].data());
-		OFFSET    = atof(tokens[4].data());
+		STEEPNESS = stod(tokens[1]) ;
+		OFFSET    = stod(tokens[2]) ;
 	 
 		if ( TYPE == FCUT_TYPE::SIGFLT )
 		{
-			validate_num_args(nargs, 6, line);
-			HEIGHT = atof(tokens[5].data());
+			validate_num_args(nargs, 4, line);
+			HEIGHT = stod(tokens[3]) ;
 		}
 	}
 }
@@ -371,4 +371,20 @@ void FCUT::print_params()
 {
   cout << to_string() << endl;
   cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << STEEPNESS << " " << OFFSET << endl;
+}
+
+
+void FCUT::print_header(ostream &header)
+// Print force cutoff function parameters to the header file.
+{
+  header << endl << "FCUT TYPE: " << to_string();
+		
+  if (TYPE == FCUT_TYPE::SIGMOID || TYPE == FCUT_TYPE::CUBSIG || TYPE == FCUT_TYPE::CUBESTRETCH || TYPE == FCUT_TYPE::SIGFLT)
+	 header << " " << STEEPNESS << " " << OFFSET;
+  if(TYPE == FCUT_TYPE::SIGFLT)
+	 header << " " << HEIGHT;
+  if(TYPE == FCUT_TYPE::TERSOFF)
+	 header << " " << OFFSET;	 
+
+  header << endl;
 }

@@ -1061,10 +1061,10 @@ int main(int argc, char* argv[])
 		}		
 	}
 
-	// Quads and triplets both have the same cutoff function parameters.
+	// Pairs, triplets, and quads all have the same cutoff function parameters.
 	// Print out only once.
-	if(ATOM_PAIRS[0].SNUM_3B_CHEBY> 0 || ATOM_PAIRS[0].SNUM_4B_CHEBY> 0)
-	  TRIPS.print_fcut_header(header) ;
+	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" ) 
+		ATOM_PAIRS[0].FORCE_CUTOFF.print_header(header) ;
 		
 	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
 		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
@@ -2039,91 +2039,17 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		  QUADS.read_cutoff_params(cin, LINE, "S_MINIM") ;
 		}
 		
-		else if ( (LINE.find("# FCUTTYP #") != string::npos) && ((CONTROLS.CHEBY_3B_ORDER >0)||(CONTROLS.CHEBY_4B_ORDER>0)))
+		else if ( (LINE.find("# FCUTTYP #") != string::npos) )
 		{
-
-			cin >> TEMP_TYPE;
-			
-			for(int i=0; i<ATOM_PAIRS.size(); i++)
-				ATOM_PAIRS[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
-			
-			if (CONTROLS.USE_3B_CHEBY)
-				for(int i=0; i<TRIPS.VEC.size(); i++)
-					TRIPS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
-					
-			if (CONTROLS.USE_4B_CHEBY)
-				for(int i=0; i<QUADS.VEC.size(); i++)
-					QUADS.VEC[i].FORCE_CUTOFF.set_type(TEMP_TYPE);
-
-#if VERBOSITY == 1
+			// Unified MD/LSQ parsing of force cutoff.
+			getline(cin,TEMP_TYPE) ;
 			if ( RANK == 0 ) 
-				cout << "	# FCUTTYP #: " << TEMP_TYPE << "	... for all Chebyshev interactions" << endl;	
-#endif
-			
-			double TMP_STEEPNESS = 0.0;
-			double TMP_OFFSET    = 0.0;
-			double TMP_HEIGHT    = 0.0;
-			
-			if(TEMP_TYPE=="TERSOFF")
 			{
-				cin >> TMP_OFFSET;
-				
-#if VERBOSITY == 1
-				if ( RANK == 0 ) 
-					cout << "			With an offset of: " << fixed << setprecision(3) << TMP_OFFSET*100.0 << "% of the pair outer cutoffs" << endl;      
-#endif			
+				parse_space(TEMP_TYPE, tokens) ;
+				cout << "# FCUTTYP #: " << tokens[0] << "      ... for all Chebyshev interactions" << endl ;
 			}
-			
-			if(TEMP_TYPE=="SIGMOID" || TEMP_TYPE=="CUBSIG" || TEMP_TYPE=="CUBESTRETCH" || TEMP_TYPE == "SIGFLT")
-			{
-				cin >> TMP_STEEPNESS;
-				cin >> TMP_OFFSET;
-				
-				if(TEMP_TYPE == "SIGFLT")
-					cin >> TMP_HEIGHT;
-					
-#if VERBOSITY == 1
-				if ( RANK == 0 ) cout << "			With steepness, offset, and height of: "
-															<< fixed << setprecision(3) 
-															<< TMP_STEEPNESS << ",   " 
-															<< TMP_OFFSET    << ", and  " 
-															<< TMP_HEIGHT    << endl;   
-#endif					
-			}
-			cin.ignore();
-			
-			
-			if (ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV")
-			{
-				for(int i=0; i<ATOM_PAIRS.size(); i++)
-				{
-					ATOM_PAIRS[i].FORCE_CUTOFF.BODIEDNESS = 2;
-					ATOM_PAIRS[i].FORCE_CUTOFF.STEEPNESS  = TMP_STEEPNESS; 
-					ATOM_PAIRS[i].FORCE_CUTOFF.OFFSET     = TMP_OFFSET;
-					ATOM_PAIRS[i].FORCE_CUTOFF.HEIGHT     = TMP_HEIGHT;
-				}
-			}
-			if (CONTROLS.USE_3B_CHEBY)
-			{
-				for(int i=0; i<TRIPS.VEC.size(); i++)
-				{
-					TRIPS.VEC[i].FORCE_CUTOFF.BODIEDNESS = 3;
-					TRIPS.VEC[i].FORCE_CUTOFF.STEEPNESS  = TMP_STEEPNESS; 
-					TRIPS.VEC[i].FORCE_CUTOFF.OFFSET     = TMP_OFFSET;
-					TRIPS.VEC[i].FORCE_CUTOFF.HEIGHT     = TMP_HEIGHT;
-				}			
-			}
-			if (CONTROLS.USE_4B_CHEBY)
-			{
-				for(int i=0; i<QUADS.VEC.size(); i++)
-				{
-					QUADS.VEC[i].FORCE_CUTOFF.BODIEDNESS = 4;
-					QUADS.VEC[i].FORCE_CUTOFF.STEEPNESS  = TMP_STEEPNESS; 
-					QUADS.VEC[i].FORCE_CUTOFF.OFFSET     = TMP_OFFSET;
-					QUADS.VEC[i].FORCE_CUTOFF.HEIGHT     = TMP_HEIGHT;
-				}			
-			}
-
+			parse_fcut_input(TEMP_TYPE, ATOM_PAIRS, TRIPS, QUADS) ;
+			//cin.ignore();
 		}
 		else if ( RANK == 0 ) 
 		{

@@ -2214,6 +2214,22 @@ void build_int_pair_map(int natmtyp, const vector<string> &atomtype,
   }
 }
 
+void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
+// Parse the input for the force cutoff for all interaction types.
+{
+	// Each 2-body interaction needs to be done separately.
+	for(int i=0; i<FF_2BODY.size(); i++) {
+		FF_2BODY[i].FORCE_CUTOFF.parse_input(line);
+		FF_2BODY[i].FORCE_CUTOFF.BODIEDNESS = 2;		
+	}
+			
+	// Handle the many-body part
+	if ( FF_2BODY[0].SNUM_3B_CHEBY>0 ) 
+		TRIPS.parse_fcut(line) ;
+
+	if(FF_2BODY[0].SNUM_4B_CHEBY>0)
+		QUADS.parse_fcut(line) ;
+}
 
 // MPI -- Related functions -- See headers at top of file
 

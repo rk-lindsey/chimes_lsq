@@ -2877,24 +2877,10 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 				
 		  if(LINE.find("FCUT TYPE:") != string::npos )
 		  {
-		  	// 2-body interactions use a separate data structure, so we need 
-			// to handle this differently than the manybody part
-			
-			FF_2BODY[0].FORCE_CUTOFF.parse_input(LINE);
-			FF_2BODY[0].FORCE_CUTOFF.BODIEDNESS = 2;
-			
-			// Copy all class members.
-			for(int i=1; i<FF_2BODY.size(); i++)
-			       FF_2BODY[i].FORCE_CUTOFF = FF_2BODY[0].FORCE_CUTOFF;
-			
-			// Handle the many-body part
-		  
-			if ( FF_2BODY[0].SNUM_3B_CHEBY>0 ) 
-				TRIPS.parse_fcut(LINE) ;
+				// Unified parsing of fcut for MD and LSQ code.
 
-			if(FF_2BODY[0].SNUM_4B_CHEBY>0)
-				QUADS.parse_fcut(LINE) ;
-
+				LINE = LINE.substr(11) ; // Chop off "FCUT TYPE: ".
+				parse_fcut_input(LINE,FF_2BODY,TRIPS,QUADS) ;
 		  }
 				
 		  else if(LINE.find("SPECIAL 3B S_MINIM:") != string::npos)
