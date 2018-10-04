@@ -1,5 +1,5 @@
-#
-# Tests MD with non-equal SMIN, SMAX, Morse Lambda values.
+!
+! Tests MD with non-equal SMIN, SMAX, Morse Lambda values.
 ###################################
 #### GENERAL CONTROL VARIABLES ####
 ###################################
