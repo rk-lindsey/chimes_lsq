@@ -2252,14 +2252,12 @@ static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, C
 		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
 	}
 	
-			// Set up the Cheby variables
-			
-			if(CONTROLS.USE_3B_CHEBY)
-				TRIPS.build_cheby_vals(ATOM_PAIRS);
+	// Set up the Cheby variables
+	if(CONTROLS.USE_3B_CHEBY)
+		TRIPS.build_cheby_vals(ATOM_PAIRS);
 
-			if(CONTROLS.USE_4B_CHEBY)
-				QUADS.build_cheby_vals(ATOM_PAIRS);				
+	if(CONTROLS.USE_4B_CHEBY)
+		QUADS.build_cheby_vals(ATOM_PAIRS);				
 		
-
 }
 			

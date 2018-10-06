@@ -686,8 +686,11 @@ void Cheby::Deriv_2B(int FRAME, A_MAT & A_MATRIX)
 						A_MATRIX.ATOM_ENERGIES[FRAME][fidx_a2][vstart+i] += (fcut * Tn[i+1])/2.0;
 					}
 				 }
+			 } else if ( rlen <= FF_2BODY[curr_pair_type_idx].S_MINIM ) {
+				 cout << "Error: distances for pair type " << curr_pair_type_idx + 1 << " = " << rlen << endl ;
+				 cout << "Minimim allowed distance = " << FF_2BODY[curr_pair_type_idx].S_MINIM << endl ;
+				 EXIT_MSG("Distance too small") ;
 			 }
-
 		 }
 	 }
 

@@ -606,19 +606,23 @@ for i in range(0,len(mapsfile)):
 	
 print ""
 			
-print "ENDFILE"		
-
 total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS 
 if (total_params != len(x)) and (total_params != (len(x)-1)) :
     sys.stderr.write( "Error in counting parameters")
     exit(1)
-		
+
+if ( total_params + 1 == len(x) ):
+    print "ENERGY OFFSET: " + str(x[len(x)-1])
+    
 if test_suite_run:
     test_suite_params=open("test_suite_params.txt","w")		
     for i in range(0,len(x)):
         phrase = `i` + " " + `x[i]` + '\n'
         test_suite_params.write(phrase)
     test_suite_params.close()
+
+print "ENDFILE"		
+
 
 # OLD WAY:
 #for i in range(0,len(x)):

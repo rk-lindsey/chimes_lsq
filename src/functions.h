@@ -272,7 +272,8 @@ public:
 	XYZ STRESS_TENSORS_Y;
 	XYZ STRESS_TENSORS_Z;
 	
-	double QM_POT_ENER;		// This is the potential energy of the QM calculation!
+	double QM_POT_ENER;		      // This is the potential energy of the QM calculation!
+	double QM_ENERGY_OFFSET ;		// This is the energy offset between MD and QM energy, as determined by lsq[2].py.
 	vector<double> QM_POT_ENER_PER_ATOM; // And this is for each atom in the frame, from QM
 	
 	double 	TEMPERATURE;		// This is the RUNNING temperature, not the set temperature!

@@ -2132,10 +2132,15 @@ static void read_input(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS &
 				if      (LINE=="true"  || LINE=="True"  || LINE=="TRUE"  || LINE == "T" || LINE == "t")
 					CONTROLS.FIT_STRESS = true;	
 				else if (LINE=="all"  || LINE=="All"  || LINE=="ALL"  || LINE == "A" || LINE == "a")
+				{
 					CONTROLS.FIT_STRESS_ALL = true;
+					if ( RANK == 0 ) cout << "Warning: Comparison for all stresses is not yet implemented\n" ;
+				}
+
 				else if(LINE=="firstall"  || LINE=="FirstAll"  || LINE=="FIRSTALL")
 				{
 					CONTROLS.FIT_STRESS_ALL = true;
+					if ( RANK == 0 ) cout << "Warning: Comparison for all stresses is not yet implemented\n" ;
 					cin >> CONTROLS.NSTRESS;
 					cin.ignore();
 				}	
@@ -2908,6 +2913,19 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 				QUADS.process_cutoff_params("S_MAXIM",FF_2BODY, PAIR_MAP) ;
 				NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF ;
 		  }
+			else if ( LINE.find("ENERGY OFFSET:") != string::npos)
+			{
+				vector<string> tokens;
+				int ntokens ;
+				ntokens = parse_space(LINE,tokens) ;
+				if ( ntokens == 3 )
+				{
+					SYSTEM.QM_ENERGY_OFFSET = stod(tokens[2]) ;
+					if ( RANK == 0 ) cout << "QM Energy Offset = " << SYSTEM.QM_ENERGY_OFFSET << endl ;
+				}
+				else
+					EXIT_MSG("The ENERGY OFFSET: command in the params file could not be read") ;
+			}
 		}
 
 		if(RANK==0)
@@ -4019,8 +4037,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 			//COORDFILE >> TEMP_STR           >> TEMP_STR           >> TEMP_STR;
 		}
 		
-		stream_parser.str("");
-		stream_parser.clear();	
+		STREAM_PARSER.str("");
+		STREAM_PARSER.clear();	
 	}
 
 	// Read in stress components for comparison to current values.
@@ -4031,8 +4049,29 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 
 		if ( ! CMPR_FORCEFILE.good() ) 
 			EXIT_MSG("Reading force comparson file failed") ;
-	}
+	} else if ( CONTROLS.FIT_STRESS_ALL ) {
+				// Units read in are kcal/mol-Ang.^3.
+		CMPR_FORCEFILE >> SYSTEM.STRESS_TENSORS_X.X >> SYSTEM.STRESS_TENSORS_X.Y >> SYSTEM.STRESS_TENSORS_X.Z ;
+		CMPR_FORCEFILE >> SYSTEM.STRESS_TENSORS_Y.X >> SYSTEM.STRESS_TENSORS_Y.Y >> SYSTEM.STRESS_TENSORS_Y.Z ;
+		CMPR_FORCEFILE >> SYSTEM.STRESS_TENSORS_Z.X >> SYSTEM.STRESS_TENSORS_Z.Y >> SYSTEM.STRESS_TENSORS_Z.Z ;
 
+		if ( ! CMPR_FORCEFILE.good() ) 
+			EXIT_MSG("Reading force comparson file failed") ;
+	}
+	if ( CONTROLS.FIT_ENER )
+	{
+		vector<double> energy(3) ;
+		CMPR_FORCEFILE >> energy[0] ;
+		CMPR_FORCEFILE >> energy[1] ;
+		CMPR_FORCEFILE >> energy[2] ;
+
+		if ( ! CMPR_FORCEFILE.good() ) 
+			EXIT_MSG("Reading force comparson file failed") ;
+		else if ( fabs(energy[0]-energy[1]) > 1.0e-08 || fabs(energy[0]-energy[2]) > 1.0e-03 )
+			EXIT_MSG("Inconsistent energy values in force comparison file") ;
+
+		SYSTEM.QM_POT_ENER = energy[0] ;
+	}
 	// Input configurations are added sequentially along z.
 		
 	SYSTEM.BOXDIM.X  = TMP_BOX.X;
@@ -4096,8 +4135,12 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 			FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS.X 
 															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS.Y 
 															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS.Z;
+		else if ( CONTROLS.FIT_STRESS_ALL )
+			FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS_X.X 
+															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS_Y.Y 
+															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS_Z.Z;
 		if(CONTROLS.FIT_ENER)
-			FORCE_SUBTRACTED_OUTPUT << SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER;
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER + SYSTEM.QM_ENERGY_OFFSET ;
 					
 		FORCE_SUBTRACTED_OUTPUT << endl;
 	}
@@ -4131,7 +4174,8 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 	cout << "RMS force error = " << fixed << setprecision(6) << ferr << endl;
 
 	ferr = 0.0 ;
-	if ( CONTROLS.FIT_STRESS ) {
+	if ( CONTROLS.FIT_STRESS )
+	{
 		ferr += (SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS.X) * (SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS.X) ;
 		ferr += (SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS.Y) * (SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS.Y) ;
 		ferr += (SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS.Z) * (SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS.Z) ;
@@ -4139,5 +4183,21 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 		ferr = sqrt(ferr/3.0) ;
 		ferr *= GPa ;
 		cout << "RMS stress error = " << ferr << " GPa " << endl ;
+	}
+	else if ( CONTROLS.FIT_STRESS_ALL )
+	{
+		ferr += (SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS_X.X) * (SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS_X.X) ;
+		ferr += (SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS_Y.Y) * (SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS_Y.Y) ;
+		ferr += (SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS_Z.Z) * (SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS_Z.Z) ;
+
+		ferr = sqrt(ferr/3.0) ;
+		ferr *= GPa ;
+		cout << "RMS stress error = " << ferr << " GPa " << endl ;
+	}
+
+	if ( CONTROLS.FIT_ENER )
+	{
+		ferr = fabs(SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER + SYSTEM.QM_ENERGY_OFFSET)/SYSTEM.ATOMS ;
+		cout << "Absolute energy error = " << ferr << " kcal/mol/atom \n" ;
 	}
 }

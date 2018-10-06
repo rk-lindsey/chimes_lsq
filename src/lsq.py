@@ -534,11 +534,9 @@ for i in range(0,len(mapsfile)):
 	
 print ""
 			
-print "ENDFILE"		
-
 total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS 
 ## Parameter count could be off by 1 if energy is fit.
-if abs(total_params - len(x)) > 1 :
+if (total_params != len(x)) and (total_params != (len(x)-1)) :
     sys.stderr.write( "Error in counting parameters\n") 
     sys.stderr.write("len(x) " + str(len(x)) + "\n") 
     sys.stderr.write("TOTAL_PAIRS " + str(TOTAL_PAIRS) + "\n") 
@@ -548,6 +546,10 @@ if abs(total_params - len(x)) > 1 :
     sys.stderr.write("COUNTED_COUL_PARAMS " + str(COUNTED_COUL_PARAMS) + "\n")
     sys.stderr.write("OVERCOORD_PARAMS " + str(OVERCOORD_PARAMS) + "\n")
     exit(1)
+
+if ( total_params + 1 == len(x) ):
+    print "ENERGY OFFSET: " + str(x[len(x)-1])
+    
 		
 if TEST_SUITE_RUN == "do":
 	test_suite_params=open("test_suite_params.txt","w")		
@@ -556,6 +558,8 @@ if TEST_SUITE_RUN == "do":
 		test_suite_params.write(phrase)
 	test_suite_params.close()
 
+
+print "ENDFILE"		
 
 	
 #for i in xrange(0,len(D)):
