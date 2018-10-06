@@ -1,4 +1,4 @@
-! Date  2018-10-01
+! Date  2018-10-05
 !
 ! Number of variables =  73
 ! Number of equations    =  14595
@@ -34,6 +34,8 @@ ATOM PAIRS: 6
 	3               C               H               0.952           8               0.01            MORSE           1.1             
 	4               C               O               1.318           8               0.01            MORSE           1.15            
 	5               H               O               0.914           8               0.01            MORSE           0.97            
+
+FCUT TYPE: CUBIC
 
 ATOM PAIR TRIPLETS: 0
 ATOM PAIR QUADRUPLETS: 0
@@ -146,4 +148,5 @@ PAIRMAPS: 9
 5 OH
 2 OO
 
+ENERGY OFFSET: -17983.391212
 ENDFILE

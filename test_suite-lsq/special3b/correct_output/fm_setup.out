@@ -37,7 +37,7 @@ Reading input file...
 		Atom type idxs:  0 1 Pair name:   CO Explicit pair index:    1 Unique pair index:    2
 		Atom type idxs:  1 0 Pair name:   OC Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   OO Explicit pair index:    3 Unique pair index:    1
-	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
+# FCUTTYP #:         CUBIC         ... for all Chebyshev interactions
 
 Note: Will use cubic scaling of: 1
 
@@ -579,7 +579,7 @@ Number of 3-body interactions = 101790
 ...matrix population complete: 
 
 Printing matricies...
-	...A matrix length: 100
+	...A matrix length (forces): 19200
 
 	Minimum distances between atoms: (Angstr.)
 		0	C C	0.988

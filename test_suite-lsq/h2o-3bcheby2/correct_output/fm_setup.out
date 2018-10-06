@@ -40,7 +40,7 @@ Reading input file...
 		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
 		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
 
-	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
+# FCUTTYP #: 	CUBIC      ... for all Chebyshev interactions
 
 Note: Will use cubic scaling of: 1
 
@@ -939,7 +939,7 @@ Number of 3-body interactions = 17166
 ...matrix population complete: 
 
 Printing matricies...
-	...A matrix length: 49
+	...A matrix length (forces): 14112
 
 	Minimum distances between atoms: (Angstr.)
 		0	O O	2.039

@@ -68,9 +68,9 @@ do
 	PASS=true
 
 	cd $i
-	rm -rf *diff*
+	rm -rf A.txt b.txt params.header diff-* b-labeled.txt 
 	
-	# Strange things happen when NP >> NF. These below 4b
+	# Strange things happen when NP >> NF. The below 4b
 	# test uses only 10 frames because otherwise the test
 	# would take forever 
 
@@ -99,6 +99,8 @@ do
 			  ALL_PASSED=false
 		 fi
 	fi
+	
+	rm -f current_output/*
 
 	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output	
 

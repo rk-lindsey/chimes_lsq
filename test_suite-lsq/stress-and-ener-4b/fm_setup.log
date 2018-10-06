@@ -1,10 +1,16 @@
 
 Reading input file...
+WARNING:  The following input line was ignored:
+ # Test takes ~25 minutes on 1 proc (head node)
 	# TRJFILE #: phen_res-300F_dt-0.1_diagstress_energy.xyzf
 	# WRAPTRJ #: 1
 	# NFRAMES #: 10
 	# NLAYERS #: 1
 	# FITCOUL #: false
+WARNING:  The following input line was ignored:
+ # CNSCOUL # 
+WARNING:  The following input line was ignored:
+         false   
 	# FITSTRS #: true
 	# FITENER #: true
 	# FITPOVR #: false
@@ -52,10 +58,11 @@ Reading input file...
 		Atom type idxs:  2 0 Pair name:   OC Explicit pair index:    6 Unique pair index:    4
 		Atom type idxs:  2 1 Pair name:   OH Explicit pair index:    7 Unique pair index:    5
 		Atom type idxs:  2 2 Pair name:   OO Explicit pair index:    8 Unique pair index:    2
-	# FCUTTYP #: TERSOFF	... for all Chebyshev interactions
-			With an offset of: 50.000% of the pair outer cutoffs
+WARNING:  The following input line was ignored:
+ OOOOOO OO OO OO 6.5 6.5 6.5
+# FCUTTYP #:         TERSOFF 0.5      ... for all Chebyshev interactions
 
-Note: Will use cubic scaling of: 1.000
+Note: Will use cubic scaling of: 1
 
 
 	Made the following triplets: 0    
@@ -115,20 +122,20 @@ Note: Will use cubic scaling of: 1.000
 
 		Atom type idxs:  2 2 2  Triplet name:       OOOOOO Unique triplet ID 333 index:    9
 	Note: Setting specific 3-body S_MAXIM values: 
-	C C C CC 4.400 CC 4.400 CC 4.400 
-	C C H CC 4.400 CH 4.000 CH 4.000 
-	C C O CC 4.400 CO 4.000 CO 4.000 
-	C H H CH 4.000 CH 4.000 HH 3.500 
-	C H O CH 4.000 CO 4.000 HO 4.000 
-	C O O CO 4.000 CO 4.000 OO 6.500 
-	H H H HH 3.500 HH 3.500 HH 3.500 
-	H H O HH 3.500 HO 4.000 HO 4.000 
-	H O O HO 4.000 HO 4.000 OO 6.500 
-	O O O OO 8.000 OO 8.000 OO 8.000 
+	C C C CC 4.400000 CC 4.400000 CC 4.400000 
+	C C H CC 4.400000 CH 4.000000 CH 4.000000 
+	C C O CC 4.400000 CO 4.000000 CO 4.000000 
+	C H H CH 4.000000 CH 4.000000 HH 3.500000 
+	C H O CH 4.000000 CO 4.000000 HO 4.000000 
+	C O O CO 4.000000 CO 4.000000 OO 6.500000 
+	H H H HH 3.500000 HH 3.500000 HH 3.500000 
+	H H O HH 3.500000 HO 4.000000 HO 4.000000 
+	H O O HO 4.000000 HO 4.000000 OO 6.500000 
+	O O O OO 8.000000 OO 8.000000 OO 8.000000 
 
-     Max 3-body cutoff = 8.000
+     Max 3-body cutoff = 8.000000
 
-     Min 3-body cutoff = 0.914
+     Min 3-body cutoff = 0.914000
 
 	The following unique triplets of atoms have been identified:
 
@@ -1448,10 +1455,10 @@ Note: Will use cubic scaling of: 1.000
 	Made the following quadruplets: 14       
 
 		Atom type idxs:  2 2 2 2  Quadruplet name: OOOOOOOOOOOO Unique quadruplet ID 3333 index:   14
-	Note: Setting all 4-body S_MAXIM values to 5.500
-     Max 4-body cutoff = 5.500
+	Note: Setting all 4-body S_MAXIM values to 5.500000
+     Max 4-body cutoff = 5.500000
 
-     Min 4-body cutoff = 0.914
+     Min 4-body cutoff = 0.914000
 
 	The following unique quadruplets of atoms have been identified:
 
@@ -11110,8 +11117,8 @@ Reading in the trajectory file...
 	Reporting outcome of layering for first frame ONLY: 
 	Real atoms:                   132
 	Total atoms (ghost):          3564
-	Real box dimesntions:         10.650 10.650 10.650
-	Total box dimensions (ghost): 31.950 31.950 31.950
+	Real box dimesntions:         10.650000 10.650000 10.650000
+	Total box dimensions (ghost): 31.950000 31.950000 31.950000
 
 WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 ...trajectory file read successful: 
@@ -11125,40 +11132,12 @@ Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramm
 
 ...Populating the matricies for A, Coulomb forces, and overbonding...
 
-	Processing frame: 1     of: 10
 Number of 3-body interactions = 693320
 Number of 4-body interactions = 545920
-	Processing frame: 2     of: 10
-Number of 3-body interactions = 694998
-Number of 4-body interactions = 542720
-	Processing frame: 3     of: 10
-Number of 3-body interactions = 694188
-Number of 4-body interactions = 539629
-	Processing frame: 4     of: 10
-Number of 3-body interactions = 691763
-Number of 4-body interactions = 553685
-	Processing frame: 5     of: 10
-Number of 3-body interactions = 692337
-Number of 4-body interactions = 537269
-	Processing frame: 6     of: 10
-Number of 3-body interactions = 697768
-Number of 4-body interactions = 554518
-	Processing frame: 7     of: 10
-Number of 3-body interactions = 688984
-Number of 4-body interactions = 552100
-	Processing frame: 8     of: 10
-Number of 3-body interactions = 687621
-Number of 4-body interactions = 547242
-	Processing frame: 9     of: 10
-Number of 3-body interactions = 686781
-Number of 4-body interactions = 549954
-	Processing frame: 10    of: 10
-Number of 3-body interactions = 686417
-Number of 4-body interactions = 544190
 ...matrix population complete: 
 
 Printing matricies...
-	...A matrix length: 10
+	...A matrix length (forces): 3960
 
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.189

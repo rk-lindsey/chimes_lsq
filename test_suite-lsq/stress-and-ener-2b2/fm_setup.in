@@ -41,7 +41,5 @@
 5		C		O		1.318		8.0		0.01	       1.15		       false	       0	       0	       0
 6		H		O		0.914		8.0		0.01	       0.97		       false	       0	       0	       0
 
-# FCUTTYP #
-        TERSOFF 0.5
 
 # ENDFILE #

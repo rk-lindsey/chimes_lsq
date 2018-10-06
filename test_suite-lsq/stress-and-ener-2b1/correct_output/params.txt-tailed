@@ -34,6 +34,8 @@ ATOM PAIRS: 6
 	4               C               O               1.318           8               0.01            MORSE           1.15            
 	5               H               O               0.914           8               0.01            MORSE           0.97            
 
+FCUT TYPE: CUBIC
+
 ATOM PAIR TRIPLETS: 0
 ATOM PAIR QUADRUPLETS: 0
 
@@ -145,4 +147,5 @@ PAIRMAPS: 9
 5 OH
 2 OO
 
+ENERGY OFFSET: -17983.391212
 ENDFILE

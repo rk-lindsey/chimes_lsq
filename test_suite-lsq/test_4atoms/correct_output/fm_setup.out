@@ -27,7 +27,7 @@ Reading input file...
 		CC: 0 0 0
 
 		Atom type idxs:  0 0 Pair name:   CC Explicit pair index:    0 Unique pair index:    0
-	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
+# FCUTTYP #: 	CUBIC      ... for all Chebyshev interactions
 
 Note: Will use cubic scaling of: 1
 
@@ -4080,7 +4080,7 @@ Number of 4-body interactions = 1
 ...matrix population complete: 
 
 Printing matricies...
-	...A matrix length: 250
+	...A matrix length (forces): 3000
 
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.305

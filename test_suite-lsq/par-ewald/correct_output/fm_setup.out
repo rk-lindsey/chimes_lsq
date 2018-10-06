@@ -84,7 +84,7 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix population complete: 
 
 Printing matricies...
-	...A matrix length: 99
+	...A matrix length (forces): 28512
 
 	Minimum distances between atoms: (Angstr.)
 		0	O O	1.860

@@ -35,7 +35,7 @@ Reading input file...
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
 		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
-	# FCUTTYP #: CUBIC	... for all Chebyshev interactions
+# FCUTTYP #: 	CUBIC      ... for all Chebyshev interactions
 
 	Attempting to read 2 charge constraints...:
 		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
@@ -498,7 +498,7 @@ Number of 4-body interactions = 452509
 ...matrix population complete: 
 
 Printing matricies...
-	...A matrix length: 20
+	...A matrix length (forces): 5760
 
 	Minimum distances between atoms: (Angstr.)
 		0	O O	2.109
