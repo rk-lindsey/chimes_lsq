@@ -2140,6 +2140,12 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 		
 		else if ( (LINE.find("# FCUTTYP #") != string::npos) )
 		{
+			getline(cin,CONTROLS.FCUT_LINE) ;
+			if ( RANK == 0 ) 
+			{
+				cout << "# FCUTTYP #: " << CONTROLS.FCUT_LINE << "      ... for all Chebyshev interactions" << endl ;
+			}		
+			/*
 			// Unified MD/LSQ parsing of force cutoff.
 			getline(cin,TEMP_TYPE) ;
 			if ( RANK == 0 ) 
@@ -2149,6 +2155,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 			}
 			parse_fcut_input(TEMP_TYPE, ATOM_PAIRS, TRIPS, QUADS) ;
 			//cin.ignore();
+			*/	
 		}
 		else if ( RANK == 0 ) 
 		{
@@ -2251,13 +2258,14 @@ static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, C
 		QUADS.print(false);
 		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
 	}
-	
+
 	// Set up the Cheby variables
 	if(CONTROLS.USE_3B_CHEBY)
 		TRIPS.build_cheby_vals(ATOM_PAIRS);
 
 	if(CONTROLS.USE_4B_CHEBY)
-		QUADS.build_cheby_vals(ATOM_PAIRS);				
-		
+		QUADS.build_cheby_vals(ATOM_PAIRS);
+	
+	parse_fcut_input(CONTROLS.FCUT_LINE, ATOM_PAIRS, TRIPS, QUADS) ;					
 }
 			

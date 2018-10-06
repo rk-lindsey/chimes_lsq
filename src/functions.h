@@ -223,6 +223,11 @@ struct JOB_CONTROL
 
   Cheby_trans CHEBY_TYPE;	// How will distance be transformed?
   string	INFILE;		// Input trajectory file
+  
+  // These variables are temporary fixes - soon we will have a class to do all input reading
+  
+  string FCUT_LINE;
+  
 
 // Constructor... MD values are set in the read_input function in chimes_md.C
 	
@@ -253,6 +258,8 @@ JOB_CONTROL(): FIT_COUL(false),
 		USE_4B_CHEBY = false;	//If true, calculate 4-Body Chebyshev interaction.
 		
 		//IO_ECONS_VAL = 0.0;
+		
+		FCUT_LINE = "CUBIC";
 	 }
 };
 

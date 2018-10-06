@@ -631,6 +631,9 @@ void Cheby::Deriv_2B(int FRAME, A_MAT & A_MATRIX)
 				 // fcut and fcutderv are the form that the penalty func and its derivative for the morse-type pair distance transformation
 
 				 FF_2BODY[curr_pair_type_idx].FORCE_CUTOFF.get_fcut(fcut, fcutderiv, rlen, 0,FF_2BODY[curr_pair_type_idx].S_MAXIM);
+				 
+				 // cout << "2B-EVAL, FCUT STYLE: " << FF_2BODY[curr_pair_type_idx].FORCE_CUTOFF.to_string() << endl;				 
+				 
 
 				 // Compute part of the derivative
 				 // NOTE: All these extra terms are coming from:
@@ -686,7 +689,8 @@ void Cheby::Deriv_2B(int FRAME, A_MAT & A_MATRIX)
 						A_MATRIX.ATOM_ENERGIES[FRAME][fidx_a2][vstart+i] += (fcut * Tn[i+1])/2.0;
 					}
 				 }
-			 } else if ( rlen <= FF_2BODY[curr_pair_type_idx].S_MINIM ) {
+			 } else if (false)//( rlen <= FF_2BODY[curr_pair_type_idx].S_MINIM ) 
+			 {
 				 cout << "Error: distances for pair type " << curr_pair_type_idx + 1 << " = " << rlen << endl ;
 				 cout << "Minimim allowed distance = " << FF_2BODY[curr_pair_type_idx].S_MINIM << endl ;
 				 EXIT_MSG("Distance too small") ;
@@ -1059,12 +1063,8 @@ void Cheby::Deriv_3B(int FRAME, A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ij, fcutderiv_ij, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ);
 							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ik, fcutderiv_ik, rlen_ik, S_MINIM_IK, S_MAXIM_IK);
 							PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_jk, fcutderiv_jk, rlen_jk, S_MINIM_JK, S_MAXIM_JK);	
-/*							
-							cout << PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.to_string() << " " << fcut_ij << " " << fcutderiv_ij << " " << rlen_ij << " " << S_MAXIM_IJ << endl;
-							cout << PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.to_string() << " " << fcut_ik << " " << fcutderiv_ik << " " << rlen_ik << " " << S_MAXIM_IK << endl;
-							cout << PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.to_string() << " " << fcut_jk << " " << fcutderiv_jk << " " << rlen_jk << " " << S_MAXIM_JK << endl;
-							cout << endl;
-*/							
+							
+							// cout << "3B-EVAL, FCUT STYLE: " << PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.to_string() << endl;							
 		
 							/////////////////////////////////////////////////////////////////////
 							/////////////////////////////////////////////////////////////////////
@@ -1150,7 +1150,6 @@ void Cheby::Deriv_3B(int FRAME, A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].ZZ -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij; 
 
-
 								    // ik pairs
 
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].XX -= force_wo_coeff_ik * RAB_IK.X * RAB_IK.X / rlen_ik;
@@ -1161,7 +1160,8 @@ void Cheby::Deriv_3B(int FRAME, A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].XX -= force_wo_coeff_jk * RAB_JK.X * RAB_JK.X / rlen_jk;
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff_jk * RAB_JK.Y * RAB_JK.Y / rlen_jk;
-								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].ZZ -= force_wo_coeff_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;					
+								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].ZZ -= force_wo_coeff_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;
+								    
 								}
 								
 								else if (CONTROLS.FIT_STRESS_ALL)
@@ -1172,7 +1172,7 @@ void Cheby::Deriv_3B(int FRAME, A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].XY -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.Y / rlen_ij;
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].XZ -= force_wo_coeff_ij * RAB_IJ.X * RAB_IJ.Z / rlen_ij;	
 									
-								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.X / rlen_ij;
+								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YZ -= force_wo_coeff_ij * RAB_IJ.Y * RAB_IJ.Z / rlen_ij;	
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].ZZ -= force_wo_coeff_ij * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
 									
@@ -1182,7 +1182,7 @@ void Cheby::Deriv_3B(int FRAME, A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].XY -= force_wo_coeff_ik * RAB_IK.X * RAB_IK.Y / rlen_ik;
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].XZ -= force_wo_coeff_ik * RAB_IK.X * RAB_IK.Z / rlen_ik;
 									
-								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff_ik * RAB_IK.Y * RAB_IK.X / rlen_ik;
+								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff_ik * RAB_IK.Y * RAB_IK.Y / rlen_ik;
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YZ -= force_wo_coeff_ik * RAB_IK.Y * RAB_IK.Z / rlen_ik;
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].ZZ -= force_wo_coeff_ik * RAB_IK.Z * RAB_IK.Z / rlen_ik; 
 									
@@ -1192,14 +1192,14 @@ void Cheby::Deriv_3B(int FRAME, A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].XY -= force_wo_coeff_jk * RAB_JK.X * RAB_JK.Y / rlen_jk;
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].XZ -= force_wo_coeff_jk * RAB_JK.X * RAB_JK.Z / rlen_jk;		 
 									
-								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff_jk * RAB_JK.Y * RAB_JK.X / rlen_jk;
+								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff_jk * RAB_JK.Y * RAB_JK.Y / rlen_jk;
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].YZ -= force_wo_coeff_jk * RAB_JK.Y * RAB_JK.Z / rlen_jk;	 
 								    A_MATRIX.STRESSES[FRAME][vstart+row_offset].ZZ -= force_wo_coeff_jk * RAB_JK.Z * RAB_JK.Z / rlen_jk;					 
 								}
 
 								if(CONTROLS.FIT_ENER) 
 								{
-									A_MATRIX.FRAME_ENERGIES[FRAME][vstart+row_offset]     += fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
+									A_MATRIX.FRAME_ENERGIES[FRAME][vstart+row_offset] += fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
 								}
 								else if(CONTROLS.FIT_ENER_PER_ATOM) 
 					 			{
@@ -1267,12 +1267,13 @@ void Cheby::Deriv_3B(int FRAME, A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 	
 	if (CONTROLS.FIT_STRESS)
 	{
+	
 		for(int i=0; i<CONTROLS.NUM_3B_CHEBY; i++) 
 		{
 			A_MATRIX.STRESSES[FRAME][n_2b_cheby_terms+i].XX *= inv_vol;
 			A_MATRIX.STRESSES[FRAME][n_2b_cheby_terms+i].YY *= inv_vol;
-			A_MATRIX.STRESSES[FRAME][n_2b_cheby_terms+i].ZZ *= inv_vol;	  
-		}
+			A_MATRIX.STRESSES[FRAME][n_2b_cheby_terms+i].ZZ *= inv_vol;  
+		}	
 	}
 	
 	else if (CONTROLS.FIT_STRESS_ALL)
@@ -1503,6 +1504,8 @@ void Cheby::Deriv_4B(int FRAME, A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_
 					if( !PAIR_QUADRUPLETS[curr_quad_type_index].FORCE_CUTOFF.PROCEED(rlen[5], S_MINIM[5], S_MAXIM[5]))
 						continue;			
 					
+					// cout << "4B-EVAL, FCUT STYLE: " << PAIR_QUADRUPLETS[curr_quad_type_index].FORCE_CUTOFF.to_string() << endl;
+					
 					// At this point, all distances are within allowed ranges. We can now proceed to the force derivative calculation
 					
 					// For all types, if r < rcut, then the potential is constant, thus the force  must be zero.
@@ -1668,8 +1671,8 @@ void Cheby::Deriv_4B(int FRAME, A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_
 							for (int f=0; f<6; f++)
 							{
 								A_MATRIX.STRESSES[FRAME][vstart+row_offset].XX -= force_wo_coeff[f] * RAB[f].X * RAB[f].X / rlen[f];
-								A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff[f] * RAB[f].Y * RAB[f].Y / rlen[f];
-								A_MATRIX.STRESSES[FRAME][vstart+row_offset].ZZ -= force_wo_coeff[f] * RAB[f].Z * RAB[f].Z / rlen[f];	 
+							    	A_MATRIX.STRESSES[FRAME][vstart+row_offset].YY -= force_wo_coeff[f] * RAB[f].Y * RAB[f].Y / rlen[f];
+								A_MATRIX.STRESSES[FRAME][vstart+row_offset].ZZ -= force_wo_coeff[f] * RAB[f].Z * RAB[f].Z / rlen[f];								     
 							}								
 						}
 						
@@ -1753,7 +1756,7 @@ void Cheby::Deriv_4B(int FRAME, A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_
 		{
 			A_MATRIX.STRESSES[FRAME][n_2b_cheby_terms + n_3b_cheby_terms+i].XX *= inv_vol;
 			A_MATRIX.STRESSES[FRAME][n_2b_cheby_terms + n_3b_cheby_terms+i].YY *= inv_vol;
-			A_MATRIX.STRESSES[FRAME][n_2b_cheby_terms + n_3b_cheby_terms+i].ZZ *= inv_vol;     
+			A_MATRIX.STRESSES[FRAME][n_2b_cheby_terms + n_3b_cheby_terms+i].ZZ *= inv_vol;   			      
 		}
 	}
 	
