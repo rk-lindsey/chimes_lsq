@@ -718,7 +718,7 @@ def fit_owlqn(A,b,alpha_val,tol,memory):
         + str(tol)
         + " -m "
         + str(memory)
-        + ">& owlqn.log" )
+        + " >& owlqn.log" )
         sys.stderr.write("Running " + command + "\n")
 
         os.system(command)
