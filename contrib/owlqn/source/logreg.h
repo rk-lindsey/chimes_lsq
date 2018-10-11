@@ -9,7 +9,7 @@
 
 class LogisticRegressionProblem {
 	std::deque<size_t> indices;
-	std::deque<float> values;
+	std::deque<double> values;
 	std::deque<size_t> instance_starts;
 	std::deque<bool> labels;
 	size_t numFeats;
@@ -20,8 +20,8 @@ public:
 	}
 
 	LogisticRegressionProblem(const char* mat, const char* labels);
-	void AddInstance(const std::deque<size_t>& inds, const std::deque<float>& vals, bool label);
-	void AddInstance(const std::vector<float>& vals, bool label);
+	void AddInstance(const std::deque<size_t>& inds, const std::deque<double>& vals, bool label);
+	void AddInstance(const std::vector<double>& vals, bool label);
 	double ScoreOf(size_t i, const std::vector<double>& weights) const;
 
 	bool LabelOf(size_t i) const {

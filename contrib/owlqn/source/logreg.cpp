@@ -27,10 +27,10 @@ LogisticRegressionProblem::LogisticRegressionProblem(const char* matFilename, co
 		st >> numIns >> numFeats >> numNonZero;
 
 		vector<deque<size_t> > rowInds(numIns);
-		vector<deque<float> > rowVals(numIns);
+		vector<deque<double> > rowVals(numIns);
 		for (size_t i = 0; i < numNonZero; i++) {
 			size_t row, col;
-			float val;
+			double val;
 			matfile >> row >> col >> val;
 			row--;
 			col--;
@@ -89,11 +89,11 @@ LogisticRegressionProblem::LogisticRegressionProblem(const char* matFilename, co
 		size_t numIns;
 		st >> numIns >> numFeats;
 
-		vector<vector<float> > rowVals(numIns);
+		vector<vector<double> > rowVals(numIns);
 
 		for (size_t j=0; j<numFeats; j++) {
 			for (size_t i=0; i<numIns; i++) {
-				float val;
+				double val;
 				matfile >> val;
 				rowVals[i].push_back(val);
 			}
@@ -149,7 +149,7 @@ LogisticRegressionProblem::LogisticRegressionProblem(const char* matFilename, co
 	}
 }
 
-void LogisticRegressionProblem::AddInstance(const deque<size_t>& inds, const deque<float>& vals, bool label) {
+void LogisticRegressionProblem::AddInstance(const deque<size_t>& inds, const deque<double>& vals, bool label) {
 	for (size_t i=0; i<inds.size(); i++) {
 		indices.push_back(inds[i]);
 		values.push_back(vals[i]);
@@ -158,7 +158,7 @@ void LogisticRegressionProblem::AddInstance(const deque<size_t>& inds, const deq
 	labels.push_back(label);
 }
 
-void LogisticRegressionProblem::AddInstance(const vector<float>& vals, bool label) {
+void LogisticRegressionProblem::AddInstance(const vector<double>& vals, bool label) {
 	for (size_t i=0; i<vals.size(); i++) {
 		values.push_back(vals[i]);
 	}

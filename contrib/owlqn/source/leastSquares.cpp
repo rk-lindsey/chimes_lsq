@@ -23,7 +23,7 @@ LeastSquaresProblem::LeastSquaresProblem(const char* matFilename, const char* bF
 
 		for (size_t j=0; j<n; j++) {
 			for (size_t i=0; i<m; i++) {
-				float val;
+				double val;
 				matfile >> val;
 				A(i, j) = val;
 			}
@@ -62,7 +62,7 @@ LeastSquaresProblem::LeastSquaresProblem(const char* matFilename, const char* bF
 
 	b.resize(m);
 	for (size_t i=0; i<m; i++) {
-		float val;
+		double val;
 		bFile >> val;
 		b[i] = val;
 	}
@@ -100,5 +100,10 @@ double LeastSquaresObjective::Eval(const DblVec& input, DblVec& gradient) {
 		}
 	}
 
-	return 0.5 * value + 1.0;
+	// Scale down the gradient to make problem definition the
+	// same as is used in SciKit-Learn.
+	for ( size_t j = 0 ; j < problem.n ; j++ ) {
+		gradient[j] /= (double) problem.m ;
+	}
+	return (0.5 * value / problem.m) + 1.0;
 }

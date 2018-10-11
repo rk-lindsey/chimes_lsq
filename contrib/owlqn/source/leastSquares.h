@@ -8,8 +8,8 @@
 struct LeastSquaresObjective;
 
 class LeastSquaresProblem {
-	std::vector<float> Amat;
-	std::vector<float> b;
+	std::vector<double> Amat;
+	std::vector<double> b;
 	size_t m, n;
 	
 	void skipEmptyAndComment(std::ifstream& file, std::string& s) {
@@ -25,11 +25,11 @@ public:
 
 	LeastSquaresProblem(const char* matfile, const char* bFile);
 
-	float A(size_t i, size_t j) const {
+	double A(size_t i, size_t j) const {
 		return Amat[i + m * j];
 	}
 
-	float& A(size_t i, size_t j) {
+	double& A(size_t i, size_t j) {
 		return Amat[i + m * j];
 	}
 
