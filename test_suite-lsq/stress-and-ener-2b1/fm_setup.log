@@ -2,7 +2,7 @@
 Reading input file...
 	# TRJFILE #: phen_res-300F_dt-0.1_fullstress_energy5F.xyzf
 	# WRAPTRJ #: 1
-	# NFRAMES #: 10
+	# NFRAMES #: 36
 	# NLAYERS #: 1
 	# FITCOUL #: false
 	# FITSTRS #: true ...will fit to all tensor components
@@ -71,38 +71,73 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 ...trajectory file read successful: 
 
 Setting up the matricies for A, Coulomb forces, and overbonding...
+3
+C 60
+O 8
+H 64
 ...matrix setup complete: 
 
 ...Populating the matricies for A, Coulomb forces, and overbonding...
 
-	Processing frame: 1     of: 10
-	Processing frame: 2     of: 10
-	Processing frame: 3     of: 10
-	Processing frame: 4     of: 10
-	Processing frame: 5     of: 10
-	Processing frame: 6     of: 10
-	Processing frame: 7     of: 10
-	Processing frame: 8     of: 10
-	Processing frame: 9     of: 10
-	Processing frame: 10    of: 10
+	Processing frame: 1     of: 36
+	Processing frame: 2     of: 36
+	Processing frame: 3     of: 36
+	Processing frame: 4     of: 36
+	Processing frame: 5     of: 36
+	Processing frame: 6     of: 36
+	Processing frame: 7     of: 36
+	Processing frame: 8     of: 36
+	Processing frame: 9     of: 36
+	Processing frame: 10    of: 36
+	Processing frame: 11    of: 36
+	Processing frame: 12    of: 36
+	Processing frame: 13    of: 36
+	Processing frame: 14    of: 36
+	Processing frame: 15    of: 36
+	Processing frame: 16    of: 36
+	Processing frame: 17    of: 36
+	Processing frame: 18    of: 36
+	Processing frame: 19    of: 36
+	Processing frame: 20    of: 36
+	Processing frame: 21    of: 36
+	Processing frame: 22    of: 36
+	Processing frame: 23    of: 36
+	Processing frame: 24    of: 36
+	Processing frame: 25    of: 36
+	Processing frame: 26    of: 36
+	Processing frame: 27    of: 36
+	Processing frame: 28    of: 36
+	Processing frame: 29    of: 36
+	Processing frame: 30    of: 36
+	Processing frame: 31    of: 36
+	Processing frame: 32    of: 36
+	Processing frame: 33    of: 36
+	Processing frame: 34    of: 36
+	Processing frame: 35    of: 36
+	Processing frame: 36    of: 36
 ...matrix population complete: 
 
 Printing matricies...
-	...A matrix length: 10
+Per-atom type energies will be provided at the end of the parameter file.
+Values will correspond to the following atom types, in order: 
+C 60
+O 8
+H 64
+	...A matrix length (forces): 14256
 
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.189
-		1	H H	0.875
-		2	O O	2.499
-		3	C H	0.862
+		1	H H	0.860
+		2	O O	2.150
+		3	C H	0.860
 		4	C O	1.186
-		5	H O	0.849
+		5	H O	0.838
 	Total number of configurations contributing to each pair type:
-		0	C C 31605
-		1	H H 36059
-		2	O O 494
-		3	C H 68107
-		4	C O 8535
-		5	H O 9092
+		0	C C 113316
+		1	H H 129472
+		2	O O 1770
+		3	C H 245485
+		4	C O 30726
+		5	H O 32871
 ...matrix printing complete: 
 

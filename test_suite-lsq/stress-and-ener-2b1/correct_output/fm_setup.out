@@ -78,6 +78,11 @@ Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix population complete: 
 
 Printing matricies...
+Per-atom type energies will be provided at the end of the parameter file.
+Values will correspond to the following atom types, in order: 
+	C 60
+	O 8
+	H 64
 	...A matrix length (forces): 14256
 
 	Minimum distances between atoms: (Angstr.)
