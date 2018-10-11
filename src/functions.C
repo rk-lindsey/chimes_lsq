@@ -2101,6 +2101,32 @@ static void ZCalcSR_Over(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF>
 		
 }
 
+void FRAME::SET_NATOMS_OF_TYPE() // setting NATOMS_OF_TYPE
+{
+	int NO_ATOM_TYPES = 0;
+	vector<string> ATOM_TYPES;
+
+	vector<string>::iterator it;
+
+	for (int i=0; i<ATOMS; i++)
+	{
+		// Get the location of the current atom type in the "ATOM_TYPES" list
+		// ...if it doesn't exist, add it
+		
+		it = find(ATOM_TYPES.begin(), ATOM_TYPES.end(), ATOMTYPE[i]);
+		
+		if (it == ATOM_TYPES.end()) // Then the atom type hasn't been added yet
+		{
+			NO_ATOM_TYPES++;
+			ATOM_TYPES.push_back(ATOMTYPE[i]);
+			NATOMS_OF_TYPE.push_back(1);
+		}
+		else
+		{
+			NATOMS_OF_TYPE[distance(ATOM_TYPES.begin(), it)]++;
+		}
+	}
+}
 
 void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<string>& TMP_ATOMTYPE, vector<PAIR_FF> &FF_2BODY, int NATMTYP)
 // Check the charges and adjust values to enforce charge neutrality if necessary.
@@ -2291,5 +2317,6 @@ void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIP
 	}
 
 #endif // USE_MPI
+
 
 

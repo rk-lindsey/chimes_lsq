@@ -622,12 +622,28 @@ def main():
     print ""
 
     total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS 
-    if (total_params != len(x)) and (total_params != (len(x)-1)) :
-        sys.stderr.write( "Error in counting parameters")
+
+N_ENER_OFFSETS = int(hf[9].split()[2])
+
+## Parameter count could be off by natom_types, if energies are included in the fit
+if (total_params != len(x)) and (len(x) != (total_params+N_ENER_OFFSETS)) :
+    sys.stderr.write( "Error in counting parameters\n") 
+    sys.stderr.write("len(x) " + str(len(x)) + "\n") 
+    sys.stderr.write("TOTAL_PAIRS " + str(TOTAL_PAIRS) + "\n") 
+    sys.stderr.write("SNUM_2B " + str(SNUM_2B) + "\n") 
+    sys.stderr.write("COUNTED_TRIP_PARAMS " + str(COUNTED_TRIP_PARAMS) + "\n") 
+    sys.stderr.write("COUNTED_QUAD_PARAMS " + str(COUNTED_QUAD_PARAMS) + "\n")
+    sys.stderr.write("COUNTED_COUL_PARAMS " + str(COUNTED_COUL_PARAMS) + "\n")
+    sys.stderr.write("OVERCOORD_PARAMS " + str(OVERCOORD_PARAMS) + "\n")
         exit(1)
 
-    if ( total_params + 1 == len(x) ):
-        print "ENERGY OFFSET: " + str(x[len(x)-1])
+
+if len(x) == (total_params+N_ENER_OFFSETS):
+
+    print "NO ENERGY OFFSETS: ", N_ENER_OFFSETS
+    
+    for i in xrange(N_ENER_OFFSETS):
+        print "ENERGY OFFSET " + `i+1` + " " + str(x[total_params+i])
 
     if test_suite_run:
         test_suite_params=open("test_suite_params.txt","w")		

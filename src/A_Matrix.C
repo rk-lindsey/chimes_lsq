@@ -1,8 +1,9 @@
 #include<vector>
+#include<algorithm>
+#include<iostream>
 
 using namespace std;
 
-#include "functions.h"
 #include "util.h"
 #include "A_Matrix.h"
 
@@ -21,6 +22,36 @@ A_MAT::A_MAT(int NFRAMES)
 	
 }
 A_MAT::~A_MAT(){}
+
+void A_MAT::INITIALIZE_NATOMS  (int ATOMS, vector<string> & FRAME_ATOMTYPES)
+{
+	// Goal: Determine how many atoms of each type are present
+
+	NO_ATOM_TYPES = 0;
+
+	vector<string>::iterator it;
+
+	for (int i=0; i<ATOMS; i++)
+	{
+		// Get the location of the current atom type in the "ATOM_TYPES" list
+		// ...if it doesn't exist, add it
+		
+		it = find(ATOM_TYPES.begin(), ATOM_TYPES.end(), FRAME_ATOMTYPES[i]);
+
+
+		if (it == ATOM_TYPES.end()) // Then the atom type hasn't been added yet
+		{
+			NO_ATOM_TYPES++;
+			ATOM_TYPES.push_back(FRAME_ATOMTYPES[i]);
+			NO_ATOMS_OF_TYPE.push_back(1);
+		}
+		else
+		{
+			NO_ATOMS_OF_TYPE[distance(ATOM_TYPES.begin(), it)]++;
+		}
+	}
+}
+
 
 void A_MAT::INITIALIZE_FORCES(int FRAME, int ATOMS, int NPARAM)
 {

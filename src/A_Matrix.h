@@ -21,6 +21,10 @@ class A_MAT
 {
 	public:
 	
+	int 				NO_ATOM_TYPES;	 // How many atom types are in the frame
+	vector<string> 			ATOM_TYPES;	 // What are their chemical symbols
+	vector<int>    			NO_ATOMS_OF_TYPE;// How many atoms of each type are there?
+	
 	vector<vector<vector<XYZ> > >	FORCES; 	// originally "A_MATRIX"       ... [#frames][#atoms][#fittingparameters]
 	vector<vector<STENSOR> >	STRESSES;	// new; stresses       ... originally tacked on to "A_MATRIX" ... [#frames][#fittingparameters]
 	vector<vector<double> >		FRAME_ENERGIES;	// new; frame energies ... originally tacked on to "A_MATRIX" ... [#frames][#fittingparameters]
@@ -36,8 +40,9 @@ class A_MAT
 	A_MAT(int NFRAMES);
 	~A_MAT();
 	
-	void INITIALIZE_FORCES  (int FRAME, int ATOMS,int PARAMS);
-	void INITIALIZE_ENERGIES(int FRAME, int ATOMS,int PARAMS, bool FRAME_ENER, bool ATOM_ENER);
+	void INITIALIZE_NATOMS  (           int ATOMS, vector<string> & FRAME_ATOMTYPES);
+	void INITIALIZE_FORCES  (int FRAME, int ATOMS, int PARAMS);
+	void INITIALIZE_ENERGIES(int FRAME, int ATOMS, int PARAMS, bool FRAME_ENER, bool ATOM_ENER);
 	void INITIALIZE_STRESSES(int FRAME, int PARAMS, bool DIAG_STRESS, bool ALL_STRESS);
 	void INITIALIZE_OVERBOND(int FRAME, int ATOMS);
 	void INITIALIZE_CHARGES (int FRAME, int FF_PAIRS,int ATOMS);

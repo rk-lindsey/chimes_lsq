@@ -35,6 +35,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<vector>
+#include<algorithm>
 #include<assert.h>
 #include<map>
 
@@ -280,8 +281,9 @@ public:
 	XYZ STRESS_TENSORS_Z;
 	
 	double QM_POT_ENER;		      // This is the potential energy of the QM calculation!
-	double QM_ENERGY_OFFSET ;		// This is the energy offset between MD and QM energy, as determined by lsq[2].py.
+	vector<double> QM_ENERGY_OFFSET ;		// This is the energy offset between MD and QM energy, as determined by lsq[2].py.
 	vector<double> QM_POT_ENER_PER_ATOM; // And this is for each atom in the frame, from QM
+	vector<int>    NATOMS_OF_TYPE;	     // How many atoms of each type there are
 	
 	double 	TEMPERATURE;		// This is the RUNNING temperature, not the set temperature!
 	double 	PRESSURE;		// This is the RUNNING pressure, not the set pressure!
@@ -308,8 +310,9 @@ public:
 	vector<XYZ>	VELOCITY_ITER;
 
 	// Update ghost atom positions.
-	void update_ghost(int n_layers);
-	inline int get_atomtype_idx(int atom);
+	void 		update_ghost(int n_layers);
+	inline int 	get_atomtype_idx(int atom);
+	void		SET_NATOMS_OF_TYPE();
 
 };
 
@@ -604,6 +607,8 @@ inline int FRAME::get_atomtype_idx(int atom)
   		ATOMTYPE_IDX[a1]-1;
 	#endif
 }
+
+
 
 
 //////////////////////////////////////////

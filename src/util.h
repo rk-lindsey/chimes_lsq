@@ -76,6 +76,9 @@ void EXIT_MSG(string EXIT_STRING, string EXIT_VAR) ;
  // error message: var
 void EXIT_MSG(string EXIT_STRING, double EXIT_VAR) ;
 
+ // error message: var
+void EXIT_MSG(string EXIT_STRING, int EXIT_VAR) ;
+
 // Read the next input line, with error checking.
 string get_next_line(istream& str) ;
 

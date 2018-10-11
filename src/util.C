@@ -203,3 +203,9 @@ void EXIT_MSG(string EXIT_STRING, double EXIT_VAR) // error message: var
 	cout << EXIT_STRING << ": " << EXIT_VAR << endl;
 	exit_run(0);
 }
+
+void EXIT_MSG(string EXIT_STRING, int EXIT_VAR) // error message: var
+{
+	cout << EXIT_STRING << ": " << EXIT_VAR << endl;
+	exit_run(0);
+}

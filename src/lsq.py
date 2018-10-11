@@ -535,8 +535,11 @@ for i in range(0,len(mapsfile)):
 print ""
 			
 total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS 
-## Parameter count could be off by 1 if energy is fit.
-if (total_params != len(x)) and (total_params != (len(x)-1)) :
+
+N_ENER_OFFSETS = int(hf[9].split()[2])
+
+## Parameter count could be off by natom_types, if energies are included in the fit
+if (total_params != len(x)) and (len(x) != (total_params+N_ENER_OFFSETS)) :
     sys.stderr.write( "Error in counting parameters\n") 
     sys.stderr.write("len(x) " + str(len(x)) + "\n") 
     sys.stderr.write("TOTAL_PAIRS " + str(TOTAL_PAIRS) + "\n") 
@@ -547,8 +550,14 @@ if (total_params != len(x)) and (total_params != (len(x)-1)) :
     sys.stderr.write("OVERCOORD_PARAMS " + str(OVERCOORD_PARAMS) + "\n")
     exit(1)
 
-if ( total_params + 1 == len(x) ):
-    print "ENERGY OFFSET: " + str(x[len(x)-1])
+
+
+if len(x) == (total_params+N_ENER_OFFSETS):
+
+    print "NO ENERGY OFFSETS: ", N_ENER_OFFSETS
+    
+    for i in xrange(N_ENER_OFFSETS):
+        print "ENERGY OFFSET " + `i+1` + " " + str(x[total_params+i])
     
 		
 if TEST_SUITE_RUN == "do":

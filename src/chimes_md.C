@@ -2913,18 +2913,25 @@ static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PA
 				QUADS.process_cutoff_params("S_MAXIM",FF_2BODY, PAIR_MAP) ;
 				NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF ;
 		  }
-			else if ( LINE.find("ENERGY OFFSET:") != string::npos)
+			else if ( LINE.find("NO ENERGY OFFSETS:") != string::npos)
 			{
 				vector<string> tokens;
 				int ntokens ;
 				ntokens = parse_space(LINE,tokens) ;
-				if ( ntokens == 3 )
+				
+				// Determine the number of offsets (atom types)
+				SYSTEM.QM_ENERGY_OFFSET.resize(stoi(tokens[2])); 
+				
+				for (int i=0; i<stoi(tokens[2]); i++)
 				{
-					SYSTEM.QM_ENERGY_OFFSET = stod(tokens[2]) ;
-					if ( RANK == 0 ) cout << "QM Energy Offset = " << SYSTEM.QM_ENERGY_OFFSET << endl ;
+					if ( ntokens == 4 )
+					{
+						SYSTEM.QM_ENERGY_OFFSET[i] = stod(tokens[3]) ;
+						if ( RANK == 0 ) cout << "QM Energy Offset " << i << " = " << SYSTEM.QM_ENERGY_OFFSET[i] << endl ;
+					}
+					else
+						EXIT_MSG("The ENERGY OFFSET: command in the params file could not be read for offset no", i) ;				
 				}
-				else
-					EXIT_MSG("The ENERGY OFFSET: command in the params file could not be read") ;
 			}
 		}
 
@@ -4131,16 +4138,30 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 		// NOTE:  PRESSURE_TENSORS_XYZ hold the potential energy contribution to the current stress tensor.
 		// PRESSURE_TENSOR holds potential + kinetic energy to the current stress tensor in GPa units.
 		// PRESSURE_TENSORS_XYZ should be used here.
+		
 		if(CONTROLS.FIT_STRESS)
-			FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS.X 
-															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS.Y 
-															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS.Z;
+			FORCE_SUBTRACTED_OUTPUT << 	  SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS.X 
+						<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS.Y 
+						<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS.Z;
 		else if ( CONTROLS.FIT_STRESS_ALL )
-			FORCE_SUBTRACTED_OUTPUT << 	SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS_X.X 
-															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS_Y.Y 
-															<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS_Z.Z;
+			FORCE_SUBTRACTED_OUTPUT << 	  SYSTEM.PRESSURE_TENSORS_XYZ.X - SYSTEM.STRESS_TENSORS_X.X 
+						<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Y - SYSTEM.STRESS_TENSORS_Y.Y 
+						<< " " << SYSTEM.PRESSURE_TENSORS_XYZ.Z - SYSTEM.STRESS_TENSORS_Z.Z;
 		if(CONTROLS.FIT_ENER)
-			FORCE_SUBTRACTED_OUTPUT << SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER + SYSTEM.QM_ENERGY_OFFSET ;
+		{
+			//FORCE_SUBTRACTED_OUTPUT << SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER + SYSTEM.QM_ENERGY_OFFSET ;
+		
+			// MAJOR ASSUMPTION: atom type orders are identical to the LSQ code
+		
+			double EDIFF = SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER;
+			
+			SYSTEM.SET_NATOMS_OF_TYPE();
+			
+			for(int i=0; i<SYSTEM.QM_ENERGY_OFFSET.size(); i++)
+				EDIFF += SYSTEM.QM_ENERGY_OFFSET[i]*SYSTEM.NATOMS_OF_TYPE[i];
+		
+			FORCE_SUBTRACTED_OUTPUT << EDIFF;
+		}
 					
 		FORCE_SUBTRACTED_OUTPUT << endl;
 	}
@@ -4160,10 +4181,10 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 		if ( CONTROLS.SUBTRACT_FORCE ) 
 		{
 			FORCE_SUBTRACTED_OUTPUT << SYSTEM.ATOMTYPE[a1] << "	"
-															<< SYSTEM.COORDS[a1].X << "   " << SYSTEM.COORDS[a1].Y << "   " << SYSTEM.COORDS[a1].Z << "   "						
-															<< (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(Hartree*Bohr) << " "
-															<< (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(Hartree*Bohr) << " "
-															<< (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(Hartree*Bohr) << endl; 			     
+						<< SYSTEM.COORDS[a1].X << "   " << SYSTEM.COORDS[a1].Y << "   " << SYSTEM.COORDS[a1].Z << "   "						
+						<< (SYSTEM.FORCES[a1].X - SYSTEM.ACCEL[a1].X)/(Hartree*Bohr) << " "
+						<< (SYSTEM.FORCES[a1].Y - SYSTEM.ACCEL[a1].Y)/(Hartree*Bohr) << " "
+						<< (SYSTEM.FORCES[a1].Z - SYSTEM.ACCEL[a1].Z)/(Hartree*Bohr) << endl; 			     
 		}
 	}
 			
@@ -4197,7 +4218,19 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 
 	if ( CONTROLS.FIT_ENER )
 	{
-		ferr = fabs(SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER + SYSTEM.QM_ENERGY_OFFSET)/SYSTEM.ATOMS ;
+		//ferr = fabs(SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER + SYSTEM.QM_ENERGY_OFFSET)/SYSTEM.ATOMS ;
+
+		// MAJOR ASSUMPTION: atom type orders are identical to the LSQ code
+		
+		ferr = SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER;
+		
+		SYSTEM.SET_NATOMS_OF_TYPE();
+		
+		for(int i=0; i<SYSTEM.QM_ENERGY_OFFSET.size(); i++)
+			ferr += SYSTEM.QM_ENERGY_OFFSET[i]*SYSTEM.NATOMS_OF_TYPE[i];
+		
+		ferr = fabs(ferr/SYSTEM.ATOMS);
+		
 		cout << "Absolute energy error = " << ferr << " kcal/mol/atom \n" ;
 	}
 }

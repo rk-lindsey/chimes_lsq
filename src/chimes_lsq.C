@@ -35,7 +35,7 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, C
 
 static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, bool use_3b_cheby, bool use_4b_cheby);
 
-static void add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE);
+static void add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE, A_MAT & A_MATRIX);
 static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLUSTER_LIST & QUADS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, vector<int>& TMP_ATOMTYPEIDX, vector<string>& TMP_ATOMTYPE);
 
 // Global variables declared as externs in functions.h, and declared in functions.C
@@ -85,8 +85,8 @@ int main(int argc, char* argv[])
 	// 2. Atom ordering in trajectory file does not change over frames ( should also always be true)
 	
 	vector<PAIRS> 		ATOM_PAIRS;		// Will store relevant info regarding atom interaction pair types.. 
-	CLUSTER_LIST TRIPS;                		// Triplet interaction: generic cluster interface.
-	CLUSTER_LIST QUADS;                		// Quadruplet interaction: generic cluster interface.
+	CLUSTER_LIST 		TRIPS;			// Triplet interaction: generic cluster interface.
+	CLUSTER_LIST 		QUADS;			// Quadruplet interaction: generic cluster interface.
 	
 	vector<FRAME> 		TRAJECTORY;		// Stores the trajectory information... box dimensions, atom types, coordinates, and forces
 	NEIGHBORS        	NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
@@ -104,8 +104,8 @@ int main(int argc, char* argv[])
 	
 	vector<int>	INT_PAIR_MAP;
 
-	vector<int>   TMP_ATOMTYPEIDX;			// Used to construct the quadruplet type index
-	vector<string> TMP_ATOMTYPE;			// Used to construct the quadruplet type index
+	vector<int>	TMP_ATOMTYPEIDX;		// Used to construct the quadruplet type index
+	vector<string>	TMP_ATOMTYPE;			// Used to construct the quadruplet type index
 
 	//////////////////////////////////////////////////
 	//
@@ -511,6 +511,8 @@ int main(int argc, char* argv[])
 	#endif
 
 	int A_SIZE;	// Do we iterate over atoms, or over atoms+1, etc  (where the latter allows us to account for inclusion of stress tensors and/or frame energy)
+	
+	A_MATRIX.INITIALIZE_NATOMS  (TRAJECTORY[0].ATOMS,TRAJECTORY[0].ATOMTYPE);
 
 	for (int f=0; f<CONTROLS.NFRAMES; f++)
 	{	
@@ -643,6 +645,16 @@ int main(int argc, char* argv[])
 		{
 			cout << "...matrix population complete: "  << endl << endl;
 			cout << "Printing matricies..." << endl;
+			
+			if (DO_ENER)
+			{
+				cout << "Per-atom type energies will be provided at the end of the parameter file." << endl;
+				cout << "Values will correspond to the following atom types, in order: " << endl;
+			
+				for(int a=0; a<A_MATRIX.NO_ATOM_TYPES; a++)
+				cout << "	" << A_MATRIX.ATOM_TYPES[a] << " " << A_MATRIX.NO_ATOMS_OF_TYPE[a] << endl;		
+
+			}
 		}
 	#endif
 	
@@ -705,7 +717,7 @@ int main(int argc, char* argv[])
 					fileA << A_MATRIX.CHARGES[N][i][a].X << "   ";
 			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << A_MATRIX.OVERBONDING[N][a].X;
-			add_col_of_ones("FORCE", DO_ENER, fileA);			  
+			add_col_of_ones("FORCE", DO_ENER, fileA, A_MATRIX);			  
 			fileA << endl;	
 		  
 			// Print Afile: .../////////////// -- For Y
@@ -717,7 +729,7 @@ int main(int argc, char* argv[])
 					fileA << A_MATRIX.CHARGES[N][i][a].Y << "   ";
 			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << A_MATRIX.OVERBONDING[N][a].Y;
-			add_col_of_ones("FORCE", DO_ENER, fileA);				  
+			add_col_of_ones("FORCE", DO_ENER, fileA, A_MATRIX);				  
 			fileA << endl;	
 
 
@@ -730,7 +742,7 @@ int main(int argc, char* argv[])
 					fileA << A_MATRIX.CHARGES[N][i][a].Z << "   ";
 			if ( CONTROLS.FIT_POVER ) 
 				fileA << " " << A_MATRIX.OVERBONDING[N][a].Z;
-			add_col_of_ones("FORCE", DO_ENER, fileA);				  
+			add_col_of_ones("FORCE", DO_ENER, fileA, A_MATRIX);				  
 			fileA << endl;		
 			
 			// Print Bfile: ...
@@ -768,17 +780,17 @@ int main(int argc, char* argv[])
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].XX << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);
 			fileA << endl;	
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].YY << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].ZZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);
 			fileA << endl;	
 			
 			
@@ -803,45 +815,45 @@ int main(int argc, char* argv[])
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].XX << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].XY << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].XZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;	
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].XY << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;	
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].YY << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;	
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].YZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].XZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;	
 			
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].YZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;
 			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.STRESSES[N][n].ZZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
+			add_col_of_ones("STRESS", DO_ENER, fileA, A_MATRIX);	
 			fileA << endl;		
 
 			// Account for the symmetry of the off-diagonal (deviatoric) components
@@ -883,17 +895,17 @@ int main(int argc, char* argv[])
 			
 			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.FRAME_ENERGIES[N][n] << " ";
-			add_col_of_ones("ENERGY", DO_ENER, fileA);				
+			add_col_of_ones("ENERGY", DO_ENER, fileA, A_MATRIX);				
 			fileA << endl;
 			
 			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.FRAME_ENERGIES[N][n] << " ";
-			add_col_of_ones("ENERGY", DO_ENER, fileA);				
+			add_col_of_ones("ENERGY", DO_ENER, fileA, A_MATRIX);				
 			fileA << endl;
 			
 			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
 				fileA << A_MATRIX.FRAME_ENERGIES[N][n] << " ";
-			add_col_of_ones("ENERGY", DO_ENER, fileA);				
+			add_col_of_ones("ENERGY", DO_ENER, fileA, A_MATRIX);				
 			fileA << endl;						
 			
 			// Output b.txt stuff
@@ -919,7 +931,7 @@ int main(int argc, char* argv[])
 			{
 				for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
 					fileA << A_MATRIX.ATOM_ENERGIES[N][a][n] << " ";
-				add_col_of_ones("ENERGY", DO_ENER, fileA);
+				add_col_of_ones("ENERGY", DO_ENER, fileA, A_MATRIX);
 				fileA << endl;
 
 				// Output b.txt stuff
@@ -2224,8 +2236,7 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLU
 		if ( RANK == 0 ) cout << "...matrix printing complete: " << endl << endl;
 }
 
-
-static void add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE)
+static void add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE, A_MAT & A_MATRIX)
 {
 	// Determine if: Energies are being included in the fit
 	// If so, is this A-matrix row is for a force or stress (then print an additional a 0.0)
@@ -2233,10 +2244,12 @@ static void add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE)
 	
 	if (DO_ENER)
 	{
-		if( (item == "FORCE") || (item == "STRESS") )
-			OUTFILE << " 0.0";
-		else
-			OUTFILE << " 1.0";			
+		if( (item == "FORCE") || (item == "STRESS") )	// OUTFILE << " 0.0";	
+			for(int i=0; i<A_MATRIX.NO_ATOM_TYPES; i++)
+				OUTFILE << " " << "0.0";
+		else // OUTFILE << " 1.0";
+			for(int i=0; i<A_MATRIX.NO_ATOM_TYPES; i++)
+				OUTFILE << " " << A_MATRIX.NO_ATOMS_OF_TYPE[i];			
 	}
 }
 
