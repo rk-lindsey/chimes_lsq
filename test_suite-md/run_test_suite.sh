@@ -129,7 +129,7 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 	 cd ../test_suite-md
 
 	 cd ../test_suite-lsq 
-	 ./run_test_suite.sh $LSQ_FORCE_JOBS
+	 ./run_test_suite.sh "$LSQ_FORCE_JOBS"
 	 
 	 cd ../test_suite-md
 
@@ -137,9 +137,14 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 	 echo " ...Now running the force comparison tests... "
 	 for i in $LSQ_FORCE_JOBS
 	 do
-		  
-		  echo " "
-		  echo "Running $i test..."
+
+		  if [ -d "$i" ] ; then
+				echo " "
+				echo "Running $i test..."
+		  else
+				echo "$i directory was not found"
+				continue
+		  fi
 		  
 		  PASS=true
 		  
