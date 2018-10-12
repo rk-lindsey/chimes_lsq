@@ -21,7 +21,7 @@ Reading input file...
 	The following unique pair types have been identified:
 		0  C C
 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               C               C               1.305           20              0.01            1.54             0               
+	0               C               C               1.29            20              0.01            1.54             0               
 
 	Read the following number of ij ik jk bins for pairs: 
 		CC: 0 0 0
@@ -37,7 +37,7 @@ Note: Will use cubic scaling of: 1
 		Atom type idxs:  0 0 0  Triplet name:       CCCCCC Unique triplet ID 111 index:    0
      Max 3-body cutoff = 20.000000
 
-     Min 3-body cutoff = 1.305000
+     Min 3-body cutoff = 1.290000
 
 	The following unique triplets of atoms have been identified:
 
@@ -166,7 +166,7 @@ Note: Will use cubic scaling of: 1
 		Atom type idxs:  0 0 0 0  Quadruplet name: CCCCCCCCCCCC Unique quadruplet ID 1111 index:    0
      Max 4-body cutoff = 20.000000
 
-     Min 4-body cutoff = 1.305000
+     Min 4-body cutoff = 1.290000
 
 	The following unique quadruplets of atoms have been identified:
 
@@ -4085,7 +4085,7 @@ Printing matricies...
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.305
 	Total number of configurations contributing to each pair type:
-		0	C C 1499
+		0	C C 1500
 	Minimum distances between atoms triplet pairs: (Angstr.)
 		0	CC CC CC 1.305 2.071 1.305 
 	Total number of configurations contributing to each triplet type:

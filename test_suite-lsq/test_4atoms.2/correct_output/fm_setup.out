@@ -24,9 +24,9 @@ Reading input file...
 		1  H H
 		2  C H
 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               C               C               1.305           5               0.01            1.54             0               
-	1               H               H               1.305           5               0.01            1.54             0               
-	2               C               H               1.305           5               0.01            1.54             0               
+	0               C               C               1.29            5               0.01            1.54             0               
+	1               H               H               0.9             5               0.01            1.54             0               
+	2               C               H               1.29            5               0.01            1.54             0               
 
 	Read the following number of ij ik jk bins for pairs: 
 		CC: 0 0 0
@@ -63,7 +63,7 @@ Note: Will use cubic scaling of: 1
 		Atom type idxs:  1 1 1  Triplet name:       HHHHHH Unique triplet ID 222 index:   -1
      Max 3-body cutoff = 5.000000
 
-     Min 3-body cutoff = 1.305000
+     Min 3-body cutoff = 0.900000
 
 	The following unique triplets of atoms have been identified:
 	Note: The following types have been removed, if present: 
@@ -351,7 +351,7 @@ Note: Will use cubic scaling of: 1
 		Atom type idxs:  1 1 1 1  Quadruplet name: HHHHHHHHHHHH Unique quadruplet ID 2222 index:   -1
      Max 4-body cutoff = 5.000000
 
-     Min 4-body cutoff = 1.305000
+     Min 4-body cutoff = 0.900000
 
 	The following unique quadruplets of atoms have been identified:
 	Note: The following types have been removed, if present: 
@@ -4297,7 +4297,7 @@ Printing matricies...
 		1	H H	1.305
 		2	C H	1.310
 	Total number of configurations contributing to each pair type:
-		0	C C 249
+		0	C C 250
 		1	H H 250
 		2	C H 1000
 	Minimum distances between atoms triplet pairs: (Angstr.)

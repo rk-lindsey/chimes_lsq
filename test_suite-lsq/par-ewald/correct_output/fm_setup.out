@@ -22,9 +22,9 @@ Reading input file...
 		1  H H
 		2  O H
 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               O               O               0.6             6               0.1             1.25             1               
-	1               H               H               0.6             6               0.1             1.25             0               
-	2               O               H               0.6             6               0.1             1.25             1               
+	0               O               O               1.8             6               0.1             1.25             1               
+	1               H               H               0.8             6               0.1             1.25             0               
+	2               O               H               0.25            6               0.1             1.25             1               
 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # P_OVERB #     # R_0_VAL #     # P_1_VAL #     # P_2_VAL #     # LAMBDA6 #
 	0               O               O               50              1.0165          -0.0657         5.0451          -3.6141         
 	1               H               H               0               0               0               0               0               
@@ -93,6 +93,6 @@ Printing matricies...
 	Total number of configurations contributing to each pair type:
 		0	O O 58365
 		1	H H 237370
-		2	O H 241090
+		2	O H 241094
 ...matrix printing complete: 
 

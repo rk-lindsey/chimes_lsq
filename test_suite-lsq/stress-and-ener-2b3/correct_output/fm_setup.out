@@ -34,12 +34,12 @@ WARNING:  The following input line was ignored:
 		4  C O
 		5  H O
 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               C               C               1.296           8               0.01            1.35             0               
-	1               H               H               1.321           8               0.01            0.675            0               
-	2               O               O               2.708           8               0.01            2.55             0               
-	3               C               H               0.952           8               0.01            1.1              0               
-	4               C               O               1.318           8               0.01            1.15             0               
-	5               H               O               0.914           8               0.01            0.97             0               
+	0               C               C               1.1             8               0.01            1.35             0               
+	1               H               H               0.8             8               0.01            0.675            0               
+	2               O               O               2               8               0.01            2.55             0               
+	3               C               H               0.8             8               0.01            1.1              0               
+	4               C               O               1.1             8               0.01            1.15             0               
+	5               H               O               0.8             8               0.01            0.97             0               
 
 	Read the following number of ij ik jk bins for pairs: 
 		CC: 0 0 0
@@ -93,11 +93,11 @@ Printing matricies...
 		4	C O	1.186
 		5	H O	0.838
 	Total number of configurations contributing to each pair type:
-		0	C C 113316
-		1	H H 129472
-		2	O O 1770
-		3	C H 245485
-		4	C O 30726
-		5	H O 32871
+		0	C C 113448
+		1	H H 129518
+		2	O O 1793
+		3	C H 245534
+		4	C O 30780
+		5	H O 32909
 ...matrix printing complete: 
 
