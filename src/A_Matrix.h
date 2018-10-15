@@ -46,12 +46,17 @@ class A_MAT
 	void INITIALIZE_STRESSES(int FRAME, int PARAMS, bool DIAG_STRESS, bool ALL_STRESS);
 	void INITIALIZE_OVERBOND(int FRAME, int ATOMS);
 	void INITIALIZE_CHARGES (int FRAME, int FF_PAIRS,int ATOMS);
-	
-	
+	void PRINT_ALL(const struct JOB_CONTROL &CONTROLS,
+								 const vector<class FRAME> &TRAJECTORY,
+								 const vector<class PAIRS> & ATOM_PAIRS,
+								 const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
+								 int istart, int iend) ;
+
 	private:
 	
 	int MY_ID;		// In parallel runs, each proc will have its own A-mat. This is the proc's ID
 	int MY_SIZE;	// Number of frames for A-mat
+	void add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE) ;
 };
 
 
