@@ -203,6 +203,7 @@ struct JOB_CONTROL
   int  NSTRESS;			// Only fit stresses for first NSTRESS frames of trajectory
   bool FIT_ENER;		// Should the total frame energy be included in the fit?
   bool FIT_ENER_PER_ATOM;	// Should the energy of each atom be included in the fit?
+	bool FIT_ENER_EVER ; // Is energy ever included in the fit ?
   int  NENER;
   bool CALL_EWALD;		// Should ewald subroutines be called?
   bool USE_POVER;		// Should overbonding information be printed to the header file?
@@ -261,6 +262,18 @@ JOB_CONTROL(): FIT_COUL(false),
 		//IO_ECONS_VAL = 0.0;
 		
 		FCUT_LINE = "CUBIC";
+		FIT_ENER_EVER = false ;
+
+		COMPARE_FORCE     = true;	// is this variable really necessary for LSQ?
+		IS_LSQ            = true; 
+		CALL_EWALD        = false;
+		FIT_ENER          = false;
+		FIT_ENER_PER_ATOM = false;
+		FIT_STRESS        = false;
+		FIT_STRESS_ALL    = false;
+		NSTRESS           = -1;
+		NENER             = -1;
+		
 	 }
 };
 
@@ -312,8 +325,10 @@ public:
 	// Update ghost atom positions.
 	void 		update_ghost(int n_layers);
 	inline int 	get_atomtype_idx(int atom);
-	void		SET_NATOMS_OF_TYPE();
-
+	void SET_NATOMS_OF_TYPE();
+	void READ_XYZF(ifstream &TRAJ_INPUT, JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS, vector<string> &TMP_ATOMTYPE,
+								 int i);
+	void build_layers(int N_LAYERS) ;
 };
 
 struct PES_PLOTS

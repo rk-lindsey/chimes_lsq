@@ -51,7 +51,19 @@ class A_MAT
 								 const vector<class PAIRS> & ATOM_PAIRS,
 								 const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
 								 int istart, int iend) ;
-
+	void PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
+									 const class FRAME &SYSTEM,
+									 const vector<class PAIRS> & ATOM_PAIRS,
+									 const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
+									 int N, ofstream &fileA, ofstream &fileb, ofstream &fileb_labeled) ;
+	void PRINT_CONSTRAINTS(const struct JOB_CONTROL &CONTROLS,
+												 const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
+												 ofstream &fileA, ofstream &fileb, ofstream &fileb_labeled,
+												 int NPAIRS) ;
+	void CLEANUP_FILES(ofstream &fileA, ofstream &fileb, ofstream &fileb_labeled) ;
+	void OPEN_FILES(ofstream &fileA, ofstream &fileb, ofstream &fileb_labeled) ;
+	void INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS, int f) ;
+	
 	private:
 	
 	int MY_ID;		// In parallel runs, each proc will have its own A-mat. This is the proc's ID

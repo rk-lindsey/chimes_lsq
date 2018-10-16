@@ -28,11 +28,24 @@ A_MAT::A_MAT(int NFRAMES)
 }
 A_MAT::~A_MAT(){}
 
+void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS, int f)
+// Set up the A "matrix"
+{
+	INITIALIZE_NATOMS  (SYSTEM.ATOMS,SYSTEM.ATOMTYPE);
+		
+	INITIALIZE_FORCES  (f, SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE);
+	INITIALIZE_ENERGIES(f, SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER, CONTROLS.FIT_ENER_PER_ATOM);
+	INITIALIZE_STRESSES(f,                     CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_STRESS, CONTROLS.FIT_STRESS_ALL);
+	INITIALIZE_OVERBOND(f, SYSTEM.ATOMS);
+	INITIALIZE_CHARGES (f, NPAIRS,SYSTEM.ATOMS);		
+}
+
 void A_MAT::INITIALIZE_NATOMS  (int ATOMS, vector<string> & FRAME_ATOMTYPES)
 {
 	// Goal: Determine how many atoms of each type are present
 
 	NO_ATOM_TYPES = 0;
+	NO_ATOMS_OF_TYPE.resize(0) ;
 
 	vector<string>::iterator it;
 
@@ -175,310 +188,29 @@ void A_MAT::PRINT_ALL(const struct JOB_CONTROL &CONTROLS,
 	// Same pattern repeated for y and z forces.
 	// charge constraints.
 	// (LEF)
-		
-	char nameA[20];
-	char nameB[20];
-	char nameBlab[20];
 
-	// Label output files by the processor rank
-	sprintf(nameA, "A.%04d.txt", RANK);
-	sprintf(nameB, "b.%04d.txt", RANK);
-	sprintf(nameBlab, "b-labeled.%04d.txt", RANK);
+	ofstream fileA, fileb, fileb_labeled ;
+	OPEN_FILES(fileA, fileb, fileb_labeled) ;
 
-	ofstream fileA(nameA);
-	ofstream fileb(nameB);
-	ofstream fileb_labeled(nameBlab);
-
-	fileA.precision(16);	//  Reduced precision to 6 for code testing.
-	fileA << std::scientific;
-
-	fileb.precision(16);	//  Usual precision set to 16.
-	fileb << std::scientific;
-
-	if ( RANK == 0 ) cout << "	...A matrix length (forces): " << FORCES.size()*FORCES[0].size()*3 << endl << endl;
-
-	bool DO_ENER       = CONTROLS.FIT_ENER;
-	  
 	// Print only the assigned frames.
 	for(int N= istart; N <= iend;N++) // Loop over frames
 	{
-		for(int a=0;a<FORCES[N].size();a++) // Loop over atoms
-		{	
-			// Print Afile: .../////////////// -- For X
-		  
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
-				fileA << FORCES[N][a][n].X  << "   ";
-			if ( CONTROLS.FIT_COUL ) 
-				for(int i=0; i<CHARGES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
-					fileA << CHARGES[N][i][a].X << "   ";
-			if ( CONTROLS.FIT_POVER ) 
-				fileA << " " << OVERBONDING[N][a].X;
-
-			add_col_of_ones("FORCE", DO_ENER, fileA);			  
-
-			fileA << endl;	
-		  
-			// Print Afile: .../////////////// -- For Y
-		  
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
-				fileA << FORCES[N][a][n].Y  << "   ";
-			if ( CONTROLS.FIT_COUL ) 
-				for(int i=0; i<CHARGES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
-					fileA << CHARGES[N][i][a].Y << "   ";
-			if ( CONTROLS.FIT_POVER ) 
-				fileA << " " << OVERBONDING[N][a].Y;
-			add_col_of_ones("FORCE", DO_ENER, fileA);				  
-			fileA << endl;	
-
-
-			// Print Afile: .../////////////// -- For Z
-		  
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
-				fileA << FORCES[N][a][n].Z  << "   ";
-			if ( CONTROLS.FIT_COUL ) 
-				for(int i=0; i<CHARGES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
-					fileA << CHARGES[N][i][a].Z << "   ";
-			if ( CONTROLS.FIT_POVER ) 
-				fileA << " " << OVERBONDING[N][a].Z;
-			add_col_of_ones("FORCE", DO_ENER, fileA);				  
-			fileA << endl;		
-			
-			// Print Bfile: ...
-			
-			{
-				fileb << TRAJECTORY[N].FORCES[a].X << endl;
-				fileb << TRAJECTORY[N].FORCES[a].Y << endl;
-				fileb << TRAJECTORY[N].FORCES[a].Z << endl;
-			
-				fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].X << endl;
-				fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Y << endl;
-				fileb_labeled << TRAJECTORY[N].ATOMTYPE[a] << " " <<  TRAJECTORY[N].FORCES[a].Z << endl;
-
-			}
-		} // End loop over atoms
+		PRINT_FRAME(CONTROLS, TRAJECTORY[N], ATOM_PAIRS, CHARGE_CONSTRAINTS,
+								N, fileA, fileb,fileb_labeled) ;
+	} // End loop over atoms
 		
 		// Output the stresses and energies 
 		
-		if (CONTROLS.FIT_STRESS)
-		{
 
-			// Check if we need to exclude some tensor data from the A and b text files.
-			if( N >= CONTROLS.NSTRESS)
-				continue;
-
-			// Output A.txt 
-			
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].XX << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);
-			fileA << endl;	
-			
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].YY << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
-			fileA << endl;
-			
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].ZZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);
-			fileA << endl;	
-			
-			
-			// Convert from GPa to internal units to match A-matrix elements
-
-			fileb << TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
-			fileb << TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
-			fileb << TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
-			
-			fileb_labeled << "s_xx " <<  TRAJECTORY[N].STRESS_TENSORS.X/GPa << endl;
-			fileb_labeled << "s_yy " <<  TRAJECTORY[N].STRESS_TENSORS.Y/GPa << endl;
-			fileb_labeled << "s_zz " <<  TRAJECTORY[N].STRESS_TENSORS.Z/GPa << endl;
-		
-		}
-		else if (CONTROLS.FIT_STRESS_ALL)
-		{
-			// Check if we need to exclude some tensor data from the A and b text files.
-			if( N >= CONTROLS.NSTRESS)
-				continue;
-						
-			// Output A.txt
-			
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].XX << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
-			fileA << endl;
-			
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].XY << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
-			fileA << endl;
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].XZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
-			fileA << endl;	
-			
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].XY << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
-			fileA << endl;	
-			
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].YY << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
-			fileA << endl;	
-			
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].YZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
-			fileA << endl;
-			
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].XZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);
-			fileA << endl;
-						
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].YZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
-			fileA << endl;
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << STRESSES[N][n].ZZ << " ";
-			add_col_of_ones("STRESS", DO_ENER, fileA);	
-			fileA << endl;		
-
-			// Account for the symmetry of the off-diagonal (deviatoric) components
-			
-			fileb << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
-			fileb << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
-			fileb << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;
-			
-			fileb << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
-			fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
-			fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
-			
-			fileb << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
-			fileb << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
-			fileb << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;			
-			
-			// Convert from GPa to internal units to match A-matrix elements
-					
-			fileb_labeled << "s_xx " << TRAJECTORY[N].STRESS_TENSORS_X.X/GPa << endl;
-			fileb_labeled << "s_xy " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl;
-			fileb_labeled << "s_xz " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl;	
-	
-			fileb_labeled << "s_yx " << TRAJECTORY[N].STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
-			fileb_labeled << "s_yy " << TRAJECTORY[N].STRESS_TENSORS_Y.Y/GPa << endl;
-			fileb_labeled << "s_yz " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl;
-
-			fileb_labeled << "s_zx " << TRAJECTORY[N].STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
-			fileb_labeled << "s_zy " << TRAJECTORY[N].STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
-			fileb_labeled << "s_zz " << TRAJECTORY[N].STRESS_TENSORS_Z.Z/GPa << endl;
-		
-		}
-		if(CONTROLS.FIT_ENER)
-		{
-			// Check if we need to exclude some energy data from the A and b text files.
-			if(N >= CONTROLS.NENER)
-				continue;
-		
-			// Output A.txt 
-			
-			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << FRAME_ENERGIES[N][n] << " ";
-			add_col_of_ones("ENERGY", DO_ENER, fileA);				
-			fileA << endl;
-			
-			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << FRAME_ENERGIES[N][n] << " ";
-			add_col_of_ones("ENERGY", DO_ENER, fileA);				
-			fileA << endl;
-			
-			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << FRAME_ENERGIES[N][n] << " ";
-			add_col_of_ones("ENERGY", DO_ENER, fileA);				
-			fileA << endl;						
-			
-			// Output b.txt stuff
-			
-			fileb                  << TRAJECTORY[N].QM_POT_ENER << endl;
-			fileb_labeled << "+1 " << TRAJECTORY[N].QM_POT_ENER << endl;
-			
-			fileb                  << TRAJECTORY[N].QM_POT_ENER << endl;
-			fileb_labeled << "+1 " << TRAJECTORY[N].QM_POT_ENER << endl;
-			
-			fileb                  << TRAJECTORY[N].QM_POT_ENER << endl;
-			fileb_labeled << "+1 " << TRAJECTORY[N].QM_POT_ENER << endl;						
-		}
-		else if(CONTROLS.FIT_ENER_PER_ATOM)
-		{
-			// Check if we need to exclude some energy data from the A and b text files.
-			if(N >= CONTROLS.NENER)
-				continue;
-		
-			// Output A.txt 
-			
-			for(int a=0; a<ATOM_ENERGIES[N].size(); a++)
-			{
-				for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
-					fileA << ATOM_ENERGIES[N][a][n] << " ";
-				add_col_of_ones("ENERGY", DO_ENER, fileA);
-				fileA << endl;
-
-				// Output b.txt stuff
-				
-				fileb                  << TRAJECTORY[N].QM_POT_ENER_PER_ATOM[a] << endl;
-				fileb_labeled << "+1 " << TRAJECTORY[N].QM_POT_ENER_PER_ATOM[a] << endl;
-			}
-		}  	
-    }
-	
 	// A and B file charge constraints: generalized
 	// 
 	// The order that charge constraints are printed needs to match
 	// the order atom pairs are expected...
 
+	PRINT_CONSTRAINTS(CONTROLS, CHARGE_CONSTRAINTS, fileA, fileb, fileb_labeled,
+										ATOM_PAIRS.size()) ;
 
-	if ( CONTROLS.FIT_COUL && (CHARGE_CONSTRAINTS.size()>0) && (RANK == NPROCS - 1)) 
-	{
-		for(int i=0; i<CHARGE_CONSTRAINTS.size(); i++)
-		{
-			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << "0.0 ";
-			
-			for(int j=0; j<ATOM_PAIRS.size(); j++)
-				for(int k=0; k<CHARGE_CONSTRAINTS.size()+1; k++) // +1 because we n_constr = npairs-1
-					if(CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX[k] == j)
-						fileA << CHARGE_CONSTRAINTS[i].CONSTRAINTS[k] << " ";
-			
-			if ( CONTROLS.FIT_POVER ) 
-				fileA  << " 0.0 ";
-			
-			fileA << endl;	
-			
-			fileb << CHARGE_CONSTRAINTS[i].FORCE << endl;	
-		}		
-	}
-	
-
-	fileA.close();
-	fileb.close();
-	fileb_labeled.close();
-
-	#ifdef USE_MPI
-		// Make sure that every process has closed its files.
-		MPI_Barrier(MPI_COMM_WORLD);
-	#endif
-
-	if ( RANK == 0 ) {
-		// Serialize into a single A and b file for now.
-		// Could make the SVD program read multiple files.
-		system("cat A.[0-9]*.txt > A.txt");
-		system("rm A.[0-9]*.txt");
-		system("cat b.[0-9]*.txt > b.txt");
-		system("rm b.[0-9]*.txt");
-		system("cat b-labeled.[0-9]*.txt > b-labeled.txt");
-		system("rm b-labeled.[0-9]*.txt");
-	}
+	CLEANUP_FILES(fileA, fileb, fileb_labeled) ;
 
 }
 
@@ -498,4 +230,318 @@ void A_MAT::add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE)
 			for(int i=0; i<NO_ATOM_TYPES; i++)
 				OUTFILE << " " << NO_ATOMS_OF_TYPE[i];			
 	}
+}
+
+
+void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
+												const class FRAME &SYSTEM,
+												const vector<class PAIRS> & ATOM_PAIRS,
+												const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
+												int N, ofstream &fileA, ofstream &fileb, ofstream &fileb_labeled)
+// Print one frame of the A matrix.
+{
+	bool DO_ENER       = CONTROLS.FIT_ENER_EVER ;
+
+	for(int a=0;a<FORCES[N].size();a++) // Loop over atoms
+	{	
+		// Print Afile: .../////////////// -- For X
+		  
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
+			fileA << FORCES[N][a][n].X  << "   ";
+		if ( CONTROLS.FIT_COUL ) 
+			for(int i=0; i<CHARGES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
+				fileA << CHARGES[N][i][a].X << "   ";
+		if ( CONTROLS.FIT_POVER ) 
+			fileA << " " << OVERBONDING[N][a].X;
+
+		add_col_of_ones("FORCE", DO_ENER, fileA);			  
+
+		fileA << endl;	
+		  
+		// Print Afile: .../////////////// -- For Y
+		  
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
+			fileA << FORCES[N][a][n].Y  << "   ";
+		if ( CONTROLS.FIT_COUL ) 
+			for(int i=0; i<CHARGES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
+				fileA << CHARGES[N][i][a].Y << "   ";
+		if ( CONTROLS.FIT_POVER ) 
+			fileA << " " << OVERBONDING[N][a].Y;
+		add_col_of_ones("FORCE", DO_ENER, fileA);				  
+		fileA << endl;	
+
+
+		// Print Afile: .../////////////// -- For Z
+		  
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
+			fileA << FORCES[N][a][n].Z  << "   ";
+		if ( CONTROLS.FIT_COUL ) 
+			for(int i=0; i<CHARGES[N].size(); i++) // Loop over pair types, i.e. OO, OH, HH
+				fileA << CHARGES[N][i][a].Z << "   ";
+		if ( CONTROLS.FIT_POVER ) 
+			fileA << " " << OVERBONDING[N][a].Z;
+		add_col_of_ones("FORCE", DO_ENER, fileA);				  
+		fileA << endl;		
+			
+		// Print Bfile: ...
+			
+		{
+			fileb << SYSTEM.FORCES[a].X << endl;
+			fileb << SYSTEM.FORCES[a].Y << endl;
+			fileb << SYSTEM.FORCES[a].Z << endl;
+			
+			fileb_labeled << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].X << endl;
+			fileb_labeled << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].Y << endl;
+			fileb_labeled << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].Z << endl;
+
+		}
+	}
+	if (CONTROLS.FIT_STRESS)
+	{
+
+		// Check if we need to exclude some tensor data from the A and b text files.
+		if( N >= CONTROLS.NSTRESS)
+			return ;
+
+		// Output A.txt 
+			
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].XX << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		fileA << endl;	
+			
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].YY << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		fileA << endl;
+			
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].ZZ << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		fileA << endl;	
+			
+			
+		// Convert from GPa to internal units to match A-matrix elements
+
+		fileb << SYSTEM.STRESS_TENSORS.X/GPa << endl;
+		fileb << SYSTEM.STRESS_TENSORS.Y/GPa << endl;
+		fileb << SYSTEM.STRESS_TENSORS.Z/GPa << endl;
+			
+		fileb_labeled << "s_xx " <<  SYSTEM.STRESS_TENSORS.X/GPa << endl;
+		fileb_labeled << "s_yy " <<  SYSTEM.STRESS_TENSORS.Y/GPa << endl;
+		fileb_labeled << "s_zz " <<  SYSTEM.STRESS_TENSORS.Z/GPa << endl;
+		
+	}
+	else if (CONTROLS.FIT_STRESS_ALL)
+	{
+		// Check if we need to exclude some tensor data from the A and b text files.
+		if( N >= CONTROLS.NSTRESS)
+			return ;
+						
+		// Output A.txt
+			
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].XX << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		fileA << endl;
+			
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].XY << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		fileA << endl;
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].XZ << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		fileA << endl;	
+			
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].XY << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		fileA << endl;	
+			
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].YY << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		fileA << endl;	
+			
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].YZ << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		fileA << endl;
+			
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].XZ << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		fileA << endl;
+						
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].YZ << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		fileA << endl;
+		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << STRESSES[N][n].ZZ << " ";
+		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		fileA << endl;		
+
+		// Account for the symmetry of the off-diagonal (deviatoric) components
+			
+		fileb << SYSTEM.STRESS_TENSORS_X.X/GPa << endl;
+		fileb << SYSTEM.STRESS_TENSORS_X.Y/GPa << endl;
+		fileb << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl;
+			
+		fileb << SYSTEM.STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
+		fileb << SYSTEM.STRESS_TENSORS_Y.Y/GPa << endl;
+		fileb << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl;
+			
+		fileb << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
+		fileb << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
+		fileb << SYSTEM.STRESS_TENSORS_Z.Z/GPa << endl;			
+			
+		// Convert from GPa to internal units to match A-matrix elements
+					
+		fileb_labeled << "s_xx " << SYSTEM.STRESS_TENSORS_X.X/GPa << endl;
+		fileb_labeled << "s_xy " << SYSTEM.STRESS_TENSORS_X.Y/GPa << endl;
+		fileb_labeled << "s_xz " << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl;	
+	
+		fileb_labeled << "s_yx " << SYSTEM.STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
+		fileb_labeled << "s_yy " << SYSTEM.STRESS_TENSORS_Y.Y/GPa << endl;
+		fileb_labeled << "s_yz " << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl;
+
+		fileb_labeled << "s_zx " << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
+		fileb_labeled << "s_zy " << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
+		fileb_labeled << "s_zz " << SYSTEM.STRESS_TENSORS_Z.Z/GPa << endl;
+		
+	}
+	if(CONTROLS.FIT_ENER)
+	{
+		// Check if we need to exclude some energy data from the A and b text files.
+		if(N >= CONTROLS.NENER)
+			return ;
+		
+		// Output A.txt 
+			
+		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << FRAME_ENERGIES[N][n] << " ";
+		add_col_of_ones("ENERGY", DO_ENER, fileA);				
+		fileA << endl;
+			
+		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << FRAME_ENERGIES[N][n] << " ";
+		add_col_of_ones("ENERGY", DO_ENER, fileA);				
+		fileA << endl;
+			
+		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+			fileA << FRAME_ENERGIES[N][n] << " ";
+		add_col_of_ones("ENERGY", DO_ENER, fileA);				
+		fileA << endl;						
+			
+		// Output b.txt stuff
+			
+		fileb                  << SYSTEM.QM_POT_ENER << endl;
+		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;
+			
+		fileb                  << SYSTEM.QM_POT_ENER << endl;
+		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;
+			
+		fileb                  << SYSTEM.QM_POT_ENER << endl;
+		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;						
+	}
+	else if(CONTROLS.FIT_ENER_PER_ATOM)
+	{
+		// Check if we need to exclude some energy data from the A and b text files.
+		if(N >= CONTROLS.NENER)
+			return ;
+		
+		// Output A.txt 
+			
+		for(int a=0; a<ATOM_ENERGIES[N].size(); a++)
+		{
+			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << ATOM_ENERGIES[N][a][n] << " ";
+			add_col_of_ones("ENERGY", DO_ENER, fileA);
+			fileA << endl;
+
+			// Output b.txt stuff
+				
+			fileb                  << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
+			fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
+		}
+	}  	
+}
+
+void A_MAT::PRINT_CONSTRAINTS(const struct JOB_CONTROL &CONTROLS,
+															const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
+															ofstream &fileA, ofstream &fileb, ofstream &fileb_labeled,
+	                            int NPAIRS)
+// Print out any charge constraints to the A matrix and b files.
+{
+	
+	if ( CONTROLS.FIT_COUL && (CHARGE_CONSTRAINTS.size()>0) && (RANK == NPROCS - 1)) 
+	{
+		for(int i=0; i<CHARGE_CONSTRAINTS.size(); i++)
+		{
+			for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+				fileA << "0.0 ";
+			
+			for(int j=0; j< NPAIRS; j++)
+				for(int k=0; k<CHARGE_CONSTRAINTS.size()+1; k++) // +1 because we n_constr = npairs-1
+					if(CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX[k] == j)
+						fileA << CHARGE_CONSTRAINTS[i].CONSTRAINTS[k] << " ";
+			
+			if ( CONTROLS.FIT_POVER ) 
+				fileA  << " 0.0 ";
+			
+			fileA << endl;	
+			
+			fileb << CHARGE_CONSTRAINTS[i].FORCE << endl;	
+		}		
+	}
+}
+
+void A_MAT::CLEANUP_FILES(ofstream &fileA, ofstream &fileb, ofstream &fileb_labeled)
+// Close and clean up the output files.
+{
+	fileA.close();
+	fileb.close();
+	fileb_labeled.close();
+
+#ifdef USE_MPI
+	// Make sure that every process has closed its files.
+	MPI_Barrier(MPI_COMM_WORLD);
+#endif
+
+	if ( RANK == 0 ) {
+		// Serialize into a single A and b file for now.
+		// Could make the SVD program read multiple files.
+		system("cat A.[0-9]*.txt > A.txt");
+		system("rm A.[0-9]*.txt");
+		system("cat b.[0-9]*.txt > b.txt");
+		system("rm b.[0-9]*.txt");
+		system("cat b-labeled.[0-9]*.txt > b-labeled.txt");
+		system("rm b-labeled.[0-9]*.txt");
+	}
+}
+	
+void A_MAT::OPEN_FILES(ofstream &fileA, ofstream &fileb, ofstream &fileb_labeled)
+{
+		
+	char nameA[20];
+	char nameB[20];
+	char nameBlab[20];
+
+	// Label output files by the processor rank
+	sprintf(nameA, "A.%04d.txt", RANK);
+	sprintf(nameB, "b.%04d.txt", RANK);
+	sprintf(nameBlab, "b-labeled.%04d.txt", RANK);
+
+	fileA.open(nameA);
+	fileb.open(nameB);
+	fileb_labeled.open(nameBlab);
+
+	fileA.precision(16);	//  Reduced precision to 6 for code testing.
+	fileA << std::scientific;
+
+	fileb.precision(16);	//  Usual precision set to 16.
+	fileb << std::scientific;
+
 }

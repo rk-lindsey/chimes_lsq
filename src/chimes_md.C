@@ -548,7 +548,7 @@ FF_SETUP_1:
   SYSTEM.WRAPDIM.Y = SYSTEM.BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1);
   SYSTEM.WRAPDIM.Z = SYSTEM.BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1);
 
-  build_layers(SYSTEM, CONTROLS);
+  SYSTEM.build_layers(CONTROLS.N_LAYERS);
 	
   if ( (CONTROLS.N_LAYERS > 0) && (RANK == 0) )	// Then ghost atoms are used 
   {

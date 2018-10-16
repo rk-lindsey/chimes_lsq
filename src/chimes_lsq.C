@@ -252,245 +252,10 @@ int main(int argc, char* argv[])
 		if ( RANK == 0 ) cout << endl << "Reading in the trajectory file..." << endl;
 	#endif
 		
-	// Prepare for layering
-		
-	vector<XYZ_INT> LAYER_MATRX;
-
 	for (int i=0; i<CONTROLS.NFRAMES; i++)
 	{
-		// Read in line with the number of atoms
-		
-		TRAJ_INPUT >> TRAJECTORY[i].ATOMS;
-		
-		// Read in line with box dimenstions
-		string header;
-		vector<string> tokens;
-
-		// Read line twice to get through newline from last input.
-		std::getline(TRAJ_INPUT, header);
-		std::getline(TRAJ_INPUT, header);
-
-		int ntokens = parse_space(header, tokens);
-
-		// Make sure we at least have boxlengths
-
-		if ( ntokens >= 3 ) 
-		{
-			TRAJECTORY[i].BOXDIM.X = stod(tokens[0]);
-			TRAJECTORY[i].BOXDIM.Y = stod(tokens[1]);
-			TRAJECTORY[i].BOXDIM.Z = stod(tokens[2]);
-		} 
-		else 
-		{
-			cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
-			cout << "        Missing box length components." << endl;
-			cout << "        See offending line below." << endl;
-			cout << header << endl;
-			exit(1);			
-		}
-		
-		// If requested, check for stress tensors... keep in mind that the 
-		// number of tensors and the number of frames with tensors can vary
-
-		if((CONTROLS.NSTRESS < 0) || (i<CONTROLS.NSTRESS))
-		{
-			if(CONTROLS.FIT_STRESS)
-			{
-				if ( ntokens >= 6 ) 
-				{
-					TRAJECTORY[i].STRESS_TENSORS.X = stod(tokens[3]);
-					TRAJECTORY[i].STRESS_TENSORS.Y = stod(tokens[4]);
-					TRAJECTORY[i].STRESS_TENSORS.Z = stod(tokens[5]);
-				} 
-				else 
-				{
-					cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
-					cout << "        Missing diagonal stress tensor components." << endl;
-					cout << "        See offending line below." << endl;
-					cout << header << endl;
-					exit(1);
-				}
-			}
-			else if(CONTROLS.FIT_STRESS_ALL)	// Expects as:xx yy zz xy xz yz // old: xx, xy, xz, yy, yx, yz, zx, zy, zz
-			{
-				// Read only the "upper" deviatoric components
-		
-				if ( ntokens >= 9 ) 
-				{
-					TRAJECTORY[i].STRESS_TENSORS_X.X = stod(tokens[3]);
-					TRAJECTORY[i].STRESS_TENSORS_Y.Y = stod(tokens[4]);
-					TRAJECTORY[i].STRESS_TENSORS_Z.Z = stod(tokens[5]);
-					
-					TRAJECTORY[i].STRESS_TENSORS_X.Y = stod(tokens[6]);
-					TRAJECTORY[i].STRESS_TENSORS_X.Z = stod(tokens[7]);
-					TRAJECTORY[i].STRESS_TENSORS_Y.Z = stod(tokens[8]);
-				} 
-				else 
-				{
-					cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
-					cout << "        Missing full stress tensor components." << endl;
-					cout << "        See offending line below." << endl;
-					cout << header << endl;
-					exit(1);
-				}
-			}
-		}
-		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
-			if(CONTROLS.FIT_ENER) // We're fitting to the absolute energy, + an offset (column of 1's at end of A-matrix)
-				TRAJECTORY[i].QM_POT_ENER = stod(tokens[tokens.size()-1]);
-
-	
-		// Check that outer cutoffs do not exceed half of the boxlength
-		// with consideration of layering
-		
-		for(int j=0; j<ATOM_PAIRS.size(); j++)
-		{
-                        if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.X * (2*CONTROLS.N_LAYERS +1) 
-			    || ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Y * (2*CONTROLS.N_LAYERS +1) 
-			    || ATOM_PAIRS[j].S_MAXIM > 0.5* TRAJECTORY[i].BOXDIM.Z * (2*CONTROLS.N_LAYERS +1) ))
-			{
-					#if WARN == TRUE
-						if (isatty(fileno(stdout)) && RANK == 0)
-						{
-							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Frame:                " << i << COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
-							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Layers:               " << CONTROLS.N_LAYERS << COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Effective boxlengths: " << TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) << COUT_STYLE.ENDSTYLE << endl;
-						}
-						else if ( RANK == 0 ) 
-						{
-							cout << "WARNING: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<endl;
-							cout << "	Frame:                " << i << COUT_STYLE.ENDSTYLE << endl;
-							cout << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
-							cout << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << endl;
-							cout << "	Layers:               " << CONTROLS.N_LAYERS << endl;
-							cout << "	Effective boxlengths: " << TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) << endl;							
-						}
-
-					#else
-						if (isatty(fileno(stdout)) && RANK == 0)
-						{
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Frame:                " << i << COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Layers:               " << CONTROLS.N_LAYERS << COUT_STYLE.ENDSTYLE << endl;
-							cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Effective boxlengths: " << TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) << COUT_STYLE.ENDSTYLE << endl;
-							exit(0);
-						}
-						else if ( RANK == 0 ) 
-						{
-							cout << "ERROR: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<endl;
-							cout << "	Frame:                " << i << COUT_STYLE.ENDSTYLE << endl;
-							cout << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << endl;		
-							cout << "	Boxlengths:           " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << endl;
-							cout << "	Layers:               " << CONTROLS.N_LAYERS << endl;
-							cout << "	Effective boxlengths: " << TRAJECTORY[i].BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << TRAJECTORY[i].BOXDIM.Z * (CONTROLS.N_LAYERS +1) << endl;
-							exit(0);
-						}
-
-					#endif
-			}
-		}
-		
-		// Setup the trajectory-holding data object
-		
-		TRAJECTORY[i].ATOMTYPE    .resize(TRAJECTORY[i].ATOMS);		
-		TRAJECTORY[i].COORDS      .resize(TRAJECTORY[i].ATOMS);
-		TRAJECTORY[i].FORCES      .resize(TRAJECTORY[i].ATOMS);	// Use for read-in forces.
-		TRAJECTORY[i].ACCEL       .resize(TRAJECTORY[i].ATOMS); // Use for calculated forces in ZCalc_Ewald.
-		TRAJECTORY[i].CHARGES     .resize(TRAJECTORY[i].ATOMS);
-		TRAJECTORY[i].ATOMTYPE_IDX.resize(TRAJECTORY[i].ATOMS);
-		
-		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
-			if(CONTROLS.FIT_ENER_PER_ATOM)
-				TRAJECTORY[i].QM_POT_ENER_PER_ATOM.resize(TRAJECTORY[i].ATOMS);
-			
-		// Read trajectory, convert to proper units, and apply PBC
-			
-		for (int j=0; j<TRAJECTORY[i].ATOMS; j++)
-		{
-			TRAJ_INPUT >> TRAJECTORY[i].ATOMTYPE[j];
-			
-			for(int k=0; k<TMP_ATOMTYPE.size(); k++)
-				if(TRAJECTORY[i].ATOMTYPE[j] == TMP_ATOMTYPE[k])
-					TRAJECTORY[i].ATOMTYPE_IDX[j] = k;
-			
-			TRAJ_INPUT >> TRAJECTORY[i].COORDS[j].X;
-			TRAJ_INPUT >> TRAJECTORY[i].COORDS[j].Y;
-			TRAJ_INPUT >> TRAJECTORY[i].COORDS[j].Z;
-			
-			TRAJ_INPUT >> TRAJECTORY[i].FORCES[j].X;
-			TRAJ_INPUT >> TRAJECTORY[i].FORCES[j].Y;
-			TRAJ_INPUT >> TRAJECTORY[i].FORCES[j].Z;
-
-			if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
-				if(CONTROLS.FIT_ENER_PER_ATOM) // We're fitting per-atom energies. Read one per line.
-					TRAJ_INPUT >> TRAJECTORY[i].QM_POT_ENER_PER_ATOM[j];
-
-			if (ATOM_PAIRS[0].PAIRTYP != "DFTBPOLY") // Convert forces to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
-			{
-				// Assume units are in Hartree/bohr
-				
-				TRAJECTORY[i].FORCES[j].X *= 627.50960803*1.889725989;
-				TRAJECTORY[i].FORCES[j].Y *= 627.50960803*1.889725989;
-				TRAJECTORY[i].FORCES[j].Z *= 627.50960803*1.889725989;
-				
-				
-				// Assume units are in eV/A
-				
-				/*
-				TRAJECTORY[i].FORCES[j].X *= 23.0609;
-				TRAJECTORY[i].FORCES[j].Y *= 23.0609;
-				TRAJECTORY[i].FORCES[j].Z *= 23.0609;
-				*/
-			}
-						
-			if(CONTROLS.WRAP_COORDS)	// Apply PBC (for cases of unwrapped coordinates)
-			{
-				TRAJECTORY[i].COORDS[j].X -= floor(TRAJECTORY[i].COORDS[j].X/TRAJECTORY[i].BOXDIM.X)*TRAJECTORY[i].BOXDIM.X;
-				TRAJECTORY[i].COORDS[j].Y -= floor(TRAJECTORY[i].COORDS[j].Y/TRAJECTORY[i].BOXDIM.Y)*TRAJECTORY[i].BOXDIM.Y;
-				TRAJECTORY[i].COORDS[j].Z -= floor(TRAJECTORY[i].COORDS[j].Z/TRAJECTORY[i].BOXDIM.Z)*TRAJECTORY[i].BOXDIM.Z;
-			}			
-			
-			// Assign atom charges.
-			if ( CONTROLS.IF_SUBTRACT_COUL ) 
-				for(int ii=0; ii< CONTROLS.NATMTYP; ii++)
-					if( TRAJECTORY[i].ATOMTYPE[j] == ATOM_PAIRS[ii].ATM1TYP )
-					{
-						TRAJECTORY[i].CHARGES[j] = ATOM_PAIRS[ii].ATM1CHG;
-						break;								
-					}
-		}
-		
-		// If layering requested, replicate the system
-
-		build_layers(TRAJECTORY[i], CONTROLS);
-		
-		if(i==0)
-		{
-			if ( (CONTROLS.N_LAYERS > 0) )	// Then ghost atoms are used 
-			{
-				if ( RANK == 0 ) 
-				{
-					cout << "	Reporting outcome of layering for first frame ONLY: " << endl;
-					cout << "	Real atoms:                   " << TRAJECTORY[i].ATOMS << endl;
-					cout << "	Total atoms (ghost):          " << TRAJECTORY[i].ALL_ATOMS << endl;
-					cout << "	Real box dimesntions:         " << TRAJECTORY[i].BOXDIM.X << " " << TRAJECTORY[i].BOXDIM.Y << " " << TRAJECTORY[i].BOXDIM.Z << endl;
-					cout << "	Total box dimensions (ghost): " << TRAJECTORY[i].BOXDIM.X * (2*CONTROLS.N_LAYERS + 1) << " " << TRAJECTORY[i].BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1) << " " << TRAJECTORY[i].BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1) << endl << endl;
-				}
-			
-				if(CONTROLS.WRAP_COORDS)
-				{
-					if ( RANK == 0 ) cout << "WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off" << endl;
-					CONTROLS.WRAP_COORDS = false;
-				}
-			}
-			else if ( RANK==0 ) // No ghost atoms.
-				cout << "WARNING: Ghost atoms/implicit layers are NOT being used." << endl;
-		}
+		// Read in an XYZ + Force file.
+		TRAJECTORY[i].READ_XYZF(TRAJ_INPUT, CONTROLS, ATOM_PAIRS, TMP_ATOMTYPE, i) ;
 	}
 	
 	#if VERBOSITY == 1
@@ -503,46 +268,8 @@ int main(int argc, char* argv[])
 	//
 	//////////////////////////////////////////////////
 
-	// Setup the A and Coulomb "matricies"
+	// Setup the A and Coulomb "matrices"
 	
-	#if VERBOSITY == 1
-	if ( RANK == 0 ) cout << "Setting up the matricies for A, Coulomb forces, and overbonding..." << endl;
-	#endif
-
-	A_MATRIX.INITIALIZE_NATOMS  (TRAJECTORY[0].ATOMS,TRAJECTORY[0].ATOMTYPE);
-
-	for (int f=0; f<CONTROLS.NFRAMES; f++)
-	{	
-		// Set up the A "matrix"
-		
-		A_MATRIX.INITIALIZE_FORCES  (f, TRAJECTORY[f].ATOMS,CONTROLS.TOT_SHORT_RANGE);
-		A_MATRIX.INITIALIZE_ENERGIES(f, TRAJECTORY[f].ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER, CONTROLS.FIT_ENER_PER_ATOM);
-		A_MATRIX.INITIALIZE_STRESSES(f,                     CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_STRESS, CONTROLS.FIT_STRESS_ALL);
-		A_MATRIX.INITIALIZE_OVERBOND(f, TRAJECTORY[f].ATOMS);
-		A_MATRIX.INITIALIZE_CHARGES (f, ATOM_PAIRS.size(),TRAJECTORY[f].ATOMS);		
-	}
-
-	#if VERBOSITY == 1
-		if (RANK == 0 ) cout << "...matrix setup complete: " << endl << endl;
-	#endif
-		
-	//////////////////////////////////////////////////
-	//
-	// Set up the 3B histograms
-	//
-	//////////////////////////////////////////////////	
-	
-	if(CONTROLS.USE_3B_CHEBY)
-	{
-		#if VERBOSITY == 1
-			if ( RANK == 0 ) cout << "Setting up the histograms to handle sparse 3b-distance populations..." << endl;
-		#endif
-	
-		for (int i=0; i<TRIPS.VEC.size(); i++)
-	     		if ( ! TRIPS.VEC[i].init_histogram(ATOM_PAIRS, PAIR_MAP) ) 
-			 break;
-	}
-		
 
 	//////////////////////////////////////////////////
 	//
@@ -551,11 +278,11 @@ int main(int argc, char* argv[])
 	//////////////////////////////////////////////////
 
 	cout.precision(16);	// WE SHOULD AT LEAST MOVE THIS TO SOMEWHERE MORE REASONABLE.. LIKE THE SECTION WHERE THE OUTPUT IS ACTUALLY PRINTED
-	
-	#if VERBOSITY == 1
-		if ( RANK == 0 ) cout << "...Populating the matricies for A, Coulomb forces, and overbonding..." << endl << endl;
-	#endif
-		
+
+#if VERBOSITY == 1
+		if ( RANK == 0 ) cout << "Setting up the matrices for A, Coulomb forces, and overbonding..." << endl;
+#endif
+
 
 	double 	NEIGHBOR_PADDING = 0.3;
 
@@ -570,15 +297,29 @@ int main(int argc, char* argv[])
 	if((CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM) && CONTROLS.NENER == -1)
 		CONTROLS.NENER = CONTROLS.NFRAMES;		
 	
-	bool DO_STRESS     = CONTROLS.FIT_STRESS;    
-	bool DO_STRESS_ALL = CONTROLS.FIT_STRESS_ALL;
-	bool DO_ENER       = CONTROLS.FIT_ENER;
-	bool DO_ENER_ATM   = CONTROLS.FIT_ENER_PER_ATOM;
+	// Is energy ever fit ?
+	CONTROLS.FIT_ENER_EVER = CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM ;
+	
+	ofstream fileA, fileb, fileb_labeled ;
+	A_MATRIX.OPEN_FILES(fileA, fileb, fileb_labeled) ;
 
+	int total_forces = 0 ;
 	for(int i= istart; i <= iend; i++)
 	{
-		// Only include stress tensor data for first NSTRESS frames..
+
 		
+		// NOTE: WE CONTINUALLY RE-USE THE 0th entry of A_MATRIX TO SAVE MEMORY.
+		A_MATRIX.INITIALIZE(CONTROLS, TRAJECTORY[i], ATOM_PAIRS.size() , 0) ;
+
+#if VERBOSITY == 1
+		if (RANK == 0 && i == istart )
+		{
+			cout << "...matrix setup complete: " << endl << endl;
+			cout << "...Populating the matrices for A, Coulomb forces, and overbonding..." << endl << endl;
+		}
+#endif
+
+		// Only include stress tensor data for first NSTRESS frames..
 		if(i >= CONTROLS.NSTRESS)
 		{
 			CONTROLS.FIT_STRESS     = false;	
@@ -588,7 +329,7 @@ int main(int argc, char* argv[])
 		if(i >= CONTROLS.NENER)
 		{
 			CONTROLS.FIT_ENER          = false;	
-			CONTROLS.FIT_ENER_PER_ATOM = false;
+			//CONTROLS.FIT_ENER_PER_ATOM = false;
 		}		
 	
 		// This output is specific to the number of processors.
@@ -601,12 +342,12 @@ int main(int argc, char* argv[])
 		NEIGHBOR_LIST.INITIALIZE(TRAJECTORY[i], NEIGHBOR_PADDING);
 		NEIGHBOR_LIST.DO_UPDATE (TRAJECTORY[i], CONTROLS);		
 
-		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, TRAJECTORY[i], i, A_MATRIX, CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
-
+		ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, TRAJECTORY[i], 0, A_MATRIX, CONTROLS.N_LAYERS, CONTROLS.USE_3B_CHEBY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
+		
 		if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
 		{
 			//SubtractCoordForces(TRAJECTORY[i], false, i, A_MATRIX,  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
-			cout << "Feature depreciated - exiting." << endl;
+			cout << "Feature deprecated - exiting." << endl;
 			exit_run(0);
 		}
 		
@@ -615,34 +356,36 @@ int main(int argc, char* argv[])
 
 		if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
 		{
-			SubtractCoordForces(TRAJECTORY[i], true, i,A_MATRIX,  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);			
-			//cout << "Feature depreciated - exiting." << endl;
+			SubtractCoordForces(TRAJECTORY[i], true, 0, A_MATRIX, ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);			
+			//cout << "Feature deprecated - exiting." << endl;
 			//exit_run(0);
-		}				
-			
+		}
+
+		A_MATRIX.PRINT_FRAME(CONTROLS, TRAJECTORY[i], ATOM_PAIRS, CHARGE_CONSTRAINTS, 0,
+												 fileA, fileb, fileb_labeled) ;
+		total_forces += 3 * A_MATRIX.FORCES[0].size() ;
 	}
 
-	// Because we need to know later whether stress/energy data were included:
-	
-	CONTROLS.FIT_STRESS        = DO_STRESS;    
-	CONTROLS.FIT_STRESS_ALL    = DO_STRESS_ALL;
-	CONTROLS.FIT_ENER          = DO_ENER;   
-	CONTROLS.FIT_ENER_PER_ATOM = DO_ENER_ATM;
+	// Add the number of force entries in the A matrix across all processes.
+	int total_forces_all = 0 ;
+#ifdef USE_MPI
+	MPI_Reduce(&total_forces, &total_forces_all, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD) ;
+#else
+	total_forces_all = total_forces ;
+#endif
 	
 	// What's below is only used to determine whether to add a col of ones to 
 	// the A-matrix (i.e. "are ANY energies included in the fit?")
-	
-	if(CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM)
-		DO_ENER = true;
-	
 	
 	#if VERBOSITY == 1
 		if ( RANK == 0 ) 
 		{
 			cout << "...matrix population complete: "  << endl << endl;
-			cout << "Printing matricies..." << endl;
-			
-			if (DO_ENER)
+			cout << "Printing matrices..." << endl;
+			cout << "	...A matrix length (forces): " << total_forces_all << endl << endl ;
+
+
+			if (CONTROLS.FIT_ENER_EVER)
 			{
 				cout << "Per-atom type energies will be provided at the end of the parameter file." << endl;
 				cout << "Values will correspond to the following atom types, in order: " << endl;
@@ -654,10 +397,12 @@ int main(int argc, char* argv[])
 		}
 	#endif
 
-		A_MATRIX.PRINT_ALL(CONTROLS, TRAJECTORY, ATOM_PAIRS, CHARGE_CONSTRAINTS,
-											 istart, iend) ;
+		A_MATRIX.PRINT_CONSTRAINTS(CONTROLS, CHARGE_CONSTRAINTS, fileA, fileb, fileb_labeled,
+															 ATOM_PAIRS.size() ) ;
+		A_MATRIX.CLEANUP_FILES(fileA, fileb, fileb_labeled) ;
 		
-	//////////////////////////////////////////////////
+	
+  //////////////////////////////////////////////////
 	//
 	// Print out the params file header
 	//
@@ -906,16 +651,6 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS,
 	
 	double TMP_CHEBY_RANGE_LOW  = -1;
 	double TMP_CHEBY_RANGE_HIGH =  1;
-	
-	CONTROLS.COMPARE_FORCE     = true;	// is this variable really necessary for LSQ?
-	CONTROLS.IS_LSQ            = true; 
-	CONTROLS.CALL_EWALD        = false;
-	CONTROLS.FIT_ENER          = false;
-	CONTROLS.FIT_ENER_PER_ATOM = false;
-	CONTROLS.FIT_STRESS        = false;
-	CONTROLS.FIT_STRESS_ALL    = false;
-	CONTROLS.NSTRESS           = -1;
-	CONTROLS.NENER             = -1;
 	
 	NEIGHBOR_LIST.USE	   = true;
 	

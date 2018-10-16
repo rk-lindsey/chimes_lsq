@@ -1320,6 +1320,323 @@ void FRAME::update_ghost(int n_layers)
 	}	
 }
 
+
+void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS, vector<string> &TMP_ATOMTYPE,
+								 int i)
+// Read values from the xyzf file into the FRAME.
+{
+	TRAJ_INPUT >> ATOMS;
+		
+	// Read in line with box dimenstions
+	string header;
+	vector<string> tokens;
+
+	// Read line twice to get through newline from last input.
+	std::getline(TRAJ_INPUT, header);
+	std::getline(TRAJ_INPUT, header);
+
+	int ntokens = parse_space(header, tokens);
+
+	// Make sure we at least have boxlengths
+
+	if ( ntokens >= 3 ) 
+	{
+		BOXDIM.X = stod(tokens[0]);
+		BOXDIM.Y = stod(tokens[1]);
+		BOXDIM.Z = stod(tokens[2]);
+	} 
+	else 
+	{
+		cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
+		cout << "        Missing box length components." << endl;
+		cout << "        See offending line below." << endl;
+		cout << header << endl;
+		exit(1);			
+	}
+		
+	// If requested, check for stress tensors... keep in mind that the 
+	// number of tensors and the number of frames with tensors can vary
+
+	if((CONTROLS.NSTRESS < 0) || (i<CONTROLS.NSTRESS))
+	{
+		if(CONTROLS.FIT_STRESS)
+		{
+			if ( ntokens >= 6 ) 
+			{
+				STRESS_TENSORS.X = stod(tokens[3]);
+				STRESS_TENSORS.Y = stod(tokens[4]);
+				STRESS_TENSORS.Z = stod(tokens[5]);
+			} 
+			else 
+			{
+				cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
+				cout << "        Missing diagonal stress tensor components." << endl;
+				cout << "        See offending line below." << endl;
+				cout << header << endl;
+				exit(1);
+			}
+		}
+		else if(CONTROLS.FIT_STRESS_ALL)	// Expects as:xx yy zz xy xz yz // old: xx, xy, xz, yy, yx, yz, zx, zy, zz
+		{
+			// Read only the "upper" deviatoric components
+		
+			if ( ntokens >= 9 ) 
+			{
+				STRESS_TENSORS_X.X = stod(tokens[3]);
+				STRESS_TENSORS_Y.Y = stod(tokens[4]);
+				STRESS_TENSORS_Z.Z = stod(tokens[5]);
+					
+				STRESS_TENSORS_X.Y = stod(tokens[6]);
+				STRESS_TENSORS_X.Z = stod(tokens[7]);
+				STRESS_TENSORS_Y.Z = stod(tokens[8]);
+			} 
+			else 
+			{
+				cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
+				cout << "        Missing full stress tensor components." << endl;
+				cout << "        See offending line below." << endl;
+				cout << header << endl;
+				exit(1);
+			}
+		}
+	}
+	if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
+		if(CONTROLS.FIT_ENER) // We're fitting to the absolute energy, + an offset (column of 1's at end of A-matrix)
+			QM_POT_ENER = stod(tokens[tokens.size()-1]);
+
+	
+	// Check that outer cutoffs do not exceed half of the boxlength
+	// with consideration of layering
+		
+	for(int j=0; j<ATOM_PAIRS.size(); j++)
+	{
+		if( (  ATOM_PAIRS[j].S_MAXIM > 0.5* BOXDIM.X * (2*CONTROLS.N_LAYERS +1) 
+					 || ATOM_PAIRS[j].S_MAXIM > 0.5* BOXDIM.Y * (2*CONTROLS.N_LAYERS +1) 
+					 || ATOM_PAIRS[j].S_MAXIM > 0.5* BOXDIM.Z * (2*CONTROLS.N_LAYERS +1) ))
+		{
+#if WARN == TRUE
+			if (isatty(fileno(stdout)) && RANK == 0)
+			{
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Frame:                " << i << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Boxlengths:           " << BOXDIM.X << " " << BOXDIM.Y << " " << BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Layers:               " << CONTROLS.N_LAYERS << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Effective boxlengths: " << BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << BOXDIM.Z * (CONTROLS.N_LAYERS +1) << COUT_STYLE.ENDSTYLE << endl;
+			}
+			else if ( RANK == 0 ) 
+			{
+				cout << "WARNING: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<endl;
+				cout << "	Frame:                " << i << COUT_STYLE.ENDSTYLE << endl;
+				cout << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+				cout << "	Boxlengths:           " << BOXDIM.X << " " << BOXDIM.Y << " " << BOXDIM.Z << endl;
+				cout << "	Layers:               " << CONTROLS.N_LAYERS << endl;
+				cout << "	Effective boxlengths: " << BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << BOXDIM.Z * (CONTROLS.N_LAYERS +1) << endl;							
+			}
+
+#else
+			if (isatty(fileno(stdout)) && RANK == 0)
+			{
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Frame:                " << i << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Boxlengths:           " << BOXDIM.X << " " << BOXDIM.Y << " " << BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Layers:               " << CONTROLS.N_LAYERS << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Effective boxlengths: " << BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << BOXDIM.Z * (CONTROLS.N_LAYERS +1) << COUT_STYLE.ENDSTYLE << endl;
+				exit(0);
+			}
+			else if ( RANK == 0 ) 
+			{
+				cout << "ERROR: Outer cutoff greater than half at least one box length: "  << ATOM_PAIRS[j].S_MAXIM <<endl;
+				cout << "	Frame:                " << i << COUT_STYLE.ENDSTYLE << endl;
+				cout << "	Pair type:            " << ATOM_PAIRS[j].ATM1TYP << " " << ATOM_PAIRS[j].ATM2TYP << endl;		
+				cout << "	Boxlengths:           " << BOXDIM.X << " " << BOXDIM.Y << " " << BOXDIM.Z << endl;
+				cout << "	Layers:               " << CONTROLS.N_LAYERS << endl;
+				cout << "	Effective boxlengths: " << BOXDIM.X * (CONTROLS.N_LAYERS +1) << " " << BOXDIM.Y * (CONTROLS.N_LAYERS +1) << " " << BOXDIM.Z * (CONTROLS.N_LAYERS +1) << endl;
+				exit(0);
+			}
+
+#endif
+		}
+	}
+		
+	// Setup the trajectory-holding data object
+		
+	ATOMTYPE    .resize(ATOMS);		
+	COORDS      .resize(ATOMS);
+	FORCES      .resize(ATOMS);	// Use for read-in forces.
+	ACCEL       .resize(ATOMS); // Use for calculated forces in ZCalc_Ewald.
+	CHARGES     .resize(ATOMS);
+	ATOMTYPE_IDX.resize(ATOMS);
+		
+	if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
+		if(CONTROLS.FIT_ENER_PER_ATOM)
+			QM_POT_ENER_PER_ATOM.resize(ATOMS);
+			
+	// Read trajectory, convert to proper units, and apply PBC
+			
+	for (int j=0; j<ATOMS; j++)
+	{
+		TRAJ_INPUT >> ATOMTYPE[j];
+			
+		for(int k=0; k<TMP_ATOMTYPE.size(); k++)
+			if(ATOMTYPE[j] == TMP_ATOMTYPE[k])
+				ATOMTYPE_IDX[j] = k;
+			
+		TRAJ_INPUT >> COORDS[j].X;
+		TRAJ_INPUT >> COORDS[j].Y;
+		TRAJ_INPUT >> COORDS[j].Z;
+			
+		TRAJ_INPUT >> FORCES[j].X;
+		TRAJ_INPUT >> FORCES[j].Y;
+		TRAJ_INPUT >> FORCES[j].Z;
+
+		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
+			if(CONTROLS.FIT_ENER_PER_ATOM) // We're fitting per-atom energies. Read one per line.
+				TRAJ_INPUT >> QM_POT_ENER_PER_ATOM[j];
+
+		if (ATOM_PAIRS[0].PAIRTYP != "DFTBPOLY") // Convert forces to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
+		{
+			// Assume units are in Hartree/bohr
+				
+			FORCES[j].X *= 627.50960803*1.889725989;
+			FORCES[j].Y *= 627.50960803*1.889725989;
+			FORCES[j].Z *= 627.50960803*1.889725989;
+				
+				
+			// Assume units are in eV/A
+				
+			/*
+				FORCES[j].X *= 23.0609;
+				FORCES[j].Y *= 23.0609;
+				FORCES[j].Z *= 23.0609;
+			*/
+		}
+						
+		if(CONTROLS.WRAP_COORDS)	// Apply PBC (for cases of unwrapped coordinates)
+		{
+			COORDS[j].X -= floor(COORDS[j].X/BOXDIM.X)*BOXDIM.X;
+			COORDS[j].Y -= floor(COORDS[j].Y/BOXDIM.Y)*BOXDIM.Y;
+			COORDS[j].Z -= floor(COORDS[j].Z/BOXDIM.Z)*BOXDIM.Z;
+		}			
+			
+		// Assign atom charges.
+		if ( CONTROLS.IF_SUBTRACT_COUL ) 
+			for(int ii=0; ii< CONTROLS.NATMTYP; ii++)
+				if( ATOMTYPE[j] == ATOM_PAIRS[ii].ATM1TYP )
+				{
+					CHARGES[j] = ATOM_PAIRS[ii].ATM1CHG;
+					break;								
+				}
+			
+	}
+		
+	// If layering requested, replicate the system
+
+	build_layers(CONTROLS.N_LAYERS);
+		
+	if(i==0)
+	{
+		if ( (CONTROLS.N_LAYERS > 0) )	// Then ghost atoms are used 
+		{
+			if ( RANK == 0 ) 
+			{
+				cout << "	Reporting outcome of layering for first frame ONLY: " << endl;
+				cout << "	Real atoms:                   " << ATOMS << endl;
+				cout << "	Total atoms (ghost):          " << ALL_ATOMS << endl;
+				cout << "	Real box dimesntions:         " << BOXDIM.X << " " << BOXDIM.Y << " " << BOXDIM.Z << endl;
+				cout << "	Total box dimensions (ghost): " << BOXDIM.X * (2*CONTROLS.N_LAYERS + 1) << " " << BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1) << " " << BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1) << endl << endl;
+			}
+			
+			if(CONTROLS.WRAP_COORDS)
+			{
+				if ( RANK == 0 ) cout << "WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off" << endl;
+				CONTROLS.WRAP_COORDS = false;
+			}
+		}
+		else if ( RANK==0 ) // No ghost atoms.
+			cout << "WARNING: Ghost atoms/implicit layers are NOT being used." << endl;
+	}
+}
+
+void FRAME::build_layers(int N_LAYERS)
+// Build layers around the primitive unit cell for use in ghost atom calculations.
+{
+	
+	
+	int     TEMP_IDX;
+	XYZ     TEMP_XYZ;
+	XYZ_INT TEMP_LAYER;
+	
+	ALL_COORDS   .resize(ATOMS);
+	LAYER_IDX    .resize(ATOMS);
+	WRAP_IDX     .resize(ATOMS);
+	ATOMTYPE     .resize(ATOMS) ;
+	ATOMTYPE_IDX .resize(ATOMS) ;
+	CHARGES      .resize(ATOMS) ;
+	PARENT       .resize(ATOMS);
+
+	// Set the first ATOMS atoms of ALL_COORDS equivalent to the "real" COORDS
+	// Then wrap those ALL_COORDS into primitive cell
+	
+	ALL_ATOMS = ATOMS;	// Default setting: for zero layers
+	
+	for (int a1=0; a1<ATOMS; a1++) 
+	{
+		WRAP_IDX[a1].X = floor(COORDS[a1].X/BOXDIM.X);
+		WRAP_IDX[a1].Y = floor(COORDS[a1].Y/BOXDIM.Y);
+		WRAP_IDX[a1].Z = floor(COORDS[a1].Z/BOXDIM.Z);
+
+		ALL_COORDS[a1].X = COORDS[a1].X - WRAP_IDX[a1].X * BOXDIM.X;
+		ALL_COORDS[a1].Y = COORDS[a1].Y - WRAP_IDX[a1].Y * BOXDIM.Y;
+		ALL_COORDS[a1].Z = COORDS[a1].Z - WRAP_IDX[a1].Z * BOXDIM.Z;
+		
+		PARENT    [a1] = a1;
+		LAYER_IDX [a1].X = LAYER_IDX [a1].Y = LAYER_IDX [a1].Z = 0;
+	}
+	
+	if(N_LAYERS>0 )
+	{	
+		TEMP_IDX = ATOMS;	
+
+		for(int n1 = -N_LAYERS; n1<=N_LAYERS; n1++)
+		{
+			for(int n2 = -N_LAYERS; n2<=N_LAYERS; n2++)
+			{
+				for(int n3 = -N_LAYERS; n3<=N_LAYERS; n3++)
+				{	
+					if (n1 == 0 && n2 == 0 && n3 == 0 ) 
+						continue;
+					else
+					{		
+						for(int a1=0; a1<ATOMS; a1++)
+						{
+							TEMP_XYZ.X = ALL_COORDS[a1].X + n1 * BOXDIM.X;
+							TEMP_XYZ.Y = ALL_COORDS[a1].Y + n2 * BOXDIM.Y;
+							TEMP_XYZ.Z = ALL_COORDS[a1].Z + n3 * BOXDIM.Z;
+				
+							TEMP_LAYER.X = n1;
+							TEMP_LAYER.Y = n2;
+							TEMP_LAYER.Z = n3;
+
+							ALL_COORDS	.push_back(TEMP_XYZ);
+							LAYER_IDX    .push_back(TEMP_LAYER);
+							ATOMTYPE     .push_back(ATOMTYPE    [a1]);
+							ATOMTYPE_IDX .push_back(ATOMTYPE_IDX[a1]);
+							CHARGES      .push_back(CHARGES     [a1]);
+							PARENT       .push_back(a1);
+				
+							TEMP_IDX++;
+						}
+					}
+				}
+			}
+		}
+		ALL_ATOMS = TEMP_IDX;
+	}		
+}
+
+
 void PAIRS::set_cheby_vals()
 // Calculate Chebyshev xmin, xmax, xavg.
 {
