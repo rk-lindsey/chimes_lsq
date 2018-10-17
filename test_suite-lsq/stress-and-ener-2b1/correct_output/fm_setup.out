@@ -70,21 +70,21 @@ Reading in the trajectory file...
 WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 ...trajectory file read successful: 
 
-Setting up the matricies for A, Coulomb forces, and overbonding...
+Setting up the matrices for A, Coulomb forces, and overbonding...
 ...matrix setup complete: 
 
-...Populating the matricies for A, Coulomb forces, and overbonding...
+...Populating the matrices for A, Coulomb forces, and overbonding...
 
 ...matrix population complete: 
 
-Printing matricies...
+Printing matrices...
+	...A matrix length (forces): 14256
+
 Per-atom type energies will be provided at the end of the parameter file.
 Values will correspond to the following atom types, in order: 
 	C 60
 	O 8
 	H 64
-	...A matrix length (forces): 14256
-
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.189
 		1	H H	0.860

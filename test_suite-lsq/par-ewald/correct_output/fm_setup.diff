@@ -1,19 +1,42 @@
-*** correct_output/fm_setup.out	Thu Oct  4 14:31:23 2018
---- current_output/fm_setup.out	Fri Oct  5 19:47:53 2018
+*** correct_output/fm_setup.out	Fri Oct 12 12:31:50 2018
+--- current_output/fm_setup.out	Wed Oct 17 12:19:48 2018
 ***************
-*** 84,90 ****
+*** 61,70 ****
+  WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+  ...trajectory file read successful: 
+  
+! Setting up the matricies for A, Coulomb forces, and overbonding...
+  ...matrix setup complete: 
+  
+! ...Populating the matricies for A, Coulomb forces, and overbonding...
+  
+  	Ewald_Deriv:
+  	R-Space Ewald cutoff      =  4.304565e+00
+--- 61,70 ----
+  WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+  ...trajectory file read successful: 
+  
+! Setting up the matrices for A, Coulomb forces, and overbonding...
+  ...matrix setup complete: 
+  
+! ...Populating the matrices for A, Coulomb forces, and overbonding...
+  
+  	Ewald_Deriv:
+  	R-Space Ewald cutoff      =  4.304565e+00
+***************
+*** 83,89 ****
+  	Number of Ewald K-vectors = 238
   ...matrix population complete: 
   
-  Printing matricies...
-! 	...A matrix length: 99
+! Printing matricies...
+  	...A matrix length (forces): 28512
   
   	Minimum distances between atoms: (Angstr.)
-  		0	O O	1.860
---- 84,90 ----
+--- 83,89 ----
+  	Number of Ewald K-vectors = 238
   ...matrix population complete: 
   
-  Printing matricies...
-! 	...A matrix length (forces): 28512
+! Printing matrices...
+  	...A matrix length (forces): 28512
   
   	Minimum distances between atoms: (Angstr.)
-  		0	O O	1.860
