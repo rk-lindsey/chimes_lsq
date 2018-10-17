@@ -62,10 +62,11 @@ fi
 for i in $MD_JOBS
 do
 
-	echo " "
-	echo "Running $i test..."
-	
-	PASS=true
+	 if ! test_dir $i ; then
+		  continue 
+	 fi
+
+	 PASS=true
 	
 	cd $i
 
@@ -138,12 +139,8 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 	 for i in $LSQ_FORCE_JOBS
 	 do
 
-		  if [ -d "$i" ] ; then
-				echo " "
-				echo "Running $i test..."
-		  else
-				echo "$i directory was not found"
-				continue
+		  if ! test_dir $i ; then
+				continue 
 		  fi
 		  
 		  PASS=true
@@ -204,6 +201,9 @@ fi
 echo "PERFORMING MAKEFILE TESTS"
 for i in $MD_MAKE_JOBS
 do
+	 if ! test_dir $i ; then
+		  continue 
+	 fi
 	 cd $i ; make NP=${NP}
 	 echo "Testing $i"
 	 if [ $? -ne 0 ] ; then

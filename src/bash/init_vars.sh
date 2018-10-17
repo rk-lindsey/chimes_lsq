@@ -90,3 +90,17 @@ function init_test_vars
 	 NUM_THREADS=$NP
 	 export OMP_NUM_THREADS=$NUM_THREADS	
 }
+
+function test_dir
+# Test to see that a directory exists, and print an informational message.
+{
+	if [[ -d "$1" ]] ; then
+		 echo " "
+		 echo "Running $1 test..."
+		 return 0
+	else
+		 echo " "
+		 echo "$1 directory was not found"
+		 return 1
+	fi
+}

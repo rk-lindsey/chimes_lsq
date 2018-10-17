@@ -1,10 +1,9 @@
 #! /bin/bash
-# NOTE: The path below needs to point to the "lsq-new-md-fmt.py" version of the lsq code.
-#       If you want to use other versions, you'll probably need to modify the inputs that
-#       are sent to the script (down below)
+# Usage:  With no arguments, all tests are run.  Otherwise, only tests specified on the command line are run.
+#         run_test_suite.sh 'lsq-jobs' 'make-jobs'
+#         'lsq-jobs' is a list of lsq tests that are run by the script.  This argument may be an empty string.
+#         'make-jobs' is a list of lsq tests that are run by makefiles.  This argument may be an empty string.
 #
-# Usage:  With no arguments, all tests are run.  Otherwise, only tests specified on the command line are run (LEF).
-
 ###############################################################
 #
 # Determine the location of necessary files
@@ -21,8 +20,8 @@ then
 	 JOBS=$LSQ_ALL_JOBS
 	 MAKE_JOBS=$LSQ_MAKE_JOBS
 else
-	 JOBS=$*
-	 MAKE_JOBS=""
+	 JOBS=$1
+	 MAKE_JOBS=$2
 fi
 
 TESTSU_BASE=`pwd -P` #`dirname $0`
@@ -62,25 +61,17 @@ ALL_PASSED=true
 for i in $JOBS
 do
 
-	echo " "
-	echo "Running $i test..."
+	 if ! test_dir $i ; then
+		  continue 
+	 fi
+		  
+	 PASS=true
 
-	PASS=true
-
-	cd $i
-	rm -rf A.txt b.txt params.header diff-* b-labeled.txt 
+	 cd $i
+	 rm -rf A.txt b.txt params.header diff-* b-labeled.txt 
 	
-	# Strange things happen when NP >> NF. The below 4b
-	# test uses only 10 frames because otherwise the test
-	# would take forever 
 
-	TMP_NP=$NP
-	
-	if [[ $i == "stress-and-ener-4b" ]] ; then
-		TMP_NP=0
-	fi
-
-	if [[ $TMP_NP -eq 0 || $TMP_NP -eq 1 ]] ; then
+	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
 		 if ../chimes_lsq < fm_setup.in > fm_setup.out ; then
 			  echo 'Chimes_lsq succeeded'
 			  SUCCESS=1
@@ -154,8 +145,9 @@ echo "VALIDATING FOR SVD SCRIPT..."
 for i in $JOBS
 do
 
-	echo " "
-	echo "Running $i test..."
+	if ! test_dir $i ; then
+		 continue 
+	fi
 
 	PASS=true
 	TECHNICAL_PASS=true
@@ -246,6 +238,9 @@ done
 echo "Running Makefile jobs"
 
 for job in $MAKE_JOBS ; do
+	 if ! test_dir $i ; then
+		  continue 
+	 fi
 	 cd $job
 	 if make all ; then
 		  echo "$job succeeded"

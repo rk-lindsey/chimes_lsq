@@ -50,8 +50,8 @@ then
 	 MAKE_JOBS=$LSQ_MAKE_JOBS
 else
 # Take JOBS from command line.
-	 JOBS=$*
-	 MAKE_JOBS=""
+	 JOBS=$1
+	 MAKE_JOBS=$2
 fi
 
 echo ""
@@ -67,18 +67,13 @@ do
 	# test uses only 10 frames because otherwise the test
 	# would take forever 
 
-	TMP_RUN_JOB=$RUN_JOB
-	
-	if [[ $i == "stress-and-ener-4b" ]] ; then
-		TMP_RUN_JOB=""
+	if ! test_dir $i ; then
+		 continue 
 	fi
-
-	echo " "
-	echo "Running $i test..."
 
 	cd $i
 
-	if $TMP_RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out ; then
+	if $RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out ; then
 		 echo "Chimes_lsq succeeded"
 		 SUCCESS=1
 	else
@@ -105,9 +100,10 @@ echo "SETTING UP FOR SVD SCRIPT..."
 
 for i in  $JOBS
 do
-	echo " "
-	echo "Running $i test..."
-	echo "Using command $RUN_LSQ_PYTHON_CODE"
+
+	if ! test_dir $i ; then
+		 continue 
+	fi
 
 	cd $i/current_output
 	
