@@ -168,6 +168,7 @@ int main(int argc, char* argv[])
 #if not defined(LINK_LAMMPS)
 	
   JOB_CONTROL CONTROLS;			// Declare the data object that will hold the main simulation control variables
+	CONTROLS.IS_LSQ            = false ; 
   NEIGHBORS   NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
 	
   // Data objects to hold coefficients for different force field types, and for FF printing (if requested)

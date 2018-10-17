@@ -264,8 +264,7 @@ JOB_CONTROL(): FIT_COUL(false),
 		FCUT_LINE = "CUBIC";
 		FIT_ENER_EVER = false ;
 
-		COMPARE_FORCE     = true;	// is this variable really necessary for LSQ?
-		IS_LSQ            = true; 
+		COMPARE_FORCE     = false;	// is this variable really necessary for LSQ?
 		CALL_EWALD        = false;
 		FIT_ENER          = false;
 		FIT_ENER_PER_ATOM = false;

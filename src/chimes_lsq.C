@@ -100,6 +100,8 @@ int main(int argc, char* argv[])
 	vector<CHARGE_CONSTRAINT> CHARGE_CONSTRAINTS;	// Specifies how we constrain charge fitting
 
 	JOB_CONTROL 	CONTROLS;			// Will hold job controls shared by both lsq and md
+	CONTROLS.IS_LSQ            = true; 
+
 	
 	vector<int>	INT_PAIR_MAP;
 
