@@ -1321,7 +1321,7 @@ void FRAME::update_ghost(int n_layers)
 }
 
 
-void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS, vector<string> &TMP_ATOMTYPE,
+void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE,
 								 int i)
 // Read values from the xyzf file into the FRAME.
 {
@@ -1478,11 +1478,18 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, JOB_CONTROL &CONTROLS, vector<PAIRS>
 	for (int j=0; j<ATOMS; j++)
 	{
 		TRAJ_INPUT >> ATOMTYPE[j];
-			
-		for(int k=0; k<TMP_ATOMTYPE.size(); k++)
+
+		int k ;
+		for( k=0; k<TMP_ATOMTYPE.size(); k++)
 			if(ATOMTYPE[j] == TMP_ATOMTYPE[k])
+			{
 				ATOMTYPE_IDX[j] = k;
-			
+				break ;
+			}
+
+		if ( k == TMP_ATOMTYPE.size() )
+			EXIT_MSG("Did not recognize atom type " + ATOMTYPE[j]) ;
+		
 		TRAJ_INPUT >> COORDS[j].X;
 		TRAJ_INPUT >> COORDS[j].Y;
 		TRAJ_INPUT >> COORDS[j].Z;
@@ -1544,14 +1551,11 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, JOB_CONTROL &CONTROLS, vector<PAIRS>
 				cout << "	Reporting outcome of layering for first frame ONLY: " << endl;
 				cout << "	Real atoms:                   " << ATOMS << endl;
 				cout << "	Total atoms (ghost):          " << ALL_ATOMS << endl;
-				cout << "	Real box dimesntions:         " << BOXDIM.X << " " << BOXDIM.Y << " " << BOXDIM.Z << endl;
+				std::streamsize p = cout.precision() ;
+				cout.precision(6) ;
+				cout << "	Real box dimensions:         " << BOXDIM.X << " " << BOXDIM.Y << " " << BOXDIM.Z << endl;
 				cout << "	Total box dimensions (ghost): " << BOXDIM.X * (2*CONTROLS.N_LAYERS + 1) << " " << BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1) << " " << BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1) << endl << endl;
-			}
-			
-			if(CONTROLS.WRAP_COORDS)
-			{
-				if ( RANK == 0 ) cout << "WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off" << endl;
-				CONTROLS.WRAP_COORDS = false;
+				cout.precision(p) ;
 			}
 		}
 		else if ( RANK==0 ) // No ghost atoms.

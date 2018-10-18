@@ -325,7 +325,7 @@ public:
 	void 		update_ghost(int n_layers);
 	inline int 	get_atomtype_idx(int atom);
 	void SET_NATOMS_OF_TYPE();
-	void READ_XYZF(ifstream &TRAJ_INPUT, JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS, vector<string> &TMP_ATOMTYPE,
+	void READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE,
 								 int i);
 	void build_layers(int N_LAYERS) ;
 };
@@ -565,9 +565,9 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 //////////////////////////////////////////
 
 
-void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, int FRAME, A_MAT & A_MATRIX, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST) ;
+void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, A_MAT & A_MATRIX, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST) ;
 
-void SubtractCoordForces (FRAME & TRAJECTORY, bool calc_deriv, int FRAME, A_MAT & A_MATRIX,  vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode);
+void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, A_MAT & A_MATRIX, vector<PAIRS> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode) ;
 
 void SubtractEwaldForces (FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
 
@@ -575,7 +575,7 @@ void ZCalc_Ewald         (FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS 
 
 void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc, XYZ boxdim);
 
-void ZCalc_Ewald_Deriv   (FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, int FRAME, A_MAT & A_MATRIX, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS);
+void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_MAT & A_MATRIX, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS) ;
 
 //////////////////////////////////////////
 //
