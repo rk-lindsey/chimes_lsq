@@ -41,6 +41,10 @@ static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, C
 static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 															  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS) ;
 static void print_map_file(map<string,int> PAIR_MAP, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS) ;
+static int process_frame(A_MAT &A_MATRIX, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, vector<PAIRS> &ATOM_PAIRS,
+												 map<string,int> &PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST,
+												 CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, vector<CHARGE_CONSTRAINT> &CHARGE_CONSTRAINTS,
+												 int i, int istart)  ;
 
 // Print the params.header file.
 // Global variables declared as externs in functions.h, and declared in functions.C
@@ -253,8 +257,6 @@ int main(int argc, char* argv[])
 #endif
 
 
-	double 	NEIGHBOR_PADDING = 0.3;
-
 	int istart, iend;
 
 	// Each processor only calculates certain frames.  Calculate which frames to use.
@@ -279,62 +281,9 @@ int main(int argc, char* argv[])
 
 		if ( i >= istart && i <= iend )
 		{
-		
-			// NOTE: WE CONTINUALLY RE-USE THE 0th entry of A_MATRIX TO SAVE MEMORY.
-			A_MATRIX.INITIALIZE(CONTROLS, SYSTEM, ATOM_PAIRS.size() ) ;
-
-#if VERBOSITY == 1
-			if (RANK == 0 && i == istart )
-			{
-				cout << "...matrix setup complete: " << endl << endl;
-				cout << "...Populating the matrices for A, Coulomb forces, and overbonding..." << endl << endl;
-			}
-#endif
-
-			// Only include stress tensor data for first NSTRESS frames..
-			if(i >= CONTROLS.NSTRESS)
-			{
-				CONTROLS.FIT_STRESS     = false;	
-				CONTROLS.FIT_STRESS_ALL = false;
-			}
-		
-			if(i >= CONTROLS.NENER)
-			{
-				CONTROLS.FIT_ENER          = false;	
-				//CONTROLS.FIT_ENER_PER_ATOM = false;
-			}		
-	
-			// This output is specific to the number of processors.
-		
-			if(NPROCS==1)
-				cout << "	Processing frame: " << setw(5) << i+1 << " of: " << CONTROLS.NFRAMES << endl;
-
-			// Use very little padding because we will update neighbor list for every frame.
-		
-			NEIGHBOR_LIST.INITIALIZE(SYSTEM, NEIGHBOR_PADDING);
-			NEIGHBOR_LIST.DO_UPDATE (SYSTEM, CONTROLS);		
-
-			ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, SYSTEM, A_MATRIX, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
-		
-			if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
-			{
-				//SubtractCoordForces(SYSTEM, false, i, A_MATRIX,  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
-				cout << "Feature deprecated - exiting." << endl;
-				exit_run(0);
-			}
-		
-			if (CONTROLS.IF_SUBTRACT_COUL) 
-				SubtractEwaldForces(SYSTEM, NEIGHBOR_LIST, CONTROLS);
-
-			if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
-			{
-				SubtractCoordForces(SYSTEM, true, A_MATRIX, ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);			
-				//cout << "Feature deprecated - exiting." << endl;
-				//exit_run(0);
-			}
-
-			A_MATRIX.PRINT_FRAME(CONTROLS, SYSTEM, ATOM_PAIRS, CHARGE_CONSTRAINTS, i) ;
-			total_forces += 3 * A_MATRIX.FORCES.size() ;
+			total_forces += process_frame(A_MATRIX, CONTROLS, SYSTEM, ATOM_PAIRS, PAIR_MAP,
+																		INT_PAIR_MAP, NEIGHBOR_LIST, TRIPS, QUADS, CHARGE_CONSTRAINTS,
+																		i, istart) ;
 		}
 	}
 
@@ -1660,4 +1609,71 @@ static void print_map_file(map<string,int> PAIR_MAP, CLUSTER_LIST &TRIPS, CLUSTE
 	
 	MAPFILE.close();
 
+}
+
+static int process_frame(A_MAT &A_MATRIX, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, vector<PAIRS> &ATOM_PAIRS,
+												 map<string,int> &PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST,
+												 CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, vector<CHARGE_CONSTRAINT> &CHARGE_CONSTRAINTS,
+												 int i, int istart) 
+// Process the ith frame of the A_MATRIX.
+{
+
+	double 	NEIGHBOR_PADDING = 0.3;
+
+	// NOTE: WE CONTINUALLY RE-USE THE 0th entry of A_MATRIX TO SAVE MEMORY.
+	A_MATRIX.INITIALIZE(CONTROLS, SYSTEM, ATOM_PAIRS.size() ) ;
+
+#if VERBOSITY == 1
+	if (RANK == 0 && i == istart )
+	{
+		cout << "...matrix setup complete: " << endl << endl;
+		cout << "...Populating the matrices for A, Coulomb forces, and overbonding..." << endl << endl;
+	}
+#endif
+
+	// Only include stress tensor data for first NSTRESS frames..
+	if(i >= CONTROLS.NSTRESS)
+	{
+		CONTROLS.FIT_STRESS     = false;	
+		CONTROLS.FIT_STRESS_ALL = false;
+	}
+		
+	if(i >= CONTROLS.NENER)
+	{
+		CONTROLS.FIT_ENER          = false;	
+		//CONTROLS.FIT_ENER_PER_ATOM = false;
+	}		
+	
+	// This output is specific to the number of processors.
+		
+	if(NPROCS==1)
+		cout << "	Processing frame: " << setw(5) << i+1 << " of: " << CONTROLS.NFRAMES << endl;
+
+	// Use very little padding because we will update neighbor list for every frame.
+		
+	NEIGHBOR_LIST.INITIALIZE(SYSTEM, NEIGHBOR_PADDING);
+	NEIGHBOR_LIST.DO_UPDATE (SYSTEM, CONTROLS);		
+
+	ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, SYSTEM, A_MATRIX, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
+		
+	if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
+	{
+		//SubtractCoordForces(SYSTEM, false, i, A_MATRIX,  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
+		cout << "Feature deprecated - exiting." << endl;
+		exit_run(0);
+	}
+		
+	if (CONTROLS.IF_SUBTRACT_COUL) 
+		SubtractEwaldForces(SYSTEM, NEIGHBOR_LIST, CONTROLS);
+
+	if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
+	{
+		SubtractCoordForces(SYSTEM, true, A_MATRIX, ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);			
+		//cout << "Feature deprecated - exiting." << endl;
+		//exit_run(0);
+	}
+
+	A_MATRIX.PRINT_FRAME(CONTROLS, SYSTEM, ATOM_PAIRS, CHARGE_CONSTRAINTS, i) ;
+	int total_forces = 3 * A_MATRIX.FORCES.size() ;
+	return total_forces ;
 }
