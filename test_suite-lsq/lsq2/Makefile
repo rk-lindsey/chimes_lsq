@@ -62,6 +62,10 @@ params.dowlqn.1.0e-04.txt: A.txt
 	$(PYTHON) ../../src/lsq2.py --algorithm=dowlqn --cores=$(NP) --nodes=$(NODES) --alpha=1.0e-04 --tol=1.0e-06 --memory=30 > params.dowlqn.1.0e-04.txt
 	mv params.dowlqn.1.0e-04.txt current_output/
 
+params.dowlqn.beta.txt: A.txt
+	$(PYTHON) ../../src/lsq2.py --algorithm=dowlqn --cores=$(NP) --nodes=$(NODES) --alpha=1.0e-04 --tol=1.0e-06 --memory=30 --beta=1.0e-02 > params.dowlqn.beta.txt
+	mv params.dowlqn.beta.txt current_output/
+
 params.svd.1.0e-04.txt: A.txt
 	$(PYTHON) ../../src/lsq2.py --algorithm=svd --eps=1.0e-04 > params.svd.1.0e-04.txt
 	mv params.svd.1.0e-04.txt current_output/

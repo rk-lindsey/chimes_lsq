@@ -44,6 +44,7 @@ Reading input file...
 		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
 		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
 
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 
 Note: Will use cubic scaling of: 1
 
@@ -52,16 +53,15 @@ Note: Will use cubic scaling of: 1
 The number of two-body non-coulomb parameters is: 24
 
 Reading in the trajectory file...
-	Reporting outcome of layering for first frame ONLY: 
-	Real atoms:                   96
-	Total atoms (ghost):          2592
-	Real box dimesntions:         8.60913 8.60913 8.60913
-	Total box dimensions (ghost): 25.8274 25.8274 25.8274
-
-WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 ...trajectory file read successful: 
 
 Setting up the matrices for A, Coulomb forces, and overbonding...
+	Reporting outcome of layering for first frame ONLY: 
+	Real atoms:                   96
+	Total atoms (ghost):          2592
+	Real box dimensions:         8.60913 8.60913 8.60913
+	Total box dimensions (ghost): 25.8274 25.8274 25.8274
+
 ...matrix setup complete: 
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...

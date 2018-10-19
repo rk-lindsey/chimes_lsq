@@ -57,6 +57,7 @@ WARNING:  The following input line was ignored:
 WARNING:  The following input line was ignored:
  OOOOOO OO OO OO 6.5 6.5 6.5
 # FCUTTYP #:         TERSOFF 0.5      ... for all Chebyshev interactions
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 
 Note: Will use cubic scaling of: 1
 
@@ -11110,16 +11111,15 @@ The number of three-body Chebyshev parameters is: 598
 The number of four-body  Chebyshev parameters is: 2688
 
 Reading in the trajectory file...
-	Reporting outcome of layering for first frame ONLY: 
-	Real atoms:                   132
-	Total atoms (ghost):          3564
-	Real box dimesntions:         10.650000 10.650000 10.650000
-	Total box dimensions (ghost): 31.950000 31.950000 31.950000
-
-WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 ...trajectory file read successful: 
 
 Setting up the matrices for A, Coulomb forces, and overbonding...
+	Reporting outcome of layering for first frame ONLY: 
+	Real atoms:                   132
+	Total atoms (ghost):          3564
+	Real box dimensions:         10.650000 10.650000 10.650000
+	Total box dimensions (ghost): 31.950000 31.950000 31.950000
+
 ...matrix setup complete: 
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...

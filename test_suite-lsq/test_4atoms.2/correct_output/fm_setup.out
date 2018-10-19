@@ -38,6 +38,7 @@ Reading input file...
 		Atom type idxs:  1 0 Pair name:   HC Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
 # FCUTTYP #: 	CUBIC      ... for all Chebyshev interactions
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 
 Note: Will use cubic scaling of: 1
 
@@ -4255,16 +4256,15 @@ The number of three-body Chebyshev parameters is: 132
 The number of four-body  Chebyshev parameters is: 1140
 
 Reading in the trajectory file...
-	Reporting outcome of layering for first frame ONLY: 
-	Real atoms:                   4
-	Total atoms (ghost):          108
-	Real box dimesntions:         59.000000 59.000000 59.000000
-	Total box dimensions (ghost): 177.000000 177.000000 177.000000
-
-WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 ...trajectory file read successful: 
 
 Setting up the matrices for A, Coulomb forces, and overbonding...
+	Reporting outcome of layering for first frame ONLY: 
+	Real atoms:                   4
+	Total atoms (ghost):          108
+	Real box dimensions:         59.000000 59.000000 59.000000
+	Total box dimensions (ghost): 177.000000 177.000000 177.000000
+
 ...matrix setup complete: 
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
