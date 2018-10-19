@@ -130,7 +130,7 @@ Attempting to read pairtype...
 
      
      Pair charges modified for exact neutrality:
-       OO 96.100542105
+       OO 96.100542106
        HH 24.025161746
        OH -48.050297272
 Atom properties:
@@ -273,8 +273,8 @@ Force field summary:
 		107 -17.2618
 		108 1.0685
 		109 31.9617
-		110 -0.0000
-		111 0.0000
+		110 0.0000
+		111 -0.0000
 
 		pair type...smin...smax...sdelta...
 		HH 0.6000 6.0000 0.1000 
@@ -389,7 +389,7 @@ Force field summary:
 		107 -1.0271
 		108 -0.2236
 		109 -16.1343
-		110 0.0000
+		110 -0.0000
 		111 -0.0000
 
 		pair type...smin...smax...sdelta...
