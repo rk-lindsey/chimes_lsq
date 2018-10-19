@@ -596,11 +596,11 @@ void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type)
 //
 //////////////////////////////////////////
 
-static void ZCalc_Spline_Deriv  (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+static void ZCalc_Spline_Deriv  (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX,  map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
-static void ZCalc_Poly_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);	
+static void ZCalc_Poly_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX,  map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);	
 
-static void ZCalc_InvR_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
+static void ZCalc_InvR_Deriv    (JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX,  map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST);
 
 //////////////////////////////////////////
 //
@@ -623,7 +623,8 @@ static void ZCalc_Cluster(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF
 //
 ////////////////////////////////////////////////////////////
 
-void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, A_MAT & A_MATRIX, const int nlayers, bool if_3b_cheby, map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST)
+void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, A_MAT & A_MATRIX,
+									map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST)
 // Controls which functions are used to calculate derivatives
 {
 	// Check for control option compatability:
@@ -661,7 +662,7 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 		ZCalc_Ewald_Deriv(FRAME_SYSTEM, FF_2BODY, A_MATRIX, PAIR_MAP, NEIGHBOR_LIST, CONTROLS);	
 	
     	if ( FF_2BODY[0].PAIRTYP == "SPLINE" )
-		 ZCalc_Spline_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
+		 ZCalc_Spline_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, A_MATRIX, PAIR_MAP, NEIGHBOR_LIST);
 	
 	else if ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" )
 	{
@@ -673,8 +674,8 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 	  if ( FF_2BODY[0].SNUM > 0)
 		 cheby.Deriv_2B(A_MATRIX) ;
 	
-	  if (if_3b_cheby)
-		 cheby.Deriv_3B(A_MATRIX, TRIPS) ;
+	  if (CONTROLS.USE_3B_CHEBY)
+		 cheby.Deriv_3B(A_MATRIX,TRIPS) ;
 			
 		if (CONTROLS.USE_4B_CHEBY) 
 		{
@@ -687,10 +688,10 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 	}			
 
     	else if ( FF_2BODY[0].PAIRTYP == "DFTBPOLY" )	
-		 ZCalc_Poly_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
+		 ZCalc_Poly_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, A_MATRIX, PAIR_MAP, NEIGHBOR_LIST);
 
     	else if ( FF_2BODY[0].PAIRTYP == "INVRSE_R" )	
-		 ZCalc_InvR_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, A_MATRIX, nlayers, PAIR_MAP, NEIGHBOR_LIST);
+		 ZCalc_InvR_Deriv(CONTROLS, FRAME_SYSTEM, FF_2BODY, A_MATRIX, PAIR_MAP, NEIGHBOR_LIST);
 
     	else 
     {
@@ -700,7 +701,7 @@ void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIS
 }	
 
 // FUNCTION UPDATED
-static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)		   
+static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX,  map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)		   
 {
 	// Original comment: Calculate derivatives of the forces wrt the spline parameters. Stores minimum distance between a pair of atoms in minD[i].
 	// New Note: This doesn't actually calcuate any derivatives.. it is just populating A with the cubic hermite basis polynomials needed for fitting
@@ -954,7 +955,7 @@ static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PA
 }
 
 // FUNCTION UPDATED
-static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)		
+static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX,  map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)		
 // Calculate derivatives of the forces wrt to inverse pair distance to various powers. Stores minimum distance between a pair of atoms in minD[i].
 {
 	XYZ RAB; 		// Replaces  Rab[3];
@@ -1088,7 +1089,7 @@ static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 }
 
 // FUNCTION UPDATED
-static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX, const int nlayers, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)	
+static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIRS> & FF_2BODY, A_MAT & A_MATRIX, map<string,int> PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)	
 // Calculate derivatives of the forces wrt the DFTB Erep parameters.
 {	
 	XYZ RAB; 		// Replaces  Rab[3];
@@ -1509,10 +1510,10 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	/* 
 
 	else if ( pair_type == INVERSE_R ) 	
-		ZCalc_SR_Analytic(Coord,Lbc, Latcons,nlayers,nat,smin,smax,snum, SForce,Vtot, Pxyz, params);
+		ZCalc_SR_Analytic(Coord,Lbc, Latcons,nat,smin,smax,snum, SForce,Vtot, Pxyz, params);
 
 	else if ( pair_type == STILLINGER )  // SAVE THIS FOR SECOND TO LAST FOR SIMILAR REASONS  
-		ZCalc_Stillinger(Coord,Lbc, Latcons,nlayers,nat,smax, SForce,Vtot,Pxyz);
+		ZCalc_Stillinger(Coord,Lbc, Latcons,nat,smax, SForce,Vtot,Pxyz);
 
 	else 
 		EXIT_MSG("Error: Unknown pair type", pair_type)
