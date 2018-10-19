@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--weights", default="None",help='weight file')
     parser.add_argument("--test-suite", type=bool, default=False,help='output for test suite')
     parser.add_argument("--alpha", type=float, default=1.0e-04,help='Lasso or ridge regularization')
+    parser.add_argument("--beta",type=float, default=0.0, help='DOWLQN L2 regularization')
     parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
     parser.add_argument("--tol", type=float, default=1.0e-05, help='OWLQN or DOWLQN tolerance')
     parser.add_argument("--cores", type=int, default=8, help='DOWLQN number of cores')
@@ -67,9 +68,10 @@ def main():
         from sklearn import linear_model
         from sklearn import preprocessing
 
-    # Regularization value.
+    # Regularization values
     alpha_val = args.alpha
-
+    beta_val  = args.beta
+    
     # Tolerance and memory for OWLQN/DOWLQN
     tol = args.tol
     memory = args.memory
@@ -269,12 +271,12 @@ def main():
         nvars = np
 
     elif algorithm == 'owlqn':
-        x = fit_owlqn(A, b, alpha_val,tol,memory)
+        x = fit_owlqn(A, b, alpha_val, beta_val, tol,memory)
         np = count_nonzero_vars(x)
         nvars = np
 
     elif algorithm == 'dowlqn':
-        x = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, tol, memory)
+        x = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, beta_val, tol, memory)
         np = count_nonzero_vars(x)
         nvars = np
 
@@ -717,7 +719,7 @@ def count_nonzero_vars(x):
             np = np + 1
     return np
 
-def fit_owlqn(A,b,alpha_val,tol,memory):
+def fit_owlqn(A,b,alpha_val,beta_val,tol,memory):
 ## Use the OWLQN fitting algorithm
     print '! OWLQN algorithm for LASSO used'
     print '! OWLQN alpha = ' + str(alpha_val)
@@ -744,7 +746,7 @@ def fit_owlqn(A,b,alpha_val,tol,memory):
         sys.exit(1)
 
 
-def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, tol, memory):
+def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory):
 ## Use the Distributed OWLQN fitting algorithm
     print '! DOWLQN algorithm for LASSO used'
     print '! DOWLQN alpha = ' + str(alpha_val)
@@ -755,15 +757,10 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, tol, memory):
     exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
     exepath = exepath + dowlqn_file
     if os.path.exists(dowlqn_file):
-        command = ( exepath
-        + " Amm.txt bmm.txt "
-        + str(alpha_val)
-        + " fit.txt -ls -tol "
-        + str(tol)
-        + " -m "
-        + str(memory)
-        + " >& dowlqn.log" )
-
+        command = ("{0} Amm.txt bmm.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4} >& dowlqn.log".format(
+                            exepath, alpha_val, tol, memory, beta_val)
+                   )
+        
         sys.stderr.write("Running " + command + "\n")
 
         os.system(command)
