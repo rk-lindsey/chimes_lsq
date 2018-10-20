@@ -224,7 +224,8 @@ struct JOB_CONTROL
   bool	USE_PARTIAL_CHARGES;	// Will there be any charges in the system?
 
   Cheby_trans CHEBY_TYPE;	// How will distance be transformed?
-  string	INFILE;		// Input trajectory file
+  vector<string> INFILE;	// Input trajectory file
+  vector<int> INFILE_FRAMES;	// How many frames should we read from each file?
   
   // These variables are temporary fixes - soon we will have a class to do all input reading
   
@@ -631,6 +632,8 @@ inline int FRAME::get_atomtype_idx(int atom)
 //	FUNCTION HEADERS -- ASSORTED
 //
 //////////////////////////////////////////
+
+void OPEN_TRAJFILE(ifstream & TRAJ_INPUT, vector<string> & INFILE, int FILE_IDX);
 
 double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);			// Overloaded.. compute differentely if for main or new velocities
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);	// Overloaded.. compute differentely if for main or new velocities

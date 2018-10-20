@@ -27,6 +27,21 @@ using namespace std;
 //
 //////////////////////////////////////////
 
+void OPEN_TRAJFILE(ifstream & TRAJ_INPUT, vector<string> & INFILE, int FILE_IDX)
+{
+	if (TRAJ_INPUT.is_open())
+		TRAJ_INPUT.close();
+		
+	if ( (FILE_IDX+1) > INFILE.size())
+		EXIT_MSG("(FILE_IDX+1) > INFILE.size(): ", FILE_IDX) ;	
+
+	TRAJ_INPUT.open(INFILE[FILE_IDX].data());
+	
+	if(!TRAJ_INPUT.is_open())
+		EXIT_MSG("ERROR: Cannot open trajectory file: ", INFILE[FILE_IDX]) ;
+}
+
+
 
 //////////////////////////////////////////
 // Functions to manage layers

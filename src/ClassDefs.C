@@ -1320,9 +1320,7 @@ void FRAME::update_ghost(int n_layers)
 	}	
 }
 
-
-void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE,
-								 int i)
+void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE, int i)
 // Read values from the xyzf file into the FRAME.
 {
 	TRAJ_INPUT >> ATOMS;
@@ -1347,7 +1345,7 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 	} 
 	else 
 	{
-		cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
+		cout << "Error:  Reading frame " << i << endl; // << " of file " << CONTROLS.INFILE << endl;
 		cout << "        Missing box length components." << endl;
 		cout << "        See offending line below." << endl;
 		cout << header << endl;
@@ -1369,7 +1367,7 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 			} 
 			else 
 			{
-				cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
+				cout << "Error:  Reading frame " << i << endl; // << " of file " << CONTROLS.INFILE << endl;
 				cout << "        Missing diagonal stress tensor components." << endl;
 				cout << "        See offending line below." << endl;
 				cout << header << endl;
@@ -1392,7 +1390,7 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 			} 
 			else 
 			{
-				cout << "Error:  Reading frame " << i << " of file " << CONTROLS.INFILE << endl;
+				cout << "Error:  Reading frame " << i  << endl; // << " of file " << CONTROLS.INFILE << endl;
 				cout << "        Missing full stress tensor components." << endl;
 				cout << "        See offending line below." << endl;
 				cout << header << endl;
