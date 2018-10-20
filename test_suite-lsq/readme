@@ -119,3 +119,13 @@ This is a list of each test and what functionality is probed
 	- tersoff style cutoff
 	- diagonal + off-diagonal stress inclusion for first 5 frames ONLY
 	- Morse-style transformation	
+20 two-traj-files
+	- Reads from two trajectory files, with 64 and 128 atoms, respectively
+	- Frame energies included in fit, for each frame
+	- 2 atom types, same for both files (C,O as in carbon monoxide)
+	- Chebyshev interactions
+	- 2-through-4-body interactions
+	- special outer cutoffs  ("SPECIFIC")
+	- Tersoff style cutoff	
+	- Morse-style transformation	
+	

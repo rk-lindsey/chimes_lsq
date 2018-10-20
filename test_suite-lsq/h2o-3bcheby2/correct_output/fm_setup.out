@@ -904,9 +904,7 @@ Note: Will use cubic scaling of: 1
 The number of two-body non-coulomb parameters is: 30
 The number of three-body Chebyshev parameters is: 330
 
-Reading in the trajectory file...
-...trajectory file read successful: 
-
+Succefully opened the trajectory file...
 Setting up the matrices for A, Coulomb forces, and overbonding...
 	Reporting outcome of layering for first frame ONLY: 
 	Real atoms:                   96

@@ -11110,9 +11110,7 @@ The number of two-body non-coulomb parameters is: 72
 The number of three-body Chebyshev parameters is: 598
 The number of four-body  Chebyshev parameters is: 2688
 
-Reading in the trajectory file...
-...trajectory file read successful: 
-
+Succefully opened the trajectory file...
 Setting up the matrices for A, Coulomb forces, and overbonding...
 	Reporting outcome of layering for first frame ONLY: 
 	Real atoms:                   132
