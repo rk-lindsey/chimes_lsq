@@ -26,7 +26,7 @@ LeastSquaresProblem(size_t m, size_t mstore, size_t n) : Amat(m * n), b(m), msto
 		calc_storage() ;
 	}
 
-	LeastSquaresProblem(const char* matfile, const char* bFile);
+	LeastSquaresProblem(const char* matfile, const char* bFile, bool split_files);
 
 	void calc_storage() ;
 	

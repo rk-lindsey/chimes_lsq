@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 		ErrorMsg("L1 regularization weight must be non-negative.") ;
 	}
 
-	bool leastSquares = true, quiet = false;
+	bool leastSquares = true, quiet = false, split_files = false ;
 	double tol = 1e-4, l2weight = 0;
 	int m = 10;
 
@@ -112,6 +112,8 @@ int main(int argc, char* argv[]) {
 			if (i >= argc || (m = atoi(argv[i])) == 0) {
 				ErrorMsg("-m (L-BFGS memory param) flag requires 1 positive int argument.") ;
 			}
+		} else if ( ! strcmp(argv[i], "-s") ) {
+			split_files = true ;
 		} else {
 			ErrorMsg(string("unrecognized argument: ") + argv[i]) ;
 		}
@@ -128,7 +130,7 @@ int main(int argc, char* argv[]) {
 	DifferentiableFunction *obj;
 	size_t size;
 	if (leastSquares) {
-		LeastSquaresProblem *prob = new LeastSquaresProblem(feature_file, label_file);
+		LeastSquaresProblem *prob = new LeastSquaresProblem(feature_file, label_file, split_files);
 		obj = new LeastSquaresObjective(*prob, l2weight);
 		size = prob->NumFeats(); 
 	} else {

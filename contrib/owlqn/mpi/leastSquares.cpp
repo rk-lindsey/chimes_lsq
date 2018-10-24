@@ -11,70 +11,146 @@ using namespace std;
 #include "mpiexterns.h"
 #include "leastSquares.h"
 
-LeastSquaresProblem::LeastSquaresProblem(const char* matFilename, const char* bFilename) {
-	ifstream matfile(matFilename);
-	if (!matfile.good()) {
-		cerr << "error opening matrix file " << matFilename << endl;
-		exit(1);
+LeastSquaresProblem::LeastSquaresProblem(const char* matFilename, const char* bFilename, bool split_files) {
+
+	if ( ! split_files ) {
+		// Read in matrix market format.
+		ifstream matfile(matFilename);
+		if (!matfile.good()) {
+			cerr << "error opening matrix file " << matFilename << endl;
+			exit(1);
+		}
+
+		string s;
+		getline(matfile, s);
+		if (!s.compare("%%MatrixMarket matrix array real general")) {
+			skipEmptyAndComment(matfile, s);
+			stringstream st(s);
+			st >> m >> n;
+
+			calc_storage() ;
+			Amat.resize(mstore * n);
+
+			for (size_t j=0; j<n; j++) {
+				for (size_t i=0; i<m; i++) {
+					double val;
+					matfile >> val;
+					if ( i >= mstart && i <= mend ) 
+						A(i, j) = val;
+				}
+			}
+			matfile.close();
+		} else {
+			matfile.close();
+			cerr << "Unsupported matrix format \"" << s << "\" in " << matFilename << endl;
+			exit(1);
+		}
+		
+		ifstream bFile(bFilename);
+		if (!bFile.good()) {
+			cerr << "error opening y-value file " << bFilename << endl;
+			exit(1);
+		}
+
+		getline(bFile, s);
+		if (s.compare("%%MatrixMarket matrix array real general")) {
+			bFile.close();
+			cerr << "unsupported y-value file format \"" << s << "\" in " << bFilename << endl;
+			exit(1);
+		}
+
+		skipEmptyAndComment(bFile, s);
+		stringstream bst(s);
+		size_t bNum, bCol;
+		bst >> bNum >> bCol;
+		if (bNum != m) {
+			cerr << "number of y-values doesn't match number of instances in " << bFilename << endl;
+			exit(1);
+		} else if (bCol != 1) {
+			cerr << "y-value matrix may not have more than one column" << endl;
+			exit(1);
+		}
+
+		b.resize(m);
+		for (size_t i=0; i<m; i++) {
+			double val;
+			bFile >> val;
+			b[i] = val;
+		}
+		bFile.close();
 	}
+	else {
+		ifstream dim_file ;
+		char name[80] ;
 
-	string s;
-	getline(matfile, s);
-	if (!s.compare("%%MatrixMarket matrix array real general")) {
-		skipEmptyAndComment(matfile, s);
-		stringstream st(s);
-		st >> m >> n;
+		// Read matrix dimensions from the dim.*.txt file.
+		sprintf(name, "dim.%04d.txt", RANK) ;
+		dim_file.open(name) ;
+		if ( ! dim_file.is_open() ) {
+			cerr << "Could not open " + string(name) + "\n" ;
+			exit(1) ;
+		}
+		int mdim, mdim2, ndim ;
+		dim_file >> n >> mstart >> mend >> m ;
+		if ( ! dim_file.good() ) {
+			cerr << "Error reading dim file\n" ;
+			exit(1) ;
+		}
+		dim_file.close() ;
+		
+		mstore = mend - mstart + 1 ;
 
-		calc_storage() ;
+		// Append the processor number to the A matrix name.
+		char matFilename2[80] ;
+		string str_filename(matFilename) ;
+		std::size_t found = str_filename.find(".") ;
+		if ( found == string::npos ) {
+			cerr < "A matrix file name must end with a suffix" ;
+			exit(1) ;
+		}
+		
+		str_filename = str_filename.substr(0,found+1) ;
+		sprintf(matFilename2, "%s%04d.txt", str_filename.data(), RANK) ;
+		ifstream matfile(matFilename2);
+		if (!matfile.good()) {
+			cerr << "error opening matrix file " << matFilename << endl;
+			exit(1);
+		}
+
 		Amat.resize(mstore * n);
 
-		for (size_t j=0; j<n; j++) {
-			for (size_t i=0; i<m; i++) {
-				double val;
-				matfile >> val;
-				if ( i >= mstart && i <= mend ) 
+		for (size_t i= mstart ; i <= mend ; i++) {
+			for (size_t j=0; j<n; j++) {
+					double val;
+					matfile >> val;
+					if ( ! matfile.good() ) {
+						cerr << "Error reading A matrix" ;
+						exit(1) ;
+					}
 					A(i, j) = val;
 			}
 		}
-
 		matfile.close();
-	} else {
-		matfile.close();
-		cerr << "Unsupported matrix format \"" << s << "\" in " << matFilename << endl;
-		exit(1);
-	}
 
-	ifstream bFile(bFilename);
-	if (!bFile.good()) {
-		cerr << "error opening y-value file " << bFilename << endl;
-		exit(1);
-	}
-	getline(bFile, s);
-	if (s.compare("%%MatrixMarket matrix array real general")) {
+
+		// Open and read the b vector.
+		ifstream bFile(bFilename);
+		if (!bFile.good()) {
+			cerr << "error opening y-value file " << bFilename << endl;
+			exit(1);
+		}
+		b.resize(m);
+		for (size_t i=0; i<m; i++) {
+			double val;
+			bFile >> val;
+			b[i] = val;
+			if ( ! bFile.good() ) {
+				cerr << "Error reading b file" ;
+				exit(1) ;
+			}
+		}
 		bFile.close();
-		cerr << "unsupported y-value file format \"" << s << "\" in " << bFilename << endl;
-		exit(1);
 	}
-
-	skipEmptyAndComment(bFile, s);
-	stringstream bst(s);
-	size_t bNum, bCol;
-	bst >> bNum >> bCol;
-	if (bNum != m) {
-		cerr << "number of y-values doesn't match number of instances in " << bFilename << endl;
-		exit(1);
-	} else if (bCol != 1) {
-		cerr << "y-value matrix may not have more than one column" << endl;
-		exit(1);
-	}
-
-	b.resize(m);
-	for (size_t i=0; i<m; i++) {
-		double val;
-		bFile >> val;
-		b[i] = val;
-	}
-	bFile.close();
 }
 
 
@@ -136,6 +212,7 @@ double LeastSquaresObjective::Eval(const DblVec& input, DblVec& gradient)
 	}
 	return (0.5 * value / problem.m) + 1.0;
 }
+
 
 void LeastSquaresProblem::calc_storage()
 {
