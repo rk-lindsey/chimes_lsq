@@ -15,15 +15,10 @@ using namespace std;
 A_MAT::A_MAT(): FORCES(), CHARGES(), OVERBONDING(), STRESSES(), FRAME_ENERGIES(), ATOM_ENERGIES()
 {
 	// Set up A-matrix
-	
-//	FORCES        .resize(MY_SIZE); 
-//	CHARGES       .resize(MY_SIZE);
-//	OVERBONDING   .resize(MY_SIZE);
-//	STRESSES      .resize(MY_SIZE);
-//	FRAME_ENERGIES.resize(MY_SIZE);
-//	ATOM_ENERGIES .resize(MY_SIZE);
-	
+	data_count = 0 ;
+	param_count = 0 ;
 }
+
 A_MAT::~A_MAT(){}
 
 void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS)
@@ -186,7 +181,17 @@ void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
 	if ( ! fileb.is_open() ) {
 		EXIT_MSG("FILEB was not open") ;
 	}
-	
+
+	// Keep track of the total number of lsq parameters.
+	param_count = CONTROLS.TOT_SHORT_RANGE ;
+	if ( CONTROLS.FIT_COUL ) {
+		param_count += CHARGES.size() ;
+	}
+	if ( CONTROLS.FIT_POVER )
+		param_count ++ ;
+	if ( CONTROLS.FIT_ENER_EVER )
+		param_count += NO_ATOM_TYPES ;
+
 	for(int a=0;a<FORCES.size();a++) // Loop over atoms
 	{	
 		// Print Afile: .../////////////// -- For X
@@ -234,6 +239,8 @@ void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
 			fileb << SYSTEM.FORCES[a].X << endl;
 			fileb << SYSTEM.FORCES[a].Y << endl;
 			fileb << SYSTEM.FORCES[a].Z << endl;
+			data_count += 3 ;
+			
 			fileb.flush() ;
 			
 			fileb_labeled << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].X << endl;
@@ -272,6 +279,7 @@ void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
 		fileb << SYSTEM.STRESS_TENSORS.X/GPa << endl;
 		fileb << SYSTEM.STRESS_TENSORS.Y/GPa << endl;
 		fileb << SYSTEM.STRESS_TENSORS.Z/GPa << endl;
+		data_count += 3 ;
 			
 		fileb_labeled << "s_xx " <<  SYSTEM.STRESS_TENSORS.X/GPa << endl;
 		fileb_labeled << "s_yy " <<  SYSTEM.STRESS_TENSORS.Y/GPa << endl;
@@ -341,7 +349,8 @@ void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
 			
 		fileb << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
 		fileb << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
-		fileb << SYSTEM.STRESS_TENSORS_Z.Z/GPa << endl;			
+		fileb << SYSTEM.STRESS_TENSORS_Z.Z/GPa << endl;
+		data_count += 9 ;
 			
 		// Convert from GPa to internal units to match A-matrix elements
 					
@@ -390,7 +399,9 @@ void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
 		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;
 			
 		fileb                  << SYSTEM.QM_POT_ENER << endl;
-		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;						
+		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;
+		data_count += 3 ;
+		
 	}
 	else if(CONTROLS.FIT_ENER_PER_ATOM)
 	{
@@ -410,6 +421,8 @@ void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
 			// Output b.txt stuff
 				
 			fileb                  << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
+			data_count++ ;
+			
 			fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
 		}
 	}
@@ -451,12 +464,13 @@ void A_MAT::PRINT_CONSTRAINTS(const struct JOB_CONTROL &CONTROLS,
 			
 			fileA << endl;	
 			
-			fileb << CHARGE_CONSTRAINTS[i].FORCE << endl;	
+			fileb << CHARGE_CONSTRAINTS[i].FORCE << endl;
+			data_count++ ;
 		}		
 	}
 }
 
-void A_MAT::CLEANUP_FILES()
+void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 // Close and clean up the output files.
 {
 	fileA.close();
@@ -469,14 +483,46 @@ void A_MAT::CLEANUP_FILES()
 #endif
 
 	if ( RANK == 0 ) {
-		// Serialize into a single A and b file for now.
-		// Could make the SVD program read multiple files.
-		system("cat A.[0-9]*.txt > A.txt");
-		system("rm A.[0-9]*.txt");
 		system("cat b.[0-9]*.txt > b.txt");
 		system("rm b.[0-9]*.txt");
 		system("cat b-labeled.[0-9]*.txt > b-labeled.txt");
 		system("rm b-labeled.[0-9]*.txt");
+		if ( ! SPLIT_FILES ) {
+			// Serialize into a single A
+			// Could make the SVD program read multiple files.
+			system("cat A.[0-9]*.txt > A.txt");
+			system("rm A.[0-9]*.txt");
+		}
+	}
+
+	if ( SPLIT_FILES ) {
+		// Keep files for A split for convenient parallel processing.
+		// Write out dimensions.
+		vector<int> all_data_count(NPROCS) ;
+		// Get the total number of data entries (all_data_count)
+#ifdef USE_MPI
+		MPI_Allgather(&data_count, 1, MPI_INT, all_data_count.data(), 1, MPI_INT, MPI_COMM_WORLD) ;
+#else
+		all_data_count[0] = data_count ;
+#endif
+		int start = 0, end = 0, total = 0 ;
+		for ( int i = 0 ; i < RANK ; i++ ) {
+			start += all_data_count[i] ;
+		}
+		end = start + all_data_count[RANK] - 1 ;
+		for ( int i = 0 ; i < NPROCS ; i++ ) {
+			total += all_data_count[i] ;
+		}
+
+		// Write the number of columns, row to start, end, and total #of rows to the dimension file.
+		char name[80] ;
+		sprintf(name, "dim.%04d.txt", RANK) ;
+		ofstream out ;
+		out.open(name) ;
+		if ( ! out.is_open()  )
+			EXIT_MSG("Could not open " + string(name)) ;
+		out << param_count << " " << start << " " << end << " " << total << "\n" ;
+		out.close() ;
 	}
 }
 	

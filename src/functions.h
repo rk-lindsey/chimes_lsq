@@ -173,6 +173,7 @@ struct JOB_CONTROL
 
   int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
   string TRAJ_FORMAT;		// .gen, .xyzf, or .lammps (currently)
+	bool   SPLIT_FILES ;  // If TRUE, do not concatenate A matrix files for LSQ.
   int    FREQ_BACKUP;       	// How often to write backup files for restart.
   bool   PRINT_VELOC;		// If true, write out the velocities 
   bool   RESTART;          	// If true, read a restart file.
@@ -215,8 +216,8 @@ struct JOB_CONTROL
   int	NUM_3B_CHEBY;		// How many parameters are associated with cheby order CHEBY_3B_ORDER?
   int	NUM_4B_CHEBY;		// How many parameters are associated with cheby order CHEBY_4B_ORDER?
   int	INVR_PARAMS;		// currently uses 19 parameters per pair type
-  int 	TOT_SNUM;			// total number of force field parameters
-  int 	TOT_SHORT_RANGE;	// Number of short tranged FF params... i.e. not Ewald
+  int 	TOT_SNUM;			// total number of 2-body force field parameters
+  int 	TOT_SHORT_RANGE;	// Number of short ranged FF params... i.e. not Ewald
 	
   bool	COUL_CONSV;		// If true, constraints will be applied to charge fitting to try to maintain consistency
   bool	IF_SUBTRACT_COORD;	// If true, subtract overcoordination forces.
@@ -259,6 +260,7 @@ JOB_CONTROL(): FIT_COUL(false),
 		CHECK_FORCE  = false;
 		USE_3B_CHEBY = false;	// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
 		USE_4B_CHEBY = false;	//If true, calculate 4-Body Chebyshev interaction.
+		SPLIT_FILES  = false ;
 		
 		//IO_ECONS_VAL = 0.0;
 		

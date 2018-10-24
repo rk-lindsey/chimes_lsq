@@ -304,7 +304,7 @@ int main(int argc, char* argv[])
 	}
 
 	A_MATRIX.PRINT_CONSTRAINTS(CONTROLS, CHARGE_CONSTRAINTS, ATOM_PAIRS.size() ) ;
-	A_MATRIX.CLEANUP_FILES() ;
+	A_MATRIX.CLEANUP_FILES(CONTROLS.SPLIT_FILES) ;
 		
 	
  	 //////////////////////////////////////////////////
@@ -537,6 +537,15 @@ static void read_lsq_input(JOB_CONTROL & CONTROLS,
 				}
 			}
 		}			
+
+		else if ( LINE.find("# SPLITFI #") != string::npos )
+		{
+			cin >> LINE ; cin.ignore() ;
+			if ( is_true(LINE) )
+				CONTROLS.SPLIT_FILES = true ;
+			else
+				CONTROLS.SPLIT_FILES = false ;
+		}
 		
 		else if(LINE.find("# NFRAMES #") != string::npos)
 		{
