@@ -26,6 +26,7 @@ def main():
     parser.add_argument("--test-suite", type=bool, default=False,help='output for test suite')
     parser.add_argument("--alpha", type=float, default=1.0e-04,help='Lasso or ridge regularization')
     parser.add_argument("--beta",type=float, default=0.0, help='DOWLQN L2 regularization')
+    parser.add_argument("--split-files", type=bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN.')
     parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
     parser.add_argument("--tol", type=float, default=1.0e-05, help='OWLQN or DOWLQN tolerance')
     parser.add_argument("--cores", type=int, default=8, help='DOWLQN number of cores')
@@ -79,7 +80,8 @@ def main():
     # Parameters for parallel run.
     num_cores = args.cores
     num_nodes = args.nodes
-
+    split_files = args.split_files
+    
     alpha_ar = [1.0e-06, 3.2e-06, 1.0e-05, 3.2e-05, 1.0e-04, 3.2e-04, 1.0e-03, 3.2e-03]
 
     # Number of folds for cross-validation.
@@ -276,7 +278,7 @@ def main():
         nvars = np
 
     elif algorithm == 'dowlqn':
-        x = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, beta_val, tol, memory)
+        x = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files)
         np = count_nonzero_vars(x)
         nvars = np
 
@@ -681,12 +683,12 @@ def write_matrix_market(mat, f):
     if len(mat.shape) == 1:
         ff.write(str(mat.shape[0]) + " " + "1\n")
         for i in range(0, mat.shape[0]):
-            ff.write(str(mat[i])+"\n")
+            ff.write("%21.16e\n" % (mat[i]))
     elif len(mat.shape) == 2:
         ff.write(str(mat.shape[0]) + " " + str(mat.shape[1]) + "\n")
         for j in range(0, mat.shape[1]):
             for i in range(0, mat.shape[0]):
-                ff.write(str(mat[i,j])+"\n")
+                ff.write("%21.16e\n" % (mat[i,j]))
 
 
 def read_matrix_market(f):
@@ -746,7 +748,7 @@ def fit_owlqn(A,b,alpha_val,beta_val,tol,memory):
         sys.exit(1)
 
 
-def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory):
+def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files):
 ## Use the Distributed OWLQN fitting algorithm
     print '! DOWLQN algorithm for LASSO used'
     print '! DOWLQN alpha = ' + str(alpha_val)
@@ -757,11 +759,15 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory):
     exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
     exepath = exepath + dowlqn_file
     if os.path.exists(dowlqn_file):
-        command = ("{0} Amm.txt bmm.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4} >& dowlqn.log".format(
+        command = ("{0} Amm.txt bmm.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4}".format(
                             exepath, alpha_val, tol, memory, beta_val)
                    )
-        
-        sys.stderr.write("Running " + command + "\n")
+        if ( split_files ) :
+            command = command + " -s"
+
+        command = command + " >& dowlqn.log"
+
+        sys.stderr.write("! DOWLQN run: " + command + "\n")
 
         os.system(command)
         x = read_matrix_market("fit.txt")
