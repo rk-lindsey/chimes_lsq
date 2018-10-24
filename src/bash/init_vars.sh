@@ -10,7 +10,7 @@ function init_test_vars
 	 #PYTHON=/collab/usr/global/tools/intel/chaos_5_x86_64_ib/python-2.7.10/bin/python
 	 # Default python
 
-	 PYTHON=/usr/tce/bin/python
+    PYTHON=/usr/tce/bin/python
 	 # Run the job with the new version of the python code (Compatible with non-generalized md code)
 	 #
 
@@ -79,6 +79,11 @@ function init_test_vars
 		  NP=24
 		  RUN_JOB="srun -n $NP"
 	 elif [ "$SYS_TYPE" == "toss_3_x86_64_ib" ] ; then
+		  module load impi/2018.0
+		  module load intel/18.0.1
+		  NP=36
+		  RUN_JOB="srun -n $NP"
+	 elif [ "$SYS_TYPE" == "toss_3_x86_64" ] ; then
 		  module load impi/2018.0
 		  module load intel/18.0.1
 		  NP=36
