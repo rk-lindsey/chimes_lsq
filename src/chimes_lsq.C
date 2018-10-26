@@ -136,8 +136,7 @@ int main(int argc, char* argv[])
 	if ( RANK == 0 ) 
 		cout << "...input file read successful: " << endl << endl;
 	
-	if ( NPROCS > CONTROLS.NFRAMES ) NPROCS = CONTROLS.NFRAMES ;	// Don't use unnecessary processors.
-
+	// if ( NPROCS > CONTROLS.NFRAMES ) NPROCS = CONTROLS.NFRAMES ;	// Don't use unnecessary processors.
 
 	//////////////////////////////////////////////////
 	//
@@ -207,7 +206,7 @@ int main(int argc, char* argv[])
 			cout << "The number of four-body  Chebyshev parameters is: " << CONTROLS.NUM_4B_CHEBY << endl;
 	}	
 
-	CONTROLS.TOT_SHORT_RANGE = CONTROLS.TOT_SNUM + CONTROLS.NUM_3B_CHEBY + CONTROLS.NUM_4B_CHEBY;	
+	CONTROLS.LSQ_SETUP( ATOM_PAIRS.size(), ATOM_TYPE.size() ) ;
 
 	//////////////////////////////////////////////////
 	//
@@ -220,19 +219,7 @@ int main(int argc, char* argv[])
 	int istart, iend;
 	
 	divide_atoms(istart, iend, CONTROLS.NFRAMES);	// Each processor only calculates certain frames.  Calculate which frames to use.
-	
-	if((CONTROLS.FIT_STRESS  || CONTROLS.FIT_STRESS_ALL) && CONTROLS.NSTRESS == -1)
-		CONTROLS.NSTRESS = CONTROLS.NFRAMES;
-		
-	if((CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM) && CONTROLS.NENER == -1)
-		CONTROLS.NENER = CONTROLS.NFRAMES;		
-	
-	CONTROLS.FIT_ENER_EVER = CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM ;	// Is energy ever fit ?
 
-	A_MATRIX.OPEN_FILES() ;
-
-	int total_forces = 0 ;
-	
 	//////////////////////////////////////////////////
 	//	
 	// Begin processing the trajecory
@@ -241,9 +228,6 @@ int main(int argc, char* argv[])
 	 
 	int FILE_IDX = 0;		// Index of traj file in CONTROLS.INFILE vector
 	ifstream TRAJ_INPUT;
-
-	if (CONTROLS.INFILE.size() == 1)
-		CONTROLS.INFILE_FRAMES.push_back(CONTROLS.NFRAMES);
 
 	OPEN_TRAJFILE(TRAJ_INPUT, CONTROLS.INFILE, FILE_IDX);
 	
@@ -255,6 +239,9 @@ int main(int argc, char* argv[])
 		
 	int OFFSET = CONTROLS.INFILE_FRAMES[FILE_IDX];
 
+	A_MATRIX.OPEN_FILES(CONTROLS) ;
+	int total_forces = 0 ;
+	
 	for (int i=0; i<CONTROLS.NFRAMES; i++)
 	{
 		if( (i+1) > OFFSET) // We've reached the end of file. Move on to the next one (if there is a next one)

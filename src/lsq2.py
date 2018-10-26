@@ -108,23 +108,32 @@ def main():
     #################################
 
     # Use genfromtxt to avoid parsing large files.
-    A = numpy.genfromtxt(Afile, dtype='float')
-    nlines = A.shape[0] 
-    np = A.shape[1] 
+    if ( not split_files ) :
+        A = numpy.genfromtxt(Afile, dtype='float')
+        nlines = A.shape[0] 
+        np = A.shape[1] 
 
-    b = numpy.genfromtxt(bfile, dtype='float') 
-    nlines2 = b.shape[0] 
+        b = numpy.genfromtxt(bfile, dtype='float') 
+        nlines2 = b.shape[0] 
 
-    hf=open(header_file,"r").readlines()
+        if ( nlines != nlines2 ):
+            print "Error: the number of lines in the input files do not match\n"
+            exit(1) 
 
-    if ( nlines != nlines2 ):
-        print "Error: the number of lines in the input files do not match\n"
-        exit(1) 
+            if np > nlines:
+                print "Error: number of variables > number of equations"
+                exit(1)
 
-    if np > nlines:
-        print "Error: number of variables > number of equations"
-        exit(1)
-
+    else:
+        dimf = open("dim.0000.txt", "r") ;
+        line = next(dimf) 
+        dim = (int(x) for x in line.split())
+        (np, nstart, nend, nlines) = dim
+        # Dummy A and b matrices.  NOT read in.
+        A = numpy.zeros((1,1),dtype=float)
+        b = numpy.genfromtxt(bfile, dtype='float') 
+        
+    hf = open(header_file,"r").readlines()
 
     print "! Date ", date.today() 
     print "!"
@@ -278,7 +287,8 @@ def main():
         nvars = np
 
     elif algorithm == 'dowlqn':
-        x = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files)
+        # Note: x and y are both set by fit_dowlqn
+        x,y = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files)
         np = count_nonzero_vars(x)
         nvars = np
 
@@ -287,7 +297,10 @@ def main():
         print "Unrecognized fitting algorithm" 
         exit(1)
 
-    y=dot(A,x)
+    # If split_files, A is not read in.        
+    if ( not split_files ) :
+        y=dot(A,x)
+        
     Z=0.0
 
     # Put calculated forces in force.txt
@@ -738,7 +751,7 @@ def fit_owlqn(A,b,alpha_val,beta_val,tol,memory):
         + " -m "
         + str(memory)
         + " >& owlqn.log" )
-        sys.stderr.write("Running " + command + "\n")
+        print("! Running " + command + "\n")
 
         os.system(command)
         x = read_matrix_market("fit.txt")
@@ -749,7 +762,8 @@ def fit_owlqn(A,b,alpha_val,beta_val,tol,memory):
 
 
 def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files):
-## Use the Distributed OWLQN fitting algorithm
+## Use the Distributed OWLQN fitting algorithm.  Returns both the solution x and
+## the estimated force vector A * x, which is read from Ax.txt.    
     print '! DOWLQN algorithm for LASSO used'
     print '! DOWLQN alpha = ' + str(alpha_val)
     write_matrix_market(A, 'Amm.txt')
@@ -759,19 +773,24 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
     exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
     exepath = exepath + dowlqn_file
     if os.path.exists(dowlqn_file):
-        command = ("{0} Amm.txt bmm.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4}".format(
-                            exepath, alpha_val, tol, memory, beta_val)
-                   )
         if ( split_files ) :
-            command = command + " -s"
+            command = ("{0} A.txt b.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4} -s >& dowlqn.log".format(
+                            exepath, alpha_val, tol, memory, beta_val) 
+            )
+        else:
+            command = ("{0} Amm.txt bmm.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4} >& dowlqn.log".format(
+                exepath, alpha_val, tol, memory, beta_val)
+            )
 
-        command = command + " >& dowlqn.log"
+        print("! DOWLQN run: " + command + "\n")
 
-        sys.stderr.write("! DOWLQN run: " + command + "\n")
-
-        os.system(command)
+        if ( os.system(command) != 0 ) :
+            print(command + " failed")
+            sys.exit(1)
+            
         x = read_matrix_market("fit.txt")
-        return x
+        y = read_matrix_market("Ax.txt")
+        return x,y
     else:
         print exepath + " does not exist"
         sys.exit(1)

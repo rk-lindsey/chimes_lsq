@@ -104,8 +104,9 @@ enum class Cheby_trans	// Supported variable transformations.
 #include "Cluster.h"
 #include "A_Matrix.h"
 
-struct JOB_CONTROL
+class JOB_CONTROL
 {
+public:
   int STEP;	// Tracks the current md step
   int NATMTYP;	// How many atom types are in the trajectory?
 	
@@ -218,6 +219,7 @@ struct JOB_CONTROL
   int	INVR_PARAMS;		// currently uses 19 parameters per pair type
   int 	TOT_SNUM;			// total number of 2-body force field parameters
   int 	TOT_SHORT_RANGE;	// Number of short ranged FF params... i.e. not Ewald
+	int   TOT_ALL_PARAMS ;  // Total number of LSQ fitting parameters.
 	
   bool	COUL_CONSV;		// If true, constraints will be applied to charge fitting to try to maintain consistency
   bool	IF_SUBTRACT_COORD;	// If true, subtract overcoordination forces.
@@ -236,47 +238,49 @@ struct JOB_CONTROL
 // Constructor... MD values are set in the read_input function in chimes_md.C
 	
 JOB_CONTROL(): FIT_COUL(false), 
-	       FIT_POVER(false),
-	       USE_3B_CHEBY(false), 
-	       USE_4B_CHEBY(false), 
-	       N_LAYERS(0), 
-	       WRAP_COORDS(false),
-	       TOT_SNUM(0), 
-	       COUL_CONSV(false), 
-	       IF_SUBTRACT_COORD(false),
-	       IF_SUBTRACT_COUL(false), 
-	       USE_PARTIAL_CHARGES(false)
-	 {
-		NFRAMES         = 0;	// Number of frames in the movie file
-		CHEBY_ORDER     = 0;	// Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
-		CHEBY_TYPE      = Cheby_trans::NONE ;
-		CHEBY_3B_ORDER  = 0;   
-		CHEBY_4B_ORDER  = 0;	// how many polynomials for 4b cheby?
-		NUM_3B_CHEBY    = 0;	// How many parameters are associated with cheby order CHEBY_3B_ORDER?
-		NUM_4B_CHEBY    = 0;	// How many parameters are associated with cheby order CHEBY_4B_ORDER?
-		TOT_SNUM        = 0;	// total number of force field parameters
-		TOT_SHORT_RANGE = 0;	// Number of short tranged FF params... i.e. not Ewald
+		FIT_POVER(false),
+		USE_3B_CHEBY(false), 
+		USE_4B_CHEBY(false), 
+		N_LAYERS(0), 
+		WRAP_COORDS(false),
+		TOT_SNUM(0), 
+		COUL_CONSV(false), 
+		IF_SUBTRACT_COORD(false),
+		IF_SUBTRACT_COUL(false), 
+		USE_PARTIAL_CHARGES(false)
+		{
+			NFRAMES         = 0;	// Number of frames in the movie file
+			CHEBY_ORDER     = 0;	// Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
+			CHEBY_TYPE      = Cheby_trans::NONE ;
+			CHEBY_3B_ORDER  = 0;   
+			CHEBY_4B_ORDER  = 0;	// how many polynomials for 4b cheby?
+			NUM_3B_CHEBY    = 0;	// How many parameters are associated with cheby order CHEBY_3B_ORDER?
+			NUM_4B_CHEBY    = 0;	// How many parameters are associated with cheby order CHEBY_4B_ORDER?
+			TOT_SNUM        = 0;	// total number of force field parameters
+			TOT_SHORT_RANGE = 0;	// Number of short tranged FF params... i.e. not Ewald
 
-		CHECK_FORCE  = false;
-		USE_3B_CHEBY = false;	// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
-		USE_4B_CHEBY = false;	//If true, calculate 4-Body Chebyshev interaction.
-		SPLIT_FILES  = false ;
+			CHECK_FORCE  = false;
+			USE_3B_CHEBY = false;	// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
+			USE_4B_CHEBY = false;	//If true, calculate 4-Body Chebyshev interaction.
+			SPLIT_FILES  = false ;
+			TOT_ALL_PARAMS = 0 ;
 		
-		//IO_ECONS_VAL = 0.0;
+			//IO_ECONS_VAL = 0.0;
 		
-		FCUT_LINE = "CUBIC";
-		FIT_ENER_EVER = false ;
+			FCUT_LINE = "CUBIC";
+			FIT_ENER_EVER = false ;
 
-		COMPARE_FORCE     = false;	// is this variable really necessary for LSQ?
-		CALL_EWALD        = false;
-		FIT_ENER          = false;
-		FIT_ENER_PER_ATOM = false;
-		FIT_STRESS        = false;
-		FIT_STRESS_ALL    = false;
-		NSTRESS           = -1;
-		NENER             = -1;
+			COMPARE_FORCE     = false;	// is this variable really necessary for LSQ?
+			CALL_EWALD        = false;
+			FIT_ENER          = false;
+			FIT_ENER_PER_ATOM = false;
+			FIT_STRESS        = false;
+			FIT_STRESS_ALL    = false;
+			NSTRESS           = -1;
+			NENER             = -1;
 		
-	 }
+		}
+	void LSQ_SETUP(int npairs, int no_atom_types) ; // Set up JOB_CONTROL for LSQ calculation.
 };
 
 

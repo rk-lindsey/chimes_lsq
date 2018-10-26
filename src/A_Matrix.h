@@ -60,7 +60,7 @@ class A_MAT
 	void PRINT_FRAME(const struct JOB_CONTROL &CONTROLS, const class FRAME &SYSTEM, const vector<class PAIRS> & ATOM_PAIRS, const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, int N) ;
 	void PRINT_CONSTRAINTS(const struct JOB_CONTROL &CONTROLS, const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, int NPAIRS) ;
 	void CLEANUP_FILES(bool SPLIT_FILES) ;
-	void OPEN_FILES() ;
+	void OPEN_FILES(const JOB_CONTROL &CONTROLS) ;
 	void INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS) ;
 	
 	private:

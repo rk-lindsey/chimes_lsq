@@ -30,7 +30,7 @@ void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS)
 	INITIALIZE_ENERGIES(SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER, CONTROLS.FIT_ENER_PER_ATOM);
 	INITIALIZE_STRESSES(CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_STRESS, CONTROLS.FIT_STRESS_ALL);
 	INITIALIZE_OVERBOND(SYSTEM.ATOMS);
-	INITIALIZE_CHARGES (NPAIRS,SYSTEM.ATOMS);		
+	INITIALIZE_CHARGES (NPAIRS,SYSTEM.ATOMS);
 }
 
 void A_MAT::INITIALIZE_NATOMS  (int ATOMS, vector<string> & FRAME_ATOMTYPES)
@@ -182,15 +182,6 @@ void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
 		EXIT_MSG("FILEB was not open") ;
 	}
 
-	// Keep track of the total number of lsq parameters.
-	param_count = CONTROLS.TOT_SHORT_RANGE ;
-	if ( CONTROLS.FIT_COUL ) {
-		param_count += CHARGES.size() ;
-	}
-	if ( CONTROLS.FIT_POVER )
-		param_count ++ ;
-	if ( CONTROLS.FIT_ENER_EVER )
-		param_count += NO_ATOM_TYPES ;
 
 	for(int a=0;a<FORCES.size();a++) // Loop over atoms
 	{	
@@ -526,7 +517,7 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 	}
 }
 	
-void A_MAT::OPEN_FILES()
+void A_MAT::OPEN_FILES(const JOB_CONTROL &CONTROLS)
 {
 		
 	char nameA[80];
@@ -561,5 +552,7 @@ void A_MAT::OPEN_FILES()
 
 	fileb.precision(16);	//  Usual precision set to 16.
 	fileb << std::scientific;
+
+	param_count = CONTROLS.TOT_ALL_PARAMS ;
 
 }

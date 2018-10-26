@@ -1644,3 +1644,29 @@ void PAIRS::set_cheby_vals()
 {
   Cheby::set_cheby_params(S_MINIM, S_MAXIM, LAMBDA, CHEBY_TYPE, X_MINIM, X_MAXIM, X_DIFF, X_AVG) ;
 }
+
+void JOB_CONTROL::LSQ_SETUP(int npairs, int no_atom_types)
+// Setup the JOB_CONTROL structure based on inputs parsed for LSQ calculations.
+{
+		TOT_SHORT_RANGE = TOT_SNUM + NUM_3B_CHEBY + NUM_4B_CHEBY;
+			
+		// Keep track of the total number of lsq parameters.
+		TOT_ALL_PARAMS = TOT_SHORT_RANGE ;
+		if ( FIT_COUL )
+			TOT_ALL_PARAMS += npairs ;
+		if ( FIT_POVER )
+			TOT_ALL_PARAMS ++ ;
+		if ( FIT_ENER_EVER )
+			TOT_ALL_PARAMS += no_atom_types ;
+	
+		if((FIT_STRESS  || FIT_STRESS_ALL) && NSTRESS == -1)
+			NSTRESS = NFRAMES;
+		
+		if((FIT_ENER || FIT_ENER_PER_ATOM) && NENER == -1)
+			NENER = NFRAMES;		
+	
+		FIT_ENER_EVER = FIT_ENER || FIT_ENER_PER_ATOM ;	// Is energy ever fit ?
+
+		if (INFILE.size() == 1)
+			INFILE_FRAMES.push_back(NFRAMES);
+}
