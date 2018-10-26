@@ -13,6 +13,9 @@ generate: all
 A.txt:
 	$(RUN_JOB) ../chimes_lsq < fm_setup.in > fm_setup.out
 
+A.0000.txt:
+	$(RUN_JOB) ../chimes_lsq < fm_setup.split.in > fm_setup.split.out
+
 %.cmp : %.txt
 	-$(COMPARE) current_output/$*.txt correct_output/$*.txt >& $*.cmp
 
@@ -22,7 +25,7 @@ lassolars: params.lassolars.1.0e-04.cmp
 
 owlqn: params.owlqn.1.0e-03.cmp
 
-dowlqn: params.dowlqn.1.0e-04.cmp
+dowlqn: params.dowlqn.1.0e-04.cmp params.dowlqn.split.cmp
 
 ridge: params.ridge.1.0e-03.cmp
 
@@ -59,8 +62,12 @@ params.owlqn.1.0e-03.txt: A.txt
 	mv params.owlqn.1.0e-03.txt current_output/
 
 params.dowlqn.1.0e-04.txt: A.txt
-	$(PYTHON) ../../src/lsq2.py --algorithm=dowlqn --cores=$(NP) --nodes=$(NODES) --alpha=1.0e-04 --tol=1.0e-06 --memory=30 > params.dowlqn.1.0e-04.txt
+	$(PYTHON) ../../src/lsq2.py --algorithm=dowlqn --cores=$(NP) --nodes=$(NODES) --alpha=1.0e-04 --tol=1.0e-04 --memory=30 > params.dowlqn.1.0e-04.txt
 	mv params.dowlqn.1.0e-04.txt current_output/
+
+params.dowlqn.split.txt: A.0000.txt
+	$(PYTHON) ../../src/lsq2.py --algorithm=dowlqn --cores=$(NP) --nodes=$(NODES) --alpha=1.0e-04 --tol=1.0e-04 --memory=30 --split-files=true > params.dowlqn.split.txt
+	mv params.dowlqn.split.txt current_output/
 
 params.dowlqn.beta.txt: A.txt
 	$(PYTHON) ../../src/lsq2.py --algorithm=dowlqn --cores=$(NP) --nodes=$(NODES) --alpha=1.0e-04 --tol=1.0e-06 --memory=30 --beta=1.0e-02 > params.dowlqn.beta.txt
@@ -75,4 +82,4 @@ params.svd.1.0e-05.txt: A.txt
 	mv params.svd.1.0e-05.txt current_output/
 
 clean:
-	rm -f A.txt b.txt params.*.txt *.cmp *.out params.header ff_groups.map
+	rm -f A.txt A.0*.txt b.txt dim.0*.txt params.*.txt *.cmp *.out params.header ff_groups.map
