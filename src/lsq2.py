@@ -32,6 +32,8 @@ def main():
     parser.add_argument("--cores", type=int, default=8, help='DOWLQN number of cores')
     parser.add_argument("--nodes", type=int, default=1, help='DOWLQN number of nodes')
     parser.add_argument("--memory", type=int, default=20, help='OWLQN or DOWLQN Hessian memory storage') ;
+    parser.add_argument("--restart", type=bool, default=False, help='Use DOWLQN restart file')
+
     args        = parser.parse_args()
 
     # Fitting algorithm to use.
@@ -58,6 +60,9 @@ def main():
     # Is this running in the test suite.
     test_suite_run = args.test_suite
 
+    # Do we restart calculations (currently only for DOWLQN)
+    restart = args.restart
+    
     if ( weights_file == "None" ):
         DO_WEIGHTING = False 
     else:
@@ -288,7 +293,7 @@ def main():
 
     elif algorithm == 'dowlqn':
         # Note: x and y are both set by fit_dowlqn
-        x,y = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files)
+        x,y = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files, restart)
         np = count_nonzero_vars(x)
         nvars = np
 
@@ -761,7 +766,7 @@ def fit_owlqn(A,b,alpha_val,beta_val,tol,memory):
         sys.exit(1)
 
 
-def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files):
+def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files, restart):
 ## Use the Distributed OWLQN fitting algorithm.  Returns both the solution x and
 ## the estimated force vector A * x, which is read from Ax.txt.    
     print '! DOWLQN algorithm for LASSO used'
@@ -773,15 +778,12 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
     exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
     exepath = exepath + dowlqn_file
     if os.path.exists(dowlqn_file):
+        command = ("{0} A.txt b.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4}".format(exepath, alpha_val, tol, memory, beta_val))
         if ( split_files ) :
-            command = ("{0} A.txt b.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4} -s >& dowlqn.log".format(
-                            exepath, alpha_val, tol, memory, beta_val) 
-            )
-        else:
-            command = ("{0} Amm.txt bmm.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4} >& dowlqn.log".format(
-                exepath, alpha_val, tol, memory, beta_val)
-            )
-
+            command = command + " -s "
+        if ( restart ) :
+            command = command + " -init restart.txt "
+        command = command +  " >& dowlqn.log"
         print("! DOWLQN run: " + command + "\n")
 
         if ( os.system(command) != 0 ) :
