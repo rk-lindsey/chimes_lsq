@@ -778,9 +778,10 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
     exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
     exepath = exepath + dowlqn_file
     if os.path.exists(dowlqn_file):
-        command = ("{0} A.txt b.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4}".format(exepath, alpha_val, tol, memory, beta_val))
         if ( split_files ) :
-            command = command + " -s "
+            command = ("{0} A.txt b.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4} -s".format(exepath, alpha_val, tol, memory, beta_val))
+        else:
+            command = ("{0} Amm.txt bmm.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4}".format(exepath, alpha_val, tol, memory, beta_val))
         if ( restart ) :
             command = command + " -init restart.txt "
         command = command +  " >& dowlqn.log"

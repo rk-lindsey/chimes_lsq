@@ -437,8 +437,36 @@ void A_MAT::PRINT_CONSTRAINTS(const struct JOB_CONTROL &CONTROLS,
 	                            int NPAIRS)
 // Print out any charge constraints to the A matrix and b files.
 {
-	
-	if ( CONTROLS.FIT_COUL && (CHARGE_CONSTRAINTS.size()>0) && (RANK == NPROCS - 1)) 
+
+	int print_rank = NPROCS - 1 ;
+	if ( CONTROLS.SPLIT_FILES ) {
+		// Keep files for A split for convenient parallel processing.
+		// Write out dimensions.
+		vector<int> all_data_count(NPROCS) ;
+		// Get the total number of data entries (all_data_count)
+#ifdef USE_MPI
+		MPI_Allgather(&data_count, 1, MPI_INT, all_data_count.data(), 1, MPI_INT, MPI_COMM_WORLD) ;
+#else
+		all_data_count[0] = data_count ;
+#endif
+		int j ;
+		for ( j = 0 ; j < NPROCS ; j++ )
+		{
+			if ( all_data_count[j] == 0 )
+			{
+				print_rank = j ;
+				break ;
+			}
+		}
+		if ( j == NPROCS ) 
+			print_rank = NPROCS - 1 ;
+	}
+	else
+	{
+		print_rank = NPROCS - 1 ;
+	}
+		
+	if ( CONTROLS.FIT_COUL && RANK == print_rank )
 	{
 		for(int i=0; i<CHARGE_CONSTRAINTS.size(); i++)
 		{
@@ -506,14 +534,22 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 		}
 
 		// Write the number of columns, row to start, end, and total #of rows to the dimension file.
-		char name[80] ;
-		sprintf(name, "dim.%04d.txt", RANK) ;
-		ofstream out ;
-		out.open(name) ;
-		if ( ! out.is_open()  )
-			EXIT_MSG("Could not open " + string(name)) ;
-		out << param_count << " " << start << " " << end << " " << total << "\n" ;
-		out.close() ;
+		if ( all_data_count[RANK] > 0 )
+		{
+			char name[80] ;
+			sprintf(name, "dim.%04d.txt", RANK) ;
+			ofstream out ;
+			out.open(name) ;
+			if ( ! out.is_open()  )
+				EXIT_MSG("Could not open " + string(name)) ;
+			out << param_count << " " << start << " " << end << " " << total << "\n" ;
+			out.close() ;
+		} else {
+			// If there is no data, the A file was not used.  Delete it.
+			char name[80] ;
+			sprintf(name, "A.%04d.txt", RANK) ;
+			remove(name) ;
+		}
 	}
 }
 	
