@@ -13,13 +13,8 @@ class LeastSquaresProblem {
 	std::vector<double> b;
 	size_t mstore, m, n, mstart, mend ;
 	
-	void skipEmptyAndComment(std::ifstream& file, std::string& s) {
-		do {
-			std::getline(file, s);
-		} while (s.size() == 0 || s[0] == '%');
-	}
-
 	friend struct LeastSquaresObjective;
+	void read_split_files(const char* matFilename, const char* bFilename)	;
 
 public:
 LeastSquaresProblem(size_t m, size_t mstore, size_t n) : Amat(m * n), b(m), mstore(mstore), m(m), n(n) {
@@ -29,7 +24,6 @@ LeastSquaresProblem(size_t m, size_t mstore, size_t n) : Amat(m * n), b(m), msto
 	LeastSquaresProblem(const char* matfile, const char* bFile, bool split_files);
 
 	void calc_storage() ;
-	
 	double A(size_t i, size_t j) const {
 #ifdef DEBUG
 		if ( i >= mstart && i <= mend )
@@ -63,6 +57,9 @@ struct LeastSquaresObjective : public DifferentiableFunction {
 	const double l2weight;
 
 	LeastSquaresObjective(const LeastSquaresProblem& p, double l2weight = 0) : problem(p), l2weight(l2weight) { }
-
+	void Eval_Ax(const DblVec& input, DblVec& Ax) ;
 	double Eval(const DblVec& input, DblVec& gradient);
 };
+
+void skipEmptyAndComment(std::ifstream& file, std::string& s) ;
+

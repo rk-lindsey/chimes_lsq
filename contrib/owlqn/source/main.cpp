@@ -32,7 +32,8 @@ void printUsageAndExit() {
 }
 
 void printVector(const DblVec &vec, const char* filename) {
-	ofstream outfile(filename);
+
+	ofstream outfile("temp-out.txt") ;
 	if (!outfile.good()) {
 		cerr << "error opening matrix file " << filename << endl;
 		exit(1);
@@ -43,6 +44,7 @@ void printVector(const DblVec &vec, const char* filename) {
 		outfile << vec[i] << endl;
 	}
 	outfile.close();
+	rename("temp-out.txt", filename) ;
 }
 
 int main(int argc, char* argv[]) {

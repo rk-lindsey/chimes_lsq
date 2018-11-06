@@ -13,6 +13,7 @@ struct DifferentiableFunction {
 
 #include "TerminationCriterion.h"
 
+
 class OWLQN {
 	bool quiet;
 	bool responsibleForTermCrit;
@@ -68,6 +69,7 @@ class OptimizerState {
 	static void scale(DblVec& a, double b);
 	static void scaleInto(DblVec& a, const DblVec& b, double c);
 
+	
 	void MapDirByInverseHessian();
 	void UpdateDir();
 	double DirDeriv() const;
@@ -78,6 +80,7 @@ class OptimizerState {
 	double EvalL1();
 	void FixDirSigns();
 	void TestDirDeriv();
+	void Print(const char *filename) ;
 
 	OptimizerState(DifferentiableFunction& f, const DblVec& init, int m, double l1weight, bool quiet) 
 		: x(init), grad(init.size()), newX(init), newGrad(init.size()), dir(init.size()), steepestDescDir(newGrad), alphas(m), iter(1), m(m), dim(init.size()), func(f), l1weight(l1weight), quiet(quiet) {
@@ -99,3 +102,6 @@ public:
 	int GetIter() const { return iter; }
 	size_t GetDim() const { return dim; }
 };
+
+void read_mm_vector(DblVec &vec, const char *filename) ;
+void printVector(const DblVec &vec, const char* filename) ;

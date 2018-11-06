@@ -1,15 +1,11 @@
-#include "logreg.h"
 #include <fstream>
 #include <sstream>
 #include <string>
-
 using namespace std;
 
-void skipEmptyAndComment(ifstream& file, string& s) {
-	do {
-		getline(file, s);
-	} while (s.size() == 0 || s[0] == '%');
-}
+
+#include "logreg.h"
+#include "leastSquares.h"
 
 LogisticRegressionProblem::LogisticRegressionProblem(const char* matFilename, const char* labelFilename) {
 	ifstream matfile(matFilename);

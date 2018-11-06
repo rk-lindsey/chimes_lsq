@@ -183,6 +183,11 @@ double OptimizerState::EvalL1() {
 	return val;
 }
 
+void OptimizerState::Print(const char *filename)
+{
+	printVector(x, filename) ;
+}
+
 void OptimizerState::BackTrackingLineSearch() {
 	double origDirDeriv = DirDeriv();
 	// if a non-descent direction is chosen, the line search will break anyway, so throw here
@@ -291,6 +296,7 @@ void OWLQN::Minimize(DifferentiableFunction& function, const DblVec& initial, Db
 		if (termCritVal < tol) break;
 
 		state.Shift();
+		state.Print("restart.txt") ;
 	}
 
 	if (!quiet && RANK == 0) cout << endl;
