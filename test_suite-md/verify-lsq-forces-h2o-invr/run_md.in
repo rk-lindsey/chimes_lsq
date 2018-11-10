@@ -32,7 +32,7 @@
 	GEN
 # CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>
 	NVT-MTK HOOVER 10
-# PRESSUR # (options are ANALYTICAL or NUMERICAL)
+# PRSCALC # (options are ANALYTICAL or NUMERICAL)
 	ANALYTICAL
 	
 ###################################

@@ -1,16 +1,14 @@
 
 Reading input file...
-WARNING:  The following input line was ignored:
- # Test takes ~25 minutes on 1 proc (head node)
+Will read from file: fm_setup.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
 	# TRJFILE #: phen_res-300F_dt-0.1_diagstress_energy.xyzf
-	# WRAPTRJ #: 1
+	# WRAPTRJ #: true
 	# NFRAMES #: 10
 	# NLAYERS #: 1
 	# FITCOUL #: false
-WARNING:  The following input line was ignored:
- # CNSCOUL # 
-WARNING:  The following input line was ignored:
-         false   
 	# FITSTRS #: true
 	# FITENER #: true
 	# FITPOVR #: false
@@ -34,12 +32,12 @@ WARNING:  The following input line was ignored:
 		4  C O
 		5  H O
 	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               C               C               1.296           8               0.01            1.35             0               
-	1               H               H               1.321           8               0.01            0.675            0               
-	2               O               O               2.708           8               0.01            2.55             0               
-	3               C               H               0.952           8               0.01            1.1              0               
-	4               C               O               1.318           8               0.01            1.15             0               
-	5               H               O               0.914           8               0.01            0.97             0               
+	0               C               C               1.1             8               0.01            1.35             0               
+	1               H               H               0.8             8               0.01            0.675            0               
+	2               O               O               2               8               0.01            2.55             0               
+	3               C               H               0.8             8               0.01            1.1              0               
+	4               C               O               1.1             8               0.01            1.15             0               
+	5               H               O               0.8             8               0.01            0.97             0               
 
 	Read the following number of ij ik jk bins for pairs: 
 		CC: 0 0 0
@@ -58,12 +56,10 @@ WARNING:  The following input line was ignored:
 		Atom type idxs:  2 0 Pair name:   OC Explicit pair index:    6 Unique pair index:    4
 		Atom type idxs:  2 1 Pair name:   OH Explicit pair index:    7 Unique pair index:    5
 		Atom type idxs:  2 2 Pair name:   OO Explicit pair index:    8 Unique pair index:    2
-WARNING:  The following input line was ignored:
- OOOOOO OO OO OO 6.5 6.5 6.5
-# FCUTTYP #:         TERSOFF 0.5      ... for all Chebyshev interactions
-
 Note: Will use cubic scaling of: 1
 
+# FCUTTYP #: CUBIC      ... for all Chebyshev interactions
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 
 	Made the following triplets: 0    
 
@@ -135,7 +131,7 @@ Note: Will use cubic scaling of: 1
 
      Max 3-body cutoff = 8.000000
 
-     Min 3-body cutoff = 0.914000
+     Min 3-body cutoff = 0.800000
 
 	The following unique triplets of atoms have been identified:
 
@@ -1458,7 +1454,7 @@ Note: Will use cubic scaling of: 1
 	Note: Setting all 4-body S_MAXIM values to 5.500000
      Max 4-body cutoff = 5.500000
 
-     Min 4-body cutoff = 0.914000
+     Min 4-body cutoff = 0.800000
 
 	The following unique quadruplets of atoms have been identified:
 
@@ -11113,99 +11109,17 @@ The number of two-body non-coulomb parameters is: 72
 The number of three-body Chebyshev parameters is: 598
 The number of four-body  Chebyshev parameters is: 2688
 
-Reading in the trajectory file...
+Succefully opened the trajectory file...
+Setting up the matrices for A, Coulomb forces, and overbonding...
 	Reporting outcome of layering for first frame ONLY: 
 	Real atoms:                   132
 	Total atoms (ghost):          3564
-	Real box dimesntions:         10.650000 10.650000 10.650000
+	Real box dimensions:         10.650000 10.650000 10.650000
 	Total box dimensions (ghost): 31.950000 31.950000 31.950000
 
-WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
-...trajectory file read successful: 
-
-Setting up the matricies for A, Coulomb forces, and overbonding...
 ...matrix setup complete: 
 
-Setting up the histograms to handle sparse 3b-distance populations...
-Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramming. 
-
-
-...Populating the matricies for A, Coulomb forces, and overbonding...
+...Populating the matrices for A, Coulomb forces, and overbonding...
 
 Number of 3-body interactions = 693320
 Number of 4-body interactions = 545920
-...matrix population complete: 
-
-Printing matricies...
-	...A matrix length (forces): 3960
-
-	Minimum distances between atoms: (Angstr.)
-		0	C C	1.189
-		1	H H	0.875
-		2	O O	2.499
-		3	C H	0.862
-		4	C O	1.186
-		5	H O	0.849
-	Total number of configurations contributing to each pair type:
-		0	C C 31605
-		1	H H 36059
-		2	O O 494
-		3	C H 68107
-		4	C O 8535
-		5	H O 9092
-	Minimum distances between atoms triplet pairs: (Angstr.)
-		0	CC CC CC 1.189 1.189 1.195 
-		1	CC CH CH 1.189 0.862 0.862 
-		2	CC CO CO 1.189 1.186 1.186 
-		3	CH CH HH 0.862 0.862 0.875 
-		4	CH CO HO 0.862 1.186 0.849 
-		5	CO CO OO 1.241 1.186 2.499 
-		6	HH HH HH 0.875 0.875 0.875 
-		7	HH HO HO 0.875 0.849 0.849 
-		8	HO HO OO 0.849 0.866 2.499 
-		9	OO OO OO 2.499 2.510 2.499 
-	Total number of configurations contributing to each triplet type:
-		0	CC CC CC 10548
-		1	CC CH CH 28126
-		2	CC CO CO 3637
-		3	CH CH HH 18615
-		4	CH CO HO 6769
-		5	CO CO OO 663
-		6	HH HH HH 3130
-		7	HH HO HO 2764
-		8	HO HO OO 887
-		9	OO OO OO 794
-	Minimum distances between atoms quadruplet pairs: (Angstr.)
-		0	CC CC CC CC CC CC 1.189 1.189 1.189 1.189 1.189 1.189 
-		1	CC CC CH CC CH CH 1.189 1.189 0.862 1.189 0.862 0.862 
-		2	CC CC CO CC CO CO 1.189 1.189 1.186 1.189 1.186 1.186 
-		3	CC CH CH CH CH HH 1.189 0.862 0.862 0.862 0.862 0.875 
-		4	CC CH CO CH CO HO 1.189 0.862 1.186 0.862 1.186 0.849 
-		5	CC CO CO CO CO OO 1.189 1.186 1.186 1.186 1.186 2.499 
-		6	CH CH CH HH HH HH 0.862 0.862 0.862 0.875 0.875 0.875 
-		7	CH CH CO HH HO HO 0.862 0.862 1.186 0.875 0.849 0.849 
-		8	CH CO CO HO HO OO 0.862 1.186 1.186 0.849 0.849 2.499 
-		9	CO CO CO OO OO OO 1.186 1.186 1.213 2.499 2.518 2.510 
-		10	HH HH HH HH HH HH 0.875 0.875 0.875 0.875 0.875 0.875 
-		11	HH HH HO HH HO HO 0.875 0.875 0.849 0.875 0.849 0.849 
-		12	HH HO HO HO HO OO 0.875 0.849 0.849 0.849 0.849 2.499 
-		13	HO HO HO OO OO OO 0.879 0.849 0.849 2.499 2.518 2.510 
-		14	OO OO OO OO OO OO 3.410 2.708 4.353 3.723 2.518 2.893 
-	Total number of configurations contributing to each quadruplet type:
-		0	CC CC CC CC CC CC 119458
-		1	CC CC CH CC CH CH 604057
-		2	CC CC CO CC CO CO 70216
-		3	CC CH CH CH CH HH 1020604
-		4	CC CH CO CH CO HO 258123
-		5	CC CO CO CO CO OO 10165
-		6	CH CH CH HH HH HH 677802
-		7	CH CH CO HH HO HO 285825
-		8	CH CO CO HO HO OO 26601
-		9	CO CO CO OO OO OO 487
-		10	HH HH HH HH HH HH 148408
-		11	HH HH HO HH HO HO 94651
-		12	HH HO HO HO HO OO 15637
-		13	HO HO HO OO OO OO 756
-		14	OO OO OO OO OO OO 5
-...matrix printing complete: 
-

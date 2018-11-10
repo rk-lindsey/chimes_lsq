@@ -72,7 +72,7 @@ do
 	
 
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		 if ../chimes_lsq < fm_setup.in > fm_setup.out ; then
+		 if ../chimes_lsq fm_setup.in > fm_setup.out ; then
 			  echo 'Chimes_lsq succeeded'
 			  SUCCESS=1
 		 else
@@ -80,7 +80,7 @@ do
 			  SUCCESS=0
 		 fi
 	else
-		 if $RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out ; then
+		 if $RUN_JOB ../chimes_lsq fm_setup.in > fm_setup.out ; then
 			  echo 'Chimes_lsq succeeded'
 			  SUCCESS=1
 		 else

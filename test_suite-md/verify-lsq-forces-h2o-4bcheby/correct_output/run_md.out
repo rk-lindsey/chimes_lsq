@@ -1,13 +1,18 @@
 Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
 	# RNDSEED #: 12357
 	# TEMPERA #: 2000 K
 	# CMPRFRC #: false
+	# CHECKFRC #: false
 	# TIMESTP #: 0.125 fs
 	# N_MDSTP #: 1
 	# NLAYERS #: 1
-	# USENEIG #: true 
+	# USENEIG #: true
 	# PRMFILE #: params.txt
 	# CRDFILE #: input.xyzf
 	# VELINIT #: GEN ... generating velocites via box Muller
@@ -18,12 +23,10 @@ Reading the simulation control input file...
 		... printing every 2.5 fs, 
 		... printing       0 frames. 
 	# FRQENER #: 1
-	# PRNTFRC #: true ...and will be printed every 1 frames.
+	# PRNTFRC #: true
+		... and will be printed every 1 frames.
 		... printing every 0.125 fs, 
 		... printing 1 frames. 
-	# CHECKFRC #: false
-   ...read complete.
-
 Setting up the data objects...
    ...setup complete
 

@@ -1,16 +1,20 @@
 Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
 	# RNDSEED #: 12357
 	# TEMPERA #: 2000 K
 	# CMPRFRC #: true... will only do 1 md step.
+                comparing to file: force.txt
 	# TIMESTP #: 0.1 fs
 	# N_MDSTP #: 1
 	# NLAYERS #: 1
-	# USENEIG #: true 
+	# USENEIG #: true
 	# PRMFILE #: params.txt
 	# CRDFILE #: input.xyzf
-	# TRAJEXT #: GEN
 	# VELINIT #: GEN ... generating velocites via box Muller
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
@@ -18,12 +22,12 @@ Reading the simulation control input file...
 	# FRQTRAJ #: 20
 		... printing every 2 fs, 
 		... printing       0 frames. 
+	# TRAJEXT #: GEN
 	# FRQENER #: 1
-	# PRNTFRC #: true ...and will be printed every 1 frames.
+	# PRNTFRC #: true
+		... and will be printed every 1 frames.
 		... printing every 0.1 fs, 
 		... printing 1 frames. 
-   ...read complete.
-
 Setting up the data objects...
    ...setup complete
 

@@ -1,7 +1,11 @@
 
 Reading input file...
+Will read from file: fm_setup.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
 	# TRJFILE #: input.xyzf
-	# WRAPTRJ #: 1
+	# WRAPTRJ #: true
 	# NFRAMES #: 49
 	# NLAYERS #: 1
 	# FITCOUL #: true
@@ -39,15 +43,14 @@ Reading input file...
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
 		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+Note: Will use cubic scaling of: 1
+
 
 	Attempting to read 2 charge constraints...:
 		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
 		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
 
 WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
-
-Note: Will use cubic scaling of: 1
-
 ...input file read successful: 
 
 The number of two-body non-coulomb parameters is: 30

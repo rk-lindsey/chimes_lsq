@@ -1,7 +1,11 @@
 
 Reading input file...
+Will read from file: fm_setup.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
 	# TRJFILE #: input.xyzf
-	# WRAPTRJ #: 1
+	# WRAPTRJ #: true
 	# NFRAMES #: 54
 	# NLAYERS #: 1
 	# FITCOUL #: false
@@ -66,10 +70,9 @@ Reading input file...
 		Atom type idxs:  3 1 Pair name:   NH Explicit pair index:   13 Unique pair index:    8
 		Atom type idxs:  3 2 Pair name:   NO Explicit pair index:   14 Unique pair index:    9
 		Atom type idxs:  3 3 Pair name:   NN Explicit pair index:   15 Unique pair index:    3
-WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
-
 Note: Will use cubic scaling of: 1
 
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 ...input file read successful: 
 
 The number of two-body non-coulomb parameters is: 80

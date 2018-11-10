@@ -1,0 +1,17 @@
+4,7d3
+< Will read from file: run_md.in
+< Input file successfully opened.
+< Input file has been rewound.
+< Input file contents successfully stored.
+14c10
+< 	# USENEIG #: true
+---
+> 	# USENEIG #: true 
+25,26c21
+< 	# PRNTFRC #: true
+< 		... and will be printed every 20 frames.
+---
+> 	# PRNTFRC #: true ...and will be printed every 20 frames.
+28a24,25
+>    ...read complete.
+> 

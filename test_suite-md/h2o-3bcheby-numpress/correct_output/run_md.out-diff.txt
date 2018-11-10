@@ -1,2 +1,12 @@
-10d9
-< 	# USENEIG #: true 
+4,7d3
+< Will read from file: run_md.in
+< Input file successfully opened.
+< Input file has been rewound.
+< Input file contents successfully stored.
+14c10
+< 	# USENEIG #: true
+---
+> 	# USENEIG #: true 
+25a22,23
+>    ...read complete.
+> 

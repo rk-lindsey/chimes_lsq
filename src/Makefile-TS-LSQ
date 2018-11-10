@@ -54,8 +54,8 @@ CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines
 ##################################
 
 
-CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C feexcept.C A_Matrix.C
-CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h Cheby.h io_styles.h A_Matrix.h
+CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C Cheby.C io_styles.C feexcept.C A_Matrix.C input.C
+CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h Cheby.h io_styles.h A_Matrix.h input.h
 
 chimes_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER)
 	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o chimes_lsq

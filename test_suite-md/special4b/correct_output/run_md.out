@@ -1,16 +1,19 @@
 Code compiled in MPI mode. Will run on 36 processor(s).
 
 Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
 	# RNDSEED #: 12357
 	# TEMPERA #: 2000 K
 	# CMPRFRC #: false
 	# TIMESTP #: 0.125 fs
 	# N_MDSTP #: 50
 	# NLAYERS #: 1
-	# USENEIG #: true 
+	# USENEIG #: true
 	# PRMFILE #: params.txt
 	# CRDFILE #: input.xyz
-	# TRAJEXT #: GEN
 	# VELINIT #: READ ... reading velocities from coordinate file
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
@@ -18,12 +21,12 @@ Reading the simulation control input file...
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
 		... printing       2 frames. 
+	# TRAJEXT #: GEN
 	# FRQENER #: 1
-	# PRNTFRC #: true ...and will be printed every 5 frames.
+	# PRNTFRC #: true
+		... and will be printed every 5 frames.
 		... printing every 0.625 fs, 
 		... printing 10 frames. 
-   ...read complete.
-
 Setting up the data objects...
    ...setup complete
 
@@ -661,10 +664,10 @@ Warning: (Step 40) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.8913
 	...Penalty potential = 0.064784007181178
       41      5.12       7.4091530     -13.5399948      -6.1308418          2512.0     18.12229956     -6.4801643
 Number of 3-body interactions = 487871
-Number of 4-body interactions = 539103
-RANK: 0 UPDATING ON STEP: 41, WITH PADDING: 1.433
 Warning: (Step 41) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.787389276037158 0.910000000000000  13 82
 	...Penalty potential = 18.432547862346773
+Number of 4-body interactions = 539103
+RANK: 0 UPDATING ON STEP: 41, WITH PADDING: 1.433
       42      5.25      11.2534430     -13.4593095      -2.2058664          3815.4     20.10299789     -2.5878598
 Warning: (Step 42) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.637396283384394 0.910000000000000  13 82
 	...Penalty potential = 202.579417408873439

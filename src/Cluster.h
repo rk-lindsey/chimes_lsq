@@ -271,7 +271,7 @@ public:
   string allocate(int nclusters, int natoms, const vector<PAIRS> &FF_2BODY);
 
   // Read the excluded interactions from the input stream.
-  void read_exclude(istream &input, string line);
+  void read_exclude(vector<vector<string> > & CONTENTS, int lineno);
 
   static string tuplet_name(int natom, bool plural, bool caps);
 
@@ -284,8 +284,15 @@ public:
 // Read the force field parameters for a cluster list.
   void read_ff_params(ifstream &PARAMFILE, const vector<string>& TMP_ATOMTYPE);
 
+
+  // Overloaded for different handling in lsq and MD codes
+
   // Read smaxim, sminim for the cluster list and store the input.
-  void read_cutoff_params(istream &input, string LINE, string input_type) ;
+  void read_cutoff_params(vector<vector<string> > & CONTENTS, int lineno, string input_type);
+
+  // Read smaxim, sminim for the cluster list and store the input.
+   void read_cutoff_params(istream &input, string LINE, string input_type) ;
+
 
   // Process cutoff parameter values from stored input.
   void process_cutoff_params(string input_type,vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;

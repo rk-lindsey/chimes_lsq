@@ -24,8 +24,8 @@
 	2
 
 # TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
-1		O		 -		15.9994
-2		H		 +		1.0079
+1		O		 0		15.9994
+2		H		 0		1.0079
 
 # PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #	# NIJBINS #	# NIKBINS #	# NJKBINS #
 1		O		O		1.9 		5.0		0.1		1.75			false		0		0		0

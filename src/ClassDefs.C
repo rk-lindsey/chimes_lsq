@@ -1149,11 +1149,14 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 	INTERACTION_3B inter;
 
 	LIST_3B_INT.clear();
-	for ( int i = 0; i < SYSTEM.ATOMS; i++ ) {
+	for ( int i = 0; i < SYSTEM.ATOMS; i++ ) 
+	{
 		int ai = i;
-		for ( int j = 0; j < LIST_3B[i].size(); j++ ) {
+		for ( int j = 0; j < LIST_3B[i].size(); j++ ) 
+		{
 			int aj = LIST_3B[i][j];
-			for ( int k = 0; k < LIST_3B[i].size(); k++ ) {
+			for ( int k = 0; k < LIST_3B[i].size(); k++ ) 
+			{
 				int ak = LIST_3B[i][k];
 
 				if ( aj == ak || SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] ) 
@@ -1162,7 +1165,8 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 				// The j-k list is possibly outside of the cutoff, so test it here.
 				double rlen = get_dist(SYSTEM, RAB, aj, ak);
 	
-				if ( rlen < MAX_CUTOFF_3B + RCUT_PADDING ) {
+				if ( rlen < MAX_CUTOFF_3B + RCUT_PADDING ) 
+				{
 					inter.a1 = ai;
 					inter.a2 = aj;
 					inter.a3 = ak;
@@ -1479,11 +1483,13 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 
 		int k ;
 		for( k=0; k<TMP_ATOMTYPE.size(); k++)
+		{
 			if(ATOMTYPE[j] == TMP_ATOMTYPE[k])
 			{
 				ATOMTYPE_IDX[j] = k;
 				break ;
 			}
+		}
 
 		if ( k == TMP_ATOMTYPE.size() )
 			EXIT_MSG("Did not recognize atom type " + ATOMTYPE[j]) ;

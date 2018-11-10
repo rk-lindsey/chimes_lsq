@@ -1,2 +1,20 @@
-10d9
-< 	# USENEIG #: true 
+4,7d3
+< Will read from file: run_md.in
+< Input file successfully opened.
+< Input file has been rewound.
+< Input file contents successfully stored.
+11d6
+< 	# CHECKFRC #: false
+15c10
+< 	# USENEIG #: true
+---
+> 	# USENEIG #: true 
+26,27c21
+< 	# PRNTFRC #: true
+< 		... and will be printed every 1 frames.
+---
+> 	# PRNTFRC #: true ...and will be printed every 1 frames.
+29a24,26
+> 	# CHECKFRC #: false
+>    ...read complete.
+> 

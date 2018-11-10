@@ -11,10 +11,10 @@ generate: all
 	cp current_output/* correct_output/
 
 A.txt:
-	$(RUN_JOB) ../chimes_lsq < fm_setup.in > fm_setup.out
+	$(RUN_JOB) ../chimes_lsq fm_setup.in > fm_setup.out
 
 A.0000.txt:
-	$(RUN_JOB) ../chimes_lsq < fm_setup.split.in > fm_setup.split.out
+	$(RUN_JOB) ../chimes_lsq fm_setup.split.in > fm_setup.split.out
 
 %.cmp : %.txt
 	-$(COMPARE) current_output/$*.txt correct_output/$*.txt >& $*.cmp

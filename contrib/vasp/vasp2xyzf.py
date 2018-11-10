@@ -1,6 +1,9 @@
 #!/opt/local/bin/python
 import sys
 
+
+# WARNING: ASSUMES A CUBIC BOX
+
 # Read the input file
 
 SKIP   = 1
@@ -69,14 +72,12 @@ while not EXIT_CONDITION:
 
 	# Get the box lengths
 	
-	
-		
 	if "A1 = (" in LINE:
-		Z = LINE.split()[3].rstrip(',')
+		A = LINE.split()[3:6]
 	if "A2 = (" in LINE:
-		X = LINE.split()[4].rstrip(',')
+		B = LINE.split()[3:6]
 	if "A3 = (" in LINE:
-		Y = LINE.split()[5].rstrip(')')
+		C = LINE.split()[3:6]	
 		
 	# Get the number of atoms of each type
 	
@@ -99,6 +100,25 @@ while not EXIT_CONDITION:
 	if len(LINE) > 0 and LINE[0] == "TEBEG":
 		TEMPERAT = LINE[2].rstrip(';')	
 
+X = [float(A[0].rstrip(',')), float(B[0].rstrip(',')), float(C[0].rstrip(','))]
+Y = [float(A[1].rstrip(',')), float(B[1].rstrip(',')), float(C[1].rstrip(','))]
+Z = [float(A[2].rstrip(')')), float(B[2].rstrip(')')), float(C[2].rstrip(')'))]
+
+for i in xrange(3):
+	if X[i] != 0.0:
+		X = X[i]
+		break
+	
+for i in xrange(3):
+	if Y[i] != 0.0:
+		Y = Y[i]
+		break
+		
+for i in xrange(3):
+	if Z[i] != 0.0:
+		Z = Z[i]
+		break	
+		
 BOXLENS.append(`(abs(float(X)))`)
 BOXLENS.append(`(abs(float(Y)))`)
 BOXLENS.append(`(abs(float(Z)))`)

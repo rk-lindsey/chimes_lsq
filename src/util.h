@@ -67,6 +67,23 @@ bool operator==(const vector<string>& lhs, const vector<string>& rhs)  ;
 
 void enable_fp_exceptions();
 
+
+//////////////////////////////////////////
+// Used in input.*
+//////////////////////////////////////////
+
+
+bool str2bool(string str);
+
+string bool2str(bool boolean);
+
+string join_string_vec(vector<string> & STR_VEC, char DELIM);
+
+
+//////////////////////////////////////////
+// Overloaded error message exit functions
+//////////////////////////////////////////
+
 // Single error message
 void EXIT_MSG(string EXIT_STRING) ; 
 

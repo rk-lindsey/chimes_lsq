@@ -1,13 +1,17 @@
 Code compiled in MPI mode. Will run on 36 processor(s).
 
 Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
 	# RNDSEED #: 12357
 	# TEMPERA #: 2000 K
 	# CMPRFRC #: false
 	# TIMESTP #: 0.125 fs
 	# N_MDSTP #: 4
 	# NLAYERS #: 1
-	# USENEIG #: true 
+	# USENEIG #: true
 	# PRMFILE #: params.new.txt
 	# CRDFILE #: input.xyz
 	# VELINIT #: READ ... reading velocities from coordinate file
@@ -19,8 +23,6 @@ Reading the simulation control input file...
 		... printing       0 frames. 
 	# FRQENER #: 1
 	# PRNTFRC #: false
-   ...read complete.
-
 Setting up the data objects...
    ...setup complete
 

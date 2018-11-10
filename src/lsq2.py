@@ -745,7 +745,7 @@ def fit_owlqn(A,b,alpha_val,beta_val,tol,memory):
     print '! OWLQN alpha = ' + str(alpha_val)
     write_matrix_market(A, 'Amm.txt')
     write_matrix_market(b, 'bmm.txt')
-    path=sys.path[0]
+    path=os.path.dirname(os.path.abspath(__file__)) # "sys.path[0]" converts to lowercase. We need the actual path casing
     exepath=path[:-3] + "contrib/owlqn/source/owlqn"
     if os.path.exists(exepath):
         command = ( exepath
@@ -773,7 +773,7 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
     print '! DOWLQN alpha = ' + str(alpha_val)
     write_matrix_market(A, 'Amm.txt')
     write_matrix_market(b, 'bmm.txt')
-    path=sys.path[0]
+    path=os.path.dirname(os.path.abspath(__file__))
     dowlqn_file = path[:-3] + "contrib/owlqn/mpi/dowlqn"
     exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
     exepath = exepath + dowlqn_file

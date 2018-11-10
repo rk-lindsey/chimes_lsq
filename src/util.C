@@ -183,6 +183,47 @@ bool operator==(const vector<string>& lhs, const vector<string>& rhs)
 
 
 //////////////////////////////////////////
+// Used in input.*
+//////////////////////////////////////////
+
+
+bool str2bool(string str)
+{
+	if      (str=="true"  || str=="True"  || str=="TRUE"  || str == "T" || str == "t")
+		return true;
+	else if (str=="false" || str=="False" || str=="FALSE" || str == "F" || str == "f")
+		return false;
+	else
+		EXIT_MSG("ERROR: Unrecognized bool value: ", str);	
+	
+	return false;
+}
+
+string bool2str(bool boolean)
+{
+	if (boolean)
+		return "true";
+	else
+		return "false";
+}
+
+string join_string_vec(vector<string> & STR_VEC, char DELIM)
+{
+	string JOIN = "";
+	
+	for(int i=0; i<STR_VEC.size(); i++)
+	{
+		if(i>0)
+			JOIN += DELIM;
+		
+		JOIN += STR_VEC[i];
+	}
+	
+	return JOIN;
+}
+
+
+//////////////////////////////////////////
 // Overloaded error message exit functions
 //////////////////////////////////////////
  

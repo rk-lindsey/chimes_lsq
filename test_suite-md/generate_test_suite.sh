@@ -44,7 +44,7 @@ do
 	cd $i
 	
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		 if ../chimes_md < run_md.in > run_md.out ; then
+		 if ../chimes_md run_md.in > run_md.out ; then
 			  SUCCESS=1
 		 else
 			  echo "Chimes_md failed"
@@ -52,7 +52,7 @@ do
 		 fi
 			
 	else
-		 if $RUN_JOB ../chimes_md < run_md.in > run_md.out ; then
+		 if $RUN_JOB ../chimes_md run_md.in > run_md.out ; then
 			  SUCCESS=1
 		 else
 			  echo "Chimes_md failed"
@@ -102,7 +102,7 @@ do
 	cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
 	cp ../../test_suite-lsq/$i/current_output/force.txt     .
 	
-	if ../chimes_md < run_md.in > run_md.out ; then
+	if ../chimes_md run_md.in > run_md.out ; then
 		 echo 'Chimes_md succeeded'
 		 SUCCESS=1
 	else

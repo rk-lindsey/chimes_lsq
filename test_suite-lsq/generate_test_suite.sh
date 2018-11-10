@@ -73,7 +73,7 @@ do
 
 	cd $i
 
-	if $RUN_JOB ../chimes_lsq < fm_setup.in > fm_setup.out ; then
+	if $RUN_JOB ../chimes_lsq fm_setup.in > fm_setup.out ; then
 		 echo "Chimes_lsq succeeded"
 		 SUCCESS=1
 	else

@@ -70,7 +70,7 @@ do
 	
 	cd $i
 
-	if $RUN_JOB ../chimes_md < run_md.in > run_md.out ; then
+	if $RUN_JOB ../chimes_md run_md.in > run_md.out ; then
 		 SUCCESS=1 
 	else
 		 echo "Chimes_md failed"
@@ -118,7 +118,6 @@ done
 # Iterate through the tests -- MD/LSQ CODE COMPATIBILITY
 ########################################
 
-
 if [ -n "$LSQ_FORCE_JOBS" ] ; then
 	 echo " "
 	 echo "VALIDATING FOR LSQ/MD CODE COMPATIBILITY..."
@@ -145,18 +144,25 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 		  
 		  PASS=true
 		  
+		  if [ ! -d ${TAG}${i} ] ; then
+		  	echo "MD test directory ${TAG}${i} doesn't exist"
+			continue
+		  fi		  
+		  
 		  cd ${TAG}${i}
 	
-	# Grab the parameter and force files from the lsq test suite output
+		# Grab the parameter and force files from the lsq test suite output
 	
 		  cp ../../test_suite-lsq/$i/current_output/params.txt    .
 		  cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
 		  cp ../../test_suite-lsq/$i/current_output/force.txt     .
 
-		  if ../chimes_md < run_md.in > run_md.out ; then
+		  if ../chimes_md run_md.in > run_md.out ; then
 				SUCCESS=1
 		  else
 				echo "Chimes_MD failed"
+
+				../chimes_md run_md.in > run_md.out
 				SUCCESS=0
 				PASS=false
 				ALL_PASS=false
@@ -207,8 +213,10 @@ do
 	 cd $i ; make NP=${NP}
 	 echo "Testing $i"
 	 if [ $? -ne 0 ] ; then
-		  echo "Test $i failed"
+		  echo "		...Test failed."
 		  ALL_PASS=false ;
+	 else
+		  echo "		...Test passed."
 	 fi
 	 echo " "
 	 cd ../

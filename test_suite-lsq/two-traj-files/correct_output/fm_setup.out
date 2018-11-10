@@ -1,17 +1,17 @@
 
 Reading input file...
+Will read from file: fm_setup.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
 	# TRJFILE #: MULTI traj_list.dat
 		...Will read from the following files: 
 		-   064_atoms_9_frames.xyzf with 9 frames.
 		-   128_atoms_5_frames.xyzf with 5 frames.
-	# WRAPTRJ #: 1
+	# WRAPTRJ #: true
 	# NFRAMES #: 14
 	# NLAYERS #: 1
 	# FITCOUL #: false
-WARNING:  The following input line was ignored:
- # CNSCOUL # 
-WARNING:  The following input line was ignored:
-         false   
 	# FITSTRS #: false
 	# FITENER #: true
 	# FITPOVR #: false
@@ -44,11 +44,10 @@ WARNING:  The following input line was ignored:
 		Atom type idxs:  0 1 Pair name:   CO Explicit pair index:    1 Unique pair index:    2
 		Atom type idxs:  1 0 Pair name:   OC Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   OO Explicit pair index:    3 Unique pair index:    1
-# FCUTTYP #:         TERSOFF 0.5      ... for all Chebyshev interactions
-WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
-
 Note: Will use cubic scaling of: 1
 
+# FCUTTYP #: TERSOFF 0.5      ... for all Chebyshev interactions
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 
 	Made the following triplets: 0    
 
