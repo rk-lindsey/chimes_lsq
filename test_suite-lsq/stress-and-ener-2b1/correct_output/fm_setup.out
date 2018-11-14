@@ -11,7 +11,7 @@ Input file contents successfully stored.
 	# FITCOUL #: false
 	# FITSTRS #: true ...will fit to all tensor components
 	# FITENER #: true
-    			 ...will only fit energies for first 5 frames.
+    			 ...will fit energies for first 5 frames.
 	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 12
@@ -84,8 +84,8 @@ Printing matrices...
 Per-atom type energies will be provided at the end of the parameter file.
 Values will correspond to the following atom types, in order: 
 	C 60
-	O 8
 	H 64
+	O 8
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.189
 		1	H H	0.860

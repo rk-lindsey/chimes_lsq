@@ -163,10 +163,14 @@ void divide_atoms(int &a1start, int &a1end, int atoms)
 	{
 		a1start = atoms + 1;
 		a1end = atoms - 1;
-	} else if ( RANK == procs_used - 1 ) {
+	} 
+	else if ( RANK == procs_used - 1 ) 
+	{
 		// End of the list.
 		a1end = atoms - 1;
-	} else {
+	} 
+	else 
+	{
 		// Next starting value - 1 .
 		a1end   = ceil( (double) (RANK+1) * atoms / procs_used ) - 1;
 		if ( a1end > atoms - 1 ) 

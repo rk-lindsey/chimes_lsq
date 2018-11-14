@@ -1,0 +1,71 @@
+USECOUL: false
+FITCOUL: false
+USEPOVR: false
+FITPOVR: false
+USE3BCH: true
+USE4BCH: false
+
+PAIRTYP: CHEBYSHEV  12 2 0 -1 1
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		N		0		14.0064
+1		H		0		1.0079
+
+ATOM PAIRS: 3
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+	0               N               N               0.934           8               0.1             MORSE           1.15            
+	1               H               H               0.529           8               0.1             MORSE           0.8             
+	2               N               H               0.761           8               0.1             MORSE           1               
+
+FCUT TYPE: TERSOFF 0.5
+
+SPECIAL 3B S_MAXIM: SPECIFIC 4
+NNNNNN NN NN NN 5.00000 5.00000 5.00000 
+NNNHNH NH NH NN 5.00000 5.00000 5.00000 
+NHNHHH HH NH NH 5.00000 5.00000 5.00000 
+HHHHHH HH HH HH 5.00000 5.00000 5.00000 
+
+ATOM PAIR TRIPLETS: 4
+
+ INDEX: 0 ATOMS: N N N
+ PAIRS: NN NN NN  2 parameters, 4 total parameters 
+     index  |  powers  |  equiv index  |  param index  
+   ----------------------------------------------------
+      0       0  1  1         0               0       
+      1       1  0  1         0               0       
+      2       1  1  0         0               0       
+      3       1  1  1         3               1       
+
+ INDEX: 1 ATOMS: H N N
+ PAIRS: NH NH NN  3 parameters, 4 total parameters 
+     index  |  powers  |  equiv index  |  param index  
+   ----------------------------------------------------
+      0       0  1  1         0               0       
+      1       1  0  1         0               0       
+      2       1  1  0         2               1       
+      3       1  1  1         3               2       
+
+ INDEX: 2 ATOMS: H H N
+ PAIRS: HH NH NH  3 parameters, 4 total parameters 
+     index  |  powers  |  equiv index  |  param index  
+   ----------------------------------------------------
+      0       0  1  1         0               0       
+      1       1  0  1         1               1       
+      2       1  1  0         1               1       
+      3       1  1  1         3               2       
+
+ INDEX: 3 ATOMS: H H H
+ PAIRS: HH HH HH  2 parameters, 4 total parameters 
+     index  |  powers  |  equiv index  |  param index  
+   ----------------------------------------------------
+      0       0  1  1         0               0       
+      1       1  0  1         0               0       
+      2       1  1  0         0               0       
+      3       1  1  1         3               1       
+
+
+ATOM PAIR QUADRUPLETS: 0
+

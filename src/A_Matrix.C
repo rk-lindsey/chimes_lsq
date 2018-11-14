@@ -1,6 +1,7 @@
 #include<vector>
 #include<algorithm>
 #include<iostream>
+#include<cmath>
 
 using namespace std;
 #ifdef USE_MPI
@@ -15,16 +16,32 @@ using namespace std;
 A_MAT::A_MAT(): FORCES(), CHARGES(), OVERBONDING(), STRESSES(), FRAME_ENERGIES(), ATOM_ENERGIES()
 {
 	// Set up A-matrix
-	data_count = 0 ;
-	param_count = 0 ;
+	
+	data_count  = 0;
+	param_count = 0;
 }
 
 A_MAT::~A_MAT(){}
 
-void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS)
+void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS, vector<PAIRS> & ATOM_PAIRS)
 // Set up the A "matrix"
 {
-	INITIALIZE_NATOMS  (SYSTEM.ATOMS,SYSTEM.ATOMTYPE);
+	// Clear out class variables 
+
+	NO_ATOM_TYPES = 0;	 
+	ATOM_TYPES	.clear();	 
+	NO_ATOMS_OF_TYPE.clear();
+	
+	FORCES		.clear(); 	 
+	STRESSES	.clear();	 
+	FRAME_ENERGIES	.clear();	 
+	ATOM_ENERGIES	.clear();	 
+	OVERBONDING	.clear();      
+	CHARGES		.clear();	         
+	
+	// Initialize everything
+
+	INITIALIZE_NATOMS  (SYSTEM.ATOMS,SYSTEM.ATOMTYPE, ATOM_PAIRS);
 		
 	INITIALIZE_FORCES  (SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE);
 	INITIALIZE_ENERGIES(SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER, CONTROLS.FIT_ENER_PER_ATOM);
@@ -33,34 +50,45 @@ void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS)
 	INITIALIZE_CHARGES (NPAIRS,SYSTEM.ATOMS);
 }
 
-void A_MAT::INITIALIZE_NATOMS  (int ATOMS, vector<string> & FRAME_ATOMTYPES)
+void A_MAT::INITIALIZE_NATOMS  (int ATOMS, vector<string> & FRAME_ATOMTYPES, vector<PAIRS> & ATOM_PAIRS)
 {
+	
 	// Goal: Determine how many atoms of each type are present
 
-	NO_ATOM_TYPES = 0;
-	NO_ATOMS_OF_TYPE.resize(0) ;
-
-	vector<string>::iterator it;
+	// First task: Identify the exepcted atom types
+	
+	ATOM_TYPES      .clear();
+	NO_ATOMS_OF_TYPE.clear();
+	
+	for (int j=0; j<ATOM_PAIRS.size(); j++)
+	{
+		if (ATOM_PAIRS[j].ATM1TYP == ATOM_PAIRS[j].ATM2TYP )
+		{
+			ATOM_TYPES.push_back(ATOM_PAIRS[j].ATM1TYP);
+			NO_ATOMS_OF_TYPE.push_back(0);
+		}
+	}
+	
+	NO_ATOM_TYPES = NO_ATOMS_OF_TYPE.size();
+	
+	// Second task: Count up how many of each type appear in the trajectory frames 
 
 	for (int i=0; i<ATOMS; i++)
 	{
-		// Get the location of the current atom type in the "ATOM_TYPES" list
-		// ...if it doesn't exist, add it
-		
-		it = find(ATOM_TYPES.begin(), ATOM_TYPES.end(), FRAME_ATOMTYPES[i]);
-
-
-		if (it == ATOM_TYPES.end()) // Then the atom type hasn't been added yet
+		for (int j=0; j<NO_ATOM_TYPES; j++)
 		{
-			NO_ATOM_TYPES++;
-			ATOM_TYPES.push_back(FRAME_ATOMTYPES[i]);
-			NO_ATOMS_OF_TYPE.push_back(1);
-		}
-		else
-		{
-			NO_ATOMS_OF_TYPE[distance(ATOM_TYPES.begin(), it)]++;
+			if (ATOM_TYPES[j] == FRAME_ATOMTYPES[i])
+				NO_ATOMS_OF_TYPE[j]++;
 		}
 	}
+	
+	/* For debugging:
+	
+	cout << "IINITIALIZATION RESULTS: " << endl;
+	
+	for (int i=0; i<NO_ATOM_TYPES; i++)
+		cout << "	+ " <<  ATOM_TYPES[i] << " " << NO_ATOMS_OF_TYPE[i] << endl;
+	*/
 }
 
 
@@ -169,19 +197,17 @@ void A_MAT::add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE)
 }
 
 
-void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
-												const class FRAME &SYSTEM,
-												const vector<class PAIRS> & ATOM_PAIRS,
-												const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
-	                      int N)
+void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
+				const class FRAME &SYSTEM,
+				const vector<class PAIRS> & ATOM_PAIRS,
+				const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
+				int N)
 // Print one frame of the A matrix.
 {
 	bool DO_ENER       = CONTROLS.FIT_ENER_EVER ;
 
-	if ( ! fileb.is_open() ) {
-		EXIT_MSG("FILEB was not open") ;
-	}
-
+	if ( ! fileb.is_open() )
+		EXIT_MSG("FILEB was not open");
 
 	for(int a=0;a<FORCES.size();a++) // Loop over atoms
 	{	
@@ -432,27 +458,30 @@ void A_MAT::PRINT_FRAME(const struct JOB_CONTROL &CONTROLS,
 	
 }
 
-void A_MAT::PRINT_CONSTRAINTS(const struct JOB_CONTROL &CONTROLS,
-															const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
-	                            int NPAIRS)
+void A_MAT::PRINT_CONSTRAINTS(	const struct JOB_CONTROL &CONTROLS,
+				const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS,
+	                        int NPAIRS)
 // Print out any charge constraints to the A matrix and b files.
 {
-
 	int print_rank = NPROCS - 1 ;
-	if ( CONTROLS.SPLIT_FILES ) {
-		// Keep files for A split for convenient parallel processing.
+	
+	if ( CONTROLS.SPLIT_FILES ) // Keep files for A split for convenient parallel processing.
+	{
 		// Write out dimensions.
 		vector<int> all_data_count(NPROCS) ;
+		
 		// Get the total number of data entries (all_data_count)
-#ifdef USE_MPI
-		MPI_Allgather(&data_count, 1, MPI_INT, all_data_count.data(), 1, MPI_INT, MPI_COMM_WORLD) ;
-#else
-		all_data_count[0] = data_count ;
-#endif
+		
+		#ifdef USE_MPI
+			MPI_Allgather(&data_count, 1, MPI_INT, all_data_count.data(), 1, MPI_INT, MPI_COMM_WORLD) ;
+		#else
+			all_data_count[0] = data_count ;
+		#endif
+		
 		int j ;
-		for ( j = 0 ; j < NPROCS ; j++ )
+		for (j=0; j<NPROCS; j++)
 		{
-			if ( all_data_count[j] == 0 )
+			if (all_data_count[j] == 0)
 			{
 				print_rank = j ;
 				break ;
@@ -496,17 +525,20 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 	fileb.close();
 	fileb_labeled.close();
 
-#ifdef USE_MPI
 	// Make sure that every process has closed its files.
-	MPI_Barrier(MPI_COMM_WORLD);
-#endif
 
-	if ( RANK == 0 ) {
+	#ifdef USE_MPI
+		MPI_Barrier(MPI_COMM_WORLD);
+	#endif
+
+	if ( RANK == 0 ) 
+	{
 		system("cat b.[0-9]*.txt > b.txt");
 		system("rm b.[0-9]*.txt");
 		system("cat b-labeled.[0-9]*.txt > b-labeled.txt");
 		system("rm b-labeled.[0-9]*.txt");
-		if ( ! SPLIT_FILES ) {
+		if ( ! SPLIT_FILES ) 
+		{
 			// Serialize into a single A
 			// Could make the SVD program read multiple files.
 			system("cat A.[0-9]*.txt > A.txt");
@@ -514,24 +546,30 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 		}
 	}
 
-	if ( SPLIT_FILES ) {
-		// Keep files for A split for convenient parallel processing.
+	if ( SPLIT_FILES ) // Keep files for A split for convenient parallel processing.
+	{
 		// Write out dimensions.
+		
 		vector<int> all_data_count(NPROCS) ;
+		
 		// Get the total number of data entries (all_data_count)
-#ifdef USE_MPI
-		MPI_Allgather(&data_count, 1, MPI_INT, all_data_count.data(), 1, MPI_INT, MPI_COMM_WORLD) ;
-#else
-		all_data_count[0] = data_count ;
-#endif
-		int start = 0, end = 0, total = 0 ;
-		for ( int i = 0 ; i < RANK ; i++ ) {
+		
+		#ifdef USE_MPI
+			MPI_Allgather(&data_count, 1, MPI_INT, all_data_count.data(), 1, MPI_INT, MPI_COMM_WORLD) ;
+		#else
+			all_data_count[0] = data_count ;
+		#endif
+		
+		int start=0, end=0, total=0;
+		
+		for (int i=0; i<RANK; i++) 
 			start += all_data_count[i] ;
-		}
+
 		end = start + all_data_count[RANK] - 1 ;
-		for ( int i = 0 ; i < NPROCS ; i++ ) {
+		
+		for (int i=0; i<NPROCS; i++) 
 			total += all_data_count[i] ;
-		}
+
 
 		// Write the number of columns, row to start, end, and total #of rows to the dimension file.
 		if ( all_data_count[RANK] > 0 )
@@ -544,7 +582,9 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 				EXIT_MSG("Could not open " + string(name)) ;
 			out << param_count << " " << start << " " << end << " " << total << "\n" ;
 			out.close() ;
-		} else {
+		} 
+		else 
+		{
 			// If there is no data, the A file was not used.  Delete it.
 			char name[80] ;
 			sprintf(name, "A.%04d.txt", RANK) ;

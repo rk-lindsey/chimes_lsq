@@ -205,7 +205,7 @@ public:
   int  NSTRESS;			// Only fit stresses for first NSTRESS frames of trajectory
   bool FIT_ENER;		// Should the total frame energy be included in the fit?
   bool FIT_ENER_PER_ATOM;	// Should the energy of each atom be included in the fit?
-	bool FIT_ENER_EVER ; // Is energy ever included in the fit ?
+  bool FIT_ENER_EVER ; 		// Is energy ever included in the fit ?
   int  NENER;
   bool CALL_EWALD;		// Should ewald subroutines be called?
   bool USE_POVER;		// Should overbonding information be printed to the header file?
@@ -219,7 +219,7 @@ public:
   int	INVR_PARAMS;		// currently uses 19 parameters per pair type
   int 	TOT_SNUM;			// total number of 2-body force field parameters
   int 	TOT_SHORT_RANGE;	// Number of short ranged FF params... i.e. not Ewald
-	int   TOT_ALL_PARAMS ;  // Total number of LSQ fitting parameters.
+  int   TOT_ALL_PARAMS ;  	// Total number of LSQ fitting parameters.
 	
   bool	COUL_CONSV;		// If true, constraints will be applied to charge fitting to try to maintain consistency
   bool	IF_SUBTRACT_COORD;	// If true, subtract overcoordination forces.
@@ -332,8 +332,7 @@ public:
 	void 		update_ghost(int n_layers);
 	inline int 	get_atomtype_idx(int atom);
 	void SET_NATOMS_OF_TYPE();
-	void READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE,
-								 int i);
+	void READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE, int i);
 	void build_layers(int N_LAYERS) ;
 };
 

@@ -1872,17 +1872,20 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				QUADS.process_cutoff_params("S_MAXIM",FF_2BODY, PAIR_MAP) ;
 				NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF ;
 		  }
-			else if ( LINE.find("NO ENERGY OFFSETS:") != string::npos)
-			{
+		  else if ( LINE.find("NO ENERGY OFFSETS:") != string::npos)
+		  {
 				vector<string> tokens;
 				int ntokens ;
 				ntokens = parse_space(LINE,tokens) ;
 				
 				// Determine the number of offsets (atom types)
-				SYSTEM.QM_ENERGY_OFFSET.resize(stoi(tokens[2])); 
+				SYSTEM.QM_ENERGY_OFFSET.resize(stoi(tokens[3])); 
 				
-				for (int i=0; i<stoi(tokens[2]); i++)
+				for (int i=0; i<stoi(tokens[3]); i++)
 				{
+					LINE = get_next_line(PARAMFILE);
+					ntokens = parse_space(LINE,tokens);
+				
 					if ( ntokens == 4 )
 					{
 						SYSTEM.QM_ENERGY_OFFSET[i] = stod(tokens[3]) ;

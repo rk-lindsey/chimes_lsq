@@ -1,0 +1,155 @@
+!
+! Number of variables =  48
+! Number of equations    =  15630
+! eps (= eps_fac*dmax) =   1.50920858265
+! RMS force error =  32.033793624
+! max abs variable =  90.7952148918
+! SVD regularization factor =  1e-05
+! number of SVD fitting vars =  47
+! Bayesian Information Criterion =   108825.775578
+!
+USECOUL: false
+FITCOUL: false
+USEPOVR: false
+FITPOVR: false
+USE3BCH: true
+USE4BCH: false
+
+PAIRTYP: CHEBYSHEV  12 2 0 -1 1
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		N		0		14.0064
+1		H		0		1.0079
+
+ATOM PAIRS: 3
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+	0               N               N               0.934           8               0.1             MORSE           1.15            
+	1               H               H               0.529           8               0.1             MORSE           0.8             
+	2               N               H               0.761           8               0.1             MORSE           1               
+
+FCUT TYPE: TERSOFF 0.5
+
+SPECIAL 3B S_MAXIM: SPECIFIC 4
+NNNNNN NN NN NN 5.00000 5.00000 5.00000 
+NNNHNH NH NH NN 5.00000 5.00000 5.00000 
+NHNHHH HH NH NH 5.00000 5.00000 5.00000 
+HHHHHH HH HH HH 5.00000 5.00000 5.00000 
+
+ATOM PAIR TRIPLETS: 4
+ATOM PAIR QUADRUPLETS: 0
+
+PAIR CHEBYSHEV PARAMS 
+
+PAIRTYPE PARAMS: 0 N N
+
+0 12.770831220330702
+1 10.951742692639305
+2 8.024559648532648
+3 21.773145578346515
+4 9.3837233348326876
+5 -1.8654566845725169
+6 1.1715576959321687
+7 -0.86636636114571253
+8 -0.24164671325793949
+9 -1.0084773332558901
+10 0.22053101783956608
+11 0.32017603427122088
+ 
+PAIRTYPE PARAMS: 1 H H
+
+0 -7.9144162514544192
+1 -28.315229540131902
+2 -18.853646606447832
+3 2.4571676316214628
+4 2.7496340566345889
+5 4.2810783614280803
+6 7.5493240663387091
+7 9.4344233304575802
+8 5.9612590873373481
+9 2.4771375947624161
+10 0.21886767199019186
+11 -0.0062803981013237475
+ 
+PAIRTYPE PARAMS: 2 N H
+
+0 5.5628042380110987
+1 14.186020607545164
+2 17.85670845371083
+3 15.215016411694467
+4 5.9739426239990738
+5 1.5663124067640828
+6 1.9753800919068718
+7 2.283330986109398
+8 1.1230898067743627
+9 0.19950648566132312
+10 0.29910895399661785
+11 0.18957978958073929
+ 
+TRIPLET CHEBYSHEV PARAMS 
+
+TRIPLETTYPE PARAMS:
+   INDEX: 0 ATOMS: N N N
+   PAIRS: NN NN NN UNIQUE: 2 TOTAL: 4
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0  1  1         0               0        6.6900330328041067
+      1       1  0  1         0               0        6.6900330328041067
+      2       1  1  0         0               0        6.6900330328041067
+      3       1  1  1         3               1        19.074576928453098
+
+TRIPLETTYPE PARAMS:
+   INDEX: 1 ATOMS: H N N
+   PAIRS: NH NH NN UNIQUE: 3 TOTAL: 4
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0  1  1         0               0        1.7745619396918064
+      1       1  0  1         0               0        1.7745619396918064
+      2       1  1  0         2               1        -0.020611865512599969
+      3       1  1  1         3               2        3.5354156883673036
+
+TRIPLETTYPE PARAMS:
+   INDEX: 2 ATOMS: H H N
+   PAIRS: HH NH NH UNIQUE: 3 TOTAL: 4
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0  1  1         0               0        -3.1597483834936941
+      1       1  0  1         1               1        1.1534734907120554
+      2       1  1  0         1               1        1.1534734907120554
+      3       1  1  1         3               2        -0.95515499726248265
+
+TRIPLETTYPE PARAMS:
+   INDEX: 3 ATOMS: H H H
+   PAIRS: HH HH HH UNIQUE: 2 TOTAL: 4
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0  1  1         0               0        1.6788442276219153
+      1       1  0  1         0               0        1.6788442276219153
+      2       1  1  0         0               0        1.6788442276219153
+      3       1  1  1         3               1        3.9370358938889387
+
+QUADRUPLET CHEBYSHEV PARAMS 
+
+
+PAIRMAPS: 4
+1 HH
+2 HN
+2 NH
+0 NN
+
+TRIPMAPS: 8
+3 HHHHHH
+2 HHNHNH
+2 NHHHNH
+2 NHNHHH
+1 NHNHNN
+1 NHNNNH
+1 NNNHNH
+0 NNNNNN
+
+NO ENERGY OFFSETS:  2
+ENERGY OFFSET 1 -64.5347952432
+ENERGY OFFSET 2 -90.7952148918
+ENDFILE

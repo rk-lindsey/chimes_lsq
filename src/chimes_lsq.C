@@ -326,10 +326,9 @@ int main(int argc, char* argv[])
 				cout << "	" << A_MATRIX.ATOM_TYPES[a] << " " << A_MATRIX.NO_ATOMS_OF_TYPE[a] << endl;		
 		}
 	}
-
+	
 	A_MATRIX.PRINT_CONSTRAINTS(CONTROLS, CHARGE_CONSTRAINTS, ATOM_PAIRS.size() ) ;
 	A_MATRIX.CLEANUP_FILES(CONTROLS.SPLIT_FILES) ;
-		
 	
  	 //////////////////////////////////////////////////
 	//
@@ -691,37 +690,53 @@ static void print_map_file(map<string,int> PAIR_MAP, CLUSTER_LIST &TRIPS, CLUSTE
 
 }
 
-static int process_frame(A_MAT &A_MATRIX, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, vector<PAIRS> &ATOM_PAIRS,
-												 map<string,int> &PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST,
-												 CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, vector<CHARGE_CONSTRAINT> &CHARGE_CONSTRAINTS,
-												 int i, int istart) 
+static int process_frame(	A_MAT &A_MATRIX, 
+				JOB_CONTROL &CONTROLS, 
+				FRAME &SYSTEM, 
+				vector<PAIRS> &ATOM_PAIRS,
+				map<string,int> &PAIR_MAP, 
+				vector<int> &INT_PAIR_MAP, 
+				NEIGHBORS &NEIGHBOR_LIST,
+				CLUSTER_LIST &TRIPS, 
+				CLUSTER_LIST &QUADS, 
+				vector<CHARGE_CONSTRAINT> &CHARGE_CONSTRAINTS,
+				int i, 
+				int istart) 
 // Process the ith frame of the A_MATRIX.
 {
 
 	double 	NEIGHBOR_PADDING = 0.3;
 
 	// NOTE: WE CONTINUALLY RE-USE THE 0th entry of A_MATRIX TO SAVE MEMORY.
-	A_MATRIX.INITIALIZE(CONTROLS, SYSTEM, ATOM_PAIRS.size() ) ;
+	A_MATRIX.INITIALIZE(CONTROLS, SYSTEM, ATOM_PAIRS.size(),ATOM_PAIRS) ;
 
 	if (RANK == 0 && i == istart )
 	{
 		cout << "...matrix setup complete: " << endl << endl;
 		cout << "...Populating the matrices for A, Coulomb forces, and overbonding..." << endl << endl;
 	}
+	
+		
+	bool DUMMY_FIT_STRESS	     = CONTROLS.FIT_STRESS;    
+	bool DUMMY_FIT_STRESS_ALL    = CONTROLS.FIT_STRESS_ALL;
+
+	bool DUMMY_FIT_ENER	     = CONTROLS.FIT_ENER;	 
+	//bool DUMMY_FIT_ENER_PER_ATOM = CONTROLS.FIT_ENER_PER_ATOM;
 
 	// Only include stress tensor data for first NSTRESS frames..
-	if(i >= CONTROLS.NSTRESS)
+	
+	if((CONTROLS.NSTRESS != -1) && (i >= CONTROLS.NSTRESS))
 	{
 		CONTROLS.FIT_STRESS     = false;	
 		CONTROLS.FIT_STRESS_ALL = false;
 	}
 		
-	if(i >= CONTROLS.NENER)
+	if((CONTROLS.NENER != -1) && (i >= CONTROLS.NENER))
 	{
 		CONTROLS.FIT_ENER          = false;	
 		//CONTROLS.FIT_ENER_PER_ATOM = false;
-	}		
-	
+	}
+			
 	// This output is specific to the number of processors.
 		
 	if(NPROCS==1)
@@ -745,11 +760,17 @@ static int process_frame(A_MAT &A_MATRIX, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, 
 		SubtractEwaldForces(SYSTEM, NEIGHBOR_LIST, CONTROLS);
 
 	if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
-	{
 		SubtractCoordForces(SYSTEM, true, A_MATRIX, ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);			
-		//cout << "Feature deprecated - exiting." << endl;
-		//exit_run(0);
-	}
+
+	
+	CONTROLS.FIT_STRESS        = DUMMY_FIT_STRESS; 
+	CONTROLS.FIT_STRESS_ALL    = DUMMY_FIT_STRESS_ALL;
+
+	CONTROLS.FIT_ENER          = DUMMY_FIT_ENER;	
+	//CONTROLS.FIT_ENER_PER_ATOM = DUMMY_FIT_ENER_PER_ATOM;	
+
+
+	CONTROLS.FIT_ENER_EVER = (CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM);
 
 	A_MATRIX.PRINT_FRAME(CONTROLS, SYSTEM, ATOM_PAIRS, CHARGE_CONSTRAINTS, i) ;
 	int total_forces = 3 * A_MATRIX.FORCES.size() ;

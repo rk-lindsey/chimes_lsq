@@ -128,4 +128,13 @@ This is a list of each test and what functionality is probed
 	- special outer cutoffs  ("SPECIFIC")
 	- Tersoff style cutoff	
 	- Morse-style transformation	
+21 one-file-three-trajs 
+	- Reads from one 30 frame trajectory file with for (a) 128 HN3 molecules, (b) an isolated H2 molecule, and (c) an isolated HN3 molecule
+	- Frame energies included in fit, for each frame
+	- 2 atom types specified in the input file (N and H), but first some frames only contain H
+	- Chebyshev interactions
+	- 2-through-3-body interactions
+	- special outer cutoffs  ("ALL")
+	- Tersoff style cutoff	
+	- Morse-style transformation	
 	

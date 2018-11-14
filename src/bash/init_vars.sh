@@ -40,7 +40,8 @@ function init_test_vars
 		       stress-and-ener-2b1
 		       stress-and-ener-2b2
 		       stress-and-ener-2b3
-		       two-traj-files' 
+		       two-traj-files
+		       one-file-three-trajs' 
 
 	 LSQ_MAKE_JOBS='lsq2'
 

@@ -38,7 +38,7 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 
 #CXX=mpiicc -std=c++11  -O3 -D USE_MPI 	# For MPI (intel  ). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
 #CXX=mpicxx  -std=c++11  -g -Wall -D USE_MPI 	# For MPI (gnu    ). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
-#CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
+CXX=mpicxx -std=c++11 -O3 -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
 #CXX=mpicxx -std=c++11 -g -D USE_MPI 	# For MPI (gnu/osx). Run on slurm machines with: srun -n <#procs> chimes_md < run_md.in
 #CXX=icc -g				# Serial, for debugging
 #CXX=icc -O3
@@ -48,7 +48,7 @@ MYFLAGS= -D VERBOSITY=1 -D FPENALTY_POWER=3.0
 # Below: Other debugging/optimiazation options
 #
 #CXX=clang++ -g -std=c++11 -g -Wall
-CXX=mpicxx -std=c++11 -g -D USE_MPI -Wall -Wno-sign-compare -DENABLE_FP_EXCEPT
+#CXX=mpicxx -std=c++11 -g -D USE_MPI -Wall -Wno-sign-compare -DENABLE_FP_EXCEPT
 
 #CXX=icpc -fast -Wall
 

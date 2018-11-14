@@ -445,9 +445,8 @@ void INPUT::PARSE_CONTROLS_FITENER(JOB_CONTROL & CONTROLS)
 			if ( RANK == 0 )
 			{
 				cout << "	# FITENER #: " << bool2str(CONTROLS.FIT_ENER) << endl;	
-							
-				if(CONTROLS.NENER>0)
-					cout << "    			 ...will only fit energies for first " << CONTROLS.NENER << " frames." << endl;
+				if(CONTROLS.NENER>=0)
+					cout << "    			 ...will fit energies for first " << CONTROLS.NENER << " frames." << endl;
 			}	
 		}
 	}
@@ -463,19 +462,19 @@ void INPUT::PARSE_CONTROLS_FITEATM(JOB_CONTROL & CONTROLS)
 			if (CONTENTS[i+1][0]=="first"  || CONTENTS[i+1][0]=="First"  || CONTENTS[i+1][0]=="FIRST")
 			{
 				CONTROLS.FIT_ENER_PER_ATOM = true;
-				CONTROLS.NENER = stoi(CONTENTS[i+1][1]);
+				CONTROLS.FIT_ENER_PER_ATOM = stoi(CONTENTS[i+1][1]);
 			}
 			else
 			{
-				CONTROLS.FIT_ENER = str2bool(CONTENTS[i+1][0]);
+				CONTROLS.FIT_ENER_PER_ATOM = str2bool(CONTENTS[i+1][0]);
 			}
 			
 			if ( RANK == 0 )
 			{
-				cout << "	# FITENER #: " << bool2str(CONTROLS.FIT_ENER_PER_ATOM) << endl;	
-							
-				if(CONTROLS.NENER>0)
-					cout << "    			 ...will only fit energies for first " << CONTROLS.NENER << " frames." << endl;
+				cout << "	# FITENER #: " << bool2str(CONTROLS.FIT_ENER_PER_ATOM);	
+				
+				if(CONTROLS.NENER>=0)
+					cout << "    			 ...will fit energies for first " << CONTROLS.NENER << " frames." << endl;
 			}	
 		}
 	}

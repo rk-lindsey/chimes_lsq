@@ -11131,8 +11131,8 @@ Printing matrices...
 Per-atom type energies will be provided at the end of the parameter file.
 Values will correspond to the following atom types, in order: 
 	C 60
-	O 8
 	H 64
+	O 8
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.189
 		1	H H	0.875

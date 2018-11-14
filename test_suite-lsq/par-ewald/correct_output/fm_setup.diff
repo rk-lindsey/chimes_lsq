@@ -1,55 +1,525 @@
-*** correct_output/fm_setup.out	Fri Oct 19 18:25:03 2018
---- current_output/fm_setup.out	Sat Nov 10 11:31:07 2018
+*** correct_output/fm_setup.out	Mon Nov 12 16:23:53 2018
+--- current_output/fm_setup.out	Tue Nov 13 17:43:34 2018
 ***************
-*** 1,7 ****
+*** 63,68 ****
+--- 63,72 ----
+  	Real box dimensions:         8.60913 8.60913 8.60913
+  	Total box dimensions (ghost): 25.8274 25.8274 25.8274
   
-  Reading input file...
-  	# TRJFILE #: input.xyzf
-! 	# WRAPTRJ #: 1
-  	# NFRAMES #: 99
-  	# NLAYERS #: 1
-  	# FITCOUL #: true
---- 1,11 ----
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
+  ...matrix setup complete: 
   
-  Reading input file...
-+ Will read from file: fm_setup.in
-+ Input file successfully opened.
-+ Input file has been rewound.
-+ Input file contents successfully stored.
-  	# TRJFILE #: input.xyzf
-! 	# WRAPTRJ #: true
-  	# NFRAMES #: 99
-  	# NLAYERS #: 1
-  	# FITCOUL #: true
+  ...Populating the matrices for A, Coulomb forces, and overbonding...
 ***************
-*** 39,53 ****
-  		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
-  		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
-  		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+*** 72,87 ****
+--- 76,582 ----
+  	R-Space accuracy estimate =  5.997380e-07
+  	K-space accuracy estimate =  6.801448e-07
+  	Number of Ewald K-vectors = 238
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 0 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
+  	Ewald_Deriv:
+  	R-Space Ewald cutoff      =  4.304565e+00
+  	R-Space accuracy estimate =  5.997380e-07
+  	K-space accuracy estimate =  8.163595e-07
+  	Number of Ewald K-vectors = 238
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 58 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 42 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 83 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 1 with the following logicals: 0 0 0
++ Printing frame 91 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
+  	Ewald_Deriv:
+  	R-Space Ewald cutoff      =  4.404565e+00
+  	R-Space accuracy estimate =  5.861217e-07
+  	K-space accuracy estimate =  7.121130e-07
+  	Number of Ewald K-vectors = 238
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 44 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 59 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 43 with the following logicals: 0 0 0
++ Printing frame 84 with the following logicals: 0 0 0
++ Printing frame 61 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 2 with the following logicals: 0 0 0
++ Printing frame 55 with the following logicals: 0 0 0
++ Printing frame 92 with the following logicals: 0 0 0
++ Printing frame 94 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 22 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 60 with the following logicals: 0 0 0
++ Printing frame 45 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 88 with the following logicals: 0 0 0
++ Printing frame 85 with the following logicals: 0 0 0
++ Printing frame 62 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 69 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 56 with the following logicals: 0 0 0
++ Printing frame 93 with the following logicals: 0 0 0
++ Printing frame 11 with the following logicals: 0 0 0
++ Printing frame 36 with the following logicals: 0 0 0
++ Printing frame 95 with the following logicals: 0 0 0
++ Printing frame 86 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ Finished initializing.
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 23 with the following logicals: 0 0 0
++ Printing frame 46 with the following logicals: 0 0 0
++ Printing frame 89 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 50 with the following logicals: 0 0 0
++ Printing frame 63 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 70 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 57 with the following logicals: 0 0 0
++ Printing frame 80 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 96 with the following logicals: 0 0 0
++ Printing frame 64 with the following logicals: 0 0 0
++ Printing frame 87 with the following logicals: 0 0 0
++ Printing frame 12 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 37 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 24 with the following logicals: 0 0 0
++ Printing frame 90 with the following logicals: 0 0 0
++ Printing frame 75 with the following logicals: 0 0 0
++ Printing frame 51 with the following logicals: 0 0 0
++ Printing frame 9 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 72 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 71 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 81 with the following logicals: 0 0 0
++ Printing frame 39 with the following logicals: 0 0 0
++ Printing frame 65 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 13 with the following logicals: 0 0 0
++ Printing frame 38 with the following logicals: 0 0 0
++ Printing frame 6 with the following logicals: 0 0 0
++ Printing frame 77 with the following logicals: 0 0 0
++ Printing frame 53 with the following logicals: 0 0 0
++ Printing frame 76 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Printing frame 52 with the following logicals: 0 0 0
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 10 with the following logicals: 0 0 0
++ Printing frame 73 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 82 with the following logicals: 0 0 0
++ Printing frame 40 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 78 with the following logicals: 0 0 0
++ Printing frame 7 with the following logicals: 0 0 0
++ Printing frame 54 with the following logicals: 0 0 0
++ Printing frame 14 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 74 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 41 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 79 with the following logicals: 0 0 0
++ Printing frame 47 with the following logicals: 0 0 0
++ Printing frame 20 with the following logicals: 0 0 0
++ Printing frame 8 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 15 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 31 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 28 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 3 with the following logicals: 0 0 0
++ Printing frame 48 with the following logicals: 0 0 0
++ Printing frame 21 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 16 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 66 with the following logicals: 0 0 0
++ Printing frame 33 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 32 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 25 with the following logicals: 0 0 0
++ Printing frame 17 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 29 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 4 with the following logicals: 0 0 0
++ Printing frame 49 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 67 with the following logicals: 0 0 0
++ Printing frame 97 with the following logicals: 0 0 0
++ Printing frame 34 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 26 with the following logicals: 0 0 0
++ Printing frame 18 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 30 with the following logicals: 0 0 0
++ IINITIALIZATION RESULTS: 
++ 	+ O 32
++ 	+ H 64
++ Finished initializing.
++ Printing frame 5 with the following logicals: 0 0 0
++ Printing frame 68 with the following logicals: 0 0 0
++ Printing frame 98 with the following logicals: 0 0 0
++ Printing frame 35 with the following logicals: 0 0 0
++ Printing frame 27 with the following logicals: 0 0 0
++ Printing frame 19 with the following logicals: 0 0 0
+  ...matrix population complete: 
   
-  	Attempting to read 2 charge constraints...:
-  		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
-  		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
-  
-  WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
-- 
-- Note: Will use cubic scaling of: 1
-- 
-  ...input file read successful: 
-  
-  The number of two-body non-coulomb parameters is: 24
---- 43,56 ----
-  		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
-  		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
-  		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
-+ Note: Will use cubic scaling of: 1
-+ 
-  
-  	Attempting to read 2 charge constraints...:
-  		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
-  		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
-  
-  WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
-  ...input file read successful: 
-  
-  The number of two-body non-coulomb parameters is: 24
+  Printing matrices...
