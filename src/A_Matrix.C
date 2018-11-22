@@ -546,29 +546,30 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 		}
 	}
 
+			
+	vector<int> all_data_count(NPROCS) ;
+		
+	// Get the total number of data entries (all_data_count)
+		
+#ifdef USE_MPI
+	MPI_Allgather(&data_count, 1, MPI_INT, all_data_count.data(), 1, MPI_INT, MPI_COMM_WORLD) ;
+#else
+	all_data_count[0] = data_count ;
+#endif
+		
+	int start=0, end=0, total=0;
+		
+	for (int i=0; i<RANK; i++) 
+		start += all_data_count[i] ;
+
+	end = start + all_data_count[RANK] - 1 ;
+		
+	for (int i=0; i<NPROCS; i++) 
+		total += all_data_count[i] ;
+
 	if ( SPLIT_FILES ) // Keep files for A split for convenient parallel processing.
 	{
 		// Write out dimensions.
-		
-		vector<int> all_data_count(NPROCS) ;
-		
-		// Get the total number of data entries (all_data_count)
-		
-		#ifdef USE_MPI
-			MPI_Allgather(&data_count, 1, MPI_INT, all_data_count.data(), 1, MPI_INT, MPI_COMM_WORLD) ;
-		#else
-			all_data_count[0] = data_count ;
-		#endif
-		
-		int start=0, end=0, total=0;
-		
-		for (int i=0; i<RANK; i++) 
-			start += all_data_count[i] ;
-
-		end = start + all_data_count[RANK] - 1 ;
-		
-		for (int i=0; i<NPROCS; i++) 
-			total += all_data_count[i] ;
 
 
 		// Write the number of columns, row to start, end, and total #of rows to the dimension file.
@@ -590,6 +591,14 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 			sprintf(name, "A.%04d.txt", RANK) ;
 			remove(name) ;
 		}
+	}
+	else {
+		// Write dimensions of A and b matrix out for fitting programs.
+		ofstream out("dim.txt") ;
+		if ( ! out.is_open()  ) 
+			EXIT_MSG("Could not open dim.txt") ;
+		out << param_count << " " << total << endl ;
+		out.close() ;
 	}
 }
 	
