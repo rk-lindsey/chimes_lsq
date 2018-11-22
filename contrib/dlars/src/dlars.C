@@ -67,9 +67,9 @@ public:
 		dim = size ;
 	}
 	
-	void read(ifstream &file) 
+	void read(ifstream &file, int dim0) 
 		{
-			file >> dim ;
+			dim = dim0 ;
 			vec = new double[dim] ;
 			for ( int i = 0 ; i < dim ; i++ ) {
 				double val ;
@@ -178,9 +178,9 @@ public:
 #endif					
 		vec[i] = val ;
 	}
-	void read(ifstream &file) 
+	void read(ifstream &file, int dim0) 
 		{
-			file >> dim ;
+			dim = dim0 ;
 			vec = new int[dim] ;
 			for ( int i = 0 ; i < dim ; i++ ) {
 				int val ;
@@ -242,9 +242,10 @@ public:
 		dim2 = 0 ;
 		
 	}
-	void read(std::ifstream &file)
+	void read(std::ifstream &file, int dim01, int dim02)
 		{
-			file >> dim1 >> dim2 ;
+			dim1 = dim01 ;
+			dim2 = dim02 ;
 			if ( mat != NULL ) {
 				delete [] mat ;
 			}
@@ -841,20 +842,25 @@ int main(int argc, char **argv)
 {
 	cout << "Distributed LARS algorithm" << endl ;
 
-	if ( argc < 3 ) {
+	if ( argc < 4 ) {
 		cout << "Not enough args " << endl ;
 		exit(1) ;
 	}
 	string xname(argv[1]) ;
 	string yname(argv[2]) ;
+	string dname(argv[3]) ;
 
+	int nprops, ndata ;
+	ifstream dfile(dname) ;
+	dfile >> nprops >> ndata ;
+	
 	ifstream xfile(xname) ;
 	if ( ! xfile.is_open() ) {
 		cout << "Could not open " << xname << endl ;
 		exit(1) ;
 	}
 	Matrix xmat ;
-	xmat.read(xfile) ;
+	xmat.read(xfile, ndata, nprops) ;
 	xmat.normalize() ;
 	xmat.check_norm() ;
 
@@ -864,7 +870,7 @@ int main(int argc, char **argv)
 		exit(1) ;
 	}
 	Vector yvec ;
-	yvec.read(yfile) ;
+	yvec.read(yfile, ndata) ;
 	yvec.normalize() ;
 	yvec.check_norm() ;
 
