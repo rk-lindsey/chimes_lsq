@@ -1,0 +1,124 @@
+Distributed LARS algorithm
+Working on iteration 1
+RMS Error 0.922613
+Updated step gamma = 0.207787
+Beta: 
+[
+0 0
+1 -0.207787
+2 0
+3 0
+4 0
+]
+Y constant offset = -4.35078e-17
+Unscaled coefficients: 
+[
+0 0
+1 -0.207787
+2 0
+3 0
+4 0
+]
+Working on iteration 2
+RMS Error 0.903413
+Updated step gamma = 0.0781345
+Beta: 
+[
+0 0
+1 -0.267953
+2 0
+3 0.0601659
+4 0
+]
+Y constant offset = -4.39148e-17
+Unscaled coefficients: 
+[
+0 0
+1 -0.267953
+2 0
+3 0.0601659
+4 0
+]
+Working on iteration 3
+RMS Error 0.893847
+Updated step gamma = 0.946513
+Beta: 
+[
+0 0
+1 -0.768882
+2 0
+3 0.741286
+4 0.474971
+]
+Y constant offset = -5.1941e-17
+Unscaled coefficients: 
+[
+0 0
+1 -0.768882
+2 0
+3 0.741286
+4 0.474971
+]
+Working on iteration 4
+RMS Error 0.812532
+Updated step gamma = 0.182434
+Beta: 
+[
+0 0.120932
+1 -0.781096
+2 0
+3 0.88699
+4 0.563891
+]
+Y constant offset = -5.24888e-17
+Unscaled coefficients: 
+[
+0 0.120932
+1 -0.781096
+2 0
+3 0.88699
+4 0.563891
+]
+Working on iteration 5
+RMS Error 0.807852
+Updated step gamma = 0.173696
+Beta: 
+[
+0 0.185444
+1 -0.943241
+2 0.195352
+3 0.953196
+4 0.597138
+]
+Y constant offset = -5.0815e-17
+Unscaled coefficients: 
+[
+0 0.185444
+1 -0.943241
+2 0.195352
+3 0.953196
+4 0.597138
+]
+Final values:
+Beta: 
+[
+0 0.185444
+1 -0.943241
+2 0.195352
+3 0.953196
+4 0.597138
+]
+Prediction: 
+[
+0 0.26354
+1 0.572817
+2 -0.332922
+3 0.00402589
+4 -0.707651
+5 -0.261558
+6 0.55738
+7 0.581331
+8 -0.5127
+9 -0.164263
+]
+Sq Error 6.49608
