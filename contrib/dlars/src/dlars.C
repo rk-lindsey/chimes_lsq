@@ -121,6 +121,12 @@ public:
 			}
 			cout << "]" << endl ;
 		}
+	void print(ofstream &of) 
+		{
+			for ( int j = 0 ; j < dim ; j++ ) {
+				of << j << " " << vec[j] << endl ;
+			}
+		}
 	void scale(Vector &out, double val) 
 	// Scale the vector by the given value, put result in Out.
 		{
@@ -128,7 +134,27 @@ public:
 				out.set(j, val * vec[j] ) ;
 			}
 		}
-
+	double l1norm()
+	// Returns L1 norm (sum of abs values).
+		{
+			double norm = 0 ;
+			for ( int i = 0 ; i < dim ; i++ ) {
+				norm += fabs(vec[i]) ;
+			}
+			return norm ;
+		}
+	void remove(int idx)
+	// Remove the specified index from the vector.
+		{
+			if ( idx < 0 || idx >= dim ) {
+				cout << "Error: bad index to remove from vector: " << idx << endl ;
+			}
+			for ( int i = idx ; i < dim - 1 ; i++ ) {
+				vec[i] = vec[i+1] ;
+			}
+			--dim ;
+		}
+	
 } ;
 
 class IntVector {
@@ -200,6 +226,7 @@ public:
 	void add(int idx, int val) {
 		vec[idx] += val ;
 	}
+
 	void print() 
 		{
 			cout << "[" << endl ;
@@ -207,6 +234,25 @@ public:
 				cout << j << " " << vec[j] << endl ;
 			}
 			cout << "]" << endl ;
+		}
+
+		void print(ofstream &of) 
+		{
+			for ( int j = 0 ; j < dim ; j++ ) {
+				of << j << " " << vec[j] << endl ;
+			}
+		}
+	
+	void remove(int idx)
+	// Remove the specified index from the vector.
+		{
+			if ( idx < 0 || idx >= dim ) {
+				cout << "Error: bad index to remove from vector: " << idx << endl ;
+			}
+			for ( int i = idx ; i < dim - 1 ; i++ ) {
+				vec[i] = vec[i+1] ;
+			}
+			--dim ;
 		}
 
 } ;
@@ -419,6 +465,17 @@ public:
 			}
 			cout << "]" << endl ;
 		}
+
+		void print(ofstream &of)
+		{
+			for ( int j = 0 ; j < dim1 ; j++ ) {
+				for ( int k = 0 ; k < dim2 ; k++ ) {
+					of << get(j,k) << " " ;
+				}
+				of << endl ;
+			}
+		}
+	
 	void dot(Vector &out, const Vector &in)
 	// Find matrix * in = out
 		{
@@ -462,6 +519,7 @@ public:
 	IntVector A ;      // Indices of the active set of properties.
 	IntVector A_last ;  // Indices of the last active set of properties.
 	IntVector exclude ; // Indices of properties not to use because of degeneracy.
+	int num_exclude ;   // The number of excluded properties
 	IntVector sign ;   // Signs for each property in X_A
 	Matrix G_A ;       // Active set Gram matrix.
 	Matrix X_A ;       // Matrix formed by of X for active properties * signs
@@ -472,17 +530,25 @@ public:
 	Vector w_A ;        // Step direction vector for fitting coefficients
 	double C_max ;      // Maximum correlation found on this iteration.
 	Vector a ;         
-	double gamma ;  // Step size ;
+	double gamma ;      // LARS Step size ;
+	double gamma_lasso ;  // Lasso constraint on LARS step size.
 	int ndata ;       // Number of data items to fit to = X.dim1
 	int nprops ;      // Number of properties to correlate = X.dim2
 	int nactive ;     // The number of active properties to correlate <= nprops
+	int remove_prop ;  // The index of the property to remove from the active set during a LASSO calculation.
+	bool do_lasso ;   // If TRUE, do a lasso calculation.  If false, do a regular LARS calculation.
 	
 	DLARS(Matrix &Xin, Vector &yin): X(Xin.dim1, Xin.dim2), y(Xin.dim1), mu(Xin.dim1),
 																	 beta(Xin.dim2), c(Xin.dim2), A(0),  exclude(Xin.dim2, 0), sign(0) 
 		{
+			do_lasso = false ;
+			gamma_lasso = 1.0e20 ;
+			gamma = 0.0 ;
 			ndata = X.dim1 ;
 			nprops = X.dim2 ;
 			nactive = 0 ;
+			remove_prop = -1 ;
+			num_exclude = 0 ;
 			
 			for ( int j = 0 ; j < ndata ; j++ ) {
 				for ( int k = 0 ; k < nprops; k++ ) {
@@ -543,7 +609,14 @@ public:
 					c.add(j, val) ;
 				}
 				if ( fabs(c.get(j)) > C_max ) {
-					C_max = fabs(c.get(j)) ;
+					// Only look for C_max if the coordinate has not been excluded.
+					int i = 0 ;
+					for ( ; i < exclude.dim ; i++ ) {
+						if ( j == exclude.get(i) )
+							break ;
+					}
+					if ( i == exclude.dim )
+						C_max = fabs(c.get(j)) ;
 				}
 			}
 		}
@@ -574,12 +647,17 @@ public:
 		{
 			G_A.realloc(nactive, nactive) ;
 			for ( int j = 0 ; j < nactive ; j++ ) {
-				for ( int k = 0 ; k < nactive ; k++ ) {
+				for ( int k = 0 ; k <= j  ; k++ ) {
 					double tmp = 0.0 ;
 					for ( int l = 0 ; l < ndata ; l++ ) {
 						tmp += X_A.get(l, j) * X_A.get(l, k) ;
 					}
 					G_A.set(j, k, tmp) ;
+				}
+			}
+			for ( int j = 0 ; j < nactive ; j++ ) {
+				for ( int k = j + 1 ; k < nactive  ; k++ ) {
+					G_A.set(j, k, G_A.get(k,j) ) ;
 				}
 			}
 		}
@@ -603,6 +681,7 @@ public:
 					if ( k == A_last.dim ) {
 						// The index is new. Exclude it in the future.
 						exclude.set( A.get(j), 1) ;
+						++num_exclude ;
 					}
 				}
 				return false ;
@@ -679,7 +758,20 @@ public:
 			a.print() ;
 #endif			
 
-		} 
+		}
+	
+	void reduce_active_set() 
+	// Reduce the active set of directions to those having maximum correlation.
+	// See Eq. 3.6
+		{
+			// Undo the change in the active set.
+			cout << "Will remove property " << A.get(remove_prop) << " from the active set" << endl ;
+			A.remove(remove_prop) ;
+			nactive = A.dim ;
+			gamma_lasso = 1.0e20 ;
+			remove_prop = -1 ;
+		}
+
 	void update_active_set() 
 	// Update the active set of directions to those having maximum correlation.
 		{
@@ -687,31 +779,34 @@ public:
 			int count = 0 ;
 			const double eps = 1.0e-6 ;
 
+			if ( do_lasso && gamma > gamma_lasso ) {
+				reduce_active_set() ;
+			} else {
+				// Search for the new active set.
+				// Some indices could be excluded if they are degenerate.
+				for ( int j = 0 ; j < nprops ; j++ ) {
+					if ( fabs( fabs(c.get(j)) - C_max ) < eps
+							 && ! exclude.get(j) ) {
+						a_trial.set(count, j) ;
+						count++ ;
+					}
+				}
+				A.realloc(count) ;
+				nactive = count ;
+			
+				for ( int j = 0 ; j < nactive ; j++ ) {
+					A.set(j, a_trial.get(j)) ;
+				}
+			}
+				
 			// Save the last active set
 			A_last.realloc(nactive) ;
 			for ( int j = 0 ; j < nactive ; j++ ) {
 				A_last.set( j, A.get(j) ) ;
 			}
 
-			// Search for the new active set.
-			// Some indices could be excluded if they are degenerate.
-			for ( int j = 0 ; j < nprops ; j++ ) {
-				if ( fabs( fabs(c.get(j)) - C_max ) < eps
-						 && ! exclude.get(j) ) {
-					a_trial.set(count, j) ;
-					count++ ;
-				}
-			}
-			A.realloc(count) ;
-			nactive = count ;
-			
-			for ( int j = 0 ; j < nactive ; j++ ) {
-				A.set(j, a_trial.get(j)) ;
-			}
-#ifdef VERBOSE			
 			cout << "New active set: " << endl ;
 			A.print() ;
-#endif			
 		}
 
 	void update_step_gamma()
@@ -750,12 +845,40 @@ public:
 				gamma = C_max / A_A ;
 			}
 			cout << "Updated step gamma = " << gamma << endl ;
+			if ( do_lasso ) update_lasso_gamma() ;
 		}
-	void update_beta()
+
+	void update_lasso_gamma()
+	// Find the Lasso gamma step, which may be less than the LARS gamma step.
+	// See Eq. 3.4 and 3.5
 		{
+			gamma_lasso = 1.0e20 ;
+			const double eps = 1.0e-06 ;
+			
+			for ( int i = 0 ; i < nactive ; i++ ) {
+				if ( fabs(w_A.get(i)) > 1.0e-40 ) {
+					double gamma_i = -beta.get(A.get(i)) / ( sign.get(i) * w_A.get(i) ) ;
+					if ( gamma_i > eps && gamma_i < gamma_lasso ) {
+						gamma_lasso = gamma_i ;
+						remove_prop = i ;
+					}
+				}
+			}
+		}
+	
+	void update_beta()
+	// Update the regression coefficients (beta)
+		{
+			double gamma_use ;
+			if ( do_lasso && gamma > gamma_lasso ) {
+				cout << "LASSO is limiting gamma from " << gamma << " to " << gamma_lasso << endl ;
+				gamma_use = gamma_lasso ;
+			} else {
+				gamma_use = gamma ;
+			}
 			for ( int j = 0 ; j < nactive ; j++ ) {
 				int idx = A.get(j) ;
-				double val = beta.get(idx) + w_A.get(j) * sign.get(j) * gamma ;
+				double val = beta.get(idx) + w_A.get(j) * sign.get(j) * gamma_use ;
 				beta.set(idx,val) ;
 			}
 #ifdef VERBOSE			
@@ -764,7 +887,7 @@ public:
 
 			cout << "Predicted mu: " << endl ;
 			for ( int j = 0 ; j < ndata ; j++ ) {
-				cout << mu.get(j) + gamma * u_A.get(j) << " " ;
+				cout << mu.get(j) + gamma_use * u_A.get(j) << " " ;
 			}
 			cout << "\n" ;
 #endif			
@@ -790,8 +913,9 @@ public:
 			uns_beta.print() ;
 		}
 			
-	void iteration()
+	bool iteration()
 	// Perform a single iteration of the LARS algorithm.
+	// Return false when no more iterations can be performed.
 		{
 
 			predict() ;
@@ -806,7 +930,7 @@ public:
 			c.print() ;
 			cout << "C_max: " << C_max << endl ;
 #endif			
-			cout << "RMS Error " << sqrt(sq_error() / ndata) << endl ;
+			cout  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << endl ;
 
 			update_active_set() ;
 
@@ -815,7 +939,7 @@ public:
 			build_G_A() ;
 			if ( ! solve_G_A() ) {
 				cout << "Iteration failed" << endl ;
-				return ;
+				return true ;
 			}
 			
 #ifdef VERBOSE			
@@ -835,6 +959,12 @@ public:
 			cout << "Beta: " << endl ;
 			beta.print() ;
 			print_unscaled() ;
+
+			if ( nactive < nprops - num_exclude ) {
+				return true ;
+			} else {
+				return false ;
+			}
 		}
 };
 	
@@ -842,14 +972,25 @@ int main(int argc, char **argv)
 {
 	cout << "Distributed LARS algorithm" << endl ;
 
-	if ( argc < 4 ) {
+	if ( argc < 5 ) {
 		cout << "Not enough args " << endl ;
 		exit(1) ;
 	}
 	string xname(argv[1]) ;
 	string yname(argv[2]) ;
 	string dname(argv[3]) ;
+	string algorithm(argv[4]) ;
 
+	bool do_lasso ;
+	if ( algorithm == "lars" ) {
+		do_lasso = false ;
+	} else if ( algorithm == "lasso" ) {
+		do_lasso = true ;
+	} else {
+		cout << "Error: unrecognized algorithm: " << algorithm << endl ;
+		exit(1) ;
+	}
+	
 	int nprops, ndata ;
 	ifstream dfile(dname) ;
 	dfile >> nprops >> ndata ;
@@ -874,6 +1015,14 @@ int main(int argc, char **argv)
 	yvec.normalize() ;
 	yvec.check_norm() ;
 
+#if(0)	
+	ofstream xtest("Xtest.txt") ;
+	xmat.print(xtest) ;
+
+	ofstream ytest("Ytest.txt") ;
+	yvec.print(ytest) ;
+#endif	
+	
 #ifdef VERBOSE	
 	cout << "Normalized X matrix" << endl ;
 	xmat.print() ;
@@ -886,10 +1035,18 @@ int main(int argc, char **argv)
 #endif	
 
 	DLARS lars(xmat, yvec) ;
-
-	for ( int j = 0 ; j < xmat.dim2 ; j++ ) {
+	lars.do_lasso = do_lasso ;
+	if ( do_lasso ) {
+		cout << "Using the LASSO algorithm\n" ;
+	} else {
+		cout << "Using the LARS algorithm\n" ;
+	}
+	for ( int j = 0 ; ; j++ ) {
 		cout << "Working on iteration " << j + 1 << endl ;
-		lars.iteration() ;
+		if ( ! lars.iteration() ) 
+			break ;
+		//cout << "Current correlation: " << endl ;
+		//lars.c.print() ;
 	}
 
 	cout << "Final values:" << endl ;

@@ -1,6 +1,11 @@
 Distributed LARS algorithm
+Using the LARS algorithm
 Working on iteration 1
-RMS Error 0.922613
+L1 norm of solution: 0 RMS Error: 0.922613
+New active set: 
+[
+0 1
+]
 Updated step gamma = 0.207787
 Beta: 
 [
@@ -20,7 +25,12 @@ Unscaled coefficients:
 4 0
 ]
 Working on iteration 2
-RMS Error 0.903413
+L1 norm of solution: 0.207787 RMS Error: 0.903413
+New active set: 
+[
+0 1
+1 3
+]
 Updated step gamma = 0.0781345
 Beta: 
 [
@@ -40,7 +50,13 @@ Unscaled coefficients:
 4 0
 ]
 Working on iteration 3
-RMS Error 0.893847
+L1 norm of solution: 0.328119 RMS Error: 0.893847
+New active set: 
+[
+0 1
+1 3
+2 4
+]
 Updated step gamma = 0.946513
 Beta: 
 [
@@ -60,7 +76,14 @@ Unscaled coefficients:
 4 0.474971
 ]
 Working on iteration 4
-RMS Error 0.812532
+L1 norm of solution: 1.98514 RMS Error: 0.812532
+New active set: 
+[
+0 0
+1 1
+2 3
+3 4
+]
 Updated step gamma = 0.182434
 Beta: 
 [
@@ -80,7 +103,15 @@ Unscaled coefficients:
 4 0.563891
 ]
 Working on iteration 5
-RMS Error 0.807852
+L1 norm of solution: 2.35291 RMS Error: 0.807852
+New active set: 
+[
+0 0
+1 1
+2 2
+3 3
+4 4
+]
 Updated step gamma = 0.173696
 Beta: 
 [

@@ -1,5 +1,5 @@
 Distributed LARS algorithm
-Using the LARS algorithm
+Using the LASSO algorithm
 Working on iteration 1
 L1 norm of solution: 0 RMS Error: 0.922613
 New active set: 
