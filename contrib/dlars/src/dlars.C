@@ -644,23 +644,154 @@ public:
 
 	void build_G_A()
 	// Build the G_A matrix after X_A has been built.
+	// Increment the matrix from previous versions if possible.
 		{
-			G_A.realloc(nactive, nactive) ;
-			for ( int j = 0 ; j < nactive ; j++ ) {
-				for ( int k = 0 ; k <= j  ; k++ ) {
-					double tmp = 0.0 ;
-					for ( int l = 0 ; l < ndata ; l++ ) {
-						tmp += X_A.get(l, j) * X_A.get(l, k) ;
+			if ( A.dim == A_last.dim + 1 ) {
+				// Use prior values to increment one row.
+				increment_G_A() ;
+			} else if ( A.dim == A_last.dim - 1 ) {
+				// Use prior values to decrement one row.
+				decrement_G_A() ;
+			} else {
+				// Unusual event: rebuild the array.
+				G_A.realloc(nactive, nactive) ;
+				for ( int j = 0 ; j < nactive ; j++ ) {
+					for ( int k = 0 ; k <= j  ; k++ ) {
+						double tmp = 0.0 ;
+						for ( int l = 0 ; l < ndata ; l++ ) {
+							tmp += X_A.get(l, j) * X_A.get(l, k) ;
+						}
+						G_A.set(j, k, tmp) ;
 					}
-					G_A.set(j, k, tmp) ;
 				}
-			}
-			for ( int j = 0 ; j < nactive ; j++ ) {
-				for ( int k = j + 1 ; k < nactive  ; k++ ) {
-					G_A.set(j, k, G_A.get(k,j) ) ;
+				for ( int j = 0 ; j < nactive ; j++ ) {
+					for ( int k = j + 1 ; k < nactive  ; k++ ) {
+						G_A.set(j, k, G_A.get(k,j) ) ;
+					}
 				}
 			}
 		}
+
+	void increment_G_A()
+	// Increment the G_A array by one extra column and one extra row.
+		{
+			int newc = 0 ;
+			// Find the new index.
+			if ( nactive != A.dim ) {
+				cout << "Error: A dimension mismatch" << endl ;
+				exit(1) ;
+			}
+			for ( ; newc < nactive ; newc++ ) {
+				int k = 0 ;
+				for ( ; k < A_last.dim ; k++ ) {
+					if ( A_last.get(k) == A.get(newc) )
+						break ;
+				}
+				if ( k == A_last.dim ) {
+					break ;
+				}
+			}
+			Matrix G_New(nactive, nactive) ;
+
+			// Copy unchanged elements of the array.
+			for ( int i = 0 ; i < newc ; i++ ) {
+				for ( int j = 0 ; j <= i ; j++ ) {
+					G_New.set(j,i, G_A.get(j,i)) ;
+				}
+			}
+			// Copy shifted elements of the existing array.
+			for ( int i = newc ; i < nactive - 1 ; i++ ) {
+				for ( int j = 0 ; j < newc ; j++ ) {
+					G_New.set(j,i+1, G_A.get(j,i)) ;
+				}
+				for ( int j = newc ; j <= i ; j++ ) {
+					G_New.set(j+1,i+1, G_A.get(j,i)) ;
+				}
+			}
+			// Calculate the new elements.
+			for ( int k = 0 ; k < nactive ; k++ ) {
+				double tmp = 0.0 ;
+				for ( int l = 0 ; l < ndata ; l++ ) {
+					tmp += X_A.get(l, newc) * X_A.get(l, k) ;
+				}
+				if ( newc <= k ) {
+					G_New.set(newc, k, tmp) ;
+				} else {
+					G_New.set(k, newc, tmp) ;
+				}
+			}
+
+			// Copy elements back into the reallocated array.
+			G_A.realloc(nactive, nactive) ;
+			for ( int i = 0 ; i < nactive ; i++ ) {
+				for ( int j = 0 ; j <= i ; j++ ) {
+					G_A.set(i,j, G_New.get(j,i)) ;
+					G_A.set(j,i, G_New.get(j,i)) ;
+				}
+			}
+		}
+
+	
+	void decrement_G_A()
+	// Decrement the G_A array by one column and one row.
+		{
+			int delc = 0 ;
+			// Find the new index.
+			if ( nactive != A.dim ) {
+				cout << "Error: A dimension mismatch" << endl ;
+				exit(1) ;
+			}
+			for ( ; delc < A_last.dim ; delc++ ) {
+				int k = 0 ;
+				for ( ; k < A.dim ; k++ ) {
+					if ( A_last.get(delc) == A.get(k) )
+						break ;
+				}
+				if ( k == A.dim ) {
+					break ;
+				}
+			}
+			// delc is the index of the deleted column.
+			if ( delc >= A_last.dim ) {
+				cout << "Error: did not find deleted index" << endl ;
+				exit(1) ;
+			}
+
+			Matrix G_New(nactive, nactive) ;
+
+			// Copy unchanged elements of the array.
+			for ( int i = 0 ; i < delc && i < nactive ; i++ ) {
+				for ( int j = 0 ; j <= i ; j++ ) {
+					G_New.set(j,i, G_A.get(j,i)) ;
+				}
+			}
+			// Copy shifted elements of the existing array.
+			for ( int i = delc + 1 ; i < nactive + 1 ; i++ ) {
+				for ( int j = 0 ; j < delc ; j++ ) {
+					if ( j <= i - 1 ) {
+						G_New.set(j,i-1, G_A.get(j,i)) ;
+					} else {
+						G_New.set(i-1,j, G_A.get(j,i)) ;
+					}
+				}
+				for ( int j = delc + 1 ; j < nactive + 1 && j <= i ; j++ ) {
+					if ( j <= i ) {
+						G_New.set(j-1,i-1, G_A.get(j,i)) ;
+					} else {
+						G_New.set(i-1,j-1, G_A.get(j,i)) ;
+					}
+				}
+			}
+			// Copy elements back into the reallocated array.
+			G_A.realloc(nactive, nactive) ;
+			for ( int i = 0 ; i < nactive ; i++ ) {
+				for ( int j = 0 ; j <= i ; j++ ) {
+					G_A.set(i,j, G_New.get(j,i)) ;
+					G_A.set(j,i, G_New.get(j,i)) ;
+				}
+			}
+		}
+
 	bool solve_G_A()
 	// Find G_A^-1 * I
 		{
@@ -778,6 +909,12 @@ public:
 			IntVector a_trial(nprops) ;
 			int count = 0 ;
 			const double eps = 1.0e-6 ;
+				
+			// Save the last active set
+			A_last.realloc(nactive) ;
+			for ( int j = 0 ; j < nactive ; j++ ) {
+				A_last.set( j, A.get(j) ) ;
+			}
 
 			if ( do_lasso && gamma > gamma_lasso ) {
 				reduce_active_set() ;
@@ -798,13 +935,6 @@ public:
 					A.set(j, a_trial.get(j)) ;
 				}
 			}
-				
-			// Save the last active set
-			A_last.realloc(nactive) ;
-			for ( int j = 0 ; j < nactive ; j++ ) {
-				A_last.set( j, A.get(j) ) ;
-			}
-
 			cout << "New active set: " << endl ;
 			A.print() ;
 		}
@@ -937,6 +1067,7 @@ public:
 			// build the X_A array.
 			build_X_A() ;
 			build_G_A() ;
+
 			if ( ! solve_G_A() ) {
 				cout << "Iteration failed" << endl ;
 				return true ;
