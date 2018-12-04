@@ -264,6 +264,23 @@ public:
 	double *scale ; // Normalization scale factor for each column.
 	int dim1, dim2 ; 			// dim1 is number of rows.  Dim2 is number of columns.
 
+	Matrix(const Matrix &matin) {
+		// Create a matrix that is a copy of another.
+		dim1 = matin.dim1 ;
+		dim2 = matin.dim2 ;
+		mat = new double[dim1 * dim2] ;
+		shift = new double[dim2] ;
+		scale = new double[dim2] ;
+
+		for ( int j = 0 ; j < dim1 * dim2 ; j++ ) {
+			mat[j] = matin.mat[j] ;
+		}
+		for ( int j = 0 ; j < dim2 ; j++ ) {
+			shift[j] = matin.shift[j] ;
+			scale[j] = matin.scale[j] ;
+		}
+	}
+	
 	Matrix(int d1, int d2) 
 		{
 			dim1 = d1 ;
@@ -310,12 +327,16 @@ public:
 		{
 			if ( dim1 > 0 && dim2 > 0 ) {
 				delete [] mat ;
+				delete [] scale ;
+				delete [] shift ;
 			}
 			mat = new double[d1 * d2] ;
+			scale = new double[d2] ;
+			shift = new double[d2] ;
 			dim1 = d1 ;
 			dim2 = d2 ;
 		}
-	inline double get(int i, int j) 
+	inline double get(int i, int j) const
 		{
 #ifdef DEBUG						
 			if ( i >= dim1 || j >= dim2 ) {
@@ -335,6 +356,14 @@ public:
 #endif						
 			mat[i * dim2 + j] = val  ;
 		}
+	inline void setT(int i, int j, double val) {
+		// Set a value with transposed indexing.
+		set(j, i, val) ;
+	}
+	inline double getT(int i, int j) {
+		// Get a value with transposed indexing.
+		return get(j, i) ;
+	}
 	void normalize()
 	// Normalize matrix to according to Eq. 1.1
 		{
@@ -361,7 +390,7 @@ public:
 				}
 			}
 		}
-	void check_norm()
+	void check_norm() const
 	// Normalize matrix to according to Eq. 1.1
 		{
 			for ( int j = 0 ; j < dim2 ; j++ ) {
@@ -427,6 +456,116 @@ public:
 			}
 			return true ;
 		}
+
+	bool cholesky_add_row(const Matrix &chol0, const Vector &newr)
+	// Given cholesky decomposition of a matrix in chol0
+	// find the cholesky decomposition of a new matrix formed by adding
+	// the specified row (newr) to the original matrix (not given).
+	// The new row is placed in the last index.
+		{
+			if ( dim1 != dim2 ) {
+				cout << "Error: Cholesky decomposition only works for square matrices " << endl ;
+			}
+			if ( newr.dim != dim1 || chol0.dim1 != dim1 - 1 || chol0.dim1 != chol0.dim2 ) {
+				cout << "Dimension mismatch" ;
+				exit(1) ;
+			}
+			Vector xtmp(dim1) ;
+			double cdotc = 0.0 ;
+			for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
+				double sum = newr.get(j) ;
+				for ( int k = 0 ; k < j ; k++ ) {
+					sum -= chol0.get(k,j) * xtmp.get(k) ;
+				}
+				xtmp.set(j, sum / chol0.get(j,j) );
+				cdotc += xtmp.get(j) * xtmp.get(j) ;
+			}
+			double d = newr.get(dim1-1) - cdotc ;
+			if ( d >= 0.0 ) {
+				xtmp.set(dim1-1, sqrt(d) ) ;
+			} else {
+				cout << "Could not add row to Cholesky matrix " << endl ;
+				return false ;
+			}
+
+			for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
+				for ( int k = 0 ; k <= j ; k++ ) {
+					set(k,j, chol0.get(k,j)) ;
+				}
+				for ( int k = j + 1 ; k < dim1 ; k++ ) {
+					set(k,j, 0.0) ;
+				}
+			}
+			for ( int j = 0 ; j < dim1 ; j++ ) {
+				set(j, dim1-1, xtmp.get(j)) ;
+			}
+			for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
+				set(dim1-1, j, 0.0) ;
+			}
+			return true ;
+		}
+	
+	bool cholesky_remove_row(int id ) {
+		// Based on larscpp github package.  Modified so that diagonal elements of the cholesky
+		// matrix are always positive.
+		// Remove a row from a Cholesky matrix.  Update the dimension of the matrix
+		// Use transpose matrix access functions because original code was written in terms of a lower
+		// triangular matrix, whereas we use an upper triangular matrix.
+		double a(0),b(0),c(0),s(0),tau(0);
+		if ( dim1 != dim2 ) {
+			cout << "Error: the cholesky matrix should be square" << endl ;
+			exit(1) ;
+		}
+		int lth = dim1 - 1 ;
+		for(int i=id; i < lth; ++i){
+			for( int j=0; j<i; ++j) {
+				setT(i,j, getT(i+1,j)) ;
+			}
+			a = getT(i+1,i);
+			b = getT(i+1,i+1);
+			if(b==0){
+				setT(i,i,a) ;
+				continue;
+			}
+			if( fabs(b) > fabs(a) ){
+				tau = -a/b;
+				s = 1/sqrt(1.0 + tau*tau);
+				c = s*tau;
+			} else {
+				tau = -b/a;
+				c = 1/sqrt(1.0 + tau*tau);
+				s = c * tau;
+			}
+			if ( c*a - s*b > 0.0 ) {
+				setT(i,i, c*a - s*b) ;
+			} else {
+				setT(i,i, s*b - c*a) ;
+				s = -s ;
+				c = -c ;
+			}
+			// L(i,i+1) = s*a + c*b;
+			for( int j=i+2; j<=lth; ++j){
+				a = getT(j,i);
+				b = getT(j, i+1);
+				setT(j, i, c*a - s*b) ;
+				setT(j, i+1, s*a + c*b) ;
+			}
+		}
+		for( int i=0; i<= lth; ++i)
+			setT(lth, i, 0) ;
+
+		// Shift the storage to accommodate a change of dimension.
+		for ( int i = 0 ; i < lth ; i++ ) {
+			for ( int j = 0 ; j < lth ; j++ ) {
+				mat[i * (dim2-1) + j] = mat[i * dim2 + j] ;
+			}
+		}
+		dim1-- ;
+		dim2-- ;
+
+		return true ;
+	}
+	
 	void cholesky_sub(Vector &x, const Vector &b)
 	// Assuming that the current matrix holds a Cholesky decomposition
 	// in R^T * R form, calculate the solution vector x given the vector
@@ -515,6 +654,7 @@ public:
 	Vector y ;         // The vector of data
 	Vector mu ;        // The predicted values of data
 	Vector beta ;      // The scaled fitting coefficients
+	Vector beta_A ;    // The fitting coefficients for the current active set.
 	Vector c ;         // The correlation vector.
 	IntVector A ;      // Indices of the active set of properties.
 	IntVector A_last ;  // Indices of the last active set of properties.
@@ -532,11 +672,13 @@ public:
 	Vector a ;         
 	double gamma ;      // LARS Step size ;
 	double gamma_lasso ;  // Lasso constraint on LARS step size.
+	double gamma_use ;  // The value of gamma to use on current step.  Based on gamma and gamma_lasso.
 	int ndata ;       // Number of data items to fit to = X.dim1
 	int nprops ;      // Number of properties to correlate = X.dim2
 	int nactive ;     // The number of active properties to correlate <= nprops
 	int remove_prop ;  // The index of the property to remove from the active set during a LASSO calculation.
 	bool do_lasso ;   // If TRUE, do a lasso calculation.  If false, do a regular LARS calculation.
+	bool solve_succeeded ; // If true, the solve of G_A succeeded.
 	
 	DLARS(Matrix &Xin, Vector &yin): X(Xin.dim1, Xin.dim2), y(Xin.dim1), mu(Xin.dim1),
 																	 beta(Xin.dim2), c(Xin.dim2), A(0),  exclude(Xin.dim2, 0), sign(0) 
@@ -544,11 +686,13 @@ public:
 			do_lasso = false ;
 			gamma_lasso = 1.0e20 ;
 			gamma = 0.0 ;
+			gamma_use = 0.0 ;
 			ndata = X.dim1 ;
 			nprops = X.dim2 ;
 			nactive = 0 ;
 			remove_prop = -1 ;
 			num_exclude = 0 ;
+			solve_succeeded = true ;
 			
 			for ( int j = 0 ; j < ndata ; j++ ) {
 				for ( int k = 0 ; k < nprops; k++ ) {
@@ -571,12 +715,22 @@ public:
 	void predict() 
 	// Calculated predicted values of y (mu hat, Eq. 1.2)
 		{
-			if ( mu.size() != ndata ||
-				  beta.size() != nprops )  {
+			if ( mu.size() != ndata ) {
 				cout << "Error:  matrix dim mismatch" << endl ;
 				exit(1) ;
 			}
 
+			if ( u_A.size() == 0 ) {
+				// First iteration.
+				for ( int j = 0 ; j < ndata ; j++ ) {
+					mu.set(j,  0.0) ;
+				}
+			} else {
+				for ( int j = 0 ; j < ndata ; j++ ) {
+					mu.set(j,  mu.get(j) + gamma_use * u_A.get(j) ) ;
+				}
+			}
+/**			
 			for ( int j = 0 ; j < ndata ; j++ ) {
 				double tmp = 0.0 ;
 				for ( int k = 0 ; k < nprops ; k++ ) {
@@ -584,6 +738,7 @@ public:
 				}
 				mu.set(j, tmp) ;
 			}
+**/
 #ifdef VERBOSE			
 			cout << "Mu = " << endl ;
 			mu.print() ;
@@ -602,10 +757,15 @@ public:
 	// Calculate the correlation vector c, Eq. 2.1
 		{
 			C_max = -1.0 ;
+			Vector ydiff(ndata,0.0) ;
+			for ( int k = 0 ; k < ndata ; k++ ) {
+				ydiff.set(k, y.get(k) - mu.get(k)) ;
+			}
 			for ( int j = 0 ; j < nprops ; j++ ) {
 				c.set(j, 0.0) ;
 				for ( int k = 0 ; k < ndata ; k++ ) {
-					double val = X.get(k,j) * ( y.get(k) - mu.get(k) ) ;
+					//double val = X.get(k,j) * ( y.get(k) - mu.get(k) ) ;
+					double val = X.get(k,j) * ydiff.get(k) ;
 					c.add(j, val) ;
 				}
 				if ( fabs(c.get(j)) > C_max ) {
@@ -795,31 +955,89 @@ public:
 	bool solve_G_A()
 	// Find G_A^-1 * I
 		{
-			const double eps = 1.0e-20 ;
-			chol.realloc(nactive, nactive) ;
 			G_A_Inv_I.realloc(nactive) ;
+			bool use_incremental_updates = true ;
 
-			if ( ! G_A.cholesky(chol) ) {
-				cout << "Cholesky failed" << endl ;
-				for ( int j = 0 ; j < nactive ; j++ ) {
-					int k ;
-					// See if this is a new index.
-					for ( k = 0 ; k < A_last.dim ; k++ ) {
-						if ( A.get(j) == A_last.get(k) ) {
-							break ;
+			bool succeeded = false ;
+			// If solve_succeeded == true, the last linear solve worked and
+			// we can possibly update the cholesky decomposition.
+			// Otherwise, the whole decomposition needs to be recalculated.
+			if ( solve_succeeded && use_incremental_updates ) {
+				if ( nactive == A_last.dim + 1 && nactive > 2 ) {
+					Matrix chol0(chol) ;
+					Vector G_row(nactive) ;
+					for ( int j = 0 ; j < nactive ; j++ ) {
+						G_row.set(j, G_A.get(nactive-1, j) ) ;
+					}
+					chol.realloc(nactive, nactive) ;
+					succeeded = chol.cholesky_add_row(chol0, G_row) ;
+					if ( succeeded ) {
+						// Back-substitute using the updated cholesky matrix.
+						succeeded = chol_backsub() ;
+						if ( succeeded ) {
+							solve_succeeded = true ;
+							return true ;
+						}
+					} else {
+						cout << "Failed to add a row to the Cholesky decomposition" << endl ;
+					} 
+				} else if ( nactive == A_last.dim - 1 && nactive > 2 ) {
+					succeeded = chol.cholesky_remove_row(remove_prop) ;
+					if ( succeeded ) {
+						// Back-substitute using the updated cholesky matrix.
+						succeeded = chol_backsub() ;
+						if ( succeeded ) {
+							solve_succeeded = true ;
+							return true ;
+						} else {
+							cout << "Failed to remove a row from the Cholesky decomposition" << endl ;
 						}
 					}
-					if ( k == A_last.dim ) {
-						// The index is new. Exclude it in the future.
-						exclude.set( A.get(j), 1) ;
-						++num_exclude ;
-					}
 				}
-				return false ;
 			}
+
+			// Try non-incremental if incremental failed or not possible/requested.
+			if ( ! succeeded ) {
+				chol.realloc(nactive, nactive) ;
+				if ( ! G_A.cholesky(chol) ) {
+					cout << "Cholesky failed" << endl ;
+					for ( int j = 0 ; j < nactive ; j++ ) {
+						int k ;
+						// See if this is a new index.
+						for ( k = 0 ; k < A_last.dim ; k++ ) {
+							if ( A.get(j) == A_last.get(k) ) {
+								break ;
+							}
+						}
+						if ( k == A_last.dim ) {
+							// The index is new. Exclude it in the future.
+							exclude.set( A.get(j), 1) ;
+							++num_exclude ;
+						}
+					}
+					solve_succeeded = false ;
+					return false ;
+				}
+			}
+			solve_succeeded = chol_backsub() ;
+			return solve_succeeded ;
+		}
+	bool chol_backsub()
+	// Perform back substitution on the cholesky matrix to find G_A_Inv_I and A_A
+	// Returns true if the solution passes consistency tests.
+		{
+			const double eps = 1.0e-20 ;
+
+			// DEBUG !!
+			//cout << "Cholesky " << endl ;
+      //chol.print() ;
+			
 			// Solve for G_A^-1 * unity
 			Vector unity(nactive, 1.0) ;
 			chol.cholesky_sub(G_A_Inv_I, unity) ;
+
+			//cout << "G_A_Inv_I " << endl ;
+			//G_A_Inv_I.print() ;
 
 			// Test to see if the solution worked.
 			Vector test(nactive) ;
@@ -827,7 +1045,7 @@ public:
 			for ( int j = 0 ; j < nactive ; j++ ) {
 				if ( fabs(test.get(j) - 1.0) > 1.0e-06 ) {
 					cout << "Cholesky solution test failed\n" ;
-					exit(1) ;
+					return false ;
 				}
 			}
 			
@@ -838,11 +1056,12 @@ public:
 			if ( A_A > eps ) 
 				A_A = 1.0 / sqrt(A_A) ;
 			else {
-				cout << "Normalization failed" << endl ;
+				cout << "A_A Normalization failed" << endl ;
 				return false ;
 			}
 			return true ;
 		}
+	
 	void build_u_A()
 		{
 			w_A.realloc(nactive) ;
@@ -900,7 +1119,6 @@ public:
 			A.remove(remove_prop) ;
 			nactive = A.dim ;
 			gamma_lasso = 1.0e20 ;
-			remove_prop = -1 ;
 		}
 
 	void update_active_set() 
@@ -908,7 +1126,7 @@ public:
 		{
 			IntVector a_trial(nprops) ;
 			int count = 0 ;
-			const double eps = 1.0e-6 ;
+			const double eps = 1.0e-5 ;
 				
 			// Save the last active set
 			A_last.realloc(nactive) ;
@@ -919,13 +1137,26 @@ public:
 			if ( do_lasso && gamma > gamma_lasso ) {
 				reduce_active_set() ;
 			} else {
+				// Maintain the ordering of the last active set to allow cholesky updating.
+				for ( int j = 0 ; j < nactive ; j++ ) {
+					a_trial.set( j, A_last.get(j) ) ;
+				}
+				count = nactive ;
 				// Search for the new active set.
-				// Some indices could be excluded if they are degenerate.
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					if ( fabs( fabs(c.get(j)) - C_max ) < eps
 							 && ! exclude.get(j) ) {
-						a_trial.set(count, j) ;
-						count++ ;
+						int k ;
+						// See if this index has occurred before.
+						for ( k = 0 ; k < nactive ; k++ ) {
+							if ( j == A_last.get(k) ) {
+								break ;
+							}
+						}
+						if ( k == nactive ) {
+							a_trial.set(count, j) ;
+							count++ ;
+						}
 					}
 				}
 				A.realloc(count) ;
@@ -945,6 +1176,9 @@ public:
 			double huge = 1.0e20 ;
 			gamma = huge ;
 
+			remove_prop = -1 ;
+
+			int jlimit = -1 ;
 			if ( nactive < nprops ) {
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					int k = 0 ;
@@ -968,6 +1202,7 @@ public:
 					}
 					if ( cmin < gamma ) {
 						gamma = cmin ;
+						jlimit = j ;
 					}
 				}
 			} else {
@@ -975,6 +1210,8 @@ public:
 				gamma = C_max / A_A ;
 			}
 			cout << "Updated step gamma = " << gamma << endl ;
+			if ( jlimit >= 0 )
+				cout << "Gamma limited by property " << jlimit << endl ;
 			if ( do_lasso ) update_lasso_gamma() ;
 		}
 
@@ -984,7 +1221,7 @@ public:
 		{
 			gamma_lasso = 1.0e20 ;
 			const double eps = 1.0e-06 ;
-			
+
 			for ( int i = 0 ; i < nactive ; i++ ) {
 				if ( fabs(w_A.get(i)) > 1.0e-40 ) {
 					double gamma_i = -beta.get(A.get(i)) / ( sign.get(i) * w_A.get(i) ) ;
@@ -994,14 +1231,14 @@ public:
 					}
 				}
 			}
+			cout << "Lasso step gamma limit = " << gamma_lasso << endl ;
 		}
 	
 	void update_beta()
 	// Update the regression coefficients (beta)
 		{
-			double gamma_use ;
 			if ( do_lasso && gamma > gamma_lasso ) {
-				cout << "LASSO is limiting gamma from " << gamma << " to " << gamma_lasso << endl ;
+				cout << "LASSO is limiting gamma from " << gamma << " to " << gamma_lasso << endl ; 
 				gamma_use = gamma_lasso ;
 			} else {
 				gamma_use = gamma ;
@@ -1069,6 +1306,7 @@ public:
 			build_G_A() ;
 
 			if ( ! solve_G_A() ) {
+				remove_prop = -1 ;
 				cout << "Iteration failed" << endl ;
 				return true ;
 			}
@@ -1084,6 +1322,7 @@ public:
 #endif			
 
 			build_u_A() ;
+
 			update_step_gamma() ;
 			update_beta() ;
 
@@ -1102,6 +1341,8 @@ public:
 int main(int argc, char **argv)
 {
 	cout << "Distributed LARS algorithm" << endl ;
+	cout << scientific ;
+	cout.precision(6) ;		
 
 	if ( argc < 5 ) {
 		cout << "Not enough args " << endl ;
@@ -1176,10 +1417,14 @@ int main(int argc, char **argv)
 		cout << "Working on iteration " << j + 1 << endl ;
 		if ( ! lars.iteration() ) 
 			break ;
+		if ( j == 25 ) {
+			continue ;
+		}
 		//cout << "Current correlation: " << endl ;
 		//lars.c.print() ;
 	}
 
+	cout.precision(16) ;		
 	cout << "Final values:" << endl ;
 	cout << "Beta: " << endl ;
 	lars.beta.print() ;
