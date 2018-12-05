@@ -121,7 +121,7 @@ public:
 			}
 			cout << "]" << endl ;
 		}
-	void print(ofstream &of) 
+	void print(ostream &of) 
 		{
 			for ( int j = 0 ; j < dim ; j++ ) {
 				of << j << " " << vec[j] << endl ;
@@ -779,6 +779,11 @@ public:
 						C_max = fabs(c.get(j)) ;
 				}
 			}
+
+			// DEBUG !!
+			//cout << "New correlation: " << endl ;
+			//c.print() ;
+			//cout << "Max correlation:" << C_max << endl ;
 		}
 	void build_X_A() {
 		// Calculate the sign and the X_A array.
@@ -956,7 +961,7 @@ public:
 	// Find G_A^-1 * I
 		{
 			G_A_Inv_I.realloc(nactive) ;
-			bool use_incremental_updates = true ;
+			const bool use_incremental_updates = true ;
 
 			bool succeeded = false ;
 			// If solve_succeeded == true, the last linear solve worked and
@@ -1125,8 +1130,8 @@ public:
 	// Update the active set of directions to those having maximum correlation.
 		{
 			IntVector a_trial(nprops) ;
-			int count = 0 ;
-			const double eps = 1.0e-5 ;
+			//int count = 0 ;
+			const double eps = 1.0e-10 ;
 				
 			// Save the last active set
 			A_last.realloc(nactive) ;
@@ -1141,7 +1146,7 @@ public:
 				for ( int j = 0 ; j < nactive ; j++ ) {
 					a_trial.set( j, A_last.get(j) ) ;
 				}
-				count = nactive ;
+				int count = nactive ;
 				// Search for the new active set.
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					if ( fabs( fabs(c.get(j)) - C_max ) < eps
@@ -1155,13 +1160,14 @@ public:
 						}
 						if ( k == nactive ) {
 							a_trial.set(count, j) ;
+							cout << "Adding property " << j << " to the active set" << endl ;
 							count++ ;
+							break ;
 						}
 					}
 				}
 				A.realloc(count) ;
 				nactive = count ;
-			
 				for ( int j = 0 ; j < nactive ; j++ ) {
 					A.set(j, a_trial.get(j)) ;
 				}
@@ -1177,8 +1183,7 @@ public:
 			gamma = huge ;
 
 			remove_prop = -1 ;
-
-			int jlimit = -1 ;
+			int add_prop = -1 ;
 			if ( nactive < nprops ) {
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					int k = 0 ;
@@ -1200,9 +1205,12 @@ public:
 					else {
 						cmin = ( c1 < c2 ) ? c1 : c2 ;
 					}
+					// DEBUG !!
+					//cout << "Property " << j << " gamma = " << cmin << endl ;
+					
 					if ( cmin < gamma ) {
 						gamma = cmin ;
-						jlimit = j ;
+						add_prop = j ;
 					}
 				}
 			} else {
@@ -1210,8 +1218,8 @@ public:
 				gamma = C_max / A_A ;
 			}
 			cout << "Updated step gamma = " << gamma << endl ;
-			if ( jlimit >= 0 )
-				cout << "Gamma limited by property " << jlimit << endl ;
+			if ( add_prop >= 0 )
+				cout << "Gamma limited by property " << add_prop << endl ;
 			if ( do_lasso ) update_lasso_gamma() ;
 		}
 
@@ -1220,7 +1228,7 @@ public:
 	// See Eq. 3.4 and 3.5
 		{
 			gamma_lasso = 1.0e20 ;
-			const double eps = 1.0e-06 ;
+			const double eps = 1.0e-10 ;
 
 			for ( int i = 0 ; i < nactive ; i++ ) {
 				if ( fabs(w_A.get(i)) > 1.0e-40 ) {
@@ -1239,6 +1247,14 @@ public:
 		{
 			if ( do_lasso && gamma > gamma_lasso ) {
 				cout << "LASSO is limiting gamma from " << gamma << " to " << gamma_lasso << endl ; 
+				cout << "LASSO will set property " << A.get(remove_prop) << " to 0.0" << endl ;
+
+				// DEBUG !! 
+				//cout << "Current beta:" << endl ;
+				//beta.print() ;
+				//cout << "Current correlation: " << endl ;
+				//c.print() ;
+
 				gamma_use = gamma_lasso ;
 			} else {
 				gamma_use = gamma ;
@@ -1260,26 +1276,42 @@ public:
 #endif			
 		}
 
-	void print_unscaled()
+	void print_unscaled(ostream &out)
 	// Print the coefficients in unscaled units.
 		{
 			double offset = y.shift ;
 			Vector uns_beta(nprops,0.0) ;
 			for ( int j = 0 ; j < nprops ; j++ ) {
 				if ( X.scale[j] == 0.0 ) {
-					cout << "Error: scale factor = 0.0" << endl ;
+					out << "Error: scale factor = 0.0" << endl ;
 					exit(1) ;
 				}
 				offset -= beta.get(j) * X.shift[j] / X.scale[j] ;
 			}
-			cout << "Y constant offset = " << offset << endl ;
-			cout << "Unscaled coefficients: " << endl ;
+			out << "Y constant offset = " << offset << endl ;
+			out << "Unscaled coefficients: " << endl ;
 			for ( int j = 0 ; j < nprops ; j++ ) {
 				uns_beta.set(j, beta.get(j) / X.scale[j]) ;
 			}
-			uns_beta.print() ;
+			if ( out == cout ) {
+				uns_beta.print() ;
+			} else {
+				uns_beta.print(cout) ;
+			}
 		}
-			
+
+	
+	void print_unshifted_mu(ostream &out)
+	// Print the prediction in unscaled units.
+		{
+			double offset = y.shift ;
+
+			out << "Y constant offset = " << offset << endl ;
+			for ( int j = 0 ; j < ndata ; j++ ) {
+				out << mu.get(j) + y.shift << endl ;
+			}
+		}
+
 	bool iteration()
 	// Perform a single iteration of the LARS algorithm.
 	// Return false when no more iterations can be performed.
@@ -1328,7 +1360,7 @@ public:
 
 			cout << "Beta: " << endl ;
 			beta.print() ;
-			print_unscaled() ;
+			print_unscaled(cout) ;
 
 			if ( nactive < nprops - num_exclude ) {
 				return true ;
@@ -1364,7 +1396,13 @@ int main(int argc, char **argv)
 	}
 	
 	int nprops, ndata ;
+	double max_beta_norm = 1.0e+06 ;
+	
 	ifstream dfile(dname) ;
+	if ( ! dfile.is_open() ) {
+		cout << "Error: could not open " << dname << endl ;
+		exit(1) ;
+	}
 	dfile >> nprops >> ndata ;
 	
 	ifstream xfile(xname) ;
@@ -1417,11 +1455,9 @@ int main(int argc, char **argv)
 		cout << "Working on iteration " << j + 1 << endl ;
 		if ( ! lars.iteration() ) 
 			break ;
-		if ( j == 25 ) {
-			continue ;
+		if ( lars.beta.l1norm() > max_beta_norm * lars.nprops ) {
+			break ;
 		}
-		//cout << "Current correlation: " << endl ;
-		//lars.c.print() ;
 	}
 
 	cout.precision(16) ;		
@@ -1436,6 +1472,21 @@ int main(int argc, char **argv)
 	lars.mu.print() ;
 
 	cout << "Sq Error " << lars.sq_error() << endl ;
+
+	// Print out the unscaled coefficients to X.txt.
+	ofstream xtxt("x.txt") ;
+	if ( ! xtxt.is_open() ) {
+		cout << "Error: could not open x.txt" << endl ;
+		exit(1) ;
+	}
+	lars.print_unscaled(xtxt) ;
+
+	ofstream Axfile("Ax.txt") ;
+	if ( ! Axfile.is_open() ) {
+		cout << "Error: could not open Ax.txt" << endl ;
+		exit(1) ;
+	}
+	lars.print_unshifted_mu(Axfile) ;
 
 #ifdef VERBOSE
 	cout << " Correlation: " << endl ;
