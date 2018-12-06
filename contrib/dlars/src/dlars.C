@@ -14,6 +14,14 @@
 #include<iostream>
 #include<fstream>
 
+
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
+int RANK ;
+int NPROCS ;
+
 using namespace std ;
 
 class Vector {
@@ -45,7 +53,8 @@ public:
 		}
 	~Vector()
 		{
-			delete[] vec ;
+			
+				delete[] vec ;
 		}
 	int size() const {
 		return dim ;
@@ -61,7 +70,7 @@ public:
 	}
 	void realloc(int size) {
 		// Reallocate the vector.
-		if ( dim > 0 ) 
+		
 			delete [] vec ;
 		vec = new double[size] ;
 		dim = size ;
@@ -115,16 +124,20 @@ public:
 		}
 	void print() 
 		{
-			cout << "[" << endl ;
-			for ( int j = 0 ; j < dim ; j++ ) {
-				cout << j << " " << vec[j] << endl ;
+			if ( RANK == 0 ) {
+				cout << "[" << endl ;
+				for ( int j = 0 ; j < dim ; j++ ) {
+					cout << j << " " << vec[j] << endl ;
+				}
+				cout << "]" << endl ;
 			}
-			cout << "]" << endl ;
 		}
 	void print(ostream &of) 
 		{
-			for ( int j = 0 ; j < dim ; j++ ) {
-				of << j << " " << vec[j] << endl ;
+			if ( RANK == 0 ) {
+				for ( int j = 0 ; j < dim ; j++ ) {
+					of << j << " " << vec[j] << endl ;
+				}
 			}
 		}
 	void scale(Vector &out, double val) 
@@ -165,7 +178,8 @@ public:
 	IntVector(int d1)
 		{
 			dim = d1 ;
-			vec = new int[d1] ;
+			
+				vec = new int[d1] ;
 		}
 	IntVector(int d1, int val)
 		{
@@ -182,12 +196,12 @@ public:
 		}
 	~IntVector()
 		{
-			delete[] vec ;
+			
+				delete[] vec ;
 		}
 	void realloc(int size) {
 		// Reallocate the vector.
-		if ( dim > 0 ) 
-			delete [] vec ;
+		delete [] vec ;
 		vec = new int[size] ;
 		dim = size ;
 	}
@@ -229,17 +243,21 @@ public:
 
 	void print() 
 		{
-			cout << "[" << endl ;
-			for ( int j = 0 ; j < dim ; j++ ) {
-				cout << j << " " << vec[j] << endl ;
+			if ( RANK == 0 ) {
+				cout << "[" << endl ;
+				for ( int j = 0 ; j < dim ; j++ ) {
+					cout << j << " " << vec[j] << endl ;
+				}
+				cout << "]" << endl ;
 			}
-			cout << "]" << endl ;
 		}
 
 		void print(ofstream &of) 
 		{
-			for ( int j = 0 ; j < dim ; j++ ) {
-				of << j << " " << vec[j] << endl ;
+			if ( RANK == 0 ) {
+				for ( int j = 0 ; j < dim ; j++ ) {
+					of << j << " " << vec[j] << endl ;
+				}
 			}
 		}
 	
@@ -263,17 +281,27 @@ public:
 	double *shift ; // Normalization shift of each column ;
 	double *scale ; // Normalization scale factor for each column.
 	int dim1, dim2 ; 			// dim1 is number of rows.  Dim2 is number of columns.
-
+	bool distributed ;    // Is this matrix distributed over processes ?
+	int row_start, row_end ;  // Starting and ending row for parallel calculations.
+	int num_rows ;    // Number of rows stored on this process.
+	
 	Matrix(const Matrix &matin) {
 		// Create a matrix that is a copy of another.
 		dim1 = matin.dim1 ;
 		dim2 = matin.dim2 ;
-		mat = new double[dim1 * dim2] ;
+		distributed = matin.distributed ;
+		row_start = matin.row_start ;
+		row_end = matin.row_end ;
+		num_rows = matin.num_rows ;
+		
+		mat = new double[num_rows * dim2] ;
 		shift = new double[dim2] ;
 		scale = new double[dim2] ;
-
-		for ( int j = 0 ; j < dim1 * dim2 ; j++ ) {
-			mat[j] = matin.mat[j] ;
+		
+		for ( int j = row_start ; j <= row_end ; j++ ) {
+			for ( int k = 0 ; k < dim1 ; k++ ) {
+				set(j,k, matin.get(j,k) ) ;
+			}
 		}
 		for ( int j = 0 ; j < dim2 ; j++ ) {
 			shift[j] = matin.shift[j] ;
@@ -288,7 +316,32 @@ public:
 			mat = new double[d1 * d2] ;
 			shift = new double[d2] ;
 			scale = new double[d2] ;
+			row_start = 0 ;
+			row_end = dim1 - 1 ;
+			num_rows = dim1 ;
+			distributed = false ;
 		}
+		
+	Matrix(int d1, int d2, bool will_dist)
+	// Specify whether to distribute or not by will_dist argument
+		{
+			dim1 = d1 ;
+			dim2 = d2 ;
+			shift = new double[d2] ;
+			scale = new double[d2] ;
+
+			if ( ! will_dist ) {
+				mat = new double[d1 * d2] ;
+				row_start = 0 ;
+				row_end = dim1 - 1 ;
+				num_rows = dim1 ;
+				distributed = false ;
+			} else {
+				distribute() ;
+				mat = new double[num_rows * d2] ;
+			}
+		}
+	
 	Matrix()	
 		{
 			dim1 = 0 ;
@@ -296,6 +349,10 @@ public:
 			mat = NULL ;
 			shift = NULL ;
 			scale = NULL ;
+			row_start = 0 ;
+			row_end = -1 ;
+			num_rows = 0 ;
+			distributed = false ;
 		}
 	~Matrix() {
 		delete [] mat ;
@@ -303,9 +360,9 @@ public:
 		delete [] scale ;
 		dim1 = 0 ;
 		dim2 = 0 ;
-		
 	}
 	void read(std::ifstream &file, int dim01, int dim02)
+	// Read a non-distributed matrix.
 		{
 			dim1 = dim01 ;
 			dim2 = dim02 ;
@@ -335,6 +392,18 @@ public:
 			shift = new double[d2] ;
 			dim1 = d1 ;
 			dim2 = d2 ;
+			if ( ! distributed ) {
+				row_start = 0 ;
+				row_end = dim1 - 1 ;
+			} else {
+				row_start = (dim1 * RANK) / NPROCS ;
+				if ( RANK < NPROCS - 1 ) {
+					row_end = (dim1 * (RANK+1)) / NPROCS - 1 ;
+				} else {
+					row_end = dim1 - 1 ;
+				}
+			}
+			num_rows = row_end - row_start + 1 ;
 		}
 	inline double get(int i, int j) const
 		{
@@ -343,8 +412,12 @@ public:
 				cout << "Matrix out of bounds" << endl ;
 				exit(1) ;
 			}
+			if ( distributed && (i > row_end || i < row_start) ) {
+				cout << "Distributed matrix out of bounds " << endl ;
+				exit(1) ;
+			}
 #endif						
-			return(mat[i * dim2 + j]) ;
+			return(mat[(i-row_start) * dim2 + j]) ;
 		}
 	inline void set(int i, int j, double val) 
 		{
@@ -353,8 +426,12 @@ public:
 				cout << "Matrix set out of bounds" << endl ;
 				exit(1) ;
 			}
+			if ( distributed && (i > row_end || i < row_start) ) {
+				cout << "Distributed matrix set out of bounds " << endl ;
+				exit(1) ;
+			}
 #endif						
-			mat[i * dim2 + j] = val  ;
+			mat[(i-row_start) * dim2 + j] = val  ;
 		}
 	inline void setT(int i, int j, double val) {
 		// Set a value with transposed indexing.
@@ -364,6 +441,34 @@ public:
 		// Get a value with transposed indexing.
 		return get(j, i) ;
 	}
+	void distribute()
+	// Settings to distribute a matrix across processes.
+		{
+						
+			row_start = (dim1 * RANK) / NPROCS ;
+			if ( RANK < NPROCS - 1 ) {
+				row_end = (dim1 * (RANK+1)) / NPROCS - 1 ;
+			} else {
+				row_end = dim1 - 1 ;
+			}
+			distributed = true ;
+			num_rows = row_end - row_start + 1 ;
+		}
+	double mult_T(int j, int k)
+	// Calculate the j,k element of X^T * X, where X is the current matrix.
+		{
+			double tmp = 0.0 ;
+			for ( int l = row_start ; l <= row_end ; l++ ) {
+				tmp += get(l, j) * get(l, k) ;
+			}
+			double tmp2 ;
+#ifdef USE_MPI
+			MPI_Allreduce(&tmp, &tmp2, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
+#else
+			tmp2 = tmp ;
+#endif
+			return tmp2 ;
+		}
 	void normalize()
 	// Normalize matrix to according to Eq. 1.1
 		{
@@ -562,7 +667,9 @@ public:
 		}
 		dim1-- ;
 		dim2-- ;
-
+		num_rows-- ;
+		row_end-- ;
+		
 		return true ;
 	}
 	
@@ -594,24 +701,28 @@ public:
 			
 	void print()
 		{
-			cout << "[" << endl ;
-			for ( int j = 0 ; j < dim1 ; j++ ) {
+			if ( RANK == 0 ) {
 				cout << "[" << endl ;
-				for ( int k = 0 ; k < dim2 ; k++ ) {
-					cout << j << " " << k << " " << get(j,k) << endl ;
+				for ( int j = 0 ; j < dim1 ; j++ ) {
+					cout << "[" << endl ;
+					for ( int k = 0 ; k < dim2 ; k++ ) {
+						cout << j << " " << k << " " << get(j,k) << endl ;
+					}
+					cout << "]" << endl ;
 				}
 				cout << "]" << endl ;
 			}
-			cout << "]" << endl ;
 		}
 
 		void print(ofstream &of)
 		{
-			for ( int j = 0 ; j < dim1 ; j++ ) {
-				for ( int k = 0 ; k < dim2 ; k++ ) {
-					of << get(j,k) << " " ;
+			if ( RANK == 0 ) {
+				for ( int j = 0 ; j < dim1 ; j++ ) {
+					for ( int k = 0 ; k < dim2 ; k++ ) {
+						of << get(j,k) << " " ;
+					}
+					of << endl ;
 				}
-				of << endl ;
 			}
 		}
 	
@@ -622,14 +733,37 @@ public:
 				cout << "Array dimension mismatch" << endl ;
 				exit(1) ;
 			}
-			for ( int j = 0 ; j < dim1 ; j++ ) {
+			for ( int j = row_start ; j <= row_end ; j++ ) {
 				double sum = 0.0 ;
 				for ( int k = 0 ; k < dim2 ; k++ ) {
 					sum += get(j,k) * in.get(k) ;
 				}
 				out.set(j, sum) ;
 			}
+#ifdef USE_MPI
+			if ( distributed ) {
+				Vector out2(dim1, 0.0) ;    // Temporary array to collect out.vec values.
+				IntVector countv(NPROCS) ;  // The number of items to receive from each process.
+				IntVector displs(NPROCS) ;  // Storage displacements in out2 for each process.
+
+				int count = row_end - row_start + 1 ;
+
+				MPI_Allgather(&count, 1, MPI_INT, countv.vec, 1, MPI_INT, MPI_COMM_WORLD) ;
+
+				displs.set(0,0) ;
+				for ( int j = 1 ; j < NPROCS ; j++ ) {
+					displs.set(j, displs.get(j-1) + countv.get(j-1) ) ;
+				}
+				MPI_Allgatherv(&(out.vec[row_start]), countv.get(RANK),
+											 MPI_DOUBLE, out2.vec, countv.vec, displs.vec, MPI_DOUBLE, MPI_COMM_WORLD) ;
+				
+				for ( int j = 0 ; j < dim1 ; j++ ) {
+					out.set(j, out2.get(j) ) ;
+				}
+			}
+#endif				
 		}
+
 	void dot_transpose(Vector &out, const Vector &in)
 	// Find Transpose(matrix) * in = out
 		{
@@ -637,13 +771,26 @@ public:
 				cout << "Array dimension mismatch" << endl ;
 				exit(1) ;
 			}
+			Vector sumv(dim2,0.0) ;			
 			for ( int j = 0 ; j < dim2 ; j++ ) {
-				double sum = 0.0 ;
-				for ( int k = 0 ; k < dim1 ; k++ ) {
-					sum += get(k,j) * in.get(k) ;
+				for ( int k = row_start ; k <= row_end ; k++ ) {
+					sumv.add(j, get(k,j) * in.get(k) ) ;
 				}
-				out.set(j, sum) ;
 			}
+#ifdef USE_MPI
+			if ( distributed ) {
+				MPI_Allreduce(sumv.vec, out.vec, dim2,
+											MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
+			} else {
+				for ( int j = 0 ; j < dim2 ; j++ ) {
+					out.set(j, sumv.get(j)) ;
+				}
+			}
+#else				
+			for ( int j = 0 ; j < dim2 ; j++ ) {
+				out.set(j, sumv.get(j)) ;
+			}
+#endif				
 		}
 } ;
 
@@ -680,7 +827,7 @@ public:
 	bool do_lasso ;   // If TRUE, do a lasso calculation.  If false, do a regular LARS calculation.
 	bool solve_succeeded ; // If true, the solve of G_A succeeded.
 	
-	DLARS(Matrix &Xin, Vector &yin): X(Xin.dim1, Xin.dim2), y(Xin.dim1), mu(Xin.dim1),
+	DLARS(Matrix &Xin, Vector &yin): X(Xin.dim1, Xin.dim2,true), y(Xin.dim1), mu(Xin.dim1),
 																	 beta(Xin.dim2), c(Xin.dim2), A(0),  exclude(Xin.dim2, 0), sign(0) 
 		{
 			do_lasso = false ;
@@ -693,13 +840,18 @@ public:
 			remove_prop = -1 ;
 			num_exclude = 0 ;
 			solve_succeeded = true ;
+
+			X.distribute() ;
+			X_A.distribute() ;
 			
-			for ( int j = 0 ; j < ndata ; j++ ) {
+			for ( int j = X.row_start ; j <= X.row_end ; j++ ) {
 				for ( int k = 0 ; k < nprops; k++ ) {
 					X.set(j, k, Xin.get(j,k) ) ;
 				}
-				y.set(j, yin.get(j)) ;
-				mu.set(j, 0.0) ;
+				for ( int j = 0 ; j < ndata ; j++ ) {
+					y.set(j, yin.get(j)) ;
+					mu.set(j, 0.0) ;
+				}
 			}
 			for ( int k = 0 ; k < nprops; k++ ) {
 				beta.set(k, 0.0) ;
@@ -761,13 +913,9 @@ public:
 			for ( int k = 0 ; k < ndata ; k++ ) {
 				ydiff.set(k, y.get(k) - mu.get(k)) ;
 			}
+
+			X.dot_transpose(c, ydiff) ;
 			for ( int j = 0 ; j < nprops ; j++ ) {
-				c.set(j, 0.0) ;
-				for ( int k = 0 ; k < ndata ; k++ ) {
-					//double val = X.get(k,j) * ( y.get(k) - mu.get(k) ) ;
-					double val = X.get(k,j) * ydiff.get(k) ;
-					c.add(j, val) ;
-				}
 				if ( fabs(c.get(j)) > C_max ) {
 					// Only look for C_max if the coordinate has not been excluded.
 					int i = 0 ;
@@ -799,7 +947,7 @@ public:
 		}
 
 		// Calculate the X_A array.
-		for ( int j = 0 ; j < ndata ; j++ ) {
+		for ( int j = X_A.row_start ; j <= X_A.row_end ; j++ ) {
 			for ( int k = 0 ; k < nactive ; k++ ) {
 				double val = X.get( j, A.get(k) ) * sign.get(k) ;
 				X_A.set(j,k, val) ;
@@ -822,10 +970,8 @@ public:
 				G_A.realloc(nactive, nactive) ;
 				for ( int j = 0 ; j < nactive ; j++ ) {
 					for ( int k = 0 ; k <= j  ; k++ ) {
-						double tmp = 0.0 ;
-						for ( int l = 0 ; l < ndata ; l++ ) {
-							tmp += X_A.get(l, j) * X_A.get(l, k) ;
-						}
+						
+						double tmp = X_A.mult_T(j,k) ;
 						G_A.set(j, k, tmp) ;
 					}
 				}
@@ -875,10 +1021,11 @@ public:
 			}
 			// Calculate the new elements.
 			for ( int k = 0 ; k < nactive ; k++ ) {
-				double tmp = 0.0 ;
-				for ( int l = 0 ; l < ndata ; l++ ) {
-					tmp += X_A.get(l, newc) * X_A.get(l, k) ;
-				}
+				double tmp = X_A.mult_T(newc, k) ;
+				
+				//for ( int l = 0 ; l < ndata ; l++ ) {
+				//tmp += X_A.get(l, newc) * X_A.get(l, k) ;
+				//}
 				if ( newc <= k ) {
 					G_New.set(newc, k, tmp) ;
 				} else {
@@ -1048,8 +1195,9 @@ public:
 			Vector test(nactive) ;
 			G_A.dot(test, G_A_Inv_I) ;
 			for ( int j = 0 ; j < nactive ; j++ ) {
-				if ( fabs(test.get(j) - 1.0) > 1.0e-06 ) {
+				if ( fabs(test.get(j) - 1.0) > 1.0e-04 ) {
 					cout << "Cholesky solution test failed\n" ;
+					cout << "Error = " << fabs(test.get(j) - 1.0) << endl ;
 					return false ;
 				}
 			}
@@ -1120,7 +1268,7 @@ public:
 	// See Eq. 3.6
 		{
 			// Undo the change in the active set.
-			cout << "Will remove property " << A.get(remove_prop) << " from the active set" << endl ;
+			if ( RANK == 0 ) cout << "Will remove property " << A.get(remove_prop) << " from the active set" << endl ;
 			A.remove(remove_prop) ;
 			nactive = A.dim ;
 			gamma_lasso = 1.0e20 ;
@@ -1132,7 +1280,7 @@ public:
 			IntVector a_trial(nprops) ;
 			//int count = 0 ;
 			const double eps = 1.0e-10 ;
-				
+
 			// Save the last active set
 			A_last.realloc(nactive) ;
 			for ( int j = 0 ; j < nactive ; j++ ) {
@@ -1160,7 +1308,7 @@ public:
 						}
 						if ( k == nactive ) {
 							a_trial.set(count, j) ;
-							cout << "Adding property " << j << " to the active set" << endl ;
+							if ( RANK == 0 ) cout << "Adding property " << j << " to the active set" << endl ;
 							count++ ;
 							break ;
 						}
@@ -1172,8 +1320,14 @@ public:
 					A.set(j, a_trial.get(j)) ;
 				}
 			}
-			cout << "New active set: " << endl ;
+			if ( RANK == 0 ) cout << "New active set: " << endl ;
 			A.print() ;
+
+#ifdef USE_MPI
+			// Sync the active set to avoid possible divergence between processes.
+			MPI_Bcast(&nactive, 1, MPI_INT, 0, MPI_COMM_WORLD) ;
+			MPI_Bcast(A.vec, nactive, MPI_INT, 0, MPI_COMM_WORLD) ;
+#endif			
 		}
 
 	void update_step_gamma()
@@ -1217,9 +1371,11 @@ public:
 				// Active set = all variables.
 				gamma = C_max / A_A ;
 			}
-			cout << "Updated step gamma = " << gamma << endl ;
-			if ( add_prop >= 0 )
-				cout << "Gamma limited by property " << add_prop << endl ;
+			if ( RANK == 0 ) {
+				cout << "Updated step gamma = " << gamma << endl ;
+				if ( add_prop >= 0 )
+					cout << "Gamma limited by property " << add_prop << endl ;
+			}
 			if ( do_lasso ) update_lasso_gamma() ;
 		}
 
@@ -1239,15 +1395,17 @@ public:
 					}
 				}
 			}
-			cout << "Lasso step gamma limit = " << gamma_lasso << endl ;
+			if ( RANK == 0 ) cout << "Lasso step gamma limit = " << gamma_lasso << endl ;
 		}
 	
 	void update_beta()
 	// Update the regression coefficients (beta)
 		{
 			if ( do_lasso && gamma > gamma_lasso ) {
-				cout << "LASSO is limiting gamma from " << gamma << " to " << gamma_lasso << endl ; 
-				cout << "LASSO will set property " << A.get(remove_prop) << " to 0.0" << endl ;
+				if ( RANK == 0 ) {
+					cout << "LASSO is limiting gamma from " << gamma << " to " << gamma_lasso << endl ; 
+					cout << "LASSO will set property " << A.get(remove_prop) << " to 0.0" << endl ;
+				}
 
 				// DEBUG !! 
 				//cout << "Current beta:" << endl ;
@@ -1264,6 +1422,11 @@ public:
 				double val = beta.get(idx) + w_A.get(j) * sign.get(j) * gamma_use ;
 				beta.set(idx,val) ;
 			}
+#ifdef USE_MPI
+			// Sync the beta values to avoid possible divergence between processes.
+			MPI_Bcast(beta.vec, nprops, MPI_DOUBLE, 0, MPI_COMM_WORLD) ;
+#endif
+			
 #ifdef VERBOSE			
 			cout << "New beta: " ;
 			beta.print() ;
@@ -1273,30 +1436,33 @@ public:
 				cout << mu.get(j) + gamma_use * u_A.get(j) << " " ;
 			}
 			cout << "\n" ;
-#endif			
+#endif
+			
 		}
 
 	void print_unscaled(ostream &out)
 	// Print the coefficients in unscaled units.
 		{
-			double offset = y.shift ;
-			Vector uns_beta(nprops,0.0) ;
-			for ( int j = 0 ; j < nprops ; j++ ) {
-				if ( X.scale[j] == 0.0 ) {
-					out << "Error: scale factor = 0.0" << endl ;
-					exit(1) ;
+			if ( RANK == 0 ) {
+				double offset = y.shift ;
+				Vector uns_beta(nprops,0.0) ;
+				for ( int j = 0 ; j < nprops ; j++ ) {
+					if ( X.scale[j] == 0.0 ) {
+						out << "Error: scale factor = 0.0" << endl ;
+						exit(1) ;
+					}
+					offset -= beta.get(j) * X.shift[j] / X.scale[j] ;
 				}
-				offset -= beta.get(j) * X.shift[j] / X.scale[j] ;
-			}
-			out << "Y constant offset = " << offset << endl ;
-			out << "Unscaled coefficients: " << endl ;
-			for ( int j = 0 ; j < nprops ; j++ ) {
-				uns_beta.set(j, beta.get(j) / X.scale[j]) ;
-			}
-			if ( out == cout ) {
-				uns_beta.print() ;
-			} else {
-				uns_beta.print(cout) ;
+				out << "Y constant offset = " << offset << endl ;
+				out << "Unscaled coefficients: " << endl ;
+				for ( int j = 0 ; j < nprops ; j++ ) {
+					uns_beta.set(j, beta.get(j) / X.scale[j]) ;
+				}
+				if ( out == cout ) {
+					uns_beta.print() ;
+				} else {
+					uns_beta.print(out) ;
+				}
 			}
 		}
 
@@ -1304,11 +1470,13 @@ public:
 	void print_unshifted_mu(ostream &out)
 	// Print the prediction in unscaled units.
 		{
-			double offset = y.shift ;
+			if ( RANK == 0 ) {
+				double offset = y.shift ;
 
-			out << "Y constant offset = " << offset << endl ;
-			for ( int j = 0 ; j < ndata ; j++ ) {
-				out << mu.get(j) + y.shift << endl ;
+				out << "Y constant offset = " << offset << endl ;
+				for ( int j = 0 ; j < ndata ; j++ ) {
+					out << mu.get(j) + y.shift << endl ;
+				}
 			}
 		}
 
@@ -1321,15 +1489,17 @@ public:
 			correlation() ;
 
 #ifdef VERBOSE
-			cout << "Pre-step beta: " << endl ;
-			beta.print() ;
-			cout << "Prediction: " << endl ;
-			mu.print() ;
-			cout << " Correlation: " << endl ;
-			c.print() ;
-			cout << "C_max: " << C_max << endl ;
+			if ( RANK == 0 ) {
+				cout << "Pre-step beta: " << endl ;
+				beta.print() ;
+				cout << "Prediction: " << endl ;
+				mu.print() ;
+				cout << " Correlation: " << endl ;
+				c.print() ;
+				cout << "C_max: " << C_max << endl ;
+			}
 #endif			
-			cout  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << endl ;
+			if ( RANK == 0 ) cout  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << endl ;
 
 			update_active_set() ;
 
@@ -1343,14 +1513,16 @@ public:
 				return true ;
 			}
 			
-#ifdef VERBOSE			
-			cout << "X_A" << endl ;
-			X_A.print() ;
-			cout << "G_A" << endl ;
-			G_A.print() ;
-			cout << "G_A_Inv " << endl ;
-			G_A_Inv_I.print() ;
-			cout << "A_A " << A_A << endl ;
+#ifdef VERBOSE
+			if ( RANK == 0 ) {
+				cout << "X_A" << endl ;
+				X_A.print() ;
+				cout << "G_A" << endl ;
+				G_A.print() ;
+				cout << "G_A_Inv " << endl ;
+				G_A_Inv_I.print() ;
+				cout << "A_A " << A_A << endl ;
+			}
 #endif			
 
 			build_u_A() ;
@@ -1358,9 +1530,11 @@ public:
 			update_step_gamma() ;
 			update_beta() ;
 
-			cout << "Beta: " << endl ;
-			beta.print() ;
-			print_unscaled(cout) ;
+			if ( RANK == 0 ) {
+				cout << "Beta: " << endl ;
+				beta.print() ;
+				print_unscaled(cout) ;
+			}
 
 			if ( nactive < nprops - num_exclude ) {
 				return true ;
@@ -1372,12 +1546,24 @@ public:
 	
 int main(int argc, char **argv)
 {
-	cout << "Distributed LARS algorithm" << endl ;
-	cout << scientific ;
-	cout.precision(6) ;		
+
+#ifdef USE_MPI	
+	MPI_Init     (&argc, &argv);
+  MPI_Comm_size(MPI_COMM_WORLD, &NPROCS);
+  MPI_Comm_rank(MPI_COMM_WORLD, &RANK);
+#else
+	RANK = 0 ;
+	NPROCS = 1 ;
+#endif	
+
+	if ( RANK == 0 ) {
+		cout << "Distributed LARS algorithm" << endl ;
+		cout << scientific ;
+		cout.precision(6) ;
+	}
 
 	if ( argc < 5 ) {
-		cout << "Not enough args " << endl ;
+		if ( RANK == 0 ) cout << "Not enough args " << endl ;
 		exit(1) ;
 	}
 	string xname(argv[1]) ;
@@ -1391,7 +1577,7 @@ int main(int argc, char **argv)
 	} else if ( algorithm == "lasso" ) {
 		do_lasso = true ;
 	} else {
-		cout << "Error: unrecognized algorithm: " << algorithm << endl ;
+		if ( RANK == 0 ) cout << "Error: unrecognized algorithm: " << algorithm << endl ;
 		exit(1) ;
 	}
 	
@@ -1400,14 +1586,14 @@ int main(int argc, char **argv)
 	
 	ifstream dfile(dname) ;
 	if ( ! dfile.is_open() ) {
-		cout << "Error: could not open " << dname << endl ;
+		if ( RANK == 0 ) cout << "Error: could not open " << dname << endl ;
 		exit(1) ;
 	}
 	dfile >> nprops >> ndata ;
 	
 	ifstream xfile(xname) ;
 	if ( ! xfile.is_open() ) {
-		cout << "Could not open " << xname << endl ;
+		if ( RANK == 0 ) cout << "Could not open " << xname << endl ;
 		exit(1) ;
 	}
 	Matrix xmat ;
@@ -1417,7 +1603,7 @@ int main(int argc, char **argv)
 
 	ifstream yfile(yname) ;
 	if ( ! yfile.is_open() ) {
-		cout << "Could not open " << yname << endl ;
+		if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
 		exit(1) ;
 	}
 	Vector yvec ;
@@ -1434,25 +1620,30 @@ int main(int argc, char **argv)
 #endif	
 	
 #ifdef VERBOSE	
-	cout << "Normalized X matrix" << endl ;
-	xmat.print() ;
+	if ( RANK == 0 ) {
+		cout << "Normalized X matrix" << endl ;
+		xmat.print() ;
 
-	cout << "Normalized Y vector" << endl ;
-	for ( int j = 0 ; j < yvec.dim ; j++ ) {
-		cout << yvec.get(j) << " " ;
+		cout << "Normalized Y vector" << endl ;
+		for ( int j = 0 ; j < yvec.dim ; j++ ) {
+			cout << yvec.get(j) << " " ;
+		}
+		cout << endl ;
 	}
-	cout << endl ;
 #endif	
 
 	DLARS lars(xmat, yvec) ;
 	lars.do_lasso = do_lasso ;
-	if ( do_lasso ) {
-		cout << "Using the LASSO algorithm\n" ;
-	} else {
-		cout << "Using the LARS algorithm\n" ;
+	if ( RANK == 0 ) {
+		if ( do_lasso ) {
+			cout << "Using the LASSO algorithm\n" ;
+		} else {
+			cout << "Using the LARS algorithm\n" ;
+		}
 	}
+
 	for ( int j = 0 ; ; j++ ) {
-		cout << "Working on iteration " << j + 1 << endl ;
+		if ( RANK == 0 ) cout << "Working on iteration " << j + 1 << endl ;
 		if ( ! lars.iteration() ) 
 			break ;
 		if ( lars.beta.l1norm() > max_beta_norm * lars.nprops ) {
@@ -1460,38 +1651,173 @@ int main(int argc, char **argv)
 		}
 	}
 
-	cout.precision(16) ;		
-	cout << "Final values:" << endl ;
-	cout << "Beta: " << endl ;
-	lars.beta.print() ;
+	if ( RANK == 0 ) {
+		cout.precision(16) ;		
+		cout << "Final values:" << endl ;
+		cout << "Beta: " << endl ;
+		lars.beta.print() ;
+	}
 
 	lars.predict() ;
 	lars.correlation() ;
 
-	cout << "Prediction: " << endl ;
+	if ( RANK == 0 ) cout << "Prediction: " << endl ;
 	lars.mu.print() ;
 
-	cout << "Sq Error " << lars.sq_error() << endl ;
+	if ( RANK == 0 ) cout << "Sq Error " << lars.sq_error() << endl ;
 
 	// Print out the unscaled coefficients to X.txt.
-	ofstream xtxt("x.txt") ;
-	if ( ! xtxt.is_open() ) {
-		cout << "Error: could not open x.txt" << endl ;
-		exit(1) ;
-	}
-	lars.print_unscaled(xtxt) ;
+	if ( RANK == 0 ) {
+		ofstream xtxt("x.txt") ;
+		if ( ! xtxt.is_open() ) {
+			if ( RANK == 0 ) cout << "Error: could not open x.txt" << endl ;
+			exit(1) ;
+		}
+		lars.print_unscaled(xtxt) ;
 
-	ofstream Axfile("Ax.txt") ;
-	if ( ! Axfile.is_open() ) {
-		cout << "Error: could not open Ax.txt" << endl ;
-		exit(1) ;
+		ofstream Axfile("Ax.txt") ;
+		if ( ! Axfile.is_open() ) {
+			if ( RANK == 0 ) cout << "Error: could not open Ax.txt" << endl ;
+			exit(1) ;
+		}
+		lars.print_unshifted_mu(Axfile) ;
 	}
-	lars.print_unshifted_mu(Axfile) ;
-
+	
 #ifdef VERBOSE
-	cout << " Correlation: " << endl ;
+	if ( RANK == 0 ) cout << " Correlation: " << endl ;
 	lars.c.print() ;
 #endif	
 
 }
+
+#if(0)
+void LeastSquaresProblem::read_split_files(const char* matFilename, const char* bFilename)
+// Read split file output from chimes_lsq.
+{
+	ifstream dim_file ;
+	char name[80] ;
+
+	// Find out how many files were written by chimes_lsq.
+	int total_files = 0 ;
+	ifstream test_file ;
+	for ( int j = 0 ; j < NPROCS + 1 ; j++ ) {
+		memset(name, 0, 80) ;
+		sprintf(name, "dim.%04d.txt", j) ;
+		test_file.open(name) ;
+		if ( test_file.is_open() ) {
+			++total_files ;
+			test_file.close() ;
+		} else {
+			test_file.close() ;
+			break ;
+		}
+	}
+	if ( total_files > NPROCS ) {
+		ErrorMsg("Not enough processes specified") ;
+	}
+
+	// Somewhat tricky logic to allow the number of processors to be greater than the number of files.
+	// In that case, only some of the rows in the split A matrix are used.
+	int proc_fac = NPROCS / total_files ;
+	int rank_div = RANK / proc_fac ;
+	int my_file = ( rank_div > total_files - 1 ) ? total_files - 1 : rank_div ;
+	int my_offset = RANK % proc_fac ;
+
+		
+	cout << "RANK = " << RANK << " proc_fac = " << proc_fac << " my_file = " << my_file << " my_offset = " << my_offset << endl ;
+
+	// Read matrix dimensions from the dim.*.txt file.
+	sprintf(name, "dim.%04d.txt", my_file) ;
+	dim_file.open(name) ;
+	if ( ! dim_file.is_open() ) {
+		cerr << "Could not open " + string(name) + "\n" ;
+		exit_run(1) ;
+	}
+			
+	int mdim, mdim2, ndim ;
+		
+	// Dimensions to use if NPROCS == total_files
+	int mstart0, mend0, mstore0 ;
+		
+	dim_file >> n >> mstart0 >> mend0 >> m ;
+	if ( ! dim_file.good() ) {
+		cerr << "Error reading dim file\n" ;
+		exit_run(1) ;
+	}
+	dim_file.close() ;
+
+	if ( mstart0 <= mend0 ) {
+		// mstore0 is the number of rows in the file.
+		mstore0 = (mend0 - mstart0 + 1) ;
+	} else {
+		mstore0 = 0 ;
+	}
+
+	mstart = mstart0 + my_offset * (mstore0 / proc_fac) ;
+
+	if ( rank_div < total_files ) {
+		if ( my_offset == proc_fac - 1 )
+			mend = mend0 ;
+		else
+			mend = mstart + (mstore0 / proc_fac) - 1 ;
+		mstore = mend - mstart + 1 ;
+	} else {
+		mend = mstart - 1 ;
+		mstore = 0 ;
+	}
+
+	cout << "RANK = " << RANK << " mstart = " << mstart << " mend = " << mend << " mstore = " << mstore << endl ;
+		
+	// Append the processor number to the A matrix name.
+	char matFilename2[80] ;
+	string str_filename(matFilename) ;
+	std::size_t found = str_filename.find(".") ;
+	if ( found == string::npos ) {
+		cerr < "A matrix file name must end with a suffix" ;
+		exit_run(1) ;
+	}
+		
+	str_filename = str_filename.substr(0,found+1) ;
+	sprintf(matFilename2, "%s%04d.txt", str_filename.data(), my_file) ;
+	ifstream matfile(matFilename2);
+	if (!matfile.good()) {
+		cerr << "error opening matrix file " << matFilename << endl;
+		exit_run(1);
+	}
+
+	Amat.resize(mstore * n);
+
+	for (size_t i= mstart0 ; i <= mend0 ; i++) {
+		for (size_t j=0; j<n; j++) {
+			double val;
+			matfile >> val;
+			if ( i >= mstart && i <= mend ) 
+				A(i, j) = val;
+		}
+	}
+	if ( ! matfile.good() ) {
+		cerr << "Error reading A matrix" ;
+		exit_run(1) ;
+	}
+	matfile.close();
+
+	// Open and read the b vector.
+	ifstream bFile(bFilename);
+	if (!bFile.good()) {
+		cerr << "error opening y-value file " << bFilename << endl;
+		exit_run(1);
+	}
+	b.resize(m);
+	for (size_t i=0; i<m; i++) {
+		double val;
+		bFile >> val;
+		b[i] = val;
+		if ( ! bFile.good() ) {
+			cerr << "Error reading b file" ;
+			exit_run(1) ;
+		}
+	}
+	bFile.close();
+}
+#endif
 

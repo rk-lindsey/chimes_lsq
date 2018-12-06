@@ -2,6 +2,7 @@ Distributed LARS algorithm
 Using the LARS algorithm
 Working on iteration 1
 L1 norm of solution: 0.000000e+00 RMS Error: 9.403806e-01
+Adding property 5 to the active set
 New active set: 
 [
 0 5
@@ -81,6 +82,7 @@ Unscaled coefficients:
 ]
 Working on iteration 2
 L1 norm of solution: 1.003409e-02 RMS Error: 9.400509e-01
+Adding property 25 to the active set
 New active set: 
 [
 0 5
@@ -161,6 +163,7 @@ Unscaled coefficients:
 ]
 Working on iteration 3
 L1 norm of solution: 9.230359e-01 RMS Error: 9.137148e-01
+Adding property 11 to the active set
 New active set: 
 [
 0 5
@@ -242,6 +245,7 @@ Unscaled coefficients:
 ]
 Working on iteration 4
 L1 norm of solution: 9.515985e-01 RMS Error: 9.130087e-01
+Adding property 12 to the active set
 New active set: 
 [
 0 5
@@ -324,6 +328,7 @@ Unscaled coefficients:
 ]
 Working on iteration 5
 L1 norm of solution: 9.895709e-01 RMS Error: 9.120759e-01
+Adding property 16 to the active set
 New active set: 
 [
 0 5
@@ -407,6 +412,7 @@ Unscaled coefficients:
 ]
 Working on iteration 6
 L1 norm of solution: 1.066675e+00 RMS Error: 9.101967e-01
+Adding property 10 to the active set
 New active set: 
 [
 0 5
@@ -491,6 +497,7 @@ Unscaled coefficients:
 ]
 Working on iteration 7
 L1 norm of solution: 1.571069e+00 RMS Error: 8.982403e-01
+Adding property 29 to the active set
 New active set: 
 [
 0 5
@@ -576,6 +583,7 @@ Unscaled coefficients:
 ]
 Working on iteration 8
 L1 norm of solution: 2.354398e+00 RMS Error: 8.807360e-01
+Adding property 6 to the active set
 New active set: 
 [
 0 5
@@ -662,6 +670,7 @@ Unscaled coefficients:
 ]
 Working on iteration 9
 L1 norm of solution: 3.804384e+00 RMS Error: 8.515405e-01
+Adding property 21 to the active set
 New active set: 
 [
 0 5
@@ -749,6 +758,7 @@ Unscaled coefficients:
 ]
 Working on iteration 10
 L1 norm of solution: 3.953573e+00 RMS Error: 8.487715e-01
+Adding property 13 to the active set
 New active set: 
 [
 0 5
@@ -837,6 +847,7 @@ Unscaled coefficients:
 ]
 Working on iteration 11
 L1 norm of solution: 5.930192e+00 RMS Error: 8.151396e-01
+Adding property 24 to the active set
 New active set: 
 [
 0 5
@@ -926,6 +937,7 @@ Unscaled coefficients:
 ]
 Working on iteration 12
 L1 norm of solution: 6.506800e+00 RMS Error: 8.064245e-01
+Adding property 2 to the active set
 New active set: 
 [
 0 5
@@ -1016,6 +1028,7 @@ Unscaled coefficients:
 ]
 Working on iteration 13
 L1 norm of solution: 7.426714e+00 RMS Error: 7.934789e-01
+Adding property 30 to the active set
 New active set: 
 [
 0 5
@@ -1107,6 +1120,7 @@ Unscaled coefficients:
 ]
 Working on iteration 14
 L1 norm of solution: 8.850295e+00 RMS Error: 7.755935e-01
+Adding property 0 to the active set
 New active set: 
 [
 0 5
@@ -1199,6 +1213,7 @@ Unscaled coefficients:
 ]
 Working on iteration 15
 L1 norm of solution: 8.914951e+00 RMS Error: 7.748422e-01
+Adding property 28 to the active set
 New active set: 
 [
 0 5
@@ -1292,6 +1307,7 @@ Unscaled coefficients:
 ]
 Working on iteration 16
 L1 norm of solution: 9.275009e+00 RMS Error: 7.707429e-01
+Adding property 27 to the active set
 New active set: 
 [
 0 5
@@ -1386,6 +1402,7 @@ Unscaled coefficients:
 ]
 Working on iteration 17
 L1 norm of solution: 9.439091e+00 RMS Error: 7.689190e-01
+Adding property 19 to the active set
 New active set: 
 [
 0 5
@@ -1481,6 +1498,7 @@ Unscaled coefficients:
 ]
 Working on iteration 18
 L1 norm of solution: 9.554368e+00 RMS Error: 7.676509e-01
+Adding property 23 to the active set
 New active set: 
 [
 0 5
@@ -1577,6 +1595,7 @@ Unscaled coefficients:
 ]
 Working on iteration 19
 L1 norm of solution: 1.142236e+01 RMS Error: 7.485005e-01
+Adding property 18 to the active set
 New active set: 
 [
 0 5
@@ -1674,6 +1693,7 @@ Unscaled coefficients:
 ]
 Working on iteration 20
 L1 norm of solution: 1.279579e+01 RMS Error: 7.361396e-01
+Adding property 8 to the active set
 New active set: 
 [
 0 5
@@ -1772,6 +1792,7 @@ Unscaled coefficients:
 ]
 Working on iteration 21
 L1 norm of solution: 1.426894e+01 RMS Error: 7.245240e-01
+Adding property 9 to the active set
 New active set: 
 [
 0 5
@@ -1871,6 +1892,7 @@ Unscaled coefficients:
 ]
 Working on iteration 22
 L1 norm of solution: 1.582446e+01 RMS Error: 7.141441e-01
+Adding property 14 to the active set
 New active set: 
 [
 0 5
@@ -1971,6 +1993,7 @@ Unscaled coefficients:
 ]
 Working on iteration 23
 L1 norm of solution: 1.679390e+01 RMS Error: 7.086477e-01
+Adding property 22 to the active set
 New active set: 
 [
 0 5
@@ -2072,6 +2095,7 @@ Unscaled coefficients:
 ]
 Working on iteration 24
 L1 norm of solution: 1.684875e+01 RMS Error: 7.083581e-01
+Adding property 1 to the active set
 New active set: 
 [
 0 5
@@ -2174,6 +2198,7 @@ Unscaled coefficients:
 ]
 Working on iteration 25
 L1 norm of solution: 1.936400e+01 RMS Error: 6.970916e-01
+Adding property 7 to the active set
 New active set: 
 [
 0 5
@@ -2277,6 +2302,7 @@ Unscaled coefficients:
 ]
 Working on iteration 26
 L1 norm of solution: 1.967302e+01 RMS Error: 6.959830e-01
+Adding property 3 to the active set
 New active set: 
 [
 0 5
@@ -2381,6 +2407,7 @@ Unscaled coefficients:
 ]
 Working on iteration 27
 L1 norm of solution: 2.015291e+01 RMS Error: 6.943803e-01
+Adding property 17 to the active set
 New active set: 
 [
 0 5
@@ -2486,6 +2513,7 @@ Unscaled coefficients:
 ]
 Working on iteration 28
 L1 norm of solution: 2.159420e+01 RMS Error: 6.902309e-01
+Adding property 15 to the active set
 New active set: 
 [
 0 5
@@ -2592,6 +2620,7 @@ Unscaled coefficients:
 ]
 Working on iteration 29
 L1 norm of solution: 2.386342e+01 RMS Error: 6.854494e-01
+Adding property 4 to the active set
 New active set: 
 [
 0 5
@@ -2699,6 +2728,7 @@ Unscaled coefficients:
 ]
 Working on iteration 30
 L1 norm of solution: 2.429628e+01 RMS Error: 6.847739e-01
+Adding property 31 to the active set
 New active set: 
 [
 0 5
@@ -2807,6 +2837,7 @@ Unscaled coefficients:
 ]
 Working on iteration 31
 L1 norm of solution: 2.439885e+01 RMS Error: 6.846241e-01
+Adding property 26 to the active set
 New active set: 
 [
 0 5
@@ -2916,6 +2947,7 @@ Unscaled coefficients:
 ]
 Working on iteration 32
 L1 norm of solution: 2.890257e+01 RMS Error: 6.812796e-01
+Adding property 20 to the active set
 New active set: 
 [
 0 5
@@ -3026,104 +3058,104 @@ Unscaled coefficients:
 Final values:
 Beta: 
 [
-0 -8.9534016894067825e-01
-1 4.2747840603354526e-01
-2 3.9035935008445283e-01
-3 3.3605303698337902e-01
-4 -2.0872949000698232e-01
-5 -3.7641521945017105e+00
-6 7.1217766613792799e-01
-7 3.2906682773689766e-01
-8 -4.7149696899627208e-01
-9 4.6142393915915222e-02
-10 1.0069181855125569e+00
-11 -1.1725082050078737e+00
-12 -6.8657993811079776e-01
-13 -1.5074327609501728e+00
-14 8.8522974959913758e-01
-15 3.8826695840393588e-01
-16 -2.4323159925050537e+00
-17 -9.6589924860190257e-01
-18 -6.4359023102990787e-01
-19 5.0789116315122917e-01
-20 -4.4313389046488662e-03
-21 1.7180124894525532e+00
-22 5.1048373366520483e-01
-23 9.9811428627074650e-01
-24 5.7744596028634032e-01
-25 8.7060168693709283e-01
-26 1.6988536000722068e-01
-27 1.5628480839227090e+00
-28 1.1369751884125376e+00
-29 2.0736371262972222e+00
-30 1.4057233409804217e+00
-31 -3.2136807986425803e-01
+0 -8.9534016894067725e-01
+1 4.2747840603354387e-01
+2 3.9035935008445399e-01
+3 3.3605303698338002e-01
+4 -2.0872949000698190e-01
+5 -3.7641521945017122e+00
+6 7.1217766613792843e-01
+7 3.2906682773689777e-01
+8 -4.7149696899627419e-01
+9 4.6142393915916353e-02
+10 1.0069181855125549e+00
+11 -1.1725082050078734e+00
+12 -6.8657993811079865e-01
+13 -1.5074327609501723e+00
+14 8.8522974959913781e-01
+15 3.8826695840393716e-01
+16 -2.4323159925050550e+00
+17 -9.6589924860190313e-01
+18 -6.4359023102990831e-01
+19 5.0789116315122862e-01
+20 -4.4313389046487447e-03
+21 1.7180124894525535e+00
+22 5.1048373366520561e-01
+23 9.9811428627074683e-01
+24 5.7744596028633999e-01
+25 8.7060168693709261e-01
+26 1.6988536000721993e-01
+27 1.5628480839227075e+00
+28 1.1369751884125374e+00
+29 2.0736371262972209e+00
+30 1.4057233409804222e+00
+31 -3.2136807986426064e-01
 ]
 Prediction: 
 [
-0 5.9544574931097749e-01
+0 5.9544574931097771e-01
 1 3.9914276523504094e-01
-2 -1.4632069883779936e-01
-3 -7.5776538909926316e-01
-4 6.5526731188756016e-02
-5 6.3334151318052323e-01
-6 -3.4088301334162313e-01
-7 -1.5083110407668421e-01
-8 3.5512433456114448e-02
-9 -7.8995150784494067e-02
-10 6.2174212707563070e-02
-11 -4.6763833452139131e-01
-12 1.2829367342495959e+00
-13 -1.6288962404906449e-01
-14 -1.0051469649973539e+00
-15 -2.3592425898352576e-01
-16 -1.5101397464824523e-01
-17 9.8911871829864551e-01
-18 7.6717654204161123e-01
+2 -1.4632069883779977e-01
+3 -7.5776538909926339e-01
+4 6.5526731188755072e-02
+5 6.3334151318052345e-01
+6 -3.4088301334162302e-01
+7 -1.5083110407668404e-01
+8 3.5512433456114503e-02
+9 -7.8995150784494414e-02
+10 6.2174212707562862e-02
+11 -4.6763833452139214e-01
+12 1.2829367342495965e+00
+13 -1.6288962404906457e-01
+14 -1.0051469649973543e+00
+15 -2.3592425898352637e-01
+16 -1.5101397464824515e-01
+17 9.8911871829864606e-01
+18 7.6717654204161179e-01
 19 6.0281300340763766e-01
-20 -2.2919587420131610e-01
-21 -3.1112616243290137e-01
-22 1.1738507820623350e+00
-23 4.1353722306045115e-01
-24 1.9461944022681885e-01
-25 -4.9468240254361355e-02
-26 5.2743355637535272e-01
-27 5.5174238760582299e-02
-28 -1.4855984362491192e+00
-29 3.2213957563439610e-01
-30 -3.8660334146688530e-01
-31 2.8389706702511008e-01
-32 -1.1757334144553491e+00
-33 -1.2500769317574392e+00
-34 9.0811371810825481e-01
-35 -5.3624484758778970e-02
-36 -5.3645045588356099e-01
-37 -4.1464453809459700e-01
-38 -2.7127619393175251e-01
-39 6.9408234556223658e-01
-40 1.2132372672288277e-01
-41 1.2026475987510190e+00
-42 -1.5812445936048687e+00
-43 6.8733667939051002e-01
-44 3.5454344933847687e-01
+20 -2.2919587420131607e-01
+21 -3.1112616243290087e-01
+22 1.1738507820623343e+00
+23 4.1353722306045143e-01
+24 1.9461944022681857e-01
+25 -4.9468240254361535e-02
+26 5.2743355637535239e-01
+27 5.5174238760582008e-02
+28 -1.4855984362491190e+00
+29 3.2213957563439660e-01
+30 -3.8660334146688519e-01
+31 2.8389706702511069e-01
+32 -1.1757334144553495e+00
+33 -1.2500769317574389e+00
+34 9.0811371810825459e-01
+35 -5.3624484758779373e-02
+36 -5.3645045588356066e-01
+37 -4.1464453809459728e-01
+38 -2.7127619393175290e-01
+39 6.9408234556223614e-01
+40 1.2132372672288284e-01
+41 1.2026475987510192e+00
+42 -1.5812445936048691e+00
+43 6.8733667939051024e-01
+44 3.5454344933847670e-01
 45 -7.1911335833618062e-01
 46 -5.5788545610122375e-01
 47 5.8698091229894900e-01
-48 7.0903191917570163e-02
-49 9.2427461025225477e-02
-50 -7.1664713097758570e-01
-51 -1.0009341006844841e+00
-52 -5.9046254328372372e-01
-53 -3.2848886767114649e-01
-54 2.0714119775003279e-01
-55 6.0194500152712316e-01
-56 -8.3675477199813136e-02
-57 -3.1302171736042683e-01
-58 -2.1233748381276573e-02
-59 -7.1015169823441548e-01
-60 1.0217480867561861e+00
+48 7.0903191917570302e-02
+49 9.2427461025225657e-02
+50 -7.1664713097758548e-01
+51 -1.0009341006844834e+00
+52 -5.9046254328372338e-01
+53 -3.2848886767114660e-01
+54 2.0714119775003317e-01
+55 6.0194500152712294e-01
+56 -8.3675477199812484e-02
+57 -3.1302171736042728e-01
+58 -2.1233748381276920e-02
+59 -7.1015169823441504e-01
+60 1.0217480867561863e+00
 61 1.0398702616028324e+00
-62 -3.7871811286936542e-02
-63 3.2903317297477808e-01
+62 -3.7871811286937077e-02
+63 3.2903317297477863e-01
 ]
 Sq Error 2.9704435908403557e+01

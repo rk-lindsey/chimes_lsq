@@ -1,3 +1,8 @@
+##CXX=mpicxx -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI
+#CXX=mpicxx -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DDEBUG
+##CXX=g++ --std=c++11 -g -Wall -DDEBUG
+CXX=g++ --std=c++11 -O3 -Wall
+
 dlars: dlars.C
-	g++ --std=c++11 -g -Wall -DDEBUG dlars.C -o dlars
-#	g++ --std=c++11 -O3 -Wall dlars.C -o dlars
+	$(CXX) dlars.C -lm -o dlars
+

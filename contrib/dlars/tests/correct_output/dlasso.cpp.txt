@@ -2,6 +2,7 @@ Distributed LARS algorithm
 Using the LASSO algorithm
 Working on iteration 1
 L1 norm of solution: 0.000000e+00 RMS Error: 9.226131e-01
+Adding property 1 to the active set
 New active set: 
 [
 0 1
@@ -28,6 +29,7 @@ Unscaled coefficients:
 ]
 Working on iteration 2
 L1 norm of solution: 2.077874e-01 RMS Error: 9.034131e-01
+Adding property 3 to the active set
 New active set: 
 [
 0 1
@@ -55,6 +57,7 @@ Unscaled coefficients:
 ]
 Working on iteration 3
 L1 norm of solution: 3.281193e-01 RMS Error: 8.938471e-01
+Adding property 4 to the active set
 New active set: 
 [
 0 1
@@ -83,6 +86,7 @@ Unscaled coefficients:
 ]
 Working on iteration 4
 L1 norm of solution: 1.985138e+00 RMS Error: 8.125322e-01
+Adding property 0 to the active set
 New active set: 
 [
 0 1
@@ -112,6 +116,7 @@ Unscaled coefficients:
 ]
 Working on iteration 5
 L1 norm of solution: 2.352909e+00 RMS Error: 8.078519e-01
+Adding property 2 to the active set
 New active set: 
 [
 0 1
@@ -142,23 +147,23 @@ Unscaled coefficients:
 Final values:
 Beta: 
 [
-0 1.8544417126179030e-01
-1 -9.4324147699912053e-01
-2 1.9535198678656621e-01
-3 9.5319575911349752e-01
-4 5.9713822252767901e-01
+0 1.8544417126179008e-01
+1 -9.4324147699912042e-01
+2 1.9535198678656601e-01
+3 9.5319575911349719e-01
+4 5.9713822252767890e-01
 ]
 Prediction: 
 [
-0 2.6354014237543233e-01
-1 5.7281721583318868e-01
-2 -3.3292218143528529e-01
-3 4.0258875729987792e-03
-4 -7.0765145287859399e-01
-5 -2.6155809362370230e-01
-6 5.5738041664964100e-01
+0 2.6354014237543238e-01
+1 5.7281721583318856e-01
+2 -3.3292218143528524e-01
+3 4.0258875729986959e-03
+4 -7.0765145287859377e-01
+5 -2.6155809362370225e-01
+6 5.5738041664964111e-01
 7 5.8133149699732134e-01
-8 -5.1270015642350564e-01
-9 -1.6426327506749505e-01
+8 -5.1270015642350553e-01
+9 -1.6426327506749500e-01
 ]
-Sq Error 6.4960772521099805e+00
+Sq Error 6.4960772521099814e+00
