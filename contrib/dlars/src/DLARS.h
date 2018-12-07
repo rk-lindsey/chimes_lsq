@@ -21,6 +21,7 @@ public:
 	Vector u_A ;        // Unit vector for predicted values.  Step occurs along this director.
 	Vector w_A ;        // Step direction vector for fitting coefficients
 	double C_max ;      // Maximum correlation found on this iteration.
+	double lambda ;     // Weighting for L1 norm in objective function.
 	Vector a ;         
 	double gamma ;      // LARS Step size ;
 	double gamma_lasso ;  // Lasso constraint on LARS step size.
@@ -31,9 +32,10 @@ public:
 	int remove_prop ;  // The index of the property to remove from the active set during a LASSO calculation.
 	bool do_lasso ;   // If TRUE, do a lasso calculation.  If false, do a regular LARS calculation.
 	bool solve_succeeded ; // If true, the solve of G_A succeeded.
+	double obj_func_val ;  // Latest value of the objective function.
 	
-	DLARS(Matrix &Xin, Vector &yin): X(Xin.dim1, Xin.dim2,true), y(Xin.dim1), mu(Xin.dim1),
-																	 beta(Xin.dim2), c(Xin.dim2), A(0),  exclude(Xin.dim2, 0), sign(0) 
+  DLARS(Matrix &Xin, Vector &yin, double lamin): X(Xin.dim1, Xin.dim2,true), y(Xin.dim1), mu(Xin.dim1),
+		beta(Xin.dim2), c(Xin.dim2), A(0),  exclude(Xin.dim2, 0), sign(0), lambda(lamin) 
 		{
 			do_lasso = false ;
 			gamma_lasso = 1.0e20 ;
@@ -70,7 +72,8 @@ public:
 		}
 
 	void predict() 
-	// Calculated predicted values of y (mu hat, Eq. 1.2)
+	// Calculated predicted values of y (mu hat, Eq. 1.2).  Update previous prediction
+	// based on u_A and gamma_use.
 		{
 			if ( mu.size() != ndata ) {
 				cout << "Error:  matrix dim mismatch" << endl ;
@@ -101,6 +104,21 @@ public:
 			mu.print() ;
 #endif
 		}
+	
+	void predict_all() 
+	// Calculated predicted values of y (mu hat, Eq. 1.2) with no updating based on u_A.
+		{
+			if ( mu.size() != ndata ) {
+				cout << "Error:  matrix dim mismatch" << endl ;
+				exit(1) ;
+			}
+			X.dot(mu, beta) ;
+
+#ifdef VERBOSE			
+			cout << "Mu = " << endl ;
+			mu.print() ;
+#endif
+		}
 	double sq_error() 
 	// Squared error Eq. 1.3
 		{
@@ -110,6 +128,14 @@ public:
 			}
 			return(result) ;
 		}
+
+	void objective_func()
+	// Calculate optimization objective function based on the requested
+	// regularization parameter lambda.  This should be called after
+	// predict_all() or predict().
+	{
+		obj_func_val = 0.5 * sq_error() / nprops + lambda * beta.l1norm() ;
+	}
 	void correlation() 
 	// Calculate the correlation vector c, Eq. 2.1
 		{
@@ -641,7 +667,7 @@ public:
 			
 		}
 
-	void print_unscaled(ostream &out)
+	void print_unscaled(ostream &out) 
 	// Print the coefficients in unscaled units.
 		{
 			if ( RANK == 0 ) {
@@ -669,7 +695,7 @@ public:
 
 	
 	void print_unshifted_mu(ostream &out)
-	// Print the prediction in unscaled units.
+	// Print the given prediction in unscaled units.
 		{
 			if ( RANK == 0 ) {
 				double offset = y.shift ;
@@ -686,6 +712,11 @@ public:
 	// Return false when no more iterations can be performed.
 		{
 
+			if ( nactive >= nprops - num_exclude ) {
+				// No more iterations are possible.
+				return false ;
+			}
+
 			predict() ;
 			correlation() ;
 
@@ -700,7 +731,11 @@ public:
 				cout << "C_max: " << C_max << endl ;
 			}
 #endif			
-			if ( RANK == 0 ) cout  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << endl ;
+			objective_func() ;
+			
+			if ( RANK == 0 ) {
+				cout  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << endl ;
+			}
 
 			update_active_set() ;
 
@@ -711,7 +746,7 @@ public:
 			if ( ! solve_G_A() ) {
 				remove_prop = -1 ;
 				cout << "Iteration failed" << endl ;
-				return true ;
+				return false ;
 			}
 			
 #ifdef VERBOSE
@@ -737,10 +772,7 @@ public:
 				print_unscaled(cout) ;
 			}
 
-			if ( nactive < nprops - num_exclude ) {
-				return true ;
-			} else {
-				return false ;
-			}
+			return true ;
+
 		}
 };

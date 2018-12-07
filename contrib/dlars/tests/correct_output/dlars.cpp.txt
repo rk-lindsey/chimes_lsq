@@ -1,7 +1,6 @@
 Distributed LARS algorithm
 Using the LARS algorithm
-Working on iteration 1
-L1 norm of solution: 0.000000e+00 RMS Error: 9.226131e-01
+L1 norm of solution: 0.000000e+00 RMS Error: 9.226131e-01 Objective fn: 8.512150e-01
 Adding property 1 to the active set
 New active set: 
 [
@@ -17,7 +16,7 @@ Beta:
 3 0.000000e+00
 4 0.000000e+00
 ]
-Y constant offset = -4.350779e-17
+Y constant offset = -3.215324e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -26,8 +25,8 @@ Unscaled coefficients:
 3 0.000000e+00
 4 0.000000e+00
 ]
-Working on iteration 2
-L1 norm of solution: 2.077874e-01 RMS Error: 9.034131e-01
+Finished iteration 1
+L1 norm of solution: 2.077874e-01 RMS Error: 9.034131e-01 Objective fn: 8.161552e-01
 Adding property 3 to the active set
 New active set: 
 [
@@ -44,7 +43,7 @@ Beta:
 3 6.016592e-02
 4 0.000000e+00
 ]
-Y constant offset = -4.391483e-17
+Y constant offset = -3.248723e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -53,8 +52,8 @@ Unscaled coefficients:
 3 6.016592e-02
 4 0.000000e+00
 ]
-Working on iteration 3
-L1 norm of solution: 3.281193e-01 RMS Error: 8.938471e-01
+Finished iteration 2
+L1 norm of solution: 3.281193e-01 RMS Error: 8.938471e-01 Objective fn: 7.989626e-01
 Adding property 4 to the active set
 New active set: 
 [
@@ -72,7 +71,7 @@ Beta:
 3 7.412858e-01
 4 4.749711e-01
 ]
-Y constant offset = -5.194097e-17
+Y constant offset = -3.990509e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -81,8 +80,8 @@ Unscaled coefficients:
 3 7.412858e-01
 4 4.749711e-01
 ]
-Working on iteration 4
-L1 norm of solution: 1.985138e+00 RMS Error: 8.125322e-01
+Finished iteration 3
+L1 norm of solution: 1.985138e+00 RMS Error: 8.125322e-01 Objective fn: 6.602086e-01
 Adding property 0 to the active set
 New active set: 
 [
@@ -101,7 +100,7 @@ Beta:
 3 8.869900e-01
 4 5.638905e-01
 ]
-Y constant offset = -5.248880e-17
+Y constant offset = -3.993460e-17
 Unscaled coefficients: 
 [
 0 1.209323e-01
@@ -110,8 +109,8 @@ Unscaled coefficients:
 3 8.869900e-01
 4 5.638905e-01
 ]
-Working on iteration 5
-L1 norm of solution: 2.352909e+00 RMS Error: 8.078519e-01
+Finished iteration 4
+L1 norm of solution: 2.352909e+00 RMS Error: 8.078519e-01 Objective fn: 6.526248e-01
 Adding property 2 to the active set
 New active set: 
 [
@@ -130,7 +129,7 @@ Beta:
 3 9.531958e-01
 4 5.971382e-01
 ]
-Y constant offset = -5.081502e-17
+Y constant offset = -3.887976e-17
 Unscaled coefficients: 
 [
 0 1.854442e-01
@@ -139,26 +138,27 @@ Unscaled coefficients:
 3 9.531958e-01
 4 5.971382e-01
 ]
+Finished iteration 5
 Final values:
 Beta: 
 [
-0 1.8544417126179008e-01
-1 -9.4324147699912042e-01
-2 1.9535198678656601e-01
-3 9.5319575911349719e-01
-4 5.9713822252767890e-01
+0 1.854441712618e-01
+1 -9.432414769991e-01
+2 1.953519867866e-01
+3 9.531957591135e-01
+4 5.971382225277e-01
 ]
 Prediction: 
 [
-0 2.6354014237543238e-01
-1 5.7281721583318856e-01
-2 -3.3292218143528524e-01
-3 4.0258875729986959e-03
-4 -7.0765145287859377e-01
-5 -2.6155809362370225e-01
-6 5.5738041664964111e-01
-7 5.8133149699732134e-01
-8 -5.1270015642350553e-01
-9 -1.6426327506749500e-01
+0 2.635401423754e-01
+1 5.728172158332e-01
+2 -3.329221814353e-01
+3 4.025887572999e-03
+4 -7.076514528786e-01
+5 -2.615580936237e-01
+6 5.573804166496e-01
+7 5.813314969973e-01
+8 -5.127001564235e-01
+9 -1.642632750675e-01
 ]
-Sq Error 6.4960772521099814e+00
+Sq Error 6.496077252110e+00

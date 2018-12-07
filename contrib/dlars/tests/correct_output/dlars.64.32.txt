@@ -1,7 +1,6 @@
 Distributed LARS algorithm
 Using the LARS algorithm
-Working on iteration 1
-L1 norm of solution: 0.000000e+00 RMS Error: 9.403806e-01
+L1 norm of solution: 0.000000e+00 RMS Error: 9.403806e-01 Objective fn: 8.843157e-01
 Adding property 5 to the active set
 New active set: 
 [
@@ -44,7 +43,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.676682e-17
+Y constant offset = -4.855485e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -80,8 +79,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 2
-L1 norm of solution: 1.003409e-02 RMS Error: 9.400509e-01
+Finished iteration 1
+L1 norm of solution: 1.003409e-02 RMS Error: 9.400509e-01 Objective fn: 8.836958e-01
 Adding property 25 to the active set
 New active set: 
 [
@@ -125,7 +124,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.122350e-17
+Y constant offset = -4.380343e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -161,8 +160,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 3
-L1 norm of solution: 9.230359e-01 RMS Error: 9.137148e-01
+Finished iteration 2
+L1 norm of solution: 9.230359e-01 RMS Error: 9.137148e-01 Objective fn: 8.348748e-01
 Adding property 11 to the active set
 New active set: 
 [
@@ -207,7 +206,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.104377e-17
+Y constant offset = -4.364841e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -243,8 +242,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 4
-L1 norm of solution: 9.515985e-01 RMS Error: 9.130087e-01
+Finished iteration 3
+L1 norm of solution: 9.515985e-01 RMS Error: 9.130087e-01 Objective fn: 8.335849e-01
 Adding property 12 to the active set
 New active set: 
 [
@@ -290,7 +289,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.096167e-17
+Y constant offset = -4.356580e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -326,8 +325,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 5
-L1 norm of solution: 9.895709e-01 RMS Error: 9.120759e-01
+Finished iteration 4
+L1 norm of solution: 9.895709e-01 RMS Error: 9.120759e-01 Objective fn: 8.318825e-01
 Adding property 16 to the active set
 New active set: 
 [
@@ -374,7 +373,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.083262e-17
+Y constant offset = -4.346775e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -410,8 +409,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 6
-L1 norm of solution: 1.066675e+00 RMS Error: 9.101967e-01
+Finished iteration 5
+L1 norm of solution: 1.066675e+00 RMS Error: 9.101967e-01 Objective fn: 8.284580e-01
 Adding property 10 to the active set
 New active set: 
 [
@@ -459,7 +458,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.067082e-17
+Y constant offset = -4.320968e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -495,8 +494,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 7
-L1 norm of solution: 1.571069e+00 RMS Error: 8.982403e-01
+Finished iteration 6
+L1 norm of solution: 1.571069e+00 RMS Error: 8.982403e-01 Objective fn: 8.068356e-01
 Adding property 29 to the active set
 New active set: 
 [
@@ -545,7 +544,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.011309e-17
+Y constant offset = -4.257201e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -581,8 +580,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 8
-L1 norm of solution: 2.354398e+00 RMS Error: 8.807360e-01
+Finished iteration 7
+L1 norm of solution: 2.354398e+00 RMS Error: 8.807360e-01 Objective fn: 7.756959e-01
 Adding property 6 to the active set
 New active set: 
 [
@@ -632,7 +631,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.629217e-17
+Y constant offset = -3.825365e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -668,8 +667,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 9
-L1 norm of solution: 3.804384e+00 RMS Error: 8.515405e-01
+Finished iteration 8
+L1 norm of solution: 3.804384e+00 RMS Error: 8.515405e-01 Objective fn: 7.251212e-01
 Adding property 21 to the active set
 New active set: 
 [
@@ -720,7 +719,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.590774e-17
+Y constant offset = -3.783036e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -756,8 +755,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 10
-L1 norm of solution: 3.953573e+00 RMS Error: 8.487715e-01
+Finished iteration 9
+L1 norm of solution: 3.953573e+00 RMS Error: 8.487715e-01 Objective fn: 7.204130e-01
 Adding property 13 to the active set
 New active set: 
 [
@@ -809,7 +808,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.558191e-17
+Y constant offset = -3.757364e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -845,8 +844,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 11
-L1 norm of solution: 5.930192e+00 RMS Error: 8.151396e-01
+Finished iteration 10
+L1 norm of solution: 5.930192e+00 RMS Error: 8.151396e-01 Objective fn: 6.644525e-01
 Adding property 24 to the active set
 New active set: 
 [
@@ -899,7 +898,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.552405e-17
+Y constant offset = -3.757388e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -935,8 +934,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 12
-L1 norm of solution: 6.506800e+00 RMS Error: 8.064245e-01
+Finished iteration 11
+L1 norm of solution: 6.506800e+00 RMS Error: 8.064245e-01 Objective fn: 6.503206e-01
 Adding property 2 to the active set
 New active set: 
 [
@@ -990,7 +989,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.529244e-17
+Y constant offset = -3.747606e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -1026,8 +1025,8 @@ Unscaled coefficients:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Working on iteration 13
-L1 norm of solution: 7.426714e+00 RMS Error: 7.934789e-01
+Finished iteration 12
+L1 norm of solution: 7.426714e+00 RMS Error: 7.934789e-01 Objective fn: 6.296088e-01
 Adding property 30 to the active set
 New active set: 
 [
@@ -1082,7 +1081,7 @@ Beta:
 30 1.303587e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.470387e-17
+Y constant offset = -3.635573e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -1118,8 +1117,8 @@ Unscaled coefficients:
 30 1.303587e-01
 31 0.000000e+00
 ]
-Working on iteration 14
-L1 norm of solution: 8.850295e+00 RMS Error: 7.755935e-01
+Finished iteration 13
+L1 norm of solution: 8.850295e+00 RMS Error: 7.755935e-01 Objective fn: 6.015453e-01
 Adding property 0 to the active set
 New active set: 
 [
@@ -1175,7 +1174,7 @@ Beta:
 30 1.358659e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.467191e-17
+Y constant offset = -3.629991e-17
 Unscaled coefficients: 
 [
 0 -5.692472e-03
@@ -1211,8 +1210,8 @@ Unscaled coefficients:
 30 1.358659e-01
 31 0.000000e+00
 ]
-Working on iteration 15
-L1 norm of solution: 8.914951e+00 RMS Error: 7.748422e-01
+Finished iteration 14
+L1 norm of solution: 8.914951e+00 RMS Error: 7.748422e-01 Objective fn: 6.003804e-01
 Adding property 28 to the active set
 New active set: 
 [
@@ -1269,7 +1268,7 @@ Beta:
 30 1.642320e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.455789e-17
+Y constant offset = -3.597298e-17
 Unscaled coefficients: 
 [
 0 -3.594270e-02
@@ -1305,8 +1304,8 @@ Unscaled coefficients:
 30 1.642320e-01
 31 0.000000e+00
 ]
-Working on iteration 16
-L1 norm of solution: 9.275009e+00 RMS Error: 7.707429e-01
+Finished iteration 15
+L1 norm of solution: 9.275009e+00 RMS Error: 7.707429e-01 Objective fn: 5.940446e-01
 Adding property 27 to the active set
 New active set: 
 [
@@ -1364,7 +1363,7 @@ Beta:
 30 1.760234e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.443795e-17
+Y constant offset = -3.580930e-17
 Unscaled coefficients: 
 [
 0 -4.859340e-02
@@ -1400,8 +1399,8 @@ Unscaled coefficients:
 30 1.760234e-01
 31 0.000000e+00
 ]
-Working on iteration 17
-L1 norm of solution: 9.439091e+00 RMS Error: 7.689190e-01
+Finished iteration 16
+L1 norm of solution: 9.439091e+00 RMS Error: 7.689190e-01 Objective fn: 5.912364e-01
 Adding property 19 to the active set
 New active set: 
 [
@@ -1460,7 +1459,7 @@ Beta:
 30 1.835238e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.439490e-17
+Y constant offset = -3.574302e-17
 Unscaled coefficients: 
 [
 0 -5.714968e-02
@@ -1496,8 +1495,8 @@ Unscaled coefficients:
 30 1.835238e-01
 31 0.000000e+00
 ]
-Working on iteration 18
-L1 norm of solution: 9.554368e+00 RMS Error: 7.676509e-01
+Finished iteration 17
+L1 norm of solution: 9.554368e+00 RMS Error: 7.676509e-01 Objective fn: 5.892879e-01
 Adding property 23 to the active set
 New active set: 
 [
@@ -1557,7 +1556,7 @@ Beta:
 30 2.780412e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.419220e-17
+Y constant offset = -3.533837e-17
 Unscaled coefficients: 
 [
 0 -2.070192e-01
@@ -1593,8 +1592,8 @@ Unscaled coefficients:
 30 2.780412e-01
 31 0.000000e+00
 ]
-Working on iteration 19
-L1 norm of solution: 1.142236e+01 RMS Error: 7.485005e-01
+Finished iteration 18
+L1 norm of solution: 1.142236e+01 RMS Error: 7.485005e-01 Objective fn: 5.602530e-01
 Adding property 18 to the active set
 New active set: 
 [
@@ -1655,7 +1654,7 @@ Beta:
 30 3.659354e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.305323e-17
+Y constant offset = -3.426181e-17
 Unscaled coefficients: 
 [
 0 -3.094843e-01
@@ -1691,8 +1690,8 @@ Unscaled coefficients:
 30 3.659354e-01
 31 0.000000e+00
 ]
-Working on iteration 20
-L1 norm of solution: 1.279579e+01 RMS Error: 7.361396e-01
+Finished iteration 19
+L1 norm of solution: 1.279579e+01 RMS Error: 7.361396e-01 Objective fn: 5.419015e-01
 Adding property 8 to the active set
 New active set: 
 [
@@ -1754,7 +1753,7 @@ Beta:
 30 4.628152e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.153308e-17
+Y constant offset = -3.287782e-17
 Unscaled coefficients: 
 [
 0 -4.168818e-01
@@ -1790,8 +1789,8 @@ Unscaled coefficients:
 30 4.628152e-01
 31 0.000000e+00
 ]
-Working on iteration 21
-L1 norm of solution: 1.426894e+01 RMS Error: 7.245240e-01
+Finished iteration 20
+L1 norm of solution: 1.426894e+01 RMS Error: 7.245240e-01 Objective fn: 5.249351e-01
 Adding property 9 to the active set
 New active set: 
 [
@@ -1854,7 +1853,7 @@ Beta:
 30 5.589964e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.031320e-17
+Y constant offset = -3.190710e-17
 Unscaled coefficients: 
 [
 0 -5.274678e-01
@@ -1890,8 +1889,8 @@ Unscaled coefficients:
 30 5.589964e-01
 31 0.000000e+00
 ]
-Working on iteration 22
-L1 norm of solution: 1.582446e+01 RMS Error: 7.141441e-01
+Finished iteration 21
+L1 norm of solution: 1.582446e+01 RMS Error: 7.141441e-01 Objective fn: 5.100017e-01
 Adding property 14 to the active set
 New active set: 
 [
@@ -1955,7 +1954,7 @@ Beta:
 30 6.274907e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.921509e-17
+Y constant offset = -3.113385e-17
 Unscaled coefficients: 
 [
 0 -5.799196e-01
@@ -1991,8 +1990,8 @@ Unscaled coefficients:
 30 6.274907e-01
 31 0.000000e+00
 ]
-Working on iteration 23
-L1 norm of solution: 1.679390e+01 RMS Error: 7.086477e-01
+Finished iteration 22
+L1 norm of solution: 1.679390e+01 RMS Error: 7.086477e-01 Objective fn: 5.021816e-01
 Adding property 22 to the active set
 New active set: 
 [
@@ -2057,7 +2056,7 @@ Beta:
 30 6.316490e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.909976e-17
+Y constant offset = -3.102205e-17
 Unscaled coefficients: 
 [
 0 -5.821349e-01
@@ -2093,8 +2092,8 @@ Unscaled coefficients:
 30 6.316490e-01
 31 0.000000e+00
 ]
-Working on iteration 24
-L1 norm of solution: 1.684875e+01 RMS Error: 7.083581e-01
+Finished iteration 23
+L1 norm of solution: 1.684875e+01 RMS Error: 7.083581e-01 Objective fn: 5.017712e-01
 Adding property 1 to the active set
 New active set: 
 [
@@ -2160,7 +2159,7 @@ Beta:
 30 7.983907e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.492886e-17
+Y constant offset = -2.760531e-17
 Unscaled coefficients: 
 [
 0 -7.128077e-01
@@ -2196,8 +2195,8 @@ Unscaled coefficients:
 30 7.983907e-01
 31 0.000000e+00
 ]
-Working on iteration 25
-L1 norm of solution: 1.936400e+01 RMS Error: 6.970916e-01
+Finished iteration 24
+L1 norm of solution: 1.936400e+01 RMS Error: 6.970916e-01 Objective fn: 4.859367e-01
 Adding property 7 to the active set
 New active set: 
 [
@@ -2264,7 +2263,7 @@ Beta:
 30 8.201922e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.442400e-17
+Y constant offset = -2.719453e-17
 Unscaled coefficients: 
 [
 0 -7.302479e-01
@@ -2300,8 +2299,8 @@ Unscaled coefficients:
 30 8.201922e-01
 31 0.000000e+00
 ]
-Working on iteration 26
-L1 norm of solution: 1.967302e+01 RMS Error: 6.959830e-01
+Finished iteration 25
+L1 norm of solution: 1.967302e+01 RMS Error: 6.959830e-01 Objective fn: 4.843923e-01
 Adding property 3 to the active set
 New active set: 
 [
@@ -2369,7 +2368,7 @@ Beta:
 30 8.523269e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.371461e-17
+Y constant offset = -2.661450e-17
 Unscaled coefficients: 
 [
 0 -7.576559e-01
@@ -2405,8 +2404,8 @@ Unscaled coefficients:
 30 8.523269e-01
 31 0.000000e+00
 ]
-Working on iteration 27
-L1 norm of solution: 2.015291e+01 RMS Error: 6.943803e-01
+Finished iteration 26
+L1 norm of solution: 2.015291e+01 RMS Error: 6.943803e-01 Objective fn: 4.821640e-01
 Adding property 17 to the active set
 New active set: 
 [
@@ -2475,7 +2474,7 @@ Beta:
 30 9.422597e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.310192e-17
+Y constant offset = -2.587046e-17
 Unscaled coefficients: 
 [
 0 -8.124691e-01
@@ -2511,8 +2510,8 @@ Unscaled coefficients:
 30 9.422597e-01
 31 0.000000e+00
 ]
-Working on iteration 28
-L1 norm of solution: 2.159420e+01 RMS Error: 6.902309e-01
+Finished iteration 27
+L1 norm of solution: 2.159420e+01 RMS Error: 6.902309e-01 Objective fn: 4.764187e-01
 Adding property 15 to the active set
 New active set: 
 [
@@ -2582,7 +2581,7 @@ Beta:
 30 1.048967e+00
 31 0.000000e+00
 ]
-Y constant offset = -2.374451e-17
+Y constant offset = -2.660690e-17
 Unscaled coefficients: 
 [
 0 -8.949977e-01
@@ -2618,8 +2617,8 @@ Unscaled coefficients:
 30 1.048967e+00
 31 0.000000e+00
 ]
-Working on iteration 29
-L1 norm of solution: 2.386342e+01 RMS Error: 6.854494e-01
+Finished iteration 28
+L1 norm of solution: 2.386342e+01 RMS Error: 6.854494e-01 Objective fn: 4.698408e-01
 Adding property 4 to the active set
 New active set: 
 [
@@ -2690,7 +2689,7 @@ Beta:
 30 1.075874e+00
 31 0.000000e+00
 ]
-Y constant offset = -2.394023e-17
+Y constant offset = -2.682194e-17
 Unscaled coefficients: 
 [
 0 -9.032863e-01
@@ -2726,8 +2725,8 @@ Unscaled coefficients:
 30 1.075874e+00
 31 0.000000e+00
 ]
-Working on iteration 30
-L1 norm of solution: 2.429628e+01 RMS Error: 6.847739e-01
+Finished iteration 29
+L1 norm of solution: 2.429628e+01 RMS Error: 6.847739e-01 Objective fn: 4.689153e-01
 Adding property 31 to the active set
 New active set: 
 [
@@ -2799,7 +2798,7 @@ Beta:
 30 1.083233e+00
 31 -7.460982e-03
 ]
-Y constant offset = -2.391726e-17
+Y constant offset = -2.682542e-17
 Unscaled coefficients: 
 [
 0 -9.034624e-01
@@ -2835,8 +2834,8 @@ Unscaled coefficients:
 30 1.083233e+00
 31 -7.460982e-03
 ]
-Working on iteration 31
-L1 norm of solution: 2.439885e+01 RMS Error: 6.846241e-01
+Finished iteration 30
+L1 norm of solution: 2.439885e+01 RMS Error: 6.846241e-01 Objective fn: 4.687102e-01
 Adding property 26 to the active set
 New active set: 
 [
@@ -2909,7 +2908,7 @@ Beta:
 30 1.390598e+00
 31 -3.075331e-01
 ]
-Y constant offset = -2.441872e-17
+Y constant offset = -2.789357e-17
 Unscaled coefficients: 
 [
 0 -8.950467e-01
@@ -2945,8 +2944,8 @@ Unscaled coefficients:
 30 1.390598e+00
 31 -3.075331e-01
 ]
-Working on iteration 32
-L1 norm of solution: 2.890257e+01 RMS Error: 6.812796e-01
+Finished iteration 31
+L1 norm of solution: 2.890257e+01 RMS Error: 6.812796e-01 Objective fn: 4.641419e-01
 Adding property 20 to the active set
 New active set: 
 [
@@ -3019,7 +3018,7 @@ Beta:
 30 1.405723e+00
 31 -3.213681e-01
 ]
-Y constant offset = -2.449629e-17
+Y constant offset = -2.799084e-17
 Unscaled coefficients: 
 [
 0 -8.953402e-01
@@ -3055,107 +3054,108 @@ Unscaled coefficients:
 30 1.405723e+00
 31 -3.213681e-01
 ]
+Finished iteration 32
 Final values:
 Beta: 
 [
-0 -8.9534016894067725e-01
-1 4.2747840603354387e-01
-2 3.9035935008445399e-01
-3 3.3605303698338002e-01
-4 -2.0872949000698190e-01
-5 -3.7641521945017122e+00
-6 7.1217766613792843e-01
-7 3.2906682773689777e-01
-8 -4.7149696899627419e-01
-9 4.6142393915916353e-02
-10 1.0069181855125549e+00
-11 -1.1725082050078734e+00
-12 -6.8657993811079865e-01
-13 -1.5074327609501723e+00
-14 8.8522974959913781e-01
-15 3.8826695840393716e-01
-16 -2.4323159925050550e+00
-17 -9.6589924860190313e-01
-18 -6.4359023102990831e-01
-19 5.0789116315122862e-01
-20 -4.4313389046487447e-03
-21 1.7180124894525535e+00
-22 5.1048373366520561e-01
-23 9.9811428627074683e-01
-24 5.7744596028633999e-01
-25 8.7060168693709261e-01
-26 1.6988536000721993e-01
-27 1.5628480839227075e+00
-28 1.1369751884125374e+00
-29 2.0736371262972209e+00
-30 1.4057233409804222e+00
-31 -3.2136807986426064e-01
+0 -8.953401689407e-01
+1 4.274784060335e-01
+2 3.903593500844e-01
+3 3.360530369834e-01
+4 -2.087294900070e-01
+5 -3.764152194502e+00
+6 7.121776661379e-01
+7 3.290668277369e-01
+8 -4.714969689963e-01
+9 4.614239391591e-02
+10 1.006918185513e+00
+11 -1.172508205008e+00
+12 -6.865799381108e-01
+13 -1.507432760950e+00
+14 8.852297495991e-01
+15 3.882669584039e-01
+16 -2.432315992505e+00
+17 -9.658992486019e-01
+18 -6.435902310299e-01
+19 5.078911631512e-01
+20 -4.431338904650e-03
+21 1.718012489453e+00
+22 5.104837336652e-01
+23 9.981142862707e-01
+24 5.774459602863e-01
+25 8.706016869371e-01
+26 1.698853600072e-01
+27 1.562848083923e+00
+28 1.136975188413e+00
+29 2.073637126297e+00
+30 1.405723340980e+00
+31 -3.213680798643e-01
 ]
 Prediction: 
 [
-0 5.9544574931097771e-01
-1 3.9914276523504094e-01
-2 -1.4632069883779977e-01
-3 -7.5776538909926339e-01
-4 6.5526731188755072e-02
-5 6.3334151318052345e-01
-6 -3.4088301334162302e-01
-7 -1.5083110407668404e-01
-8 3.5512433456114503e-02
-9 -7.8995150784494414e-02
-10 6.2174212707562862e-02
-11 -4.6763833452139214e-01
-12 1.2829367342495965e+00
-13 -1.6288962404906457e-01
-14 -1.0051469649973543e+00
-15 -2.3592425898352637e-01
-16 -1.5101397464824515e-01
-17 9.8911871829864606e-01
-18 7.6717654204161179e-01
-19 6.0281300340763766e-01
-20 -2.2919587420131607e-01
-21 -3.1112616243290087e-01
-22 1.1738507820623343e+00
-23 4.1353722306045143e-01
-24 1.9461944022681857e-01
-25 -4.9468240254361535e-02
-26 5.2743355637535239e-01
-27 5.5174238760582008e-02
-28 -1.4855984362491190e+00
-29 3.2213957563439660e-01
-30 -3.8660334146688519e-01
-31 2.8389706702511069e-01
-32 -1.1757334144553495e+00
-33 -1.2500769317574389e+00
-34 9.0811371810825459e-01
-35 -5.3624484758779373e-02
-36 -5.3645045588356066e-01
-37 -4.1464453809459728e-01
-38 -2.7127619393175290e-01
-39 6.9408234556223614e-01
-40 1.2132372672288284e-01
-41 1.2026475987510192e+00
-42 -1.5812445936048691e+00
-43 6.8733667939051024e-01
-44 3.5454344933847670e-01
-45 -7.1911335833618062e-01
-46 -5.5788545610122375e-01
-47 5.8698091229894900e-01
-48 7.0903191917570302e-02
-49 9.2427461025225657e-02
-50 -7.1664713097758548e-01
-51 -1.0009341006844834e+00
-52 -5.9046254328372338e-01
-53 -3.2848886767114660e-01
-54 2.0714119775003317e-01
-55 6.0194500152712294e-01
-56 -8.3675477199812484e-02
-57 -3.1302171736042728e-01
-58 -2.1233748381276920e-02
-59 -7.1015169823441504e-01
-60 1.0217480867561863e+00
-61 1.0398702616028324e+00
-62 -3.7871811286937077e-02
-63 3.2903317297477863e-01
+0 5.954457493110e-01
+1 3.991427652350e-01
+2 -1.463206988378e-01
+3 -7.577653890993e-01
+4 6.552673118876e-02
+5 6.333415131805e-01
+6 -3.408830133416e-01
+7 -1.508311040767e-01
+8 3.551243345611e-02
+9 -7.899515078449e-02
+10 6.217421270756e-02
+11 -4.676383345214e-01
+12 1.282936734250e+00
+13 -1.628896240491e-01
+14 -1.005146964997e+00
+15 -2.359242589835e-01
+16 -1.510139746482e-01
+17 9.891187182986e-01
+18 7.671765420416e-01
+19 6.028130034076e-01
+20 -2.291958742013e-01
+21 -3.111261624329e-01
+22 1.173850782062e+00
+23 4.135372230605e-01
+24 1.946194402268e-01
+25 -4.946824025436e-02
+26 5.274335563754e-01
+27 5.517423876058e-02
+28 -1.485598436249e+00
+29 3.221395756344e-01
+30 -3.866033414669e-01
+31 2.838970670251e-01
+32 -1.175733414455e+00
+33 -1.250076931757e+00
+34 9.081137181083e-01
+35 -5.362448475878e-02
+36 -5.364504558836e-01
+37 -4.146445380946e-01
+38 -2.712761939318e-01
+39 6.940823455622e-01
+40 1.213237267229e-01
+41 1.202647598751e+00
+42 -1.581244593605e+00
+43 6.873366793905e-01
+44 3.545434493385e-01
+45 -7.191133583362e-01
+46 -5.578854561012e-01
+47 5.869809122989e-01
+48 7.090319191757e-02
+49 9.242746102522e-02
+50 -7.166471309776e-01
+51 -1.000934100684e+00
+52 -5.904625432837e-01
+53 -3.284888676711e-01
+54 2.071411977500e-01
+55 6.019450015271e-01
+56 -8.367547719981e-02
+57 -3.130217173604e-01
+58 -2.123374838128e-02
+59 -7.101516982344e-01
+60 1.021748086756e+00
+61 1.039870261603e+00
+62 -3.787181128694e-02
+63 3.290331729748e-01
 ]
-Sq Error 2.9704435908403557e+01
+Sq Error 2.970443590840e+01

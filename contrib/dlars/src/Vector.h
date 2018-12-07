@@ -43,6 +43,19 @@ public:
 #endif					
 		vec[i] = val ;
 	}
+
+	Vector &operator=(const Vector& in) {
+		if ( dim !=in.dim ) {
+			delete [] vec ;
+			vec = new double [in.dim] ;
+			dim = in.dim ;
+		}
+		for ( int j = 0 ; j < dim ; j++ ) {
+			vec[j] = in.vec[j] ;
+		}
+		return *this ;
+	}
+		
 	void realloc(int size) {
 		// Reallocate the vector.
 		

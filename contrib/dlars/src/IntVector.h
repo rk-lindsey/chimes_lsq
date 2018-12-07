@@ -35,6 +35,18 @@ public:
 		dim = size ;
 	}
 
+	IntVector &operator=(const IntVector& in) {
+		if ( dim !=in.dim ) {
+			delete [] vec ;
+			vec = new int [in.dim] ;
+			dim = in.dim ;
+		}
+		for ( int j = 0 ; j < dim ; j++ ) {
+			vec[j] = in.vec[j] ;
+		}
+		return *this ;
+	}
+		
 	int size() const {
 		return dim ;
 	}

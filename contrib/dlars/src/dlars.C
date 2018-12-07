@@ -80,6 +80,9 @@ int main(int argc, char **argv)
 	static struct option long_options[] =
 	{
 		{"algorithm", required_argument, 0, 'a'},
+		{"iterations", required_argument, 0, 'i'},
+		{"lambda", required_argument, 0, 'l'},
+		{"max_norm", required_argument, 0, 'm'},
 		{"split_files", no_argument, 0, 's'},
 		{"help", no_argument, 0, 'h'},
 		{0, 0, 0, 0}
@@ -88,15 +91,31 @@ int main(int argc, char **argv)
 	int option_index = 0 ;
 	int opt_type ;
 
-	string algorithm("lasso") ;
-	bool split_files = false ;
+	// Default options.
+	
+	string algorithm("lasso") ;       // Algorithm to use: lasso or lars
+	bool split_files = false ;        // Read input matrix from split files ?
+
+	// Stopping criteria.  Default is to calculate all possible solutions.
+	double max_beta_norm = 1.0e+50 ;  // Maximum L1 norm of solution 
+	int max_iterations = 10000000 ;   // Maximum number of LARS iterations.
+	double lambda = 0.0 ;             // L1 weighting factor.
 	
 	while (1) {
-		opt_type = getopt_long(argc, argv, "a:sh", long_options, &option_index) ;
+		opt_type = getopt_long(argc, argv, "a:i:l:m:sh", long_options, &option_index) ;
 		if ( opt_type == -1 ) break ;
 		switch ( opt_type ) {
 		case 'a':
 			algorithm = string(optarg) ;
+			break ;
+		case 'i':
+			max_iterations = atoi(optarg) ;
+			break ;
+		case 'l':
+		  lambda = atof(optarg) ;
+			break ;			
+		case 'm':
+			max_beta_norm = atof(optarg) ;
 			break ;
 		case 's':
 			split_files = true ;
@@ -120,7 +139,6 @@ int main(int argc, char **argv)
 	}
 	
 	int nprops, ndata ;
-	double max_beta_norm = 1.0e+06 ;
 	
 	Matrix xmat ;
 	if ( split_files ) {
@@ -177,7 +195,7 @@ int main(int argc, char **argv)
 	}
 #endif	
 
-	DLARS lars(xmat, yvec) ;
+	DLARS lars(xmat, yvec, lambda) ;
 	lars.do_lasso = do_lasso ;
 	if ( RANK == 0 ) {
 		if ( do_lasso ) {
@@ -187,25 +205,37 @@ int main(int argc, char **argv)
 		}
 	}
 
-	for ( int j = 0 ; ; j++ ) {
-		if ( RANK == 0 ) cout << "Working on iteration " << j + 1 << endl ;
+	Vector last_beta(nprops) ; // Last good coefficients
+
+	double last_obj_func = 1.0e50 ;
+	
+	for ( int j = 0 ; j + 1 <= max_iterations ; j++ ) {
 		if ( ! lars.iteration() ) 
 			break ;
-		if ( lars.beta.l1norm() > max_beta_norm * lars.nprops ) {
+
+		if ( RANK == 0 ) cout << "Finished iteration " << j + 1 << endl ;
+
+		// Check against exit conditions.
+		if ( lars.beta.l1norm() > max_beta_norm ) 
 			break ;
-		}
+		else if ( lars.obj_func_val > last_obj_func )
+			break ;
+		
+		last_beta = lars.beta ;
+		last_obj_func = lars.obj_func_val ;
 	}
 
 	if ( RANK == 0 ) {
-		cout.precision(16) ;		
+		cout.precision(12) ;
 		cout << "Final values:" << endl ;
 		cout << "Beta: " << endl ;
-		lars.beta.print() ;
+		last_beta.print() ;
 	}
 
-	lars.predict() ;
+	lars.beta = last_beta ;
+	lars.predict_all() ;
 	lars.correlation() ;
-
+	
 	if ( RANK == 0 ) cout << "Prediction: " << endl ;
 	lars.mu.print() ;
 
@@ -214,6 +244,8 @@ int main(int argc, char **argv)
 	// Print out the unscaled coefficients to X.txt.
 	if ( RANK == 0 ) {
 		ofstream xtxt("x.txt") ;
+		xtxt.precision(12) ;
+		xtxt << scientific ;
 		if ( ! xtxt.is_open() ) {
 			if ( RANK == 0 ) cout << "Error: could not open x.txt" << endl ;
 			exit(1) ;
@@ -221,6 +253,8 @@ int main(int argc, char **argv)
 		lars.print_unscaled(xtxt) ;
 
 		ofstream Axfile("Ax.txt") ;
+		Axfile.precision(12) ;
+		Axfile << scientific ;
 		if ( ! Axfile.is_open() ) {
 			if ( RANK == 0 ) cout << "Error: could not open Ax.txt" << endl ;
 			exit(1) ;
