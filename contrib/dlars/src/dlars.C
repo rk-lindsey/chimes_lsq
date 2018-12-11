@@ -4,8 +4,9 @@
     The Annals of Statistics, 32, 407-499(2004).
     Larry Fried
 
-		Currently only works serially (non-distributed).
-    11/2018
+		The X and X_A matrices are distributed.  Code works with MPI.
+
+    12/2018
 **/
 
 // #define VERBOSE // Define for extra output

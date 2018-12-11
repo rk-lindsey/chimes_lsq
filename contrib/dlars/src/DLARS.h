@@ -134,7 +134,7 @@ public:
 	// regularization parameter lambda.  This should be called after
 	// predict_all() or predict().
 	{
-		obj_func_val = 0.5 * sq_error() / nprops + lambda * beta.l1norm() ;
+		obj_func_val = 0.5 * sq_error() / ndata + lambda * beta.l1norm() ;
 	}
 	void correlation() 
 	// Calculate the correlation vector c, Eq. 2.1
@@ -408,7 +408,7 @@ public:
 	// Perform back substitution on the cholesky matrix to find G_A_Inv_I and A_A
 	// Returns true if the solution passes consistency tests.
 		{
-			const double eps = 1.0e-20 ;
+			const double eps = 1.0e-50 ;
 
 			//cout << "Cholesky " << endl ;
       //chol.print() ;
@@ -508,7 +508,7 @@ public:
 		{
 			IntVector a_trial(nprops) ;
 			//int count = 0 ;
-			const double eps = 1.0e-10 ;
+			const double eps = 1.0e-12 ;
 
 			// Save the last active set
 			A_last.realloc(nactive) ;
@@ -680,15 +680,15 @@ public:
 					}
 					offset -= beta.get(j) * X.shift[j] / X.scale[j] ;
 				}
-				out << "Y constant offset = " << offset << endl ;
-				out << "Unscaled coefficients: " << endl ;
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					uns_beta.set(j, beta.get(j) / X.scale[j]) ;
 				}
 				if ( out == cout ) {
 					uns_beta.print() ;
 				} else {
-					uns_beta.print(out) ;
+					for ( int j = 0 ; j < nprops ; j++ ) {
+						out << uns_beta.get(j) << endl ;
+					}
 				}
 			}
 		}
@@ -700,7 +700,7 @@ public:
 			if ( RANK == 0 ) {
 				double offset = y.shift ;
 
-				out << "Y constant offset = " << offset << endl ;
+				//out << "Y constant offset = " << offset << endl ;
 				for ( int j = 0 ; j < ndata ; j++ ) {
 					out << mu.get(j) + y.shift << endl ;
 				}
@@ -769,6 +769,8 @@ public:
 			if ( RANK == 0 ) {
 				cout << "Beta: " << endl ;
 				beta.print() ;
+				cout << "Y constant offset = " << y.shift << endl ;
+				cout << "Unscaled coefficients: " << endl ;
 				print_unscaled(cout) ;
 			}
 
