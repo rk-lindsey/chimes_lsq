@@ -26,11 +26,11 @@ def main():
     parser.add_argument("--test-suite", type=bool, default=False,help='output for test suite')
     parser.add_argument("--alpha", type=float, default=1.0e-04,help='Lasso or ridge regularization')
     parser.add_argument("--beta",type=float, default=0.0, help='DOWLQN L2 regularization')
-    parser.add_argument("--split-files", type=bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN.')
+    parser.add_argument("--split-files", type=bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
     parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
     parser.add_argument("--tol", type=float, default=1.0e-05, help='OWLQN or DOWLQN tolerance')
-    parser.add_argument("--cores", type=int, default=8, help='DOWLQN number of cores')
-    parser.add_argument("--nodes", type=int, default=1, help='DOWLQN number of nodes')
+    parser.add_argument("--cores", type=int, default=8, help='DOWLQN/DLARS number of cores')
+    parser.add_argument("--nodes", type=int, default=1, help='DOWLQN/DLARS number of nodes')
     parser.add_argument("--memory", type=int, default=20, help='OWLQN or DOWLQN Hessian memory storage') ;
     parser.add_argument("--restart", type=bool, default=False, help='Use DOWLQN restart file')
 
@@ -68,9 +68,10 @@ def main():
     else:
         DO_WEIGHTING = True
 
-    if (algorithm.find("lasso") >= 0 or algorithm.find("ridge") >= 0
-        or algorithm.find("lassolars") >= 0  or algorithm.find("lars") >= 0
-        or algorithm.find("lasso_split") >= 0 ) :
+    # Algorithms requiring sklearn.
+    sk_algos = ["lasso", "ridge", "lassolars", "lars", "lasso_split"] ;
+        
+    if algorithm in sk_algos:
         from sklearn import linear_model
         from sklearn import preprocessing
 
@@ -297,6 +298,11 @@ def main():
         np = count_nonzero_vars(x)
         nvars = np
 
+    elif algorithm == 'dlars' or algorithm == 'dlasso' :
+        x,y = fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm)
+        np = count_nonzero_vars(x)
+        nvars = np
+        
     else:
 
         print "Unrecognized fitting algorithm" 
@@ -771,8 +777,6 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
 ## the estimated force vector A * x, which is read from Ax.txt.    
     print '! DOWLQN algorithm for LASSO used'
     print '! DOWLQN alpha = ' + str(alpha_val)
-    write_matrix_market(A, 'Amm.txt')
-    write_matrix_market(b, 'bmm.txt')
     path=os.path.dirname(os.path.abspath(__file__))
     dowlqn_file = path[:-3] + "contrib/owlqn/mpi/dowlqn"
     exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
@@ -781,6 +785,8 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
         if ( split_files ) :
             command = ("{0} A.txt b.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4} -s".format(exepath, alpha_val, tol, memory, beta_val))
         else:
+            write_matrix_market(A, 'Amm.txt')
+            write_matrix_market(b, 'bmm.txt')
             command = ("{0} Amm.txt bmm.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4}".format(exepath, alpha_val, tol, memory, beta_val))
         if ( restart ) :
             command = command + " -init restart.txt "
@@ -793,6 +799,46 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
             
         x = read_matrix_market("fit.txt")
         y = read_matrix_market("Ax.txt")
+        return x,y
+    else:
+        print exepath + " does not exist"
+        sys.exit(1)
+
+
+def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm):
+## Use the Distributed LARS/LASSO fitting algorithm.  Returns both the solution x and
+## the estimated force vector A * x, which is read from Ax.txt.    
+    if algorithm == 'dlasso' :
+        print '! DLARS code for LASSO used'
+    elif algorithm == 'dlars' :
+        print '! DLARS code for LARS used'
+    else:
+        print "Bad algorithm in fit_dlars:" + algorithm
+        exit(1)
+    print '! DLARS alpha = ' + str(alpha_val)
+
+    path=os.path.dirname(os.path.abspath(__file__))
+    dlars_file = path[:-3] + "contrib/dlars/src/dlars"
+    exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
+    exepath = exepath + dlars_file
+    if os.path.exists(dlars_file):
+        command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha_val))
+        if ( split_files ) :
+            command = command + " --split_files"
+        if ( algorithm == 'dlars' ):
+            command = command + " --algorithm=lars"
+        elif ( algorithm == 'dlasso' ):
+            command = command + " --algorithm=lasso"
+    
+        command = command +  " >& dlars.log"
+        print("! DLARS run: " + command + "\n")
+
+        if ( os.system(command) != 0 ) :
+            print(command + " failed")
+            sys.exit(1)
+            
+        x = numpy.genfromtxt("x.txt", dtype='float')
+        y = numpy.genfromtxt("Ax.txt", dtype='float') 
         return x,y
     else:
         print exepath + " does not exist"
