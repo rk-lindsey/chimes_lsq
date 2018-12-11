@@ -15,6 +15,74 @@ using namespace std;
 #include "Cheby.h"
 
 
+string InputListing::operator()(int i, int j)
+// Access a particular token in the InputListing.
+{
+	if ( i >= list.size() )
+	{
+		if ( RANK == 0 )
+		{
+			cout << "Input was not found for line " + to_string(i) << endl ;
+		}
+		exit_run(1) ;
+	}
+	if ( j >= list[i].size() )
+	{
+		if ( RANK == 0 )
+		{
+			cout << "Not enough tokens in line." << endl ;
+
+			cout << "Working on line: " << endl ;
+			for ( int j = 0 ; j < list[i].size() ; j++ ) {
+				cout << list[i][j] << " " ;
+			}
+			cout << endl ;
+		}
+		exit_run(1) ;
+	}
+	return list[i][j] ;
+}
+
+vector<string> &InputListing::operator()(int i)
+// Access a vector of tokens for a particular line.
+{
+	if ( i >= list.size() )
+	{
+		if ( RANK == 0 )
+		{
+			cout << "Input was not found for line " + to_string(i) << endl ;
+		}
+		exit_run(1) ;
+	}
+	return list[i] ;
+}
+
+void InputListing::push_back(vector<string> &item) 
+// Add a vector of tokens to the InputListing.
+{
+	list.push_back(item) ;
+}
+
+int InputListing::size()
+// Return the number of lines.
+{
+	return(list.size() ) ;
+}
+
+int InputListing::size(int i)
+// Return the number of tokens for a particular line.
+{
+	if ( i >= list.size() )
+	{
+		if ( RANK == 0 )
+		{
+			cout << "Input was not found for line " + to_string(i) << endl ;
+		}
+		exit_run(1) ;
+	}
+	return( list[i].size() ) ;
+}
+
 // Constructor/deconstructor
 
 INPUT::INPUT(string FNAME){ FILENAME = FNAME; }
@@ -101,7 +169,8 @@ void INPUT::CHECK_FILE()
 
 // Wrapper functions: Process entire input file
 
-void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,	       
+void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS
+															 ,	       
 	    		       vector<PAIRS>		 & ATOM_PAIRS, 
 	    		       CLUSTER_LIST		 & TRIPS, 
 	    		       CLUSTER_LIST		 & QUADS, 
@@ -220,30 +289,30 @@ void INPUT::PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS)
 
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (CONTENTS[i][1] == "TRJFILE")
+		if (CONTENTS(i,1) == "TRJFILE")
 		{
 			// Determine if we're dealing with a single or multiple trajectory files, handle appropriately
 			
-			if(CONTENTS[i+1].size() == 1) // We have a single file
+			if(CONTENTS.size(i+1) == 1) // We have a single file
 			{
-				CONTROLS.INFILE.push_back(CONTENTS[i+1][0]);
+				CONTROLS.INFILE.push_back(CONTENTS(i+1,0));
 				
 				if ( RANK == 0 ) 
 					cout << "	# TRJFILE #: " << CONTROLS.INFILE[0] << endl;	
 				break;
 			}
-			else if(CONTENTS[i+1].size() == 2) // We have multiple files
+			else if(CONTENTS.size(i+1) == 2) // We have multiple files
 			{	
 				if ( RANK == 0 ) 
-					cout << "	# TRJFILE #: MULTI " << CONTENTS[i+1][1] << endl;
+					cout << "	# TRJFILE #: MULTI " << CONTENTS(i+1,1) << endl;
 					
 				// Read the files (later, will add option to skip first N frames, and to process every M frames)
 				
 				ifstream MULTI;
-				MULTI.open(CONTENTS[i+1][1]);
+				MULTI.open(CONTENTS(i+1,1));
 				
 				if (!MULTI.is_open())
-					EXIT_MSG("ERROR: Cannot open MULTI file: ", CONTENTS[i+1][0]);	
+					EXIT_MSG("ERROR: Cannot open MULTI file: ", CONTENTS(i+1,0));	
 				
 				if ( RANK == 0 ) 
 					cout << "		...Will read from the following files: " << endl;
@@ -258,7 +327,7 @@ void INPUT::PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS)
 				if(PARSED_LINE.size() != 1)
 					EXIT_MSG("ERROR: Expected to read <nfiles>, got: ", LINE);	
 				
-				int NFILES = stoi(PARSED_LINE[0]);
+				int NFILES = convert_int(PARSED_LINE[0],i+1);
 				
 				for (int j=0; j<NFILES; j++)
 				{
@@ -269,7 +338,7 @@ void INPUT::PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS)
 					if(PARSED_LINE.size() != 2)
 						EXIT_MSG("ERROR: Expected to read <nframes> <filename>, got: ", LINE);											
 					
-					CONTROLS.INFILE_FRAMES.push_back(stoi(PARSED_LINE[0]));
+					CONTROLS.INFILE_FRAMES.push_back(convert_int(PARSED_LINE[0],i+1));
 					CONTROLS.INFILE       .push_back(     PARSED_LINE[1]);
 					
 					if ( RANK == 0 ) 
@@ -284,8 +353,8 @@ void INPUT::PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS)
 			else
 			{
 				cout << "ERROR: Unrecognized TRAJFILE option: ";
-				for (int j=0; j<CONTENTS[i+1].size(); j++)
-					cout << CONTENTS[i+1][j] << " ";
+				for (int j=0; j<CONTENTS.size(i+1); j++)
+					cout << CONTENTS(i+1,j) << " ";
 				cout << endl;
 				exit_run(0);
 			}
@@ -299,11 +368,11 @@ void INPUT::PARSE_CONTROLS_WRAPTRJ(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{	
-		if (found_input_keyword("WRAPTRJ", CONTENTS[i]))
+		if (found_input_keyword("WRAPTRJ", CONTENTS(i)))
 		{
-			if((i+1 < N_CONTENTS) && (CONTENTS[i+1].size() == 1)) // We have a single file
+			if((i+1 < N_CONTENTS) && (CONTENTS.size(i+1) == 1)) // We have a single file
 			{
-				CONTROLS.WRAP_COORDS = str2bool(CONTENTS[i+1][0]);
+				CONTROLS.WRAP_COORDS = convert_bool(CONTENTS(i+1,0),i+1);
 				
 				if ( RANK == 0 ) 
 					cout << "	# WRAPTRJ #: " << bool2str(CONTROLS.WRAP_COORDS) << endl;
@@ -319,9 +388,9 @@ void INPUT::PARSE_CONTROLS_SPLITFI(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("SPLITFI", CONTENTS[i]))
+		if (found_input_keyword("SPLITFI", CONTENTS(i)))
 		{
-			CONTROLS.SPLIT_FILES = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.SPLIT_FILES = convert_bool(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# SPLITFI #: " << bool2str(CONTROLS.SPLIT_FILES) << endl;	
@@ -336,9 +405,9 @@ void INPUT::PARSE_CONTROLS_NFRAMES(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("NFRAMES", CONTENTS[i]))
+		if (found_input_keyword("NFRAMES", CONTENTS(i)))
 		{
-			CONTROLS.NFRAMES = stoi(CONTENTS[i+1][0]);
+			CONTROLS.NFRAMES = convert_int(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 	
 					cout << "	# NFRAMES #: " << CONTROLS.NFRAMES << endl;			
@@ -352,9 +421,9 @@ void INPUT::PARSE_CONTROLS_NLAYERS(JOB_CONTROL & CONTROLS)
 {
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (CONTENTS[i][1] == "NLAYERS")
+		if (CONTENTS(i,1) == "NLAYERS")
 		{
-			CONTROLS.N_LAYERS = stoi(CONTENTS[i+1][0]);
+			CONTROLS.N_LAYERS = convert_int(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 		
 					cout << "	# NLAYERS #: " << CONTROLS.N_LAYERS << endl;
@@ -371,9 +440,9 @@ void INPUT::PARSE_CONTROLS_FITCOUL(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("FITCOUL", CONTENTS[i]))
+		if (found_input_keyword("FITCOUL", CONTENTS(i)))
 		{
-			CONTROLS.FIT_COUL = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.FIT_COUL = convert_bool(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# FITCOUL #: " << bool2str(CONTROLS.FIT_COUL) << endl;				
@@ -388,24 +457,24 @@ void INPUT::PARSE_CONTROLS_FITSTRS(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("FITSTRS", CONTENTS[i]))
+		if (found_input_keyword("FITSTRS", CONTENTS(i)))
 		{
-			if (CONTENTS[i+1][0]=="first"  || CONTENTS[i+1][0]=="First"  || CONTENTS[i+1][0]=="FIRST")
+			if (CONTENTS(i+1,0)=="first"  || CONTENTS(i+1,0)=="First"  || CONTENTS(i+1,0)=="FIRST")
 			{
 				CONTROLS.FIT_STRESS = true;
-				CONTROLS.NSTRESS    = stoi(CONTENTS[i+1][1]);
+				CONTROLS.NSTRESS    = convert_int(CONTENTS(i+1,1),i+1);
 			}			
-			else if (CONTENTS[i+1][0]=="all"  || CONTENTS[i+1][0]=="All"  || CONTENTS[i+1][0]=="ALL"  || CONTENTS[i+1][0] == "A" || CONTENTS[i+1][0] == "a")
+			else if (CONTENTS(i+1,0)=="all"  || CONTENTS(i+1,0)=="All"  || CONTENTS(i+1,0)=="ALL"  || CONTENTS(i+1,0) == "A" || CONTENTS(i+1,0) == "a")
 			{
 					CONTROLS.FIT_STRESS_ALL = true;
 			}
-			else if(CONTENTS[i+1][0]=="firstall"  || CONTENTS[i+1][0]=="FirstAll"  || CONTENTS[i+1][0]=="FIRSTALL")
+			else if(CONTENTS(i+1,0)=="firstall"  || CONTENTS(i+1,0)=="FirstAll"  || CONTENTS(i+1,0)=="FIRSTALL")
 			{
 					CONTROLS.FIT_STRESS_ALL = true;
-					CONTROLS.NSTRESS    = stoi(CONTENTS[i+1][1]);			
+					CONTROLS.NSTRESS    = convert_int(CONTENTS(i+1,1),i+1);			
 			}
 			else
-				CONTROLS.FIT_STRESS = str2bool(CONTENTS[i+1][0]);
+				CONTROLS.FIT_STRESS = convert_bool(CONTENTS(i+1,0),i+1);
 
 			if ( RANK == 0 ) 
 			{
@@ -430,16 +499,16 @@ void INPUT::PARSE_CONTROLS_FITENER(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("FITENER", CONTENTS[i]))		
+		if (found_input_keyword("FITENER", CONTENTS(i)))		
 		{
-			if (CONTENTS[i+1][0]=="first"  || CONTENTS[i+1][0]=="First"  || CONTENTS[i+1][0]=="FIRST")
+			if (CONTENTS(i+1,0)=="first"  || CONTENTS(i+1,0)=="First"  || CONTENTS(i+1,0)=="FIRST")
 			{
 				CONTROLS.FIT_ENER = true;
-				CONTROLS.NENER    = stoi(CONTENTS[i+1][1]);
+				CONTROLS.NENER    = convert_int(CONTENTS(i+1,1),i+1);
 			}
 			else
 			{
-				CONTROLS.FIT_ENER = str2bool(CONTENTS[i+1][0]);
+				CONTROLS.FIT_ENER = convert_bool(CONTENTS(i+1,0),i+1);
 			}
 			
 			if ( RANK == 0 )
@@ -457,16 +526,16 @@ void INPUT::PARSE_CONTROLS_FITEATM(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("FITEATM", CONTENTS[i]))				
+		if (found_input_keyword("FITEATM", CONTENTS(i)))				
 		{
-			if (CONTENTS[i+1][0]=="first"  || CONTENTS[i+1][0]=="First"  || CONTENTS[i+1][0]=="FIRST")
+			if (CONTENTS(i+1,0)=="first"  || CONTENTS(i+1,0)=="First"  || CONTENTS(i+1,0)=="FIRST")
 			{
 				CONTROLS.FIT_ENER_PER_ATOM = true;
-				CONTROLS.FIT_ENER_PER_ATOM = stoi(CONTENTS[i+1][1]);
+				CONTROLS.FIT_ENER_PER_ATOM = convert_int(CONTENTS(i+1,1),i+1);
 			}
 			else
 			{
-				CONTROLS.FIT_ENER_PER_ATOM = str2bool(CONTENTS[i+1][0]);
+				CONTROLS.FIT_ENER_PER_ATOM = convert_bool(CONTENTS(i+1,0),i+1);
 			}
 			
 			if ( RANK == 0 )
@@ -485,9 +554,9 @@ void INPUT::PARSE_CONTROLS_FITPOVR(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("FITPOVR", CONTENTS[i]))						
+		if (found_input_keyword("FITPOVR", CONTENTS(i)))						
 		{
-			CONTROLS.FIT_POVER = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.FIT_POVER = convert_bool(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# FITPOVR #: " << bool2str(CONTROLS.FIT_POVER) << endl;		
@@ -502,9 +571,9 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("PAIRTYP", CONTENTS[i]))								
+		if (found_input_keyword("PAIRTYP", CONTENTS(i)))								
 		{
-			FF_TYPE = CONTENTS[i+1][0];
+			FF_TYPE = CONTENTS(i+1,0);
 			
 			if (FF_TYPE != "SPLINE" && FF_TYPE != "CHEBYSHEV" && FF_TYPE != "DFTBPOLY" && FF_TYPE != "INVRSE_R") // These are not supported:  && FF_TYPE != "LJ" && FF_TYPE != "STILLIN")
 			{
@@ -530,7 +599,7 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 			
 			if(FF_TYPE == "INVRSE_R")
 			{
-				CONTROLS.INVR_PARAMS = stoi(CONTENTS[i+1][1]);
+				CONTROLS.INVR_PARAMS = convert_int(CONTENTS(i+1,1),i+1);
 					
 				if ( RANK == 0 ) 
 					cout << "	             " << "Will use the following number of inverse-r params: " << CONTROLS.INVR_PARAMS << endl;					
@@ -538,15 +607,15 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 
 			if(FF_TYPE == "DFTBPOLY" || FF_TYPE == "CHEBYSHEV")
 			{
-				CONTROLS.CHEBY_ORDER = stoi(CONTENTS[i+1][1]);
+				CONTROLS.CHEBY_ORDER = convert_int(CONTENTS(i+1,1),i+1);
 				
 				if ( RANK == 0 ) 
 					cout << "	             " << "Will use 2-body order: " << CONTROLS.CHEBY_ORDER << endl;
 				
 				if(FF_TYPE == "CHEBYSHEV")
 				{
-					if(CONTENTS[i+1].size() >= 3)
-						CONTROLS.CHEBY_3B_ORDER = stoi(CONTENTS[i+1][2]);
+					if(CONTENTS.size(i+1) >= 3)
+						CONTROLS.CHEBY_3B_ORDER = convert_int(CONTENTS(i+1,2),i+1);
 					else
 						CONTROLS.CHEBY_3B_ORDER = 0;
 
@@ -556,8 +625,8 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 					if(CONTROLS.CHEBY_3B_ORDER>0)
 						CONTROLS.USE_3B_CHEBY = true;
 						
-					if(CONTENTS[i+1].size() >= 4)
-						CONTROLS.CHEBY_4B_ORDER = stoi(CONTENTS[i+1][3]);
+					if(CONTENTS.size(i+1) >= 4)
+						 CONTROLS.CHEBY_4B_ORDER = convert_int(CONTENTS(i+1,3),i+1);
 					else
 						CONTROLS.CHEBY_4B_ORDER = 0;
 
@@ -567,16 +636,16 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 					if(CONTROLS.CHEBY_4B_ORDER>0)
 						CONTROLS.USE_4B_CHEBY = true;
 					
-					if(CONTENTS[i+1].size()>4)
-						TMP_CHEBY_RANGE_LOW = stoi(CONTENTS[i+1][4]);
+					if(CONTENTS.size(i+1)>4)
+						TMP_CHEBY_RANGE_LOW = convert_int(CONTENTS(i+1,4),i+1);
 					else
 						TMP_CHEBY_RANGE_LOW = -1;
 
 					if(TMP_CHEBY_RANGE_LOW < -1.0 || TMP_CHEBY_RANGE_LOW > +1.0 )
 						EXIT_MSG("ERROR: TMP_CHEBY_RANGE_LOW must be betwee -1 and 1");	
 
-					if(CONTENTS[i+1].size()>5)
-						TMP_CHEBY_RANGE_HIGH = stoi(CONTENTS[i+1][5]);
+					if(CONTENTS.size(i+1)>5)
+						TMP_CHEBY_RANGE_HIGH = convert_int(CONTENTS(i+1,5),i+1);
 					else
 						TMP_CHEBY_RANGE_HIGH = 1;
 
@@ -610,14 +679,14 @@ void INPUT::PARSE_CONTROLS_CHBTYPE(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("CHBTYPE", CONTENTS[i]))			
+		if (found_input_keyword("CHBTYPE", CONTENTS(i)))			
 		{
 			if(FF_TYPE == "CHEBYSHEV" )
 			{
-				CONTROLS.CHEBY_TYPE = Cheby::get_trans_type(CONTENTS[i+1][0]);
+				CONTROLS.CHEBY_TYPE = Cheby::get_trans_type(CONTENTS(i+1,0));
 			
 				if ( RANK == 0 ) 
-					cout << "	# CHBTYPE #: " << CONTENTS[i+1][0] << endl;	
+					cout << "	# CHBTYPE #: " << CONTENTS(i+1,0) << endl;	
 			}
 			else if ( RANK == 0 ) 
 			{
@@ -640,9 +709,9 @@ void INPUT::PARSE_TOPOLOGY_EXCLUDE(CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if(CONTENTS[i].size() >= 4)
+		if(CONTENTS.size(i) >= 4)
 		{
-			SEARCH = CONTENTS[i][0] + ' ' + CONTENTS[i][1] + ' ' + CONTENTS[i][2];
+			SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2);
 			
 			if (SEARCH == "EXCLUDE 3B INTERACTION:")
 			{
@@ -657,9 +726,9 @@ void INPUT::PARSE_TOPOLOGY_EXCLUDE(CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if(CONTENTS[i].size() >= 4)
+		if(CONTENTS.size(i) >= 4)
 		{
-			SEARCH = CONTENTS[i][0] + ' ' + CONTENTS[i][1] + ' ' + CONTENTS[i][2];
+			SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2);
 			
 			if (SEARCH == "EXCLUDE 4B INTERACTION:")
 			{
@@ -675,9 +744,9 @@ void INPUT::PARSE_TOPOLOGY_NATMTYP(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("NATMTYP", CONTENTS[i]))
+		if (found_input_keyword("NATMTYP", CONTENTS(i)))
 		{
-			CONTROLS.NATMTYP = stoi(CONTENTS[i+1][0]);
+			CONTROLS.NATMTYP = convert_int(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# NATMTYP #: " << CONTROLS.NATMTYP << endl;	
@@ -722,7 +791,7 @@ void INPUT::PARSE_TOPOLOGY_TYPEIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("TYPEIDX", CONTENTS[i]))		
+		if (found_input_keyword("TYPEIDX", CONTENTS(i)))		
 		{
 	
 			if ( RANK == 0 ) 
@@ -746,28 +815,28 @@ void INPUT::PARSE_TOPOLOGY_TYPEIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				ATOM_PAIRS[j].PAIRIDX	 = j; 
 				ATOM_PAIRS[j].CHEBY_TYPE = CONTROLS.CHEBY_TYPE;
 				
-				TMP_ATOMTYPEIDX[j]           = stoi(CONTENTS[i+1+j][0]) - 1;
+				TMP_ATOMTYPEIDX[j]           = convert_int(CONTENTS(i+1+j,0),i+1+j) - 1;
 				ATOM_PAIRS[j].ATM1TYPE_IDX   = TMP_ATOMTYPEIDX[j];
 
 				if ( (TMP_ATOMTYPEIDX[j] < 0) || (TMP_ATOMTYPEIDX[j] >= CONTROLS.NATMTYP ))
-					EXIT_MSG("Bad atom index in TYPEIDX section: " + CONTENTS[i+1+j][0] );
+					EXIT_MSG("Bad atom index in TYPEIDX section: " + CONTENTS(i+1+j,0) );
 
-				ATOM_PAIRS[j].ATM1TYP = CONTENTS[i+1+j][1];
+				ATOM_PAIRS[j].ATM1TYP = CONTENTS(i+1+j,1);
 				TMP_ATOMTYPE[j]       = ATOM_PAIRS[j].ATM1TYP;
 				
 				if(!CONTROLS.FIT_COUL)
 				{
-					ATOM_PAIRS[j].ATM1CHG = stod(CONTENTS[i+1+j][2]);
+					ATOM_PAIRS[j].ATM1CHG = convert_double(CONTENTS(i+1+j,2),i+1+j);
 				}
 				else
 				{
-					ATOM_PAIRS[j].CHRGSGN = CONTENTS[i+1+j][2];
+					ATOM_PAIRS[j].CHRGSGN = CONTENTS(i+1+j,2);
 					ATOM_PAIRS[j].ATM1CHG = 0.0;
 				}
 
 				SUM_OF_CHARGES += abs(ATOM_PAIRS[j].ATM1CHG);
 
-				ATOM_PAIRS[j].ATM1MAS = stod(CONTENTS[i+1+j][3]);
+				ATOM_PAIRS[j].ATM1MAS = convert_double(CONTENTS(i+1+j,3),i+1+j);
 		
 				ATOM_PAIRS[j].ATM2TYP      = ATOM_PAIRS[j].ATM1TYP;
 				ATOM_PAIRS[j].ATM2TYPE_IDX = ATOM_PAIRS[j].ATM1TYPE_IDX;
@@ -880,12 +949,12 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 
 	for (int c=0; c<CONTENTS.size(); c++)
 	{
-		if (found_input_keyword("PAIRIDX", CONTENTS[c]))		
+		if (found_input_keyword("PAIRIDX", CONTENTS(c)))		
 		{
 			for(int i=0; i<NPAIR; i++)
 			{
-				TEMP_PAIR.ATM1TYP = CONTENTS[c+1+i][1];
-				TEMP_PAIR.ATM2TYP = CONTENTS[c+1+i][2];
+				TEMP_PAIR.ATM1TYP = CONTENTS(c+1+i,1);
+				TEMP_PAIR.ATM2TYP = CONTENTS(c+1+i,2);
 
 				TEMP_STR = TEMP_PAIR.ATM1TYP;
 				TEMP_STR.append(TEMP_PAIR.ATM2TYP);
@@ -894,10 +963,10 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				ATOM_PAIRS[TEMP_INT].PAIRIDX = TEMP_INT;
 				ATOM_PAIRS[TEMP_INT].CUBIC_SCALE = 1.0;	// Set the default value
 
-				ATOM_PAIRS[TEMP_INT].S_MINIM = stod(CONTENTS[c+1+i][3]);
-				ATOM_PAIRS[TEMP_INT].S_MAXIM = stod(CONTENTS[c+1+i][4]);
-				ATOM_PAIRS[TEMP_INT].S_DELTA = stod(CONTENTS[c+1+i][5]);
-				ATOM_PAIRS[TEMP_INT].LAMBDA  = stod(CONTENTS[c+1+i][6]);
+				ATOM_PAIRS[TEMP_INT].S_MINIM = convert_double(CONTENTS(c+1+i,3),c+1+i);
+				ATOM_PAIRS[TEMP_INT].S_MAXIM = convert_double(CONTENTS(c+1+i,4),c+1+i);
+				ATOM_PAIRS[TEMP_INT].S_DELTA = convert_double(CONTENTS(c+1+i,5),c+1+i);
+				ATOM_PAIRS[TEMP_INT].LAMBDA  = convert_double(CONTENTS(c+1+i,6),c+1+i);
 				
 				ATOM_PAIRS[TEMP_INT].MIN_FOUND_DIST = 	1.0e10;	// Set an initial minimum distance	
 				
@@ -914,23 +983,23 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				
 				// Read overbonding parameters and histogram parameters
 								
-				if(str2bool(CONTENTS[c+1+i][7]))
+				if(convert_bool(CONTENTS(c+1+i,7),c+1+i))
 				{
 					// Overbonding
 					
 					ATOM_PAIRS[TEMP_INT].USE_OVRPRMS = true;
-					ATOM_PAIRS[TEMP_INT].OVER_TO_ATM =      CONTENTS[c+1+i][8+0];
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[0]  = stod(CONTENTS[c+1+i][8+1]);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[1]  = stod(CONTENTS[c+1+i][8+2]);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[2]  = stod(CONTENTS[c+1+i][8+3]);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[3]  = stod(CONTENTS[c+1+i][8+4]);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[4]  = stod(CONTENTS[c+1+i][8+5]);
+					ATOM_PAIRS[TEMP_INT].OVER_TO_ATM =      CONTENTS(c+1+i,8+0);
+					ATOM_PAIRS[TEMP_INT].OVRPRMS[0]  = convert_double(CONTENTS(c+1+i,8+1),c+1+i);
+					ATOM_PAIRS[TEMP_INT].OVRPRMS[1]  = convert_double(CONTENTS(c+1+i,8+2),c+1+i);
+					ATOM_PAIRS[TEMP_INT].OVRPRMS[2]  = convert_double(CONTENTS(c+1+i,8+3),c+1+i);
+					ATOM_PAIRS[TEMP_INT].OVRPRMS[3]  = convert_double(CONTENTS(c+1+i,8+4),c+1+i);
+					ATOM_PAIRS[TEMP_INT].OVRPRMS[4]  = convert_double(CONTENTS(c+1+i,8+5),c+1+i);
 					
-					if(CONTENTS[c+1+i].size() == 17)	// Histograms
+					if(CONTENTS.size(c+1+i) == 17)	// Histograms
 					{
-						ATOM_PAIRS[TEMP_INT].NBINS[0] = stod(CONTENTS[c+1+i][14]);
-						ATOM_PAIRS[TEMP_INT].NBINS[1] = stod(CONTENTS[c+1+i][15]);
-						ATOM_PAIRS[TEMP_INT].NBINS[2] = stod(CONTENTS[c+1+i][16]);
+						ATOM_PAIRS[TEMP_INT].NBINS[0] = convert_double(CONTENTS(c+1+i,14),c+1+i);
+						ATOM_PAIRS[TEMP_INT].NBINS[1] = convert_double(CONTENTS(c+1+i,15),c+1+i);
+						ATOM_PAIRS[TEMP_INT].NBINS[2] = convert_double(CONTENTS(c+1+i,16),c+1+i);
 					}
 				}
 				else
@@ -941,11 +1010,11 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 					
 					// Histograms
 					
-					if(CONTENTS[c+1+i].size() == 11)
+					if(CONTENTS.size(c+1+i) == 11)
 					{
-						ATOM_PAIRS[TEMP_INT].NBINS[0] = stoi(CONTENTS[c+1+i][8]);
-						ATOM_PAIRS[TEMP_INT].NBINS[1] = stoi(CONTENTS[c+1+i][9]);
-						ATOM_PAIRS[TEMP_INT].NBINS[2] = stoi(CONTENTS[c+1+i][10]);
+						ATOM_PAIRS[TEMP_INT].NBINS[0] = convert_int(CONTENTS(c+1+i,8),c+i+1);
+						ATOM_PAIRS[TEMP_INT].NBINS[1] = convert_int(CONTENTS(c+1+i,9),c+i+1);
+						ATOM_PAIRS[TEMP_INT].NBINS[2] = convert_int(CONTENTS(c+1+i,10),c+i+1);
 					}					
 				}		
 			}
@@ -1047,13 +1116,13 @@ void INPUT::PARSE_TOPOLOGY_CUBSCLE(vector<PAIRS> & ATOM_PAIRS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if(CONTENTS[i].size() >= 4)
+		if(CONTENTS.size(i) >= 4)
 		{
-			SEARCH = CONTENTS[i][0] + ' ' + CONTENTS[i][1] + ' ' + CONTENTS[i][2] + ' ' + CONTENTS[i][3];
+			SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2) + ' ' + CONTENTS(i,3);
 			
 			if (SEARCH == "PAIR CHEBYSHEV CUBIC SCALING:")
 				for(int i=0; i<NPAIR; i++)
-					ATOM_PAIRS[i].CUBIC_SCALE = stod(CONTENTS[i][5]);
+					ATOM_PAIRS[i].CUBIC_SCALE = convert_double(CONTENTS(i,5),i);
 
 			if ( RANK == 0 ) 
 				cout << "Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl; // All types use same scaling
@@ -1072,9 +1141,9 @@ void INPUT::PARSE_TOPOLOGY_CHGCONS(vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINT
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if(CONTENTS[i].size() >= 2)
+		if(CONTENTS.size(i) >= 2)
 		{
-			SEARCH = CONTENTS[i][0] + ' ' + CONTENTS[i][1];
+			SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1);
 			
 			if (SEARCH == "CHARGE CONSTRAINTS:")
 			{
@@ -1089,17 +1158,17 @@ void INPUT::PARSE_TOPOLOGY_CHGCONS(vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINT
 				
 					for(int j=0; j<NPAIR; j++)
 					{
-						CHARGE_CONSTRAINTS[n].PAIRTYPE    .push_back(         CONTENTS[i+1+n][j]);
-						CHARGE_CONSTRAINTS[n].PAIRTYPE_IDX.push_back(PAIR_MAP[CONTENTS[i+1+n][j]]);
+						CHARGE_CONSTRAINTS[n].PAIRTYPE    .push_back(         CONTENTS(i+1+n,j));
+						CHARGE_CONSTRAINTS[n].PAIRTYPE_IDX.push_back(PAIR_MAP[CONTENTS(i+1+n,j)]);
 					}
 				
 					// Read the constraints 
 				
 					for(int j=0; j<NPAIR; j++)
-						CHARGE_CONSTRAINTS[n].CONSTRAINTS.push_back(stod(CONTENTS[i+1+n][NPAIR+j])); 
+						CHARGE_CONSTRAINTS[n].CONSTRAINTS.push_back(convert_double(CONTENTS(i+1+n,NPAIR+j),i+1+n)); 
 				
 					// Read the associated force
-					CHARGE_CONSTRAINTS[n].FORCE = stod(CONTENTS[i+1+n][CONTENTS[i+1+n].size()-1]);				
+					CHARGE_CONSTRAINTS[n].FORCE = convert_double(CONTENTS(i+1+n,CONTENTS.size(i+1+n)-1),i+1+n);				
 
 		
 					if ( RANK == 0 ) 
@@ -1131,9 +1200,9 @@ void INPUT::PARSE_TOPOLOGY_SPECMIN(CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if(CONTENTS[i].size() >= 4)
+		if(CONTENTS.size(i) >= 4)
 		{
-			SEARCH = CONTENTS[i][0] + ' ' + CONTENTS[i][1] + ' ' + CONTENTS[i][2];
+			SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2);
 			
 			if (SEARCH == "SPECIAL 3B S_MINIM:")
 			{
@@ -1147,9 +1216,9 @@ void INPUT::PARSE_TOPOLOGY_SPECMIN(CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if(CONTENTS[i].size() >= 4)
+		if(CONTENTS.size(i) >= 4)
 		{
-			SEARCH = CONTENTS[i][0] + ' ' + CONTENTS[i][1] + ' ' + CONTENTS[i][2];
+			SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2);
 			
 			if (SEARCH == "SPECIAL 4B S_MINIM:")
 			{
@@ -1169,9 +1238,9 @@ void INPUT::PARSE_TOPOLOGY_SPECMAX(CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if(CONTENTS[i].size() >= 4)
+		if(CONTENTS.size(i) >= 4)
 		{
-			SEARCH = CONTENTS[i][0] + ' ' + CONTENTS[i][1] + ' ' + CONTENTS[i][2];
+			SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2);
 			
 			if (SEARCH == "SPECIAL 3B S_MAXIM:")
 			{
@@ -1185,9 +1254,9 @@ void INPUT::PARSE_TOPOLOGY_SPECMAX(CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if(CONTENTS[i].size() >= 4)
+		if(CONTENTS.size(i) >= 4)
 		{
-			SEARCH = CONTENTS[i][0] + ' ' + CONTENTS[i][1] + ' ' + CONTENTS[i][2];
+			SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2);
 			
 			if (SEARCH == "SPECIAL 4B S_MAXIM:")
 			{
@@ -1203,9 +1272,9 @@ void INPUT::PARSE_TOPOLOGY_FCUTTYP(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("FCUTTYP", CONTENTS[i]))				
+		if (found_input_keyword("FCUTTYP", CONTENTS(i)))				
 		{
-			CONTROLS.FCUT_LINE = join_string_vec(CONTENTS[i+1],' ');
+			CONTROLS.FCUT_LINE = join_string_vec(CONTENTS(i+1),' ');
 			
 			parse_fcut_input(CONTROLS.FCUT_LINE, ATOM_PAIRS, TRIPS, QUADS) ;
 			
@@ -1320,38 +1389,38 @@ void INPUT::PARSE_CONTROLS_PLOTPES(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("PLOTPES", CONTENTS[i]))			
+		if (found_input_keyword("PLOTPES", CONTENTS(i)))			
 		{
-			CONTROLS.PLOT_PES = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.PLOT_PES = convert_bool(CONTENTS(i+1,0),i+1);
 			
 			if (CONTROLS.PLOT_PES)
 			{
 				if (RANK==0)
 					cout << "	# PLOTPES #: true... will only plot PES's" << endl;	
 			
-				FF_PLOTS.N_PLOTS    = stoi(CONTENTS[i+1][1]);
-				CONTROLS.PARAM_FILE =      CONTENTS[i+1][2] ;
+				FF_PLOTS.N_PLOTS    = convert_int(CONTENTS(i+1,1),i+1);
+				CONTROLS.PARAM_FILE =      CONTENTS(i+1,2) ;
 			
 				// Parse options
 			
-				for (int j=3; j<CONTENTS[i+1].size(); j++)
+				for (int j=3; j<CONTENTS.size(i+1); j++)
 				{
-					if(CONTENTS[i+1][j]=="Exclude"  || CONTENTS[i+1][j]=="exclude"  || CONTENTS[i+1][j]=="EXCLUDE")
+					if(CONTENTS(i+1,j)=="Exclude"  || CONTENTS(i+1,j)=="exclude"  || CONTENTS(i+1,j)=="EXCLUDE")
 					{
-						if(CONTENTS[i+1][j+1]=="Fcut"  || CONTENTS[i+1][j+1]=="fcut"  || CONTENTS[i+1][j+1]=="FCUT")
+						if(CONTENTS(i+1,j+1)=="Fcut"  || CONTENTS(i+1,j+1)=="fcut"  || CONTENTS(i+1,j+1)=="FCUT")
 						{
 							FF_PLOTS.INCLUDE_FCUT = false;
 							if (RANK==0)
 									cout << "		Excluding cubic scaling (fcut)" << endl;
 						}
 				
-						else if (CONTENTS[i+1][j]=="Charges"  || CONTENTS[i+1][j]=="charges"  || CONTENTS[i+1][j]=="CHARGES")
+						else if (CONTENTS(i+1,j)=="Charges"  || CONTENTS(i+1,j)=="charges"  || CONTENTS(i+1,j)=="CHARGES")
 						{
 							FF_PLOTS.INCLUDE_CHARGES = false;
 							if (RANK==0)
 									cout << "		Excluding charges" << endl;
 						}	
-						else if (CONTENTS[i+1][j]=="Penalty"  || CONTENTS[i+1][j]=="penalty"  || CONTENTS[i+1][j]=="PENALTY")
+						else if (CONTENTS(i+1,j)=="Penalty"  || CONTENTS(i+1,j)=="penalty"  || CONTENTS(i+1,j)=="PENALTY")
 						{
 							FF_PLOTS.INCLUDE_PENALTY = false;
 							if (RANK==0)
@@ -1359,9 +1428,9 @@ void INPUT::PARSE_CONTROLS_PLOTPES(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS)
 						}	
 					}		
 				
-					if(CONTENTS[i+1][j]=="No"  || CONTENTS[i+1][j]=="no"  || CONTENTS[i+1][j]=="NO")
+					if(CONTENTS(i+1,j) =="No"  || CONTENTS(i+1,j)=="no"  || CONTENTS(i+1,j)=="NO")
 					{
-						if(CONTENTS[i+1][j+1]=="4D"  || CONTENTS[i+1][j+1]=="4d")
+						if(CONTENTS(i+1,j+1)=="4D"  || CONTENTS(i+1,j+1)=="4d")
 						{
 							FF_PLOTS.DO_4D = false;
 							if (RANK==0)
@@ -1387,16 +1456,16 @@ void INPUT::PARSE_CONTROLS_PLOTPES(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS)
 					if (RANK==0)
 						cout << endl << "	Processing Individual plot requests " << endl;			
 				
-					if(CONTENTS[i+2+j][0]=="PAIRTYPE")
+					if(CONTENTS(i+2+j,0)=="PAIRTYPE")
 						FF_PLOTS.NBODY.push_back(2);
-					else if(CONTENTS[i+2+j][0]=="TRIPLETTYPE")
+					else if(CONTENTS(i+2+j,0)=="TRIPLETTYPE")
 						FF_PLOTS.NBODY.push_back(3);
 					else
-						EXIT_MSG("ERROR: Unrecognized interaction type. Allowed values are PAIRTYPE and TRIPLETTYPE: ", CONTENTS[i+2+j][0]);
+						EXIT_MSG("ERROR: Unrecognized interaction type. Allowed values are PAIRTYPE and TRIPLETTYPE: ", CONTENTS(i+2+j,0));
 
-					FF_PLOTS.TYPE_INDEX.push_back(stoi(CONTENTS[i+2+j][2]));
+					FF_PLOTS.TYPE_INDEX.push_back(convert_int(CONTENTS(i+2+j,2),i+2+j));
 				
-					FF_PLOTS.PES_TYPES.push_back(join_string_vec(CONTENTS[i+2+j],' '));
+					FF_PLOTS.PES_TYPES.push_back(join_string_vec(CONTENTS(i+2+j),' '));
 
 				}
 			}
@@ -1419,7 +1488,7 @@ void INPUT::PARSE_CONTROLS_SLFCNST()
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("SLFCNST", CONTENTS[i]))						
+		if (found_input_keyword("SLFCNST", CONTENTS(i)))						
 		{
 			if ( RANK == 0 ) 
 				cout << "NOTE: Feature \"SLFCNST\" is no longer supported. Ignoring." << endl;
@@ -1437,9 +1506,9 @@ void INPUT::PARSE_CONTROLS_RNDSEED(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("RNDSEED", CONTENTS[i]))								
+		if (found_input_keyword("RNDSEED", CONTENTS(i)))								
 		{
-			CONTROLS.SEED = stoi(CONTENTS[i+1][0]);
+			CONTROLS.SEED = convert_int(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# RNDSEED #: " << CONTROLS.SEED << endl;
@@ -1454,9 +1523,9 @@ void INPUT::PARSE_CONTROLS_TEMPERA(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("TEMPERA", CONTENTS[i]))										
+		if (found_input_keyword("TEMPERA", CONTENTS(i)))										
 		{
-			CONTROLS.TEMPERATURE = stod(CONTENTS[i+1][0]);
+			CONTROLS.TEMPERATURE = convert_double(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# TEMPERA #: " << CONTROLS.TEMPERATURE << " K" << endl;	
@@ -1471,9 +1540,9 @@ void INPUT::PARSE_CONTROLS_PRESSUR(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("PRESSUR", CONTENTS[i]))										
+		if (found_input_keyword("PRESSUR", CONTENTS(i)))										
 		{
-			CONTROLS.PRESSURE = stod(CONTENTS[i+1][0]);
+			CONTROLS.PRESSURE = convert_double(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# PRESSUR #: " << CONTROLS.PRESSURE << " GPa" << endl;	
@@ -1488,9 +1557,9 @@ void INPUT::PARSE_CONTROLS_CONVCUT(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("CONVCUT", CONTENTS[i]))										
+		if (found_input_keyword("CONVCUT", CONTENTS(i)))										
 		{
-			CONTROLS.NVT_CONV_CUT = stod(CONTENTS[i+1][0]);
+			CONTROLS.NVT_CONV_CUT = convert_double(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# CONVCUT #: " << CONTROLS.NVT_CONV_CUT*100 << " % of set T" << endl;	
@@ -1505,14 +1574,14 @@ void INPUT::PARSE_CONTROLS_CMPRFRC(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("CMPRFRC", CONTENTS[i]))										
+		if (found_input_keyword("CMPRFRC", CONTENTS(i)))										
 		{
-			CONTROLS.COMPARE_FORCE = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.COMPARE_FORCE = convert_bool(CONTENTS(i+1,0),i+1);
 			
 			// // Read in the name of the file
 			
-			if((CONTROLS.COMPARE_FORCE) && (CONTENTS[i+1].size() == 2))
-				CONTROLS.COMPARE_FILE = CONTENTS[i+1][1];
+			if((CONTROLS.COMPARE_FORCE) && (CONTENTS.size(i+1) == 2))
+				CONTROLS.COMPARE_FILE = CONTENTS(i+1,1);
 			else if(CONTROLS.COMPARE_FORCE)
 				EXIT_MSG("ERROR: If # CMPRFRC # is true, a force file must be specified on the same line.");
 
@@ -1538,9 +1607,9 @@ void INPUT::PARSE_CONTROLS_CHCKFRC(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("CHECKFRC", CONTENTS[i]))		
+		if (found_input_keyword("CHECKFRC", CONTENTS(i)))
 		{
-			CONTROLS.CHECK_FORCE =  str2bool(CONTENTS[i+1][0]);
+			CONTROLS.CHECK_FORCE =  convert_bool(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				 cout << "\t# CHECKFRC #: " << bool2str(CONTROLS.CHECK_FORCE) << endl;
@@ -1554,27 +1623,27 @@ void INPUT::PARSE_CONTROLS_SUBTFRC(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("SUBTFRC", CONTENTS[i]))		
+		if (found_input_keyword("SUBTFRC", CONTENTS(i)))		
 		{
-			CONTROLS.SUBTRACT_FORCE = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.SUBTRACT_FORCE = convert_bool(CONTENTS(i+1,0),i+1);
 			
 			// Read in the name of the file
 			
-			if(CONTENTS[i+1].size() == 2)
-				CONTROLS.COMPARE_FILE = CONTENTS[i+1][1];
+			if(CONTENTS.size(i+1) == 2)
+				CONTROLS.COMPARE_FILE = CONTENTS(i+1,1);
 			else
 				EXIT_MSG("ERROR: If # SUBTFRC # is true, a subtranction file must be specified on the same line.");
 
 			// Determine if we are subtracting off forces and/or energies
 			
-			for(int j=2; j<CONTENTS[i+1].size(); j++)
+			for(int j=2; j<CONTENTS.size(i+1); j++)
 			{
-				if (CONTENTS[i+1][j] == "SUBTR_ENERGY")
+				if (CONTENTS(i+1,j) == "SUBTR_ENERGY")
 					CONTROLS.FIT_ENER = true;
-				else if(CONTENTS[i+1][j] == "SUBTR_STRESS")
+				else if(CONTENTS(i+1,j) == "SUBTR_STRESS")
 					CONTROLS.FIT_STRESS = true;
 				else
-					EXIT_MSG("ERROR: Unrecognized SUBTFRC option... Allowed values are SUBTR_ENERGY and SUBTR_STRESS: ", CONTENTS[i+1][2]);
+					EXIT_MSG("ERROR: Unrecognized SUBTFRC option... Allowed values are SUBTR_ENERGY and SUBTR_STRESS: ", CONTENTS(i+1,2));
 			}
 			
 			
@@ -1605,9 +1674,9 @@ void INPUT::PARSE_CONTROLS_TIMESTP(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("TIMESTP", CONTENTS[i]))		
+		if (found_input_keyword("TIMESTP", CONTENTS(i)))		
 		{
-			CONTROLS.DELTA_T_FS = stod(CONTENTS[i+1][0]);
+			CONTROLS.DELTA_T_FS = convert_double(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# TIMESTP #: " << CONTROLS.DELTA_T_FS << " fs" << endl;	
@@ -1624,9 +1693,9 @@ void INPUT::PARSE_CONTROLS_N_MDSTP(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("N_MDSTP", CONTENTS[i]))		
+		if (found_input_keyword("N_MDSTP", CONTENTS(i)))		
 		{
-			CONTROLS.N_MD_STEPS = stoi(CONTENTS[i+1][0]);
+			CONTROLS.N_MD_STEPS = convert_int(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# N_MDSTP #: " << CONTROLS.N_MD_STEPS << endl;	
@@ -1641,9 +1710,9 @@ void INPUT::PARSE_CONTROLS_PENTHRS(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("PENTHRS", CONTENTS[i]))		
+		if (found_input_keyword("PENTHRS", CONTENTS(i)))		
 		{
-			CONTROLS.PENALTY_THRESH = stod(CONTENTS[i+1][0]);
+			CONTROLS.PENALTY_THRESH = convert_double(CONTENTS(i+1,0),i+1);
 			
 			if ( RANK == 0 ) 
 				cout << "	# PENTHRS #: " << CONTROLS.PENALTY_THRESH << endl;	
@@ -1658,19 +1727,19 @@ void INPUT::PARSE_CONTROLS_NLAYERS(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("NLAYERS", CONTENTS[i]))		
+		if (found_input_keyword("NLAYERS", CONTENTS(i)))		
 		{
-			CONTROLS.N_LAYERS = stoi(CONTENTS[i+1][0]);
+			CONTROLS.N_LAYERS = convert_int(CONTENTS(i+1,0),i+1);
 			
 			if (RANK==0)
 				cout << "	# NLAYERS #: " << CONTROLS.N_LAYERS << endl;	
 			
-			if (CONTENTS[i+1].size() == 3)
+			if (CONTENTS.size(i+1) == 3)
 			{
-				if(CONTENTS[i+1][1] == "REPLICATE")
-					CONTROLS.REAL_REPLICATES = stoi(CONTENTS[i+1][2]);
+				if(CONTENTS(i+1,1) == "REPLICATE")
+					CONTROLS.REAL_REPLICATES = convert_int(CONTENTS(i+1,2),i+1);
 				else
-					EXIT_MSG("ERROR: Unrecognized NLAYERS command: ",CONTENTS[i+1][1]);
+					EXIT_MSG("ERROR: Unrecognized NLAYERS command: ",CONTENTS(i+1,1));
 				
 				if (RANK==0)
 					cout << "	             ... Creating " << CONTROLS.REAL_REPLICATES << " real replicates before ghost atom layering." << endl;	
@@ -1686,9 +1755,9 @@ void INPUT::PARSE_CONTROLS_USENEIG(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("USENEIG", CONTENTS[i]))		
+		if (found_input_keyword("USENEIG", CONTENTS(i))	 )
 		{
-			NEIGHBOR_LIST.USE = str2bool(CONTENTS[i+1][0]);
+			NEIGHBOR_LIST.USE = convert_bool(CONTENTS(i+1,0),i+1);
 		
 			if (RANK==0)
 				cout << "	# USENEIG #: " << bool2str(NEIGHBOR_LIST.USE) << endl;
@@ -1703,9 +1772,9 @@ void INPUT::PARSE_CONTROLS_PRMFILE(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("PRMFILE", CONTENTS[i]))		
+		if (found_input_keyword("PRMFILE", CONTENTS(i)))		
 		{
-			CONTROLS.PARAM_FILE = CONTENTS[i+1][0];
+			CONTROLS.PARAM_FILE = CONTENTS(i+1,0);
 		
 			if (RANK==0)
 				cout << "	# PRMFILE #: " << CONTROLS.PARAM_FILE << endl;	
@@ -1720,18 +1789,18 @@ void INPUT::PARSE_CONTROLS_CRDFILE(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("CRDFILE", CONTENTS[i]))		
+		if (found_input_keyword("CRDFILE", CONTENTS(i)))		
 		{
-			if(CONTENTS[i+1][0] == "CAT") // Then we'll be catenating several files together
+			if(CONTENTS(i+1,0) == "CAT") // Then we'll be catenating several files together
 			{
 				cout << "	# CRDFILE #: Creating a cell from multiple input files: ";
-				int NO_FILES = stoi(CONTENTS[i+1][2]);
+				int NO_FILES = convert_int(CONTENTS(i+1,2),i+1);
 				
 				cout << NO_FILES  << endl;
 				
 				for(int j=0; j<NO_FILES; j++)
 				{
-					CONTROLS.COORD_FILE.push_back(CONTENTS[i+1][3+j]);
+					CONTROLS.COORD_FILE.push_back(CONTENTS(i+1,3+j));
 					
 					if(RANK == 0)
 						cout << "		" << CONTROLS.COORD_FILE[3+j] << endl;
@@ -1740,41 +1809,41 @@ void INPUT::PARSE_CONTROLS_CRDFILE(JOB_CONTROL & CONTROLS)
 				if(RANK == 0)
 					cout << "	Note: Assumes files have the same x and y box dimensions!" << endl;			
 			}
-			if(CONTENTS[i+1][0] == "SCALE") // Then coordinates/boxlengths will be scaled
+			if(CONTENTS(i+1,0) == "SCALE") // Then coordinates/boxlengths will be scaled
 			{
-				CONTROLS.SCALE_SYSTEM_BY = stod(CONTENTS[i+1][1]);
+				CONTROLS.SCALE_SYSTEM_BY = convert_double(CONTENTS(i+1,1),i+1);
 
-				CONTROLS.COORD_FILE.push_back(CONTENTS[i+1][2]);
+				CONTROLS.COORD_FILE.push_back(CONTENTS(i+1,2));
 				
 				if (RANK==0)
 					cout << "	# CRDFILE #: " << CONTROLS.COORD_FILE[0] << endl;
 			}
-			if(CONTENTS[i+1][0] == "INITIALIZE")
+			if(CONTENTS(i+1,0) == "INITIALIZE")
 			{
 				CONTROLS.BUILD = true;
 				
-				CONTROLS.BUILD_TYPE = CONTENTS[i+1][1];
+				CONTROLS.BUILD_TYPE = CONTENTS(i+1,1);
 				
 				if (CONTROLS.BUILD_TYPE == "MOLECULAR")
-					CONTROLS.BUILD_FILE = CONTENTS[i+1][2];
+					CONTROLS.BUILD_FILE = CONTENTS(i+1,2);
 					
 				else if (CONTROLS.BUILD_TYPE == "ATOMIC")
-					CONTROLS.BUILD_ATOM = CONTENTS[i+1][2];
+					CONTROLS.BUILD_ATOM = CONTENTS(i+1,2);
 
-				if(CONTENTS[i+1][3] != "BOXL")
+				if(CONTENTS(i+1,3) != "BOXL")
 					EXIT_MSG("ERROR: Expected \'BOXL <value> NMOLEC <value>.");
 					
-				CONTROLS.BUILD_BOXL = stod(CONTENTS[i+1][4]);
+				CONTROLS.BUILD_BOXL = convert_double(CONTENTS(i+1,4),i+1);
 
-				if(CONTENTS[i+1][5] != "NMOLEC")
+				if(CONTENTS(i+1,5) != "NMOLEC")
 					EXIT_MSG("ERROR: Expected \'BOXL <value> NMOLEC <value>.");
 
-				CONTROLS.BUILD_NMOLEC = stoi(CONTENTS[i+1][6]);	
+				CONTROLS.BUILD_NMOLEC = convert_int(CONTENTS(i+1,6),i+1);	
 				
 			}
 			else
 			{
-				CONTROLS.COORD_FILE.push_back(CONTENTS[i+1][0]);
+				CONTROLS.COORD_FILE.push_back(CONTENTS(i+1,0));
 				
 				if (RANK==0)
 					cout << "	# CRDFILE #: " << CONTROLS.COORD_FILE[0] << endl;	
@@ -1793,16 +1862,16 @@ void INPUT::PARSE_CONTROLS_VELINIT(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("VELINIT", CONTENTS[i]))		
+		if (found_input_keyword("VELINIT", CONTENTS(i)))		
 		{
 			
-			if (CONTENTS[i+1][0]=="READ")
+			if (CONTENTS(i+1,0)=="READ")
 				CONTROLS.INIT_VEL = false;
 			
-			else if (CONTENTS[i+1][0]=="GEN")
+			else if (CONTENTS(i+1,0)=="GEN")
 				CONTROLS.INIT_VEL = true;
 			
-			else if ( CONTENTS[i+1][0] == "RESTART" ) 
+			else if ( CONTENTS(i+1,0) == "RESTART" ) 
 				CONTROLS.RESTART = true ;
 			
 			else
@@ -1834,9 +1903,9 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("CONSRNT", CONTENTS[i]))		
+		if (found_input_keyword("CONSRNT", CONTENTS(i)))		
 		{
-			CONTROLS.ENSEMBLE = CONTENTS[i+1][0];
+			CONTROLS.ENSEMBLE = CONTENTS(i+1,0);
 			
 			// Note: don't need to do ensemble checking here - CONSTRAINT initialization takes care of that. 
 
@@ -1850,17 +1919,17 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 			if(CONTROLS.ENSEMBLE == "LMP-NVE" || CONTROLS.ENSEMBLE == "LMP-NVT" || CONTROLS.ENSEMBLE == "LMP-NPT")
 			{
 				if(CONTROLS.ENSEMBLE == "LMP-NVT" || CONTROLS.ENSEMBLE == "LMP-NPT")
-					CONTROLS.FREQ_UPDATE_THERMOSTAT = stod(CONTENTS[i+1][1]);
+					CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,1),i+1);
 
 				if(CONTROLS.ENSEMBLE == "LMP-NPT")
-					CONTROLS.FREQ_UPDATE_BAROSTAT = stoi(CONTENTS[i+1][1]);
+					CONTROLS.FREQ_UPDATE_BAROSTAT = convert_int(CONTENTS(i+1,1),i+1);
 			}
 			else if(CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI" || CONTROLS.ENSEMBLE == "LMP-MIN")
 			{
-				CONTROLS.MIN_E_CONVG_CRIT = stod(CONTENTS[i+1][1]);
-				CONTROLS.MIN_F_CONVG_CRIT = stod(CONTENTS[i+1][2]);
-				CONTROLS.MIN_MAX_ITER     = stoi(CONTENTS[i+1][3]);
-				CONTROLS.MIN_MAX_EVAL     = stoi(CONTENTS[i+1][4]);
+				CONTROLS.MIN_E_CONVG_CRIT = convert_double(CONTENTS(i+1,1),i+1);
+				CONTROLS.MIN_F_CONVG_CRIT = convert_double(CONTENTS(i+1,2),i+1);
+				CONTROLS.MIN_MAX_ITER     = convert_int(CONTENTS(i+1,3),i+1);
+				CONTROLS.MIN_MAX_EVAL     = convert_int(CONTENTS(i+1,4),i+1);
 			}
 			else
 			{
@@ -1869,15 +1938,15 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 					if (CONTROLS.ENSEMBLE == "NVT-MTK" || CONTROLS.ENSEMBLE == "NPT-MTK")
 					{
 						CONTROLS.USE_HOOVER_THRMOSTAT   = true;
-						CONTROLS.FREQ_UPDATE_THERMOSTAT = stod(CONTENTS[i+1][2]);
+						CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,2),i+1);
 						
 						if (RANK==0)
 							cout << "	# CONSRNT #: HOOVER... a Hoover time of " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " will be used." << endl;
 
 						if(CONTROLS.ENSEMBLE == "NPT-MTK")
 						{
-							if(CONTENTS[i+1].size() == 2)
-								CONTROLS.FREQ_UPDATE_BAROSTAT = stod(CONTENTS[i+1][1]);
+							if(CONTENTS.size(i+1) == 2)
+								CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,1),i+1);
 							else
 								CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;	
 								
@@ -1888,12 +1957,12 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 					else if (CONTROLS.ENSEMBLE == "NVT-SCALE" || CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NVT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
 					{
 						CONTROLS.USE_HOOVER_THRMOSTAT   = false;
-						CONTROLS.FREQ_UPDATE_THERMOSTAT = stod(CONTENTS[i+1][1]);
+						CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,1),i+1);
 
 						if (CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
 						{
-							if(CONTENTS[i+1].size() == 3)
-								CONTROLS.FREQ_UPDATE_BAROSTAT = stod(CONTENTS[i+1][2]);
+							if(CONTENTS.size(i+1) == 3)
+								CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,2),i+1);
 							else
 								CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
 						}
@@ -1903,17 +1972,17 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 					}
 					else
 					{
-						cout << "ERROR: Unrecognized # CONSRNT # command: " << join_string_vec(CONTENTS[i+1],' ') << endl;
+						cout << "ERROR: Unrecognized # CONSRNT # command: " << join_string_vec(CONTENTS(i+1),' ') << endl;
 						exit_run(1);	
 					}	
 				}
 				
-				for (int j=0; j<CONTENTS[i+1].size(); j++)
+				for (int j=0; j<CONTENTS.size(i+1); j++)
 				{
-					if (CONTENTS[i+1][j] == "FREEZE")
+					if (CONTENTS(i+1,j) == "FREEZE")
 					{
-						CONTROLS.FREEZE_IDX_START = stoi(CONTENTS[i+1][j+1]);
-						CONTROLS.FREEZE_IDX_STOP  = stoi(CONTENTS[i+1][j+2]);
+						CONTROLS.FREEZE_IDX_START = convert_int(CONTENTS(i+1,j+1),i+1);
+						CONTROLS.FREEZE_IDX_STOP  = convert_int(CONTENTS(i+1,j+2),i+1);
 						
 						if(RANK == 0)
 						{
@@ -1937,16 +2006,16 @@ void INPUT::PARSE_CONTROLS_PRSCALC(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("PRSCALC", CONTENTS[i]))		
+		if (found_input_keyword("PRSCALC", CONTENTS(i)))		
 		{
-			if(CONTENTS[i+1][0] == "ANALYTICAL")
+			if(CONTENTS(i+1,0) == "ANALYTICAL")
 			{
 				CONTROLS.USE_NUMERICAL_PRESS = false;
 				
 				if (RANK==0)
 					cout << "	# PRSCALC #: ANALYTICAL" << endl;
 			}
-			else if(CONTENTS[i+1][0] == "NUMERICAL")
+			else if(CONTENTS(i+1,0) == "NUMERICAL")
 			{
 				CONTROLS.USE_NUMERICAL_PRESS = true;
 				
@@ -1968,9 +2037,9 @@ void INPUT::PARSE_CONTROLS_WRPCRDS(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("WRPCRDS", CONTENTS[i]))		
+		if (found_input_keyword("WRPCRDS", CONTENTS(i)))		
 		{
-			CONTROLS.WRAP_COORDS = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.WRAP_COORDS = convert_bool(CONTENTS(i+1,0),i+1);
 		
 			if (RANK==0)
 				cout << "	# WRPCRDS #: " << bool2str(CONTROLS.WRAP_COORDS) << endl;
@@ -1988,9 +2057,9 @@ void INPUT::PARSE_CONTROLS_FRQDFTB(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("FRQDFTB", CONTENTS[i]) || found_input_keyword("FRQTRAJ", CONTENTS[i]))
+		if (found_input_keyword("FRQDFTB", CONTENTS(i)) || found_input_keyword("FRQTRAJ", CONTENTS(i)))
 		{
-			CONTROLS.FREQ_DFTB_GEN = stoi(CONTENTS[i+1][0]);
+			CONTROLS.FREQ_DFTB_GEN = convert_int(CONTENTS(i+1,0),i+1);
 		
 			if (RANK==0)
 				cout << "	# FRQTRAJ #: " << CONTROLS.FREQ_DFTB_GEN << endl;
@@ -2011,9 +2080,9 @@ void INPUT::PARSE_CONTROLS_TRAJEXT(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("TRAJEXT", CONTENTS[i]))		
+		if (found_input_keyword("TRAJEXT", CONTENTS(i)))		
 		{
-			CONTROLS.TRAJ_FORMAT = CONTENTS[i+1][0];
+			CONTROLS.TRAJ_FORMAT = CONTENTS(i+1,0);
 		
 			if (RANK==0)
 				cout << "	# TRAJEXT #: " << CONTROLS.TRAJ_FORMAT << endl;	
@@ -2028,9 +2097,9 @@ void INPUT::PARSE_CONTROLS_FRQENER(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("FRQENER", CONTENTS[i]))		
+		if (found_input_keyword("FRQENER", CONTENTS(i)))		
 		{
-			CONTROLS.FREQ_ENER = stoi(CONTENTS[i+1][0]);
+			CONTROLS.FREQ_ENER = convert_int(CONTENTS(i+1,0),i+1);
 		
 			if (RANK==0)
 				cout << "	# FRQENER #: " << CONTROLS.FREQ_ENER << endl;
@@ -2045,16 +2114,16 @@ void INPUT::PARSE_CONTROLS_PRNTFRC(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("PRNTFRC", CONTENTS[i]))		
+		if (found_input_keyword("PRNTFRC", CONTENTS(i)))		
 		{
-			CONTROLS.PRINT_FORCE = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.PRINT_FORCE = convert_bool(CONTENTS(i+1,0),i+1);
 			
-			if(CONTENTS[i+1].size() == 2 )
+			if(CONTENTS.size(i+1) == 2 )
 			{
-				if(CONTENTS[i+1][1] == "FRQDFTB")
+				if(CONTENTS(i+1,1) == "FRQDFTB")
 					CONTROLS.FREQ_FORCE = CONTROLS.FREQ_DFTB_GEN;
 				else
-					CONTROLS.FREQ_FORCE = stoi(CONTENTS[i+1][1]);
+					CONTROLS.FREQ_FORCE = convert_int(CONTENTS(i+1,1),i+1);
 			}
 		
 			if (RANK==0)
@@ -2083,9 +2152,9 @@ void INPUT::PARSE_CONTROLS_PRNTBAD(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("PRNTBAD", CONTENTS[i]))		
+		if (found_input_keyword("PRNTBAD", CONTENTS(i)))		
 		{
-			CONTROLS.PRINT_BAD_CFGS = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.PRINT_BAD_CFGS = convert_bool(CONTENTS(i+1,0),i+1);
 		
 			if (RANK==0)
 				cout << "	# PRNTBAD #: " << bool2str(CONTROLS.PRINT_BAD_CFGS) << endl;
@@ -2100,16 +2169,16 @@ void INPUT::PARSE_CONTROLS_PRNTVEL(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("PRNTVEL", CONTENTS[i]))		
+		if (found_input_keyword("PRNTVEL", CONTENTS(i)))		
 		{
-			CONTROLS.PRINT_VELOC = str2bool(CONTENTS[i+1][0]);
+			CONTROLS.PRINT_VELOC = convert_bool(CONTENTS(i+1,0),i+1);
 			
-			if(CONTENTS[i+1].size() == 2 )
+			if(CONTENTS.size(i+1) == 2 )
 			{
-				if(CONTENTS[i+1][1] == "FRQDFTB")
+				if(CONTENTS(i+1,1) == "FRQDFTB")
 					CONTROLS.FREQ_VELOC = CONTROLS.FREQ_DFTB_GEN;
 				else
-					CONTROLS.FREQ_VELOC = stoi(CONTENTS[i+1][1]);
+					CONTROLS.FREQ_VELOC = convert_int(CONTENTS(i+1,1),i+1);
 			}
 			
 			if (RANK==0)
@@ -2156,9 +2225,82 @@ void INPUT::RUN_SANITY_MD(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 	return;
 }
 
-		
-		
-		
+double INPUT::convert_double(const string &str, int idx)
+// Convert a string to a double with user-friendly error checking.
+// Use as a replacement for stod.
+// idx specifies the first index of the CONTENTS array
+{
+	int pos = str.find_first_not_of(" \t\n") ;
+	if ( isalpha(str[pos]) ) {
+		if ( RANK == 0 )
+			cout << "String found where floating point expected: " + str << endl ;
+		convert_error(idx) ;
+	} else if ( str[pos] == '+' || str[pos] == '-' || str[pos] == '.' || isdigit(str[pos]) ) {
+		return stod(str) ;
+	}
+	if ( RANK == 0 ) {
+		cout << "String found where floating point number expected: " + str << endl ;
+		convert_error(idx) ;
+	}
+
+	// Not reached.
+	return 0.0 ;
+}
+
+
+int INPUT::convert_int(const string &str, int idx)
+// Convert a string to an integer with user-friendly error checking.
+// Use as a replacement for stoi.
+// idx specifies the first index of the CONTENTS array
+{
+	int pos = str.find_first_not_of(" \t\n") ;
+	if ( isalpha(str[pos]) ) {
+		if ( RANK == 0 )
+			cout << "String found where integer expected: " + str << endl ;
+		convert_error(idx) ;
+	} else if ( str[pos] == '+' || str[pos] == '-' || isdigit(str[pos]) ) {
+		return stoi(str) ;
+	}
+	if ( RANK == 0 ) 
+		cout << "String found where integer expected: " + str << endl ;
+	convert_error(idx) ;
+
+	// Not reached.
+	return 0 ;
+}
+
+
+bool INPUT::convert_bool(const string &str, int idx)
+// Convert a string to a boolean with user-friendly error checking.
+// Use as a replacement for str2bool
+// idx specifies the first index of the CONTENTS array
+{
+	int pos = str.find_first_not_of(" \t\n") ;
+	if ( str[pos] == 't' || str[pos] == 'T' || str[pos] == 'F' || str[pos] == 'f' ) {
+		return str2bool(str) ;
+	}
+	if ( RANK == 0 ) 
+		cout << "String found where true/false expected: " + str << endl ;
+	convert_error(idx) ;
+
+	// Not reached.
+	return false ;
+}
+
+void INPUT::convert_error(int idx)
+// Call when an error occurs in converting input to a data type.
+{
+		if ( RANK == 0 )
+		{
+			cout << "Working on input: " ;
+			for ( int j = 0 ; j < CONTENTS.size(idx) ; j++ ) {
+				cout << CONTENTS(idx,j) << " " ;
+			}
+			cout << endl ;
+		}
+		exit_run(1) ;
+}
+
 		
 		
 		

@@ -122,7 +122,10 @@ int main(int argc, char* argv[])
 	// Job parameters: Declare and set defaults
 	//
 	//////////////////////////////////////////////////
-	
+
+	if ( argc != 2 )
+		EXIT_MSG("Usage: chimes_lsq input_file > <output_file") ;
+			
 	string INFILE   = argv[1];
 	
 	vector<PAIRS> 	ATOM_PAIRS;			// Will store relevant info regarding atom interaction pair types.. 

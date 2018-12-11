@@ -19,6 +19,7 @@ using namespace std;
 #include "functions.h"
 #include "util.h"
 #include "Cheby.h"
+#include "input.h"
 
 // define for extra output
 //#define DEBUG_CLUSTER
@@ -955,7 +956,7 @@ void CLUSTER_LIST::process_cutoff_params(string input_type,vector<PAIRS> & ATOM_
 
 // Overloaded for different handling in lsq and MD codes
 
-void CLUSTER_LIST::read_cutoff_params(vector<vector<string> > & CONTENTS, int lineno, string input_type)
+void CLUSTER_LIST::read_cutoff_params(InputListing & CONTENTS, int lineno, string input_type)
 // Read the lsq cutoff parameters (S_MAXIM, S_MINIM) and store for later processing by process_cutoff_params.
 {
 	vector<string> *line_ptr ;
@@ -967,21 +968,21 @@ void CLUSTER_LIST::read_cutoff_params(vector<vector<string> > & CONTENTS, int li
 		line_ptr = &S_MINIM_INPUT ;
 		
   else
-	 EXIT_MSG("UNKNOWN INPUT type: " + input_type + " " + join_string_vec(CONTENTS[lineno],' '));
+		EXIT_MSG("UNKNOWN INPUT type: " + input_type + " " + join_string_vec(CONTENTS(lineno),' '));
 
-  line_ptr->push_back(join_string_vec(CONTENTS[lineno],' '));
+  line_ptr->push_back(join_string_vec(CONTENTS(lineno),' '));
 
-  if (CONTENTS[lineno].size() < 5 ) 
-	 EXIT_MSG("Not enough tokens: " + join_string_vec(CONTENTS[lineno],' '));
+  if (CONTENTS.size(lineno) < 5 ) 
+		EXIT_MSG("Not enough tokens: " + join_string_vec(CONTENTS(lineno),' '));
 
-  string TEMP_STR = CONTENTS[lineno][3];
+  string TEMP_STR = CONTENTS(lineno,3) ;
 			
   if ( TEMP_STR == "SPECIFIC" )
   {
-	 int n_special_cutoffs = stoi(CONTENTS[lineno][4]);
+		int n_special_cutoffs = stoi(CONTENTS(lineno,4));
 				
 	 for(int i=1; i<=n_special_cutoffs; i++)
-		line_ptr->push_back(join_string_vec(CONTENTS[lineno+i],' ')) ;
+		 line_ptr->push_back(join_string_vec(CONTENTS(lineno+i),' ')) ;
   }
 }
 void CLUSTER_LIST::read_cutoff_params(istream &input, string LINE, string input_type)
@@ -1444,22 +1445,22 @@ bool CLUSTER_LIST::is_excluded(vector<string> atom_names)
 }
 
 
-void CLUSTER_LIST::read_exclude(vector<vector<string> > & CONTENTS, int lineno)
+void CLUSTER_LIST::read_exclude(InputListing & CONTENTS, int lineno)
 // Read the excluded interactions from the input stream.
 {
-  if ( CONTENTS[lineno].size() < 4 ) 
-	 EXIT_MSG("Wrong number of parameters in EXCLUDE command: " + join_string_vec(CONTENTS[lineno],' '));
+  if ( CONTENTS.size(lineno) < 4 ) 
+		EXIT_MSG("Wrong number of parameters in EXCLUDE command: " + join_string_vec(CONTENTS(lineno),' '));
 
-  int nexclude = stoi(CONTENTS[lineno][3]);
+  int nexclude = stoi(CONTENTS(lineno,3));
 
   for(int i=1; i<=nexclude; i++)
   {
 
-	 if ( CONTENTS[lineno+i].size() != VEC[0].NATOMS )
-		EXIT_MSG("Wrong number of atoms in exclude command: " + join_string_vec(CONTENTS[lineno+i],' '));
+		if ( CONTENTS.size(lineno+i) != VEC[0].NATOMS )
+			EXIT_MSG("Wrong number of atoms in exclude command: " + join_string_vec(CONTENTS(lineno+i),' '));
 
-	 sort( CONTENTS[lineno+i].begin(),  CONTENTS[lineno+i].end() );
-	 EXCLUDE.push_back( CONTENTS[lineno+i]);
+	 sort( CONTENTS(lineno+i).begin(),  CONTENTS(lineno+i).end() );
+	 EXCLUDE.push_back( CONTENTS(lineno+i));
   }
 			
 }

@@ -9,6 +9,26 @@ using namespace std;
 #include "util.h"
 
 
+class InputListing {
+	// Provides safe access to input lines and tokens.
+	vector< vector< string> > list ;	// Entire contents of the infile - [lines]["words" ("tokens")]
+public:
+	// Access a particular token in the InputListing.
+	string operator()(int i, int j) ;
+
+	// Access a vector of tokens for a particular line.
+	vector<string> &operator()(int i) ;
+
+	// Add a vector of tokens to the InputListing.
+	void push_back(vector<string> &item) ;
+
+  // Return the number of lines.
+	int size() ;
+
+  // Return the number of tokens for a particular line.	
+	int size(int i) ;
+} ;
+
 class INPUT
 {
 	// Reads and stores the ENTIRE input file (fm_setup.in or run_md.in)
@@ -46,7 +66,8 @@ class INPUT
 		string		MODE;			// Are we parsing fm_setup.in or run_md.in (MODE == "LSQ" or MODE == "MD")
 		string 		FILENAME;		// fm_setup.in or run_md.in
 		ifstream 	INFILE;
-		vector< vector< string> > CONTENTS;	// Entire contents of the infile - [lines]["words" ("tokens")]
+
+		InputListing CONTENTS ;
 	
 		// LSQ parsing helpers
 	
@@ -148,6 +169,19 @@ class INPUT
 		// Run MD sanity checks
 	
 		void RUN_SANITY_MD(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
+
+		// Convert a string to a double with error checking.
+		double convert_double(const string &str, int idx) ;
+
+		// Convert a string to an int with error checking.
+		int convert_int(const string &str, int idx) ;
+
+		// Convert a string to a boolean with error checking.
+		bool convert_bool(const string &str, int idx) ;
+			
+		// Call when an error occurs in converting input to a data type.
+		void convert_error(int idx) ;
+
 };
 
 #endif

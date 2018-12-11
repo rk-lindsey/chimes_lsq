@@ -1,7 +1,6 @@
 
 #ifndef _Cluster_h  // Protects against double-inclusion.
 
-
 class PAIRS	// NEEDS UPDATING
 {
 	public:
@@ -271,7 +270,7 @@ public:
   string allocate(int nclusters, int natoms, const vector<PAIRS> &FF_2BODY);
 
   // Read the excluded interactions from the input stream.
-  void read_exclude(vector<vector<string> > & CONTENTS, int lineno);
+  void read_exclude(class InputListing & CONTENTS, int lineno);
 
   static string tuplet_name(int natom, bool plural, bool caps);
 
@@ -288,7 +287,7 @@ public:
   // Overloaded for different handling in lsq and MD codes
 
   // Read smaxim, sminim for the cluster list and store the input.
-  void read_cutoff_params(vector<vector<string> > & CONTENTS, int lineno, string input_type);
+  void read_cutoff_params(class InputListing & CONTENTS, int lineno, string input_type);
 
   // Read smaxim, sminim for the cluster list and store the input.
    void read_cutoff_params(istream &input, string LINE, string input_type) ;
