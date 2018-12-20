@@ -114,4 +114,16 @@ public:
 			--dim ;
 		}
 
+	void push(int val)
+		// Add the value to the end of the vector.
+	{
+		int *newv = new int[dim+1] ;
+		for ( int j = 0 ; j < dim ; j++ ) {
+			newv[j] = vec[j] ;
+		}
+		newv[dim] = val ;
+		delete [] vec ;
+		vec = newv ;
+		++dim ;
+	}
 } ;

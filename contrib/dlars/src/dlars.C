@@ -209,6 +209,10 @@ int main(int argc, char **argv)
 	Vector last_beta(nprops) ; // Last good coefficients
 
 	double last_obj_func = 1.0e50 ;
+
+	ofstream trajfile("traj.txt") ;
+	trajfile.precision(6) ;
+	trajfile << scientific ;
 	
 	for ( int j = 0 ; j + 1 <= max_iterations ; j++ ) {
 		if ( ! lars.iteration() ) 
@@ -221,8 +225,11 @@ int main(int argc, char **argv)
 			break ;
 		else if ( lars.obj_func_val > last_obj_func )
 			break ;
-		
+
 		last_beta = lars.beta ;
+		trajfile << "Iteration " << j + 1 << endl ;
+		lars.beta.print(trajfile) ;
+		
 		last_obj_func = lars.obj_func_val ;
 	}
 
@@ -268,5 +275,8 @@ int main(int argc, char **argv)
 	lars.c.print() ;
 #endif	
 
+#ifdef USE_MPI
+	MPI_Finalize() ;
+#endif		
 }
 

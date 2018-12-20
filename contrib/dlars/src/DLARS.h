@@ -30,6 +30,7 @@ public:
 	int nprops ;      // Number of properties to correlate = X.dim2
 	int nactive ;     // The number of active properties to correlate <= nprops
 	int remove_prop ;  // The index of the property to remove from the active set during a LASSO calculation.
+	int add_prop ;  // The index of the property to add to the active set during a LASSO calculation.
 	bool do_lasso ;   // If TRUE, do a lasso calculation.  If false, do a regular LARS calculation.
 	bool solve_succeeded ; // If true, the solve of G_A succeeded.
 	double obj_func_val ;  // Latest value of the objective function.
@@ -45,6 +46,7 @@ public:
 			nprops = X.dim2 ;
 			nactive = 0 ;
 			remove_prop = -1 ;
+			add_prop = -1 ;
 			num_exclude = 0 ;
 			solve_succeeded = true ;
 
@@ -408,7 +410,6 @@ public:
 	// Perform back substitution on the cholesky matrix to find G_A_Inv_I and A_A
 	// Returns true if the solution passes consistency tests.
 		{
-			const double eps = 1.0e-50 ;
 
 			//cout << "Cholesky " << endl ;
       //chol.print() ;
@@ -423,19 +424,23 @@ public:
 			// Test to see if the solution worked.
 			Vector test(nactive) ;
 			G_A.dot(test, G_A_Inv_I) ;
+			double errval = 0.0 ;
 			for ( int j = 0 ; j < nactive ; j++ ) {
+				errval += fabs(test.get(j)-1.0) ;
 				if ( fabs(test.get(j) - 1.0) > 1.0e-04 ) {
 					cout << "Cholesky solution test failed\n" ;
 					cout << "Error = " << fabs(test.get(j) - 1.0) << endl ;
 					return false ;
 				}
 			}
+			if ( nactive > 0 && RANK == 0 ) cout << "Cholesky error test = " << errval / nactive << endl ;
+			
 			
 			A_A = 0.0 ;
 			for ( int j = 0 ; j < nactive ; j++ ) {
 				A_A += G_A_Inv_I.get(j) ;
 			}
-			if ( A_A > eps ) 
+			if ( A_A > 0.0 ) 
 				A_A = 1.0 / sqrt(A_A) ;
 			else {
 				cout << "A_A Normalization failed" << endl ;
@@ -508,7 +513,7 @@ public:
 		{
 			IntVector a_trial(nprops) ;
 			//int count = 0 ;
-			const double eps = 1.0e-12 ;
+			const double eps = 1.0e-10 ;
 
 			// Save the last active set
 			A_last.realloc(nactive) ;
@@ -518,13 +523,13 @@ public:
 
 			if ( do_lasso && gamma > gamma_lasso ) {
 				reduce_active_set() ;
+			} else if ( add_prop >= 0 ) {
+				A.push(add_prop) ;
+				nactive++ ;
 			} else {
-				// Maintain the ordering of the last active set to allow cholesky updating.
-				for ( int j = 0 ; j < nactive ; j++ ) {
-					a_trial.set( j, A_last.get(j) ) ;
-				}
-				int count = nactive ;
+				// Something strange has happened.
 				// Search for the new active set.
+				int count = 0 ;
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					if ( fabs( fabs(c.get(j)) - C_max ) < eps
 							 && ! exclude.get(j) ) {
@@ -566,7 +571,8 @@ public:
 			gamma = huge ;
 
 			remove_prop = -1 ;
-			int add_prop = -1 ;
+			add_prop = -1 ;
+			
 			if ( nactive < nprops ) {
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					int k = 0 ;
@@ -577,21 +583,13 @@ public:
 					if ( k != nactive ) continue ;
 					double c1 = ( C_max - c.get(j) ) / (A_A - a.get(j) ) ;
 					double c2 = ( C_max + c.get(j) ) / (A_A + a.get(j) ) ;
-					double cmin ;
 
-					if ( c1 < 0.0 ) {
-						cmin = ( c2 > 0.0 ) ? c2 : huge ;
+					if ( c1 > 0.0 && c1 < gamma ) {
+						gamma = c1 ;
+						add_prop = j ;
 					}
-					else if ( c2 < 0.0 ) {
-						cmin = ( c1 > 0.0 ) ? c1 : huge ;
-					}
-					else {
-						cmin = ( c1 < c2 ) ? c1 : c2 ;
-					}
-					//cout << "Property " << j << " gamma = " << cmin << endl ;
-					
-					if ( cmin < gamma ) {
-						gamma = cmin ;
+					if ( c2 > 0.0 && c2 < gamma ) {
+						gamma = c2 ;
 						add_prop = j ;
 					}
 				}
@@ -612,12 +610,11 @@ public:
 	// See Eq. 3.4 and 3.5
 		{
 			gamma_lasso = 1.0e20 ;
-			const double eps = 1.0e-10 ;
 
 			for ( int i = 0 ; i < nactive ; i++ ) {
 				if ( fabs(w_A.get(i)) > 1.0e-40 ) {
 					double gamma_i = -beta.get(A.get(i)) / ( sign.get(i) * w_A.get(i) ) ;
-					if ( gamma_i > eps && gamma_i < gamma_lasso ) {
+					if ( gamma_i > 0.0 && gamma_i < gamma_lasso ) {
 						gamma_lasso = gamma_i ;
 						remove_prop = i ;
 					}
@@ -683,7 +680,7 @@ public:
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					uns_beta.set(j, beta.get(j) / X.scale[j]) ;
 				}
-				if ( out == cout ) {
+				if ( out.rdbuf() == cout.rdbuf() ) {
 					uns_beta.print() ;
 				} else {
 					for ( int j = 0 ; j < nprops ; j++ ) {
@@ -698,8 +695,6 @@ public:
 	// Print the given prediction in unscaled units.
 		{
 			if ( RANK == 0 ) {
-				double offset = y.shift ;
-
 				//out << "Y constant offset = " << offset << endl ;
 				for ( int j = 0 ; j < ndata ; j++ ) {
 					out << mu.get(j) + y.shift << endl ;

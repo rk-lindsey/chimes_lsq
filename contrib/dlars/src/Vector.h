@@ -155,5 +155,17 @@ public:
 			}
 			--dim ;
 		}
-	
+
+	void push(double val)
+		// Add the value to the end of the vector.
+	{
+		double *newv = new double[dim+1] ;
+		for ( int j = 0 ; j < dim ; j++ ) {
+			newv[j] = vec[j] ;
+		}
+		newv[dim] = val ;
+		delete [] vec ;
+		vec = newv ;
+		++dim ;
+	}
 } ;
