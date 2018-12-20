@@ -1,11 +1,12 @@
 Distributed LARS algorithm
 Using the LASSO algorithm
-L1 norm of solution: 0.000000e+00 RMS Error: 9.403806e-01 Objective fn: 8.843157e-01
+L1 norm of solution: 0.000000e+00 RMS Error: 9.403806e-01 Objective fn: 4.421579e-01
 Adding property 5 to the active set
 New active set: 
 [
 0 5
 ]
+Cholesky error test = 0.000000e+00
 Updated step gamma = 1.003409e-02
 Gamma limited by property 25
 Lasso step gamma limit = 1.000000e+20
@@ -44,7 +45,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.855485e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -81,13 +82,14 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 1
-L1 norm of solution: 1.003409e-02 RMS Error: 9.400509e-01 Objective fn: 8.836958e-01
+L1 norm of solution: 1.003409e-02 RMS Error: 9.400509e-01 Objective fn: 4.418479e-01
 Adding property 25 to the active set
 New active set: 
 [
 0 5
 1 25
 ]
+Cholesky error test = 5.551115e-17
 Updated step gamma = 6.902995e-01
 Gamma limited by property 11
 Lasso step gamma limit = 1.000000e+20
@@ -126,7 +128,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.380343e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -163,7 +165,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 2
-L1 norm of solution: 9.230359e-01 RMS Error: 9.137148e-01 Objective fn: 8.348748e-01
+L1 norm of solution: 9.230359e-01 RMS Error: 9.137148e-01 Objective fn: 4.174374e-01
 Adding property 11 to the active set
 New active set: 
 [
@@ -171,6 +173,7 @@ New active set:
 1 25
 2 11
 ]
+Cholesky error test = 2.220446e-16
 Updated step gamma = 1.698994e-02
 Gamma limited by property 12
 Lasso step gamma limit = 1.000000e+20
@@ -209,7 +212,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.364841e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -246,7 +249,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 3
-L1 norm of solution: 9.515985e-01 RMS Error: 9.130087e-01 Objective fn: 8.335849e-01
+L1 norm of solution: 9.515985e-01 RMS Error: 9.130087e-01 Objective fn: 4.167924e-01
 Adding property 12 to the active set
 New active set: 
 [
@@ -255,6 +258,7 @@ New active set:
 2 11
 3 12
 ]
+Cholesky error test = 5.551115e-17
 Updated step gamma = 2.030774e-02
 Gamma limited by property 16
 Lasso step gamma limit = 1.000000e+20
@@ -293,7 +297,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.356580e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -330,7 +334,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 4
-L1 norm of solution: 9.895709e-01 RMS Error: 9.120759e-01 Objective fn: 8.318825e-01
+L1 norm of solution: 9.895709e-01 RMS Error: 9.120759e-01 Objective fn: 4.159412e-01
 Adding property 16 to the active set
 New active set: 
 [
@@ -340,6 +344,7 @@ New active set:
 3 12
 4 16
 ]
+Cholesky error test = 1.554312e-16
 Updated step gamma = 3.511304e-02
 Gamma limited by property 10
 Lasso step gamma limit = 1.000000e+20
@@ -378,7 +383,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.346775e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -415,7 +420,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 5
-L1 norm of solution: 1.066675e+00 RMS Error: 9.101967e-01 Objective fn: 8.284580e-01
+L1 norm of solution: 1.066675e+00 RMS Error: 9.101967e-01 Objective fn: 4.142290e-01
 Adding property 10 to the active set
 New active set: 
 [
@@ -426,6 +431,7 @@ New active set:
 4 16
 5 10
 ]
+Cholesky error test = 1.295260e-16
 Updated step gamma = 2.044547e-01
 Gamma limited by property 29
 Lasso step gamma limit = 1.000000e+20
@@ -464,7 +470,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.320968e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -501,7 +507,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 6
-L1 norm of solution: 1.571069e+00 RMS Error: 8.982403e-01 Objective fn: 8.068356e-01
+L1 norm of solution: 1.571069e+00 RMS Error: 8.982403e-01 Objective fn: 4.034178e-01
 Adding property 29 to the active set
 New active set: 
 [
@@ -513,6 +519,7 @@ New active set:
 5 10
 6 29
 ]
+Cholesky error test = 1.110223e-16
 Updated step gamma = 3.020886e-01
 Gamma limited by property 6
 Lasso step gamma limit = 1.000000e+20
@@ -551,7 +558,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -4.257201e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -588,7 +595,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 7
-L1 norm of solution: 2.354398e+00 RMS Error: 8.807360e-01 Objective fn: 7.756959e-01
+L1 norm of solution: 2.354398e+00 RMS Error: 8.807360e-01 Objective fn: 3.878480e-01
 Adding property 6 to the active set
 New active set: 
 [
@@ -601,6 +608,7 @@ New active set:
 6 29
 7 6
 ]
+Cholesky error test = 1.249001e-16
 Updated step gamma = 5.322921e-01
 Gamma limited by property 21
 Lasso step gamma limit = 1.000000e+20
@@ -639,7 +647,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.825365e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -676,7 +684,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 8
-L1 norm of solution: 3.804384e+00 RMS Error: 8.515405e-01 Objective fn: 7.251212e-01
+L1 norm of solution: 3.804384e+00 RMS Error: 8.515405e-01 Objective fn: 3.625606e-01
 Adding property 21 to the active set
 New active set: 
 [
@@ -690,6 +698,7 @@ New active set:
 7 6
 8 21
 ]
+Cholesky error test = 1.603655e-16
 Updated step gamma = 5.055967e-02
 Gamma limited by property 13
 Lasso step gamma limit = 1.000000e+20
@@ -728,7 +737,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.783036e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -765,7 +774,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 9
-L1 norm of solution: 3.953573e+00 RMS Error: 8.487715e-01 Objective fn: 7.204130e-01
+L1 norm of solution: 3.953573e+00 RMS Error: 8.487715e-01 Objective fn: 3.602065e-01
 Adding property 13 to the active set
 New active set: 
 [
@@ -780,6 +789,7 @@ New active set:
 8 21
 9 13
 ]
+Cholesky error test = 1.110223e-16
 Updated step gamma = 6.139474e-01
 Gamma limited by property 24
 Lasso step gamma limit = 1.000000e+20
@@ -818,7 +828,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.757364e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -855,7 +865,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 10
-L1 norm of solution: 5.930192e+00 RMS Error: 8.151396e-01 Objective fn: 6.644525e-01
+L1 norm of solution: 5.930192e+00 RMS Error: 8.151396e-01 Objective fn: 3.322263e-01
 Adding property 24 to the active set
 New active set: 
 [
@@ -871,6 +881,7 @@ New active set:
 9 13
 10 24
 ]
+Cholesky error test = 1.513940e-16
 Updated step gamma = 1.742515e-01
 Gamma limited by property 2
 Lasso step gamma limit = 1.000000e+20
@@ -909,7 +920,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.757388e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -946,7 +957,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 11
-L1 norm of solution: 6.506800e+00 RMS Error: 8.064245e-01 Objective fn: 6.503206e-01
+L1 norm of solution: 6.506800e+00 RMS Error: 8.064245e-01 Objective fn: 3.251603e-01
 Adding property 2 to the active set
 New active set: 
 [
@@ -963,6 +974,7 @@ New active set:
 10 24
 11 2
 ]
+Cholesky error test = 8.326673e-17
 Updated step gamma = 2.625811e-01
 Gamma limited by property 30
 Lasso step gamma limit = 1.000000e+20
@@ -1001,7 +1013,7 @@ Beta:
 30 0.000000e+00
 31 0.000000e+00
 ]
-Y constant offset = -3.747606e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -1038,7 +1050,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 12
-L1 norm of solution: 7.426714e+00 RMS Error: 7.934789e-01 Objective fn: 6.296088e-01
+L1 norm of solution: 7.426714e+00 RMS Error: 7.934789e-01 Objective fn: 3.148044e-01
 Adding property 30 to the active set
 New active set: 
 [
@@ -1056,6 +1068,7 @@ New active set:
 11 2
 12 30
 ]
+Cholesky error test = 1.964241e-16
 Updated step gamma = 3.854218e-01
 Gamma limited by property 0
 Lasso step gamma limit = 1.000000e+20
@@ -1094,7 +1107,7 @@ Beta:
 30 1.303587e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.635573e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 0.000000e+00
@@ -1131,7 +1144,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 13
-L1 norm of solution: 8.850295e+00 RMS Error: 7.755935e-01 Objective fn: 6.015453e-01
+L1 norm of solution: 8.850295e+00 RMS Error: 7.755935e-01 Objective fn: 3.007727e-01
 Adding property 0 to the active set
 New active set: 
 [
@@ -1150,6 +1163,7 @@ New active set:
 12 30
 13 0
 ]
+Cholesky error test = 1.348128e-16
 Updated step gamma = 1.655363e-02
 Gamma limited by property 28
 Lasso step gamma limit = 1.000000e+20
@@ -1188,7 +1202,7 @@ Beta:
 30 1.358659e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.629991e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -5.692472e-03
@@ -1225,7 +1239,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 14
-L1 norm of solution: 8.914951e+00 RMS Error: 7.748422e-01 Objective fn: 6.003804e-01
+L1 norm of solution: 8.914951e+00 RMS Error: 7.748422e-01 Objective fn: 3.001902e-01
 Adding property 28 to the active set
 New active set: 
 [
@@ -1245,6 +1259,7 @@ New active set:
 13 0
 14 28
 ]
+Cholesky error test = 1.702342e-16
 Updated step gamma = 9.027092e-02
 Gamma limited by property 27
 Lasso step gamma limit = 1.000000e+20
@@ -1283,7 +1298,7 @@ Beta:
 30 1.642320e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.597298e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -3.594270e-02
@@ -1320,7 +1335,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 15
-L1 norm of solution: 9.275009e+00 RMS Error: 7.707429e-01 Objective fn: 5.940446e-01
+L1 norm of solution: 9.275009e+00 RMS Error: 7.707429e-01 Objective fn: 2.970223e-01
 Adding property 27 to the active set
 New active set: 
 [
@@ -1341,6 +1356,7 @@ New active set:
 14 28
 15 27
 ]
+Cholesky error test = 2.706169e-16
 Updated step gamma = 3.681036e-02
 Gamma limited by property 19
 Lasso step gamma limit = 3.601906e+02
@@ -1379,7 +1395,7 @@ Beta:
 30 1.760234e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.580930e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -4.859340e-02
@@ -1416,7 +1432,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 16
-L1 norm of solution: 9.439091e+00 RMS Error: 7.689190e-01 Objective fn: 5.912364e-01
+L1 norm of solution: 9.439091e+00 RMS Error: 7.689190e-01 Objective fn: 2.956182e-01
 Adding property 19 to the active set
 New active set: 
 [
@@ -1438,6 +1454,7 @@ New active set:
 15 27
 16 19
 ]
+Cholesky error test = 2.155139e-16
 Updated step gamma = 2.456800e-02
 Gamma limited by property 23
 Lasso step gamma limit = 1.000000e+20
@@ -1476,7 +1493,7 @@ Beta:
 30 1.835238e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.574302e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -5.714968e-02
@@ -1513,7 +1530,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 17
-L1 norm of solution: 9.554368e+00 RMS Error: 7.676509e-01 Objective fn: 5.892879e-01
+L1 norm of solution: 9.554368e+00 RMS Error: 7.676509e-01 Objective fn: 2.946439e-01
 Adding property 23 to the active set
 New active set: 
 [
@@ -1536,6 +1553,7 @@ New active set:
 16 19
 17 23
 ]
+Cholesky error test = 1.665335e-16
 Updated step gamma = 3.908946e-01
 Gamma limited by property 18
 Lasso step gamma limit = 1.000000e+20
@@ -1574,7 +1592,7 @@ Beta:
 30 2.780412e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.533837e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -2.070192e-01
@@ -1611,7 +1629,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 18
-L1 norm of solution: 1.142236e+01 RMS Error: 7.485005e-01 Objective fn: 5.602530e-01
+L1 norm of solution: 1.142236e+01 RMS Error: 7.485005e-01 Objective fn: 2.801265e-01
 Adding property 18 to the active set
 New active set: 
 [
@@ -1635,6 +1653,7 @@ New active set:
 17 23
 18 18
 ]
+Cholesky error test = 2.045148e-16
 Updated step gamma = 2.818110e-01
 Gamma limited by property 8
 Lasso step gamma limit = 1.000000e+20
@@ -1673,7 +1692,7 @@ Beta:
 30 3.659354e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.426181e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -3.094843e-01
@@ -1710,7 +1729,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 19
-L1 norm of solution: 1.279579e+01 RMS Error: 7.361396e-01 Objective fn: 5.419015e-01
+L1 norm of solution: 1.279579e+01 RMS Error: 7.361396e-01 Objective fn: 2.709508e-01
 Adding property 8 to the active set
 New active set: 
 [
@@ -1735,6 +1754,7 @@ New active set:
 18 18
 19 8
 ]
+Cholesky error test = 2.498002e-16
 Updated step gamma = 2.978821e-01
 Gamma limited by property 9
 Lasso step gamma limit = 1.000000e+20
@@ -1773,7 +1793,7 @@ Beta:
 30 4.628152e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.287782e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -4.168818e-01
@@ -1810,7 +1830,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 20
-L1 norm of solution: 1.426894e+01 RMS Error: 7.245240e-01 Objective fn: 5.249351e-01
+L1 norm of solution: 1.426894e+01 RMS Error: 7.245240e-01 Objective fn: 2.624675e-01
 Adding property 9 to the active set
 New active set: 
 [
@@ -1836,6 +1856,7 @@ New active set:
 19 8
 20 9
 ]
+Cholesky error test = 2.696256e-16
 Updated step gamma = 3.116646e-01
 Gamma limited by property 14
 Lasso step gamma limit = 1.000000e+20
@@ -1874,7 +1895,7 @@ Beta:
 30 5.589964e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.190710e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -5.274678e-01
@@ -1911,7 +1932,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 21
-L1 norm of solution: 1.582446e+01 RMS Error: 7.141441e-01 Objective fn: 5.100017e-01
+L1 norm of solution: 1.582446e+01 RMS Error: 7.141441e-01 Objective fn: 2.550009e-01
 Adding property 14 to the active set
 New active set: 
 [
@@ -1938,6 +1959,7 @@ New active set:
 20 9
 21 14
 ]
+Cholesky error test = 2.775558e-16
 Updated step gamma = 1.860449e-01
 Gamma limited by property 22
 Lasso step gamma limit = 4.785975e+00
@@ -1976,7 +1998,7 @@ Beta:
 30 6.274907e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.113385e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -5.799196e-01
@@ -2013,7 +2035,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 22
-L1 norm of solution: 1.679390e+01 RMS Error: 7.086477e-01 Objective fn: 5.021816e-01
+L1 norm of solution: 1.679390e+01 RMS Error: 7.086477e-01 Objective fn: 2.510908e-01
 Adding property 22 to the active set
 New active set: 
 [
@@ -2041,6 +2063,7 @@ New active set:
 21 14
 22 22
 ]
+Cholesky error test = 2.944505e-16
 Updated step gamma = 9.796269e-03
 Gamma limited by property 1
 Lasso step gamma limit = 9.717955e+00
@@ -2079,7 +2102,7 @@ Beta:
 30 6.316490e-01
 31 0.000000e+00
 ]
-Y constant offset = -3.102205e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -5.821349e-01
@@ -2116,7 +2139,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 23
-L1 norm of solution: 1.684875e+01 RMS Error: 7.083581e-01 Objective fn: 5.017712e-01
+L1 norm of solution: 1.684875e+01 RMS Error: 7.083581e-01 Objective fn: 2.508856e-01
 Adding property 1 to the active set
 New active set: 
 [
@@ -2145,6 +2168,7 @@ New active set:
 22 22
 23 1
 ]
+Cholesky error test = 2.821817e-16
 Updated step gamma = 4.318808e-01
 Gamma limited by property 7
 Lasso step gamma limit = 7.205015e+00
@@ -2183,7 +2207,7 @@ Beta:
 30 7.983907e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.760531e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -7.128077e-01
@@ -2220,7 +2244,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 24
-L1 norm of solution: 1.936400e+01 RMS Error: 6.970916e-01 Objective fn: 4.859367e-01
+L1 norm of solution: 1.936400e+01 RMS Error: 6.970916e-01 Objective fn: 2.429683e-01
 Adding property 7 to the active set
 New active set: 
 [
@@ -2250,6 +2274,7 @@ New active set:
 23 1
 24 7
 ]
+Cholesky error test = 3.774758e-16
 Updated step gamma = 5.245613e-02
 Gamma limited by property 3
 Lasso step gamma limit = 3.200838e+00
@@ -2288,7 +2313,7 @@ Beta:
 30 8.201922e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.719453e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -7.302479e-01
@@ -2325,7 +2350,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 25
-L1 norm of solution: 1.967302e+01 RMS Error: 6.959830e-01 Objective fn: 4.843923e-01
+L1 norm of solution: 1.967302e+01 RMS Error: 6.959830e-01 Objective fn: 2.421961e-01
 Adding property 3 to the active set
 New active set: 
 [
@@ -2356,6 +2381,7 @@ New active set:
 24 7
 25 3
 ]
+Cholesky error test = 3.245267e-16
 Updated step gamma = 8.129727e-02
 Gamma limited by property 17
 Lasso step gamma limit = 3.364770e+00
@@ -2394,7 +2420,7 @@ Beta:
 30 8.523269e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.661450e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -7.576559e-01
@@ -2431,7 +2457,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 26
-L1 norm of solution: 2.015291e+01 RMS Error: 6.943803e-01 Objective fn: 4.821640e-01
+L1 norm of solution: 2.015291e+01 RMS Error: 6.943803e-01 Objective fn: 2.410820e-01
 Adding property 17 to the active set
 New active set: 
 [
@@ -2463,6 +2489,7 @@ New active set:
 25 3
 26 17
 ]
+Cholesky error test = 5.304399e-16
 Updated step gamma = 2.018838e-01
 Gamma limited by property 15
 Lasso step gamma limit = 8.973896e-01
@@ -2501,7 +2528,7 @@ Beta:
 30 9.422597e-01
 31 0.000000e+00
 ]
-Y constant offset = -2.587046e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -8.124691e-01
@@ -2538,7 +2565,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 27
-L1 norm of solution: 2.159420e+01 RMS Error: 6.902309e-01 Objective fn: 4.764187e-01
+L1 norm of solution: 2.159420e+01 RMS Error: 6.902309e-01 Objective fn: 2.382094e-01
 Adding property 15 to the active set
 New active set: 
 [
@@ -2571,6 +2598,7 @@ New active set:
 26 17
 27 15
 ]
+Cholesky error test = 5.590766e-16
 Updated step gamma = 3.062150e-01
 Gamma limited by property 4
 Lasso step gamma limit = 7.312727e+00
@@ -2609,7 +2637,7 @@ Beta:
 30 1.048967e+00
 31 0.000000e+00
 ]
-Y constant offset = -2.660690e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -8.949977e-01
@@ -2646,7 +2674,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 28
-L1 norm of solution: 2.386342e+01 RMS Error: 6.854494e-01 Objective fn: 4.698408e-01
+L1 norm of solution: 2.386342e+01 RMS Error: 6.854494e-01 Objective fn: 2.349204e-01
 Adding property 4 to the active set
 New active set: 
 [
@@ -2680,6 +2708,7 @@ New active set:
 27 15
 28 4
 ]
+Cholesky error test = 3.368953e-16
 Updated step gamma = 5.643135e-02
 Gamma limited by property 31
 Lasso step gamma limit = 9.573614e-01
@@ -2718,7 +2747,7 @@ Beta:
 30 1.075874e+00
 31 0.000000e+00
 ]
-Y constant offset = -2.682194e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -9.032863e-01
@@ -2755,7 +2784,7 @@ Unscaled coefficients:
 31 0.000000e+00
 ]
 Finished iteration 29
-L1 norm of solution: 2.429628e+01 RMS Error: 6.847739e-01 Objective fn: 4.689153e-01
+L1 norm of solution: 2.429628e+01 RMS Error: 6.847739e-01 Objective fn: 2.344576e-01
 Adding property 31 to the active set
 New active set: 
 [
@@ -2790,6 +2819,7 @@ New active set:
 28 4
 29 31
 ]
+Cholesky error test = 6.328271e-16
 Updated step gamma = 1.235312e-02
 Gamma limited by property 26
 Lasso step gamma limit = 1.941477e-01
@@ -2828,7 +2858,7 @@ Beta:
 30 1.083233e+00
 31 -7.460982e-03
 ]
-Y constant offset = -2.682542e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -9.034624e-01
@@ -2865,7 +2895,7 @@ Unscaled coefficients:
 31 -7.460982e-03
 ]
 Finished iteration 30
-L1 norm of solution: 2.439885e+01 RMS Error: 6.846241e-01 Objective fn: 4.687102e-01
+L1 norm of solution: 2.439885e+01 RMS Error: 6.846241e-01 Objective fn: 2.343551e-01
 Adding property 26 to the active set
 New active set: 
 [
@@ -2901,6 +2931,7 @@ New active set:
 29 31
 30 26
 ]
+Cholesky error test = 6.052506e-16
 Updated step gamma = 5.161738e-01
 Gamma limited by property 20
 Lasso step gamma limit = 2.350034e-01
@@ -2941,7 +2972,7 @@ Beta:
 30 1.223170e+00
 31 -1.440777e-01
 ]
-Y constant offset = -2.731173e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -8.996309e-01
@@ -2978,7 +3009,7 @@ Unscaled coefficients:
 31 -1.440777e-01
 ]
 Finished iteration 31
-L1 norm of solution: 2.640989e+01 RMS Error: 6.823473e-01 Objective fn: 4.655979e-01
+L1 norm of solution: 2.640989e+01 RMS Error: 6.823473e-01 Objective fn: 2.327989e-01
 Will remove property 9 from the active set
 New active set: 
 [
@@ -3013,6 +3044,7 @@ New active set:
 28 31
 29 26
 ]
+Cholesky error test = 6.920390e-16
 Updated step gamma = 2.107867e-01
 Gamma limited by property 9
 Lasso step gamma limit = 2.711873e+00
@@ -3051,7 +3083,7 @@ Beta:
 30 1.338140e+00
 31 -2.531190e-01
 ]
-Y constant offset = -2.827803e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -9.002694e-01
@@ -3088,7 +3120,7 @@ Unscaled coefficients:
 31 -2.531190e-01
 ]
 Finished iteration 32
-L1 norm of solution: 2.819931e+01 RMS Error: 6.813887e-01 Objective fn: 4.642906e-01
+L1 norm of solution: 2.819931e+01 RMS Error: 6.813887e-01 Objective fn: 2.321453e-01
 Adding property 9 to the active set
 New active set: 
 [
@@ -3124,6 +3156,7 @@ New active set:
 29 26
 30 9
 ]
+Cholesky error test = 7.843188e-16
 Updated step gamma = 4.415466e-02
 Gamma limited by property 20
 Lasso step gamma limit = 3.207638e+00
@@ -3162,7 +3195,7 @@ Beta:
 30 1.367686e+00
 31 -2.833662e-01
 ]
-Y constant offset = -2.813233e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -8.978011e-01
@@ -3199,7 +3232,7 @@ Unscaled coefficients:
 31 -2.833662e-01
 ]
 Finished iteration 33
-L1 norm of solution: 2.860512e+01 RMS Error: 6.813091e-01 Objective fn: 4.641820e-01
+L1 norm of solution: 2.860512e+01 RMS Error: 6.813091e-01 Objective fn: 2.320910e-01
 Adding property 20 to the active set
 New active set: 
 [
@@ -3236,6 +3269,7 @@ New active set:
 30 9
 31 20
 ]
+Cholesky error test = 7.181755e-16
 Updated step gamma = 5.670086e-02
 Lasso step gamma limit = 3.498881e+00
 Beta: 
@@ -3273,7 +3307,7 @@ Beta:
 30 1.405723e+00
 31 -3.213681e-01
 ]
-Y constant offset = -2.799084e-17
+Y constant offset = -4.683753e-17
 Unscaled coefficients: 
 [
 0 -8.953402e-01
@@ -3310,12 +3344,13 @@ Unscaled coefficients:
 31 -3.213681e-01
 ]
 Finished iteration 34
+Stopping: no more iterations possible
 Final values:
 Beta: 
 [
 0 -8.953401689407e-01
 1 4.274784060335e-01
-2 3.903593500845e-01
+2 3.903593500844e-01
 3 3.360530369834e-01
 4 -2.087294900070e-01
 5 -3.764152194502e+00
