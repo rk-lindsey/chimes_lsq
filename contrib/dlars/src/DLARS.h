@@ -22,7 +22,7 @@ public:
 	Vector w_A ;        // Step direction vector for fitting coefficients
 	double C_max ;      // Maximum correlation found on this iteration.
 	double lambda ;     // Weighting for L1 norm in objective function.
-	Vector a ;         
+	Vector a ;          // Update vector for correlation.
 	double gamma ;      // LARS Step size ;
 	double gamma_lasso ;  // Lasso constraint on LARS step size.
 	double gamma_use ;  // The value of gamma to use on current step.  Based on gamma and gamma_lasso.
@@ -142,12 +142,20 @@ public:
 	// Calculate the correlation vector c, Eq. 2.1
 		{
 			C_max = -1.0 ;
-			Vector ydiff(ndata,0.0) ;
-			for ( int k = 0 ; k < ndata ; k++ ) {
-				ydiff.set(k, y.get(k) - mu.get(k)) ;
-			}
 
-			X.dot_transpose(c, ydiff) ;
+			if ( gamma_use <= 0.0 ) {
+				// First iteration.
+				Vector ydiff(ndata,0.0) ;
+				for ( int k = 0 ; k < ndata ; k++ ) {
+					ydiff.set(k, y.get(k) - mu.get(k)) ;
+				}
+
+				X.dot_transpose(c, ydiff) ;
+			} else {
+				// c = c - gamma_use * a.
+				c.add_mult(a, -gamma_use) ;
+			}
+					
 			for ( int j = 0 ; j < nprops ; j++ ) {
 				if ( fabs(c.get(j)) > C_max ) {
 					// Only look for C_max if the coordinate has not been excluded.

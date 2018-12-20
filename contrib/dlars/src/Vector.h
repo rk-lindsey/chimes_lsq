@@ -168,4 +168,15 @@ public:
 		vec = newv ;
 		++dim ;
 	}
+	void add_mult(const Vector &in, double factor)
+		// Set out = out + factor * in
+	{
+		if ( in.dim != dim ) {
+			cout << "Error in add_mult: dim mismatch\n" ;
+			exit(1) ;
+		}
+		for ( int k = 0 ; k < dim ; k++ ) {
+			vec[k] += factor * in.get(k) ;
+		}
+	}
 } ;
