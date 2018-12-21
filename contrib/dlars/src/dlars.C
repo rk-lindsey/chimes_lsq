@@ -84,6 +84,7 @@ int main(int argc, char **argv)
 		{"iterations", required_argument, 0, 'i'},
 		{"lambda", required_argument, 0, 'l'},
 		{"max_norm", required_argument, 0, 'm'},
+		{"normalize", required_argument, 0, 'n'},
 		{"split_files", no_argument, 0, 's'},
 		{"help", no_argument, 0, 'h'},
 		{0, 0, 0, 0}
@@ -96,14 +97,14 @@ int main(int argc, char **argv)
 	
 	string algorithm("lasso") ;       // Algorithm to use: lasso or lars
 	bool split_files = false ;        // Read input matrix from split files ?
-
+	bool normalize=true ;             // Whether to normalize the X matrix.
 	// Stopping criteria.  Default is to calculate all possible solutions.
 	double max_beta_norm = 1.0e+50 ;  // Maximum L1 norm of solution 
 	int max_iterations = 10000000 ;   // Maximum number of LARS iterations.
 	double lambda = 0.0 ;             // L1 weighting factor.
 	
 	while (1) {
-		opt_type = getopt_long(argc, argv, "a:i:l:m:sh", long_options, &option_index) ;
+		opt_type = getopt_long(argc, argv, "a:i:l:m:n:sh", long_options, &option_index) ;
 		if ( opt_type == -1 ) break ;
 		switch ( opt_type ) {
 		case 'a':
@@ -117,6 +118,16 @@ int main(int argc, char **argv)
 			break ;			
 		case 'm':
 			max_beta_norm = atof(optarg) ;
+			break ;
+		case 'n':
+			if ( optarg[0] == 'y' ) {
+				normalize = true ;
+			} else if ( optarg[0] == 'n' ) {
+				normalize = false ;
+			} else {
+				cerr << "--normalize arg should be y or n" ;
+				exit(1) ;
+			}
 			break ;
 		case 's':
 			split_files = true ;
@@ -162,8 +173,11 @@ int main(int argc, char **argv)
 		dfile >> nprops >> ndata ;
 		xmat.read(xfile, ndata, nprops, true) ;
 	}
-	xmat.normalize() ;
-	xmat.check_norm() ;
+
+	if ( normalize ) {
+		xmat.normalize() ;
+		xmat.check_norm() ;
+	}
 
 	ifstream yfile(yname) ;
 	if ( ! yfile.is_open() ) {
@@ -172,8 +186,10 @@ int main(int argc, char **argv)
 	}
 	Vector yvec ;
 	yvec.read(yfile, ndata) ;
-	yvec.normalize() ;
-	yvec.check_norm() ;
+	if ( normalize ) {
+		yvec.normalize() ;
+		yvec.check_norm() ;
+	}
 
 #if(0)	
 	ofstream xtest("Xtest.txt") ;
@@ -215,20 +231,28 @@ int main(int argc, char **argv)
 	trajfile << scientific ;
 	
 	for ( int j = 0 ; j + 1 <= max_iterations ; j++ ) {
-		if ( ! lars.iteration() ) 
+		if ( ! lars.iteration() ) {
+			if ( RANK == 0 ) cout << "Stopping: no more iterations possible" << endl ;
 			break ;
+		}
 
 		if ( RANK == 0 ) cout << "Finished iteration " << j + 1 << endl ;
 
 		// Check against exit conditions.
-		if ( lars.beta.l1norm() > max_beta_norm ) 
+		if ( lars.beta.l1norm() > max_beta_norm ) {
+			if ( RANK == 0 ) cout << "Stopping: Maximum L1 norm exceeded" << endl ;
 			break ;
-		else if ( lars.obj_func_val > last_obj_func )
+		}
+		else if ( lars.obj_func_val > last_obj_func ) {
+			if ( RANK == 0 ) cout << "Stopping: Objective function increased" << endl ;
 			break ;
-
+		}
 		last_beta = lars.beta ;
-		trajfile << "Iteration " << j + 1 << endl ;
-		lars.beta.print(trajfile) ;
+		if ( RANK == 0 ) {
+			trajfile << "Iteration " << j + 1 << endl ;
+			lars.print_error(trajfile) ;
+			lars.beta.print(trajfile) ;
+		}
 		
 		last_obj_func = lars.obj_func_val ;
 	}

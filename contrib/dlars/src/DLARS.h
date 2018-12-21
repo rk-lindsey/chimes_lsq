@@ -532,6 +532,7 @@ public:
 			if ( do_lasso && gamma > gamma_lasso ) {
 				reduce_active_set() ;
 			} else if ( add_prop >= 0 ) {
+				if ( RANK == 0 ) cout << "Adding property " << add_prop << " to the active set" << endl ;
 				A.push(add_prop) ;
 				nactive++ ;
 			} else {
@@ -710,6 +711,13 @@ public:
 			}
 		}
 
+	void print_error(ostream &out)
+	{
+		if ( RANK == 0 ) {
+			out  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << endl ;
+		}
+	}
+
 	bool iteration()
 	// Perform a single iteration of the LARS algorithm.
 	// Return false when no more iterations can be performed.
@@ -735,10 +743,8 @@ public:
 			}
 #endif			
 			objective_func() ;
-			
-			if ( RANK == 0 ) {
-				cout  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << endl ;
-			}
+
+			print_error(cout) ;
 
 			update_active_set() ;
 

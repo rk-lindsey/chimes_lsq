@@ -44,6 +44,10 @@ public:
 			row_end = dim1 - 1 ;
 			num_rows = dim1 ;
 			distributed = false ;
+			for ( int j = 0 ; j < dim2 ; j++ ) {
+				shift[j] = 0.0 ;
+				scale[j] = 1.0 ;
+			}
 		}
 		
 	Matrix(int d1, int d2, bool will_dist)
@@ -53,7 +57,11 @@ public:
 			dim2 = d2 ;
 			shift = new double[d2] ;
 			scale = new double[d2] ;
-
+			for ( int j = 0 ; j < dim2 ; j++ ) {
+				shift[j] = 0.0 ;
+				scale[j] = 1.0 ;
+			}
+			
 			if ( ! will_dist ) {
 				mat = new double[d1 * d2] ;
 				row_start = 0 ;
@@ -118,6 +126,10 @@ public:
 						}
 					}
 				}
+			}
+			for ( int j = 0 ; j < dim2 ; j++ ) {
+				shift[j] = 0.0 ;
+				scale[j] = 1.0 ;
 			}
 		}
 	
@@ -635,7 +647,7 @@ public:
 		{
 			if ( RANK == 0 ) {
 				cout << "[" << endl ;
-				for ( int j = 0 ; j < dim1 ; j++ ) {
+				for ( int j = row_start ; j <= row_end ; j++ ) {
 					cout << "[" << endl ;
 					for ( int k = 0 ; k < dim2 ; k++ ) {
 						cout << j << " " << k << " " << get(j,k) << endl ;
