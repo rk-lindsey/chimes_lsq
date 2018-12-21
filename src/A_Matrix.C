@@ -13,7 +13,7 @@ using namespace std;
 #include "A_Matrix.h"
 
 
-A_MAT::A_MAT(): FORCES(), CHARGES(), OVERBONDING(), STRESSES(), FRAME_ENERGIES(), ATOM_ENERGIES()
+A_MAT::A_MAT(): FORCES(), STRESSES(), FRAME_ENERGIES(), ATOM_ENERGIES(), OVERBONDING(), CHARGES()
 {
 	// Set up A-matrix
 	

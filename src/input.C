@@ -947,7 +947,7 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 	string TEMP_STR;
 	int    TEMP_INT; 
 
-	for (int c=0; c<CONTENTS.size(); c++)
+	for (int c=0; c< N_CONTENTS ; c++)
 	{
 		if (found_input_keyword("PAIRIDX", CONTENTS(c)))		
 		{
@@ -2231,12 +2231,23 @@ double INPUT::convert_double(const string &str, int idx)
 // idx specifies the first index of the CONTENTS array
 {
 	int pos = str.find_first_not_of(" \t\n") ;
-	if ( isalpha(str[pos]) ) {
+	int posdigit = str.find_first_of("0123456789") ;
+	
+	if ( isalpha(str[pos]) || posdigit == string::npos )
+	{
 		if ( RANK == 0 )
 			cout << "String found where floating point expected: " + str << endl ;
 		convert_error(idx) ;
-	} else if ( str[pos] == '+' || str[pos] == '-' || str[pos] == '.' || isdigit(str[pos]) ) {
-		return stod(str) ;
+	} else if ( str[pos] == '+' || str[pos] == '-' || str[pos] == '.' || isdigit(str[pos]) )
+	{
+		try
+		{
+			return stod(str) ;
+		}
+		catch (...)
+		{
+			;
+		}
 	}
 	if ( RANK == 0 ) {
 		cout << "String found where floating point number expected: " + str << endl ;
@@ -2254,12 +2265,19 @@ int INPUT::convert_int(const string &str, int idx)
 // idx specifies the first index of the CONTENTS array
 {
 	int pos = str.find_first_not_of(" \t\n") ;
-	if ( isalpha(str[pos]) ) {
+	int posdigit = str.find_first_of("0123456789") ;
+	if ( isalpha(str[pos]) || posdigit == string::npos ) {
 		if ( RANK == 0 )
 			cout << "String found where integer expected: " + str << endl ;
 		convert_error(idx) ;
 	} else if ( str[pos] == '+' || str[pos] == '-' || isdigit(str[pos]) ) {
-		return stoi(str) ;
+		try {
+			return stoi(str) ;
+		}
+		catch (...)
+		{
+			;
+		}
 	}
 	if ( RANK == 0 ) 
 		cout << "String found where integer expected: " + str << endl ;
@@ -2277,7 +2295,12 @@ bool INPUT::convert_bool(const string &str, int idx)
 {
 	int pos = str.find_first_not_of(" \t\n") ;
 	if ( str[pos] == 't' || str[pos] == 'T' || str[pos] == 'F' || str[pos] == 'f' ) {
-		return str2bool(str) ;
+		try {
+			return str2bool(str) ;
+		}
+		catch ( ... ) {
+			;
+		}
 	}
 	if ( RANK == 0 ) 
 		cout << "String found where true/false expected: " + str << endl ;
