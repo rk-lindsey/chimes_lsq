@@ -5,7 +5,7 @@ PYTHON=/usr/tce/bin/python
 COMPARE=perl ../../contrib/compare/compare.pl
 
 # Don't run lasso test by default.  Takes too long, get poor result.
-all: A.txt svd lassolars ridge ridgecv owlqn dowlqn
+all: A.txt svd lassolars ridge ridgecv owlqn dowlqn dlars
 
 generate: all
 	cp current_output/* correct_output/
@@ -32,6 +32,8 @@ ridge: params.ridge.1.0e-03.cmp
 ridgecv: params.ridgecv.cmp
 
 lasso: params.lasso.cmp
+
+dlars: params.dlars.1.0e-04.cmp params.dlasso.1.0e-04.cmp params.dlasso.norm.cmp params.dlasso.read.cmp
 
 params.lasso.txt : A.txt
 	$(PYTHON) ../../src/lsq2.py --algorithm=lasso --alpha=1.0e-04 > params.lasso.txt	
@@ -80,6 +82,22 @@ params.svd.1.0e-04.txt: A.txt
 params.svd.1.0e-05.txt: A.txt
 	$(PYTHON) ../../src/lsq2.py --algorithm=svd --eps=1.0e-05 > params.svd.1.0e-05.txt
 	mv params.svd.1.0e-05.txt current_output/
+
+params.dlars.1.0e-04.txt: A.0000.txt
+	$(PYTHON) ../../src/lsq2.py --algorithm=dlars --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false > params.dlars.1.0e-04.txt
+	mv params.dlars.1.0e-04.txt current_output
+
+params.dlasso.1.0e-04.txt: A.0000.txt
+	$(PYTHON) ../../src/lsq2.py --algorithm=dlasso --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false > params.dlasso.1.0e-04.txt
+	mv params.dlasso.1.0e-04.txt current_output
+
+params.dlasso.norm.txt: A.0000.txt
+	$(PYTHON) ../../src/lsq2.py --algorithm=dlasso --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=true > params.dlasso.norm.txt
+	mv params.dlasso.norm.txt current_output
+
+params.dlasso.read.txt: A.0000.txt params.dlasso.norm.txt
+	$(PYTHON) ../../src/lsq2.py --algorithm=dlasso --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=true --read_output=true > params.dlasso.read.txt
+	mv params.dlasso.read.txt current_output
 
 clean:
 	rm -f A.txt A.0*.txt b.txt dim.0*.txt params.*.txt *.cmp *.out params.header ff_groups.map
