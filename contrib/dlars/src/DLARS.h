@@ -34,9 +34,11 @@ public:
 	bool do_lasso ;   // If TRUE, do a lasso calculation.  If false, do a regular LARS calculation.
 	bool solve_succeeded ; // If true, the solve of G_A succeeded.
 	double obj_func_val ;  // Latest value of the objective function.
+	int iterations ;    // The number of solver iterations.
+	ofstream trajfile ;  // Output file for the trajectory (solution history).
 	
-  DLARS(Matrix &Xin, Vector &yin, double lamin): X(Xin.dim1, Xin.dim2,true), y(Xin.dim1), mu(Xin.dim1),
-		beta(Xin.dim2), c(Xin.dim2), A(0),  exclude(Xin.dim2, 0), sign(0), lambda(lamin) 
+  DLARS(Matrix &Xin, Vector &yin, double lamin): X(Xin), y(Xin.dim1), mu(Xin.dim1),
+		beta(Xin.dim2), c(Xin.dim2), A(0),  exclude(Xin.dim2, 0), sign(0), lambda(lamin)
 		{
 			do_lasso = false ;
 			gamma_lasso = 1.0e20 ;
@@ -49,18 +51,18 @@ public:
 			add_prop = -1 ;
 			num_exclude = 0 ;
 			solve_succeeded = true ;
+			iterations = 0 ;
 
-			X.distribute() ;
-			X_A.distribute() ;
-			
-			for ( int j = X.row_start ; j <= X.row_end ; j++ ) {
-				for ( int k = 0 ; k < nprops; k++ ) {
-					X.set(j, k, Xin.get(j,k) ) ;
-				}
-				for ( int j = 0 ; j < ndata ; j++ ) {
-					y.set(j, yin.get(j)) ;
-					mu.set(j, 0.0) ;
-				}
+			X_A.distribute(Xin) ;
+
+			if ( RANK == 0 ) {
+				trajfile.open("traj.txt") ;
+				trajfile.precision(6) ;
+				trajfile << scientific ;
+			}
+			for ( int j = 0 ; j < ndata ; j++ ) {
+				y.set(j, yin.get(j)) ;
+				mu.set(j, 0.0) ;
 			}
 			for ( int k = 0 ; k < nprops; k++ ) {
 				beta.set(k, 0.0) ;
@@ -392,7 +394,7 @@ public:
 			if ( ! succeeded ) {
 				chol.realloc(nactive, nactive) ;
 				if ( ! G_A.cholesky(chol) ) {
-					cout << "Cholesky failed" << endl ;
+					if ( RANK == 0 ) cout << "Cholesky failed" << endl ;
 					for ( int j = 0 ; j < nactive ; j++ ) {
 						int k ;
 						// See if this is a new index.
@@ -619,11 +621,12 @@ public:
 	// See Eq. 3.4 and 3.5
 		{
 			gamma_lasso = 1.0e20 ;
-
+			const double eps = 1.0e-12 ;
+			
 			for ( int i = 0 ; i < nactive ; i++ ) {
 				if ( fabs(w_A.get(i)) > 1.0e-40 ) {
 					double gamma_i = -beta.get(A.get(i)) / ( sign.get(i) * w_A.get(i) ) ;
-					if ( gamma_i > 0.0 && gamma_i < gamma_lasso ) {
+					if ( gamma_i > eps && gamma_i < gamma_lasso ) {
 						gamma_lasso = gamma_i ;
 						remove_prop = i ;
 					}
@@ -728,7 +731,15 @@ public:
 				return false ;
 			}
 
+			iterations++ ;
 			predict() ;
+
+			if ( RANK == 0 ) {
+				trajfile << "Iteration " << iterations << endl ;
+				print_error(trajfile) ;
+				beta.print(trajfile) ;
+			}
+		
 			correlation() ;
 
 #ifdef VERBOSE

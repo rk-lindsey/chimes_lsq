@@ -135,6 +135,13 @@ public:
 				out.set(j, val * vec[j] ) ;
 			}
 		}
+	void scale(Vector &out, const Vector &vals) 
+	// Multiply the vector by the given array of values, put result in Out.
+		{
+			for ( int j = 0 ; j < dim ; j++ ) {
+				out.set(j, vals.get(j) * vec[j] ) ;
+			}
+		}
 	double l1norm()
 	// Returns L1 norm (sum of abs values).
 		{

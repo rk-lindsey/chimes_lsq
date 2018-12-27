@@ -23,7 +23,7 @@ public:
 		scale = new double[dim2] ;
 		
 		for ( int j = row_start ; j <= row_end ; j++ ) {
-			for ( int k = 0 ; k < dim1 ; k++ ) {
+			for ( int k = 0 ; k < dim2 ; k++ ) {
 				set(j,k, matin.get(j,k) ) ;
 			}
 		}
@@ -139,6 +139,7 @@ public:
 		ifstream dim_file ;
 		char name[80] ;
 
+		distributed = true ;
 		
 		string strDimFile(dimFilename) ;
 		std::size_t found1 = strDimFile.find(".") ;
@@ -146,14 +147,14 @@ public:
 			cerr << "A dimension file name must end with a suffix" ;
 			exit(1) ;
 		}
+		string dim_ext  = strDimFile.substr(found1+1, string::npos) ;
 		strDimFile = strDimFile.substr(0,found1) ;
-		
 		// Find out how many files were written by chimes_lsq.
 		int total_files = 0 ;
 		ifstream test_file ;
 		for ( int j = 0 ; j < NPROCS + 1 ; j++ ) {
 			memset(name, 0, 80) ;
-			sprintf(name, "%s.%04d.txt", strDimFile.c_str(), j) ;
+			sprintf(name, "%s.%04d.%s", strDimFile.c_str(), j, dim_ext.c_str()) ;
 			test_file.open(name) ;
 			if ( test_file.is_open() ) {
 				++total_files ;
@@ -188,7 +189,7 @@ public:
 #endif		
 
 		// Read matrix dimensions from the dim.*.txt file.
-		sprintf(name, "dim.%04d.txt", my_file) ;
+		sprintf(name, "%s.%04d.%s", strDimFile.c_str(), my_file, dim_ext.c_str()) ;
 		dim_file.open(name) ;
 		if ( ! dim_file.is_open() ) {
 			cerr << "Could not open " + string(name) + "\n" ;
@@ -221,11 +222,15 @@ public:
 				row_end = row_start + (mstore0 / proc_fac) - 1 ;
 			num_rows= row_end - row_start + 1 ;
 		} else {
-			row_end = row_start - 1 ;
+			// Left-over process not used.
+			row_start = dim1 + 1 ;
+			row_end  = dim1 ;
 			num_rows= 0 ;
 		}
-		
+
+#ifdef VERBOSE		
 		cout << "RANK = " << RANK << " row_start = " << row_start << " row_end = " << row_end << " num_rows = " << num_rows << endl ;
+#endif		
 		
 		// Append the processor number to the A matrix name.
 		char matFilename2[80] ;
@@ -236,8 +241,9 @@ public:
 			exit(1) ;
 		}
 		
+		string mat_ext = str_filename.substr(found+1) ;
 		str_filename = str_filename.substr(0,found+1) ;
-		sprintf(matFilename2, "%s%04d.txt", str_filename.data(), my_file) ;
+		sprintf(matFilename2, "%s%04d.%s", str_filename.c_str(), my_file, mat_ext.c_str()) ;
 		ifstream matfile(matFilename2);
 		if (!matfile.good()) {
 			cerr << "error opening matrix file " << matFilename << endl;
@@ -286,23 +292,25 @@ public:
 				delete [] scale ;
 				delete [] shift ;
 			}
-			mat = new double[d1 * d2] ;
 			scale = new double[d2] ;
 			shift = new double[d2] ;
-			dim1 = d1 ;
-			dim2 = d2 ;
 			if ( ! distributed ) {
 				row_start = 0 ;
-				row_end = dim1 - 1 ;
-			} else {
-				row_start = (dim1 * RANK) / NPROCS ;
+				row_end = d1 - 1 ;
+				num_rows = row_end - row_start + 1 ;
+			} else if ( d1 != dim1 ) {
+				// Do not change distribution parameters unless dim1 changes.
+				row_start = (d1 * RANK) / NPROCS ;
 				if ( RANK < NPROCS - 1 ) {
-					row_end = (dim1 * (RANK+1)) / NPROCS - 1 ;
+					row_end = (d1 * (RANK+1)) / NPROCS - 1 ;
 				} else {
-					row_end = dim1 - 1 ;
+					row_end = d1 - 1 ;
 				}
+				num_rows = row_end - row_start + 1 ;
 			}
-			num_rows = row_end - row_start + 1 ;
+			dim1 = d1 ;
+			dim2 = d2 ;
+			mat = new double[num_rows * d2] ;
 		}
 	inline double get(int i, int j) const
 		{
@@ -343,7 +351,6 @@ public:
 	void distribute()
 	// Settings to distribute a matrix across processes.
 		{
-						
 			row_start = (dim1 * RANK) / NPROCS ;
 			if ( RANK < NPROCS - 1 ) {
 				row_end = (dim1 * (RANK+1)) / NPROCS - 1 ;
@@ -353,6 +360,27 @@ public:
 			distributed = true ;
 			num_rows = row_end - row_start + 1 ;
 		}
+	void distribute(const Matrix &xin)
+	// Settings to distribute a matrix across processes based on another matrix's distribution pattern.
+		{
+			dim1 = xin.dim1 ;
+			row_start = xin.row_start ;
+			row_end = xin.row_end ;
+			distributed = xin.distributed ;
+			num_rows = xin.num_rows ;
+		}
+	void scale_rows(const Vector& vals)
+		// Multiply each row of the matrix by the values in vals.
+	{
+		if ( vals.dim != dim1 ) {
+			cout << "Error in scale_rows: dimensions did not match" << endl ;
+		}
+		for ( int j = row_start ; j <= row_end ; j++ ) {
+			for ( int k = 0 ; k < dim2 ; k++ ) {
+				set(j,k, get(j,k) * vals.get(j)) ;
+			}
+		}
+	}
 	double mult_T(int j, int k)
 	// Calculate the j,k element of X^T * X, where X is the current matrix.
 		{

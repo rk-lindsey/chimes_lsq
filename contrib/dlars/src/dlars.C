@@ -86,6 +86,7 @@ int main(int argc, char **argv)
 		{"max_norm", required_argument, 0, 'm'},
 		{"normalize", required_argument, 0, 'n'},
 		{"split_files", no_argument, 0, 's'},
+		{"weights", required_argument, 0, 'w'},
 		{"help", no_argument, 0, 'h'},
 		{0, 0, 0, 0}
 	} ;
@@ -102,6 +103,7 @@ int main(int argc, char **argv)
 	double max_beta_norm = 1.0e+50 ;  // Maximum L1 norm of solution 
 	int max_iterations = 10000000 ;   // Maximum number of LARS iterations.
 	double lambda = 0.0 ;             // L1 weighting factor.
+	string weight_file("") ;
 	
 	while (1) {
 		opt_type = getopt_long(argc, argv, "a:i:l:m:n:sh", long_options, &option_index) ;
@@ -135,6 +137,9 @@ int main(int argc, char **argv)
 		case 'h':
 			display_usage(long_options) ;
 			exit(0) ;
+		case 'w':
+			weight_file=string(optarg) ;
+			break ;
 		default:
 			abort() ;
 		}
@@ -174,11 +179,6 @@ int main(int argc, char **argv)
 		xmat.read(xfile, ndata, nprops, true) ;
 	}
 
-	if ( normalize ) {
-		xmat.normalize() ;
-		xmat.check_norm() ;
-	}
-
 	ifstream yfile(yname) ;
 	if ( ! yfile.is_open() ) {
 		if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
@@ -186,7 +186,22 @@ int main(int argc, char **argv)
 	}
 	Vector yvec ;
 	yvec.read(yfile, ndata) ;
+
+	if ( ! weight_file.empty() ) {
+		Vector weights ;
+		ifstream weight_stream(weight_file) ;
+		if ( ! weight_stream.is_open() ) {
+			if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
+			exit(1) ;
+		}
+		weights.read(weight_stream, ndata) ;
+		xmat.scale_rows(weights) ;
+		yvec.scale(yvec,weights) ;
+	}
+
 	if ( normalize ) {
+		xmat.normalize() ;
+		xmat.check_norm() ;
 		yvec.normalize() ;
 		yvec.check_norm() ;
 	}
@@ -226,9 +241,7 @@ int main(int argc, char **argv)
 
 	double last_obj_func = 1.0e50 ;
 
-	ofstream trajfile("traj.txt") ;
-	trajfile.precision(6) ;
-	trajfile << scientific ;
+	const double eps = 1.0e-10 ;
 	
 	for ( int j = 0 ; j + 1 <= max_iterations ; j++ ) {
 		if ( ! lars.iteration() ) {
@@ -243,17 +256,11 @@ int main(int argc, char **argv)
 			if ( RANK == 0 ) cout << "Stopping: Maximum L1 norm exceeded" << endl ;
 			break ;
 		}
-		else if ( lars.obj_func_val > last_obj_func ) {
+		else if ( lars.obj_func_val > last_obj_func + eps ) {
 			if ( RANK == 0 ) cout << "Stopping: Objective function increased" << endl ;
 			break ;
 		}
 		last_beta = lars.beta ;
-		if ( RANK == 0 ) {
-			trajfile << "Iteration " << j + 1 << endl ;
-			lars.print_error(trajfile) ;
-			lars.beta.print(trajfile) ;
-		}
-		
 		last_obj_func = lars.obj_func_val ;
 	}
 
