@@ -16,23 +16,26 @@ from subprocess import call
 def main():
     parser = argparse.ArgumentParser(description='Least-squares force matching based on output of chimes_lsq')
     # Arguments supported by the lsq code.
-    parser.add_argument("--algorithm", default='svd', help='fitting algorithm')
+    # Decided to use underscore rather than - for parameter word separator character.
     parser.add_argument("--A", default='A.txt',help='A (derivative) matrix') 
+    parser.add_argument("--algorithm", default='svd', help='fitting algorithm')
+    parser.add_argument("--alpha", type=float, default=1.0e-04,help='Lasso or ridge regularization')
     parser.add_argument("--b", default='b.txt',help='b (force) file')
+    parser.add_argument("--beta",type=float, default=0.0, help='DOWLQN L2 regularization')
+    parser.add_argument("--cores", type=int, default=8, help='DOWLQN/DLARS number of cores')
+    parser.add_argument("--eps", type=float, default=1.0e-05,help='svd regularization')
+    parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
     parser.add_argument("--header", default='params.header',help='parameter file header')
     parser.add_argument("--map", default='ff_groups.map',help='parameter file map')
-    parser.add_argument("--eps", type=float, default=1.0e-05,help='svd regularization')
-    parser.add_argument("--weights", default="None",help='weight file')
-    parser.add_argument("--test-suite", type=bool, default=False,help='output for test suite')
-    parser.add_argument("--alpha", type=float, default=1.0e-04,help='Lasso or ridge regularization')
-    parser.add_argument("--beta",type=float, default=0.0, help='DOWLQN L2 regularization')
-    parser.add_argument("--split-files", type=bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
-    parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
-    parser.add_argument("--tol", type=float, default=1.0e-05, help='OWLQN or DOWLQN tolerance')
-    parser.add_argument("--cores", type=int, default=8, help='DOWLQN/DLARS number of cores')
-    parser.add_argument("--nodes", type=int, default=1, help='DOWLQN/DLARS number of nodes')
     parser.add_argument("--memory", type=int, default=20, help='OWLQN or DOWLQN Hessian memory storage') ;
-    parser.add_argument("--restart", type=bool, default=False, help='Use DOWLQN restart file')
+    parser.add_argument("--nodes", type=int, default=1, help='DOWLQN/DLARS number of nodes')
+    parser.add_argument("--normalize", type=str2bool, default=True, help='Normalize DLARS calculation')
+    parser.add_argument("--read_output", type=str2bool, default=False, help='Read output from previous DLARS run')
+    parser.add_argument("--restart", type=str2bool, default=False, help='Use DOWLQN restart file')
+    parser.add_argument("--split_files", type=str2bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
+    parser.add_argument("--test_suite", type=str2bool, default=False,help='output for test suite')
+    parser.add_argument("--tol", type=float, default=1.0e-05, help='OWLQN or DOWLQN tolerance')
+    parser.add_argument("--weights", default="None",help='weight file')
 
     args        = parser.parse_args()
 
@@ -62,6 +65,9 @@ def main():
 
     # Do we restart calculations (currently only for DOWLQN)
     restart = args.restart
+
+    # Do we read output from a previous DLARS run ?
+    read_output = args.read_output
     
     if ( weights_file == "None" ):
         DO_WEIGHTING = False 
@@ -87,19 +93,21 @@ def main():
     num_cores = args.cores
     num_nodes = args.nodes
     split_files = args.split_files
-    
+
+    normalize = args.normalize
+
     alpha_ar = [1.0e-06, 3.2e-06, 1.0e-05, 3.2e-05, 1.0e-04, 3.2e-04, 1.0e-03, 3.2e-03]
 
     # Number of folds for cross-validation.
     folds = args.folds
 
     max_iter_num = 100000
-
+    
     test_suite_run = False
 
         # Then this run is being used for the test suite... 
         # print out parameters without any fanciness so tolerances can be checked  
-    if ( DO_WEIGHTING ):
+    if ( DO_WEIGHTING and not split_files ):
         WEIGHTS= numpy.genfromtxt(weights_file,dtype='float')
 
     #################################
@@ -114,7 +122,7 @@ def main():
     #################################
 
     # Use genfromtxt to avoid parsing large files.
-    if ( not split_files ) :
+    if ( (not split_files) and (not read_output) ) :
         A = numpy.genfromtxt(Afile, dtype='float')
         nlines = A.shape[0] 
         np = A.shape[1] 
@@ -294,12 +302,12 @@ def main():
 
     elif algorithm == 'dowlqn':
         # Note: x and y are both set by fit_dowlqn
-        x,y = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files, restart)
+        x,y = fit_dowlqn(A, b, num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files, restart, weights_file)
         np = count_nonzero_vars(x)
         nvars = np
 
     elif algorithm == 'dlars' or algorithm == 'dlasso' :
-        x,y = fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm)
+        x,y = fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize)
         np = count_nonzero_vars(x)
         nvars = np
         
@@ -309,7 +317,7 @@ def main():
         exit(1)
 
     # If split_files, A is not read in.        
-    if ( not split_files ) :
+    if ( (not split_files) and (not read_output) ) :
         y=dot(A,x)
         
     Z=0.0
@@ -696,6 +704,16 @@ def is_number(s):
         return False
 
 
+def str2bool(v):
+## Convert string to bool.  Used in command argument parsing.
+    if v.lower() in ('yes', 'true', 't', 'y'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError("Boolean value expected")
+                       
+        
 def write_matrix_market(mat, f):
 # Print an array in matrix market format.
 # Matrix market uses column-oriented storage.
@@ -772,7 +790,7 @@ def fit_owlqn(A,b,alpha_val,beta_val,tol,memory):
         sys.exit(1)
 
 
-def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files, restart):
+def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split_files, restart, weights_file):
 ## Use the Distributed OWLQN fitting algorithm.  Returns both the solution x and
 ## the estimated force vector A * x, which is read from Ax.txt.    
     print '! DOWLQN algorithm for LASSO used'
@@ -781,6 +799,11 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
     dowlqn_file = path[:-3] + "contrib/owlqn/mpi/dowlqn"
     exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
     exepath = exepath + dowlqn_file
+
+    if ( weights_files != "None" ):
+        print "Error: dowlqn does not currently support weighting"
+        exit(1)
+        
     if os.path.exists(dowlqn_file):
         if ( split_files ) :
             command = ("{0} A.txt b.txt {1} fit.txt -ls -tol {2} -m {3} -l2weight {4} -s".format(exepath, alpha_val, tol, memory, beta_val))
@@ -805,7 +828,8 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
         sys.exit(1)
 
 
-def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm):
+def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output,
+              weights_file, normalize):
 ## Use the Distributed LARS/LASSO fitting algorithm.  Returns both the solution x and
 ## the estimated force vector A * x, which is read from Ax.txt.    
     if algorithm == 'dlasso' :
@@ -817,33 +841,43 @@ def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm):
         exit(1)
     print '! DLARS alpha = ' + str(alpha_val)
 
-    path=os.path.dirname(os.path.abspath(__file__))
-    dlars_file = path[:-3] + "contrib/dlars/src/dlars"
-    exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
-    exepath = exepath + dlars_file
-    if os.path.exists(dlars_file):
-        command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha_val))
-        if ( split_files ) :
-            command = command + " --split_files"
-        if ( algorithm == 'dlars' ):
-            command = command + " --algorithm=lars"
-        elif ( algorithm == 'dlasso' ):
-            command = command + " --algorithm=lasso"
-    
-        command = command +  " >& dlars.log"
-        print("! DLARS run: " + command + "\n")
+    if not read_output:
+        path=os.path.dirname(os.path.abspath(__file__))
+        dlars_file = path[:-3] + "contrib/dlars/src/dlars"
+        exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
+        exepath = exepath + dlars_file
+        if os.path.exists(dlars_file):
+            command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha_val))
+            if ( split_files ) :
+                command = command + " --split_files"
+            if ( algorithm == 'dlars' ):
+                command = command + " --algorithm=lars"
+            elif ( algorithm == 'dlasso' ):
+                command = command + " --algorithm=lasso"
 
-        if ( os.system(command) != 0 ) :
-            print(command + " failed")
+            if ( weights_file != 'None' ):
+                command = command + " --weights=" + weights_file
+
+            if ( normalize ):
+                command = command + " --normalize=y" 
+            else:
+                command = command + " --normalize=n" 
+                
+            command = command +  " >& dlars.log"
+            print("! DLARS run: " + command + "\n")
+
+            if ( os.system(command) != 0 ) :
+                print(command + " failed")
+                sys.exit(1)
+        else:
+            print exepath + " does not exist"
             sys.exit(1)
-            
-        x = numpy.genfromtxt("x.txt", dtype='float')
-        y = numpy.genfromtxt("Ax.txt", dtype='float') 
-        return x,y
     else:
-        print exepath + " does not exist"
-        sys.exit(1)
-        
+        print "! Reading output from prior DLARS calculation"
+
+    x = numpy.genfromtxt("x.txt", dtype='float')
+    y = numpy.genfromtxt("Ax.txt", dtype='float') 
+    return x,y
 
 def fit_lasso_split(alpha_val, A, b, nsplit):
 ## Lasso Regression based on splitting the data n ways and averaging
