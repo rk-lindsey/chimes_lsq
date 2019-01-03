@@ -29,7 +29,7 @@ def main():
     parser.add_argument("--map", default='ff_groups.map',help='parameter file map')
     parser.add_argument("--memory", type=int, default=20, help='OWLQN or DOWLQN Hessian memory storage') ;
     parser.add_argument("--nodes", type=int, default=1, help='DOWLQN/DLARS number of nodes')
-    parser.add_argument("--normalize", type=str2bool, default=True, help='Normalize DLARS calculation')
+    parser.add_argument("--normalize", type=str2bool, default=False, help='Normalize DLARS calculation')
     parser.add_argument("--read_output", type=str2bool, default=False, help='Read output from previous DLARS run')
     parser.add_argument("--restart", type=str2bool, default=False, help='Use DOWLQN restart file')
     parser.add_argument("--split_files", type=str2bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
