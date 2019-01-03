@@ -57,7 +57,7 @@ public:
 
 			if ( RANK == 0 ) {
 				trajfile.open("traj.txt") ;
-				trajfile.precision(6) ;
+				trajfile.precision(12) ;
 				trajfile << scientific ;
 			}
 			for ( int j = 0 ; j < ndata ; j++ ) {
@@ -733,11 +733,13 @@ public:
 
 			iterations++ ;
 			predict() ;
+			objective_func() ;
 
 			if ( RANK == 0 ) {
 				trajfile << "Iteration " << iterations << endl ;
 				print_error(trajfile) ;
 				beta.print(trajfile) ;
+				print_error(cout) ;
 			}
 		
 			correlation() ;
@@ -753,10 +755,6 @@ public:
 				cout << "C_max: " << C_max << endl ;
 			}
 #endif			
-			objective_func() ;
-
-			print_error(cout) ;
-
 			update_active_set() ;
 
 			// build the X_A array.

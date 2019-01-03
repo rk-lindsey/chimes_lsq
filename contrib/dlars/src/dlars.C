@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	if ( RANK == 0 ) {
 		cout << "Distributed LARS algorithm" << endl ;
 		cout << scientific ;
-		cout.precision(6) ;
+		cout.precision(12) ;
 	}
 
 	
