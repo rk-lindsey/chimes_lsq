@@ -48,5 +48,20 @@ Options:
 								A corresponding dim file is required for each A.xxxx.txt file, e.g. dim.xxxx.txt.
 								The dim file gives:  The number of data columns, the starting row for the file,
 								the ending row (inclusive) for the file, and the total number of rows in the A matrix.
-								
+	--weights=<file>     Give the name of a file with weights for each row of the A matrix, and value of b.
    --help               Print a list of supported options.
+
+
+If multiple stopping criteria are given (--iterations, --lambda, --max_norm),
+the first criterion encountered will stop the calculation, and the previous iteration
+will be reported.  For instance, if lambda is specified, when the objective
+function increases, the last iteration (smallest objection function value found)
+will be used for the solution.  If max_norm is specified, when the L1 norm of the
+solution exceeds the max_norm, the previous iteration is reported.  If no stopping
+criteria are given, the program will iterate until the RMS error no longer decreases,
+or until no more variables can be added to the active set.  It is expected that
+a stopping criterion will be specified, because without one the LASSO/LARS algorithms become
+equivalent to ordinary regression.
+
+
+
