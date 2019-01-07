@@ -137,4 +137,12 @@ public:
 			vec[k] += factor * in.get(k) ;
 		}
 	}
+	void clear()
+	// Clear all entries of the vector.
+	{
+		if ( dim > 0 ) 
+			delete [] vec ;
+		vec = NULL ;
+		dim = 0 ;
+	}
 } ;

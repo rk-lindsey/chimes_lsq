@@ -84,11 +84,9 @@ public:
 				exit(1) ;
 			}
 
-			if ( u_A.size() == 0 ) {
+			if ( u_A.dim == 0 ) {
 				// First iteration.
-				for ( int j = 0 ; j < ndata ; j++ ) {
-					mu.set(j,  0.0) ;
-				}
+				X.dot(mu, beta) ;
 			} else {
 				for ( int j = 0 ; j < ndata ; j++ ) {
 					mu.set(j,  mu.get(j) + gamma_use * u_A.get(j) ) ;
@@ -346,11 +344,10 @@ public:
 			}
 		}
 
-	bool solve_G_A()
+	bool solve_G_A(bool use_incremental_updates)
 	// Find G_A^-1 * I
 		{
 			G_A_Inv_I.realloc(nactive) ;
-			const bool use_incremental_updates = true ;
 
 			bool succeeded = false ;
 			// If solve_succeeded == true, the last linear solve worked and
@@ -523,7 +520,7 @@ public:
 		{
 			IntVector a_trial(nprops) ;
 			//int count = 0 ;
-			const double eps = 1.0e-10 ;
+			const double eps = 1.0e-6 ;
 
 			// Save the last active set
 			A_last.realloc(nactive) ;
@@ -538,9 +535,11 @@ public:
 				A.push(add_prop) ;
 				nactive++ ;
 			} else {
-				// Something strange has happened.
+				// Either we are restarting or something strange has happened.
 				// Search for the new active set.
-				int count = 0 ;
+				int count = A_last.dim ;
+				a_trial = A_last ;
+
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					if ( fabs( fabs(c.get(j)) - C_max ) < eps
 							 && ! exclude.get(j) ) {
@@ -553,9 +552,8 @@ public:
 						}
 						if ( k == nactive ) {
 							a_trial.set(count, j) ;
-							if ( RANK == 0 ) cout << "Adding property " << j << " to the active set" << endl ;
 							count++ ;
-							break ;
+							if ( RANK == 0 ) cout << "Adding property " << j << " to the active set" << endl ;
 						}
 					}
 				}
@@ -715,9 +713,10 @@ public:
 		}
 
 	void print_error(ostream &out)
+	// Print the current fitting error and related parameters.
 	{
 		if ( RANK == 0 ) {
-			out  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << endl ;
+			out  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << " Number of vars: " << A.dim << endl ;
 		}
 	}
 
@@ -761,7 +760,7 @@ public:
 			build_X_A() ;
 			build_G_A() ;
 
-			if ( ! solve_G_A() ) {
+			if ( ! solve_G_A(true) ) {
 				remove_prop = -1 ;
 				cout << "Iteration failed" << endl ;
 				return false ;
@@ -795,4 +794,69 @@ public:
 			return true ;
 
 		}
+
+	int restart(string filename)
+	// Restart from the given file.
+	{
+		int iter ;
+		ifstream inf(filename) ;
+		if ( ! inf.good() ) {
+			cout << "Could not open " << filename << " for restart" << endl ;
+			exit(1) ;
+		}
+		while (1) {
+			string s ;
+			// Get the iteration number.
+			inf >> s >> iter ;
+			//iter-- ;
+			if ( inf.eof() || ! inf.good() ) break ;
+
+			// Get the objective function from the next line.
+			for ( int j = 0 ; j < 15 ; j++ ) {
+				inf >> s ;
+				if ( j == 10 ) {
+					obj_func_val = stod(s) ;
+					//cout << "OBJ FUNC: " << obj_func_val << endl ;
+				}
+			}
+
+			if ( inf.eof() || ! inf.good() ) {
+				cout << "Could not read the objective function value from " << filename << endl ;
+				exit(1) ;
+			}
+			A.clear() ;
+
+			// Read all of the beta values.
+			for ( int j = 0 ; j < nprops ; j++ ) {
+				int k ;
+				double val ;
+				inf >> k >> val ;
+				if ( k != j ) {
+					cout << "Bad index in restart file." << k << " " << j << " " << endl ;
+					exit(1) ;
+				}
+				beta.set(j, val) ;
+
+				// Update the active set.
+				if ( fabs(val) > 0.0 ) {
+					A.push(j) ;
+				}
+			}
+			if ( inf.eof() || ! inf.good() ) {
+				cout << "Could not read the parameter values from " << filename << endl ;
+				exit(1) ;
+			}
+		}
+		nactive = A.dim ;
+		iterations = iter - 1 ;
+		
+		predict_all() ;
+		objective_func() ;
+		correlation() ;
+		build_X_A() ;
+		build_G_A() ;
+		solve_G_A(false) ;
+
+		return iter -1 ;
+	}
 };

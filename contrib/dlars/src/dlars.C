@@ -85,7 +85,8 @@ int main(int argc, char **argv)
 		{"lambda", required_argument, 0, 'l'},
 		{"max_norm", required_argument, 0, 'm'},
 		{"normalize", required_argument, 0, 'n'},
-		{"split_files", no_argument, 0, 's'},
+		{"restart", required_argument, 0, 'r'},
+		{"split_files", required_argument, 0, 's'},
 		{"weights", required_argument, 0, 'w'},
 		{"help", no_argument, 0, 'h'},
 		{0, 0, 0, 0}
@@ -104,9 +105,10 @@ int main(int argc, char **argv)
 	int max_iterations = 10000000 ;   // Maximum number of LARS iterations.
 	double lambda = 0.0 ;             // L1 weighting factor.
 	string weight_file("") ;
+	string restart_file ;
 	
 	while (1) {
-		opt_type = getopt_long(argc, argv, "a:i:l:m:n:sh", long_options, &option_index) ;
+		opt_type = getopt_long(argc, argv, "a:i:l:m:n:r:sh", long_options, &option_index) ;
 		if ( opt_type == -1 ) break ;
 		switch ( opt_type ) {
 		case 'a':
@@ -131,8 +133,19 @@ int main(int argc, char **argv)
 				exit(1) ;
 			}
 			break ;
+		case 'r':
+			restart_file = string(optarg) ;
+			break ;
 		case 's':
 			split_files = true ;
+			if ( optarg[0] == 'y' ) {
+				split_files = true ;
+			} else if ( optarg[0] == 'n' ) {
+				split_files = false ;
+			} else {
+				cerr << "--split_files arg should be y or n" ;
+				exit(1) ;
+			}
 			break ;
 		case 'h':
 			display_usage(long_options) ;
@@ -242,8 +255,14 @@ int main(int argc, char **argv)
 	double last_obj_func = 1.0e50 ;
 
 	const double eps = 1.0e-10 ;
-	
-	for ( int j = 0 ; j + 1 <= max_iterations ; j++ ) {
+
+	int j = 0 ;
+	if ( ! restart_file.empty() ) {
+		j = lars.restart(restart_file) ;
+		last_obj_func = lars.obj_func_val ;
+		last_beta = lars.beta ;
+	}
+	for (  ; j + 1 <= max_iterations ; j++ ) {
 		if ( ! lars.iteration() ) {
 			if ( RANK == 0 ) cout << "Stopping: no more iterations possible" << endl ;
 			break ;
