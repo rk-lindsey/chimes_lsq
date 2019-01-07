@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 		{"max_norm", required_argument, 0, 'm'},
 		{"normalize", required_argument, 0, 'n'},
 		{"restart", required_argument, 0, 'r'},
-		{"split_files", required_argument, 0, 's'},
+		{"split_files", no_argument, 0, 's'},
 		{"weights", required_argument, 0, 'w'},
 		{"help", no_argument, 0, 'h'},
 		{0, 0, 0, 0}
@@ -138,14 +138,6 @@ int main(int argc, char **argv)
 			break ;
 		case 's':
 			split_files = true ;
-			if ( optarg[0] == 'y' ) {
-				split_files = true ;
-			} else if ( optarg[0] == 'n' ) {
-				split_files = false ;
-			} else {
-				cerr << "--split_files arg should be y or n" ;
-				exit(1) ;
-			}
 			break ;
 		case 'h':
 			display_usage(long_options) ;
