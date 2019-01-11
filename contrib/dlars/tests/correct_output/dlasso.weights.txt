@@ -1,0 +1,110 @@
+Distributed LARS algorithm
+Using the LASSO algorithm
+L1 norm of solution: 0.000000000000e+00 RMS Error: 1.142529901917e+00 Objective fn: 6.526872883871e-01 Number of vars: 0
+Adding property 1 to the active set
+New active set: 
+0 1
+Cholesky error test = 0.000000000000e+00
+Updated step gamma = 2.800004870890e-01
+Gamma limited by property 4
+Lasso step gamma limit = 1.000000000000e+20
+Beta: 
+[
+1 -2.800004870890e-01
+]
+Finished iteration 1
+L1 norm of solution: 2.800004870890e-01 RMS Error: 1.099904656634e+00 Objective fn: 6.048951268424e-01 Number of vars: 1
+Adding property 4 to the active set
+New active set: 
+0 1
+1 4
+Cholesky error test = 0.000000000000e+00
+Updated step gamma = 9.885358373738e-01
+Gamma limited by property 2
+Lasso step gamma limit = 1.000000000000e+20
+Beta: 
+[
+1 -8.605224610211e-01
+4 5.805219739321e-01
+]
+Finished iteration 2
+L1 norm of solution: 1.441044434953e+00 RMS Error: 9.714277994833e-01 Objective fn: 4.718359848044e-01 Number of vars: 2
+Adding property 2 to the active set
+New active set: 
+0 1
+1 4
+2 2
+Cholesky error test = 0.000000000000e+00
+Updated step gamma = 2.674895024445e-01
+Gamma limited by property 0
+Lasso step gamma limit = 1.000000000000e+20
+Beta: 
+[
+1 -1.226399869262e+00
+2 4.174585078440e-01
+4 6.836157292773e-01
+]
+Finished iteration 3
+L1 norm of solution: 2.327474106383e+00 RMS Error: 9.067850635785e-01 Objective fn: 4.111295757645e-01 Number of vars: 3
+Adding property 0 to the active set
+New active set: 
+0 1
+1 4
+2 2
+3 0
+Cholesky error test = 2.775557561563e-16
+Updated step gamma = 2.135025974548e+00
+Gamma limited by property 3
+Lasso step gamma limit = 1.000000000000e+20
+Beta: 
+[
+0 -1.195373350250e+00
+1 -4.382268309972e+00
+2 2.974278207162e+00
+4 1.383624592618e+00
+]
+Finished iteration 4
+L1 norm of solution: 9.935544460001e+00 RMS Error: 5.453792073004e-01 Objective fn: 1.487192398778e-01 Number of vars: 4
+Adding property 3 to the active set
+New active set: 
+0 1
+1 4
+2 2
+3 0
+4 3
+Cholesky error test = 3.996802888651e-16
+Updated step gamma = 2.350813765982e-01
+Lasso step gamma limit = 8.334792315756e-01
+Beta: 
+[
+0 -8.582203630129e-01
+1 -4.533865783605e+00
+2 3.514148033838e+00
+3 4.541783565765e-01
+4 1.794046299509e+00
+]
+Finished iteration 5
+Stopping: no more iterations possible
+Final values:
+Beta: 
+[
+0 -8.582203630129e-01
+1 -4.533865783605e+00
+2 3.514148033838e+00
+3 4.541783565765e-01
+4 1.794046299509e+00
+]
+Prediction: 
+[
+0 2.005841073412e-01
+1 2.387084415091e-01
+2 -2.471623656227e-01
+3 3.585580586161e-01
+4 -3.182172139176e-01
+5 -9.563898694608e-01
+6 8.960052634973e-01
+7 2.779845700337e-01
+8 -2.206250883496e+00
+9 1.756179891499e+00
+]
+Sq Error 2.919121543933e+00
