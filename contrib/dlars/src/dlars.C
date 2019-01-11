@@ -14,6 +14,7 @@
 #include<math.h>
 #include<iostream>
 #include<fstream>
+#include<sstream>
 #include<string.h>
 #include<getopt.h>
 
@@ -254,11 +255,16 @@ int main(int argc, char **argv)
 		last_obj_func = lars.obj_func_val ;
 		last_beta = lars.beta ;
 	}
+	int last_status = 1 ;
 	for (  ; j + 1 <= max_iterations ; j++ ) {
-		if ( ! lars.iteration() ) {
+		int status = lars.iteration() ;
+		if ( status == 0 ) {
 			if ( RANK == 0 ) cout << "Stopping: no more iterations possible" << endl ;
 			break ;
-		}
+		} else if ( status == -1 && last_status == 1 ) {
+			if ( RANK == 0 ) cout << "Iteration failed: continuing" << endl ;
+			continue ;
+		} 
 
 		if ( RANK == 0 ) cout << "Finished iteration " << j + 1 << endl ;
 
@@ -273,13 +279,14 @@ int main(int argc, char **argv)
 		}
 		last_beta = lars.beta ;
 		last_obj_func = lars.obj_func_val ;
+		last_status = status ;
 	}
 
 	if ( RANK == 0 ) {
 		cout.precision(12) ;
 		cout << "Final values:" << endl ;
 		cout << "Beta: " << endl ;
-		last_beta.print() ;
+		last_beta.print(cout) ;
 	}
 
 	lars.beta = last_beta ;
@@ -287,7 +294,7 @@ int main(int argc, char **argv)
 	lars.correlation() ;
 	
 	if ( RANK == 0 ) cout << "Prediction: " << endl ;
-	lars.mu.print() ;
+	lars.mu.print(cout) ;
 
 	if ( RANK == 0 ) cout << "Sq Error " << lars.sq_error() << endl ;
 

@@ -370,7 +370,7 @@ public:
 							return true ;
 						}
 					} else {
-						cout << "Failed to add a row to the Cholesky decomposition" << endl ;
+						if ( RANK == 0 ) cout << "Failed to add a row to the Cholesky decomposition" << endl ;
 					} 
 				} else if ( nactive == A_last.dim - 1 && nactive > 2 ) {
 					succeeded = chol.cholesky_remove_row(remove_prop) ;
@@ -381,7 +381,7 @@ public:
 							solve_succeeded = true ;
 							return true ;
 						} else {
-							cout << "Failed to remove a row from the Cholesky decomposition" << endl ;
+							if ( RANK == 0 ) cout << "Failed to remove a row from the Cholesky decomposition" << endl ;
 						}
 					}
 				}
@@ -551,7 +551,7 @@ public:
 							}
 						}
 						if ( k == nactive ) {
-							a_trial.set(count, j) ;
+							a_trial.push(j) ;
 							count++ ;
 							if ( RANK == 0 ) cout << "Adding property " << j << " to the active set" << endl ;
 						}
@@ -564,7 +564,7 @@ public:
 				}
 			}
 			if ( RANK == 0 ) cout << "New active set: " << endl ;
-			A.print() ;
+			A.print_all(cout) ;
 
 #ifdef USE_MPI
 			// Sync the active set to avoid possible divergence between processes.
@@ -663,7 +663,7 @@ public:
 			
 #ifdef VERBOSE			
 			cout << "New beta: " ;
-			beta.print() ;
+			beta.print(cout) ;
 
 			cout << "Predicted mu: " << endl ;
 			for ( int j = 0 ; j < ndata ; j++ ) {
@@ -691,7 +691,7 @@ public:
 					uns_beta.set(j, beta.get(j) / X.scale[j]) ;
 				}
 				if ( out.rdbuf() == cout.rdbuf() ) {
-					uns_beta.print() ;
+					uns_beta.print(cout) ;
 				} else {
 					for ( int j = 0 ; j < nprops ; j++ ) {
 						out << uns_beta.get(j) << endl ;
@@ -720,14 +720,33 @@ public:
 		}
 	}
 
-	bool iteration()
+	void print_restart()
+		// Print the restart file
+	{
+		ofstream rst("restart.txt") ;
+
+		if ( RANK == 0 && rst.is_open() ) {
+			rst << scientific ;
+			rst.precision(14) ;
+			rst << "Iteration " << iterations << endl ;
+			print_error(rst) ;
+			beta.print_sparse(rst) ;
+			rst << "Exclude " << endl ;
+			exclude.print_sparse(rst) ;
+		}
+		rst.close() ;
+	}
+
+	int iteration()
 	// Perform a single iteration of the LARS algorithm.
-	// Return false when no more iterations can be performed.
+	// Return 0 when no more iterations can be performed.
+	// Return 1 on success.
+	// Return -1 on a failed iteration that could be recovered from.
 		{
 
 			if ( nactive >= nprops - num_exclude ) {
 				// No more iterations are possible.
-				return false ;
+				return 0 ;
 			}
 
 			iterations++ ;
@@ -739,6 +758,7 @@ public:
 				print_error(trajfile) ;
 				beta.print(trajfile) ;
 				print_error(cout) ;
+				print_restart() ;
 			}
 		
 			correlation() ;
@@ -762,8 +782,9 @@ public:
 
 			if ( ! solve_G_A(true) ) {
 				remove_prop = -1 ;
+				add_prop = -1 ;
 				cout << "Iteration failed" << endl ;
-				return false ;
+				return -1 ;
 			}
 			
 #ifdef VERBOSE
@@ -785,13 +806,13 @@ public:
 
 			if ( RANK == 0 ) {
 				cout << "Beta: " << endl ;
-				beta.print() ;
-				cout << "Y constant offset = " << y.shift << endl ;
-				cout << "Unscaled coefficients: " << endl ;
-				print_unscaled(cout) ;
+				beta.print(cout) ;
+				//cout << "Y constant offset = " << y.shift << endl ;
+				//cout << "Unscaled coefficients: " << endl ;
+				//print_unscaled(cout) ;
 			}
 
-			return true ;
+			return 1 ;
 
 		}
 
@@ -827,24 +848,22 @@ public:
 			A.clear() ;
 
 			// Read all of the beta values.
+			string line ;
+			getline(inf,line) ;
+			beta.read_sparse(inf) ;
 			for ( int j = 0 ; j < nprops ; j++ ) {
-				int k ;
-				double val ;
-				inf >> k >> val ;
-				if ( k != j ) {
-					cout << "Bad index in restart file." << k << " " << j << " " << endl ;
-					exit(1) ;
-				}
-				beta.set(j, val) ;
-
-				// Update the active set.
-				if ( fabs(val) > 0.0 ) {
+				if ( fabs(beta.get(j)) > 0.0 ) {
 					A.push(j) ;
 				}
 			}
 			if ( inf.eof() || ! inf.good() ) {
 				cout << "Could not read the parameter values from " << filename << endl ;
 				exit(1) ;
+			}
+
+			getline(inf,line) ;
+			if ( line.find("Exclude") != string::npos ) {
+				exclude.read_sparse(inf) ;
 			}
 		}
 		nactive = A.dim ;

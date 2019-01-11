@@ -32,6 +32,7 @@ Outputs:
 	Ax.txt :  The final estimated value of b (= Ax), given the parameters x.
 	traj.txt: The 'trajectory' of x values for each iteration, along with values of
 	          the RMS error and objective function.
+   restart.txt: A file to use in restarting a previous calculation.				
 
 Options:
    --algorithm=<alg>    The algorithm may be either LARS or LASSO.  LASSO always gives better answers than
@@ -41,7 +42,7 @@ Options:
 	--max_norm=<val>     Set the maximum L1 norm of the solution.  This is based on the scaled variables.
 	--normalize=<y or n> Specifies whether the A matrix and b vector are normalized prior to fitting.
 	                     The default is to normalize.
-    --restart=<file>    Restart from the traj.txt file specified.
+    --restart=<file>    Restart from the restart.txt file specified.
     --split_files       If specified, split input files are read.  Instead of A.txt, A.0000.txt,
 	                     A.0001.txt, etc. is read by each MPI process.  This can speed job execution
 								for large A matrices.  The chimes_lsq code generates these files if the

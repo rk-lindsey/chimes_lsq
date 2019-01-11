@@ -74,6 +74,46 @@ public:
 				set(i, val) ;
 			}
 		}
+
+	void read_sparse(ifstream &file)
+		// Read a vector in sparse format.
+		{
+			string line ;
+
+			clear() ;
+			getline(file,line) ;
+
+			size_t pos =  line.find('[') ;
+			if ( pos == string::npos ) {
+				cout << "Did not find '[' character in " + line << endl ;
+				exit(1) ;
+			}
+			istringstream istr(line.substr(pos+1)) ;
+			istr >> dim ;
+			vec = new double[dim] ;
+			for ( int i = 0 ; i < dim ; i++ ) {
+				vec[i] = double{0} ;
+			}
+			int idx ;
+			double val ;
+			for ( int i = 0 ; i < dim ; i++ ) {
+				getline(file, line) ;
+				if ( line.find(']') != string::npos ) {
+					break ;
+				}
+				istringstream istr(line) ;
+				istr >> idx >> val ;
+				if ( idx < dim && idx >= 0 ) 
+					set(idx, val) ;
+				else {
+					cout << "Error reading sparse vector " << endl ;
+					cout << line ;
+					exit(1) ;
+				}
+			}
+			cout <<  "Last line: " + line << endl ;
+		}
+
 	void normalize()
 		{
 			shift = 0 ;
@@ -110,17 +150,45 @@ public:
 		{
 			vec[idx] += val ;
 		}
-	void print() 
+	//void print() 
+	//{
+	//if ( RANK == 0 ) {
+	//cout << "[" << endl ;
+	//for ( int j = 0 ; j < dim ; j++ ) {
+	//if ( fabs(vec[j]) > 0.0 ) 
+	//cout << j << " " << vec[j] << endl ;
+//}
+	//cout << "]" << endl ;
+//}
+//}
+	void print(ostream &of)
+	// Print only non-zero values.
 		{
 			if ( RANK == 0 ) {
-				cout << "[" << endl ;
+				of << "[" << endl ;
 				for ( int j = 0 ; j < dim ; j++ ) {
-					cout << j << " " << vec[j] << endl ;
+					if ( fabs(vec[j]) > 0.0 ) 
+						of << j << " " << vec[j] << endl ;
 				}
-				cout << "]" << endl ;
+				of << "]" << endl ;
 			}
 		}
-	void print(ostream &of) 
+	
+		void print_sparse(ofstream &of)
+		// Print only non-zero values.
+		{
+			if ( RANK == 0 ) {
+				of << "[ " << dim << endl ;
+				for ( int j = 0 ; j < dim ; j++ ) {
+					if ( fabs(vec[j]) > 0.0 ) 
+						of << j << " " << vec[j] << endl ;
+				}
+				of << "]" << endl ;
+			}
+		}
+
+	void print_all(ostream &of)
+	// Print all values.
 		{
 			if ( RANK == 0 ) {
 				for ( int j = 0 ; j < dim ; j++ ) {
