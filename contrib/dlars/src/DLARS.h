@@ -2,7 +2,7 @@
 class DLARS
 {
 public:
-	Matrix X ;         // The matrix of data vs properties
+	Matrix &X ;         // The matrix of data vs properties
 	Vector y ;         // The vector of data
 	Vector mu ;        // The predicted values of data
 	Vector beta ;      // The scaled fitting coefficients
