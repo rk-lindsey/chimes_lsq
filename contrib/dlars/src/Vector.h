@@ -1,3 +1,11 @@
+// Used by all classes to safely stop the calculation.
+void stop_run(int stat) {
+#ifdef USE_MPI
+	MPI_Abort(MPI_COMM_WORLD,stat) ;
+#else
+	exit(start) ;
+#endif
+}
 
 class Vector {
 public:
@@ -111,7 +119,7 @@ public:
 					exit(1) ;
 				}
 			}
-			cout <<  "Last line: " + line << endl ;
+			// cout <<  "Last line: " + line << endl ;
 		}
 
 	void normalize()

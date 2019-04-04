@@ -54,7 +54,7 @@ public:
 #ifdef DEBUG					
 		if ( i >= dim ) {
 			cout << "IntVector set out of bounds" << endl ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 #endif					
 		vec[i] = val ;
@@ -80,7 +80,7 @@ public:
 			size_t pos =  line.find('[') ;
 			if ( pos == string::npos ) {
 				cout << "Did not find '[' character in " + line << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			istringstream istr(line.substr(pos+1)) ;
 			istr >> dim ;
@@ -99,7 +99,7 @@ public:
 				else {
 					cout << "Error reading sparse vector " << endl ;
 					cout << line ;
-					exit(1) ;
+					stop_run(1) ;
 				}
 			}
 		}
@@ -108,7 +108,7 @@ public:
 #ifdef DEBUG					
 		if ( idx >= dim ) {
 			cout << "IntVector index out of bounds" << endl ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 #endif					
 		return vec[idx] ;
@@ -180,7 +180,7 @@ public:
 	{
 		if ( in.dim != dim ) {
 			cout << "Error in add_mult: dim mismatch\n" ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		for ( int k = 0 ; k < dim ; k++ ) {
 			vec[k] += factor * in.get(k) ;

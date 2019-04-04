@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	
 	if ( argc < 4 ) {
 		if ( RANK == 0 ) cout << "Not enough args " << endl ;
-		exit(1) ;
+		stop_run(1) ;
 	}
 	string xname(argv[1]) ;
 	string yname(argv[2]) ;
@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 				normalize = false ;
 			} else {
 				cerr << "--normalize arg should be y or n" ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			break ;
 		case 'r':
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 			break ;
 		case 'h':
 			display_usage(long_options) ;
-			exit(0) ;
+			stop_run(0) ;
 		case 'w':
 			weight_file=string(optarg) ;
 			break ;
@@ -151,14 +151,14 @@ int main(int argc, char **argv)
 		}
 	}
 
-	bool do_lasso ;
+	bool do_lasso = true ;
 	if ( algorithm == "lars" ) {
 		do_lasso = false ;
 	} else if ( algorithm == "lasso" ) {
 		do_lasso = true ;
 	} else {
 		if ( RANK == 0 ) cout << "Error: unrecognized algorithm: " << algorithm << endl ;
-		exit(1) ;
+		stop_run(1) ;
 	}
 	
 	int nprops, ndata ;
@@ -174,12 +174,12 @@ int main(int argc, char **argv)
 		ifstream xfile(xname) ;
 		if ( ! xfile.is_open() ) {
 			if ( RANK == 0 ) cout << "Could not open " << xname << endl ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		ifstream dfile(dname) ;
 		if ( ! dfile.is_open() ) {
 			if ( RANK == 0 ) cout << "Error: could not open " << dname << endl ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		dfile >> nprops >> ndata ;
 		xmat.read(xfile, ndata, nprops, true) ;
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
 	ifstream yfile(yname) ;
 	if ( ! yfile.is_open() ) {
 		if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
-		exit(1) ;
+		stop_run(1) ;
 	}
 	Vector yvec ;
 	yvec.read(yfile, ndata) ;
@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 		ifstream weight_stream(weight_file) ;
 		if ( ! weight_stream.is_open() ) {
 			if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		weights.read(weight_stream, ndata) ;
 		xmat.scale_rows(weights) ;
@@ -305,7 +305,7 @@ int main(int argc, char **argv)
 		xtxt << scientific ;
 		if ( ! xtxt.is_open() ) {
 			if ( RANK == 0 ) cout << "Error: could not open x.txt" << endl ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		lars.print_unscaled(xtxt) ;
 
@@ -314,7 +314,7 @@ int main(int argc, char **argv)
 		Axfile << scientific ;
 		if ( ! Axfile.is_open() ) {
 			if ( RANK == 0 ) cout << "Error: could not open Ax.txt" << endl ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		lars.print_unshifted_mu(Axfile) ;
 	}

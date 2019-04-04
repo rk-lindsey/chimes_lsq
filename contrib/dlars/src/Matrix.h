@@ -145,7 +145,7 @@ public:
 		std::size_t found1 = strDimFile.find(".") ;
 		if ( found1 == string::npos ) {
 			cerr << "A dimension file name must end with a suffix" ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		string dim_ext  = strDimFile.substr(found1+1, string::npos) ;
 		strDimFile = strDimFile.substr(0,found1) ;
@@ -167,13 +167,13 @@ public:
 		if ( total_files > NPROCS ) {
 			if ( RANK == 0 ) {
 				cout << "Not enough processes specified" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 		}
 		if ( total_files == 0 ) {
 			if ( RANK == 0 ) {
 				cout << "No dimension files were found" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 		}
 
@@ -193,7 +193,7 @@ public:
 		dim_file.open(name) ;
 		if ( ! dim_file.is_open() ) {
 			cerr << "Could not open " + string(name) + "\n" ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		
 		// Dimensions to use if NPROCS == total_files
@@ -202,7 +202,7 @@ public:
 		dim_file >> dim2 >> mstart0 >> mend0 >> dim1 ;
 		if ( ! dim_file.good() ) {
 			cerr << "Error reading dim file\n" ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		dim_file.close() ;
 		
@@ -238,7 +238,7 @@ public:
 		std::size_t found = str_filename.find(".") ;
 		if ( found == string::npos ) {
 			cerr << "A matrix file name must end with a suffix" ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		
 		string mat_ext = str_filename.substr(found+1) ;
@@ -247,7 +247,7 @@ public:
 		ifstream matfile(matFilename2);
 		if (!matfile.good()) {
 			cerr << "error opening matrix file " << matFilename << endl;
-			exit(1);
+			stop_run(1);
 		}
 
 		if ( mat != NULL ) {
@@ -280,7 +280,7 @@ public:
 		}
 		if ( ! matfile.good() ) {
 			cerr << "Error reading A matrix" ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		matfile.close();
 	}
@@ -317,11 +317,11 @@ public:
 #ifdef DEBUG						
 			if ( i >= dim1 || j >= dim2 ) {
 				cout << "Matrix out of bounds" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			if ( distributed && (i > row_end || i < row_start) ) {
 				cout << "Distributed matrix out of bounds " << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 #endif						
 			return(mat[(i-row_start) * dim2 + j]) ;
@@ -331,11 +331,11 @@ public:
 #ifdef DEBUG						
 			if ( i >= dim1 || j >= dim2 ) {
 				cout << "Matrix set out of bounds" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			if ( distributed && (i > row_end || i < row_start) ) {
 				cout << "Distributed matrix set out of bounds " << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 #endif						
 			mat[(i-row_start) * dim2 + j] = val  ;
@@ -545,7 +545,7 @@ public:
 			}
 			if ( newr.dim != dim1 || chol0.dim1 != dim1 - 1 || chol0.dim1 != chol0.dim2 ) {
 				cout << "Dimension mismatch" ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			Vector xtmp(dim1) ;
 			double cdotc = 0.0 ;
@@ -591,7 +591,7 @@ public:
 		double a(0),b(0),c(0),s(0),tau(0);
 		if ( dim1 != dim2 ) {
 			cout << "Error: the cholesky matrix should be square" << endl ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		int lth = dim1 - 1 ;
 		for(int i=id; i < lth; ++i){
@@ -652,7 +652,7 @@ public:
 		{
 			if ( b.dim != x.dim || b.dim != dim1 || b.dim != dim2 ) {
 				cout << "Dimension mismatch" ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			Vector xtmp(dim1) ;
 			for ( int j = 0 ; j < dim1 ; j++ ) {
@@ -703,7 +703,7 @@ public:
 		{
 			if ( out.dim != dim1 || in.dim != dim2 ) {
 				cout << "Array dimension mismatch" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			for ( int j = row_start ; j <= row_end ; j++ ) {
 				double sum = 0.0 ;
@@ -741,7 +741,7 @@ public:
 		{
 			if ( out.dim != dim2 || in.dim != dim1 ) {
 				cout << "Array dimension mismatch" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			Vector sumv(dim2,0.0) ;			
 			for ( int j = 0 ; j < dim2 ; j++ ) {

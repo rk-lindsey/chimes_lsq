@@ -74,14 +74,14 @@ public:
 				X.shift[k] = Xin.shift[k] ;
 			}
 		}
-
+	
 	void predict() 
 	// Calculated predicted values of y (mu hat, Eq. 1.2).  Update previous prediction
 	// based on u_A and gamma_use.
 		{
 			if ( mu.size() != ndata ) {
 				cout << "Error:  matrix dim mismatch" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 
 			if ( u_A.dim == 0 ) {
@@ -112,7 +112,7 @@ public:
 		{
 			if ( mu.size() != ndata ) {
 				cout << "Error:  matrix dim mismatch" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			X.dot(mu, beta) ;
 
@@ -230,7 +230,7 @@ public:
 			// Find the new index.
 			if ( nactive != A.dim ) {
 				cout << "Error: A dimension mismatch" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			for ( ; newc < nactive ; newc++ ) {
 				int k = 0 ;
@@ -291,7 +291,7 @@ public:
 			// Find the new index.
 			if ( nactive != A.dim ) {
 				cout << "Error: A dimension mismatch" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			for ( ; delc < A_last.dim ; delc++ ) {
 				int k = 0 ;
@@ -306,7 +306,7 @@ public:
 			// delc is the index of the deleted column.
 			if ( delc >= A_last.dim ) {
 				cout << "Error: did not find deleted index" << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 
 			Matrix G_New(nactive, nactive) ;
@@ -370,7 +370,11 @@ public:
 							return true ;
 						}
 					} else {
-						if ( RANK == 0 ) cout << "Failed to add a row to the Cholesky decomposition" << endl ;
+						if ( RANK == 0 ) {
+							cout << "Failed to add a row to the Cholesky decomposition" << endl ;
+							cout << "Will perform a non-incremental Cholesky decomposition" << endl ;
+						}
+						
 					} 
 				} else if ( nactive == A_last.dim - 1 && nactive > 2 ) {
 					succeeded = chol.cholesky_remove_row(remove_prop) ;
@@ -381,7 +385,10 @@ public:
 							solve_succeeded = true ;
 							return true ;
 						} else {
-							if ( RANK == 0 ) cout << "Failed to remove a row from the Cholesky decomposition" << endl ;
+							if ( RANK == 0 ) {
+								cout << "Failed to remove a row from the Cholesky decomposition" << endl ;
+								cout << "Will perform a non-incremental decomposition" << endl ;
+							}
 						}
 					}
 				}
@@ -391,7 +398,7 @@ public:
 			if ( ! succeeded ) {
 				chol.realloc(nactive, nactive) ;
 				if ( ! G_A.cholesky(chol) ) {
-					if ( RANK == 0 ) cout << "Cholesky failed" << endl ;
+					if ( RANK == 0 ) cout << "Non-incremental Cholesky failed" << endl ;
 					for ( int j = 0 ; j < nactive ; j++ ) {
 						int k ;
 						// See if this is a new index.
@@ -420,7 +427,7 @@ public:
 
 			//cout << "Cholesky " << endl ;
       //chol.print() ;
-			
+			const double eps_fail = 1.0e-04 ;  // Max allowed solution error.
 			// Solve for G_A^-1 * unity
 			Vector unity(nactive, 1.0) ;
 			chol.cholesky_sub(G_A_Inv_I, unity) ;
@@ -434,7 +441,7 @@ public:
 			double errval = 0.0 ;
 			for ( int j = 0 ; j < nactive ; j++ ) {
 				errval += fabs(test.get(j)-1.0) ;
-				if ( fabs(test.get(j) - 1.0) > 1.0e-04 ) {
+				if ( fabs(test.get(j) - 1.0) > eps_fail ) {
 					cout << "Cholesky solution test failed\n" ;
 					cout << "Error = " << fabs(test.get(j) - 1.0) << endl ;
 					return false ;
@@ -458,6 +465,7 @@ public:
 	
 	void build_u_A()
 		{
+			const double eps_fail = 1.0e-04 ;
 			w_A.realloc(nactive) ;
 			u_A.realloc(ndata) ;
 			a.realloc(nprops) ;
@@ -480,18 +488,19 @@ public:
 				test += u_A.get(j) * u_A.get(j) ;
 			}
 			test = sqrt(test) ;
-			if ( fabs(test-1.0) > 1.0e-04 ) {
+			if ( fabs(test-1.0) > eps_fail ) {
 				cout << "U_A norm test failed" << endl ;
 				cout << "Norm = " << test << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 
 			// Test X_A^T u__A = A_A * I
 			Vector testv(nactive,0.0) ;
 			X_A.dot_transpose(testv, u_A) ;
 			for ( int j = 0 ; j < nactive ; j++ ) {
-				if ( fabs(testv.get(j) - A_A) > 1.0e-08 ) {
+				if ( fabs(testv.get(j) - A_A) > eps_fail ) {
 					cout << "u_A test failed " << endl ;
+					stop_run(1) ;
 				}
 			}
 				
@@ -656,6 +665,18 @@ public:
 				double val = beta.get(idx) + w_A.get(j) * sign.get(j) * gamma_use ;
 				beta.set(idx,val) ;
 			}
+			// If we are removing a property, set the value to exactly 0.
+			// Check that the calculated value is close to 0.
+			if ( do_lasso && gamma > gamma_lasso ) {
+				if ( fabs(beta.get(A.get(remove_prop))) > 1.0e-08 ) {
+					if ( RANK == 0 ) {
+						cout << "Error: failed to set variable to zero when removing prop\n" ;
+						stop_run(1) ;
+					}
+				}
+				beta.set(A.get(remove_prop),0.0) ;
+			}
+			
 #ifdef USE_MPI
 			// Sync the beta values to avoid possible divergence between processes.
 			MPI_Bcast(beta.vec, nprops, MPI_DOUBLE, 0, MPI_COMM_WORLD) ;
@@ -683,7 +704,7 @@ public:
 				for ( int j = 0 ; j < nprops ; j++ ) {
 					if ( X.scale[j] == 0.0 ) {
 						out << "Error: scale factor = 0.0" << endl ;
-						exit(1) ;
+						stop_run(1) ;
 					}
 					offset -= beta.get(j) * X.shift[j] / X.scale[j] ;
 				}
@@ -727,7 +748,8 @@ public:
 
 		if ( RANK == 0 && rst.is_open() ) {
 			rst << scientific ;
-			rst.precision(14) ;
+			rst.precision(16) ;
+			rst.width(24) ;
 			rst << "Iteration " << iterations << endl ;
 			print_error(rst) ;
 			beta.print_sparse(rst) ;
@@ -823,7 +845,7 @@ public:
 		ifstream inf(filename) ;
 		if ( ! inf.good() ) {
 			cout << "Could not open " << filename << " for restart" << endl ;
-			exit(1) ;
+			stop_run(1) ;
 		}
 		while (1) {
 			string s ;
@@ -843,7 +865,7 @@ public:
 
 			if ( inf.eof() || ! inf.good() ) {
 				cout << "Could not read the objective function value from " << filename << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 			A.clear() ;
 
@@ -858,7 +880,7 @@ public:
 			}
 			if ( inf.eof() || ! inf.good() ) {
 				cout << "Could not read the parameter values from " << filename << endl ;
-				exit(1) ;
+				stop_run(1) ;
 			}
 
 			getline(inf,line) ;
@@ -866,6 +888,8 @@ public:
 				exclude.read_sparse(inf) ;
 			}
 		}
+		inf.close() ;
+		
 		nactive = A.dim ;
 		iterations = iter - 1 ;
 		
