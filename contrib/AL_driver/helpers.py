@@ -1,3 +1,5 @@
+# Global (python) modules
+
 from subprocess import check_output 
 from subprocess import CalledProcessError
 import time
@@ -5,11 +7,19 @@ import glob
 import sys
 import math
 
+""" Small helper functions and utilities general to the ALC process. """
+
 def run_bash_cmnd(cmnd_str):
 
-	# Notes:
-	#
-	# Runs a shell command (expects bash), and captures any returned output
+	""" 
+	
+	Runs a (bash) shell command - captures and returns any resulting output. 
+	
+	Usage: run_bash_cmnd("my command string")
+	
+	Notes: Linux wildcards will not work as expected. Use the glob if needed.
+	
+	"""
 
 	msg = ""
 	
@@ -21,22 +31,34 @@ def run_bash_cmnd(cmnd_str):
 	return msg
 	
 def run_bash_cmnd_to_file(outfile, cmnd_str):
+
+	""" 
+	
+	Runs a bash shell command - captures and saves any returned output to file. 
+	
+	Usage: run_bash_cmnd_to_file("my_outfile_name.dat", "my command string")
+	
+	Notes: Linux wildcards will not work as expected. Use the glob if needed.
+	
+	"""
 	
 	ofstream = open(outfile,'r')
 	ofstream .write(run_bash_cmnd(cmnd_str))
 	ofstream .close()
 	
-	
-def run_bash_cmnd_suppress(cmnd_str):
 
-	# Notes:
-	#
-	# Runs a shell command (expects bash), ... output is ignored
-
-	call(cmnd_str.split())	
-	return
 	
 def cat_to_var(*argv):
+
+	""" 
+	
+	Concatenates a list of files and returns result. 
+	
+	Usage: cat_to_var(file1.dat, file2.dat, file3.dat)	
+	
+	Notes: Linux wildcards will not work as expected. Use the glob if needed.
+	
+	"""
 
 	files_to_cat = argv # This is a pointer!
 	
@@ -55,6 +77,16 @@ def cat_to_var(*argv):
 	
 def cat_specific(outfilename, *argv):
 
+	""" 
+	
+	Concatenates a list of files and returns result. 
+	
+	Usage: cat_specific("my_outfile.dat", "file1.dat", "file2.dat", "file3.dat")	
+	
+	Notes: Linux wildcards will not work as expected. Use the glob if needed.
+	
+	"""
+
 	files_to_cat = argv[0] # This is a pointer!
 
 	with open(outfilename, "w") as ofstream:
@@ -65,14 +97,36 @@ def cat_specific(outfilename, *argv):
 
 def cat_pattern(outfilename, pattern):
 
+	""" 
+	
+	Concatenates files matching a linux pattern i.e. *, saves results to file. 
+	
+	Usage: cat_pattern("my_outfile.txt","*.dat")	
+	
+	Notes: Linux wildcards WILL work as expected. 
+	
+	"""
+
 	files_to_cat = glob.glob(pattern)
 	
 	with open(outfilename, "wb") as ofstream:
+
 		for f in files_to_cat:
+
 			with open(f, "rb") as ifstream:
 				ofstream.write(ifstream.read())
 				
-def head(*argv): # Syntax is: head(file_to_head) or head(file_to_head,nlines_requested)
+def head(*argv):
+	
+	""" 
+	
+	Mimics functionality of Linux head command. 
+	
+	Usage: head("my_file.txt") or head("my_file.txt",2)
+	
+	Notes: Linux wildcards will not work as expected. Use the glob if needed.
+	
+	"""	
 	
 	nlines = 10
 	
@@ -94,6 +148,16 @@ def head(*argv): # Syntax is: head(file_to_head) or head(file_to_head,nlines_req
 	
 def wc_l(infile):
 
+	""" 
+	
+	Mimics functionality of Linux wc -l command. 
+	
+	Usage: wc_l("my_file.txt")
+	
+	Notes: Linux wildcards will not work as expected. Use the glob if needed.
+	
+	"""	
+
 	nlines = 0
 	
 	with open(infile, "r") as ifstream:
@@ -102,6 +166,16 @@ def wc_l(infile):
 	return nlines		
 	
 def count_xyzframes_general(infile):
+
+	""" 
+	
+	Counts the number of frames in a .xyz(f) file 
+	
+	Usage: count_xyzframes_general("my_file.txt")
+	
+	Notes: Linux wildcards will not work as expected. Use the glob if needed.
+	
+	"""	
 
 	nframes = 0
 	
@@ -113,10 +187,17 @@ def count_xyzframes_general(infile):
 	
 def create_and_launch_job(*argv, **kwargs):
 
-	# Notes:
-	#
-	# "job_executable" is the string to be executed in the submit script
-	# if "job_executable" is empty, will use whatever list of commands are specified in *argv
+	""" 
+	
+	Creates and submits a run file to the queuing system.
+	
+	Usage: create_and_launch_job(<arguments>)
+	
+	Notes: if "job_executable" is empty, uses the commands specified in *argv.
+	       See function definition in helpers.py for a full list of options.
+	       Currently, function only supports SLURM systems.
+	
+	"""	
 
 	################################
 	# 0. Set up an argument parser
@@ -201,11 +282,17 @@ def create_and_launch_job(*argv, **kwargs):
 
 def wait_for_job(active_job, **kwargs):
 
-	# Notes:
-	#
-	# Accepts a jobid and queries the queueing system to determine
-	# whether the job is still active ... does not return until job is complete
-	# will likely need to be modified for ~parallel learning~
+	""" 
+	
+	Pauses the code until a single SLURM job completes.
+	
+	Usage: wait_for_job(2116091,<arguments>)
+	
+	Notes: Accepts a jobid and queries the queueing system to determine
+	       whether the job is active. Doesn't return until job completes.
+	       See function definition in helpers.py for a full list of options.
+	
+	"""	
 
 	################################
 	# 0. Set up an argument parser
@@ -256,11 +343,17 @@ def wait_for_job(active_job, **kwargs):
 
 def wait_for_jobs(*argv, **kwargs):
 
-	# Notes:
-	#
-	# Accepts a jobid and queries the queueing system to determine
-	# whether the job is still active ... does not return until job is complete
-	# will likely need to be modified for ~parallel learning~
+	""" 
+	
+	Pauses the code until SLURM job completes.
+	
+	Usage: wait_for_jobs([2116091, 2116092], <arguments>)
+	
+	Notes: Accepts list of jobid and queries the queueing system to determine
+	       whether any jobs are active. Doesn't return until job completes.
+	       See function definition in helpers.py for a full list of options.
+	
+	"""
 
 	################################
 	# 0. Set up an argument parser
@@ -323,9 +416,30 @@ def wait_for_jobs(*argv, **kwargs):
 	
 
 def str2bool(v):
-    return v.lower() in ("true")
+
+	""" 
+	
+	Converts "true" or "false" in any case to a corresponding boolean value.
+	
+	Usage: str2bool("FALSE")
+	
+	"""
+
+	return v.lower() in ("true")
 
 def break_apart_xyz(*argv):
+
+	""" 
+	
+	Breaks a .xyz(f) file into individual frames.
+	
+	Usage: break_apart_xyz(250, "my_file.xyz")
+	
+	Notes: Takes as input a number of frames and a .xyz or .xyzf file, and breaks it apart 
+	       into frames. 
+	       Optional: break into chunks of (3rd arg).
+	       	
+	"""
 
 	# Takes as input a number of frames and a .xyz or .xyzf file, and breaks it apart 
 	# into frames. 
@@ -459,6 +573,17 @@ import sys
 
 
 def dftbgen_to_xyz(*argv):
+
+	""" 
+	
+	Converts a .gen file to .xyz and prints box lengths.
+	
+	Usage: dftbgen_to_xyz(250, "my_file.xyz")
+	
+	Notes: Assumes an orthorhombic box.
+	       Prints box lengths to a separate file (*.box).
+	       	
+	"""
 
 	#NOTE: Assumes an orthorhombic box
 

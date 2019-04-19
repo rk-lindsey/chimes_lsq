@@ -8,7 +8,11 @@ import numpy as np
 import random
 import matplotlib 			# This and the next command prevents matplotlib from requiring an x-server (useful when screen is used)
 matplotlib.use('Agg')
+
+# Global (python) modules - for  matplotlib
+
 import matplotlib.pyplot as plt
+import cycler
 from cycler import cycler
 import math as m
 
@@ -19,8 +23,19 @@ import helpers
 
 def populate_repo(my_ALC):
 
+	""" 
+	
+	Updates central repository's list of selected species. 
+	
+	Usage: populate_repo(1)
+
+	"""
+
 	if not os.path.isdir("../CENTRAL_REPO"):
 		helpers.run_bash_cmnd("mkdir ../CENTRAL_REPO")
+		
+	currdir = helpers.run_bash_cmnd("pwd").rstrip()
+	os.chdir("../ALC-" + `my_ALC`)
 
 	# Create the list of selected species for the current ALC
 	
@@ -54,13 +69,67 @@ def populate_repo(my_ALC):
 	# Recompile the central repo list of files
 
 	helpers.run_bash_cmnd("rm -f ../CENTRAL_REPO/full_repo.xyzlist")
+
+	helpers.cat_specific("../CENTRAL_REPO/full_repo.xyzlist", glob.glob("../CENTRAL_REPO/*.all_selections.xyzlist"))
+	
+	os.chdir(currdir)
+	
+
+def cleanup_repo(my_ALC):
+
+	""" 
+	
+	Cleans up central repository's list of selected species. 
+	
+	Usage: cleanup_repo(1)
+	
+	Notes: Useful when AL dies mid-run by ensuring the central repsotory's
+	       list of selected species only corresponds to ALC's < my_ALC.
+	
+	"""
+
+	# check if the central repo exists
+	
+	if not os.path.isdir("../CENTRAL_REPO"):
+		return
 		
-	helpers.cat_pattern("../CENTRAL_REPO//full_repo.xyzlist", ' '.join(glob.glob("../CENTRAL_REPO/*.all_selections.xyzlist")))
+	print "Cleaning up the current CENTRAL_REPO..."
 	
+	currdir = helpers.run_bash_cmnd("pwd").rstrip()
+	os.chdir("../CENTRAL_REPO")		
+		
+	# Get a list of all present 'ALC-X.all_selections.xyzlist' files
+	# remove any files for ALC-X where X > my_ALC
 	
+	checklist = glob.glob("ALC-*.all_selections.xyzlist")
+	
+	for i in checklist:
+	
+		idx = i.split('.')[0].split('-')[1] # the "X" in ALC-X.all_selections.xyzlist
+		
+		if int(idx) >= my_ALC:
+			
+			helpers.run_bash_cmnd("rm -f " + i)
+		
+	os.chdir(currdir)
+	
+	if my_ALC > 0:
+		populate_repo(my_ALC-1)
+	
+	print "...done."
 	
 
 def GET_BIN(val,bins):
+
+	""" 
+	
+	Determines a bin number for a given energy. 
+	
+	Usage: GET_BIN(12.2573,bins)
+	
+	Notes: This function is intended for use by gen_subset only.
+	
+	"""
 
 	for i in xrange(len(bins)-1):
 	
@@ -75,6 +144,16 @@ def GET_BIN(val,bins):
 	exit()
 			
 def GEN_NORM_HIST(idx_list, ener_list, central_repo_enerlist, minval, maxval, nbins):
+
+	""" 
+	
+	Normalizes a histogram.
+	
+	Usage: GEN_NORM_HIST(idx_list, ener_list, central_repo_enerlist, minval, maxval, nbins)
+	
+	Notes: This function is intended for use by gen_subset only.
+	
+	"""
 
 	ener_vals = []
 
@@ -97,6 +176,16 @@ def GEN_NORM_HIST(idx_list, ener_list, central_repo_enerlist, minval, maxval, nb
 		
 	
 def SET_CONDITIONS(nsweeps):
+
+	""" 
+	
+	Determines which sweeps to print MC stats for.
+	
+	Usage: SET_CONDITIONS(nsweeps)
+	
+	Notes: This function is intended for use by gen_subset only.
+	
+	"""
 	
 	arr = []
 
@@ -112,15 +201,19 @@ def SET_CONDITIONS(nsweeps):
 
 def gen_subset(**kwargs): # time python gen_subset.py  all.energies_normed $SELECTIONS $SWEEPS 0 # Last 2 args: # to select, # sweeps, (optional:) E-cutoff
 
-
-	# Notes:
-	#
-	# Expects to be run from the ALC-X directory
-	# Expects "all.energies_normed" in the ALC-X directory 
-	# 
-	# 
-	# 
+	""" 
 	
+	Selects a subset of species to add to the central repository.
+	
+	Usage: gen_subset(<arguments>)
+	
+	Notes: See function definition in helpers.py for a full list of options. 
+	       Expects to be run from the ALC-X directory
+	       Expects "all.energies_normed" in the ALC-X directory
+	       Generates a plot of histogram and RMS evolution
+	       Generates a list of selected species
+	
+	"""
 	
 	################################
 	# 0. Set up an argument parser

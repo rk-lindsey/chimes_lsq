@@ -7,12 +7,18 @@ import os
 
 def get_repo_energies(*argv, **kwargs):
 
-	# Notes:
-	#
-	# Gets ChIMES energies for clusters in the CFG_REPO directory
-	# Runs out of the ALC folder
-	# Expects a "params.txt" file to be there
-	# Calls .sh scripts in the utilities folder
+	""" 
+	
+	Gets ChIMES energies for clusters in the CFG_REPO directory.
+	
+	Usage: get_repo_energies(<arguements>)
+	
+	Notes: See function definition in helpers.py for a full list of options. 
+	       Runs out of the ALC folder.
+	       Expects a "params.txt" file to be there.
+	       Calls .sh scripts in the utilities folder.	
+	      	
+	"""
 
 	################################
 	# 0. Set up an argument parser
@@ -49,12 +55,9 @@ def get_repo_energies(*argv, **kwargs):
 
 	helpers.run_bash_cmnd("cp " + args["driver_dir"] + "/utilities/new-get_dumb_ener.sh	   .")
 	helpers.run_bash_cmnd("cp " + args["driver_dir"] + "/utilities/new-get_dumb_ener_subjob.sh .")
-	
-	
+
 	# Grab the run_md.base file, prepare for this job
 	
-	helpers.run_bash_cmnd("cp " + args["base_runfile"] + " .")
-
 	ifstream = open(args["base_runfile"],'r')
 	runfile  = ifstream.readlines()
 
@@ -74,16 +77,18 @@ def get_repo_energies(*argv, **kwargs):
 			if "PRNTBAD" in runfile[i]:
 				found1 = True
 	ofstream.close()
-	helpers.run_bash_cmnd("mv tmp " + args["base_runfile"])	
+	helpers.run_bash_cmnd("mv tmp run_md.base")	
 	
 	
 	################################
 	# 2. Submit the local energy job
 	################################	
+	
+	curr_dir = helpers.run_bash_cmnd("pwd").rstrip()
 
 	run_cmnd  = "msub -l nodes=" + args["job_nodes"] + ":ppn=" + args["job_ppn"] + " -l walltime=" + args["job_walltime"] + ":00:00 -N dmb_enr " + " -q " +  args["job_queue"] + " " + " -A " +  args["job_account"] + " "
-	run_cmnd += " new-get_dumb_ener.sh GEN_FF/params.txt.reduced "  + args["job_executable"] + " " + args["base_runfile"] + " " + args["driver_dir"]
-
+	run_cmnd += " new-get_dumb_ener.sh GEN_FF/params.txt.reduced "  + args["job_executable"] + " " + curr_dir + "/run_md.base " + args["driver_dir"]
+	
 	# Submit and monitor the jobs
 
 	active_jobs = []
@@ -106,9 +111,36 @@ def get_repo_energies(*argv, **kwargs):
 		helpers.run_bash_cmnd("cp " + args["driver_dir"]   + "/utilities/new-get_dumb_ener_subjob.sh   ../CENTRAL_REPO")
 		helpers.run_bash_cmnd("cp " + currdir + "/GEN_FF/params.txt.reduced			       ../CENTRAL_REPO")
 		helpers.run_bash_cmnd("cp " + args["base_runfile"] + "  				       ../CENTRAL_REPO")   
+		
+		os.chdir("../CENTRAL_REPO")	
+			
+		
+		# Update the base run_md file
+		
+		ifstream = open(args["base_runfile"],'r')
+		runfile  = ifstream.readlines()
 	
-		os.chdir("../CENTRAL_REPO")
+		ofstream = open("tmp",'w')			
+		
+		found1 = False
 
+		for i in xrange(len(runfile)):
+	
+			if found1:
+				ofstream.write('\t' + "params.txt.reduced" + '\n')
+				found1 = False		
+			else:
+				ofstream.write(runfile[i])
+
+				if "PRMFILE" in runfile[i]:
+					found1 = True
+				
+		ofstream.close()
+		helpers.run_bash_cmnd("mv tmp " + args["base_runfile"])		
+		
+		
+		# Set up the job	
+		
 		helpers.run_bash_cmnd("cp full_repo.xyzlist xyzlist.dat")
 	
 		run_cmnd  = "msub -l nodes=" + args["job_nodes"] + ":ppn=" + args["job_ppn"] + " -l walltime=" + args["job_walltime"] + ":00:00 -N dmb_enr " + " -q " +  args["job_queue"] + " " + " -A " +  args["job_account"] + " "
@@ -135,14 +167,20 @@ def get_repo_energies(*argv, **kwargs):
 	
 
 
-def list_clusters(repo, *argv): # This is where we need to start caring about the number of atoms types and thier order!
+def list_clusters(CFG_REPO, *argv): # This is where we need to start caring about the number of atoms types and thier order!
 
-	# Notes:
-	#
-	# Assumes repo is located at current_ALC/<repo>
-	# Does NOT include "species" that contain fewer than 2 atoms
-	# No special parsing required
-
+	""" 
+	
+	Generates a list of wrapped clusters in the repo directory.
+	
+	Usage: get_repo_energies(<arguements>)
+	
+	Notes: See function definition in helpers.py for a full list of options. 
+	       Assumes repo is located at current_ALC/<repo>.
+	       Does NOT include "species" that contain fewer than 2 atoms.
+	      	
+	"""
+	
 	atm_types = argv[0] # This is a pointer!
 
 	helpers.run_bash_cmnd("rm -f xyzlist.dat ts_xyzlist.dat")
@@ -153,7 +191,7 @@ def list_clusters(repo, *argv): # This is where we need to start caring about th
 	
 	ofstream = open("xyzlist.dat",'w')
 	
-	repo_files = glob.glob(repo + "/tight*.wrap*xyz")
+	repo_files = glob.glob(CFG_REPO + "/tight*.wrap*xyz")
 	
 	for i in xrange(len(repo_files)):
 
@@ -184,7 +222,7 @@ def list_clusters(repo, *argv): # This is where we need to start caring about th
 	
 	ofstream = open("ts_xyzlist.dat",'w')
 
-	repo_files = glob.glob(repo + "/ts*.wrap*xyz")
+	repo_files = glob.glob(CFG_REPO + "/ts*.wrap*xyz")
 	
 	for i in xrange(len(repo_files)):
 	
@@ -210,9 +248,17 @@ def list_clusters(repo, *argv): # This is where we need to start caring about th
 
 def generate_clusters(**kwargs):
 
-	# Notes:
-	#
-	# WARNING: the cluster code seems to be hard coded for two atom types only, at the moment
+	""" 
+	
+	Extracts tight- and loose-clusters from a trajectory file.
+	
+	Usage: generate_clusters(<arguements>)
+	
+	Notes: See function definition in helpers.py for a full list of options. 
+
+	WARNING: The cluster is hard coded for two atom types only, at the moment.
+	      	
+	"""
 	
 	################################
 	# 0. Set up an argument parser
@@ -274,11 +320,16 @@ def generate_clusters(**kwargs):
 
 def get_pared_trajs(do_cluster):
 
-	# Notes:
-	#
-	# No special arg parsing needed here.
-	# This is already being run from inside of the CASE/INDEP folder
+	""" 
 	
+	Pares a trajectory down to a smaller number of frames.
+	
+	Usage: get_pared_trajs(True)
+	
+	Notes: This is run from inside of the CASE/INDEP folder.
+	      	
+	"""
+
 	do_cluster = bool(do_cluster)
 	
 	################################
@@ -370,10 +421,13 @@ def get_pared_trajs(do_cluster):
 
 if __name__=='__main__':
 
-	# Notes:
-	#
-	# This allows generate_clusters() and get_pared_trajs() to be called from the command line
+	""" 
 	
+	Allows commandline calls to generate_clusters() and get_pared_trajs().
+	
+	      	
+	"""
+
 	if   sys.argv[1] == "generate_clusters":
 	
 		generate_clusters(

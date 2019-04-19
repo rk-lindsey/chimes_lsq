@@ -1,0 +1,4 @@
+To run, move the config.py file into the src directory, and run
+with something like:
+
+unbuffer python ../PYTHON_DRIVER/main.py 0 1 2 | tee driver.log

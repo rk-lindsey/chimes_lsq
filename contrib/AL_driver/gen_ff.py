@@ -1,16 +1,28 @@
+# Global (python) modules
+
 import os.path
 import os
 import glob
-import helpers # User-defined "module"
+
+# Local modules
+
+import helpers
 
 
 def build_amat(my_ALC, **kwargs):  
+
+	""" 
 	
-	# Notes:
-	#
-	# Expects to be called from ALC-my_ALC's base folder
-	# Sets up and launches a chimes_lsq job to build the A-matrix
-	# Returns a job_id for the submitted job
+	Generates the A- and b-matrices for an input trajectory.
+	
+	Usage: build_amat(1, <arguments>)
+	
+	Notes: See function definition in helpers.py for a full list of options. 
+	       Requrires config.CHIMES_LSQ.
+	       Expects to be called from ALC-my_ALC's base folder.
+	       Returns a job_id for the submitted job.
+	       	
+	"""
 
 	################################
 	# 0. Set up an argument parser
@@ -162,6 +174,28 @@ def build_amat(my_ALC, **kwargs):
 	
 
 def solve_amat(my_ALC, **kwargs):  
+
+
+	""" 
+	
+	Generates parameters based on generated A- and b-matrices.
+	
+	Usage: solve_amat(1, <arguments>)
+	
+	Notes: See function definition in helpers.py for a full list of options. 
+	       Requrires config.CHIMES_SOLVER.
+	       Currently only supports lassolars and svd.
+	       Returns a job_id for the submitted job.
+	       Assumes last ALC's GEN_FF folder can be accessed from current 
+	       ALC's base folder via ../ALC-(n-1)/GEN_FF.
+	       
+	WARNING: Only coded to work with forces and energies.
+	
+	WARNING: Weight generation function will need to be updated for stresses.
+	       
+	WARNING: Concatenation is untested and may be problematic for large A-matrices.
+	       	
+	"""
 
 	# WARNING: Only coded to work with forces and energies ... weights writing function
 	#          will need to be updated if stresses are included

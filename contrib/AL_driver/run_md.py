@@ -3,29 +3,34 @@
 import glob
 import os
 
-# Localmodules
+# Local modules
 
 import helpers
 
 def run_md(my_ALC, my_case, my_indep, *argv, **kwargs):
 
-	# Notes:
-	#
-	# Assumes job is being launched from ALC-X
-	# Designed to work for parallel learning... each parallel simulation is a "case" which can have multiple indep sims:
-	#	ALC-X/CASE-1_INDEP-1/<md simulation/stuff>
-	#
-	# Input files MUST be named like case-1.indep-1.input.xyz and case-1.indep-1.run_md.in
-	#
-	# ... will also run molanal on finished simulation
-	# ... Will also post-process the molanal output
-	# ... Will generate clusters	
-	# ... Will save clusters to CASE-X_INDEP-0/CFG_REPO
-	#
-	#
-	# Expects the following executables in the molanal_dir:
-	# - molanal.new
-	# - findmolecules.pl
+	""" 
+	
+	Launches a ChIMES md simulation and post-md analysis.
+	
+	Usage: run_md(1, 0, 0, <arguments>)
+	
+	Notes: See function definition in helpers.py for a full list of options. 
+	       Requrires config.CHIMES_MD.
+	       Requrires config.CHIMES_MOLANAL (should contain molanal.new and findmolecules.pl)
+	       Expects to be called from ALC-my_ALC's base folder.
+	       Assumes job is being launched from ALC-X.
+	       Supports ~parallel learning~ via file structure:
+	              ALC-X/CASE-1_INDEP-1/<md simulation/stuff>
+	       Expects input files named like:
+	              case-1.indep-1.input.xyz and case-1.indep-1.run_md.in
+	       will also run molanal on finished simulation.
+	       Will also post-process the molanal output.
+	       Will generate clusters.
+	       Will save clusters to CASE-X_INDEP-0/CFG_REPO.
+	       Returns a job_id for the submitted job.
+	       	
+	"""
 	
 	################################
 	# 0. Set up an argument parser

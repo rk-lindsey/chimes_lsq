@@ -1,7 +1,24 @@
+# Global (python) modules
+
 import sys
+import os
+
+# Localmodules
 
 import helpers
 
+""" 
+
+Extract relevant speciation from an MD run.
+
+Usage: python post_process_molanal.py "C1 O1 1(O-C)" "C1 O2 2(O-C)" "C2 O2 1(C-C) 2(O-C)" "C3 O2 2(C-C) 2(O-C)"
+
+Notes: Expects to find traj.gen-find_molecs.out in the working directory.
+
+       	
+"""
+	
+	
 # Post-process (extract relevant speciation)
 
 
@@ -14,7 +31,12 @@ for i in xrange(nspecies):
 	ofstream = open(ofname,'w')
 	
 	ofstream.write("# " + args_species[i]    + '\n')
-	ofstream.write("# <mol_frac> <lifetime>" + '\n')		
+	ofstream.write("# <mol_frac> <lifetime>" + '\n')	
+	
+	if not os.path.isfile("traj.gen-find_molecs.out"):	
+	
+		print "ERROR: Cannot find file traj.gen-find_molecs.out"
+		os._exit(1)
 	
 	ifname   = "traj.gen-find_molecs.out"
 	ifstream = open(ifname,'r')
