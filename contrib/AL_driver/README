@@ -1,3 +1,6 @@
+04/25/19 - RKL:
+Basic restart handling has been added, for single-system ALC iterations. This functionality has only been tested on a superficial level so far. Next commit will be for "stable" restart functioanlity.
+
 04/19/19 - RKL:
 Tool now works for ALC iterations for a single system, at a single state point.
 Next tasks include adding a resubmission capability for MD, adding an overall

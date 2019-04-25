@@ -6,12 +6,107 @@ import os
 # Local modules
 
 import helpers
+import cluster
+
+def post_proc(my_ALC, my_case, my_indep, *argv, **kwargs):
+
+	""" 
+	
+	Post-processes a ChIMES MD run
+	
+	Usage: run_md(1, 0, 0, <arguments>)
+	
+	Notes: See function definition in run_md.py for a full list of options. 
+	       Requrires config.CHIMES_MOLANAL (should contain molanal.new and findmolecules.pl)
+	       Expects to be called from ALC-my_ALC's base folder.
+	       Assumes job is being launched from ALC-X.
+	       Supports ~parallel learning~ via file structure:
+	              ALC-X/CASE-1_INDEP-1/<md simulation/stuff>
+	       Expects input files named like:
+	              case-1.indep-1.input.xyz and case-1.indep-1.run_md.in
+	       will run molanal on finished simulation.
+	       Will post-process the molanal output.
+	       Will generate clusters.
+	       Will save clusters to CASE-X_INDEP-0/CFG_REPO.
+	       	
+	"""
+	
+	################################
+	# 0. Set up an argument parser
+	################################
+	
+	### ...argv
+	
+	args_species = argv # This is a pointer!
+	
+	### ...kwargs
+	
+	default_keys   = [""]*10
+	default_values = [""]*10
+
+
+	# MD specific controls
+	
+	default_keys[0 ] = "basefile_dir"  ; default_values[0 ] = "../CHIMES-MD_BASEFILES/"	# Directory containing run_md.base, etc.
+	default_keys[1 ] = "driver_dir"    ; default_values[1 ] = "" 				# Post_proc_lsq*py file... should also include the python command
+	default_keys[2 ] = "penalty_pref"  ; default_values[2 ] = 1.0E6				# Penalty function pre-factor
+	default_keys[3 ] = "penalty_dist"  ; default_values[3 ] = 0.02				# Pentaly function kick-in distance
+	default_keys[4 ] = "molanal_dir"   ; default_values[4 ] = ""				# Path to the molanal directory
+	default_keys[5 ] = "local_python"  ; default_values[5 ] = ""				# Local computer's python executable
+
+	# Cluster specific controls
+		
+	default_keys[6 ] = "do_cluster " ; default_values[6 ] = True			# Local computer's python executable
+	default_keys[7 ] = "tight_crit"  ; default_values[7 ] = "../../../../tight_bond_crit.dat"				# File with tight bonding criteria for clustering
+	default_keys[8 ] = "loose_crit"  ; default_values[8 ] = "../../../../loose_bond_crit.dat"				# File with loose bonding criteria for clustering
+	default_keys[9 ] = "clu_code"	 ; default_values[9 ] = "/p/lscratchrza/rlindsey/RC4B_RAG/11-12-18/new_ts_clu.cpp"	# Clustering code
+	default_keys[10] = "compilation" ; default_values[10] = "g++ -std=c++11 -O3"						# Command to compile clustering code	
+
+	args = dict(zip(default_keys, default_values))
+	args.update(kwargs)
+
+	################################
+	# 1. Move to the MD directory
+	################################
+	
+	my_md_path = "CASE-" + str(my_case) + "_INDEP_" + str(my_indep) + "/"
+
+	os.chdir(my_md_path)
+	
+	################################
+	# 1. Run molanal
+	################################
+	
+	helpers.run_bash_cmnd(args["molanal_dir"] + "/molanal.new traj.gen > traj.gen-molanal.out")
+	helpers.run_bash_cmnd(args["molanal_dir"] + "/findmolecules.pl traj.gen-molanal.out > traj.gen-find_molecs.out")
+	helpers.run_bash_cmnd("rm -rf molecules " + ' '.join(glob.glob("molanal*")))
+	helpers.run_bash_cmnd(args["local_python"] + " " + args["driver_dir"] + "/post_process_molanal.py " + " \"" + '\" \"'.join(args_species) + "\"")
+	
+	################################
+	# 1. Cluster
+	################################
+	
+	print "compilation: ", args["compilation"]
+	
+	cluster.get_pared_trajs(args["do_cluster"])
+	
+	
+	cluster.generate_clusters(traj_file   = "traj_250F.xyz",
+				  tight_crit  = args["tight_crit" ],
+				  loose_crit  = args["loose_crit" ],
+				  clu_code    = args["clu_code"   ],
+				  compilation = args["compilation"])
+
+	os.chdir("..")
+	
+	return 	
+
 
 def run_md(my_ALC, my_case, my_indep, *argv, **kwargs):
 
 	""" 
 	
-	Launches a ChIMES md simulation and post-md analysis.
+	Launches a ChIMES md simulation
 	
 	Usage: run_md(1, 0, 0, <arguments>)
 	
@@ -42,38 +137,29 @@ def run_md(my_ALC, my_case, my_indep, *argv, **kwargs):
 	
 	### ...kwargs
 	
-	default_keys   = [""]*20
-	default_values = [""]*20
+	default_keys   = [""]*13
+	default_values = [""]*13
 
 
 	# MD specific controls
-	
+
 	default_keys[0 ] = "basefile_dir"  ; default_values[0 ] = "../CHIMES-MD_BASEFILES/"	# Directory containing run_md.base, etc.
 	default_keys[1 ] = "driver_dir"    ; default_values[1 ] = "" 				# Post_proc_lsq*py file... should also include the python command
 	default_keys[2 ] = "penalty_pref"  ; default_values[2 ] = 1.0E6				# Penalty function pre-factor
 	default_keys[3 ] = "penalty_dist"  ; default_values[3 ] = 0.02				# Pentaly function kick-in distance
-	default_keys[4 ] = "molanal_dir"   ; default_values[4 ] = ""				# Path to the molanal directory
-	default_keys[5 ] = "local_python"  ; default_values[5 ] = ""				# Local computer's python executable
-
-	# Cluster specific controls
-		
-	default_keys[6 ] = "do_cluster " ; default_values[6 ] = True			# Local computer's python executable
-	default_keys[7 ] = "tight_crit"  ; default_values[7 ] = "../../../../tight_bond_crit.dat"				# File with tight bonding criteria for clustering
-	default_keys[8 ] = "loose_crit"  ; default_values[8 ] = "../../../../loose_bond_crit.dat"				# File with loose bonding criteria for clustering
-	default_keys[9 ] = "clu_code"	 ; default_values[9 ] = "/p/lscratchrza/rlindsey/RC4B_RAG/11-12-18/new_ts_clu.cpp"	# Clustering code
-	default_keys[10] = "compilation" ; default_values[10] = "g++ -std=c++11 -O3"						# Command to compile clustering code	
-
-	# Overall job controls	
 	
-	default_keys[11] = "job_name"	   ; default_values[11] = "ALC-"+ `my_ALC`+"-md"	# Name for ChIMES md job
-	default_keys[12] = "job_nodes"     ; default_values[12] = "2"				# Number of nodes for ChIMES md job
-	default_keys[13] = "job_ppn"	   ; default_values[13] = "36"  			# Number of processors per node for ChIMES md job
-	default_keys[14] = "job_walltime"  ; default_values[14] = "1"				# Walltime in hours for ChIMES md job
-	default_keys[15] = "job_queue"     ; default_values[15] = "pdebug"			# Queue for ChIMES md job
-	default_keys[16] = "job_account"   ; default_values[16] = "pbronze"			# Account for ChIMES md job
-	default_keys[17] = "job_executable"; default_values[17] = ""				# Full path to executable for ChIMES md job
-	default_keys[18] = "job_system"    ; default_values[18] = "slurm"			# slurm or torque       
-	default_keys[19] = "job_file"	   ; default_values[19] = "run.cmd"			# Name of the resulting submit script   
+	# Overall job controls
+
+	default_keys[4 ] = "job_name"	   ; default_values[11] = "ALC-"+ `my_ALC`+"-md"	# Name for ChIMES md job
+	default_keys[5 ] = "job_nodes"     ; default_values[12] = "2"				# Number of nodes for ChIMES md job
+	default_keys[6 ] = "job_ppn"	   ; default_values[13] = "36"  			# Number of processors per node for ChIMES md job
+	default_keys[7 ] = "job_walltime"  ; default_values[14] = "1"				# Walltime in hours for ChIMES md job
+	default_keys[8 ] = "job_queue"     ; default_values[15] = "pdebug"			# Queue for ChIMES md job
+	default_keys[9 ] = "job_account"   ; default_values[16] = "pbronze"			# Account for ChIMES md job
+	default_keys[10] = "job_executable"; default_values[17] = ""				# Full path to executable for ChIMES md job
+	default_keys[11] = "job_system"    ; default_values[18] = "slurm"			# slurm or torque	
+	default_keys[12] = "job_file"	   ; default_values[19] = "run.cmd"			# Name of the resulting submit script	
+
 	
 
 	args = dict(zip(default_keys, default_values))
@@ -167,35 +253,14 @@ def run_md(my_ALC, my_case, my_indep, *argv, **kwargs):
 	ofstream.close()
 	helpers.run_bash_cmnd("mv tmp " + md_infile)	
 	
-	
 	################################
 	# 4. Launch the md simulation
-	# ... will also run molanal on finished simulation
-	# ... Will also post-process the molanal output
-	# ... Will generate clusters
 	################################
 	
 	
 	# Create the task string
 	
-	job_task  = "-n " + `int(args["job_nodes"])*int(args["job_ppn"])` + " " +  args["job_executable"] + " " + md_infile + " > run_md.out"
-	job_task += '\n'
-	job_task += args["molanal_dir"] + "/molanal.new traj.gen > traj.gen-molanal.out"
-	job_task += '\n'		
-	job_task += args["molanal_dir"] + "/findmolecules.pl traj.gen-molanal.out > traj.gen-find_molecs.out"
-	job_task += '\n'
-	job_task += "rm -rf molecules molanal*"	
-	job_task += '\n'	
-	job_task += args["local_python"] + " " + args["driver_dir"] + "/post_process_molanal.py " + " \"" + '\" \"'.join(args_species) + "\""
-	job_task += '\n'		
-	job_task += args["local_python"] + " " + args["driver_dir"] + "/cluster.py get_pared_trajs "      + `args["do_cluster"]`
-	
-	print "compilation: ", args["compilation"]
-	
-	if args["do_cluster"]:
-		job_task += '\n'	
-		job_task += args["local_python"] + " " + args["driver_dir"] + "/cluster.py generate_clusters " + " traj_250F.xyz" + " " + args["tight_crit" ] + " " + args["loose_crit" ] + " " + args["clu_code"   ] + " " + args["compilation"]
-	
+	job_task  = "-n " + `int(args["job_nodes"])*int(args["job_ppn"])` + " " +  args["job_executable"] + " " + md_infile + " > run_md.out"	
 
 	if args["job_system"] == "slurm":
 		job_task = "srun "   + job_task

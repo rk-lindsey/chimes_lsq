@@ -12,6 +12,7 @@ import run_md
 import cluster
 import gen_selections
 import vasp_driver
+import restart
 
 
 """ 
@@ -61,41 +62,60 @@ config.VASP_POSTPRC   = config.HPC_PYTHON + " " + config.VASP_POSTPRC
 
 print "Will run for the following active learning cycles:"
 
-for THIS_ALC in sys.argv[1:]:
+ALC_LIST = sys.argv[1:]
+
+for THIS_ALC in ALC_LIST:
 	print THIS_ALC
 	
-helpers.run_bash_cmnd("rm -f restart.dat")
 
-for THIS_ALC in sys.argv[1:]:
+# Set up the restart file
+	
+restart_controller = restart.restart() # Reads/creates restart file. Must be named "restart.dat"
+
+ALC_LIST = restart_controller.update_ALC_list(ALC_LIST)
+
+print "After processing restart file, will run for the following active learning cycles:"
+
+for THIS_ALC in ALC_LIST:
+	print THIS_ALC
+
+
+for THIS_ALC in ALC_LIST:
 
 	THIS_ALC = int(THIS_ALC)
 	
 	# Prepare the restart file
 
-	
-	restream = open("restart.dat",'a',0)	
-	restream.write("ALC: " + str(THIS_ALC) + '\n')
+	restart_controller.update_file("ALC: " + str(THIS_ALC) + '\n')
 		
+
 	print "Working on ALC:", THIS_ALC
 
 	os.chdir(config.WORKING_DIR)
+	
 
 	# Begins in the working directory (WORKING_DIR)
 
 	if THIS_ALC == 0: # Then this is the first ALC, so we need to do things a bit differently ... "FULLY" TESTED
+	
+	
+		if not restart_controller.BUILD_AMAT: # Then we haven't even begun this ALC
 
-		# Set up/move into the ALC directory
+			# Set up/move into the ALC directory
 		
-		helpers.run_bash_cmnd("rm -rf ALC-" + str(THIS_ALC))
-		helpers.run_bash_cmnd("mkdir  ALC-" + str(THIS_ALC))
+			helpers.run_bash_cmnd("rm -rf ALC-" + str(THIS_ALC))
+			helpers.run_bash_cmnd("mkdir  ALC-" + str(THIS_ALC))
 		
 		os.chdir("ALC-" + str(THIS_ALC))
 		
+				
 		################################
 		# Generate the force field	
 		################################
 		
-		active_job = gen_ff.build_amat(THIS_ALC,
+		if not restart_controller.BUILD_AMAT:
+		
+			active_job = gen_ff.build_amat(THIS_ALC,
 					prev_gen_path      = config.ALC0_FILES,
 					job_ppn            = str(config.HPC_PPN),
 					job_walltime       = "1",			
@@ -103,11 +123,16 @@ for THIS_ALC in sys.argv[1:]:
 					job_system         = config.HPC_SYSTEM,
 					job_executable     = config.CHIMES_LSQ)
 					
-		helpers.wait_for_job(active_job, job_system = config.HPC_SYSTEM, verbose = True, job_name = "build_amat")
+			helpers.wait_for_job(active_job, job_system = config.HPC_SYSTEM, verbose = True, job_name = "build_amat")
+
+			restart_controller.update_file("BUILD_AMAT: COMPLETE" + '\n')	
+		else:
+			restart_controller.update_file("BUILD_AMAT: COMPLETE" + '\n')
+			
 		
-		restream.write("BUILD_AMAT: COMPLETE" + '\n')	
+		if not restart_controller.SOLVE_AMAT:
 		
-		active_job = gen_ff.solve_amat(THIS_ALC, 
+			active_job = gen_ff.solve_amat(THIS_ALC, 
 					weights_force  = config.WEIGHTS_FORCE,
 					weights_energy = config.WEIGHTS_ENER,
 					regression_alg = config.REGRESS_ALG,
@@ -118,71 +143,82 @@ for THIS_ALC in sys.argv[1:]:
 					job_system     = config.HPC_SYSTEM,
 					job_executable = config.CHIMES_SOLVER)	
 					
-		helpers.wait_for_job(active_job, job_system = config.HPC_SYSTEM, verbose = True, job_name = "solve_amat")
+			helpers.wait_for_job(active_job, job_system = config.HPC_SYSTEM, verbose = True, job_name = "solve_amat")
+			
+			helpers.run_bash_cmnd(config.CHIMES_POSTPRC + " GEN_FF/params.txt")
 		
-		restream.write("SOLVE_AMAT: COMPLETE" + '\n')	
+			restart_controller.update_file("SOLVE_AMAT: COMPLETE" + '\n')	
 		
-		helpers.run_bash_cmnd(config.CHIMES_POSTPRC + " GEN_FF/params.txt")
+		else:
+			restart_controller.update_file("SOLVE_AMAT: COMPLETE" + '\n')	
+		
 		
 		
 		################################				
 		# Extract/process/select clusters
 		################################
 		
-		# Get a list of files from which to extract clusters
+		if not restart_controller.CLUSTER_EXTRACTION:
+
+			# Get a list of files from which to extract clusters
 		
-		traj_files = helpers.cat_to_var("GEN_FF/traj_list.dat")[1:]
+			traj_files = helpers.cat_to_var("GEN_FF/traj_list.dat")[1:]
 		
 		
-		# Extract clusters from each file, save into own repo, list
+			# Extract clusters from each file, save into own repo, list
 		
-		cat_xyzlist_cmnd    = ""
-		cat_ts_xyzlist_cmnd = ""
+			cat_xyzlist_cmnd    = ""
+			cat_ts_xyzlist_cmnd = ""
 		
-		for i in xrange(len(traj_files)):
 		
-			# Pre-process name
+			for i in xrange(len(traj_files)):
+		
+				# Pre-process name
+				
+				traj_files[i] = traj_files[i].split()[1]
+				
+				print "Extracting clusters from file: ", traj_files[i]
+				
+				# Extract
+		
+				cluster.generate_clusters(
+							traj_file   = "GEN_FF/" + traj_files[i].split()[0],
+							tight_crit  = config.TIGHT_CRIT,
+							loose_crit  = config.LOOSE_CRIT,
+							clu_code    = config.CLU_CODE,
+							compilation = "g++ -std=c++11 -O3")
+				
+				repo = "CFG_REPO-" + traj_files[i].split()[0]
+				
+				helpers.run_bash_cmnd("mv CFG_REPO " + repo)
+				
+				# list
+		
+				cluster.list_clusters(repo, 
+							config.ATOM_TYPES)
+							
+				helpers.run_bash_cmnd("mv xyzlist.dat    " + traj_files[i].split()[0] + ".xyzlist.dat"   )
+				helpers.run_bash_cmnd("mv ts_xyzlist.dat " + traj_files[i].split()[0] + ".ts_xyzlist.dat")
+				
+				cat_xyzlist_cmnd    += traj_files[i].split()[0] + ".xyzlist.dat "
+				cat_ts_xyzlist_cmnd += traj_files[i].split()[0] + ".ts_xyzlist.dat "
+				
+			helpers.cat_specific("xyzlist.dat"   , cat_xyzlist_cmnd   .split())
+			helpers.cat_specific("ts_xyzlist.dat", cat_ts_xyzlist_cmnd.split())
+
+			helpers.run_bash_cmnd("rm -f " + cat_xyzlist_cmnd   )
+			helpers.run_bash_cmnd("rm -f " + cat_ts_xyzlist_cmnd)
 			
-			traj_files[i] = traj_files[i].split()[1]
-			
-			print "Extracting clusters from file: ", traj_files[i]
-			
-			# Extract
+			restart_controller.update_file("CLUSTER_EXTRACTION: COMPLETE" + '\n')	
+
+		else:
+			restart_controller.update_file("CLUSTER_EXTRACTION: COMPLETE" + '\n')
 		
-			cluster.generate_clusters(
-						traj_file   = "GEN_FF/" + traj_files[i].split()[0],
-						tight_crit  = config.TIGHT_CRIT,
-						loose_crit  = config.LOOSE_CRIT,
-						clu_code    = config.CLU_CODE,
-						compilation = "g++ -std=c++11 -O3")
-			
-			repo = "CFG_REPO-" + traj_files[i].split()[0]
-			
-			helpers.run_bash_cmnd("mv CFG_REPO " + repo)
-			
-			# list
+		if not restart_controller.CLUENER_CALC:
+
+			# Compute cluster energies
 		
-			cluster.list_clusters(repo, 
-						config.ATOM_TYPES)
-						
-			helpers.run_bash_cmnd("mv xyzlist.dat    " + traj_files[i].split()[0] + ".xyzlist.dat"   )
-			helpers.run_bash_cmnd("mv ts_xyzlist.dat " + traj_files[i].split()[0] + ".ts_xyzlist.dat")
-			
-			cat_xyzlist_cmnd    += traj_files[i].split()[0] + ".xyzlist.dat "
-			cat_ts_xyzlist_cmnd += traj_files[i].split()[0] + ".ts_xyzlist.dat "
-			
-		helpers.cat_specific("xyzlist.dat"   , cat_xyzlist_cmnd   .split())
-		helpers.cat_specific("ts_xyzlist.dat", cat_ts_xyzlist_cmnd.split())
-		
-		helpers.run_bash_cmnd("rm -f " + cat_xyzlist_cmnd   )
-		helpers.run_bash_cmnd("rm -f " + cat_ts_xyzlist_cmnd)
-		
-		restream.write("CLUSTER_EXTRACTION: COMPLETE" + '\n')
-		
-		
-		# Compute cluster energies
-		
-		active_jobs = cluster.get_repo_energies(
+			active_jobs = cluster.get_repo_energies(
 					base_runfile   = config.ALC0_FILES + "/run_md.base",
 					driver_dir     = config.DRIVER_DIR,
 					job_ppn        = str(config.HPC_PPN),
@@ -191,40 +227,56 @@ for THIS_ALC in sys.argv[1:]:
 					job_system     = config.HPC_SYSTEM,
 					job_executable = config.CHIMES_MD)	
 					
-		helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "get_repo_energies")
+			helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "get_repo_energies")
 		
-		print helpers.run_bash_cmnd("pwd")
-		print helpers.run_bash_cmnd("ls -lrt")	
+			print helpers.run_bash_cmnd("pwd")
+			print helpers.run_bash_cmnd("ls -lrt")	
 		
-		restream.write("CLUENER_CALC: COMPLETE" + '\n')
+			restart_controller.update_file("CLUENER_CALC: COMPLETE" + '\n')	
+			
+		else:
+			restart_controller.update_file("CLUENER_CALC: COMPLETE" + '\n')	
 		
 		
-		# Generate cluster sub-selection and store in central repository
+		if not restart_controller.CLU_SELECTION:
 		
-		gen_selections.cleanup_repo(THIS_ALC)
+			# Generate cluster sub-selection and store in central repository
 		
-		gen_selections.gen_subset(
+			gen_selections.cleanup_repo(THIS_ALC)
+		
+			gen_selections.gen_subset(
 					nsel     = config.MEM_NSEL, # Number of selections to make    
 					nsweep   = config.MEM_CYCL, # Number of MC sqeeps	      
 					nbins    = config.MEM_BINS, # Number of histogram bins  	
 					ecut     = config.MEM_ECUT) # Maximum energy to consider	
-					
-		restream.write("CLU_SELECTION: COMPLETE" + '\n')
 		
-		gen_selections.populate_repo(THIS_ALC)
+			gen_selections.populate_repo(THIS_ALC)
 
-		repo = "CASE-" + str(THIS_CASE) + "_INDEP_" + str(THIS_INDEP) + "/CFG_REPO/"
+			repo = "CASE-" + str(THIS_CASE) + "_INDEP_" + str(THIS_INDEP) + "/CFG_REPO/"
+			
+			restart_controller.update_file("CLU_SELECTION: COMPLETE" + '\n')
+			
+		else:
+			restart_controller.update_file("CLU_SELECTION: COMPLETE" + '\n')
 
 		
 		################################
 		# Launch VASP
 		################################
 		
-		vasp_driver.cleanup_and_setup(["all"], ".")
+		if not restart_controller.CLEANSETUP_VASP:
 		
-		restream.write("CLEANSETUP_VASP: COMPLETE" + '\n')		
+			vasp_driver.cleanup_and_setup(["all"], ".")
 		
-		active_jobs = vasp_driver.setup_vasp(THIS_ALC,
+			restart_controller.update_file("CLEANSETUP_VASP: COMPLETE" + '\n')
+			
+		else:
+			restart_controller.update_file("CLEANSETUP_VASP: COMPLETE" + '\n')
+		
+		
+		if not restart_controller.INIT_VASPJOB:	
+		
+			active_jobs = vasp_driver.setup_vasp(THIS_ALC,
 						["all"], 
 						config.ATOM_TYPES, 
 						basefile_dir   = config.VASP_FILES,
@@ -237,64 +289,74 @@ for THIS_ALC in sys.argv[1:]:
 						job_account    = "pbronze",
 						job_system     = config.HPC_SYSTEM)
 		
-		helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "setup_vasp")
+			helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "setup_vasp")
 		
-		restream.write("INIT_VASPJOB: COMPLETE" + '\n')
+			restart_controller.update_file("INIT_VASPJOB: COMPLETE" + '\n')
+		else:
+			restart_controller.update_file("INIT_VASPJOB: COMPLETE" + '\n')
 		
 		# Check that the job was complete
 		
-		while True:
+		if not restart_controller.ALL_VASPJOBS:
 
-			active_jobs = vasp_driver.continue_job(
+			while True:
+
+				active_jobs = vasp_driver.continue_job(
 						["all"], 
 						job_system     = config.HPC_SYSTEM)
 						
-			print "active jobs: ", active_jobs			
+				print "active jobs: ", active_jobs			
 						
-			if len(active_jobs) > 0:
+				if len(active_jobs) > 0:
 			
-				print "waiting for restarted vasp job."
+					print "waiting for restarted vasp job."
 			
-				helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "setup_vasp - restarts")
-			else:
-				print "All jobs are complete"
-				break		
+					helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "setup_vasp - restarts")
+				else:
+					print "All jobs are complete"
+					break		
 		
 		
-		restream.write("ALL_VASPJOBS: COMPLETE" + '\n')
+			restart_controller.update_file("ALL_VASPJOBS: COMPLETE" + '\n')
+		else:
+			restart_controller.update_file("ALL_VASPJOBS: COMPLETE" + '\n')
+		
 
-		
 		# Post-process the vasp jobs
 		
 		print "post-processing..."	
 		
 		vasp_driver.post_process(["all"], "ENERGY",
-					vasp_postproc = config.VASP_POSTPRC)
+				vasp_postproc = config.VASP_POSTPRC)
 
 		os.chdir("..")
 		
 		print "ALC-", THIS_ALC, "is complete"	
 		
-		restream.write("THIS_ALC: COMPLETE" + '\n')
-		restream.close()
-		
+		restart_controller.update_file("THIS_ALC: COMPLETE" + '\n')		
 		
 	else:
+	
+		if not restart_controller.BUILD_AMAT: # Then we haven't even begun this ALC
 
-		# Set up/move into the ALC directory
+			# Set up/move into the ALC directory
 		
-		helpers.run_bash_cmnd("rm -rf ALC-" + str(THIS_ALC))
-		helpers.run_bash_cmnd("mkdir  ALC-" + str(THIS_ALC))
+			helpers.run_bash_cmnd("rm -rf ALC-" + str(THIS_ALC))
+			helpers.run_bash_cmnd("mkdir  ALC-" + str(THIS_ALC))
 		
 		os.chdir("ALC-" + str(THIS_ALC))
+		
+		
 		
 		vasp_all_path = config.WORKING_DIR + "/ALC-" + `THIS_ALC-1` + "/VASP-all/"
 		vasp_20F_path = ""
 		
 		if THIS_ALC > 1:
 			vasp_20F_path = config.WORKING_DIR + "/ALC-" + `THIS_ALC-1` + "/VASP-20/"
+			
+		if not restart_controller.BUILD_AMAT:
 		
-		active_job = gen_ff.build_amat(THIS_ALC, 
+			active_job = gen_ff.build_amat(THIS_ALC, 
 				prev_vasp_all_path = vasp_all_path,
 				prev_vasp_20_path  = vasp_20F_path,
 				job_ppn        = str(config.HPC_PPN),
@@ -303,11 +365,15 @@ for THIS_ALC in sys.argv[1:]:
 				job_system     = config.HPC_SYSTEM,
 				job_executable = config.CHIMES_LSQ)
 		
-		helpers.wait_for_job(active_job, job_system = config.HPC_SYSTEM, verbose = True, job_name = "build_amat")
+			helpers.wait_for_job(active_job, job_system = config.HPC_SYSTEM, verbose = True, job_name = "build_amat")
 		
-		restream.write("BUILD_AMAT: COMPLETE" + '\n')	
+			restart_controller.update_file("BUILD_AMAT: COMPLETE" + '\n')
+		else:
+			restart_controller.update_file("BUILD_AMAT: COMPLETE" + '\n')
+			
+		if not restart_controller.SOLVE_AMAT:	
 		
-		active_job = gen_ff.solve_amat(THIS_ALC, 
+			active_job = gen_ff.solve_amat(THIS_ALC, 
 				weights_force  = config.WEIGHTS_FORCE,
 				weights_energy = config.WEIGHTS_ENER,
 				regression_alg = config.REGRESS_ALG,
@@ -318,11 +384,13 @@ for THIS_ALC in sys.argv[1:]:
 				job_system     = config.HPC_SYSTEM,
 				job_executable = config.CHIMES_SOLVER)	
 				
-		helpers.wait_for_job(active_job, job_system = config.HPC_SYSTEM, verbose = True, job_name = "solve_amat")	
-		
-		restream.write("SOLVE_AMAT: COMPLETE" + '\n')
-		
-		helpers.run_bash_cmnd(config.CHIMES_POSTPRC + " GEN_FF/params.txt")
+			helpers.wait_for_job(active_job, job_system = config.HPC_SYSTEM, verbose = True, job_name = "solve_amat")	
+
+			helpers.run_bash_cmnd(config.CHIMES_POSTPRC + " GEN_FF/params.txt")
+			
+			restart_controller.update_file("SOLVE_AMAT: COMPLETE" + '\n')	
+		else:
+			restart_controller.update_file("SOLVE_AMAT: COMPLETE" + '\n')	
 		
 		################################				
 		# Run MD
@@ -332,15 +400,48 @@ for THIS_ALC in sys.argv[1:]:
 		# ... May want to consider making speciation optional ... can add another key word that allows the user to set up different 
 		#    types of post-processing jobs
 		
+		
+		if not restart_controller.RUN_MD:
 				
-		# Run the MD/cluster jobs
+			# Run the MD/cluster jobs
 		
-		active_jobs = []
+			active_jobs = []
 		
-		for THIS_CASE in xrange(config.NO_CASES):		
+			for THIS_CASE in xrange(config.NO_CASES):		
 		
 		
-			active_job = run_md.run_md(THIS_ALC, THIS_CASE, THIS_INDEP,
+				active_job = run_md.run_md(THIS_ALC, THIS_CASE, THIS_INDEP,
+					basefile_dir   = config.CHIMES_MDFILES, 
+					driver_dir     = config.DRIVER_DIR,
+					penalty_pref   = 1.0E6,		
+					penalty_dist   = 0.02, 		
+					job_name       = "ALC-"+ str(THIS_ALC) +"-md-c" + str(THIS_CASE) +"-i" + str(THIS_INDEP),
+					job_nodes      = 8,	   	 
+					job_ppn        = 36,	   	 
+					job_walltime   = 1,	   	 
+					job_queue      = "pdebug", 	 
+					job_account    = "pbronze",	 
+					job_executable = config.CHIMES_MD,	 
+					job_system     = "slurm",  	 
+					job_file       = "run.cmd")	
+
+			active_jobs.append(active_job.split()[0])										
+			helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "run_md")
+
+			#!!!! THIS NEEDS TO BE UPDATED TO WORK IN PARALLEL!!!! ... probably just need to adjust how the restart class is set
+
+			restart_controller.update_file("RUN_MD: COMPLETE" + '\n')
+		else:
+			restart_controller.update_file("RUN_MD: COMPLETE" + '\n')
+			
+			
+		if not restart_controller.POST_PROC:
+		
+			for THIS_CASE in xrange(config.NO_CASES):	
+		
+				# Post-process the MD job
+		
+				run_md.post_proc(THIS_ALC, THIS_CASE, THIS_INDEP,
 					"C1 O1 1(O-C)",
 					"C1 O2 2(O-C)",
 					"C2 O2 1(C-C) 2(O-C)",
@@ -355,94 +456,107 @@ for THIS_ALC in sys.argv[1:]:
 					tight_crit     = config.TIGHT_CRIT,	
 					loose_crit     = config.LOOSE_CRIT,	
 					clu_code       = config.CLU_CODE,  	
-					compilation    = "g++ -std=c++11 -O3",
-					job_name       = "ALC-"+ str(THIS_ALC) +"-md-c" + str(THIS_CASE) +"-i" + str(THIS_INDEP),
-					job_nodes      = 8,	   	 
-					job_ppn        = 36,	   	 
-					job_walltime   = 1,	   	 
-					job_queue      = "pdebug", 	 
-					job_account    = "pbronze",	 
-					job_executable = config.CHIMES_MD,	 
-					job_system     = "slurm",  	 
-					job_file       = "run.cmd")	
+					compilation    = "g++ -std=c++11 -O3")
+					
+				#!!!! THIS NEEDS TO BE UPDATED TO WORK IN PARALLEL!!!! ... probably just need to adjust how the restart class is set
+					
+			restart_controller.update_file("POST_PROC: COMPLETE" + '\n')
+		else:
+			restart_controller.update_file("POST_PROC: COMPLETE" + '\n')
+		
+		
+		if not restart_controller.CLUSTER_EXTRACTION:
+		
+			# list ... remember, we only do clustering/active learning on a single indep (0)
+		
+			cat_xyzlist_cmnd    = ""
+			cat_ts_xyzlist_cmnd = ""		
+		
+			for THIS_CASE in xrange(config.NO_CASES):
+			        
+			        repo = "CASE-" + str(THIS_CASE) + "_INDEP_" + str(THIS_INDEP) + "/CFG_REPO/"
+			        
+			        cluster.list_clusters(repo, 
+			        		config.ATOM_TYPES)	
+			        		
+			        helpers.run_bash_cmnd("mv xyzlist.dat	 " + "CASE-" + str(THIS_CASE) + ".xyzlist.dat"   )
+			        helpers.run_bash_cmnd("mv ts_xyzlist.dat " + "CASE-" + str(THIS_CASE) + ".ts_xyzlist.dat")
+			        
+			        cat_xyzlist_cmnd    += "CASE-" + str(THIS_CASE) + ".xyzlist.dat "
+			        cat_ts_xyzlist_cmnd += "CASE-" + str(THIS_CASE) + ".ts_xyzlist.dat "
+			        
+			helpers.cat_specific("xyzlist.dat"   , cat_xyzlist_cmnd   .split())
+			helpers.cat_specific("ts_xyzlist.dat", cat_ts_xyzlist_cmnd.split())
+		
+			helpers.run_bash_cmnd("rm -f " + cat_xyzlist_cmnd   )
+			helpers.run_bash_cmnd("rm -f " + cat_ts_xyzlist_cmnd)
+		
+			restart_controller.update_file("CLUSTER_EXTRACTION: COMPLETE" + '\n')					
+		else:
+			restart_controller.update_file("CLUSTER_EXTRACTION: COMPLETE" + '\n')					
+		
+		
+		if not restart_controller.CLUENER_CALC:
+		
+			# Compute cluster energies
+		
+			gen_selections.cleanup_repo(THIS_ALC)	
+		
+			active_jobs = cluster.get_repo_energies(
+					calc_central   = True,
+					base_runfile   = config.CHIMES_MDFILES + "/" + "run_md.base",
+					driver_dir     = config.DRIVER_DIR,
+					job_ppn        = str(config.HPC_PPN),
+					job_walltime   = "1",					
+					job_account    = config.HPC_ACCOUNT, 
+					job_system     = config.HPC_SYSTEM,
+					job_executable = config.CHIMES_MD)	
+					
+			helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "get_repo_energies")
 
-		active_jobs.append(active_job.split()[0])										
-		helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "run_md")
-
-		restream.write("RUN_MD: COMPLETE" + '\n')
-		
-		
-		# list ... remember, we only do clustering/active learning on a single indep (0)
-		
-		cat_xyzlist_cmnd    = ""
-		cat_ts_xyzlist_cmnd = ""		
-		
-		for THIS_CASE in xrange(config.NO_CASES):
-		        
-		        repo = "CASE-" + str(THIS_CASE) + "_INDEP_" + str(THIS_INDEP) + "/CFG_REPO/"
-		        
-		        cluster.list_clusters(repo, 
-		        		config.ATOM_TYPES)	
-		        		
-		        helpers.run_bash_cmnd("mv xyzlist.dat	 " + "CASE-" + str(THIS_CASE) + ".xyzlist.dat"   )
-		        helpers.run_bash_cmnd("mv ts_xyzlist.dat " + "CASE-" + str(THIS_CASE) + ".ts_xyzlist.dat")
-		        
-		        cat_xyzlist_cmnd    += "CASE-" + str(THIS_CASE) + ".xyzlist.dat "
-		        cat_ts_xyzlist_cmnd += "CASE-" + str(THIS_CASE) + ".ts_xyzlist.dat "
-		        
-		helpers.cat_specific("xyzlist.dat"   , cat_xyzlist_cmnd   .split())
-		helpers.cat_specific("ts_xyzlist.dat", cat_ts_xyzlist_cmnd.split())
-		
-		helpers.run_bash_cmnd("rm -f " + cat_xyzlist_cmnd   )
-		helpers.run_bash_cmnd("rm -f " + cat_ts_xyzlist_cmnd)
-		
-		
-		restream.write("CLUSTER_EXTRACTION: COMPLETE" + '\n')					
-		
-		# Compute cluster energies
-		
-		gen_selections.cleanup_repo(THIS_ALC)	
-		
-		active_jobs = cluster.get_repo_energies(
-				calc_central   = True,
-				base_runfile   = config.CHIMES_MDFILES + "/" + "run_md.base",
-				driver_dir     = config.DRIVER_DIR,
-				job_ppn        = str(config.HPC_PPN),
-				job_walltime   = "1",					
-				job_account    = config.HPC_ACCOUNT, 
-				job_system     = config.HPC_SYSTEM,
-				job_executable = config.CHIMES_MD)	
-				
-		helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "get_repo_energies")
-
-		restream.write("CLUENER_CALC: COMPLETE" + '\n')	
-
-
-		# Generate cluster sub-selection and store in central repository
-
-		gen_selections.gen_subset(
-				repo     = "../CENTRAL_REPO/full_repo.energies_normed",
-				nsel     = config.MEM_NSEL, # Number of selections to make    
-				nsweep   = config.MEM_CYCL, # Number of MC sqeeps	      
-				nbins    = config.MEM_BINS, # Number of histogram bins  	
-				ecut     = config.MEM_ECUT) # Maximum energy to consider	
-				
-		restream.write("CLU_SELECTION: COMPLETE" + '\n')
-						
+			restart_controller.update_file("CLUENER_CALC: COMPLETE" + '\n')	
+		else:
+			restart_controller.update_file("CLUENER_CALC: COMPLETE" + '\n')	
 
 
-		gen_selections.populate_repo(THIS_ALC)	
+		if not restart_controller.CLU_SELECTION:
+
+			# Generate cluster sub-selection and store in central repository
+
+			gen_selections.gen_subset(
+					 repo	  = "../CENTRAL_REPO/full_repo.energies_normed",
+					 nsel	  = config.MEM_NSEL, # Number of selections to make    
+					 nsweep   = config.MEM_CYCL, # Number of MC sqeeps	       
+					 nbins    = config.MEM_BINS, # Number of histogram bins 	 
+					 ecut	  = config.MEM_ECUT) # Maximum energy to consider	
+					 
+			gen_selections.populate_repo(THIS_ALC)   
+					 
+			restart_controller.update_file("CLU_SELECTION: COMPLETE" + '\n')
+		else:
+			restart_controller.update_file("CLU_SELECTION: COMPLETE" + '\n')
+							 
+
+
+			 
 
 
 		################################
 		# Launch VASP
 		################################
 		
-		vasp_driver.cleanup_and_setup(["20", "all"], "..")
+		if not restart_controller.CLEANSETUP_VASP:
 		
-		restream.write("CLEANSETUP_VASP: COMPLETE" + '\n')
+			vasp_driver.cleanup_and_setup(["20", "all"], "..")
 		
-		active_jobs = vasp_driver.setup_vasp(THIS_ALC,
+			restart_controller.update_file("CLEANSETUP_VASP: COMPLETE" + '\n')
+		else:
+			restart_controller.update_file("CLEANSETUP_VASP: COMPLETE" + '\n')
+			
+			
+		if not restart_controller.INIT_VASPJOB:
+		
+			active_jobs = vasp_driver.setup_vasp(THIS_ALC,
 						["20", "all"], 
 						config.ATOM_TYPES,
 						THIS_CASE, 
@@ -457,31 +571,36 @@ for THIS_ALC in sys.argv[1:]:
 						job_account    = "pbronze",
 						job_system     = config.HPC_SYSTEM)
 		
-		helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "setup_vasp")
+			helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "setup_vasp")
 		
-		restream.write("INIT_VASPJOB: COMPLETE" + '\n')
+			restart_controller.update_file("INIT_VASPJOB: COMPLETE" + '\n')
+		else:
+			restart_controller.update_file("INIT_VASPJOB: COMPLETE" + '\n')
 		
-		# Check that the job was complete
+		if not restart_controller.ALL_VASPJOBS:
 		
-		while True:
+			# Check that the job was complete
+		
+			while True:
 
-			active_jobs = vasp_driver.continue_job(
-						["all","20"], 
-						job_system     = config.HPC_SYSTEM)
-						
-			print "active jobs: ", active_jobs			
-						
-			if len(active_jobs) > 0:
-			
-				print "waiting for restarted vasp job."
-			
-				helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "setup_vasp - restarts")
-			else:
-				print "All jobs are complete"
-				break	
+				active_jobs = vasp_driver.continue_job(
+							["all","20"], 
+							job_system     = config.HPC_SYSTEM)
+							
+				print "active jobs: ", active_jobs			
+							
+				if len(active_jobs) > 0:
 				
-		restream.write("ALL_VASPJOBS: COMPLETE" + '\n')	
-		
+					print "waiting for restarted vasp job."
+				
+					helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "setup_vasp - restarts")
+				else:
+					print "All jobs are complete"
+					break	
+					
+			restart_controller.update_file("ALL_VASPJOBS: COMPLETE" + '\n')
+		else:
+			restart_controller.update_file("ALL_VASPJOBS: COMPLETE" + '\n')
 		
 		# Post-process the vasp jobs
 		
@@ -494,5 +613,4 @@ for THIS_ALC in sys.argv[1:]:
 		
 		print "ALC-", THIS_ALC, "is complete"	
 		
-		restream.write("THIS_ALC: COMPLETE" + '\n')
-		restream.close()					
+		restart_controller.update_file("THIS_ALC: COMPLETE" + '\n')				
