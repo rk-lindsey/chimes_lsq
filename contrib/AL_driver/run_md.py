@@ -41,8 +41,8 @@ def post_proc(my_ALC, my_case, my_indep, *argv, **kwargs):
 	
 	### ...kwargs
 	
-	default_keys   = [""]*10
-	default_values = [""]*10
+	default_keys   = [""]*11
+	default_values = [""]*11
 
 
 	# MD specific controls
@@ -77,8 +77,8 @@ def post_proc(my_ALC, my_case, my_indep, *argv, **kwargs):
 	# 1. Run molanal
 	################################
 	
-	helpers.run_bash_cmnd(args["molanal_dir"] + "/molanal.new traj.gen > traj.gen-molanal.out")
-	helpers.run_bash_cmnd(args["molanal_dir"] + "/findmolecules.pl traj.gen-molanal.out > traj.gen-find_molecs.out")
+	helpers.run_bash_cmnd_to_file("traj.gen-molanal.out",args["molanal_dir"] + "/molanal.new traj.gen")
+	helpers.run_bash_cmnd_to_file("traj.gen-find_molecs.out", args["molanal_dir"] + "/findmolecules.pl traj.gen-molanal.out")
 	helpers.run_bash_cmnd("rm -rf molecules " + ' '.join(glob.glob("molanal*")))
 	helpers.run_bash_cmnd(args["local_python"] + " " + args["driver_dir"] + "/post_process_molanal.py " + " \"" + '\" \"'.join(args_species) + "\"")
 	
@@ -150,15 +150,15 @@ def run_md(my_ALC, my_case, my_indep, *argv, **kwargs):
 	
 	# Overall job controls
 
-	default_keys[4 ] = "job_name"	   ; default_values[11] = "ALC-"+ `my_ALC`+"-md"	# Name for ChIMES md job
-	default_keys[5 ] = "job_nodes"     ; default_values[12] = "2"				# Number of nodes for ChIMES md job
-	default_keys[6 ] = "job_ppn"	   ; default_values[13] = "36"  			# Number of processors per node for ChIMES md job
-	default_keys[7 ] = "job_walltime"  ; default_values[14] = "1"				# Walltime in hours for ChIMES md job
-	default_keys[8 ] = "job_queue"     ; default_values[15] = "pdebug"			# Queue for ChIMES md job
-	default_keys[9 ] = "job_account"   ; default_values[16] = "pbronze"			# Account for ChIMES md job
-	default_keys[10] = "job_executable"; default_values[17] = ""				# Full path to executable for ChIMES md job
-	default_keys[11] = "job_system"    ; default_values[18] = "slurm"			# slurm or torque	
-	default_keys[12] = "job_file"	   ; default_values[19] = "run.cmd"			# Name of the resulting submit script	
+	default_keys[4 ] = "job_name"	   ; default_values[4 ] = "ALC-"+ `my_ALC`+"-md"	# Name for ChIMES md job
+	default_keys[5 ] = "job_nodes"     ; default_values[5 ] = "2"				# Number of nodes for ChIMES md job
+	default_keys[6 ] = "job_ppn"	   ; default_values[6 ] = "36"  			# Number of processors per node for ChIMES md job
+	default_keys[7 ] = "job_walltime"  ; default_values[7 ] = "1"				# Walltime in hours for ChIMES md job
+	default_keys[8 ] = "job_queue"     ; default_values[8 ] = "pdebug"			# Queue for ChIMES md job
+	default_keys[9 ] = "job_account"   ; default_values[9 ] = "pbronze"			# Account for ChIMES md job
+	default_keys[10] = "job_executable"; default_values[10] = ""				# Full path to executable for ChIMES md job
+	default_keys[11] = "job_system"    ; default_values[11] = "slurm"			# slurm or torque	
+	default_keys[12] = "job_file"	   ; default_values[12] = "run.cmd"			# Name of the resulting submit script	
 
 	
 

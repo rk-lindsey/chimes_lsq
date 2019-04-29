@@ -19,12 +19,14 @@ import restart
 
 Active Learning Driver Main.
 
-Usage: unbuffer python ../PYTHON_DRIVER/main.py 0 1 2 | driver.log 
+Usage: unbuffer python ../PYTHON_DRIVER/main.py 0 1 2 | tee driver.log 
 
 Notes: Second argument is a list of cycles to run (i.e. ALC-0, ALC-, ALC-2)
        Still working on support for parallel learning
        Still working on support for DLARS
        Still working on restart functionality
+       
+WARNING: Ensure all queued jobs have ended or been killed before restarting.       
        
 NOTE TO SELF: (4/15/19, 12:00 pm): The code has been set up for parallel edits, 
               but none of these new changes have been tested
@@ -83,6 +85,14 @@ for THIS_ALC in ALC_LIST:
 for THIS_ALC in ALC_LIST:
 
 	THIS_ALC = int(THIS_ALC)
+	
+	
+	# Let the ALC process know whether this is a restarted cycle, or a completely new cycle
+	
+	if THIS_ALC != restart_controller.last_ALC:
+	
+		restart_controller.reinit_vars()
+	
 	
 	# Prepare the restart file
 
@@ -275,6 +285,8 @@ for THIS_ALC in ALC_LIST:
 		
 		
 		if not restart_controller.INIT_VASPJOB:	
+				
+			vasp_driver.cleanup_and_setup(["all"], ".") # Always clean up, just in case		
 		
 			active_jobs = vasp_driver.setup_vasp(THIS_ALC,
 						["all"], 
@@ -320,13 +332,14 @@ for THIS_ALC in ALC_LIST:
 			restart_controller.update_file("ALL_VASPJOBS: COMPLETE" + '\n')
 		else:
 			restart_controller.update_file("ALL_VASPJOBS: COMPLETE" + '\n')
-		
+			
+		if not restart_controller.THIS_ALC:
 
-		# Post-process the vasp jobs
+			# Post-process the vasp jobs
 		
-		print "post-processing..."	
+			print "post-processing..."	
 		
-		vasp_driver.post_process(["all"], "ENERGY",
+			vasp_driver.post_process(["all"], "ENERGY",
 				vasp_postproc = config.VASP_POSTPRC)
 
 		os.chdir("..")
@@ -556,6 +569,8 @@ for THIS_ALC in ALC_LIST:
 			
 		if not restart_controller.INIT_VASPJOB:
 		
+			vasp_driver.cleanup_and_setup(["20", "all"], "..") # Always clean up, just in case
+		
 			active_jobs = vasp_driver.setup_vasp(THIS_ALC,
 						["20", "all"], 
 						config.ATOM_TYPES,
@@ -602,11 +617,14 @@ for THIS_ALC in ALC_LIST:
 		else:
 			restart_controller.update_file("ALL_VASPJOBS: COMPLETE" + '\n')
 		
-		# Post-process the vasp jobs
 		
-		print "post-processing..."	
+		if not restart_controller.THIS_ALC:
+
+			# Post-process the vasp jobs
 		
-		vasp_driver.post_process(["all","20"], "ENERGY",
+			print "post-processing..."	
+		
+			vasp_driver.post_process(["all","20"], "ENERGY",
 					vasp_postproc = config.VASP_POSTPRC)
 					
 		os.chdir("..")

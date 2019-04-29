@@ -42,7 +42,7 @@ def run_bash_cmnd_to_file(outfile, cmnd_str):
 	
 	"""
 	
-	ofstream = open(outfile,'r')
+	ofstream = open(outfile,'w+')
 	ofstream .write(run_bash_cmnd(cmnd_str))
 	ofstream .close()
 	

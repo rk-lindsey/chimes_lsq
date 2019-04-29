@@ -1,3 +1,6 @@
+04/29/19 - RKL:
+Restart handling has been fully tested, for single-system ALC iterations. Next few commits will focus on adding support for parallel learning.
+
 04/25/19 - RKL:
 Basic restart handling has been added, for single-system ALC iterations. This functionality has only been tested on a superficial level so far. Next commit will be for "stable" restart functioanlity.
 

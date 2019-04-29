@@ -4,17 +4,17 @@ import os
 
 # Local modules
 
-	""" 
-	
-	Class controlling driver restart capability
-	
-	Usage: my_restart_class = restart.restart()
-	
-	Notes: Searches for "restart.dat" in the base ALC directory.
-	       If no "restart.dat" file is found, assumes a fresh start.
-	       Functionality is not supported for user-modified restart files.
-	      	
-	"""
+""" 
+
+Class controlling driver restart capability
+
+Usage: my_restart_class = restart.restart()
+
+Notes: Searches for "restart.dat" in the base ALC directory.
+       If no "restart.dat" file is found, assumes a fresh start.
+       Functionality is not supported for user-modified restart files.
+      	
+"""
 
 class restart:
 
@@ -42,6 +42,17 @@ class restart:
 			ifstream = open("restart.dat",'r')
 			contents = ifstream.readlines()
 			ifstream.close()
+			
+			# Check if empty
+
+			if len(contents) == 0:
+			
+				# Set up the restart file 
+
+				self.restart_stream = open("restart.dat",'w+',0) # 0: no buffering
+
+				return
+				
 			
 			# Find index of "ALC: X" in contents for the last attempted ALC
 			
@@ -135,10 +146,15 @@ class restart:
 			
 
 	def update_ALC_list(self, *argv):
-	
+		
 		ALC_LIST = argv[0]
 
 		ALC_LIST = sorted(set(ALC_LIST)) # Ascending sort preserving only unique values
+		
+		# Check if restart file was empty (i.e. self.last_ALC never got updated from -1)
+		
+		if self.last_ALC == -1:
+			return 	ALC_LIST	
 		
 		# Cases:
 		#
