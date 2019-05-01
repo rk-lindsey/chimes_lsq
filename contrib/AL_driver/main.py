@@ -27,9 +27,7 @@ Notes: Second argument is a list of cycles to run (i.e. ALC-0, ALC-, ALC-2)
        Still working on restart functionality
        
 WARNING: Ensure all queued jobs have ended or been killed before restarting.       
-       
-NOTE TO SELF: (4/15/19, 12:00 pm): The code has been set up for parallel edits, 
-              but none of these new changes have been tested
+
 	
 """	       
 	
@@ -359,8 +357,6 @@ for THIS_ALC in ALC_LIST:
 		
 		os.chdir("ALC-" + str(THIS_ALC))
 		
-		
-		
 		vasp_all_path = config.WORKING_DIR + "/ALC-" + `THIS_ALC-1` + "/VASP-all/"
 		vasp_20F_path = ""
 		
@@ -383,6 +379,7 @@ for THIS_ALC in ALC_LIST:
 			restart_controller.update_file("BUILD_AMAT: COMPLETE" + '\n')
 		else:
 			restart_controller.update_file("BUILD_AMAT: COMPLETE" + '\n')
+					
 			
 		if not restart_controller.SOLVE_AMAT:	
 		
@@ -419,10 +416,11 @@ for THIS_ALC in ALC_LIST:
 			# Run the MD/cluster jobs
 		
 			active_jobs = []
+			
+			#print "running for cases:", config.NO_CASES
 		
-			for THIS_CASE in xrange(config.NO_CASES):		
-		
-		
+			for THIS_CASE in xrange(config.NO_CASES):
+
 				active_job = run_md.run_md(THIS_ALC, THIS_CASE, THIS_INDEP,
 					basefile_dir   = config.CHIMES_MDFILES, 
 					driver_dir     = config.DRIVER_DIR,
@@ -436,9 +434,10 @@ for THIS_ALC in ALC_LIST:
 					job_account    = "pbronze",	 
 					job_executable = config.CHIMES_MD,	 
 					job_system     = "slurm",  	 
-					job_file       = "run.cmd")	
-
-			active_jobs.append(active_job.split()[0])										
+					job_file       = "run.cmd")
+	
+				active_jobs.append(active_job.split()[0])	
+								
 			helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "run_md")
 
 			#!!!! THIS NEEDS TO BE UPDATED TO WORK IN PARALLEL!!!! ... probably just need to adjust how the restart class is set
@@ -446,8 +445,7 @@ for THIS_ALC in ALC_LIST:
 			restart_controller.update_file("RUN_MD: COMPLETE" + '\n')
 		else:
 			restart_controller.update_file("RUN_MD: COMPLETE" + '\n')
-			
-			
+					
 		if not restart_controller.POST_PROC:
 		
 			for THIS_CASE in xrange(config.NO_CASES):	
@@ -475,8 +473,7 @@ for THIS_ALC in ALC_LIST:
 					
 			restart_controller.update_file("POST_PROC: COMPLETE" + '\n')
 		else:
-			restart_controller.update_file("POST_PROC: COMPLETE" + '\n')
-		
+			restart_controller.update_file("POST_PROC: COMPLETE" + '\n')	
 		
 		if not restart_controller.CLUSTER_EXTRACTION:
 		
@@ -508,7 +505,7 @@ for THIS_ALC in ALC_LIST:
 		else:
 			restart_controller.update_file("CLUSTER_EXTRACTION: COMPLETE" + '\n')					
 		
-		
+				
 		if not restart_controller.CLUENER_CALC:
 		
 			# Compute cluster energies
@@ -520,7 +517,8 @@ for THIS_ALC in ALC_LIST:
 					base_runfile   = config.CHIMES_MDFILES + "/" + "run_md.base",
 					driver_dir     = config.DRIVER_DIR,
 					job_ppn        = str(config.HPC_PPN),
-					job_walltime   = "1",					
+					job_queue      = "pbatch",
+					job_walltime   = "4",					
 					job_account    = config.HPC_ACCOUNT, 
 					job_system     = config.HPC_SYSTEM,
 					job_executable = config.CHIMES_MD)	
@@ -551,6 +549,7 @@ for THIS_ALC in ALC_LIST:
 							 
 
 
+
 			 
 
 
@@ -558,20 +557,28 @@ for THIS_ALC in ALC_LIST:
 		# Launch VASP
 		################################
 		
+		# Note: If multiple cases are being used, only run clean/setup once!
+		
 		if not restart_controller.CLEANSETUP_VASP:
 		
-			vasp_driver.cleanup_and_setup(["20", "all"], "..")
+			vasp_driver.cleanup_and_setup(["20", "all"], build_dir=".")
 		
 			restart_controller.update_file("CLEANSETUP_VASP: COMPLETE" + '\n')
 		else:
 			restart_controller.update_file("CLEANSETUP_VASP: COMPLETE" + '\n')
 			
-			
+					
 		if not restart_controller.INIT_VASPJOB:
 		
-			vasp_driver.cleanup_and_setup(["20", "all"], "..") # Always clean up, just in case
+			active_jobs = []
+			
+			vasp_driver.cleanup_and_setup(["20", "all"], build_dir=".")
 		
-			active_jobs = vasp_driver.setup_vasp(THIS_ALC,
+			for THIS_CASE in xrange(config.NO_CASES):
+		
+				vasp_driver.cleanup_and_setup(["20", "all"], THIS_CASE, build_dir=".") # Always clean up, just in case
+		
+				active_job = vasp_driver.setup_vasp(THIS_ALC,
 						["20", "all"], 
 						config.ATOM_TYPES,
 						THIS_CASE, 
@@ -585,22 +592,35 @@ for THIS_ALC in ALC_LIST:
 						job_queue      = config.VASP_QUEUE,
 						job_account    = "pbronze",
 						job_system     = config.HPC_SYSTEM)
+						
+				active_jobs += active_job
 		
 			helpers.wait_for_jobs(active_jobs, job_system = config.HPC_SYSTEM, verbose = True, job_name = "setup_vasp")
 		
 			restart_controller.update_file("INIT_VASPJOB: COMPLETE" + '\n')
 		else:
 			restart_controller.update_file("INIT_VASPJOB: COMPLETE" + '\n')
+
 		
+		
+		##### NEED TO FIX RESTART SO THAT IT HANDLES MULTIPLE CASES!!!!
+		##### --- I made some mods ... it  might actually work
+					
 		if not restart_controller.ALL_VASPJOBS:
 		
 			# Check that the job was complete
 		
 			while True:
+			
+				active_jobs = []
+			
+				for THIS_CASE in xrange(config.NO_CASES):
 
-				active_jobs = vasp_driver.continue_job(
-							["all","20"], 
+					active_job = vasp_driver.continue_job(
+							["all","20"], THIS_CASE, 
 							job_system     = config.HPC_SYSTEM)
+							
+					active_jobs += active_job
 							
 				print "active jobs: ", active_jobs			
 							
@@ -617,6 +637,10 @@ for THIS_ALC in ALC_LIST:
 		else:
 			restart_controller.update_file("ALL_VASPJOBS: COMPLETE" + '\n')
 		
+	
+		
+		#### NEED TO MODIFY POST-PROCESS SO IT GRABS OUTPUT FROM CASES!!! 
+		##### --- I made some mods ... it  might actually work
 		
 		if not restart_controller.THIS_ALC:
 
@@ -624,11 +648,13 @@ for THIS_ALC in ALC_LIST:
 		
 			print "post-processing..."	
 		
-			vasp_driver.post_process(["all","20"], "ENERGY",
+			vasp_driver.post_process(["all","20"], "ENERGY", config.NO_CASES,
 					vasp_postproc = config.VASP_POSTPRC)
+					
 					
 		os.chdir("..")
 		
 		print "ALC-", THIS_ALC, "is complete"	
 		
-		restart_controller.update_file("THIS_ALC: COMPLETE" + '\n')				
+		restart_controller.update_file("THIS_ALC: COMPLETE" + '\n')	
+				

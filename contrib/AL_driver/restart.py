@@ -154,7 +154,7 @@ class restart:
 		# Check if restart file was empty (i.e. self.last_ALC never got updated from -1)
 		
 		if self.last_ALC == -1:
-			return 	ALC_LIST	
+			return 	ALC_LIST
 		
 		# Cases:
 		#
@@ -166,7 +166,7 @@ class restart:
 		#	- start on next ALC
 		# 4. Restart's last ALC is less than or equal to the greatest ALC in the list, but was not completed
 		#	- start on the current ALC ... restart checks will skip completed steps
-		
+				
 		# Case 1
 		
 		if int(ALC_LIST[-1]) < self.last_ALC:
@@ -209,7 +209,7 @@ class restart:
 			
 		# Case 4
 		
-		if (int(ALC_LIST[-1]) > self.last_ALC) and (not self.THIS_ALC):
+		if (int(ALC_LIST[-1]) >= self.last_ALC) and (not self.THIS_ALC):
 			
 			# Get the index of ALC_LIST item matching self.last_ALC
 			

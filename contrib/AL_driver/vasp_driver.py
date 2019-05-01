@@ -27,8 +27,12 @@ def cleanup_and_setup(*argv, **kwargs):
 	
 	### ...argv
 	
-	args_targets = argv[0] # This is a pointer!
+	args_targets   = argv[0] # This is a pointer!
+	args_this_case = -1
 	
+	if len(argv) == 2:
+		args_this_case = argv[1]
+
 	### ...kwargs
 	
 	default_keys   = [""]*1
@@ -40,17 +44,44 @@ def cleanup_and_setup(*argv, **kwargs):
 
 	args = dict(zip(default_keys, default_values))
 	args.update(kwargs)	
+	
+	print helpers.run_bash_cmnd("pwd")
+	
+	for i in args_targets: # 20 all
+	
+		if args_this_case == -1:
+	
+			for i in args_targets: # 20 all
+
+				vasp_dir = args["build_dir"] + "/VASP-" + i
+			
+				if os.path.isdir(vasp_dir):
+			
+					helpers.run_bash_cmnd("rm -rf " + vasp_dir)
+					helpers.run_bash_cmnd("mkdir  " + vasp_dir)
+								
+				else:
+					helpers.run_bash_cmnd("mkdir  " + vasp_dir)
+				
+			return
 
 	for i in args_targets: # 20 all
 
 		vasp_dir = args["build_dir"] + "/VASP-" + i
 		
 		if os.path.isdir(vasp_dir):
-			helpers.run_bash_cmnd("rm -rf " + vasp_dir)
-			helpers.run_bash_cmnd("mkdir  " + vasp_dir)
+		
+			helpers.run_bash_cmnd("rm -f " + vasp_dir + "/*")
+
+			vasp_dir = args["build_dir"] + "/VASP-" + i + "/CASE-" + `args_this_case`
+
+			if os.path.isdir(vasp_dir):
+				helpers.run_bash_cmnd("rm -f " + vasp_dir + "/*")
+			else:
+				helpers.run_bash_cmnd("mkdir  -p " + vasp_dir)
+			
 		else:
-			helpers.run_bash_cmnd("mkdir  " + vasp_dir)
-				
+			helpers.run_bash_cmnd("mkdir -p  " + vasp_dir + "/CASE-" + `args_this_case`)
 
 
 def continue_job(*argv, **kwargs):
@@ -73,6 +104,7 @@ def continue_job(*argv, **kwargs):
 	### ...argv
 	
 	args_targets = argv[0] # This is a pointer!
+	args_case    = argv[1]
 	
 	### ...kwargs
 	
@@ -93,9 +125,9 @@ def continue_job(*argv, **kwargs):
 	
 	for i in xrange(len(args_targets)): # 20 all
 	
-		if os.path.isdir("VASP-" + args_targets[i]):
+		if os.path.isdir("VASP-" + args_targets[i] + "/CASE-" + `args_case`):
 		
-			os.chdir("VASP-" + args_targets[i])
+			os.chdir("VASP-" + args_targets[i] + "/CASE-" + `args_case`)
 
 			# Count the number of possible jobs
 			
@@ -114,7 +146,7 @@ def continue_job(*argv, **kwargs):
 				else:	
 					job_list.append(helpers.run_bash_cmnd("msub run_vasp.cmd").replace('\n', ''))
 					
-			os.chdir("..")
+			os.chdir("../..")
 
 	return job_list	
 
@@ -217,6 +249,7 @@ def post_process(*argv, **kwargs):
 	
 	args_targets    = argv[0] # ... all ... 20
 	args_properties = argv[1] # "ENERGY STRESS" ...etc for the post process script
+	args_cases      = argv[2]
 	
 	
 	### ...kwargs
@@ -234,19 +267,24 @@ def post_process(*argv, **kwargs):
 	
 	################################
 
-
 	for i in xrange(len(args_targets)): # 20 all
 
 		if not os.path.isdir("VASP-" + args_targets[i]):
 
 			continue
+			
+		print "Working on:","VASP-" + args_targets[i]
 	
 		os.chdir("VASP-" + args_targets[i])
 	
 		helpers.run_bash_cmnd("rm -f OUTCAR.xyzf")
 		
-		outcar_list = glob.glob("*.OUTCAR")
+		outcar_list = []
 		
+		for j in xrange(args_cases):
+			
+			outcar_list += glob.glob("CASE-" + `j` + "/*.OUTCAR")
+			
 		for j in xrange(len(outcar_list)):
 
 			print helpers.run_bash_cmnd(args["vasp_postproc"] + " " + outcar_list[j] + " 1 " + args_properties + " | grep ERROR ")
@@ -269,7 +307,7 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 	
 	Sets up and launches VASP single point calculations
 	
-	Usage: setup_vasp(1, <arguements>)
+	Usage: setup_vasp(1, <arguments>)
 	
 	Notes: See function definition in helpers.py for a full list of options. 
 	       Expects to be run from teh ALC-X folder.
@@ -349,7 +387,9 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 	
 		curr_dir = helpers.run_bash_cmnd("pwd").rstrip() # This should be either CASE-X... (ALC>=1) or ...? (ALC==0)
 	
-		vasp_dir = "VASP-" + args_targets[i]		
+		vasp_dir = "VASP-" + args_targets[i] + "/CASE-" + my_case
+		
+		helpers.run_bash_cmnd("mkdir -p " + vasp_dir)		
 			
 		# Set up an launch the job
 		
@@ -379,6 +419,7 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 			for j in target_files:
 
 				generate_POSCAR(j, atm_types, my_smear)	
+				
 		else:
 
 			ifstream     = open(curr_dir + "/" + args_targets[i] + ".selection.dat", 'r') # all.selection.dat ... a list of indices
@@ -407,6 +448,11 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 			for j in xrange(len(target_files)):
 			
 				sel_file = contents[int(target_files[j].rstrip())].split()[3]
+				
+				case_check = "CASE-" + my_case
+				
+				if case_check not in sel_file:
+					continue
 
 				if args["traj_list"]:
 				

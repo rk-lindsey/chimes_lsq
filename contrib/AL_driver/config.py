@@ -16,7 +16,7 @@
 ##### General variables
 
 ATOM_TYPES    = ["C", "O"]
-NO_CASES      = 1
+NO_CASES      = 3
 THIS_SMEAR    = 2400       # All self-consistent vasp calcs will use this smearing (K) 
 
 # FYI:

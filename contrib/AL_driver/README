@@ -1,3 +1,8 @@
+04/30/19 - RKL:
+Parallel learning seems to be working, after initial tests. Next few commits will focus on:
+	+ a CFG_REPO clean up capability (to minimize files)
+	+ distributed solving (DLARS) ... requires a-mat chunks
+
 04/29/19 - RKL:
 Restart handling has been fully tested, for single-system ALC iterations. Next few commits will focus on adding support for parallel learning.
 
@@ -13,3 +18,12 @@ restart capability, and enabling parallel learning.
 This tool has only been added to the SVN repo for tracking - it is not yet ready
 for general use. Currently, capabilities only include learning at a single state
 point, using lars/lasso as the LSQ solver.
+
+
+First stable commit: Tool now works for ALC iterations for a single system,
+at a single state point.
+
+Next tasks include: 
+	+ Adding a resubmission capability for MD
+	+ Adding an overall restart capability
+	+ Enabling parallel learning 
