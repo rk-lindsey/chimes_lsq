@@ -46,10 +46,23 @@ Options:
     --split_files       If specified, split input files are read.  Instead of A.txt, A.0000.txt,
 	                     A.0001.txt, etc. is read by each MPI process.  This can speed job execution
 								for large A matrices.  The chimes_lsq code generates these files if the
-								#SPLITFI# option is specified.
+								#SPLITFI# option is specified.  Each split A matrix file has the same number
+								of columns, which is equal to the number of fitting parameters.  The number of
+								rows in the split A matrix file can vary.  The files are stored in row-major
+								format, where one row occupies each line in the file.  It is also OK to place each
+								entry in the matrix on a separate line in the file.
+								
 								A corresponding dim file is required for each A.xxxx.txt file, e.g. dim.xxxx.txt.
 								The dim file gives:  The number of data columns, the starting row for the file,
-								the ending row (inclusive) for the file, and the total number of rows in the A matrix.
+								the ending row (inclusive) for the file, and the total number of rows in the A matrix,
+								using C++ index style, which begins at 0.
+								
+								Each dim file must that the same number of data columns (1st number) and total number of
+								rows in the A matrix (4th number).  The starting (2nd number) and ending rows (3rd number)
+								vary, so that the starting row of the n+1th file will be equal to the ending row of
+								the nth file + 1. The ending row of the last file must be equal to the total number of rows - 1.
+								The starting row of the 1st dimension file must be 0.
+								
 	--weights=<file>     Give the name of a file with weights for each row of the A matrix, and value of b.
    --help               Print a list of supported options.
 
