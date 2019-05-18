@@ -17,6 +17,7 @@
 #include<sstream>
 #include<string.h>
 #include<getopt.h>
+#include <chrono>
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -107,7 +108,7 @@ int main(int argc, char **argv)
 	double lambda = 0.0 ;             // L1 weighting factor.
 	string weight_file("") ;
 	string restart_file ;
-	
+
 	while (1) {
 		opt_type = getopt_long(argc, argv, "a:i:l:m:n:r:sh", long_options, &option_index) ;
 		if ( opt_type == -1 ) break ;
@@ -256,6 +257,8 @@ int main(int argc, char **argv)
 		last_beta = lars.beta ;
 	}
 	int last_status = 1 ;
+	auto time1 = std::chrono::system_clock::now() ;
+	
 	for (  ; j + 1 <= max_iterations ; j++ ) {
 		int status = lars.iteration() ;
 		if ( status == 0 ) {
@@ -280,6 +283,14 @@ int main(int argc, char **argv)
 		last_beta = lars.beta ;
 		last_obj_func = lars.obj_func_val ;
 		last_status = status ;
+
+		auto time2 = std::chrono::system_clock::now() ;
+		std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
+		
+		if ( RANK == 0 )
+			cout << "Time for iteration " << j << " = " << elapsed_seconds.count() << " seconds " << endl ;
+
+		time1 = std::chrono::system_clock::now() ;
 	}
 
 	if ( RANK == 0 ) {

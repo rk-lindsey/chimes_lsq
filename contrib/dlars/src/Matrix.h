@@ -375,19 +375,28 @@ public:
 		if ( vals.dim != dim1 ) {
 			cout << "Error in scale_rows: dimensions did not match" << endl ;
 		}
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(vals) default(none)
+#endif		
 		for ( int j = row_start ; j <= row_end ; j++ ) {
 			for ( int k = 0 ; k < dim2 ; k++ ) {
 				set(j,k, get(j,k) * vals.get(j)) ;
 			}
 		}
+		
 	}
 	double mult_T(int j, int k)
 	// Calculate the j,k element of X^T * X, where X is the current matrix.
 		{
 			double tmp = 0.0 ;
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(k,j) reduction(+:tmp) default(none)
+#endif					
 			for ( int l = row_start ; l <= row_end ; l++ ) {
 				tmp += get(l, j) * get(l, k) ;
 			}
+			
 			double tmp2 ;
 #ifdef USE_MPI
 			MPI_Allreduce(&tmp, &tmp2, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
@@ -396,15 +405,22 @@ public:
 #endif
 			return tmp2 ;
 		}
+
 	void normalize()
 	// Normalize matrix to according to Eq. 1.1
 		{
 			Vector tmp(dim2, 0.0) ;
 			
 			for ( int j = 0 ; j < dim2 ; j++ ) {
+				double sum = 0.0 ;
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(j) reduction(+:sum) default(none)
+#endif						
 				for ( int k = row_start ; k <= row_end ; k++ ) {
-					tmp.add(j, get(k, j) ) ;
+					sum += get(k, j) ;
 				}
+
+				tmp.set(j,sum) ;
 			}
 #ifdef USE_MPI
 			MPI_Allreduce(tmp.vec, shift, dim2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
@@ -551,6 +567,9 @@ public:
 			double cdotc = 0.0 ;
 			for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
 				double sum = newr.get(j) ;
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(chol0,xtmp,j) reduction(+:sum) default(none)
+#endif						
 				for ( int k = 0 ; k < j ; k++ ) {
 					sum -= chol0.get(k,j) * xtmp.get(k) ;
 				}
@@ -565,6 +584,9 @@ public:
 				return false ;
 			}
 
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(chol0) default(none)
+#endif					
 			for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
 				for ( int k = 0 ; k <= j ; k++ ) {
 					set(k,j, chol0.get(k,j)) ;
@@ -573,9 +595,17 @@ public:
 					set(k,j, 0.0) ;
 				}
 			}
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(xtmp) default(none)
+#endif					
 			for ( int j = 0 ; j < dim1 ; j++ ) {
 				set(j, dim1-1, xtmp.get(j)) ;
 			}
+			
+#ifdef USE_OPENMP		
+#pragma omp parallel for default(none)
+#endif					
 			for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
 				set(dim1-1, j, 0.0) ;
 			}
@@ -594,10 +624,16 @@ public:
 			stop_run(1) ;
 		}
 		int lth = dim1 - 1 ;
+
 		for(int i=id; i < lth; ++i){
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(i) default(none)
+#endif					
 			for( int j=0; j<i; ++j) {
 				setT(i,j, getT(i+1,j)) ;
 			}
+
 			a = getT(i+1,i);
 			b = getT(i+1,i+1);
 			if(b==0){
@@ -621,6 +657,10 @@ public:
 				c = -c ;
 			}
 			// L(i,i+1) = s*a + c*b;
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(i,lth,c,s) private(a,b) default(none)
+#endif					
 			for( int j=i+2; j<=lth; ++j){
 				a = getT(j,i);
 				b = getT(j, i+1);
@@ -628,15 +668,30 @@ public:
 				setT(j, i+1, s*a + c*b) ;
 			}
 		}
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(lth) default(none)
+#endif				
 		for( int i=0; i<= lth; ++i)
 			setT(lth, i, 0) ;
 
 		// Shift the storage to accommodate a change of dimension.
+		double *newmat = new double[dim1*dim2] ;
+
+
+
+#ifdef USE_OPENMP
+//#pragma omp parallel for shared(lth,newmat,mat) default(none)
+#pragma omp parallel for shared(lth,newmat) default(none)
+#endif				
 		for ( int i = 0 ; i < lth ; i++ ) {
 			for ( int j = 0 ; j < lth ; j++ ) {
-				mat[i * (dim2-1) + j] = mat[i * dim2 + j] ;
+				newmat[i * (dim2-1) + j] = mat[i * dim2 + j] ;
 			}
 		}
+		delete [] mat ;
+		mat = newmat ;
+		
 		dim1-- ;
 		dim2-- ;
 		num_rows-- ;
@@ -655,18 +710,31 @@ public:
 				stop_run(1) ;
 			}
 			Vector xtmp(dim1) ;
+			Matrix& mat=*this ;
+			
 			for ( int j = 0 ; j < dim1 ; j++ ) {
 				double sum = b.get(j) ;
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(xtmp,mat,j) reduction(+:sum) default(none)
+#endif						
 				for ( int k = 0 ; k < j ; k++ ) {
-					sum -= get(k,j) * xtmp.get(k) ;
+					sum -= mat.get(k,j) * xtmp.get(k) ;
 				}
-				xtmp.set(j, sum / get(j,j) );
+
+				xtmp.set(j, sum / mat.get(j,j) );
 			}
+
 			for ( int j = dim1 - 1 ; j >= 0 ; j-- ) {
 				double sum = xtmp.get(j) ;
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(j,x) reduction(+:sum) default(none)
+#endif						
 				for ( int k = j + 1 ; k < dim1 ; k++ ) {
 					sum -= get(j,k) * x.get(k) ;
 				}
+
 				x.set(j, sum / get(j,j) ) ;
 			}
 		}

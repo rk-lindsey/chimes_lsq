@@ -3,7 +3,7 @@ void stop_run(int stat) {
 #ifdef USE_MPI
 	MPI_Abort(MPI_COMM_WORLD,stat) ;
 #else
-	exit(start) ;
+	exit(stat) ;
 #endif
 }
 

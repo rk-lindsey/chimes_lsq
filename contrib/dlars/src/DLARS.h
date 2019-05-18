@@ -563,6 +563,8 @@ public:
 							a_trial.push(j) ;
 							count++ ;
 							if ( RANK == 0 ) cout << "Adding property " << j << " to the active set" << endl ;
+							// Break to add only one property to the active set at a time.
+							break ;
 						}
 					}
 				}
