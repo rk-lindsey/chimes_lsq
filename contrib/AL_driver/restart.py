@@ -2,23 +2,21 @@
 
 import os
 
-# Local modules
-
-""" 
-
-Class controlling driver restart capability
-
-Usage: my_restart_class = restart.restart()
-
-Notes: Searches for "restart.dat" in the base ALC directory.
-       If no "restart.dat" file is found, assumes a fresh start.
-       Functionality is not supported for user-modified restart files.
-      	
-"""
-
 class restart:
 
 	def __init__(self):
+	
+		""" 
+
+		Class controlling driver restart capability
+
+		Usage: my_restart_class = restart.restart()
+
+		Notes: Searches for "restart.dat" in the base ALC directory.
+		       If no "restart.dat" file is found, assumes a fresh start.
+		       Functionality is not supported for user-modified restart files.
+		      	
+		"""
 	
 		self.last_ALC		= -1
 		self.BUILD_AMAT		= False

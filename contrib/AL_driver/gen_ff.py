@@ -21,6 +21,8 @@ def build_amat(my_ALC, **kwargs):
 	       Requrires config.CHIMES_LSQ.
 	       Expects to be called from ALC-my_ALC's base folder.
 	       Returns a job_id for the submitted job.
+	       
+	WARNING: This driver does NOT support SPLITFI functionality.
 	       	
 	"""
 
@@ -28,26 +30,28 @@ def build_amat(my_ALC, **kwargs):
 	# 0. Set up an argument parser
 	################################
 	
-	default_keys   = [""]*11
-	default_values = [""]*11
+	default_keys   = [""]*13
+	default_values = [""]*13
 	
 	# Paths
 	
 	default_keys[0 ] = "prev_gen_path"     ; default_values[0 ] = 	 "../ALC-" + `my_ALC-1` + "/GEN_FF/"    # Path to previous ALCs GEN_FF folder -- absolute is best
 	default_keys[1 ] = "prev_vasp_all_path"; default_values[1 ] = 	 ""	       	       	       	        # Path to previous ALCs VASP-all folder -- absolute is best
 	default_keys[2 ] = "prev_vasp_20_path" ; default_values[2 ] = 	 ""	       	       	       	        # Path to previous ALCs VASP-20 folder --absolute is best
+	default_keys[3 ] = "split_files"       ; default_values[3 ] = 	 False					# !!! UNUSED
 	
 	# Job controls
 	
-	default_keys[3 ] = "job_name"	       ; default_values[3 ] = 	 "ALC-"+ `my_ALC`+"-lsq-1"	        # Name for ChIMES lsq job
-	default_keys[4 ] = "job_nodes"         ; default_values[4 ] = 	 "2"			  	        # Number of nodes for ChIMES lsq job
-	default_keys[5 ] = "job_ppn"	       ; default_values[5 ] = 	 "36"  		  	       	        # Number of processors per node for ChIMES lsq job
-	default_keys[6 ] = "job_walltime"      ; default_values[6 ] = 	 "1"			  	        # Walltime in hours for ChIMES lsq job
-	default_keys[7 ] = "job_queue"         ; default_values[7 ] = 	 "pdebug"		  	        # Queue for ChIMES lsq job
-	default_keys[8 ] = "job_account"       ; default_values[8 ] = 	 "pbronze"		  	        # Account for ChIMES lsq job
-	default_keys[9 ] = "job_executable"    ; default_values[9 ] = 	 ""			  	        # Full path to executable for ChIMES lsq job
-	default_keys[10] = "job_system"        ; default_values[10] = 	 "slurm"	       	       	        # slurm or torque 	 
-	
+	default_keys[4 ] = "job_name"	       ; default_values[4 ] =	 "ALC-"+ `my_ALC`+"-lsq-1"		# Name for ChIMES lsq job
+	default_keys[5 ] = "job_nodes"         ; default_values[5 ] =	 "2"					# Number of nodes for ChIMES lsq job
+	default_keys[6 ] = "job_ppn"	       ; default_values[6 ] =	 "36"					# Number of processors per node for ChIMES lsq job
+	default_keys[7 ] = "job_walltime"      ; default_values[7 ] =	 "1"					# Walltime in hours for ChIMES lsq job
+	default_keys[8 ] = "job_queue"         ; default_values[8 ] =	 "pdebug"				# Queue for ChIMES lsq job
+	default_keys[9 ] = "job_account"       ; default_values[9 ] =	 "pbronze"				# Account for ChIMES lsq job
+	default_keys[10] = "job_executable"    ; default_values[10] =	 ""					# Full path to executable for ChIMES lsq job
+	default_keys[11] = "job_system"        ; default_values[11] =	 "slurm"				# slurm or torque	
+	default_keys[12] = "job_email"         ; default_values[12] =     True					# Send slurm emails?
+		
 	
 	args = dict(zip(default_keys, default_values))
 	args.update(kwargs)
@@ -72,8 +76,7 @@ def build_amat(my_ALC, **kwargs):
 		helpers.run_bash_cmnd("cp " + args["prev_gen_path"] + "/fm_setup.in"   + " GEN_FF/fm_setup.in")
 		helpers.run_bash_cmnd("cp " + args["prev_gen_path"] + "/traj_list.dat" + " GEN_FF/traj_list.dat")
 		helpers.run_bash_cmnd("cp " + ' '.join(glob.glob(args["prev_gen_path"] + "/*xyzf"  )) + " GEN_FF/")
-		
-		
+
 		nfiles = int(helpers.head("GEN_FF/traj_list.dat",1)[0])
 	else:
 
@@ -159,6 +162,7 @@ def build_amat(my_ALC, **kwargs):
 	
 	lsq_jobid_1 = helpers.create_and_launch_job(
 		job_name       =      args["job_name"	 ] ,
+		job_email      =     args["job_email"    ] ,
 		job_nodes      =  str(args["job_nodes"   ]),
 		job_ppn        =  str(args["job_ppn"	 ]),
 		job_walltime   =  str(args["job_walltime"]),
@@ -174,7 +178,6 @@ def build_amat(my_ALC, **kwargs):
 	
 
 def solve_amat(my_ALC, **kwargs):  
-
 
 	""" 
 	
@@ -194,25 +197,21 @@ def solve_amat(my_ALC, **kwargs):
 	WARNING: Weight generation function will need to be updated for stresses.
 	       
 	WARNING: Concatenation is untested and may be problematic for large A-matrices.
+	
+	WARNING: This driver does NOT support SPLITFI functionality.
+	
+	WARNING: DLARS/DLASSO is NOT supported with split files.	
+	
+	WARNING: The DLARS/DLASSO code zero pads for ints of *4 MAXIMUM* digits
 	       	
 	"""
-
-	# WARNING: Only coded to work with forces and energies ... weights writing function
-	#          will need to be updated if stresses are included
-	#
-	# WARNING: Havent tested concatenation method ... it may be problematic for large A-matrices
-	#
-
-	# Notes:
-	#
-	# Assumes last ALC's GEN_FF folder can be accessed from current ALC's base folder via ../ALC-(n-1)/GEN_FF
 
 	################################
 	# 0. Set up an argument parser
 	################################
 	
-	default_keys   = [""]*12
-	default_values = [""]*12
+	default_keys   = [""]*14
+	default_values = [""]*14
 	
 	# Weights
 	
@@ -223,17 +222,20 @@ def solve_amat(my_ALC, **kwargs):
 	
 	default_keys[2 ] = "regression_alg"    ; default_values[2 ] = 	 "lassolars" # Regression algorithm to be used in lsq2
 	default_keys[3 ] = "regression_var"    ; default_values[3 ] = 	 "1.0E-4"    # SVD eps or Lasso alpha
+	default_keys[4 ] = "split_files"       ; default_values[4 ] = 	 False       # !!! UNUSED
 	
 	# Overall job controls
 	
-	default_keys[4 ] = "job_name"	       ; default_values[4 ] =	 "ALC-"+ `my_ALC`+"-lsq-2"		# Name for ChIMES lsq job
-	default_keys[5 ] = "job_nodes"         ; default_values[5 ] =	 "1"					# Number of nodes for ChIMES lsq job
-	default_keys[6 ] = "job_ppn"	       ; default_values[6 ] =	 "36"					# Number of processors per node for ChIMES lsq job
-	default_keys[7 ] = "job_walltime"      ; default_values[7 ] =	 "1"					# Walltime in hours for ChIMES lsq job
-	default_keys[8 ] = "job_queue"         ; default_values[8 ] =	 "pdebug"				# Queue for ChIMES lsq job
-	default_keys[9 ] = "job_account"       ; default_values[9 ] =	 "pbronze"				# Account for ChIMES lsq job
-	default_keys[10] = "job_executable"    ; default_values[10] =	 ""					# Full path to executable for ChIMES lsq job
-	default_keys[11] = "job_system"        ; default_values[11] =	 "slurm"				# slurm or torque	
+	default_keys[5 ] = "job_name"	       ; default_values[5 ] =	 "ALC-"+ `my_ALC`+"-lsq-2"		# Name for ChIMES lsq job
+	default_keys[6 ] = "job_nodes"         ; default_values[6 ] =	 "1"					# Number of nodes for ChIMES lsq job
+	default_keys[7 ] = "job_ppn"	       ; default_values[7 ] =	 "36"					# Number of processors per node for ChIMES lsq job
+	default_keys[8 ] = "job_walltime"      ; default_values[8 ] =	 "1"					# Walltime in hours for ChIMES lsq job
+	default_keys[9 ] = "job_queue"         ; default_values[9 ] =	 "pdebug"				# Queue for ChIMES lsq job
+	default_keys[10] = "job_account"       ; default_values[10] =	 "pbronze"				# Account for ChIMES lsq job
+	default_keys[11] = "job_executable"    ; default_values[11] =	 ""					# Full path to executable for ChIMES lsq job
+	default_keys[12] = "job_system"        ; default_values[12] =	 "slurm"				# slurm or torque	
+	default_keys[13] = "job_email"         ; default_values[13] =    True				       # Send slurm emails?
+	
 	
 
 	args = dict(zip(default_keys, default_values))
@@ -269,21 +271,17 @@ def solve_amat(my_ALC, **kwargs):
 	#    ... Only needed for ALC >= 1
 	################################
 	
-	print helpers.run_bash_cmnd("pwd")
-	#print helpers.run_bash_cmnd(
-	#print helpers.run_bash_cmnd(
-	#print helpers.run_bash_cmnd(
 	
 	if my_ALC > 0: # "*_comb" files should always exist, because we create them for ALC-0 too
 	
 		# A-files
 	
-		prevfile    = "../ALC-" + `my_ALC-1` + "/GEN_FF/A_comb.txt"
+		#prevfile    = "../ALC-" + `my_ALC-1` + "/GEN_FF/A_comb.txt"
 	
 		helpers.cat_specific("GEN_FF/A_comb.txt",       ["../ALC-" + `my_ALC-1` + "/GEN_FF/A_comb.txt",       "GEN_FF/A.txt"]      )
 	
 		helpers.cat_specific("GEN_FF/b_comb.txt",       ["../ALC-" + `my_ALC-1` + "/GEN_FF/b_comb.txt",       "GEN_FF/b.txt"]      )
-	
+
 		helpers.cat_specific("GEN_FF/weights_comb.dat", ["../ALC-" + `my_ALC-1` + "/GEN_FF/weights_comb.dat", "GEN_FF/weights.dat"])
 
 		os.chdir("GEN_FF")
@@ -291,17 +289,33 @@ def solve_amat(my_ALC, **kwargs):
 	else:
 		os.chdir("GEN_FF")
 		
-		helpers.run_bash_cmnd("mv A.txt       A_comb.txt"      )
-		helpers.run_bash_cmnd("mv b.txt       b_comb.txt"      ) 
-		helpers.run_bash_cmnd("mv weights.dat weights_comb.dat")
-			
+		if not os.path.isfile("A_comb.txt"): # for restarted jobs that died at this stage
+			helpers.run_bash_cmnd("mv A.txt       A_comb.txt"      )
+			helpers.run_bash_cmnd("mv b.txt       b_comb.txt"      ) 
+			helpers.run_bash_cmnd("mv weights.dat weights_comb.dat")
+
 	
-	# Sanity checks
+	if "dlasso" in args["regression_alg"]:
+	
+		# If we are using dlars/dlasso, need to create the dim.txt file
+	
+		nvars = len(helpers.head("A_comb.txt",1)[0].split())
+		nline =     helpers.wc_l("b_comb.txt")
+	
+		ofstream = open("dim.txt",'w')
+		ofstream.write(`nvars` + " " + `nline` + '\n') # no. vars, first line, last line, total possible lines
+		ofstream.close() 
+	
+	# Sanity checks	... As written, these only make sense when a single A-mat is being read
 	
 	print "A-mat entries:  ",helpers.run_bash_cmnd("wc -l A_comb.txt").split()[0]
 	print "b-mat entries:  ",helpers.run_bash_cmnd("wc -l b_comb.txt").split()[0]
 	print "weight entries: ",helpers.run_bash_cmnd("wc -l weights_comb.dat").split()[0]
 	
+	if "dlasso" in args["regression_alg"]:
+		
+		print "Dim file contents:", helpers.cat_to_var("dim.txt")
+
 
 	################################
 	# 3. Run the actual fit
@@ -309,15 +323,22 @@ def solve_amat(my_ALC, **kwargs):
 	
 	# Create the task string
 			
-	job_task = args["job_executable"] + " --A A_comb.txt --b b_comb.txt --weights weights_comb.dat --algorithm " + args["regression_alg"]
-
-	if "svd" in args["regression_alg"]:
-		job_task += " --eps " + args["regression_var"]
+	job_task = args["job_executable"] + " --A A_comb.txt --b b_comb.txt --weights weights_comb.dat --algorithm " + args["regression_alg"]  + " "
+	
+	if "dlasso" in args["regression_alg"]:
+		job_task += "--active True " 
+		job_task += "--alpha " + str(args["regression_var"])  + " "	
+		job_task += "--nodes "  + str(args["job_nodes"]) + " " 
+		job_task += "--cores "  + str(int(args["job_nodes"])*int(args["job_ppn"])) + " " 			
+	
+	elif "svd" in args["regression_alg"]:
+		job_task += " --eps "   + str(args["regression_var"])
 	elif "lasso" in args["regression_alg"]:
-		job_task += " --alpha " + args["regression_var"]
+		job_task += " --alpha " + str(args["regression_var"])		
 	else:
 		print "ERROR: unknown regression algorithm: ", args["regression_alg"]
 		exit()
+	
 
 	# Launch the job
 	 
@@ -325,6 +346,7 @@ def solve_amat(my_ALC, **kwargs):
 
 	run_py_jobid = helpers.create_and_launch_job(
 		job_name       =     args["job_name"	] ,
+		job_email      =     args["job_email"   ] ,	
 		job_nodes      = str(args["job_nodes"	]),
 		job_ppn        = str(args["job_ppn"	]),
 		job_walltime   = str(args["job_walltime"]),
@@ -339,5 +361,62 @@ def solve_amat(my_ALC, **kwargs):
 	return run_py_jobid.split()[0]
 
 
+def split_weights():
 
+	""" 
+	
+	Splits a weights.dat file for parallel learning.
+	
+	...Currently, nothing calls this function...
+	
+	Expects to find:
+	
+	weights.dat
+	b.*.txt
+	
+	
+	"""
+
+	# Read all assigned weights
+	
+	ifstream = open("weights.dat", "r")
+	weights  = ifstream.readlines()
+	ifstream.close()
+	
+	
+	# Get the number of lines in each bfile
+	
+	bfiles = glob.glob("b.*.txt")
+	bfiles.sort()
+	
+	for i in xrange(len(bfiles)):
+		
+		bfiles[i] = helpers.wc_l(bfiles[i])
+
+	# Break up the weight file to match the bfile
+	
+	start = 0
+	pad   = 4 # 1+len(str(len(bfiles)))
+	
+	print "len:", len(bfiles)
+	
+	for i in xrange(len(bfiles)):
+		
+		outname  = "weights." + `i`.rjust(pad,'0') + ".dat"
+		ofstream = open(outname,'w')
+		
+		ofstream.write( "\n".join(str(j) for j in weights[start:(start+bfiles[i])] ) + '\n')
+		
+		ofstream.close()
+		
+		start += bfiles[i]
+		
+	print helpers.run_bash_cmnd("ls")
+	print "-->",glob.glob("weights.*.dat")
+	print "-->",' '.join(glob.glob("weights.*.dat"))
+
+	print "weight entries: ",helpers.run_bash_cmnd("wc -l " + "weights.dat").split()[0]
+	print "weight entries: ",helpers.run_bash_cmnd("wc -l " + ' '.join(glob.glob("weights.*.dat"))).split()[0]
+	
+	exit()
 

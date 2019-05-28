@@ -1,0 +1,67 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module run_md</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>run_md</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/run_md.py">/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/run_md.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;Global&nbsp;(python)&nbsp;modules</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="cluster.html">cluster</a><br>
+</td><td width="25%" valign=top><a href="glob.html">glob</a><br>
+</td><td width="25%" valign=top><a href="helpers.html">helpers</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-post_proc"><strong>post_proc</strong></a>(my_ALC, my_case, my_indep, *argv, **kwargs)</dt><dd><tt>Post-processes&nbsp;a&nbsp;ChIMES&nbsp;MD&nbsp;run<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-run_md">run_md</a>(1,&nbsp;0,&nbsp;0,&nbsp;&lt;arguments&gt;)<br>
+&nbsp;<br>
+Notes:&nbsp;See&nbsp;function&nbsp;definition&nbsp;in&nbsp;run_md.py&nbsp;for&nbsp;a&nbsp;full&nbsp;list&nbsp;of&nbsp;options.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Requrires&nbsp;config.CHIMES_MOLANAL&nbsp;(should&nbsp;contain&nbsp;molanal.new&nbsp;and&nbsp;findmolecules.pl)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expects&nbsp;to&nbsp;be&nbsp;called&nbsp;from&nbsp;ALC-my_ALC's&nbsp;base&nbsp;folder.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assumes&nbsp;job&nbsp;is&nbsp;being&nbsp;launched&nbsp;from&nbsp;ALC-X.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Supports&nbsp;~parallel&nbsp;learning~&nbsp;via&nbsp;file&nbsp;structure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALC-X/CASE-1_INDEP-1/&lt;md&nbsp;simulation/stuff&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expects&nbsp;input&nbsp;files&nbsp;named&nbsp;like:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case-1.indep-1.input.xyz&nbsp;and&nbsp;case-1.indep-1.run_md.in<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;will&nbsp;run&nbsp;molanal&nbsp;on&nbsp;finished&nbsp;simulation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Will&nbsp;post-process&nbsp;the&nbsp;molanal&nbsp;output.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Will&nbsp;generate&nbsp;clusters.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Will&nbsp;save&nbsp;clusters&nbsp;to&nbsp;CASE-X_INDEP-0/CFG_REPO.</tt></dd></dl>
+ <dl><dt><a name="-run_md"><strong>run_md</strong></a>(my_ALC, my_case, my_indep, *argv, **kwargs)</dt><dd><tt>Launches&nbsp;a&nbsp;ChIMES&nbsp;md&nbsp;simulation<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-run_md">run_md</a>(1,&nbsp;0,&nbsp;0,&nbsp;&lt;arguments&gt;)<br>
+&nbsp;<br>
+Notes:&nbsp;See&nbsp;function&nbsp;definition&nbsp;in&nbsp;helpers.py&nbsp;for&nbsp;a&nbsp;full&nbsp;list&nbsp;of&nbsp;options.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Requrires&nbsp;config.CHIMES_MD.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Requrires&nbsp;config.CHIMES_MOLANAL&nbsp;(should&nbsp;contain&nbsp;molanal.new&nbsp;and&nbsp;findmolecules.pl)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expects&nbsp;to&nbsp;be&nbsp;called&nbsp;from&nbsp;ALC-my_ALC's&nbsp;base&nbsp;folder.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assumes&nbsp;job&nbsp;is&nbsp;being&nbsp;launched&nbsp;from&nbsp;ALC-X.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Supports&nbsp;~parallel&nbsp;learning~&nbsp;via&nbsp;file&nbsp;structure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALC-X/CASE-1_INDEP-1/&lt;md&nbsp;simulation/stuff&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expects&nbsp;input&nbsp;files&nbsp;named&nbsp;like:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case-1.indep-1.input.xyz&nbsp;and&nbsp;case-1.indep-1.run_md.in<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;will&nbsp;also&nbsp;run&nbsp;molanal&nbsp;on&nbsp;finished&nbsp;simulation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Will&nbsp;also&nbsp;post-process&nbsp;the&nbsp;molanal&nbsp;output.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Will&nbsp;generate&nbsp;clusters.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Will&nbsp;save&nbsp;clusters&nbsp;to&nbsp;CASE-X_INDEP-0/CFG_REPO.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;a&nbsp;job_id&nbsp;for&nbsp;the&nbsp;submitted&nbsp;job.</tt></dd></dl>
+</td></tr></table>
+</body></html>

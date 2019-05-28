@@ -1,0 +1,116 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module helpers</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>helpers</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/helpers.py">/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/helpers.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;Global&nbsp;(python)&nbsp;modules</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="glob.html">glob</a><br>
+</td><td width="25%" valign=top><a href="math.html">math</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-break_apart_xyz"><strong>break_apart_xyz</strong></a>(*argv)</dt><dd><tt>Breaks&nbsp;a&nbsp;.xyz(f)&nbsp;file&nbsp;into&nbsp;individual&nbsp;frames.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-break_apart_xyz">break_apart_xyz</a>(250,&nbsp;"my_file.xyz")<br>
+&nbsp;<br>
+Notes:&nbsp;Takes&nbsp;as&nbsp;input&nbsp;a&nbsp;number&nbsp;of&nbsp;frames&nbsp;and&nbsp;a&nbsp;.xyz&nbsp;or&nbsp;.xyzf&nbsp;file,&nbsp;and&nbsp;breaks&nbsp;it&nbsp;apart&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;into&nbsp;frames.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Optional:&nbsp;break&nbsp;into&nbsp;chunks&nbsp;of&nbsp;(3rd&nbsp;arg).</tt></dd></dl>
+ <dl><dt><a name="-cat_pattern"><strong>cat_pattern</strong></a>(outfilename, pattern)</dt><dd><tt>Concatenates&nbsp;files&nbsp;matching&nbsp;a&nbsp;linux&nbsp;pattern&nbsp;i.e.&nbsp;*,&nbsp;saves&nbsp;results&nbsp;to&nbsp;file.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-cat_pattern">cat_pattern</a>("my_outfile.txt","*.dat")&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
+Notes:&nbsp;Linux&nbsp;wildcards&nbsp;WILL&nbsp;work&nbsp;as&nbsp;expected.</tt></dd></dl>
+ <dl><dt><a name="-cat_specific"><strong>cat_specific</strong></a>(outfilename, *argv)</dt><dd><tt>Concatenates&nbsp;a&nbsp;list&nbsp;of&nbsp;files&nbsp;and&nbsp;returns&nbsp;result.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-cat_specific">cat_specific</a>("my_outfile.dat",&nbsp;"file1.dat",&nbsp;"file2.dat",&nbsp;"file3.dat")&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
+Notes:&nbsp;Linux&nbsp;wildcards&nbsp;will&nbsp;not&nbsp;work&nbsp;as&nbsp;expected.&nbsp;Use&nbsp;the&nbsp;glob&nbsp;if&nbsp;needed.</tt></dd></dl>
+ <dl><dt><a name="-cat_to_var"><strong>cat_to_var</strong></a>(*argv)</dt><dd><tt>Concatenates&nbsp;a&nbsp;list&nbsp;of&nbsp;files&nbsp;and&nbsp;returns&nbsp;result.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-cat_to_var">cat_to_var</a>(file1.dat,&nbsp;file2.dat,&nbsp;file3.dat)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
+Notes:&nbsp;Linux&nbsp;wildcards&nbsp;will&nbsp;not&nbsp;work&nbsp;as&nbsp;expected.&nbsp;Use&nbsp;the&nbsp;glob&nbsp;if&nbsp;needed.</tt></dd></dl>
+ <dl><dt><a name="-count_xyzframes_general"><strong>count_xyzframes_general</strong></a>(infile)</dt><dd><tt>Counts&nbsp;the&nbsp;number&nbsp;of&nbsp;frames&nbsp;in&nbsp;a&nbsp;.xyz(f)&nbsp;file&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-count_xyzframes_general">count_xyzframes_general</a>("my_file.txt")<br>
+&nbsp;<br>
+Notes:&nbsp;Linux&nbsp;wildcards&nbsp;will&nbsp;not&nbsp;work&nbsp;as&nbsp;expected.&nbsp;Use&nbsp;the&nbsp;glob&nbsp;if&nbsp;needed.</tt></dd></dl>
+ <dl><dt><a name="-create_and_launch_job"><strong>create_and_launch_job</strong></a>(*argv, **kwargs)</dt><dd><tt>Creates&nbsp;and&nbsp;submits&nbsp;a&nbsp;run&nbsp;file&nbsp;to&nbsp;the&nbsp;queuing&nbsp;system.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-create_and_launch_job">create_and_launch_job</a>(&lt;arguments&gt;)<br>
+&nbsp;<br>
+Notes:&nbsp;if&nbsp;"job_executable"&nbsp;is&nbsp;empty,&nbsp;uses&nbsp;the&nbsp;commands&nbsp;specified&nbsp;in&nbsp;*argv.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See&nbsp;function&nbsp;definition&nbsp;in&nbsp;helpers.py&nbsp;for&nbsp;a&nbsp;full&nbsp;list&nbsp;of&nbsp;options.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Currently,&nbsp;function&nbsp;only&nbsp;supports&nbsp;SLURM&nbsp;systems.</tt></dd></dl>
+ <dl><dt><a name="-dftbgen_to_xyz"><strong>dftbgen_to_xyz</strong></a>(*argv)</dt><dd><tt>Converts&nbsp;a&nbsp;.gen&nbsp;file&nbsp;to&nbsp;.xyz&nbsp;and&nbsp;prints&nbsp;box&nbsp;lengths.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-dftbgen_to_xyz">dftbgen_to_xyz</a>(250,&nbsp;"my_file.xyz")<br>
+&nbsp;<br>
+Notes:&nbsp;Assumes&nbsp;an&nbsp;orthorhombic&nbsp;box.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;box&nbsp;lengths&nbsp;to&nbsp;a&nbsp;separate&nbsp;file&nbsp;(*.box).</tt></dd></dl>
+ <dl><dt><a name="-email_user"><strong>email_user</strong></a>(base, address, status)</dt><dd><tt>Sends&nbsp;a&nbsp;message&nbsp;(status)&nbsp;to&nbsp;the&nbsp;specified&nbsp;email&nbsp;address&nbsp;(address)<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-email_user">email_user</a>("me@my_domain.com","email&nbsp;message&nbsp;text")<br>
+&nbsp;<br>
+Notes:&nbsp;This&nbsp;uses&nbsp;(requires)&nbsp;linux&nbsp;mailx.&nbsp;Nothing&nbsp;will&nbsp;be&nbsp;sent&nbsp;if<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address&nbsp;is&nbsp;an&nbsp;empty&nbsp;string.&nbsp;Calls&nbsp;send_email.sh&nbsp;in&nbsp;utilities.</tt></dd></dl>
+ <dl><dt><a name="-head"><strong>head</strong></a>(*argv)</dt><dd><tt>Mimics&nbsp;functionality&nbsp;of&nbsp;Linux&nbsp;head&nbsp;command.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-head">head</a>("my_file.txt")&nbsp;or&nbsp;<a href="#-head">head</a>("my_file.txt",2)<br>
+&nbsp;<br>
+Notes:&nbsp;Linux&nbsp;wildcards&nbsp;will&nbsp;not&nbsp;work&nbsp;as&nbsp;expected.&nbsp;Use&nbsp;the&nbsp;glob&nbsp;if&nbsp;needed.</tt></dd></dl>
+ <dl><dt><a name="-run_bash_cmnd"><strong>run_bash_cmnd</strong></a>(cmnd_str)</dt><dd><tt>Runs&nbsp;a&nbsp;(bash)&nbsp;shell&nbsp;command&nbsp;-&nbsp;captures&nbsp;and&nbsp;returns&nbsp;any&nbsp;resulting&nbsp;output.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-run_bash_cmnd">run_bash_cmnd</a>("my&nbsp;command&nbsp;string")<br>
+&nbsp;<br>
+Notes:&nbsp;Linux&nbsp;wildcards&nbsp;will&nbsp;not&nbsp;work&nbsp;as&nbsp;expected.&nbsp;Use&nbsp;the&nbsp;glob&nbsp;if&nbsp;needed.</tt></dd></dl>
+ <dl><dt><a name="-run_bash_cmnd_to_file"><strong>run_bash_cmnd_to_file</strong></a>(outfile, cmnd_str)</dt><dd><tt>Runs&nbsp;a&nbsp;bash&nbsp;shell&nbsp;command&nbsp;-&nbsp;captures&nbsp;and&nbsp;saves&nbsp;any&nbsp;returned&nbsp;output&nbsp;to&nbsp;file.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-run_bash_cmnd_to_file">run_bash_cmnd_to_file</a>("my_outfile_name.dat",&nbsp;"my&nbsp;command&nbsp;string")<br>
+&nbsp;<br>
+Notes:&nbsp;Linux&nbsp;wildcards&nbsp;will&nbsp;not&nbsp;work&nbsp;as&nbsp;expected.&nbsp;Use&nbsp;the&nbsp;glob&nbsp;if&nbsp;needed.</tt></dd></dl>
+ <dl><dt><a name="-str2bool"><strong>str2bool</strong></a>(v)</dt><dd><tt>Converts&nbsp;"true"&nbsp;or&nbsp;"false"&nbsp;in&nbsp;any&nbsp;case&nbsp;to&nbsp;a&nbsp;corresponding&nbsp;boolean&nbsp;value.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-str2bool">str2bool</a>("FALSE")</tt></dd></dl>
+ <dl><dt><a name="-wait_for_job"><strong>wait_for_job</strong></a>(active_job, **kwargs)</dt><dd><tt>Pauses&nbsp;the&nbsp;code&nbsp;until&nbsp;a&nbsp;single&nbsp;SLURM&nbsp;job&nbsp;completes.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-wait_for_job">wait_for_job</a>(2116091,&lt;arguments&gt;)<br>
+&nbsp;<br>
+Notes:&nbsp;Accepts&nbsp;a&nbsp;jobid&nbsp;and&nbsp;queries&nbsp;the&nbsp;queueing&nbsp;system&nbsp;to&nbsp;determine<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;whether&nbsp;the&nbsp;job&nbsp;is&nbsp;active.&nbsp;Doesn't&nbsp;return&nbsp;until&nbsp;job&nbsp;completes.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See&nbsp;function&nbsp;definition&nbsp;in&nbsp;helpers.py&nbsp;for&nbsp;a&nbsp;full&nbsp;list&nbsp;of&nbsp;options.</tt></dd></dl>
+ <dl><dt><a name="-wait_for_jobs"><strong>wait_for_jobs</strong></a>(*argv, **kwargs)</dt><dd><tt>Pauses&nbsp;the&nbsp;code&nbsp;until&nbsp;SLURM&nbsp;job&nbsp;completes.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-wait_for_jobs">wait_for_jobs</a>([2116091,&nbsp;2116092],&nbsp;&lt;arguments&gt;)<br>
+&nbsp;<br>
+Notes:&nbsp;Accepts&nbsp;list&nbsp;of&nbsp;jobid&nbsp;and&nbsp;queries&nbsp;the&nbsp;queueing&nbsp;system&nbsp;to&nbsp;determine<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;whether&nbsp;any&nbsp;jobs&nbsp;are&nbsp;active.&nbsp;Doesn't&nbsp;return&nbsp;until&nbsp;job&nbsp;completes.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See&nbsp;function&nbsp;definition&nbsp;in&nbsp;helpers.py&nbsp;for&nbsp;a&nbsp;full&nbsp;list&nbsp;of&nbsp;options.</tt></dd></dl>
+ <dl><dt><a name="-wc_l"><strong>wc_l</strong></a>(infile)</dt><dd><tt>Mimics&nbsp;functionality&nbsp;of&nbsp;Linux&nbsp;wc&nbsp;-l&nbsp;command.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-wc_l">wc_l</a>("my_file.txt")<br>
+&nbsp;<br>
+Notes:&nbsp;Linux&nbsp;wildcards&nbsp;will&nbsp;not&nbsp;work&nbsp;as&nbsp;expected.&nbsp;Use&nbsp;the&nbsp;glob&nbsp;if&nbsp;needed.</tt></dd></dl>
+</td></tr></table>
+</body></html>

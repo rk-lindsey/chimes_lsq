@@ -40,13 +40,11 @@ def cleanup_and_setup(*argv, **kwargs):
 
 	# VASP specific controls
 
-	default_keys[0 ] = "build_dir" 	   ; default_values[0 ] = "." 				# Post_proc_lsq*py file... should also include the python command
+	default_keys[0 ] = "build_dir" 	   ; default_values[0 ] = "."
 
 	args = dict(zip(default_keys, default_values))
 	args.update(kwargs)	
-	
-	print helpers.run_bash_cmnd("pwd")
-	
+
 	for i in args_targets: # 20 all
 	
 		if args_this_case == -1:
@@ -104,7 +102,11 @@ def continue_job(*argv, **kwargs):
 	### ...argv
 	
 	args_targets = argv[0] # This is a pointer!
-	args_case    = argv[1]
+	
+	args_case    = 0
+	
+	if len(argv) == 2:
+		args_case    = argv[1]
 	
 	### ...kwargs
 	
@@ -121,13 +123,18 @@ def continue_job(*argv, **kwargs):
 	# 1. Check on job status, resubmit if needed
 	################################	
 	
+	print ""
+	print "	Attempting to continue VASP jobs for case: ", args_case
+	
 	job_list = []
 	
 	for i in xrange(len(args_targets)): # 20 all
 	
-		if os.path.isdir("VASP-" + args_targets[i] + "/CASE-" + `args_case`):
+		CASE_PATH = "CASE-" + `args_case`
+	
+		if os.path.isdir("VASP-" + args_targets[i] + "/" + CASE_PATH):
 		
-			os.chdir("VASP-" + args_targets[i] + "/CASE-" + `args_case`)
+			os.chdir("VASP-" + args_targets[i] + "/" + CASE_PATH)
 
 			# Count the number of possible jobs
 			
@@ -137,16 +144,31 @@ def continue_job(*argv, **kwargs):
 			
 			count_OUTCAR = len(helpers.run_bash_cmnd("ls " + ' '.join(glob.glob("*.OUTCAR"))).split())
 
+			print ""
+			print "		Counted POSCAR:", count_POSCAR
+			print "		Counted OUTCAR:", count_OUTCAR
+			
+			
 			# If all jobs haven't completed, resubmit
 			
 			if count_POSCAR > count_OUTCAR:
+			
+				print "			Resubmitting."
 
 				if args["job_system"] == "slurm":
 					job_list.append(helpers.run_bash_cmnd("msub run_vasp.cmd").replace('\n', ''))
 				else:	
 					job_list.append(helpers.run_bash_cmnd("msub run_vasp.cmd").replace('\n', ''))
-					
+
+			else:
+				print "			Not resubmitting."
+			
+			print ""
+			
 			os.chdir("../..")
+		else:
+			print "Cant find directory VASP-"+ args_targets[i] + "/" + CASE_PATH
+			print helpers.run_bash_cmnd("pwd")
 
 	return job_list	
 
@@ -171,6 +193,7 @@ def generate_POSCAR(inxyz, *argv):
 	smearing  = int(argv[1])
 	ifstream = open(inxyz,'r')
 	ofstream = open(inxyz + ".POSCAR", 'w')
+	
 	
 	# Set up the header portion
 	
@@ -249,7 +272,11 @@ def post_process(*argv, **kwargs):
 	
 	args_targets    = argv[0] # ... all ... 20
 	args_properties = argv[1] # "ENERGY STRESS" ...etc for the post process script
-	args_cases      = argv[2]
+	
+	args_cases    = 1
+	
+	if len(argv) == 3:
+		args_cases    = argv[2]	
 	
 	
 	### ...kwargs
@@ -266,12 +293,18 @@ def post_process(*argv, **kwargs):
 	args.update(kwargs)	
 	
 	################################
+	
+	print helpers.run_bash_cmnd("pwd")
+	print helpers.run_bash_cmnd("ls")
 
 	for i in xrange(len(args_targets)): # 20 all
 
 		if not os.path.isdir("VASP-" + args_targets[i]):
-
+		
+			print "Skipping VASP-" + args_targets[i]
+			
 			continue
+
 			
 		print "Working on:","VASP-" + args_targets[i]
 	
@@ -349,8 +382,8 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 	
 	### ...kwargs
 	
-	default_keys   = [""]*12
-	default_values = [""]*12
+	default_keys   = [""]*14
+	default_values = [""]*14
 
 
 	# VASP specific controls
@@ -359,18 +392,20 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 	default_keys[1 ] = "traj_list" 	   ; default_values[1 ] = "" 				# Post_proc_lsq*py file... should also include the python command
 	default_keys[2 ] = "modules" 	   ; default_values[2 ] = "mkl" 			# Post_proc_lsq*py file... should also include the python command
 	default_keys[3 ] = "build_dir" 	   ; default_values[3 ] = "." 				# Post_proc_lsq*py file... should also include the python command
+	default_keys[4 ] = "first_run"     ; default_values[4 ] = False				# Optional... is this the first run? if so, dont search for "CASE" in the name
 
 
 	# Overall job controls	
 	
-	default_keys[4 ] = "job_nodes"     ; default_values[4 ] = "2"			      # Number of nodes for ChIMES md job
-	default_keys[5 ] = "job_ppn"	   ; default_values[5 ] = "36"  		      # Number of processors per node for ChIMES md job
-	default_keys[6 ] = "job_walltime"  ; default_values[6 ] = "1"			      # Walltime in hours for ChIMES md job
-	default_keys[7 ] = "job_queue"     ; default_values[7 ] = "pdebug"		      # Queue for ChIMES md job
-	default_keys[8 ] = "job_account"   ; default_values[8 ] = "pbronze"		      # Account for ChIMES md job
-	default_keys[9 ] = "job_executable"; default_values[9 ] = ""			      # Full path to executable for ChIMES md job
-	default_keys[10] = "job_system"    ; default_values[10] = "slurm"		      # slurm or torque       
-	default_keys[11] = "job_file"	   ; default_values[11] = "run.cmd"		      # Name of the resulting submit script   
+	default_keys[5 ] = "job_nodes"     ; default_values[5 ] = "2"			      # Number of nodes for ChIMES md job
+	default_keys[6 ] = "job_ppn"	   ; default_values[6 ] = "36"  		      # Number of processors per node for ChIMES md job
+	default_keys[7 ] = "job_walltime"  ; default_values[7 ] = "1"			      # Walltime in hours for ChIMES md job
+	default_keys[8 ] = "job_queue"     ; default_values[8 ] = "pdebug"		      # Queue for ChIMES md job
+	default_keys[9 ] = "job_account"   ; default_values[9 ] = "pbronze"		      # Account for ChIMES md job
+	default_keys[10] = "job_executable"; default_values[10] = ""			      # Full path to executable for ChIMES md job
+	default_keys[11] = "job_system"    ; default_values[11] = "slurm"		      # slurm or torque       
+	default_keys[12] = "job_file"	   ; default_values[12] = "run.cmd"		      # Name of the resulting submit script   
+	default_keys[13] = "job_email"     ; default_values[13] = True			      # Send slurm emails?
 	
 
 	args = dict(zip(default_keys, default_values))
@@ -429,10 +464,12 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 			ifstream     = open(curr_dir + "/" + args_targets[i] + ".xyzlist.dat",   'r') # all.xyzlist.dat ... a list of file names
 			contents     = ifstream.readlines()
 			ifstream     .close()
-			
+
 			temp = my_smear
 			
 			if args["traj_list"]:
+			
+				print "here"
 			
 				# Need to figure out the possible temperatures ... 
 			
@@ -444,14 +481,16 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 					temps[j] = temps[j].split()
 	
 				ifstream.close()
-			
+
 			for j in xrange(len(target_files)):
-			
+
 				sel_file = contents[int(target_files[j].rstrip())].split()[3]
 				
 				case_check = "CASE-" + my_case
+
 				
-				if case_check not in sel_file:
+				if (not args["first_run"]) and (case_check not in sel_file):
+
 					continue
 
 				if args["traj_list"]:
@@ -462,7 +501,7 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 					
 							temp = temps[k][2]
 							break
-	
+
 				generate_POSCAR(curr_dir + "/" + sel_file, atm_types, temp)
 				
 				helpers.run_bash_cmnd("mv " + curr_dir + "/" + sel_file + ".POSCAR tmp.POSCAR")
@@ -472,7 +511,6 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 				sel_POSCAR = sel_POSCAR.replace('/','.')
 				
 				helpers.run_bash_cmnd("mv  tmp.POSCAR " + sel_POSCAR)
-
 
 		################################
 		# 2. Launch the actual job 
@@ -518,6 +556,7 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 	
 		this_jobid = helpers.create_and_launch_job(job_task,
 			job_name       =          "vasp_spcalcs"  ,
+			job_email      =     args["job_email"   ] ,			
 			job_nodes      = str(args["job_nodes"	]),
 			job_ppn        = str(args["job_ppn"	]),
 			job_walltime   = str(args["job_walltime"]),

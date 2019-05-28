@@ -1,0 +1,523 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module local_pydoc</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>local_pydoc</strong></big></big> (version 88564, 26 February 2001)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/local_pydoc.py">/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/local_pydoc.py</a></font></td></tr></table>
+    <p><tt>Generate&nbsp;Python&nbsp;documentation&nbsp;in&nbsp;HTML&nbsp;or&nbsp;text&nbsp;for&nbsp;interactive&nbsp;use.<br>
+In&nbsp;the&nbsp;Python&nbsp;interpreter,&nbsp;do&nbsp;"from&nbsp;pydoc&nbsp;import&nbsp;help"&nbsp;to&nbsp;provide&nbsp;online<br>
+help.&nbsp;&nbsp;Calling&nbsp;help(thing)&nbsp;on&nbsp;a&nbsp;Python&nbsp;object&nbsp;documents&nbsp;the&nbsp;object.<br>
+Or,&nbsp;at&nbsp;the&nbsp;shell&nbsp;command&nbsp;line&nbsp;outside&nbsp;of&nbsp;Python:<br>
+Run&nbsp;"pydoc&nbsp;&lt;name&gt;"&nbsp;to&nbsp;show&nbsp;documentation&nbsp;on&nbsp;something.&nbsp;&nbsp;&lt;name&gt;&nbsp;may&nbsp;be<br>
+the&nbsp;name&nbsp;of&nbsp;a&nbsp;function,&nbsp;module,&nbsp;package,&nbsp;or&nbsp;a&nbsp;dotted&nbsp;reference&nbsp;to&nbsp;a<br>
+class&nbsp;or&nbsp;function&nbsp;within&nbsp;a&nbsp;module&nbsp;or&nbsp;module&nbsp;in&nbsp;a&nbsp;package.&nbsp;&nbsp;If&nbsp;the<br>
+argument&nbsp;contains&nbsp;a&nbsp;path&nbsp;segment&nbsp;delimiter&nbsp;(e.g.&nbsp;slash&nbsp;on&nbsp;Unix,<br>
+backslash&nbsp;on&nbsp;Windows)&nbsp;it&nbsp;is&nbsp;treated&nbsp;as&nbsp;the&nbsp;path&nbsp;to&nbsp;a&nbsp;Python&nbsp;source&nbsp;file.<br>
+Run&nbsp;"pydoc&nbsp;-k&nbsp;&lt;keyword&gt;"&nbsp;to&nbsp;search&nbsp;for&nbsp;a&nbsp;keyword&nbsp;in&nbsp;the&nbsp;synopsis&nbsp;lines<br>
+of&nbsp;all&nbsp;available&nbsp;modules.<br>
+Run&nbsp;"pydoc&nbsp;-p&nbsp;&lt;port&gt;"&nbsp;to&nbsp;start&nbsp;an&nbsp;HTTP&nbsp;server&nbsp;on&nbsp;a&nbsp;given&nbsp;port&nbsp;on&nbsp;the<br>
+local&nbsp;machine&nbsp;to&nbsp;generate&nbsp;documentation&nbsp;web&nbsp;pages.&nbsp;&nbsp;Port&nbsp;number&nbsp;0&nbsp;can&nbsp;be<br>
+used&nbsp;to&nbsp;get&nbsp;an&nbsp;arbitrary&nbsp;unused&nbsp;port.<br>
+For&nbsp;platforms&nbsp;without&nbsp;a&nbsp;command&nbsp;line,&nbsp;"pydoc&nbsp;-g"&nbsp;starts&nbsp;the&nbsp;HTTP&nbsp;server<br>
+and&nbsp;also&nbsp;pops&nbsp;up&nbsp;a&nbsp;little&nbsp;window&nbsp;for&nbsp;controlling&nbsp;it.<br>
+Run&nbsp;"pydoc&nbsp;-w&nbsp;&lt;name&gt;"&nbsp;to&nbsp;write&nbsp;out&nbsp;the&nbsp;HTML&nbsp;documentation&nbsp;for&nbsp;a&nbsp;module<br>
+to&nbsp;a&nbsp;file&nbsp;named&nbsp;"&lt;name&gt;.html".<br>
+Module&nbsp;docs&nbsp;for&nbsp;core&nbsp;modules&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in<br>
+&nbsp;&nbsp;&nbsp;&nbsp;https://docs.python.org/library/<br>
+This&nbsp;can&nbsp;be&nbsp;overridden&nbsp;by&nbsp;setting&nbsp;the&nbsp;PYTHONDOCS&nbsp;environment&nbsp;variable<br>
+to&nbsp;a&nbsp;different&nbsp;URL&nbsp;or&nbsp;to&nbsp;a&nbsp;local&nbsp;directory&nbsp;containing&nbsp;the&nbsp;Library<br>
+Reference&nbsp;Manual&nbsp;pages.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="__builtin__.html">__builtin__</a><br>
+<a href="imp.html">imp</a><br>
+<a href="inspect.html">inspect</a><br>
+</td><td width="25%" valign=top><a href="locale.html">locale</a><br>
+<a href="os.html">os</a><br>
+<a href="pkgutil.html">pkgutil</a><br>
+</td><td width="25%" valign=top><a href="re.html">re</a><br>
+<a href="sys.html">sys</a><br>
+<a href="types.html">types</a><br>
+</td><td width="25%" valign=top><a href="warnings.html">warnings</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="local_pydoc.html#ErrorDuringImport">ErrorDuringImport</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="local_pydoc.html#Doc">Doc</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="local_pydoc.html#HTMLDoc">HTMLDoc</a>
+</font></dt><dt><font face="helvetica, arial"><a href="local_pydoc.html#TextDoc">TextDoc</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="local_pydoc.html#Helper">Helper</a>
+</font></dt><dt><font face="helvetica, arial"><a href="local_pydoc.html#ModuleScanner">ModuleScanner</a>
+</font></dt><dt><font face="helvetica, arial"><a href="local_pydoc.html#Scanner">Scanner</a>
+</font></dt><dt><font face="helvetica, arial"><a href="repr.html#Repr">repr.Repr</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="local_pydoc.html#HTMLRepr">HTMLRepr</a>
+</font></dt><dt><font face="helvetica, arial"><a href="local_pydoc.html#TextRepr">TextRepr</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Doc">class <strong>Doc</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Doc-docclass"><strong>docclass</strong></a> = <a href="#Doc-fail">fail</a>(self, object, name<font color="#909090">=None</font>, *args)</dt></dl>
+
+<dl><dt><a name="Doc-docdata"><strong>docdata</strong></a> = <a href="#Doc-fail">fail</a>(self, object, name<font color="#909090">=None</font>, *args)</dt></dl>
+
+<dl><dt><a name="Doc-docmodule"><strong>docmodule</strong></a> = <a href="#Doc-fail">fail</a>(self, object, name<font color="#909090">=None</font>, *args)</dt></dl>
+
+<dl><dt><a name="Doc-docother"><strong>docother</strong></a> = <a href="#Doc-fail">fail</a>(self, object, name<font color="#909090">=None</font>, *args)</dt></dl>
+
+<dl><dt><a name="Doc-docproperty"><strong>docproperty</strong></a> = <a href="#Doc-fail">fail</a>(self, object, name<font color="#909090">=None</font>, *args)</dt></dl>
+
+<dl><dt><a name="Doc-docroutine"><strong>docroutine</strong></a> = <a href="#Doc-fail">fail</a>(self, object, name<font color="#909090">=None</font>, *args)</dt></dl>
+
+<dl><dt><a name="Doc-document"><strong>document</strong></a>(self, object, name<font color="#909090">=None</font>, *args)</dt><dd><tt>Generate&nbsp;documentation&nbsp;for&nbsp;an&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="Doc-fail"><strong>fail</strong></a>(self, object, name<font color="#909090">=None</font>, *args)</dt><dd><tt>Raise&nbsp;an&nbsp;exception&nbsp;for&nbsp;unimplemented&nbsp;types.</tt></dd></dl>
+
+<dl><dt><a name="Doc-getdocloc"><strong>getdocloc</strong></a>(self, object, basedir<font color="#909090">='/usr/tce/packages/python/python-2.7.16/lib/python2.7'</font>)</dt><dd><tt>Return&nbsp;the&nbsp;location&nbsp;of&nbsp;module&nbsp;docs&nbsp;or&nbsp;None</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ErrorDuringImport">class <strong>ErrorDuringImport</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Errors&nbsp;that&nbsp;occurred&nbsp;while&nbsp;trying&nbsp;to&nbsp;import&nbsp;something&nbsp;to&nbsp;document&nbsp;it.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="local_pydoc.html#ErrorDuringImport">ErrorDuringImport</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ErrorDuringImport-__init__"><strong>__init__</strong></a>(self, filename, exc_info)</dt></dl>
+
+<dl><dt><a name="ErrorDuringImport-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#ErrorDuringImport-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;object&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="ErrorDuringImport-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ErrorDuringImport-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ErrorDuringImport-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#ErrorDuringImport-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="ErrorDuringImport-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#ErrorDuringImport-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="ErrorDuringImport-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#ErrorDuringImport-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="ErrorDuringImport-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ErrorDuringImport-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#ErrorDuringImport-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="ErrorDuringImport-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#ErrorDuringImport-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ErrorDuringImport-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="ErrorDuringImport-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLDoc">class <strong>HTMLDoc</strong></a>(<a href="local_pydoc.html#Doc">Doc</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Formatter&nbsp;class&nbsp;for&nbsp;HTML&nbsp;documentation.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="HTMLDoc-bigsection"><strong>bigsection</strong></a>(self, title, *args)</dt><dd><tt>Format&nbsp;a&nbsp;section&nbsp;with&nbsp;a&nbsp;big&nbsp;heading.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-classlink"><strong>classlink</strong></a>(self, object, modname)</dt><dd><tt>Make&nbsp;a&nbsp;link&nbsp;for&nbsp;a&nbsp;class.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-docclass"><strong>docclass</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, funcs<font color="#909090">={}</font>, classes<font color="#909090">={}</font>, *ignored)</dt><dd><tt>Produce&nbsp;HTML&nbsp;documentation&nbsp;for&nbsp;a&nbsp;class&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-docdata"><strong>docdata</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, cl<font color="#909090">=None</font>)</dt><dd><tt>Produce&nbsp;html&nbsp;documentation&nbsp;for&nbsp;a&nbsp;data&nbsp;descriptor.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-docmodule"><strong>docmodule</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, *ignored)</dt><dd><tt>Produce&nbsp;HTML&nbsp;documentation&nbsp;for&nbsp;a&nbsp;module&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-docother"><strong>docother</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, *ignored)</dt><dd><tt>Produce&nbsp;HTML&nbsp;documentation&nbsp;for&nbsp;a&nbsp;data&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-docproperty"><strong>docproperty</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, cl<font color="#909090">=None</font>)</dt><dd><tt>Produce&nbsp;html&nbsp;documentation&nbsp;for&nbsp;a&nbsp;property.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-docroutine"><strong>docroutine</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, funcs<font color="#909090">={}</font>, classes<font color="#909090">={}</font>, methods<font color="#909090">={}</font>, cl<font color="#909090">=None</font>)</dt><dd><tt>Produce&nbsp;HTML&nbsp;documentation&nbsp;for&nbsp;a&nbsp;function&nbsp;or&nbsp;method&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-escape"><strong>escape</strong></a>(self, text)<font color="#909090"><font face="helvetica, arial"> from <a href="local_pydoc.html#HTMLRepr">HTMLRepr</a></font></font></dt></dl>
+
+<dl><dt><a name="HTMLDoc-formattree"><strong>formattree</strong></a>(self, tree, modname, parent<font color="#909090">=None</font>)</dt><dd><tt>Produce&nbsp;HTML&nbsp;for&nbsp;a&nbsp;class&nbsp;tree&nbsp;as&nbsp;given&nbsp;by&nbsp;inspect.getclasstree().</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-formatvalue"><strong>formatvalue</strong></a>(self, object)</dt><dd><tt>Format&nbsp;an&nbsp;argument&nbsp;default&nbsp;value&nbsp;as&nbsp;text.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-grey"><strong>grey</strong></a>(self, text)</dt></dl>
+
+<dl><dt><a name="HTMLDoc-heading"><strong>heading</strong></a>(self, title, fgcol, bgcol, extras<font color="#909090">=''</font>)</dt><dd><tt>Format&nbsp;a&nbsp;page&nbsp;heading.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-index"><strong>index</strong></a>(self, dir, shadowed<font color="#909090">=None</font>)</dt><dd><tt>Generate&nbsp;an&nbsp;HTML&nbsp;index&nbsp;for&nbsp;a&nbsp;directory&nbsp;of&nbsp;modules.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-markup"><strong>markup</strong></a>(self, text, escape<font color="#909090">=None</font>, funcs<font color="#909090">={}</font>, classes<font color="#909090">={}</font>, methods<font color="#909090">={}</font>)</dt><dd><tt>Mark&nbsp;up&nbsp;some&nbsp;plain&nbsp;text,&nbsp;given&nbsp;a&nbsp;context&nbsp;of&nbsp;symbols&nbsp;to&nbsp;look&nbsp;for.<br>
+Each&nbsp;context&nbsp;dictionary&nbsp;maps&nbsp;object&nbsp;names&nbsp;to&nbsp;anchor&nbsp;names.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-modpkglink"><strong>modpkglink</strong></a>(self, data)</dt><dd><tt>Make&nbsp;a&nbsp;link&nbsp;for&nbsp;a&nbsp;module&nbsp;or&nbsp;package&nbsp;to&nbsp;display&nbsp;in&nbsp;an&nbsp;index.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-modulelink"><strong>modulelink</strong></a>(self, object)</dt><dd><tt>Make&nbsp;a&nbsp;link&nbsp;for&nbsp;a&nbsp;module.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-multicolumn"><strong>multicolumn</strong></a>(self, list, format, cols<font color="#909090">=4</font>)</dt><dd><tt>Format&nbsp;a&nbsp;list&nbsp;of&nbsp;items&nbsp;into&nbsp;a&nbsp;multi-column&nbsp;list.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-namelink"><strong>namelink</strong></a>(self, name, *dicts)</dt><dd><tt>Make&nbsp;a&nbsp;link&nbsp;for&nbsp;an&nbsp;identifier,&nbsp;given&nbsp;name-to-URL&nbsp;mappings.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-page"><strong>page</strong></a>(self, title, contents)</dt><dd><tt>Format&nbsp;an&nbsp;HTML&nbsp;page.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-preformat"><strong>preformat</strong></a>(self, text)</dt><dd><tt>Format&nbsp;literal&nbsp;preformatted&nbsp;text.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-repr"><strong>repr</strong></a>(self, object)<font color="#909090"><font face="helvetica, arial"> from <a href="local_pydoc.html#HTMLRepr">HTMLRepr</a></font></font></dt></dl>
+
+<dl><dt><a name="HTMLDoc-section"><strong>section</strong></a>(self, title, fgcol, bgcol, contents, width<font color="#909090">=6</font>, prelude<font color="#909090">=''</font>, marginalia<font color="#909090">=None</font>, gap<font color="#909090">='&amp;nbsp;'</font>)</dt><dd><tt>Format&nbsp;a&nbsp;section&nbsp;with&nbsp;a&nbsp;heading.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="local_pydoc.html#Doc">Doc</a>:<br>
+<dl><dt><a name="HTMLDoc-document"><strong>document</strong></a>(self, object, name<font color="#909090">=None</font>, *args)</dt><dd><tt>Generate&nbsp;documentation&nbsp;for&nbsp;an&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-fail"><strong>fail</strong></a>(self, object, name<font color="#909090">=None</font>, *args)</dt><dd><tt>Raise&nbsp;an&nbsp;exception&nbsp;for&nbsp;unimplemented&nbsp;types.</tt></dd></dl>
+
+<dl><dt><a name="HTMLDoc-getdocloc"><strong>getdocloc</strong></a>(self, object, basedir<font color="#909090">='/usr/tce/packages/python/python-2.7.16/lib/python2.7'</font>)</dt><dd><tt>Return&nbsp;the&nbsp;location&nbsp;of&nbsp;module&nbsp;docs&nbsp;or&nbsp;None</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTMLRepr">class <strong>HTMLRepr</strong></a>(<a href="repr.html#Repr">repr.Repr</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;for&nbsp;safely&nbsp;making&nbsp;an&nbsp;HTML&nbsp;representation&nbsp;of&nbsp;a&nbsp;Python&nbsp;object.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="HTMLRepr-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-escape"><strong>escape</strong></a>(self, text)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr"><strong>repr</strong></a>(self, object)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr1"><strong>repr1</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_instance"><strong>repr_instance</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_str"><strong>repr_str</strong></a> = <a href="#HTMLRepr-repr_string">repr_string</a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_string"><strong>repr_string</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_unicode"><strong>repr_unicode</strong></a> = <a href="#HTMLRepr-repr_string">repr_string</a>(self, x, level)</dt></dl>
+
+<hr>
+Methods inherited from <a href="repr.html#Repr">repr.Repr</a>:<br>
+<dl><dt><a name="HTMLRepr-repr_array"><strong>repr_array</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_deque"><strong>repr_deque</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_dict"><strong>repr_dict</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_frozenset"><strong>repr_frozenset</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_list"><strong>repr_list</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_long"><strong>repr_long</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_set"><strong>repr_set</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="HTMLRepr-repr_tuple"><strong>repr_tuple</strong></a>(self, x, level)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Helper">class <strong>Helper</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Helper-__call__"><strong>__call__</strong></a>(self, request<font color="#909090">=&lt;object object&gt;</font>)</dt></dl>
+
+<dl><dt><a name="Helper-__init__"><strong>__init__</strong></a>(self, input<font color="#909090">=None</font>, output<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Helper-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Helper-getline"><strong>getline</strong></a>(self, prompt)</dt><dd><tt>Read&nbsp;one&nbsp;line,&nbsp;using&nbsp;raw_input&nbsp;when&nbsp;available.</tt></dd></dl>
+
+<dl><dt><a name="Helper-help"><strong>help</strong></a>(self, request)</dt></dl>
+
+<dl><dt><a name="Helper-interact"><strong>interact</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Helper-intro"><strong>intro</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Helper-list"><strong>list</strong></a>(self, items, columns<font color="#909090">=4</font>, width<font color="#909090">=80</font>)</dt></dl>
+
+<dl><dt><a name="Helper-listkeywords"><strong>listkeywords</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Helper-listmodules"><strong>listmodules</strong></a>(self, key<font color="#909090">=''</font>)</dt></dl>
+
+<dl><dt><a name="Helper-listsymbols"><strong>listsymbols</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Helper-listtopics"><strong>listtopics</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Helper-showsymbol"><strong>showsymbol</strong></a>(self, symbol)</dt></dl>
+
+<dl><dt><a name="Helper-showtopic"><strong>showtopic</strong></a>(self, topic, more_xrefs<font color="#909090">=''</font>)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>input</strong></dt>
+</dl>
+<dl><dt><strong>output</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>keywords</strong> = {'and': 'BOOLEAN', 'as': 'with', 'assert': ('assert', ''), 'break': ('break', 'while for'), 'class': ('class', 'CLASSES SPECIALMETHODS'), 'continue': ('continue', 'while for'), 'def': ('function', ''), 'del': ('del', 'BASICMETHODS'), 'elif': 'if', 'else': ('else', 'while for'), ...}</dl>
+
+<dl><dt><strong>symbol</strong> = 'u"'</dl>
+
+<dl><dt><strong>symbols</strong> = {'!=': 'COMPARISON OPERATORS', '"': 'STRINGS', '"""': 'STRINGS', '%': 'OPERATORS FORMATTING', '%=': 'AUGMENTEDASSIGNMENT', '&amp;': 'OPERATORS BITWISE', '&amp;=': 'AUGMENTEDASSIGNMENT', "'": 'STRINGS', "'''": 'STRINGS', '(': 'TUPLES FUNCTIONS CALLS', ...}</dl>
+
+<dl><dt><strong>symbols_</strong> = ("'", "'''", '"""', '"', "b'", 'b"', "r'", 'r"', "u'", 'u"')</dl>
+
+<dl><dt><strong>topic</strong> = 'STRINGS'</dl>
+
+<dl><dt><strong>topics</strong> = {'ASSERTION': 'assert', 'ASSIGNMENT': ('assignment', 'AUGMENTEDASSIGNMENT'), 'ATTRIBUTEMETHODS': ('attribute-access', 'ATTRIBUTES SPECIALMETHODS'), 'ATTRIBUTES': ('attribute-references', 'getattr hasattr setattr ATTRIBUTEMETHODS'), 'AUGMENTEDASSIGNMENT': ('augassign', 'NUMBERMETHODS'), 'BACKQUOTES': ('string-conversions', 'repr str STRINGS LITERALS'), 'BASICMETHODS': ('customization', 'cmp hash repr str SPECIALMETHODS'), 'BINARY': ('binary', 'EXPRESSIONS'), 'BITWISE': ('bitwise', 'EXPRESSIONS'), 'BOOLEAN': ('booleans', 'EXPRESSIONS TRUTHVALUE'), ...}</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ModuleScanner">class <strong>ModuleScanner</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>An&nbsp;interruptible&nbsp;scanner&nbsp;that&nbsp;searches&nbsp;module&nbsp;synopses.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ModuleScanner-run"><strong>run</strong></a>(self, callback, key<font color="#909090">=None</font>, completer<font color="#909090">=None</font>, onerror<font color="#909090">=None</font>)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Scanner">class <strong>Scanner</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;generic&nbsp;tree&nbsp;iterator.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Scanner-__init__"><strong>__init__</strong></a>(self, roots, children, descendp)</dt></dl>
+
+<dl><dt><a name="Scanner-next"><strong>next</strong></a>(self)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TextDoc">class <strong>TextDoc</strong></a>(<a href="local_pydoc.html#Doc">Doc</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Formatter&nbsp;class&nbsp;for&nbsp;text&nbsp;documentation.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="TextDoc-bold"><strong>bold</strong></a>(self, text)</dt><dd><tt>Format&nbsp;a&nbsp;string&nbsp;in&nbsp;bold&nbsp;by&nbsp;overstriking.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-docclass"><strong>docclass</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, *ignored)</dt><dd><tt>Produce&nbsp;text&nbsp;documentation&nbsp;for&nbsp;a&nbsp;given&nbsp;class&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-docdata"><strong>docdata</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, cl<font color="#909090">=None</font>)</dt><dd><tt>Produce&nbsp;text&nbsp;documentation&nbsp;for&nbsp;a&nbsp;data&nbsp;descriptor.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-docmodule"><strong>docmodule</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>)</dt><dd><tt>Produce&nbsp;text&nbsp;documentation&nbsp;for&nbsp;a&nbsp;given&nbsp;module&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-docother"><strong>docother</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, parent<font color="#909090">=None</font>, maxlen<font color="#909090">=None</font>, doc<font color="#909090">=None</font>)</dt><dd><tt>Produce&nbsp;text&nbsp;documentation&nbsp;for&nbsp;a&nbsp;data&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-docproperty"><strong>docproperty</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, cl<font color="#909090">=None</font>)</dt><dd><tt>Produce&nbsp;text&nbsp;documentation&nbsp;for&nbsp;a&nbsp;property.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-docroutine"><strong>docroutine</strong></a>(self, object, name<font color="#909090">=None</font>, mod<font color="#909090">=None</font>, cl<font color="#909090">=None</font>)</dt><dd><tt>Produce&nbsp;text&nbsp;documentation&nbsp;for&nbsp;a&nbsp;function&nbsp;or&nbsp;method&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-formattree"><strong>formattree</strong></a>(self, tree, modname, parent<font color="#909090">=None</font>, prefix<font color="#909090">=''</font>)</dt><dd><tt>Render&nbsp;in&nbsp;text&nbsp;a&nbsp;class&nbsp;tree&nbsp;as&nbsp;returned&nbsp;by&nbsp;inspect.getclasstree().</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-formatvalue"><strong>formatvalue</strong></a>(self, object)</dt><dd><tt>Format&nbsp;an&nbsp;argument&nbsp;default&nbsp;value&nbsp;as&nbsp;text.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-indent"><strong>indent</strong></a>(self, text, prefix<font color="#909090">='    '</font>)</dt><dd><tt>Indent&nbsp;text&nbsp;by&nbsp;prepending&nbsp;a&nbsp;given&nbsp;prefix&nbsp;to&nbsp;each&nbsp;line.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-repr"><strong>repr</strong></a>(self, x)<font color="#909090"><font face="helvetica, arial"> from <a href="local_pydoc.html#TextRepr">TextRepr</a></font></font></dt></dl>
+
+<dl><dt><a name="TextDoc-section"><strong>section</strong></a>(self, title, contents)</dt><dd><tt>Format&nbsp;a&nbsp;section&nbsp;with&nbsp;a&nbsp;given&nbsp;heading.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="local_pydoc.html#Doc">Doc</a>:<br>
+<dl><dt><a name="TextDoc-document"><strong>document</strong></a>(self, object, name<font color="#909090">=None</font>, *args)</dt><dd><tt>Generate&nbsp;documentation&nbsp;for&nbsp;an&nbsp;object.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-fail"><strong>fail</strong></a>(self, object, name<font color="#909090">=None</font>, *args)</dt><dd><tt>Raise&nbsp;an&nbsp;exception&nbsp;for&nbsp;unimplemented&nbsp;types.</tt></dd></dl>
+
+<dl><dt><a name="TextDoc-getdocloc"><strong>getdocloc</strong></a>(self, object, basedir<font color="#909090">='/usr/tce/packages/python/python-2.7.16/lib/python2.7'</font>)</dt><dd><tt>Return&nbsp;the&nbsp;location&nbsp;of&nbsp;module&nbsp;docs&nbsp;or&nbsp;None</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TextRepr">class <strong>TextRepr</strong></a>(<a href="repr.html#Repr">repr.Repr</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;for&nbsp;safely&nbsp;making&nbsp;a&nbsp;text&nbsp;representation&nbsp;of&nbsp;a&nbsp;Python&nbsp;object.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="TextRepr-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr1"><strong>repr1</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_instance"><strong>repr_instance</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_str"><strong>repr_str</strong></a> = <a href="#TextRepr-repr_string">repr_string</a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_string"><strong>repr_string</strong></a>(self, x, level)</dt></dl>
+
+<hr>
+Methods inherited from <a href="repr.html#Repr">repr.Repr</a>:<br>
+<dl><dt><a name="TextRepr-repr"><strong>repr</strong></a>(self, x)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_array"><strong>repr_array</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_deque"><strong>repr_deque</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_dict"><strong>repr_dict</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_frozenset"><strong>repr_frozenset</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_list"><strong>repr_list</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_long"><strong>repr_long</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_set"><strong>repr_set</strong></a>(self, x, level)</dt></dl>
+
+<dl><dt><a name="TextRepr-repr_tuple"><strong>repr_tuple</strong></a>(self, x, level)</dt></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-allmethods"><strong>allmethods</strong></a>(cl)</dt></dl>
+ <dl><dt><a name="-apropos"><strong>apropos</strong></a>(key)</dt><dd><tt>Print&nbsp;all&nbsp;the&nbsp;one-line&nbsp;module&nbsp;summaries&nbsp;that&nbsp;contain&nbsp;a&nbsp;substring.</tt></dd></dl>
+ <dl><dt><a name="-classify_class_attrs"><strong>classify_class_attrs</strong></a>(object)</dt><dd><tt>Wrap&nbsp;inspect.classify_class_attrs,&nbsp;with&nbsp;fixup&nbsp;for&nbsp;data&nbsp;descriptors.</tt></dd></dl>
+ <dl><dt><a name="-classname"><strong>classname</strong></a>(object, modname)</dt><dd><tt>Get&nbsp;a&nbsp;class&nbsp;name&nbsp;and&nbsp;qualify&nbsp;it&nbsp;with&nbsp;a&nbsp;module&nbsp;name&nbsp;if&nbsp;necessary.</tt></dd></dl>
+ <dl><dt><a name="-cli"><strong>cli</strong></a>()</dt><dd><tt>Command-line&nbsp;interface&nbsp;(looks&nbsp;at&nbsp;sys.argv&nbsp;to&nbsp;decide&nbsp;what&nbsp;to&nbsp;do).</tt></dd></dl>
+ <dl><dt><a name="-cram"><strong>cram</strong></a>(text, maxlen)</dt><dd><tt>Omit&nbsp;part&nbsp;of&nbsp;a&nbsp;string&nbsp;if&nbsp;needed&nbsp;to&nbsp;make&nbsp;it&nbsp;fit&nbsp;in&nbsp;a&nbsp;maximum&nbsp;length.</tt></dd></dl>
+ <dl><dt><a name="-describe"><strong>describe</strong></a>(thing)</dt><dd><tt>Produce&nbsp;a&nbsp;short&nbsp;description&nbsp;of&nbsp;the&nbsp;given&nbsp;thing.</tt></dd></dl>
+ <dl><dt><a name="-doc"><strong>doc</strong></a>(thing, title<font color="#909090">='Python Library Documentation: %s'</font>, forceload<font color="#909090">=0</font>)</dt><dd><tt>Display&nbsp;text&nbsp;documentation,&nbsp;given&nbsp;an&nbsp;object&nbsp;or&nbsp;a&nbsp;path&nbsp;to&nbsp;an&nbsp;object.</tt></dd></dl>
+ <dl><dt><a name="-getdoc"><strong>getdoc</strong></a>(object)</dt><dd><tt>Get&nbsp;the&nbsp;doc&nbsp;string&nbsp;or&nbsp;comments&nbsp;for&nbsp;an&nbsp;object.</tt></dd></dl>
+ <dl><dt><a name="-getpager"><strong>getpager</strong></a>()</dt><dd><tt>Decide&nbsp;what&nbsp;method&nbsp;to&nbsp;use&nbsp;for&nbsp;paging&nbsp;through&nbsp;text.</tt></dd></dl>
+ <dl><dt><a name="-gui"><strong>gui</strong></a>()</dt><dd><tt>Graphical&nbsp;interface&nbsp;(starts&nbsp;web&nbsp;server&nbsp;and&nbsp;pops&nbsp;up&nbsp;a&nbsp;control&nbsp;window).</tt></dd></dl>
+ <dl><dt><a name="-importfile"><strong>importfile</strong></a>(path)</dt><dd><tt>Import&nbsp;a&nbsp;Python&nbsp;source&nbsp;file&nbsp;or&nbsp;compiled&nbsp;file&nbsp;given&nbsp;its&nbsp;path.</tt></dd></dl>
+ <dl><dt><a name="-isdata"><strong>isdata</strong></a>(object)</dt><dd><tt>Check&nbsp;if&nbsp;an&nbsp;object&nbsp;is&nbsp;of&nbsp;a&nbsp;type&nbsp;that&nbsp;probably&nbsp;means&nbsp;it's&nbsp;data.</tt></dd></dl>
+ <dl><dt><a name="-ispackage"><strong>ispackage</strong></a>(path)</dt><dd><tt>Guess&nbsp;whether&nbsp;a&nbsp;path&nbsp;refers&nbsp;to&nbsp;a&nbsp;package&nbsp;directory.</tt></dd></dl>
+ <dl><dt><a name="-ispath"><strong>ispath</strong></a>(x)</dt></dl>
+ <dl><dt><a name="-locate"><strong>locate</strong></a>(path, forceload<font color="#909090">=0</font>)</dt><dd><tt>Locate&nbsp;an&nbsp;object&nbsp;by&nbsp;name&nbsp;or&nbsp;dotted&nbsp;path,&nbsp;importing&nbsp;as&nbsp;necessary.</tt></dd></dl>
+ <dl><dt><a name="-pager"><strong>pager</strong></a>(text)</dt><dd><tt>The&nbsp;first&nbsp;time&nbsp;this&nbsp;is&nbsp;called,&nbsp;determine&nbsp;what&nbsp;kind&nbsp;of&nbsp;pager&nbsp;to&nbsp;use.</tt></dd></dl>
+ <dl><dt><a name="-pathdirs"><strong>pathdirs</strong></a>()</dt><dd><tt>Convert&nbsp;sys.path&nbsp;into&nbsp;a&nbsp;list&nbsp;of&nbsp;absolute,&nbsp;existing,&nbsp;unique&nbsp;paths.</tt></dd></dl>
+ <dl><dt><a name="-pipepager"><strong>pipepager</strong></a>(text, cmd)</dt><dd><tt>Page&nbsp;through&nbsp;text&nbsp;by&nbsp;feeding&nbsp;it&nbsp;to&nbsp;another&nbsp;program.</tt></dd></dl>
+ <dl><dt><a name="-plain"><strong>plain</strong></a>(text)</dt><dd><tt>Remove&nbsp;boldface&nbsp;formatting&nbsp;from&nbsp;text.</tt></dd></dl>
+ <dl><dt><a name="-plainpager"><strong>plainpager</strong></a>(text)</dt><dd><tt>Simply&nbsp;print&nbsp;unformatted&nbsp;text.&nbsp;&nbsp;This&nbsp;is&nbsp;the&nbsp;ultimate&nbsp;fallback.</tt></dd></dl>
+ <dl><dt><a name="-render_doc"><strong>render_doc</strong></a>(thing, title<font color="#909090">='Python Library Documentation: %s'</font>, forceload<font color="#909090">=0</font>)</dt><dd><tt>Render&nbsp;text&nbsp;documentation,&nbsp;given&nbsp;an&nbsp;object&nbsp;or&nbsp;a&nbsp;path&nbsp;to&nbsp;an&nbsp;object.</tt></dd></dl>
+ <dl><dt><a name="-replace"><strong>replace</strong></a>(text, *pairs)</dt><dd><tt>Do&nbsp;a&nbsp;series&nbsp;of&nbsp;global&nbsp;replacements&nbsp;on&nbsp;a&nbsp;string.</tt></dd></dl>
+ <dl><dt><a name="-resolve"><strong>resolve</strong></a>(thing, forceload<font color="#909090">=0</font>)</dt><dd><tt>Given&nbsp;an&nbsp;object&nbsp;or&nbsp;a&nbsp;path&nbsp;to&nbsp;an&nbsp;object,&nbsp;get&nbsp;the&nbsp;object&nbsp;and&nbsp;its&nbsp;name.</tt></dd></dl>
+ <dl><dt><a name="-safeimport"><strong>safeimport</strong></a>(path, forceload<font color="#909090">=0</font>, cache<font color="#909090">={}</font>)</dt><dd><tt>Import&nbsp;a&nbsp;module;&nbsp;handle&nbsp;errors;&nbsp;return&nbsp;None&nbsp;if&nbsp;the&nbsp;module&nbsp;isn't&nbsp;found.<br>
+If&nbsp;the&nbsp;module&nbsp;*is*&nbsp;found&nbsp;but&nbsp;an&nbsp;exception&nbsp;occurs,&nbsp;it's&nbsp;wrapped&nbsp;in&nbsp;an<br>
+<a href="#ErrorDuringImport">ErrorDuringImport</a>&nbsp;exception&nbsp;and&nbsp;reraised.&nbsp;&nbsp;Unlike&nbsp;__import__,&nbsp;if&nbsp;a<br>
+package&nbsp;path&nbsp;is&nbsp;specified,&nbsp;the&nbsp;module&nbsp;at&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;path&nbsp;is&nbsp;returned,<br>
+not&nbsp;the&nbsp;package&nbsp;at&nbsp;the&nbsp;beginning.&nbsp;&nbsp;If&nbsp;the&nbsp;optional&nbsp;'forceload'&nbsp;argument<br>
+is&nbsp;1,&nbsp;we&nbsp;reload&nbsp;the&nbsp;module&nbsp;from&nbsp;disk&nbsp;(unless&nbsp;it's&nbsp;a&nbsp;dynamic&nbsp;extension).</tt></dd></dl>
+ <dl><dt><a name="-serve"><strong>serve</strong></a>(port, callback<font color="#909090">=None</font>, completer<font color="#909090">=None</font>)</dt></dl>
+ <dl><dt><a name="-source_synopsis"><strong>source_synopsis</strong></a>(file)</dt></dl>
+ <dl><dt><a name="-splitdoc"><strong>splitdoc</strong></a>(doc)</dt><dd><tt>Split&nbsp;a&nbsp;doc&nbsp;string&nbsp;into&nbsp;a&nbsp;synopsis&nbsp;line&nbsp;(if&nbsp;any)&nbsp;and&nbsp;the&nbsp;rest.</tt></dd></dl>
+ <dl><dt><a name="-stripid"><strong>stripid</strong></a>(text)</dt><dd><tt>Remove&nbsp;the&nbsp;hexadecimal&nbsp;id&nbsp;from&nbsp;a&nbsp;Python&nbsp;object&nbsp;representation.</tt></dd></dl>
+ <dl><dt><a name="-synopsis"><strong>synopsis</strong></a>(filename, cache<font color="#909090">={}</font>)</dt><dd><tt>Get&nbsp;the&nbsp;one-line&nbsp;summary&nbsp;out&nbsp;of&nbsp;a&nbsp;module&nbsp;file.</tt></dd></dl>
+ <dl><dt><a name="-tempfilepager"><strong>tempfilepager</strong></a>(text, cmd)</dt><dd><tt>Page&nbsp;through&nbsp;text&nbsp;by&nbsp;invoking&nbsp;a&nbsp;program&nbsp;on&nbsp;a&nbsp;temporary&nbsp;file.</tt></dd></dl>
+ <dl><dt><a name="-ttypager"><strong>ttypager</strong></a>(text)</dt><dd><tt>Page&nbsp;through&nbsp;text&nbsp;on&nbsp;a&nbsp;text&nbsp;terminal.</tt></dd></dl>
+ <dl><dt><a name="-visiblename"><strong>visiblename</strong></a>(name, all<font color="#909090">=None</font>, obj<font color="#909090">=None</font>)</dt><dd><tt>Decide&nbsp;whether&nbsp;to&nbsp;show&nbsp;documentation&nbsp;on&nbsp;a&nbsp;variable.</tt></dd></dl>
+ <dl><dt><a name="-writedoc"><strong>writedoc</strong></a>(thing, forceload<font color="#909090">=0</font>)</dt><dd><tt>Write&nbsp;HTML&nbsp;documentation&nbsp;to&nbsp;a&nbsp;file&nbsp;in&nbsp;the&nbsp;current&nbsp;directory.</tt></dd></dl>
+ <dl><dt><a name="-writedocs"><strong>writedocs</strong></a>(dir, pkgpath<font color="#909090">=''</font>, done<font color="#909090">=None</font>)</dt><dd><tt>Write&nbsp;out&nbsp;HTML&nbsp;documentation&nbsp;for&nbsp;all&nbsp;modules&nbsp;in&nbsp;a&nbsp;directory&nbsp;tree.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__author__</strong> = 'Ka-Ping Yee &lt;ping@lfw.org&gt;'<br>
+<strong>__credits__</strong> = 'Guido van Rossum, for an excellent programming l...erlain, for the first implementation of textdoc.<font color="#c040c0">\n</font>'<br>
+<strong>__date__</strong> = '26 February 2001'<br>
+<strong>__version__</strong> = '$Revision: 88564 $'<br>
+<strong>help</strong> = &lt;pydoc.Helper instance&gt;<br>
+<strong>html</strong> = &lt;local_pydoc.HTMLDoc instance&gt;<br>
+<strong>text</strong> = &lt;local_pydoc.TextDoc instance&gt;</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Ka-Ping&nbsp;Yee&nbsp;&lt;ping@lfw.org&gt;</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Credits</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Guido&nbsp;van&nbsp;Rossum,&nbsp;for&nbsp;an&nbsp;excellent&nbsp;programming&nbsp;language.<br>
+Tommy&nbsp;Burnette,&nbsp;the&nbsp;original&nbsp;creator&nbsp;of&nbsp;manpy.<br>
+Paul&nbsp;Prescod,&nbsp;for&nbsp;all&nbsp;his&nbsp;work&nbsp;on&nbsp;onlinehelp.<br>
+Richard&nbsp;Chamberlain,&nbsp;for&nbsp;the&nbsp;first&nbsp;implementation&nbsp;of&nbsp;textdoc.<br>
+</td></tr></table>
+</body></html>

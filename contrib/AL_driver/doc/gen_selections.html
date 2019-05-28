@@ -1,0 +1,72 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module gen_selections</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>gen_selections</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/gen_selections.py">/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/gen_selections.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;Global&nbsp;(python)&nbsp;modules</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="argparse.html">argparse</a><br>
+<a href="glob.html">glob</a><br>
+<a href="helpers.html">helpers</a><br>
+</td><td width="25%" valign=top><a href="math.html">math</a><br>
+<a href="matplotlib.html">matplotlib</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+<a href="random.html">random</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-GEN_NORM_HIST"><strong>GEN_NORM_HIST</strong></a>(idx_list, ener_list, central_repo_enerlist, minval, maxval, nbins)</dt><dd><tt>Normalizes&nbsp;a&nbsp;histogram.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-GEN_NORM_HIST">GEN_NORM_HIST</a>(idx_list,&nbsp;ener_list,&nbsp;central_repo_enerlist,&nbsp;minval,&nbsp;maxval,&nbsp;nbins)<br>
+&nbsp;<br>
+Notes:&nbsp;This&nbsp;function&nbsp;is&nbsp;intended&nbsp;for&nbsp;use&nbsp;by&nbsp;gen_subset&nbsp;only.</tt></dd></dl>
+ <dl><dt><a name="-GET_BIN"><strong>GET_BIN</strong></a>(val, bins)</dt><dd><tt>Determines&nbsp;a&nbsp;bin&nbsp;number&nbsp;for&nbsp;a&nbsp;given&nbsp;energy.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-GET_BIN">GET_BIN</a>(12.2573,bins)<br>
+&nbsp;<br>
+Notes:&nbsp;This&nbsp;function&nbsp;is&nbsp;intended&nbsp;for&nbsp;use&nbsp;by&nbsp;gen_subset&nbsp;only.</tt></dd></dl>
+ <dl><dt><a name="-SET_CONDITIONS"><strong>SET_CONDITIONS</strong></a>(nsweeps)</dt><dd><tt>Determines&nbsp;which&nbsp;sweeps&nbsp;to&nbsp;print&nbsp;MC&nbsp;stats&nbsp;for.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-SET_CONDITIONS">SET_CONDITIONS</a>(nsweeps)<br>
+&nbsp;<br>
+Notes:&nbsp;This&nbsp;function&nbsp;is&nbsp;intended&nbsp;for&nbsp;use&nbsp;by&nbsp;gen_subset&nbsp;only.</tt></dd></dl>
+ <dl><dt><a name="-cleanup_repo"><strong>cleanup_repo</strong></a>(my_ALC)</dt><dd><tt>Cleans&nbsp;up&nbsp;central&nbsp;repository's&nbsp;list&nbsp;of&nbsp;selected&nbsp;species.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-cleanup_repo">cleanup_repo</a>(1)<br>
+&nbsp;<br>
+Notes:&nbsp;Useful&nbsp;when&nbsp;AL&nbsp;dies&nbsp;mid-run&nbsp;by&nbsp;ensuring&nbsp;the&nbsp;central&nbsp;repsotory's<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;of&nbsp;selected&nbsp;species&nbsp;only&nbsp;corresponds&nbsp;to&nbsp;ALC's&nbsp;&lt;&nbsp;my_ALC.</tt></dd></dl>
+ <dl><dt><a name="-gen_subset"><strong>gen_subset</strong></a>(**kwargs)</dt><dd><tt>Selects&nbsp;a&nbsp;subset&nbsp;of&nbsp;species&nbsp;to&nbsp;add&nbsp;to&nbsp;the&nbsp;central&nbsp;repository.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-gen_subset">gen_subset</a>(&lt;arguments&gt;)<br>
+&nbsp;<br>
+Notes:&nbsp;See&nbsp;function&nbsp;definition&nbsp;in&nbsp;helpers.py&nbsp;for&nbsp;a&nbsp;full&nbsp;list&nbsp;of&nbsp;options.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expects&nbsp;to&nbsp;be&nbsp;run&nbsp;from&nbsp;the&nbsp;ALC-X&nbsp;directory<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expects&nbsp;"all.energies_normed"&nbsp;in&nbsp;the&nbsp;ALC-X&nbsp;directory<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generates&nbsp;a&nbsp;plot&nbsp;of&nbsp;histogram&nbsp;and&nbsp;RMS&nbsp;evolution<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generates&nbsp;a&nbsp;list&nbsp;of&nbsp;selected&nbsp;species</tt></dd></dl>
+ <dl><dt><a name="-populate_repo"><strong>populate_repo</strong></a>(my_ALC)</dt><dd><tt>Updates&nbsp;central&nbsp;repository's&nbsp;list&nbsp;of&nbsp;selected&nbsp;species.&nbsp;<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-populate_repo">populate_repo</a>(1)</tt></dd></dl>
+</td></tr></table>
+</body></html>

@@ -26,8 +26,8 @@ def get_repo_energies(*argv, **kwargs):
 	# 0. Set up an argument parser
 	################################	
 	
-	default_keys   = [""]*11
-	default_values = [""]*11	
+	default_keys   = [""]*12
+	default_values = [""]*12	
 	
 	# Cluster specific controls
 	
@@ -44,7 +44,9 @@ def get_repo_energies(*argv, **kwargs):
 	default_keys[7 ] = "job_queue"         ; default_values[7 ] = 	 "pdebug"		  	        # Queue for ChIMES lsq job
 	default_keys[8 ] = "job_account"       ; default_values[8 ] = 	 "pbronze"		  	        # Account for ChIMES lsq job
 	default_keys[9 ] = "job_executable"    ; default_values[9 ] = 	 ""			  	        # Full path to executable for ChIMES lsq job
-	default_keys[10] = "job_system"        ; default_values[10] = 	 "slurm"	       	       	        # slurm or torque 	 
+	default_keys[10] = "job_system"        ; default_values[10] = 	 "slurm"	       	       	        # slurm or torque 
+	default_keys[11] = "job_email"         ; default_values[11] =     True					# Send slurm emails?
+		 
 		
 	args = dict(zip(default_keys, default_values))
 	args.update(kwargs)
@@ -89,6 +91,8 @@ def get_repo_energies(*argv, **kwargs):
 	curr_dir = helpers.run_bash_cmnd("pwd").rstrip()
 
 	run_cmnd  = "msub -l nodes=" + args["job_nodes"] + ":ppn=" + args["job_ppn"] + " -l walltime=" + args["job_walltime"] + ":00:00 -N dmb_enr " + " -q " +  args["job_queue"] + " " + " -A " +  args["job_account"] + " "
+	if args["job_email"]:
+		run_cmnd += " -m abe "
 	run_cmnd += " new-get_dumb_ener.sh GEN_FF/params.txt.reduced "  + args["job_executable"] + " " + curr_dir + "/run_md.base " + args["driver_dir"]
 	
 	# Submit and monitor the jobs
@@ -312,9 +316,19 @@ def generate_clusters(**kwargs):
 	helpers.run_bash_cmnd("rm -rf CFG_REPO")
 	helpers.run_bash_cmnd("mkdir CFG_REPO")
 	
+	# Save
+	
+	#items =  ' '.join(glob.glob("*wrap*xyz")) + " " + ' '.join(glob.glob("*wrap*lammpstrj")) + " " + ' '.join(glob.glob("*cluster*stats"))
+	items = ' '.join(glob.glob("*.wrapped.*xyz"))
+	
+	helpers.run_bash_cmnd("mv " + items + " CFG_REPO")
+	
+	# Cleanup
+	
 	items =  ' '.join(glob.glob("*wrap*xyz")) + " " + ' '.join(glob.glob("*wrap*lammpstrj")) + " " + ' '.join(glob.glob("*cluster*stats"))
 
-	helpers.run_bash_cmnd("mv " + items + " CFG_REPO")
+	helpers.run_bash_cmnd("rm -f " + items)
+	
 
 	if args["my_dir"]:
 		os.chdir("..")

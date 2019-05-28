@@ -1,0 +1,72 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module gen_ff</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>gen_ff</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/gen_ff.py">/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/gen_ff.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;Global&nbsp;(python)&nbsp;modules</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="glob.html">glob</a><br>
+</td><td width="25%" valign=top><a href="helpers.html">helpers</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-build_amat"><strong>build_amat</strong></a>(my_ALC, **kwargs)</dt><dd><tt>Generates&nbsp;the&nbsp;A-&nbsp;and&nbsp;b-matrices&nbsp;for&nbsp;an&nbsp;input&nbsp;trajectory.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-build_amat">build_amat</a>(1,&nbsp;&lt;arguments&gt;)<br>
+&nbsp;<br>
+Notes:&nbsp;See&nbsp;function&nbsp;definition&nbsp;in&nbsp;helpers.py&nbsp;for&nbsp;a&nbsp;full&nbsp;list&nbsp;of&nbsp;options.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Requrires&nbsp;config.CHIMES_LSQ.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expects&nbsp;to&nbsp;be&nbsp;called&nbsp;from&nbsp;ALC-my_ALC's&nbsp;base&nbsp;folder.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;a&nbsp;job_id&nbsp;for&nbsp;the&nbsp;submitted&nbsp;job.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+WARNING:&nbsp;This&nbsp;driver&nbsp;does&nbsp;NOT&nbsp;support&nbsp;SPLITFI&nbsp;functionality.</tt></dd></dl>
+ <dl><dt><a name="-solve_amat"><strong>solve_amat</strong></a>(my_ALC, **kwargs)</dt><dd><tt>Generates&nbsp;parameters&nbsp;based&nbsp;on&nbsp;generated&nbsp;A-&nbsp;and&nbsp;b-matrices.<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#-solve_amat">solve_amat</a>(1,&nbsp;&lt;arguments&gt;)<br>
+&nbsp;<br>
+Notes:&nbsp;See&nbsp;function&nbsp;definition&nbsp;in&nbsp;helpers.py&nbsp;for&nbsp;a&nbsp;full&nbsp;list&nbsp;of&nbsp;options.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Requrires&nbsp;config.CHIMES_SOLVER.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Currently&nbsp;only&nbsp;supports&nbsp;lassolars&nbsp;and&nbsp;svd.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;a&nbsp;job_id&nbsp;for&nbsp;the&nbsp;submitted&nbsp;job.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assumes&nbsp;last&nbsp;ALC's&nbsp;GEN_FF&nbsp;folder&nbsp;can&nbsp;be&nbsp;accessed&nbsp;from&nbsp;current&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ALC's&nbsp;base&nbsp;folder&nbsp;via&nbsp;../ALC-(n-1)/GEN_FF.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+WARNING:&nbsp;Only&nbsp;coded&nbsp;to&nbsp;work&nbsp;with&nbsp;forces&nbsp;and&nbsp;energies.<br>
+&nbsp;<br>
+WARNING:&nbsp;Weight&nbsp;generation&nbsp;function&nbsp;will&nbsp;need&nbsp;to&nbsp;be&nbsp;updated&nbsp;for&nbsp;stresses.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+WARNING:&nbsp;Concatenation&nbsp;is&nbsp;untested&nbsp;and&nbsp;may&nbsp;be&nbsp;problematic&nbsp;for&nbsp;large&nbsp;A-matrices.<br>
+&nbsp;<br>
+WARNING:&nbsp;This&nbsp;driver&nbsp;does&nbsp;NOT&nbsp;support&nbsp;SPLITFI&nbsp;functionality.<br>
+&nbsp;<br>
+WARNING:&nbsp;DLARS/DLASSO&nbsp;is&nbsp;NOT&nbsp;supported&nbsp;with&nbsp;split&nbsp;files.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
+WARNING:&nbsp;The&nbsp;DLARS/DLASSO&nbsp;code&nbsp;zero&nbsp;pads&nbsp;for&nbsp;ints&nbsp;of&nbsp;*4&nbsp;MAXIMUM*&nbsp;digits</tt></dd></dl>
+ <dl><dt><a name="-split_weights"><strong>split_weights</strong></a>()</dt><dd><tt>Splits&nbsp;a&nbsp;weights.dat&nbsp;file&nbsp;for&nbsp;parallel&nbsp;learning.<br>
+&nbsp;<br>
+...Currently,&nbsp;nothing&nbsp;calls&nbsp;this&nbsp;function...<br>
+&nbsp;<br>
+Expects&nbsp;to&nbsp;find:<br>
+&nbsp;<br>
+weights.dat<br>
+b.*.txt</tt></dd></dl>
+</td></tr></table>
+</body></html>

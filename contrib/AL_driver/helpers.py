@@ -9,6 +9,7 @@ import math
 
 """ Small helper functions and utilities general to the ALC process. """
 
+
 def run_bash_cmnd(cmnd_str):
 
 	""" 
@@ -185,6 +186,27 @@ def count_xyzframes_general(infile):
 				nframes += 1
 	return nframes	
 	
+	
+def email_user(base, address, status):
+
+	""" 
+	
+	Sends a message (status) to the specified email address (address)
+	
+	Usage: email_user("me@my_domain.com","email message text")
+	
+	Notes: This uses (requires) linux mailx. Nothing will be sent if
+	       address is an empty string. Calls send_email.sh in utilities.
+
+	"""
+
+	if address:
+
+		cmnd = base + "/utilities/send_email.sh " + address + " " + status + " "
+
+		return run_bash_cmnd(cmnd)
+		
+	
 def create_and_launch_job(*argv, **kwargs):
 
 	""" 
@@ -203,8 +225,8 @@ def create_and_launch_job(*argv, **kwargs):
 	# 0. Set up an argument parser
 	################################
 	
-	default_keys   = [""]*9
-	default_values = [""]*9
+	default_keys   = [""]*10
+	default_values = [""]*10
 
 	# Overall job controls
 	
@@ -217,6 +239,7 @@ def create_and_launch_job(*argv, **kwargs):
 	default_keys[6 ] = "job_executable"    ; default_values[6 ] =	 ""			# Full path to executable for ChIMES lsq job
 	default_keys[7 ] = "job_system"        ; default_values[7 ] =	 "slurm"		# slurm or torque	
 	default_keys[8 ] = "job_file"          ; default_values[8 ] =	 "run.cmd"		# Name of the resulting submit script	
+	default_keys[9 ] = "job_email"         ; default_values[9 ] =	 True			# Name of the resulting submit script	
 	
 
 	args = dict(zip(default_keys, default_values))
@@ -234,7 +257,8 @@ def create_and_launch_job(*argv, **kwargs):
 	JOB.append(" -l " + "nodes=" + args["job_nodes"] + ":ppn=" + args["job_ppn"])
 	JOB.append(" -l " + "walltime=" + args["job_walltime"] + ":00:00")	  	   
 	JOB.append(" -q " + args["job_queue"])
-	JOB.append(" -m " + "abe")   
+	if args["job_email"]:
+		JOB.append(" -m abe")   
 	JOB.append(" -A " + args["job_account"])  
 	JOB.append(" -V " )
 	JOB.append(" -o " + "stdoutmsg")

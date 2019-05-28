@@ -137,8 +137,8 @@ def run_md(my_ALC, my_case, my_indep, *argv, **kwargs):
 	
 	### ...kwargs
 	
-	default_keys   = [""]*13
-	default_values = [""]*13
+	default_keys   = [""]*14
+	default_values = [""]*14
 
 
 	# MD specific controls
@@ -158,7 +158,9 @@ def run_md(my_ALC, my_case, my_indep, *argv, **kwargs):
 	default_keys[9 ] = "job_account"   ; default_values[9 ] = "pbronze"			# Account for ChIMES md job
 	default_keys[10] = "job_executable"; default_values[10] = ""				# Full path to executable for ChIMES md job
 	default_keys[11] = "job_system"    ; default_values[11] = "slurm"			# slurm or torque	
-	default_keys[12] = "job_file"	   ; default_values[12] = "run.cmd"			# Name of the resulting submit script	
+	default_keys[12] = "job_file"	   ; default_values[12] = "run.cmd"			# Name of the resulting submit script
+	default_keys[13] = "job_email"     ; default_values[13] = True				# Send slurm emails?
+		
 
 	
 
@@ -269,6 +271,7 @@ def run_md(my_ALC, my_case, my_indep, *argv, **kwargs):
 	
 	md_jobid = helpers.create_and_launch_job(
 		job_name       =     args["job_name"	] ,
+		job_email      =     args["job_email"   ] ,
 		job_nodes      = str(args["job_nodes"   ]),
 		job_ppn        = str(args["job_ppn"     ]),
 		job_walltime   = str(args["job_walltime"]),
