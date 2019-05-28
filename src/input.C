@@ -169,8 +169,7 @@ void INPUT::CHECK_FILE()
 
 // Wrapper functions: Process entire input file
 
-void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS
-															 ,	       
+void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,	       
 	    		       vector<PAIRS>		 & ATOM_PAIRS, 
 	    		       CLUSTER_LIST		 & TRIPS, 
 	    		       CLUSTER_LIST		 & QUADS, 
@@ -248,6 +247,7 @@ void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGH
 	PARSE_CONTROLS_TIMESTP(CONTROLS);
 	PARSE_CONTROLS_N_MDSTP(CONTROLS);
 	PARSE_CONTROLS_PENTHRS(CONTROLS);
+	PARSE_CONTROLS_KILLLEN(CONTROLS);
 	PARSE_CONTROLS_NLAYERS(CONTROLS);
 	PARSE_CONTROLS_USENEIG(CONTROLS, NEIGHBOR_LIST);
 	PARSE_CONTROLS_PRMFILE(CONTROLS);
@@ -335,8 +335,8 @@ void INPUT::PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS)
 
 					parse_space(LINE,PARSED_LINE);
 					
-					if(PARSED_LINE.size() != 2)
-						EXIT_MSG("ERROR: Expected to read <nframes> <filename>, got: ", LINE);											
+					if( (PARSED_LINE.size() != 2) && (PARSED_LINE.size() != 3))
+						EXIT_MSG("ERROR: Expected to read <nframes> <filename> or <nframes> <filename> <temperature>,  got: ", LINE);											
 					
 					CONTROLS.INFILE_FRAMES.push_back(convert_int(PARSED_LINE[0],i+1));
 					CONTROLS.INFILE       .push_back(     PARSED_LINE[1]);
@@ -1721,6 +1721,23 @@ void INPUT::PARSE_CONTROLS_PENTHRS(JOB_CONTROL & CONTROLS)
 		}
 	}
 }
+void INPUT::PARSE_CONTROLS_KILLLEN(JOB_CONTROL & CONTROLS)
+{
+        int N_CONTENTS = CONTENTS.size();
+
+        for (int i=0; i<N_CONTENTS; i++)
+        {
+                if (found_input_keyword("USEKILL", CONTENTS(i)))
+                {
+                        CONTROLS.USE_KILL_LEN = convert_bool(CONTENTS(i+1,0),i+1);
+
+                        if ( RANK == 0 )
+                                cout << "        # USEKILL #: " << CONTROLS.USE_KILL_LEN << endl;
+
+                        break;
+                }
+        }
+}
 void INPUT::PARSE_CONTROLS_NLAYERS(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
@@ -2232,7 +2249,7 @@ double INPUT::convert_double(const string &str, int idx)
 {
 	int pos = str.find_first_not_of(" \t\n") ;
 	int posdigit = str.find_first_of("0123456789") ;
-	
+		
 	if ( isalpha(str[pos]) || posdigit == string::npos )
 	{
 		if ( RANK == 0 )
@@ -2253,7 +2270,7 @@ double INPUT::convert_double(const string &str, int idx)
 		cout << "String found where floating point number expected: " + str << endl ;
 		convert_error(idx) ;
 	}
-
+		
 	// Not reached.
 	return 0.0 ;
 }
@@ -2323,7 +2340,7 @@ void INPUT::convert_error(int idx)
 		}
 		exit_run(1) ;
 }
-
+		
 		
 		
 		

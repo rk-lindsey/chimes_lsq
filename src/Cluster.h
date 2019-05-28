@@ -19,6 +19,8 @@ class PAIRS	// NEEDS UPDATING
 	  	double S_MINIM; 		      // Minimum allowed pair distance for fitting
 	  	double S_MAXIM; 		      // Maximum allowed pair distance for fitting
 	  	double S_DELTA; 		      // Fitting "grid" spacing (width)
+		
+		double KILLLEN;			      // Pair distance below which to kill the simulation
 
 	  	double X_MINIM; 		      // Minimum transformed Cheby
 	  	double X_MAXIM; 		      // Maximum transformed Cheby

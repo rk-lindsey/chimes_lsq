@@ -1662,7 +1662,7 @@ void JOB_CONTROL::LSQ_SETUP(int npairs, int no_atom_types)
 			TOT_ALL_PARAMS += npairs ;
 		if ( FIT_POVER )
 			TOT_ALL_PARAMS ++ ;
-		if ( FIT_ENER_EVER )
+		if ( FIT_ENER_EVER || FIT_ENER )
 			TOT_ALL_PARAMS += no_atom_types ;
 	
 		if((FIT_STRESS  || FIT_STRESS_ALL) && NSTRESS == -1)

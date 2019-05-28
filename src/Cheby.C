@@ -1872,6 +1872,16 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 		  int curr_pair_type_idx_ij =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP, SYSTEM.PARENT) ;
 		
 		  double rlen_ij = get_dist(SYSTEM, RAB_IJ, a1, a2);	// Updates RAB!
+		  
+		  if (rlen_ij < FF_2BODY[curr_pair_type_idx_ij].KILLLEN)
+		  {
+		  	cout << "ERROR: Found a pair distance below the r_ij kill length:" << endl;
+			cout << "Pair type:   " << curr_pair_type_idx_ij << endl;
+			cout << "Kill length: " << FF_2BODY[curr_pair_type_idx_ij].KILLLEN << endl;
+			cout << "r_ij:        " << rlen_ij << endl;
+			exit_run(0);
+		  }
+			
 								
 		  if(rlen_ij < FF_2BODY[curr_pair_type_idx_ij].S_MAXIM)	// We want to evaluate the penalty function when r < rmin (LEF) .. Assumes 3b inner cutoff is never shorter than 2b's
 		  {	
@@ -2026,6 +2036,7 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 {
 
   int i_start, i_end;
+  int a1start, a1end;
   vector<TRIP_FF> & FF_3BODY = TRIPS.VEC ;
 
 		
@@ -2310,6 +2321,7 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
   // Prepare iterators for outermost loop
 		
   int i_start, i_end;
+  int a1start, a1end;
 		
   static bool called_before = false ;
 

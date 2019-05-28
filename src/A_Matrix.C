@@ -270,8 +270,8 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 	{
 
 		// Check if we need to exclude some tensor data from the A and b text files.
-		if( N >= CONTROLS.NSTRESS)
-			return ;
+		if( N < CONTROLS.NSTRESS)
+                {
 
 		// Output A.txt 
 			
@@ -301,13 +301,13 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		fileb_labeled << "s_xx " <<  SYSTEM.STRESS_TENSORS.X/GPa << endl;
 		fileb_labeled << "s_yy " <<  SYSTEM.STRESS_TENSORS.Y/GPa << endl;
 		fileb_labeled << "s_zz " <<  SYSTEM.STRESS_TENSORS.Z/GPa << endl;
-		
+		}
 	}
 	else if (CONTROLS.FIT_STRESS_ALL)
 	{
 		// Check if we need to exclude some tensor data from the A and b text files.
-		if( N >= CONTROLS.NSTRESS)
-			return ;
+		if( N < CONTROLS.NSTRESS)
+                {
 						
 		// Output A.txt
 			
@@ -382,14 +382,13 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		fileb_labeled << "s_zx " << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
 		fileb_labeled << "s_zy " << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
 		fileb_labeled << "s_zz " << SYSTEM.STRESS_TENSORS_Z.Z/GPa << endl;
-		
+		}
 	}
 	if(CONTROLS.FIT_ENER)
 	{
 		// Check if we need to exclude some energy data from the A and b text files.
-		if(N >= CONTROLS.NENER)
-			return ;
-		
+		if(N < CONTROLS.NENER)
+		{
 		// Output A.txt 
 			
 		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
@@ -418,30 +417,30 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		fileb                  << SYSTEM.QM_POT_ENER << endl;
 		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;
 		data_count += 3 ;
-		
+		}
 	}
 	else if(CONTROLS.FIT_ENER_PER_ATOM)
 	{
 		// Check if we need to exclude some energy data from the A and b text files.
-		if(N >= CONTROLS.NENER)
-			return ;
-		
-		// Output A.txt 
-			
-		for(int a=0; a<ATOM_ENERGIES.size(); a++)
+		if(N < CONTROLS.NENER)
 		{
-			for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
-				fileA << ATOM_ENERGIES[a][n] << " ";
-			add_col_of_ones("ENERGY", DO_ENER, fileA);
-			fileA << endl;
-
-			// Output b.txt stuff
-				
-			fileb                  << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
-			data_count++ ;
+			// Output A.txt 
 			
-			fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
-		}
+			for(int a=0; a<ATOM_ENERGIES.size(); a++)
+			{
+				for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+					fileA << ATOM_ENERGIES[a][n] << " ";
+				add_col_of_ones("ENERGY", DO_ENER, fileA);
+				fileA << endl;
+
+				// Output b.txt stuff
+				
+				fileb                  << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
+				data_count++ ;
+			
+				fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
+			}
+                }
 	}
 	fileA.flush() ;
 	fileb.flush() ;
@@ -537,6 +536,7 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 		system("rm b.[0-9]*.txt");
 		system("cat b-labeled.[0-9]*.txt > b-labeled.txt");
 		system("rm b-labeled.[0-9]*.txt");
+
 		if ( ! SPLIT_FILES ) 
 		{
 			// Serialize into a single A

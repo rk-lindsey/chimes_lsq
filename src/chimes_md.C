@@ -94,6 +94,9 @@ WRITE_TRAJ BAD_CONFIGS_1("XYZ","BAD_1"); // Configs where r_ij < r_cut,in
 WRITE_TRAJ BAD_CONFIGS_2("XYZ","BAD_2"); // Configs where r_ij < r_cut,in +d_penalty
 
 // Variables that are defined locally for house_md which need to be global for LAMMPS linking
+
+CLUSTER_LIST TRIPS;                   // Holds all 3-body parameters
+CLUSTER_LIST QUADS;                   // Holds all 4-body parameters
  
 #if defined(USE_MPI) && defined(LINK_LAMMPS)
 
@@ -106,15 +109,15 @@ WRITE_TRAJ BAD_CONFIGS_2("XYZ","BAD_2"); // Configs where r_ij < r_cut,in +d_pen
 	map<string,int> PAIR_MAP;		// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
   	vector<int> INT_PAIR_MAP ;		
 	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
-	map<string,int>& TRIAD_MAP;		// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
-	map<int,string>& TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
-	map<string,int>& QUAD_MAP;		// Input is 6 of any ATOM_PAIRS.PRPR_NM pairs, output is a quadruplet type index
-	map<int,string>& QUAD_MAP_REVERSE;	// Input/output is the reverse of QUAD_MAP
+	//map<string,int>& TRIAD_MAP;		// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
+	//map<int,string>& TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
+	//map<string,int>& QUAD_MAP;		// Input is 6 of any ATOM_PAIRS.PRPR_NM pairs, output is a quadruplet type index
+	//map<int,string>& QUAD_MAP_REVERSE;	// Input/output is the reverse of QUAD_MAP
 	
 	vector<PAIR_FF> FF_2BODY;		// Holds all 2-body parameters
 
 	NEIGHBORS NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
-	
+
 #endif
 	
 	
@@ -178,8 +181,8 @@ int main(int argc, char* argv[])
 
   vector<PAIR_FF> FF_2BODY;		// Holds all 2-body parameters
 
-  CLUSTER_LIST TRIPS;			// Holds all 3-body parameters
-  CLUSTER_LIST QUADS;      		// Holds all 4-body parameters
+  //CLUSTER_LIST TRIPS;			// Holds all 3-body parameters
+  //CLUSTER_LIST QUADS;      		// Holds all 4-body parameters
 		
   // Define the mapping variables that let us figure out which FF params to use for a given pair/triplet of pairs
 		
@@ -1567,7 +1570,7 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 		
 		// Now we need to build the ghost atoms/neighbor lists
 		
-		build_layers(SYS, CONTROLS) ;
+		SYS.build_layers(CONTROLS.N_LAYERS) ;
 
 		SYS.WRAPDIM.X = SYS.BOXDIM.X * (2*CONTROLS.N_LAYERS + 1);
 		SYS.WRAPDIM.Y = SYS.BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1);
@@ -2105,6 +2108,8 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  }
 				 	
 		  PARAMFILE >> FF_2BODY[i].S_DELTA;
+		  
+		  FF_2BODY[i].KILLLEN = FF_2BODY[i].S_DELTA; // Killlen is/can only be used when ff type is cheby
 				
 		  if((N_PLOTS == 0) &&
 			  (  FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.X
@@ -2672,7 +2677,7 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 	 if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE)
 		cout << "...cheby lambda";
 	 if(FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
-		cout << "...penalty dist...penalty scaling...cubic scaling";
+		cout << "...penalty dist...penalty scaling...cubic scaling...killlen";
 	 cout << endl;
 				
 	 cout << "		" << FF_2BODY[i].PRPR_NM << " ";
@@ -2689,7 +2694,9 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 		if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE )
 		  cout << FF_2BODY[i].LAMBDA << " ";
 		cout << FF_2BODY[i].PENALTY_DIST << " " << scientific << FF_2BODY[i].PENALTY_SCALE<< " ";
-		cout << FF_2BODY[i].CUBIC_SCALE;
+		cout << FF_2BODY[i].CUBIC_SCALE << " ";
+		
+		cout << FF_2BODY[i].KILLLEN;
 	 }
 		
 	 cout << endl;

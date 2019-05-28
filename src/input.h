@@ -9,25 +9,21 @@ using namespace std;
 #include "util.h"
 
 
-class InputListing {
+class InputListing 
+{
 	// Provides safe access to input lines and tokens.
-	vector< vector< string> > list ;	// Entire contents of the infile - [lines]["words" ("tokens")]
-public:
-	// Access a particular token in the InputListing.
-	string operator()(int i, int j) ;
 
-	// Access a vector of tokens for a particular line.
-	vector<string> &operator()(int i) ;
+	vector< vector< string> > list;	// Entire contents of the infile - [lines]["words" ("tokens")]
 
-	// Add a vector of tokens to the InputListing.
-	void push_back(vector<string> &item) ;
-
-  // Return the number of lines.
-	int size() ;
-
-  // Return the number of tokens for a particular line.	
-	int size(int i) ;
-} ;
+	public:
+	
+	string operator()(int i, int j);	// Access a particular token in the InputListing.	
+	vector<string> &operator()(int i);	// Access a vector of tokens for a particular line.
+	void push_back(vector<string> &item);	// Add a vector of tokens to the InputListing.
+  
+	int size();				// Return the number of lines.
+	int size(int i);			// Return the number of tokens for a particular line.	
+};
 
 class INPUT
 {
@@ -143,6 +139,7 @@ class INPUT
 		void PARSE_CONTROLS_TIMESTP(JOB_CONTROL & CONTROLS);
 		void PARSE_CONTROLS_N_MDSTP(JOB_CONTROL & CONTROLS);
 		void PARSE_CONTROLS_PENTHRS(JOB_CONTROL & CONTROLS);
+		void PARSE_CONTROLS_KILLLEN(JOB_CONTROL & CONTROLS);
 		void PARSE_CONTROLS_NLAYERS(JOB_CONTROL & CONTROLS);
 		void PARSE_CONTROLS_USENEIG(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
 		void PARSE_CONTROLS_PRMFILE(JOB_CONTROL & CONTROLS);

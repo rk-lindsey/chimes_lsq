@@ -105,8 +105,9 @@ def main():
     
     test_suite_run = False
 
-        # Then this run is being used for the test suite... 
-        # print out parameters without any fanciness so tolerances can be checked  
+    # Then this run is being used for the test suite... 
+    # print out parameters without any fanciness so tolerances can be checked  
+    
     if ( DO_WEIGHTING and not split_files ):
         WEIGHTS= numpy.genfromtxt(weights_file,dtype='float')
 
@@ -157,7 +158,7 @@ def main():
     #A=zeros((nlines,np))
     #b=zeros((nlines))
 
-    if DO_WEIGHTING:
+    if DO_WEIGHTING and not split_files:
         if ( WEIGHTS.shape[0] != nlines ):
             print "Wrong number of lines in WEIGHTS file"
             exit(1)
@@ -169,7 +170,7 @@ def main():
     weightedA = None
     weightedb = None
 
-    if DO_WEIGHTING:
+    if DO_WEIGHTING and not split_files:
 
         # This way requires too much memory for long A-mat's
         # to avoid a memory error, we will do it the slow way instead:
@@ -307,6 +308,9 @@ def main():
         nvars = np
 
     elif algorithm == 'dlars' or algorithm == 'dlasso' :
+    	
+	
+    
         x,y = fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize)
         np = count_nonzero_vars(x)
         nvars = np

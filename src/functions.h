@@ -84,6 +84,8 @@ extern string FULL_FILE_3B;	// The 4D PES for 3B FF
 extern string SCAN_FILE_3B;	// The 2D PES scans for 3B
 extern string SCAN_FILE_2B;	// The 2D PES scans for 2B
 
+extern vector<double>  LMP_CHARGE;
+
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  
 extern int NPROCS;		// Number of processors
@@ -169,12 +171,13 @@ public:
   
   double PENALTY_THRESH;	// [0,1]; If a penalty potential more than PENALTY_THRESH*<current per-atom e_cons value> is produced, kill the simulation... it's a runaway
   double IO_ECONS_VAL;		// The conserved quantity output to screen
+  bool USE_KILL_LEN;		// If true, and if a cheby type interaction, will kill the simulation if pair distances below FF_2BODY[i].KILLLEN are found
 	
   // "Output control" 
 
   int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
   string TRAJ_FORMAT;		// .gen, .xyzf, or .lammps (currently)
-	bool   SPLIT_FILES ;  // If TRUE, do not concatenate A matrix files for LSQ.
+  bool   SPLIT_FILES ;  	// If TRUE, do not concatenate A matrix files for LSQ.
   int    FREQ_BACKUP;       	// How often to write backup files for restart.
   bool   PRINT_VELOC;		// If true, write out the velocities 
   bool   RESTART;          	// If true, read a restart file.
@@ -265,10 +268,12 @@ JOB_CONTROL(): FIT_COUL(false),
 			SPLIT_FILES  = false ;
 			TOT_ALL_PARAMS = 0 ;
 		
+			USE_KILL_LEN = false;
 			//IO_ECONS_VAL = 0.0;
 		
 			FCUT_LINE = "CUBIC";
 			FIT_ENER_EVER = false ;
+			
 
 			COMPARE_FORCE     = false;	// is this variable really necessary for LSQ?
 			CALL_EWALD        = false;
@@ -625,7 +630,7 @@ inline int FRAME::get_atomtype_idx(int atom)
 	#ifndef LINK_LAMMPS
   		return(ATOMTYPE_IDX[atom]);
 	#else
-  		ATOMTYPE_IDX[a1]-1;
+  		return(ATOMTYPE_IDX[atom]-1);
 	#endif
 }
 

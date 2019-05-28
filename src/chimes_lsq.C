@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 	// Job parameters: Declare and set defaults
 	//
 	//////////////////////////////////////////////////
-
+	
 	if ( argc != 2 )
 		EXIT_MSG("Usage: chimes_lsq input_file > <output_file") ;
 			
