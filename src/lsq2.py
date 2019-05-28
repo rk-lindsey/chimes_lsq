@@ -32,10 +32,11 @@ def main():
     parser.add_argument("--normalize", type=str2bool, default=False, help='Normalize DLARS calculation')
     parser.add_argument("--read_output", type=str2bool, default=False, help='Read output from previous DLARS run')
     parser.add_argument("--restart", type=str2bool, default=False, help='Use DOWLQN restart file')
-    parser.add_argument("--split_files", type=str2bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
+    parser.add_argument("--split_files",    type=str2bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
     parser.add_argument("--test_suite", type=str2bool, default=False,help='output for test suite')
     parser.add_argument("--tol", type=float, default=1.0e-05, help='OWLQN or DOWLQN tolerance')
     parser.add_argument("--weights", default="None",help='weight file')
+    parser.add_argument("--active", default=False, help='is this a DLARS/DLASSO run from the active learning driver?')
 
     args        = parser.parse_args()
 
@@ -73,6 +74,8 @@ def main():
         DO_WEIGHTING = False 
     else:
         DO_WEIGHTING = True
+	
+    is_active = args.active
 
     # Algorithms requiring sklearn.
     sk_algos = ["lasso", "ridge", "lassolars", "lars", "lasso_split"] ;
@@ -123,7 +126,15 @@ def main():
     #################################
 
     # Use genfromtxt to avoid parsing large files.
-    if ( (not split_files) and (not read_output) ) :
+    
+    if (is_active and not split_files): # Then this is an AL driver run with dlars/dlasso ... we do NOT split A-matrix
+    
+        A      = numpy.zeros((1,1),dtype=float)
+        b      = numpy.genfromtxt(bfile, dtype='float') 
+	np     = "undefined"
+	nlines = b.shape[0]
+
+    elif ( (not split_files) and (not read_output) ) :
         A = numpy.genfromtxt(Afile, dtype='float')
         nlines = A.shape[0] 
         np = A.shape[1] 
@@ -170,7 +181,7 @@ def main():
     weightedA = None
     weightedb = None
 
-    if DO_WEIGHTING and not split_files:
+    if DO_WEIGHTING and not split_files and not is_active:
 
         # This way requires too much memory for long A-mat's
         # to avoid a memory error, we will do it the slow way instead:
@@ -308,10 +319,8 @@ def main():
         nvars = np
 
     elif algorithm == 'dlars' or algorithm == 'dlasso' :
-    	
-	
-    
-        x,y = fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize)
+
+        x,y = fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize, Afile, bfile, is_active)
         np = count_nonzero_vars(x)
         nvars = np
         
@@ -321,7 +330,8 @@ def main():
         exit(1)
 
     # If split_files, A is not read in.        
-    if ( (not split_files) and (not read_output) ) :
+    # This conditional should really be set by the algorithm, since many set  y themselves...    
+    if ( (not split_files) and (not read_output) and (not is_active) ) :
         y=dot(A,x)
         
     Z=0.0
@@ -832,10 +842,11 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
         sys.exit(1)
 
 
-def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output,
-              weights_file, normalize):
-## Use the Distributed LARS/LASSO fitting algorithm.  Returns both the solution x and
-## the estimated force vector A * x, which is read from Ax.txt.    
+def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize, Afile, bfile, is_active):
+
+    # Use the Distributed LARS/LASSO fitting algorithm.  Returns both the solution x and
+    # the estimated force vector A * x, which is read from Ax.txt.    
+
     if algorithm == 'dlasso' :
         print '! DLARS code for LASSO used'
     elif algorithm == 'dlars' :
@@ -846,12 +857,32 @@ def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_outp
     print '! DLARS alpha = ' + str(alpha_val)
 
     if not read_output:
+    
+    	# Use the following if lsq2 is in a full ChIMES directory
+
         path=os.path.dirname(os.path.abspath(__file__))
         dlars_file = path[:-3] + "contrib/dlars/src/dlars"
+	
+	# Otherwise, use the following to hard-code the path:
+	
+	#dlars_file = "/my/hardcoded/path/"
+	
         exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
+	
         exepath = exepath + dlars_file
+	
         if os.path.exists(dlars_file):
-            command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha_val))
+	
+            command = None
+	        
+            if  is_active: # Then we're using the parallel driver and files are named differently
+
+		command = exepath + " " + Afile + " " + bfile + " dim.txt --lambda=" + `alpha_val`
+		normalize = True
+
+            else:
+                command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha_val))
+
             if ( split_files ) :
                 command = command + " --split_files"
             if ( algorithm == 'dlars' ):
@@ -868,6 +899,7 @@ def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_outp
                 command = command + " --normalize=n" 
                 
             command = command +  " >& dlars.log"
+	    
             print("! DLARS run: " + command + "\n")
 
             if ( os.system(command) != 0 ) :
