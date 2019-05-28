@@ -36,11 +36,11 @@ Outputs:
 
 Options:
    --algorithm=<alg>    The algorithm may be either LARS or LASSO.  LASSO always gives better answers than
-	                     LARS for a given L1 norm, but requires more iterations.
+	                LARS for a given L1 norm, but requires more iterations.
    --iterations=<num>   Sets a limit on the number of iterations allowed.
-	--lambda=<val>       Sets the value of lambda in the objective function.  By default, lambda = 0.0
-	--max_norm=<val>     Set the maximum L1 norm of the solution.  This is based on the scaled variables.
-	--normalize=<y or n> Specifies whether the A matrix and b vector are normalized prior to fitting.
+   --lambda=<val>       Sets the value of lambda in the objective function.  By default, lambda = 0.0
+   --max_norm=<val>     Set the maximum L1 norm of the solution.  This is based on the scaled variables.
+   --normalize=<y or n> Specifies whether the A matrix and b vector are normalized prior to fitting.
 	                     The default is to normalize.
     --restart=<file>    Restart from the restart.txt file specified.
     --split_files       If specified, split input files are read.  Instead of A.txt, A.0000.txt,

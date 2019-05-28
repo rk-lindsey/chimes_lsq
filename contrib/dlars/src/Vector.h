@@ -139,9 +139,26 @@ public:
 			for ( int i = 0 ; i < dim ; i++ ) {
 				test += vec[i] ;
 			}
-			if ( fabs(test) > 1.0e-06 ) {
-				cout << "Vector was not normalized" << endl ;
+			if ( fabs(test) > 1.0e-06 ) 
+			{
+			
+#ifdef WARN_ONLY
+				if ( RANK == 0 ) 
+				{
+					cout << "WARNING: vector was not normalized" << endl ;
+					cout << "Test yielded value: " << fabs(test) << endl;
+					cout << "Success criteria:   1.0e-6" << endl;
+				}
+				
+#else			
+				if ( RANK == 0 ) 
+				{
+					cout << "Error: vector was not normalized" << endl ;
+					cout << "Test yielded value: " << fabs(test) << endl;
+					cout << "Success criteria:   1.0e-6" << endl;
+				}
 				exit(1) ;
+#endif				
 			}
 		}
 	double get(int idx) const 

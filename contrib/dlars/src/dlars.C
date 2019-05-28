@@ -1,7 +1,7 @@
 /** Distributed LARS-LASSO algorithm 
 		The notation and implementation closely follows
 		B. Efron, T. Hastie, I. Johnstone, and R. Tibshirani, "Least Angle Regression",
-    The Annals of Statistics, 32, 407-499(2004).
+    		The Annals of Statistics, 32, 407-499(2004).
     Larry Fried
 
 		The X and X_A matrices are distributed.  Code works with MPI.
@@ -162,15 +162,30 @@ int main(int argc, char **argv)
 		stop_run(1) ;
 	}
 	
+	if ( RANK == 0 ) {
+		cout << " ...options read." << endl;
+	}
+	
+	
 	int nprops, ndata ;
 	
 	Matrix xmat ;
 	if ( split_files ) {
 		// Read the X matrix from multiple split files, as output by chimes_lsq
+		
+		if ( RANK == 0 ) {
+			cout << " ...reading split xmat." << endl;
+		}
+		
 		xmat.read_split_files(xname.c_str(), dname.c_str()) ;
 		nprops= xmat.dim2 ;
 		ndata = xmat.dim1 ;
 	} else {
+	
+		if ( RANK == 0 ) {
+			cout << " ...reading single xmat." << endl;
+		}
+			
 		// Read the X matrix from a single file.
 		ifstream xfile(xname) ;
 		if ( ! xfile.is_open() ) {
@@ -185,6 +200,12 @@ int main(int argc, char **argv)
 		dfile >> nprops >> ndata ;
 		xmat.read(xfile, ndata, nprops, true) ;
 	}
+	
+	if ( RANK == 0 ) {
+		cout << " ...xmat read." << endl;
+	}
+	
+	
 
 	ifstream yfile(yname) ;
 	if ( ! yfile.is_open() ) {
@@ -193,6 +214,10 @@ int main(int argc, char **argv)
 	}
 	Vector yvec ;
 	yvec.read(yfile, ndata) ;
+	
+	if ( RANK == 0 ) {
+		cout << " ...yvec read." << endl;
+	}	
 
 	if ( ! weight_file.empty() ) {
 		Vector weights ;
@@ -204,13 +229,25 @@ int main(int argc, char **argv)
 		weights.read(weight_stream, ndata) ;
 		xmat.scale_rows(weights) ;
 		yvec.scale(yvec,weights) ;
+		
+		if ( RANK == 0 ) {
+			cout << " ...weights read." << endl;
+		}			
 	}
 
 	if ( normalize ) {
 		xmat.normalize() ;
 		xmat.check_norm() ;
+		
+		if ( RANK == 0 ) {
+			cout << " ...xmat normalized." << endl;
+		}		
 		yvec.normalize() ;
 		yvec.check_norm() ;
+		
+		if ( RANK == 0 ) {
+			cout << " ...yvec normalized." << endl;
+		}			
 	}
 
 #if(0)	
