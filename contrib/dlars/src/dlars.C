@@ -219,8 +219,10 @@ int main(int argc, char **argv)
 		cout << " ...yvec read." << endl;
 	}	
 
+	Vector weights ;
+
 	if ( ! weight_file.empty() ) {
-		Vector weights ;
+		
 		ifstream weight_stream(weight_file) ;
 		if ( ! weight_stream.is_open() ) {
 			if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
@@ -330,7 +332,8 @@ int main(int argc, char **argv)
 		time1 = std::chrono::system_clock::now() ;
 	}
 
-	if ( RANK == 0 ) {
+	if ( RANK == 0 ) 
+	{
 		cout.precision(12) ;
 		cout << "Final values:" << endl ;
 		cout << "Beta: " << endl ;
@@ -346,25 +349,35 @@ int main(int argc, char **argv)
 
 	if ( RANK == 0 ) cout << "Sq Error " << lars.sq_error() << endl ;
 
-	// Print out the unscaled coefficients to X.txt.
-	if ( RANK == 0 ) {
+	
+	if ( RANK == 0 ) 
+	{
+		// Print out the unscaled coefficients to X.txt.
+		
 		ofstream xtxt("x.txt") ;
 		xtxt.precision(12) ;
 		xtxt << scientific ;
-		if ( ! xtxt.is_open() ) {
+		if ( ! xtxt.is_open() ) 
+		{
 			if ( RANK == 0 ) cout << "Error: could not open x.txt" << endl ;
 			stop_run(1) ;
 		}
 		lars.print_unscaled(xtxt) ;
 
+		// Print out the predicted values based on unscaled coefficients
+
 		ofstream Axfile("Ax.txt") ;
 		Axfile.precision(12) ;
 		Axfile << scientific ;
-		if ( ! Axfile.is_open() ) {
+		if ( ! Axfile.is_open() ) 
+		{
 			if ( RANK == 0 ) cout << "Error: could not open Ax.txt" << endl ;
 			stop_run(1) ;
 		}
-		lars.print_unshifted_mu(Axfile) ;
+		if ( ! weight_file.empty() )
+			lars.print_unshifted_mu(Axfile, weights) ;
+		else
+			lars.print_unshifted_mu(Axfile) ;
 	}
 	
 #ifdef VERBOSE

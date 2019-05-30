@@ -726,14 +726,25 @@ public:
 	
 	void print_unshifted_mu(ostream &out)
 	// Print the given prediction in unscaled units.
-		{
-			if ( RANK == 0 ) {
-				//out << "Y constant offset = " << offset << endl ;
-				for ( int j = 0 ; j < ndata ; j++ ) {
-					out << mu.get(j) + y.shift << endl ;
-				}
+	{
+		if ( RANK == 0 ) {
+			//out << "Y constant offset = " << offset << endl ;
+			for ( int j = 0 ; j < ndata ; j++ ) {
+				out << mu.get(j) + y.shift << endl ;
 			}
 		}
+	}
+	
+	void print_unshifted_mu(ostream &out, Vector &weights)
+	// Print the given prediction in unscaled units.
+	{
+		if ( RANK == 0 ) {
+			//out << "Y constant offset = " << offset << endl ;
+			for ( int j = 0 ; j < ndata ; j++ ) {
+				out << (mu.get(j) + y.shift)/weights.get(j) << endl ;
+			}
+		}
+	}	
 
 	void print_error(ostream &out)
 	// Print the current fitting error and related parameters.
