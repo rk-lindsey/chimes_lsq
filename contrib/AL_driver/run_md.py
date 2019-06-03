@@ -1,6 +1,6 @@
 # Global (python) modules
 
-import glob
+import glob # Warning: glob is unserted... set my_list = sorted(glob.glob(<str>)) if sorting needed
 import os
 
 # Local modules

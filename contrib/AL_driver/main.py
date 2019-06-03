@@ -5,7 +5,6 @@ import sys
 
 # Local modules
 
-import config  # User-specified "global" vars
 import helpers
 import gen_ff
 import run_md
@@ -13,6 +12,12 @@ import cluster
 import gen_selections
 import vasp_driver
 import restart
+
+# Allow config file to be read from local directory
+
+local_path = os.path.normpath(helpers.run_bash_cmnd("pwd").rstrip())
+sys.path.append(local_path)
+import config  # User-specified "global" vars
 
 
 def main(args):
@@ -26,6 +31,11 @@ def main(args):
 	Usage: unbuffer python ../PYTHON_DRIVER/main.py 0 1 2 | tee driver.log 
 
 	Notes: 
+
+	       - Run location is specified in the config file (WORKING_DIR), NOT the 
+	
+	       - This tool works most effectively when run with screen during remote runs
+	         (screen allows the session to be detached/reattached)	
 	
 	       - Build documentation with: ./build_docs.sh 
 	         ...This will create .html files in the doc directory that can be opened
@@ -36,7 +46,9 @@ def main(args):
 		 
 	       - Consider A-mat load balancing: some frames can be much smaller than others
 	              
-	WARNING: Ensure all queued jobs have ended or been killed before restarting.      
+	WARNING: Assumes lsq2.py is using the ***hardcoded*** DLARS path
+	
+	WARNING: Ensure all queued jobs have ended or been killed before restarting      
 
 	WARNING: FIRST/FIRSTALL untested
 
@@ -52,11 +64,18 @@ def main(args):
 		 
 	To Do: 
 	
+	       - Add ability to do full-frame ALC only (no clustering) ... this would require
+		 either the ability to start at ALC-1, or the ability to run MD for ALC-0
+	
+	       - Add a utility to check/fix data types set in config
+	
+	       - Create support for stress inclusion/weighting	       
+	       
+	       - Introduce a test suite	
+	
 	       - Create support for restarted DLARS/DLASSO jobs
 	       
 	       - Create support for distributed DLARS/DLASSO jobs
-	       
-	       - Create support for stress inclusion/weighting	       
 	       	
 	       - Consider A-mat load balancing: some frames can be much smaller than others	
 	       
@@ -76,7 +95,17 @@ def main(args):
 	THIS_CASE  = 0
 	THIS_INDEP = 0
 	EMAIL_ADD  = '' 
-
+	
+	if os.path.normpath(config.WORKING_DIR) != local_path:
+	
+		print "Error: this script was not run from config.WORKING_DIR!"
+		print "Exiting."
+		
+		exit()
+	
+	print "The following has been set as the working directory:"
+	print '\t', config.WORKING_DIR
+	print "The ALC-X contents of this directory will be overwritten."
 
 	################################
 	# Pre-process user specified variables
@@ -89,7 +118,7 @@ def main(args):
 
 	config.VASP_POSTPRC   = config.HPC_PYTHON + " " + config.VASP_POSTPRC
 	
-	if hasattr(config, 'EMAIL_ADD'):
+	if config.EMAIL_ADD:
 		EMAIL_ADD = config.EMAIL_ADD	
 
 	################################
@@ -165,7 +194,9 @@ def main(args):
 						prev_gen_path      = config.ALC0_FILES,
 						job_email          = config.HPC_EMAIL,
 						job_ppn            = str(config.HPC_PPN),
-						job_walltime       = "1",			
+						job_nodes          = config.CHIMES_BUILD_NODES,
+						job_walltime       = config.CHIMES_BUILD_TIME,	
+						job_queue          = config.CHIMES_BUILD_QUEUE,		
 						job_account        = config.HPC_ACCOUNT, 
 						job_system         = config.HPC_SYSTEM,
 						job_executable     = config.CHIMES_LSQ)
@@ -186,10 +217,11 @@ def main(args):
 						weights_energy = config.WEIGHTS_ENER,
 						regression_alg = config.REGRESS_ALG,
 						regression_var = config.REGRESS_VAR,
-						job_email          = config.HPC_EMAIL,
+						job_email      = config.HPC_EMAIL,
 						job_ppn        = str(config.HPC_PPN),
-						job_nodes      = config.REGRESS_NODES,
-						job_walltime   = "1",					
+						job_nodes      = config.CHIMES_SOLVE_NODES,
+						job_walltime   = config.CHIMES_SOLVE_TIME,	
+						job_queue      = config.CHIMES_SOLVE_QUEUE,					
 						job_account    = config.HPC_ACCOUNT, 
 						job_system     = config.HPC_SYSTEM,
 						job_executable = config.CHIMES_SOLVER)	
@@ -305,7 +337,8 @@ def main(args):
 						nsel     = config.MEM_NSEL, # Number of selections to make    
 						nsweep   = config.MEM_CYCL, # Number of MC sqeeps	      
 						nbins    = config.MEM_BINS, # Number of histogram bins  	
-						ecut     = config.MEM_ECUT) # Maximum energy to consider	
+						ecut     = config.MEM_ECUT, # Maximum energy to consider
+						seed     = config.SEED    ) # Seed for random number generator	
 			
 				gen_selections.populate_repo(THIS_ALC)
 
@@ -348,9 +381,9 @@ def main(args):
 						job_email      = config.HPC_EMAIL,
 						job_nodes      = config.VASP_NODES,
 						job_ppn        = config.HPC_PPN,
-						job_walltime   = config.VASP_WALLT,
+						job_walltime   = config.VASP_TIME,
 						job_queue      = config.VASP_QUEUE,
-						job_account    = "pbronze",
+						job_account    = config.HPC_ACCOUNT, 
 						job_system     = config.HPC_SYSTEM)
 						# Not using this option anymore:
 						#traj_list      = config.ALC0_FILES + "/traj_list.dat", # Has a temperature for each file ... expected as integer
@@ -434,7 +467,9 @@ def main(args):
 					prev_vasp_20_path  = vasp_20F_path,
 					job_email          = config.HPC_EMAIL,
 					job_ppn            = str(config.HPC_PPN),
-					job_walltime       = "1",			
+					job_nodes          = config.CHIMES_BUILD_NODES,
+					job_walltime       = config.CHIMES_BUILD_TIME,	
+					job_queue          = config.CHIMES_BUILD_QUEUE,						
 					job_account        = config.HPC_ACCOUNT, 
 					job_system         = config.HPC_SYSTEM,
 					job_executable     = config.CHIMES_LSQ)
@@ -457,8 +492,9 @@ def main(args):
 					regression_var = config.REGRESS_VAR,	
 					job_email      = config.HPC_EMAIL,					
 					job_ppn        = str(config.HPC_PPN),
-					job_nodes      = config.REGRESS_NODES,					
-					job_walltime   = "1",					
+					job_nodes      = config.CHIMES_SOLVE_NODES,
+					job_walltime   = config.CHIMES_SOLVE_TIME,	
+					job_queue      = config.CHIMES_SOLVE_QUEUE,								
 					job_account    = config.HPC_ACCOUNT, 
 					job_system     = config.HPC_SYSTEM,
 					job_executable = config.CHIMES_SOLVER)	
@@ -498,12 +534,12 @@ def main(args):
 						penalty_pref   = 1.0E6,		
 						penalty_dist   = 0.02, 		
 						job_name       = "ALC-"+ str(THIS_ALC) +"-md-c" + str(THIS_CASE) +"-i" + str(THIS_INDEP),
-						job_email      = config.HPC_EMAIL,
-						job_nodes      = 8,	   	 
-						job_ppn        = 36,	   	 
-						job_walltime   = 1,	   	 
-						job_queue      = "pdebug", 	 
-						job_account    = "pbronze",	 
+						job_email      = config.HPC_EMAIL,	   	 
+						job_ppn        = config.HPC_PPN,	   	 
+						job_nodes      = config.CHIMES_MD_NODES,
+						job_walltime   = config.CHIMES_MD_TIME,      
+						job_queue      = config.CHIMES_MD_QUEUE,      
+						job_account    = config.HPC_ACCOUNT, 
 						job_executable = config.CHIMES_MD,	 
 						job_system     = "slurm",  	 
 						job_file       = "run.cmd")
@@ -531,8 +567,8 @@ def main(args):
 						"C3 O2 2(C-C) 2(O-C)",
 						basefile_dir   = config.CHIMES_MDFILES, 
 						driver_dir     = config.DRIVER_DIR,
-						penalty_pref   = 1.0E6,		
-						penalty_dist   = 0.02, 		
+						penalty_pref   = config.CHIMES_PEN_PREFAC,	  
+						penalty_dist   = config.CHIMES_PEN_DIST,		  
 						molanal_dir    = config.CHIMES_MOLANAL, 
 						local_python   = config.HPC_PYTHON, 	
 						do_cluster     = config.DO_CLUSTER,	
@@ -592,8 +628,8 @@ def main(args):
 						driver_dir     = config.DRIVER_DIR,
 						job_email      = config.HPC_EMAIL,
 						job_ppn        = str(config.HPC_PPN),
-						job_queue      = "pbatch",
-						job_walltime   = "4",					
+						job_queue      = config.CALC_REPO_ENER_QUEUE,
+						job_walltime   = str(config.CALC_REPO_ENER_TIME),				  
 						job_account    = config.HPC_ACCOUNT, 
 						job_system     = config.HPC_SYSTEM,
 						job_executable = config.CHIMES_MD)	
@@ -663,9 +699,9 @@ def main(args):
 							job_email      = config.HPC_EMAIL,
 							job_nodes      = config.VASP_NODES,
 							job_ppn        = config.HPC_PPN,
-							job_walltime   = config.VASP_WALLT,
+							job_walltime   = config.VASP_TIME,
 							job_queue      = config.VASP_QUEUE,
-							job_account    = "pbronze",
+							job_account    = config.HPC_ACCOUNT, 
 							job_system     = config.HPC_SYSTEM)
 							
 					active_jobs += active_job

@@ -1,6 +1,6 @@
 # Global (python) modules
 
-import glob
+import glob # Warning: glob is unserted... set my_list = sorted(glob.glob(<str>)) if sorting needed
 import os
 import sys
 import argparse
@@ -70,7 +70,7 @@ def populate_repo(my_ALC):
 
 	helpers.run_bash_cmnd("rm -f ../CENTRAL_REPO/full_repo.xyzlist")
 
-	helpers.cat_specific("../CENTRAL_REPO/full_repo.xyzlist", glob.glob("../CENTRAL_REPO/*.all_selections.xyzlist"))
+	helpers.cat_specific("../CENTRAL_REPO/full_repo.xyzlist", sorted(glob.glob("../CENTRAL_REPO/*.all_selections.xyzlist")))
 	
 	os.chdir(currdir)
 	
@@ -219,8 +219,8 @@ def gen_subset(**kwargs): # time python gen_subset.py  all.energies_normed $SELE
 	# 0. Set up an argument parser
 	################################	
 	
-	default_keys   = [""]*6
-	default_values = [""]*6        
+	default_keys   = [""]*7
+	default_values = [""]*7        
 	
 	# Cluster specific controls
 	
@@ -230,6 +230,7 @@ def gen_subset(**kwargs): # time python gen_subset.py  all.energies_normed $SELE
 	default_keys[3 ] = "nbins"	 ; default_values[3 ] = '20'		      # Number of histogram bins	 
 	default_keys[4 ] = "ecut"	 ; default_values[4 ] = '1.0E10'	      # Maximum energy to consider	 
 	default_keys[5 ] = "repo"	 ; default_values[5 ] = ''		      # Location of central repo energies
+	default_keys[6 ] = "seed"	 ; default_values[6 ] = 1		      # Seed for random number generator
 
 		
 	args = dict(zip(default_keys, default_values))
@@ -393,7 +394,7 @@ def gen_subset(**kwargs): # time python gen_subset.py  all.energies_normed $SELE
 	# Generate the initial sub-selection
 	########################
 	
-	random.seed(1)
+	random.seed(args["seed"])
 	
 	# Step 0: Combine the new (ENER) and old (REPENER) energies into REPO. If
 	#         min/max are from ENER, remove (pop off) the from REPO b/c they 

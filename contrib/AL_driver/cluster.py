@@ -1,6 +1,6 @@
 # Global (python) modules
 
-import glob
+import glob # Warning: glob is unserted... set my_list = sorted(glob.glob(<str>)) if sorting needed
 import helpers
 import sys
 import os
@@ -195,9 +195,10 @@ def list_clusters(CFG_REPO, *argv): # This is where we need to start caring abou
 	# X. Get a list of all tight species
 	################################
 	
-	ofstream = open("xyzlist.dat",'w')
+	#ofstream = open("xyzlist.dat",'w')
+	ofstream = open("tmp",'w')	# Sorting is required for reproducible runs
 	
-	repo_files = glob.glob(CFG_REPO + "/tight*.wrap*xyz")
+	repo_files = sorted(glob.glob(CFG_REPO + "/tight*.wrap*xyz"))
 	
 	for i in xrange(len(repo_files)):
 
@@ -220,15 +221,19 @@ def list_clusters(CFG_REPO, *argv): # This is where we need to start caring abou
 
 	ofstream.close()
 	
+	helpers.run_bash_cmnd_to_file("xyzlist.dat", "sort tmp")
+	helpers.run_bash_cmnd("rm -f tmp")
+	
 
 	
 	################################
 	# X. Get a list of all loose species
 	################################
 	
-	ofstream = open("ts_xyzlist.dat",'w')
+	#ofstream = open("ts_xyzlist.dat",'w')
+	ofstream = open("tmp",'w')
 
-	repo_files = glob.glob(CFG_REPO + "/ts*.wrap*xyz")
+	repo_files = sorted(glob.glob(CFG_REPO + "/ts*.wrap*xyz"))
 	
 	for i in xrange(len(repo_files)):
 	
@@ -250,6 +255,9 @@ def list_clusters(CFG_REPO, *argv): # This is where we need to start caring abou
 		ofstream.write(str(no_atoms) + " " + ' '.join(map(str,no_types)) + " " + repo_files[i] + '\n')
 
 	ofstream.close()
+	
+	helpers.run_bash_cmnd_to_file("ts_xyzlist.dat", "sort tmp")
+	helpers.run_bash_cmnd("rm -f tmp")	
 
 
 def generate_clusters(**kwargs):
@@ -318,7 +326,6 @@ def generate_clusters(**kwargs):
 	
 	# Save
 	
-	#items =  ' '.join(glob.glob("*wrap*xyz")) + " " + ' '.join(glob.glob("*wrap*lammpstrj")) + " " + ' '.join(glob.glob("*cluster*stats"))
 	items = ' '.join(glob.glob("*.wrapped.*xyz"))
 	
 	helpers.run_bash_cmnd("mv " + items + " CFG_REPO")

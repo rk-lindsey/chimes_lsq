@@ -1,6 +1,6 @@
 # Global (python) modules
 
-import glob
+import glob # Warning: glob is unserted... set my_list = sorted(glob.glob(<str>)) if sorting needed
 import os
 
 # Localmodules
@@ -293,9 +293,6 @@ def post_process(*argv, **kwargs):
 	args.update(kwargs)	
 	
 	################################
-	
-	print helpers.run_bash_cmnd("pwd")
-	print helpers.run_bash_cmnd("ls")
 
 	for i in xrange(len(args_targets)): # 20 all
 
@@ -315,8 +312,8 @@ def post_process(*argv, **kwargs):
 		outcar_list = []
 		
 		for j in xrange(args_cases):
-			
-			outcar_list += glob.glob("CASE-" + `j` + "/*.OUTCAR")
+		
+			outcar_list += sorted(glob.glob("CASE-" + `j` + "/*.OUTCAR"))
 			
 		for j in xrange(len(outcar_list)):
 
@@ -449,7 +446,7 @@ def setup_vasp(my_ALC, *argv, **kwargs):
 
 			# Generate the POSCAR files
 
-			target_files = ' '.join(glob.glob("case_" + str(my_case) + ".indep_0.traj_" + args_targets[i] + "F_#*")).split()
+			target_files = ' '.join(sorted(glob.glob("case_" + str(my_case) + ".indep_0.traj_" + args_targets[i] + "F_#*"))).split()
 
 			for j in target_files:
 

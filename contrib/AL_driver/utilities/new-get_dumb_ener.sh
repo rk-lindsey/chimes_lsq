@@ -10,8 +10,7 @@
 #	2.
 #		msub -l nodes=<#nodes>:ppn=<#procs> <this .cmd file> <parameter file> REPO
 # 		Expects only xyzlist.dat in the working directory
-	  
-#MSUB -m abe		  	  
+	  		  	  
 #MSUB -V		  
 #MSUB -o stdoutmsg	  
 
@@ -61,8 +60,8 @@ do
 		TARG=""; if [[ "$crit" == "ts" ]] ; then TARG="${crit}_"; fi
 		
 		if [ ! -e ${TARG}xyzlist.dat ] ; then
-		
-			echo "ERROR: Cannot find file ${TARG}xyzlist.dat ... skipping this loop."
+
+			echo "Warning: Cannot find file ${TARG}xyzlist.dat ... skipping this loop."
 			continue
 		fi
 
@@ -72,6 +71,15 @@ do
 		# Prepare to break the job into $NPROC separate jobs
 		
 		NJOBS=${#REPO_FILES[@]} # Number of configurations to compute energies for
+		
+		if [ $NJOBS -lt $NPROC ] ; then
+		
+			NPROC=$NJOBS
+			
+			echo "NJOBS < NPROCS ... will only use $NPROC procs."			
+		fi
+			
+		
 		JPERN=`echo " $NJOBS / $NPROC    " | bc`
 		NJOB1=`echo " $JPERN * $NPROC + 1" | bc`
 		

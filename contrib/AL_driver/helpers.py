@@ -108,7 +108,7 @@ def cat_pattern(outfilename, pattern):
 	
 	"""
 
-	files_to_cat = glob.glob(pattern)
+	files_to_cat = sorted(glob.glob(pattern))
 	
 	with open(outfilename, "wb") as ofstream:
 

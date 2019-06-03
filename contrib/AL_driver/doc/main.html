@@ -9,7 +9,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>main</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/main.py">/usr/WS2/rlindsey/ChIMES4B_SVN/contrib/AL_driver/main.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/p/lustre1/rlindsey/RC4B_RAG/11-12-18/PYTHON_DRIVER/main.py">/p/lustre1/rlindsey/RC4B_RAG/11-12-18/PYTHON_DRIVER/main.py</a></font></td></tr></table>
     <p><tt>#&nbsp;Global&nbsp;(python)&nbsp;modules</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -35,9 +35,7 @@
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-main"><strong>main</strong></a>(args)</dt><dd><tt>Code&nbsp;Author:&nbsp;Rebecca&nbsp;K&nbsp;Lindsey&nbsp;(RKL)&nbsp;-&nbsp;2019<br>
-&nbsp;<br>
-Active&nbsp;Learning&nbsp;Driver&nbsp;Main.<br>
+<td width="100%"><dl><dt><a name="-main"><strong>main</strong></a>(args)</dt><dd><tt>Active&nbsp;Learning&nbsp;Driver&nbsp;Main.<br>
 &nbsp;<br>
 Usage:&nbsp;unbuffer&nbsp;python&nbsp;../PYTHON_DRIVER/main.py&nbsp;0&nbsp;1&nbsp;2&nbsp;|&nbsp;tee&nbsp;driver.log&nbsp;<br>
 &nbsp;<br>
@@ -48,10 +46,19 @@ Notes:&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;any&nbsp;browser&nbsp;(i.e.&nbsp;firefox,&nbsp;if&nbsp;running&nbsp;on&nbsp;the&nbsp;LC)&nbsp;&nbsp;<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Second&nbsp;argument&nbsp;to&nbsp;main.py&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;cycles&nbsp;to&nbsp;run&nbsp;(i.e.&nbsp;ALC-0,&nbsp;ALC-,&nbsp;ALC-2)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;This&nbsp;must&nbsp;ALWAYS&nbsp;be&nbsp;a&nbsp;sequence&nbsp;starting&nbsp;from&nbsp;0<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Consider&nbsp;A-mat&nbsp;load&nbsp;balancing:&nbsp;some&nbsp;frames&nbsp;can&nbsp;be&nbsp;much&nbsp;smaller&nbsp;than&nbsp;others<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+To&nbsp;Do:&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Create&nbsp;support&nbsp;for&nbsp;restarted&nbsp;DLARS/DLASSO&nbsp;jobs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Create&nbsp;support&nbsp;for&nbsp;distributed&nbsp;DLARS/DLASSO&nbsp;jobs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Consider&nbsp;A-mat&nbsp;load&nbsp;balancing:&nbsp;some&nbsp;frames&nbsp;can&nbsp;be&nbsp;much&nbsp;smaller&nbsp;than&nbsp;others&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 WARNING:&nbsp;Ensure&nbsp;all&nbsp;queued&nbsp;jobs&nbsp;have&nbsp;ended&nbsp;or&nbsp;been&nbsp;killed&nbsp;before&nbsp;restarting.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 &nbsp;<br>
 WARNING:&nbsp;FIRST/FIRSTALL&nbsp;untested<br>
@@ -64,20 +71,6 @@ WARNING:&nbsp;DLARS/DLASSO&nbsp;is&nbsp;NOT&nbsp;supported&nbsp;with&nbsp;split&
 &nbsp;<br>
 WARNING:&nbsp;Per-atom&nbsp;energies&nbsp;will&nbsp;be&nbsp;incorrect&nbsp;if&nbsp;number&nbsp;of&nbsp;atoms&nbsp;for&nbsp;multiple&nbsp;types&nbsp;is&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;identical&nbsp;across&nbsp;the&nbsp;entire&nbsp;A-mat&nbsp;(i.e.&nbsp;for&nbsp;a&nbsp;CO&nbsp;system)&nbsp;...&nbsp;This&nbsp;can&nbsp;be/is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rectified&nbsp;by&nbsp;running&nbsp;additional&nbsp;AL&nbsp;cycles&nbsp;that&nbsp;extracts&nbsp;individual&nbsp;molecules<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-To&nbsp;Do:&nbsp;<br>
-&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Create&nbsp;support&nbsp;for&nbsp;restarted&nbsp;DLARS/DLASSO&nbsp;jobs<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Create&nbsp;support&nbsp;for&nbsp;distributed&nbsp;DLARS/DLASSO&nbsp;jobs<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Create&nbsp;support&nbsp;for&nbsp;stress&nbsp;inclusion/weighting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Consider&nbsp;A-mat&nbsp;load&nbsp;balancing:&nbsp;some&nbsp;frames&nbsp;can&nbsp;be&nbsp;much&nbsp;smaller&nbsp;than&nbsp;others&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Add&nbsp;an&nbsp;ability&nbsp;to&nbsp;go&nbsp;back&nbsp;and&nbsp;run&nbsp;additional&nbsp;independent&nbsp;simulations&nbsp;for&nbsp;various&nbsp;ALC's/cases<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Build&nbsp;a&nbsp;test&nbsp;suite</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rectified&nbsp;by&nbsp;running&nbsp;additional&nbsp;AL&nbsp;cycles&nbsp;that&nbsp;extracts&nbsp;individual&nbsp;molecules</tt></dd></dl>
 </td></tr></table>
 </body></html>

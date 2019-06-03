@@ -2,7 +2,7 @@
 
 import os.path
 import os
-import glob
+import glob # Warning: glob is unserted... set my_list = sorted(glob.glob(<str>)) if sorting needed
 
 # Local modules
 
@@ -386,9 +386,8 @@ def split_weights():
 	
 	# Get the number of lines in each bfile
 	
-	bfiles = glob.glob("b.*.txt")
-	bfiles.sort()
-	
+	bfiles = sorted(glob.glob("b.*.txt"))
+
 	for i in xrange(len(bfiles)):
 		
 		bfiles[i] = helpers.wc_l(bfiles[i])
@@ -410,10 +409,6 @@ def split_weights():
 		ofstream.close()
 		
 		start += bfiles[i]
-		
-	print helpers.run_bash_cmnd("ls")
-	print "-->",glob.glob("weights.*.dat")
-	print "-->",' '.join(glob.glob("weights.*.dat"))
 
 	print "weight entries: ",helpers.run_bash_cmnd("wc -l " + "weights.dat").split()[0]
 	print "weight entries: ",helpers.run_bash_cmnd("wc -l " + ' '.join(glob.glob("weights.*.dat"))).split()[0]
