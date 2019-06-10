@@ -31,7 +31,10 @@ using namespace std;
 
 // Constructor/deconstructor
 
-WRITE_TRAJ::WRITE_TRAJ(){}
+WRITE_TRAJ::WRITE_TRAJ()
+{
+	FIRST_CALL = true;
+}
 
 WRITE_TRAJ::WRITE_TRAJ(string CONTENTS_STR) // Default extension is .gen
 {
@@ -60,6 +63,7 @@ WRITE_TRAJ::~WRITE_TRAJ()
 
 void WRITE_TRAJ::INIT(string EXTENSION_STR, string CONTENTS_STR)
 {
+	FIRST_CALL = true;
 
 	SET_EXTENSION(EXTENSION_STR);	
 	SET_CONTENTS (CONTENTS_STR);
@@ -127,12 +131,14 @@ void WRITE_TRAJ::SET_CONTENTS(string CONTENTS_STR)
 		CONTENTS = TRAJ_TYPE::BAD_1;
 	else if(CONTENTS_STR == "BAD_2")
 		CONTENTS = TRAJ_TYPE::BAD_2;
+	else if(CONTENTS_STR == "BAD_3")
+		CONTENTS = TRAJ_TYPE::BAD_3;		
 	else if(CONTENTS_STR == "FORCE")
 		CONTENTS = TRAJ_TYPE::FORCE;
 	else
 	{
 		cout << "ERROR: Unknown contents type for output trajectory." << endl;
-		cout << "Allowed types are STANDARD, BAD_1, BAD_2, and FORCE." << endl;
+		cout << "Allowed types are STANDARD, BAD_1, BAD_2, BAD_3 and FORCE." << endl;
 		exit_run(0);	
 	}	
 }
@@ -149,6 +155,9 @@ void WRITE_TRAJ::SET_FILENAME()
 			break;
 		case TRAJ_TYPE::BAD_2:
 			FILENAME = "traj_bad_r.lt.rin+dp";
+			break;
+		case TRAJ_TYPE::BAD_3:
+			FILENAME = "traj_bad_r.ge.rin+dp_dftbfrq";
 			break;
 		case TRAJ_TYPE::FORCE:
 			FILENAME = "forceout";
@@ -198,8 +207,11 @@ string WRITE_TRAJ::RETURN_CONTENTS()
 		case TRAJ_TYPE::BAD_2:
 			RESULT = "BAD_2";
 			break;
+		case TRAJ_TYPE::BAD_3:
+			RESULT = "BAD_3";
+			break;			
 		case TRAJ_TYPE::FORCE:
-			RESULT = "BAD_2";
+			RESULT = "FORCE";
 			break;			
 		default:
 			RESULT = "Unknown!";		
@@ -243,8 +255,15 @@ string WRITE_TRAJ::RETURN_EXTENSION()
 void WRITE_TRAJ::PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 {
 
-  	if ( ATOMTYPS.size() == 0 ) 
+	if (FIRST_CALL)
 	{
+		FIRST_CALL = false;
+		
+		ATOMTYPS.resize(CONTROLS.NATMTYP);
+		
+		for (int i=0; i<CONTROLS.NATMTYP; i++)
+			ATOMTYPS[i] = CONTROLS.ATOMTYPES[i];
+
 		bool FOUND = false;
 		
 		for (int i=0; i<SYSTEM.ATOMS; i++) 
@@ -259,19 +278,17 @@ void WRITE_TRAJ::PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 					break;
 				}
 			}
-			
+				
 			if (!FOUND)
-				ATOMTYPS.push_back(SYSTEM.ATOMTYPE[i]);
-		}
-		
-		if (ATOMTYPS.size() != CONTROLS.NATMTYP)
-		{
-			cout << "Error in atom type counting... see WRITE_TRAJ::PRINT_FRAME function." << endl;
-			cout << "Expected: " << CONTROLS.NATMTYP << endl;
-			cout << "Got:      " << ATOMTYPS.size() << endl;
-			exit(0);
+			{
+				cout << "ERROR: Unknown atom type " << SYSTEM.ATOMTYPE[i] << endl;
+				cout << "See WRITE_TRAJ::PRINT_FRAME function." << endl;
+			
+				exit_run(0);
+			}
 		}
 	}
+
 	
 	switch (EXTENSION)
 	{

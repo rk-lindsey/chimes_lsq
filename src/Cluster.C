@@ -728,7 +728,7 @@ void CLUSTER_LIST::read_maps(ifstream& paramfile, string line)
 		index = stoi(tokens[0]);
 		cluster_pairs = tokens[1];
 
-		if (( cluster_pairs.length() != 2 * VEC[0].NPAIRS)  && (cluster_pairs.length() != 4 * VEC[0].NPAIRS) ) // allow for 2-letter element names
+		if (( cluster_pairs.length() <= 2 * VEC[0].NPAIRS)  && (cluster_pairs.length() >= 4 * VEC[0].NPAIRS) ) // allow for 2-letter element names
 		  EXIT_MSG("Incorrect cluster length: " + line);
 
 		if (RANK==0)

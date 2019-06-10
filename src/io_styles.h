@@ -27,6 +27,7 @@ enum class TRAJ_TYPE
 	STANDARD,	// Standard trajectory file
 	BAD_1,		// Configs where r_ij < r_cut,in 
 	BAD_2,		// Configs where r_ij < r_cut,in +d_penalty	
+	BAD_3,	
 	FORCE		// Special: for tracking forces
 };
 
@@ -46,6 +47,7 @@ class WRITE_TRAJ
 
 	private:
 	
+		bool		FIRST_CALL;	// If this is the first call, figure out system atom type ordering	
 		TRAJ_EXT 	EXTENSION;	// File extension
 		TRAJ_TYPE 	CONTENTS;	// File type (contents)
 		string		FILENAME;	// Name for the trajectory file

@@ -26,6 +26,7 @@ using namespace std;
 
 extern WRITE_TRAJ BAD_CONFIGS_1; // Configs where r_ij < r_cut,in 
 extern WRITE_TRAJ BAD_CONFIGS_2; // Configs where r_ij < r_cut,in +d_penalty
+extern WRITE_TRAJ BAD_CONFIGS_3; // All other configs, but only printed when (CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0)
 
 
 //////////////////////////////////////////
@@ -2014,20 +2015,16 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
   // traj file for BAD_CONFIG_1 should only contain configs where rij<rcutin
   // and BAD_CONFIG_2 should only contain configs where rcutin < rij < rcutin+dp.
   
-    if  ((BAD_CONFIG_1_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
-  	BAD_CONFIGS_1.PRINT_FRAME(CONTROLS, SYSTEM);
-   else if ((BAD_CONFIG_2_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
-	BAD_CONFIGS_2.PRINT_FRAME(CONTROLS, SYSTEM);
+  if ((RANK == 0) && CONTROLS.PRINT_BAD_CFGS)
+  {
   
-  /*
-  // PRE-CLASS
-  if  ((BAD_CONFIG_1_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
-  	PRINT_CONFIG(SYSTEM, CONTROLS,1);
-   else if ((BAD_CONFIG_2_FOUND>0) && CONTROLS.PRINT_BAD_CFGS)
-	PRINT_CONFIG(SYSTEM, CONTROLS,2);
-   */
-
-//cout << "COUNTED INTERACTIONS: " << COUNTED_INTERACTIONS << endl;	
+	if      (BAD_CONFIG_1_FOUND>0)
+  	BAD_CONFIGS_1.PRINT_FRAME(CONTROLS, SYSTEM);
+	else if (BAD_CONFIG_2_FOUND>0)
+	BAD_CONFIGS_2.PRINT_FRAME(CONTROLS, SYSTEM);
+	else if((CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0)) 
+		BAD_CONFIGS_3.PRINT_FRAME(CONTROLS, SYSTEM);
+   }
 } 
 
 

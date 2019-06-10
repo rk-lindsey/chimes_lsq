@@ -89,6 +89,7 @@ string SCAN_FILE_3B;
 string SCAN_FILE_2B;
 ofstream BAD_CONFIGS_1;	// Configs where r_ij < r_cut,in 
 ofstream BAD_CONFIGS_2;	// Configs where r_ij < r_cut,in +d_penalty
+ofstream BAD_CONFIGS_3; // All other configs, but only printed when (CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0)
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  

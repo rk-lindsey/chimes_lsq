@@ -92,6 +92,8 @@ int RANK;		// Index of current processor
 
 WRITE_TRAJ BAD_CONFIGS_1("XYZ","BAD_1"); // Configs where r_ij < r_cut,in 
 WRITE_TRAJ BAD_CONFIGS_2("XYZ","BAD_2"); // Configs where r_ij < r_cut,in +d_penalty
+WRITE_TRAJ BAD_CONFIGS_3("XYZ","BAD_3"); // All other configs, but only printed when (CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0)
+
 
 // Variables that are defined locally for house_md which need to be global for LAMMPS linking
 
@@ -1684,6 +1686,8 @@ static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NAT
 		STREAM_PARSER.str("");
 		STREAM_PARSER.clear();
 		
+		CONTROLS.ATOMTYPES.resize(NATMTYP);
+		
 		if ( NATMTYP > MAX_ATOM_TYPES ) 
 		{
 		  cout << "ERROR: TOO MANY ATOM TYPES DEFINED\n" ;
@@ -1739,6 +1743,7 @@ static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NAT
 		  STREAM_PARSER >> TEMP_STR;
 		  TMP_ATOMTYPEIDX[i] = stoi(TEMP_STR) ;
 		  STREAM_PARSER >> TMP_ATOMTYPE[i];
+		  CONTROLS.ATOMTYPES[i] = TMP_ATOMTYPE[i];
 		  if(CONTROLS.FIT_COUL)
 			 STREAM_PARSER >> TEMP_STR;
 		  else
