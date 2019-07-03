@@ -1886,10 +1886,15 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				int ntokens ;
 				ntokens = parse_space(LINE,tokens) ;
 				
+				cout << "CHECK-0: " << LINE << endl;
+				
+				for (int i=0; i<ntokens; i++)
+					cout << "CHECK-A: " << i << " " << tokens[i] << endl;
+				
 				// Determine the number of offsets (atom types)
 				SYSTEM.QM_ENERGY_OFFSET.resize(stoi(tokens[3])); 
 				
-				for (int i=0; i<stoi(tokens[3]); i++)
+				for (int i=0; i<SYSTEM.QM_ENERGY_OFFSET.size(); i++)
 				{
 					LINE = get_next_line(PARAMFILE);
 					ntokens = parse_space(LINE,tokens);
