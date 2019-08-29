@@ -11114,9 +11114,15 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 	Reporting outcome of layering for first frame ONLY: 
 	Real atoms:                   132
 	Total atoms (ghost):          3564
-	Real box dimensions:         10.650000 10.650000 10.650000
-	Total box dimensions (ghost): 31.950000 31.950000 31.950000
-
+	cell vectors (a)            10.650000 0.000000 0.000000
+	cell vectors (b)            0.000000 10.650000 0.000000
+	cell vectors (c)            0.000000 0.000000 10.650000
+	cell volume (A^3)           1207.949625
+	Extent (x,y,z)              10.650000 10.650000 10.650000
+	Layers:                     1
+	Effective cell vectors (a): 31.950000 0.000000 0.000000
+	Effective cell vectors (a): 0.000000 31.950000 0.000000
+	Effective cell vectors (a): 0.000000 0.000000 31.950000
 ...matrix setup complete: 
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...

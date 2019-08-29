@@ -7,7 +7,7 @@
 # I get strange behavior when I use intel/mvapich/mpicxx... I use intel/impi/mpiicc... check which other edits were made (Besides restart and lsq)
 
 
-LINK2LMPS=yes
+LINK2LMPS=no #yes
 LAMMPSDIR=/usr/gapps/polymers/lammps_borax/
 
 # Compiling flags

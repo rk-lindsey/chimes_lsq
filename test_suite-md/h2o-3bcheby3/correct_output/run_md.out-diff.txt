@@ -1,17 +1,109 @@
-4,7d3
-< Will read from file: run_md.in
-< Input file successfully opened.
-< Input file has been rewound.
-< Input file contents successfully stored.
-14c10
-< 	# USENEIG #: true
+37,44c37
+< 	...Updated simulation box dimensions: 
+< 		cell vectors (a)            8.6091309 0 0
+< 		cell vectors (b)            0 8.6091309 0
+< 		cell vectors (c)            0 0 8.6091309
+< 		Layers:                     1
+< 		Effective cell vectors (a): 25.8273927 0 0
+< 		Effective cell vectors (a): 0 25.8273927 0
+< 		Effective cell vectors (a): 0 0 25.8273927
 ---
-> 	# USENEIG #: true 
-25,26c21
-< 	# PRNTFRC #: true
-< 		... and will be printed every 20 frames.
+> 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+53,61c46,50
+< 	Real atoms:                 96
+< 	Total atoms (ghost):        2592
+< 	cell vectors (a)            8.6091 0.0000 0.0000
+< 	cell vectors (b)            0.0000 8.6091 0.0000
+< 	cell vectors (c)            0.0000 0.0000 8.6091
+< 	Layers:                     1
+< 	Effective cell vectors (a): 25.8274 0.0000 0.0000
+< 	Effective cell vectors (a): 0.0000 25.8274 0.0000
+< 	Effective cell vectors (a): 0.0000 0.0000 25.8274
 ---
-> 	# PRNTFRC #: true ...and will be printed every 20 frames.
-28a24,25
->    ...read complete.
+> 	Real atoms:                   96
+> 	Total atoms (ghost):          2592
+> 	Real box dimesntions:         8.6091 8.6091 8.6091
+> 	Total box dimensions (ghost): 25.8274 25.8274 25.8274
 > 
+146,147c135,136
+< 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+< 		OO 1.9390 4.3000 0.1000 MORSE 2.7000 0.1000 1.0000e+05 1.0000e+00 1.0000e-01
+---
+> 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+> 		OO 1.9390 4.3000 0.1000 MORSE 2.7000 0.1000 1.0000e+05 1.0000e+00
+160,161c149,150
+< 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+< 		HH 9.8200e-01 4.1000e+00 1.0000e-01 MORSE 1.6000e+00 1.0000e-01 1.0000e+05 1.0000e+00 1.0000e-01
+---
+> 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+> 		HH 9.8200e-01 4.1000e+00 1.0000e-01 MORSE 1.6000e+00 1.0000e-01 1.0000e+05 1.0000e+00
+174,175c163,164
+< 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+< 		OH 7.2000e-01 4.2000e+00 1.0000e-01 MORSE 1.0000e+00 1.0000e-01 1.0000e+05 1.0000e+00 1.0000e-01
+---
+> 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+> 		OH 7.2000e-01 4.2000e+00 1.0000e-01 MORSE 1.0000e+00 1.0000e-01 1.0000e+05 1.0000e+00
+1125,1128c1114,1117
+< Warning: (Step 277) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.073864769189668 1.082000000000000  20 64
+< 	...Penalty potential = 0.053840568552937
+< Warning: (Step 278) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.062228093479525 1.082000000000000  20 64
+< 	...Penalty potential = 0.772939755575808
+---
+> Warning: (Step 277) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.073864769189661 1.082000000000000  20 64
+> 	...Penalty potential = 0.053840568553074
+> Warning: (Step 278) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.062228093479517 1.082000000000000  20 64
+> 	...Penalty potential = 0.772939755576667
+1131,1132c1120,1121
+< Warning: (Step 279) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.050874031394082 1.082000000000000  20 64
+< 	...Penalty potential = 3.015564522208297
+---
+> Warning: (Step 279) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.050874031394075 1.082000000000000  20 64
+> 	...Penalty potential = 3.015564522210426
+1134,1147c1123,1136
+< Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.041300175561010 1.082000000000000  20 64
+< 	...Penalty potential = 6.741827055859043
+< Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.818547485459162 0.820000000000000  45 68
+< 	...Penalty potential = 0.000306451298691
+< Warning: (Step 281) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035417904280632 1.082000000000000  20 64
+< 	...Penalty potential = 10.107810015006020
+< Warning: (Step 281) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.815527765434951 0.820000000000000  45 68
+< 	...Penalty potential = 0.008944863583339
+< Warning: (Step 282) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.034696493914800 1.082000000000000  20 64
+< 	...Penalty potential = 10.584735113244177
+< Warning: (Step 282) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.814555425644108 0.820000000000000  45 68
+< 	...Penalty potential = 0.016139564056292
+< Warning: (Step 283) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.039355935510216 1.082000000000000  20 64
+< 	...Penalty potential = 7.754892365260840
+---
+> Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.041300175561003 1.082000000000000  20 64
+> 	...Penalty potential = 6.741827055862465
+> Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.818547485459165 0.820000000000000  45 68
+> 	...Penalty potential = 0.000306451298690
+> Warning: (Step 281) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035417904280628 1.082000000000000  20 64
+> 	...Penalty potential = 10.107810015008621
+> Warning: (Step 281) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.815527765434953 0.820000000000000  45 68
+> 	...Penalty potential = 0.008944863583330
+> Warning: (Step 282) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.034696493914799 1.082000000000000  20 64
+> 	...Penalty potential = 10.584735113244623
+> Warning: (Step 282) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.814555425644109 0.820000000000000  45 68
+> 	...Penalty potential = 0.016139564056281
+> Warning: (Step 283) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.039355935510219 1.082000000000000  20 64
+> 	...Penalty potential = 7.754892365259144
+1149,1151c1138,1140
+< 	...Penalty potential = 0.008241431789902
+< Warning: (Step 284) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.048240923630276 1.082000000000000  20 64
+< 	...Penalty potential = 3.847438337393858
+---
+> 	...Penalty potential = 0.008241431789900
+> Warning: (Step 284) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.048240923630283 1.082000000000000  20 64
+> 	...Penalty potential = 3.847438337391504
+1154,1157c1143,1146
+< Warning: (Step 285) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.059487748751753 1.082000000000000  20 64
+< 	...Penalty potential = 1.140924171639688
+< Warning: (Step 286) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.071441965448150 1.082000000000000  20 64
+< 	...Penalty potential = 0.117692621577551
+---
+> Warning: (Step 285) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.059487748751761 1.082000000000000  20 64
+> 	...Penalty potential = 1.140924171638506
+> Warning: (Step 286) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.071441965448159 1.082000000000000  20 64
+> 	...Penalty potential = 0.117692621577224

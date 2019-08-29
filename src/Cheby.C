@@ -549,34 +549,34 @@ void Cheby::map_indices_int(CLUSTER & cluster, vector<int> & atom_type_idx, vect
 
 void Cheby::Deriv_2B(A_MAT & A_MATRIX)
  // Calculate derivatives of the forces wrt the Chebyshev parameters. Stores minimum distance between a pair of atoms in minD[i].
- {
-	 XYZ RAB; 		// Replaces  Rab[3];
-	 double rlen;
-	 int vstart;
-	 static double *Tn, *Tnd;
-	 static bool called_before = false;
+{
+	XYZ RAB; 		// Replaces  Rab[3];
+	double rlen;
+	int vstart;
+	static double *Tn, *Tnd;
+	static bool called_before = false;
 
-	 double fcut; 
-	 double fcutderiv; 				
-	 double deriv;
-	 double tmp_doub; 	
+	double fcut; 
+	double fcutderiv; 				
+	double deriv;
+	double tmp_doub; 	
 
-	 double inv_vol = 1.0 / (SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z) ;
+	double inv_vol = 1.0 / SYSTEM.BOXDIM.VOL;
 
-	 if ( ! called_before ) 
-	 {
-		 called_before = true;
-		 int dim = 0;
+	if ( ! called_before ) 
+	{
+		called_before = true;
+		int dim = 0;
 
-		 for ( int i = 0; i < FF_2BODY.size(); i++ ) 
-			 if (FF_2BODY[i].SNUM > dim ) 
-				 dim = FF_2BODY[i].SNUM;	 
+		for ( int i = 0; i < FF_2BODY.size(); i++ ) 
+			if (FF_2BODY[i].SNUM > dim ) 
+				dim = FF_2BODY[i].SNUM;	 
 
-		 dim++;
-		 Tn   = new double [dim];
-		 Tnd  = new double [dim];
+		dim++;
+		Tn   = new double [dim];
+		Tnd  = new double [dim];
 
-	 }
+	}
 
 	 // Main loop for Chebyshev terms:
 
@@ -720,8 +720,8 @@ void Cheby::Deriv_2B(A_MAT & A_MATRIX)
 			A_MATRIX.STRESSES[i].YZ *= inv_vol;
 			A_MATRIX.STRESSES[i].ZZ *= inv_vol;
 		}
-		
-	}
+
+	 }
 
   return;
 }
@@ -746,7 +746,7 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 	double rlen_ij,  rlen_ik,  rlen_jk;
 	double rlen_ij_dummy, rlen_ik_dummy, rlen_jk_dummy;
 	int vstart;
-    	static int n_2b_cheby_terms, n_3b_cheby_terms;
+	static int n_2b_cheby_terms, n_3b_cheby_terms;
 	static double *Tn_ij,  *Tn_ik,  *Tn_jk;
 	static double *Tnd_ij, *Tnd_ik, *Tnd_jk;
 	static bool called_before = false;
@@ -768,7 +768,7 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 	double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
 	double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
 	
-	double inv_vol = 1.0 / (SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z) ;
+	double inv_vol = 1.0 / SYSTEM.BOXDIM.VOL;;
 
 	vector<CLUSTER> &PAIR_TRIPLETS = TRIPS.VEC ;
 
@@ -1334,7 +1334,7 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 	vector<double> x_avg(6) ;
 	vector<double> x_diff(6) ;
 
-	double inv_vol = 1.0 / ( SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z ) ;
+	double inv_vol = 1.0 / SYSTEM.BOXDIM.VOL;
 	
 	vector<bool> FORCE_IS_ZERO(6);	// replaces FORCE_IS_ZERO_IJ, FORCE_IS_ZERO_IK, FORCE_IS_ZERO_JK;
 	

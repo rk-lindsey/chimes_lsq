@@ -68,7 +68,7 @@ params.dowlqn.1.0e-04.txt: A.txt
 	mv params.dowlqn.1.0e-04.txt current_output/
 
 params.dowlqn.split.txt: A.0000.txt
-	$(PYTHON) ../../src/lsq2.py --algorithm=dowlqn --cores=$(NP) --nodes=$(NODES) --alpha=1.0e-04 --tol=1.0e-04 --memory=30 --split-files=true > params.dowlqn.split.txt
+	$(PYTHON) ../../src/lsq2.py --algorithm=dowlqn --cores=$(NP) --nodes=$(NODES) --alpha=1.0e-04 --tol=1.0e-04 --memory=30 --split_files=true > params.dowlqn.split.txt
 	mv params.dowlqn.split.txt current_output/
 
 params.dowlqn.beta.txt: A.txt

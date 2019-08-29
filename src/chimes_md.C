@@ -111,10 +111,6 @@ CLUSTER_LIST QUADS;                   // Holds all 4-body parameters
 	map<string,int> PAIR_MAP;		// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
   	vector<int> INT_PAIR_MAP ;		
 	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
-	//map<string,int>& TRIAD_MAP;		// Input is three of any ATOM_PAIRS.PRPR_NM pairs, output is a triplet type index
-	//map<int,string>& TRIAD_MAP_REVERSE;	// Input/output is the reverse of TRIAD_MAP
-	//map<string,int>& QUAD_MAP;		// Input is 6 of any ATOM_PAIRS.PRPR_NM pairs, output is a quadruplet type index
-	//map<int,string>& QUAD_MAP_REVERSE;	// Input/output is the reverse of QUAD_MAP
 	
 	vector<PAIR_FF> FF_2BODY;		// Holds all 2-body parameters
 
@@ -182,9 +178,6 @@ int main(int argc, char* argv[])
   // Data objects to hold coefficients for different force field types, and for FF printing (if requested)
 
   vector<PAIR_FF> FF_2BODY;		// Holds all 2-body parameters
-
-  //CLUSTER_LIST TRIPS;			// Holds all 3-body parameters
-  //CLUSTER_LIST QUADS;      		// Holds all 4-body parameters
 		
   // Define the mapping variables that let us figure out which FF params to use for a given pair/triplet of pairs
 		
@@ -345,11 +338,11 @@ int main(int argc, char* argv[])
   // Read input file input.xyz, where box dims are on the info line:
   ////////////////////////////////////////////////////////////
 	
-  SYSTEM.BOXDIM.X = SYSTEM.BOXDIM.Y = SYSTEM.BOXDIM.Z = 0;
-	
   if(CONTROLS.BUILD)
   {
-	 SYSTEM.BOXDIM.X = SYSTEM.BOXDIM.Y = SYSTEM.BOXDIM.Z = CONTROLS.BUILD_BOXL;
+	 SYSTEM.BOXDIM.CELL_AX = SYSTEM.BOXDIM.CELL_BY = SYSTEM.BOXDIM.CELL_CZ = CONTROLS.BUILD_BOXL;
+	 
+	 SYSTEM.BOXDIM.UPDATE_CELL();
 		
 	 // Get the coordinates for the molecule to be inserted
 		
@@ -412,7 +405,7 @@ int main(int argc, char* argv[])
 	 // Place the molecules on a staggered cubic lattice
 		
 	 int GRIDPOINTS = ceil(pow(CONTROLS.BUILD_NMOLEC,1.0/3.0)); 
-	 int GRIDSPACE  = ceil(SYSTEM.BOXDIM.X/GRIDPOINTS);
+	 int GRIDSPACE  = ceil(SYSTEM.BOXDIM.CELL_AX/GRIDPOINTS);
 		
 	 if (RANK==0)
 		cout << "	...Using " << GRIDPOINTS << " staggered gridpoints with spacing " << GRIDSPACE << "Angstr." << endl;
@@ -481,7 +474,13 @@ int main(int argc, char* argv[])
   else
   {
 	 for (int i=0; i<CONTROLS.COORD_FILE.size(); i++)
+	 {
+		 if ((i>0)&& (!SYSTEM.BOXDIM.IS_ORTHO))
+			 EXIT_MSG("ERROR: Multiple files can only be concatenated when orthorhombic cells are used.");
+		 
 		 read_coord_file(i, CONTROLS, SYSTEM, CMPR_FORCEFILE) ;
+	 }
+	 
   }
   ////////////////////////////////////////////////////////////
   // Figure out atom charges and masses, based on parameter 
@@ -547,24 +546,29 @@ FF_SETUP_1:
   ////////////////////////////////////////////////////////////	
 	
   if(CONTROLS.REAL_REPLICATES>0 )
+  {
+  	if (!SYSTEM.BOXDIM.IS_ORTHO)
+		EXIT_MSG("ERROR: Real replicates construction only implemented for orthorhombic systems.");
+  
 	 build_real_replicates(SYSTEM, CONTROLS) ;
+  }
 	
   // New layer handling: ghost atoms.. but this should be called whether or not ghost atoms are requested
   // (Required for neighbor lists, which are now ALWAYS used)
-
-
-  SYSTEM.WRAPDIM.X = SYSTEM.BOXDIM.X * (2*CONTROLS.N_LAYERS + 1);
-  SYSTEM.WRAPDIM.Y = SYSTEM.BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1);
-  SYSTEM.WRAPDIM.Z = SYSTEM.BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1);
 
   SYSTEM.build_layers(CONTROLS.N_LAYERS);
 	
   if ( (CONTROLS.N_LAYERS > 0) && (RANK == 0) )	// Then ghost atoms are used 
   {
-	 cout << "	Real atoms:                   " << SYSTEM.ATOMS     << endl;
-	 cout << "	Total atoms (ghost):          " << SYSTEM.ALL_ATOMS << endl;
-	 cout << "	Real box dimesntions:         " << SYSTEM.BOXDIM.X  << " " << SYSTEM.BOXDIM.Y  << " " << SYSTEM.BOXDIM.Z  << endl;
-	 cout << "	Total box dimensions (ghost): " << SYSTEM.WRAPDIM.X << " " << SYSTEM.WRAPDIM.Y << " " << SYSTEM.WRAPDIM.Z << endl << endl;
+	cout << "	Real atoms:                 " << SYSTEM.ATOMS     << endl;
+	cout << "	Total atoms (ghost):        " << SYSTEM.ALL_ATOMS << endl;
+	cout <<  "	cell vectors (a)            " << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_AY << " " << SYSTEM.BOXDIM.CELL_AZ << endl;
+	cout <<  "	cell vectors (b)            " << SYSTEM.BOXDIM.CELL_BX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_BZ << endl;
+	cout <<  "	cell vectors (c)            " << SYSTEM.BOXDIM.CELL_CX << " " << SYSTEM.BOXDIM.CELL_CY << " " << SYSTEM.BOXDIM.CELL_CZ << endl;
+	cout <<  "	Layers:                     " << CONTROLS.N_LAYERS << endl;
+	cout <<  "	Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_AX * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AY * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AZ * (2*CONTROLS.N_LAYERS +1) << endl;
+	cout <<  "	Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_BX * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BY * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BZ * (2*CONTROLS.N_LAYERS +1) << endl;
+	cout <<  "	Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_CX * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CY * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CZ * (2*CONTROLS.N_LAYERS +1) << endl;   
 			
 	 if(CONTROLS.WRAP_COORDS)
 	 {
@@ -587,11 +591,17 @@ FF_SETUP_1:
   // Set up the Nose-Hoover thermostat
 	
   ENSEMBLE_CONTROL.INITIALIZE(CONTROLS.ENSEMBLE, CONTROLS, SYSTEM.ATOMS);
+  
+  if((ENSEMBLE_CONTROL.STYLE== "NPT-BEREND")||(ENSEMBLE_CONTROL.STYLE== "NPT-BEREND-ANISO")||(ENSEMBLE_CONTROL.STYLE== "NPT-MTK"))
+  {
+  	if (!SYSTEM.BOXDIM.IS_ORTHO)
+		EXIT_MSG("ERROR: NPT-BEREND, NPT-BEREND-ANISO, and NPT-MTK only compatible with orthorhombic cells. Try LMP-NPT.");
+}
 
   if ( CONTROLS.RESTART ) 
 	 read_restart_params(COORDFILE, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, SYSTEM) ;
 
-  Vol = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
+  Vol = SYSTEM.BOXDIM.VOL;
 
   if ( CONTROLS.INIT_VEL ) // Use box Muller to initialize velocities
   {
@@ -665,7 +675,8 @@ FF_SETUP_2:
   // Set up the neighbor list
   ////////////////////////////////////////////////////////////
 
-  if(NEIGHBOR_LIST.USE && !CONTROLS.PLOT_PES)
+  //if(NEIGHBOR_LIST.USE && !CONTROLS.PLOT_PES)
+  if(!CONTROLS.PLOT_PES)
   {
 	 if(RANK == 0)
 		cout << "Initializing the neighbor list..." << endl;
@@ -833,7 +844,7 @@ FF_SETUP_2:
   if(CONTROLS.RESTART)
 	 FIRST_STEP = CONTROLS.STEP;
 	
-  for(CONTROLS.STEP=FIRST_STEP;CONTROLS.STEP<CONTROLS.N_MD_STEPS;CONTROLS.STEP++)	//start Big Loop here.
+  for(CONTROLS.STEP=FIRST_STEP; CONTROLS.STEP<CONTROLS.N_MD_STEPS; CONTROLS.STEP++)	//start Big Loop here.
   {
 	 ////////////////////////////////////////////////////////////
 	 // Do first half of coordinate/velocity updating
@@ -846,11 +857,7 @@ FF_SETUP_2:
 		if(CONTROLS.WRAP_COORDS)				// Wrap the coordinates:
 		{
 		 	for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-		 	{
-			 	SYSTEM.COORDS[a1].X -= floor(SYSTEM.COORDS[a1].X / SYSTEM.BOXDIM.X) * SYSTEM.BOXDIM.X;
-			 	SYSTEM.COORDS[a1].Y -= floor(SYSTEM.COORDS[a1].Y / SYSTEM.BOXDIM.Y) * SYSTEM.BOXDIM.Y;
-			 	SYSTEM.COORDS[a1].Z -= floor(SYSTEM.COORDS[a1].Z / SYSTEM.BOXDIM.Z) * SYSTEM.BOXDIM.Z;
-		 	}	
+				SYSTEM.BOXDIM.WRAP_ATOM(SYSTEM.COORDS[a1], SYSTEM.WRAP_IDX[a1], false);
 		} 
 
 		ENSEMBLE_CONTROL.UPDATE_VELOCS_HALF_1(SYSTEM, CONTROLS);// Update first half of velocity and max velocity for neighbor lists:		
@@ -1206,22 +1213,27 @@ static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBL
 	// Print out the file
 	
 	fxyz << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
-	fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.X << " ";
-	fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Y << " ";
-	fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Z << endl;
+	
+	if (SYSTEM.BOXDIM.IS_ORTHO)
+	{
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_AX << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_BY << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CZ << endl;		
+	}
+	else
+	{
+		EXIT_MSG("ERROR: Non-orthorhombic functionality not implemented for write_xyzv");
+	}
+	
+
 	
 	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
 	{
 		XYZ tmp = SYSTEM.COORDS[ia] ;
 		
 		if ( CONTROLS.WRAP_COORDS ) 	// Wrap into the primitive cell
-		{
-			
-			tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
-			tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
-			tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
-		}
-
+			SYSTEM.BOXDIM.WRAP_ATOM(tmp, SYSTEM.WRAP_IDX[ia], false);
+		
 		fxyz << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.X << " ";
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Y << " ";
@@ -1290,12 +1302,12 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 		LMPFILE << SYSTEM.ATOMS << " atoms" << endl;
 		LMPFILE << NATMTYP << " atom types" << endl << endl;
 	
-		LMPFILE << "0 " << SYSTEM.BOXDIM.X << " xlo xhi" << endl;
-		LMPFILE << "0 " << SYSTEM.BOXDIM.Y << " ylo yhi" << endl;
-		LMPFILE << "0 " << SYSTEM.BOXDIM.Z << " zlo zhi" << endl << endl;  
+		LMPFILE << "0 " << SYSTEM.BOXDIM.CELL_LX << " xlo xhi" << endl;
+		LMPFILE << "0 " << SYSTEM.BOXDIM.CELL_LY << " ylo yhi" << endl;
+		LMPFILE << "0 " << SYSTEM.BOXDIM.CELL_LZ << " zlo zhi" << endl << endl;  
 	
 		// LAMMPS allow for a triclinic simulation cell; skew parameters included here.
-		LMPFILE << "0.00000000 0.00000000 0.00000000 xy xz yz" << endl;  
+		LMPFILE << SYSTEM.BOXDIM.XY << " " << SYSTEM.BOXDIM.XZ << " " << SYSTEM.BOXDIM.YZ << " xy xz yz" << endl;  
 		LMPFILE << endl;  
 	
 		LMPFILE << "Masses" << " " << endl << endl;
@@ -1475,9 +1487,7 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 
 		SYS.ATOMS      = TOTAL_ATOMS;//nlocal;
 		
-		SYS.BOXDIM.X   = xprd;
-		SYS.BOXDIM.Y   = yprd;
-		SYS.BOXDIM.Z   = zprd;
+		SYS.BOXDIM.UNLAMMPSIFY(xprd, yprd, zprd, boxxy, boxxz, boxyz);
 		
 		SYS.ATOMTYPE    .resize(TOTAL_ATOMS);
 		SYS.COORDS      .resize(TOTAL_ATOMS);
@@ -1494,26 +1504,24 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 
 			int i=START+iter;
 
-  	      	SYS.CHARGES[i] = LMP_CHARGE[type[iter]-1];
+  	      		SYS.CHARGES[i] = LMP_CHARGE[type[iter]-1];
 		
 			SYS.COORDS[i].X = x[iter][0];
 			SYS.COORDS[i].Y = x[iter][1];
 			SYS.COORDS[i].Z = x[iter][2];
 		  
-  	      	SYS.MASS[i] = mass[type[iter]];
+  	      		SYS.MASS[i] = mass[type[iter]];
 	  
 			f[iter][0] = 0;
 			f[iter][1] = 0;
 			f[iter][2] = 0;
 	  
 			SYS.ATOMTYPE_IDX[i] = type[iter];
-		    SYS.ATOMTYPE    [i] = TMP_ATOMTYPE[type[iter]-1];
+			SYS.ATOMTYPE    [i] = TMP_ATOMTYPE[type[iter]-1];
 		  
 			// Wrap the coordinates
 			
-  	   	   	SYS.COORDS[i].X -= floor(SYS.COORDS[i].X/SYS.BOXDIM.X)*SYS.BOXDIM.X;
-			SYS.COORDS[i].Y -= floor(SYS.COORDS[i].Y/SYS.BOXDIM.Y)*SYS.BOXDIM.Y;
-			SYS.COORDS[i].Z -= floor(SYS.COORDS[i].Z/SYS.BOXDIM.Z)*SYS.BOXDIM.Z;
+  	   	   	SYS.BOXDIM.WRAP_ATOM(SYS.COORDS[i], SYS.WRAP_IDX[i], true);
 			
 			// Prepare forces
 			
@@ -1573,10 +1581,6 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 		// Now we need to build the ghost atoms/neighbor lists
 		
 		SYS.build_layers(CONTROLS.N_LAYERS) ;
-
-		SYS.WRAPDIM.X = SYS.BOXDIM.X * (2*CONTROLS.N_LAYERS + 1);
-		SYS.WRAPDIM.Y = SYS.BOXDIM.Y * (2*CONTROLS.N_LAYERS + 1);
-		SYS.WRAPDIM.Z = SYS.BOXDIM.Z * (2*CONTROLS.N_LAYERS + 1);
 		
 		// Use very little padding because we will update neighbor list for every frame.
 		
@@ -1625,7 +1629,7 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 	    
 		// Set the stresses based on our MD code's calculation
 	    
-		double vol = SYS.BOXDIM.X * SYS.BOXDIM.Y * SYS.BOXDIM.Z;
+		double vol = SYS.BOXDIM.VOL;
 
 		virial[0] =  SYS.PRESSURE_TENSORS_XYZ.X*vol;
 		virial[1] =  SYS.PRESSURE_TENSORS_XYZ.Y*vol;
@@ -2120,46 +2124,57 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  PARAMFILE >> FF_2BODY[i].S_DELTA;
 		  
 		  FF_2BODY[i].KILLLEN = FF_2BODY[i].S_DELTA; // Killlen is/can only be used when ff type is cheby
+		  
+		if ((N_PLOTS == 0) && (! SYSTEM.BOXDIM.IS_RCUT_SAFE(FF_2BODY[i].S_MAXIM, CONTROLS.N_LAYERS)))  
+		{
+			if (isatty(fileno(stdout)) && RANK == 0)
+			{
+				#if WARN == TRUE
+					cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: ";
+				#else
+					cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "Error: ";
+				#endif
 				
-		  if((N_PLOTS == 0) &&
-			  (  FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.X
-				  || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.Y
-				  || FF_2BODY[i].S_MAXIM > 0.5* SYSTEM.WRAPDIM.Z ) )
-		  {
-#if WARN == TRUE
-			 if(RANK==0)
-			 {
-				if (isatty(fileno(stdout)))
-				{
-				  cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "WARNING: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
-				  cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
-				  cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD <<  SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << COUT_STYLE.ENDSTYLE << endl;
-				}
-				else
-				{
-				  cout << "WARNING: Outer cutoff greater than half at least one box length" << endl;
-				  cout << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP  << endl;
-				  cout << " " <<  SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
-				}								
-			 }
-
-#else
-			 if (isatty(fileno(stdout)))
-			 {
-				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "ERROR: Outer cutoff greater than half at least one box length" << COUT_STYLE.ENDSTYLE << endl;
-				cout << COUT_STYLE.RED << COUT_STYLE.BOLD << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;
-				exit_run(0);
-			 }
-			 else
-			 {
-				cout << "ERROR: Outer cutoff greater than half at least one box length" << endl;
-				cout << "	Pair type " <<FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << endl;
-				exit_run(0);							
-			 }
-#endif
-		  }
-
-				
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "Outer cutoff greater than half of at least one layered cell vector at least one box length: "  << FF_2BODY[i].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Frame:                      " << i << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Pair type:                  " << FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	cell vectors (a)            " << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_AY << " " << SYSTEM.BOXDIM.CELL_AZ << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	cell vectors (b)            " << SYSTEM.BOXDIM.CELL_BX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_BZ << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	cell vectors (c)            " << SYSTEM.BOXDIM.CELL_CX << " " << SYSTEM.BOXDIM.CELL_CY << " " << SYSTEM.BOXDIM.CELL_CZ << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Layers:                     " << CONTROLS.N_LAYERS << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_AX * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AY * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AZ * (CONTROLS.N_LAYERS +1) << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_BX * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BY * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BZ * (CONTROLS.N_LAYERS +1) << COUT_STYLE.ENDSTYLE << endl;
+				cout << COUT_STYLE.MAGENTA << COUT_STYLE.BOLD << "	Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_CX * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CY * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CZ * (CONTROLS.N_LAYERS +1) << COUT_STYLE.ENDSTYLE << endl;
+			
+				#if ! WARN
+					exit_run(0);
+				#endif
+			}
+			else if ( RANK == 0 ) 
+			{
+				#if WARN == TRUE
+					cout << "WARNING: ";
+				#else
+					cout << "Error: ";
+				#endif
+			
+				cout <<  "Outer cutoff greater than half of at least one layered cell vector at least one box length: "  << FF_2BODY[i].S_MAXIM <<COUT_STYLE.ENDSTYLE << endl;
+				cout <<  "	Frame:                      " << i << COUT_STYLE.ENDSTYLE << endl;
+				cout <<  "	Pair type:                  " << FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << COUT_STYLE.ENDSTYLE << endl;		
+				cout <<  "	cell vectors (a)            " << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_AY << " " << SYSTEM.BOXDIM.CELL_AZ << endl;
+				cout <<  "	cell vectors (b)            " << SYSTEM.BOXDIM.CELL_BX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_BZ << endl;
+				cout <<  "	cell vectors (c)            " << SYSTEM.BOXDIM.CELL_CX << " " << SYSTEM.BOXDIM.CELL_CY << " " << SYSTEM.BOXDIM.CELL_CZ << endl;
+				cout <<  "	Layers:                     " << CONTROLS.N_LAYERS << endl;
+				cout <<  "	Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_AX * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AY * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AZ * (CONTROLS.N_LAYERS +1) << endl;
+				cout <<  "	Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_BX * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BY * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BZ * (CONTROLS.N_LAYERS +1) << endl;
+				cout <<  "	Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_CX * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CY * (CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CZ * (CONTROLS.N_LAYERS +1) << endl;	
+			
+				#if ! WARN
+					exit_run(0);
+				#endif										
+			}
+		}
+			 				
 		  FF_2BODY[i].PRPR_NM = FF_2BODY[i].ATM1TYP;
 		  FF_2BODY[i].PRPR_NM.append(FF_2BODY[i].ATM2TYP);	
 
@@ -2864,18 +2879,26 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 // Read coordinates,  and optionally velocities and forces.  There is support for more than one coordinate
 // input file, given by the index.
 {
-  ifstream COORDFILE;
-	int TEMP_INT ;
-	XYZ TMP_BOX ;
-  stringstream	STREAM_PARSER;
-	string FIRST_EXT;
-  string  LINE;
+	ifstream 		COORDFILE;
+	int 			TEMP_INT ;
+	XYZ 			TMP_BOX ;
+	stringstream	STREAM_PARSER;
+	string 			FIRST_EXT;
+	string  		LINE;
 
 	COORDFILE.open(CONTROLS.COORD_FILE[index].data());
 	
 	COORDFILE >> TEMP_INT;	// Store number of atoms in file in a temp var
-	COORDFILE >> TMP_BOX.X >> TMP_BOX.Y >> TMP_BOX.Z;
-
+	
+	if(SYSTEM.BOXDIM.IS_ORTHO)
+	{
+		COORDFILE >> TMP_BOX.X >> TMP_BOX.Y >> TMP_BOX.Z;
+	}
+	else
+	{
+		EXIT_MSG("ERROR: Non-orthorhomic functionality not yet implemented in read_coord_file");
+	}
+	
 	if(CONTROLS.FIT_STRESS)                                                                                           
 		COORDFILE >>  SYSTEM.PRESSURE_TENSORS.X >>  SYSTEM.PRESSURE_TENSORS.Y >>  SYSTEM.PRESSURE_TENSORS.Z;      
 
@@ -2955,7 +2978,7 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 		SYSTEM.COORDS[CURR_ATOM].X -= floor(SYSTEM.COORDS[CURR_ATOM].X/TMP_BOX.X)*TMP_BOX.X;
 		SYSTEM.COORDS[CURR_ATOM].Y -= floor(SYSTEM.COORDS[CURR_ATOM].Y/TMP_BOX.Y)*TMP_BOX.Y;
 		SYSTEM.COORDS[CURR_ATOM].Z -= floor(SYSTEM.COORDS[CURR_ATOM].Z/TMP_BOX.Z)*TMP_BOX.Z;
-		SYSTEM.COORDS[CURR_ATOM].Z += SYSTEM.BOXDIM.Z;
+		SYSTEM.COORDS[CURR_ATOM].Z += SYSTEM.BOXDIM.CELL_CZ;
 
 		// Prepare velocities
 		SYSTEM.VELOCITY[CURR_ATOM].X = 0;
@@ -3060,12 +3083,15 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	}
 	// Input configurations are added sequentially along z.
 		
-	SYSTEM.BOXDIM.X  = TMP_BOX.X;
-	SYSTEM.BOXDIM.Y  = TMP_BOX.Y;
-	SYSTEM.BOXDIM.Z += TMP_BOX.Z;
+	SYSTEM.BOXDIM.CELL_AX  = TMP_BOX.X;
+	SYSTEM.BOXDIM.CELL_BY  = TMP_BOX.Y;
+	SYSTEM.BOXDIM.CELL_CZ += TMP_BOX.Z;
 		
 	if(CONTROLS.SCALE_SYSTEM_BY != 1.0)
 	{
+		if (! SYSTEM.BOXDIM.IS_ORTHO)
+			EXIT_MSG("ERROR: Box scaling for non-orthorhombic cells has not yet been implemented.");
+		
 		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
 		{
 			SYSTEM.COORDS[a1].X *= CONTROLS.SCALE_SYSTEM_BY;
@@ -3073,13 +3099,25 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 			SYSTEM.COORDS[a1].Z *= CONTROLS.SCALE_SYSTEM_BY;
 		}
 			
-		SYSTEM.BOXDIM.X *= CONTROLS.SCALE_SYSTEM_BY;
-		SYSTEM.BOXDIM.Y *= CONTROLS.SCALE_SYSTEM_BY;
-		SYSTEM.BOXDIM.Z *= CONTROLS.SCALE_SYSTEM_BY;
+		SYSTEM.BOXDIM.CELL_AX *= CONTROLS.SCALE_SYSTEM_BY;
+		SYSTEM.BOXDIM.CELL_BY *= CONTROLS.SCALE_SYSTEM_BY;
+		SYSTEM.BOXDIM.CELL_CZ *= CONTROLS.SCALE_SYSTEM_BY;
 	}
+	
+	SYSTEM.BOXDIM.UPDATE_CELL();	
 		
 	if (RANK==0)
-		cout << "	...Updated simulation box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+	{
+		cout <<  "	...Updated simulation box dimensions: " << endl;
+		cout <<  "		cell vectors (a)            " << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_AY << " " << SYSTEM.BOXDIM.CELL_AZ << endl;
+		cout <<  "		cell vectors (b)            " << SYSTEM.BOXDIM.CELL_BX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_BZ << endl;
+		cout <<  "		cell vectors (c)            " << SYSTEM.BOXDIM.CELL_CX << " " << SYSTEM.BOXDIM.CELL_CY << " " << SYSTEM.BOXDIM.CELL_CZ << endl;
+		cout <<  "		Layers:                     " << CONTROLS.N_LAYERS << endl;
+		cout <<  "		Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_AX * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AY * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AZ * (2*CONTROLS.N_LAYERS +1) << endl;
+		cout <<  "		Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_BX * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BY * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BZ * (2*CONTROLS.N_LAYERS +1) << endl;
+		cout <<  "		Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_CX * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CY * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CZ * (2*CONTROLS.N_LAYERS +1) << endl;	
+		
+	}
 
 	if ( ! CONTROLS.RESTART ) 
 	{
@@ -3112,7 +3150,11 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 		FORCE_SUBTRACTED_OUTPUT.open(FORCE_SUBTRACTED_FILE.data());
 				
 		FORCE_SUBTRACTED_OUTPUT << END << endl;
-		FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << " ";
+		
+		if (SYSTEM.BOXDIM.IS_ORTHO)
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_CZ << " ";
+		else
+			EXIT_MSG("ERROR: subtract_force FORCE_SUBTRACTED_OUTPUT not updated for non-orthorhombic cells");
 				
 		// NOTE:  PRESSURE_TENSORS_XYZ hold the potential energy contribution to the current stress tensor.
 		// PRESSURE_TENSOR holds potential + kinetic energy to the current stress tensor in GPa units.

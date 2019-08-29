@@ -35,7 +35,14 @@ Reading initial coordinates and forces...
    ...Read the following number of atoms: 96
      ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
-	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+	...Updated simulation box dimensions: 
+		cell vectors (a)            8.6091309 0 0
+		cell vectors (b)            0 8.6091309 0
+		cell vectors (c)            0 0 8.6091309
+		Layers:                     1
+		Effective cell vectors (a): 25.8273927 0 0
+		Effective cell vectors (a): 0 25.8273927 0
+		Effective cell vectors (a): 0 0 25.8273927
    ...read complete for file input.xyz
 
 Reading atom info from parameter file...
@@ -44,11 +51,15 @@ Reading atom info from parameter file...
 		1     H , q (e):  0.000, mass (amu):   1.0079
    ...read complete
 
-	Real atoms:                   96
-	Total atoms (ghost):          2592
-	Real box dimesntions:         8.6091 8.6091 8.6091
-	Total box dimensions (ghost): 25.8274 25.8274 25.8274
-
+	Real atoms:                 96
+	Total atoms (ghost):        2592
+	cell vectors (a)            8.6091 0.0000 0.0000
+	cell vectors (b)            0.0000 8.6091 0.0000
+	cell vectors (c)            0.0000 0.0000 8.6091
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.8274 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.8274
 Setting up thermostats/barostats/velocities...
 	...Configuring constraints for a NVT-MTK simulation.
 	...Setting thermostat time constant to: 10.0000
@@ -159,8 +170,8 @@ Force field summary:
 		-1.0000 to 1.0000
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OO 1.9000 5.0000 0.1000 MORSE 1.7500 0.0100 1.0000e+04 1.0000e+00
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		OO 1.9000 5.0000 0.1000 MORSE 1.7500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
 		Parameters: 
 		0 -1.7654e+03
 		1 -2.0209e+02
@@ -177,8 +188,8 @@ Force field summary:
 		12 -1.2423e+01
 		13 2.5460e+00
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		HH 9.0000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		HH 9.0000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
 		Parameters: 
 		0 -1.3411e+02
 		1 -8.6071e+01
@@ -195,8 +206,8 @@ Force field summary:
 		12 1.6384e-01
 		13 8.5018e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OH 7.0000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		OH 7.0000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
 		Parameters: 
 		0 9.0444e+01
 		1 1.0459e+02
@@ -660,41 +671,41 @@ RANK: 0 UPDATING ON STEP: 31, WITH PADDING: 0.397
       38      4.75       4.8087615     -11.3950672      -6.5863057          1630.4     26.56197213     -6.8758370
       39      4.88       5.0165582     -11.5721986      -6.5556404          1700.8     25.02026334     -6.8625509
       40      5.00       5.5949641     -12.0707565      -6.4757924          1896.9     21.83147411     -6.8017225
-Warning: (Step 40) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.891358138837586 0.910000000000000  13 82
-	...Penalty potential = 0.064784007181178
+Warning: (Step 40) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.891358138837579 0.910000000000000  13 82
+	...Penalty potential = 0.064784007181250
       41      5.12       7.4091530     -13.5399948      -6.1308418          2512.0     18.12229956     -6.4801643
 Number of 3-body interactions = 487871
-Warning: (Step 41) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.787389276037158 0.910000000000000  13 82
-	...Penalty potential = 18.432547862346773
+Warning: (Step 41) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.787389276037147 0.910000000000000  13 82
+	...Penalty potential = 18.432547862351331
 Number of 4-body interactions = 539103
 RANK: 0 UPDATING ON STEP: 41, WITH PADDING: 1.433
       42      5.25      11.2534430     -13.4593095      -2.2058664          3815.4     20.10299789     -2.5878598
-Warning: (Step 42) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.637396283384394 0.910000000000000  13 82
-	...Penalty potential = 202.579417408873439
+Warning: (Step 42) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.637396283384381 0.910000000000000  13 82
+	...Penalty potential = 202.579417408904135
       43      5.38      16.1621351     -11.6951874       4.4669478          5479.7     22.90201295      4.0410999
-Warning: (Step 43) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.451953931735782 0.910000000000000  13 82
-	...Penalty potential = 961.009053062435214
+Warning: (Step 43) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.451953931735767 0.910000000000000  13 82
+	...Penalty potential = 961.009053062528551
       44      5.50      19.0264189      -3.9917050      15.0347139          6450.8     25.09717221     14.5619359
-Warning: (Step 44) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.264832251526283 0.910000000000000  13 82
-	...Penalty potential = 2685.455421310850397
+Warning: (Step 44) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.264832251526270 0.910000000000000  13 82
+	...Penalty potential = 2685.455421311009559
       45      5.62      15.8884940      13.7282141      29.6167081          5386.9     24.73858253     29.1085851
-Warning: (Step 45) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.137781580949130 0.910000000000000  13 82
-	...Penalty potential = 4604.902812783995614
+Warning: (Step 45) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.137781580949125 0.910000000000000  13 82
+	...Penalty potential = 4604.902812784089292
       46      5.75       9.5791050      33.4842529      43.0633580          3247.8     22.76786694     42.5359716
-Warning: (Step 46) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.151049701982764 0.910000000000000  13 82
-	...Penalty potential = 4371.595875209224687
+Warning: (Step 46) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.151049701982770 0.910000000000000  13 82
+	...Penalty potential = 4371.595875209124642
       47      5.88      10.4252147      30.9782484      41.4034631          3534.6     22.20623344     40.8633904
-Warning: (Step 47) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.292443478167873 0.910000000000000  13 82
-	...Penalty potential = 2355.212716769497547
+Warning: (Step 47) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.292443478167884 0.910000000000000  13 82
+	...Penalty potential = 2355.212716769362942
       48      6.00      16.9866565      10.0767938      27.0634503          5759.3     22.71073011     26.5098954
-Warning: (Step 48) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.480490435881964 0.910000000000000  13 82
-	...Penalty potential = 792.352653785983989
+Warning: (Step 48) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.480490435881975 0.910000000000000  13 82
+	...Penalty potential = 792.352653785920893
       49      6.12      19.0534905      -6.0412170      13.0122735          6460.0     20.88935380     12.4510174
 Number of 3-body interactions = 1738733
-Warning: (Step 49) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.657661241271987 0.910000000000000  13 82
-	...Penalty potential = 160.676323983179600
 Number of 4-body interactions = 6885607
 RANK: 0 UPDATING ON STEP: 49, WITH PADDING: 3.114
+Warning: (Step 49) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.657661241271997 0.910000000000000  13 82
+	...Penalty potential = 160.676323983161183
       50      6.25      17.3169432     -13.6579962       3.6589470          5871.2      9.82521070      3.1019743
 END SIMULATION
 	Average temperature over run = 2096.4867 K

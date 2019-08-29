@@ -1,14 +1,31 @@
-133c133
-<        OO 96.100542106
+39,46c39
+< 	...Updated simulation box dimensions: 
+< 		cell vectors (a)            8.6091309 0 0
+< 		cell vectors (b)            0 8.6091309 0
+< 		cell vectors (c)            0 0 8.6091309
+< 		Layers:                     1
+< 		Effective cell vectors (a): 25.8273927 0 0
+< 		Effective cell vectors (a): 0 25.8273927 0
+< 		Effective cell vectors (a): 0 0 25.8273927
 ---
->        OO 96.100542105
-276,277c276,277
-< 		110 0.0000
-< 		111 -0.0000
+> 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+55,63c48,52
+< 	Real atoms:                 96
+< 	Total atoms (ghost):        2592
+< 	cell vectors (a)            8.6091 0.0000 0.0000
+< 	cell vectors (b)            0.0000 8.6091 0.0000
+< 	cell vectors (c)            0.0000 0.0000 8.6091
+< 	Layers:                     1
+< 	Effective cell vectors (a): 25.8274 0.0000 0.0000
+< 	Effective cell vectors (a): 0.0000 25.8274 0.0000
+< 	Effective cell vectors (a): 0.0000 0.0000 25.8274
 ---
-> 		110 -0.0000
-> 		111 0.0000
-392c392
+> 	Real atoms:                   96
+> 	Total atoms (ghost):          2592
+> 	Real box dimesntions:         8.6091 8.6091 8.6091
+> 	Total box dimensions (ghost): 25.8274 25.8274 25.8274
+> 
+291c280
 < 		110 -0.0000
 ---
 > 		110 0.0000

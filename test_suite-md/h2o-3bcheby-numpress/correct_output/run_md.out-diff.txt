@@ -1,12 +1,45 @@
-4,7d3
-< Will read from file: run_md.in
-< Input file successfully opened.
-< Input file has been rewound.
-< Input file contents successfully stored.
-14c10
-< 	# USENEIG #: true
+34,41c34
+< 	...Updated simulation box dimensions: 
+< 		cell vectors (a)            8.6091309 0 0
+< 		cell vectors (b)            0 8.6091309 0
+< 		cell vectors (c)            0 0 8.6091309
+< 		Layers:                     1
+< 		Effective cell vectors (a): 25.8273927 0 0
+< 		Effective cell vectors (a): 0 25.8273927 0
+< 		Effective cell vectors (a): 0 0 25.8273927
 ---
-> 	# USENEIG #: true 
-25a22,23
->    ...read complete.
+> 	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+50,58c43,47
+< 	Real atoms:                 96
+< 	Total atoms (ghost):        2592
+< 	cell vectors (a)            8.6091 0.0000 0.0000
+< 	cell vectors (b)            0.0000 8.6091 0.0000
+< 	cell vectors (c)            0.0000 0.0000 8.6091
+< 	Layers:                     1
+< 	Effective cell vectors (a): 25.8274 0.0000 0.0000
+< 	Effective cell vectors (a): 0.0000 25.8274 0.0000
+< 	Effective cell vectors (a): 0.0000 0.0000 25.8274
+---
+> 	Real atoms:                   96
+> 	Total atoms (ghost):          2592
+> 	Real box dimesntions:         8.6091 8.6091 8.6091
+> 	Total box dimensions (ghost): 25.8274 25.8274 25.8274
 > 
+141,142c130,131
+< 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+< 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
+---
+> 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+> 		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00
+155,156c144,145
+< 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+< 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+---
+> 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+> 		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+169,170c158,159
+< 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+< 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+---
+> 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
+> 		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00

@@ -78,7 +78,7 @@ def main():
     is_active = args.active
 
     # Algorithms requiring sklearn.
-    sk_algos = ["lasso", "ridge", "lassolars", "lars", "lasso_split"] ;
+    sk_algos = ["lasso", "ridge", "lassolars", "lars", "lasso_split", "ridgecv"] ;
         
     if algorithm in sk_algos:
         from sklearn import linear_model

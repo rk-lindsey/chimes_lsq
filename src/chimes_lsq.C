@@ -295,7 +295,6 @@ int main(int argc, char* argv[])
 			
 			OFFSET += CONTROLS.INFILE_FRAMES[FILE_IDX];			
 		}
-		
 		SYSTEM.READ_XYZF(TRAJ_INPUT, CONTROLS, ATOM_PAIRS, ATOM_TYPE, i) ;
 
 		if ( i >= istart && i <= iend )

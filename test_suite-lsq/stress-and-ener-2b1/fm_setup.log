@@ -11,7 +11,7 @@ Input file contents successfully stored.
 	# FITCOUL #: false
 	# FITSTRS #: true ...will fit to all tensor components
 	# FITENER #: true
-    			 ...will only fit energies for first 5 frames.
+    			 ...will fit energies for first 5 frames.
 	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 12
@@ -66,51 +66,561 @@ The number of two-body non-coulomb parameters is: 72
 
 Succefully opened the trajectory file...
 Setting up the matrices for A, Coulomb forces, and overbonding...
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Reporting outcome of layering for first frame ONLY: 
 	Real atoms:                   132
 	Total atoms (ghost):          3564
-	Real box dimensions:         10.65 10.65 10.65
-	Total box dimensions (ghost): 31.95 31.95 31.95
-
+	cell vectors (a)            10.65 0 0
+	cell vectors (b)            0 10.65 0
+	cell vectors (c)            0 0 10.65
+	cell volume (A^3)           1207.95
+	Extent (x,y,z)              10.65 10.65 10.65
+	Layers:                     1
+	Effective cell vectors (a): 31.95 0 0
+	Effective cell vectors (a): 0 31.95 0
+	Effective cell vectors (a): 0 0 31.95
 ...matrix setup complete: 
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
 	Processing frame: 1     of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 2     of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 3     of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 4     of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 5     of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 6     of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 7     of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 8     of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 9     of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 10    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 11    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 12    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 13    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 14    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 15    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 16    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 17    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 18    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 19    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 20    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 21    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 22    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 23    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 24    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 25    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 26    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 27    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 28    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 29    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 30    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 31    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 32    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 33    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 34    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 35    of: 36
+Read the following lattice parameters: 
+	LATCON_A : 10.65
+	LATCON_B : 10.65
+	LATCON_C : 10.65
+	LAT_ALPHA: 1.570796326794897
+	LAT_BETA : 1.570796326794897
+	LAT_GAMMA: 1.570796326794897
+Generated the following LAMMPSian cell parameters: 
+	CELL_LX: 10.65
+	CELL_LY: 10.65
+	CELL_LZ: 10.65
+	XY:      0
+	XZ:      0
+	YZ:      0
 	Processing frame: 36    of: 36
 ...matrix population complete: 
 
@@ -119,6 +629,9 @@ Printing matrices...
 
 Per-atom type energies will be provided at the end of the parameter file.
 Values will correspond to the following atom types, in order: 
+	C 60
+	H 64
+	O 8
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.189
 		1	H H	0.860

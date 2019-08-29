@@ -108,139 +108,139 @@ enum class Cheby_trans	// Supported variable transformations.
 
 class JOB_CONTROL
 {
-public:
-  int STEP;	// Tracks the current md step
-  int NATMTYP;	// How many atom types are in the trajectory?
+	public:
+  		int STEP;	// Tracks the current md step
+  		int NATMTYP;	// How many atom types are in the trajectory?
 	
-  ///////////////////////////////////////////////
-  // Variables read in from the parameter file:
-  ///////////////////////////////////////////////
+  		///////////////////////////////////////////////
+  		// Variables read in from the parameter file:
+  		///////////////////////////////////////////////
 	
-  bool   FIT_COUL;		// Replaces fit_coul... If true, take charges from spline parameters.
-  bool   USE_COULOMB;	 	// Replaces if_coulomb... If true, calculate Coulomb forces.
-  bool   USE_OVERCOORD;		// Replaces if_overcoord... If true, calculate ReaxFF-like overcoordination term.
-  bool   FIT_POVER;		// Replaces fit_pover... If true, find linear overcoordination parameter from least-squares fitting. -- this needs to be updated for new handling
-  bool   USE_3B_CHEBY;		// Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
-  bool   USE_4B_CHEBY;		// If true, calculate 4-Body Chebyshev interaction.
-  vector<string> ATOMTYPES;	// A list of atom types		
+  		bool   FIT_COUL;	      // Replaces fit_coul... If true, take charges from spline parameters.
+		bool   USE_COULOMB;	      // Replaces if_coulomb... If true, calculate Coulomb forces.
+		bool   USE_OVERCOORD;	      // Replaces if_overcoord... If true, calculate ReaxFF-like overcoordination term.
+		bool   FIT_POVER;	      // Replaces fit_pover... If true, find linear overcoordination parameter from least-squares fitting. -- this needs to be updated for new handling
+		bool   USE_3B_CHEBY;	      // Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
+		bool   USE_4B_CHEBY;	      // If true, calculate 4-Body Chebyshev interaction.
+		vector<string> ATOMTYPES;     // A list of atom types	      
         
 	
-  ///////////////////////////////////////////////
-  // Variables read in from main md code input file
-  ///////////////////////////////////////////////
-	
-  // "General control variables"
+  		///////////////////////////////////////////////
+		// Variables read in from main md code input file
+		///////////////////////////////////////////////
 
-  int    SEED;			// Replaces rand_seed...
-  double TEMPERATURE;		// Replaces TempMD
-  double PRESSURE;		// Introduced for NPT
-  string ENSEMBLE;		// NVE, NPT, NVT
-  bool   PLOT_PES;		// Plot out the potential energy surfaces? IF so, nothing else will be done.
-  bool   CHECK_FORCE;      	// If true, numerically check forces from derivatives of energy.
-  bool   COMPARE_FORCE;		// Replaces if_read_force... If TRUE, read in read in a set of forces from a file for comparison with those computed by this code
+		// "General control variables"
 
-  bool   SUBTRACT_FORCE;	// Read frame, compute forces based on parameter file, print out frame where FF forces have been subtracted from input forces
-  string COMPARE_FILE;		// Name of the file that holds the forces
-  double DELTA_T;		// Relaces deltat
-  double DELTA_T_FS;		// Replaces deltat_fs... in femtoseconds
-  int	 N_MD_STEPS;		// Replaces nsteps...
-  int    N_LAYERS;		// Replaces nlayers... Number of periodic images to use. Usually, no need to go past 1 ...(depends only on spline interaction cutoff).
-  int    REAL_REPLICATES;	// Number of real replicate layers to create. Only goes in the positive direction, so 1 replicate corresponds to 8*attoms
-  double SCALE_SYSTEM_BY;	// Amount to scale boxlengths/coordinates by
-  string PARAM_FILE;		// Replaces params_file...
-  vector<string> COORD_FILE;	// Replaces xyz_file... Can be a list of files, which will be assembled together along the z-axis to form a single cell
-  bool   SELF_CONSIST;		// Is this part of a self-consistent DFT MD --> FIT --> MM MD --> CYCLE type calculation?
-  double NVT_CONV_CUT;		// What is the cutoff for "conservation"... Will kill the program if the current temperature and set temperature differ by more than this fraction
-  // ie if | T_set - T_curr | >  NVT_CONV_CUT * T_set, end with error message.. defaults to 0.1 (10%)
+		int    SEED;		      // Replaces rand_seed...
+		double TEMPERATURE;	      // Replaces TempMD
+		double PRESSURE;	      // Introduced for NPT
+		string ENSEMBLE;	      // NVE, NPT, NVT
+		bool   PLOT_PES;	      // Plot out the potential energy surfaces? IF so, nothing else will be done.
+		bool   CHECK_FORCE;	      // If true, numerically check forces from derivatives of energy.
+		bool   COMPARE_FORCE;	      // Replaces if_read_force... If TRUE, read in read in a set of forces from a file for comparison with those computed by this code
 
-  // "Simulation options"
+		bool   SUBTRACT_FORCE;        // Read frame, compute forces based on parameter file, print out frame where FF forces have been subtracted from input forces
+		string COMPARE_FILE;	      // Name of the file that holds the forces
+		double DELTA_T; 	      // Relaces deltat
+		double DELTA_T_FS;	      // Replaces deltat_fs... in femtoseconds
+		int    N_MD_STEPS;	      // Replaces nsteps...
+		int    N_LAYERS;	      // Replaces nlayers... Number of periodic images to use. Usually, no need to go past 1 ...(depends only on spline interaction cutoff).
+		int    REAL_REPLICATES;       // Number of real replicate layers to create. Only goes in the positive direction, so 1 replicate corresponds to 8*attoms
+		double SCALE_SYSTEM_BY;       // Amount to scale boxlengths/coordinates by
+		string PARAM_FILE;	      // Replaces params_file...
+		vector<string> COORD_FILE;    // Replaces xyz_file... Can be a list of files, which will be assembled together along the z-axis to form a single cell
+		bool   SELF_CONSIST;	      // Is this part of a self-consistent DFT MD --> FIT --> MM MD --> CYCLE type calculation?
+		double NVT_CONV_CUT;	      // What is the cutoff for "conservation"... Will kill the program if the current temperature and set temperature differ by more than this fraction
+		// ie if | T_set - T_curr | >  NVT_CONV_CUT * T_set, end with error message.. defaults to 0.1 (10%)
 
-  bool   INIT_VEL;		// Replaces if_init_vel... If true, initialize velocities.
-  bool   USE_HOOVER_THRMOSTAT;	// Replaces if_hoover... Use a Nose-Hoover thermostat?	
-  int    FREEZE_IDX_START;	// First atom in continuous range to freeze.. .counting starts from 0... value of -1 indicates no atoms are to be frozen
-  int    FREEZE_IDX_STOP;	// Last atom in continuous range to freeze 
-  double FREQ_UPDATE_THERMOSTAT;// Replaces scale_freq and thoover_fs... it's usage depends on whether USE_HOOVER_THERMOSTAT is true or false.. will be cast as int where required
-  double FREQ_UPDATE_BAROSTAT;	// Barostat time constant... defaults to 1000
-  bool   USE_NUMERICAL_PRESS;	// Replaces num_pressure... Whether to calculate pressures by finite difference.
-  double MIN_E_CONVG_CRIT;	// Options for LAMMPS minimization: Stopping criteria for energy and force, max iterations, max energy/force evaluations
-  double MIN_F_CONVG_CRIT;
-  double MIN_MAX_ITER;
-  double MIN_MAX_EVAL;
+		// "Simulation options"
+
+		bool   INIT_VEL;	      // Replaces if_init_vel... If true, initialize velocities.
+		bool   USE_HOOVER_THRMOSTAT;  // Replaces if_hoover... Use a Nose-Hoover thermostat?  
+		int    FREEZE_IDX_START;      // First atom in continuous range to freeze.. .counting starts from 0... value of -1 indicates no atoms are to be frozen
+		int    FREEZE_IDX_STOP;       // Last atom in continuous range to freeze 
+		double FREQ_UPDATE_THERMOSTAT;// Replaces scale_freq and thoover_fs... it's usage depends on whether USE_HOOVER_THERMOSTAT is true or false.. will be cast as int where required
+		double FREQ_UPDATE_BAROSTAT;  // Barostat time constant... defaults to 1000
+		bool   USE_NUMERICAL_PRESS;   // Replaces num_pressure... Whether to calculate pressures by finite difference.
+		double MIN_E_CONVG_CRIT;      // Options for LAMMPS minimization: Stopping criteria for energy and force, max iterations, max energy/force evaluations
+		double MIN_F_CONVG_CRIT;
+		double MIN_MAX_ITER;
+		double MIN_MAX_EVAL;
+
+		// For penalty-function related exit
+
+		double PENALTY_THRESH;        // [0,1]; If a penalty potential more than PENALTY_THRESH*<current per-atom e_cons value> is produced, kill the simulation... it's a runaway
+		double IO_ECONS_VAL;	      // The conserved quantity output to screen
+		bool USE_KILL_LEN;	      // If true, and if a cheby type interaction, will kill the simulation if pair distances below FF_2BODY[i].KILLLEN are found
+
+		// "Output control" 
+
+		int    FREQ_DFTB_GEN;	      // Replaces gen_freq... How often to write the gen file.
+		string TRAJ_FORMAT;	      // .gen, .xyzf, or .lammps (currently)
+		bool   SPLIT_FILES ;	      // If TRUE, do not concatenate A matrix files for LSQ.
+		int    FREQ_BACKUP;	      // How often to write backup files for restart.
+		bool   PRINT_VELOC;	      // If true, write out the velocities 
+		bool   RESTART; 	      // If true, read a restart file.
+		int    FREQ_VELOC;
+		int    FREQ_ENER;	      // Replaces energy_freq... How often to output energy
+		bool   PRINT_FORCE;	      // Replaces if_output_force... If TRUE, write out calculated forces.    
+		bool   PRINT_BAD_CFGS;        // Print any config where r < r_cut
+		int    FREQ_FORCE;	      // How often to print the forces        
+		int    SELF_CONSIST_FREQ;     // How frequently to print POSCAR file
+		bool   WRAP_COORDS;	      // Should coordinates be wrapped?
+
+		// Controls for how to construct the initial system, if desired
+
+		bool   BUILD;
+		string BUILD_TYPE;
+		string BUILD_FILE;
+		double BUILD_BOXL;
+		int    BUILD_NMOLEC;
+		string BUILD_ATOM;
+		              
+		///////////////////////////////////////////////
+		// Variables exclusive to the LSQ code
+		///////////////////////////////////////////////
+
+		bool IS_LSQ;		      // Is this for an lsq run or actual md?
+		bool FIT_STRESS;	      // Should stress tensors be included in the fit? --> This is ONLY for the diagonal components, xx, yy, zz
+		bool FIT_STRESS_ALL;	      // Should stress tensors be included in the fit? --> This is ONLY for ALL components, xx, xy, xz ... zz 
+		int  NSTRESS;		      // Only fit stresses for first NSTRESS frames of trajectory
+		bool FIT_ENER;  	      // Should the total frame energy be included in the fit?
+		bool FIT_ENER_PER_ATOM;       // Should the energy of each atom be included in the fit?
+		bool FIT_ENER_EVER ;	      // Is energy ever included in the fit ?
+		int  NENER;
+		bool CALL_EWALD;	      // Should ewald subroutines be called?
+		bool USE_POVER; 	      // Should overbonding information be printed to the header file?
+
+		int   NFRAMES;  	      // Number of frames in the movie file
+		int   CHEBY_ORDER;	      // Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
+		int   CHEBY_3B_ORDER;	      // how many polynomials for 3b cheby?
+		int   CHEBY_4B_ORDER;	      // how many polynomials for 4b cheby?
+		int   NUM_3B_CHEBY;	      // How many parameters are associated with cheby order CHEBY_3B_ORDER?
+		int   NUM_4B_CHEBY;	      // How many parameters are associated with cheby order CHEBY_4B_ORDER?
+		int   INVR_PARAMS;	      // currently uses 19 parameters per pair type
+		int   TOT_SNUM; 		      // total number of 2-body force field parameters
+		int   TOT_SHORT_RANGE;        // Number of short ranged FF params... i.e. not Ewald
+		int   TOT_ALL_PARAMS ;        // Total number of LSQ fitting parameters.
+
+		bool  COUL_CONSV;	      // If true, constraints will be applied to charge fitting to try to maintain consistency
+		bool  IF_SUBTRACT_COORD;      // If true, subtract overcoordination forces.
+		bool  IF_SUBTRACT_COUL;       // If true, subtract Coulombic forces (for use with fixed charges).
+		bool  USE_PARTIAL_CHARGES;    // Will there be any charges in the system?
+
+		Cheby_trans CHEBY_TYPE;       // How will distance be transformed?
+		vector<string> INFILE;        // Input trajectory file
+		vector<int> INFILE_FRAMES;    // How many frames should we read from each file?
+
+		// These variables are temporary fixes - soon we will have a class to do all input reading
+
+		string FCUT_LINE;
   
-  // For penalty-function related exit
-  
-  double PENALTY_THRESH;	// [0,1]; If a penalty potential more than PENALTY_THRESH*<current per-atom e_cons value> is produced, kill the simulation... it's a runaway
-  double IO_ECONS_VAL;		// The conserved quantity output to screen
-  bool USE_KILL_LEN;		// If true, and if a cheby type interaction, will kill the simulation if pair distances below FF_2BODY[i].KILLLEN are found
-	
-  // "Output control" 
 
-  int    FREQ_DFTB_GEN;		// Replaces gen_freq... How often to write the gen file.
-  string TRAJ_FORMAT;		// .gen, .xyzf, or .lammps (currently)
-  bool   SPLIT_FILES ;  	// If TRUE, do not concatenate A matrix files for LSQ.
-  int    FREQ_BACKUP;       	// How often to write backup files for restart.
-  bool   PRINT_VELOC;		// If true, write out the velocities 
-  bool   RESTART;          	// If true, read a restart file.
-  int    FREQ_VELOC;
-  int    FREQ_ENER;		// Replaces energy_freq... How often to output energy
-  bool   PRINT_FORCE;		// Replaces if_output_force... If TRUE, write out calculated forces.	
-  bool   PRINT_BAD_CFGS;	// Print any config where r < r_cut
-  int    FREQ_FORCE;		// How often to print the forces	
-  int    SELF_CONSIST_FREQ;	// How frequently to print POSCAR file
-  bool   WRAP_COORDS;		// Should coordinates be wrapped?
+  		// Constructor... MD values are set in the read_input function in chimes_md.C
 	
-  // Controls for how to construct the initial system, if desired
-	
-  bool   BUILD;
-  string BUILD_TYPE;
-  string BUILD_FILE;
-  double BUILD_BOXL;
-  int    BUILD_NMOLEC;
-  string BUILD_ATOM;
-		
-  ///////////////////////////////////////////////
-  // Variables exclusive to the LSQ code
-  ///////////////////////////////////////////////
-	
-  bool IS_LSQ;			// Is this for an lsq run or actual md?
-  bool FIT_STRESS;		// Should stress tensors be included in the fit? --> This is ONLY for the diagonal components, xx, yy, zz
-  bool FIT_STRESS_ALL;		// Should stress tensors be included in the fit? --> This is ONLY for ALL components, xx, xy, xz ... zz 
-  int  NSTRESS;			// Only fit stresses for first NSTRESS frames of trajectory
-  bool FIT_ENER;		// Should the total frame energy be included in the fit?
-  bool FIT_ENER_PER_ATOM;	// Should the energy of each atom be included in the fit?
-  bool FIT_ENER_EVER ; 		// Is energy ever included in the fit ?
-  int  NENER;
-  bool CALL_EWALD;		// Should ewald subroutines be called?
-  bool USE_POVER;		// Should overbonding information be printed to the header file?
-	
-  int	NFRAMES;		// Number of frames in the movie file
-  int	CHEBY_ORDER;		// Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
-  int	CHEBY_3B_ORDER;		// how many polynomials for 3b cheby?
-  int	CHEBY_4B_ORDER;		// how many polynomials for 4b cheby?
-  int	NUM_3B_CHEBY;		// How many parameters are associated with cheby order CHEBY_3B_ORDER?
-  int	NUM_4B_CHEBY;		// How many parameters are associated with cheby order CHEBY_4B_ORDER?
-  int	INVR_PARAMS;		// currently uses 19 parameters per pair type
-  int 	TOT_SNUM;			// total number of 2-body force field parameters
-  int 	TOT_SHORT_RANGE;	// Number of short ranged FF params... i.e. not Ewald
-  int   TOT_ALL_PARAMS ;  	// Total number of LSQ fitting parameters.
-	
-  bool	COUL_CONSV;		// If true, constraints will be applied to charge fitting to try to maintain consistency
-  bool	IF_SUBTRACT_COORD;	// If true, subtract overcoordination forces.
-  bool	IF_SUBTRACT_COUL;	// If true, subtract Coulombic forces (for use with fixed charges).
-  bool	USE_PARTIAL_CHARGES;	// Will there be any charges in the system?
-
-  Cheby_trans CHEBY_TYPE;	// How will distance be transformed?
-  vector<string> INFILE;	// Input trajectory file
-  vector<int> INFILE_FRAMES;	// How many frames should we read from each file?
-  
-  // These variables are temporary fixes - soon we will have a class to do all input reading
-  
-  string FCUT_LINE;
-  
-
-// Constructor... MD values are set in the read_input function in chimes_md.C
-	
-JOB_CONTROL(): FIT_COUL(false), 
+  		JOB_CONTROL(): FIT_COUL(false), 
 		FIT_POVER(false),
 		USE_3B_CHEBY(false), 
 		USE_4B_CHEBY(false), 
@@ -288,57 +288,131 @@ JOB_CONTROL(): FIT_COUL(false),
 	void LSQ_SETUP(int npairs, int no_atom_types) ; // Set up JOB_CONTROL for LSQ calculation.
 };
 
+class BOX
+{
+	
+	/*
+
+	Notes for usage with LAMMPS linking: 	Box origin must be at 0,0,0, and all cell vector components must be positive 
+
+	*/
+	
+	public:
+		
+		// General cell properties
+		
+		bool   IS_ORTHO;						// Is this an orthorhombic cell? If so, we'll use the more computationally efficient operations
+		
+		double VOL;							// Cell volume
+		
+		// Cell geometery... if IS_ORTHO is true, ONLY CELL_AX, CELL_BY, and CELL_CZ are ever modified
+		
+		
+		
+		double CELL_AX, CELL_AY, CELL_AZ;	// Cell vectors (h-mat)
+		double CELL_BX, CELL_BY, CELL_BZ;
+		double CELL_CX, CELL_CY, CELL_CZ;
+		
+		double INVR_CELL_AX, INVR_CELL_AY, INVR_CELL_AZ;// Inverted Cell vectors (h-mat)
+		double INVR_CELL_BX, INVR_CELL_BY, INVR_CELL_BZ;
+		double INVR_CELL_CX, INVR_CELL_CY, INVR_CELL_CZ;
+		
+		double LATCON_A,  LATCON_B, LATCON_C;	// Cell lattice constants
+		double LAT_ALPHA, LAT_BETA, LAT_GAMMA;	// Cell lattice angles
+		
+		double CELL_LX, CELL_LY, CELL_LZ;	// Cell vector lengths (for LAMMPS)
+		
+		double XY, XZ, YZ;			// Cell tilt angles (for LAMMPS)
+		
+		double EXTENT_X, EXTENT_Y, EXTENT_Z;	// Cell extent in the x, y, and z directions
+		
+		BOX();
+		BOX(const BOX & COPY_FROM);
+		~BOX();
+		
+		void READ_BOX();					// Reads box geometery (orth or non-orth) from .xyz(f) file
+		void COPY_BOX_TO(BOX & TO_BOX);				// Copies vars from this box to input box
+				
+		void   UPDATE_INVER_CELL();				// Computes the inverse h-mat from the h-mat
+		void   UPDATE_LAT_VALUES(); 
+		void   UPDATE_EXTENT();
+		double UPDATE_VOLUME();					// Computes cell volume and saves to VOL
+		void   UPDATE_CELL();					// Updates all cell geometry variables, assuming the h-matrix has been externally modified
+		
+		void UNLAMMPSIFY(double lx, double ly, double lz, double xy, double xz, double yz); //Converts LAMMPS  (lx,ly,lz) = (xhi-xlo,yhi-ylo,zhi-zlo) and tilt factors (xy,xz,yz) to lattice constants and angles alpha, beta, and gamma
+		void LAMMPSIFY(); // ??		
+		
+		void WRAP_ATOM(XYZ & UNWRAPPED_ATOM, XYZ_INT & WRAP_IDX, bool UPDATE_WRAPDIM);												// Wraps an atom in box ... Saves wrapped coordinates to UN_WRAPPED_ATOM
+		void WRAP_ATOM(XYZ & UNWRAPPED_ATOM, XYZ & WRAPPED_ATOM, XYZ_INT & WRAP_IDX, bool UPDATE_WRAPDIM);			// Wraps an atom in box ... Saves wrapped coordinates to WRAPPED_ATOM or UN_WRAPPED_ATOM
+	
+		void LAYER_ATOM(XYZ & REFERENCE_ATOM, XYZ_INT & LAYER_INDEX);				// Creates replicate atoms (ghost or real) ... Saves replicate coordinates in REFERENCE_ATOM
+		void LAYER_ATOM(XYZ & REFERENCE_ATOM, XYZ_INT & LAYER_INDEX, XYZ & LAYERED_ATOM);	// Creates replicate atoms (ghost or real) ... Saves replicate coordinates in REFERENCE_ATOM or LAYERED_ATOM
+	
+		bool IS_RCUT_SAFE(double CUTOFF, int LAYERS);					// Returns "true" if rcut is less than half the shortest cell vector (general for triclinic systems)
+		
+		void SCALE_BY_FACTOR(double FACTOR);
+		void SCALE_BY_FACTOR(double FACTOR, bool SCALE_ATOMS, XYZ & ATOM);		// Multiplies cell vectors times a scalar and shifts atoms accordingly, if requested
+		
+		void GET_DISTANCE(const XYZ & ATOM1, const XYZ & ATOM2, XYZ & RAB, bool USE_MIC);// Updates RAB to contain distance vectors
+
+
+};
+
+
+
+
 
 class FRAME
 {
-public:
-    	int ATOMS;             		// Just the parent atoms.
-    	int ALL_ATOMS;         	   	// All atoms, including ghosts. 
-	
-	int MY_ATOMS;			// Used for lammps linking. Specify how many atoms in SYS the process owns
-	int MY_ATOMS_START;		// Used for lammps linking. Specify what index along SYS starts the process' atoms
-	XYZ BOXDIM;			// Dimenions of the primitive box.
-	XYZ WRAPDIM;			// Dimenions of the ghost atom box. Equivalent to BOXDIM if no layers are used
-	XYZ STRESS_TENSORS;		// Only used for the diagonal components, xx, yy, zz
-	XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested
-	XYZ STRESS_TENSORS_Y;
-	XYZ STRESS_TENSORS_Z;
-	
-	double QM_POT_ENER;		      // This is the potential energy of the QM calculation!
-	vector<double> QM_ENERGY_OFFSET ;		// This is the energy offset between MD and QM energy, as determined by lsq[2].py.
-	vector<double> QM_POT_ENER_PER_ATOM; // And this is for each atom in the frame, from QM
-	vector<int>    NATOMS_OF_TYPE;	     // How many atoms of each type there are
-	
-	double 	TEMPERATURE;		// This is the RUNNING temperature, not the set temperature!
-	double 	PRESSURE;		// This is the RUNNING pressure, not the set pressure!
-	double 	AVG_TEMPERATURE;	// Only used for velocity scaling-type thermostats
-	double 	PRESSURE_XYZ;		// This is the running pressure sans the ideal gas term
-	XYZ	PRESSURE_TENSORS_XYZ;	// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term
-	XYZ	PRESSURE_TENSORS;	// Adds in the ideal gas term
-	double	TOT_POT_ENER;		// Replaces VTOT
-	
-	vector<int>	PARENT;
-	vector<XYZ_INT> LAYER_IDX;
-	vector<XYZ_INT> WRAP_IDX;  	// Index of box wrapping for this atom.
-	vector<string> 	ATOMTYPE;
-	vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPS file printing
-	vector<XYZ>	COORDS;
-	vector<XYZ>    ALL_COORDS;  	// Coordinates of atoms + ghosts used for force evaluation.
-	vector<double> 	CHARGES;
-	vector<double> 	MASS;
-	vector<XYZ>	FORCES;
-	vector<XYZ>	ACCEL;
-	vector<XYZ>	TMP_EWALD;	// Holds temporary ewald accels/forces
-	vector<XYZ>	VELOCITY;
-	vector<XYZ>	VELOCITY_NEW;
-	vector<XYZ>	VELOCITY_ITER;
+	public:
+  		int ATOMS;             		// Just the parent atoms.
+		int ALL_ATOMS;         	   	// All atoms, including ghosts. 
 
-	// Update ghost atom positions.
-	void 		update_ghost(int n_layers);
-	inline int 	get_atomtype_idx(int atom);
-	void SET_NATOMS_OF_TYPE();
-	void READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE, int i);
-	void build_layers(int N_LAYERS) ;
+		int MY_ATOMS;			// Used for lammps linking. Specify how many atoms in SYS the process owns
+		int MY_ATOMS_START;		// Used for lammps linking. Specify what index along SYS starts the process' atoms
+		BOX BOXDIM;			// Dimenions of the primitive box.
+		XYZ STRESS_TENSORS;		// Only used for the diagonal components, xx, yy, zz
+		XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested
+		XYZ STRESS_TENSORS_Y;
+		XYZ STRESS_TENSORS_Z;
+
+		double         QM_POT_ENER;		// This is the potential energy of the QM calculation!
+		vector<double> QM_ENERGY_OFFSET;    	// This is the energy offset between MD and QM energy, as determined by lsq[2].py.
+		vector<double> QM_POT_ENER_PER_ATOM;	// And this is for each atom in the frame, from QM
+		vector<int>    NATOMS_OF_TYPE;	    	// How many atoms of each type there are
+
+		double 	TEMPERATURE;				// This is the RUNNING temperature, not the set temperature!
+		double 	PRESSURE;					// This is the RUNNING pressure, not the set pressure!
+		double 	AVG_TEMPERATURE;			// Only used for velocity scaling-type thermostats
+		double 	PRESSURE_XYZ;				// This is the running pressure sans the ideal gas term
+		XYZ	PRESSURE_TENSORS_XYZ;		// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term
+		XYZ	PRESSURE_TENSORS;			// Adds in the ideal gas term
+		double	TOT_POT_ENER;				// Replaces VTOT
+
+		vector<int>	PARENT;
+		vector<XYZ_INT> LAYER_IDX;
+		vector<XYZ_INT> WRAP_IDX;  	// Index of box wrapping for this atom.
+		vector<string> 	ATOMTYPE;
+		vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPS file printing
+		vector<XYZ>	COORDS;
+		vector<XYZ>     ALL_COORDS;  	// Coordinates of atoms + ghosts used for force evaluation.
+		vector<double> 	CHARGES;
+		vector<double> 	MASS;
+		vector<XYZ>	FORCES;
+		vector<XYZ>     ACCEL;
+		vector<XYZ>     TMP_EWALD;	// Holds temporary ewald accels/forces
+		vector<XYZ>     VELOCITY;
+		vector<XYZ>	VELOCITY_NEW;
+		vector<XYZ>     VELOCITY_ITER;
+
+		// Update ghost atom positions.
+
+		void 		update_ghost(int n_layers, bool UPDATE_WRAPDIM);
+		inline int 	get_atomtype_idx(int atom);
+
+		void SET_NATOMS_OF_TYPE();
+		void READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE, int i);
+		void build_layers(int N_LAYERS) ;
 };
 
 struct PES_PLOTS
@@ -378,7 +452,7 @@ struct PES_PLOTS
 	vector<XYZ_INT>	IJ_IK_JK_TYPE;
 		
 	
-   PES_PLOTS(): N_PLOTS(0), INCLUDE_2B(0), DO_4D(1), N_SCAN(0) {} 
+	PES_PLOTS(): N_PLOTS(0), INCLUDE_2B(0), DO_4D(1), N_SCAN(0) {} 
 		
 };
 
@@ -537,22 +611,30 @@ class CONSTRAINT
 };
 
 
-class THERMO_AVG {
-// Time average of thermodynamic properties.
-public:
-	double TEMP_SUM;
-	double PRESS_SUM;
-	XYZ STRESS_TENSOR_SUM;
-	void WRITE(ofstream &fout);
-	void READ(ifstream &fin);
-	THERMO_AVG() {
-	  // Zero the initial value of all sums.
-	  TEMP_SUM = 0.0;
-	  PRESS_SUM = 0.0;
-	  STRESS_TENSOR_SUM.X = 0.0;
-	  STRESS_TENSOR_SUM.Y = 0.0;
-	  STRESS_TENSOR_SUM.Z = 0.0;
-	}
+class THERMO_AVG 
+{
+	// Time average of thermodynamic properties.
+	
+	public:
+		
+		double 	TEMP_SUM;
+		double 	PRESS_SUM;
+		XYZ 	STRESS_TENSOR_SUM;
+		
+		void WRITE(ofstream &fout);
+		void READ(ifstream &fin);
+		
+		THERMO_AVG() 
+		{
+	  		// Zero the initial value of all sums.
+		
+			TEMP_SUM  = 0.0;
+			PRESS_SUM = 0.0;
+			
+			STRESS_TENSOR_SUM.X = 0.0;
+			STRESS_TENSOR_SUM.Y = 0.0;
+			STRESS_TENSOR_SUM.Z = 0.0;
+		}
 };
 
 
@@ -585,7 +667,7 @@ void SubtractEwaldForces (FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &
 
 void ZCalc_Ewald         (FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
 
-void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc, XYZ boxdim);
+void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc, BOX boxdim);
 
 void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_MAT & A_MATRIX, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS) ;
 
@@ -603,26 +685,18 @@ void   ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
 // Distance calculation and smoothing functions
 //////////////////////////////////////////
 
-inline double get_dist(const FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
+inline double get_dist(FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 // Calculates distance as a2 - a1... This function modifies RAB!
 {
 	if(SYSTEM.ATOMS == SYSTEM.ALL_ATOMS) // Then we're not using ghost atoms. Need to use MIC
-	{
-		RAB.X = SYSTEM.COORDS[a2].X - SYSTEM.COORDS[a1].X;
-		RAB.Y = SYSTEM.COORDS[a2].Y - SYSTEM.COORDS[a1].Y;
-		RAB.Z = SYSTEM.COORDS[a2].Z - SYSTEM.COORDS[a1].Z;
-		
-		RAB.X -= floor( 0.5 + RAB.X/SYSTEM.BOXDIM.X )  * SYSTEM.BOXDIM.X;
-		RAB.Y -= floor( 0.5 + RAB.Y/SYSTEM.BOXDIM.Y )  * SYSTEM.BOXDIM.Y;
-		RAB.Z -= floor( 0.5 + RAB.Z/SYSTEM.BOXDIM.Z )  * SYSTEM.BOXDIM.Z;
-	}
+		SYSTEM.BOXDIM.GET_DISTANCE(SYSTEM.COORDS[a1], SYSTEM.COORDS[a2], RAB, true);
 	else
-	{
-		RAB.X = SYSTEM.ALL_COORDS[a2].X - SYSTEM.ALL_COORDS[a1].X;
-		RAB.Y = SYSTEM.ALL_COORDS[a2].Y - SYSTEM.ALL_COORDS[a1].Y;
-		RAB.Z = SYSTEM.ALL_COORDS[a2].Z - SYSTEM.ALL_COORDS[a1].Z;
-	}
-	return sqrt( RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z );
+		SYSTEM.BOXDIM.GET_DISTANCE(SYSTEM.ALL_COORDS[a1], SYSTEM.ALL_COORDS[a2], RAB, false);
+
+	
+	//cout << "	" << sqrt(RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z) << endl;
+	
+	return sqrt(RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z);
 }
 
 inline int FRAME::get_atomtype_idx(int atom)
@@ -634,6 +708,12 @@ inline int FRAME::get_atomtype_idx(int atom)
 	#endif
 }
 
+//////////////////////////////////////////
+// Trig functions for box operations
+//////////////////////////////////////////
+
+double VECTOR_MAGNITUDE(vector<double> & vec);
+double VECTOR_ANGLE(vector<double> & v1, vector<double> & v2);
 
 
 

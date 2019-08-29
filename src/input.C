@@ -2238,6 +2238,10 @@ void INPUT::RUN_SANITY_MD(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 {
 	if( (CONTROLS.N_LAYERS>0) && (!NEIGHBOR_LIST.USE) )
 		if (RANK == 0)
+			EXIT_MSG("Neighbor lists must be used if NLAYERS > 0");
+			
+	if( (CONTROLS.N_LAYERS==0) && (NEIGHBOR_LIST.USE) )
+			
 			cout << "WARNING: Use of neighbor lists HIGHLY reccommended when NLAYERS > 0!" << endl;
 	return;
 }

@@ -14,9 +14,9 @@ using namespace std;
 //////////////////////////////////////////
 
 static double add_sines    (int kx, int ky, int kz, vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ);
-static void   generate_trig(vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ, XYZ & RVEC, XYZ & BOXDIM, int kmax);
+static void   generate_trig(vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ, XYZ & RVEC, BOX & BOXDIM, int kmax);
 
-static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, XYZ & PRIM_BOX, bool lsq_mode); // MD compare force version
+static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, BOX & PRIM_BOX, bool lsq_mode); // MD compare force version
 
 
 //////////////////////////////////////////
@@ -25,13 +25,13 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 //
 //////////////////////////////////////////
 
-static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, XYZ & PRIM_BOX, bool lsq_mode)
+static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, double & UCoul, int PRIM_ATOMS, BOX & PRIM_BOX, bool lsq_mode)
 {
 // Calculate Ewald K-space components.  Use a rearrangement of the usual Ewald
 // expression to generate an order-N evaluation.   See A. Y. Toukmaji et. al,
 // Comp. Phys. Comm. 95, 73-92 (1996).
 	
-	double Volume   = PRIM_BOX.X * PRIM_BOX.Y * PRIM_BOX.Z;
+	double Volume   = PRIM_BOX.CELL_AX * PRIM_BOX.CELL_BY * PRIM_BOX.CELL_CZ;
 	const double PI = M_PI;
   
 	//set up Ewald Coulomb parameters:
@@ -60,7 +60,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 		LAST_BOXDIMS.X = LAST_BOXDIMS.Y = LAST_BOXDIMS.Z = 0.0;		
 	}
 
-	if (PRIM_BOX.X != LAST_BOXDIMS.X || PRIM_BOX.Y != LAST_BOXDIMS.Y || PRIM_BOX.Z != LAST_BOXDIMS.Z ) 
+	if (PRIM_BOX.CELL_AX != LAST_BOXDIMS.X || PRIM_BOX.CELL_BY != LAST_BOXDIMS.Y || PRIM_BOX.CELL_CZ != LAST_BOXDIMS.Z ) 
 	{
 		// Update K factors when box dimensions change.
 	
@@ -80,9 +80,9 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 					
 					if(ksq!=0 && ksq<ksqmax)
 					{						
-						K_V[totk].X = (2.0*PI/PRIM_BOX.X)*kx;
-						K_V[totk].Y = (2.0*PI/PRIM_BOX.Y)*ky;
-						K_V[totk].Z = (2.0*PI/PRIM_BOX.Z)*kz;
+						K_V[totk].X = (2.0*PI/PRIM_BOX.CELL_AX)*kx;
+						K_V[totk].Y = (2.0*PI/PRIM_BOX.CELL_BY)*ky;
+						K_V[totk].Z = (2.0*PI/PRIM_BOX.CELL_CZ)*kz;
 						
 						rksq = K_V[totk].X*K_V[totk].X + K_V[totk].Y*K_V[totk].Y + K_V[totk].Z*K_V[totk].Z;
 						
@@ -119,9 +119,9 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 
 		}
 		
-		LAST_BOXDIMS.X = PRIM_BOX.X;
-		LAST_BOXDIMS.Y = PRIM_BOX.Y;
-		LAST_BOXDIMS.Z = PRIM_BOX.Z;
+		LAST_BOXDIMS.X = PRIM_BOX.CELL_AX;
+		LAST_BOXDIMS.Y = PRIM_BOX.CELL_BY;
+		LAST_BOXDIMS.Z = PRIM_BOX.CELL_CZ;
 	}
 
 	UCoul = 0;
@@ -248,13 +248,13 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
   bool lsq_mode ;
   string TEMP_STR;
 
-	XYZ PRIM_BOX;
+	BOX PRIM_BOX;
 	int PRIM_ATOMS;
 	
 	// Primitive box is the same as the original box in this implementation of layers.
-	PRIM_BOX.X = TRAJECTORY.BOXDIM.X;
-	PRIM_BOX.Y = TRAJECTORY.BOXDIM.Y;
-	PRIM_BOX.Z = TRAJECTORY.BOXDIM.Z;
+	PRIM_BOX.CELL_AX = TRAJECTORY.BOXDIM.CELL_AX;
+	PRIM_BOX.CELL_BY = TRAJECTORY.BOXDIM.CELL_BY;
+	PRIM_BOX.CELL_CZ = TRAJECTORY.BOXDIM.CELL_CZ;
 		
 	PRIM_ATOMS = TRAJECTORY.ATOMS;
 
@@ -391,26 +391,26 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 
 }
 
-void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc, XYZ boxdim)
+void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, int & kc, double & r_acc, double & k_acc, BOX boxdim)
 {
 	// Calculate optimal Ewald parameters as suggested by Fincham, Mol. Sim. 1, 1-9 (1994) and the Moldy code manual.
     double p;
   
     double effort_ratio = 5.5;  // Ratio of time for real vs. fourier term.
     double V;
-    double min_boxdim = boxdim.X;
+    double min_boxdim = boxdim.CELL_AX;
 
     // balance_factor and accuracy_factor determined so that K_acc and r_acc are approximately equal
     // to the target accuray.
     double balance_factor = 1.1;
     double accuracy_factor = 0.8;
 
-    if ( boxdim.Y < min_boxdim ) 
-  	  min_boxdim = boxdim.Y;
-    if ( boxdim.Z < min_boxdim ) 
-  	  min_boxdim = boxdim.Z;
+    if ( boxdim.CELL_BY < min_boxdim ) 
+  	  min_boxdim = boxdim.CELL_BY;
+    if ( boxdim.CELL_CZ < min_boxdim ) 
+  	  min_boxdim = boxdim.CELL_CZ;
 
-    V = boxdim.X * boxdim.Y * boxdim.Z;
+    V = boxdim.CELL_AX * boxdim.CELL_BY * boxdim.CELL_CZ;
 
     p = -log(accuracy) * accuracy_factor;
     alpha = sqrt(M_PI) * pow(effort_ratio * nat/(V*V), 1.0/6.0);
@@ -446,39 +446,39 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_M
 
 	// Main loop Ewald Coulomb:
   
-    string			TEMP_STR;
-	int				i_pair;
-	const  int 		maxk 		= 10000;			// Max number of kspace vectors
+	string			TEMP_STR;
+	int			i_pair;
+	const  int 		maxk     = 10000;	// Max number of kspace vectors
 	static int 		kmax;					
-	const  int 		ksqmax 		= 50;			
-	static double 	alphasq 	= 0.7;			
-	const  double 	PI 			= 3.14159265359;
-	static int    	totk 		= 0;
+	const  int 		ksqmax   = 50;			
+	static double 		alphasq  = 0.7;			
+	const  double 		PI       = 3.14159265359;
+	static int    		totk     = 0;
 	int    			ksq;
 	double 			Kfac;
 	XYZ    			R_K; 
 	double 			rksq;
-	double 			alpha 		= sqrt(alphasq);
-	static double 	r_cut;						
-	const  double 	accuracy	 = EWALD_ACCURACY;
+	double 			alpha    = sqrt(alphasq);
+	static double 		r_cut;						
+	const  double 		accuracy = EWALD_ACCURACY;
 	double 			tempd, tempd2, tempd3, tempd4;
 	
 	double 			Volume;
 	XYZ 			D_XYZ; 						
 	double 			rlen_mi;
-	static vector<XYZ> SIN_XYZ; 				
-	static vector<XYZ> COS_XYZ; 				
-	double 			ke = 1.0; 					// this is the unit conversion to achieve charges in nice electron units. currently we apply this conversion at MD-level, not here.
-	static double 	*Kfac_v;
-	static vector<XYZ_INT> K_V(maxk); 
-	static XYZ    	LAST_BOXDIMS;
-	int				a2start, a2end, a2;
+	static vector<XYZ>	SIN_XYZ; 				
+	static vector<XYZ>	COS_XYZ; 				
+	double 			ke = 1.0;	// this is the unit conversion to achieve charges in nice electron units. currently we apply this conversion at MD-level, not here.
+	static double 		*Kfac_v;
+	static vector<XYZ_INT>	K_V(maxk); 
+	static XYZ    		LAST_BOXDIMS;
+	int			a2start, a2end, a2;
 	
-	Volume = FRAME_TRAJECTORY.BOXDIM.X * FRAME_TRAJECTORY.BOXDIM.Y * FRAME_TRAJECTORY.BOXDIM.Z;
+	Volume = FRAME_TRAJECTORY.BOXDIM.VOL;
 	
 	bool BOX_CHANGED = false;
 	
-	if (LAST_BOXDIMS.X != FRAME_TRAJECTORY.BOXDIM.X  || LAST_BOXDIMS.Y != FRAME_TRAJECTORY.BOXDIM.Y  || LAST_BOXDIMS.Z != FRAME_TRAJECTORY.BOXDIM.Z)
+	if (LAST_BOXDIMS.X != FRAME_TRAJECTORY.BOXDIM.CELL_AX  || LAST_BOXDIMS.Y != FRAME_TRAJECTORY.BOXDIM.CELL_BY  || LAST_BOXDIMS.Z != FRAME_TRAJECTORY.BOXDIM.CELL_CZ)
 		BOX_CHANGED = true;
 	if(NPROCS>1)
 		BOX_CHANGED = true;
@@ -487,7 +487,9 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_M
 	{
 		double r_acc, k_acc;
 
-		LAST_BOXDIMS = FRAME_TRAJECTORY.BOXDIM ;
+		LAST_BOXDIMS.X = FRAME_TRAJECTORY.BOXDIM.CELL_AX ;
+		LAST_BOXDIMS.Y = FRAME_TRAJECTORY.BOXDIM.CELL_BY ;
+		LAST_BOXDIMS.Z = FRAME_TRAJECTORY.BOXDIM.CELL_CZ ;
 
 		optimal_ewald_params(accuracy, FRAME_TRAJECTORY.ATOMS, alpha, r_cut, kmax,r_acc, k_acc, FRAME_TRAJECTORY.BOXDIM);	
 
@@ -526,13 +528,13 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_M
 					if(ksq!=0 and ksq<ksqmax)
 					{
 
-						R_K.X = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.X ) * kx;
+						R_K.X = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_AX ) * kx;
 						K_V[totk].X = kx;
 	
-						R_K.Y = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.Y ) * ky;
+						R_K.Y = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_BY ) * ky;
 						K_V[totk].Y = ky;
 
-						R_K.Z = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.Z ) * kz;
+						R_K.Z = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_CZ ) * kz;
 						K_V[totk].Z = kz;
 					
 						rksq = R_K.X*R_K.X + R_K.Y*R_K.Y + R_K.Z*R_K.Z;
@@ -624,9 +626,9 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_M
 			// Sum over all k vectors.
 			for ( int ik = 0; ik < totk; ik++ ) 
 			{
-				R_K.X = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.X ) *  K_V[ik].X;
-				R_K.Y = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.Y ) *  K_V[ik].Y;
-				R_K.Z = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.Z ) *  K_V[ik].Z;
+				R_K.X = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_AX ) *  K_V[ik].X;
+				R_K.Y = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_BY ) *  K_V[ik].Y;
+				R_K.Z = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_CZ ) *  K_V[ik].Z;
 
 				Kfac =  Kfac_v[ik];//exp(-1.0*rksq/(4.0*alpha*alpha))/rksq;
 
@@ -749,7 +751,7 @@ static double add_sines(int kx, int ky, int kz, vector<XYZ> & SIN_XYZ, vector<XY
 	return(SIN_K.X * COSYZ + COS_K.X * SINYZ);
 }
 
-static void  generate_trig(vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ, XYZ & RVEC, XYZ & BOXDIM, int kmax)
+static void  generate_trig(vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ, XYZ & RVEC, BOX & BOXDIM, int kmax)
 {
 	SIN_XYZ.resize(kmax);
 	COS_XYZ.resize(kmax);
@@ -757,13 +759,13 @@ static void  generate_trig(vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ, XYZ & R
 	SIN_XYZ[0].X = SIN_XYZ[0].Y = SIN_XYZ[0].Z = 0.0;
 	COS_XYZ[0].X = COS_XYZ[0].Y = COS_XYZ[0].Z = 1.0;
 
-	SIN_XYZ[1].X = sin( 2.0 * M_PI * RVEC.X / BOXDIM.X );
-	SIN_XYZ[1].Y = sin( 2.0 * M_PI * RVEC.Y / BOXDIM.Y );
-	SIN_XYZ[1].Z = sin( 2.0 * M_PI * RVEC.Z / BOXDIM.Z );
+	SIN_XYZ[1].X = sin( 2.0 * M_PI * RVEC.X / BOXDIM.CELL_AX );
+	SIN_XYZ[1].Y = sin( 2.0 * M_PI * RVEC.Y / BOXDIM.CELL_BY );
+	SIN_XYZ[1].Z = sin( 2.0 * M_PI * RVEC.Z / BOXDIM.CELL_CZ );
 
-	COS_XYZ[1].X = cos( 2.0 * M_PI * RVEC.X / BOXDIM.X );
-	COS_XYZ[1].Y = cos( 2.0 * M_PI * RVEC.Y / BOXDIM.Y );
-	COS_XYZ[1].Z = cos( 2.0 * M_PI * RVEC.Z / BOXDIM.Z );
+	COS_XYZ[1].X = cos( 2.0 * M_PI * RVEC.X / BOXDIM.CELL_AX );
+	COS_XYZ[1].Y = cos( 2.0 * M_PI * RVEC.Y / BOXDIM.CELL_BY );
+	COS_XYZ[1].Z = cos( 2.0 * M_PI * RVEC.Z / BOXDIM.CELL_CZ );
   
 	// Use angle addition formula recursively.
 	

@@ -38,7 +38,14 @@ Reading initial coordinates and forces...
      ...Read box dimensions: 8.3465634528 8.3465634528 8.3465634528
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead: force.txt
-	...Updated simulation box dimensions: 8.3465634528 8.3465634528 8.3465634528
+	...Updated simulation box dimensions: 
+		cell vectors (a)            8.3465634528 0 0
+		cell vectors (b)            0 8.3465634528 0
+		cell vectors (c)            0 0 8.3465634528
+		Layers:                     1
+		Effective cell vectors (a): 25.0396903584 0 0
+		Effective cell vectors (a): 0 25.0396903584 0
+		Effective cell vectors (a): 0 0 25.0396903584
    ...read complete for file input.xyzf
 
 Reading atom info from parameter file...
@@ -47,11 +54,15 @@ Reading atom info from parameter file...
 		1     O , q (e):  0.000, mass (amu):  15.9990
    ...read complete
 
-	Real atoms:                   64
-	Total atoms (ghost):          1728
-	Real box dimesntions:         8.3466 8.3466 8.3466
-	Total box dimensions (ghost): 25.0397 25.0397 25.0397
-
+	Real atoms:                 64
+	Total atoms (ghost):        1728
+	cell vectors (a)            8.3466 0.0000 0.0000
+	cell vectors (b)            0.0000 8.3466 0.0000
+	cell vectors (c)            0.0000 0.0000 8.3466
+	Layers:                     1
+	Effective cell vectors (a): 25.0397 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.0397 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.0397
 Setting up thermostats/barostats/velocities...
 	...Configuring constraints for a NVT-MTK simulation.
 	...Setting thermostat time constant to: 10.0000
@@ -129,8 +140,8 @@ Force field summary:
 		-1.0000 to 1.0000
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		CC 0.9880 8.0000 0.0100 MORSE 1.3500 0.0100 1.0000e+04 1.0000e+00
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		CC 0.9880 8.0000 0.0100 MORSE 1.3500 0.0100 1.0000e+04 1.0000e+00 1.0000e-02
 		Parameters: 
 		0 7.2844e+01
 		1 1.6443e+01
@@ -145,8 +156,8 @@ Force field summary:
 		10 1.1599e+00
 		11 -2.6987e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OO 9.1100e-01 8.0000e+00 1.0000e-02 MORSE 2.5500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		OO 9.1100e-01 8.0000e+00 1.0000e-02 MORSE 2.5500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-02
 		Parameters: 
 		0 1.5973e+02
 		1 7.6796e+00
@@ -161,8 +172,8 @@ Force field summary:
 		10 1.1422e+00
 		11 -6.5407e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		CO 8.7600e-01 8.0000e+00 1.0000e-02 MORSE 1.1500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		CO 8.7600e-01 8.0000e+00 1.0000e-02 MORSE 1.1500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-02
 		Parameters: 
 		0 3.9436e+01
 		1 4.4684e+01

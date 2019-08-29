@@ -31,7 +31,14 @@ Reading initial coordinates and forces...
    ...Read the following number of atoms: 96
      ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
-	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+	...Updated simulation box dimensions: 
+		cell vectors (a)            8.6091309 0 0
+		cell vectors (b)            0 8.6091309 0
+		cell vectors (c)            0 0 8.6091309
+		Layers:                     1
+		Effective cell vectors (a): 25.8273927 0 0
+		Effective cell vectors (a): 0 25.8273927 0
+		Effective cell vectors (a): 0 0 25.8273927
    ...read complete for file input.xyz
 
 Reading atom info from parameter file...
@@ -40,11 +47,15 @@ Reading atom info from parameter file...
 		1     H , q (e): POSITIVE, mass (amu):   1.0080
    ...read complete
 
-	Real atoms:                   96
-	Total atoms (ghost):          2592
-	Real box dimesntions:         8.6091 8.6091 8.6091
-	Total box dimensions (ghost): 25.8274 25.8274 25.8274
-
+	Real atoms:                 96
+	Total atoms (ghost):        2592
+	cell vectors (a)            8.6091 0.0000 0.0000
+	cell vectors (b)            0.0000 8.6091 0.0000
+	cell vectors (c)            0.0000 0.0000 8.6091
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.8274 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.8274
 Setting up thermostats/barostats/velocities...
 	...Configuring constraints for a NVT-MTK simulation.
 	...Setting thermostat time constant to: 10.0000
@@ -113,8 +124,8 @@ Force field summary:
 		-1.0000 to 1.0000
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
 		Parameters: 
 		0 6.2212e+01
 		1 -2.3006e+01
@@ -127,8 +138,8 @@ Force field summary:
 		8 -4.7312e+01
 		9 -2.8730e+01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
 		Parameters: 
 		0 -1.0727e+01
 		1 -1.7487e+01
@@ -141,8 +152,8 @@ Force field summary:
 		8 -6.8694e+00
 		9 -2.7220e+00
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling
-		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
 		Parameters: 
 		0 -1.9422e+00
 		1 2.8491e+01
@@ -324,7 +335,7 @@ RANK: 0 UPDATING ON STEP: 789, WITH PADDING: 0.699
      800    100.00       6.2160805     -53.1095339     -46.8934534          2107.5     10.98211466    -51.1787573
 RANK: 0 UPDATING ON STEP: 807, WITH PADDING: 0.643
      810    101.25       6.2223770     -53.2275621     -47.0051850          2109.7      9.61753713    -51.1787059
-     820    102.50       5.9691015     -53.0930380     -47.1239365          2023.8     10.96853176    -51.1785159
+     820    102.50       5.9691015     -53.0930380     -47.1239365          2023.8     10.96853175    -51.1785159
 RANK: 0 UPDATING ON STEP: 823, WITH PADDING: 0.634
      830    103.75       5.8390149     -53.0794490     -47.2404341          1979.7     12.75922989    -51.1782430
      840    105.00       6.1475891     -53.5068871     -47.3592980          2084.3     12.88039727    -51.1786982
@@ -345,7 +356,7 @@ RANK: 0 UPDATING ON STEP: 924, WITH PADDING: 0.443
      930    116.25       5.4222064     -53.7610302     -48.3388238          1838.4     11.34344027    -51.1786621
 RANK: 0 UPDATING ON STEP: 938, WITH PADDING: 0.505
      940    117.50       5.7813117     -54.1637640     -48.3824522          1960.1     11.84671198    -51.1793725
-     950    118.75       5.6636272     -54.0842867     -48.4206596          1920.2     12.94154910    -51.1787220
+     950    118.75       5.6636272     -54.0842867     -48.4206596          1920.2     12.94154909    -51.1787220
 RANK: 0 UPDATING ON STEP: 954, WITH PADDING: 0.488
      960    120.00       5.7210076     -54.1738516     -48.4528440          1939.7     13.45910780    -51.1790875
 RANK: 0 UPDATING ON STEP: 969, WITH PADDING: 0.516

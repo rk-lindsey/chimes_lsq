@@ -41,7 +41,32 @@ void OPEN_TRAJFILE(ifstream & TRAJ_INPUT, vector<string> & INFILE, int FILE_IDX)
 		EXIT_MSG("ERROR: Cannot open trajectory file: ", INFILE[FILE_IDX]) ;
 }
 
-
+double VECTOR_MAGNITUDE(vector<double> & vec)
+{
+	double MAG = 0;
+	
+	for (int i=0; i<vec.size(); i++)
+		MAG += vec[i]*vec[i];
+	
+	return sqrt(MAG);
+	
+}
+double VECTOR_ANGLE(vector<double> & v1, vector<double> & v2)
+{
+	double ANG = 0;
+	
+	if (v1.size() != v2.size())
+		EXIT_MSG("ERROR: Cannot compute angle between vectors of different dimension");
+		
+	for (int i=0; i<v1.size(); i++)
+		ANG += v1[i]*v2[i];
+	
+	ANG /= VECTOR_MAGNITUDE(v1);
+	ANG /= VECTOR_MAGNITUDE(v2);
+	
+	return acos(ANG);
+			
+}
 
 //////////////////////////////////////////
 // Functions to manage layers
@@ -51,84 +76,99 @@ void OPEN_TRAJFILE(ifstream & TRAJ_INPUT, vector<string> & INFILE, int FILE_IDX)
 void build_real_replicates(FRAME &SYSTEM, const JOB_CONTROL &CONTROLS)
 // Create real (non-ghost) replicates of the input atoms.
 {
-  if(RANK == 0)
-	 cout << "Building " << CONTROLS.REAL_REPLICATES << " replicates..." << endl;
+	if(RANK == 0)
+		cout << "Building " << CONTROLS.REAL_REPLICATES << " replicates..." << endl;
 	
-  int TEMP_IDX = SYSTEM.ATOMS;
-  XYZ TEMP_XYZ{0.0, 0.0, 0.0} ;
+	int TEMP_IDX = SYSTEM.ATOMS;
+	XYZ TEMP_XYZ{0.0, 0.0, 0.0} ;
+	XYZ_INT TMP_LAYER;
 		
-  SYSTEM.PARENT   .resize(SYSTEM.ATOMS);
-  SYSTEM.LAYER_IDX.resize(SYSTEM.ATOMS);
+	SYSTEM.PARENT   .resize(SYSTEM.ATOMS);
+	SYSTEM.LAYER_IDX.resize(SYSTEM.ATOMS);
 			
-  // Create coordinates for the layer atoms. layer elements do not include 0, 0, 0, which is the main cell
+	// Create coordinates for the layer atoms. layer elements do not include 0, 0, 0, which is the main cell
 
-  for(int a1=0; a1<SYSTEM.ATOMS; a1++)
-  {			
-	 for(int n1=0; n1<=CONTROLS.REAL_REPLICATES; n1++)
-	 {
-		for(int n2=0; n2<=CONTROLS.REAL_REPLICATES; n2++)
+	for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+	{			
+		for(int n1=0; n1<=CONTROLS.REAL_REPLICATES; n1++)
 		{
-		  for(int n3=0; n3<=CONTROLS.REAL_REPLICATES; n3++)
-		  {	
-			 if ((n1 == 0) && (n2 == 0) && (n3 == 0) )
-				SYSTEM.PARENT[a1] = a1;
-			 else
-			 {											
-				TEMP_XYZ.X = SYSTEM.COORDS.at(a1).X + n1 * SYSTEM.BOXDIM.X;
-				TEMP_XYZ.Y = SYSTEM.COORDS.at(a1).Y + n2 * SYSTEM.BOXDIM.Y;
-				TEMP_XYZ.Z = SYSTEM.COORDS.at(a1).Z + n3 * SYSTEM.BOXDIM.Z;
+			for(int n2=0; n2<=CONTROLS.REAL_REPLICATES; n2++)
+			{
+				for(int n3=0; n3<=CONTROLS.REAL_REPLICATES; n3++)
+				{	
+					if ((n1 == 0) && (n2 == 0) && (n3 == 0) )
+						SYSTEM.PARENT[a1] = a1;
+					else
+					{
+						TMP_LAYER.X = n1;
+						TMP_LAYER.X = n2;
+						TMP_LAYER.X = n3;
+					
+						SYSTEM.BOXDIM.LAYER_ATOM(SYSTEM.COORDS[a1], TMP_LAYER, TEMP_XYZ);
 
-				SYSTEM.COORDS       .push_back(TEMP_XYZ);
-				SYSTEM.ATOMTYPE     .push_back(SYSTEM.ATOMTYPE     .at(a1));
-				SYSTEM.ATOMTYPE_IDX .push_back(SYSTEM.ATOMTYPE_IDX .at(a1));
-				SYSTEM.CHARGES      .push_back(SYSTEM.CHARGES      .at(a1));
-				SYSTEM.MASS         .push_back(SYSTEM.MASS         .at(a1));	
-				SYSTEM.VELOCITY     .push_back(SYSTEM.VELOCITY     .at(a1));
-				SYSTEM.VELOCITY_ITER.push_back(SYSTEM.VELOCITY_ITER.at(a1));
+						SYSTEM.COORDS       .push_back(TEMP_XYZ);
+						SYSTEM.ATOMTYPE     .push_back(SYSTEM.ATOMTYPE     .at(a1));
+						SYSTEM.ATOMTYPE_IDX .push_back(SYSTEM.ATOMTYPE_IDX .at(a1));
+						SYSTEM.CHARGES      .push_back(SYSTEM.CHARGES      .at(a1));
+						SYSTEM.MASS         .push_back(SYSTEM.MASS         .at(a1));	
+						SYSTEM.VELOCITY     .push_back(SYSTEM.VELOCITY     .at(a1));
+						SYSTEM.VELOCITY_ITER.push_back(SYSTEM.VELOCITY_ITER.at(a1));
 
-				TEMP_IDX++;
+						TEMP_IDX++;
 							
-				SYSTEM.PARENT.push_back(TEMP_IDX);
-			 }
-		  }
+						SYSTEM.PARENT.push_back(TEMP_IDX);
+					}
+				}
+			}
+	 	}
+  	}
+		
+ 	SYSTEM.ATOMS = TEMP_IDX;
+
+	SYSTEM.BOXDIM.CELL_AX *= (CONTROLS.REAL_REPLICATES + 1);
+	SYSTEM.BOXDIM.CELL_AY *= (CONTROLS.REAL_REPLICATES + 1);
+	SYSTEM.BOXDIM.CELL_AZ *= (CONTROLS.REAL_REPLICATES + 1);
+  
+	SYSTEM.BOXDIM.CELL_BX *= (CONTROLS.REAL_REPLICATES + 1);
+	SYSTEM.BOXDIM.CELL_BY *= (CONTROLS.REAL_REPLICATES + 1);
+	SYSTEM.BOXDIM.CELL_BZ *= (CONTROLS.REAL_REPLICATES + 1);
+  
+	SYSTEM.BOXDIM.CELL_CX *= (CONTROLS.REAL_REPLICATES + 1);
+	SYSTEM.BOXDIM.CELL_CY *= (CONTROLS.REAL_REPLICATES + 1);
+	SYSTEM.BOXDIM.CELL_CZ *= (CONTROLS.REAL_REPLICATES + 1);
+  
+	SYSTEM.BOXDIM.UPDATE_CELL();
+
+  	SYSTEM.FORCES      .resize(SYSTEM.ATOMS);
+  	SYSTEM.ACCEL       .resize(SYSTEM.ATOMS);
+	SYSTEM.VELOCITY_NEW.resize(SYSTEM.ATOMS);
+		
+	for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+	{			
+		SYSTEM.ACCEL[a1].X = 0;
+		SYSTEM.ACCEL[a1].Y = 0;
+		SYSTEM.ACCEL[a1].Z = 0;
+	}
+		
+	if(!CONTROLS.COMPARE_FORCE && !CONTROLS.SUBTRACT_FORCE)
+	{
+		for(int a1=0; a1<SYSTEM.ATOMS; a1++)
+		{		
+			SYSTEM.FORCES[a1].X = 0;
+			SYSTEM.FORCES[a1].Y = 0;
+			SYSTEM.FORCES[a1].Z = 0;
 		}
-	 }
-  }
-		
-  SYSTEM.ATOMS = TEMP_IDX;
-
-  SYSTEM.BOXDIM.X *= (CONTROLS.REAL_REPLICATES + 1);
-  SYSTEM.BOXDIM.Y *= (CONTROLS.REAL_REPLICATES + 1);
-  SYSTEM.BOXDIM.Z *= (CONTROLS.REAL_REPLICATES + 1);
-
-  SYSTEM.FORCES      .resize(SYSTEM.ATOMS);
-  SYSTEM.ACCEL       .resize(SYSTEM.ATOMS);
-  SYSTEM.VELOCITY_NEW.resize(SYSTEM.ATOMS);
-		
-  for(int a1=0; a1<SYSTEM.ATOMS; a1++)
-  {			
-	 SYSTEM.ACCEL[a1].X = 0;
-	 SYSTEM.ACCEL[a1].Y = 0;
-	 SYSTEM.ACCEL[a1].Z = 0;
-  }
-		
-  if(!CONTROLS.COMPARE_FORCE && !CONTROLS.SUBTRACT_FORCE)
-  {
-	 for(int a1=0; a1<SYSTEM.ATOMS; a1++)
-	 {
-			
-		SYSTEM.FORCES[a1].X = 0;
-		SYSTEM.FORCES[a1].Y = 0;
-		SYSTEM.FORCES[a1].Z = 0;
-	 }
-  }
+	}
 
 		
-  if(RANK == 0)
-  {
-	 cout << "	New total atoms:    " << SYSTEM.ATOMS << endl;
-	 cout << "	New box dimensions: " << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl << endl;
-  }	
+	if(RANK == 0)
+	{
+		cout << "	New total atoms:    " << SYSTEM.ATOMS << endl;
+		cout << "	New box dimensions: " << endl;
+		cout <<  "	cell vectors (a)            " << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_AY << " " << SYSTEM.BOXDIM.CELL_AZ << endl;
+		cout <<  "	cell vectors (b)            " << SYSTEM.BOXDIM.CELL_BX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_BZ << endl;
+		cout <<  "	cell vectors (c)            " << SYSTEM.BOXDIM.CELL_CX << " " << SYSTEM.BOXDIM.CELL_CY << " " << SYSTEM.BOXDIM.CELL_CZ << endl;
+	}	
 }
 
 
@@ -240,11 +280,7 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	// Set up for MPI
 	
 	int a1start, a1end, a2start, a2end;
-	/*
-	divide_atoms(a1start, a1end, SYSTEM.ATOMS);
-	divide_atoms(a2start, a2end, SYSTEM.ALL_ATOMS);
-	*/
-	
+
 	REPLICATE.ATOMS		= SYSTEM.ATOMS;
 	REPLICATE.ALL_ATOMS	= SYSTEM.ALL_ATOMS;
 
@@ -256,15 +292,9 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	REPLICATE.MY_ATOMS   = SYSTEM.MY_ATOMS ;
 	REPLICATE.MY_ATOMS_START = SYSTEM.MY_ATOMS_START ;
 	
-	REPLICATE.BOXDIM.X	= SYSTEM.BOXDIM.X;
-	REPLICATE.BOXDIM.Y	= SYSTEM.BOXDIM.Y;
-	REPLICATE.BOXDIM.Z	= SYSTEM.BOXDIM.Z;
+	REPLICATE.BOXDIM = SYSTEM.BOXDIM;
 
-	REPLICATE.WRAPDIM.X	= SYSTEM.WRAPDIM.X;
-	REPLICATE.WRAPDIM.Y	= SYSTEM.WRAPDIM.Y;
-	REPLICATE.WRAPDIM.Z	= SYSTEM.WRAPDIM.Z;
-
-	REPLICATE.TOT_POT_ENER 			= SYSTEM.TOT_POT_ENER;
+	REPLICATE.TOT_POT_ENER = SYSTEM.TOT_POT_ENER;
 	
 	REPLICATE.FORCES      .resize(REPLICATE.ATOMS);
 	REPLICATE.ACCEL       .resize(REPLICATE.ATOMS);
@@ -281,12 +311,7 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 		REPLICATE.COORDS[i].Y = SYSTEM.COORDS[i].Y;
 		REPLICATE.COORDS[i].Z = SYSTEM.COORDS[i].Z;		
 
-		REPLICATE.WRAP_IDX[i].X = SYSTEM.WRAP_IDX[i].X ;
-		REPLICATE.WRAP_IDX[i].Y = SYSTEM.WRAP_IDX[i].Y ;
-		REPLICATE.WRAP_IDX[i].Z = SYSTEM.WRAP_IDX[i].Z ;
-
 		REPLICATE.MASS        [i] = SYSTEM.MASS[i];
-
 	}
 
 	REPLICATE.ATOMTYPE    .resize(REPLICATE.ALL_ATOMS);
@@ -303,29 +328,25 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 		REPLICATE.PARENT      [i] = SYSTEM.PARENT[i];
 		REPLICATE.CHARGES     [i] = SYSTEM.CHARGES[i];
 
-		REPLICATE.LAYER_IDX[i].X = SYSTEM.LAYER_IDX[i].X;
-		REPLICATE.LAYER_IDX[i].Y = SYSTEM.LAYER_IDX[i].X;
-		REPLICATE.LAYER_IDX[i].Z = SYSTEM.LAYER_IDX[i].X;		
-
 		REPLICATE.ALL_COORDS[i].X = SYSTEM.ALL_COORDS[i].X;
 		REPLICATE.ALL_COORDS[i].Y = SYSTEM.ALL_COORDS[i].Y;
 		REPLICATE.ALL_COORDS[i].Z = SYSTEM.ALL_COORDS[i].Z;
 	}
 	
-	REPLICATE.TOT_POT_ENER = SYSTEM.TOT_POT_ENER ;
-	REPLICATE.PRESSURE     = SYSTEM.PRESSURE ;
-	REPLICATE.PRESSURE_XYZ = SYSTEM.PRESSURE_XYZ ;
-	REPLICATE.PRESSURE_TENSORS_XYZ = SYSTEM.PRESSURE_TENSORS_XYZ ;
-	REPLICATE.PRESSURE_TENSORS = SYSTEM.PRESSURE_TENSORS ;
+	REPLICATE.TOT_POT_ENER 		= SYSTEM.TOT_POT_ENER;
+	REPLICATE.PRESSURE     		= SYSTEM.PRESSURE;
+	REPLICATE.PRESSURE_XYZ 		= SYSTEM.PRESSURE_XYZ;
+	REPLICATE.PRESSURE_TENSORS_XYZ 	= SYSTEM.PRESSURE_TENSORS_XYZ;
+	REPLICATE.PRESSURE_TENSORS	= SYSTEM.PRESSURE_TENSORS;
 
-	REPLICATE.TEMPERATURE  = SYSTEM.TEMPERATURE ;
-	REPLICATE.AVG_TEMPERATURE = SYSTEM.AVG_TEMPERATURE ;
-	REPLICATE.QM_POT_ENER = SYSTEM.QM_POT_ENER ;
+	REPLICATE.TEMPERATURE  		= SYSTEM.TEMPERATURE;
+	REPLICATE.AVG_TEMPERATURE 	= SYSTEM.AVG_TEMPERATURE;
+	REPLICATE.QM_POT_ENER 		= SYSTEM.QM_POT_ENER;
 
-	REPLICATE.STRESS_TENSORS = SYSTEM.STRESS_TENSORS ;
-	REPLICATE.STRESS_TENSORS_X = SYSTEM.STRESS_TENSORS_X ;
-	REPLICATE.STRESS_TENSORS_Y = SYSTEM.STRESS_TENSORS_Y ;
-	REPLICATE.STRESS_TENSORS_Z = SYSTEM.STRESS_TENSORS_Z ;
+	REPLICATE.STRESS_TENSORS 	= SYSTEM.STRESS_TENSORS;
+	REPLICATE.STRESS_TENSORS_X 	= SYSTEM.STRESS_TENSORS_X;
+	REPLICATE.STRESS_TENSORS_Y 	= SYSTEM.STRESS_TENSORS_Y;
+	REPLICATE.STRESS_TENSORS_Z 	= SYSTEM.STRESS_TENSORS_Z;
 	
 }
 
@@ -351,32 +372,23 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 
 	lscale = 1.0  + eps;
 	
-	for (int j=0; j < REPLICATE.ATOMS; j++ ) 
-	{
-	 	REPLICATE.COORDS[j].X = lscale * SYSTEM.COORDS[j].X;
-		REPLICATE.COORDS[j].Y = lscale * SYSTEM.COORDS[j].Y;
-		REPLICATE.COORDS[j].Z = lscale * SYSTEM.COORDS[j].Z;
-	}
+	for (int j=0; j < REPLICATE.ATOMS; j++ )		
+		REPLICATE.BOXDIM.SCALE_BY_FACTOR(lscale, true, REPLICATE.COORDS[j]);
 
 	for (int j=0; j < REPLICATE.ALL_ATOMS; j++ ) 
-	{
-	 	REPLICATE.ALL_COORDS[j].X = lscale * SYSTEM.ALL_COORDS[j].X;
-		REPLICATE.ALL_COORDS[j].Y = lscale * SYSTEM.ALL_COORDS[j].Y;
-		REPLICATE.ALL_COORDS[j].Z = lscale * SYSTEM.ALL_COORDS[j].Z;
-	}
+		REPLICATE.BOXDIM.SCALE_BY_FACTOR(lscale, true, REPLICATE.ALL_COORDS[j]);
 	
-	REPLICATE.BOXDIM.X = lscale * SYSTEM.BOXDIM.X;
-	REPLICATE.BOXDIM.Y = lscale * SYSTEM.BOXDIM.Y;
-	REPLICATE.BOXDIM.Z = lscale * SYSTEM.BOXDIM.Z;
+	REPLICATE.BOXDIM.SCALE_BY_FACTOR(lscale);
+	REPLICATE.BOXDIM.UPDATE_CELL();
+	
 
 	// Compute/store new total potential energy and volume
 	
-	Vol1 = REPLICATE.BOXDIM.X * REPLICATE.BOXDIM.Y * REPLICATE.BOXDIM.Z;
+	Vol1 = REPLICATE.BOXDIM.VOL;
 	
 	REPLICATE.TOT_POT_ENER = 0;
 	
-	ZCalc(REPLICATE, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP,
-			TRIPS, QUADS, NEIGHBOR_LIST);
+	ZCalc(REPLICATE, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
 	
 	Vtot1 = REPLICATE.TOT_POT_ENER;
 	
@@ -384,32 +396,25 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 
 	lscale = 1.0  - eps;
 	
-	for (int j=0; j < REPLICATE.ATOMS; j++ ) 
-	{
-	 	REPLICATE.COORDS[j].X = lscale * SYSTEM.COORDS[j].X;
-		REPLICATE.COORDS[j].Y = lscale * SYSTEM.COORDS[j].Y;
-		REPLICATE.COORDS[j].Z = lscale * SYSTEM.COORDS[j].Z;
-	}
+	REPLICATE_SYSTEM(SYSTEM, REPLICATE);
 
-	for (int j=0; j < REPLICATE.ALL_ATOMS; j++ ) 
-	{
-	 	REPLICATE.ALL_COORDS[j].X = lscale * SYSTEM.ALL_COORDS[j].X;
-		REPLICATE.ALL_COORDS[j].Y = lscale * SYSTEM.ALL_COORDS[j].Y;
-		REPLICATE.ALL_COORDS[j].Z = lscale * SYSTEM.ALL_COORDS[j].Z;
-	}
+	for (int j=0; j < REPLICATE.ATOMS; j++ ) 
+		REPLICATE.BOXDIM.SCALE_BY_FACTOR(lscale, true, REPLICATE.COORDS[j]);
 	
-	REPLICATE.BOXDIM.X = lscale * SYSTEM.BOXDIM.X;
-	REPLICATE.BOXDIM.Y = lscale * SYSTEM.BOXDIM.Y;
-	REPLICATE.BOXDIM.Z = lscale * SYSTEM.BOXDIM.Z;
+	for (int j=0; j < REPLICATE.ALL_ATOMS; j++ ) 
+		REPLICATE.BOXDIM.SCALE_BY_FACTOR(lscale, true, REPLICATE.ALL_COORDS[j]);
+
+	REPLICATE.BOXDIM.SCALE_BY_FACTOR(lscale);
+	REPLICATE.BOXDIM.UPDATE_CELL();
+	
 	
 	// Compute/store new total potential energy and volume
 	
-	Vol2 = REPLICATE.BOXDIM.X * REPLICATE.BOXDIM.Y * REPLICATE.BOXDIM.Z;
+	Vol2 = REPLICATE.BOXDIM.VOL;
 	
 	REPLICATE.TOT_POT_ENER = 0;
 	
-	ZCalc(REPLICATE, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP,
-			TRIPS, QUADS, NEIGHBOR_LIST);
+	ZCalc(REPLICATE, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
 	
 	Vtot2 = REPLICATE.TOT_POT_ENER;
 
@@ -423,9 +428,7 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 }
 
 
-void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, 
-						map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, 
-						CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST)
+void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST)
 // Check the forces by finite derivative of the energy.  This will be computationally
 // expensive, but an important check.
 {
@@ -452,7 +455,7 @@ void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BOD
 		else if ( j == 2 )
 		  SYSTEM.COORDS[a1].Z += eps ;
 
-		SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
+		SYSTEM.update_ghost(CONTROLS.N_LAYERS, false) ;
 
 		// Recalculate the forces
 		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
@@ -474,7 +477,7 @@ void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BOD
 		else if ( j == 2 )
 		  SYSTEM.COORDS[a1].Z = coords[a1].Z - eps ;
 
-		SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
+		SYSTEM.update_ghost(CONTROLS.N_LAYERS, false) ;
 
 		NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
 
@@ -520,94 +523,9 @@ void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BOD
 	 SYSTEM.COORDS[a1] = coords[a1] ;
 	 SYSTEM.ACCEL[a1] = forces[a1] ;
   }
-  SYSTEM.update_ghost(CONTROLS.N_LAYERS) ;
+  SYSTEM.update_ghost(CONTROLS.N_LAYERS, false) ;
 
 }
-
-
-//////////////////////////////////////////
-// Bad configuration tracking functions
-//////////////////////////////////////////
-/*
-
-void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type)
-// Output the current configuration
-{
-	int PRINT_WIDTH     = 21; // Use 21 for testing
-	int PRINT_PRECISION = 14; // Use 14 for testing
-	
-	if(type == 1)
-	{
-		ofstream &BAD_CONFIGS = BAD_CONFIGS_1;
-	
-		// Print out the file
-	
-		BAD_CONFIGS << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
-		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.X << " ";
-		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Y << " ";
-		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Z << endl;
-	
-		for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
-		{
-			XYZ tmp = SYSTEM.COORDS[ia];
-			
-			if ( CONTROLS.WRAP_COORDS ) 	// Wrap into the primitive cell
-			{
-				
-				tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
-				tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
-				tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
-			}
-	
-			BAD_CONFIGS << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
-			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.X << " ";
-			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Y << " ";
-			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Z << "    ";
-	
-			BAD_CONFIGS << endl;
-		}
-	
-	}
-	else if (type == 2)
-	{
-		ofstream &BAD_CONFIGS = BAD_CONFIGS_2;
-	
-		// Print out the file
-	
-		BAD_CONFIGS << fixed << setw(5) << setprecision(0) << SYSTEM.ATOMS << endl;
-		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.X << " ";
-		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Y << " ";
-		BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.Z << endl;
-	
-		for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
-		{
-			XYZ tmp = SYSTEM.COORDS[ia];
-			
-			if ( CONTROLS.WRAP_COORDS ) 	// Wrap into the primitive cell
-			{
-				
-				tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
-				tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
-				tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
-			}
-	
-			BAD_CONFIGS << setw(2) << SYSTEM.ATOMTYPE[ia] << " ";
-			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.X << " ";
-			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Y << " ";
-			BAD_CONFIGS << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << tmp.Z << "    ";
-	
-			BAD_CONFIGS << endl;
-		}
-	
-	}
-	else
-	{
-		cout << "ERROR: Unknown print type. See PRINT_CONFIG()." << endl;
-		exit(1);
-	}	
-	
-}
-*/
 
 //////////////////////////////////////////
 //
@@ -738,7 +656,7 @@ static void ZCalc_Spline_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PA
 	int    vstart,kstart;
 	string TEMP_STR;
 	
-	double VOL = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
+	double VOL = SYSTEM.BOXDIM.VOL;
 
 	// Main loop for SPLINE terms:
 	
@@ -987,7 +905,7 @@ static void ZCalc_InvR_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	double dfc;
 	double rfac;
 	
-	double VOL = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
+	double VOL = SYSTEM.BOXDIM.VOL;
 	
 	// Set up for layering
 
@@ -1126,7 +1044,7 @@ static void ZCalc_Poly_Deriv(JOB_CONTROL & CONTROLS, FRAME & SYSTEM, vector<PAIR
 	int dim;
 	double rfac;
 	
-	double VOL = SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
+	double VOL = SYSTEM.BOXDIM.VOL;
 
 	if ( ! called_before ) 
 	{
@@ -1412,17 +1330,16 @@ void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, A_MAT & A_MATRIX, vect
 		
 			if((FF_2BODY[curr_pair_type_idx].USE_OVRPRMS && ai != ak && SYSTEM.ATOMTYPE[ai] == FF_2BODY[curr_pair_type_idx].OVER_TO_ATM))
 			{
-
 				rik = get_dist(SYSTEM, RVEC, ai, ak);			
 				
 				// Calculate the derivative of Eover w/r/t delta. Terms emerge from quotient rule combined with chain rule.
 
 				tempr = 1.0/(1+exp(FF_2BODY[curr_pair_type_idx].OVRPRMS[4]*S[ai])) - FF_2BODY[curr_pair_type_idx].OVRPRMS[4]*S[ai]*exp(FF_2BODY[curr_pair_type_idx].OVRPRMS[4]*S[ai])
-					        / pow(1.0+exp(FF_2BODY[curr_pair_type_idx].OVRPRMS[4]*S[ai]),2);
+					   / pow(1.0+exp(FF_2BODY[curr_pair_type_idx].OVRPRMS[4]*S[ai]),2);
 
 				tempr *= FF_2BODY[curr_pair_type_idx].OVRPRMS[2]*pow(rik/FF_2BODY[curr_pair_type_idx].OVRPRMS[1],FF_2BODY[curr_pair_type_idx].OVRPRMS[3]) *
-					     FF_2BODY[curr_pair_type_idx].OVRPRMS[3]*exp(FF_2BODY[curr_pair_type_idx].OVRPRMS[2] *
-						 pow(rik/FF_2BODY[curr_pair_type_idx].OVRPRMS[1],FF_2BODY[curr_pair_type_idx].OVRPRMS[3]))/rik;	
+					 FF_2BODY[curr_pair_type_idx].OVRPRMS[3]*exp(FF_2BODY[curr_pair_type_idx].OVRPRMS[2] *
+					 pow(rik/FF_2BODY[curr_pair_type_idx].OVRPRMS[1],FF_2BODY[curr_pair_type_idx].OVRPRMS[3]))/rik;	
 
 
 				dEover[ai].X -= tempr*RVEC.X/rik*FF_2BODY[curr_pair_type_idx].OVRPRMS[0];
@@ -1513,10 +1430,10 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	else if ( FF_2BODY[0].PAIRTYP == "CLUSTER" )
 	  	  ZCalc_Cluster(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);	
 	else 
-    {
+    	{
 		cout << "Error: bad pairtype in ZCalc: " << FF_2BODY[0].PAIRTYP << endl;
 		exit_run(1);
-    }	
+    	}	
 	
 	if ( CONTROLS.USE_COULOMB ) 
 		ZCalc_Ewald(SYSTEM, CONTROLS, NEIGHBOR_LIST);
@@ -1525,23 +1442,11 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	  ZCalcSR_Over(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
 
 	// FUNCTIONS THAT NEED UPDATING:
-
-	/* 
-
-	else if ( pair_type == INVERSE_R ) 	
-		ZCalc_SR_Analytic(Coord,Lbc, Latcons,nat,smin,smax,snum, SForce,Vtot, Pxyz, params);
-
-	else if ( pair_type == STILLINGER )  // SAVE THIS FOR SECOND TO LAST FOR SIMILAR REASONS  
-		ZCalc_Stillinger(Coord,Lbc, Latcons,nat,smax, SForce,Vtot,Pxyz);
-
-	else 
-		EXIT_MSG("Error: Unknown pair type", pair_type)
-	*/
 	
-	SYSTEM.PRESSURE_XYZ           /= 3.0 *  SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
-	SYSTEM.PRESSURE_TENSORS_XYZ.X /=        SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
-	SYSTEM.PRESSURE_TENSORS_XYZ.Y /=        SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
-	SYSTEM.PRESSURE_TENSORS_XYZ.Z /=        SYSTEM.BOXDIM.X * SYSTEM.BOXDIM.Y * SYSTEM.BOXDIM.Z;
+	SYSTEM.PRESSURE_XYZ           /= 3.0 *  SYSTEM.BOXDIM.VOL;
+	SYSTEM.PRESSURE_TENSORS_XYZ.X /=        SYSTEM.BOXDIM.VOL;
+	SYSTEM.PRESSURE_TENSORS_XYZ.Y /=        SYSTEM.BOXDIM.VOL;
+	SYSTEM.PRESSURE_TENSORS_XYZ.Z /=        SYSTEM.BOXDIM.VOL;
 
   return;
 }
@@ -1588,7 +1493,17 @@ static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 			double rcutoff = FF_2BODY[curr_pair_type_idx].S_MAXIM;
 
 			rlen_mi = get_dist(SYSTEM, RVEC, a1, a2);
-	
+			
+			/*
+			cout << "Step " << CONTROLS.STEP << endl;
+			cout << "	a1, a2: " << a1 << " 	" << a2 << endl;
+			cout << "	a1 crd: " << SYSTEM.ALL_COORDS[a1].X << " " << SYSTEM.ALL_COORDS[a1].Y << " " << SYSTEM.ALL_COORDS[a1].Z << endl;
+			cout << "	a2 crd: " << SYSTEM.ALL_COORDS[a2].X << " " << SYSTEM.ALL_COORDS[a2].Y << " " << SYSTEM.ALL_COORDS[a2].Z << endl;
+			cout << "	rlen  : " <<  rlen_mi << endl;
+			cout << "	rvec  : " << RVEC.X << "	" << RVEC.Y << "	" << RVEC.Z << endl;
+			cout << endl;
+			*/
+
 			if ( rlen_mi < FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2) 
 				EXIT_MSG("Error: close approach", rlen_mi);
 

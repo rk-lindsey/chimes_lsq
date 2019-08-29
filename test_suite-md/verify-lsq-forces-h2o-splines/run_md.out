@@ -36,7 +36,14 @@ Reading initial coordinates and forces...
      ...Read box dimensions: 8.6091309 8.6091309 8.6091309
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead: force.txt
-	...Updated simulation box dimensions: 8.6091309 8.6091309 8.6091309
+	...Updated simulation box dimensions: 
+		cell vectors (a)            8.6091309 0 0
+		cell vectors (b)            0 8.6091309 0
+		cell vectors (c)            0 0 8.6091309
+		Layers:                     1
+		Effective cell vectors (a): 25.8273927 0 0
+		Effective cell vectors (a): 0 25.8273927 0
+		Effective cell vectors (a): 0 0 25.8273927
    ...read complete for file input.xyzf
 
 Reading atom info from parameter file...
@@ -45,11 +52,15 @@ Reading atom info from parameter file...
 		1     H , q (e): POSITIVE, mass (amu):   1.0079
    ...read complete
 
-	Real atoms:                   96
-	Total atoms (ghost):          2592
-	Real box dimesntions:         8.6091 8.6091 8.6091
-	Total box dimensions (ghost): 25.8274 25.8274 25.8274
-
+	Real atoms:                 96
+	Total atoms (ghost):        2592
+	cell vectors (a)            8.6091 0.0000 0.0000
+	cell vectors (b)            0.0000 8.6091 0.0000
+	cell vectors (c)            0.0000 0.0000 8.6091
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.8274 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.8274
 WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 Setting up thermostats/barostats/velocities...
 	...Configuring constraints for a NVT-MTK simulation.
@@ -277,7 +288,7 @@ Force field summary:
 		107 -17.2618
 		108 1.0685
 		109 31.9617
-		110 0.0000
+		110 -0.0000
 		111 -0.0000
 
 		pair type...smin...smax...sdelta...

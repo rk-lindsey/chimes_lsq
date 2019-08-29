@@ -331,12 +331,7 @@ void WRITE_TRAJ::PRINT_FRAME_GEN(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 		XYZ tmp = SYSTEM.COORDS[i] ;
 
 		if ( CONTROLS.WRAP_COORDS ) 
-		{
-			// Wrap into the primitive cell
-			tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
-			tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
-			tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
-		}
+			SYSTEM.BOXDIM.WRAP_ATOM(tmp, SYSTEM.WRAP_IDX[i], false);	// Wrap into the primitive cell
 			
 		TRAJFILE << right << setw(4) << i+1 << " " << setw(2) << SYSTEM.ATOMTYPE_IDX[i]+1 << " " 
 				<< fixed << setprecision(5) << setw(8) << tmp.X << " "
@@ -348,35 +343,34 @@ void WRITE_TRAJ::PRINT_FRAME_GEN(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 			 << fixed << setprecision(5) << setw(8) << 0.0 << " "
 			 << fixed << setprecision(5) << setw(8) << 0.0 << endl;
 		
-	TRAJFILE << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.X << " "
-			 << fixed << setprecision(5) << setw(8) << 0.0 << " "
-			 << fixed << setprecision(5) << setw(8) << 0.0 << endl;
+	TRAJFILE << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.CELL_AX << " "
+			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.CELL_AY << " "
+			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.CELL_AZ << endl;
 		
-	TRAJFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
-			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.Y << " "
-			 << fixed << setprecision(5) << setw(8) << 0.0 << endl;
+	TRAJFILE << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.CELL_BX << " "
+			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.CELL_BY << " "
+			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.CELL_BZ << endl;
 		
-	TRAJFILE << fixed << setprecision(5) << setw(8) << 0.0 << " "
-			 << fixed << setprecision(5) << setw(8) << 0.0 << " "
-			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.Z << endl;
+	TRAJFILE << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.CELL_CX << " "
+			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.CELL_CY << " "
+			 << fixed << setprecision(5) << setw(8) << SYSTEM.BOXDIM.CELL_CZ << endl;
 }
 
 void WRITE_TRAJ::PRINT_FRAME_XYZ(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 {
 	TRAJFILE << SYSTEM.ATOMS << endl;
-	TRAJFILE << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+	
+	if (SYSTEM.BOXDIM.IS_ORTHO)
+		TRAJFILE << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_CZ << endl;
+	else
+		EXIT_MSG("ERROR: PRINT_FRAME_XYZF_FORCE for non-orthorhombic cells not yet implemented");	
 		
 	for (int a1=0; a1<SYSTEM.ATOMS; a1++) 
 	{
 		XYZ tmp = SYSTEM.COORDS[a1] ;
 
 		if ( CONTROLS.WRAP_COORDS ) 
-		{
-			// Wrap into the primitive cell
-			tmp.X -= floor(tmp.X/SYSTEM.BOXDIM.X)*SYSTEM.BOXDIM.X;
-			tmp.Y -= floor(tmp.Y/SYSTEM.BOXDIM.Y)*SYSTEM.BOXDIM.Y;
-			tmp.Z -= floor(tmp.Z/SYSTEM.BOXDIM.Z)*SYSTEM.BOXDIM.Z;
-		}
+			SYSTEM.BOXDIM.WRAP_ATOM(tmp, SYSTEM.WRAP_IDX[a1], false);	// Wrap into the primitive cell
 			
 		TRAJFILE << right << setw(4) << SYSTEM.ATOMTYPE[a1] << " "  
 				<< fixed << setprecision(5) << setw(15) << tmp.X << " "
@@ -391,10 +385,10 @@ void WRITE_TRAJ::PRINT_FRAME_LAMMPSTRJ(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 	TRAJFILE << (CONTROLS.STEP+1) * CONTROLS.DELTA_T_FS << endl;
 	TRAJFILE << "ITEM: NUMBER OF ATOMS" << endl;
 	TRAJFILE << SYSTEM.ATOMS << endl;
-	TRAJFILE << "ITEM: BOX BOUNDS xy xz yz pp pp pp" << endl;
-	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.X << " 0.0" << endl;
-	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.Y << " 0.0" << endl;
-	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.Z << " 0.0" << endl;
+	TRAJFILE << "ITEM: BOX BOUNDS xy xz yz xy xz yz" << endl;
+	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.CELL_LX << " " << SYSTEM.BOXDIM.XY << endl;
+	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.CELL_LY << " " << SYSTEM.BOXDIM.XZ << endl;
+	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.CELL_LZ << " " << SYSTEM.BOXDIM.YZ << endl;
 	
 	
 	// FYI, can get fancy and control what gets printed to the lammps-format files using:
@@ -429,7 +423,11 @@ void WRITE_TRAJ::PRINT_FRAME_XYZF_FORCE(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 	TRAJFILE.precision(10);	
 
 	TRAJFILE << SYSTEM.ATOMS << endl;
-	TRAJFILE << SYSTEM.BOXDIM.X << " " << SYSTEM.BOXDIM.Y << " " << SYSTEM.BOXDIM.Z << endl;
+	
+	if (SYSTEM.BOXDIM.IS_ORTHO)
+		TRAJFILE << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_CZ << endl;
+	else
+		EXIT_MSG("ERROR: PRINT_FRAME_XYZF_FORCE for non-orthorhombic cells not yet implemented");
 
 	for(int i=0;i<SYSTEM.ATOMS;i++)
 	{
