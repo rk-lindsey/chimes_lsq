@@ -557,7 +557,7 @@ FF_SETUP_1:
   // (Required for neighbor lists, which are now ALWAYS used)
 
   SYSTEM.build_layers(CONTROLS.N_LAYERS);
-	
+  
   if ( (CONTROLS.N_LAYERS > 0) && (RANK == 0) )	// Then ghost atoms are used 
   {
 	cout << "	Real atoms:                 " << SYSTEM.ATOMS     << endl;
@@ -1222,7 +1222,18 @@ static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBL
 	}
 	else
 	{
-		EXIT_MSG("ERROR: Non-orthorhombic functionality not implemented for write_xyzv");
+		fxyz << "NON_ORTHO ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_AX << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_AY << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_AZ << " ";	
+		
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_BX << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_BY << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_BZ << " ";
+		
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CX << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CY << " ";
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CZ << endl;				
 	}
 	
 
@@ -2879,25 +2890,41 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 // Read coordinates,  and optionally velocities and forces.  There is support for more than one coordinate
 // input file, given by the index.
 {
-	ifstream 		COORDFILE;
-	int 			TEMP_INT ;
-	XYZ 			TMP_BOX ;
+	ifstream 	COORDFILE;
+	int 		TEMP_INT;
+	BOX 		TMP_BOX;
 	stringstream	STREAM_PARSER;
-	string 			FIRST_EXT;
-	string  		LINE;
+	string 		FIRST_EXT;
+	string  	LINE;
+	vector<string>	tokens;
 
 	COORDFILE.open(CONTROLS.COORD_FILE[index].data());
 	
 	COORDFILE >> TEMP_INT;	// Store number of atoms in file in a temp var
 	
-	if(SYSTEM.BOXDIM.IS_ORTHO)
+	COORDFILE >> LINE;
+	
+	if(LINE == "NON_ORTHO")
 	{
-		COORDFILE >> TMP_BOX.X >> TMP_BOX.Y >> TMP_BOX.Z;
+		SYSTEM.BOXDIM.IS_ORTHO = false;
+		TMP_BOX.IS_ORTHO = false;
+		COORDFILE >> TMP_BOX.CELL_AX;
 	}
+		
+	else
+		TMP_BOX.CELL_AX = stof(LINE);
+	
+	
+	if (SYSTEM.BOXDIM.IS_ORTHO)
+		COORDFILE >> TMP_BOX.CELL_BY >> TMP_BOX.CELL_CZ; // TMP_BOX.CELL_AX >> 
 	else
 	{
-		EXIT_MSG("ERROR: Non-orthorhomic functionality not yet implemented in read_coord_file");
+		COORDFILE >>                    TMP_BOX.CELL_AY >> TMP_BOX.CELL_AZ; // TMP_BOX.CELL_AX >> 
+		COORDFILE >> TMP_BOX.CELL_BX >> TMP_BOX.CELL_BY >> TMP_BOX.CELL_BZ;
+		COORDFILE >> TMP_BOX.CELL_CX >> TMP_BOX.CELL_CY >> TMP_BOX.CELL_CZ;
 	}
+	
+	TMP_BOX.UPDATE_CELL();
 	
 	if(CONTROLS.FIT_STRESS)                                                                                           
 		COORDFILE >>  SYSTEM.PRESSURE_TENSORS.X >>  SYSTEM.PRESSURE_TENSORS.Y >>  SYSTEM.PRESSURE_TENSORS.Z;      
@@ -2944,23 +2971,23 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	if (RANK==0)
 	{
 		cout << "     ...Read the following coordinate file extension: " << EXTENSION << endl;
-		cout << "   ...Read the following number of atoms: " << TEMP_INT << endl;
-		cout << "     ...Read box dimensions: " << TMP_BOX.X << " " << TMP_BOX.Y << " " << TMP_BOX.Z << endl;
+		cout << "     ...Read the following number of atoms: " << TEMP_INT << endl;
+		cout << "     ...Read box dimensions: " << endl;
+		TMP_BOX.WRITE_BOX(CONTROLS.N_LAYERS);
 		
 		if(CONTROLS.FIT_STRESS)
 			cout << "	...Read stress tensors: " << SYSTEM.PRESSURE_TENSORS.X << " " << SYSTEM.PRESSURE_TENSORS.Y << " " << SYSTEM.PRESSURE_TENSORS.Z << endl;
 		if(CONTROLS.FIT_ENER)  													
 			cout << "	...Read potential energy: " << SYSTEM.QM_POT_ENER << endl;					       
-		
 	}
 	
 	getline(COORDFILE,LINE);
 
-	int CURR_ATOM = -1 ;
+	int     CURR_ATOM    = -1 ;
+	XYZ_INT TMP_WRAP_IDX = {0.0,0.0,0.0};
 
 	for(int a=0; a<TEMP_INT;a++)
-	{
-			
+	{		
 		CURR_ATOM++;
 
 		getline(COORDFILE,LINE);
@@ -2975,9 +3002,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 
 		// Wrap the coordinates, shift along Z
 
-		SYSTEM.COORDS[CURR_ATOM].X -= floor(SYSTEM.COORDS[CURR_ATOM].X/TMP_BOX.X)*TMP_BOX.X;
-		SYSTEM.COORDS[CURR_ATOM].Y -= floor(SYSTEM.COORDS[CURR_ATOM].Y/TMP_BOX.Y)*TMP_BOX.Y;
-		SYSTEM.COORDS[CURR_ATOM].Z -= floor(SYSTEM.COORDS[CURR_ATOM].Z/TMP_BOX.Z)*TMP_BOX.Z;
+		TMP_BOX.WRAP_ATOM(SYSTEM.COORDS[CURR_ATOM], TMP_WRAP_IDX, true);
+		
 		SYSTEM.COORDS[CURR_ATOM].Z += SYSTEM.BOXDIM.CELL_CZ;
 
 		// Prepare velocities
@@ -3047,7 +3073,7 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 		}
 		
 		STREAM_PARSER.str("");
-		STREAM_PARSER.clear();	
+		STREAM_PARSER.clear();
 	}
 
 	// Read in stress components for comparison to current values.
@@ -3083,9 +3109,17 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	}
 	// Input configurations are added sequentially along z.
 		
-	SYSTEM.BOXDIM.CELL_AX  = TMP_BOX.X;
-	SYSTEM.BOXDIM.CELL_BY  = TMP_BOX.Y;
-	SYSTEM.BOXDIM.CELL_CZ += TMP_BOX.Z;
+	SYSTEM.BOXDIM.CELL_AX  = TMP_BOX.CELL_AX;
+	SYSTEM.BOXDIM.CELL_AY  = TMP_BOX.CELL_AY;
+	SYSTEM.BOXDIM.CELL_AZ  = TMP_BOX.CELL_AZ;
+	
+	SYSTEM.BOXDIM.CELL_BX  = TMP_BOX.CELL_BX;
+	SYSTEM.BOXDIM.CELL_BY  = TMP_BOX.CELL_BY;
+	SYSTEM.BOXDIM.CELL_BZ  = TMP_BOX.CELL_BZ;
+
+	SYSTEM.BOXDIM.CELL_CX  = TMP_BOX.CELL_CX;
+	SYSTEM.BOXDIM.CELL_CY  = TMP_BOX.CELL_CY;				
+	SYSTEM.BOXDIM.CELL_CZ += TMP_BOX.CELL_CZ;
 		
 	if(CONTROLS.SCALE_SYSTEM_BY != 1.0)
 	{
@@ -3108,15 +3142,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 		
 	if (RANK==0)
 	{
-		cout <<  "	...Updated simulation box dimensions: " << endl;
-		cout <<  "		cell vectors (a)            " << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_AY << " " << SYSTEM.BOXDIM.CELL_AZ << endl;
-		cout <<  "		cell vectors (b)            " << SYSTEM.BOXDIM.CELL_BX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_BZ << endl;
-		cout <<  "		cell vectors (c)            " << SYSTEM.BOXDIM.CELL_CX << " " << SYSTEM.BOXDIM.CELL_CY << " " << SYSTEM.BOXDIM.CELL_CZ << endl;
-		cout <<  "		Layers:                     " << CONTROLS.N_LAYERS << endl;
-		cout <<  "		Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_AX * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AY * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_AZ * (2*CONTROLS.N_LAYERS +1) << endl;
-		cout <<  "		Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_BX * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BY * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_BZ * (2*CONTROLS.N_LAYERS +1) << endl;
-		cout <<  "		Effective cell vectors (a): " << SYSTEM.BOXDIM.CELL_CX * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CY * (2*CONTROLS.N_LAYERS +1) << " " << SYSTEM.BOXDIM.CELL_CZ * (2*CONTROLS.N_LAYERS +1) << endl;	
-		
+		cout <<  "     ...Updated simulation box dimensions: " << endl;
+		SYSTEM.BOXDIM.WRITE_BOX(CONTROLS.N_LAYERS);
 	}
 
 	if ( ! CONTROLS.RESTART ) 
@@ -3152,9 +3179,24 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 		FORCE_SUBTRACTED_OUTPUT << END << endl;
 		
 		if (SYSTEM.BOXDIM.IS_ORTHO)
+		{
 			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_CZ << " ";
+		}
 		else
-			EXIT_MSG("ERROR: subtract_force FORCE_SUBTRACTED_OUTPUT not updated for non-orthorhombic cells");
+		{
+			FORCE_SUBTRACTED_OUTPUT << "NON_ORTHO ";
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_AX << " ";
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_AY << " ";
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_AZ << " ";	    
+		
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_BX << " ";
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_BY << " ";
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_BZ << " ";
+		
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_CX << " ";
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_CY << " ";
+			FORCE_SUBTRACTED_OUTPUT << SYSTEM.BOXDIM.CELL_CZ << " ";	    
+		}
 				
 		// NOTE:  PRESSURE_TENSORS_XYZ hold the potential energy contribution to the current stress tensor.
 		// PRESSURE_TENSOR holds potential + kinetic energy to the current stress tensor in GPa units.

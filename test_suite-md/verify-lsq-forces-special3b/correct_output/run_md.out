@@ -34,18 +34,49 @@ Setting up the data objects...
 Reading initial coordinates and forces...
       Opening force.txt to read forces for comparison
      ...Read the following coordinate file extension: xyzf
-   ...Read the following number of atoms: 64
-     ...Read box dimensions: 8.3465634528 8.3465634528 8.3465634528
+     ...Read the following number of atoms: 64
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.3465633392334 0 0
+       Cell vectors (b)                0 8.3465634528 0
+       Cell vectors (c)                0 0 8.3465634528
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.0396900177002 0 0
+       Ghost cell vectors (a) 	        0 25.0396903584 0
+       Ghost cell vectors (a) 	        0 0 25.0396903584
+       Invr. cell vectors (a) 	        0.11980978989274 -0 0
+       Invr. cell vectors (b) 	        -0 0.119809788262561 -0
+       Invr. cell vectors (c) 	        0 -0 0.119809788262561
+       Lat. constants (a,b,c) 	        8.3465633392334 8.3465634528 8.3465634528
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.3465633392334 8.3465634528 8.3465634528
+       LMP cell lengths (lx,ly,lz)     8.3465633392334 8.3465634528 8.3465634528
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     581.464348898237
+
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead: force.txt
-	...Updated simulation box dimensions: 
-		cell vectors (a)            8.3465634528 0 0
-		cell vectors (b)            0 8.3465634528 0
-		cell vectors (c)            0 0 8.3465634528
-		Layers:                     1
-		Effective cell vectors (a): 25.0396903584 0 0
-		Effective cell vectors (a): 0 25.0396903584 0
-		Effective cell vectors (a): 0 0 25.0396903584
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.3465633392334 0 0
+       Cell vectors (b)                0 8.3465634528 0
+       Cell vectors (c)                0 0 8.3465634528
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.0396900177002 0 0
+       Ghost cell vectors (a) 	        0 25.0396903584 0
+       Ghost cell vectors (a) 	        0 0 25.0396903584
+       Invr. cell vectors (a) 	        0.11980978989274 -0 0
+       Invr. cell vectors (b) 	        -0 0.119809788262561 -0
+       Invr. cell vectors (c) 	        0 -0 0.119809788262561
+       Lat. constants (a,b,c) 	        8.3465633392334 8.3465634528 8.3465634528
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.3465633392334 8.3465634528 8.3465634528
+       LMP cell lengths (lx,ly,lz)     8.3465633392334 8.3465634528 8.3465634528
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     581.464348898237
+
    ...read complete for file input.xyzf
 
 Reading atom info from parameter file...
@@ -73,7 +104,7 @@ Running velocity sanity checks...
 	Initial velocity center of mass: (   -0.0907,     0.0065,     0.1233) 
 	Final   velocity center of mass: (   -0.0000,    -0.0000,     0.0000) 
 	Total Mass     = 896.3200 au
-	Volume         = 581.4644 Ang^3
+	Volume         = 581.4643 Ang^3
 	Number density = 0.1828 mol atm/cm^3
 	Mass density   = 2.5597 g/cm^3
    ...checks complete
@@ -692,4 +723,4 @@ Generating fast maps...
 BEGIN SIMULATION:
 RANK: 0 RESET RCUT_PADDING TO: 0.0966386615
 Number of 3-body interactions = 83678
-RMS force error = 0.000043
+RMS force error = 0.000045

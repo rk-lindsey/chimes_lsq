@@ -1,0 +1,39 @@
+####### CONTROL VARIABLES #######
+
+# TRJFILE #
+        ../../../test_suite-md/lj-triclinic-1/ORTHO-GEN_XYZF/forceout.xyzf 
+# WRAPTRJ # 
+        true
+# NFRAMES # 
+        25
+# NLAYERS #
+        1
+# FITCOUL #
+        false
+# FITSTRS # 
+        false
+# FITENER #
+        false   
+# FITPOVR # 
+        false
+# PAIRTYP # 
+        CHEBYSHEV 12 0
+# CHBTYPE #
+        MORSE
+
+####### TOPOLOGY VARIABLES #######
+
+# NATMTYP # 
+        1
+
+# TYPEIDX #     # ATM_TYP #     # ATMCHRG #     # ATMMASS # 
+1               C                0.0            12.011
+
+# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA #        # USEOVRP #     # NIJBINS #     # NIKBINS #     # NJKBINS #
+1               C               C               1.0           	3.15            0.01            1.25                    false           0               0               0
+
+# FCUTTYP #
+        CUBIC   
+
+# ENDFILE #
+

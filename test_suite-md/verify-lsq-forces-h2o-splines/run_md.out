@@ -32,18 +32,49 @@ Setting up the data objects...
 Reading initial coordinates and forces...
       Opening force.txt to read forces for comparison
      ...Read the following coordinate file extension: xyzf
-   ...Read the following number of atoms: 96
-     ...Read box dimensions: 8.6091309 8.6091309 8.6091309
+     ...Read the following number of atoms: 96
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        0 25.8273927 0
+       Ghost cell vectors (a) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084112874303
+
 	...Ignoring last three fields of atom info lines in xyzf file... 
 	...will read from specified force file instead: force.txt
-	...Updated simulation box dimensions: 
-		cell vectors (a)            8.6091309 0 0
-		cell vectors (b)            0 8.6091309 0
-		cell vectors (c)            0 0 8.6091309
-		Layers:                     1
-		Effective cell vectors (a): 25.8273927 0 0
-		Effective cell vectors (a): 0 25.8273927 0
-		Effective cell vectors (a): 0 0 25.8273927
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        0 25.8273927 0
+       Ghost cell vectors (a) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084112874303
+
    ...read complete for file input.xyzf
 
 Reading atom info from parameter file...
@@ -145,7 +176,7 @@ Attempting to read pairtype...
 
      
      Pair charges modified for exact neutrality:
-       OO 96.100542106
+       OO 96.100542105
        HH 24.025161746
        OH -48.050297272
 Atom properties:
@@ -289,7 +320,7 @@ Force field summary:
 		108 1.0685
 		109 31.9617
 		110 -0.0000
-		111 -0.0000
+		111 0.0000
 
 		pair type...smin...smax...sdelta...
 		HH 0.6000 6.0000 0.1000 
@@ -404,7 +435,7 @@ Force field summary:
 		107 -1.0271
 		108 -0.2236
 		109 -16.1343
-		110 -0.0000
+		110 0.0000
 		111 -0.0000
 
 		pair type...smin...smax...sdelta...
@@ -552,7 +583,7 @@ Ewald parameters:
 	Ewald alpha               =  7.723233e-01
 	R-Space Ewald cutoff      =  4.304565e+00
 	R-Space accuracy estimate =  5.997380e-07
-	K-Space accuracy estimate =  6.801448e-07
+	K-Space accuracy estimate =  6.801449e-07
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364

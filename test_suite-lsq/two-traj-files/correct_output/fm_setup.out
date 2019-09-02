@@ -976,8 +976,11 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      605     1   2   1   2   2   1         602             51              2        
 		      606     2   1   1   1   2   2         602             51              2        
 		      607     2   1   1   2   1   2         602             51              2        
+BUILDING LAYERS 
 		      608     1   2   2   1   2   1         602             51              2        
 		      609     1   2   2   2   1   1         602             51              2        
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      610     2   1   2   1   1   2         602             51              2        
 		      611     2   2   1   1   1   2         602             51              2        
 		      612     2   1   2   2   1   1         602             51              2        
@@ -988,6 +991,9 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      617     1   2   2   1   2   2         614             52              2        
 		      618     1   2   2   2   1   2         614             52              2        
 		      619     2   1   2   1   2   2         614             52              2        
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      620     2   2   1   2   1   2         614             52              2        
 		      621     2   1   2   2   2   1         614             52              2        
 		      622     2   2   1   2   2   1         614             52              2        
@@ -996,13 +1002,19 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      625     2   2   2   2   1   1         614             52              2        
 		      626     1   2   2   2   2   1         626             53              8        
 		      627     2   1   2   2   1   2         626             53              8        
+BUILDING LAYERS 
 		      628     2   2   1   1   2   2         626             53              8        
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      629     1   2   2   2   2   2         629             54              4        
 		      630     2   1   2   2   2   2         629             54              4        
 		      631     2   2   1   2   2   2         629             54              4        
 		      632     2   2   2   1   2   2         629             54              4        
 		      633     2   2   2   2   1   2         629             54              4        
 		      634     2   2   2   2   2   1         629             54              4        
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      635     2   2   2   2   2   2         635             55              24       
 
     Cluster index       : 1
@@ -1016,20 +1028,29 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      2       0   0   1   0   2   1         1               1               2        
 		      3       0   0   2   0   1   1         1               1               2        
 		      4       0   0   1   0   2   2         4               2               2        
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      5       0   0   2   0   1   2         4               2               2        
 		      6       0   0   2   0   2   1         4               2               2        
 		      7       0   0   1   1   0   0         7               3               2        
 		      8       0   1   0   0   1   0         7               3               2        
 		      9       1   0   0   0   0   1         7               3               2        
 		      10      0   0   1   1   0   1         10              4               1        
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      11      0   0   1   1   1   0         10              4               1        
 		      12      0   1   0   0   1   1         10              4               1        
+BUILDING LAYERS 
 		      13      1   0   0   0   1   1         10              4               1        
 		      14      0   1   1   0   1   0         10              4               1        
 		      15      1   0   1   0   0   1         10              4               1        
 		      16      0   0   1   1   0   2         16              5               1        
 		      17      0   0   1   1   2   0         16              5               1        
 		      18      0   1   0   0   1   2         16              5               1        
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      19      1   0   0   0   2   1         16              5               1        
 		      20      0   1   2   0   1   0         16              5               1        
 		      21      1   0   2   0   0   1         16              5               1        
@@ -1037,6 +1058,9 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      23      0   1   1   0   1   1         22              6               2        
 		      24      1   0   1   0   1   1         22              6               2        
 		      25      0   0   1   1   1   2         25              7               1        
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      26      0   0   1   1   2   1         25              7               1        
 		      27      0   1   1   0   1   2         25              7               1        
 		      28      1   0   1   0   2   1         25              7               1        
@@ -1044,6 +1068,9 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      30      1   0   2   0   1   1         25              7               1        
 		      31      0   0   1   1   2   2         31              8               2        
 		      32      0   1   2   0   1   2         31              8               2        
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      33      1   0   2   0   2   1         31              8               2        
 		      34      0   0   1   2   0   0         34              9               2        
 		      35      0   2   0   0   1   0         34              9               2        
@@ -1192,7 +1219,10 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      178     0   2   1   1   0   1         176             39              1        
 		      179     2   0   1   1   1   0         176             39              1        
 		      180     1   2   1   0   0   1         176             39              1        
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      181     2   1   1   0   1   0         176             39              1        
+BUILDING LAYERS 
 		      182     0   1   0   2   1   2         182             40              1        
 		      183     1   0   0   2   2   1         182             40              1        
 		      184     0   2   1   1   0   2         182             40              1        
@@ -1208,7 +1238,10 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      194     0   1   0   2   2   1         194             42              1        
 		      195     1   0   0   2   1   2         194             42              1        
 		      196     0   2   2   1   0   1         194             42              1        
+BUILDING LAYERS 
 		      197     2   0   2   1   1   0         194             42              1        
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      198     1   2   1   0   0   2         194             42              1        
 		      199     2   1   1   0   2   0         194             42              1        
 		      200     0   1   0   2   2   2         200             43              1        
@@ -1221,8 +1254,11 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      207     1   0   1   1   0   1         206             44              2        
 		      208     1   1   0   0   1   1         206             44              2        
 		      209     0   1   1   1   1   1         209             45              2        
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      210     1   0   1   1   1   1         209             45              2        
 		      211     1   1   1   0   1   1         209             45              2        
+BUILDING LAYERS 
 		      212     0   1   1   1   1   2         212             46              2        
 		      213     1   0   1   1   2   1         212             46              2        
 		      214     1   1   2   0   1   1         212             46              2        
@@ -1234,8 +1270,11 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      220     1   1   0   0   2   1         215             47              1        
 		      221     0   1   1   1   2   1         221             48              1        
 		      222     1   0   1   1   1   2         221             48              1        
+BUILDING LAYERS 
 		      223     0   1   2   1   1   1         221             48              1        
 		      224     1   0   2   1   1   1         221             48              1        
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      225     1   1   1   0   1   2         221             48              1        
 		      226     1   1   1   0   2   1         221             48              1        
 		      227     0   1   1   1   2   2         227             49              1        
@@ -1249,6 +1288,9 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      235     0   2   0   1   1   0         233             50              1        
 		      236     2   0   0   1   0   1         233             50              1        
 		      237     1   2   0   0   1   0         233             50              1        
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 		      238     2   1   0   0   0   1         233             50              1        
 		      239     0   1   1   2   0   1         239             51              1        
 		      240     1   0   1   2   1   0         239             51              1        
@@ -1515,6 +1557,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      501     1   1   1   2   2   2         501             106             2        
 		      502     1   2   2   1   1   2         501             106             2        
 		      503     2   1   2   1   2   1         501             106             2        
+BUILDING LAYERS 
 		      504     1   1   2   1   2   2         504             107             6        
 		      505     1   1   2   2   0   0         505             108             2        
 		      506     1   2   0   1   2   0         505             108             2        
@@ -1524,6 +1567,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      510     1   2   0   1   2   1         508             109             1        
 		      511     2   1   0   1   1   2         508             109             1        
 		      512     1   2   1   1   2   0         508             109             1        
+BUILDING LAYERS 
 		      513     2   1   1   1   0   2         508             109             1        
 		      514     1   1   2   2   0   2         514             110             1        
 		      515     1   1   2   2   2   0         514             110             1        
@@ -1531,6 +1575,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      517     2   1   0   1   2   2         514             110             1        
 		      518     1   2   2   1   2   0         514             110             1        
 		      519     2   1   2   1   0   2         514             110             1        
+BUILDING LAYERS 
 		      520     1   1   2   2   1   1         520             111             2        
 		      521     1   2   1   1   2   1         520             111             2        
 		      522     2   1   1   1   1   2         520             111             2        
@@ -1538,6 +1583,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      524     1   1   2   2   2   1         523             112             1        
 		      525     1   2   1   1   2   2         523             112             1        
 		      526     2   1   1   1   2   2         523             112             1        
+BUILDING LAYERS 
 		      527     1   2   2   1   2   1         523             112             1        
 		      528     2   1   2   1   1   2         523             112             1        
 		      529     1   1   2   2   2   2         529             113             2        
@@ -1545,6 +1591,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      531     2   1   2   1   2   2         529             113             2        
 		      532     1   2   0   2   0   1         532             114             2        
 		      533     2   1   0   2   1   0         532             114             2        
+BUILDING LAYERS 
 		      534     2   2   1   1   0   0         532             114             2        
 		      535     1   2   0   2   0   2         535             115             2        
 		      536     2   1   0   2   2   0         535             115             2        
@@ -1552,6 +1599,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      538     1   2   0   2   1   0         538             116             1        
 		      539     2   1   0   2   0   1         538             116             1        
 		      540     1   2   1   2   0   0         538             116             1        
+BUILDING LAYERS 
 		      541     2   1   1   2   0   0         538             116             1        
 		      542     2   2   0   1   0   1         538             116             1        
 		      543     2   2   0   1   1   0         538             116             1        
@@ -1559,11 +1607,13 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      545     2   1   0   2   1   1         544             117             1        
 		      546     1   2   1   2   0   1         544             117             1        
 		      547     2   1   1   2   1   0         544             117             1        
+BUILDING LAYERS 
 		      548     2   2   1   1   0   1         544             117             1        
 		      549     2   2   1   1   1   0         544             117             1        
 		      550     1   2   0   2   1   2         550             118             1        
 		      551     2   1   0   2   2   1         550             118             1        
 		      552     1   2   1   2   0   2         550             118             1        
+BUILDING LAYERS 
 		      553     2   1   1   2   2   0         550             118             1        
 		      554     2   2   2   1   0   1         550             118             1        
 		      555     2   2   2   1   1   0         550             118             1        
@@ -1572,6 +1622,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      558     1   2   2   2   0   0         556             119             1        
 		      559     2   1   2   2   0   0         556             119             1        
 		      560     2   2   0   1   0   2         556             119             1        
+BUILDING LAYERS 
 		      561     2   2   0   1   2   0         556             119             1        
 		      562     1   2   0   2   2   1         562             120             1        
 		      563     2   1   0   2   1   2         562             120             1        
@@ -1599,6 +1650,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      585     1   2   2   2   1   0         583             125             1        
 		      586     2   1   2   2   0   1         583             125             1        
 		      587     2   2   0   1   1   2         583             125             1        
+BUILDING LAYERS 
 		      588     2   2   0   1   2   1         583             125             1        
 		      589     1   2   1   2   2   1         589             126             1        
 		      590     2   1   1   2   1   2         589             126             1        
@@ -1616,6 +1668,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      602     2   1   2   2   0   2         601             128             2        
 		      603     2   2   0   1   2   2         601             128             2        
 		      604     1   2   2   2   2   1         604             129             2        
+BUILDING LAYERS 
 		      605     2   1   2   2   1   2         604             129             2        
 		      606     2   2   1   1   2   2         604             129             2        
 		      607     1   2   2   2   2   2         607             130             2        
@@ -1632,6 +1685,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      618     2   2   1   2   1   0         616             133             2        
 		      619     2   2   0   2   1   2         619             134             1        
 		      620     2   2   0   2   2   1         619             134             1        
+BUILDING LAYERS 
 		      621     2   2   1   2   0   2         619             134             1        
 		      622     2   2   1   2   2   0         619             134             1        
 		      623     2   2   2   2   0   1         619             134             1        
@@ -1645,6 +1699,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      631     2   2   2   2   1   1         629             137             2        
 		      632     2   2   1   2   2   2         632             138             2        
 		      633     2   2   2   2   1   2         632             138             2        
+BUILDING LAYERS 
 		      634     2   2   2   2   2   1         632             138             2        
 		      635     2   2   2   2   2   2         635             139             6        
 
@@ -1665,6 +1720,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      8       0   0   1   0   2   2         8               3               1        
 		      9       0   1   0   2   0   2         8               3               1        
 		      10      0   0   2   0   1   2         8               3               1        
+BUILDING LAYERS 
 		      11      0   2   0   1   0   2         8               3               1        
 		      12      0   0   1   1   0   0         12              4               2        
 		      13      0   1   0   0   1   0         12              4               2        
@@ -1750,6 +1806,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      93      0   1   1   2   0   2         90              26              1        
 		      94      0   0   2   1   2   0         94              27              1        
 		      95      0   2   0   2   1   0         94              27              1        
+BUILDING LAYERS 
 		      96      0   1   2   0   2   0         94              27              1        
 		      97      0   2   1   2   0   0         94              27              1        
 		      98      0   0   2   1   2   1         98              28              1        
@@ -1758,12 +1815,14 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      101     0   2   1   2   0   1         98              28              1        
 		      102     0   0   2   1   2   2         102             29              1        
 		      103     0   2   0   2   1   2         102             29              1        
+BUILDING LAYERS 
 		      104     0   1   2   0   2   2         102             29              1        
 		      105     0   2   1   2   0   2         102             29              1        
 		      106     0   0   2   2   0   0         106             30              2        
 		      107     0   2   0   0   2   0         106             30              2        
 		      108     0   0   2   2   0   1         108             31              2        
 		      109     0   2   0   0   2   1         108             31              2        
+BUILDING LAYERS 
 		      110     0   0   2   2   0   2         110             32              2        
 		      111     0   2   0   0   2   2         110             32              2        
 		      112     0   0   2   2   1   0         112             33              1        
@@ -1771,6 +1830,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      114     0   2   1   0   2   0         112             33              1        
 		      115     0   1   2   2   0   0         112             33              1        
 		      116     0   0   2   2   1   1         116             34              1        
+BUILDING LAYERS 
 		      117     0   2   0   1   2   1         116             34              1        
 		      118     0   2   1   0   2   1         116             34              1        
 		      119     0   1   2   2   0   1         116             34              1        
@@ -1780,6 +1840,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      123     0   1   2   2   0   2         120             35              1        
 		      124     0   0   2   2   2   0         124             36              1        
 		      125     0   2   0   2   2   0         124             36              1        
+BUILDING LAYERS 
 		      126     0   2   2   0   2   0         124             36              1        
 		      127     0   2   2   2   0   0         124             36              1        
 		      128     0   0   2   2   2   1         128             37              1        
@@ -1787,6 +1848,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      130     0   2   2   0   2   1         128             37              1        
 		      131     0   2   2   2   0   1         128             37              1        
 		      132     0   0   2   2   2   2         132             38              1        
+BUILDING LAYERS 
 		      133     0   2   0   2   2   2         132             38              1        
 		      134     0   2   2   0   2   2         132             38              1        
 		      135     0   2   2   2   0   2         132             38              1        
@@ -1795,12 +1857,14 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      138     0   1   1   1   1   2         138             41              4        
 		      139     0   1   1   1   2   0         139             42              1        
 		      140     0   1   1   2   1   0         139             42              1        
+BUILDING LAYERS 
 		      141     0   1   2   1   1   0         139             42              1        
 		      142     0   2   1   1   1   0         139             42              1        
 		      143     0   1   1   1   2   1         143             43              1        
 		      144     0   1   1   2   1   1         143             43              1        
 		      145     0   1   2   1   1   1         143             43              1        
 		      146     0   2   1   1   1   1         143             43              1        
+BUILDING LAYERS 
 		      147     0   1   1   1   2   2         147             44              1        
 		      148     0   1   1   2   1   2         147             44              1        
 		      149     0   1   2   1   1   2         147             44              1        
@@ -1809,6 +1873,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      152     0   2   2   1   1   0         151             45              2        
 		      153     0   1   1   2   2   1         153             46              2        
 		      154     0   2   2   1   1   1         153             46              2        
+BUILDING LAYERS 
 		      155     0   1   1   2   2   2         155             47              2        
 		      156     0   2   2   1   1   2         155             47              2        
 		      157     0   1   2   1   2   0         157             48              2        
@@ -1837,6 +1902,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      180     0   2   2   2   1   2         177             56              1        
 		      181     0   2   2   2   2   0         181             57              4        
 		      182     0   2   2   2   2   1         182             58              4        
+BUILDING LAYERS 
 		      183     0   2   2   2   2   2         183             59              4        
 		      184     1   0   0   0   0   1         184             60              4        
 		      185     1   0   0   0   0   2         185             61              4        
@@ -1855,6 +1921,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      198     1   0   0   0   2   2         198             65              1        
 		      199     1   0   0   2   0   2         198             65              1        
 		      200     1   0   2   0   0   2         198             65              1        
+BUILDING LAYERS 
 		      201     1   2   0   0   0   2         198             65              1        
 		      202     1   0   0   1   1   0         202             66              2        
 		      203     1   1   1   0   0   0         202             66              2        
@@ -1869,6 +1936,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      212     1   0   0   1   2   1         212             70              1        
 		      213     1   0   0   2   1   1         212             70              1        
 		      214     1   1   2   0   0   1         212             70              1        
+BUILDING LAYERS 
 		      215     1   2   1   0   0   1         212             70              1        
 		      216     1   0   0   1   2   2         216             71              1        
 		      217     1   0   0   2   1   2         216             71              1        
@@ -1882,6 +1950,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      225     1   2   2   0   0   2         224             74              2        
 		      226     1   0   1   0   1   1         226             75              2        
 		      227     1   1   0   1   0   1         226             75              2        
+BUILDING LAYERS 
 		      228     1   0   1   0   1   2         228             76              2        
 		      229     1   1   0   1   0   2         228             76              2        
 		      230     1   0   1   0   2   1         230             77              1        
@@ -1896,6 +1965,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      239     1   1   0   0   1   0         238             79              2        
 		      240     1   0   1   1   0   1         240             80              2        
 		      241     1   1   0   0   1   1         240             80              2        
+BUILDING LAYERS 
 		      242     1   0   1   1   0   2         242             81              2        
 		      243     1   1   0   0   1   2         242             81              2        
 		      244     1   0   1   1   1   0         244             82              1        
@@ -2002,6 +2072,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      345     1   1   2   2   0   1         342             109             1        
 		      346     1   0   2   2   1   2         346             110             1        
 		      347     1   2   0   1   2   2         346             110             1        
+BUILDING LAYERS 
 		      348     1   2   1   0   2   2         346             110             1        
 		      349     1   1   2   2   0   2         346             110             1        
 		      350     1   0   2   2   2   0         350             111             1        
@@ -2013,6 +2084,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      356     1   2   2   0   2   1         354             112             1        
 		      357     1   2   2   2   0   1         354             112             1        
 		      358     1   0   2   2   2   2         358             113             1        
+BUILDING LAYERS 
 		      359     1   2   0   2   2   2         358             113             1        
 		      360     1   2   2   0   2   2         358             113             1        
 		      361     1   2   2   2   0   2         358             113             1        
@@ -2021,12 +2093,14 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      364     1   1   1   1   1   2         364             116             4        
 		      365     1   1   1   1   2   0         365             117             1        
 		      366     1   1   1   2   1   0         365             117             1        
+BUILDING LAYERS 
 		      367     1   1   2   1   1   0         365             117             1        
 		      368     1   2   1   1   1   0         365             117             1        
 		      369     1   1   1   1   2   1         369             118             1        
 		      370     1   1   1   2   1   1         369             118             1        
 		      371     1   1   2   1   1   1         369             118             1        
 		      372     1   2   1   1   1   1         369             118             1        
+BUILDING LAYERS 
 		      373     1   1   1   1   2   2         373             119             1        
 		      374     1   1   1   2   1   2         373             119             1        
 		      375     1   1   2   1   1   2         373             119             1        
@@ -2035,6 +2109,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      378     1   2   2   1   1   0         377             120             2        
 		      379     1   1   1   2   2   1         379             121             2        
 		      380     1   2   2   1   1   1         379             121             2        
+BUILDING LAYERS 
 		      381     1   1   1   2   2   2         381             122             2        
 		      382     1   2   2   1   1   2         381             122             2        
 		      383     1   1   2   1   2   0         383             123             2        
@@ -2042,6 +2117,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      385     1   1   2   1   2   1         385             124             2        
 		      386     1   2   1   2   1   1         385             124             2        
 		      387     1   1   2   1   2   2         387             125             2        
+BUILDING LAYERS 
 		      388     1   2   1   2   1   2         387             125             2        
 		      389     1   1   2   2   1   0         389             126             2        
 		      390     1   2   1   1   2   0         389             126             2        
@@ -2049,6 +2125,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      392     1   2   1   1   2   1         391             127             2        
 		      393     1   1   2   2   1   2         393             128             2        
 		      394     1   2   1   1   2   2         393             128             2        
+BUILDING LAYERS 
 		      395     1   1   2   2   2   0         395             129             1        
 		      396     1   2   1   2   2   0         395             129             1        
 		      397     1   2   2   1   2   0         395             129             1        
@@ -2056,6 +2133,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      399     1   1   2   2   2   1         399             130             1        
 		      400     1   2   1   2   2   1         399             130             1        
 		      401     1   2   2   1   2   1         399             130             1        
+BUILDING LAYERS 
 		      402     1   2   2   2   1   1         399             130             1        
 		      403     1   1   2   2   2   2         403             131             1        
 		      404     1   2   1   2   2   2         403             131             1        
@@ -2064,6 +2142,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      407     1   2   2   2   2   0         407             132             4        
 		      408     1   2   2   2   2   1         408             133             4        
 		      409     1   2   2   2   2   2         409             134             4        
+BUILDING LAYERS 
 		      410     2   0   0   0   0   1         410             135             4        
 		      411     2   0   0   0   0   2         411             136             4        
 		      412     2   0   0   0   1   1         412             137             1        
@@ -2089,6 +2168,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      432     2   0   0   1   1   2         432             143             2        
 		      433     2   1   1   0   0   2         432             143             2        
 		      434     2   0   0   1   2   0         434             144             1        
+BUILDING LAYERS 
 		      435     2   0   0   2   1   0         434             144             1        
 		      436     2   1   2   0   0   0         434             144             1        
 		      437     2   2   1   0   0   0         434             144             1        
@@ -2105,6 +2185,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      448     2   0   0   2   2   1         448             148             2        
 		      449     2   2   2   0   0   1         448             148             2        
 		      450     2   0   0   2   2   2         450             149             2        
+BUILDING LAYERS 
 		      451     2   2   2   0   0   2         450             149             2        
 		      452     2   0   1   0   1   1         452             150             2        
 		      453     2   1   0   1   0   1         452             150             2        
@@ -2120,6 +2201,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      463     2   2   0   1   0   2         460             153             1        
 		      464     2   0   1   1   0   0         464             154             2        
 		      465     2   1   0   0   1   0         464             154             2        
+BUILDING LAYERS 
 		      466     2   0   1   1   0   1         466             155             2        
 		      467     2   1   0   0   1   1         466             155             2        
 		      468     2   0   1   1   0   2         468             156             2        
@@ -2134,6 +2216,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      477     2   1   1   1   0   1         474             158             1        
 		      478     2   0   1   1   1   2         478             159             1        
 		      479     2   1   0   1   1   2         478             159             1        
+BUILDING LAYERS 
 		      480     2   1   1   0   1   2         478             159             1        
 		      481     2   1   1   1   0   2         478             159             1        
 		      482     2   0   1   1   2   0         482             160             1        
@@ -2149,6 +2232,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      492     2   1   2   0   1   2         490             162             1        
 		      493     2   2   1   1   0   2         490             162             1        
 		      494     2   0   1   2   0   0         494             163             1        
+BUILDING LAYERS 
 		      495     2   1   0   0   2   0         494             163             1        
 		      496     2   2   0   0   1   0         494             163             1        
 		      497     2   0   2   1   0   0         494             163             1        
@@ -2242,6 +2326,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      585     2   2   0   2   2   2         584             188             1        
 		      586     2   2   2   0   2   2         584             188             1        
 		      587     2   2   2   2   0   2         584             188             1        
+BUILDING LAYERS 
 		      588     2   1   1   1   1   0         588             189             4        
 		      589     2   1   1   1   1   1         589             190             4        
 		      590     2   1   1   1   1   2         590             191             4        
@@ -2252,6 +2337,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      595     2   1   1   1   2   1         595             193             1        
 		      596     2   1   1   2   1   1         595             193             1        
 		      597     2   1   2   1   1   1         595             193             1        
+BUILDING LAYERS 
 		      598     2   2   1   1   1   1         595             193             1        
 		      599     2   1   1   1   2   2         599             194             1        
 		      600     2   1   1   2   1   2         599             194             1        
@@ -2260,6 +2346,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      603     2   1   1   2   2   0         603             195             2        
 		      604     2   2   2   1   1   0         603             195             2        
 		      605     2   1   1   2   2   1         605             196             2        
+BUILDING LAYERS 
 		      606     2   2   2   1   1   1         605             196             2        
 		      607     2   1   1   2   2   2         607             197             2        
 		      608     2   2   2   1   1   2         607             197             2        
@@ -2267,6 +2354,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      610     2   2   1   2   1   0         609             198             2        
 		      611     2   1   2   1   2   1         611             199             2        
 		      612     2   2   1   2   1   1         611             199             2        
+BUILDING LAYERS 
 		      613     2   1   2   1   2   2         613             200             2        
 		      614     2   2   1   2   1   2         613             200             2        
 		      615     2   1   2   2   1   0         615             201             2        
@@ -2275,6 +2363,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      618     2   2   1   1   2   1         617             202             2        
 		      619     2   1   2   2   1   2         619             203             2        
 		      620     2   2   1   1   2   2         619             203             2        
+BUILDING LAYERS 
 		      621     2   1   2   2   2   0         621             204             1        
 		      622     2   2   1   2   2   0         621             204             1        
 		      623     2   2   2   1   2   0         621             204             1        
@@ -2282,6 +2371,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      625     2   1   2   2   2   1         625             205             1        
 		      626     2   2   1   2   2   1         625             205             1        
 		      627     2   2   2   1   2   1         625             205             1        
+BUILDING LAYERS 
 		      628     2   2   2   2   1   1         625             205             1        
 		      629     2   1   2   2   2   2         629             206             1        
 		      630     2   2   1   2   2   2         629             206             1        
@@ -2289,6 +2379,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      632     2   2   2   2   1   2         629             206             1        
 		      633     2   2   2   2   2   0         633             207             4        
 		      634     2   2   2   2   2   1         634             208             4        
+BUILDING LAYERS 
 		      635     2   2   2   2   2   2         635             209             4        
 
     Cluster index       : 3
@@ -2302,6 +2393,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      2       1   0   0   1   1   0         0               0               2        
 		      3       0   0   1   0   1   2         3               1               1        
 		      4       0   1   0   1   0   2         3               1               1        
+BUILDING LAYERS 
 		      5       0   0   1   0   2   1         3               1               1        
 		      6       0   1   0   2   0   1         3               1               1        
 		      7       1   0   0   1   2   0         3               1               1        
@@ -2309,6 +2401,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      9       0   0   1   0   2   2         9               2               2        
 		      10      0   1   0   2   0   2         9               2               2        
 		      11      1   0   0   2   2   0         9               2               2        
+BUILDING LAYERS 
 		      12      0   0   1   1   0   0         12              3               2        
 		      13      0   1   0   0   1   0         12              3               2        
 		      14      1   0   0   0   0   1         12              3               2        
@@ -2330,6 +2423,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      30      0   0   1   1   1   2         30              7               1        
 		      31      0   1   0   1   1   2         30              7               1        
 		      32      0   0   1   1   2   1         30              7               1        
+BUILDING LAYERS 
 		      33      0   1   0   2   1   1         30              7               1        
 		      34      1   0   0   1   2   1         30              7               1        
 		      35      1   0   0   2   1   1         30              7               1        
@@ -2346,6 +2440,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      46      1   0   0   0   1   2         42              10              1        
 		      47      1   0   0   1   0   2         42              10              1        
 		      48      0   0   1   2   0   2         48              11              1        
+BUILDING LAYERS 
 		      49      0   1   0   0   2   2         48              11              1        
 		      50      0   0   1   2   2   0         48              11              1        
 		      51      0   1   0   2   2   0         48              11              1        
@@ -2361,6 +2456,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      61      1   0   0   1   2   2         57              13              1        
 		      62      1   0   0   2   1   2         57              13              1        
 		      63      0   0   1   2   2   2         63              14              2        
+BUILDING LAYERS 
 		      64      0   1   0   2   2   2         63              14              2        
 		      65      1   0   0   2   2   2         63              14              2        
 		      66      0   0   2   0   1   1         66              15              2        
@@ -2376,6 +2472,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      76      0   2   0   2   0   2         75              17              2        
 		      77      2   0   0   2   2   0         75              17              2        
 		      78      0   0   2   1   0   0         78              18              2        
+BUILDING LAYERS 
 		      79      0   2   0   0   1   0         78              18              2        
 		      80      2   0   0   0   0   1         78              18              2        
 		      81      0   0   2   1   0   1         81              19              1        
@@ -2390,6 +2487,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      90      0   2   0   2   1   0         87              20              1        
 		      91      2   0   0   0   2   1         87              20              1        
 		      92      2   0   0   2   0   1         87              20              1        
+BUILDING LAYERS 
 		      93      0   0   2   1   1   1         93              21              2        
 		      94      0   2   0   1   1   1         93              21              2        
 		      95      2   0   0   1   1   1         93              21              2        
@@ -2525,6 +2623,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      225     1   2   0   0   0   2         222             48              1        
 		      226     2   0   1   2   0   0         222             48              1        
 		      227     2   1   0   0   2   0         222             48              1        
+BUILDING LAYERS 
 		      228     0   1   2   0   2   1         228             49              1        
 		      229     0   2   1   2   0   1         228             49              1        
 		      230     1   0   2   0   1   2         228             49              1        
@@ -2534,6 +2633,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      234     0   1   2   0   2   2         234             50              1        
 		      235     0   2   1   2   0   2         234             50              1        
 		      236     1   0   2   0   2   2         234             50              1        
+BUILDING LAYERS 
 		      237     1   2   0   2   0   2         234             50              1        
 		      238     2   0   1   2   2   0         234             50              1        
 		      239     2   1   0   2   2   0         234             50              1        
@@ -2541,6 +2641,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      241     0   2   1   0   1   0         240             51              1        
 		      242     1   0   2   1   0   0         240             51              1        
 		      243     1   2   0   0   1   0         240             51              1        
+BUILDING LAYERS 
 		      244     2   0   1   0   0   1         240             51              1        
 		      245     2   1   0   0   0   1         240             51              1        
 		      246     0   1   2   1   0   1         246             52              1        
@@ -2548,6 +2649,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      248     1   0   2   1   1   0         246             52              1        
 		      249     1   2   0   1   1   0         246             52              1        
 		      250     2   0   1   0   1   1         246             52              1        
+BUILDING LAYERS 
 		      251     2   1   0   1   0   1         246             52              1        
 		      252     0   1   2   1   0   2         252             53              1        
 		      253     0   2   1   0   1   2         252             53              1        
@@ -2555,6 +2657,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      255     1   2   0   2   1   0         252             53              1        
 		      256     2   0   1   0   2   1         252             53              1        
 		      257     2   1   0   2   0   1         252             53              1        
+BUILDING LAYERS 
 		      258     0   1   2   1   1   0         258             54              1        
 		      259     0   2   1   1   1   0         258             54              1        
 		      260     1   0   2   1   0   1         258             54              1        
@@ -2563,6 +2666,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      263     2   1   0   0   1   1         258             54              1        
 		      264     0   1   2   1   1   1         264             55              1        
 		      265     0   2   1   1   1   1         264             55              1        
+BUILDING LAYERS 
 		      266     1   0   2   1   1   1         264             55              1        
 		      267     1   2   0   1   1   1         264             55              1        
 		      268     2   0   1   1   1   1         264             55              1        
@@ -2570,6 +2674,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      270     0   1   2   1   1   2         270             56              1        
 		      271     0   2   1   1   1   2         270             56              1        
 		      272     1   0   2   1   2   1         270             56              1        
+BUILDING LAYERS 
 		      273     1   2   0   2   1   1         270             56              1        
 		      274     2   0   1   1   2   1         270             56              1        
 		      275     2   1   0   2   1   1         270             56              1        
@@ -2577,6 +2682,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      277     0   2   1   2   1   0         276             57              1        
 		      278     1   0   2   1   0   2         276             57              1        
 		      279     1   2   0   0   1   2         276             57              1        
+BUILDING LAYERS 
 		      280     2   0   1   2   0   1         276             57              1        
 		      281     2   1   0   0   2   1         276             57              1        
 		      282     0   1   2   1   2   1         282             58              1        
@@ -2586,6 +2692,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      286     2   0   1   2   1   1         282             58              1        
 		      287     2   1   0   1   2   1         282             58              1        
 		      288     0   1   2   1   2   2         288             59              1        
+BUILDING LAYERS 
 		      289     0   2   1   2   1   2         288             59              1        
 		      290     1   0   2   1   2   2         288             59              1        
 		      291     1   2   0   2   1   2         288             59              1        
@@ -2613,6 +2720,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      313     0   2   1   1   2   0         312             63              1        
 		      314     1   0   2   2   0   1         312             63              1        
 		      315     1   2   0   0   2   1         312             63              1        
+BUILDING LAYERS 
 		      316     2   0   1   1   0   2         312             63              1        
 		      317     2   1   0   0   1   2         312             63              1        
 		      318     0   1   2   2   1   1         318             64              1        
@@ -2627,6 +2735,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      327     1   2   0   2   2   1         324             65              1        
 		      328     2   0   1   1   2   2         324             65              1        
 		      329     2   1   0   2   1   2         324             65              1        
+BUILDING LAYERS 
 		      330     0   1   2   2   2   0         330             66              1        
 		      331     0   2   1   2   2   0         330             66              1        
 		      332     1   0   2   2   0   2         330             66              1        
@@ -2644,6 +2753,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      344     1   0   2   2   2   2         342             68              1        
 		      345     1   2   0   2   2   2         342             68              1        
 		      346     2   0   1   2   2   2         342             68              1        
+BUILDING LAYERS 
 		      347     2   1   0   2   2   2         342             68              1        
 		      348     0   2   2   0   1   0         348             69              1        
 		      349     0   2   2   1   0   0         348             69              1        
@@ -2659,6 +2769,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      359     2   2   0   1   1   0         354             70              1        
 		      360     0   2   2   0   1   2         360             71              1        
 		      361     0   2   2   1   0   2         360             71              1        
+BUILDING LAYERS 
 		      362     2   0   2   0   2   1         360             71              1        
 		      363     2   2   0   2   0   1         360             71              1        
 		      364     2   0   2   1   2   0         360             71              1        
@@ -2674,6 +2785,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      374     2   0   2   0   1   2         372             73              1        
 		      375     2   2   0   1   0   2         372             73              1        
 		      376     2   0   2   2   1   0         372             73              1        
+BUILDING LAYERS 
 		      377     2   2   0   1   2   0         372             73              1        
 		      378     0   2   2   0   2   2         378             74              1        
 		      379     0   2   2   2   0   2         378             74              1        
@@ -2737,6 +2849,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      437     1   1   1   2   0   2         436             89              2        
 		      438     1   1   1   2   2   0         436             89              2        
 		      439     1   1   1   1   1   1         439             90              6        
+BUILDING LAYERS 
 		      440     1   1   1   1   1   2         440             91              2        
 		      441     1   1   1   1   2   1         440             91              2        
 		      442     1   1   1   2   1   1         440             91              2        
@@ -2747,6 +2860,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      447     1   1   2   0   0   0         447             94              2        
 		      448     1   2   1   0   0   0         447             94              2        
 		      449     2   1   1   0   0   0         447             94              2        
+BUILDING LAYERS 
 		      450     1   1   2   0   0   1         450             95              1        
 		      451     1   2   1   0   0   1         450             95              1        
 		      452     1   1   2   0   1   0         450             95              1        
@@ -2754,6 +2868,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      454     2   1   1   0   1   0         450             95              1        
 		      455     2   1   1   1   0   0         450             95              1        
 		      456     1   1   2   0   0   2         456             96              1        
+BUILDING LAYERS 
 		      457     1   2   1   0   0   2         456             96              1        
 		      458     1   1   2   0   2   0         456             96              1        
 		      459     1   2   1   2   0   0         456             96              1        
@@ -2761,6 +2876,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      461     2   1   1   2   0   0         456             96              1        
 		      462     1   1   2   0   1   1         462             97              2        
 		      463     1   2   1   1   0   1         462             97              2        
+BUILDING LAYERS 
 		      464     2   1   1   1   1   0         462             97              2        
 		      465     1   1   2   0   1   2         465             98              1        
 		      466     1   2   1   1   0   2         465             98              1        
@@ -2769,12 +2885,14 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      469     2   1   1   1   2   0         465             98              1        
 		      470     2   1   1   2   1   0         465             98              1        
 		      471     1   1   2   0   2   2         471             99              2        
+BUILDING LAYERS 
 		      472     1   2   1   2   0   2         471             99              2        
 		      473     2   1   1   2   2   0         471             99              2        
 		      474     1   1   2   1   0   0         474             100             2        
 		      475     1   2   1   0   1   0         474             100             2        
 		      476     2   1   1   0   0   1         474             100             2        
 		      477     1   1   2   1   0   1         477             101             1        
+BUILDING LAYERS 
 		      478     1   2   1   0   1   1         477             101             1        
 		      479     1   1   2   1   1   0         477             101             1        
 		      480     1   2   1   1   1   0         477             101             1        
@@ -2782,18 +2900,21 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      482     2   1   1   1   0   1         477             101             1        
 		      483     1   1   2   1   0   2         483             102             1        
 		      484     1   2   1   0   1   2         483             102             1        
+BUILDING LAYERS 
 		      485     1   1   2   1   2   0         483             102             1        
 		      486     1   2   1   2   1   0         483             102             1        
 		      487     2   1   1   0   2   1         483             102             1        
 		      488     2   1   1   2   0   1         483             102             1        
 		      489     1   1   2   1   1   1         489             103             2        
 		      490     1   2   1   1   1   1         489             103             2        
+BUILDING LAYERS 
 		      491     2   1   1   1   1   1         489             103             2        
 		      492     1   1   2   1   1   2         492             104             1        
 		      493     1   2   1   1   1   2         492             104             1        
 		      494     1   1   2   1   2   1         492             104             1        
 		      495     1   2   1   2   1   1         492             104             1        
 		      496     2   1   1   1   2   1         492             104             1        
+BUILDING LAYERS 
 		      497     2   1   1   2   1   1         492             104             1        
 		      498     1   1   2   1   2   2         498             105             2        
 		      499     1   2   1   2   1   2         498             105             2        
@@ -2819,6 +2940,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      519     1   1   2   2   1   2         519             110             1        
 		      520     1   2   1   1   2   2         519             110             1        
 		      521     1   1   2   2   2   1         519             110             1        
+BUILDING LAYERS 
 		      522     1   2   1   2   2   1         519             110             1        
 		      523     2   1   1   1   2   2         519             110             1        
 		      524     2   1   1   2   1   2         519             110             1        
@@ -2836,6 +2958,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      536     2   2   1   2   0   0         534             114             2        
 		      537     1   2   2   0   1   0         537             115             1        
 		      538     1   2   2   1   0   0         537             115             1        
+BUILDING LAYERS 
 		      539     2   1   2   0   0   1         537             115             1        
 		      540     2   2   1   0   0   1         537             115             1        
 		      541     2   1   2   1   0   0         537             115             1        
@@ -2849,6 +2972,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      549     1   2   2   0   1   2         549             117             1        
 		      550     1   2   2   1   0   2         549             117             1        
 		      551     2   1   2   0   2   1         549             117             1        
+BUILDING LAYERS 
 		      552     2   2   1   2   0   1         549             117             1        
 		      553     2   1   2   1   2   0         549             117             1        
 		      554     2   2   1   2   1   0         549             117             1        
@@ -2864,6 +2988,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      564     2   2   1   1   0   2         561             119             1        
 		      565     2   1   2   2   1   0         561             119             1        
 		      566     2   2   1   1   2   0         561             119             1        
+BUILDING LAYERS 
 		      567     1   2   2   0   2   2         567             120             1        
 		      568     1   2   2   2   0   2         567             120             1        
 		      569     2   1   2   0   2   2         567             120             1        
@@ -2877,6 +3002,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      577     2   1   2   1   1   1         576             122             2        
 		      578     2   2   1   1   1   1         576             122             2        
 		      579     1   2   2   1   1   2         579             123             2        
+BUILDING LAYERS 
 		      580     2   1   2   1   2   1         579             123             2        
 		      581     2   2   1   2   1   1         579             123             2        
 		      582     1   2   2   1   2   0         582             124             1        
@@ -2917,6 +3043,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      617     2   2   2   1   0   1         616             133             2        
 		      618     2   2   2   1   1   0         616             133             2        
 		      619     2   2   2   0   1   2         619             134             1        
+BUILDING LAYERS 
 		      620     2   2   2   1   0   2         619             134             1        
 		      621     2   2   2   0   2   1         619             134             1        
 		      622     2   2   2   2   0   1         619             134             1        
@@ -2926,6 +3053,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      626     2   2   2   2   0   2         625             135             2        
 		      627     2   2   2   2   2   0         625             135             2        
 		      628     2   2   2   1   1   1         628             136             6        
+BUILDING LAYERS 
 		      629     2   2   2   1   1   2         629             137             2        
 		      630     2   2   2   1   2   1         629             137             2        
 		      631     2   2   2   2   1   1         629             137             2        
@@ -2936,6 +3064,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 
     Cluster index       : 4
     Atoms in the cluster: O O O O 
+BUILDING LAYERS 
     Pairs in the cluster: OO OO OO OO OO OO 
     Number of unique sets of powers: 56 (636 total)...
 		     index  |  powers  |  equiv index  |  param index  | count 
@@ -2947,18 +3076,21 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      4       0   0   1   0   1   2         4               1               2        
 		      5       0   1   0   1   0   2         4               1               2        
 		      6       0   0   1   0   2   1         4               1               2        
+BUILDING LAYERS 
 		      7       0   1   0   2   0   1         4               1               2        
 		      8       1   0   0   1   2   0         4               1               2        
 		      9       1   0   0   2   1   0         4               1               2        
 		      10      0   0   2   0   1   1         4               1               2        
 		      11      0   2   0   1   0   1         4               1               2        
 		      12      2   0   0   1   1   0         4               1               2        
+BUILDING LAYERS 
 		      13      1   1   2   0   0   0         4               1               2        
 		      14      1   2   1   0   0   0         4               1               2        
 		      15      2   1   1   0   0   0         4               1               2        
 		      16      0   0   1   0   2   2         16              2               2        
 		      17      0   1   0   2   0   2         16              2               2        
 		      18      1   0   0   2   2   0         16              2               2        
+BUILDING LAYERS 
 		      19      0   0   2   0   1   2         16              2               2        
 		      20      0   2   0   1   0   2         16              2               2        
 		      21      0   0   2   0   2   1         16              2               2        
@@ -2966,6 +3098,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      23      2   0   0   1   2   0         16              2               2        
 		      24      2   0   0   2   1   0         16              2               2        
 		      25      1   2   2   0   0   0         16              2               2        
+BUILDING LAYERS 
 		      26      2   1   2   0   0   0         16              2               2        
 		      27      2   2   1   0   0   0         16              2               2        
 		      28      0   0   1   1   0   0         28              3               8        
@@ -2973,6 +3106,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      30      1   0   0   0   0   1         28              3               8        
 		      31      0   0   1   1   0   1         31              4               2        
 		      32      0   1   0   0   1   1         31              4               2        
+BUILDING LAYERS 
 		      33      0   0   1   1   1   0         31              4               2        
 		      34      0   1   0   1   1   0         31              4               2        
 		      35      1   0   0   0   1   1         31              4               2        
@@ -2980,6 +3114,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      37      0   1   1   0   1   0         31              4               2        
 		      38      0   1   1   1   0   0         31              4               2        
 		      39      1   0   1   0   0   1         31              4               2        
+BUILDING LAYERS 
 		      40      1   1   0   0   0   1         31              4               2        
 		      41      1   0   1   1   0   0         31              4               2        
 		      42      1   1   0   0   1   0         31              4               2        
@@ -3009,6 +3144,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      66      1   1   1   1   0   0         55              6               2        
 		      67      0   0   1   1   1   2         67              7               1        
 		      68      0   1   0   1   1   2         67              7               1        
+BUILDING LAYERS 
 		      69      0   0   1   1   2   1         67              7               1        
 		      70      0   1   0   2   1   1         67              7               1        
 		      71      1   0   0   1   2   1         67              7               1        
@@ -3025,6 +3161,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      82      1   2   0   1   0   1         67              7               1        
 		      83      2   0   1   1   1   0         67              7               1        
 		      84      2   1   0   1   1   0         67              7               1        
+BUILDING LAYERS 
 		      85      1   1   2   0   0   1         67              7               1        
 		      86      1   2   1   0   0   1         67              7               1        
 		      87      1   1   2   0   1   0         67              7               1        
@@ -3112,6 +3249,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      169     0   0   1   2   1   2         169             13              1        
 		      170     0   1   0   1   2   2         169             13              1        
 		      171     0   0   1   2   2   1         169             13              1        
+BUILDING LAYERS 
 		      172     0   1   0   2   2   1         169             13              1        
 		      173     1   0   0   1   2   2         169             13              1        
 		      174     1   0   0   2   1   2         169             13              1        
@@ -3123,18 +3261,21 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      180     1   2   0   2   1   0         169             13              1        
 		      181     0   2   2   0   1   1         169             13              1        
 		      182     0   2   2   1   0   1         169             13              1        
+BUILDING LAYERS 
 		      183     2   0   2   0   1   1         169             13              1        
 		      184     2   2   0   1   0   1         169             13              1        
 		      185     2   0   2   1   1   0         169             13              1        
 		      186     2   2   0   1   1   0         169             13              1        
 		      187     1   1   2   0   0   2         169             13              1        
 		      188     1   2   1   0   0   2         169             13              1        
+BUILDING LAYERS 
 		      189     1   1   2   0   2   0         169             13              1        
 		      190     1   2   1   2   0   0         169             13              1        
 		      191     2   1   1   0   2   0         169             13              1        
 		      192     2   1   1   2   0   0         169             13              1        
 		      193     0   0   1   2   2   2         193             14              2        
 		      194     0   1   0   2   2   2         193             14              2        
+BUILDING LAYERS 
 		      195     1   0   0   2   2   2         193             14              2        
 		      196     0   2   2   0   1   2         193             14              2        
 		      197     0   2   2   1   0   2         193             14              2        
@@ -3143,6 +3284,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      200     2   0   2   1   2   0         193             14              2        
 		      201     2   2   0   2   1   0         193             14              2        
 		      202     1   2   2   0   0   2         193             14              2        
+BUILDING LAYERS 
 		      203     2   1   2   0   2   0         193             14              2        
 		      204     2   2   1   2   0   0         193             14              2        
 		      205     0   0   2   0   2   2         205             15              6        
@@ -3150,6 +3292,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      207     2   0   0   2   2   0         205             15              6        
 		      208     2   2   2   0   0   0         205             15              6        
 		      209     0   0   2   1   1   1         209             16              2        
+BUILDING LAYERS 
 		      210     0   2   0   1   1   1         209             16              2        
 		      211     2   0   0   1   1   1         209             16              2        
 		      212     0   1   1   0   2   1         209             16              2        
@@ -3157,12 +3300,14 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      214     1   0   1   0   1   2         209             16              2        
 		      215     1   1   0   1   0   2         209             16              2        
 		      216     1   0   1   2   1   0         209             16              2        
+BUILDING LAYERS 
 		      217     1   1   0   1   2   0         209             16              2        
 		      218     2   1   1   0   0   1         209             16              2        
 		      219     1   2   1   0   1   0         209             16              2        
 		      220     1   1   2   1   0   0         209             16              2        
 		      221     0   0   2   1   1   2         221             17              1        
 		      222     0   2   0   1   1   2         221             17              1        
+BUILDING LAYERS 
 		      223     0   0   2   1   2   1         221             17              1        
 		      224     0   2   0   2   1   1         221             17              1        
 		      225     2   0   0   1   2   1         221             17              1        
@@ -3170,6 +3315,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      227     0   1   1   0   2   2         221             17              1        
 		      228     0   1   1   2   0   2         221             17              1        
 		      229     1   0   1   0   2   2         221             17              1        
+BUILDING LAYERS 
 		      230     1   1   0   2   0   2         221             17              1        
 		      231     1   0   1   2   2   0         221             17              1        
 		      232     1   1   0   2   2   0         221             17              1        
@@ -3198,6 +3344,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      255     2   2   2   0   1   0         245             18              2        
 		      256     2   2   2   1   0   0         245             18              2        
 		      257     0   0   2   2   0   0         257             19              8        
+BUILDING LAYERS 
 		      258     0   2   0   0   2   0         257             19              8        
 		      259     2   0   0   0   0   2         257             19              8        
 		      260     0   0   2   2   0   1         260             20              2        
@@ -3215,6 +3362,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      272     0   0   2   2   0   2         272             21              2        
 		      273     0   2   0   0   2   2         272             21              2        
 		      274     0   0   2   2   2   0         272             21              2        
+BUILDING LAYERS 
 		      275     0   2   0   2   2   0         272             21              2        
 		      276     2   0   0   0   2   2         272             21              2        
 		      277     2   0   0   2   0   2         272             21              2        
@@ -3230,6 +3378,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      287     0   2   1   0   2   1         284             22              2        
 		      288     0   1   2   2   0   1         284             22              2        
 		      289     2   0   1   0   1   2         284             22              2        
+BUILDING LAYERS 
 		      290     2   1   0   1   0   2         284             22              2        
 		      291     1   0   2   2   1   0         284             22              2        
 		      292     1   2   0   1   2   0         284             22              2        
@@ -3242,6 +3391,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      299     0   2   0   2   2   1         296             23              1        
 		      300     2   0   0   1   2   2         296             23              1        
 		      301     2   0   0   2   1   2         296             23              1        
+BUILDING LAYERS 
 		      302     0   2   1   0   2   2         296             23              1        
 		      303     0   1   2   2   0   2         296             23              1        
 		      304     2   0   1   0   2   2         296             23              1        
@@ -3256,6 +3406,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      313     2   2   0   1   2   0         296             23              1        
 		      314     2   1   2   0   0   2         296             23              1        
 		      315     2   2   1   0   0   2         296             23              1        
+BUILDING LAYERS 
 		      316     1   2   2   0   2   0         296             23              1        
 		      317     1   2   2   2   0   0         296             23              1        
 		      318     2   2   1   0   2   0         296             23              1        
@@ -3275,6 +3426,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      332     0   1   1   1   1   0         332             25              8        
 		      333     1   0   1   1   0   1         332             25              8        
 		      334     1   1   0   0   1   1         332             25              8        
+BUILDING LAYERS 
 		      335     0   1   1   1   1   1         335             26              4        
 		      336     1   0   1   1   1   1         335             26              4        
 		      337     1   1   0   1   1   1         335             26              4        
@@ -3286,12 +3438,14 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      343     1   1   0   2   1   1         341             27              4        
 		      344     1   1   2   0   1   1         341             27              4        
 		      345     1   2   1   1   0   1         341             27              4        
+BUILDING LAYERS 
 		      346     2   1   1   1   1   0         341             27              4        
 		      347     0   1   1   1   2   0         347             28              2        
 		      348     0   1   1   2   1   0         347             28              2        
 		      349     1   0   1   1   0   2         347             28              2        
 		      350     1   1   0   0   1   2         347             28              2        
 		      351     1   0   1   2   0   1         347             28              2        
+BUILDING LAYERS 
 		      352     1   1   0   0   2   1         347             28              2        
 		      353     0   1   2   1   1   0         347             28              2        
 		      354     0   2   1   1   1   0         347             28              2        
@@ -3299,6 +3453,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      356     1   2   0   0   1   1         347             28              2        
 		      357     2   0   1   1   0   1         347             28              2        
 		      358     2   1   0   0   1   1         347             28              2        
+BUILDING LAYERS 
 		      359     0   1   1   1   2   1         359             29              1        
 		      360     0   1   1   2   1   1         359             29              1        
 		      361     1   0   1   1   1   2         359             29              1        
@@ -3306,6 +3461,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      363     1   0   1   2   1   1         359             29              1        
 		      364     1   1   0   1   2   1         359             29              1        
 		      365     0   1   2   1   1   1         359             29              1        
+BUILDING LAYERS 
 		      366     0   2   1   1   1   1         359             29              1        
 		      367     1   0   2   1   1   1         359             29              1        
 		      368     1   2   0   1   1   1         359             29              1        
@@ -3313,6 +3469,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      370     2   1   0   1   1   1         359             29              1        
 		      371     1   1   1   0   1   2         359             29              1        
 		      372     1   1   1   1   0   2         359             29              1        
+BUILDING LAYERS 
 		      373     1   1   1   0   2   1         359             29              1        
 		      374     1   1   1   2   0   1         359             29              1        
 		      375     1   1   1   1   2   0         359             29              1        
@@ -3321,6 +3478,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      378     1   1   2   1   0   1         359             29              1        
 		      379     2   1   1   0   1   1         359             29              1        
 		      380     2   1   1   1   0   1         359             29              1        
+BUILDING LAYERS 
 		      381     1   1   2   1   1   0         359             29              1        
 		      382     1   2   1   1   1   0         359             29              1        
 		      383     0   1   1   1   2   2         383             30              1        
@@ -3329,6 +3487,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      386     1   1   0   2   1   2         383             30              1        
 		      387     1   0   1   2   2   1         383             30              1        
 		      388     1   1   0   2   2   1         383             30              1        
+BUILDING LAYERS 
 		      389     0   1   2   1   1   2         383             30              1        
 		      390     0   2   1   1   1   2         383             30              1        
 		      391     1   0   2   1   2   1         383             30              1        
@@ -3336,6 +3495,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      393     2   0   1   1   2   1         383             30              1        
 		      394     2   1   0   2   1   1         383             30              1        
 		      395     1   1   2   0   1   2         383             30              1        
+BUILDING LAYERS 
 		      396     1   2   1   1   0   2         383             30              1        
 		      397     1   1   2   0   2   1         383             30              1        
 		      398     1   2   1   2   0   1         383             30              1        
@@ -3373,6 +3533,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      430     1   2   1   2   1   0         419             32              2        
 		      431     0   1   1   2   2   2         431             33              2        
 		      432     1   0   1   2   2   2         431             33              2        
+BUILDING LAYERS 
 		      433     1   1   0   2   2   2         431             33              2        
 		      434     0   2   2   1   1   2         431             33              2        
 		      435     2   0   2   1   2   1         431             33              2        
@@ -3389,6 +3550,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      446     1   2   0   1   1   2         443             34              2        
 		      447     2   0   1   2   1   1         443             34              2        
 		      448     2   1   0   1   2   1         443             34              2        
+BUILDING LAYERS 
 		      449     1   1   1   0   2   2         443             34              2        
 		      450     1   1   1   2   0   2         443             34              2        
 		      451     1   1   1   2   2   0         443             34              2        
@@ -3403,6 +3565,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      460     2   1   0   2   2   1         455             35              2        
 		      461     1   1   2   0   2   2         455             35              2        
 		      462     1   2   1   2   0   2         455             35              2        
+BUILDING LAYERS 
 		      463     2   1   1   2   2   0         455             35              2        
 		      464     2   2   2   0   1   1         455             35              2        
 		      465     2   2   2   1   0   1         455             35              2        
@@ -3415,6 +3578,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      472     2   1   0   0   1   2         467             36              4        
 		      473     0   1   2   2   1   1         473             37              2        
 		      474     0   2   1   1   2   1         473             37              2        
+BUILDING LAYERS 
 		      475     1   0   2   2   1   1         473             37              2        
 		      476     1   2   0   1   2   1         473             37              2        
 		      477     2   0   1   1   1   2         473             37              2        
@@ -3431,6 +3595,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      488     1   2   0   2   2   1         485             38              2        
 		      489     2   0   1   1   2   2         485             38              2        
 		      490     2   1   0   2   1   2         485             38              2        
+BUILDING LAYERS 
 		      491     1   2   2   0   2   1         485             38              2        
 		      492     1   2   2   2   0   1         485             38              2        
 		      493     2   1   2   0   1   2         485             38              2        
@@ -3471,6 +3636,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      528     2   1   2   1   0   2         509             40              1        
 		      529     2   2   1   0   2   1         509             40              1        
 		      530     2   1   2   2   0   1         509             40              1        
+BUILDING LAYERS 
 		      531     1   2   2   1   2   0         509             40              1        
 		      532     1   2   2   2   1   0         509             40              1        
 		      533     0   1   2   2   2   2         533             41              1        
@@ -3480,6 +3646,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      537     2   0   1   2   2   2         533             41              1        
 		      538     2   1   0   2   2   2         533             41              1        
 		      539     0   2   2   1   2   2         533             41              1        
+BUILDING LAYERS 
 		      540     0   2   2   2   1   2         533             41              1        
 		      541     2   0   2   1   2   2         533             41              1        
 		      542     2   2   0   2   1   2         533             41              1        
@@ -3488,6 +3655,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      545     1   2   2   0   2   2         533             41              1        
 		      546     1   2   2   2   0   2         533             41              1        
 		      547     2   1   2   0   2   2         533             41              1        
+BUILDING LAYERS 
 		      548     2   2   1   2   0   2         533             41              1        
 		      549     2   1   2   2   2   0         533             41              1        
 		      550     2   2   1   2   2   0         533             41              1        
@@ -3495,6 +3663,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      552     2   2   2   1   0   2         533             41              1        
 		      553     2   2   2   0   2   1         533             41              1        
 		      554     2   2   2   2   0   1         533             41              1        
+BUILDING LAYERS 
 		      555     2   2   2   1   2   0         533             41              1        
 		      556     2   2   2   2   1   0         533             41              1        
 		      557     0   2   2   2   2   0         557             42              8        
@@ -3502,6 +3671,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      559     2   2   0   0   2   2         557             42              8        
 		      560     0   2   2   2   2   1         560             43              4        
 		      561     2   0   2   2   1   2         560             43              4        
+BUILDING LAYERS 
 		      562     2   2   0   1   2   2         560             43              4        
 		      563     2   2   1   0   2   2         560             43              4        
 		      564     2   1   2   2   0   2         560             43              4        
@@ -3509,11 +3679,13 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      566     0   2   2   2   2   2         566             44              4        
 		      567     2   0   2   2   2   2         566             44              4        
 		      568     2   2   0   2   2   2         566             44              4        
+BUILDING LAYERS 
 		      569     2   2   2   0   2   2         566             44              4        
 		      570     2   2   2   2   0   2         566             44              4        
 		      571     2   2   2   2   2   0         566             44              4        
 		      572     1   1   1   1   1   1         572             45              24       
 		      573     1   1   1   1   1   2         573             46              4        
+BUILDING LAYERS 
 		      574     1   1   1   1   2   1         573             46              4        
 		      575     1   1   1   2   1   1         573             46              4        
 		      576     1   1   2   1   1   1         573             46              4        
@@ -3521,6 +3693,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      578     2   1   1   1   1   1         573             46              4        
 		      579     1   1   1   1   2   2         579             47              2        
 		      580     1   1   1   2   1   2         579             47              2        
+BUILDING LAYERS 
 		      581     1   1   1   2   2   1         579             47              2        
 		      582     1   1   2   1   1   2         579             47              2        
 		      583     1   2   1   1   1   2         579             47              2        
@@ -3528,6 +3701,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      585     1   2   1   2   1   1         579             47              2        
 		      586     2   1   1   1   2   1         579             47              2        
 		      587     2   1   1   2   1   1         579             47              2        
+BUILDING LAYERS 
 		      588     1   2   2   1   1   1         579             47              2        
 		      589     2   1   2   1   1   1         579             47              2        
 		      590     2   2   1   1   1   1         579             47              2        
@@ -3561,6 +3735,7 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 		      618     1   2   2   2   1   2         614             52              2        
 		      619     2   1   2   1   2   2         614             52              2        
 		      620     2   2   1   2   1   2         614             52              2        
+BUILDING LAYERS 
 		      621     2   1   2   2   2   1         614             52              2        
 		      622     2   2   1   2   2   1         614             52              2        
 		      623     2   2   2   1   1   2         614             52              2        
@@ -3581,10 +3756,214 @@ WARNING: Coordinate wrapping not supported for ghost atom use. Turning option of
 
 The number of two-body non-coulomb parameters is: 36
 The number of three-body Chebyshev parameters is: 98
+BUILDING LAYERS 
 The number of four-body  Chebyshev parameters is: 602
 
 Succefully opened the trajectory file...
 Setting up the matrices for A, Coulomb forces, and overbonding...
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 	Reporting outcome of layering for first frame ONLY: 
 	Real atoms:                   64
 	Total atoms (ghost):          1728
@@ -3601,8 +3980,133 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 Number of 3-body interactions = 100785
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 Number of 4-body interactions = 261122
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
+BUILDING LAYERS 
 ...matrix population complete: 
 
 Printing matrices...

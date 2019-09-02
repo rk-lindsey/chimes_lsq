@@ -32,17 +32,48 @@ Setting up the data objects...
 
 Reading initial coordinates and forces...
      ...Read the following coordinate file extension: xyzf
-   ...Read the following number of atoms: 96
-     ...Read box dimensions: 8.6091309 8.6091309 8.6091309
+     ...Read the following number of atoms: 96
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        0 25.8273927 0
+       Ghost cell vectors (a) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084112874303
+
 	...Ignoring last three fields of atom info lines in xyzf file... 
-	...Updated simulation box dimensions: 
-		cell vectors (a)            8.6091309 0 0
-		cell vectors (b)            0 8.6091309 0
-		cell vectors (c)            0 0 8.6091309
-		Layers:                     1
-		Effective cell vectors (a): 25.8273927 0 0
-		Effective cell vectors (a): 0 25.8273927 0
-		Effective cell vectors (a): 0 0 25.8273927
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        0 25.8273927 0
+       Ghost cell vectors (a) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084112874303
+
    ...read complete for file input.xyzf
 
 Reading atom info from parameter file...
@@ -1342,7 +1373,7 @@ Ewald parameters:
 	Ewald alpha               =  7.723233e-01
 	R-Space Ewald cutoff      =  4.304565e+00
 	R-Space accuracy estimate =  5.997380e-07
-	K-Space accuracy estimate =  6.801448e-07
+	K-Space accuracy estimate =  6.801449e-07
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
@@ -1350,7 +1381,7 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-       1      0.12       5.2450076     -49.1445683     -43.8995607          1778.3     14.83818685    -43.8995607
+       1      0.12       5.2450076     -49.1445683     -43.8995606          1778.3     14.83818725    -43.8995606
 END SIMULATION
 	Average temperature over run = 1778.2983 K
 	Average pressure    over run = 14.8382 GPa

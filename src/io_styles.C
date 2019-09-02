@@ -363,7 +363,10 @@ void WRITE_TRAJ::PRINT_FRAME_XYZ(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 	if (SYSTEM.BOXDIM.IS_ORTHO)
 		TRAJFILE << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_CZ << endl;
 	else
-		EXIT_MSG("ERROR: PRINT_FRAME_XYZF_FORCE for non-orthorhombic cells not yet implemented");	
+		TRAJFILE << "NON_ORTHO "
+		         << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_AY << " " << SYSTEM.BOXDIM.CELL_AZ << " "
+		         << SYSTEM.BOXDIM.CELL_BX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_BZ << " "
+			 << SYSTEM.BOXDIM.CELL_CX << " " << SYSTEM.BOXDIM.CELL_CY << " " << SYSTEM.BOXDIM.CELL_CZ << endl; 
 		
 	for (int a1=0; a1<SYSTEM.ATOMS; a1++) 
 	{
@@ -381,14 +384,17 @@ void WRITE_TRAJ::PRINT_FRAME_XYZ(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 
 void WRITE_TRAJ::PRINT_FRAME_LAMMPSTRJ(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 {
+	// See the docs: texplanationhttps://lammps.sandia.gov/doc/Howto_triclinic.html
+	// And Axel's explanation (docs aren't exactly clear): https://lammps.sandia.gov/threads/msg14649.html
+
 	TRAJFILE << "ITEM: TIMESTEP" << endl;
 	TRAJFILE << (CONTROLS.STEP+1) * CONTROLS.DELTA_T_FS << endl;
 	TRAJFILE << "ITEM: NUMBER OF ATOMS" << endl;
 	TRAJFILE << SYSTEM.ATOMS << endl;
-	TRAJFILE << "ITEM: BOX BOUNDS xy xz yz xy xz yz" << endl;
-	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.CELL_LX << " " << SYSTEM.BOXDIM.XY << endl;
-	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.CELL_LY << " " << SYSTEM.BOXDIM.XZ << endl;
-	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.CELL_LZ << " " << SYSTEM.BOXDIM.YZ << endl;
+	TRAJFILE << "ITEM: BOX BOUNDS xy xz yz" << endl;
+	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.EXTENT_X << " " << SYSTEM.BOXDIM.XY << endl;
+	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.EXTENT_Y << " " << SYSTEM.BOXDIM.XZ << endl;
+	TRAJFILE << "0.0 " << SYSTEM.BOXDIM.EXTENT_Z << " " << SYSTEM.BOXDIM.YZ << endl;
 	
 	
 	// FYI, can get fancy and control what gets printed to the lammps-format files using:
@@ -427,7 +433,10 @@ void WRITE_TRAJ::PRINT_FRAME_XYZF_FORCE(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 	if (SYSTEM.BOXDIM.IS_ORTHO)
 		TRAJFILE << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_CZ << endl;
 	else
-		EXIT_MSG("ERROR: PRINT_FRAME_XYZF_FORCE for non-orthorhombic cells not yet implemented");
+		TRAJFILE << "NON_ORTHO "
+		         << SYSTEM.BOXDIM.CELL_AX << " " << SYSTEM.BOXDIM.CELL_AY << " " << SYSTEM.BOXDIM.CELL_AZ << " "
+		         << SYSTEM.BOXDIM.CELL_BX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_BZ << " "
+			 << SYSTEM.BOXDIM.CELL_CX << " " << SYSTEM.BOXDIM.CELL_CY << " " << SYSTEM.BOXDIM.CELL_CZ << endl; 
 
 	for(int i=0;i<SYSTEM.ATOMS;i++)
 	{

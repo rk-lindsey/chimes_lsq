@@ -301,21 +301,18 @@ class BOX
 		
 		// General cell properties
 		
-		bool   IS_ORTHO;						// Is this an orthorhombic cell? If so, we'll use the more computationally efficient operations
+		bool   IS_ORTHO;			// Is this an orthorhombic cell? If so, we'll use the more computationally efficient operations
 		
-		double VOL;							// Cell volume
+		double VOL;				// Cell volume
 		
 		// Cell geometery... if IS_ORTHO is true, ONLY CELL_AX, CELL_BY, and CELL_CZ are ever modified
-		
-		
-		
-		double CELL_AX, CELL_AY, CELL_AZ;	// Cell vectors (h-mat)
+
+		double CELL_AX, CELL_AY, CELL_AZ;	// Cell vectors (transpose gives h-mat)
 		double CELL_BX, CELL_BY, CELL_BZ;
 		double CELL_CX, CELL_CY, CELL_CZ;
-		
-		double INVR_CELL_AX, INVR_CELL_AY, INVR_CELL_AZ;// Inverted Cell vectors (h-mat)
-		double INVR_CELL_BX, INVR_CELL_BY, INVR_CELL_BZ;
-		double INVR_CELL_CX, INVR_CELL_CY, INVR_CELL_CZ;
+
+		vector<double> HMAT;
+		vector<double> INVR_HMAT;
 		
 		double LATCON_A,  LATCON_B, LATCON_C;	// Cell lattice constants
 		double LAT_ALPHA, LAT_BETA, LAT_GAMMA;	// Cell lattice angles
@@ -331,13 +328,15 @@ class BOX
 		~BOX();
 		
 		void READ_BOX();					// Reads box geometery (orth or non-orth) from .xyz(f) file
-		void COPY_BOX_TO(BOX & TO_BOX);				// Copies vars from this box to input box
+		void WRITE_BOX(int LAYERS);
 				
 		void   UPDATE_INVER_CELL();				// Computes the inverse h-mat from the h-mat
 		void   UPDATE_LAT_VALUES(); 
 		void   UPDATE_EXTENT();
 		double UPDATE_VOLUME();					// Computes cell volume and saves to VOL
 		void   UPDATE_CELL();					// Updates all cell geometry variables, assuming the h-matrix has been externally modified
+		
+		//void PREPARE_COORDS();					// Properly rotates/aligns/shifts coordinate origin to 0,0,0
 		
 		void UNLAMMPSIFY(double lx, double ly, double lz, double xy, double xz, double yz); //Converts LAMMPS  (lx,ly,lz) = (xhi-xlo,yhi-ylo,zhi-zlo) and tilt factors (xy,xz,yz) to lattice constants and angles alpha, beta, and gamma
 		void LAMMPSIFY(); // ??		
