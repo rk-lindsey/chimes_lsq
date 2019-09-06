@@ -2168,7 +2168,7 @@ cout << "DEBUG: FYI, WRAPPING" << endl;
 	}
 		
 	// If layering requested, replicate the system
-cout << "BUILDING LAYERS " << endl;
+//cout << "BUILDING LAYERS " << endl;
 	build_layers(CONTROLS.N_LAYERS);
 		
 	if(i==0)
