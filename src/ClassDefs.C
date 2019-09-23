@@ -29,6 +29,9 @@ NEIGHBORS::NEIGHBORS()		// Constructor
 	UPDATE_FREQ   =  30.0;
 	SAFETY        =  1.01;
 	
+	// New for triclinic support
+	UPDATE_WITH_BIG = true;
+	
 }
 NEIGHBORS::~NEIGHBORS(){}	// Deconstructor
 
@@ -39,6 +42,15 @@ void NEIGHBORS::INITIALIZE(FRAME & SYSTEM)		// (overloaded) class constructor --
 		LIST_UNORDERED.resize(SYSTEM.ATOMS);
 		LIST_3B       .resize(SYSTEM.ALL_ATOMS);
 		LIST_4B       .resize(SYSTEM.ALL_ATOMS);
+		
+		// UPDATE_WITH_BIG will is true by default
+		// If it is already false at this point, it is because the user requested it
+		// a small update may be requested for cell vectors that don't obey our requirements (all positive)
+
+		if ((UPDATE_WITH_BIG == true) && (SYSTEM.ALL_ATOMS < 200))
+			UPDATE_WITH_BIG = false;
+
+		
 }
 
 void NEIGHBORS::INITIALIZE_MD(FRAME & SYSTEM)		// (overloaded) class constructor -- if no padding specified, default to 0.3
@@ -83,11 +95,11 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 // Choose algorithm based on system size including ghost atoms.
 {
 	FIX_LAYERS(SYSTEM, CONTROLS);
-
-	if ( (SYSTEM.ALL_ATOMS < 200) || (!USE) ) //cout << "Using DO_UPDATE_SMALL" << endl;
-		DO_UPDATE_SMALL(SYSTEM, CONTROLS);
-	else 
+		
+	if (UPDATE_WITH_BIG && USE)
 		DO_UPDATE_BIG(SYSTEM, CONTROLS);
+	else
+		DO_UPDATE_SMALL(SYSTEM, CONTROLS);
 
 	if ( CONTROLS.USE_3B_CHEBY ) 
 	  UPDATE_3B_INTERACTION(SYSTEM, CONTROLS);

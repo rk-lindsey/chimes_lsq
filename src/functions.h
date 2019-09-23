@@ -492,12 +492,12 @@ class NEIGHBORS
 {
 	private:
 
-		bool   FIRST_CALL;					// Is this the first call? if so, need to build initial list
-		bool   SECOND_CALL;					// Is this the second call? If so, pick the padding distance.
+		bool   FIRST_CALL;						// Is this the first call? if so, need to build initial list
+		bool   SECOND_CALL;						// Is this the second call? If so, pick the padding distance.
 		double DISPLACEMENT;
-		double SAFETY;                 		// Safety factor in calculating neighbors.
+		double SAFETY;                 					// Safety factor in calculating neighbors.
 		
-		void FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);		// Updates ghost atoms based on pbc-wrapped real atoms
+		void FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Updates ghost atoms based on pbc-wrapped real atoms
 		void DO_UPDATE_SMALL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
 		void DO_UPDATE_BIG   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
 		void UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS);  // Update 3-Body interaction list.
@@ -505,19 +505,20 @@ class NEIGHBORS
 		
 	public:
 
-		double RCUT_PADDING;				// Neighborlist cutoff is r_max + rcut_padding
-		bool   USE;							// Do we even want to use a neighbor list?
+		bool   UPDATE_WITH_BIG;			// Should we update our neighbor list with DO_UPDATE_BIG? If false, uses DO_UPDATE_SMALL
+		double RCUT_PADDING;			// Neighborlist cutoff is r_max + rcut_padding
+		bool   USE;				// Do we even want to use a neighbor list?
 		double CURR_VEL;
 		double MAX_VEL;
-		double MAX_CUTOFF;					// The maximum of all force field outer cutoffs (r_max and s_max)
+		double MAX_CUTOFF;			// The maximum of all force field outer cutoffs (r_max and s_max)
 		double MAX_CUTOFF_3B;
 		double MAX_CUTOFF_4B;
 		double EWALD_CUTOFF;           		// The cutoff for Ewald interactions.
 		double UPDATE_FREQ;            		// Target update frequency.
 		
-		vector<vector<int> > LIST;			// The actual (2B) neighbor list. Of size [atoms][neighbors]
+		vector<vector<int> > LIST;		// The actual (2B) neighbor list. Of size [atoms][neighbors]
 		vector<vector<int> > LIST_EWALD;	// The Ewald neighbor list. Of size [atoms][neighbors]
-		vector<vector<int> > LIST_UNORDERED;// All neighbors of particle i with i not equal to j.
+		vector<vector<int> > LIST_UNORDERED;	// All neighbors of particle i with i not equal to j.
 		vector<vector<int> > LIST_3B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
 		vector<vector<int> > LIST_4B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
 

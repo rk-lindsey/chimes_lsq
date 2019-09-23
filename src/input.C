@@ -1778,6 +1778,21 @@ void INPUT::PARSE_CONTROLS_USENEIG(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_
 		
 			if (RANK==0)
 				cout << "	# USENEIG #: " << bool2str(NEIGHBOR_LIST.USE) << endl;
+				
+			if (CONTENTS.size(i+1) == 2)
+			{
+				if (CONTENTS(i+1,1) == "SMALL")
+				{
+					NEIGHBOR_LIST.UPDATE_WITH_BIG = false;
+				}
+				else
+				{
+					EXIT_MSG("ERROR: Unrecognized # USENEIG # option: ", CONTENTS(i+1,1));
+				}
+				
+				cout << "		Will force update through the \"small\" method " << endl;
+			}
+					
 		
 			break;
 		}
