@@ -1434,7 +1434,7 @@ void BOX::UPDATE_INVER_CELL()
 	
 	TMP[0] =      (HMAT[4]*HMAT[8] - HMAT[5]*HMAT[7]);
 	TMP[1] = -1 * (HMAT[3]*HMAT[8] - HMAT[5]*HMAT[6]);
-	TMP[2] =      (HMAT[3]*HMAT[7] - HMAT[5]*HMAT[6]);
+	TMP[2] =      (HMAT[3]*HMAT[7] - HMAT[4]*HMAT[6]);
 	
 	TMP[3] = -1 * (HMAT[1]*HMAT[8] - HMAT[2]*HMAT[7]);
 	TMP[4] =      (HMAT[0]*HMAT[8] - HMAT[2]*HMAT[6]);
