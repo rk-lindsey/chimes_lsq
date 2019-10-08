@@ -317,6 +317,11 @@ int main(int argc, char* argv[])
 
   if(CONTROLS.COORD_FILE.size() > 1)
   {
+ 	 if (CONTROLS.RESTART)
+	 {
+		cout << "ERROR: # CRDFILE # \"CAT\" option cannot be used when # VELINIT # is RESTART." << endl;
+		exit_run(0);
+	 } 
 	 if (CONTROLS.COMPARE_FORCE)
 	 {
 		cout << "ERROR: # CRDFILE # \"CAT\" option cannot be used when # CMPRFRC # is true." << endl;
@@ -1274,11 +1279,38 @@ static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBL
 
 }
 
-static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL,
-										  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, FRAME &SYSTEM)
+static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, FRAME &SYSTEM)
 {
-	COORDFILE >> CONTROLS.STEP ;
-	COORDFILE >> NEIGHBOR_LIST.RCUT_PADDING ;
+	vector<string> tokens;
+	int ntokens;
+	string LINE;
+
+	if(COORDFILE.is_open())
+		COORDFILE.close();
+		
+	COORDFILE.open(CONTROLS.COORD_FILE[0].data());
+		
+	bool FIRST = false;
+	
+	while (true)
+	{
+		getline(COORDFILE,LINE);
+		ntokens = parse_space(LINE,tokens);
+
+		if (ntokens == 1)
+			if (!FIRST)
+				FIRST = true;
+			else
+				break;
+	}
+	
+	CONTROLS.STEP = stoi(tokens[0]);
+	
+	getline(COORDFILE,LINE);
+	parse_space(LINE,tokens);
+	
+	NEIGHBOR_LIST.RCUT_PADDING = stod(tokens[0]);
+
 	ENSEMBLE_CONTROL.READ(COORDFILE) ;
 	AVG_DATA.READ(COORDFILE) ;
 }
