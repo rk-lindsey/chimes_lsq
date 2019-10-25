@@ -954,6 +954,68 @@ void CLUSTER_LIST::process_cutoff_params(string input_type,vector<PAIRS> & ATOM_
   }
 }
 
+
+void CLUSTER_LIST::update_minmax_cutoffs(const vector<PAIRS> & FF_2BODY) // For MD
+{
+	double val = 0;
+
+	if ( RANK == 0 ) 
+		cout << "\t" << "Latest " << VEC[0].NATOMS << "-body outer cutoff values: " << endl;
+
+	val = -1.0;
+	for ( int i = 0; i < NCLUSTERS; i++ ) 
+	{
+		VEC[i].set_default_smaxim(FF_2BODY);
+	
+		if ( RANK == 0 ) 
+			cout << "\t" << i << ":";
+	
+		for ( int j = 0; j < VEC[0].NPAIRS; j++ ) 
+		{
+			if ( VEC[i].S_MAXIM[j] > val ) 
+				val = VEC[i].S_MAXIM[j];
+			
+			if ( RANK == 0 ) 
+				cout << "  " << VEC[i].S_MAXIM[j];
+		}
+		if ( RANK == 0 ) 
+			cout << endl;
+	 }
+	 if ( RANK == 0 ) 
+		cout << "     Max " << VEC[0].NATOMS << "-body cutoff = " << val << endl;
+		
+	 MAX_CUTOFF = val ;
+  
+
+  	 val = 1.0e10;
+	 
+	 if ( RANK == 0 ) 
+	 	cout << "\t" << "Latest " << VEC[0].NATOMS << "-body inner cutoff values: " << endl;
+	 
+	 for ( int i = 0; i < NCLUSTERS; i++ ) 
+	 {
+	 	VEC[i].set_default_sminim(FF_2BODY);
+	 
+	 	if ( RANK == 0 ) 
+	 		cout << "\t" << i << ":";
+	 
+		for ( int j = 0; j < VEC[0].NPAIRS; j++ ) 
+		{
+			if ( VEC[i].S_MINIM[j] < val ) 
+				val = VEC[i].S_MINIM[j];
+				
+			if ( RANK == 0 ) 	
+				cout << "  " << VEC[i].S_MINIM[j];
+		}
+		
+		if ( RANK == 0 ) 
+			cout << endl;
+	 }
+	 if ( RANK == 0 ) 
+		cout << "     Min " << VEC[0].NATOMS << "-body cutoff = " << val << endl << endl;
+ 
+}
+
 // Overloaded for different handling in lsq and MD codes
 
 void CLUSTER_LIST::read_cutoff_params(InputListing & CONTENTS, int lineno, string input_type)

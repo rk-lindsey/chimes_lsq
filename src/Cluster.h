@@ -297,6 +297,9 @@ public:
 
   // Process cutoff parameter values from stored input.
   void process_cutoff_params(string input_type,vector<PAIRS> & ATOM_PAIRS, map<string,int> &PAIR_MAP) ;
+  
+  // Update min/max cutoff values. Required for proper handling of special cutoffs
+  void update_minmax_cutoffs(const vector<PAIRS> & FF_2BODY); 
 
   // Parse the force cutoff parameters for a cluster.
   void parse_fcut(string LINE);

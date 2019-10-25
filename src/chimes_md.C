@@ -680,14 +680,24 @@ FF_SETUP_2:
   // Set up the neighbor list
   ////////////////////////////////////////////////////////////
 
-  //if(NEIGHBOR_LIST.USE && !CONTROLS.PLOT_PES)
   if(!CONTROLS.PLOT_PES)
   {
 	 if(RANK == 0)
 		cout << "Initializing the neighbor list..." << endl;
+
+	if (CONTROLS.USE_3B_CHEBY)
+	{
+	 	 TRIPS.update_minmax_cutoffs(FF_2BODY);
+		 NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF;
+	}
+	if (CONTROLS.USE_4B_CHEBY)	       
+	{
+		QUADS.update_minmax_cutoffs(FF_2BODY);
+		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
+	}
 		
-	 NEIGHBOR_LIST.INITIALIZE_MD(SYSTEM);
-	 NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+	NEIGHBOR_LIST.INITIALIZE_MD(SYSTEM);
+	NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
   }
 	
 	
@@ -1911,7 +1921,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  {
 				TRIPS.read_cutoff_params(PARAMFILE, LINE, "S_MAXIM") ;
 				TRIPS.process_cutoff_params("S_MAXIM", FF_2BODY, PAIR_MAP) ;
-				NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF ;
+//NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF ;
 
 		  }
 				
@@ -1925,7 +1935,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  {
 				QUADS.read_cutoff_params(PARAMFILE, LINE, "S_MAXIM") ;
 				QUADS.process_cutoff_params("S_MAXIM",FF_2BODY, PAIR_MAP) ;
-				NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF ;
+				//NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF ;
 		  }
 		  else if ( LINE.find("NO ENERGY OFFSETS:") != string::npos)
 		  {
@@ -2155,8 +2165,8 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
 		  {
 			 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
-			 NEIGHBOR_LIST.MAX_CUTOFF_3B = FF_2BODY[i].S_MAXIM;
-			 NEIGHBOR_LIST.MAX_CUTOFF_4B = FF_2BODY[i].S_MAXIM;
+//NEIGHBOR_LIST.MAX_CUTOFF_3B = FF_2BODY[i].S_MAXIM;
+//			 NEIGHBOR_LIST.MAX_CUTOFF_4B = FF_2BODY[i].S_MAXIM;
 		  }
 				 	
 		  PARAMFILE >> FF_2BODY[i].S_DELTA;

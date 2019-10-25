@@ -1054,6 +1054,19 @@ Force field summary:
 
 
 Initializing the neighbor list...
+	Latest 3-body outer cutoff values: 
+	0:  4.3000  4.3000  4.3000
+	1:  4.2000  4.2000  4.3000
+	2:  4.1000  4.2000  4.2000
+	3:  4.1000  4.1000  4.1000
+     Max 3-body cutoff = 4.3000
+	Latest 3-body inner cutoff values: 
+	0:  1.9390  1.9390  1.9390
+	1:  0.7200  0.7200  1.9390
+	2:  0.9820  0.7200  0.7200
+	3:  0.9820  0.9820  0.9820
+     Min 3-body cutoff = 0.7200
+
 NEIGHBOR LIST MAX CUTOFF IS: 4.30000
 USING PADDING: 0.300
 Number of 3-body interactions = 25950

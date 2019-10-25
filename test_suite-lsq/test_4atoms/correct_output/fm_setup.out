@@ -4066,6 +4066,20 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
+	Latest 3-body outer cutoff values: 
+	0:  20.0000000000000000  20.0000000000000000  20.0000000000000000
+     Max 3-body cutoff = 20.0000000000000000
+	Latest 3-body inner cutoff values: 
+	0:  1.2900000000000000  1.2900000000000000  1.2900000000000000
+     Min 3-body cutoff = 1.2900000000000000
+
+	Latest 4-body outer cutoff values: 
+	0:  20.0000000000000000  20.0000000000000000  20.0000000000000000  20.0000000000000000  20.0000000000000000  20.0000000000000000
+     Max 4-body cutoff = 20.0000000000000000
+	Latest 4-body inner cutoff values: 
+	0:  1.2900000000000000  1.2900000000000000  1.2900000000000000  1.2900000000000000  1.2900000000000000  1.2900000000000000
+     Min 4-body cutoff = 1.2900000000000000
+
 Number of 3-body interactions = 4
 Number of 4-body interactions = 1
 Number of 3-body interactions = 4

@@ -708,6 +708,8 @@ static int process_frame(	A_MAT &A_MATRIX,
 // Process the ith frame of the A_MATRIX.
 {
 
+	static bool called_before = false;
+
 	double 	NEIGHBOR_PADDING = 0.3;
 
 	// NOTE: WE CONTINUALLY RE-USE THE 0th entry of A_MATRIX TO SAVE MEMORY.
@@ -746,7 +748,21 @@ static int process_frame(	A_MAT &A_MATRIX,
 		cout << "	Processing frame: " << setw(5) << i+1 << " of: " << CONTROLS.NFRAMES << endl;
 
 	// Use very little padding because we will update neighbor list for every frame.
-		
+if(!called_before)
+{
+	called_before = true;
+	
+	if (CONTROLS.USE_3B_CHEBY)
+	{
+	 	 TRIPS.update_minmax_cutoffs(ATOM_PAIRS);
+		 NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF;
+	}
+	if (CONTROLS.USE_4B_CHEBY)	       
+	{
+		QUADS.update_minmax_cutoffs(ATOM_PAIRS);
+		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
+	}
+}		
 	NEIGHBOR_LIST.INITIALIZE(SYSTEM, NEIGHBOR_PADDING);
 	NEIGHBOR_LIST.DO_UPDATE (SYSTEM, CONTROLS);		
 
