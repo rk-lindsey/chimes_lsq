@@ -62,7 +62,7 @@ CXX_LSQ_SRC=chimes_lsq.C functions.C Ewald.C ClassDefs.C Fcut.C Cluster.C util.C
 CXX_LSQ_HEADER=functions.h Fcut.h Cluster.h util.h Cheby.h io_styles.h A_Matrix.h input.h
 
 chimes_lsq: $(CXX_LSQ_SRC) $(CXX_LSQ_HEADER) 
-	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o chimes_lsq_TEST
+	$(CXX) $(CXX_LSQ_SRC) $(CXX_LSQ_INCLUDES) -o chimes_lsq
 
 clean_lsq:
 	/bin/rm -f chimes_lsq.o functions.o Ewald.o
@@ -89,9 +89,9 @@ LIBS=/usr/lib64/libfftw3.a
 
 chimes_md: $(CXX_MD_SRC) $(CXX_MD_HEADER)
 ifeq ($(LINK2LMPS), yes)
-	$(CXX) $(FLAGLMP) $(CXX_MD_SRC) $(LAMMPS_LIB) $(LMP_COUPLE_LIB) $(LIBS) -o chimes_md_TEST
+	$(CXX) $(FLAGLMP) $(CXX_MD_SRC) $(LAMMPS_LIB) $(LMP_COUPLE_LIB) $(LIBS) -o chimes_md
 else
-	$(CXX) $(CXX_MD_SRC) -o chimes_md_TEST
+	$(CXX) $(CXX_MD_SRC) -o chimes_md
 endif
 
 clean_md:
