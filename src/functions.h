@@ -76,7 +76,8 @@ static const double Tfs     = 48.888;		// Internal time unit in fs.
 static const double GPa     = 6.9479;		// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
 static const double atm     = GPa*9869.23266716;// stress conversion to atm (for LAMMPS).
 static const double GPa2atm = 9869.23266716;	// x_GPa * GPa2atm = x_atm
-static const double pi      = 3.14159265359;		
+static const double pi      = 3.14159265359;
+static const double mpers   = 0.02045482828; 	// conversion from internal velocity units (kcal^1/2/g^1/2) to m/s... v_internal_units * this const --> m/s ... note: 1 kcal/g = 4184000 m^2/s^2		
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- general
 
@@ -188,6 +189,7 @@ class JOB_CONTROL
 		int    FREQ_FORCE;	      // How often to print the forces        
 		int    SELF_CONSIST_FREQ;     // How frequently to print POSCAR file
 		bool   WRAP_COORDS;	      // Should coordinates be wrapped?
+		bool   FORDFTB;	              // Write a special output file for DFTB+ to read in? (default = false)
 
 		// Controls for how to construct the initial system, if desired
 
@@ -283,6 +285,7 @@ class JOB_CONTROL
 			FIT_STRESS_ALL    = false;
 			NSTRESS           = -1;
 			NENER             = -1;
+			FORDFTB           = false;
 		
 		}
 	void LSQ_SETUP(int npairs, int no_atom_types) ; // Set up JOB_CONTROL for LSQ calculation.

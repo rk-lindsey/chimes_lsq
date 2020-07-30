@@ -32,11 +32,12 @@ def main():
     parser.add_argument("--normalize", type=str2bool, default=False, help='Normalize DLARS calculation')
     parser.add_argument("--read_output", type=str2bool, default=False, help='Read output from previous DLARS run')
     parser.add_argument("--restart", type=str2bool, default=False, help='Use DOWLQN restart file')
+    parser.add_argument("--restart_dlasso_dlars", type=str, default="", help='Determines whether dlasso or dlars job will be restarted. Argument is the restart file name ')
     parser.add_argument("--split_files",    type=str2bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
     parser.add_argument("--test_suite", type=str2bool, default=False,help='output for test suite')
     parser.add_argument("--tol", type=float, default=1.0e-05, help='OWLQN or DOWLQN tolerance')
     parser.add_argument("--weights", default="None",help='weight file')
-    parser.add_argument("--active", default=False, help='is this a DLARS/DLASSO run from the active learning driver?')
+    parser.add_argument("--active",  type=str2bool, default=False, help='is this a DLARS/DLASSO run from the active learning driver?')
 
     args        = parser.parse_args()
 
@@ -45,7 +46,7 @@ def main():
     
     # Matrix of force derivatives (a. la. A x = b )
     Afile       = args.A
-    
+
     # Matrix of forces
     bfile       = args.b
 
@@ -66,6 +67,9 @@ def main():
 
     # Do we restart calculations (currently only for DOWLQN)
     restart = args.restart
+    
+    # Do we restart a dlars or dlasso calculation?
+    restart_dlasso_dlars = args.restart_dlasso_dlars
 
     # Do we read output from a previous DLARS run ?
     read_output = args.read_output
@@ -120,14 +124,13 @@ def main():
     #################################
     #################################
 
-
     #################################
     #   Process input, setup output
     #################################
 
     # Use genfromtxt to avoid parsing large files.
     
-    if (is_active and not split_files): # Then this is an AL driver run with dlars/dlasso ... we do NOT split A-matrix
+    if (is_active and not split_files) or ((algorithm == "dlasso") and not split_files): # Then this is an AL driver run with dlars/dlasso ... we do NOT split A-matrix
     
         A      = numpy.zeros((1,1),dtype=float)
         b      = numpy.genfromtxt(bfile, dtype='float') 
@@ -151,14 +154,21 @@ def main():
                 exit(1)
 
     else:
-        dimf = open("dim.0000.txt", "r") ;
-        line = next(dimf) 
-        dim = (int(x) for x in line.split())
-        (np, nstart, nend, nlines) = dim
-        # Dummy A and b matrices.  NOT read in.
-        A = numpy.zeros((1,1),dtype=float)
-        b = numpy.genfromtxt(bfile, dtype='float') 
         
+	if not read_output:
+    
+           dimf = open("dim.0000.txt", "r") ;
+           line = next(dimf) 
+           dim = (int(x) for x in line.split())
+           (np, nstart, nend, nlines) = dim
+           # Dummy A and b matrices.  NOT read in.
+           A = numpy.zeros((1,1),dtype=float)
+           b = numpy.genfromtxt(bfile, dtype='float') 
+	else:
+	   np = "undefined"
+	   nlines = "undefined"
+	
+
     hf = open(header_file,"r").readlines()
 
     print "! Date ", date.today() 
@@ -181,7 +191,7 @@ def main():
     weightedA = None
     weightedb = None
 
-    if DO_WEIGHTING and not split_files and not is_active:
+    if DO_WEIGHTING and not split_files and not is_active and not (algorithm == "dlasso"):
 
         # This way requires too much memory for long A-mat's
         # to avoid a memory error, we will do it the slow way instead:
@@ -320,7 +330,7 @@ def main():
 
     elif algorithm == 'dlars' or algorithm == 'dlasso' :
 
-        x,y = fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize, Afile, bfile, is_active)
+        x,y = fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize, Afile, bfile,restart_dlasso_dlars)
         np = count_nonzero_vars(x)
         nvars = np
         
@@ -331,7 +341,7 @@ def main():
 
     # If split_files, A is not read in.        
     # This conditional should really be set by the algorithm, since many set  y themselves...    
-    if ( (not split_files) and (not read_output) and (not is_active) ) :
+    if ( (not split_files) and (not read_output) and (not is_active) and (algorithm != "dlasso") ):
         y=dot(A,x)
         
     Z=0.0
@@ -842,7 +852,7 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
         sys.exit(1)
 
 
-def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize, Afile, bfile, is_active):
+def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize, Afile, bfile, restart_dlasso_dlars):
 
     # Use the Distributed LARS/LASSO fitting algorithm.  Returns both the solution x and
     # the estimated force vector A * x, which is read from Ax.txt.    
@@ -857,6 +867,7 @@ def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_outp
     print '! DLARS alpha = ' + str(alpha_val)
 
     if not read_output:
+    
     
     	# Use the following if lsq2 is in a full ChIMES directory
 
@@ -874,14 +885,11 @@ def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_outp
         if os.path.exists(dlars_file):
 	
             command = None
-	        
-            if  is_active: # Then we're using the parallel driver and files are named differently
+   
+            command = exepath + " " + Afile + " " + bfile + " dim.txt --lambda=" + `alpha_val`
 
-		command = exepath + " " + Afile + " " + bfile + " dim.txt --lambda=" + `alpha_val`
-		normalize = True
-
-            else:
-                command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha_val))
+            #else:
+            #    command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha_val))
 
             if ( split_files ) :
                 command = command + " --split_files"
@@ -897,9 +905,14 @@ def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_outp
                 command = command + " --normalize=y" 
             else:
                 command = command + " --normalize=n" 
+		
+            if restart_dlasso_dlars != "":
+	    	print "Will run a dlars/dlasso restart job with file:", restart_dlasso_dlars
+		
+		command = command + " --restart=" + restart_dlasso_dlars
                 
             command = command +  " >& dlars.log"
-	    
+
             print("! DLARS run: " + command + "\n")
 
             if ( os.system(command) != 0 ) :

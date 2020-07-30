@@ -379,7 +379,7 @@ void Cheby::map_indices(CLUSTER & cluster, vector<string> & atom_type, vector<in
   for ( int j = 0 ; j < natoms ; j++ ) 
   {
 	 if ( rev_index[j] < 0 ) 
-		EXIT_MSG("Bad reverse index") ;
+		EXIT_MSG("Bad reverse index - debug 1") ;
   }
 #endif
 		 
@@ -482,6 +482,7 @@ void Cheby::map_indices_int(CLUSTER & cluster, vector<int> & atom_type_idx, vect
 #endif
 
   for ( int m = 0 ; m < natoms ; m++ )
+  {
 	 for ( int n = 0 ; n < natoms ; n++ ) 
 	 {
 		if ( ATOM_TYPE_AND_INDEX[m].first == indices[n] && ! used[n] ) 
@@ -492,6 +493,7 @@ void Cheby::map_indices_int(CLUSTER & cluster, vector<int> & atom_type_idx, vect
 		  break ;
 		}
 	 }
+  }
 
   // Find the reverse of the sorted index.
   // vector<int> rev_index(natoms, -1) ;
@@ -511,7 +513,7 @@ void Cheby::map_indices_int(CLUSTER & cluster, vector<int> & atom_type_idx, vect
   for ( int j = 0 ; j < natoms ; j++ ) 
   {
 	 if ( rev_index[j] < 0 ) 
-		EXIT_MSG("Bad reverse index") ;
+		EXIT_MSG("Bad reverse index - debug 2") ;
   }
 #endif
 		 
@@ -2153,6 +2155,8 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 					
 	 // Before doing any polynomial/coeff set up, make sure that all ij, ik, and jk distances are 
 	 // within the allowed range.
+	 
+
 
 	 if ( FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_ij, s_minim[0], s_maxim[0]) )
 	 {
@@ -2183,7 +2187,7 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 			 set_polys(curr_pair_type_idx_ij, Tn_ij, Tnd_ij, rlen_ij_dummy, x_diff[0], x_avg[0], FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY);
 			 set_polys(curr_pair_type_idx_ik, Tn_ik, Tnd_ik, rlen_ik_dummy, x_diff[1], x_avg[1], FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY);
 			 set_polys(curr_pair_type_idx_jk, Tn_jk, Tnd_jk, rlen_jk_dummy, x_diff[2], x_avg[2], FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY);
-												
+																	
 			 // Apply the FF
 
 			 // Set up the smoothing functions
@@ -2309,7 +2313,7 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 		  }	
 		}				
 	 }		
-  } 	// Loop over interactions.
+  } 	// Loop over interactions. 
 }
 
 
@@ -2499,8 +2503,8 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 	 if( !FF_4BODY[curr_quad_type_index].FORCE_CUTOFF.PROCEED(rlen[4], S_MINIM[4], S_MAXIM[4]))
 		continue;
 	 if( !FF_4BODY[curr_quad_type_index].FORCE_CUTOFF.PROCEED(rlen[5], S_MINIM[5], S_MAXIM[5]))
-		continue;	
-
+		continue;
+				
 // At this point, all distances are within allowed ranges. We can now proceed to the force derivative calculation
 			
 	 // For all types, if r < rcut, then the potential is constant, thus the force  must be zero.

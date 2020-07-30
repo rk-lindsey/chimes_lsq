@@ -339,7 +339,8 @@ int main(int argc, char* argv[])
 	//
 	//////////////////////////////////////////////////	   
 
-	print_param_header(CONTROLS, ATOM_PAIRS, TRIPS, QUADS) ;
+	if ( RANK == 0 ) 
+		print_param_header(CONTROLS, ATOM_PAIRS, TRIPS, QUADS) ;
 	
 	//////////////////////////////////////////////////
 	//
@@ -347,7 +348,8 @@ int main(int argc, char* argv[])
 	//
 	//////////////////////////////////////////////////	  	
 
-	print_map_file(PAIR_MAP, TRIPS, QUADS) ;
+	if ( RANK == 0 ) 
+		print_map_file(PAIR_MAP, TRIPS, QUADS) ;
 
 	//////////////////////////////////////////////////
 	//

@@ -1916,7 +1916,7 @@ void CLUSTER::map_indices_int(vector<int> & atom_type_idx, vector<int> & pair_ma
   
   for ( int j = 0; j < natoms; j++ ) 
 	 if ( rev_index[j] < 0 ) 
-		EXIT_MSG("Bad reverse index");
+		EXIT_MSG("Bad reverse index - Cluster");
 		 
   int m = 0;
   for(int i = 0; i < natoms; i++)

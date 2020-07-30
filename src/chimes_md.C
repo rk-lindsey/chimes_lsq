@@ -62,6 +62,7 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 static void parse_ff_controls  (string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CONTROLS ) ;
 static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifstream &CMPR_FORCEFILE) ;
 static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
+static void print_for_dftbplus(FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
 
 // Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
 
@@ -898,6 +899,10 @@ FF_SETUP_2:
 	// FOR MPI: Synchronize forces, energy, and pressure.
 	 sum_forces(SYSTEM.ACCEL, SYSTEM.ATOMS, SYSTEM.TOT_POT_ENER, SYSTEM.PRESSURE_XYZ, SYSTEM.PRESSURE_TENSORS_XYZ.X, SYSTEM.PRESSURE_TENSORS_XYZ.Y, SYSTEM.PRESSURE_TENSORS_XYZ.Z);
 #endif
+
+	if ( (RANK==0)&&(CONTROLS.FORDFTB ) )
+		print_for_dftbplus(SYSTEM, CONTROLS);
+
 		
 	 if ( CONTROLS.CHECK_FORCE ) 
 		check_forces(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST) ;
@@ -1074,8 +1079,24 @@ FF_SETUP_2:
 		
 		if ( (CONTROLS.STEP+1) % CONTROLS.FREQ_ENER == 0 && RANK == 0 ) 
 		{
-		 	printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.8f", CONTROLS.STEP+1, (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS, Ktot/SYSTEM.ATOMS,SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,SYSTEM.TEMPERATURE, SYSTEM.PRESSURE);
-			STATISTICS << CONTROLS.STEP+1<< "     " << (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS<< "  " << Ktot/SYSTEM.ATOMS<< "      " <<SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS<< "        " <<(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS<< " " <<SYSTEM.TEMPERATURE<< "      " << SYSTEM.PRESSURE;
+		 	printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.8f", 
+			CONTROLS.STEP+1, 
+			(CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS, 
+			Ktot/SYSTEM.ATOMS,
+			SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,
+			(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,
+			SYSTEM.TEMPERATURE, 
+			SYSTEM.PRESSURE);
+			
+			STATISTICS 
+			<< CONTROLS.STEP+1
+			<< "     " 
+			<< (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS
+			<< "  " << Ktot/SYSTEM.ATOMS
+			<< "      " <<SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS
+			<< "        "<<(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS
+			<< " " <<SYSTEM.TEMPERATURE<< "      " 
+			<< SYSTEM.PRESSURE;
 			
 			// Print the econs value
 
@@ -1200,6 +1221,43 @@ static void read_input(	string & INFILE,
 					NEIGHBOR_LIST);
 }
 
+static void print_for_dftbplus(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
+{
+	int PRINT_WIDTH     = 21; // Use 21 for testing
+	int PRINT_PRECISION = 14; // Use 14 for testing
+	
+	ofstream dftbplus_file;
+	dftbplus_file.open("dftbplus_data.dat");
+	
+	double offset = 0;
+	
+	SYSTEM.SET_NATOMS_OF_TYPE();
+	
+	for (int i=0; i< SYSTEM.QM_ENERGY_OFFSET.size(); i++)
+		offset +=  SYSTEM.QM_ENERGY_OFFSET[i]* SYSTEM.NATOMS_OF_TYPE[i];
+		
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.TOT_POT_ENER+offset << endl;
+	
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ.X  << endl;
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ.Y  << endl;
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ.Z  << endl;
+
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << 0.0 << endl;
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << 0.0 << endl;
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << 0.0 << endl;
+	
+	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
+	{
+		dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.ACCEL[ia].X << endl;
+		dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.ACCEL[ia].Y << endl;
+		dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.ACCEL[ia].Z << endl;
+	}
+	
+	dftbplus_file.close();
+	
+	
+}
+
 static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL,
 							  THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart)
 // Output final xyz position in the same format as input.xyz for restarting.
@@ -1233,7 +1291,7 @@ static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBL
 	{
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_AX << " ";
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_BY << " ";
-		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CZ << endl;		
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CZ;		
 	}
 	else
 	{
@@ -1248,9 +1306,11 @@ static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBL
 		
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CX << " ";
 		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CY << " ";
-		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CZ << endl;				
+		fxyz << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.BOXDIM.CELL_CZ;				
 	}
+
 	
+	fxyz << endl;
 
 	
 	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
@@ -2884,10 +2944,20 @@ static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,i
 		ij =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[0]];
 		ik =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[1]];
 		jk =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[2]];
+		
+		/*
+		cout << ij << " " << ik << " " << jk << endl;
+		cout << FF_2BODY[0].ATM1TYP << endl;
+		cout << FF_2BODY[0].ATM2TYP << endl;
+		cout << FF_2BODY[1].ATM1TYP << endl;
+		cout << FF_2BODY[1].ATM2TYP << endl;
+		cout << FF_2BODY[2].ATM1TYP << endl;
+		cout << FF_2BODY[2].ATM2TYP << endl;
+		*/
 			
 		ATM_TYP_1 = FF_2BODY[ij].ATM1TYP;
-		ATM_TYP_2 = FF_2BODY[jk].ATM1TYP;
-		ATM_TYP_3 = FF_2BODY[jk].ATM2TYP;
+		ATM_TYP_2 = FF_2BODY[ij].ATM2TYP;
+		ATM_TYP_3 = FF_2BODY[jk].ATM1TYP;
 				
 		cout << "	Will work with pair types: " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[0] << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[1] << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[2] << endl;
 		cout << "	and atom types:            " << ATM_TYP_1 << " " << ATM_TYP_2 << " " << ATM_TYP_3 << endl;
@@ -3021,7 +3091,7 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	getline(COORDFILE,LINE);
 
 	int     CURR_ATOM    = -1 ;
-	XYZ_INT TMP_WRAP_IDX = {0.0,0.0,0.0};
+	XYZ_INT TMP_WRAP_IDX = {0,0,0};
 
 	for(int a=0; a<TEMP_INT;a++)
 	{		
