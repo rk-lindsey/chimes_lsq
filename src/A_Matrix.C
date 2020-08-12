@@ -204,6 +204,22 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 				int N)
 // Print one frame of the A matrix.
 {
+	// Determine which trajectory file this frame came from
+	
+	int my_file     = 0;
+	int frame_check = 0;
+	
+	for(int i=0; i<CONTROLS.INFILE.size(); i++)
+	{
+		frame_check += CONTROLS.INFILE_FRAMES[i];
+	
+		if (N < frame_check)
+			break;
+			
+		my_file++;
+	}
+
+
 	bool DO_ENER       = CONTROLS.FIT_ENER_EVER ;
 
 	if ( ! fileb.is_open() )
@@ -260,9 +276,9 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 			
 			fileb.flush() ;
 			
-			fileb_labeled << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].X << endl;
-			fileb_labeled << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].Y << endl;
-			fileb_labeled << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].Z << endl;
+			fileb_labeled << CONTROLS.INFILE_FORCE_FLAGS[my_file] << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].X << endl;
+			fileb_labeled << CONTROLS.INFILE_FORCE_FLAGS[my_file] << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].Y << endl;
+			fileb_labeled << CONTROLS.INFILE_FORCE_FLAGS[my_file] << SYSTEM.ATOMTYPE[a] << " " <<  SYSTEM.FORCES[a].Z << endl;
 
 		}
 	}
@@ -298,9 +314,9 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		fileb << SYSTEM.STRESS_TENSORS.Z/GPa << endl;
 		data_count += 3 ;
 			
-		fileb_labeled << "s_xx " <<  SYSTEM.STRESS_TENSORS.X/GPa << endl;
-		fileb_labeled << "s_yy " <<  SYSTEM.STRESS_TENSORS.Y/GPa << endl;
-		fileb_labeled << "s_zz " <<  SYSTEM.STRESS_TENSORS.Z/GPa << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_xx " <<  SYSTEM.STRESS_TENSORS.X/GPa << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_yy " <<  SYSTEM.STRESS_TENSORS.Y/GPa << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_zz " <<  SYSTEM.STRESS_TENSORS.Z/GPa << endl;
 		}
 	}
 	else if (CONTROLS.FIT_STRESS_ALL)
@@ -371,17 +387,17 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 			
 		// Convert from GPa to internal units to match A-matrix elements
 					
-		fileb_labeled << "s_xx " << SYSTEM.STRESS_TENSORS_X.X/GPa << endl;
-		fileb_labeled << "s_xy " << SYSTEM.STRESS_TENSORS_X.Y/GPa << endl;
-		fileb_labeled << "s_xz " << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl;	
+		fileb_labeled << CONTROLS.INFILE_FORCE_FLAGS[my_file] << "s_xx " << SYSTEM.STRESS_TENSORS_X.X/GPa << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_xy " << SYSTEM.STRESS_TENSORS_X.Y/GPa << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_xz " << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl;      
 	
-		fileb_labeled << "s_yx " << SYSTEM.STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
-		fileb_labeled << "s_yy " << SYSTEM.STRESS_TENSORS_Y.Y/GPa << endl;
-		fileb_labeled << "s_yz " << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_yx " << SYSTEM.STRESS_TENSORS_X.Y/GPa << endl; // Symmetry - this is just Y.X
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_yy " << SYSTEM.STRESS_TENSORS_Y.Y/GPa << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_yz " << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl;
 
-		fileb_labeled << "s_zx " << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
-		fileb_labeled << "s_zy " << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
-		fileb_labeled << "s_zz " << SYSTEM.STRESS_TENSORS_Z.Z/GPa << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_zx " << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl; // Symmetry - this is just Z.X
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_zy " << SYSTEM.STRESS_TENSORS_Y.Z/GPa << endl; // Symmetry - this is just Z.Y
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_zz " << SYSTEM.STRESS_TENSORS_Z.Z/GPa << endl;
 		}
 	}
 	if(CONTROLS.FIT_ENER)
@@ -409,13 +425,13 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		// Output b.txt stuff
 			
 		fileb                  << SYSTEM.QM_POT_ENER << endl;
-		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "+1 " << SYSTEM.QM_POT_ENER << endl;
 			
 		fileb                  << SYSTEM.QM_POT_ENER << endl;
-		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "+1 " << SYSTEM.QM_POT_ENER << endl;
 			
 		fileb                  << SYSTEM.QM_POT_ENER << endl;
-		fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER << endl;
+		fileb_labeled << CONTROLS.INFILE_ENERGY_FLAGS[my_file] << "+1 " << SYSTEM.QM_POT_ENER << endl;
 		data_count += 3 ;
 		}
 	}
@@ -438,7 +454,7 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 				fileb                  << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
 				data_count++ ;
 			
-				fileb_labeled << "+1 " << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
+				fileb_labeled << CONTROLS.INFILE_ENERGY_FLAGS[my_file] << "+2 " << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
 			}
                 }
 	}

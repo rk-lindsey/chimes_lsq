@@ -234,6 +234,9 @@ class JOB_CONTROL
 		Cheby_trans CHEBY_TYPE;       // How will distance be transformed?
 		vector<string> INFILE;        // Input trajectory file
 		vector<int> INFILE_FRAMES;    // How many frames should we read from each file?
+		vector<string> INFILE_FORCE_FLAGS;	// Specify a string to prepend to force  labels in b-labels.txt file... default is an empty string
+		vector<string> INFILE_STRESS_FLAGS;	// Specify a string to prepend to stress labels in b-labels.txt file... default is an empty string
+		vector<string> INFILE_ENERGY_FLAGS;	// Specify a string to prepend to energy labels in b-labels.txt file... default is an empty string
 
 		// These variables are temporary fixes - soon we will have a class to do all input reading
 

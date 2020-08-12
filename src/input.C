@@ -337,11 +337,25 @@ void INPUT::PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS)
 
 					parse_space(LINE,PARSED_LINE);
 					
-					if( (PARSED_LINE.size() != 2) && (PARSED_LINE.size() != 3))
-						EXIT_MSG("ERROR: Expected to read <nframes> <filename> or <nframes> <filename> <temperature>,  got: ", LINE);											
+					if( (PARSED_LINE.size() != 2) && (PARSED_LINE.size() != 3) && (PARSED_LINE.size() != 6) && (PARSED_LINE.size() != 5))
+						EXIT_MSG("ERROR: Expected to read <nframes> <filename> with <temperature>, <temperature> <F_flag> <S_flag>,<E_flag>, or <F_flag> <S_flag> <E_flag>,  got: ", LINE);											
 					
 					CONTROLS.INFILE_FRAMES.push_back(convert_int(PARSED_LINE[0],i+1));
 					CONTROLS.INFILE       .push_back(     PARSED_LINE[1]);
+					
+					if (PARSED_LINE.size() >= 5)
+					{
+						CONTROLS.INFILE_FORCE_FLAGS .push_back(PARSED_LINE[ PARSED_LINE.size()-3 ]);
+						CONTROLS.INFILE_STRESS_FLAGS.push_back(PARSED_LINE[ PARSED_LINE.size()-2 ]);
+						CONTROLS.INFILE_ENERGY_FLAGS.push_back(PARSED_LINE[ PARSED_LINE.size()-1 ]);
+					}
+					else
+					{
+						CONTROLS.INFILE_FORCE_FLAGS .push_back("");
+						CONTROLS.INFILE_STRESS_FLAGS.push_back("");
+						CONTROLS.INFILE_ENERGY_FLAGS.push_back("");				     
+					}
+					
 					
 					if ( RANK == 0 ) 
 						cout << "		-   " 

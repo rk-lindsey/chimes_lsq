@@ -165,8 +165,9 @@ def main():
            A = numpy.zeros((1,1),dtype=float)
            b = numpy.genfromtxt(bfile, dtype='float') 
 	else:
+	   b      = numpy.genfromtxt(bfile, dtype='float') 
 	   np = "undefined"
-	   nlines = "undefined"
+	   nlines = b.shape[0]
 	
 
     hf = open(header_file,"r").readlines()
