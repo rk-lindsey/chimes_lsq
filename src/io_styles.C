@@ -254,7 +254,6 @@ string WRITE_TRAJ::RETURN_EXTENSION()
 
 void WRITE_TRAJ::PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 {
-
 	if (FIRST_CALL)
 	{
 		FIRST_CALL = false;
@@ -438,24 +437,28 @@ void WRITE_TRAJ::PRINT_FRAME_XYZF_FORCE(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 		         << SYSTEM.BOXDIM.CELL_BX << " " << SYSTEM.BOXDIM.CELL_BY << " " << SYSTEM.BOXDIM.CELL_BZ << " "
 			 << SYSTEM.BOXDIM.CELL_CX << " " << SYSTEM.BOXDIM.CELL_CY << " " << SYSTEM.BOXDIM.CELL_CZ << endl; 
 
+	double factor = 1.0;
+
 	for(int i=0;i<SYSTEM.ATOMS;i++)
 	{
+		if (CONTENTS == TRAJ_TYPE::STANDARD)
+			factor = SYSTEM.MASS[i];
 	
 	 	TRAJFILE << right << setw(4) << SYSTEM.ATOMTYPE[i] 
 	        	 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.COORDS[i].X 
 			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.COORDS[i].Y
 			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.COORDS[i].Z
-			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].X / fconv
-			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].Y / fconv
-			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].Z / fconv << endl ;
+			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].X / fconv * factor
+			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].Y / fconv * factor
+			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].Z / fconv * factor << endl ;
 
-		TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].X << endl;
-	  	TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Y << endl;
-	  	TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Z << endl;
+		TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].X * factor << endl;
+	  	TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Y * factor << endl;
+	  	TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Z * factor << endl;
 			
-	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].X << endl;
-	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Y << endl;
-	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Z << endl;
+	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].X  * factor << endl;
+	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Y  * factor << endl;
+	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Z  * factor << endl;
 
 	}
 }
