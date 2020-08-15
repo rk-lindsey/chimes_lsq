@@ -176,6 +176,7 @@ class JOB_CONTROL
 
 		// "Output control" 
 
+		bool   INCLUDE_ATOM_OFFSETS;  // If true, single-atom contirubtions are added to all output energies. Default is false.
 		int    FREQ_DFTB_GEN;	      // Replaces gen_freq... How often to write the gen file.
 		string TRAJ_FORMAT;	      // .gen, .xyzf, or .lammps (currently)
 		bool   SPLIT_FILES ;	      // If TRUE, do not concatenate A matrix files for LSQ.
@@ -377,8 +378,8 @@ class FRAME
 		int MY_ATOMS_START;		// Used for lammps linking. Specify what index along SYS starts the process' atoms
 		BOX BOXDIM;			// Dimenions of the primitive box.
 		XYZ STRESS_TENSORS;		// Only used for the diagonal components, xx, yy, zz
-		XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested
-		XYZ STRESS_TENSORS_Y;
+		XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested ... used primarily for the lsq code. When used
+		XYZ STRESS_TENSORS_Y;		// by the MD code, stores stress tensors for comparative purposes (e.g. from DFT)
 		XYZ STRESS_TENSORS_Z;
 
 		double         QM_POT_ENER;		// This is the potential energy of the QM calculation!
@@ -390,8 +391,10 @@ class FRAME
 		double 	PRESSURE;					// This is the RUNNING pressure, not the set pressure!
 		double 	AVG_TEMPERATURE;			// Only used for velocity scaling-type thermostats
 		double 	PRESSURE_XYZ;				// This is the running pressure sans the ideal gas term
-		XYZ	PRESSURE_TENSORS_XYZ;		// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term
-		XYZ	PRESSURE_TENSORS;			// Adds in the ideal gas term
+		//XYZ	PRESSURE_TENSORS_XYZ;			// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term
+		vector<XYZ> PRESSURE_TENSORS_XYZ_ALL; 		// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term ... includes off-diagonals
+		//XYZ	PRESSURE_TENSORS;			// Adds in the ideal gas term
+		vector<XYZ> PRESSURE_TENSORS_ALL;		// Adds in the ideal gas term ... includes off-diagonals
 		double	TOT_POT_ENER;				// Replaces VTOT
 
 		vector<int>	PARENT;
@@ -626,6 +629,7 @@ class THERMO_AVG
 		double 	TEMP_SUM;
 		double 	PRESS_SUM;
 		XYZ 	STRESS_TENSOR_SUM;
+		vector<XYZ> 	STRESS_TENSOR_SUM_ALL;
 		
 		void WRITE(ofstream &fout);
 		void READ(ifstream &fin);
@@ -746,7 +750,16 @@ void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIP
 
 #ifdef USE_MPI
 	void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
-	void sum_forces         (vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure, double & tens_x, double & tens_y, double & tens_z);
+	void sum_forces         (vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure,
+					double tens_xx,
+					double tens_xy,
+					double tens_xz,
+					double tens_yx,
+					double tens_yy,
+					double tens_yz,
+					double tens_zx,
+					double tens_zy,
+					double tens_zz);
 #endif
 
 #endif

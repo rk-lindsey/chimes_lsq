@@ -262,6 +262,7 @@ void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGH
 	
 	// "Output control"
 	
+	PARSE_CONTROLS_ATMENER(CONTROLS);
 	PARSE_CONTROLS_FRQDFTB(CONTROLS);
 	PARSE_CONTROLS_TRAJEXT(CONTROLS);
 	PARSE_CONTROLS_FRQENER(CONTROLS);
@@ -2099,6 +2100,29 @@ void INPUT::PARSE_CONTROLS_WRPCRDS(JOB_CONTROL & CONTROLS)
 }
 
 // "Output control"
+
+void INPUT::PARSE_CONTROLS_ATMENER(JOB_CONTROL & CONTROLS)
+{
+	int N_CONTENTS = CONTENTS.size();
+	
+	for (int i=0; i<N_CONTENTS; i++)
+	{
+		if (found_input_keyword("ATMENER", CONTENTS(i)))
+		{
+			CONTROLS.INCLUDE_ATOM_OFFSETS = convert_bool(CONTENTS(i+1,0),i+1);
+		
+			if (RANK==0)
+				cout << "	# ATMENER #: " << CONTROLS.INCLUDE_ATOM_OFFSETS << endl;
+			
+			if ( CONTROLS.INCLUDE_ATOM_OFFSETS && RANK==0)
+				cout << "		... All reported energies include single atom contributions if available" << endl;
+			if (!CONTROLS.INCLUDE_ATOM_OFFSETS && RANK==0)
+				cout << "		... All reported energies *DO NOT* include single atom contributions" << endl;
+		
+			break;
+		}
+	}
+}
 
 void INPUT::PARSE_CONTROLS_FRQDFTB(JOB_CONTROL & CONTROLS)
 {

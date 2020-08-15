@@ -1910,11 +1910,28 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 				double coeff                = FF_2BODY[curr_pair_type_idx_ij].PARAMS[i]; // This is the Cheby FF param for the given power
 				SYSTEM.TOT_POT_ENER += coeff * fcut_2b * Tn[i+1];
 				deriv                = (fcut_2b * Tnd[i+1] + fcutderiv_2b * Tn[i+1]);
-				SYSTEM.PRESSURE_XYZ -= coeff * deriv * rlen_ij;				
-					
+				SYSTEM.PRESSURE_XYZ -= coeff * deriv * rlen_ij;		
+				
+				// OLD WAY: Only compute diagonal terms		
+				/*	
 				SYSTEM.PRESSURE_TENSORS_XYZ.X -= coeff * deriv * RAB_IJ.X * RAB_IJ.X / rlen_ij;
 				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= coeff * deriv * RAB_IJ.Y * RAB_IJ.Y / rlen_ij;
 				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= coeff * deriv * RAB_IJ.Z * RAB_IJ.Z / rlen_ij;
+				*/
+
+				// NEW WAY: Compute both on- and off-diagonal terms
+
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X -= coeff * deriv * RAB_IJ.X * RAB_IJ.X / rlen_ij; // xx
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y -= coeff * deriv * RAB_IJ.X * RAB_IJ.Y / rlen_ij; // xy
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z -= coeff * deriv * RAB_IJ.X * RAB_IJ.Z / rlen_ij; // xz
+
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y;          // yx
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y -= coeff * deriv * RAB_IJ.Y * RAB_IJ.Y / rlen_ij; // yy
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z -= coeff * deriv * RAB_IJ.Y * RAB_IJ.Z / rlen_ij; // yz
+
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z;          // zx
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z;          // xy
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z -= coeff * deriv * RAB_IJ.Z * RAB_IJ.Z / rlen_ij; // zz
 					
 				SYSTEM.ACCEL[a1].X += coeff * deriv * RAB_IJ.X / rlen_ij;
 				SYSTEM.ACCEL[a1].Y += coeff * deriv * RAB_IJ.Y / rlen_ij;
@@ -2233,18 +2250,33 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 				force_ik /= rlen_ik;
 				force_jk /= rlen_jk;
 
-				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ij * RAB_IJ.X * RAB_IJ.X ;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ij * RAB_IJ.Y * RAB_IJ.Y ;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ij * RAB_IJ.Z * RAB_IJ.Z ;
-							
-				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ik * RAB_IK.X * RAB_IK.X ;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ik * RAB_IK.Y * RAB_IK.Y ;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ik * RAB_IK.Z * RAB_IK.Z ;
-							
-				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_jk * RAB_JK.X * RAB_JK.X ;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_jk * RAB_JK.Y * RAB_JK.Y ;
-				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_jk * RAB_JK.Z * RAB_JK.Z ;
-							
+				// OLD WAY: Only compute diagonal terms	
+				/*
+				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ij * RAB_IJ.X * RAB_IJ.X ; // xx
+				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ij * RAB_IJ.Y * RAB_IJ.Y ; // yy
+				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ij * RAB_IJ.Z * RAB_IJ.Z ; // zz
+			
+				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_ik * RAB_IK.X * RAB_IK.X ; // xx
+				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_ik * RAB_IK.Y * RAB_IK.Y ; // yy
+				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_ik * RAB_IK.Z * RAB_IK.Z ; // zz
+			
+				SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_jk * RAB_JK.X * RAB_JK.X ; // xx
+				SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_jk * RAB_JK.Y * RAB_JK.Y ; // yy
+				SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_jk * RAB_JK.Z * RAB_JK.Z ; // zz
+				*/
+				// NEW WAY: Compute both on- and off-diagonal terms
+
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X -= (force_ij * RAB_IJ.X * RAB_IJ.X  + force_ik * RAB_IK.X * RAB_IK.X  + force_jk * RAB_JK.X * RAB_JK.X) ; // xx
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y -= (force_ij * RAB_IJ.X * RAB_IJ.Y  + force_ik * RAB_IK.X * RAB_IK.Y  + force_jk * RAB_JK.X * RAB_JK.Y) ; // xy
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z -= (force_ij * RAB_IJ.X * RAB_IJ.Z  + force_ik * RAB_IK.X * RAB_IK.Z  + force_jk * RAB_JK.X * RAB_JK.Z) ; // xz
+
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y;          // yx
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y -= (force_ij * RAB_IJ.Y * RAB_IJ.Y  + force_ik * RAB_IK.Y * RAB_IK.Y  + force_jk * RAB_JK.Y * RAB_JK.Y) ;  // yy
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z -= (force_ij * RAB_IJ.Y * RAB_IJ.Z  + force_ik * RAB_IK.Y * RAB_IK.Z  + force_jk * RAB_JK.Y * RAB_JK.Z) ; // yz
+
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z;          // zx
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z;          // xy
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z -= (force_ij * RAB_IJ.Z * RAB_IJ.Z  + force_ik * RAB_IK.Z * RAB_IK.Z  + force_jk * RAB_JK.Z * RAB_JK.Z) ; // zz	
 
 				// Apply forces to ij pair
 			      
@@ -2630,10 +2662,30 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		  SYSTEM.PRESSURE_XYZ -= force_4b[j] * rlen[j];
 
 		  force_4b[j] /= rlen[j];
+		  
+		  // OLD WAY: Only compute diagonal terms
+		  /*	
 					
 		  SYSTEM.PRESSURE_TENSORS_XYZ.X -= force_4b[j] * RAB[j].X * RAB[j].X ;
 		  SYSTEM.PRESSURE_TENSORS_XYZ.Y -= force_4b[j] * RAB[j].Y * RAB[j].Y ;
 		  SYSTEM.PRESSURE_TENSORS_XYZ.Z -= force_4b[j] * RAB[j].Z * RAB[j].Z ;
+		  */
+
+		  // NEW WAY: Compute both on- and off-diagonal terms
+
+		  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X -= force_4b[j] * RAB[j].X * RAB[j].X;    // xx
+		  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y -= force_4b[j] * RAB[j].X * RAB[j].Y;    // xy
+		  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z -= force_4b[j] * RAB[j].X * RAB[j].Z;    // xz
+
+		  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y; // yx
+		  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y -= force_4b[j] * RAB[j].Y * RAB[j].Y;    // yy
+		  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z -= force_4b[j] * RAB[j].Y * RAB[j].Z;    // yz
+
+		  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z; // zx
+		  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z; // xy
+		  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z -= force_4b[j] * RAB[j].Z * RAB[j].Z;    // zz
+		  
+		  
 		}
 
 		// Apply forces to ij pair

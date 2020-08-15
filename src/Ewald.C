@@ -185,9 +185,9 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 		B.Y = 1.0 - 2.0 * K_V[ik].Y * K_V[ik].Y / rksq - 0.5 * K_V[ik].Y * K_V[ik].Y / alphasq ;
 		B.Z = 1.0 - 2.0 * K_V[ik].Z * K_V[ik].Z / rksq - 0.5 * K_V[ik].Z * K_V[ik].Z / alphasq ;
 
-		TRAJECTORY.PRESSURE_TENSORS_XYZ.X += (2*PI*ke/Volume)*kweight * B.X ;
-		TRAJECTORY.PRESSURE_TENSORS_XYZ.Y += (2*PI*ke/Volume)*kweight * B.Y ;
-		TRAJECTORY.PRESSURE_TENSORS_XYZ.Z += (2*PI*ke/Volume)*kweight * B.Z ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[0].X += (2*PI*ke/Volume)*kweight * B.X ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[1].Y += (2*PI*ke/Volume)*kweight * B.Y ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[2].Z += (2*PI*ke/Volume)*kweight * B.Z ;
 		
 		for(int a1=0; a1<PRIM_ATOMS; a1++) 
 		{
@@ -355,9 +355,9 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 
 				// Real space part of the pressure tensor.
 				// See Heyes, PRB, 49, 755(1994), eq. 22.
-				TRAJECTORY.PRESSURE_TENSORS_XYZ.X += tempx * RVEC.X * RVEC.X ;
-				TRAJECTORY.PRESSURE_TENSORS_XYZ.Y += tempx * RVEC.Y * RVEC.Y ;
-				TRAJECTORY.PRESSURE_TENSORS_XYZ.Z += tempx * RVEC.Z * RVEC.Z ;
+				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[0].X += tempx * RVEC.X * RVEC.X ;
+				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[1].Y += tempx * RVEC.Y * RVEC.Y ;
+				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[2].Z += tempx * RVEC.Z * RVEC.Z ;
 				
 				TRAJECTORY.TMP_EWALD[fidx_a2].X -= RVEC.X * tempx;
 				TRAJECTORY.TMP_EWALD[fidx_a2].Y -= RVEC.Y * tempx;
