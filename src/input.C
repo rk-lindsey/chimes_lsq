@@ -300,6 +300,10 @@ void INPUT::PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS)
 			{
 				CONTROLS.INFILE.push_back(CONTENTS(i+1,0));
 				
+				CONTROLS.INFILE_FORCE_FLAGS .push_back("");
+				CONTROLS.INFILE_STRESS_FLAGS.push_back("");
+				CONTROLS.INFILE_ENERGY_FLAGS.push_back("");
+				
 				if ( RANK == 0 ) 
 					cout << "	# TRJFILE #: " << CONTROLS.INFILE[0] << endl;	
 				break;
