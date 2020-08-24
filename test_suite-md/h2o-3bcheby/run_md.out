@@ -550,7 +550,10 @@ END SIMULATION
 	Average temperature over run = 2006.7656 K
 	Average pressure    over run = 37.6362 GPa
 	Pressures from diagonal stress tensors over run: 37.6369
-	Average diagonal stress tensors over run: 
+	Average stress tensors over run: 
 		sigma_xx: 38.9456 GPa
 		sigma_yy: 36.4883 GPa
 		sigma_zz: 37.4769 GPa
+		sigma_xy: 4.2219 GPa
+		sigma_xz: 4.8146 GPa
+		sigma_yz: 3.6973 GPa

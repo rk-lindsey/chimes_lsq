@@ -359,7 +359,7 @@ RANK: 0 UPDATING ON STEP: 744, WITH PADDING: 0.524
      750     93.75       6.3341657     -52.8317828     -46.4976171          2147.6     14.01898127    -51.1787732
      760     95.00       6.2530898     -52.7989566     -46.5458668          2120.1     15.82535583    -51.1781469
 RANK: 0 UPDATING ON STEP: 760, WITH PADDING: 0.510
-     770     96.25       6.6565023     -53.2690974     -46.6125952          2256.9     15.87732491    -51.1797302
+     770     96.25       6.6565023     -53.2690974     -46.6125952          2256.9     15.87732490    -51.1797302
 RANK: 0 UPDATING ON STEP: 774, WITH PADDING: 0.674
      780     97.50       6.2375446     -52.9369505     -46.6994059          2114.8     15.44652834    -51.1785282
 RANK: 0 UPDATING ON STEP: 789, WITH PADDING: 0.699
@@ -375,7 +375,7 @@ RANK: 0 UPDATING ON STEP: 843, WITH PADDING: 0.510
      850    106.25       6.3661792     -53.8586204     -47.4924412          2158.4     12.46772601    -51.1792212
 RANK: 0 UPDATING ON STEP: 857, WITH PADDING: 0.564
      860    107.50       5.9949912     -53.6315859     -47.6365947          2032.6     12.47175883    -51.1786448
-     870    108.75       5.7448325     -53.5203111     -47.7754786          1947.8     12.13141688    -51.1786875
+     870    108.75       5.7448325     -53.5203111     -47.7754786          1947.8     12.13141687    -51.1786875
 RANK: 0 UPDATING ON STEP: 873, WITH PADDING: 0.553
      880    110.00       5.6155941     -53.5234530     -47.9078589          1903.9     11.26599407    -51.1790247
      890    111.25       5.3490689     -53.3735474     -48.0244785          1813.6     10.34900631    -51.1784170
@@ -401,7 +401,10 @@ END SIMULATION
 	Average temperature over run = 1996.7288 K
 	Average pressure    over run = 11.8540 GPa
 	Pressures from diagonal stress tensors over run: 11.8552
-	Average diagonal stress tensors over run: 
+	Average stress tensors over run: 
 		sigma_xx: 13.1763 GPa
 		sigma_yy: 10.6583 GPa
 		sigma_zz: 11.7309 GPa
+		sigma_xy: 4.4250 GPa
+		sigma_xz: 4.8214 GPa
+		sigma_yz: 3.7477 GPa
