@@ -2176,15 +2176,16 @@ void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIP
 
 #ifdef USE_MPI
 	void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure,
-	double tens_xx,
-	double tens_xy,
-	double tens_xz,
-	double tens_yx,
-	double tens_yy,
-	double tens_yz,
-	double tens_zx,
-	double tens_zy,
-	double tens_zz)
+	double &tens_xx,
+	double &tens_xy,
+	double &tens_xz,
+	double &tens_yx,
+	double &tens_yy,
+	double &tens_yz,
+	double &tens_zx,
+	double &tens_zy,
+	double &tens_zz)
+	
 	// Add up forces, potential energy, and pressure from all processes.  
 	{
 		// Sum up the potential energy, pressure, tensors , and forces from all processors

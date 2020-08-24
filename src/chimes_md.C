@@ -2110,6 +2110,19 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			
 		if(RANK==0)
 		  cout << endl;
+		  
+		  
+		
+		if(SYSTEM.QM_ENERGY_OFFSET.size() == 0)
+		{
+			SYSTEM.QM_ENERGY_OFFSET.resize(NO_PAIRS);
+			
+			for(int i=0; i<NO_PAIRS; i++)
+				SYSTEM.QM_ENERGY_OFFSET[i] = 0.0;
+		}
+			
+		
+		
 			
 		PARAMFILE.close();
 		break;
