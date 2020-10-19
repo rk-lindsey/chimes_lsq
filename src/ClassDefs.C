@@ -222,7 +222,7 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		BIN_IDX.X = floor( (SYSTEM.ALL_COORDS[a1].X + SYSTEM.BOXDIM.EXTENT_X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
 		BIN_IDX.Y = floor( (SYSTEM.ALL_COORDS[a1].Y + SYSTEM.BOXDIM.EXTENT_Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
 		BIN_IDX.Z = floor( (SYSTEM.ALL_COORDS[a1].Z + SYSTEM.BOXDIM.EXTENT_Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		
+
 		/* RKL - no longer used - 082319
 					
 		BIN_IDX.X = floor( (SYSTEM.ALL_COORDS[a1].X + SYSTEM.BOXDIM.X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
@@ -341,14 +341,6 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 				}
 			}
 		}
-		/*
-		cout << "NEIGHBORS OF ATOM " << a1 << "	: " << endl;
-		
-		for (int j=0; j<LIST[a1].size(); j++)
-			cout << "	" << LIST[a1][j] << endl;
-		*/
-		
-
 	}
 
 	if(FIRST_CALL == false)
@@ -1504,17 +1496,44 @@ void BOX::UPDATE_LAT_VALUES()
 void BOX::UPDATE_EXTENT()
 {
 	// See LAMMPS manual for formula
-
-	double TMP = XY;
-
-	if (XZ > TMP)
-		TMP = XZ;
-	if ((XY+XZ) > TMP)
-		TMP = XY+XZ;
 	
-	EXTENT_X = CELL_LX + TMP;
-	EXTENT_Y = CELL_LY + YZ;
-	EXTENT_Z = CELL_LZ;	
+	
+	double tmp;
+	    
+	double xlo = 0.0;
+	if (XY < xlo)
+		xlo = XY;
+	if (XZ < xlo)
+		xlo = XZ;
+	if(XY+XZ < xlo)
+		xlo = XY+XZ;
+		
+	double ylo = 0.0;
+	if (YZ< ylo)
+		ylo = YZ;
+	double zlo = 0.0;
+	
+	double xhi = CELL_AX;
+	tmp = 0.0;
+	if (XY > tmp)
+		tmp = XY;
+	if (XZ > tmp)
+		tmp = XZ;
+	if (XY+XZ> tmp)
+		tmp = XY+XZ;
+	xhi += tmp;
+	
+	double yhi = CELL_BY;
+	if(YZ > 0.0)
+		yhi += YZ;
+		
+	double zhi = CELL_CZ;
+	
+	
+	
+	EXTENT_X = xhi - xlo;
+	EXTENT_Y = yhi - ylo;
+	EXTENT_Z = zhi - zlo;			
 }
 
 void BOX::UPDATE_CELL() // Assumes CELL_* values have been set, either orthorhombically or triclinically
@@ -1575,19 +1594,19 @@ void BOX::LAMMPSIFY()
 	
 	XY      = LATCON_B * cos (LAT_GAMMA);
 	
-	if (XY < 1E-12)
+	if (abs(XY) < 1E-12)
 		XY = 0.0;
 	
 	XZ      = LATCON_C * cos (LAT_BETA );
 	
-	if (XZ < 1E-12)
+	if (abs(XZ) < 1E-12)
 		XZ = 0.0;
 	
 	CELL_LY = sqrt(LATCON_B*LATCON_B - XY*XY);
 	
 	YZ      = (LATCON_B * LATCON_C * cos(LAT_ALPHA) - XY*XZ)/CELL_LY;
 	
-	if (YZ < 1E-12)
+	if (abs(YZ) < 1E-12)
 		YZ = 0.0;	
 	
 	CELL_LZ = sqrt( LATCON_C*LATCON_C - XZ*XZ -YZ*YZ );

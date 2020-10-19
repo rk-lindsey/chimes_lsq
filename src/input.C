@@ -350,9 +350,24 @@ void INPUT::PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS)
 					
 					if (PARSED_LINE.size() >= 5)
 					{
-						CONTROLS.INFILE_FORCE_FLAGS .push_back(PARSED_LINE[ PARSED_LINE.size()-3 ]);
-						CONTROLS.INFILE_STRESS_FLAGS.push_back(PARSED_LINE[ PARSED_LINE.size()-2 ]);
-						CONTROLS.INFILE_ENERGY_FLAGS.push_back(PARSED_LINE[ PARSED_LINE.size()-1 ]);
+						string tmp_a = PARSED_LINE[ PARSED_LINE.size()-3 ];
+						string tmp_b = PARSED_LINE[ PARSED_LINE.size()-2 ];
+						string tmp_c = PARSED_LINE[ PARSED_LINE.size()-1 ];
+						
+						if (tmp_a != "None")
+							CONTROLS.INFILE_FORCE_FLAGS .push_back(tmp_a);
+						else
+							CONTROLS.INFILE_FORCE_FLAGS .push_back("");
+							
+						if (tmp_b != "None")
+							CONTROLS.INFILE_STRESS_FLAGS .push_back(tmp_b);
+						else
+							CONTROLS.INFILE_STRESS_FLAGS .push_back("");
+							
+						if (tmp_c != "None")
+							CONTROLS.INFILE_ENERGY_FLAGS .push_back(tmp_c);
+						else
+							CONTROLS.INFILE_ENERGY_FLAGS .push_back("");														
 					}
 					else
 					{
@@ -1841,10 +1856,14 @@ void INPUT::PARSE_CONTROLS_CRDFILE(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
 	
+	bool found = false;
+	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
 		if (found_input_keyword("CRDFILE", CONTENTS(i)))		
 		{
+			found = true;
+			
 			if(CONTENTS(i+1,0) == "CAT") // Then we'll be catenating several files together
 			{
 				cout << "	# CRDFILE #: Creating a cell from multiple input files: ";
@@ -1905,7 +1924,10 @@ void INPUT::PARSE_CONTROLS_CRDFILE(JOB_CONTROL & CONTROLS)
 
 			break;
 		}
-	}	
+	}
+	
+	if(!found)
+		EXIT_MSG("ERROR: # CRDFILE # must be specified!");
 }
 
 // " Simulation options"
@@ -1914,10 +1936,13 @@ void INPUT::PARSE_CONTROLS_VELINIT(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
 	
+	bool found = false;
+	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
 		if (found_input_keyword("VELINIT", CONTENTS(i)))		
 		{
+			found = true;
 			
 			if (CONTENTS(i+1,0)=="READ")
 				CONTROLS.INIT_VEL = false;
@@ -1949,16 +1974,23 @@ void INPUT::PARSE_CONTROLS_VELINIT(JOB_CONTROL & CONTROLS)
 		
 			break;
 		}
-	}	
+	}
+	
+	if(!found)
+		EXIT_MSG("ERROR: # VELINIT # must be specified!");	
 }
 void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
 	
+	bool found = false;
+	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
 		if (found_input_keyword("CONSRNT", CONTENTS(i)))		
 		{
+			found = true;
+			
 			CONTROLS.ENSEMBLE = CONTENTS(i+1,0);
 			
 			// Note: don't need to do ensemble checking here - CONSTRAINT initialization takes care of that. 
@@ -2052,7 +2084,10 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 
 			break;
 		}
-	}	
+	}
+	
+	if(!found)
+		EXIT_MSG("ERROR: # CONSRNT # must be specified!");
 }
 void INPUT::PARSE_CONTROLS_PRSCALC(JOB_CONTROL & CONTROLS)
 {
@@ -2065,16 +2100,10 @@ void INPUT::PARSE_CONTROLS_PRSCALC(JOB_CONTROL & CONTROLS)
 			if(CONTENTS(i+1,0) == "ANALYTICAL")
 			{
 				CONTROLS.USE_NUMERICAL_PRESS = false;
-				
-				if (RANK==0)
-					cout << "	# PRSCALC #: ANALYTICAL" << endl;
 			}
 			else if(CONTENTS(i+1,0) == "NUMERICAL")
 			{
 				CONTROLS.USE_NUMERICAL_PRESS = true;
-				
-				if (RANK==0)
-					cout << "	# PRSCALC #: NUMERICAL" << endl;
 			}
 			else
 			{
@@ -2083,7 +2112,19 @@ void INPUT::PARSE_CONTROLS_PRSCALC(JOB_CONTROL & CONTROLS)
 			
 			break;
 		}
-	}	
+	}
+	
+	if(CONTROLS.USE_NUMERICAL_PRESS)
+	{
+		if (RANK==0)
+			cout << "	# PRSCALC #: NUMERICAL" << endl;
+	}
+	else
+	{
+		if (RANK==0)
+			cout << "	# PRSCALC #: ANALYTICAL" << endl;
+	}
+		
 }
 void INPUT::PARSE_CONTROLS_WRPCRDS(JOB_CONTROL & CONTROLS)
 {
@@ -2093,14 +2134,13 @@ void INPUT::PARSE_CONTROLS_WRPCRDS(JOB_CONTROL & CONTROLS)
 	{
 		if (found_input_keyword("WRPCRDS", CONTENTS(i)))		
 		{
-			CONTROLS.WRAP_COORDS = convert_bool(CONTENTS(i+1,0),i+1);
-		
-			if (RANK==0)
-				cout << "	# WRPCRDS #: " << bool2str(CONTROLS.WRAP_COORDS) << endl;
-		
+			CONTROLS.WRAP_COORDS = convert_bool(CONTENTS(i+1,0),i+1);		
 			break;
 		}
 	}	
+	
+	if (RANK==0)
+		cout << "	# WRPCRDS #: " << bool2str(CONTROLS.WRAP_COORDS) << endl;	
 }
 
 // "Output control"
@@ -2109,23 +2149,25 @@ void INPUT::PARSE_CONTROLS_ATMENER(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
 	
+	CONTROLS.INCLUDE_ATOM_OFFSETS = false;
+	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
 		if (found_input_keyword("ATMENER", CONTENTS(i)))
 		{
 			CONTROLS.INCLUDE_ATOM_OFFSETS = convert_bool(CONTENTS(i+1,0),i+1);
-		
-			if (RANK==0)
-				cout << "	# ATMENER #: " << CONTROLS.INCLUDE_ATOM_OFFSETS << endl;
-			
-			if ( CONTROLS.INCLUDE_ATOM_OFFSETS && RANK==0)
-				cout << "		... All reported energies include single atom contributions if available" << endl;
-			if (!CONTROLS.INCLUDE_ATOM_OFFSETS && RANK==0)
-				cout << "		... All reported energies *DO NOT* include single atom contributions" << endl;
-		
 			break;
 		}
 	}
+	
+	if (RANK==0)
+		cout << "	# ATMENER #: " << CONTROLS.INCLUDE_ATOM_OFFSETS << endl;
+	
+	if ( CONTROLS.INCLUDE_ATOM_OFFSETS && RANK==0)
+		cout << "		... All reported energies include single atom contributions if available" << endl;
+	if (!CONTROLS.INCLUDE_ATOM_OFFSETS && RANK==0)
+		cout << "		... All reported energies *DO NOT* include single atom contributions" << endl;
+	
 }
 
 void INPUT::PARSE_CONTROLS_FRQDFTB(JOB_CONTROL & CONTROLS)
@@ -2137,19 +2179,19 @@ void INPUT::PARSE_CONTROLS_FRQDFTB(JOB_CONTROL & CONTROLS)
 		if (found_input_keyword("FRQDFTB", CONTENTS(i)) || found_input_keyword("FRQTRAJ", CONTENTS(i)))
 		{
 			CONTROLS.FREQ_DFTB_GEN = convert_int(CONTENTS(i+1,0),i+1);
-		
-			if (RANK==0)
-				cout << "	# FRQTRAJ #: " << CONTROLS.FREQ_DFTB_GEN << endl;
-			
-			if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0 && RANK==0)
-			{
-				cout << "		... printing every " << CONTROLS.FREQ_DFTB_GEN*CONTROLS.DELTA_T_FS << " fs, " << endl;
-				cout << "		... printing       " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_DFTB_GEN << " frames. " << endl; 
-			}
-		
 			break;
 		}
 	}	
+	
+	if (RANK==0)
+		cout << "	# FRQTRAJ #: " << CONTROLS.FREQ_DFTB_GEN << endl;
+	
+	if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0 && RANK==0)
+	{
+		cout << "		... printing every " << CONTROLS.FREQ_DFTB_GEN*CONTROLS.DELTA_T_FS << " fs, " << endl;
+		cout << "		... printing       " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_DFTB_GEN << " frames. " << endl; 
+	}
+			
 }
 void INPUT::PARSE_CONTROLS_TRAJEXT(JOB_CONTROL & CONTROLS)
 {
@@ -2159,14 +2201,12 @@ void INPUT::PARSE_CONTROLS_TRAJEXT(JOB_CONTROL & CONTROLS)
 	{
 		if (found_input_keyword("TRAJEXT", CONTENTS(i)))		
 		{
-			CONTROLS.TRAJ_FORMAT = CONTENTS(i+1,0);
-		
-			if (RANK==0)
-				cout << "	# TRAJEXT #: " << CONTROLS.TRAJ_FORMAT << endl;	
-		
+			CONTROLS.TRAJ_FORMAT = CONTENTS(i+1,0);		
 			break;
 		}
 	}	
+	if (RANK==0)
+		cout << "	# TRAJEXT #: " << CONTROLS.TRAJ_FORMAT << endl;		
 }
 void INPUT::PARSE_CONTROLS_FRQENER(JOB_CONTROL & CONTROLS)
 {
@@ -2176,14 +2216,12 @@ void INPUT::PARSE_CONTROLS_FRQENER(JOB_CONTROL & CONTROLS)
 	{
 		if (found_input_keyword("FRQENER", CONTENTS(i)))		
 		{
-			CONTROLS.FREQ_ENER = convert_int(CONTENTS(i+1,0),i+1);
-		
-			if (RANK==0)
-				cout << "	# FRQENER #: " << CONTROLS.FREQ_ENER << endl;
-		
+			CONTROLS.FREQ_ENER = convert_int(CONTENTS(i+1,0),i+1);		
 			break;
 		}
 	}	
+	if (RANK==0)
+		cout << "	# FRQENER #: " << CONTROLS.FREQ_ENER << endl;	
 }
 void INPUT::PARSE_CONTROLS_PRNTFRC(JOB_CONTROL & CONTROLS)
 {
@@ -2203,23 +2241,22 @@ void INPUT::PARSE_CONTROLS_PRNTFRC(JOB_CONTROL & CONTROLS)
 					CONTROLS.FREQ_FORCE = convert_int(CONTENTS(i+1,1),i+1);
 			}
 		
-			if (RANK==0)
-			{
-				cout << "	# PRNTFRC #: " << bool2str(CONTROLS.PRINT_FORCE) << endl;
-				
-				if(CONTROLS.PRINT_FORCE)
-				{
-					cout << "		... and will be printed every " << CONTROLS.FREQ_FORCE << " frames."<< endl;	
-				
-					if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0)
-					{
-						cout << "		... printing every " << CONTROLS.FREQ_FORCE*CONTROLS.DELTA_T_FS << " fs, " << endl;
-						cout << "		... printing " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_FORCE << " frames. " << endl; 
-					}
-				}
-			}
-		
 			break;
+		}
+	}	
+	if (RANK==0)
+	{
+		cout << "	# PRNTFRC #: " << bool2str(CONTROLS.PRINT_FORCE) << endl;
+		
+		if(CONTROLS.PRINT_FORCE)
+		{
+			cout << "		... and will be printed every " << CONTROLS.FREQ_FORCE << " frames."<< endl;	
+		
+			if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0)
+			{
+				cout << "		... printing every " << CONTROLS.FREQ_FORCE*CONTROLS.DELTA_T_FS << " fs, " << endl;
+				cout << "		... printing " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_FORCE << " frames. " << endl; 
+			}
 		}
 	}	
 }
@@ -2232,13 +2269,11 @@ void INPUT::PARSE_CONTROLS_PRNTBAD(JOB_CONTROL & CONTROLS)
 		if (found_input_keyword("PRNTBAD", CONTENTS(i)))		
 		{
 			CONTROLS.PRINT_BAD_CFGS = convert_bool(CONTENTS(i+1,0),i+1);
-		
-			if (RANK==0)
-				cout << "	# PRNTBAD #: " << bool2str(CONTROLS.PRINT_BAD_CFGS) << endl;
-		
 			break;
 		}
 	}	
+	if (RANK==0)
+		cout << "	# PRNTBAD #: " << bool2str(CONTROLS.PRINT_BAD_CFGS) << endl;	
 }
 void INPUT::PARSE_CONTROLS_FRQRSTR(JOB_CONTROL & CONTROLS)
 {
@@ -2249,13 +2284,11 @@ void INPUT::PARSE_CONTROLS_FRQRSTR(JOB_CONTROL & CONTROLS)
 		if (found_input_keyword("FRQRSTR", CONTENTS(i)))		
 		{
 			CONTROLS.FREQ_BACKUP = convert_int(CONTENTS(i+1,0),i+1);
-		
-			if (RANK==0)
-				cout << "	# FRQRSTR #: " << CONTROLS.FREQ_BACKUP << endl;
-		
 			break;
 		}
 	}	
+	if (RANK==0)
+		cout << "	# FRQRSTR #: " << CONTROLS.FREQ_BACKUP << endl;	
 }
 void INPUT::PARSE_CONTROLS_PRNTVEL(JOB_CONTROL & CONTROLS)
 {
@@ -2275,25 +2308,24 @@ void INPUT::PARSE_CONTROLS_PRNTVEL(JOB_CONTROL & CONTROLS)
 					CONTROLS.FREQ_VELOC = convert_int(CONTENTS(i+1,1),i+1);
 			}
 			
-			if (RANK==0)
-			{
-				cout << "	# PRNTFRC #: " << bool2str(CONTROLS.PRINT_FORCE) << endl;
-				
-				if(CONTROLS.PRINT_FORCE)
-				{
-					cout << "		... and will be printed every " << CONTROLS.FREQ_FORCE << " frames."<< endl;	
-				
-					if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0)
-					{
-						cout << "		... printing every " << CONTROLS.FREQ_FORCE*CONTROLS.DELTA_T_FS << " fs, " << endl;
-						cout << "		... printing " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_FORCE << " frames. " << endl; 
-					}
-				}
-			}			
-			
 			break;
 		}
 	}	
+	if (RANK==0)
+	{
+		cout << "	# PRNTFRC #: " << bool2str(CONTROLS.PRINT_FORCE) << endl;
+		
+		if(CONTROLS.PRINT_FORCE)
+		{
+			cout << "		... and will be printed every " << CONTROLS.FREQ_FORCE << " frames."<< endl;	
+		
+			if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0)
+			{
+				cout << "		... printing every " << CONTROLS.FREQ_FORCE*CONTROLS.DELTA_T_FS << " fs, " << endl;
+				cout << "		... printing " << CONTROLS.N_MD_STEPS/CONTROLS.FREQ_FORCE << " frames. " << endl; 
+			}
+		}
+	}			
 }
 void INPUT::PARSE_CONTROLS_GETSTRS(JOB_CONTROL & CONTROLS)
 {
@@ -2316,13 +2348,11 @@ void INPUT::PARSE_CONTROLS_FORDFTB(JOB_CONTROL & CONTROLS)
 		if (found_input_keyword("FORDFTB", CONTENTS(i)))		
 		{
 			CONTROLS.FORDFTB = convert_bool(CONTENTS(i+1,0),i+1);
-		
-			if (RANK==0)
-				cout << "	# FORDFTB #: " << bool2str(CONTROLS.FORDFTB) << endl;
-		
 			break;
 		}
 	}	
+	if (RANK==0)
+		cout << "	# FORDFTB #: " << bool2str(CONTROLS.FORDFTB) << endl;
 }
 
 // Run MD sanity checks

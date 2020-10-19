@@ -46,7 +46,7 @@ class A_MAT
 	vector<XYZ >           OVERBONDING;     // originally "P_OVER_FORCES"  ... [#frames][#atoms]
 	vector<vector<XYZ> >   CHARGES;	        // originally "COULOMB_FORCES" ... [#frames][#pairtypes][#atoms]
 
-	ofstream fileA, fileb, fileb_labeled;
+	ofstream fileA, fileb, fileb_labeled, filena;
 
 	A_MAT();
 	~A_MAT();
@@ -66,6 +66,7 @@ class A_MAT
 	private:
 	
 	void add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE);
+	void write_natoms(ofstream & OUTFILE);
 	int data_count;
 	int param_count;
 	

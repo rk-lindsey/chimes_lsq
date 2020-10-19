@@ -196,6 +196,20 @@ void A_MAT::add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE)
 	}
 }
 
+void A_MAT::write_natoms(ofstream & OUTFILE)
+{
+	// For each line that is printed to A.txt/b.txt, write the corresponding
+	// number of atoms in that frame. This is used by the active learning driver
+	// for weighting
+	
+	int natoms = 0;
+	
+	for(int i=0; i<NO_ATOM_TYPES; i++)
+		natoms +=  NO_ATOMS_OF_TYPE[i];
+				
+	OUTFILE << natoms << endl;			
+	
+}
 
 void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 				const class FRAME &SYSTEM,
@@ -237,7 +251,8 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		if ( CONTROLS.FIT_POVER ) 
 			fileA << " " << OVERBONDING[a].X;
 
-		add_col_of_ones("FORCE", DO_ENER, fileA);			  
+		add_col_of_ones("FORCE", DO_ENER, fileA);
+		write_natoms(filena);			  
 
 		fileA << endl;	
 		  
@@ -250,7 +265,8 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 				fileA << CHARGES[i][a].Y << "   ";
 		if ( CONTROLS.FIT_POVER ) 
 			fileA << " " << OVERBONDING[a].Y;
-		add_col_of_ones("FORCE", DO_ENER, fileA);				  
+		add_col_of_ones("FORCE", DO_ENER, fileA);
+		write_natoms(filena);				  
 		fileA << endl;	
 
 
@@ -263,7 +279,8 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 				fileA << CHARGES[i][a].Z << "   ";
 		if ( CONTROLS.FIT_POVER ) 
 			fileA << " " << OVERBONDING[a].Z;
-		add_col_of_ones("FORCE", DO_ENER, fileA);				  
+		add_col_of_ones("FORCE", DO_ENER, fileA);
+		write_natoms(filena);				  
 		fileA << endl;		
 			
 		// Print Bfile: ...
@@ -294,16 +311,19 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].XX << " ";
 		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);
 		fileA << endl;	
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].YY << " ";
 		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		write_natoms(filena);
 		fileA << endl;
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].ZZ << " ";
 		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);
 		fileA << endl;	
 			
 			
@@ -329,45 +349,56 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].XX << " ";
-		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);	
 		fileA << endl;
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].XY << " ";
-		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);	
 		fileA << endl;
+		
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].XZ << " ";
-		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);	
 		fileA << endl;	
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].XY << " ";
-		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);	
 		fileA << endl;	
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].YY << " ";
-		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);	
 		fileA << endl;	
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].YZ << " ";
-		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);	
 		fileA << endl;
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].XZ << " ";
 		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);
 		fileA << endl;
 						
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].YZ << " ";
-		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);	
 		fileA << endl;
+		
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << STRESSES[n].ZZ << " ";
-		add_col_of_ones("STRESS", DO_ENER, fileA);	
+		add_col_of_ones("STRESS", DO_ENER, fileA);
+		write_natoms(filena);	
 		fileA << endl;		
 
 		// Account for the symmetry of the off-diagonal (deviatoric) components
@@ -387,7 +418,7 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 			
 		// Convert from GPa to internal units to match A-matrix elements
 					
-		fileb_labeled << CONTROLS.INFILE_FORCE_FLAGS[my_file] << "s_xx " << SYSTEM.STRESS_TENSORS_X.X/GPa << endl;
+		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_xx " << SYSTEM.STRESS_TENSORS_X.X/GPa << endl;
 		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_xy " << SYSTEM.STRESS_TENSORS_X.Y/GPa << endl;
 		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "s_xz " << SYSTEM.STRESS_TENSORS_X.Z/GPa << endl;      
 	
@@ -409,26 +440,29 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 			
 		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << FRAME_ENERGIES[n] << " ";
-		add_col_of_ones("ENERGY", DO_ENER, fileA);				
+		add_col_of_ones("ENERGY", DO_ENER, fileA);	
+		write_natoms(filena);			
 		fileA << endl;
 			
 		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << FRAME_ENERGIES[n] << " ";
 		add_col_of_ones("ENERGY", DO_ENER, fileA);				
+		write_natoms(filena);
 		fileA << endl;
 			
 		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
 			fileA << FRAME_ENERGIES[n] << " ";
 		add_col_of_ones("ENERGY", DO_ENER, fileA);				
+		write_natoms(filena);
 		fileA << endl;						
 			
 		// Output b.txt stuff
 			
 		fileb                  << SYSTEM.QM_POT_ENER << endl;
-		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "+1 " << SYSTEM.QM_POT_ENER << endl;
+		fileb_labeled << CONTROLS.INFILE_ENERGY_FLAGS[my_file] << "+1 " << SYSTEM.QM_POT_ENER << endl;
 			
 		fileb                  << SYSTEM.QM_POT_ENER << endl;
-		fileb_labeled << CONTROLS.INFILE_STRESS_FLAGS[my_file] << "+1 " << SYSTEM.QM_POT_ENER << endl;
+		fileb_labeled << CONTROLS.INFILE_ENERGY_FLAGS[my_file] << "+1 " << SYSTEM.QM_POT_ENER << endl;
 			
 		fileb                  << SYSTEM.QM_POT_ENER << endl;
 		fileb_labeled << CONTROLS.INFILE_ENERGY_FLAGS[my_file] << "+1 " << SYSTEM.QM_POT_ENER << endl;
@@ -539,6 +573,7 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 	fileA.close();
 	fileb.close();
 	fileb_labeled.close();
+	filena.close();
 
 	// Make sure that every process has closed its files.
 
@@ -549,9 +584,13 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 	if ( RANK == 0 ) 
 	{
 		system("cat b.[0-9]*.txt > b.txt");
-		system("rm b.[0-9]*.txt");
+		system("rm  b.[0-9]*.txt");
+		
 		system("cat b-labeled.[0-9]*.txt > b-labeled.txt");
-		system("rm b-labeled.[0-9]*.txt");
+		system("rm  b-labeled.[0-9]*.txt");
+		
+		system("cat natoms.[0-9]*.txt > natoms.txt");
+		system("rm  natoms.[0-9]*.txt");		
 
 		if ( ! SPLIT_FILES ) 
 		{
@@ -624,29 +663,31 @@ void A_MAT::OPEN_FILES(const JOB_CONTROL &CONTROLS)
 	char nameA[80];
 	char nameB[80];
 	char nameBlab[80];
+	char namena[80];
 
 	// Label output files by the processor rank
 	sprintf(nameA, "A.%04d.txt", RANK);
 	sprintf(nameB, "b.%04d.txt", RANK);
 	sprintf(nameBlab, "b-labeled.%04d.txt", RANK);
+	sprintf(namena, "natoms.%04d.txt", RANK);
 
 	fileA.open(nameA);
 	fileb.open(nameB);
 	fileb_labeled.open(nameBlab);
+	filena.open(namena);
 
 	if ( ! fileA.good() || ! fileA.is_open() )
-		EXIT_MSG(string("Could not open") + nameA) ;
+		EXIT_MSG(string("Could not open ") + nameA) ;
 
 	if ( ! fileb.good() || ! fileb.is_open() )
-		EXIT_MSG(string("Could not open") + nameB) ;
+		EXIT_MSG(string("Could not open ") + nameB) ;
 
 	if ( ! fileb_labeled.good() || ! fileb_labeled.is_open() ) 
-		EXIT_MSG(string("Could not open") + nameBlab) ;
+		EXIT_MSG(string("Could not open ") + nameBlab) ;
+		
+	if ( ! filena.good() || ! filena.is_open() )
+		EXIT_MSG(string("Could not open ") + namena) ;		
 
-
-//	cout << "Opened " << nameB << endl ;
-//	cout << "Opened " << nameBlab << endl ;
-//	cout << "Opened " << nameA << endl ;
 
 	fileA.precision(16);	//  Reduced precision to 6 for code testing.
 	fileA << std::scientific;

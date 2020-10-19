@@ -1463,8 +1463,14 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	  // Add the per-atom contributions to energy, if requested
 	  
 	  if(CONTROLS.INCLUDE_ATOM_OFFSETS)
-	  	for(int a=0;a<SYSTEM.ATOMS;a++)
+	  {
+	  
+	  	int a1start, a1end;
+	  	divide_atoms(a1start, a1end, SYSTEM.ATOMS);
+	  
+	  	for(int a=a1start;a<=a1end;a++)
 	  		SYSTEM.TOT_POT_ENER += SYSTEM.QM_ENERGY_OFFSET[ SYSTEM.ATOMTYPE_IDX[a] ];
+	  }
 		
 	}
 	else if ( FF_2BODY[0].PAIRTYP == "LJ" ) 
