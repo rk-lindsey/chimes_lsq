@@ -143,7 +143,8 @@ public:
 		
 		string strDimFile(dimFilename) ;
 		std::size_t found1 = strDimFile.find(".") ;
-		if ( found1 == string::npos ) {
+		if ( found1 == string::npos ) 
+		{
 			cerr << "A dimension file name must end with a suffix" ;
 			stop_run(1) ;
 		}
@@ -152,7 +153,8 @@ public:
 		// Find out how many files were written by chimes_lsq.
 		int total_files = 0 ;
 		ifstream test_file ;
-		for ( int j = 0 ; j < NPROCS + 1 ; j++ ) {
+		for ( int j = 0 ; j < NPROCS + 1 ; j++ ) 
+		{
 			memset(name, 0, 80) ;
 			sprintf(name, "%s.%04d.%s", strDimFile.c_str(), j, dim_ext.c_str()) ;
 			test_file.open(name) ;
@@ -167,18 +169,24 @@ public:
 		if ( total_files > NPROCS ) {
 			if ( RANK == 0 ) {
 				cout << "Not enough processes specified" << endl ;
-				stop_run(1) ;
+				cout << "Counted more files than processes:" << endl;
+				cout << "Total files: " << total_files << endl;
+				cout << "Total procs: " << NPROCS << endl;
+				MPI_Finalize();
+				exit(0);
 			}
 		}
-		if ( total_files == 0 ) {
-			if ( RANK == 0 ) {
+		if ( total_files == 0 ) 
+		{
+			if ( RANK == 0 ) 
+			{
 				cout << "No dimension files were found" << endl ;
 				stop_run(1) ;
 			}
 		}
 
 		// Somewhat tricky logic to allow the number of processors to be greater than the number of files.
-		// In that case, only some of the rows in the split A matrix are used.
+		// In that case, only some of the rows in the split A matrix are used.		
 		int proc_fac = NPROCS / total_files ;
 		int rank_div = RANK / proc_fac ;
 		int my_file = ( rank_div > total_files - 1 ) ? total_files - 1 : rank_div ;
@@ -194,7 +202,7 @@ public:
 		if ( ! dim_file.is_open() ) {
 			cerr << "Could not open " + string(name) + "\n" ;
 			stop_run(1) ;
-		}
+		}		
 		
 		// Dimensions to use if NPROCS == total_files
 		int mstart0, mend0, mstore0 ;
@@ -244,9 +252,9 @@ public:
 		string mat_ext = str_filename.substr(found+1) ;
 		str_filename = str_filename.substr(0,found+1) ;
 		sprintf(matFilename2, "%s%04d.%s", str_filename.c_str(), my_file, mat_ext.c_str()) ;
-		ifstream matfile(matFilename2);
+		ifstream matfile(matFilename2);		
 		if (!matfile.good()) {
-			cerr << "error opening matrix file " << matFilename << endl;
+			cerr << "error opening matrix file " << matFilename2 << endl;
 			stop_run(1);
 		}
 

@@ -177,6 +177,8 @@ Cheby_trans Cheby::get_trans_type(string cheby_type)
 	 return Cheby_trans::INVRSE_R ;
   else if ( cheby_type == "DEFAULT" )
 	 return Cheby_trans::NONE ;
+  else if ( cheby_type == "NONE" )
+	 return Cheby_trans::NONE ;	 
   else
 	 EXIT_MSG("Bad Cheby transformation type: " + cheby_type) ;
 

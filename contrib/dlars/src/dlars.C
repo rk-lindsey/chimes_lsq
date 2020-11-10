@@ -102,10 +102,13 @@ int main(int argc, char **argv)
 	string algorithm("lasso") ;       // Algorithm to use: lasso or lars
 	bool split_files = false ;        // Read input matrix from split files ?
 	bool normalize=true ;             // Whether to normalize the X matrix.
+	
 	// Stopping criteria.  Default is to calculate all possible solutions.
+	
 	double max_beta_norm = 1.0e+50 ;  // Maximum L1 norm of solution 
 	int max_iterations = 10000000 ;   // Maximum number of LARS iterations.
 	double lambda = 0.0 ;             // L1 weighting factor.
+	
 	string weight_file("") ;
 	string restart_file ;
 
@@ -159,14 +162,14 @@ int main(int argc, char **argv)
 		do_lasso = true ;
 	} else {
 		if ( RANK == 0 ) cout << "Error: unrecognized algorithm: " << algorithm << endl ;
-		stop_run(1) ;
+		MPI_Finalize();
+		exit(0);
 	}
 	
 	if ( RANK == 0 ) {
 		cout << " ...options read." << endl;
 	}
-	
-	
+		
 	int nprops, ndata ;
 	
 	Matrix xmat ;
@@ -178,6 +181,10 @@ int main(int argc, char **argv)
 		}
 		
 		xmat.read_split_files(xname.c_str(), dname.c_str()) ;
+		if ( RANK == 0 ) {
+			cout << " finished." << endl;
+		}		
+		
 		nprops= xmat.dim2 ;
 		ndata = xmat.dim1 ;
 	} else {
@@ -189,13 +196,15 @@ int main(int argc, char **argv)
 		// Read the X matrix from a single file.
 		ifstream xfile(xname) ;
 		if ( ! xfile.is_open() ) {
-			if ( RANK == 0 ) cout << "Could not open " << xname << endl ;
-			stop_run(1) ;
+			cout << "Could not open " << xname << endl ;
+			MPI_Finalize();
+			exit(0);
 		}
 		ifstream dfile(dname) ;
 		if ( ! dfile.is_open() ) {
-			if ( RANK == 0 ) cout << "Error: could not open " << dname << endl ;
-			stop_run(1) ;
+			cout << "Error: could not open " << dname << endl ;
+			MPI_Finalize();
+			exit(0);
 		}
 		dfile >> nprops >> ndata ;
 		xmat.read(xfile, ndata, nprops, true) ;
@@ -204,14 +213,15 @@ int main(int argc, char **argv)
 	if ( RANK == 0 ) {
 		cout << " ...xmat read." << endl;
 	}
-	
-	
+
 
 	ifstream yfile(yname) ;
 	if ( ! yfile.is_open() ) {
-		if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
-		stop_run(1) ;
+		cout << "Could not open " << yname << endl ;
+		MPI_Finalize();
+		exit(0);
 	}
+	
 	Vector yvec ;
 	yvec.read(yfile, ndata) ;
 	
@@ -225,8 +235,9 @@ int main(int argc, char **argv)
 		
 		ifstream weight_stream(weight_file) ;
 		if ( ! weight_stream.is_open() ) {
-			if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
-			stop_run(1) ;
+			cout << "Could not open " << weight_file << endl ;
+			MPI_Finalize();
+			exit(0);
 		}
 		weights.read(weight_stream, ndata) ;
 		xmat.scale_rows(weights) ;
@@ -236,7 +247,7 @@ int main(int argc, char **argv)
 			cout << " ...weights read." << endl;
 		}			
 	}
-
+	
 	if ( normalize ) {
 		xmat.normalize() ;
 		xmat.check_norm() ;

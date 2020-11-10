@@ -1,8 +1,13 @@
 #!/opt/local/bin/python
 import sys
 
-
-# WARNING: ASSUMES A CUBIC BOX
+# Usage is one of: 
+#	python <this script> <OUTCAR file>
+#	python <this script> <OUTCAR file> <frame skip> <optional args>
+# Optional args are:
+#	STRESS or ALLSTR which print diagonal or all stress tensor components, respectively
+#	ENERGY which prints overall frame energy
+# The frame skip arg tell the script to only output every frame skip'th frame
 
 # Read the input file
 
@@ -50,15 +55,22 @@ EXIT_CONDITION = False
 
 IFSTREAM = open(OUTCAR, 'r')
 
-X = ""
-Y = ""
-Z = ""
+A = None
+B = None
+C = None
 
 POT_ENER = 0.0
+
+DETECT_LENGTHS = -1
 
 while not EXIT_CONDITION:
 	
 	LINE = IFSTREAM.readline()
+	
+	if not LINE:
+		
+		print "	!ERROR: End of file reached: ",OUTCAR
+		exit()
 	
 	if "free  energy   TOTEN" in LINE:
 	
@@ -72,12 +84,24 @@ while not EXIT_CONDITION:
 
 	# Get the box lengths
 	
-	if "A1 = (" in LINE:
-		A = LINE.split()[3:6]
-	if "A2 = (" in LINE:
-		B = LINE.split()[3:6]
-	if "A3 = (" in LINE:
-		C = LINE.split()[3:6]	
+	if "direct lattice vectors" in LINE:
+		DETECT_LENGTHS = 0
+		continue
+	
+	if DETECT_LENGTHS == 0:
+		A = LINE.split()[0:3]
+		DETECT_LENGTHS += 1
+		continue
+		
+	if DETECT_LENGTHS == 1:
+		B = LINE.split()[0:3]
+		DETECT_LENGTHS += 1
+		continue
+		
+	if DETECT_LENGTHS == 2:
+		C = LINE.split()[0:3]
+		DETECT_LENGTHS = -1
+		continue	
 		
 	# Get the number of atoms of each type
 	
@@ -100,28 +124,34 @@ while not EXIT_CONDITION:
 	if len(LINE) > 0 and LINE[0] == "TEBEG":
 		TEMPERAT = LINE[2].rstrip(';')	
 
-X = [float(A[0].rstrip(',')), float(B[0].rstrip(',')), float(C[0].rstrip(','))]
-Y = [float(A[1].rstrip(',')), float(B[1].rstrip(',')), float(C[1].rstrip(','))]
-Z = [float(A[2].rstrip(')')), float(B[2].rstrip(')')), float(C[2].rstrip(')'))]
+#X = [float(A[0].rstrip(',')), float(B[0].rstrip(',')), float(C[0].rstrip(','))]
+#Y = [float(A[1].rstrip(',')), float(B[1].rstrip(',')), float(C[1].rstrip(','))]
+#Z = [float(A[2].rstrip(')')), float(B[2].rstrip(')')), float(C[2].rstrip(')'))]
 
-for i in xrange(3):
-	if X[i] != 0.0:
-		X = X[i]
-		break
+if False:
+	for i in xrange(3):
+		if X[i] != 0.0:
+			X = X[i]
+			break
 	
-for i in xrange(3):
-	if Y[i] != 0.0:
-		Y = Y[i]
-		break
+	for i in xrange(3):
+		if Y[i] != 0.0:
+			Y = Y[i]
+			break
 		
-for i in xrange(3):
-	if Z[i] != 0.0:
-		Z = Z[i]
-		break	
+	for i in xrange(3):
+		if Z[i] != 0.0:
+			Z = Z[i]
+			break	
 		
-BOXLENS.append(`(abs(float(X)))`)
-BOXLENS.append(`(abs(float(Y)))`)
-BOXLENS.append(`(abs(float(Z)))`)
+	BOXLENS.append(`(abs(float(X)))`)
+	BOXLENS.append(`(abs(float(Y)))`)
+	BOXLENS.append(`(abs(float(Z)))`)
+	
+BOXLENS.append(' '.join(A))
+BOXLENS.append(' '.join(B))
+BOXLENS.append(' '.join(C))
+	
 		
 IFSTREAM.close()
 		
@@ -183,6 +213,11 @@ TENSOR_ZX = 0
 
 
 for LINE in IFSTREAM:
+
+	if not LINE:
+		
+		print "ERROR: End of file reached"
+		exit()
 
 	if "in kB" in LINE:
 		if TOTAL_FRAMES%SKIP == 0: # Then we should print this frame -- Convert kbar to GPa
