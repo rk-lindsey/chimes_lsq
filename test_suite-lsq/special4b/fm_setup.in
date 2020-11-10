@@ -1,0 +1,52 @@
+
+####### CONTROL VARIABLES #######
+
+# TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force
+  input.xyzf
+# WRAPTRJ # ! Does the trajectory file need wrapping? (i.e. post-run PBC)
+	true
+# NFRAMES # ! How many frames are in the .xyzf file?
+	20
+# NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
+	1
+# FITCOUL # ! Fit charges? If false, use user-specified fixed charges, and subtract them from the forces -- NOTE: FUNCTIONALITY CURRENTLY ONLY SUPPORTED FOR TRUE, AND FALSE WITH CHARGES = 0
+  false
+# FITPOVR #  ! Use ReaxFF linear overcoordination parameters? If this is false and parameters are provided below, those parameters will be subtracted from forces
+	false
+# PAIRTYP # ! Short-range interaction type. See manual for accepted types. Case sensitive
+	CHEBYSHEV 14 3 2
+# CHBTYPE # ! Are we transforming distance in terms of inverse distance(INVRSE_R), a morse-type function? (MORSE)? .. "DEFAULT" for no transformation.
+	MORSE
+
+####### TOPOLOGY VARIABLES #######
+
+# NATMTYP # 
+	2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+1		O		 0		15.9994
+2		H		 0		1.0079
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #	# NIJBINS #	# NIKBINS #	# NJKBINS #
+1		O		O		1.9 		5.0		0.1		1.75			false		0		0		0
+2		O		H		0.7		5.0		0.1		1.25			false		0		0		0
+3		H		H		0.9		5.0		0.1		1.25			false		0		0		0
+
+# FCUTTYP #
+	CUBIC
+
+CHARGE CONSTRAINTS:
+OO	HH	OH	1000.0		 4000.0		4000.0	0.0
+OO	HH	OH	1000.0		-4000.0		0.0	0.0
+
+SPECIAL 3B S_MAXIM: SPECIFIC 2
+OOOOOO OO OO OO 6.00000 6.00000 6.00000 
+OOOHOH OH OH OO 4.00000 4.00000 6.00000 
+
+SPECIAL 4B S_MAXIM: SPECIFIC 3
+OOOOOOOOOOOO OO OO OO OO OO OO 4.00000 4.00000 4.00000 4.00000 4.00000 4.00000 
+OOOOOHOOOHOH OH OH OH OO OO OO 2.00000 2.00000 2.00000 4.00000 4.00000 4.00000 
+OOOHOHOHOHHH HH OH OH OH OH OO 3.00000 4.00000 4.00000 4.00000 4.00000 4.00000 
+
+
+# ENDFILE #

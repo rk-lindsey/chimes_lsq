@@ -1,0 +1,168 @@
+Code compiled in MPI mode. Will run on 1 processor(s).
+
+Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# RNDSEED #: 12357
+	# TEMPERA #: 500 K
+	# CMPRFRC #: true... will only do 1 md step.
+                comparing to file: ../../test_suite-lsq/nonorth/correct_output/force.txt
+	# TIMESTP #: 0.2 fs
+	# N_MDSTP #: 25000
+	# NLAYERS #: 1
+	# USENEIG #: true
+	# PRMFILE #: ../../test_suite-lsq/nonorth/correct_output/params.txt
+	# CRDFILE #: ../nonorth/forceout.xyzf
+	# VELINIT #: GEN ... generating velocites via box Muller
+	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
+	# PRSCALC #: ANALYTICAL
+	# FRQTRAJ #: 20
+		... printing every 4 fs, 
+		... printing       1250 frames. 
+	# FRQENER #: 20
+	# PRNTFRC #: false
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+      Opening ../../test_suite-lsq/nonorth/correct_output/force.txt to read forces for comparison
+     ...Read the following coordinate file extension: xyzf
+     ...Read the following number of atoms: 288
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   0
+       Cell vectors (a)                14.76000023 0 0
+       Cell vectors (b)                7.380000114 12.78253516 0
+       Cell vectors (c)                0 0 13.60000021
+       Layers:                         1
+       Ghost cell vectors (a) 	        44.28000069 0 0
+       Ghost cell vectors (a) 	        22.140000342 38.34760548 0
+       Ghost cell vectors (a) 	        0 0 40.80000063
+       Invr. cell vectors (a) 	        0.0677506764510396 -0 0
+       Invr. cell vectors (b) 	        -0.0391158712785617 0.0782317425677239 -0
+       Invr. cell vectors (c) 	        0 -0 0.0735294106293253
+       Lat. constants (a,b,c) 	        14.76000023 14.7600002303278 13.60000021
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.04719755128765
+       Cell extents (x,y,z)            22.140000344 12.78253516 13.60000021
+       LMP cell lengths (lx,ly,lz)     14.76000023 12.78253516 13.60000021
+       LMP cell tilts facs. (xy,xz,yz) 7.380000114 0 0
+       Cell volume                     2565.91505748228
+
+	...Ignoring last three fields of atom info lines in xyzf file... 
+	...will read from specified force file instead: ../../test_suite-lsq/nonorth/correct_output/force.txt
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   0
+       Cell vectors (a)                14.76000023 0 0
+       Cell vectors (b)                7.380000114 12.78253516 0
+       Cell vectors (c)                0 0 13.60000021
+       Layers:                         1
+       Ghost cell vectors (a) 	        44.28000069 0 0
+       Ghost cell vectors (a) 	        22.140000342 38.34760548 0
+       Ghost cell vectors (a) 	        0 0 40.80000063
+       Invr. cell vectors (a) 	        0.0677506764510396 -0 0
+       Invr. cell vectors (b) 	        -0.0391158712785617 0.0782317425677239 -0
+       Invr. cell vectors (c) 	        0 -0 0.0735294106293253
+       Lat. constants (a,b,c) 	        14.76000023 14.7600002303278 13.60000021
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.04719755128765
+       Cell extents (x,y,z)            22.140000344 12.78253516 13.60000021
+       LMP cell lengths (lx,ly,lz)     14.76000023 12.78253516 13.60000021
+       LMP cell tilts facs. (xy,xz,yz) 7.380000114 0 0
+       Cell volume                     2565.91505748228
+
+   ...read complete for file ../nonorth/forceout.xyzf
+
+Reading atom info from parameter file...
+	Read 1 atom types:
+		0     C , q (e):  0.000, mass (amu):  12.0110
+   ...read complete
+
+	Real atoms:                 288
+	Total atoms (ghost):        7776
+	cell vectors (a)            14.7600 0.0000 0.0000
+	cell vectors (b)            7.3800 12.7825 0.0000
+	cell vectors (c)            0.0000 0.0000 13.6000
+	Layers:                     1
+	Effective cell vectors (a): 44.2800 0.0000 0.0000
+	Effective cell vectors (a): 22.1400 38.3476 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 40.8000
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVT-MTK simulation.
+	...Setting thermostat time constant to: 10.0000
+Initializing velocities via box Muller...
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (   -0.0175,     0.0085,     0.0119) 
+	Final   velocity center of mass: (    0.0000,    -0.0000,    -0.0000) 
+	Total Mass     = 3459.1680 au
+	Volume         = 2565.9151 Ang^3
+	Number density = 0.1864 mol atm/cm^3
+	Mass density   = 2.2386 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      false
+		...Use fit charges?             false
+		...Compute ReaxFF overbonding?  false
+		...Use fit overbonding param?   false
+		...Use 3-body Cheby params?     false
+		...Use 4-body Cheby params?     false
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Read FF quadruplet specifications...
+	...Reading all remaining force field parameters...
+	...Read 2-body FF params...
+	Reading  1 pairs for mapping
+	........Reading pair: CC with mapped index: 0
+	...Read FF pairmaps...
+
+   ...read complete.
+
+Notes on simulation: 
+	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
+	Electrostatics will not be computed.
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		CHEBYSHEV 12
+	Performing pair distance transformations over range: 
+		-1.0000 to 1.0000
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		CC 1.0000 3.1500 0.0100 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00 1.0000e-02
+		Parameters: 
+		0 2.8585e+02
+		1 -2.1374e+02
+		2 3.5860e+02
+		3 -1.7216e+02
+		4 4.4798e+01
+		5 -3.4202e+01
+		6 3.0633e+01
+		7 -3.3368e+01
+		8 1.1478e+01
+		9 -1.0055e+00
+		10 -3.3838e+00
+		11 1.2440e+00
+
+
+Initializing the neighbor list...
+NEIGHBOR LIST MAX CUTOFF IS: 3.15000
+USING PADDING: 0.300
+
+Generating fast maps... 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   CC Explicit pair index:    0 Unique pair index:    0
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.1178554869
+RMS force error = 0.000002

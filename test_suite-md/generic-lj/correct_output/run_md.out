@@ -1,0 +1,337 @@
+Code compiled in MPI mode. Will run on 36 processor(s).
+
+Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: false
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 1000
+	# NLAYERS #: 1
+	# USENEIG #: true
+	# PRMFILE #: params.lj.txt
+	# CRDFILE #: input.xyz
+	# VELINIT #: READ ... reading velocities from coordinate file
+	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
+	# PRSCALC #: ANALYTICAL
+	# FRQTRAJ #: 20
+		... printing every 2.5 fs, 
+		... printing       50 frames. 
+	# FRQENER #: 10
+	# PRNTFRC #: false
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+     ...Read the following coordinate file extension: xyz
+     ...Read the following number of atoms: 96
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        0 25.8273927 0
+       Ghost cell vectors (a) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084112874303
+
+	...Reading velocities from last three fields of atom info lines in xyzf file... 
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        0 25.8273927 0
+       Ghost cell vectors (a) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084112874303
+
+   ...read complete for file input.xyz
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e): -0.730, mass (amu):  15.9990
+		1     H , q (e):  0.365, mass (amu):   1.0080
+   ...read complete
+
+	Real atoms:                 96
+	Total atoms (ghost):        2592
+	cell vectors (a)            8.6091 0.0000 0.0000
+	cell vectors (b)            0.0000 8.6091 0.0000
+	cell vectors (c)            0.0000 0.0000 8.6091
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.8274 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.8274
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVT-MTK simulation.
+	...Setting thermostat time constant to: 10.0000
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+	Total Mass     = 576.4800 au
+	Volume         = 638.0841 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      false
+		...Use fit charges?             false
+		...Compute ReaxFF overbonding?  false
+		...Use fit overbonding param?   false
+		...Use 3-body Cheby params?     false
+		...Use 4-body Cheby params?     false
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Reading all remaining force field parameters...
+	...Read 2-body FF params...
+	Reading  4 pairs for mapping
+	........Reading pair: OO with mapped index: 0
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: HH with mapped index: 1
+	...Read FF pairmaps...
+
+   ...read complete.
+
+Notes on simulation: 
+	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
+	Electrostatics will not be computed.
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		LJ 2
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...sdelta...
+		OO 0.7500 6.0000 0.1000 
+		Parameters: 
+		0 1.0000
+		1 1.1000
+
+		pair type...smin...smax...sdelta...
+		HH 0.7500 6.0000 0.1000 
+		Parameters: 
+		0 1.0000
+		1 1.1000
+
+		pair type...smin...smax...sdelta...
+		OH 0.7500 6.0000 0.1000 
+		Parameters: 
+		0 1.0000
+		1 1.1000
+
+
+Initializing the neighbor list...
+NEIGHBOR LIST MAX CUTOFF IS: 6.00000
+USING PADDING: 0.300
+
+Generating fast maps... 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.3776339900
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
+      10      1.25       6.5684678       2.2055966       8.7740645          2227.0     23.95226303      8.7594617
+RANK: 0 UPDATING ON STEP: 12, WITH PADDING: 0.589
+      20      2.50       9.2504944      -0.4807042       8.7697902          3136.3     11.45933252      8.7610183
+RANK: 0 UPDATING ON STEP: 27, WITH PADDING: 0.624
+      30      3.75       9.6675172      -1.0617834       8.6057338          3277.7      7.65743455      8.7620968
+      40      5.00       9.2562413      -0.9963002       8.2599410          3138.3      7.03193895      8.7627870
+RANK: 0 UPDATING ON STEP: 43, WITH PADDING: 0.619
+      50      6.25       8.7311029      -0.9635820       7.7675209          2960.2      6.62644602      8.7622005
+RANK: 0 UPDATING ON STEP: 59, WITH PADDING: 0.597
+      60      7.50       7.8463688      -0.6481806       7.1981883          2660.3      7.50014158      8.7633335
+      70      8.75       7.5155479      -0.9329742       6.5825737          2548.1      5.91417751      8.7625600
+RANK: 0 UPDATING ON STEP: 75, WITH PADDING: 0.569
+      80     10.00       6.9416983      -0.9989845       5.9427138          2353.6      5.27731664      8.7626547
+      90     11.25       6.1847571      -0.8584861       5.3262710          2096.9      5.61716441      8.7628282
+RANK: 0 UPDATING ON STEP: 92, WITH PADDING: 0.533
+     100     12.50       5.5280748      -0.7574990       4.7705758          1874.3      5.76471250      8.7630192
+RANK: 0 UPDATING ON STEP: 109, WITH PADDING: 0.494
+     110     13.75       5.1381129      -0.8663336       4.2717793          1742.1      4.99713695      8.7627182
+     120     15.00       4.6857136      -0.8540195       3.8316941          1588.7      4.72886966      8.7628500
+RANK: 0 UPDATING ON STEP: 126, WITH PADDING: 0.454
+     130     16.25       4.3308792      -0.8717380       3.4591412          1468.4      4.34983406      8.7630257
+     140     17.50       4.1278394      -0.9873984       3.1404410          1399.5      3.59074278      8.7627137
+RANK: 0 UPDATING ON STEP: 143, WITH PADDING: 0.417
+     150     18.75       3.8134695      -0.9330888       2.8803807          1292.9      3.55915205      8.7626878
+     160     20.00       3.5261381      -0.8444848       2.6816533          1195.5      3.63165529      8.7630961
+RANK: 0 UPDATING ON STEP: 160, WITH PADDING: 0.393
+     170     21.25       3.5986645      -1.0664422       2.5322222          1220.1      2.35034364      8.7626822
+RANK: 0 UPDATING ON STEP: 176, WITH PADDING: 0.391
+     180     22.50       3.5835031      -1.1582810       2.4252221          1215.0      1.61308760      8.7629383
+     190     23.75       3.5295388      -1.1665360       2.3630028          1196.7      1.34388961      8.7630094
+RANK: 0 UPDATING ON STEP: 191, WITH PADDING: 0.400
+     200     25.00       3.5117160      -1.1661789       2.3455370          1190.6      1.22636936      8.7630220
+RANK: 0 UPDATING ON STEP: 207, WITH PADDING: 0.398
+     210     26.25       3.5437606      -1.1712516       2.3725091          1201.5      1.20059886      8.7629661
+     220     27.50       3.5945117      -1.1501302       2.4443815          1218.7      1.40173940      8.7629780
+RANK: 0 UPDATING ON STEP: 223, WITH PADDING: 0.392
+     230     28.75       3.6703811      -1.1086040       2.5617771          1244.4      1.79422882      8.7629740
+RANK: 0 UPDATING ON STEP: 238, WITH PADDING: 0.399
+     240     30.00       3.7806862      -1.0546164       2.7260698          1281.8      2.32191262      8.7629280
+     250     31.25       3.9110720      -0.9721476       2.9389243          1326.0      3.02231370      8.7629155
+RANK: 0 UPDATING ON STEP: 253, WITH PADDING: 0.414
+     260     32.50       4.1012583      -0.8991599       3.2020984          1390.5      3.67630162      8.7628773
+RANK: 0 UPDATING ON STEP: 268, WITH PADDING: 0.438
+     270     33.75       4.3284971      -0.8082582       3.5202389          1467.6      4.33924256      8.7630002
+     280     35.00       4.7847541      -0.8860931       3.8986610          1622.3      4.27383698      8.7627332
+RANK: 0 UPDATING ON STEP: 283, WITH PADDING: 0.468
+     290     36.25       5.3076650      -0.9574750       4.3501900          1799.5      4.28512332      8.7628935
+RANK: 0 UPDATING ON STEP: 298, WITH PADDING: 0.496
+     300     37.50       5.8723218      -1.0049538       4.8673680          1991.0      4.50622350      8.7628623
+     310     38.75       6.3995051      -0.9625686       5.4369365          2169.7      5.18319913      8.7626406
+RANK: 0 UPDATING ON STEP: 313, WITH PADDING: 0.564
+     320     40.00       6.8105330      -0.7787792       6.0317538          2309.1      6.48882586      8.7627274
+RANK: 0 UPDATING ON STEP: 328, WITH PADDING: 0.596
+     330     41.25       7.3439732      -0.7112105       6.6327626          2489.9      7.30088200      8.7624766
+     340     42.50       7.8818622      -0.6575907       7.2242715          2672.3      7.96249915      8.7631526
+RANK: 0 UPDATING ON STEP: 344, WITH PADDING: 0.625
+     350     43.75       8.3669498      -0.5949991       7.7719507          2836.8      8.62286538      8.7613677
+RANK: 0 UPDATING ON STEP: 359, WITH PADDING: 0.641
+     360     45.00       8.7931138      -0.5652438       8.2278699          2981.3      9.09759438      8.7618140
+     370     46.25       9.2597606      -0.6782967       8.5814639          3139.5      8.95268444      8.7625577
+RANK: 0 UPDATING ON STEP: 375, WITH PADDING: 0.626
+     380     47.50       9.3321470      -0.5515651       8.7805818          3164.0      9.62905293      8.7634029
+     390     48.75       9.6592472      -0.8528356       8.8064116          3274.9      8.37294146      8.7622559
+RANK: 0 UPDATING ON STEP: 391, WITH PADDING: 0.622
+     400     50.00       9.3941709      -0.7450292       8.6491418          3185.1      8.54534451      8.7633995
+RANK: 0 UPDATING ON STEP: 407, WITH PADDING: 0.621
+     410     51.25       9.2905668      -0.9730063       8.3175604          3149.9      7.30154343      8.7628124
+     420     52.50       8.8139742      -0.9801617       7.8338124          2988.3      6.94179944      8.7623979
+RANK: 0 UPDATING ON STEP: 423, WITH PADDING: 0.611
+     430     53.75       7.7359651      -0.4702118       7.2657533          2622.8      8.76937408      8.7613563
+RANK: 0 UPDATING ON STEP: 439, WITH PADDING: 0.586
+     440     55.00       7.2763758      -0.5862080       6.6901678          2467.0      8.01914175      8.7615682
+     450     56.25       6.7610412      -0.6702796       6.0907615          2292.3      7.13101313      8.7626889
+RANK: 0 UPDATING ON STEP: 454, WITH PADDING: 0.610
+     460     57.50       6.3422280      -0.8378033       5.5044247          2150.3      5.82013433      8.7627625
+     470     58.75       5.9938385      -1.0603210       4.9335175          2032.2      4.32153081      8.7626507
+RANK: 0 UPDATING ON STEP: 472, WITH PADDING: 0.561
+     480     60.00       5.4920714      -1.0907405       4.4013309          1862.1      3.71607793      8.7628995
+RANK: 0 UPDATING ON STEP: 487, WITH PADDING: 0.562
+     490     61.25       5.0602594      -1.1369197       3.9233397          1715.7      3.19630514      8.7628075
+     500     62.50       4.6067969      -1.1007440       3.5060530          1561.9      3.18107887      8.7626368
+RANK: 0 UPDATING ON STEP: 503, WITH PADDING: 0.535
+     510     63.75       4.0537733      -0.8893358       3.1644374          1374.4      3.96332865      8.7633503
+     520     65.00       3.8980129      -1.0121623       2.8858507          1321.6      3.38860976      8.7627375
+RANK: 0 UPDATING ON STEP: 522, WITH PADDING: 0.456
+     530     66.25       3.6336235      -0.9706363       2.6629871          1232.0      3.46735765      8.7627994
+RANK: 0 UPDATING ON STEP: 537, WITH PADDING: 0.456
+     540     67.50       3.4019919      -0.9041952       2.4977968          1153.4      3.66183090      8.7629533
+     550     68.75       3.3499171      -0.9665619       2.3833552          1135.8      3.31834590      8.7628316
+RANK: 0 UPDATING ON STEP: 553, WITH PADDING: 0.437
+     560     70.00       3.3433251      -1.0284943       2.3148308          1133.5      2.95929958      8.7628310
+RANK: 0 UPDATING ON STEP: 569, WITH PADDING: 0.418
+     570     71.25       3.3171848      -1.0254217       2.2917631          1124.7      2.88740592      8.7628488
+     580     72.50       3.3220222      -1.0078668       2.3141554          1126.3      2.87800351      8.7628945
+RANK: 0 UPDATING ON STEP: 585, WITH PADDING: 0.410
+     590     73.75       3.4209123      -1.0382067       2.3827056          1159.8      2.65638486      8.7628680
+     600     75.00       3.5948534      -1.0948106       2.5000427          1218.8      2.33160287      8.7628276
+RANK: 0 UPDATING ON STEP: 600, WITH PADDING: 0.422
+     610     76.25       3.7922906      -1.1234275       2.6688631          1285.8      2.16488267      8.7628338
+RANK: 0 UPDATING ON STEP: 615, WITH PADDING: 0.437
+     620     77.50       4.0182974      -1.1277826       2.8905148          1362.4      2.17241086      8.7629196
+     630     78.75       4.3496382      -1.1803058       3.1693324          1474.7      2.09254243      8.7627911
+RANK: 0 UPDATING ON STEP: 630, WITH PADDING: 0.457
+     640     80.00       4.6937333      -1.1852777       3.5084556          1591.4      2.35869501      8.7627698
+RANK: 0 UPDATING ON STEP: 645, WITH PADDING: 0.483
+     650     81.25       4.9835085      -1.0810235       3.9024850          1689.6      3.23135505      8.7627541
+     660     82.50       5.2337439      -0.8908394       4.3429046          1774.5      4.51464911      8.7627772
+RANK: 0 UPDATING ON STEP: 660, WITH PADDING: 0.515
+     670     83.75       5.5785508      -0.7523501       4.8262007          1891.4      5.49918537      8.7629822
+RANK: 0 UPDATING ON STEP: 675, WITH PADDING: 0.553
+     680     85.00       6.2806875      -0.9163872       5.3643003          2129.4      5.17706190      8.7626035
+     690     86.25       6.9635175      -1.0070313       5.9564862          2361.0      5.12973780      8.7625542
+RANK: 0 UPDATING ON STEP: 690, WITH PADDING: 0.594
+     700     87.50       7.4910898      -0.9305177       6.5605721          2539.8      5.76679350      8.7627438
+RANK: 0 UPDATING ON STEP: 705, WITH PADDING: 0.631
+     710     88.75       8.0858669      -0.9406122       7.1452547          2741.5      6.02565566      8.7622001
+     720     90.00       8.5867003      -0.9128226       7.6738777          2911.3      6.33862204      8.7625859
+RANK: 0 UPDATING ON STEP: 720, WITH PADDING: 0.663
+     730     91.25       9.1934940      -1.0799130       8.1135810          3117.0      5.86308160      8.7622380
+RANK: 0 UPDATING ON STEP: 735, WITH PADDING: 0.686
+     740     92.50       9.1850829      -0.7733656       8.4117173          3114.2      7.34977787      8.7628061
+     750     93.75       9.3581247      -0.8130133       8.5451115          3172.8      7.44178000      8.7615055
+RANK: 0 UPDATING ON STEP: 750, WITH PADDING: 0.698
+     760     95.00       9.1250588      -0.6083243       8.5167345          3093.8      8.27784861      8.7628941
+RANK: 0 UPDATING ON STEP: 765, WITH PADDING: 0.699
+     770     96.25       9.2059490      -0.8810420       8.3249069          3121.2      7.04740745      8.7623122
+     780     97.50       8.8471834      -0.8645847       7.9825986          2999.6      6.95160577      8.7627399
+RANK: 0 UPDATING ON STEP: 781, WITH PADDING: 0.694
+     790     98.75       8.4061263      -0.8885492       7.5175771          2850.1      6.70676539      8.7622188
+RANK: 0 UPDATING ON STEP: 797, WITH PADDING: 0.697
+     800    100.00       7.6906978      -0.7081607       6.9825371          2607.5      7.21109046      8.7627489
+     810    101.25       7.2385228      -0.8253502       6.4131726          2454.2      6.36004596      8.7626278
+RANK: 0 UPDATING ON STEP: 813, WITH PADDING: 0.685
+     820    102.50       6.7905750      -0.9635854       5.8269896          2302.3      5.33148064      8.7626310
+RANK: 0 UPDATING ON STEP: 829, WITH PADDING: 0.643
+     830    103.75       6.2493944      -0.9977337       5.2516607          2118.8      4.73653382      8.7627093
+     840    105.00       5.7260628      -1.0124509       4.7136119          1941.4      4.25061470      8.7628360
+RANK: 0 UPDATING ON STEP: 846, WITH PADDING: 0.597
+     850    106.25       5.3071711      -1.0857813       4.2213897          1799.4      3.54478240      8.7627109
+     860    107.50       4.8747499      -1.0909943       3.7837557          1652.8      3.14769071      8.7629145
+RANK: 0 UPDATING ON STEP: 863, WITH PADDING: 0.550
+     870    108.75       4.5352664      -1.1310062       3.4042602          1537.7      2.67568269      8.7628201
+     880    110.00       4.2159996      -1.1329241       3.0830755          1429.4      2.45572134      8.7629184
+RANK: 0 UPDATING ON STEP: 880, WITH PADDING: 0.509
+     890    111.25       3.9726278      -1.1537957       2.8188321          1346.9      2.27972901      8.7628767
+RANK: 0 UPDATING ON STEP: 897, WITH PADDING: 0.476
+     900    112.50       3.7599593      -1.1514584       2.6085009          1274.8      2.30263118      8.7629058
+     910    113.75       3.5648465      -1.1142582       2.4505883          1208.6      2.54563161      8.7628635
+RANK: 0 UPDATING ON STEP: 913, WITH PADDING: 0.455
+     920    115.00       3.3951674      -1.0511084       2.3440589          1151.1      2.88639262      8.7630144
+RANK: 0 UPDATING ON STEP: 929, WITH PADDING: 0.444
+     930    116.25       3.3576300      -1.0727912       2.2848387          1138.4      2.80333371      8.7628500
+     940    117.50       3.3558169      -1.0843830       2.2714339          1137.8      2.69071531      8.7629665
+RANK: 0 UPDATING ON STEP: 945, WITH PADDING: 0.435
+     950    118.75       3.4594103      -1.1560565       2.3033538          1172.9      2.34133921      8.7628309
+     960    120.00       3.5283487      -1.1468529       2.3814958          1196.3      2.38197816      8.7628747
+RANK: 0 UPDATING ON STEP: 960, WITH PADDING: 0.440
+     970    121.25       3.6034766      -1.0975881       2.5058885          1221.7      2.64855646      8.7628716
+RANK: 0 UPDATING ON STEP: 975, WITH PADDING: 0.455
+     980    122.50       3.7473175      -1.0690162       2.6783013          1270.5      2.82457106      8.7629551
+     990    123.75       4.0310779      -1.1261404       2.9049375          1366.7      2.64813161      8.7628314
+RANK: 0 UPDATING ON STEP: 990, WITH PADDING: 0.476
+    1000    125.00       4.3606383      -1.1694295       3.1912088          1478.5      2.57153587      8.7628665
+END SIMULATION
+	Average temperature over run = 1952.6246 K
+	Average pressure    over run = 5.0508 GPa

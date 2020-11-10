@@ -1,0 +1,565 @@
+
+Reading input file...
+Will read from file: fm_setup.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# TRJFILE #: input.xyzf
+	# WRAPTRJ #: true
+	# NFRAMES #: 20
+	# NLAYERS #: 1
+	# FITCOUL #: false
+	# FITPOVR #: false
+	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
+	             Will use 2-body order: 14
+	             Will use 3-body order: 3
+	             Will use 4-body order: 2
+	             Will transform Chebyshev pair distances to range -1 to 1
+	# CHBTYPE #: MORSE
+	# NATMTYP #: 2
+	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
+ 	1              O              0              15.9994        
+ 	2              H              0              1.0079         
+
+	The following unique pair types have been identified:
+		0  O O
+		1  H H
+		2  O H
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
+	0               O               O               1.9             5               0.1             1.75             0               
+	1               H               H               0.9             5               0.1             1.25             0               
+	2               O               H               0.7             5               0.1             1.25             0               
+
+	Read the following number of ij ik jk bins for pairs: 
+		OO: 0 0 0
+		HH: 0 0 0
+		OH: 0 0 0
+
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+Note: Will use cubic scaling of: 1
+
+
+	Attempting to read 2 charge constraints...:
+		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
+		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
+
+# FCUTTYP #: CUBIC      ... for all Chebyshev interactions
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+
+	Made the following triplets: 0    
+
+		Atom type idxs:  0 0 0  Triplet name:       OOOOOO Unique triplet ID 111 index:    0
+
+	Made the following triplets: 1    
+
+		Atom type idxs:  0 0 1  Triplet name:       OOOHOH Unique triplet ID 211 index:    1
+		Atom type idxs:  0 1 0  Triplet name:       OHOOOH Unique triplet ID 121 index:    1
+
+	Made the following triplets: 2    
+
+		Atom type idxs:  0 1 1  Triplet name:       OHOHHH Unique triplet ID 221 index:    2
+		Atom type idxs:  1 0 0  Triplet name:       OHOHOO Unique triplet ID 112 index:    1
+		Atom type idxs:  1 0 1  Triplet name:       OHHHOH Unique triplet ID 212 index:    2
+		Atom type idxs:  1 1 0  Triplet name:       HHOHOH Unique triplet ID 122 index:    2
+
+	Made the following triplets: 3    
+
+		Atom type idxs:  1 1 1  Triplet name:       HHHHHH Unique triplet ID 222 index:    3
+	Note: Setting specific 3-body S_MAXIM values: 
+	O O O OO 6.000000 OO 6.000000 OO 6.000000 
+	H O O OH 4.000000 OH 4.000000 OO 6.000000 
+	H H O HH 5.000000 OH 5.000000 OH 5.000000 
+	H H H HH 5.000000 HH 5.000000 HH 5.000000 
+
+     Max 3-body cutoff = 6.000000
+
+     Min 3-body cutoff = 0.700000
+
+	The following unique triplets of atoms have been identified:
+
+    Cluster index       : 0
+    Atoms in the cluster: O O O 
+    Pairs in the cluster: OO OO OO 
+    Number of unique sets of powers: 7 (20 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       1   0   1         0               0               2        
+		      2       1   1   0         0               0               2        
+		      3       0   1   2         3               1               1        
+		      4       1   0   2         3               1               1        
+		      5       0   2   1         3               1               1        
+		      6       2   0   1         3               1               1        
+		      7       1   2   0         3               1               1        
+		      8       2   1   0         3               1               1        
+		      9       0   2   2         9               2               2        
+		      10      2   0   2         9               2               2        
+		      11      2   2   0         9               2               2        
+		      12      1   1   1         12              3               6        
+		      13      1   1   2         13              4               2        
+		      14      1   2   1         13              4               2        
+		      15      2   1   1         13              4               2        
+		      16      1   2   2         16              5               2        
+		      17      2   1   2         16              5               2        
+		      18      2   2   1         16              5               2        
+		      19      2   2   2         19              6               6        
+
+    Cluster index       : 1
+    Atoms in the cluster: H O O 
+    Pairs in the cluster: OH OH OO 
+    Number of unique sets of powers: 13 (20 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       1   0   1         0               0               1        
+		      2       0   1   2         2               1               1        
+		      3       1   0   2         2               1               1        
+		      4       0   2   1         4               2               1        
+		      5       2   0   1         4               2               1        
+		      6       0   2   2         6               3               1        
+		      7       2   0   2         6               3               1        
+		      8       1   1   0         8               4               2        
+		      9       1   1   1         9               5               2        
+		      10      1   1   2         10              6               2        
+		      11      1   2   0         11              7               1        
+		      12      2   1   0         11              7               1        
+		      13      1   2   1         13              8               1        
+		      14      2   1   1         13              8               1        
+		      15      1   2   2         15              9               1        
+		      16      2   1   2         15              9               1        
+		      17      2   2   0         17              10              2        
+		      18      2   2   1         18              11              2        
+		      19      2   2   2         19              12              2        
+
+    Cluster index       : 2
+    Atoms in the cluster: H H O 
+    Pairs in the cluster: HH OH OH 
+    Number of unique sets of powers: 13 (20 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       0   1   2         1               1               1        
+		      2       0   2   1         1               1               1        
+		      3       0   2   2         3               2               2        
+		      4       1   0   1         4               3               1        
+		      5       1   1   0         4               3               1        
+		      6       1   0   2         6               4               1        
+		      7       1   2   0         6               4               1        
+		      8       1   1   1         8               5               2        
+		      9       1   1   2         9               6               1        
+		      10      1   2   1         9               6               1        
+		      11      1   2   2         11              7               2        
+		      12      2   0   1         12              8               1        
+		      13      2   1   0         12              8               1        
+		      14      2   0   2         14              9               1        
+		      15      2   2   0         14              9               1        
+		      16      2   1   1         16              10              2        
+		      17      2   1   2         17              11              1        
+		      18      2   2   1         17              11              1        
+		      19      2   2   2         19              12              2        
+
+    Cluster index       : 3
+    Atoms in the cluster: H H H 
+    Pairs in the cluster: HH HH HH 
+    Number of unique sets of powers: 7 (20 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       1   0   1         0               0               2        
+		      2       1   1   0         0               0               2        
+		      3       0   1   2         3               1               1        
+		      4       1   0   2         3               1               1        
+		      5       0   2   1         3               1               1        
+		      6       2   0   1         3               1               1        
+		      7       1   2   0         3               1               1        
+		      8       2   1   0         3               1               1        
+		      9       0   2   2         9               2               2        
+		      10      2   0   2         9               2               2        
+		      11      2   2   0         9               2               2        
+		      12      1   1   1         12              3               6        
+		      13      1   1   2         13              4               2        
+		      14      1   2   1         13              4               2        
+		      15      2   1   1         13              4               2        
+		      16      1   2   2         16              5               2        
+		      17      2   1   2         16              5               2        
+		      18      2   2   1         16              5               2        
+		      19      2   2   2         19              6               6        
+
+
+	Made the following quadruplets: 0       
+
+		Atom type idxs:  0 0 0 0  Quadruplet name: OOOOOOOOOOOO Unique quadruplet ID 1111 index:    0
+
+	Made the following quadruplets: 1       
+
+		Atom type idxs:  0 0 0 1  Quadruplet name: OOOOOHOOOHOH Unique quadruplet ID 2111 index:    1
+		Atom type idxs:  0 0 1 0  Quadruplet name: OOOHOOOHOOOH Unique quadruplet ID 1211 index:    1
+
+	Made the following quadruplets: 2       
+
+		Atom type idxs:  0 0 1 1  Quadruplet name: OOOHOHOHOHHH Unique quadruplet ID 2211 index:    2
+		Atom type idxs:  0 1 0 0  Quadruplet name: OHOOOOOHOHOO Unique quadruplet ID 1121 index:    1
+		Atom type idxs:  0 1 0 1  Quadruplet name: OHOOOHOHHHOH Unique quadruplet ID 2121 index:    2
+		Atom type idxs:  0 1 1 0  Quadruplet name: OHOHOOHHOHOH Unique quadruplet ID 1221 index:    2
+
+	Made the following quadruplets: 3       
+
+		Atom type idxs:  0 1 1 1  Quadruplet name: OHOHOHHHHHHH Unique quadruplet ID 2221 index:    3
+		Atom type idxs:  1 0 0 0  Quadruplet name: OHOHOHOOOOOO Unique quadruplet ID 1112 index:    1
+		Atom type idxs:  1 0 0 1  Quadruplet name: OHOHHHOOOHOH Unique quadruplet ID 2112 index:    2
+		Atom type idxs:  1 0 1 0  Quadruplet name: OHHHOHOHOOOH Unique quadruplet ID 1212 index:    2
+		Atom type idxs:  1 0 1 1  Quadruplet name: OHHHHHOHOHHH Unique quadruplet ID 2212 index:    3
+		Atom type idxs:  1 1 0 0  Quadruplet name: HHOHOHOHOHOO Unique quadruplet ID 1122 index:    2
+		Atom type idxs:  1 1 0 1  Quadruplet name: HHOHHHOHHHOH Unique quadruplet ID 2122 index:    3
+		Atom type idxs:  1 1 1 0  Quadruplet name: HHHHOHHHOHOH Unique quadruplet ID 1222 index:    3
+
+	Made the following quadruplets: 4       
+
+		Atom type idxs:  1 1 1 1  Quadruplet name: HHHHHHHHHHHH Unique quadruplet ID 2222 index:    4
+	Note: Setting specific 4-body S_MAXIM values: 
+	O O O O OO 4.000000 OO 4.000000 OO 4.000000 OO 4.000000 OO 4.000000 OO 4.000000 
+	H O O O OH 2.000000 OH 2.000000 OH 2.000000 OO 4.000000 OO 4.000000 OO 4.000000 
+	H H O O HH 3.000000 OH 4.000000 OH 4.000000 OH 4.000000 OH 4.000000 OO 4.000000 
+	H H H O HH 5.000000 HH 5.000000 OH 5.000000 HH 5.000000 OH 5.000000 OH 5.000000 
+	H H H H HH 5.000000 HH 5.000000 HH 5.000000 HH 5.000000 HH 5.000000 HH 5.000000 
+
+     Max 4-body cutoff = 5.000000
+
+     Min 4-body cutoff = 0.700000
+
+	The following unique quadruplets of atoms have been identified:
+
+    Cluster index       : 0
+    Atoms in the cluster: O O O O 
+    Pairs in the cluster: OO OO OO OO OO OO 
+    Number of unique sets of powers: 7 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0               6        
+		      1       0   1   0   1   0   1         0               0               6        
+		      2       1   0   0   1   1   0         0               0               6        
+		      3       1   1   1   0   0   0         0               0               6        
+		      4       0   0   1   1   0   0         4               1               8        
+		      5       0   1   0   0   1   0         4               1               8        
+		      6       1   0   0   0   0   1         4               1               8        
+		      7       0   0   1   1   0   1         7               2               2        
+		      8       0   1   0   0   1   1         7               2               2        
+		      9       0   0   1   1   1   0         7               2               2        
+		      10      0   1   0   1   1   0         7               2               2        
+		      11      1   0   0   0   1   1         7               2               2        
+		      12      1   0   0   1   0   1         7               2               2        
+		      13      0   1   1   0   1   0         7               2               2        
+		      14      0   1   1   1   0   0         7               2               2        
+		      15      1   0   1   0   0   1         7               2               2        
+		      16      1   1   0   0   0   1         7               2               2        
+		      17      1   0   1   1   0   0         7               2               2        
+		      18      1   1   0   0   1   0         7               2               2        
+		      19      0   0   1   1   1   1         19              3               2        
+		      20      0   1   0   1   1   1         19              3               2        
+		      21      1   0   0   1   1   1         19              3               2        
+		      22      0   1   1   0   1   1         19              3               2        
+		      23      0   1   1   1   0   1         19              3               2        
+		      24      1   0   1   0   1   1         19              3               2        
+		      25      1   1   0   1   0   1         19              3               2        
+		      26      1   0   1   1   1   0         19              3               2        
+		      27      1   1   0   1   1   0         19              3               2        
+		      28      1   1   1   0   0   1         19              3               2        
+		      29      1   1   1   0   1   0         19              3               2        
+		      30      1   1   1   1   0   0         19              3               2        
+		      31      0   1   1   1   1   0         31              4               8        
+		      32      1   0   1   1   0   1         31              4               8        
+		      33      1   1   0   0   1   1         31              4               8        
+		      34      0   1   1   1   1   1         34              5               4        
+		      35      1   0   1   1   1   1         34              5               4        
+		      36      1   1   0   1   1   1         34              5               4        
+		      37      1   1   1   0   1   1         34              5               4        
+		      38      1   1   1   1   0   1         34              5               4        
+		      39      1   1   1   1   1   0         34              5               4        
+		      40      1   1   1   1   1   1         40              6               24       
+
+    Cluster index       : 1
+    Atoms in the cluster: H O O O 
+    Pairs in the cluster: OH OH OH OO OO OO 
+    Number of unique sets of powers: 12 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0               2        
+		      1       0   1   0   1   0   1         0               0               2        
+		      2       1   0   0   1   1   0         0               0               2        
+		      3       0   0   1   1   0   0         3               1               2        
+		      4       0   1   0   0   1   0         3               1               2        
+		      5       1   0   0   0   0   1         3               1               2        
+		      6       0   0   1   1   0   1         6               2               1        
+		      7       0   1   0   0   1   1         6               2               1        
+		      8       0   0   1   1   1   0         6               2               1        
+		      9       0   1   0   1   1   0         6               2               1        
+		      10      1   0   0   0   1   1         6               2               1        
+		      11      1   0   0   1   0   1         6               2               1        
+		      12      0   0   1   1   1   1         12              3               2        
+		      13      0   1   0   1   1   1         12              3               2        
+		      14      1   0   0   1   1   1         12              3               2        
+		      15      0   1   1   0   1   0         15              4               1        
+		      16      0   1   1   1   0   0         15              4               1        
+		      17      1   0   1   0   0   1         15              4               1        
+		      18      1   1   0   0   0   1         15              4               1        
+		      19      1   0   1   1   0   0         15              4               1        
+		      20      1   1   0   0   1   0         15              4               1        
+		      21      0   1   1   0   1   1         21              5               1        
+		      22      0   1   1   1   0   1         21              5               1        
+		      23      1   0   1   0   1   1         21              5               1        
+		      24      1   1   0   1   0   1         21              5               1        
+		      25      1   0   1   1   1   0         21              5               1        
+		      26      1   1   0   1   1   0         21              5               1        
+		      27      0   1   1   1   1   0         27              6               2        
+		      28      1   0   1   1   0   1         27              6               2        
+		      29      1   1   0   0   1   1         27              6               2        
+		      30      0   1   1   1   1   1         30              7               2        
+		      31      1   0   1   1   1   1         30              7               2        
+		      32      1   1   0   1   1   1         30              7               2        
+		      33      1   1   1   0   0   0         33              8               6        
+		      34      1   1   1   0   0   1         34              9               2        
+		      35      1   1   1   0   1   0         34              9               2        
+		      36      1   1   1   1   0   0         34              9               2        
+		      37      1   1   1   0   1   1         37              10              2        
+		      38      1   1   1   1   0   1         37              10              2        
+		      39      1   1   1   1   1   0         37              10              2        
+		      40      1   1   1   1   1   1         40              11              6        
+
+    Cluster index       : 2
+    Atoms in the cluster: H H O O 
+    Pairs in the cluster: HH OH OH OH OH OO 
+    Number of unique sets of powers: 18 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0               2        
+		      1       0   1   0   1   0   1         0               0               2        
+		      2       0   0   1   1   0   0         2               1               2        
+		      3       0   1   0   0   1   0         2               1               2        
+		      4       0   0   1   1   0   1         4               2               2        
+		      5       0   1   0   0   1   1         4               2               2        
+		      6       0   0   1   1   1   0         6               3               1        
+		      7       0   1   0   1   1   0         6               3               1        
+		      8       0   1   1   0   1   0         6               3               1        
+		      9       0   1   1   1   0   0         6               3               1        
+		      10      0   0   1   1   1   1         10              4               1        
+		      11      0   1   0   1   1   1         10              4               1        
+		      12      0   1   1   0   1   1         10              4               1        
+		      13      0   1   1   1   0   1         10              4               1        
+		      14      0   1   1   1   1   0         14              5               4        
+		      15      0   1   1   1   1   1         15              6               4        
+		      16      1   0   0   0   0   1         16              7               4        
+		      17      1   0   0   0   1   1         17              8               1        
+		      18      1   0   0   1   0   1         17              8               1        
+		      19      1   0   1   0   0   1         17              8               1        
+		      20      1   1   0   0   0   1         17              8               1        
+		      21      1   0   0   1   1   0         21              9               2        
+		      22      1   1   1   0   0   0         21              9               2        
+		      23      1   0   0   1   1   1         23              10              2        
+		      24      1   1   1   0   0   1         23              10              2        
+		      25      1   0   1   0   1   1         25              11              2        
+		      26      1   1   0   1   0   1         25              11              2        
+		      27      1   0   1   1   0   0         27              12              2        
+		      28      1   1   0   0   1   0         27              12              2        
+		      29      1   0   1   1   0   1         29              13              2        
+		      30      1   1   0   0   1   1         29              13              2        
+		      31      1   0   1   1   1   0         31              14              1        
+		      32      1   1   0   1   1   0         31              14              1        
+		      33      1   1   1   0   1   0         31              14              1        
+		      34      1   1   1   1   0   0         31              14              1        
+		      35      1   0   1   1   1   1         35              15              1        
+		      36      1   1   0   1   1   1         35              15              1        
+		      37      1   1   1   0   1   1         35              15              1        
+		      38      1   1   1   1   0   1         35              15              1        
+		      39      1   1   1   1   1   0         39              16              4        
+		      40      1   1   1   1   1   1         40              17              4        
+
+    Cluster index       : 3
+    Atoms in the cluster: H H H O 
+    Pairs in the cluster: HH HH OH HH OH OH 
+    Number of unique sets of powers: 12 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0               6        
+		      1       0   0   1   1   0   0         1               1               2        
+		      2       0   1   0   0   1   0         1               1               2        
+		      3       1   0   0   0   0   1         1               1               2        
+		      4       0   0   1   1   0   1         4               2               1        
+		      5       0   0   1   1   1   0         4               2               1        
+		      6       0   1   0   0   1   1         4               2               1        
+		      7       1   0   0   0   1   1         4               2               1        
+		      8       0   1   1   0   1   0         4               2               1        
+		      9       1   0   1   0   0   1         4               2               1        
+		      10      0   0   1   1   1   1         10              3               2        
+		      11      0   1   1   0   1   1         10              3               2        
+		      12      1   0   1   0   1   1         10              3               2        
+		      13      0   1   0   1   0   1         13              4               2        
+		      14      1   0   0   1   1   0         13              4               2        
+		      15      1   1   1   0   0   0         13              4               2        
+		      16      0   1   0   1   1   0         16              5               1        
+		      17      1   0   0   1   0   1         16              5               1        
+		      18      0   1   1   1   0   0         16              5               1        
+		      19      1   0   1   1   0   0         16              5               1        
+		      20      1   1   0   0   0   1         16              5               1        
+		      21      1   1   0   0   1   0         16              5               1        
+		      22      0   1   0   1   1   1         22              6               1        
+		      23      1   0   0   1   1   1         22              6               1        
+		      24      0   1   1   1   0   1         22              6               1        
+		      25      1   0   1   1   1   0         22              6               1        
+		      26      1   1   1   0   0   1         22              6               1        
+		      27      1   1   1   0   1   0         22              6               1        
+		      28      0   1   1   1   1   0         28              7               2        
+		      29      1   0   1   1   0   1         28              7               2        
+		      30      1   1   0   0   1   1         28              7               2        
+		      31      0   1   1   1   1   1         31              8               2        
+		      32      1   0   1   1   1   1         31              8               2        
+		      33      1   1   1   0   1   1         31              8               2        
+		      34      1   1   0   1   0   1         34              9               2        
+		      35      1   1   0   1   1   0         34              9               2        
+		      36      1   1   1   1   0   0         34              9               2        
+		      37      1   1   0   1   1   1         37              10              2        
+		      38      1   1   1   1   0   1         37              10              2        
+		      39      1   1   1   1   1   0         37              10              2        
+		      40      1   1   1   1   1   1         40              11              6        
+
+    Cluster index       : 4
+    Atoms in the cluster: H H H H 
+    Pairs in the cluster: HH HH HH HH HH HH 
+    Number of unique sets of powers: 7 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0               6        
+		      1       0   1   0   1   0   1         0               0               6        
+		      2       1   0   0   1   1   0         0               0               6        
+		      3       1   1   1   0   0   0         0               0               6        
+		      4       0   0   1   1   0   0         4               1               8        
+		      5       0   1   0   0   1   0         4               1               8        
+		      6       1   0   0   0   0   1         4               1               8        
+		      7       0   0   1   1   0   1         7               2               2        
+		      8       0   1   0   0   1   1         7               2               2        
+		      9       0   0   1   1   1   0         7               2               2        
+		      10      0   1   0   1   1   0         7               2               2        
+		      11      1   0   0   0   1   1         7               2               2        
+		      12      1   0   0   1   0   1         7               2               2        
+		      13      0   1   1   0   1   0         7               2               2        
+		      14      0   1   1   1   0   0         7               2               2        
+		      15      1   0   1   0   0   1         7               2               2        
+		      16      1   1   0   0   0   1         7               2               2        
+		      17      1   0   1   1   0   0         7               2               2        
+		      18      1   1   0   0   1   0         7               2               2        
+		      19      0   0   1   1   1   1         19              3               2        
+		      20      0   1   0   1   1   1         19              3               2        
+		      21      1   0   0   1   1   1         19              3               2        
+		      22      0   1   1   0   1   1         19              3               2        
+		      23      0   1   1   1   0   1         19              3               2        
+		      24      1   0   1   0   1   1         19              3               2        
+		      25      1   1   0   1   0   1         19              3               2        
+		      26      1   0   1   1   1   0         19              3               2        
+		      27      1   1   0   1   1   0         19              3               2        
+		      28      1   1   1   0   0   1         19              3               2        
+		      29      1   1   1   0   1   0         19              3               2        
+		      30      1   1   1   1   0   0         19              3               2        
+		      31      0   1   1   1   1   0         31              4               8        
+		      32      1   0   1   1   0   1         31              4               8        
+		      33      1   1   0   0   1   1         31              4               8        
+		      34      0   1   1   1   1   1         34              5               4        
+		      35      1   0   1   1   1   1         34              5               4        
+		      36      1   1   0   1   1   1         34              5               4        
+		      37      1   1   1   0   1   1         34              5               4        
+		      38      1   1   1   1   0   1         34              5               4        
+		      39      1   1   1   1   1   0         34              5               4        
+		      40      1   1   1   1   1   1         40              6               24       
+
+...input file read successful: 
+
+The number of two-body non-coulomb parameters is: 42
+The number of three-body Chebyshev parameters is: 40
+The number of four-body  Chebyshev parameters is: 56
+
+Succefully opened the trajectory file...
+Setting up the matrices for A, Coulomb forces, and overbonding...
+	Reporting outcome of layering for first frame ONLY: 
+	Real atoms:                   96
+	Total atoms (ghost):          2592
+	cell vectors (a)            8.609131 0.000000 0.000000
+	cell vectors (b)            0.000000 8.609131 0.000000
+	cell vectors (c)            0.000000 0.000000 8.609131
+	cell volume (A^3)           638.084116
+	Extent (x,y,z)              8.609131 8.609131 8.609131
+	Layers:                     1
+	Effective cell vectors (a): 25.827393 0.000000 0.000000
+	Effective cell vectors (a): 0.000000 25.827393 0.000000
+	Effective cell vectors (a): 0.000000 0.000000 25.827393
+...matrix setup complete: 
+
+...Populating the matrices for A, Coulomb forces, and overbonding...
+
+	Latest 3-body outer cutoff values: 
+	0:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	1:  4.0000000000000000  4.0000000000000000  6.0000000000000000
+	2:  5.0000000000000000  5.0000000000000000  5.0000000000000000
+	3:  5.0000000000000000  5.0000000000000000  5.0000000000000000
+     Max 3-body cutoff = 6.0000000000000000
+	Latest 3-body inner cutoff values: 
+	0:  1.8999999999999999  1.8999999999999999  1.8999999999999999
+	1:  0.7000000000000000  0.7000000000000000  1.8999999999999999
+	2:  0.9000000000000000  0.7000000000000000  0.7000000000000000
+	3:  0.9000000000000000  0.9000000000000000  0.9000000000000000
+     Min 3-body cutoff = 0.7000000000000000
+
+	Latest 4-body outer cutoff values: 
+	0:  4.0000000000000000  4.0000000000000000  4.0000000000000000  4.0000000000000000  4.0000000000000000  4.0000000000000000
+	1:  2.0000000000000000  2.0000000000000000  2.0000000000000000  4.0000000000000000  4.0000000000000000  4.0000000000000000
+	2:  3.0000000000000000  4.0000000000000000  4.0000000000000000  4.0000000000000000  4.0000000000000000  4.0000000000000000
+	3:  5.0000000000000000  5.0000000000000000  5.0000000000000000  5.0000000000000000  5.0000000000000000  5.0000000000000000
+	4:  5.0000000000000000  5.0000000000000000  5.0000000000000000  5.0000000000000000  5.0000000000000000  5.0000000000000000
+     Max 4-body cutoff = 5.0000000000000000
+	Latest 4-body inner cutoff values: 
+	0:  1.8999999999999999  1.8999999999999999  1.8999999999999999  1.8999999999999999  1.8999999999999999  1.8999999999999999
+	1:  0.7000000000000000  0.7000000000000000  0.7000000000000000  1.8999999999999999  1.8999999999999999  1.8999999999999999
+	2:  0.9000000000000000  0.7000000000000000  0.7000000000000000  0.7000000000000000  0.7000000000000000  1.8999999999999999
+	3:  0.9000000000000000  0.9000000000000000  0.7000000000000000  0.9000000000000000  0.7000000000000000  0.7000000000000000
+	4:  0.9000000000000000  0.9000000000000000  0.9000000000000000  0.9000000000000000  0.9000000000000000  0.9000000000000000
+     Min 4-body cutoff = 0.7000000000000000
+
+Number of 3-body interactions = 180048
+Number of 4-body interactions = 452509
+...matrix population complete: 
+
+Printing matrices...
+	...A matrix length (forces): 5760
+
+	Minimum distances between atoms: (Angstr.)
+		0	O O	2.109
+		1	H H	1.082
+		2	O H	0.828
+	Total number of configurations contributing to each pair type:
+		0	O O 7853
+		1	H H 32876
+		2	O H 33144
+	Minimum distances between atoms triplet pairs: (Angstr.)
+		0	OO OO OO 2.125 2.109 2.109 
+		1	OH OH OO 0.828 0.828 2.109 
+		2	HH OH OH 1.082 0.828 0.828 
+		3	HH HH HH 1.082 1.082 1.082 
+	Total number of configurations contributing to each triplet type:
+		0	OO OO OO 92366
+		1	OH OH OO 99900
+		2	HH OH OH 393602
+		3	HH HH HH 246540
+	Minimum distances between atoms quadruplet pairs: (Angstr.)
+		0	OO OO OO OO OO OO 2.149 2.125 2.125 2.125 2.109 2.109 
+		1	OH OH OH OO OO OO 0.944 0.914 0.891 2.149 2.258 2.148 
+		2	HH OH OH OH OH OO 1.082 0.838 0.828 0.828 0.828 2.109 
+		3	HH HH OH HH OH OH 1.082 1.082 0.828 1.082 0.828 0.828 
+		4	HH HH HH HH HH HH 1.177 1.194 1.194 1.082 1.082 1.082 
+	Total number of configurations contributing to each quadruplet type:
+		0	OO OO OO OO OO OO 2771
+		1	OH OH OH OO OO OO 46
+		2	HH OH OH OH OH OO 116706
+		3	HH HH OH HH OH OH 2104352
+		4	HH HH HH HH HH HH 908886
+...matrix printing complete: 
+

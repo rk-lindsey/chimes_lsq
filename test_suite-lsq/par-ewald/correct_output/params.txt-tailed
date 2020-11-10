@@ -1,0 +1,93 @@
+!
+! Number of variables =  28
+! Number of equations    =  28514
+! eps (= eps_fac*dmax) =   0.06481013686109467
+! RMS force error =  18.231167510368344
+! max abs variable =  137.49037853844607
+! SVD regularization factor =  1e-05
+! number of SVD fitting vars =  28
+! Bayesian Information Criterion =   165847.07583663316
+!
+USECOUL: true
+FITCOUL: true
+USEPOVR: true
+FITPOVR: true
+USE3BCH: false
+USE4BCH: false
+
+PAIRTYP: CHEBYSHEV  8 0 0 -1 1
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		-		15.9994
+1		H		+		1.0079
+
+ATOM PAIRS: 3
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               1.8             6               0.1             MORSE           1.25            
+	1               H               H               0.8             6               0.1             MORSE           1.25            
+	2               O               H               0.25            6               0.1             MORSE           1.25            
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# USEOVRP #	# TO_ATOM #	# P_OVERB #	# R_0_VAL #	# P_1_VAL #	# P_2_VAL #	# LAMBDA6 #
+	0               O               O               1               O               50              1.0165          -0.0657         5.0451          -3.6141         
+	1               H               H               0               NONE            0               0               0               0               0               
+	2               O               H               1               O               50              1.0165          -0.0657         5.0451          -3.6141         
+
+FCUT TYPE: CUBIC
+
+ATOM PAIR TRIPLETS: 0
+ATOM PAIR QUADRUPLETS: 0
+
+PAIR CHEBYSHEV PARAMS 
+
+PAIRTYPE PARAMS: 0 O O
+
+0 137.49037853844607
+1 -34.983787824395264
+2 25.278684498857587
+3 -37.92038385380688
+4 19.211620043634117
+5 -4.513827224400783
+6 6.660087684586969
+7 -1.970443911463608
+q_O x q_O 46.748207199833494
+ 
+PAIRTYPE PARAMS: 1 H H
+
+0 25.194421224317786
+1 -13.576751817413234
+2 1.90606834444069
+3 -6.483652611996909
+4 3.625233640642836
+5 0.03784175664136136
+6 4.48411396071208
+7 0.40215031895268627
+q_H x q_H 11.687089740231775
+ 
+PAIRTYPE PARAMS: 2 O H
+
+0 89.46228105811167
+1 12.963552858720924
+2 28.861279598623057
+3 -39.7008442847673
+4 9.980739555138923
+5 2.914965749258714
+6 18.85039183827921
+7 -6.969045644287615
+q_O x q_H -23.37399275686732
+ 
+TRIPLET CHEBYSHEV PARAMS 
+
+QUADRUPLET CHEBYSHEV PARAMS 
+
+P OVER: -5.067934877339788
+
+PAIRMAPS: 4
+1 HH
+2 HO
+2 OH
+0 OO
+
+ENDFILE

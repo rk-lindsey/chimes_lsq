@@ -1,0 +1,236 @@
+Code compiled in MPI mode. Will run on 36 processor(s).
+
+Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: false
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 1000
+	# NLAYERS #: 1
+	# USENEIG #: true
+	# PRMFILE #: params.cheby.txt
+	# CRDFILE #: input.xyz
+	# VELINIT #: READ ... reading velocities from coordinate file
+	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
+	# PRSCALC #: NUMERICAL
+	# WRPCRDS #: false
+	# FRQTRAJ #: 20
+		... printing every 2.5 fs, 
+		... printing       50 frames. 
+	# FRQENER #: 10
+	# PRNTFRC #: false
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+     ...Read the following coordinate file extension: xyz
+     ...Read the following number of atoms: 96
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        0 25.8273927 0
+       Ghost cell vectors (a) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084112874303
+
+	...Reading velocities from last three fields of atom info lines in xyzf file... 
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        0 25.8273927 0
+       Ghost cell vectors (a) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084112874303
+
+   ...read complete for file input.xyz
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e): NEGATIVE, mass (amu):  15.9990
+		1     H , q (e): POSITIVE, mass (amu):   1.0080
+   ...read complete
+
+	Real atoms:                 96
+	Total atoms (ghost):        2592
+	cell vectors (a)            8.6091 0.0000 0.0000
+	cell vectors (b)            0.0000 8.6091 0.0000
+	cell vectors (c)            0.0000 0.0000 8.6091
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.8274 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.8274
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVT-MTK simulation.
+	...Setting thermostat time constant to: 10.0000
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+	Total Mass     = 576.4800 au
+	Volume         = 638.0841 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      true
+		...Use fit charges?             true
+		...Compute ReaxFF overbonding?  true
+		...Use fit overbonding param?   true
+		...Use 3-body Cheby params?     false
+		...Use 4-body Cheby params?     false
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Reading all remaining force field parameters...
+		Re-setting individual atom charges based on pair charges :
+      Total system charge = 0.0000
+      Charges modified for exact neutrality (e):
+       O -0.642212752
+       H 0.321106174
+
+     
+     Pair charges modified for exact neutrality:
+       OO 136.955435417
+       HH 34.238815760
+       OH -68.477674615
+Atom properties:
+		0     O , q (e): -0.642, mass (amu):  15.9990
+		1     H , q (e):  0.321, mass (amu):   1.0080
+	...Read 2-body FF params...
+	...Read ReaxFF overbonding FF params...
+	Reading  4 pairs for mapping
+	........Reading pair: OO with mapped index: 0
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: HH with mapped index: 1
+	...Read FF pairmaps...
+
+   ...read complete.
+
+Notes on simulation: 
+	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
+	Ewald summations will be used and charges will be taken from fit values
+	Overbonding contributions will be considered.
+		p-over will be read from fit parameters.
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		CHEBYSHEV 10
+	Performing pair distance transformations over range: 
+		-1.0000 to 1.0000
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
+		Parameters: 
+		0 6.2212e+01
+		1 -2.3006e+01
+		2 2.5612e+01
+		3 -3.2300e+01
+		4 2.1359e+00
+		5 9.5848e+00
+		6 3.6259e+01
+		7 -3.9351e+01
+		8 -4.7312e+01
+		9 -2.8730e+01
+
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		Parameters: 
+		0 -1.0727e+01
+		1 -1.7487e+01
+		2 -3.5065e+01
+		3 -3.6602e+01
+		4 -3.6970e+01
+		5 -2.7880e+01
+		6 -2.0534e+01
+		7 -1.3158e+01
+		8 -6.8694e+00
+		9 -2.7220e+00
+
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		Parameters: 
+		0 -1.9422e+00
+		1 2.8491e+01
+		2 2.6798e+01
+		3 1.6461e+01
+		4 1.2108e+00
+		5 4.5687e+00
+		6 1.4727e-02
+		7 -8.0805e-01
+		8 1.1782e+00
+		9 8.7526e-01
+
+	Fitted charges read from parameter file:
+		OO 4.1244e-01 (1.3696e+02)
+		HH 1.0311e-01 (3.4239e+01)
+		OH -2.0622e-01 (-6.8478e+01)
+
+	ReaxFF over-coordination parameters: 
+		pair...pover...r0...p1...p2...lambda6
+		OO 2.5254e+01 1.0165e+00 -6.5700e-02 5.0451e+00 -3.6141e+00
+		HH 2.5254e+01 0.0000e+00 0.0000e+00 0.0000e+00 0.0000e+00
+		OH 2.5254e+01 1.0165e+00 -6.5700e-02 5.0451e+00 -3.6141e+00
+
+Initializing the neighbor list...
+NEIGHBOR LIST MAX CUTOFF IS: 6.00000
+USING PADDING: 0.300
+
+Generating fast maps... 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.3776339900
+
+Ewald parameters: 
+	Requested Ewald accuracy  =  1.000000e-06
+	Ewald alpha               =  7.723233e-01
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-Space accuracy estimate =  6.801449e-07
+
+	Cutting off K-vectors with magnitude less than 7
+	Number of Ewald K-vectors = 1364
+	K-space accuracy estimate = 0.0000008680
+
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)

@@ -1,0 +1,82 @@
+!
+! Number of variables =  24
+! Number of equations    =  18144
+! eps (= eps_fac*dmax) =   330.4388204348295
+! RMS force error =  0.006360727391968845
+! max abs variable =  8.02627742275137e-05
+! SVD regularization factor =  1e-05
+! number of SVD fitting vars =  10
+! Bayesian Information Criterion =   -183432.58284006623
+!
+USECOUL: false
+FITCOUL: false
+USEPOVR: false
+FITPOVR: false
+USE3BCH: false
+USE4BCH: false
+
+PAIRTYP: DFTBPOLY  8
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		0		15.9994
+1		H		0		1.0079
+
+ATOM PAIRS: 3
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0               3               0.1             NONE            
+	1               H               H               0               3               0.1             NONE            
+	2               O               H               0               3               0.1             NONE            
+
+ATOM PAIR TRIPLETS: 0
+ATOM PAIR QUADRUPLETS: 0
+
+PAIR DFTBPOLY PARAMS 
+
+PAIRTYPE PARAMS: 0 O O
+
+0 1.3899267870137642e-06
+1 4.542748522332643e-06
+2 8.457726863570583e-06
+3 1.2981371359017777e-05
+4 1.723518473967177e-05
+5 1.844206136089263e-05
+6 9.293183073091149e-06
+7 -2.791977673161392e-05
+ 
+PAIRTYPE PARAMS: 1 H H
+
+0 3.408069826424714e-05
+1 6.031871844809938e-05
+2 8.02627742275137e-05
+3 7.309355793261999e-05
+4 1.5141638984635374e-05
+5 -6.27236575655929e-05
+6 2.1517257816811022e-05
+7 -2.0112562891488943e-06
+ 
+PAIRTYPE PARAMS: 2 O H
+
+0 -6.304662303770413e-06
+1 -1.8859495610996433e-05
+2 -3.249242769910192e-05
+3 -3.405631481908236e-05
+4 1.0089737560498175e-06
+5 6.238035331209204e-05
+6 -3.708863910526043e-05
+7 5.787997264260976e-06
+ 
+TRIPLET DFTBPOLY PARAMS 
+
+QUADRUPLET DFTBPOLY PARAMS 
+
+
+PAIRMAPS: 4
+1 HH
+2 HO
+2 OH
+0 OO
+
+ENDFILE

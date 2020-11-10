@@ -1,9 +1,0 @@
-nlayers 1
-fit_coulomb true
-fit_pover true
-pair_type chebyshev
-subtract_coord false
-cheby_order 12
-smin 0.75 0.75 0.75
-smax 6.0 6.0 6.0
-sdelta 0.1 0.1 0.1

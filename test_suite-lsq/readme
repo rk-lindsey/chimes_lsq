@@ -1,0 +1,140 @@
+This is a list of each test and what functionality is probed
+
+1  chon-dftbpoly
+	- 4 atom types (C,H,O,N as in solvated amino acids?)
+	- DFTBPOLY interactions (9th order standard polynomial)
+	- 2-body interactions
+	- cubic style cutoff  (default used - value not specified in input file)	
+	- Direct transformation (style "NA")
+2  h2o-2bcheby
+	- 2 atom types (O,H as in water)
+	- Chebyshev interactions
+	- 2-body interactions
+	- charge constraints specified, AND charges are fit
+	- overbonding is fit
+	- cubic style cutoff (default used - value not specified in input file)	
+	- Morse-style transformation	
+3  h2o-2bcheby2
+	- The same as h2o-3bcheby, except more frames, higher O3B, shorter cutoffs, and different Morse Lambda values
+4  h2o-3bcheby
+	- 2 atom types (O,H as in water)
+	- Chebyshev interactions
+	- 2-through-3-body interactions
+	- charge constraints specified, AND charges are fit
+	- cubic style cutoff	
+	- Morse-style transformation	
+5  h2o-3bcheby2
+	- The same as h2o-3bcheby, except more frames, higher O3B, and shorter cutoffs
+6  h2o-3bcheby3
+	- The same as h2o-3bcheby, except more frames, higher O3B, shorter cutoffs, and different Morse Lambda values	
+7  h2o-4bcheby
+	- 2 atom types (O,H as in water)
+	- Chebyshev interactions
+	- 2-through-4-body interactions
+	- charge constraints specified, AND charges are fit
+	- cubic style cutoff	
+	- Morse-style transformation
+8  h2o-dftbpoly
+	- 2 atom types (O,H as in water)
+	- DFTBPOLY interactions (9th order standard polynomial)
+	- 2-body interactions
+	- cubic style cutoff  (default used - value not specified in input file)	
+	- Morse transformation
+9  h2o-invr
+	- 2 atom types (O,H as in water)
+	- INVR_R style interactions (4th order)
+	- 2-body interactions
+	- overbonding is fit
+	- cubic style cutoff (default used - value not specified in input file)	
+	- Morse-style transformation	
+10 h2o-splines
+	- 2 atom types (O,H as in water)
+	- Spline interactions
+	- 2-body interactions
+	- charge constraints specified, AND charges are fit
+	- overbonding is fit
+	- cubic style cutoff (default used - value not specified in input file)	
+	- Transformation set to "N/A"	
+11 par-ewald
+	- Identical to h2o-2bcheby ... indended to test serial v. MPI Ewald calcs
+12 special3b
+	- 2 atom types (C,O as in carbon monoxide)
+	- Chebyshev interactions
+	- 2-through-3-body interactions
+	- special outer cutoffs  ("SPECIFIC")
+	- cubic style cutoff	
+	- Morse-style transformation	
+13 special4b
+	- 2 atom types (O,H as in water)
+	- Chebyshev interactions
+	- 2-through-4-body interactions
+	- charge constraints specified, but charges not fit
+	- special outer cutoffs  ("SPECIFIC")
+	- cubic style cutoff	
+	- Morse-style transformation	
+14 test_4atoms
+	- 1 atom type, 4 atoms, based on an UA-OPLS-style butane
+	- Chebyshev interactions
+	- 2-through-4-body interactions	
+	- cubic style cutoff
+	- Morse-style transformation			
+15 test_4atoms.2 
+	- 2 atom types, 4 atoms, based on an UA-OPLS-style butane, but two atoms replaced by H
+	- Chebyshev interactions
+	- 2-through-4-body interactions	
+	- cubic style cutoff
+	- Morse-style transformation	
+	- excluded 3-and-4 body interactions specified
+16 stress-and-ener-4b
+	- 3 atom types (C,H,O as in phenolic resin)
+	- Chebyshev interactions
+	- 2-through-4-body interactions
+	- special outer cutoffs  ("SPECIFIC" and "ALL")
+	- tersoff style cutoff
+	- full (diagonal) stress inclusion
+	- full frame energy inclusion
+	- Morse-style transformation	
+17 stress-and-ener-2b1
+	- 3 atom types (C,H,O as in phenolic resin)
+	- Chebyshev interactions
+	- 2-body interactions
+	- special outer cutoffs  ("SPECIFIC" and "ALL")
+	- tersoff style cutoff
+	- full (diagonal + off-diagonal) stress inclusion
+	- frame energy inclusion for first 5 frames ONLY
+	- Morse-style transformation	
+18 stress-and-ener-2b2
+	- 3 atom types (C,H,O as in phenolic resin)
+	- Chebyshev interactions
+	- 2-body interactions
+	- special outer cutoffs  ("SPECIFIC" and "ALL")
+	- tersoff style cutoff
+	- diagonal stress inclusion for first 5 frames ONLY
+	- Morse-style transformation	
+19 stress-and-ener-2b3
+	- 3 atom types (C,H,O as in phenolic resin)
+	- Chebyshev interactions
+	- 2-body interactions
+	- special outer cutoffs  ("SPECIFIC" and "ALL")
+	- tersoff style cutoff
+	- diagonal + off-diagonal stress inclusion for first 5 frames ONLY
+	- Morse-style transformation	
+20 two-traj-files
+	- Reads from two trajectory files, with 64 and 128 atoms, respectively
+	- Frame energies included in fit, for each frame
+	- 2 atom types, same for both files (C,O as in carbon monoxide)
+	- Chebyshev interactions
+	- 2-through-4-body interactions
+	- special outer cutoffs  ("SPECIFIC")
+	- Tersoff style cutoff	
+	- Morse-style transformation	
+21 one-file-three-trajs 
+	- Reads from one 30 frame trajectory file with for (a) 128 HN3 molecules, (b) an isolated H2 molecule, and (c) an isolated HN3 molecule
+	- Frame energies included in fit, for each frame
+	- 2 atom types specified in the input file (N and H), but first some frames only contain H
+	- Chebyshev interactions
+	- 2-through-3-body interactions
+	- special outer cutoffs  ("ALL")
+	- Tersoff style cutoff	
+	- Morse-style transformation	
+	

@@ -1,0 +1,26 @@
+USECOUL: false
+FITCOUL: false
+USEPOVR: false
+FITPOVR: false
+USE3BCH: false
+USE4BCH: false
+
+PAIRTYP: DFTBPOLY  8
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		0		15.9994
+1		H		0		1.0079
+
+ATOM PAIRS: 3
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0               3               0.1             NONE            
+	1               H               H               0               3               0.1             NONE            
+	2               O               H               0               3               0.1             NONE            
+
+ATOM PAIR TRIPLETS: 0
+
+ATOM PAIR QUADRUPLETS: 0
+

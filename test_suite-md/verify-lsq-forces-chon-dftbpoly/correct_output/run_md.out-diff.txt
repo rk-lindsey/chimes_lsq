@@ -1,0 +1,31 @@
+10d9
+< 	# USENEIG #: true 
+29c28
+< 	Opening force.txt to read forces for comparison
+---
+> Opening force.txt to read forces for comparison
+34d32
+< 	...Ignoring last three fields of atom info lines in xyzf file... 
+45,48d42
+< Building 1 layer(s)...
+< 	New total atoms:    1664
+< 	New box dimensions: 27.0384 27.0384 27.0384
+< 
+53,56c47,50
+< 	Initial velocity center of mass: (    0.0083,    -0.0040,     0.0290) 
+< 	Final   velocity center of mass: (   -0.0000,     0.0000,    -0.0000) 
+< 	Total Mass     = 11914.5600 au
+< 	Volume         = 19767.1003 Ang^3
+---
+> 	Initial velocity center of mass: (   -0.0847,     0.0269,     0.0604) 
+> 	Final   velocity center of mass: (    0.0000,    -0.0000,    -0.0000) 
+> 	Total Mass     = 1489.3200 au
+> 	Volume         = 2470.8875 Ang^3
+226,228d219
+< Initializing the neighbor list...
+< NEIGHBOR LIST MAX CUTOFF IS: 5.0000
+< USING PADDING: 0.3000
+230c221
+< RMS force error = 0.140005
+---
+> RMS force error =  1.400050e-01

@@ -1,0 +1,105 @@
+
+Reading input file...
+Will read from file: fm_setup.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# TRJFILE #: input.xyzf
+	# WRAPTRJ #: true
+	# NFRAMES #: 99
+	# NLAYERS #: 1
+	# FITCOUL #: true
+	# FITPOVR #: true
+	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
+	             Will use 2-body order: 8
+	             Will use 3-body order: 0
+	             Will use 4-body order: 0
+	             Will transform Chebyshev pair distances to range -1 to 1
+	# CHBTYPE #: MORSE
+	# NATMTYP #: 2
+	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
+ 	1              O              -		15.9994        
+ 	2              H              +		1.0079         
+
+	The following unique pair types have been identified:
+		0  O O
+		1  H H
+		2  O H
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
+	0               O               O               0.6             6               0.1             1.25             1               
+	1               H               H               0.6             6               0.1             1.25             0               
+	2               O               H               0.6             6               0.1             1.25             1               
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # P_OVERB #     # R_0_VAL #     # P_1_VAL #     # P_2_VAL #     # LAMBDA6 #
+	0               O               O               50              1.0165          -0.0657         5.0451          -3.6141         
+	1               H               H               0               0               0               0               0               
+	2               O               H               50              1.0165          -0.0657         5.0451          -3.6141         
+
+	Read the following number of ij ik jk bins for pairs: 
+		OO: 0 0 0
+		HH: 0 0 0
+		OH: 0 0 0
+
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+Note: Will use cubic scaling of: 1
+
+
+	Attempting to read 2 charge constraints...:
+		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
+		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
+
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+...input file read successful: 
+
+The number of two-body non-coulomb parameters is: 24
+
+Succefully opened the trajectory file...
+Setting up the matrices for A, Coulomb forces, and overbonding...
+	Reporting outcome of layering for first frame ONLY: 
+	Real atoms:                   96
+	Total atoms (ghost):          2592
+	cell vectors (a)            8.60913 0 0
+	cell vectors (b)            0 8.60913 0
+	cell vectors (c)            0 0 8.60913
+	cell volume (A^3)           638.084
+	Extent (x,y,z)              8.60913 8.60913 8.60913
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0 0
+	Effective cell vectors (a): 0 25.8274 0
+	Effective cell vectors (a): 0 0 25.8274
+...matrix setup complete: 
+
+...Populating the matrices for A, Coulomb forces, and overbonding...
+
+	Ewald_Deriv:
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-space accuracy estimate =  6.801448e-07
+	Number of Ewald K-vectors = 238
+	Ewald_Deriv:
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-space accuracy estimate =  6.801448e-07
+	Number of Ewald K-vectors = 238
+	Ewald_Deriv:
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-space accuracy estimate =  6.801448e-07
+	Number of Ewald K-vectors = 238
+...matrix population complete: 
+
+Printing matrices...
+	...A matrix length (forces): 28512
+
+	Minimum distances between atoms: (Angstr.)
+		0	O O	2.039
+		1	H H	1.082
+		2	O H	0.820
+	Total number of configurations contributing to each pair type:
+		0	O O 58201
+		1	H H 236732
+		2	O H 240454
+...matrix printing complete: 
+
