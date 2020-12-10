@@ -71,8 +71,8 @@ realclean_lsq: clean_lsq
 	rm -f chimes_lsq 
 
 build_tests_lsq:
-	cd ../test_suite-lsq
-	./generate_test_suite.sh
+	cd ../test_suite-lsq;\
+	./generate_test_suite.sh;\
 	cd -
 
 ##################################
@@ -101,8 +101,8 @@ realclean_md: clean_md
 	/bin/rm -f chimes_md
 
 build_tests_md:
-	cd ../test_suite-md
-	./generate_test_suite.sh
+	cd ../test_suite-md;\
+	./generate_test_suite.sh;\
 	cd -
 
 ##################################
