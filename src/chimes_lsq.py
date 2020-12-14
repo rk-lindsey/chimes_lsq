@@ -360,16 +360,12 @@ def main():
     USE_POVER = hf[2].split()
     USE_POVER = USE_POVER[1]
 
-    ATOM_TYPES_LINE=9
-
+    ATOM_TYPES_LINE  = 9
     TOTAL_ATOM_TYPES = hf[ATOM_TYPES_LINE].split()
-
     TOTAL_ATOM_TYPES = int(TOTAL_ATOM_TYPES[2])
-
-    ATOM_PAIRS_LINE=11+TOTAL_ATOM_TYPES+2
-
-    TOTAL_PAIRS =  hf[ATOM_PAIRS_LINE].split()
-    TOTAL_PAIRS = int(TOTAL_PAIRS[2])
+    ATOM_PAIRS_LINE  = 11+TOTAL_ATOM_TYPES+2
+    TOTAL_PAIRS      = hf[ATOM_PAIRS_LINE].split()
+    TOTAL_PAIRS      = int(TOTAL_PAIRS[2])
 
     A1 = ""
     A2 = ""
@@ -421,8 +417,6 @@ def main():
 
                 for i in xrange(0,int(TOTL)):
                     ADD_LINES += 1
-
-    #print "TOTAL 4B PARAMETERS ", SNUM_4B            
 
     for i in range(0,TOTAL_PAIRS):
 
@@ -511,6 +505,8 @@ def main():
             ADD_LINES += 2
 
     ADD_LINES = 0
+    
+    # QUADS    
 
     COUNTED_QUAD_PARAMS = 0
     if TOTAL_QUADS > 0:
@@ -573,11 +569,11 @@ def main():
                 QUAD_PAR_IDX += int(UNIQ)
                 COUNTED_QUAD_PARAMS += int(UNIQ)
 
-            #print "COUNTED_QUAD_PARAMS", COUNTED_QUAD_PARAMS
-
             print ""
 
             ADD_LINES += 2
+
+    # Remaining tidbids
 
 
     if FIT_POVER == "true":
@@ -712,7 +708,7 @@ def fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_
             if args.restart_dlasso_dlars != "":
 	    	print "Will run a dlars/dlasso restart job with file:", args.restart_dlasso_dlars
 		
-		command = command + " --restart=" + args.restart_dlasso_dlars
+		    command = command + " --restart=" + args.restart_dlasso_dlars
                 
             command = command +  " >& dlars.log"
 
