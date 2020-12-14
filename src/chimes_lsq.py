@@ -1,148 +1,98 @@
-
 import sys
 import numpy
 import scipy.linalg
 import math as m
 import subprocess
 import os
-
 import argparse
 
-from numpy import *
+from numpy        import *
 from numpy.linalg import lstsq
-from datetime import *
-from subprocess import call
+from datetime     import *
+from subprocess   import call
+
+
+#############################################
+#############################################
+# Main
+#############################################
+#############################################
 
 def main():
+    
+    #############################################
+    # Define arguments supported by the lsq code
+    #############################################
+        
     parser = argparse.ArgumentParser(description='Least-squares force matching based on output of chimes_lsq')
-    # Arguments supported by the lsq code.
-    # Decided to use underscore rather than - for parameter word separator character.
-    parser.add_argument("--A", default='A.txt',help='A (derivative) matrix') 
-    parser.add_argument("--algorithm", default='svd', help='fitting algorithm')
-    parser.add_argument("--alpha", type=float, default=1.0e-04,help='Lasso or ridge regularization')
-    parser.add_argument("--b", default='b.txt',help='b (force) file')
-    parser.add_argument("--beta",type=float, default=0.0, help='DOWLQN L2 regularization')
-    parser.add_argument("--cores", type=int, default=8, help='DOWLQN/DLARS number of cores')
-    parser.add_argument("--eps", type=float, default=1.0e-05,help='svd regularization')
-    parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
-    parser.add_argument("--header", default='params.header',help='parameter file header')
-    parser.add_argument("--map", default='ff_groups.map',help='parameter file map')
-    parser.add_argument("--memory", type=int, default=20, help='OWLQN or DOWLQN Hessian memory storage') ;
-    parser.add_argument("--nodes", type=int, default=1, help='DOWLQN/DLARS number of nodes')
-    parser.add_argument("--normalize", type=str2bool, default=False, help='Normalize DLARS calculation')
-    parser.add_argument("--read_output", type=str2bool, default=False, help='Read output from previous DLARS run')
-    parser.add_argument("--restart", type=str2bool, default=False, help='Use DOWLQN restart file')
-    parser.add_argument("--restart_dlasso_dlars", type=str, default="", help='Determines whether dlasso or dlars job will be restarted. Argument is the restart file name ')
-    parser.add_argument("--split_files",    type=str2bool, default=False, help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
-    parser.add_argument("--test_suite", type=str2bool, default=False,help='output for test suite')
-    parser.add_argument("--tol", type=float, default=1.0e-05, help='OWLQN or DOWLQN tolerance')
-    parser.add_argument("--weights", default="None",help='weight file')
-    parser.add_argument("--active",  type=str2bool, default=False, help='is this a DLARS/DLASSO run from the active learning driver?')
+
+    parser.add_argument("--A",                    type=str,      default='A.txt',         help='A (derivative) matrix') 
+    parser.add_argument("--algorithm",            type=str,      default='svd',           help='fitting algorithm')
+    parser.add_argument("--dlasso_dlars_path",    type=str     , default='',              help='Path to DLARS and/or DLASSO solver')
+    parser.add_argument("--alpha",                type=float,    default=1.0e-04,         help='Lasso or ridge regularization')
+    parser.add_argument("--b",                    type=str,      default='b.txt',         help='b (force) file')
+    parser.add_argument("--cores",                type=int,      default=8,               help='DOWLQN/DLARS number of cores')
+    parser.add_argument("--eps",                  type=float,    default=1.0e-05,         help='svd regularization')
+    parser.add_argument("--header",               type=str,      default='params.header', help='parameter file header')
+    parser.add_argument("--map",                  type=str,      default='ff_groups.map', help='parameter file map')
+    parser.add_argument("--nodes",                type=int,      default=1,               help='DOWLQN/DLARS number of nodes')
+    parser.add_argument("--normalize",            type=str2bool, default=False,           help='Normalize DLARS calculation')
+    parser.add_argument("--read_output",          type=str2bool, default=False,           help='Read output from previous DLARS run')
+    parser.add_argument("--restart",              type=str2bool, default=False,           help='Use DOWLQN restart file')
+    parser.add_argument("--restart_dlasso_dlars", type=str,      default="",              help='Determines whether dlasso or dlars job will be restarted. Argument is the restart file name ')
+    parser.add_argument("--split_files",          type=str2bool, default=False,           help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
+    parser.add_argument("--test_suite",           type=str2bool, default=False,           help='output for test suite')
+    parser.add_argument("--weights",              type=str,      default="None",          help='weight file')
+    parser.add_argument("--active",               type=str2bool, default=False,           help='is this a DLARS/DLASSO run from the active learning driver?')
+
+    # Actually parse the arguments
 
     args        = parser.parse_args()
 
-    # Fitting algorithm to use.
-    algorithm   = args.algorithm
-    
-    # Matrix of force derivatives (a. la. A x = b )
-    Afile       = args.A
 
-    # Matrix of forces
-    bfile       = args.b
-
-    # Force field header
-    header_file = args.header
-
-    # Pair mapping
-    map_file    = args.map
-
-    # SVD regularization
-    eps_fac     = args.eps
-
-    # Weights to use for each force
-    weights_file = args.weights
-
-    # Is this running in the test suite.
-    test_suite_run = args.test_suite
-
-    # Do we restart calculations (currently only for DOWLQN)
-    restart = args.restart
-    
-    # Do we restart a dlars or dlasso calculation?
-    restart_dlasso_dlars = args.restart_dlasso_dlars
-
-    # Do we read output from a previous DLARS run ?
-    read_output = args.read_output
-    
-    if ( weights_file == "None" ):
-        DO_WEIGHTING = False 
-    else:
-        DO_WEIGHTING = True
-	
-    is_active = args.active
+    #############################################
+    # Import sklearn modules, if needed
+    #############################################
 
     # Algorithms requiring sklearn.
     sk_algos = ["lasso", "lassolars", "lars"] ;
         
-    if algorithm in sk_algos:
+    if args.algorithm in sk_algos:
         from sklearn import linear_model
         from sklearn import preprocessing
+        
+        
+    #############################################
+    # Read weights, if used
+    #############################################        
+        
+        
+    if ( args.weights == "None" ):
+        DO_WEIGHTING = False 
+    else:
+        DO_WEIGHTING = True
+        if ( not args.split_files ):
+            WEIGHTS= numpy.genfromtxt(args.weights,dtype='float')
 
-    # Regularization values
-    alpha_val = args.alpha
-    beta_val  = args.beta
+
+    #################################
+    #   Process A and b matrices, sanity check weight dimensions
+    #################################
+
+    # Use genfromtxt to avoid parsing large files. Note that the AL driver does not use split matrices
     
-    # Tolerance and memory for OWLQN/DOWLQN
-    tol = args.tol
-    memory = args.memory
-
-    # Parameters for parallel run.
-    num_cores = args.cores
-    num_nodes = args.nodes
-    split_files = args.split_files
-
-    normalize = args.normalize
-
-    alpha_ar = [1.0e-06, 3.2e-06, 1.0e-05, 3.2e-05, 1.0e-04, 3.2e-04, 1.0e-03, 3.2e-03]
-
-    # Number of folds for cross-validation.
-    folds = args.folds
-
-    max_iter_num = 100000
-    
-    test_suite_run = False
-
-    # Then this run is being used for the test suite... 
-    # print out parameters without any fanciness so tolerances can be checked  
-    
-    if ( DO_WEIGHTING and not split_files ):
-        WEIGHTS= numpy.genfromtxt(weights_file,dtype='float')
-
-    #################################
-    #################################
-    #           BEGIN CODE
-    #################################
-    #################################
-
-    #################################
-    #   Process input, setup output
-    #################################
-
-    # Use genfromtxt to avoid parsing large files.
-    
-    if (is_active and not split_files) or ((algorithm == "dlasso") and not split_files): # Then this is an AL driver run with dlars/dlasso ... we do NOT split A-matrix
+    if (args.active  and not args.split_files) or ((args.algorithm == "dlasso") and not args.split_files): 
     
         A      = numpy.zeros((1,1),dtype=float)
-        b      = numpy.genfromtxt(bfile, dtype='float') 
-	np     = "undefined"
-	nlines = b.shape[0]
+        b      = numpy.genfromtxt(args.b, dtype='float') 
+	    np     = "undefined"
+	    nlines = b.shape[0]
 
-    elif ( (not split_files) and (not read_output) ) :
-        A = numpy.genfromtxt(Afile, dtype='float')
-        nlines = A.shape[0] 
-        np = A.shape[1] 
-
-        b = numpy.genfromtxt(bfile, dtype='float') 
+    elif ( (not args.split_files) and (not args.read_output) ) :
+        A       = numpy.genfromtxt(args.A , dtype='float')
+        nlines  = A.shape[0] 
+        np      = A.shape[1] 
+        b       = numpy.genfromtxt(args.b, dtype='float') 
         nlines2 = b.shape[0] 
 
         if ( nlines != nlines2 ):
@@ -155,35 +105,25 @@ def main():
 
     else:
         
-	if not read_output:
-    
-           dimf = open("dim.0000.txt", "r") ;
-           line = next(dimf) 
-           dim = (int(x) for x in line.split())
-           (np, nstart, nend, nlines) = dim
-           # Dummy A and b matrices.  NOT read in.
-           A = numpy.zeros((1,1),dtype=float)
-           b = numpy.genfromtxt(bfile, dtype='float') 
-	else:
-	   b      = numpy.genfromtxt(bfile, dtype='float') 
-	   np = "undefined"
-	   nlines = b.shape[0]
+	    if not args.read_output:
+            dimf = open("dim.0000.txt", "r") ;
+            line = next(dimf) 
+            dim  = (int(x) for x in line.split())
+            A    = numpy.zeros((1,1),dtype=float)           # Dummy A matrix - NOT read in.
+            b    = numpy.genfromtxt(args.b, dtype='float')  # Dummy b matrix - NOT read in.
+            (np, nstart, nend, nlines) = dim
+	    else:
+	        b      = numpy.genfromtxt(args.b, dtype='float') 
+	        np     = "undefined"
+	        nlines = b.shape[0]
+            
+    # Sanity check weight dimensions        
 	
-
-    hf = open(header_file,"r").readlines()
-
-    print "! Date ", date.today() 
-    print "!"
-    print "! Number of variables = ", np
-    print "! Number of equations    = ", nlines
-
-    #A=zeros((nlines,np))
-    #b=zeros((nlines))
-
-    if DO_WEIGHTING and not split_files:
+    if DO_WEIGHTING and not args.split_files:
         if ( WEIGHTS.shape[0] != nlines ):
             print "Wrong number of lines in WEIGHTS file"
-            exit(1)
+            exit(1)  
+
 
     #################################
     # Apply weighting to A and b
@@ -192,13 +132,10 @@ def main():
     weightedA = None
     weightedb = None
 
-    if DO_WEIGHTING and not split_files and not is_active and not (algorithm == "dlasso"):
+    if DO_WEIGHTING and not args.split_files and not args.active  and not (args.algorithm == "dlasso"):
 
         # This way requires too much memory for long A-mat's
-        # to avoid a memory error, we will do it the slow way instead:
-        #
-        #weightedA = dot(diag(WEIGHTS),A)
-        #weightedb = dot(diag(WEIGHTS),b)
+        # to avoid a memory error, we will do it the slow way:
 
         weightedA = numpy.zeros((A.shape[0],A.shape[1]),dtype=float)
         weightedb = numpy.zeros((A.shape[0],),dtype=float)
@@ -206,30 +143,31 @@ def main():
         for i in xrange(A.shape[0]):     # Loop over rows (atom force components)
             for j in xrange(A.shape[1]): # Loop over cols (variables in fit)
                 weightedA[i][j] = A[i][j]*WEIGHTS[i]
-                weightedb[i] = b[i]*WEIGHTS[i]
+                weightedb[i]    = b[i]   *WEIGHTS[i]
 
 
 
     #################################
-    # Do the SVD, process output
+    # Solve the matrix equation
     #################################
 
-    if algorithm == 'svd':
+    if args.algorithm == 'svd':
+        
+        # Make the scipy call
+        
         print '! svd algorithm used'
         try:
-            if DO_WEIGHTING:
-                #U,D,VT=numpy.linalg.svd(weightedA)
-                # OK to overwrite weightedA.  It is not used to calculate y (predicted forces) below.
-                U,D,VT=scipy.linalg.svd(weightedA,overwrite_a=True)
-                Dmat=array((transpose(weightedA)))
-            else:
-                #U,D,VT=numpy.linalg.svd(A)
-                # Do not overwrite A.  It is used to calculate y (predicted forces) below.
-                U,D,VT=scipy.linalg.svd(A,overwrite_a=False)
-                Dmat=array((transpose(A)))  
+            if DO_WEIGHTING: # Then it's OK to overwrite weightedA.  It is not used to calculate y (predicted forces) below.
+                U,D,VT = scipy.linalg.svd(weightedA,overwrite_a=True)
+                Dmat   = array((transpose(weightedA)))
+            else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
+                U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
+                Dmat   = array((transpose(A)))  
         except LinAlgError:
             sys.stderr.write("SVD algorithm failed")
             exit(1)
+            
+        # Process output
 
         dmax = 0.0
 
@@ -240,9 +178,9 @@ def main():
             for j in range(0,len(Dmat[i])):
                 Dmat[i][j]=0.0
 
-                # Cut off singular values based on fraction of maximum value as per 
-                # numerical recipes (LEF).
-        eps=eps_fac * dmax
+        # Cut off singular values based on fraction of maximum value as per numerical recipes.
+        
+        eps=args.eps * dmax
         nvars = 0
 
         for i in xrange(0,len(D)):
@@ -250,44 +188,50 @@ def main():
                 Dmat[i][i]=1.0/D[i]
                 nvars += 1
 
-        print "! eps (= eps_fac*dmax) =  ", eps        
-        print "! SVD regularization factor = ", eps_fac
+        print "! eps (= args.eps*dmax) =  ", eps        
+        print "! SVD regularization factor = ", args.eps
 
         x=dot(transpose(VT),Dmat)
 
         if DO_WEIGHTING:
-            x=dot(x,dot(transpose(U),weightedb))
+            x = dot(x,dot(transpose(U),weightedb))
         else:
-            x=dot(x,dot(transpose(U),b))
+            x = dot(x,dot(transpose(U),b))
 
-
-    elif algorithm == 'lasso':
+    elif args.algorithm == 'lasso':
+        
+        # Make the sklearn call
+        
         print '! Lasso regression used'
-        print '! Lasso alpha = ' + str(alpha_val)
-        reg = linear_model.Lasso(alpha=alpha_val,fit_intercept=False,max_iter=max_iter_num)
+        print '! Lasso alpha = ' + str(args.alpha)
+        reg   = linear_model.Lasso(alpha=args.alpha,fit_intercept=False,max_iter=100000)
         reg.fit(A,b)
-        x = reg.coef_
-        np = count_nonzero_vars(x)
+        x     = reg.coef_
+        np    = count_nonzero_vars(x)
         nvars = np
 
-    elif algorithm == 'lassolars':
+    elif args.algorithm == 'lassolars':
+        
+        # Make the sklearn call
+        
         print '! LARS implementation of LASSO used'
-        print '! LASSO alpha = ', alpha_val
+        print '! LASSO alpha = ', args.alpha
 
         if DO_WEIGHTING:
-            reg = linear_model.LassoLars(alpha=alpha_val,fit_intercept=False,fit_path=False,verbose=True,max_iter=max_iter_num, copy_X=False)
+            reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000, copy_X=False)
             reg.fit(weightedA,weightedb)
         else:
-            reg = linear_model.LassoLars(alpha=alpha_val,fit_intercept=False,fit_path=False,verbose=True,max_iter=max_iter_num)
+            reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000)
             reg.fit(A,b)
+        x       = reg.coef_[0]
+        np      = count_nonzero_vars(x)
+        nvars   = np
 
-        x = reg.coef_[0]
-        np = count_nonzero_vars(x)
-        nvars = np
+    elif args.algorithm == 'dlars' or args.algorithm == 'dlasso' :
+        
+        # Make the DLARS or DLASSO call
 
-    elif algorithm == 'dlars' or algorithm == 'dlasso' :
-
-        x,y = fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize, Afile, bfile,restart_dlasso_dlars)
+        x,y = fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_files, args.algorithm, args.read_output, args.weights, args.normalize, args.A , args.b ,args.restart_dlasso_dlars)
         np = count_nonzero_vars(x)
         nvars = np
         
@@ -298,36 +242,50 @@ def main():
 
 
 
+    #################################
+    # Process output from solver(s)
+    #################################
 
-
-    # If split_files, A is not read in.        
-    # This conditional should really be set by the algorithm, since many set  y themselves...    
-    if ( (not split_files) and (not read_output) and (not is_active) and (algorithm != "dlasso") ):
+    # If split_files, A is not read in ...This conditional should really be set by the algorithm, since many set  y themselves...  
+      
+    if ( (not args.split_files) and (not args.read_output) and (not args.active ) and (args.algorithm != "dlasso") ):
         y=dot(A,x)
         
     Z=0.0
 
     # Put calculated forces in force.txt
+    
     yfile = open("force.txt", "w")
+    
     for a in range(0,len(b)):
-        Z=Z+(y[a]-b[a])**2.0
+        Z = Z + (y[a] - b[a]) ** 2.0
         yfile.write("%13.6e\n"% y[a]) 
-
 
     bic = float(nlines) * log(Z/float(nlines)) + float(nvars) * log(float(nlines))
 
-    print "! RMS force error = " , sqrt(Z/float(nlines))
-    print "! max abs variable = ",  max(abs(x))
-    print "! number of fitting vars = ", nvars
-    print "! Bayesian Information Criterion =  ", bic
+
+    #############################################
+    # Setup output
+    #############################################
+    
+    print "! Date ", date.today() 
+    print "!"
+    print "! Number of variables            = ", np
+    print "! Number of equations            = ", nlines
+    print "! RMS force error                = " , sqrt(Z/float(nlines))
+    print "! max abs variable               = ",  max(abs(x))
+    print "! number of fitting vars         = ", nvars
+    print "! Bayesian Information Criterion = ", bic
     if args.weights !="None":
-        print '! Using weighting file: ',weights_file
+        print '! Using weighting file:            ',args.weights
     print "!"
 
 
     ####################################
     # Actually process the header file...
     ####################################
+
+    hf = open(args.header ,"r").readlines()
 
     BREAK_COND = False
 
@@ -383,12 +341,7 @@ def main():
             if len(TMP) >= 5:
                 SNUM_4B = int(TMP[4])
 
-            SNUM_2B = int(TMP[2])
-
-            #print "Expecting:"
-            #print SNUM_2B
-            #print SNUM_3B
-            #print SNUM_4B        
+            SNUM_2B = int(TMP[2])  
 
     elif POTENTIAL == "INVRSE_R":
         TMP = hf[7].split()
@@ -633,7 +586,7 @@ def main():
     else:
         OVERCOORD_PARAMS = 0
 
-    mapsfile=open(map_file,"r").readlines()
+    mapsfile=open(args.map,"r").readlines()
 
     print ""
 
@@ -665,20 +618,14 @@ def main():
         for i in xrange(N_ENER_OFFSETS):
             print "ENERGY OFFSET " + `i+1` + " " + str(x[total_params+i])
 
-    if test_suite_run:
-        test_suite_params=open("test_suite_params.txt","w")		
-        for i in range(0,len(x)):
-            phrase = `i` + " " + `x[i]` + '\n'
-            test_suite_params.write(phrase)
-            test_suite_params.close()
-
     print "ENDFILE"		
     return 0
 
-    # OLD WAY:
-    #for i in range(0,len(x)):
-    #    print i,x[i]
-
+#############################################
+#############################################
+# Small helper functions
+#############################################
+#############################################
 
 def is_number(s):
 # Test if s is a number.
@@ -707,65 +654,65 @@ def count_nonzero_vars(x):
     return np
 
 
+#############################################
+#############################################
+# DLARS wrapper
+#############################################
+#############################################
 
-def fit_dlars(num_nodes, num_cores, alpha_val, split_files, algorithm, read_output, weights_file, normalize, Afile, bfile, restart_dlasso_dlars):
+def fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_files, args.algorithm, args.read_output, args.weights, args.normalize, args.A , args.b, args.restart_dlasso_dlars):
 
     # Use the Distributed LARS/LASSO fitting algorithm.  Returns both the solution x and
     # the estimated force vector A * x, which is read from Ax.txt.    
+    
+    if dlasso_dlars_path == '':
+        print "ERROR: DLARS/DLASSO  path not provided."
+        print "Please run again with --dlasso_dlars_path </absolute/path/to/dlars/dlasso/src/>"
+        exit(0)
 
-    if algorithm == 'dlasso' :
+    if args.algorithm == 'dlasso' :
         print '! DLARS code for LASSO used'
-    elif algorithm == 'dlars' :
+    elif args.algorithm == 'dlars' :
         print '! DLARS code for LARS used'
     else:
-        print "Bad algorithm in fit_dlars:" + algorithm
+        print "Bad algorithm in fit_dlars:" + args.algorithm
         exit(1)
-    print '! DLARS alpha = ' + str(alpha_val)
+    print '! DLARS alpha = ' + str(args.alpha)
 
-    if not read_output:
+    if not args.read_output:
     
-    
-    	# Use the following if lsq2 is in a full ChIMES directory
-
-        path=os.path.dirname(os.path.abspath(__file__))
-        dlars_file = path[:-3] + "contrib/dlars/src/dlars"
+        exepath = "srun -N " + str(args.nodes) + " -n " + str(args.cores) + " "
 	
-	# Otherwise, use the following to hard-code the path:
-	
-	#dlars_file = "/my/hardcoded/path/"
-	
-        exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
-	
-        exepath = exepath + dlars_file
-	
+        exepath = exepath + dlasso_dlars_path + "dlars"
+        	
         if os.path.exists(dlars_file):
 	
             command = None
    
-            command = exepath + " " + Afile + " " + bfile + " dim.txt --lambda=" + `alpha_val`
+            command = exepath + " " + args.A  + " " + args.b + " dim.txt --lambda=" + `args.alpha`
 
             #else:
-            #    command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha_val))
+            #    command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, args.alpha))
 
-            if ( split_files ) :
+            if ( args.split_files ) :
                 command = command + " --split_files"
-            if ( algorithm == 'dlars' ):
+            if ( args.algorithm == 'dlars' ):
                 command = command + " --algorithm=lars"
-            elif ( algorithm == 'dlasso' ):
+            elif ( args.algorithm == 'dlasso' ):
                 command = command + " --algorithm=lasso"
 
-            if ( weights_file != 'None' ):
-                command = command + " --weights=" + weights_file
+            if ( args.weights != 'None' ):
+                command = command + " --weights=" + args.weights
 
-            if ( normalize ):
+            if ( args.normalize ):
                 command = command + " --normalize=y" 
             else:
                 command = command + " --normalize=n" 
 		
-            if restart_dlasso_dlars != "":
-	    	print "Will run a dlars/dlasso restart job with file:", restart_dlasso_dlars
+            if args.restart_dlasso_dlars != "":
+	    	print "Will run a dlars/dlasso restart job with file:", args.restart_dlasso_dlars
 		
-		command = command + " --restart=" + restart_dlasso_dlars
+		command = command + " --restart=" + args.restart_dlasso_dlars
                 
             command = command +  " >& dlars.log"
 
