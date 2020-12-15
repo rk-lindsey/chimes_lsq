@@ -1,8 +1,0 @@
-1417c1417
-< 	Average stress tensors over run: 
----
-> 	Average diagonal stress tensors over run: 
-1421,1423d1420
-< 		sigma_xy: 3.5415 GPa
-< 		sigma_xz: 0.6166 GPa
-< 		sigma_yz: 8.2974 GPa

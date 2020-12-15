@@ -18,14 +18,25 @@ Input file contents successfully stored.
 	# VELINIT #: READ ... reading velocities from coordinate file
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
+	# WRPCRDS #: true
+	# ATMENER #: 0
+		... All reported energies *DO NOT* include single atom contributions
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
 		... printing       50 frames. 
+	# TRAJEXT #: GEN
 	# FRQENER #: 10
 	# PRNTFRC #: true
 		... and will be printed every 1 frames.
 		... printing every 0.125 fs, 
 		... printing 1000 frames. 
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: true
+		... and will be printed every 1 frames.
+		... printing every 0.125 fs, 
+		... printing 1000 frames. 
+	# FORDFTB #: false
 Setting up the data objects...
    ...setup complete
 
