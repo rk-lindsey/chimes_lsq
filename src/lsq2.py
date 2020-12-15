@@ -825,7 +825,7 @@ def fit_dowlqn(A,b,num_nodes, num_cores, alpha_val, beta_val, tol, memory, split
     exepath = "srun -N " + str(num_nodes) + " -n " + str(num_cores) + " "
     exepath = exepath + dowlqn_file
 
-    if ( weights_files != "None" ):
+    if ( weights_file != "None" ):
         print "Error: dowlqn does not currently support weighting"
         exit(1)
         
