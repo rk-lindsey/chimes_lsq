@@ -4,6 +4,7 @@ Getting Started
 * :ref:`Obtaining the code     <sec-obtaining>`
 * :ref:`Compiling and running  <sec-compiling>`
 
+---------------
 
 .. _sec-obtaining:
 
@@ -39,6 +40,9 @@ On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/
 ^^^^^^^^^^^^^^^^^^^
 
 On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse>`_ page, click the three dots next to "master" under the heading "Source," and select download from the drop down menu
+
+
+---------------
 
 
 .. _sec-compiling:

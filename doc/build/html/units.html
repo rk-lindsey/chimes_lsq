@@ -30,14 +30,15 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Citing" href="citing.html" />
-    <link rel="prev" title="The (should we specify lsq? will we have md?) Input File" href="lsq_input_file.html" /> 
+    <link rel="next" title="Citing the ChIMES Parameter Generator" href="citing.html" />
+    <link rel="prev" title="Generating a ChIMES model" href="lsq_input_file.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,12 +83,19 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html">The (should we specify lsq? will we have md?) Input File</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html">Generating a ChIMES model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#trjfile"><code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#fitcoul"><code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#cbhtyp"><code class="docutils literal notranslate"><span class="pre">CBHTYP</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#exclude"><code class="docutils literal notranslate"><span class="pre">EXCLUDE</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#chgcons"><code class="docutils literal notranslate"><span class="pre">CHGCONS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#special-xb-minim"><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MINIM</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#special-xb-maxim"><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MAXIM</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#fcuttyp"><code class="docutils literal notranslate"><span class="pre">FCUTTYP</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing the ChIMES Parameter Generator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="legal.html">Legal</a></li>
 </ul>
 
@@ -158,6 +166,117 @@
 <h1>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h1>
 <p>Coming Soon.</p>
 <p>This page will discss units for ALL files</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="36%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">File</th>
+<th class="head">Units</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>test-1</td>
+<td><table border="1" class="first last docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Property</th>
+<th class="head">Value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Mass</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Density</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Charge</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Distance</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Time</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Velocity</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Temperature</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Pressure</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Energies</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Forces</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Stresses</td>
+<td>tmp</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="row-odd"><td>test-2</td>
+<td><table border="1" class="first last docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Property</th>
+<th class="head">Value</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Mass</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Density</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Charge</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Distance</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Time</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Velocity</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Temperature</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Pressure</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Energies</td>
+<td>tmp</td>
+</tr>
+<tr class="row-odd"><td>Forces</td>
+<td>tmp</td>
+</tr>
+<tr class="row-even"><td>Stresses</td>
+<td>tmp</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 
 
@@ -168,10 +287,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="citing.html" class="btn btn-neutral float-right" title="Citing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="citing.html" class="btn btn-neutral float-right" title="Citing the ChIMES Parameter Generator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="lsq_input_file.html" class="btn btn-neutral float-left" title="The (should we specify lsq? will we have md?) Input File" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="lsq_input_file.html" class="btn btn-neutral float-left" title="Generating a ChIMES model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

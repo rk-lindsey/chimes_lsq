@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The (should we specify lsq? will we have md?) Input File &mdash; chimes_lsq 0.0.1 documentation</title>
+  <title>Generating a ChIMES model &mdash; chimes_lsq 0.0.1 documentation</title>
   
 
   
@@ -30,6 +30,7 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -82,12 +83,38 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">The (should we specify lsq? will we have md?) Input File</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Generating a ChIMES model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#essential-workflow">Essential workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#reference-data-preparation">1. Reference data preparation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hyperparameter-selection">2. Hyperparameter selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#design-matrix-generation">3. Design matrix generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#design-matrix-optimization">4. Design matrix optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performing-calculations-with-chimes">5. Performing calculations with ChIMES</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#input-files-and-options">Input files and options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#additional-details-on">Additional details on:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#trjfile"><code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#fitcoul"><code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#cbhtyp"><code class="docutils literal notranslate"><span class="pre">CBHTYP</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#exclude"><code class="docutils literal notranslate"><span class="pre">EXCLUDE</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#chgcons"><code class="docutils literal notranslate"><span class="pre">CHGCONS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#special-xb-minim"><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MINIM</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#special-xb-maxim"><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MAXIM</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="#fcuttyp"><code class="docutils literal notranslate"><span class="pre">FCUTTYP</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#running">Running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-files">Output files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#caveats">Caveats</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing the ChIMES Parameter Generator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="legal.html">Legal</a></li>
 </ul>
 
@@ -135,7 +162,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>The (should we specify lsq? will we have md?) Input File</li>
+      <li>Generating a ChIMES model</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -154,17 +181,355 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="the-should-we-specify-lsq-will-we-have-md-input-file">
-<h1>The (should we specify lsq? will we have md?) Input File<a class="headerlink" href="#the-should-we-specify-lsq-will-we-have-md-input-file" title="Permalink to this headline">¶</a></h1>
-<p>Coming Soon.</p>
-<p>This file will discuss:</p>
-<p>Comprehensive overview of input file options
-Ancillary features
-Disucssion on weighting
-Running the actual fits (supported open source solvers too)
-Rules of thumb for running (don’t use this phrasing)
-Comprehensive description of the output file(s)
-Caveats (i.e. single atom energy)</p>
+  <div class="section" id="generating-a-chimes-model">
+<h1>Generating a ChIMES model<a class="headerlink" href="#generating-a-chimes-model" title="Permalink to this headline">¶</a></h1>
+<p>This section assumes the goal of obtaining an atomistic ChIMES model from Kohn-Sham density functional theory (DFT) molecular dynamics (MD) generated reference data. However, ChIMES models can be fit to a broad variety of reference calculations. For additional information see:  <strong>[CALL OUT SPECIFIC REFERENCES]</strong></p>
+<p>At its simplest, ChIMES models are generated by per-atom force matching to DFT reference data, and at the highest level, the ChIMES Parameter Generator, <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> aims to solve the following over-determined matrix equation:</p>
+<div class="math notranslate nohighlight">
+\begin{equation}
+
+   \mathrm{\mathbf{wAc}} = \mathrm{\mathbf{wb}_{DFT}},
+
+\end{equation}</div><p>where <span class="math notranslate nohighlight">\(\mathrm{\mathbf{b}_{DFT}}\)</span> is the vector of DFT-generated per-atom force components, <span class="math notranslate nohighlight">\(F^{\mathrm{DFT}}_{ijk}\)</span>, <span class="math notranslate nohighlight">\(\mathrm{\mathbf{w}}\)</span> is a diagonal matrix of weights to be applied to the elements of <span class="math notranslate nohighlight">\(\mathrm{\mathbf{b}_{DFT}}\)</span> and rows of <span class="math notranslate nohighlight">\(\mathrm{\mathbf{A}}\)</span>, <span class="math notranslate nohighlight">\(\mathrm{\mathbf{c}}\)</span> is the diagonal matrix of generated model parameters, and <span class="math notranslate nohighlight">\(\mathrm{\mathbf{A}}\)</span> is the overdetermined ChIMES design matrix for which elements of <span class="math notranslate nohighlight">\(\mathrm{\mathbf{A}}\)</span> are given by:</p>
+<div class="math notranslate nohighlight">
+\begin{equation}
+
+   M _{a,b} = \frac{\partial X _{a,\mathrm{ChIMES} \{c\}}}{\partial c_{b}}
+
+\end{equation}.</div><p>Additional details are provided below in the following sections:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#sec-workflow"><span class="std std-ref">Essential workflow</span></a></li>
+<li><a class="reference internal" href="#sec-input-files"><span class="std std-ref">Input files and options</span></a></li>
+<li><a class="reference internal" href="#sec-running"><span class="std std-ref">Running</span></a></li>
+<li><a class="reference internal" href="#sec-output-files"><span class="std std-ref">Output files</span></a></li>
+<li><a class="reference internal" href="#sec-caveats"><span class="std std-ref">Caveats</span></a></li>
+</ul>
+<hr class="docutils" />
+<div class="section" id="essential-workflow">
+<span id="sec-workflow"></span><h2>Essential workflow<a class="headerlink" href="#essential-workflow" title="Permalink to this headline">¶</a></h2>
+<p>The basic ChIMES model development workflow comprises 5 main steps, briefly outlined below. Note:</p>
+<div class="section" id="reference-data-preparation">
+<h3>1. Reference data preparation<a class="headerlink" href="#reference-data-preparation" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>DFT-MD simulations are run for the target material over the target thermodynamic condition(s)</li>
+<li>Per-atom forces and optionally the system energy and stress tensor are extracted from the trajectory and saved in a “training trajectory” file, in a <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> compatible format</li>
+</ul>
+</div>
+<div class="section" id="hyperparameter-selection">
+<h3>2. Hyperparameter selection<a class="headerlink" href="#hyperparameter-selection" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>ChIMES model hyperparameters (e.g. bodiedness, polynomial orders, cutoffs, transformation function parameters, etc.) are specified in the <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> input file (e.g., typically named <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code>), along with the training trajectory file</li>
+</ul>
+</div>
+<div class="section" id="design-matrix-generation">
+<h3>3. Design matrix generation<a class="headerlink" href="#design-matrix-generation" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> is executed to produce the design matrix (<code class="docutils literal notranslate"><span class="pre">A.txt</span></code>), the vector of forces (and optionally energies and stresses) from DFT (<code class="docutils literal notranslate"><span class="pre">b.txt</span></code>), and other metadata files (e.g. <code class="docutils literal notranslate"><span class="pre">params.header</span></code>, <code class="docutils literal notranslate"><span class="pre">ff_groups.map</span></code>)</li>
+</ul>
+</div>
+<div class="section" id="design-matrix-optimization">
+<h3>4. Design matrix optimization<a class="headerlink" href="#design-matrix-optimization" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>ChIMES paramteters are generated via the <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code> utility, which also allows for consideration of an optional weight</li>
+</ul>
+</div>
+<div class="section" id="performing-calculations-with-chimes">
+<h3>5. Performing calculations with ChIMES<a class="headerlink" href="#performing-calculations-with-chimes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>ChIMES calculations and simulations are performed through the <a class="reference external" href="https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_calculator/browse">ChIMES Calculator</a>, which can be linked to a variety of simulation software packages</li>
+</ul>
+<hr class="docutils" />
+</div>
+</div>
+<div class="section" id="input-files-and-options">
+<span id="sec-input-files"></span><h2>Input files and options<a class="headerlink" href="#input-files-and-options" title="Permalink to this headline">¶</a></h2>
+<p><strong>[THIS SECTION NEEDS TO BE WRITTEN]</strong></p>
+<ul class="simple">
+<li>Options/hyperparameters</li>
+<li>Ancillary features</li>
+<li>Disucssion on weighting</li>
+</ul>
+<p><strong>[ TO DO: Add links to external pages describing various things, e.g. ghost atoms ]</strong></p>
+<p>Note: Asterisks (*) indicate options described in greater detail below</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="23%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Control  variables</th>
+<th class="head">Description</th>
+<th class="head">Value/Options/Notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code> *</td>
+<td>Training trajectory file(s)</td>
+<td>See below for details.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">WRAPTRJ</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>: Coorindate wrapping</td>
+<td>Automatically disabled when ghost atoms (layers) are used.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>: {A,b}.txt file splitting</td>
+<td>Should not be used unless DLARS/DLASSO solvers are used.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">NFRAMES</span></code></td>
+<td>Number of training frames</td>
+<td>Any integer &gt; 0.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">NLAYERS</span></code></td>
+<td>Number of supercell ghost layers</td>
+<td>A value of 0 yields the original box. A value of 1 yields a single shell of replicated boxes around the original box (i.e. 27 boxes).</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> *</td>
+<td><code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>: Fit/use charges</td>
+<td>See below for details.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">FITSTRS</span></code></td>
+<td>Whether/how to include stresses</td>
+<td>See below for details.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">FITENER</span></code></td>
+<td>Whether/how to include energies</td>
+<td>See below for details.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">FITEATM</span></code></td>
+<td>(DELETE) Boolean: Fit per-atom energies</td>
+<td>(Defunct) N/A.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">FITPOVR</span></code></td>
+<td>(DELETE) Boolean: Fit ReaxFF overbonding</td>
+<td>(Defunct) N/A.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">PAIRTYP</span></code></td>
+<td>(DELETE) Interaction type</td>
+<td>(Defunct) N/A.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">CHBTYPE</span></code> *</td>
+<td>Pair distance transformation type</td>
+<td>See below for details.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">USENEIG</span></code></td>
+<td>Neighbor list/distance convention</td>
+<td>Auto-select algorithm (<code class="docutils literal notranslate"><span class="pre">true</span></code>) or use small-cell friendly method (<code class="docutils literal notranslate"><span class="pre">true</span> <span class="pre">SMALL</span></code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Note: Asterisks (*) indicate options described in greater detail below</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="18%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Topology variables</th>
+<th class="head">Description</th>
+<th class="head">Value/Options/Notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">NATMTYP</span></code></td>
+<td>Number of atom types</td>
+<td>Number of unique atom types in trajectory.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">TYPEIDX</span></code></td>
+<td>Atom type index</td>
+<td>Integers, ranging from 1 to <code class="docutils literal notranslate"><span class="pre">NATMTYP</span></code>. Values form a column below <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">TYPEIDX</span> <span class="pre">#</span></code>.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ATM_TYP</span></code></td>
+<td>Atom type chemical symbol</td>
+<td>Any string. Chemical symbol for each unique atom type.  Values form a column below <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">ATM_TYP</span> <span class="pre">#</span></code>.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">ATMCHRG</span></code></td>
+<td>Atom type charge</td>
+<td>If <code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> is false: a partial atomic charge for each atom type. If <code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> is true: a positive or negative sign, to indicate how pair charge signs should be assigned.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ATMMASS</span></code></td>
+<td>Atom type mass</td>
+<td>Floats &gt; 0.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">EXCLUDE</span></code> *</td>
+<td>Interaction to excude/ignore</td>
+<td>Sets of n-body <a href="#id1"><span class="problematic" id="id2">``</span></a>ATM_TYP``s. Rarely used.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></td>
+<td>Pair type index</td>
+<td>Ascending integers from 1 to the number of unique atom pair types. Values form a column below <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRIDX</span> <span class="pre">#</span></code>.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">ATM_TYX</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">ATM_TYP</span></code> of atom X in pair <code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></td>
+<td>Used to define interaction pair types. Order does not matter.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">S_MINIM</span></code></td>
+<td>Inner cutoff for pair <code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></td>
+<td>Generally taken as slightly less than smallest distance sampled in DFT-MD trajectory.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">S_MAXIM</span></code></td>
+<td>Outer cutoff for pair <code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></td>
+<td>Should be small enough to prevent self-interaction across periodic boundaries.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">S_DELTA</span></code></td>
+<td>(DELETE) Soon to be defunct</td>
+<td>(Defunct) Requires dummy float.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">MORSE_LAMBDA</span></code></td>
+<td>(RENAME) <code class="docutils literal notranslate"><span class="pre">CHEBTYPE</span></code> variable</td>
+<td>Morse-type lambda for Morse <code class="docutils literal notranslate"><span class="pre">CHEBTYP</span></code>. Only used if <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRTYP</span> <span class="pre">#</span></code> is <code class="docutils literal notranslate"><span class="pre">CHEBYSHEV</span></code>. Generally set to location of first radial distribution peak for each pair type.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">USEOVERP</span></code></td>
+<td>(DELETE) ReaxFF overbonding variable</td>
+<td>(Defunct) N/A.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">NIJBINS</span></code></td>
+<td>(DELETE) Defunct</td>
+<td>(Defunct) N/A.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">NIKBINS</span></code></td>
+<td>(DELETE) Defunct</td>
+<td>(Defunct) N/A.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">NJKBINS</span></code></td>
+<td>(DELETE) Defunct</td>
+<td>(Defunct) N/A.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">CHGCONS</span></code> *</td>
+<td>Charge fitting constraints</td>
+<td>See below for details.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MINIM</span></code> *</td>
+<td>Special manybody inner cutoffs</td>
+<td>See below for details.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MAXIM</span></code> *</td>
+<td>Special manybody outer cutoffs</td>
+<td>See below for details.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">FCUTTYP</span></code> *</td>
+<td>Cutoff function style/parameters</td>
+<td>See below for details.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">CUBSCLE</span></code></td>
+<td>(DELETE) A depricated <code class="docutils literal notranslate"><span class="pre">CHBTYPE</span></code> variable</td>
+<td>N/A - Defunct</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="additional-details-on">
+<h3>Additional details on:<a class="headerlink" href="#additional-details-on" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+</div>
+<div class="section" id="trjfile">
+<h1><code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code><a class="headerlink" href="#trjfile" title="Permalink to this headline">¶</a></h1>
+<p>This keyword provides the name of the simulation trajectory file. Files use a .xyzf format, which is like the standard .xyz format, with two exceptions: (1) the line after that specifying number of atoms will contain information on box dimensions and optionally stress tensor and system energy, and (2) each coordinate line has x, y, and z forces on the corresponding atom appended. Options are:
+1. <code class="docutils literal notranslate"><span class="pre">&lt;any</span> <span class="pre">string&gt;</span></code>: Tell the program to search for a single trajectory file name.
+2. <code class="docutils literal notranslate"><span class="pre">MULTI</span> <span class="pre">&lt;any</span> <span class="pre">string&gt;</span></code>: Tell the program to expect multiple trajectory files. Here, &lt;any string&gt; is the name of a file structured like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&lt;nfiles&gt;
+&lt;frames to read&gt; path/to/file-1.xyzf
+&lt;frames to read&gt; path/to/file-2.xyzf
+...
+&lt;frames to read&gt; path/to/file-n.xyzf
+</pre></div>
+</div>
+<p><strong>[ ADD: DETAILS ON HIDDEN FUNCTIONALITY OF HIDDEN TRAJ_LIST LABELING ]</strong></p>
+<p>Note that,  when using the <code class="docutils literal notranslate"><span class="pre">MULTI</span></code> option, <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">NFRAMES</span> <span class="pre">#</span></code> mustbe equal to the sum of  <code class="docutils literal notranslate"><span class="pre">&lt;frames</span> <span class="pre">to</span> <span class="pre">read&gt;</span></code> for each of the <code class="docutils literal notranslate"><span class="pre">&lt;nfiles&gt;</span></code>.</p>
+<p>Comment lines in trajectory file frames are formatted like:
+<code class="docutils literal notranslate"><span class="pre">&lt;box</span> <span class="pre">x-len&gt;</span> <span class="pre">&lt;box</span> <span class="pre">y-len&gt;</span> <span class="pre">&lt;box</span> <span class="pre">z-len&gt;</span> <span class="pre">&lt;s_xx&gt;</span> <span class="pre">&lt;s_xy&gt;</span> <span class="pre">&lt;s_xz&gt;</span> <span class="pre">&lt;s_yy&gt;</span> <span class="pre">&lt;s_yz&gt;</span> <span class="pre">&lt;s_zz&gt;</span> <span class="pre">&lt;energy&gt;</span></code>
+or, if the first word on the line is “NON-ORTHO”,
+<code class="docutils literal notranslate"><span class="pre">NON-ORTHO</span> <span class="pre">&lt;latvec-1_x&gt;</span> <span class="pre">&lt;latvec-1_y&gt;</span> <span class="pre">&lt;latvec-1_z&gt;</span> <span class="pre">&lt;latvec-2_x&gt;</span> <span class="pre">&lt;latvec-2_y&gt;</span> <span class="pre">&lt;latvec-2_z&gt;</span> <span class="pre">&lt;latvec-3_x&gt;</span> <span class="pre">&lt;latvec-3_y&gt;</span> <span class="pre">&lt;latvec-3_z&gt;</span> <span class="pre">&lt;s_xx&gt;</span> <span class="pre">&lt;s_xy&gt;</span> <span class="pre">&lt;s_xz&gt;</span> <span class="pre">&lt;s_yy&gt;</span> <span class="pre">&lt;s_yz&gt;</span> <span class="pre">&lt;s_zz&gt;</span> <span class="pre">&lt;energy&gt;</span></code>,
+where s_ab are the ab stress tensors and energy is the overall system energy, and latvec-i_a is the ath component of the ith lattice vector.
+Note that stress tensors and energies are optional and thier inclusion is indicated by <code class="docutils literal notranslate"><span class="pre">FITSTRS</span></code> and <code class="docutils literal notranslate"><span class="pre">FITENER</span></code> in the <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code> file. Additional details can be found in the corresponding sections below.</p>
+</div>
+<div class="section" id="fitcoul">
+<h1><code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code><a class="headerlink" href="#fitcoul" title="Permalink to this headline">¶</a></h1>
+<p>This keyword defines whether charges should be fit, or held fixed at user-defined values. Note that currently, functionality is only supported when <code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> is true, or when <code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> is false and all charges are zero.  If <code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> is false, but charges are non-zero, program will attempt to subtract charge contributions from forces.</p>
+</div>
+<div class="section" id="cbhtyp">
+<h1><code class="docutils literal notranslate"><span class="pre">CBHTYP</span></code><a class="headerlink" href="#cbhtyp" title="Permalink to this headline">¶</a></h1>
+<p>This keyword defined the pair distance transformation method (i.e. for compatibility with the [-1,1] domain over which Chebyshev polynomials are defined). Currently, the only options are <code class="docutils literal notranslate"><span class="pre">MORSE</span></code> and <code class="docutils literal notranslate"><span class="pre">DEFAULT</span></code> (i.e. “direct” <strong>[point reader to H2O paper or provide functional forms below]</strong>). If <code class="docutils literal notranslate"><span class="pre">MORSE</span></code> is selected, meaningful values of <code class="docutils literal notranslate"><span class="pre">MORSE_LAMBDA</span></code> should be specified.</p>
+</div>
+<div class="section" id="exclude">
+<h1><code class="docutils literal notranslate"><span class="pre">EXCLUDE</span></code><a class="headerlink" href="#exclude" title="Permalink to this headline">¶</a></h1>
+<p>(Ancillary support)</p>
+<p>Interactions corresponding to specific atom triplets can be excluded from the fitting process by including the following lines above the <code class="docutils literal notranslate"><span class="pre">NATMTYP</span></code> entry in the input file, e.g. to exclude O-O-O and C-O-O 3-body interactions from the fit:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>EXCLUDE 3B INTERACTION: <span class="m">2</span>
+OOOOOO
+COCOOO
+</pre></div>
+</div>
+</div>
+<div class="section" id="chgcons">
+<h1><code class="docutils literal notranslate"><span class="pre">CHGCONS</span></code><a class="headerlink" href="#chgcons" title="Permalink to this headline">¶</a></h1>
+<p>If the user desires to fit charges during the force matching process, they can either do so with no constraints (the default option), or by specifying n_atom_pairs -1 constraints. These constraints are added to the end of the input file, before <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">ENDFILE</span> <span class="pre">#</span></code>. Take water, as an example; here we have 3 pair types, OO, OH, and HH. We want to enforce that the sum of all charges is zero, and that H has half the charge of O, and we can do so by adding the following lines:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>CHARGE CONSTRAINTS:
+OO  HH  OH  <span class="m">1000</span>.0  -4000.0  <span class="m">0</span>.0     <span class="m">0</span>.0
+OO  HH  OH  <span class="m">1000</span>.0   <span class="m">4000</span>.0  <span class="m">4000</span>.0  <span class="m">0</span>.0
+</pre></div>
+</div>
+<p>The first line can be re-written as the equation: <span class="math notranslate nohighlight">\(1000q_\mathrm{O}q_\mathrm{O} - 4000q_\mathrm{H}q_\mathrm{H} = 0\)</span>, and enforces the relationship that <span class="math notranslate nohighlight">\(|q_\mathrm{O}| = 2|q_\mathrm{H}|\)</span>. The second line can be re-written as the equation: <span class="math notranslate nohighlight">\(1000q_\mathrm{O}q_\mathrm{O}+ 4000q_\mathrm{H}q_\mathrm{H} + 4000q_\mathrm{O}q_\mathrm{H} = 0\)</span>, and enforces that the sign of <span class="math notranslate nohighlight">\(q_\mathrm{OH}\)</span> needs to be opposite of <span class="math notranslate nohighlight">\(q_\mathrm{HH}\)</span> and <span class="math notranslate nohighlight">\(q_\mathrm{OO}\)</span> (i.e. negative), and the relationship <span class="math notranslate nohighlight">\(|q_\mathrm{OH}| = 2|q_\mathrm{HH}|\)</span>. Note that each line needs entries for all atom pairs.</p>
+</div>
+<div class="section" id="special-xb-minim">
+<h1><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MINIM</span></code><a class="headerlink" href="#special-xb-minim" title="Permalink to this headline">¶</a></h1>
+<p>By default, many-body inner cutoffs are taken to be equivalent to the constituent 2-body inner cutoffs. One has the option of setting all inner cutoffs of a given bodiedness (e.g. 3-body) to an equivalent value by adding the following line to the end of the fm_setup,in file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>SPECIAL 3B S_MINIM: ALL <span class="m">0</span>.0
+</pre></div>
+</div>
+<p>Otherwise, each cutoff can be specified separately through syntax similar to the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>SPECIAL 3B S_MINIM: SPECIFIC <span class="m">4</span>
+OOOOOO OO OO OO <span class="m">2</span>.00000 <span class="m">2</span>.00000 <span class="m">2</span>.00000
+OOOHOH OO OH OH <span class="m">2</span>.00000 <span class="m">0</span>.80000 <span class="m">0</span>.80000
+HHOHOH OH OH HH <span class="m">0</span>.80000 <span class="m">0</span>.80000 <span class="m">1</span>.00000
+HHHHHH HH HH HH <span class="m">1</span>.00000 <span class="m">1</span>.00000 <span class="m">1</span>.00000
+</pre></div>
+</div>
+<p>Where the “4” is the number of cutoffs to be listed. Any many-body type for which a line is not provided will use the same <code class="docutils literal notranslate"><span class="pre">S_MINIM</span></code> as the 2-body interactions, where constituent pairs determine the cutoff.</p>
+</div>
+<div class="section" id="special-xb-maxim">
+<h1><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MAXIM</span></code><a class="headerlink" href="#special-xb-maxim" title="Permalink to this headline">¶</a></h1>
+<p>By default, many-body outer cutoffs are taken to be equivalent to the constituent 2-body outer cutoffs. One has the option of setting all outer cutoffs of a given bodiedness (e.g. 3-body) to an equivalent value by adding the following line to the end of the fm_setup,in file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>SPECIAL 3B S_MAXIM: ALL <span class="m">4</span>.0
+</pre></div>
+</div>
+<p>Otherwise, each cutoff can be specified separately through syntax similar to the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>SPECIAL 3B S_MAXIM: SPECIFIC <span class="m">4</span>
+CCCCCC CC CC CC <span class="m">4</span>.4 <span class="m">4</span>.4 <span class="m">4</span>.4
+COCOCC CC CO CO <span class="m">4</span>.4 <span class="m">4</span>.0 <span class="m">4</span>.0
+OOCOCO CO CO OO <span class="m">4</span>.0 <span class="m">4</span>.0 <span class="m">6</span>.5
+OOOOOO OO OO OO <span class="m">6</span>.5 <span class="m">6</span>.5 <span class="m">6</span>.5
+</pre></div>
+</div>
+<p>Where the “4” is the number of cutoffs to be listed. Any many-body type for which a line is not provided will use the same <code class="docutils literal notranslate"><span class="pre">S_MAXIM</span></code> as the 2-body interactions, where constituent pairs determine the cutoff.</p>
+</div>
+<div class="section" id="fcuttyp">
+<h1><code class="docutils literal notranslate"><span class="pre">FCUTTYP</span></code><a class="headerlink" href="#fcuttyp" title="Permalink to this headline">¶</a></h1>
+<p>This keyword specifies Chebyshev potential cutoff function types and corresponding parameters. <code class="docutils literal notranslate"><span class="pre">FCUTTYP</span></code> should be specified on its own line, under <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRIDX</span> <span class="pre">#</span></code> entries. Currently supported options include <code class="docutils literal notranslate"><span class="pre">CUBIC</span></code> and <code class="docutils literal notranslate"><span class="pre">TERSOFF</span> <span class="pre">&lt;float&gt;</span></code>, where <code class="docutils literal notranslate"><span class="pre">&lt;float&gt;</span></code> gives the cutoff function kick-in distance as: <span class="math notranslate nohighlight">\(r_\mathrm{cut} - &lt;\mathrm{float}&gt;r_\mathrm{cut}\)</span>, and should take on values between 0 and 1.</p>
+<hr class="docutils" />
+<div class="section" id="running">
+<span id="sec-running"></span><h2>Running<a class="headerlink" href="#running" title="Permalink to this headline">¶</a></h2>
+<p><strong>[THIS SECTION NEEDS TO BE WRITTEN]</strong></p>
+<ul class="simple">
+<li>Running the actual fits (supported open source solvers too)</li>
+<li>Rules of thumb for running (don’t use this phrasing)</li>
+</ul>
+</div>
+<div class="section" id="output-files">
+<span id="sec-output-files"></span><h2>Output files<a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h2>
+<p><strong>[THIS SECTION NEEDS TO BE WRITTEN]</strong></p>
+<ul class="simple">
+<li>Comprehensive description of the output file(s)</li>
+</ul>
+</div>
+<div class="section" id="caveats">
+<span id="sec-caveats"></span><h2>Caveats<a class="headerlink" href="#caveats" title="Permalink to this headline">¶</a></h2>
+<p><strong>[THIS SECTION NEEDS TO BE WRITTEN]</strong></p>
+<ul class="simple">
+<li>Caveats (i.e. single atom energy)</li>
+</ul>
+</div>
 </div>
 
 
