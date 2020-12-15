@@ -19,6 +19,8 @@ if [ $# -eq 0 ]
 then
 	 JOBS=$LSQ_ALL_JOBS
 	 MAKE_JOBS=$LSQ_MAKE_JOBS
+	 
+	 echo "here" 
 else
 	 JOBS=$1
 	 MAKE_JOBS=$2
@@ -243,10 +245,19 @@ done
 echo "Running Makefile jobs"
 
 for job in $MAKE_JOBS ; do
+
 	 if ! test_dir $i ; then
 		  continue 
 	 fi
+	 
+	 if [[ $job == "lsq2" ]] ; then
+	 	cd ../contrib/owlqn/source/
+	 	make
+	 	cd - 
+         fi
+	 
 	 cd $job
+	 
 	 if make all ; then
 		  echo "$job succeeded"
 	 else
@@ -267,6 +278,7 @@ elif [ "$SET_PASSED" = false ] ; then
 	echo "TEST(S) FAILED FOR SETUP SCRIPT"
 else
 	echo "ERROR: BAD LOGIC IN TEST SUITE DRIVER (THIS SCRIPT)"
+	echo "ALL/SVD PASSED: $ALL_PASSED $SVD_PASSEDs" 
 fi
 	
 exit 0

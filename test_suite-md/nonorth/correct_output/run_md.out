@@ -17,14 +17,25 @@ Input file contents successfully stored.
 	# VELINIT #: GEN ... generating velocites via box Muller
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
+	# WRPCRDS #: true
+	# ATMENER #: 0
+		... All reported energies *DO NOT* include single atom contributions
 	# FRQTRAJ #: 1000
 		... printing every 200 fs, 
 		... printing       25 frames. 
+	# TRAJEXT #: GEN
 	# FRQENER #: 20
 	# PRNTFRC #: true
 		... and will be printed every 1000 frames.
 		... printing every 200 fs, 
 		... printing 25 frames. 
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: true
+		... and will be printed every 1000 frames.
+		... printing every 200 fs, 
+		... printing 25 frames. 
+	# FORDFTB #: false
 Setting up the data objects...
    ...setup complete
 

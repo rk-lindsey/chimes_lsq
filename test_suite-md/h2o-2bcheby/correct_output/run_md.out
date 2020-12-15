@@ -18,12 +18,18 @@ Input file contents successfully stored.
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
 	# WRPCRDS #: false
+	# ATMENER #: 0
+		... All reported energies *DO NOT* include single atom contributions
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
 		... printing       50 frames. 
 	# TRAJEXT #: GEN
 	# FRQENER #: 10
 	# PRNTFRC #: false
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: false
+	# FORDFTB #: false
 Setting up the data objects...
    ...setup complete
 

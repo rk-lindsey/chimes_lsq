@@ -43,6 +43,9 @@ do
 	
 	cd $i
 	
+	if [ ! -d current_output ] ; then mkdir current_output ; fi
+	if [ ! -d correct_output ] ; then mkdir correct_output ; fi
+	
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
 		 if ../chimes_md run_md.in > run_md.out ; then
 			  SUCCESS=1
@@ -81,7 +84,11 @@ rm -rf *o *dSYM chimes_lsq chimes_md
 cd ../test_suite-md
 
 cd ../test_suite-lsq 
-./run_test_suite.sh $LSQ_FORCE_JOBS
+
+for i in ${LSQ_FORCE_JOBS}
+do
+	./run_test_suite.sh $i # $LSQ_FORCE_JOBS
+done
 
 cd ../src
 cd ../test_suite-md
@@ -91,10 +98,20 @@ echo " ...Now running the force comparison tests... "
 for i in ${LSQ_FORCE_JOBS}
 do
 
+	echo $i
+	exit 0
+
+	if [[ $i == *"lsq2"* ]] ; then
+		continue
+	fi 
+
 	echo " "
 	echo "Running $i test..."
 	
 	cd ${TAG}${i}
+
+	if [ ! -d current_output ] ; then mkdir current_output ; fi
+	if [ ! -d correct_output ] ; then mkdir correct_output ; fi
 	
 	# Grab the parameter and force files from the lsq test suite output
 	
