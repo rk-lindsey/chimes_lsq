@@ -114,12 +114,22 @@
 <li class="toctree-l2"><a class="reference internal" href="#running">Running</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#generating-the-design-matrix-chimes-lsq">Generating the design matrix (<code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code>)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#output-files">Output files</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#tips-and-tricks">Tips and Tricks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tips-and-tricks">Tips and tricks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#solving-for-chimes-parameters">Solving for ChIMES parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#supported-solvers">Supported solvers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-dlars-and-dlasso">Using <code class="docutils literal notranslate"><span class="pre">DLARS</span></code> and <code class="docutils literal notranslate"><span class="pre">DLASSO</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#options-and-flags">Options and flags</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#choosing-solvers">Choosing solvers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#weighting">Weighting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Tips and tricks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#checking-fit-quality">Checking fit quality</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#solving-for-chimes-parameters">Solving for ChIMES parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-issues">Common Issues</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#caveats">Caveats</a></li>
 </ul>
 </li>
@@ -722,7 +732,7 @@ OOOOOO OO OO OO <span class="m">6</span>.5 <span class="m">6</span>.5 <span clas
 </ul>
 </div>
 <div class="section" id="tips-and-tricks">
-<h4>Tips and Tricks<a class="headerlink" href="#tips-and-tricks" title="Permalink to this headline">¶</a></h4>
+<h4>Tips and tricks<a class="headerlink" href="#tips-and-tricks" title="Permalink to this headline">¶</a></h4>
 <ul>
 <li><p class="first">Inner cutoffs are typically set to the lowest sampled distance for each given pair type in the training trajectory</p>
 </li>
@@ -761,23 +771,255 @@ OOOOOO OO OO OO <span class="m">6</span>.5 <span class="m">6</span>.5 <span clas
 <hr class="docutils" />
 </div>
 </div>
-</div>
 <div class="section" id="solving-for-chimes-parameters">
-<span id="sec-solving"></span><h2>Solving for ChIMES parameters<a class="headerlink" href="#solving-for-chimes-parameters" title="Permalink to this headline">¶</a></h2>
-<p><strong>[THIS SECTION NEEDS TO BE WRITTEN]</strong></p>
+<span id="sec-solving"></span><h3>Solving for ChIMES parameters<a class="headerlink" href="#solving-for-chimes-parameters" title="Permalink to this headline">¶</a></h3>
+<p>Once a ChIMES design matrix has been generated, parameters can be obtained by running <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code>. Note that this script depends on native <a class="reference external" href="https://numpy.org">numpy</a> and <a class="reference external" href="https://www.scipy.org">scipy</a>, installations for <a class="reference external" href="https://www.python.org">python2.x</a> <strong>[THIS NEEDS TO BE UPGRADED TO 3.X]</strong>, and has numerous features, detailed below. If <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> was run with <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> set to <code class="docutils literal notranslate"><span class="pre">false</span></code> and no weighting is desired, one can solve for ChIMES parameters using principal component analysis based on the singular value decomposition of the design matrix (“SVD”) with default regularizaition (1.0e-05) via:</p>
+<p><strong>[ WE NEED TO UPDATE TO PYTHON3.X]</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python2.x /path/to/repo/src/chimes_lsq.py &gt; params.txt
+</pre></div>
+</div>
+<p>however we note that <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> supports many other solvers, summarized below:</p>
+<div class="section" id="supported-solvers">
+<h4>Supported solvers<a class="headerlink" href="#supported-solvers" title="Permalink to this headline">¶</a></h4>
+<p>Note: Asterisks (*) indicate options described in greater detail below</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="5%" />
+<col width="23%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Method</th>
+<th class="head">Additional dependencies</th>
+<th class="head">Related <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code> flags</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>SVD</td>
+<td>None</td>
+<td><code class="docutils literal notranslate"><span class="pre">--eps</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code></td>
+</tr>
+<tr class="row-odd"><td>LASSO</td>
+<td><a class="reference external" href="https://scikit-learn.org/stable/">sklearn</a></td>
+<td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code></td>
+</tr>
+<tr class="row-even"><td>LASSOLARS</td>
+<td><a class="reference external" href="https://scikit-learn.org/stable/">sklearn</a></td>
+<td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code></td>
+</tr>
+<tr class="row-odd"><td>DLARS*</td>
+<td>DLARS</td>
+<td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code> (<code class="docutils literal notranslate"><span class="pre">--dlasso_dlars_path</span></code>) <code class="docutils literal notranslate"><span class="pre">--nodes</span></code> <code class="docutils literal notranslate"><span class="pre">--cores</span></code> <code class="docutils literal notranslate"><span class="pre">--read_output</span></code> <code class="docutils literal notranslate"><span class="pre">--restart</span></code> <code class="docutils literal notranslate"><span class="pre">--split_files</span></code></td>
+</tr>
+<tr class="row-even"><td>DLASSO*</td>
+<td>DLARS</td>
+<td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code> (<code class="docutils literal notranslate"><span class="pre">--dlasso_dlars_path</span></code>) <code class="docutils literal notranslate"><span class="pre">--nodes</span></code> <code class="docutils literal notranslate"><span class="pre">--cores</span></code> <code class="docutils literal notranslate"><span class="pre">--read_output</span></code> <code class="docutils literal notranslate"><span class="pre">--restart</span></code> <code class="docutils literal notranslate"><span class="pre">--split_files</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="using-dlars-and-dlasso">
+<h4>Using <code class="docutils literal notranslate"><span class="pre">DLARS</span></code> and <code class="docutils literal notranslate"><span class="pre">DLASSO</span></code><a class="headerlink" href="#using-dlars-and-dlasso" title="Permalink to this headline">¶</a></h4>
+<p><strong>special cases.. where will it live?</strong> … Additional notes</p>
+</div>
+<div class="section" id="options-and-flags">
+<h4>Options and flags<a class="headerlink" href="#options-and-flags" title="Permalink to this headline">¶</a></h4>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="8%" />
+<col width="10%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Flag</th>
+<th class="head">Option type</th>
+<th class="head">Default value</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--A</span></code></td>
+<td>str</td>
+<td>A.txt</td>
+<td>Design matrix</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--algorithm</span></code></td>
+<td>str</td>
+<td>svd</td>
+<td>Fitting algorithm (Supported options: svd, lasso, lassolars, dlars, and dlasso)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--dlasso_dlars_path</span></code></td>
+<td>str</td>
+<td>N/A</td>
+<td>Path to DLARS/DLASSO solver</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code></td>
+<td>float</td>
+<td>1.0e-04</td>
+<td>Lasso or ridge regularization</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--b</span></code></td>
+<td>str</td>
+<td>b.txt</td>
+<td>Reference force file</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--cores</span></code></td>
+<td>int</td>
+<td>8</td>
+<td>DLARS/DLASSO number of cores</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--eps</span></code></td>
+<td>float</td>
+<td>1.0e-05</td>
+<td>SVD regularization</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--header</span></code></td>
+<td>str</td>
+<td>params.header</td>
+<td>Parameter file header</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--map</span></code></td>
+<td>str</td>
+<td>ff_groups.map</td>
+<td>Parameter file map</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--nodes</span></code></td>
+<td>int</td>
+<td>1</td>
+<td>DLARS/DLASSO number of nodes</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--normalize</span></code></td>
+<td>bool</td>
+<td>False</td>
+<td>Normalize DLARS/DLASSO calculation</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--read_output</span></code></td>
+<td>bool</td>
+<td>False</td>
+<td>Read output from previous DLARS run</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--restart_dlasso_dlars</span></code></td>
+<td>str</td>
+<td>N/A</td>
+<td>Determines whether dlasso or dlars job will be restarted. Argument is the restart file name</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--split_files</span></code></td>
+<td>bool</td>
+<td>False</td>
+<td>LSQ code has split A matrix output (DLARS/DLASSO)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--test_suite</span></code></td>
+<td>bool</td>
+<td>False</td>
+<td>Output for test suite</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--weights</span></code></td>
+<td>str</td>
+<td>N/A</td>
+<td>Weight file</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--active</span></code></td>
+<td>bool</td>
+<td>False</td>
+<td>Is this a DLARS/DLASSO run from the active learning driver?</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="choosing-solvers">
+<h4>Choosing solvers<a class="headerlink" href="#choosing-solvers" title="Permalink to this headline">¶</a></h4>
+<p>All solvers support regularization (i.e. via <code class="docutils literal notranslate"><span class="pre">--eps</span></code> or <code class="docutils literal notranslate"><span class="pre">--alpha</span></code>), which can aid overfitting mitigation. For LASSO, LASSOLARS, DLARS, and DLASSO solvers, regularization has the added benefit of automatically setting minimally-informative parameters to zero, helping minimize model size and increase efficiency. Note that these zeroed parameters can be scrubbed from the parameter file with <code class="docutils literal notranslate"><span class="pre">post_proc_chimes_lsq.py</span></code>, e.g.:</p>
+<p><strong>[ WE NEED TO UPDATE TO PYTHON3.X]</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python2.x /path/to/repo/src/post_proc_chimes_lsq.py &lt;parameter_file&gt;
+</pre></div>
+</div>
+<p>which produces a new parameter file named <code class="docutils literal notranslate"><span class="pre">&lt;parameter_file&gt;.reduced</span></code>.</p>
+</div>
+<div class="section" id="weighting">
+<h4>Weighting<a class="headerlink" href="#weighting" title="Permalink to this headline">¶</a></h4>
+<p>Weighting is often needed when energies and stresses tensors are included in the fit. Typical respective weighting factors are 0.1 – 5.0 and 200 – 500. Weights can be rapidly generated through:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">wF</span><span class="o">=</span><span class="m">1</span>.0
+<span class="nv">wE</span><span class="o">=</span><span class="m">5</span>.0
+<span class="nv">wS</span><span class="o">=</span><span class="m">250</span>.0
+
+paste b-labeled.txt force.txt <span class="p">|</span> awk -v <span class="nv">wF</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$wF</span><span class="s2">&quot;</span> -v <span class="nv">wE</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$wE</span><span class="s2">&quot;</span> -v <span class="nv">wS</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$wS</span><span class="s2">&quot;</span> <span class="s1">&#39;{if($1==&quot;+1&quot;){print wE}elseif($1~&quot;s_&quot;){print wS}else{print wF}}&#39;</span> &gt; weights.txt
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h4>Tips and tricks<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
-<li>Running the actual fits (supported open source solvers too)</li>
-<li>Heuristics/pro-tips</li>
-<li>Disucssion on weighting</li>
+<li>Weighting and regularization can all impact quality of resulting models, and their values should be considered model hyperparameters and carefully explored for each fitting problem.</li>
+<li>For LARS or LASSO-based solvers, regularization of 1.0e-2 or 1E-5 are reasonable starting points for un-normalized and normalized fits, respectively</li>
+<li>Running <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code> can be memory intensive. Check the size of A.txt relative to the available memory (RAM) on the workhorse machine prior to running.</li>
 </ul>
-<p>Once a ChIMES design matrix has been generated, parameters can be obtained by running <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code>. This script has numerous features, detailed below. Note that this documentation does not cover use with the DLARS or OWLQN codes.</p>
+</div>
+<div class="section" id="checking-fit-quality">
+<h4>Checking fit quality<a class="headerlink" href="#checking-fit-quality" title="Permalink to this headline">¶</a></h4>
+<p>Though it is critical to evaluate model performance on the basis of physical predictions, it can be helpful to evaluate model performance through target force, energy, or stress recovery. This can be easily obtained through:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>paste b-labeled.txt force.txt <span class="p">|</span> awk <span class="s1">&#39;{if($1==&quot;+1&quot;)              {print ($2,$3)}}&#39;</span> &gt; compare-energies.txt
+paste b-labeled.txt force.txt <span class="p">|</span> awk <span class="s1">&#39;{if($1~ &quot;s_&quot;)              {print ($2,$3)}}&#39;</span> &gt; compare-stresses.txt
+paste b-labeled.txt force.txt <span class="p">|</span> awk <span class="s1">&#39;{if(($1!~&quot;+1&quot;)&amp;&amp;($1!=&quot;+1&quot;)){print ($2,$3)}}&#39;</span> &gt; compare-forces.txt
+
+xmgrace compare*txt
+</pre></div>
+</div>
+<p>If optional <code class="docutils literal notranslate"><span class="pre">&lt;F_flag&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;S_flag&gt;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&lt;E_flag&gt;</span></code> flags in <code class="docutils literal notranslate"><span class="pre">traj_list.dat</span></code> yield more information in <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code> from which  selections can be parsed, as can consideration of <code class="docutils literal notranslate"><span class="pre">natoms.txt</span></code>.</p>
 <hr class="docutils" />
+</div>
+</div>
+</div>
+<div class="section" id="common-issues">
+<span id="sec-issues"></span><h2>Common Issues<a class="headerlink" href="#common-issues" title="Permalink to this headline">¶</a></h2>
+<p><strong>My model is requiring SO many iterations to become stable</strong></p>
+<ul>
+<li><p class="first">Have you set reasonable inner cutoffs (i.e. 0.02 to 0.002 less than the smallest observed distance, set individually for each pair type)?</p>
+</li>
+<li><p class="first">Have you remembered to set the penalty parameters (i.e. <span class="math notranslate nohighlight">\(A_{\mathrm{p}}\)</span> from 1.0e5 to 1.0e6, <span class="math notranslate nohighlight">\(d_{\mathrm{p}}\)</span> from 0.01 to 0.05)?</p>
+</li>
+<li><p class="first">Have you tried using a smaller timestep during the early training stages? (e.g., if DFT simulations for a C/H/O/N system used a 0.5 fs timestep)?</p>
+<blockquote>
+<div><ul class="simple">
+<li>ChIMES training simulations should use something closer to 0.1 – 0.2</li>
+<li>Small timesteps allow the ChIMES simulations to remain stable for longer, which can help make iteratively-obtained training data more informative</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p><strong>My model is yielding very bad RDFs/is missing significant RDF features</strong></p>
+<ul class="simple">
+<li>Have you accidentally grabbed only sequential configurations?</li>
+<li>Have you watched your DFT trajectory to make sure the system exhibits significant evolution?<ul>
+<li>For example physical properties of a melted material will generally not be recovered from training to only solid phase data</li>
+</ul>
+</li>
+<li>Have you checked that your actual training trajectory contains those features? For example, you can quickly check by computing your RDFs directly from the training trajectory and checking you peaks in all the expected positions.</li>
+</ul>
+<p><strong>My model just isn’t as good as expected</strong></p>
+<ul>
+<li><p class="first">Are you using an appropriate bodiedness/polynomial order?</p>
+<blockquote>
+<div><ul class="simple">
+<li>Holdout cross-validation on the original training set can give you an idea of what to use.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Are your cutoffs appropriate?</p>
+<blockquote>
+<div><ul class="simple">
+<li>Cutoffs cannot be arbitrarily short (they should encapsulate the relevant physics) <em>or</em> long (they should preclude self-interaction across the training periodic boundary conditions)</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
 </div>
 <div class="section" id="caveats">
 <span id="sec-caveats"></span><h2>Caveats<a class="headerlink" href="#caveats" title="Permalink to this headline">¶</a></h2>
-<p><strong>[THIS SECTION NEEDS TO BE WRITTEN]</strong></p>
 <ul class="simple">
-<li>Caveats (i.e. single atom energy)</li>
+<li>ChIMES models are not inherently transferable - training set generation should be carefully considered prior to model generation</li>
+<li>High-complexity (e.g. bodiedness and polynomial order) models for complex molecular materials (e.g. C-containing) will not generally be stable for dynamics the first time through - in these cases, iterative model fitting is usually required. See <a class="reference external" href="https://doi.org/10.1063/5.0021965">link</a> for additional details.</li>
+<li>ChIMES will attempt to generate single-atom energies - these values <em>cannot</em> be accurately determined unless the training set contains frames with varied atomic composition, otherwise, ChIMES assigns one atom the sum of single-atom energies for each atom type.</li>
 </ul>
 </div>
 </div>
