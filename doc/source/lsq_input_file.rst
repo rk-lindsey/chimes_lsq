@@ -418,7 +418,7 @@ Output files
 
 
 
-Tips and Tricks
+Tips and tricks
 """"""""""""""""""
 
 * Inner cutoffs are typically set to the lowest sampled distance for each given pair type in the training trajectory
@@ -452,26 +452,160 @@ Tips and Tricks
 .. _sec-solving:
 
 Solving for ChIMES parameters
---------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**[THIS SECTION NEEDS TO BE WRITTEN]**
+Once a ChIMES design matrix has been generated, parameters can be obtained by running ``chimes_lsq.py``. Note that this script depends on native `numpy <https://numpy.org>`_ and `scipy <https://www.scipy.org>`_, installations for `python2.x <https://www.python.org>`_ **[THIS NEEDS TO BE UPGRADED TO 3.X]**, and has numerous features, detailed below. If ``chimes_lsq`` was run with ``SPLITFI`` set to ``false`` and no weighting is desired, one can solve for ChIMES parameters using principal component analysis based on the singular value decomposition of the design matrix ("SVD") with default regularizaition (1.0e-05) via:
 
-* Running the actual fits (supported open source solvers too)
-* Heuristics/pro-tips
-* Disucssion on weighting
+**[ WE NEED TO UPDATE TO PYTHON3.X]**
+
+.. code-block:: bash
+    
+    python2.x /path/to/repo/src/chimes_lsq.py > params.txt
+
+however we note that ``chimes_lsq`` supports many other solvers, summarized below:
+
+Supported solvers
+"""""""""""""""""""""""""""""""
+
+Note: Asterisks (*) indicate options described in greater detail below
+
+========== ==============================================  =======================================================
+Method      Additional dependencies                        Related ``chimes_lsq.py`` flags
+========== ==============================================  =======================================================
+SVD         None                                           ``--eps`` ``--weights``
+LASSO       `sklearn <https://scikit-learn.org/stable/>`_  ``--alpha`` ``--normalize`` ``--weights``
+LASSOLARS   `sklearn <https://scikit-learn.org/stable/>`_  ``--alpha`` ``--normalize`` ``--weights``
+DLARS*      DLARS                                          ``--alpha`` ``--normalize`` ``--weights`` (``--dlasso_dlars_path``) ``--nodes`` ``--cores`` ``--read_output`` ``--restart`` ``--split_files``
+DLASSO*     DLARS                                          ``--alpha`` ``--normalize`` ``--weights`` (``--dlasso_dlars_path``) ``--nodes`` ``--cores`` ``--read_output`` ``--restart`` ``--split_files``
+========== ==============================================  =======================================================
+
+Using ``DLARS`` and ``DLASSO``
+"""""""""""""""""""""""""""""""
+
+**special cases.. where will it live?** ... Additional notes 
+
+Options and flags
+"""""""""""""""""""""""""""""""
+
+========================== ===========  ===============  =====================
+Flag                       Option type  Default value    Description
+========================== ===========  ===============  =====================
+``--A``                    str            A.txt           Design matrix 
+``--algorithm``            str            svd             Fitting algorithm (Supported options: svd, lasso, lassolars, dlars, and dlasso)
+``--dlasso_dlars_path``    str            N/A             Path to DLARS/DLASSO solver
+``--alpha``                float          1.0e-04         Lasso or ridge regularization
+``--b``                    str            b.txt           Reference force file
+``--cores``                int            8               DLARS/DLASSO number of cores
+``--eps``                  float          1.0e-05         SVD regularization
+``--header``               str            params.header   Parameter file header
+``--map``                  str            ff_groups.map   Parameter file map
+``--nodes``                int            1               DLARS/DLASSO number of nodes
+``--normalize``            bool           False           Normalize DLARS/DLASSO calculation
+``--read_output``          bool           False           Read output from previous DLARS run
+``--restart_dlasso_dlars`` str            N/A             Determines whether dlasso or dlars job will be restarted. Argument is the restart file name 
+``--split_files``          bool           False           LSQ code has split A matrix output (DLARS/DLASSO)
+``--test_suite``           bool           False           Output for test suite
+``--weights``              str            N/A             Weight file
+``--active``               bool           False           Is this a DLARS/DLASSO run from the active learning driver?
+========================== ===========  ===============  =====================                                        
 
 
-Once a ChIMES design matrix has been generated, parameters can be obtained by running ``chimes_lsq.py``. This script has numerous features, detailed below. Note that this documentation does not cover use with the DLARS or OWLQN codes.
+Choosing solvers
+"""""""""""""""""""""""""""""""
 
+All solvers support regularization (i.e. via ``--eps`` or ``--alpha``), which can aid overfitting mitigation. For LASSO, LASSOLARS, DLARS, and DLASSO solvers, regularization has the added benefit of automatically setting minimally-informative parameters to zero, helping minimize model size and increase efficiency. Note that these zeroed parameters can be scrubbed from the parameter file with ``post_proc_chimes_lsq.py``, e.g.:
+
+**[ WE NEED TO UPDATE TO PYTHON3.X]**
+
+.. code-block:: bash
+
+    python2.x /path/to/repo/src/post_proc_chimes_lsq.py <parameter_file>
+    
+which produces a new parameter file named ``<parameter_file>.reduced``.
+
+
+Weighting
+"""""""""""""""""""""""""""""""
+
+Weighting is often needed when energies and stresses tensors are included in the fit. Typical respective weighting factors are 0.1 – 5.0 and 200 – 500. Weights can be rapidly generated through:
+
+.. code-block:: bash
+
+    wF=1.0
+    wE=5.0
+    wS=250.0
+    
+    paste b-labeled.txt force.txt | awk -v wF="$wF" -v wE="$wE" -v wS="$wS" '{if($1=="+1"){print wE}elseif($1~"s_"){print wS}else{print wF}}' > weights.txt
+
+
+Tips and tricks
+"""""""""""""""""""""""""""""""
+
+* Weighting and regularization can all impact quality of resulting models, and their values should be considered model hyperparameters and carefully explored for each fitting problem. 
+* For LARS or LASSO-based solvers, regularization of 1.0e-2 or 1E-5 are reasonable starting points for un-normalized and normalized fits, respectively
+* Running ``chimes_lsq.py`` can be memory intensive. Check the size of A.txt relative to the available memory (RAM) on the workhorse machine prior to running.
+
+
+Checking fit quality
+"""""""""""""""""""""""""""""""
+
+Though it is critical to evaluate model performance on the basis of physical predictions, it can be helpful to evaluate model performance through target force, energy, or stress recovery. This can be easily obtained through:
+
+.. code-block:: bash
+
+    paste b-labeled.txt force.txt | awk '{if($1=="+1")              {print ($2,$3)}}' > compare-energies.txt
+    paste b-labeled.txt force.txt | awk '{if($1~ "s_")              {print ($2,$3)}}' > compare-stresses.txt
+    paste b-labeled.txt force.txt | awk '{if(($1!~"+1")&&($1!="+1")){print ($2,$3)}}' > compare-forces.txt
+
+    xmgrace compare*txt
+    
+If optional ``<F_flag>``, ``<S_flag>``, and ``<E_flag>`` flags in ``traj_list.dat`` yield more information in ``b-labeled.txt`` from which  selections can be parsed, as can consideration of ``natoms.txt``.
 
 
 -----------------
+
+
+.. _sec-issues:
+
+Common Issues
+--------------------------------------------
+
+
+**My model is requiring SO many iterations to become stable**
+
+* Have you set reasonable inner cutoffs (i.e. 0.02 to 0.002 less than the smallest observed distance, set individually for each pair type)?
+* Have you remembered to set the penalty parameters (i.e. :math:`A_{\mathrm{p}}` from 1.0e5 to 1.0e6, :math:`d_{\mathrm{p}}` from 0.01 to 0.05)?
+* Have you tried using a smaller timestep during the early training stages? (e.g., if DFT simulations for a C/H/O/N system used a 0.5 fs timestep)?
+
+    * ChIMES training simulations should use something closer to 0.1 – 0.2
+    * Small timesteps allow the ChIMES simulations to remain stable for longer, which can help make iteratively-obtained training data more informative
+
+**My model is yielding very bad RDFs/is missing significant RDF features**
+
+* Have you accidentally grabbed only sequential configurations?
+* Have you watched your DFT trajectory to make sure the system exhibits significant evolution? 
+
+  * For example physical properties of a melted material will generally not be recovered from training to only solid phase data
+  
+* Have you checked that your actual training trajectory contains those features? For example, you can quickly check by computing your RDFs directly from the training trajectory and checking you peaks in all the expected positions. 
+
+**My model just isn’t as good as expected**
+
+* Are you using an appropriate bodiedness/polynomial order? 
+
+   * Holdout cross-validation on the original training set can give you an idea of what to use.
+   
+* Are your cutoffs appropriate? 
+
+   * Cutoffs cannot be arbitrarily short (they should encapsulate the relevant physics) *or* long (they should preclude self-interaction across the training periodic boundary conditions)
+
 
 .. _sec-caveats:
 
 Caveats
 --------------------------------------------
 
-**[THIS SECTION NEEDS TO BE WRITTEN]**
+* ChIMES models are not inherently transferable - training set generation should be carefully considered prior to model generation
+* High-complexity (e.g. bodiedness and polynomial order) models for complex molecular materials (e.g. C-containing) will not generally be stable for dynamics the first time through - in these cases, iterative model fitting is usually required. See `link <https://doi.org/10.1063/5.0021965>`_ for additional details. 
+* ChIMES will attempt to generate single-atom energies - these values *cannot* be accurately determined unless the training set contains frames with varied atomic composition, otherwise, ChIMES assigns one atom the sum of single-atom energies for each atom type.
 
-* Caveats (i.e. single atom energy)
