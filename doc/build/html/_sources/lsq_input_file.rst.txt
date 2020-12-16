@@ -461,6 +461,10 @@ Solving for ChIMES parameters
 * Disucssion on weighting
 
 
+Once a ChIMES design matrix has been generated, parameters can be obtained by running ``chimes_lsq.py``. This script has numerous features, detailed below. Note that this documentation does not cover use with the DLARS or OWLQN codes.
+
+
+
 -----------------
 
 .. _sec-caveats:
