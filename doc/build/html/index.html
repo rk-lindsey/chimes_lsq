@@ -84,17 +84,10 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chimes_overview.html">ChIMES Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html">Generating a ChIMES model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#trjfile"><code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#fitcoul"><code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#cbhtyp"><code class="docutils literal notranslate"><span class="pre">CBHTYP</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#exclude"><code class="docutils literal notranslate"><span class="pre">EXCLUDE</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#chgcons"><code class="docutils literal notranslate"><span class="pre">CHGCONS</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#special-xb-minim"><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MINIM</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#special-xb-maxim"><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MAXIM</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#fcuttyp"><code class="docutils literal notranslate"><span class="pre">FCUTTYP</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing the ChIMES Parameter Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="legal.html">Legal</a></li>
 </ul>
 
@@ -164,6 +157,12 @@
   <div class="section" id="chimes-parameter-generator-documentation">
 <h1>ChIMES Parameter Generator Documentation<a class="headerlink" href="#chimes-parameter-generator-documentation" title="Permalink to this headline">¶</a></h1>
 <p><cite>Note: This documentation is under still construction.</cite></p>
+<div class="section" id="to-do">
+<h2>TO DO:<a class="headerlink" href="#to-do" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Add sample input and output files</li>
+</ul>
+<hr class="docutils" />
 <p>The <strong>Ch</strong>ebyshev <strong>I</strong>nteraction <strong>M</strong>odel for <strong>E</strong>fficient <strong>S</strong>imulation (ChIMES) is a machine-learned interatomic potential targeting chemistry in condensed phase systems. ChIMES models are able to approach quantum-accuracy through a systamtically improvable explicitly many-bodied basis comprised of linear combinations of Chebyshev polynomials. Though originally developed to enable description of organic molecular materials, ChIMES has successfuly been applied to systems spanning ambient water to molten carbon, and leveraged as correction for density functional based tight binding simulations.</p>
 <p>The ChIMES least squares (chimes_lsq) utility facilitates generates of ChIMES parameter sets from reference data, and can be used for particle-based simulations and single point calculations through using the <a class="reference external" href="https://doi.org/10.1021/acs.jctc.7b00867">ChIMES Calculator</a>.</p>
 <p>The ChIMES Calculator is developed at Lawrence Livermore National Laboratory with funding from the US Department of Energy (DOE), and is open source, distributed freely under the terms of the (specify) License.</p>
@@ -171,17 +170,10 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chimes_overview.html">ChIMES Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html">Generating a ChIMES model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#trjfile"><code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#fitcoul"><code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#cbhtyp"><code class="docutils literal notranslate"><span class="pre">CBHTYP</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#exclude"><code class="docutils literal notranslate"><span class="pre">EXCLUDE</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#chgcons"><code class="docutils literal notranslate"><span class="pre">CHGCONS</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#special-xb-minim"><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MINIM</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#special-xb-maxim"><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MAXIM</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html#fcuttyp"><code class="docutils literal notranslate"><span class="pre">FCUTTYP</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
-<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing the ChIMES Parameter Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="legal.html">Legal</a></li>
 </ul>
 </div>
@@ -201,6 +193,7 @@ States Government or Lawrence Livermore National Security, LLC. The views and
 opinions of authors expressed herein do not necessarily state or reflect those
 of the United States Government or Lawrence Livermore National Security, LLC,
 and shall not be used for advertising or product endorsement purposes.</p>
+</div>
 </div>
 
 

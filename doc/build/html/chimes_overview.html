@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ChIMES Overview &mdash; chimes_lsq 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Generating a ChIMES model" href="lsq_input_file.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> chimes_lsq
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ChIMES Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-chimes-equations">The ChIMES equations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#chimes-energy">ChIMES energy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chimes-atom-cluster-energies">ChIMES atom cluster energies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-chimes-penalty-function">The ChIMES penalty function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chimes-smoothing-functions">ChIMES smoothing functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-cubic-cutoff-function">The cubic cutoff function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-tersoff-cutoff-function">The Tersoff cutoff function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#on-permutational-invariance">On permutational invariance</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html">Generating a ChIMES model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">Legal</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">chimes_lsq</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>ChIMES Overview</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/chimes_overview.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="chimes-overview">
+<span id="page-overview"></span><h1>ChIMES Overview<a class="headerlink" href="#chimes-overview" title="Permalink to this headline">¶</a></h1>
+<p>This page provides an overview of key ChIMES equations. For further details, see the complete set of ChIMES references available at <a class="reference internal" href="citing.html#page-citing"><span class="std std-ref">Citing ChIMES</span></a>.</p>
+<div class="section" id="the-chimes-equations">
+<h2>The ChIMES equations<a class="headerlink" href="#the-chimes-equations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="chimes-energy">
+<h3>ChIMES energy<a class="headerlink" href="#chimes-energy" title="Permalink to this headline">¶</a></h3>
+<p>ChIMES is a reactive explicitly many-bodied machine learned interatomic potential (ML-IAP) for which interactions are
+computed on the basis of atom clusters. For example, the total ChIMES energy is given as:</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+   E_{n_\mathrm{B}}
+   = \sum_{i_1}        ^{n_a} {}^{1}\!E_{i_1}
+   + \sum_{i_1&gt;i_2}    ^{n_a} {}^{2}\!E_{i_1i_2}
+   + \sum_{i_1&gt;i_2&gt;i_3}^{n_a} {}^{3}\!E_{i_1i_2i_3}
+   + \dots
+   + \sum_{i_1&gt;i_2\dots &gt;i_{n\mathrm{B}-1}&gt;i_{n\mathrm{B}}}^{n_a} {}^{n}\!E_{i_1i_2\dots i_n}
+
+\end{eqnarray}</div><p>where <span class="math notranslate nohighlight">\(E_{n_\mathrm{B}}\)</span> is the total ChIMES system energy, <span class="math notranslate nohighlight">\(n_{\mathrm{B}}\)</span> is the maximum bodiedness,
+<span class="math notranslate nohighlight">\({}^{n}\!E_{i_1i_2\dots i_n}\)</span> is the <span class="math notranslate nohighlight">\(n\)</span>-body ChIMES energy for
+a given set of <span class="math notranslate nohighlight">\(n\)</span> atoms with indices <span class="math notranslate nohighlight">\(i = {i_1, i_2, \dots , i_n}\)</span>, and <span class="math notranslate nohighlight">\(n_a\)</span> is the total number of atoms in the system. In the
+ChIMES framework, single-body energies are constant values and <span class="math notranslate nohighlight">\(n\)</span>-body energies are constructed from the product of
+polynomials of transformed atom pair distances. Thus, a 2-body interaction would involve a single pair, <span class="math notranslate nohighlight">\(ij\)</span>, while a
+three-body interaction would involve three pairs, <span class="math notranslate nohighlight">\(ij, ik,\)</span> and <span class="math notranslate nohighlight">\(jk\)</span>, a 4-body interaction would involve <span class="math notranslate nohighlight">\(4\choose 2\)</span> pairs,
+and so on. Currently, the ChIMES parameter generator supports up to 4-body interactions.</p>
+</div>
+<div class="section" id="chimes-atom-cluster-energies">
+<h3>ChIMES atom cluster energies<a class="headerlink" href="#chimes-atom-cluster-energies" title="Permalink to this headline">¶</a></h3>
+<p>Taking a 3-body interaction as an example, we define the following: <span class="math notranslate nohighlight">\(\mathbf{A}=\{i,j,k\}\)</span> is th eindex over atoms within an atom interaction cluster, with the corresponding set of pairs given by <span class="math notranslate nohighlight">\(\mathbf{P}=\{ij,ik,jk\}\)</span>, thier element pair types by <span class="math notranslate nohighlight">\(\mathbf{E}=\{e_ie_j, e_ie_k, e_je_k\}\)</span>, and the polynomial order for each pair given by <span class="math notranslate nohighlight">\(\mathbf{O}=\{\alpha , \beta , \gamma\}\)</span>. Two mapping functions are used to relate pair indices <span class="math notranslate nohighlight">\(\mathbf{P}\)</span> to the three aforementioned pair properties: <span class="math notranslate nohighlight">\(m_1 = \mathbf{P}\to \mathbf{E}\)</span> and <span class="math notranslate nohighlight">\(m_2 = \mathbf{P}\to \mathbf{O}\)</span>, where an index <span class="math notranslate nohighlight">\(y\)</span> refers to a particular component of <span class="math notranslate nohighlight">\(\mathbf{P}\)</span>, defining an interaction pair.</p>
+<p>Using these definitions, the generalized ChIMES energy for a cluster of <span class="math notranslate nohighlight">\(n\)</span> atoms is written:</p>
+<div class="math notranslate nohighlight">
+\begin{equation}
+^{n}\!E = \prod _{y \in \mathbf{P}} f_s^{m_1(y)} (r_y)    \times \sum_{\mathbf{O}}^{\mathcal{O}^*}c_{\mathbf{O}}^{\mathbf{E}} \prod _{y \in \mathbf{P}} T_{m_2(y)}(s_y^{m_1(y)}),
+
+\end{equation}</div><p>where the <span class="math notranslate nohighlight">\(\sum_{\mathbf{O}}\)</span> notation indicates a multiple sum for which there are <span class="math notranslate nohighlight">\(\binom{n}{2}\)</span> distinct indices, <span class="math notranslate nohighlight">\(\mathcal{O}^*\)</span> is the maximum polynomial order for a <span class="math notranslate nohighlight">\(n\)</span>-body interaction, and the asterisk indicates a sufficient number of non-zero terms exist that the graph formed by the edges of interacting atoms connects all <span class="math notranslate nohighlight">\(n\)</span> atoms, which guarantees a true <span class="math notranslate nohighlight">\(n\)</span>-body interaction. <span class="math notranslate nohighlight">\(T_{m_2(y)}(s_y^{m_1(y)})\)</span> is a Chebyshev polynomial of order <span class="math notranslate nohighlight">\(m_2(y)\)</span> that depends on pair distance <span class="math notranslate nohighlight">\(s_y^{m_1(y)}\)</span> for pair <span class="math notranslate nohighlight">\(y\)</span> of atom types <span class="math notranslate nohighlight">\(m_1(y)\)</span> that has been transformed from <span class="math notranslate nohighlight">\(r_y\)</span> to ensure it existis in the [-1,1] domain over which Chebyshev polynomials are defined, and <span class="math notranslate nohighlight">\(f_s^{m_1(y)} (r_y)\)</span> is a cutoff function that ensures smooth behavior at the outer cutoff.</p>
+<p>Using the above definition of <span class="math notranslate nohighlight">\(^{n}\!E\)</span> on arrives at the following for a two-body interaction:</p>
+<div class="math notranslate nohighlight">
+\begin{equation}
+^{2}\!E = f_s^{e_ie_j} (r_{ij}) \sum_{\alpha = 1} ^{\mathcal{O}_{2B}} c_{\alpha}^{e_ie_j} T_{\alpha}(s_{ij}^{e_ie_j}).
+
+\end{equation}</div><p>Note that an additional penalty term, <span class="math notranslate nohighlight">\(f_p^{e_ie_j}\)</span> is added to each two-body interaction, described in greater detail below.</p>
+<p>For a higher-body interaction, e.g. between three atoms, one obtains the following:</p>
+<div class="math notranslate nohighlight">
+\begin{equation}
+^{3}\!E  = f_s^{e_ie_j}(r_{ij})f_s^{e_ie_k}(r_{ik})f_s^{e_je_k}(r_{jk})  \sum_{\alpha = 1} ^{\mathcal{O}_{3B}} \sum_{\beta  = 1} ^{\mathcal{O}_{3B}} \sum_{\gamma = 1} ^{\mathcal{O}_{3B}}   c_{\alpha , \beta , \gamma}^{\mathbf{E}} T_{\alpha}(s_{ij}^{e_ie_j})  T_{\beta }(s_{ik}^{e_ie_k}) T_{\gamma}(s_{jk}^{e_je_k}).
+
+\end{equation}</div></div>
+<div class="section" id="the-chimes-penalty-function">
+<h3>The ChIMES penalty function<a class="headerlink" href="#the-chimes-penalty-function" title="Permalink to this headline">¶</a></h3>
+<p>Two-body ChIMES interactions include an additional penalty function, which prevents spurious close contacts and discrourages sampling of interatomic distances smaller that model inner cutoffs (i.e. where the Chebyshev polynomials are undefined). The penalty function takes on the following form:</p>
+<div class="math notranslate nohighlight">
+\begin{equation}
+f_p^{m_1(y)} (r_y) =
+\begin{cases}
+A_{\mathrm{p}}^{m_1(y)}(r_{\mathrm{c,in}}^{m_1(y)}+d^{m_1(y)}_{\mathrm{p}} -r_y)^3,&amp; \text{if } r_y &lt; r_{\mathrm{c,in}}^{m_1(y)}+d^{m_1(y)}_{\mathrm{p}}\\
+0,              &amp; \text{otherwise}
+\end{cases}
+\end{equation}</div><p>where <span class="math notranslate nohighlight">\(r_{\mathrm{c,in}}\)</span>, <span class="math notranslate nohighlight">\(A_{\mathrm{p}}\)</span>, and <span class="math notranslate nohighlight">\(d^{m_1(y)}_{\mathrm{p}}\)</span> are inner cutoffs, penalty prefactors, and penalty initation distances, respectively. Note that optimal choice of <span class="math notranslate nohighlight">\(A_{\mathrm{p}}\)</span>, and <span class="math notranslate nohighlight">\(d^{m_1(y)}_{\mathrm{p}}\)</span> will depend on target conditions and model quality, but respective values of <span class="math notranslate nohighlight">\(10^5\)</span> kcal/(mol Å <span class="math notranslate nohighlight">\(^3\)</span>) and 0.01 Å are generally reasonable initial values.</p>
+</div>
+<div class="section" id="chimes-smoothing-functions">
+<h3>ChIMES smoothing functions<a class="headerlink" href="#chimes-smoothing-functions" title="Permalink to this headline">¶</a></h3>
+<p>ChIMES models include smoothing functions for each constituent pair interaction, ensuring smoothness as outer cutoffs, <span class="math notranslate nohighlight">\(r_{\mathrm{c,out}}^{m_1(y)}\)</span> are approached. Currently, two smoothing function forms are supported, “cubic” and “Tersoff”. The former has been shown to work reasonably well for models including up to 3-body interactions, but the Tersoff form is best for models including higher-bodied interactions since it can be tuned to minimzed the smoothing function cutoff on the overall interactions (see <strong>[papers]</strong> for further details).</p>
+<div class="section" id="the-cubic-cutoff-function">
+<h4>The cubic cutoff function<a class="headerlink" href="#the-cubic-cutoff-function" title="Permalink to this headline">¶</a></h4>
+<p>The cubic cutoff function is given by:</p>
+<div class="math notranslate nohighlight">
+  \begin{equation}
+ f_s^{m_1(y)} (r_y) =  \left( 1- \frac{r_y}{r_{\mathrm{c,out}}^{m_1(y)}} \right)^3.
+ \end{equation}</div></div>
+<div class="section" id="the-tersoff-cutoff-function">
+<h4>The Tersoff cutoff function<a class="headerlink" href="#the-tersoff-cutoff-function" title="Permalink to this headline">¶</a></h4>
+<p>The Tersoff cutoff function takes the form:</p>
+<div class="math notranslate nohighlight">
+\begin{equation}
+f_s^{m_1(y)} (r_y) =
+\begin{cases}
+0, &amp; \text{if } r_y &gt; r_{\mathrm{c,out}}^{m_1(y)} \\
+1, &amp; \text{if } r_y &lt; d_{\mathrm{t}} \\
+\frac{1}{2}+\frac{1}{2}\sin\left( \pi \left[ \frac{r_y-d_{\mathrm{t}}}{r_{\mathrm{c,out}}^{m_1(y)} - d_{\mathrm{t}} } \right] + \frac{\pi}{2} \right), &amp; \text{otherwise}
+\end{cases}
+\end{equation}</div><p>where <span class="math notranslate nohighlight">\(d_{\mathrm{t}}\)</span> is the threshold distance, given by <span class="math notranslate nohighlight">\(d_{\mathrm{t}} = r_{\mathrm{c,out}}^{m_1(y)}(1-f_\mathrm{O})\)</span>, and <span class="math notranslate nohighlight">\(f_\mathrm{O}\)</span> is a value in [0,1] generally taken to be 0.5 to 0.75. This form exhibits a smooth step, allowing <span class="math notranslate nohighlight">\(^{n}\!E\)</span> to remain unmodified by the smoothing function for all <span class="math notranslate nohighlight">\(r_{m_1(y)}&lt;d_{\mathrm{t}}\)</span>, which is particularly useful for many-body interactions of large <span class="math notranslate nohighlight">\(n\)</span>, where the product of <span class="math notranslate nohighlight">\(\binom{n}{2}f_s^{m_1(y)}(r_y)\)</span> factors is used, and can otherwise severely reduce <span class="math notranslate nohighlight">\(^{n}\!E\)</span> contributions to the total energy.</p>
+</div>
+</div>
+<div class="section" id="on-permutational-invariance">
+<h3>On permutational invariance<a class="headerlink" href="#on-permutational-invariance" title="Permalink to this headline">¶</a></h3>
+<p>ChIMES explicitly enforces permuational invariance.</p>
+<p>In particular, we require <span class="math notranslate nohighlight">\(^n\!E_A = ^n\!E\Pi _A\)</span>, where <span class="math notranslate nohighlight">\(\Pi\)</span> is a permutation operator acting on the <span class="math notranslate nohighlight">\(n\)</span> atoms in the cluster. This leads to equality conditions among the coefficients, i.e. <span class="math notranslate nohighlight">\(c_\mathbf{O}^\mathbf{E} =  c_{\prod \mathbf{O}}^{\prod \mathbf{E}}\)</span>. As an example, for a 4-body interaction, we have:</p>
+<div class="math notranslate nohighlight">
+\begin{equation}
+ c_{\alpha \beta \gamma \delta \epsilon \zeta}^{e_ie_j,e_ie_k,e_ie_l,e_je_k,e_je_l,e_ke_l} = c_{\alpha \delta \epsilon \beta \gamma \zeta}^{e_je_i,e_je_k,e_je_l,e_ie_k,e_ie_l,e_ke_l},
+ \end{equation}</div><p>which is derived by permuting atoms <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span>. We note that in ChIMES, permutational invariance is enforced by treating permutationally related coefficients as the same unique fitting variable.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="lsq_input_file.html" class="btn btn-neutral float-right" title="Generating a ChIMES model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Rebecca K. Lindsey, Nir Goldman, &amp; Laurence E. Fried
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

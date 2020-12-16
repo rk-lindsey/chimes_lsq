@@ -1,6 +1,6 @@
 .. _page-citing:
 
-Citing the ChIMES Parameter Generator
+Citing
 =============================================
 
 - :ref:`Reference Key for ChIMES Methods         <sec-methods>`
