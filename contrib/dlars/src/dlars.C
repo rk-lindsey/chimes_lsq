@@ -231,7 +231,7 @@ int main(int argc, char **argv)
 		
 		ifstream weight_stream(weight_file) ;
 		if ( ! weight_stream.is_open() ) {
-			if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
+			if ( RANK == 0 ) cout << "Could not open " << weight_file << endl ;
 			stop_run(1) ;
 		}
 		weights.read(weight_stream, ndata) ;
