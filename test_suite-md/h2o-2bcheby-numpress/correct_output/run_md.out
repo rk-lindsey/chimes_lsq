@@ -18,11 +18,18 @@ Input file contents successfully stored.
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: NUMERICAL
 	# WRPCRDS #: false
+	# ATMENER #: 0
+		... All reported energies *DO NOT* include single atom contributions
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
 		... printing       50 frames. 
+	# TRAJEXT #: GEN
 	# FRQENER #: 10
 	# PRNTFRC #: false
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: false
+	# FORDFTB #: false
 Setting up the data objects...
    ...setup complete
 
@@ -400,7 +407,10 @@ END SIMULATION
 	Average temperature over run = 1996.7288 K
 	Average pressure    over run = 11.8552 GPa
 	Pressures from diagonal stress tensors over run: 11.8552
-	Average diagonal stress tensors over run: 
+	Average stress tensors over run: 
 		sigma_xx: 13.1763 GPa
 		sigma_yy: 10.6583 GPa
 		sigma_zz: 11.7309 GPa
+		sigma_xy: 4.4250 GPa
+		sigma_xz: 4.8214 GPa
+		sigma_yz: 3.7477 GPa

@@ -42,20 +42,17 @@ cd ../test_suite-lsq
 #
 ###############################################################
 
-if [ $# -eq 0 ] 
-# Use default JOBS.  
-then
-#  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
+if [ $# -eq 0 ] ; then # Use default JOBS.  
+	#  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
 	 JOBS=$LSQ_ALL_JOBS
 	 MAKE_JOBS=$LSQ_MAKE_JOBS
-else
-# Take JOBS from command line.
+else  # Take JOBS from command line.
 	 JOBS=$1
 	 MAKE_JOBS=$2
 fi
 
 echo ""
-echo "SETTING UP FOR SPLINES_LS..."
+echo "SETTING UP FOR CHIMES_LS..."
 
 if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
 	 RUN_JOB=""
@@ -73,6 +70,9 @@ do
 
 	cd $i
 
+	if [ ! -d current_output ] ; then mkdir current_output ; fi
+	if [ ! -d correct_output ] ; then mkdir correct_output ; fi
+
 	if $RUN_JOB ../chimes_lsq fm_setup.in > fm_setup.out ; then
 		 echo "Chimes_lsq succeeded"
 		 SUCCESS=1
@@ -88,6 +88,7 @@ do
 	
 	cd ..
 done
+
 
 
 ###############################################################

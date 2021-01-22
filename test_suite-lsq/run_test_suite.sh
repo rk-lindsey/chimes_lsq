@@ -19,6 +19,8 @@ if [ $# -eq 0 ]
 then
 	 JOBS=$LSQ_ALL_JOBS
 	 MAKE_JOBS=$LSQ_MAKE_JOBS
+	 
+	 echo "here" 
 else
 	 JOBS=$1
 	 MAKE_JOBS=$2
@@ -47,12 +49,12 @@ cd ../test_suite-lsq
 
 ###############################################################
 #
-#  Run the tests for the splines_ls program
+#  Run the tests for the chimes_lsq program
 #
 ###############################################################
 
 echo ""
-echo "VALIDATING FOR SPLINES_LS..."
+echo "VALIDATING FOR CHIMES_LSQ..."
 
 SET_PASSED=true
 SVD_PASSED=true
@@ -67,15 +69,20 @@ do
 		  
 	 PASS=true
 
+	 
+	 if [[ ! -d $i/current_output ]] ; then
+		  mkdir $i/current_output
+	 fi
+
 	 cd $i
 	 rm -rf A.txt b.txt params.header diff-* b-labeled.txt 
 	
 
-	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		 if ../chimes_lsq fm_setup.in > fm_setup.out ; then
-			  echo 'Chimes_lsq succeeded'
-			  SUCCESS=1
-		 else
+	 if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
+		  if ../chimes_lsq fm_setup.in > fm_setup.out ; then
+				echo 'Chimes_lsq succeeded'
+				SUCCESS=1
+		  else
 			  echo 'Chimes_lsq failed'
 			  SUCCESS=0
 		 fi
@@ -90,7 +97,7 @@ do
 			  ALL_PASSED=false
 		 fi
 	fi
-	
+
 	rm -f current_output/*
 
 	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output	
@@ -140,7 +147,7 @@ done
 #
 ###############################################################
 
-echo "VALIDATING FOR SVD SCRIPT..."
+echo "VALIDATING FOR SVD SCRIPT ..."
 
 for i in $JOBS
 do
@@ -238,10 +245,19 @@ done
 echo "Running Makefile jobs"
 
 for job in $MAKE_JOBS ; do
+
 	 if ! test_dir $i ; then
 		  continue 
 	 fi
+	 
+	 if [[ $job == "lsq2" ]] ; then
+	 	cd ../contrib/owlqn/source/
+	 	make
+	 	cd - 
+         fi
+	 
 	 cd $job
+	 
 	 if make all ; then
 		  echo "$job succeeded"
 	 else
@@ -262,6 +278,7 @@ elif [ "$SET_PASSED" = false ] ; then
 	echo "TEST(S) FAILED FOR SETUP SCRIPT"
 else
 	echo "ERROR: BAD LOGIC IN TEST SUITE DRIVER (THIS SCRIPT)"
+	echo "ALL/SVD PASSED: $ALL_PASSED $SVD_PASSEDs" 
 fi
 	
 exit 0
