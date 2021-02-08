@@ -64,6 +64,8 @@ Options:
                         The starting row of the 1st dimension file must be 0.
                         
    --weights=<file>     Give the name of a file with weights for each row of the A matrix, and value of b.
+	--con_grad           Use conjugate gradient algorithm instead of Cholesky decomposition to solve equations.  (experimental)
+	--precondition       Use a preconditioning matrix in conjugate gradient solves (experimental)
    --help               Print a list of supported options.
 
 

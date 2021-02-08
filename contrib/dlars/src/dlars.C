@@ -87,6 +87,8 @@ int main(int argc, char **argv)
 		{"lambda", required_argument, 0, 'l'},
 		{"max_norm", required_argument, 0, 'm'},
 		{"normalize", required_argument, 0, 'n'},
+		{"con_grad", no_argument, 0, 'c'},
+		{"precondition", no_argument, 0, 'p'},
 		{"restart", required_argument, 0, 'r'},
 		{"split_files", no_argument, 0, 's'},
 		{"weights", required_argument, 0, 'w'},
@@ -102,6 +104,8 @@ int main(int argc, char **argv)
 	string algorithm("lasso") ;       // Algorithm to use: lasso or lars
 	bool split_files = false ;        // Read input matrix from split files ?
 	bool normalize=true ;             // Whether to normalize the X matrix.
+	bool con_grad = false ;           // Whether to use congugate gradient algorithm to solve linear equations.
+	bool use_precondition = false ;
 	
 	// Stopping criteria.  Default is to calculate all possible solutions.
 	
@@ -113,7 +117,8 @@ int main(int argc, char **argv)
 	string restart_file ;
 
 	while (1) {
-		opt_type = getopt_long(argc, argv, "a:i:l:m:n:r:sh", long_options, &option_index) ;
+		// Colons in string indicate required arguments.
+		opt_type = getopt_long(argc, argv, "a:i:l:m:n:cpr:sw:h", long_options, &option_index) ;
 		if ( opt_type == -1 ) break ;
 		switch ( opt_type ) {
 		case 'a':
@@ -138,19 +143,27 @@ int main(int argc, char **argv)
 				stop_run(1) ;
 			}
 			break ;
+		case 'p':
+			use_precondition = true ;
+			break ;
+		case 'c':
+			con_grad = true ;
+			break ;
 		case 'r':
 			restart_file = string(optarg) ;
 			break ;
 		case 's':
 			split_files = true ;
 			break ;
-		case 'h':
-			display_usage(long_options) ;
-			stop_run(0) ;
 		case 'w':
 			weight_file=string(optarg) ;
 			break ;
+		case 'h':
+			// Help !
+			display_usage(long_options) ;
+			stop_run(0) ;
 		default:
+			if ( RANK == 0 ) cout << "Unrecognized option: " << (char) opt_type << endl ;
 			abort() ;
 		}
 	}
@@ -289,6 +302,9 @@ int main(int argc, char **argv)
 		}
 	}
 
+	lars.solve_con_grad = con_grad ;
+	lars.use_precondition = use_precondition ;
+	
 	Vector last_beta(nprops) ; // Last good coefficients
 
 	double last_obj_func = 1.0e50 ;
