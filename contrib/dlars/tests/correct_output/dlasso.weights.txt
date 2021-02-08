@@ -1,10 +1,18 @@
 Distributed LARS algorithm
+ ...options read.
+ ...reading single xmat.
+ ...xmat read.
+ ...yvec read.
+ ...weights read.
+ ...xmat normalized.
+ ...yvec normalized.
 Using the LASSO algorithm
 L1 norm of solution: 0.000000000000e+00 RMS Error: 1.142529901917e+00 Objective fn: 6.526872883871e-01 Number of vars: 0
 Adding property 1 to the active set
 New active set: 
 0 1
 Cholesky error test = 0.000000000000e+00
+Time solving equations = 1.710800000000e-05
 Updated step gamma = 2.800004870890e-01
 Gamma limited by property 4
 Lasso step gamma limit = 1.000000000000e+20
@@ -13,12 +21,14 @@ Beta:
 1 -2.800004870890e-01
 ]
 Finished iteration 1
+Time for iteration 0 = 3.202350000000e-03 seconds 
 L1 norm of solution: 2.800004870890e-01 RMS Error: 1.099904656634e+00 Objective fn: 6.048951268424e-01 Number of vars: 1
 Adding property 4 to the active set
 New active set: 
 0 1
 1 4
 Cholesky error test = 0.000000000000e+00
+Time solving equations = 6.058000000000e-06
 Updated step gamma = 9.885358373738e-01
 Gamma limited by property 2
 Lasso step gamma limit = 1.000000000000e+20
@@ -28,6 +38,7 @@ Beta:
 4 5.805219739321e-01
 ]
 Finished iteration 2
+Time for iteration 1 = 3.344204000000e-03 seconds 
 L1 norm of solution: 1.441044434953e+00 RMS Error: 9.714277994833e-01 Objective fn: 4.718359848044e-01 Number of vars: 2
 Adding property 2 to the active set
 New active set: 
@@ -35,6 +46,7 @@ New active set:
 1 4
 2 2
 Cholesky error test = 0.000000000000e+00
+Time solving equations = 3.603500000000e-05
 Updated step gamma = 2.674895024445e-01
 Gamma limited by property 0
 Lasso step gamma limit = 1.000000000000e+20
@@ -45,6 +57,7 @@ Beta:
 4 6.836157292773e-01
 ]
 Finished iteration 3
+Time for iteration 2 = 2.346396000000e-03 seconds 
 L1 norm of solution: 2.327474106383e+00 RMS Error: 9.067850635785e-01 Objective fn: 4.111295757645e-01 Number of vars: 3
 Adding property 0 to the active set
 New active set: 
@@ -53,6 +66,7 @@ New active set:
 2 2
 3 0
 Cholesky error test = 2.775557561563e-16
+Time solving equations = 1.044700000000e-05
 Updated step gamma = 2.135025974548e+00
 Gamma limited by property 3
 Lasso step gamma limit = 1.000000000000e+20
@@ -64,6 +78,7 @@ Beta:
 4 1.383624592618e+00
 ]
 Finished iteration 4
+Time for iteration 3 = 2.347434000000e-03 seconds 
 L1 norm of solution: 9.935544460001e+00 RMS Error: 5.453792073004e-01 Objective fn: 1.487192398778e-01 Number of vars: 4
 Adding property 3 to the active set
 New active set: 
@@ -73,6 +88,7 @@ New active set:
 3 0
 4 3
 Cholesky error test = 3.996802888651e-16
+Time solving equations = 1.344400000000e-05
 Updated step gamma = 2.350813765982e-01
 Lasso step gamma limit = 8.334792315756e-01
 Beta: 
@@ -84,6 +100,7 @@ Beta:
 4 1.794046299509e+00
 ]
 Finished iteration 5
+Time for iteration 4 = 2.498619000000e-03 seconds 
 Stopping: no more iterations possible
 Final values:
 Beta: 

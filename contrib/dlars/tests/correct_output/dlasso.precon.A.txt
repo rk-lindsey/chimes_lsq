@@ -13,7 +13,7 @@ New active set:
  Iter = 1 Error = 0.000000000000e+00 Func = -5.000000000000e-01 Step = 1.000000000000e+00
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 0.000000000000e+00
-Time solving equations = 3.428800000000e-05
+Time solving equations = 3.491000000000e-05
 Updated step gamma = 3.241707654294e+02
 Gamma limited by property 23
 Lasso step gamma limit = 1.000000000000e+20
@@ -22,7 +22,7 @@ Beta:
 18 3.241707654294e+02
 ]
 Finished iteration 1
-Time for iteration 0 = 4.864789000000e-03 seconds 
+Time for iteration 0 = 3.495707000000e-02 seconds 
 L1 norm of solution: 3.241707654294e+02 RMS Error: 3.261126051416e+01 Objective fn: 5.317471561612e+02 Number of vars: 1
 Adding property 23 to the active set
 New active set: 
@@ -32,7 +32,7 @@ New active set:
  Iter = 2 Error = 3.510833468577e-16 Func = -1.100048932774e+00 Step = 8.487545523437e-01
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 3.330669073875e-16
-Time solving equations = 2.162000000000e-05
+Time solving equations = 2.315700000000e-05
 Updated step gamma = 1.918647928756e+03
 Gamma limited by property 21
 Lasso step gamma limit = 1.000000000000e+20
@@ -42,7 +42,7 @@ Beta:
 23 1.422939034847e+03
 ]
 Finished iteration 2
-Time for iteration 1 = 4.169078000000e-03 seconds 
+Time for iteration 1 = 2.534144800000e-02 seconds 
 L1 norm of solution: 3.170048835124e+03 RMS Error: 2.457427966321e+01 Objective fn: 3.019476104829e+02 Number of vars: 2
 Adding property 21 to the active set
 New active set: 
@@ -54,7 +54,7 @@ New active set:
  Iter = 3 Error = 1.392817216109e-12 Func = -1.190025737281e+00 Step = 6.177682241682e-01
 pre_con_grad succeeded in 3 iterations
 Cholesky error test = 6.756817327869e-13
-Time solving equations = 4.394600000000e-05
+Time solving equations = 2.694400000000e-05
 Updated step gamma = 3.572295379826e+02
 Gamma limited by property 3
 Lasso step gamma limit = 1.000000000000e+20
@@ -65,7 +65,7 @@ Beta:
 23 1.669973005112e+03
 ]
 Finished iteration 3
-Time for iteration 2 = 3.241414000000e-03 seconds 
+Time for iteration 2 = 4.128925600000e-02 seconds 
 L1 norm of solution: 3.721161684459e+03 RMS Error: 2.333171409753e+01 Objective fn: 2.721844413644e+02 Number of vars: 3
 Adding property 3 to the active set
 New active set: 
@@ -79,7 +79,7 @@ New active set:
  Iter = 4 Error = 1.650207019775e-11 Func = -1.884017229079e+00 Step = 1.247102621740e+00
 pre_con_grad succeeded in 4 iterations
 Cholesky error test = 6.497663518346e-12
-Time solving equations = 4.363200000000e-05
+Time solving equations = 3.069800000000e-05
 Updated step gamma = 1.340051221411e+03
 Gamma limited by property 8
 Lasso step gamma limit = 1.000000000000e+20
@@ -91,7 +91,7 @@ Beta:
 23 2.461463182435e+03
 ]
 Finished iteration 4
-Time for iteration 3 = 3.334321000000e-03 seconds 
+Time for iteration 3 = 3.354716300000e-02 seconds 
 L1 norm of solution: 6.322392149797e+03 RMS Error: 1.864157420960e+01 Objective fn: 1.737541445060e+02 Number of vars: 4
 Adding property 8 to the active set
 New active set: 
@@ -107,7 +107,7 @@ New active set:
  Iter = 5 Error = 1.169996074628e-07 Func = -2.594274965148e+00 Step = 1.441190827001e+00
 pre_con_grad succeeded in 5 iterations
 Cholesky error test = 4.482051061405e-08
-Time solving equations = 4.743100000000e-05
+Time solving equations = 3.416300000000e-05
 Updated step gamma = 3.902350815464e+02
 Gamma limited by property 20
 Lasso step gamma limit = 1.000000000000e+20
@@ -120,7 +120,7 @@ Beta:
 23 2.597737656335e+03
 ]
 Finished iteration 5
-Time for iteration 4 = 3.142309000000e-03 seconds 
+Time for iteration 4 = 3.368483300000e-02 seconds 
 L1 norm of solution: 7.211284793624e+03 RMS Error: 1.752422226812e+01 Objective fn: 1.535491830512e+02 Number of vars: 5
 Adding property 20 to the active set
 New active set: 
@@ -140,7 +140,7 @@ New active set:
  Iter = 8 Error = 1.982814261391e-11 Func = -3.319237142932e+00 Step = 7.485777438799e-06
 pre_con_grad succeeded in 8 iterations
 Cholesky error test = 6.820840188955e-12
-Time solving equations = 4.270500000000e-05
+Time solving equations = 4.593300000000e-05
 Updated step gamma = 4.953860965987e+01
 Gamma limited by property 6
 Lasso step gamma limit = 4.417804648517e+03
@@ -154,7 +154,7 @@ Beta:
 23 2.568608185479e+03
 ]
 Finished iteration 6
-Time for iteration 5 = 3.187350000000e-03 seconds 
+Time for iteration 5 = 3.367945800000e-02 seconds 
 L1 norm of solution: 7.338922194605e+03 RMS Error: 1.738242744573e+01 Objective fn: 1.510743919530e+02 Number of vars: 6
 Adding property 6 to the active set
 New active set: 
@@ -177,7 +177,7 @@ New active set:
  Iter = 10 Error = 2.648880533111e-10 Func = -3.464018763136e+00 Step = 2.780181148883e-05
 pre_con_grad succeeded in 10 iterations
 Cholesky error test = 7.525234403870e-11
-Time solving equations = 4.974100000000e-05
+Time solving equations = 5.016000000000e-05
 Updated step gamma = 1.399019224940e+02
 Gamma limited by property 1
 Lasso step gamma limit = 4.019079903454e+03
@@ -192,7 +192,7 @@ Beta:
 23 2.479196371852e+03
 ]
 Finished iteration 7
-Time for iteration 6 = 3.307801000000e-03 seconds 
+Time for iteration 6 = 3.378215500000e-02 seconds 
 L1 norm of solution: 7.707160360011e+03 RMS Error: 1.699422828078e+01 Objective fn: 1.444018974297e+02 Number of vars: 7
 Adding property 1 to the active set
 New active set: 
@@ -217,7 +217,7 @@ New active set:
  Iter = 11 Error = 2.928076055834e-10 Func = -4.150813084408e+00 Step = 6.964349201055e-03
 pre_con_grad succeeded in 11 iterations
 Cholesky error test = 7.415752734108e-11
-Time solving equations = 5.092300000000e-05
+Time solving equations = 5.302000000000e-05
 Updated step gamma = 8.201234748002e+01
 Gamma limited by property 10
 Lasso step gamma limit = 1.946916122753e+03
@@ -233,7 +233,7 @@ Beta:
 23 2.414373514842e+03
 ]
 Finished iteration 8
-Time for iteration 7 = 3.392941000000e-03 seconds 
+Time for iteration 7 = 3.362049100000e-02 seconds 
 L1 norm of solution: 7.943458786388e+03 RMS Error: 1.676056906870e+01 Objective fn: 1.404583377533e+02 Number of vars: 8
 Adding property 10 to the active set
 New active set: 
@@ -262,7 +262,7 @@ New active set:
  Iter = 14 Error = 1.506207596932e-08 Func = -4.224706453703e+00 Step = 1.922533677696e-01
 pre_con_grad succeeded in 14 iterations
 Cholesky error test = 3.848903245501e-09
-Time solving equations = 1.107330000000e-04
+Time solving equations = 7.905700000000e-05
 Updated step gamma = 3.529125695383e+02
 Gamma limited by property 17
 Lasso step gamma limit = 1.893326129334e+03
@@ -279,7 +279,7 @@ Beta:
 23 2.134323564934e+03
 ]
 Finished iteration 9
-Time for iteration 8 = 3.464260000000e-03 seconds 
+Time for iteration 8 = 3.361601900000e-02 seconds 
 L1 norm of solution: 8.969300591334e+03 RMS Error: 1.587665972982e+01 Objective fn: 1.260341620882e+02 Number of vars: 9
 Adding property 17 to the active set
 New active set: 
@@ -321,7 +321,7 @@ Restarting preconditioned conjugate gradient
  Iter = 25 Error = 1.107793493559e-07 Func = -1.001532908263e+01 Step = 7.062689617051e-06
 pre_con_grad succeeded in 5 iterations
 Cholesky error test = 2.753300119007e-08
-Time solving equations = 1.096020000000e-04
+Time solving equations = 1.070980000000e-04
 Updated step gamma = 5.902147671990e+02
 Gamma limited by property 15
 Lasso step gamma limit = 2.175111643525e+02
@@ -340,7 +340,7 @@ Beta:
 23 1.748341144349e+03
 ]
 Finished iteration 10
-Time for iteration 9 = 3.303425000000e-03 seconds 
+Time for iteration 9 = 3.363324200000e-02 seconds 
 L1 norm of solution: 9.942785364401e+03 RMS Error: 1.518211333545e+01 Objective fn: 1.152482826652e+02 Number of vars: 10
 Will remove property 10 from the active set
 New active set: 
@@ -370,7 +370,7 @@ New active set:
  Iter = 15 Error = 2.059665968628e-07 Func = -9.616461424535e+00 Step = 2.555711738025e-06
 pre_con_grad succeeded in 15 iterations
 Cholesky error test = 4.688744785023e-08
-Time solving equations = 7.111500000000e-05
+Time solving equations = 7.187500000000e-05
 Updated step gamma = 2.837102528953e+02
 Gamma limited by property 15
 Lasso step gamma limit = 1.027554485904e+03
@@ -387,7 +387,7 @@ Beta:
 23 1.265619969935e+03
 ]
 Finished iteration 11
-Time for iteration 10 = 3.177025000000e-03 seconds 
+Time for iteration 10 = 3.334259400000e-02 seconds 
 L1 norm of solution: 1.118700678492e+04 RMS Error: 1.441766331794e+01 Objective fn: 1.039345077747e+02 Number of vars: 9
 Adding property 15 to the active set
 New active set: 
@@ -422,7 +422,7 @@ New active set:
  Iter = 19 Error = 1.046653285041e-07 Func = -1.171659538379e+01 Step = 7.130347135604e-06
 pre_con_grad succeeded in 19 iterations
 Cholesky error test = 1.865403914669e-08
-Time solving equations = 8.892700000000e-05
+Time solving equations = 1.013080000000e-04
 Updated step gamma = 3.685370460880e+02
 Gamma limited by property 22
 Lasso step gamma limit = 7.936015018872e+02
@@ -440,7 +440,7 @@ Beta:
 23 6.778843821358e+02
 ]
 Finished iteration 12
-Time for iteration 11 = 3.593814000000e-03 seconds 
+Time for iteration 11 = 2.569443100000e-02 seconds 
 L1 norm of solution: 1.297101507417e+04 RMS Error: 1.357334297084e+01 Objective fn: 9.211781970201e+01 Number of vars: 10
 Adding property 22 to the active set
 New active set: 
@@ -521,7 +521,7 @@ Restarting preconditioned conjugate gradient
  Iter = 62 Error = 4.510222888604e-07 Func = -2.245700047182e+01 Step = 1.439712343748e-05
 pre_con_grad succeeded in 20 iterations
 Cholesky error test = 9.485054929360e-08
-Time solving equations = 3.073360000000e-04
+Time solving equations = 3.247660000000e-04
 Updated step gamma = 3.219765259873e+02
 Gamma limited by property 10
 Lasso step gamma limit = 5.615211320713e+02
@@ -540,7 +540,7 @@ Beta:
 23 2.891851045573e+02
 ]
 Finished iteration 13
-Time for iteration 12 = 4.099405000000e-03 seconds 
+Time for iteration 12 = 3.368770600000e-02 seconds 
 L1 norm of solution: 1.512883442890e+04 RMS Error: 1.284707362509e+01 Objective fn: 8.252365036427e+01 Number of vars: 11
 Adding property 10 to the active set
 New active set: 
@@ -791,7 +791,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.229697907789e-15
-Time solving equations = 9.462980000000e-04
+Time solving equations = 9.413840000000e-04
 Updated step gamma = 4.545865676793e+01
 Gamma limited by property 9
 Lasso step gamma limit = 2.631067356482e+02
@@ -811,7 +811,7 @@ Beta:
 23 2.392207188943e+02
 ]
 Finished iteration 14
-Time for iteration 13 = 4.835469000000e-03 seconds 
+Time for iteration 13 = 3.424073200000e-02 seconds 
 L1 norm of solution: 1.543782680790e+04 RMS Error: 1.276294211099e+01 Objective fn: 8.144634566425e+01 Number of vars: 12
 Adding property 9 to the active set
 New active set: 
@@ -1073,7 +1073,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.528691703138e-15
-Time solving equations = 1.012518000000e-03
+Time solving equations = 9.939730000000e-04
 Updated step gamma = 9.236711548065e+01
 Gamma limited by property 13
 Lasso step gamma limit = 1.967950432038e+02
@@ -1094,7 +1094,7 @@ Beta:
 23 1.269408189144e+02
 ]
 Finished iteration 15
-Time for iteration 14 = 4.775510000000e-03 seconds 
+Time for iteration 14 = 4.234350900000e-02 seconds 
 L1 norm of solution: 1.611078623094e+04 RMS Error: 1.259591930816e+01 Objective fn: 7.932859160886e+01 Number of vars: 13
 Adding property 13 to the active set
 New active set: 
@@ -1367,7 +1367,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.919099799709e-15
-Time solving equations = 1.137295000000e-03
+Time solving equations = 1.100262000000e-03
 Updated step gamma = 1.314940878889e+02
 Gamma limited by property 11
 Lasso step gamma limit = 1.045505867735e+02
@@ -1390,7 +1390,7 @@ Beta:
 22 -1.772627339265e+03
 ]
 Finished iteration 16
-Time for iteration 15 = 4.817923000000e-03 seconds 
+Time for iteration 15 = 3.378490400000e-02 seconds 
 L1 norm of solution: 1.692992728749e+04 RMS Error: 1.241970950047e+01 Objective fn: 7.712459203808e+01 Number of vars: 14
 Will remove property 23 from the active set
 New active set: 
@@ -1652,7 +1652,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.349347983775e-15
-Time solving equations = 9.821090000000e-04
+Time solving equations = 1.043641000000e-03
 Updated step gamma = 2.967205561500e+01
 Gamma limited by property 11
 Lasso step gamma limit = 3.573805794327e+02
@@ -1673,7 +1673,7 @@ Beta:
 22 -1.868838839805e+03
 ]
 Finished iteration 17
-Time for iteration 16 = 4.129541000000e-03 seconds 
+Time for iteration 16 = 3.372802300000e-02 seconds 
 L1 norm of solution: 1.714061821384e+04 RMS Error: 1.237921171582e+01 Objective fn: 7.662244135252e+01 Number of vars: 13
 Adding property 11 to the active set
 New active set: 
@@ -1946,7 +1946,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.078502366779e-15
-Time solving equations = 1.064405000000e-03
+Time solving equations = 1.093932000000e-03
 Updated step gamma = 1.587738564663e+02
 Gamma limited by property 27
 Lasso step gamma limit = 1.291677773431e+02
@@ -1969,7 +1969,7 @@ Beta:
 22 -2.274920841362e+03
 ]
 Finished iteration 18
-Time for iteration 17 = 4.503343000000e-03 seconds 
+Time for iteration 17 = 3.351815100000e-02 seconds 
 L1 norm of solution: 1.809843328057e+04 RMS Error: 1.222312390920e+01 Objective fn: 7.470237904981e+01 Number of vars: 14
 Will remove property 13 from the active set
 New active set: 
@@ -2231,7 +2231,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 9.650400137126e-16
-Time solving equations = 1.000285000000e-03
+Time solving equations = 1.028948000000e-03
 Updated step gamma = 3.001168329724e+01
 Gamma limited by property 27
 Lasso step gamma limit = 4.114235044188e+02
@@ -2252,7 +2252,7 @@ Beta:
 22 -2.370115725629e+03
 ]
 Finished iteration 19
-Time for iteration 18 = 4.362651000000e-03 seconds 
+Time for iteration 18 = 1.404741100000e-02 seconds 
 L1 norm of solution: 1.831880034089e+04 RMS Error: 1.219374676611e+01 Objective fn: 7.434373009803e+01 Number of vars: 13
 Adding property 27 to the active set
 New active set: 
@@ -2525,7 +2525,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.427429603089e-15
-Time solving equations = 1.143726000000e-03
+Time solving equations = 1.031047000000e-03
 Updated step gamma = 1.326317723361e+02
 Gamma limited by property 14
 Lasso step gamma limit = 3.417701961478e+02
@@ -2547,7 +2547,7 @@ Beta:
 27 -2.643981053438e+02
 ]
 Finished iteration 20
-Time for iteration 19 = 4.799269000000e-03 seconds 
+Time for iteration 19 = 4.900475000000e-03 seconds 
 L1 norm of solution: 1.945210793359e+04 RMS Error: 1.207385237059e+01 Objective fn: 7.288895553339e+01 Number of vars: 14
 Adding property 14 to the active set
 New active set: 
@@ -2831,7 +2831,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.901382837687e-15
-Time solving equations = 1.095289000000e-03
+Time solving equations = 1.082683000000e-03
 Updated step gamma = 4.056139578139e+01
 Gamma limited by property 0
 Lasso step gamma limit = 5.023454706720e+02
@@ -2854,7 +2854,7 @@ Beta:
 27 -3.302581616920e+02
 ]
 Finished iteration 21
-Time for iteration 20 = 5.227092000000e-03 seconds 
+Time for iteration 20 = 3.341393900000e-02 seconds 
 L1 norm of solution: 1.993624043974e+04 RMS Error: 1.203562366714e+01 Objective fn: 7.242811852855e+01 Number of vars: 15
 Adding property 0 to the active set
 New active set: 
@@ -3149,7 +3149,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 4.413136522885e-15
-Time solving equations = 1.074923000000e-03
+Time solving equations = 1.176508000000e-03
 Updated step gamma = 1.962832118945e+00
 Gamma limited by property 5
 Lasso step gamma limit = 5.310537745584e+02
@@ -3173,7 +3173,7 @@ Beta:
 27 -3.335863891381e+02
 ]
 Finished iteration 22
-Time for iteration 21 = 4.916238000000e-03 seconds 
+Time for iteration 21 = 3.378670200000e-02 seconds 
 L1 norm of solution: 1.996078564180e+04 RMS Error: 1.203380942184e+01 Objective fn: 7.240628460054e+01 Number of vars: 16
 Adding property 5 to the active set
 New active set: 
@@ -3479,7 +3479,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 8.862192025978e-15
-Time solving equations = 1.247041000000e-03
+Time solving equations = 1.172856000000e-03
 Updated step gamma = 1.578874191339e+01
 Gamma limited by property 23
 Lasso step gamma limit = 2.756578108967e+02
@@ -3504,7 +3504,7 @@ Beta:
 27 -3.639832352237e+02
 ]
 Finished iteration 23
-Time for iteration 22 = 5.486158000000e-03 seconds 
+Time for iteration 22 = 3.363825400000e-02 seconds 
 L1 norm of solution: 2.020935592968e+04 RMS Error: 1.201584178926e+01 Objective fn: 7.219022695224e+01 Number of vars: 17
 Adding property 23 to the active set
 New active set: 
@@ -3821,7 +3821,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 6.426957731441e-15
-Time solving equations = 1.296922000000e-03
+Time solving equations = 1.169196000000e-03
 Updated step gamma = 2.040832678699e+01
 Gamma limited by property 13
 Lasso step gamma limit = 3.286850795827e+02
@@ -3847,7 +3847,7 @@ Beta:
 27 -3.901515445646e+02
 ]
 Finished iteration 24
-Time for iteration 23 = 5.447026000000e-03 seconds 
+Time for iteration 23 = 3.365419900000e-02 seconds 
 L1 norm of solution: 2.056193084140e+04 RMS Error: 1.199143628102e+01 Objective fn: 7.189727204086e+01 Number of vars: 18
 Adding property 13 to the active set
 New active set: 
@@ -4175,7 +4175,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.425760094782e-14
-Time solving equations = 1.287101000000e-03
+Time solving equations = 1.342548000000e-03
 Updated step gamma = 2.002087076846e+02
 Gamma limited by property 19
 Lasso step gamma limit = 1.160655985434e+02
@@ -4203,7 +4203,7 @@ Beta:
 27 -5.210982885898e+02
 ]
 Finished iteration 25
-Time for iteration 24 = 5.494761000000e-03 seconds 
+Time for iteration 24 = 3.381730800000e-02 seconds 
 L1 norm of solution: 2.271334490933e+04 RMS Error: 1.186511240077e+01 Objective fn: 7.039044614151e+01 Number of vars: 19
 Will remove property 8 from the active set
 New active set: 
@@ -4520,7 +4520,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 5.841006690667e-15
-Time solving equations = 1.262304000000e-03
+Time solving equations = 1.322857000000e-03
 Updated step gamma = 7.942406212062e+01
 Gamma limited by property 19
 Lasso step gamma limit = 1.758353005539e+02
@@ -4546,7 +4546,7 @@ Beta:
 27 -6.088500384641e+02
 ]
 Finished iteration 26
-Time for iteration 25 = 4.761465000000e-03 seconds 
+Time for iteration 25 = 3.288625300000e-02 seconds 
 L1 norm of solution: 2.410676122972e+04 RMS Error: 1.180492467656e+01 Objective fn: 6.967812330961e+01 Number of vars: 18
 Adding property 19 to the active set
 New active set: 
@@ -4874,7 +4874,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 6.394884621841e-14
-Time solving equations = 1.368964000000e-03
+Time solving equations = 1.302041000000e-03
 Updated step gamma = 2.648025794364e+02
 Gamma limited by property 8
 Lasso step gamma limit = 8.919289179474e+01
@@ -4902,7 +4902,7 @@ Beta:
 27 -4.698636236591e+02
 ]
 Finished iteration 27
-Time for iteration 26 = 5.053402000000e-03 seconds 
+Time for iteration 26 = 3.421715900000e-02 seconds 
 L1 norm of solution: 2.750656444026e+04 RMS Error: 1.169183587718e+01 Objective fn: 6.834951308949e+01 Number of vars: 19
 Will remove property 23 from the active set
 New active set: 
@@ -5219,7 +5219,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 3.296128801998e-14
-Time solving equations = 1.259931000000e-03
+Time solving equations = 1.308913000000e-03
 Updated step gamma = 9.499005846837e+01
 Gamma limited by property 23
 Lasso step gamma limit = 2.318293740381e+02
@@ -5245,7 +5245,7 @@ Beta:
 27 -3.634876238391e+02
 ]
 Finished iteration 28
-Time for iteration 27 = 4.724011000000e-03 seconds 
+Time for iteration 27 = 3.306604400000e-02 seconds 
 L1 norm of solution: 3.047469907546e+04 RMS Error: 1.161633375494e+01 Objective fn: 6.746960495308e+01 Number of vars: 18
 Adding property 23 to the active set
 New active set: 
@@ -5573,7 +5573,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.122610776268e-13
-Time solving equations = 1.419720000000e-03
+Time solving equations = 1.373493000000e-03
 Updated step gamma = 7.674463935412e+01
 Gamma limited by property 8
 Lasso step gamma limit = 1.968238156376e+02
@@ -5600,7 +5600,7 @@ Beta:
 27 -2.420509473402e+02
 ]
 Finished iteration 29
-Time for iteration 28 = 5.696933000000e-03 seconds 
+Time for iteration 28 = 2.600073200000e-02 seconds 
 L1 norm of solution: 3.387449954786e+04 RMS Error: 1.155389455259e+01 Objective fn: 6.674623966616e+01 Number of vars: 19
 Adding property 8 to the active set
 New active set: 
@@ -5939,7 +5939,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 8.082423619271e-14
-Time solving equations = 1.434653000000e-03
+Time solving equations = 1.441596000000e-03
 Updated step gamma = 1.364893162411e+02
 Gamma limited by property 12
 Lasso step gamma limit = 3.637233181352e+01
@@ -5968,7 +5968,7 @@ Beta:
 27 -1.928104502905e+02
 ]
 Finished iteration 30
-Time for iteration 29 = 5.512982000000e-03 seconds 
+Time for iteration 29 = 3.387208100000e-02 seconds 
 L1 norm of solution: 3.561581841604e+04 RMS Error: 1.152838582944e+01 Objective fn: 6.645183991620e+01 Number of vars: 20
 Will remove property 15 from the active set
 New active set: 
@@ -6296,7 +6296,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 5.060279680660e-14
-Time solving equations = 1.503823000000e-03
+Time solving equations = 1.569129000000e-03
 Updated step gamma = 9.980159301269e+01
 Gamma limited by property 15
 Lasso step gamma limit = 8.857714378188e+01
@@ -6324,7 +6324,7 @@ Beta:
 27 -6.766402355996e+01
 ]
 Finished iteration 31
-Time for iteration 30 = 4.944287000000e-03 seconds 
+Time for iteration 30 = 3.308463600000e-02 seconds 
 L1 norm of solution: 3.971818330637e+04 RMS Error: 1.148481583888e+01 Objective fn: 6.595049742653e+01 Number of vars: 19
 Will remove property 21 from the active set
 New active set: 
@@ -6641,7 +6641,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.329800467273e-14
-Time solving equations = 1.440586000000e-03
+Time solving equations = 1.498428000000e-03
 Updated step gamma = 5.696788690986e+00
 Gamma limited by property 15
 Lasso step gamma limit = 1.158498193715e+02
@@ -6667,7 +6667,7 @@ Beta:
 27 -7.937484367566e+01
 ]
 Finished iteration 32
-Time for iteration 31 = 4.846373000000e-03 seconds 
+Time for iteration 31 = 3.347974800000e-02 seconds 
 L1 norm of solution: 3.986607843243e+04 RMS Error: 1.148372347809e+01 Objective fn: 6.593795246063e+01 Number of vars: 18
 Adding property 15 to the active set
 New active set: 
@@ -6995,7 +6995,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.374124288975e-14
-Time solving equations = 1.343284000000e-03
+Time solving equations = 1.401378000000e-03
 Updated step gamma = 2.831007592078e+01
 Gamma limited by property 12
 Lasso step gamma limit = 1.463841915605e+02
@@ -7022,7 +7022,7 @@ Beta:
 27 -1.175826222086e+02
 ]
 Finished iteration 33
-Time for iteration 32 = 5.209809000000e-03 seconds 
+Time for iteration 32 = 1.893678800000e-02 seconds 
 L1 norm of solution: 4.090546465048e+04 RMS Error: 1.147761659440e+01 Objective fn: 6.586784134401e+01 Number of vars: 19
 Adding property 12 to the active set
 New active set: 
@@ -7361,7 +7361,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.545019750499e-13
-Time solving equations = 1.416382000000e-03
+Time solving equations = 1.460758000000e-03
 Updated step gamma = 4.991818965347e+00
 Gamma limited by property 21
 Lasso step gamma limit = 4.557864590379e+01
@@ -7389,7 +7389,7 @@ Beta:
 27 -1.207558618172e+02
 ]
 Finished iteration 34
-Time for iteration 33 = 5.868797000000e-03 seconds 
+Time for iteration 33 = 2.437228300000e-02 seconds 
 L1 norm of solution: 4.125583204841e+04 RMS Error: 1.147600818058e+01 Objective fn: 6.584938188034e+01 Number of vars: 20
 Adding property 21 to the active set
 New active set: 
@@ -7739,7 +7739,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.227213122924e-13
-Time solving equations = 1.524110000000e-03
+Time solving equations = 1.549759000000e-03
 Updated step gamma = 7.434557072383e+01
 Gamma limited by property 7
 Lasso step gamma limit = 5.703768982820e+01
@@ -7769,7 +7769,7 @@ Beta:
 27 -2.944301457588e+01
 ]
 Finished iteration 35
-Time for iteration 34 = 5.988840000000e-03 seconds 
+Time for iteration 34 = 3.549632200000e-02 seconds 
 L1 norm of solution: 4.664816807257e+04 RMS Error: 1.145679308164e+01 Objective fn: 6.562905385775e+01 Number of vars: 21
 Will remove property 11 from the active set
 New active set: 
@@ -8108,7 +8108,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.342925770587e-13
-Time solving equations = 1.577880000000e-03
+Time solving equations = 1.638597000000e-03
 Updated step gamma = 1.348702679471e+01
 Gamma limited by property 7
 Lasso step gamma limit = 1.487948049904e+01
@@ -8136,7 +8136,7 @@ Beta:
 27 -2.755340464712e+00
 ]
 Finished iteration 36
-Time for iteration 35 = 5.185973000000e-03 seconds 
+Time for iteration 35 = 3.175773000000e-02 seconds 
 L1 norm of solution: 4.765824337405e+04 RMS Error: 1.145440163186e+01 Objective fn: 6.560165837202e+01 Number of vars: 20
 Adding property 7 to the active set
 New active set: 
@@ -8486,7 +8486,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.781432144656e-13
-Time solving equations = 1.501612000000e-03
+Time solving equations = 1.532153000000e-03
 Updated step gamma = 1.650787697653e+01
 Gamma limited by property 16
 Lasso step gamma limit = 1.912278378084e+00
@@ -8516,7 +8516,7 @@ Beta:
 23 8.982768540175e+02
 ]
 Finished iteration 37
-Time for iteration 36 = 5.313548000000e-03 seconds 
+Time for iteration 36 = 3.334820100000e-02 seconds 
 L1 norm of solution: 4.782862253928e+04 RMS Error: 1.145405076332e+01 Objective fn: 6.559763944438e+01 Number of vars: 21
 Will remove property 27 from the active set
 New active set: 
@@ -8855,7 +8855,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.360689338981e-13
-Time solving equations = 1.475488000000e-03
+Time solving equations = 1.531767000000e-03
 Updated step gamma = 1.172971870730e+01
 Gamma limited by property 16
 Lasso step gamma limit = 5.553015447700e+00
@@ -8884,7 +8884,7 @@ Beta:
 23 9.139972173520e+02
 ]
 Finished iteration 38
-Time for iteration 37 = 5.116359000000e-03 seconds 
+Time for iteration 37 = 1.824308500000e-02 seconds 
 L1 norm of solution: 4.830090095814e+04 RMS Error: 1.145314085483e+01 Objective fn: 6.558721772027e+01 Number of vars: 20
 Will remove property 6 from the active set
 New active set: 
@@ -9212,7 +9212,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 8.019316205240e-14
-Time solving equations = 1.482864000000e-03
+Time solving equations = 1.485655000000e-03
 Updated step gamma = 4.593674965414e+00
 Gamma limited by property 16
 Lasso step gamma limit = 1.185124552780e+03
@@ -9239,7 +9239,7 @@ Beta:
 23 9.296557954720e+02
 ]
 Finished iteration 39
-Time for iteration 38 = 5.166319000000e-03 seconds 
+Time for iteration 38 = 1.741080200000e-02 seconds 
 L1 norm of solution: 4.861474100176e+04 RMS Error: 1.145259984657e+01 Objective fn: 6.558102162288e+01 Number of vars: 19
 Adding property 16 to the active set
 New active set: 
@@ -9578,7 +9578,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 3.166356066231e-13
-Time solving equations = 1.500900000000e-03
+Time solving equations = 1.458373000000e-03
 Updated step gamma = 9.992604362986e+00
 Gamma limited by property 27
 Lasso step gamma limit = 2.567605699540e+02
@@ -9606,7 +9606,7 @@ Beta:
 23 9.785771693321e+02
 ]
 Finished iteration 40
-Time for iteration 39 = 5.764117000000e-03 seconds 
+Time for iteration 39 = 3.439003900000e-02 seconds 
 L1 norm of solution: 4.961247859814e+04 RMS Error: 1.145113537634e+01 Objective fn: 6.556425070361e+01 Number of vars: 20
 Adding property 27 to the active set
 New active set: 
@@ -9956,7 +9956,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.651635524909e-13
-Time solving equations = 1.495940000000e-03
+Time solving equations = 1.530571000000e-03
 Updated step gamma = 5.599456225164e+00
 Gamma limited by property 11
 Lasso step gamma limit = 2.622240990509e+02
@@ -9985,7 +9985,7 @@ Beta:
 27 3.831890098979e+00
 ]
 Finished iteration 41
-Time for iteration 40 = 6.091887000000e-03 seconds 
+Time for iteration 40 = 3.370808100000e-02 seconds 
 L1 norm of solution: 5.017634907699e+04 RMS Error: 1.145044208528e+01 Objective fn: 6.555631197423e+01 Number of vars: 21
 Adding property 11 to the active set
 New active set: 
@@ -10346,7 +10346,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 5.789308426591e-13
-Time solving equations = 1.552906000000e-03
+Time solving equations = 1.594776000000e-03
 Updated step gamma = 1.369563786914e+01
 Gamma limited by property 26
 Lasso step gamma limit = 5.164634241118e+01
@@ -10376,7 +10376,7 @@ Beta:
 27 1.044433205422e+01
 ]
 Finished iteration 42
-Time for iteration 41 = 5.509532000000e-03 seconds 
+Time for iteration 41 = 3.335948300000e-02 seconds 
 L1 norm of solution: 5.244783869004e+04 RMS Error: 1.144812957729e+01 Objective fn: 6.552983540925e+01 Number of vars: 22
 Adding property 26 to the active set
 New active set: 
@@ -10748,7 +10748,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 7.248646127778e-13
-Time solving equations = 1.653059000000e-03
+Time solving equations = 1.707093000000e-03
 Updated step gamma = 1.453025528351e+01
 Gamma limited by property 6
 Lasso step gamma limit = 3.795131330336e+01
@@ -10779,7 +10779,7 @@ Beta:
 27 1.745990810506e+01
 ]
 Finished iteration 43
-Time for iteration 42 = 6.224304000000e-03 seconds 
+Time for iteration 42 = 3.539419100000e-02 seconds 
 L1 norm of solution: 5.485778965472e+04 RMS Error: 1.144630391927e+01 Objective fn: 6.550893670618e+01 Number of vars: 23
 Adding property 6 to the active set
 New active set: 
@@ -11162,7 +11162,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 5.263937434089e-13
-Time solving equations = 1.553710000000e-03
+Time solving equations = 1.631213000000e-03
 Updated step gamma = 1.915605530150e+01
 Gamma limited by property 25
 Lasso step gamma limit = 2.930395637110e+01
@@ -11194,7 +11194,7 @@ Beta:
 27 2.000252136726e+01
 ]
 Finished iteration 44
-Time for iteration 43 = 5.889521000000e-03 seconds 
+Time for iteration 43 = 5.282949000000e-03 seconds 
 L1 norm of solution: 5.883063949248e+04 RMS Error: 1.144438926064e+01 Objective fn: 6.548702277456e+01 Number of vars: 24
 Adding property 25 to the active set
 New active set: 
@@ -11588,7 +11588,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 5.861044982680e-13
-Time solving equations = 1.681761000000e-03
+Time solving equations = 1.717608000000e-03
 Updated step gamma = 2.125759791956e+00
 Gamma limited by property 24
 Lasso step gamma limit = 1.014839012930e+01
@@ -11621,7 +11621,7 @@ Beta:
 27 2.028473933930e+01
 ]
 Finished iteration 45
-Time for iteration 44 = 6.508003000000e-03 seconds 
+Time for iteration 44 = 2.429185900000e-02 seconds 
 L1 norm of solution: 5.927153596691e+04 RMS Error: 1.144424607933e+01 Objective fn: 6.548538416214e+01 Number of vars: 25
 Adding property 24 to the active set
 New active set: 
@@ -12026,7 +12026,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 3.719461063931e-11
-Time solving equations = 1.832128000000e-03
+Time solving equations = 1.834641000000e-03
 Updated step gamma = 1.491556081337e+02
 Gamma limited by property 2
 Lasso step gamma limit = 1.655580410651e+01
@@ -12061,7 +12061,7 @@ Beta:
 27 6.968432228122e+01
 ]
 Finished iteration 46
-Time for iteration 45 = 6.218218000000e-03 seconds 
+Time for iteration 45 = 3.414846300000e-02 seconds 
 L1 norm of solution: 9.447824073553e+04 RMS Error: 1.143378039753e+01 Objective fn: 6.536566708942e+01 Number of vars: 26
 Will remove property 10 from the active set
 New active set: 
@@ -12455,7 +12455,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.900977680298e-11
-Time solving equations = 2.213806000000e-03
+Time solving equations = 2.130096000000e-03
 Updated step gamma = 2.241941946992e+01
 Gamma limited by property 10
 Lasso step gamma limit = 6.078004956036e+01
@@ -12488,7 +12488,7 @@ Beta:
 27 1.326915771818e+02
 ]
 Finished iteration 47
-Time for iteration 46 = 6.000704000000e-03 seconds 
+Time for iteration 46 = 3.306631200000e-02 seconds 
 L1 norm of solution: 1.405979288670e+05 RMS Error: 1.142137919183e+01 Objective fn: 6.522395132180e+01 Number of vars: 25
 Adding property 10 to the active set
 New active set: 
@@ -12893,7 +12893,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.258137266919e-11
-Time solving equations = 2.106347000000e-03
+Time solving equations = 2.085158000000e-03
 Updated step gamma = 1.103677485460e+02
 Gamma limited by property 2
 Lasso step gamma limit = 3.695573185672e+01
@@ -12928,7 +12928,7 @@ Beta:
 27 2.432609627427e+02
 ]
 Finished iteration 48
-Time for iteration 47 = 6.748262000000e-03 seconds 
+Time for iteration 47 = 3.408672900000e-02 seconds 
 L1 norm of solution: 2.198966331994e+05 RMS Error: 1.140345442924e+01 Objective fn: 6.501938645986e+01 Number of vars: 26
 Will remove property 21 from the active set
 New active set: 
@@ -13322,7 +13322,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 6.570557431473e-12
-Time solving equations = 2.163112000000e-03
+Time solving equations = 2.157709000000e-03
 Updated step gamma = 2.761168269108e+00
 Gamma limited by property 21
 Lasso step gamma limit = 2.303575711615e+02
@@ -13355,7 +13355,7 @@ Beta:
 27 2.517059439407e+02
 ]
 Finished iteration 49
-Time for iteration 48 = 6.098987000000e-03 seconds 
+Time for iteration 48 = 2.652167500000e-02 seconds 
 L1 norm of solution: 2.238626953707e+05 RMS Error: 1.140267396572e+01 Objective fn: 6.501048678429e+01 Number of vars: 25
 Adding property 21 to the active set
 New active set: 
@@ -13760,7 +13760,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.334395070409e-11
-Time solving equations = 2.040872000000e-03
+Time solving equations = 2.106843000000e-03
 Updated step gamma = 7.031127568600e+01
 Gamma limited by property 2
 Lasso step gamma limit = 8.744290855420e+01
@@ -13794,7 +13794,7 @@ Beta:
 27 4.605594649703e+02
 ]
 Finished iteration 50
-Time for iteration 49 = 6.348737000000e-03 seconds 
+Time for iteration 49 = 6.578846000000e-03 seconds 
 L1 norm of solution: 3.772918078809e+05 RMS Error: 1.138051472500e+01 Objective fn: 6.475805770297e+01 Number of vars: 26
 Adding property 2 to the active set
 New active set: 
@@ -14210,7 +14210,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 7.610307445955e-11
-Time solving equations = 1.878728000000e-03
+Time solving equations = 1.934027000000e-03
 Updated step gamma = 8.404064861663e+01
 Gamma limited by property 4
 Lasso step gamma limit = 3.233661942279e+00
@@ -14246,7 +14246,7 @@ Beta:
 27 4.677444511868e+02
 ]
 Finished iteration 51
-Time for iteration 50 = 6.424764000000e-03 seconds 
+Time for iteration 50 = 1.615794400000e-02 seconds 
 L1 norm of solution: 3.861598567533e+05 RMS Error: 1.137968904336e+01 Objective fn: 6.474866136177e+01 Number of vars: 27
 Will remove property 1 from the active set
 New active set: 
@@ -14651,7 +14651,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.924723628340e-11
-Time solving equations = 2.115208000000e-03
+Time solving equations = 2.228338000000e-03
 Updated step gamma = 2.215589352031e+01
 Gamma limited by property 4
 Lasso step gamma limit = 1.480272194277e+01
@@ -14686,7 +14686,7 @@ Beta:
 27 5.115891749137e+02
 ]
 Finished iteration 52
-Time for iteration 51 = 5.922292000000e-03 seconds 
+Time for iteration 51 = 3.205868300000e-02 seconds 
 L1 norm of solution: 4.183828108113e+05 RMS Error: 1.137708465531e+01 Objective fn: 6.471902762708e+01 Number of vars: 26
 Will remove property 23 from the active set
 New active set: 
@@ -15080,7 +15080,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 9.462777228464e-12
-Time solving equations = 2.124338000000e-03
+Time solving equations = 2.142741000000e-03
 Updated step gamma = 3.617038212667e-01
 Gamma limited by property 23
 Lasso step gamma limit = 7.839720578925e+01
@@ -15113,7 +15113,7 @@ Beta:
 27 5.121739244655e+02
 ]
 Finished iteration 53
-Time for iteration 52 = 5.675860000000e-03 seconds 
+Time for iteration 52 = 3.309916700000e-02 seconds 
 L1 norm of solution: 4.188989147213e+05 RMS Error: 1.137704854802e+01 Objective fn: 6.471861683206e+01 Number of vars: 25
 Adding property 23 to the active set
 New active set: 
@@ -15518,7 +15518,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 3.650107993636e-11
-Time solving equations = 2.110375000000e-03
+Time solving equations = 2.152081000000e-03
 Updated step gamma = 6.817053322198e+00
 Gamma limited by property 4
 Lasso step gamma limit = 4.504757943451e+01
@@ -15552,7 +15552,7 @@ Beta:
 27 5.323814955550e+02
 ]
 Finished iteration 54
-Time for iteration 53 = 6.358023000000e-03 seconds 
+Time for iteration 53 = 3.473056800000e-02 seconds 
 L1 norm of solution: 4.338337468263e+05 RMS Error: 1.137608110017e+01 Objective fn: 6.470761059879e+01 Number of vars: 26
 Adding property 4 to the active set
 New active set: 
@@ -15968,7 +15968,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.170571787649e-10
-Time solving equations = 1.860775000000e-03
+Time solving equations = 1.932934000000e-03
 Updated step gamma = 6.521185128106e+01
 Gamma limited by property 1
 Lasso step gamma limit = 3.089444978584e+00
@@ -16004,7 +16004,7 @@ Beta:
 27 5.379051629708e+02
 ]
 Finished iteration 55
-Time for iteration 54 = 6.687428000000e-03 seconds 
+Time for iteration 54 = 3.333676300000e-02 seconds 
 L1 norm of solution: 4.442071017835e+05 RMS Error: 1.137547333944e+01 Objective fn: 6.470069684821e+01 Number of vars: 27
 Will remove property 3 from the active set
 New active set: 
@@ -16409,7 +16409,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.370514041471e-11
-Time solving equations = 2.200539000000e-03
+Time solving equations = 2.238619000000e-03
 Updated step gamma = 7.304671451183e+00
 Gamma limited by property 1
 Lasso step gamma limit = 3.647385840205e+01
@@ -16443,7 +16443,7 @@ Beta:
 27 5.593335044694e+02
 ]
 Finished iteration 56
-Time for iteration 55 = 5.791923000000e-03 seconds 
+Time for iteration 55 = 1.819376500000e-02 seconds 
 L1 norm of solution: 4.601582172881e+05 RMS Error: 1.137464394309e+01 Objective fn: 6.469126241606e+01 Number of vars: 26
 Adding property 1 to the active set
 New active set: 
@@ -16859,7 +16859,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.209376631761e-10
-Time solving equations = 1.945479000000e-03
+Time solving equations = 1.954798000000e-03
 Updated step gamma = 5.754256392199e+01
 Gamma limited by property 3
 Lasso step gamma limit = 2.387555258422e+00
@@ -16895,7 +16895,7 @@ Beta:
 27 5.630284646554e+02
 ]
 Finished iteration 57
-Time for iteration 56 = 6.255911000000e-03 seconds 
+Time for iteration 56 = 3.391017200000e-02 seconds 
 L1 norm of solution: 4.692316442339e+05 RMS Error: 1.137422771625e+01 Objective fn: 6.468652807060e+01 Number of vars: 27
 Will remove property 0 from the active set
 New active set: 
@@ -17300,7 +17300,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 5.213552666506e-11
-Time solving equations = 2.215466000000e-03
+Time solving equations = 2.251251000000e-03
 Updated step gamma = 1.559346745588e+00
 Gamma limited by property 0
 Lasso step gamma limit = 2.814992701309e+01
@@ -17334,7 +17334,7 @@ Beta:
 27 5.674774852992e+02
 ]
 Finished iteration 58
-Time for iteration 57 = 6.250717000000e-03 seconds 
+Time for iteration 57 = 3.333915700000e-02 seconds 
 L1 norm of solution: 4.726197274186e+05 RMS Error: 1.137407931941e+01 Objective fn: 6.468484018216e+01 Number of vars: 26
 Adding property 0 to the active set
 New active set: 
@@ -17750,7 +17750,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.809047068525e-10
-Time solving equations = 2.222481000000e-03
+Time solving equations = 2.192220000000e-03
 Updated step gamma = 5.425196501885e+01
 Gamma limited by property 3
 Lasso step gamma limit = 5.262019581577e+01
@@ -17786,7 +17786,7 @@ Beta:
 27 6.459245644301e+02
 ]
 Finished iteration 59
-Time for iteration 58 = 6.779775000000e-03 seconds 
+Time for iteration 58 = 3.429652500000e-02 seconds 
 L1 norm of solution: 6.796262932276e+05 RMS Error: 1.136950938695e+01 Objective fn: 6.463287184992e+01 Number of vars: 27
 Will remove property 9 from the active set
 New active set: 
@@ -18191,7 +18191,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.952134180801e-10
-Time solving equations = 2.214183000000e-03
+Time solving equations = 2.235353000000e-03
 Updated step gamma = 3.519890973361e-02
 Gamma limited by property 9
 Lasso step gamma limit = 3.472982945497e+01
@@ -18225,7 +18225,7 @@ Beta:
 27 6.459612893914e+02
 ]
 Finished iteration 60
-Time for iteration 59 = 6.051242000000e-03 seconds 
+Time for iteration 59 = 3.402241300000e-02 seconds 
 L1 norm of solution: 6.797598939834e+05 RMS Error: 1.136950919499e+01 Objective fn: 6.463286966751e+01 Number of vars: 26
 Adding property 9 to the active set
 New active set: 
@@ -18641,7 +18641,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 2.155105887985e-10
-Time solving equations = 2.253648000000e-03
+Time solving equations = 2.370436000000e-03
 Updated step gamma = 1.597525072129e+00
 Gamma limited by property 3
 Lasso step gamma limit = 2.472740308206e+01
@@ -18676,7 +18676,7 @@ Beta:
 27 6.483551035596e+02
 ]
 Finished iteration 61
-Time for iteration 60 = 6.580494000000e-03 seconds 
+Time for iteration 60 = 1.751893800000e-02 seconds 
 L1 norm of solution: 6.860533357533e+05 RMS Error: 1.136950417870e+01 Objective fn: 6.463281263478e+01 Number of vars: 27
 Adding property 3 to the active set
 New active set: 
@@ -19103,7 +19103,7 @@ Pre-conditioned conjugate gradient failed
 Conjugate gradient method failed. 
 Trying cholesky instead 
 Cholesky error test = 1.082572125912e-07
-Time solving equations = 1.852973000000e-03
+Time solving equations = 1.996267000000e-03
 Updated step gamma = 3.210582702165e+00
 Lasso step gamma limit = 6.670478746971e-01
 LASSO is limiting gamma from 3.210582702165e+00 to 6.670478746971e-01
@@ -19139,7 +19139,7 @@ Beta:
 27 6.487427253450e+02
 ]
 Finished iteration 62
-Time for iteration 61 = 6.961265000000e-03 seconds 
+Time for iteration 61 = 3.554751400000e-02 seconds 
 Stopping: no more iterations possible
 Final values:
 Beta: 
