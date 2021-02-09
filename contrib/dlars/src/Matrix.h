@@ -773,7 +773,7 @@ public:
 			}
 		}
 	
-	void dot(Vector &out, const Vector &in)
+	void dot(Vector &out, const Vector &in) const
 	// Find matrix * in = out
 		{
 			if ( out.dim != dim1 || in.dim != dim2 ) {
@@ -839,4 +839,195 @@ public:
 			}
 #endif				
 		}
+
+	bool con_grad(Vector &x, const Vector &b, int max_iter, int max_restart,
+								double tol)
+	// Congugate gradient method to solver linear equations.
+	// Solves Matrix * x = b.  The value given in x is used
+	// as an initial guess.
+	// max_iter is the maximum number of iterations to perform.
+	// max_restart is the maximum number of restarts to perform.
+	// tol is the tolerance.  The solution is returned in x.
+		{
+			int dim = x.dim ;
+			
+			Vector r2(dim), r1(dim) ;
+			Vector x2(dim), x1(dim) ;
+			Vector p2(dim), p1(dim) ;
+			Vector tmp(dim), xstep(dim), tmp2(dim) ;
+
+			int iter = 0 ;
+			for ( int l = 0 ; l < max_restart ; l++ ) {
+				double oldfunc = 1.0e50 ;
+
+				dot(tmp, x) ;
+				r1.assign_mult(b, tmp, -1.0) ;
+
+				p1 = r1 ;
+				x1 = x ;
+
+				
+				for ( int k = 0 ; k < max_iter ; k++ ) {
+
+					++iter ;
+					// Matrix dot vector.
+					dot(tmp, p1) ;
+
+					// Vector dot vector.
+					double denom = p1.dot(tmp) ;
+					if ( fabs(denom) < 1.0e-50 ) {
+						if ( RANK == 0 ) cout << "con_grad failed: zero denominator\n" ;
+						return false ;
+					}
+					double alpha = r1.dot(r1) / denom ;
+
+					x2.assign_mult(x1, p1, alpha) ;
+					r2.assign_mult(r1, tmp, -alpha) ;
+
+					p1.scale(xstep,alpha) ;
+					double err =  sqrt( r2.dot(r2) ) ;
+					double stp = sqrt(xstep.dot(xstep)) ;
+
+					dot(tmp2, x2) ;
+
+					// func is the objective function for minimization, which should decrease.
+					double func = 0.5 * tmp2.dot(x2) - x2.dot(b) ;
+					
+					if ( RANK == 0 ) { 
+						cout << " Iter = " << iter << " Error = " << err << " Func = " << func << " Step = " << stp << endl ; 
+					}
+					
+					if ( err < tol ) {
+//						if ( RANK == 0 ) cout << "con_grad succeeded in " << k+1 << " iterations" << endl ;
+						x = x2 ;
+						return true ;
+					}
+					/* if ( func > oldfunc ) { */
+					/* 	if ( RANK == 0 ) { */
+					/* 		cout << "Failed to decrease conjugate gradient function\n" ; */
+					/* 		cout << "Restarting\n" ; */
+					/* 		break ; */
+					/* 	} */
+					/* } */
+
+					// Fletcher-Reeves formula.
+					double beta = r2.dot(r2) / r1.dot(r1) ;
+
+					// Polak-Ribiere formula.
+          // double beta = (r2.dot(r2) - r2.dot(r1)) / r1.dot(r1) ;
+
+					p2.assign_mult(r2,p1,beta) ;
+
+					// Reset for net iterations.
+					x1 = x2 ;
+					r1 = r2 ;
+					p1 = p2 ;
+					oldfunc = func ;
+					
+				}
+
+				// Reset x for restart.
+				// if ( RANK == 0 ) cout << "Restarting conjugate gradient " << endl ;
+				x = x2 ;
+				
+			}
+			if ( RANK == 0 ) {
+				cout << "con_grad failed in " << iter << " iterations " << endl ;
+			}
+			return false ;
+		} // End of con_grad
+
+
+	bool pre_con_grad(Vector &x, const Vector &b, const Matrix &M_inv, int max_iter, int max_restart,
+								double tol)
+	// Preconditioned congugate gradient method to solver linear equations.
+	// Solves Matrix * x = b.  The value given in x is used
+	// as an initial guess.
+	// The inverse of the pre-conditioner, M_inv, is explicitly specified, 
+	// as opposed to specifying M.
+	// max_iter is the maximum number of iterations to perform.
+	// max_restart is the maximum number of restarts to perform.
+	// tol is the tolerance.  The solution is returned in x.
+		{
+			int dim = x.dim ;
+			
+			Vector r2(dim), r1(dim) ;
+			Vector x2(dim), x1(dim) ;
+			Vector p2(dim), p1(dim) ;
+			Vector tmp(dim), xstep(dim), tmp2(dim) ;
+			Vector z2(dim), z1(dim) ;
+
+			int iter = 0 ;
+			for ( int l = 0 ; l < max_restart ; l++ ) {
+				double oldfunc = 1.0e50 ;
+
+				dot(tmp, x) ;
+				r1.assign_mult(b, tmp, -1.0) ;
+
+				x1 = x ;
+				M_inv.dot(z1, r1) ;
+				p1 = z1 ;
+				
+				for ( int k = 0 ; k < max_iter ; k++ ) {
+
+					++iter ;
+					// Matrix dot vector.
+					dot(tmp, p1) ;
+
+					// Vector dot vector.
+					double denom = p1.dot(tmp) ;
+					if ( fabs(denom) < 1.0e-50 ) {
+						if ( RANK == 0 ) cout << "pre_con_grad failed: zero denominator\n" ;
+						return false ;
+					}
+					double alpha = r1.dot(z1) / denom ;
+					
+					x2.assign_mult(x1, p1, alpha) ;
+					r2.assign_mult(r1, tmp, -alpha) ;
+
+					p1.scale(xstep,alpha) ;
+					double err =  sqrt( r2.dot(r2) ) ;
+					double stp = sqrt(xstep.dot(xstep)) ;
+
+					dot(tmp2, x2) ;
+
+					// func is the objective function for minimization, which should decrease.
+					double func = 0.5 * tmp2.dot(x2) - x2.dot(b) ;
+					
+					if ( RANK == 0 ) { 
+						cout << " Iter = " << iter << " Error = " << err << " Func = " << func << " Step = " << stp << endl ; 
+					}
+					
+					if ( err < tol ) {
+						if ( RANK == 0 ) cout << "pre_con_grad succeeded in " << k+1 << " iterations" << endl ;
+						x = x2 ;
+						return true ;
+					}
+
+					M_inv.dot(z2, r2) ;
+
+					double beta = z2.dot(r2) / z1.dot(r1) ;
+
+					p2.assign_mult(z2,p1,beta) ;
+
+					// Reset for net iterations.
+					x1 = x2 ;
+					r1 = r2 ;
+					p1 = p2 ;
+					z1 = z2 ;
+					oldfunc = func ;
+					
+				}
+
+				// Reset x for restart.
+				if ( RANK == 0 ) cout << "Restarting preconditioned conjugate gradient " << endl ;
+				x = x2 ;
+				
+			}
+			if ( RANK == 0 ) {
+				cout << "pre_con_grad failed in " << iter << " iterations " << endl ;
+			}
+			return false ;
+		} // End of pre_con_grad
+	
 } ;

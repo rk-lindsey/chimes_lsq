@@ -1,5 +1,5 @@
 CXX=mpicxx -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY
-##CXX=mpicxx -O3 -fopenmp -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI
+##CXX=mpicxx -O3 -fopenmp -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DUSE_OPENMP
 ##CXX=mpicxx -g -fopenmp -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DDEBUG
 ##CXX=mpicxx -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI
 ##CXX=g++ --std=c++11 -g -Wall -DDEBUG
