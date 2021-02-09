@@ -172,8 +172,7 @@ public:
 				cout << "Counted more files than processes:" << endl;
 				cout << "Total files: " << total_files << endl;
 				cout << "Total procs: " << NPROCS << endl;
-				MPI_Finalize();
-				exit(0);
+				stop_run(1) ;
 			}
 		}
 		if ( total_files == 0 ) 

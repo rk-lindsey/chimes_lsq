@@ -162,8 +162,7 @@ int main(int argc, char **argv)
 		do_lasso = true ;
 	} else {
 		if ( RANK == 0 ) cout << "Error: unrecognized algorithm: " << algorithm << endl ;
-		MPI_Finalize();
-		exit(0);
+		stop_run(1) ;
 	}
 	
 	if ( RANK == 0 ) {
@@ -196,15 +195,13 @@ int main(int argc, char **argv)
 		// Read the X matrix from a single file.
 		ifstream xfile(xname) ;
 		if ( ! xfile.is_open() ) {
-			cout << "Could not open " << xname << endl ;
-			MPI_Finalize();
-			exit(0);
+			if ( RANK == 0 ) cout << "Could not open " << xname << endl ;
+			stop_run(1) ;
 		}
 		ifstream dfile(dname) ;
 		if ( ! dfile.is_open() ) {
-			cout << "Error: could not open " << dname << endl ;
-			MPI_Finalize();
-			exit(0);
+			if ( RANK == 0 ) cout << "Error: could not open " << dname << endl ;
+			stop_run(1) ;
 		}
 		dfile >> nprops >> ndata ;
 		xmat.read(xfile, ndata, nprops, true) ;
@@ -217,9 +214,8 @@ int main(int argc, char **argv)
 
 	ifstream yfile(yname) ;
 	if ( ! yfile.is_open() ) {
-		cout << "Could not open " << yname << endl ;
-		MPI_Finalize();
-		exit(0);
+		if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
+		stop_run(1) ;
 	}
 	
 	Vector yvec ;
@@ -235,9 +231,8 @@ int main(int argc, char **argv)
 		
 		ifstream weight_stream(weight_file) ;
 		if ( ! weight_stream.is_open() ) {
-			cout << "Could not open " << weight_file << endl ;
-			MPI_Finalize();
-			exit(0);
+			if ( RANK == 0 ) cout << "Could not open " << weight_file << endl ;
+			stop_run(1) ;
 		}
 		weights.read(weight_stream, ndata) ;
 		xmat.scale_rows(weights) ;

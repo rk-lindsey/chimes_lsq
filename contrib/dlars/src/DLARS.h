@@ -283,7 +283,6 @@ public:
 			}
 		}
 
-	
 	void decrement_G_A()
 	// Decrement the G_A array by one column and one row.
 		{
@@ -643,7 +642,7 @@ public:
 			}
 			if ( RANK == 0 ) cout << "Lasso step gamma limit = " << gamma_lasso << endl ;
 		}
-	
+
 	void update_beta()
 	// Update the regression coefficients (beta)
 		{
@@ -722,20 +721,19 @@ public:
 				}
 			}
 		}
-
 	
 	void print_unshifted_mu(ostream &out)
 	// Print the given prediction in unscaled units.
-	{
-		if ( RANK == 0 ) {
-			//out << "Y constant offset = " << offset << endl ;
-			for ( int j = 0 ; j < ndata ; j++ ) {
-				out << mu.get(j) + y.shift << endl ;
+		{
+			if ( RANK == 0 ) {
+				//out << "Y constant offset = " << offset << endl ;
+				for ( int j = 0 ; j < ndata ; j++ ) {
+					out << mu.get(j) + y.shift << endl ;
+				}
 			}
 		}
-	}
 	
-	void print_unshifted_mu(ostream &out, Vector &weights)
+  void print_unshifted_mu(ostream &out, Vector &weights)
 	// Print the given prediction in unscaled units.
 	{
 		if ( RANK == 0 ) {
