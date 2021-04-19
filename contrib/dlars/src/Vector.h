@@ -65,10 +65,18 @@ public:
 	}
 		
 	void realloc(int size) {
-		// Reallocate the vector.
-		
-			delete [] vec ;
-		vec = new double[size] ;
+		// Reallocate the vector.  Maintain previous values.
+		double *vec2 = new double[size] ;
+
+		int ncopy = ( dim < size ) ? dim : size ;
+		for ( int i = 0 ; i < ncopy ; i++ ) {
+			vec2[i] = vec[i] ;
+		}
+		for ( int i = ncopy ; i < size ; i++ ) {
+			vec2[i] = 0.0 ;
+		}
+		delete [] vec ;
+		vec = vec2 ;
 		dim = size ;
 	}
 	
@@ -221,6 +229,17 @@ public:
 				}
 			}
 		}
+	double dot(const Vector &vec2) {
+		if ( vec2.dim != dim ) {
+			cout << "Error: dot product with unmatched dimensions\n" ;
+			exit(1) ;
+		}
+		double val = 0.0 ;
+		for ( int j = 0 ; j < dim ; j++ ) {
+			val += vec2.get(j) * vec[j] ;
+		}
+		return (val) ;
+	}
 	void scale(Vector &out, double val) 
 	// Scale the vector by the given value, put result in Out.
 		{
@@ -268,6 +287,28 @@ public:
 		vec = newv ;
 		++dim ;
 	}
+	void add(const Vector &in)
+	// Add the vector to vec.
+	{
+		if ( in.dim != dim ) {
+					cout << "Error in add: dim mismatch\n" ;
+			exit(1) ;
+		}
+		for ( int k = 0 ; k < dim ; k++ ) {
+			vec[k] += in.get(k) ;
+		}
+	}
+	void subtract(const Vector &in)
+	// Subtract the vector from vec.
+	{
+		if ( in.dim != dim ) {
+			cout << "Error in add: dim mismatch\n" ;
+			exit(1) ;
+		}
+		for ( int k = 0 ; k < dim ; k++ ) {
+			vec[k] -= in.get(k) ;
+		}
+	}
 	void add_mult(const Vector &in, double factor)
 		// Set out = out + factor * in
 	{
@@ -279,6 +320,18 @@ public:
 			vec[k] += factor * in.get(k) ;
 		}
 	}
+	void assign_mult(const Vector &in1, const Vector &in2, double factor)
+		// Set vec = in1 + factor * in2
+	{
+		if ( in1.dim != dim || in2.dim != dim ) {
+			cout << "Error in add_mult: dim mismatch\n" ;
+			exit(1) ;
+		}
+		for ( int k = 0 ; k < dim ; k++ ) {
+			vec[k] = in1.get(k) + factor * in2.get(k) ;
+		}
+	}
+	
 	void clear()
 	// Clear all entries of the vector.
 	{

@@ -1,6 +1,6 @@
 RUN=srun -n 7 ../src/dlars
 COMPARE=perl ../../compare/compare.pl
-all: lars lasso stopping split weights restart restart2
+all: lars lasso stopping split weights restart restart2 con_grad
 
 lars:
 	$(RUN) Xcpp.txt Ycpp.txt Xcpp.dim --algorithm=lars > dlars.cpp.txt
@@ -49,6 +49,14 @@ restart2:
 	cp restart.txt restart.save
 	$(RUN) A.txt b.txt A.dim --restart=restart.save > dlasso.restart2.2.txt
 	-$(COMPARE) dlasso.restart2.2.txt correct_output/dlasso.restart2.2.txt
+
+con_grad:
+	$(RUN) Xcpp.txt Ycpp.txt Xcpp.dim --con_grad --weights=Ycpp.weights > dlasso.con_grad.txt
+	-$(COMPARE) dlasso.con_grad.txt correct_output/dlasso.con_grad.txt
+	$(RUN) A.txt b.txt A.dim --con_grad > dlasso.con_grad.A.txt
+	-$(COMPARE) dlasso.con_grad.A.txt correct_output/dlasso.con_grad.A.txt
+	$(RUN) A.txt b.txt A.dim --con_grad --precondition > dlasso.precon.A.txt
+	-$(COMPARE) dlasso.precon.A.txt correct_output/dlasso.precon.A.txt
 
 clean:
 	rm -f dlars.*.txt dlasso.*.txt *.diff

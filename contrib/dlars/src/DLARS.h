@@ -33,6 +33,9 @@ public:
 	int add_prop ;  // The index of the property to add to the active set during a LASSO calculation.
 	bool do_lasso ;   // If TRUE, do a lasso calculation.  If false, do a regular LARS calculation.
 	bool solve_succeeded ; // If true, the solve of G_A succeeded.
+	bool solve_con_grad ;  // If true, solve G_A by conjugate gradient instead of cholesky decomp.
+  bool use_precondition  ; // If true, use preconditioning in conjugate gradient.
+
 	double obj_func_val ;  // Latest value of the objective function.
 	int iterations ;    // The number of solver iterations.
 	ofstream trajfile ;  // Output file for the trajectory (solution history).
@@ -51,6 +54,9 @@ public:
 			add_prop = -1 ;
 			num_exclude = 0 ;
 			solve_succeeded = true ;
+			solve_con_grad = false ;
+			use_precondition = false ;
+			
 			iterations = 0 ;
 
 			X_A.distribute(Xin) ;
@@ -283,7 +289,6 @@ public:
 			}
 		}
 
-	
 	void decrement_G_A()
 	// Decrement the G_A array by one column and one row.
 		{
@@ -347,12 +352,34 @@ public:
 	bool solve_G_A(bool use_incremental_updates)
 	// Find G_A^-1 * I
 		{
-			G_A_Inv_I.realloc(nactive) ;
+			
+			auto time1 = std::chrono::system_clock::now() ;
 
+			G_A_Inv_I.realloc(nactive) ;
+			
 			bool succeeded = false ;
 			// If solve_succeeded == true, the last linear solve worked and
 			// we can possibly update the cholesky decomposition.
 			// Otherwise, the whole decomposition needs to be recalculated.
+			if ( solve_con_grad ) {
+				solve_succeeded = solve_G_A_con_grad() ;
+				succeeded = solve_succeeded ;
+				if ( ! solve_succeeded ) {
+					if ( RANK == 0 ) {
+						cout << "Conjugate gradient method failed. " << endl ;
+						cout << "Trying cholesky instead \n" ;
+					}
+				} else {
+
+					auto time2 = std::chrono::system_clock::now() ;
+					std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
+					if ( RANK == 0 ) {
+						cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
+					}
+					
+					return true ;
+				}
+			}
 			if ( solve_succeeded && use_incremental_updates ) {
 				if ( nactive == A_last.dim + 1 && nactive > 2 ) {
 					Matrix chol0(chol) ;
@@ -367,6 +394,13 @@ public:
 						succeeded = chol_backsub() ;
 						if ( succeeded ) {
 							solve_succeeded = true ;
+
+							auto time2 = std::chrono::system_clock::now() ;
+							std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
+							if ( RANK == 0 ) {
+								cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
+							}
+							
 							return true ;
 						}
 					} else {
@@ -383,6 +417,13 @@ public:
 						succeeded = chol_backsub() ;
 						if ( succeeded ) {
 							solve_succeeded = true ;
+
+							auto time2 = std::chrono::system_clock::now() ;
+							std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
+							if ( RANK == 0 ) {
+								cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
+							}
+							
 							return true ;
 						} else {
 							if ( RANK == 0 ) {
@@ -418,6 +459,13 @@ public:
 				}
 			}
 			solve_succeeded = chol_backsub() ;
+
+			auto time2 = std::chrono::system_clock::now() ;
+			std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
+			if ( RANK == 0 ) {
+				cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
+			}			
+
 			return solve_succeeded ;
 		}
 	bool chol_backsub()
@@ -432,9 +480,15 @@ public:
 			Vector unity(nactive, 1.0) ;
 			chol.cholesky_sub(G_A_Inv_I, unity) ;
 
-			//cout << "G_A_Inv_I " << endl ;
-			//G_A_Inv_I.print() ;
+//			Vector G_A_Inv_I_cg(nactive, 0.0) ;
+//			G_A.con_grad(G_A_Inv_I_cg, unity, nactive, 3, 1.0e-08) ;
+			
+//			cout << "G_A_Inv_I " << endl ;
+//			G_A_Inv_I.print(cout) ;
 
+//			cout << "G_A_Inv_I_cg " << endl ;
+//			G_A_Inv_I_cg.print(cout) ;
+			
 			// Test to see if the solution worked.
 			Vector test(nactive) ;
 			G_A.dot(test, G_A_Inv_I) ;
@@ -462,7 +516,112 @@ public:
 			}
 			return true ;
 		}
-	
+
+
+	bool solve_G_A_con_grad()
+	// Use the conjugate gradient method to find G_A_Inv_I and A_A
+	// Does not use cholesky decomposition.
+	// Returns true if the solution passes consistency tests.
+		{
+
+			const double eps_fail = 1.0e-04 ;  // Max allowed solution error.
+
+			// Solve for G_A^-1 * unity
+			Vector unity(nactive, 1.0) ;
+
+			// if ( RANK == 0 ) {
+			// 	// cout << "G_A_Inv_I guess = \n" ;
+			// 	G_A_Inv_I.print(cout) ;
+			// }
+
+
+			if ( use_precondition ) {
+				// SSOR preconditioner
+				Matrix K(nactive, nactive) ;
+				Matrix pre_con(nactive, nactive) ;			
+				double omega = 1.1 ;
+				double omega_scale = sqrt(2.0-omega) ;
+			
+				for ( int i = 0 ; i < nactive ; i++ ) {
+					for ( int j = 0 ; j <= i ; j++ ) {
+						if ( i != j ) {
+							double val = -omega_scale * sqrt(omega/G_A.get(i,i))
+								* omega * G_A.get(i,j) / G_A.get(j,j) ;
+							K.set(i,j,val) ;
+						} else {
+							double val = omega_scale * sqrt(omega/G_A.get(i,i))
+								* (1.0-omega) ;
+							K.set(i,i,val) ;
+						}
+					}
+					for ( int j = i+1 ; j < nactive ; j++ ) {
+						K.set(i,j,0.0) ;
+					}
+				}
+				// pre_con = K^T * K
+				for ( int i = 0 ; i < nactive ; i++ ) {
+					for ( int j = 0 ; j < nactive ; j++ ) {
+						double sum = 0.0 ;
+						for ( int k = 0 ; k < nactive ; k++ ) {
+							sum += K.get(k,i) * K.get(k,j) ;
+						}
+						// Approximate pre-conditioner.
+						pre_con.set(i,j,sum) ;
+
+						// Use diagonal matrix.
+						//pre_con.set(i,j,0.0) ;
+					}
+					// Use diagonal matrix.
+					// pre_con.set(i,i,1.0/G_A.get(i,i)) ;
+				}
+
+				if ( ! G_A.pre_con_grad(G_A_Inv_I, unity, pre_con, nactive+10, 10, 1.0e-06) ) {
+					if ( RANK == 0 ) cout << "Pre-conditioned conjugate gradient failed\n" ;
+					return false ;
+				}
+			} else { // ! use_precondition
+			
+				if ( ! G_A.con_grad(G_A_Inv_I, unity, nactive+10, 10, 1.0e-06) ) {
+					if ( RANK == 0 ) cout << "Conjugate gradient failed\n" ;
+					return false ; 
+				} 
+			}
+			
+			// if ( RANK == 0 ) {
+			// 	cout << "G_A_Inv_I solution" << endl ;
+			// 	G_A_Inv_I.print(cout) ;
+			// }
+
+			// Test to see if the solution worked.
+			Vector test(nactive) ;
+			G_A.dot(test, G_A_Inv_I) ;
+			double errval = 0.0 ;
+			for ( int j = 0 ; j < nactive ; j++ ) {
+				errval += fabs(test.get(j)-1.0) ;
+				if ( fabs(test.get(j) - 1.0) > eps_fail ) {
+					if ( RANK == 0 ) {
+						cout << "Conjugate gradient solution test failed\n" ;
+						cout << "Error = " << fabs(test.get(j) - 1.0) << endl ;
+					}
+					return false ;
+				}
+			}
+			if ( nactive > 0 && RANK == 0 ) cout << "Cholesky error test = " << errval / nactive << endl ;
+			
+			
+			A_A = 0.0 ;
+			for ( int j = 0 ; j < nactive ; j++ ) {
+				A_A += G_A_Inv_I.get(j) ;
+			}
+			if ( A_A > 0.0 ) 
+				A_A = 1.0 / sqrt(A_A) ;
+			else {
+				if ( RANK == 0 ) cout << "A_A Normalization failed" << endl ;
+				return false ;
+			}
+			return true ;
+		}
+
 	void build_u_A()
 		{
 			const double eps_fail = 1.0e-04 ;
@@ -643,7 +802,7 @@ public:
 			}
 			if ( RANK == 0 ) cout << "Lasso step gamma limit = " << gamma_lasso << endl ;
 		}
-	
+
 	void update_beta()
 	// Update the regression coefficients (beta)
 		{
@@ -722,20 +881,19 @@ public:
 				}
 			}
 		}
-
 	
 	void print_unshifted_mu(ostream &out)
 	// Print the given prediction in unscaled units.
-	{
-		if ( RANK == 0 ) {
-			//out << "Y constant offset = " << offset << endl ;
-			for ( int j = 0 ; j < ndata ; j++ ) {
-				out << mu.get(j) + y.shift << endl ;
+		{
+			if ( RANK == 0 ) {
+				//out << "Y constant offset = " << offset << endl ;
+				for ( int j = 0 ; j < ndata ; j++ ) {
+					out << mu.get(j) + y.shift << endl ;
+				}
 			}
 		}
-	}
 	
-	void print_unshifted_mu(ostream &out, Vector &weights)
+  void print_unshifted_mu(ostream &out, Vector &weights)
 	// Print the given prediction in unscaled units.
 	{
 		if ( RANK == 0 ) {

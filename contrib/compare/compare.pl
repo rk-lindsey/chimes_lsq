@@ -30,15 +30,20 @@ my @ignore_phrases = ("allocation limits",
                       "the cache file", 
                       "too many iterations",
                       "version tag",
-		      "Date",
-		      "Warning: r < rmin",
-		      "Penalty potential",
-		      
-		      
-		      
-		      
-		      
-		      
+							 "Date",
+							 "Warning: r < rmin",
+							 "Penalty potential",
+							 "..options read.",
+							 "..xmat read.",
+							 "..yvec read.",
+							 "..xmat normalized.",
+							 "..yvec normalized.",
+							 "..reading single",
+							 "..weights read",
+							 "cholesky error test",
+							 "..reading split",
+							 "finished",
+							 "using the lasso algorithm"
 		      );
 
 my $read1 = 1 ;

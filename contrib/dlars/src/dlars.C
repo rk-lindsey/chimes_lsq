@@ -87,6 +87,8 @@ int main(int argc, char **argv)
 		{"lambda", required_argument, 0, 'l'},
 		{"max_norm", required_argument, 0, 'm'},
 		{"normalize", required_argument, 0, 'n'},
+		{"con_grad", no_argument, 0, 'c'},
+		{"precondition", no_argument, 0, 'p'},
 		{"restart", required_argument, 0, 'r'},
 		{"split_files", no_argument, 0, 's'},
 		{"weights", required_argument, 0, 'w'},
@@ -102,6 +104,8 @@ int main(int argc, char **argv)
 	string algorithm("lasso") ;       // Algorithm to use: lasso or lars
 	bool split_files = false ;        // Read input matrix from split files ?
 	bool normalize=true ;             // Whether to normalize the X matrix.
+	bool con_grad = false ;           // Whether to use congugate gradient algorithm to solve linear equations.
+	bool use_precondition = false ;
 	
 	// Stopping criteria.  Default is to calculate all possible solutions.
 	
@@ -113,7 +117,8 @@ int main(int argc, char **argv)
 	string restart_file ;
 
 	while (1) {
-		opt_type = getopt_long(argc, argv, "a:i:l:m:n:r:sh", long_options, &option_index) ;
+		// Colons in string indicate required arguments.
+		opt_type = getopt_long(argc, argv, "a:i:l:m:n:cpr:sw:h", long_options, &option_index) ;
 		if ( opt_type == -1 ) break ;
 		switch ( opt_type ) {
 		case 'a':
@@ -138,19 +143,27 @@ int main(int argc, char **argv)
 				stop_run(1) ;
 			}
 			break ;
+		case 'p':
+			use_precondition = true ;
+			break ;
+		case 'c':
+			con_grad = true ;
+			break ;
 		case 'r':
 			restart_file = string(optarg) ;
 			break ;
 		case 's':
 			split_files = true ;
 			break ;
-		case 'h':
-			display_usage(long_options) ;
-			stop_run(0) ;
 		case 'w':
 			weight_file=string(optarg) ;
 			break ;
+		case 'h':
+			// Help !
+			display_usage(long_options) ;
+			stop_run(0) ;
 		default:
+			if ( RANK == 0 ) cout << "Unrecognized option: " << (char) opt_type << endl ;
 			abort() ;
 		}
 	}
@@ -162,8 +175,7 @@ int main(int argc, char **argv)
 		do_lasso = true ;
 	} else {
 		if ( RANK == 0 ) cout << "Error: unrecognized algorithm: " << algorithm << endl ;
-		MPI_Finalize();
-		exit(0);
+		stop_run(1) ;
 	}
 	
 	if ( RANK == 0 ) {
@@ -196,15 +208,13 @@ int main(int argc, char **argv)
 		// Read the X matrix from a single file.
 		ifstream xfile(xname) ;
 		if ( ! xfile.is_open() ) {
-			cout << "Could not open " << xname << endl ;
-			MPI_Finalize();
-			exit(0);
+			if ( RANK == 0 ) cout << "Could not open " << xname << endl ;
+			stop_run(1) ;
 		}
 		ifstream dfile(dname) ;
 		if ( ! dfile.is_open() ) {
-			cout << "Error: could not open " << dname << endl ;
-			MPI_Finalize();
-			exit(0);
+			if ( RANK == 0 ) cout << "Error: could not open " << dname << endl ;
+			stop_run(1) ;
 		}
 		dfile >> nprops >> ndata ;
 		xmat.read(xfile, ndata, nprops, true) ;
@@ -217,9 +227,8 @@ int main(int argc, char **argv)
 
 	ifstream yfile(yname) ;
 	if ( ! yfile.is_open() ) {
-		cout << "Could not open " << yname << endl ;
-		MPI_Finalize();
-		exit(0);
+		if ( RANK == 0 ) cout << "Could not open " << yname << endl ;
+		stop_run(1) ;
 	}
 	
 	Vector yvec ;
@@ -235,9 +244,8 @@ int main(int argc, char **argv)
 		
 		ifstream weight_stream(weight_file) ;
 		if ( ! weight_stream.is_open() ) {
-			cout << "Could not open " << weight_file << endl ;
-			MPI_Finalize();
-			exit(0);
+			if ( RANK == 0 ) cout << "Could not open " << weight_file << endl ;
+			stop_run(1) ;
 		}
 		weights.read(weight_stream, ndata) ;
 		xmat.scale_rows(weights) ;
@@ -294,6 +302,9 @@ int main(int argc, char **argv)
 		}
 	}
 
+	lars.solve_con_grad = con_grad ;
+	lars.use_precondition = use_precondition ;
+	
 	Vector last_beta(nprops) ; // Last good coefficients
 
 	double last_obj_func = 1.0e50 ;
