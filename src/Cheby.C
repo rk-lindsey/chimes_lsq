@@ -684,11 +684,6 @@ void Cheby::Deriv_2B(A_MAT & A_MATRIX)
 					{
 						A_MATRIX.FRAME_ENERGIES[vstart+i]    += fcut * Tn[i+1];
 					}
-					else if(CONTROLS.FIT_ENER_PER_ATOM) 
-					{
-						A_MATRIX.ATOM_ENERGIES[a1     ][vstart+i] += (fcut * Tn[i+1])/2.0;
-						A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+i] += (fcut * Tn[i+1])/2.0;
-					}
 				 }
 			 } else if (false)//( rlen <= FF_2BODY[curr_pair_type_idx].S_MINIM ) 
 			 {
@@ -1113,61 +1108,6 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 								{
 									A_MATRIX.FRAME_ENERGIES[vstart+row_offset] += fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
 								}
-								else if(CONTROLS.FIT_ENER_PER_ATOM) 
-					 			{
-					
-									// Method-1:
-									// Assume that the per-atom energy is just the n-body energy (3-body, in this case) dividided evently
-									// across bodies... 
-									/*
-								
-									double Eijk_wo_const = fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
-									
-									A_MATRIX.ATOM_ENERGIES[a1     ][vstart+row_offset] += Eijk_wo_const/3.0;
-									A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+row_offset] += Eijk_wo_const/3.0;
-									A_MATRIX.ATOM_ENERGIES[fidx_a3][vstart+row_offset] += Eijk_wo_const/3.0;
-									*/
-									// Method-2:
-									// Assigning per-atom energies here will be a bit tricky. This is an approximate method with many caveats.
-									// Here's how it will work:
-									// 
-									// Assume order = 1, i.e. no summation over orders needed.
-									// 
-									// Assume E_ijk = C_ijk * [ fc_ij * fc_ik * fc_jk ] * [ T_ij * T_ik * T_jk ]
-									//
-									// Then we can say that the effective pair contributions to the E_ijk is:
-									//
-									// X_eff,ij = [fc_ij * T_ij] / [ fc_ij * fc_ik * fc_jk ] * [ T_ij * T_ik * T_jk ]
-									// X_eff,ik = [fc_ik * T_ik] / [ fc_ij * fc_ik * fc_jk ] * [ T_ij * T_ik * T_jk ]
-									// X_eff,jk = [fc_jk * T_jk] / [ fc_ij * fc_ik * fc_jk ] * [ T_ij * T_ik * T_jk ]
-									//
-									// And we can normalize these X_eff,ab values by thier sum:
-									//
-									// X_eff,ij,norm = X_eff,ij / ( X_eff,ij + X_eff,ik + X_eff,jk )
-									// X_eff,ik,norm = X_eff,ik / ( X_eff,ij + X_eff,ik + X_eff,jk )
-									// X_eff,jk,norm = X_eff,jk / ( X_eff,ij + X_eff,ik + X_eff,jk )	
-									//
-									// And finally, use these to approximate (with serveral caveats!) the effective energy on the ith atom:
-									//
-									// E_i,eff = E_ijk/2.0 * (X_eff,ij,norm + X_eff,ik,norm)	
-									
-									double X_eff_ij = (fcut_ij * Tn_ij[pow_ij]) / (fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]);
-									double X_eff_ik = (fcut_ik * Tn_ik[pow_ik]) / (fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]);
-									double X_eff_jk = (fcut_jk * Tn_jk[pow_jk]) / (fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]);
-									
-									double normfac  = X_eff_ij + X_eff_ik + X_eff_jk;
-									
-									X_eff_ij /= normfac;		 
-									X_eff_ik /= normfac;
-									X_eff_jk /= normfac;
-									
-									double Eijk_wo_const = fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
-									
-									A_MATRIX.ATOM_ENERGIES[a1     ][vstart+row_offset] += Eijk_wo_const/2.0 * (X_eff_ij + X_eff_ik);
-									A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+row_offset] += Eijk_wo_const/2.0 * (X_eff_ij + X_eff_jk);
-									A_MATRIX.ATOM_ENERGIES[fidx_a3][vstart+row_offset] += Eijk_wo_const/2.0 * (X_eff_ik + X_eff_jk);
-									
-					 			}
 							}
 						} // end if rlen_jk within cutoffs...
 					} // end if rlen_ik within cutoffs...	
@@ -1617,41 +1557,6 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 						if(CONTROLS.FIT_ENER) 
 						{
 							A_MATRIX.FRAME_ENERGIES[vstart+row_offset]    += TMP_ENER;
-						}
-						else if(CONTROLS.FIT_ENER_PER_ATOM) 
-					 	{
-							// Method-1: See 3-body calculation for explaination
-
-							/*
-							A_MATRIX.ATOM_ENERGIES[a1     ][vstart+row_offset] += TMP_ENER/4.0;
-							A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+row_offset] += TMP_ENER/4.0;
-							A_MATRIX.ATOM_ENERGIES[fidx_a3][vstart+row_offset] += TMP_ENER/4.0;
-							A_MATRIX.ATOM_ENERGIES[fidx_a4][vstart+row_offset] += TMP_ENER/4.0;							
-							*/
-
-							//Method-2: See 3-body calculation for explaination
-
-							double X_eff_ij = (fcut[0] * Tn_ij[powers[0]]) / TMP_ENER;
-							double X_eff_ik = (fcut[1] * Tn_ik[powers[1]]) / TMP_ENER;
-							double X_eff_il = (fcut[2] * Tn_il[powers[2]]) / TMP_ENER;
-							double X_eff_jk = (fcut[3] * Tn_jk[powers[3]]) / TMP_ENER;
-							double X_eff_jl = (fcut[4] * Tn_jl[powers[4]]) / TMP_ENER;
-							double X_eff_kl = (fcut[5] * Tn_kl[powers[5]]) / TMP_ENER;
-							
-							double normfac  =  X_eff_ij +  X_eff_ik +  X_eff_il +  X_eff_jk +  X_eff_jl + X_eff_kl;
-							
-							X_eff_ij /= normfac;
-							X_eff_ik /= normfac;
-							X_eff_il /= normfac;
-							X_eff_jk /= normfac;
-							X_eff_jl /= normfac;
-							X_eff_kl /= normfac;
-							
-							A_MATRIX.ATOM_ENERGIES[a1     ][vstart+row_offset] += TMP_ENER/2.0 * (X_eff_ij + X_eff_ik + X_eff_il);
-							A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+row_offset] += TMP_ENER/2.0 * (X_eff_ij + X_eff_jk + X_eff_jl);
-							A_MATRIX.ATOM_ENERGIES[fidx_a3][vstart+row_offset] += TMP_ENER/2.0 * (X_eff_ik + X_eff_jk + X_eff_kl);
-							A_MATRIX.ATOM_ENERGIES[fidx_a4][vstart+row_offset] += TMP_ENER/2.0 * (X_eff_il + X_eff_jl + X_eff_kl);
-							
 						}
 					}
 				}	// End loop over 4th atom							

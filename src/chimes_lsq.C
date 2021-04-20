@@ -659,9 +659,7 @@ static int process_frame(	A_MAT &A_MATRIX,
 		
 	bool DUMMY_FIT_STRESS	     = CONTROLS.FIT_STRESS;    
 	bool DUMMY_FIT_STRESS_ALL    = CONTROLS.FIT_STRESS_ALL;
-
-	bool DUMMY_FIT_ENER	     = CONTROLS.FIT_ENER;	 
-	//bool DUMMY_FIT_ENER_PER_ATOM = CONTROLS.FIT_ENER_PER_ATOM;
+	bool DUMMY_FIT_ENER	         = CONTROLS.FIT_ENER;	 
 
 	// Only include stress tensor data for first NSTRESS frames..
 	
@@ -674,7 +672,6 @@ static int process_frame(	A_MAT &A_MATRIX,
 	if((CONTROLS.NENER != -1) && (i >= CONTROLS.NENER))
 	{
 		CONTROLS.FIT_ENER          = false;	
-		//CONTROLS.FIT_ENER_PER_ATOM = false;
 	}
 			
 	// This output is specific to the number of processors.
@@ -714,12 +711,8 @@ if(!called_before)
 	
 	CONTROLS.FIT_STRESS        = DUMMY_FIT_STRESS; 
 	CONTROLS.FIT_STRESS_ALL    = DUMMY_FIT_STRESS_ALL;
-
 	CONTROLS.FIT_ENER          = DUMMY_FIT_ENER;	
-	//CONTROLS.FIT_ENER_PER_ATOM = DUMMY_FIT_ENER_PER_ATOM;	
-
-
-	CONTROLS.FIT_ENER_EVER = (CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM);
+	CONTROLS.FIT_ENER_EVER     = CONTROLS.FIT_ENER;
 
 	A_MATRIX.PRINT_FRAME(CONTROLS, SYSTEM, ATOM_PAIRS, CHARGE_CONSTRAINTS, i) ;
 	int total_forces = 3 * A_MATRIX.FORCES.size() ;

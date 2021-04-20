@@ -2118,10 +2118,6 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 	ACCEL       .resize(ATOMS); // Use for calculated forces in ZCalc_Ewald.
 	CHARGES     .resize(ATOMS);
 	ATOMTYPE_IDX.resize(ATOMS);
-		
-	if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
-		if(CONTROLS.FIT_ENER_PER_ATOM)
-			QM_POT_ENER_PER_ATOM.resize(ATOMS);
 			
 	// Read trajectory, convert to proper units, and apply PBC
 			
@@ -2149,10 +2145,6 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 		TRAJ_INPUT >> FORCES[j].X;
 		TRAJ_INPUT >> FORCES[j].Y;
 		TRAJ_INPUT >> FORCES[j].Z;
-
-		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
-			if(CONTROLS.FIT_ENER_PER_ATOM) // We're fitting per-atom energies. Read one per line.
-				TRAJ_INPUT >> QM_POT_ENER_PER_ATOM[j];
 
 		// Convert forces from atomic (H/B) to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
 				
@@ -2302,10 +2294,10 @@ void JOB_CONTROL::LSQ_SETUP(int npairs, int no_atom_types)
 		if((FIT_STRESS  || FIT_STRESS_ALL) && NSTRESS == -1)
 			NSTRESS = NFRAMES;
 		
-		if((FIT_ENER || FIT_ENER_PER_ATOM) && NENER == -1)
+		if(FIT_ENER && NENER == -1)
 			NENER = NFRAMES;		
 	
-		FIT_ENER_EVER = FIT_ENER || FIT_ENER_PER_ATOM ;	// Is energy ever fit ?
+		FIT_ENER_EVER = FIT_ENER;	// Is energy ever fit ?
 
 		if (INFILE.size() == 1)
 			INFILE_FRAMES.push_back(NFRAMES);

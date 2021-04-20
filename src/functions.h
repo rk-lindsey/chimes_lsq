@@ -170,7 +170,6 @@ class JOB_CONTROL
 		bool FIT_STRESS_ALL;	      // Should stress tensors be included in the fit? --> This is ONLY for ALL components, xx, xy, xz ... zz 
 		int  NSTRESS;		      // Only fit stresses for first NSTRESS frames of trajectory
 		bool FIT_ENER;  	      // Should the total frame energy be included in the fit?
-		bool FIT_ENER_PER_ATOM;       // Should the energy of each atom be included in the fit?
 		bool FIT_ENER_EVER ;	      // Is energy ever included in the fit ?
 		int  NENER;
 		bool CALL_EWALD;	      // Should ewald subroutines be called?
@@ -242,7 +241,6 @@ class JOB_CONTROL
 			COMPARE_FORCE     = false;	// is this variable really necessary for LSQ?
 			CALL_EWALD        = false;
 			FIT_ENER          = false;
-			FIT_ENER_PER_ATOM = false;
 			FIT_STRESS        = false;
 			FIT_STRESS_ALL    = false;
 			NSTRESS           = -1;

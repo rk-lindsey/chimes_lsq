@@ -43,7 +43,7 @@ void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS, vector<
 	INITIALIZE_NATOMS  (SYSTEM.ATOMS,SYSTEM.ATOMTYPE, ATOM_PAIRS);
 		
 	INITIALIZE_FORCES  (SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE);
-	INITIALIZE_ENERGIES(SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER, CONTROLS.FIT_ENER_PER_ATOM);
+	INITIALIZE_ENERGIES(SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER);
 	INITIALIZE_STRESSES(CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_STRESS, CONTROLS.FIT_STRESS_ALL);
 	INITIALIZE_CHARGES (NPAIRS,SYSTEM.ATOMS);
 }
@@ -107,7 +107,7 @@ void A_MAT::INITIALIZE_FORCES(int ATOMS, int NPARAM)
 	}
 }
 
-void A_MAT::INITIALIZE_ENERGIES(int ATOMS,int PARAMS, bool FRAME_ENER, bool ATOM_ENER)
+void A_MAT::INITIALIZE_ENERGIES(int ATOMS,int PARAMS, bool FRAME_ENER)
 {
 	if (FRAME_ENER)
 	{
@@ -448,29 +448,6 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		fileb_labeled << CONTROLS.INFILE_ENERGY_FLAGS[my_file] << "+1 " << SYSTEM.QM_POT_ENER << endl;
 		data_count += 3 ;
 		}
-	}
-	else if(CONTROLS.FIT_ENER_PER_ATOM)
-	{
-		// Check if we need to exclude some energy data from the A and b text files.
-		if(N < CONTROLS.NENER)
-		{
-			// Output A.txt 
-			
-			for(int a=0; a<ATOM_ENERGIES.size(); a++)
-			{
-				for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
-					fileA << ATOM_ENERGIES[a][n] << " ";
-				add_col_of_ones("ENERGY", DO_ENER, fileA);
-				fileA << endl;
-
-				// Output b.txt stuff
-				
-				fileb                  << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
-				data_count++ ;
-			
-				fileb_labeled << CONTROLS.INFILE_ENERGY_FLAGS[my_file] << "+2 " << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
-			}
-                }
 	}
 	fileA.flush() ;
 	fileb.flush() ;
