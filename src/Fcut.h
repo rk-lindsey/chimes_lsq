@@ -5,12 +5,7 @@
 
 enum class FCUT_TYPE // Contains allowed force cut-off types.
 {
-	CUBESTRETCH,
 	CUBIC,
-	COSINE,
-	CUBSIG,
-	SIGMOID,
-	SIGFLT,
 	TERSOFF
 } ;
 
@@ -18,15 +13,11 @@ class FCUT
 {
 public:
 
-	double STEEPNESS;
 	double OFFSET; 
-	double HEIGHT;
+
 
 	// power used in the cutoff function.
-	int  POWER ;
-
-	// 2, 3, 4, body interaction.
-	int BODIEDNESS ;
+	int  POWER = 3 ;
 
 	// Type of cutoff-function employed.
 	FCUT_TYPE TYPE ;
