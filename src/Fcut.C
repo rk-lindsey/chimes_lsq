@@ -86,7 +86,7 @@ FCUT::FCUT()
 void FCUT::set_type(string s) 
 // Set the type of the cutoff function.
 {
-	else if ( s == "CUBIC" ) 
+	if ( s == "CUBIC" ) 
 	{
 		TYPE = FCUT_TYPE::CUBIC;
 	} 

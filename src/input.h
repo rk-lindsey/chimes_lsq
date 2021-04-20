@@ -51,9 +51,7 @@ class INPUT
 					vector<int>               & TMP_ATOMTYPEIDX, 
 					vector<string>            & TMP_ATOMTYPE);
 							
-		void PARSE_INFILE_MD (	JOB_CONTROL 	& CONTROLS, 
-					PES_PLOTS	& FF_PLOTS, 
-					NEIGHBORS	& NEIGHBOR_LIST);		
+		void PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);		
 		
 	private:	// private funcitons
 	
@@ -114,12 +112,8 @@ class INPUT
 	
 		// MD controls initialization
 	
-		void PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);
-	
-		// Variables for printing out PES for a given parameter file
-	
-		void PARSE_CONTROLS_PLOTPES(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS);
-	
+		void PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS,NEIGHBORS & NEIGHBOR_LIST);
+		
 		// For self-consistent fitting type runs
 	
 		void PARSE_CONTROLS_SLFCNST();

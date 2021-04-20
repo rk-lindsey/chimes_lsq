@@ -1813,8 +1813,7 @@ void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIP
 	// Each 2-body interaction needs to be done separately.
 	for(int i=0; i<FF_2BODY.size(); i++) 
 	{
-		FF_2BODY[i].FORCE_CUTOFF.parse_input(line);
-		FF_2BODY[i].FORCE_CUTOFF.BODIEDNESS = 2;		
+		FF_2BODY[i].FORCE_CUTOFF.parse_input(line);		
 	}
 		
 	// Handle the many-body part

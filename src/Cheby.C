@@ -2876,7 +2876,7 @@ void Cheby::Print_2B(int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_C
 	return;
 }  
 
-void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan)	
+void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, int scan)	
 // Print heat map slices for 2+3-body cheby potentials
 {
 	

@@ -49,11 +49,10 @@ using namespace std;
 	
 // Define function headers -- general
 
-static void read_input        (string & INFILE, JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);
+static void read_input        (string & INFILE, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
 static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NATMTYP, vector<string>& TMP_ATOMTYPE, vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES,  vector<double>& TMP_MASS, vector<int> &TMP_SIGN) ;
-static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP, const vector<string>& TMP_ATOMTYPE, const vector<int>& TMP_ATOMTYPEIDX, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS, const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
+static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int NATMTYP, const vector<string>& TMP_ATOMTYPE, const vector<int>& TMP_ATOMTYPEIDX, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS, const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
 static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, const JOB_CONTROL &CONTROLS) ;
-static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE, CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby) ;
 
 // Define function headers -- MPI
 
@@ -163,7 +162,6 @@ int main(int argc, char* argv[])
   
   string INFILE = argv[1];
 	
-  PES_PLOTS FF_PLOTS;			// Declare the data object that will help set up PES plots
   FRAME      SYSTEM;			// Declare the data object that will hold the system coordinates, velocities, accelrations, etc.
   CONSTRAINT ENSEMBLE_CONTROL;		// Declare the class that will handle integration/constraints
   THERMO_AVG AVG_DATA ;
@@ -239,7 +237,7 @@ int main(int argc, char* argv[])
   ifstream PARAMFILE;
   ifstream COORDFILE;
 
-  read_input(INFILE, CONTROLS, FF_PLOTS,NEIGHBOR_LIST);		// Populate object with user defined values
+  read_input(INFILE, CONTROLS, NEIGHBOR_LIST);		// Populate object with user defined values
 	
   cout.precision(15);		// Set output precision
 	
@@ -265,12 +263,6 @@ int main(int argc, char* argv[])
   if ( CONTROLS.PRINT_VELOC ) 
 	 OUT_VELOCFILE.open("velocout.txt");	
 	 
-  ////////////////////////////////////////////////////////////
-  // Hop to PES printing, if requested 
-  ////////////////////////////////////////////////////////////
-	
-  if (FF_PLOTS.N_PLOTS > 0)
-	 goto FF_SETUP_1; 
 
   ////////////////////////////////////////////////////////////
   // Open all input files and count the total number of expected atoms
@@ -502,8 +494,6 @@ int main(int argc, char* argv[])
   // Figure out atom charges and masses, based on parameter 
   // file
   ////////////////////////////////////////////////////////////
-	 
-FF_SETUP_1: 
 	
   if(RANK==0) 
 	 cout << "Reading atom info from parameter file..." << endl; 
@@ -511,10 +501,6 @@ FF_SETUP_1:
   // Read in the possible atom types and their features	
 
   read_atom_types(PARAMFILE, CONTROLS, NATMTYP, TMP_ATOMTYPE, TMP_NATOMTYPE, TMP_ATOMTYPEIDX, TMP_CHARGES, TMP_MASS, TMP_SIGN) ;
-	
-  if (FF_PLOTS.N_PLOTS > 0)
-	 goto FF_SETUP_2; 
-	
 
   // Assign atom features to atoms in SYSTEM data object, and the PAIR_FF object
   // Figure out how many atoms of each type we have... this can be useful for
@@ -661,9 +647,7 @@ FF_SETUP_1:
   // Begin setup of force field data objects...
   ////////////////////////////////////////////////////////////  
 
-FF_SETUP_2:
-
-  read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, SYSTEM, FF_PLOTS.N_PLOTS, NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX,TMP_CHARGES, TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE) ;
+  read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, SYSTEM, NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX,TMP_CHARGES, TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE) ;
 	
   // Set the atom charges
 	
@@ -691,25 +675,23 @@ FF_SETUP_2:
   // Set up the neighbor list
   ////////////////////////////////////////////////////////////
 
-  if(!CONTROLS.PLOT_PES)
-  {
-	 if(RANK == 0)
-		cout << "Initializing the neighbor list..." << endl;
+  if(RANK == 0)
+  	cout << "Initializing the neighbor list..." << endl;
 
-	if (CONTROLS.USE_3B_CHEBY)
-	{
-	 	 TRIPS.update_minmax_cutoffs(FF_2BODY);
-		 NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF;
-	}
-	if (CONTROLS.USE_4B_CHEBY)	       
-	{
-		QUADS.update_minmax_cutoffs(FF_2BODY);
-		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
-	}
-		
-	NEIGHBOR_LIST.INITIALIZE_MD(SYSTEM);
-	NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+  if (CONTROLS.USE_3B_CHEBY)
+  {
+   	 TRIPS.update_minmax_cutoffs(FF_2BODY);
+  	 NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF;
   }
+  if (CONTROLS.USE_4B_CHEBY)	       
+  {
+  	QUADS.update_minmax_cutoffs(FF_2BODY);
+  	NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
+  }
+  	
+  NEIGHBOR_LIST.INITIALIZE_MD(SYSTEM);
+  NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+  
 	
 	
   ////////////////////////////////////////////////////////////
@@ -748,21 +730,8 @@ FF_SETUP_2:
   }
 
 
-  ////////////////////////////////////////////////////////////
-  // If PES printing is requested, do so here and then 
-  // exit the program
-  ////////////////////////////////////////////////////////////  	
-	
   Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP} ;
 
-  if(RANK==0)
-  {
-	 if (FF_PLOTS.N_PLOTS > 0)
-	 {
-		print_pes(FF_PLOTS, FF_2BODY, PAIR_MAP, PAIR_MAP_REVERSE, TRIPS, QUADS, CONTROLS, cheby) ;
-		exit_run(0);
-	 }
-  }	
 
   ////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////
@@ -1238,8 +1207,7 @@ FF_SETUP_2:
 
 
 static void read_input(	string & INFILE,
-			JOB_CONTROL & CONTROLS, 
-			PES_PLOTS & FF_PLOTS, 
+			JOB_CONTROL & CONTROLS,
 			NEIGHBORS & NEIGHBOR_LIST)// UPDATED
 {
 	if (RANK==0)
@@ -1254,9 +1222,7 @@ static void read_input(	string & INFILE,
 	
 	// Read the LSQ input file
 	
-	MD_INPUT.PARSE_INFILE_MD(	CONTROLS, 
-					FF_PLOTS, 
-					NEIGHBOR_LIST);
+	MD_INPUT.PARSE_INFILE_MD(CONTROLS, NEIGHBOR_LIST);
 }
 
 static void print_for_dftbplus(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
@@ -1944,7 +1910,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				map<string,int> &PAIR_MAP, 
 				NEIGHBORS &NEIGHBOR_LIST, 
 				FRAME& SYSTEM, 
-				int N_PLOTS, 
 				int NATMTYP,
                            	const vector<string>& TMP_ATOMTYPE, 
 				const vector<int>& TMP_ATOMTYPEIDX,
@@ -2064,7 +2029,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		{
 		  cout << "   ...read complete." << endl << endl;
 		  cout << "Notes on simulation: " << endl;
-		  cout << "	Using fpenalty power " << FPENALTY_POWER << endl;
 		  
 		  cout << "	Using the following fcut style for 2B Chebyshev interactions: ";
 		  FF_2BODY[0].FORCE_CUTOFF.print_params();	
@@ -2258,15 +2222,13 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
 		  {
 			 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
-//NEIGHBOR_LIST.MAX_CUTOFF_3B = FF_2BODY[i].S_MAXIM;
-//			 NEIGHBOR_LIST.MAX_CUTOFF_4B = FF_2BODY[i].S_MAXIM;
 		  }
 				 	
 		  PARAMFILE >> FF_2BODY[i].S_DELTA;
 		  
 		  FF_2BODY[i].KILLLEN = FF_2BODY[i].S_DELTA; // Killlen is/can only be used when ff type is cheby
 		  
-		if ((N_PLOTS == 0) && (! SYSTEM.BOXDIM.IS_RCUT_SAFE(FF_2BODY[i].S_MAXIM, CONTROLS.N_LAYERS)))  
+		if ((! SYSTEM.BOXDIM.IS_RCUT_SAFE(FF_2BODY[i].S_MAXIM, CONTROLS.N_LAYERS)))  
 		{
 			if (isatty(fileno(stdout)) && RANK == 0)
 			{
@@ -2360,7 +2322,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 // Setup force cutoff type for 2-body
 					
 			 FF_2BODY[0].FORCE_CUTOFF.set_type("CUBIC");
-			 FF_2BODY[0].FORCE_CUTOFF.BODIEDNESS = 2 ;
 					
 			 // Copy all class members.
 			 for(int i=1; i<FF_2BODY.size(); i++)
@@ -2641,19 +2602,16 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				}
 			 }
 		  }
-		  if(!CONTROLS.PLOT_PES)
+		  for(int a=0; a<SYSTEM.ATOMS;a++)
 		  {
-			 for(int a=0; a<SYSTEM.ATOMS;a++)
-			 {
-				for(int i=0; i<NATMTYP; i++)
-				{
-				  if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
-				  {
-					 SYSTEM.CHARGES[a] = TMP_CHARGES[i];
-					 break;
-				  }			
-				}
-			 }
+		  	for(int i=0; i<NATMTYP; i++)
+		  	{
+		  	  if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
+		  	  {
+		  		 SYSTEM.CHARGES[a] = TMP_CHARGES[i];
+		  		 break;
+		  	  }			
+		  	}
 		  }
 		  check_charges(SYSTEM, TMP_CHARGES, TMP_ATOMTYPE, FF_2BODY, NATMTYP) ;
 			
@@ -2853,117 +2811,6 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
   cout << endl;
 }
 
-static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE, CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby)
-// Print the potential energy surface. The quads argument is unused for now.
-{
-
-  vector<CLUSTER>& FF_3BODY = TRIPS.VEC ;
-  
-  int ij, ik, jk;
-  string ATM_TYP_1, ATM_TYP_2, ATM_TYP_3;
-
-
-  ifstream FULL_INFILE_3B;
-  ifstream SCAN_INFILE_3B;
-  ifstream SCAN_INFILE_2B;
-		
-  ofstream FULL_OUTFILE_3B;
-  ofstream SCAN_OUTFILE_3B;
-  ofstream SCAN_OUTFILE_2B;			
-
-  vector<double> IJ_DIST_3B;
-  vector<double> IK_DIST_3B;
-  vector<double> JK_DIST_3B;
-  vector<double> PES_VAL_3B;
-		
-  vector<double> IJ_DIST_2B;
-  vector<double> IK_DIST_2B;
-  vector<double> JK_DIST_2B;
-  vector<double> PES_VAL_2B_IJ;
-  vector<double> PES_VAL_2B_IK;
-  vector<double> PES_VAL_2B_JK;
-		
-  int idx_3b = 0;
-  int scan_2b_idx = 0;
-		
-  for (int i=0; i<FF_PLOTS.N_PLOTS; i++)
-  {
-	 cout << "	Printing force field PES for: " << FF_PLOTS.PES_TYPES[i] << endl;
-			
-	 // Figure out whether this is a 2- or 3-body interaction
-	 // Figure out the index of the interaction type
-	 // If it is 3-body, figure out:
-	 // 1. the individual atom types
-	 // 2. the pair type indicies
-			
-		
-	 IJ_DIST_3B.clear();
-	 IK_DIST_3B.clear();
-	 JK_DIST_3B.clear();
-	 PES_VAL_3B.clear();		
-			
-	 IJ_DIST_2B.clear();
-	 IK_DIST_2B.clear();
-	 JK_DIST_2B.clear();
-			
-	 PES_VAL_2B_IJ.clear();
-	 PES_VAL_2B_IK.clear();
-	 PES_VAL_2B_JK.clear();
-								
-			
-	 if(FF_PLOTS.NBODY[i] == 3)	// Eventually also add a check that tye 3B type is Chebyshev...
-	 {
-		ij =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[0]];
-		ik =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[1]];
-		jk =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[2]];
-		
-		/*
-		cout << ij << " " << ik << " " << jk << endl;
-		cout << FF_2BODY[0].ATM1TYP << endl;
-		cout << FF_2BODY[0].ATM2TYP << endl;
-		cout << FF_2BODY[1].ATM1TYP << endl;
-		cout << FF_2BODY[1].ATM2TYP << endl;
-		cout << FF_2BODY[2].ATM1TYP << endl;
-		cout << FF_2BODY[2].ATM2TYP << endl;
-		*/
-			
-		ATM_TYP_1 = FF_2BODY[ij].ATM1TYP;
-		ATM_TYP_2 = FF_2BODY[ij].ATM2TYP;
-		ATM_TYP_3 = FF_2BODY[jk].ATM1TYP;
-				
-		cout << "	Will work with pair types: " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[0] << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[1] << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[2] << endl;
-		cout << "	and atom types:            " << ATM_TYP_1 << " " << ATM_TYP_2 << " " << ATM_TYP_3 << endl;
-				
-				
-		if(FF_PLOTS.DO_4D)
-		{
-		  cout << "ERROR: Functionality depreciated. Code needs updating " << endl; 
-		  exit_run(0);
-		}
-
-		cheby.Print_3B(TRIPS, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk, FF_PLOTS, i);	
-				
-		scan_2b_idx++;				
-	 }
-	 else if(FF_PLOTS.NBODY[i] == 2)
-	 {
-
-		cout << "	Will work with pair types: " << PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]] << endl;
-		cout << "	and atom types:            " << FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << endl;
-					
-		cheby.Print_2B(FF_PLOTS.TYPE_INDEX[i], PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]], FF_PLOTS.INCLUDE_FCUT, FF_PLOTS.INCLUDE_CHARGES, FF_PLOTS.INCLUDE_PENALTY, "");
-	 }
-	 else
-	 {
-		cout << "Functionality not programmed yet." << endl;
-	 }
-
-	 cout << "	...Force field PES printing complete." << endl;
-		
-	 idx_3b++;
-			
-  }
-}
 
 static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifstream &CMPR_FORCEFILE)
 // Read coordinates,  and optionally velocities and forces.  There is support for more than one coordinate

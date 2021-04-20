@@ -6,21 +6,9 @@
 	#define FORCECHECK 0
 #endif
 
-#ifndef FPENALTY_POWER
-	#define FPENALTY_POWER 3.0
-#endif
-
 #ifndef WARN
 	#define WARN TRUE
 #endif 
-
-#define GNUPLOT 1
-#define MATLAB  2
-#define PYTHON  3
-
-#ifndef PESFORMAT
-	#define PESFORMAT GNUPLOT
-#endif
 
 #ifndef _HELPERS_
 #define _HELPERS_
@@ -134,7 +122,6 @@ class JOB_CONTROL
 		double TEMPERATURE;	      // Replaces TempMD
 		double PRESSURE;	      // Introduced for NPT
 		string ENSEMBLE;	      // NVE, NPT, NVT
-		bool   PLOT_PES;	      // Plot out the potential energy surfaces? IF so, nothing else will be done.
 		bool   CHECK_FORCE;	      // If true, numerically check forces from derivatives of energy.
 		bool   COMPARE_FORCE;	      // Replaces if_read_force... If TRUE, read in read in a set of forces from a file for comparison with those computed by this code
 
@@ -419,46 +406,6 @@ class FRAME
 		void build_layers(int N_LAYERS) ;
 };
 
-struct PES_PLOTS
-{
-	int N_PLOTS;
-	vector<string> PES_TYPES;
-	vector<int> NBODY;
-	vector<int> TYPE_INDEX;
-	string TYPE_1;
-	string TYPE_2;
-	string TYPE_3;
-	bool INCLUDE_2B;
-	bool INCLUDE_FCUT;
-	bool INCLUDE_CHARGES;
-	bool INCLUDE_PENALTY;
-	bool DO_4D;	// Do we want to include the 4D 3-body scan data??
-	
-	// Variables used for scans of 3b potential
-	
-	int N_SCAN;
-	
-	vector<int>PARENT_TYPE;
-	
-	vector<int> FIX_PAIR_1;
-	vector<int> FIX_PAIR_2;
-	
-	vector<double> FIX_VAL_1;
-	vector<double> FIX_VAL_2;
-	
-	vector<int> SCAN_PAIR;
-	
-	vector<string> SCAN_TYPE;
-	
-	// Variables used to add 2b to 3b
-	
-	vector<string> 	SEARCH_STRING_2B;
-	vector<XYZ_INT>	IJ_IK_JK_TYPE;
-		
-	
-	PES_PLOTS(): N_PLOTS(0), INCLUDE_2B(0), DO_4D(1), N_SCAN(0) {} 
-		
-};
 
 struct CHARGE_CONSTRAINT
 {

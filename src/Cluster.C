@@ -751,7 +751,6 @@ void CLUSTER_LIST::parse_fcut(string LINE)
 // Parse the force cutoff parameters for a cluster.
 {
   VEC[0].FORCE_CUTOFF.parse_input(LINE);
-  VEC[0].FORCE_CUTOFF.BODIEDNESS = VEC[0].NATOMS;
 
   // Copy all class members.
   for(int i=1; i<VEC.size(); i++)

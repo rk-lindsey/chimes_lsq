@@ -217,18 +217,14 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,
 	RUN_SANITY_LSQ(CONTROLS);	
 
 }
-void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST)
+void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 {
 	READ_FILE();
 	
 	// MD controls initialization
 	
-	PARSE_CONTROLS_INITIAL(CONTROLS, FF_PLOTS, NEIGHBOR_LIST);
-	
-	// Variables for printing out PES for a given parameter file
-	
-	PARSE_CONTROLS_PLOTPES(CONTROLS, FF_PLOTS);
-	
+	PARSE_CONTROLS_INITIAL(CONTROLS, NEIGHBOR_LIST);
+		
 	// For self-consistent fitting type runs
 	
 	PARSE_CONTROLS_SLFCNST();
@@ -1217,14 +1213,13 @@ void INPUT::RUN_SANITY_LSQ(JOB_CONTROL & CONTROLS)
 		
 // MD controls initialization
 
-void INPUT::PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST) 		
+void INPUT::PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST) 		
 {
 	// Set some defaults
 	
 	CONTROLS.IS_LSQ           = false;
 	CONTROLS.SELF_CONSIST     = false;
 	CONTROLS.SUBTRACT_FORCE   = false;
-	CONTROLS.PLOT_PES         = false;
 	CONTROLS.WRAP_COORDS      = true;
 	CONTROLS.PRINT_VELOC      = false;
 	CONTROLS.NVT_CONV_CUT     = 0.10;
@@ -1251,111 +1246,8 @@ void INPUT::PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS,
 	
 	CONTROLS.PENALTY_THRESH = -1.0;	// Default is to not enforce a max-allowed penalty
 	CONTROLS.IO_ECONS_VAL   =  0.0;
-	
-	FF_PLOTS.INCLUDE_FCUT     = true;
-	FF_PLOTS.INCLUDE_CHARGES  = true;
-	FF_PLOTS.INCLUDE_PENALTY  = true;
-	FF_PLOTS.DO_4D            = false;
 }
 
-// Variables for printing out PES for a given parameter file
-
-void INPUT::PARSE_CONTROLS_PLOTPES(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS)
-{
-	int N_CONTENTS = CONTENTS.size();
-	
-	for (int i=0; i<N_CONTENTS; i++)
-	{
-		if (found_input_keyword("PLOTPES", CONTENTS(i)))			
-		{
-			CONTROLS.PLOT_PES = convert_bool(CONTENTS(i+1,0),i+1);
-			
-			if (CONTROLS.PLOT_PES)
-			{
-				if (RANK==0)
-					cout << "	# PLOTPES #: true... will only plot PES's" << endl;	
-			
-				FF_PLOTS.N_PLOTS    = convert_int(CONTENTS(i+1,1),i+1);
-				CONTROLS.PARAM_FILE =      CONTENTS(i+1,2) ;
-			
-				// Parse options
-			
-				for (int j=3; j<CONTENTS.size(i+1); j++)
-				{
-					if(CONTENTS(i+1,j)=="Exclude"  || CONTENTS(i+1,j)=="exclude"  || CONTENTS(i+1,j)=="EXCLUDE")
-					{
-						if(CONTENTS(i+1,j+1)=="Fcut"  || CONTENTS(i+1,j+1)=="fcut"  || CONTENTS(i+1,j+1)=="FCUT")
-						{
-							FF_PLOTS.INCLUDE_FCUT = false;
-							if (RANK==0)
-									cout << "		Excluding cubic scaling (fcut)" << endl;
-						}
-				
-						else if (CONTENTS(i+1,j)=="Charges"  || CONTENTS(i+1,j)=="charges"  || CONTENTS(i+1,j)=="CHARGES")
-						{
-							FF_PLOTS.INCLUDE_CHARGES = false;
-							if (RANK==0)
-									cout << "		Excluding charges" << endl;
-						}	
-						else if (CONTENTS(i+1,j)=="Penalty"  || CONTENTS(i+1,j)=="penalty"  || CONTENTS(i+1,j)=="PENALTY")
-						{
-							FF_PLOTS.INCLUDE_PENALTY = false;
-							if (RANK==0)
-									cout << "		Excluding penalty for 2b (only) scan" << endl;
-						}	
-					}		
-				
-					if(CONTENTS(i+1,j) =="No"  || CONTENTS(i+1,j)=="no"  || CONTENTS(i+1,j)=="NO")
-					{
-						if(CONTENTS(i+1,j+1)=="4D"  || CONTENTS(i+1,j+1)=="4d")
-						{
-							FF_PLOTS.DO_4D = false;
-							if (RANK==0)
-									cout << "		Will not print the 4D 3-body data" << endl;
-						}
-				
-					}
-				}
-			
-				if(FF_PLOTS.INCLUDE_FCUT)
-					cout << "		Including cubic scaling (fcut)" << endl;						
-
-				if(FF_PLOTS.INCLUDE_CHARGES)
-					cout << "		Including charges" << endl;						
-
-				if(FF_PLOTS.INCLUDE_PENALTY)
-					cout << "		Including penalty for 2b (only) scan" << endl;						
-			
-				// Read in the search string in a way that makes spacing not matter
-			
-				for(int j=0; j<FF_PLOTS.N_PLOTS; j++) // Process a line like: "PAIRTYPE PARAMS: 0"
-				{
-					if (RANK==0)
-						cout << endl << "	Processing Individual plot requests " << endl;			
-				
-					if(CONTENTS(i+2+j,0)=="PAIRTYPE")
-						FF_PLOTS.NBODY.push_back(2);
-					else if(CONTENTS(i+2+j,0)=="TRIPLETTYPE")
-						FF_PLOTS.NBODY.push_back(3);
-					else
-						EXIT_MSG("ERROR: Unrecognized interaction type. Allowed values are PAIRTYPE and TRIPLETTYPE: ", CONTENTS(i+2+j,0));
-
-					FF_PLOTS.TYPE_INDEX.push_back(convert_int(CONTENTS(i+2+j,2),i+2+j));
-				
-					FF_PLOTS.PES_TYPES.push_back(join_string_vec(CONTENTS(i+2+j),' '));
-
-				}
-			}
-			else
-			{
-				if (RANK==0)
-					cout << "	# PLOTPES #: false " << endl;	
-			}
-			
-			break;
-		}
-	}	
-}
 
 // For self-consistent fitting type runs
 
