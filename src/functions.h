@@ -29,25 +29,6 @@
 
 using namespace std;
 
-// For the LAMMPS version of the MD Code
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-	#define  QUOTE_(x) #x
-	#define  QUOTE(x) QUOTE_(x)
-
-	#include "lmppath.h"
-
-	#include QUOTE(LMPPATH/src/library.h)
-	#include QUOTE(LMPPATH/src/fix.h)
-	#include QUOTE(LMPPATH/src/fix_external.h)  
-
-	#include QUOTE(LMPPATH/src/lammps.h)
-	#include QUOTE(LMPPATH/src/input.h)
-	#include QUOTE(LMPPATH/src/modify.h)
-#endif
-
-
 // Maximum number of atom types and powers.
 
 #define MAX_ATOM_TYPES   10 
@@ -72,8 +53,6 @@ static const double mpers   = 0.02045482828; 	// conversion from internal veloci
 extern string FULL_FILE_3B;	// The 4D PES for 3B FF
 extern string SCAN_FILE_3B;	// The 2D PES scans for 3B
 extern string SCAN_FILE_2B;	// The 2D PES scans for 2B
-
-extern vector<double>  LMP_CHARGE;
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  
@@ -148,10 +127,6 @@ class JOB_CONTROL
 		double FREQ_UPDATE_THERMOSTAT;// Replaces scale_freq and thoover_fs... it's usage depends on whether USE_HOOVER_THERMOSTAT is true or false.. will be cast as int where required
 		double FREQ_UPDATE_BAROSTAT;  // Barostat time constant... defaults to 1000
 		bool   USE_NUMERICAL_PRESS;   // Replaces num_pressure... Whether to calculate pressures by finite difference.
-		double MIN_E_CONVG_CRIT;      // Options for LAMMPS minimization: Stopping criteria for energy and force, max iterations, max energy/force evaluations
-		double MIN_F_CONVG_CRIT;
-		double MIN_MAX_ITER;
-		double MIN_MAX_EVAL;
 
 		// For penalty-function related exit
 
@@ -353,8 +328,6 @@ class FRAME
   		int ATOMS;             		// Just the parent atoms.
 		int ALL_ATOMS;         	   	// All atoms, including ghosts. 
 
-		int MY_ATOMS;			// Used for lammps linking. Specify how many atoms in SYS the process owns
-		int MY_ATOMS_START;		// Used for lammps linking. Specify what index along SYS starts the process' atoms
 		BOX BOXDIM;			// Dimenions of the primitive box.
 		XYZ STRESS_TENSORS;		// Only used for the diagonal components, xx, yy, zz
 		XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested ... used primarily for the lsq code. When used
@@ -380,7 +353,7 @@ class FRAME
 		vector<XYZ_INT> LAYER_IDX;
 		vector<XYZ_INT> WRAP_IDX;  	// Index of box wrapping for this atom.
 		vector<string> 	ATOMTYPE;
-		vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPS file printing
+		vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPStrj file printing
 		vector<XYZ>	COORDS;
 		vector<XYZ>     ALL_COORDS;  	// Coordinates of atoms + ghosts used for force evaluation.
 		vector<double> 	CHARGES;
@@ -645,11 +618,7 @@ inline double get_dist(FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 
 inline int FRAME::get_atomtype_idx(int atom)
 {
-	#ifndef LINK_LAMMPS
-  		return(ATOMTYPE_IDX[atom]);
-	#else
   		return(ATOMTYPE_IDX[atom]-1);
-	#endif
 }
 
 //////////////////////////////////////////

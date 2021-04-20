@@ -1690,85 +1690,69 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 			
 			*/
 			
-			if(CONTROLS.ENSEMBLE == "LMP-NVE" || CONTROLS.ENSEMBLE == "LMP-NVT" || CONTROLS.ENSEMBLE == "LMP-NPT")
+
+			if(CONTROLS.ENSEMBLE != "NVE")
 			{
-				if(CONTROLS.ENSEMBLE == "LMP-NVT" || CONTROLS.ENSEMBLE == "LMP-NPT")
+				if (CONTROLS.ENSEMBLE == "NVT-MTK" || CONTROLS.ENSEMBLE == "NPT-MTK")
+				{
+					CONTROLS.USE_HOOVER_THRMOSTAT   = true;
+					CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,2),i+1);
+					
+					if (RANK==0)
+						cout << "	# CONSRNT #: HOOVER... a Hoover time of " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " will be used." << endl;
+
+					if(CONTROLS.ENSEMBLE == "NPT-MTK")
+					{
+						if(CONTENTS.size(i+1) == 2)
+							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,1),i+1);
+						else
+							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;	
+							
+						if (RANK==0)
+							cout << "	                   ... and barostat will use  " << CONTROLS.FREQ_UPDATE_BAROSTAT << "." << endl;	
+					}
+				}
+				else if (CONTROLS.ENSEMBLE == "NVT-SCALE" || CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NVT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
+				{
+					CONTROLS.USE_HOOVER_THRMOSTAT   = false;
 					CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,1),i+1);
 
-				if(CONTROLS.ENSEMBLE == "LMP-NPT")
-					CONTROLS.FREQ_UPDATE_BAROSTAT = convert_int(CONTENTS(i+1,1),i+1);
-			}
-			else if(CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI" || CONTROLS.ENSEMBLE == "LMP-MIN")
-			{
-				CONTROLS.MIN_E_CONVG_CRIT = convert_double(CONTENTS(i+1,1),i+1);
-				CONTROLS.MIN_F_CONVG_CRIT = convert_double(CONTENTS(i+1,2),i+1);
-				CONTROLS.MIN_MAX_ITER     = convert_int(CONTENTS(i+1,3),i+1);
-				CONTROLS.MIN_MAX_EVAL     = convert_int(CONTENTS(i+1,4),i+1);
-			}
-			else
-			{
-				if(CONTROLS.ENSEMBLE != "NVE")
-				{
-					if (CONTROLS.ENSEMBLE == "NVT-MTK" || CONTROLS.ENSEMBLE == "NPT-MTK")
+					if (CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
 					{
-						CONTROLS.USE_HOOVER_THRMOSTAT   = true;
-						CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,2),i+1);
-						
-						if (RANK==0)
-							cout << "	# CONSRNT #: HOOVER... a Hoover time of " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " will be used." << endl;
-
-						if(CONTROLS.ENSEMBLE == "NPT-MTK")
-						{
-							if(CONTENTS.size(i+1) == 2)
-								CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,1),i+1);
-							else
-								CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;	
-								
-							if (RANK==0)
-								cout << "	                   ... and barostat will use  " << CONTROLS.FREQ_UPDATE_BAROSTAT << "." << endl;	
-						}
+						if(CONTENTS.size(i+1) == 3)
+							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,2),i+1);
+						else
+							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
 					}
-					else if (CONTROLS.ENSEMBLE == "NVT-SCALE" || CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NVT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
-					{
-						CONTROLS.USE_HOOVER_THRMOSTAT   = false;
-						CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,1),i+1);
-
-						if (CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
-						{
-							if(CONTENTS.size(i+1) == 3)
-								CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,2),i+1);
-							else
-								CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
-						}
 		
-						if (RANK==0)
-							cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << "... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." << endl;	
-					}
-					else
-					{
-						cout << "ERROR: Unrecognized # CONSRNT # command: " << join_string_vec(CONTENTS(i+1),' ') << endl;
-						exit_run(1);	
-					}	
+					if (RANK==0)
+						cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << "... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." << endl;	
 				}
-				
-				for (int j=0; j<CONTENTS.size(i+1); j++)
+				else
 				{
-					if (CONTENTS(i+1,j) == "FREEZE")
+					cout << "ERROR: Unrecognized # CONSRNT # command: " << join_string_vec(CONTENTS(i+1),' ') << endl;
+					exit_run(1);	
+				}	
+			}
+			
+			for (int j=0; j<CONTENTS.size(i+1); j++)
+			{
+				if (CONTENTS(i+1,j) == "FREEZE")
+				{
+					CONTROLS.FREEZE_IDX_START = convert_int(CONTENTS(i+1,j+1),i+1);
+					CONTROLS.FREEZE_IDX_STOP  = convert_int(CONTENTS(i+1,j+2),i+1);
+					
+					if(RANK == 0)
 					{
-						CONTROLS.FREEZE_IDX_START = convert_int(CONTENTS(i+1,j+1),i+1);
-						CONTROLS.FREEZE_IDX_STOP  = convert_int(CONTENTS(i+1,j+2),i+1);
-						
-						if(RANK == 0)
-						{
-							cout << "		...Atoms over the following range will be frozen will be frozen (indexed from 0): "; 
-							cout << CONTROLS.FREEZE_IDX_START << " - "  << CONTROLS.FREEZE_IDX_STOP << endl;
-						}
-						
-						break;
-						
+						cout << "		...Atoms over the following range will be frozen will be frozen (indexed from 0): "; 
+						cout << CONTROLS.FREEZE_IDX_START << " - "  << CONTROLS.FREEZE_IDX_STOP << endl;
 					}
+					
+					break;
+					
 				}
 			}
+			
 
 			break;
 		}

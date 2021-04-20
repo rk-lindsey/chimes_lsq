@@ -288,9 +288,6 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	a2start = 0;
 	a1end   = REPLICATE.ATOMS;
 	a2end   = REPLICATE.ALL_ATOMS;
-
-	REPLICATE.MY_ATOMS   = SYSTEM.MY_ATOMS ;
-	REPLICATE.MY_ATOMS_START = SYSTEM.MY_ATOMS_START ;
 	
 	REPLICATE.BOXDIM = SYSTEM.BOXDIM;
 
@@ -746,10 +743,6 @@ void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<stri
   {
 	 TMP_CHARGES[i] -= (total_charge * count[i]) / SYSTEM.ATOMS ;
 	 if ( RANK == 0 ) cout << "       " << SYSTEM.ATOMTYPE[i] << " " << fixed << setprecision(9) << TMP_CHARGES[i] << endl ;
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-	 LMP_CHARGE[i] = TMP_CHARGES[i]; // save charges to global variable for LAMMPS
-#endif
-
   }
   if ( RANK == 0 )
 	 cout << endl ;

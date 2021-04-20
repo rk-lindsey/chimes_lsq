@@ -37,13 +37,6 @@
 #include "util.h"
 #include "io_styles.h"
 #include "input.h"
-
-// For LAMMPS linking
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-	#include "lmppath.h"
-	using namespace LAMMPS_NS;
-#endif
 	
 using namespace std;	
 	
@@ -63,22 +56,6 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
 static void print_for_dftbplus(FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
 
-// Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-	// Helper functions
-
-	void Write_Lammps_datafile (const FRAME & SYSTEM, const int & NATMTYP, const vector<double> & TMP_MASS);
-	void Write_Lammps_inputfile(const JOB_CONTROL & CONTROLS); 
-
-	// callback function for LAMMPS simulation
-
-	void md_callback(void *, bigint, int, int *, double **, double **);
-
-#endif 
-
-
 // Global variables declared as externs in functions.h, and declared in functions.C -- general
 
 string FULL_FILE_3B;		
@@ -95,29 +72,11 @@ WRITE_TRAJ BAD_CONFIGS_2("XYZ","BAD_2"); // Configs where r_ij < r_cut,in +d_pen
 WRITE_TRAJ BAD_CONFIGS_3("XYZ","BAD_3"); // All other configs, but only printed when (CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0)
 
 
-// Variables that are defined locally for house_md which need to be global for LAMMPS linking
+// Could be defined locally now that LAMMPS contributions have been removed
 
 CLUSTER_LIST TRIPS;                   // Holds all 3-body parameters
 CLUSTER_LIST QUADS;                   // Holds all 4-body parameters
  
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-	// Gloabl variables needed by callback function for LAMMPS  
-	
-	int TOTAL_ATOMS;
-	vector<double>	LMP_CHARGE;		// Global data object to hold charges for the LAMMPS input files     
-	vector<string>  TMP_ATOMTYPE;		// Will be used by lammps to map lammps atom types (int's) back to chemical symbols
-	JOB_CONTROL	CONTROLS;		// Declare the data object that will hold the main simulation control variables
-	map<string,int> PAIR_MAP;		// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
-  	vector<int> INT_PAIR_MAP ;		
-	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
-	
-	vector<PAIR_FF> FF_2BODY;		// Holds all 2-body parameters
-
-	NEIGHBORS NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
-
-#endif
-	
 	
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
@@ -176,10 +135,6 @@ int main(int argc, char* argv[])
   }
 
 	
-  // These are data objects that are normally defined locally, but need to be global for LAMMPS linking
-	
-#if not defined(LINK_LAMMPS)
-	
   JOB_CONTROL CONTROLS;			// Declare the data object that will hold the main simulation control variables
   CONTROLS.IS_LSQ            = false ; 
   NEIGHBORS   NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
@@ -203,8 +158,6 @@ int main(int argc, char* argv[])
 // For parameter file parsing
 		
   vector<string> TMP_ATOMTYPE;
-
-#endif 
 
   double Ktot;
   double Vol;
@@ -597,7 +550,7 @@ int main(int argc, char* argv[])
   if((ENSEMBLE_CONTROL.STYLE== "NPT-BEREND")||(ENSEMBLE_CONTROL.STYLE== "NPT-BEREND-ANISO")||(ENSEMBLE_CONTROL.STYLE== "NPT-MTK"))
   {
   	if (!SYSTEM.BOXDIM.IS_ORTHO)
-		EXIT_MSG("ERROR: NPT-BEREND, NPT-BEREND-ANISO, and NPT-MTK only compatible with orthorhombic cells. Try LMP-NPT.");
+		EXIT_MSG("ERROR: NPT-BEREND, NPT-BEREND-ANISO, and NPT-MTK only compatible with orthorhombic cells.");
 }
 
   if ( CONTROLS.RESTART ) 
@@ -731,94 +684,6 @@ int main(int argc, char* argv[])
 
 
   Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP} ;
-
-
-  ////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////
-  //
-  // 			LINK TO LAMMPS
-  //
-  ////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-  if(RANK==0)
-	 cout <<	"Running LAMMPS linked code! " << endl;
-	
-  // Note: All lammps stuff is handled by the first proc, regardless of whether serial or not, however
-  //       force calculations (local) are run w/ nmpi procs
-		
-  // Have LAMMPS handle Ewald sums; turn off here. 
-  CONTROLS.USE_COULOMB = false;
-		
-  // Set the total number of atoms in the system 
-		
-  TOTAL_ATOMS = SYSTEM.ATOMS;
-		
-  if(RANK==0)	// Only one rank does file writing
-  {
-	 // Generate the LAMMPS input file based ENTIRELY on the house_md input. 
-	 // The user does not need to provide anything other than the usual chimes_md input!!!!
-
-	 Write_Lammps_datafile (SYSTEM, NATMTYP, TMP_MASS);
-	 Write_Lammps_inputfile(CONTROLS);
-  }
-
-  // Create an instance of lammps
-
-  LAMMPS *lmp = new LAMMPS(0,NULL,MPI_COMM_WORLD);
-		
-  // Feed lammps the input file
-	
-  lmp->input->file("in.lammps");
-
-  // set up the callback function in lammps
-	 	
-  int ifix = lmp->modify->find_fix_by_style("external");
-  FixExternal *fix = (FixExternal *) lmp->modify->fix[ifix];
-  fix->set_callback(md_callback, lmp);
-
-  // Actually run lammps... this is where the time step and simulation length are specified
-  // Note:  LAMMPS output is automatically saved to log.lammps
-	
-  stringstream ss1,ss2;
-  string tmpstr;
-  const char *command;
-  ss1 << "timestep " << CONTROLS.DELTA_T_FS;
-  tmpstr = ss1.str();     
-  command = tmpstr.c_str();
-  if(RANK==0)
-	 cout << command << endl;
-  lmp->input->one(command);
-
-  if      ((CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ANISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-TRI") && (CONTROLS.ENSEMBLE != "LMP-MIN"))
-	 ss2 << "run " << CONTROLS.N_MD_STEPS;
-  else if ((CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO") || (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO") || (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI") || (CONTROLS.ENSEMBLE == "LMP-MIN"))
-	 ss2 << "minimize " << CONTROLS.MIN_E_CONVG_CRIT << " " << CONTROLS.MIN_F_CONVG_CRIT << " " << CONTROLS.MIN_MAX_ITER << " " << CONTROLS.MIN_MAX_EVAL;
-			
-  tmpstr = ss2.str();    
-		
-  command = tmpstr.c_str();
-  if(RANK==0)
-	 cout << command << endl;
-  lmp->input->one(command);
-	
-  if(RANK==0)
-	 cout << "LAMMPS run finished." << endl;
-
-  // exit code here; no need to run simulation code. But first, wait for all the other processes
-  //(i.e. those running lammps) to get here.
-		
-  MPI_Barrier(MPI_COMM_WORLD);
-		
-  // Delete the lammps pointer
-		
-  delete lmp;
-		
-  return 0; 
-
-#endif
 
 
   ////////////////////////////////////////////////////////////
@@ -1390,376 +1255,6 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 }
 
 
-	////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////
-	//
-	//			LAMMPS CALLBACK FUNCTION AND UTILS
-	//
-	////////////////////////////////////////////////////////////  
-	////////////////////////////////////////////////////////////
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-	void Write_Lammps_datafile(const FRAME & SYSTEM, const int & NATMTYP, const vector<double> & TMP_MASS)
-	
-	// Generate an input file to sent to lammps
-	// note: ensemble, timestep, and some other info are hardcoded
-	// note: Velocities could be input here, after positions.
-	// Format:
-	// Velocities
-	//
-	// atom_index vx vy vz [units: Angstroms/fs, for lammps 'units real']
-	// etc. 	
-	{		
-		ofstream LMPFILE;
-		LMPFILE.open("data.lammps");
-	
-		LMPFILE << "# Position data file" << endl << endl;
-	
-		LMPFILE << SYSTEM.ATOMS << " atoms" << endl;
-		LMPFILE << NATMTYP << " atom types" << endl << endl;
-	
-		LMPFILE << "0 " << SYSTEM.BOXDIM.CELL_LX << " xlo xhi" << endl;
-		LMPFILE << "0 " << SYSTEM.BOXDIM.CELL_LY << " ylo yhi" << endl;
-		LMPFILE << "0 " << SYSTEM.BOXDIM.CELL_LZ << " zlo zhi" << endl << endl;  
-	
-		// LAMMPS allow for a triclinic simulation cell; skew parameters included here.
-		LMPFILE << SYSTEM.BOXDIM.XY << " " << SYSTEM.BOXDIM.XZ << " " << SYSTEM.BOXDIM.YZ << " xy xz yz" << endl;  
-		LMPFILE << endl;  
-	
-		LMPFILE << "Masses" << " " << endl << endl;
-		for (int i = 1; i <= NATMTYP; i++)
-			LMPFILE << i << " " << TMP_MASS[i-1] << endl;
-	
-		LMPFILE << endl;  
-	
-		LMPFILE << "Atoms" << endl << endl;  
-		for (int i = 0; i < SYSTEM.ATOMS; i++)
-			LMPFILE << i+1 << " " << SYSTEM.ATOMTYPE_IDX[i]+1 << " " << SYSTEM.CHARGES[i] << " " << SYSTEM.COORDS[i].X << " " << SYSTEM.COORDS[i].Y << " " << SYSTEM.COORDS[i].Z << endl;  
-		
-		LMPFILE.close(); 
-
-	}
-
-	void Write_Lammps_inputfile(const JOB_CONTROL & CONTROLS)
-	// Eventually we should link the pair_style cutoff distance with whatever the max forcefield cutoff is
-	{
-		ofstream LMPINFILE;
-		LMPINFILE.open("in.lammps");
-	
-		// These inputs shouldn't *need* to change, so we'll hard-code them
-
-		LMPINFILE << "units            real" << endl;
-		LMPINFILE << "kspace_style     ewald 1e-4" << endl;
-		LMPINFILE << "atom_style       charge" << endl;
-		LMPINFILE << "atom_modify      map array" << endl;
-		LMPINFILE << "atom_modify      sort 0 0.0" << endl;
-		LMPINFILE << "read_data        data.lammps" << endl;
-		LMPINFILE << "neighbor         1.0 bin" << endl;
-		LMPINFILE << "neigh_modify     delay 0 every 1 check no page 100000 one 10000" << endl << endl;
-		
-		// Set the pairstyle and coefficients
-	
-		LMPINFILE << "pair_style       coul/long 20.0" << endl;	
-		LMPINFILE << "pair_coeff       * *"  << endl << endl;
-	
-		// Initialize the velocity via the temperature (only used if this ISNT a minimization job)
-		
-		if ((CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ANISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-TRI") && (CONTROLS.ENSEMBLE != "LMP-MIN"))
-		{
-			LMPINFILE << "velocity         all create " << CONTROLS.TEMPERATURE << " " << CONTROLS.SEED << endl << endl;
-	
-			if      (CONTROLS.ENSEMBLE == "LMP-NVE")
-				LMPINFILE << "fix       1 all nve " << endl;
-			else if (CONTROLS.ENSEMBLE == "LMP-NVT")
-				LMPINFILE << "fix       1 all nvt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << endl; 
-			else if (CONTROLS.ENSEMBLE == "LMP-NPT")
-				LMPINFILE << "fix       1 all npt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " iso " << CONTROLS.PRESSURE*GPa2atm << " " << CONTROLS.PRESSURE*GPa2atm <<  " " <<  CONTROLS.FREQ_UPDATE_BAROSTAT << endl;
-			else
-			{
-				cout << "ERROR: Unrecognized ensemble for LAMMPS linking." << endl;
-				cout << endl;
-				cout << "...Currently supported options are \"LMP-NVE,\" \"LMP-NVT,\" \"LMP-NPT\" \"LMP-MIN-BOX-ISO,\" \"LMP-MIN-BOX-ANISO,\" \"LMP-MIN-BOX-TRI,\" and \"LMP-MIN,\"" << endl;
-				exit_run(0);
-			}
-		}
-		else
-		{
-			if      (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO")
-				LMPINFILE << "fix       1 all box/relax iso   "  << CONTROLS.PRESSURE*GPa2atm << endl;
-			else if (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO")
-				LMPINFILE << "fix       1 all box/relax aniso "  << CONTROLS.PRESSURE*GPa2atm << endl;
-			else if (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI")
-				LMPINFILE << "fix       1 all box/relax tri   "  << CONTROLS.PRESSURE*GPa2atm << endl;
-			//else if (CONTROLS.ENSEMBLE != "LMP-MIN")
-			//	...No fix needed for a plain minimaztion
-		}		LMPINFILE << endl;
-	
-		// I *think* this line converts the potential energy in the thermodynamic output section to the potential energy + thermostat/barostat contributions?
-	
-		LMPINFILE << "fix_modify       1 energy yes" << endl;
-	
-		// Not sure of the exact meaning of this syntax, but I think this is saying use the callback function to compute potential energies and forces?
-	
-		LMPINFILE << "fix              ext all external pf/callback 1 1" << endl;
-	
-		// Again, adding contributions from the callback function to the PE?
-	
-		LMPINFILE << "fix_modify       ext energy yes" << endl << endl;
-	
-		// Custom thermo output ... Make this an optional read-in string from the house_md input file eventually
-	
-		LMPINFILE << "thermo_style     custom step temp etotal ke pe lx ly lz pxx pyy pzz press vol density" << endl;
-		LMPINFILE << "thermo_modify    format float %20.15g flush yes " << endl << endl;
-	
-		// Print frequencies/formats 
-	
-		LMPINFILE << "thermo           " << CONTROLS.FREQ_ENER << endl << endl;;
-		
-		// Dump a plain xyz format and in a lammps format that has boxlengths
-							
-		LMPINFILE << "dump             dump_1 all xyz    " << CONTROLS.FREQ_DFTB_GEN << " traj.xyz " << endl; 	// name of dump, atom group, type of dump, dump frequency, name of dumped file
-		LMPINFILE << "dump             dump_2 all custom " << CONTROLS.FREQ_DFTB_GEN << " traj.lammpstrj element xu yu zu " << endl; 	// name of dump, atom group, type of dump, dump frequency, name of dumped file
-	
-		// Don't do any spacial ordering of molecules
-	
-		LMPINFILE << "atom_modify      sort 0 0.0 " << endl;
-	
-		// Write a restart file every 1000 steps ...Printing alternates between .a and .b
-	
-		LMPINFILE << "restart          100 restart.a restart.b" << endl;
-		
-		// Other dump options that I'm ignoring for now
-		//
-		// dump            1 all custom 5 pos.xyz id type q x y z
-		// dump            2 all custom 5 vel.xyz id type q vx vy vz
-	
-	}
-
-
-
-	void md_callback(void *ptr, bigint ntimestep, int nlocal, int *id, double **x, double **f) 
-	// Callback to house_md with atom IDs and coords from each proc.
-	// Invoke house_md to compute forces, load them into f for LAMMPS to use.
-	// "f" can be NULL if proc owns no atoms
-	{
-	
-		class LAMMPS *lmp = (class LAMMPS *) ptr;
-
-		// Get information about the system that LAMMPS has built based on the lammps input file?
-	    
-		double boxxlo = *((double *) lammps_extract_global(lmp,"boxxlo"));
-		double boxylo = *((double *) lammps_extract_global(lmp,"boxylo"));
-		double boxzlo = *((double *) lammps_extract_global(lmp,"boxzlo"));
-	    
-		double boxxhi = *((double *) lammps_extract_global(lmp,"boxxhi"));
-		double boxyhi = *((double *) lammps_extract_global(lmp,"boxyhi"));
-		double boxzhi = *((double *) lammps_extract_global(lmp,"boxzhi"));
-		
-		double boxxy  = *((double *) lammps_extract_global(lmp,"xy"));
-		double boxxz  = *((double *) lammps_extract_global(lmp,"xz"));
-		double boxyz  = *((double *) lammps_extract_global(lmp,"yz"));
-
-		double xprd = (boxxhi-boxxlo);
-		double yprd = (boxyhi-boxylo);
-		double zprd = (boxzhi-boxzlo);
-  
-
-		double *mass   = (double *) lammps_extract_atom(lmp,"mass"  );
-		double *virial = (double *) lammps_extract_atom(lmp,"virial");
-	    
-		int    *type   = (int *)    lammps_extract_atom(lmp,"type"  );
-		
-		// Now we need to deal with the following:
-		// Lammps only passes a subset of atoms to each house_md process.
-		// If we push those atom subsets into ZCalc, we will get nonsense
-		// because the double loop will only go over that subset of atoms
-		//
-		// Instead, what we do here is to construct the entire system into
-		// SYS, broadcast it to all processors, and then run as usual.
-
-		
-		// Let all processors know how many atoms each processor "has"
-		
-		vector<int> NATOMS_PER_PROC(NPROCS);	// Figure out how many atoms each processor has
-		
-		MPI_Barrier(MPI_COMM_WORLD);
-		
-		MPI_Gather(&nlocal, 1, MPI_INT, &NATOMS_PER_PROC.front(), 1, MPI_INT, 0, MPI_COMM_WORLD);
-		MPI_Bcast (&NATOMS_PER_PROC.front(),NPROCS,MPI_INT,0,MPI_COMM_WORLD);
-
-		// Create SYS with size of total number of atoms in the system
-		
-		int START = 0;
-
-		if(RANK>0)
-			for(int i=0; i<RANK; i++)
-				START += NATOMS_PER_PROC[i]; 
-
-		// Declare and set up the data object that will hold the system coordinates, velocities, accelrations, etc
-		// For the callback force calculation
-		
-		
-		FRAME SYS; 
-
-		SYS.ATOMS      = TOTAL_ATOMS;//nlocal;
-		
-		SYS.BOXDIM.UNLAMMPSIFY(xprd, yprd, zprd, boxxy, boxxz, boxyz);
-		
-		SYS.ATOMTYPE    .resize(TOTAL_ATOMS);
-		SYS.COORDS      .resize(TOTAL_ATOMS);
-		SYS.CHARGES     .resize(TOTAL_ATOMS);
-		SYS.MASS        .resize(TOTAL_ATOMS);
-		SYS.FORCES      .resize(TOTAL_ATOMS);
-		SYS.ACCEL       .resize(TOTAL_ATOMS);
-		SYS.VELOCITY    .resize(TOTAL_ATOMS);
-		SYS.VELOCITY_NEW.resize(TOTAL_ATOMS);
-		SYS.ATOMTYPE_IDX.resize(TOTAL_ATOMS);
-	
-		for (int iter = 0; iter < nlocal; iter++) 
-		{
-
-			int i=START+iter;
-
-  	      		SYS.CHARGES[i] = LMP_CHARGE[type[iter]-1];
-		
-			SYS.COORDS[i].X = x[iter][0];
-			SYS.COORDS[i].Y = x[iter][1];
-			SYS.COORDS[i].Z = x[iter][2];
-		  
-  	      		SYS.MASS[i] = mass[type[iter]];
-	  
-			f[iter][0] = 0;
-			f[iter][1] = 0;
-			f[iter][2] = 0;
-	  
-			SYS.ATOMTYPE_IDX[i] = type[iter];
-			SYS.ATOMTYPE    [i] = TMP_ATOMTYPE[type[iter]-1];
-		  
-			// Wrap the coordinates
-			
-  	   	   	SYS.BOXDIM.WRAP_ATOM(SYS.COORDS[i], SYS.WRAP_IDX[i], true);
-			
-			// Prepare forces
-			
-			SYS.FORCES[i].X = 0;
-			SYS.FORCES[i].Y = 0;
-			SYS.FORCES[i].Z = 0;
-		  
-			// Prepare accelerations
-		  
-			SYS.ACCEL[i].X = 0;
-			SYS.ACCEL[i].Y = 0;
-			SYS.ACCEL[i].Z = 0;	
-		}
-	    
-		// Now we need to sync SYS.COORDS across all processors.. 
-		// Note, masses and velocities have not been updated because they 
-		// do not factor into anything in house_md but kinetic energy calculations, which 
-		// are not used in conjunction with LAMMPS
-
-	    
-		vector<int> STARTS          (NPROCS);
-		vector<int> NCOORDS_PER_PROC(NPROCS);
-		vector<int> STARTS_COORDS   (NPROCS);
-	    
-		SYS.MY_ATOMS       = nlocal;
-		SYS.MY_ATOMS_START = START; 
-
-		for(int i=0; i<NPROCS; i++)
-		{
-			STARTS[i]           = 0;
-			STARTS_COORDS[i]    = 0;
-			NCOORDS_PER_PROC[i] = 3*NATOMS_PER_PROC[i];	
-			
-			for(int j=0; j<i; j++)
-			{
-				STARTS[i]        += NATOMS_PER_PROC[j];
-				STARTS_COORDS[i] += 3*NATOMS_PER_PROC[j];
-			}
-		}
-	    
-	    
-		double *coord = (double *) SYS.COORDS.data();
-		double *force = (double *) SYS.FORCES.data();
-		double *accel = (double *) SYS.ACCEL .data();
-		
-		MPI_Barrier(MPI_COMM_WORLD);
-
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.CHARGES.front(),      &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_DOUBLE, MPI_COMM_WORLD);
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.ATOMTYPE_IDX.front(), &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_INT,    MPI_COMM_WORLD);
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, coord,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, force,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, accel,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
-		
-		for(int i=0; i<TOTAL_ATOMS; i++)
-			SYS.ATOMTYPE[i] = TMP_ATOMTYPE[SYS.ATOMTYPE_IDX[i]-1];
-		
-		// Now we need to build the ghost atoms/neighbor lists
-		
-		SYS.build_layers(CONTROLS.N_LAYERS) ;
-		
-		// Use very little padding because we will update neighbor list for every frame.
-		
-		double PADDING = 0.01;
-		
-		NEIGHBOR_LIST.INITIALIZE(SYS, PADDING);	// Doesn't care about velocity
-		NEIGHBOR_LIST.DO_UPDATE(SYS, CONTROLS);	
-		
-		// Do the actual force calculation using our MD code
-
-		ZCalc(SYS, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
-
-		// Now we need to sync up all the forces, potential energy, and tensors with LAMMPS
-		//... but first, we need to sum the potential energy computed by each process, since 
-		// we're saving it directly to LAMMPS' PE which corresponds to the sum over all processes.
-		
-		MPI_Barrier(MPI_COMM_WORLD);
-		
-		MPI_Allreduce(MPI_IN_PLACE, &SYS.TOT_POT_ENER,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		
-		// Also, need to add up the forces (accel) to account for f[i]+=val, f[j]-=val, for when 
-		// j is on a different proc than i
-		
-		MPI_Allreduce(MPI_IN_PLACE, accel, 3*SYS.ATOMS, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-		
-		// Give LAMMPS the computed forces
-		
-		for (int iter = 0; iter < nlocal; iter++)
-		{
-			int i=START+iter;
-		
-			f[iter][0] = SYS.ACCEL[i].X;
-			f[iter][1] = SYS.ACCEL[i].Y;
-			f[iter][2] = SYS.ACCEL[i].Z;
-		}
-		
-		// Integrate?
-		
-		int ifix = lmp->modify->find_fix_by_style("external");
-		FixExternal *fix = (FixExternal *) lmp->modify->fix[ifix];
-		fix->set_energy(SYS.TOT_POT_ENER);
-		
-		// stress tensor is multiplied by (atm/vol) in LAMMPS; multiply out volume here
-		// virial points to LAMMPS array for stress tensor
-		// XY, YZ, and XZ components need to be included at a later date.
-	    
-		// Set the stresses based on our MD code's calculation
-	    
-		double vol = SYS.BOXDIM.VOL;
-
-		virial[0] =  SYS.PRESSURE_TENSORS_XYZ.X*vol;
-		virial[1] =  SYS.PRESSURE_TENSORS_XYZ.Y*vol;
-		virial[2] =  SYS.PRESSURE_TENSORS_XYZ.Z*vol;
-	    
-		virial[3] = SYS.PRESSURE_TENSORS_XYZ[0].Y*vol; // XY
-		virial[4] = SYS.PRESSURE_TENSORS_XYZ[0].Z*vol; // XZ
-		virial[5] = SYS.PRESSURE_TENSORS_XYZ[1].Z*vol; // YZ
-    
-	}
-	
-#endif
-
 static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NATMTYP, vector<string>& TMP_ATOMTYPE,
 									 vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES, 
 									 vector<double>& TMP_MASS, vector<int> &TMP_SIGN)
@@ -1816,9 +1311,6 @@ static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NAT
 		}
   
 		// We need a globally-defined data object to hold charges for passing into LAMMPS
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-		LMP_CHARGE         .resize(NATMTYP);
-#endif
 			
 		TMP_ATOMTYPE   .resize(NATMTYP);
 		TMP_NATOMTYPE  .resize(NATMTYP);
@@ -2465,12 +1957,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				if( (FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j]) 
 					 || (FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j]) )
 				{
-				  TMP_CHARGES[j] = sqrt(fabs(FF_2BODY[i].PAIR_CHRG))*TMP_SIGN[j];
-							
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-				  LMP_CHARGE[j] = TMP_CHARGES[j]; // save charges to global variable for LAMMPS
-#endif
-					
+				  TMP_CHARGES[j] = sqrt(fabs(FF_2BODY[i].PAIR_CHRG))*TMP_SIGN[j];					
 				  break;
 				}
 			 }

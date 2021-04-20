@@ -89,16 +89,12 @@ inline int Cheby::get_pair_index(int a1, int a2, const vector<int> &atomtype_idx
 {
   int curr_pair_type_idx ;
 
-#ifndef LINK_LAMMPS
   int idx = atomtype_idx[parent[a1]]*natmtyp + atomtype_idx[parent[a2]] ;
   if ( idx < 0 || idx >= INT_PAIR_MAP.size() ) 
   {
 	 cout << "Index out of range" << endl ;
   }
   curr_pair_type_idx =  INT_PAIR_MAP[idx] ;
-#else
-  curr_pair_type_idx =  INT_PAIR_MAP[(atomtype_idx[a1]-1)*natmtyp + (atomtype_idx[SYSTEM.PARENT[a2]]-1)];
-#endif
   
   return curr_pair_type_idx ;
 }
@@ -1122,7 +1118,7 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 					
 									// Method-1:
 									// Assume that the per-atom energy is just the n-body energy (3-body, in this case) dividided evently
-									// across bodies... This is how LAMMPS handles many-body per-atom energy assgignments
+									// across bodies... 
 									/*
 								
 									double Eijk_wo_const = fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
@@ -1755,13 +1751,7 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
   // Set up for MPI
 	
   int a1start, a1end;	
-
-#ifndef LINK_LAMMPS
   divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
-#else
-  a1start = SYSTEM.MY_ATOMS_START;
-  a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-#endif	
 
   // Set up for neighbor lists
 	
@@ -2016,15 +2006,8 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 	 called_before = true ;
   }
 
-#ifndef LINK_LAMMPS
   divide_atoms(i_start, i_end, NEIGHBOR_LIST.LIST_3B_INT.size());	
-#else
-  // Not sure if this is correct for LAMMPS.  Please check ! (Larry) -- it looks correct (RKL)
-  i_start = 0;
-  i_end = NEIGHBOR_LIST.LIST_3B_INT.size() - 1;
-  a1start = SYSTEM.MY_ATOMS_START;
-  a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-#endif	
+	
 		
   int a1;
   int INTERACTIONS = 0;
@@ -2035,10 +2018,6 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 
 	 a1 = NEIGHBOR_LIST.LIST_3B_INT[ii].a1;
 
-#ifdef LINK_LAMMPS
-	 if ( a1 < a1start || a1 > a1end ) continue;
-#endif
-			
 	 int a2 = NEIGHBOR_LIST.LIST_3B_INT[ii].a2;
 	 int a3 = NEIGHBOR_LIST.LIST_3B_INT[ii].a3;
 
@@ -2308,19 +2287,10 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 
   vector<CLUSTER>& FF_4BODY = QUADS.VEC ;
 
-#ifndef LINK_LAMMPS
   divide_atoms(i_start, i_end, NEIGHBOR_LIST.LIST_4B_INT.size());	
-#else
-  i_start = 0;
-  i_end = NEIGHBOR_LIST.LIST_4B_INT.size() - 1;
-  a1start = SYSTEM.MY_ATOMS_START;
-  a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-#endif	
 
   if ( ! called_before ) 
   {
-
-
 	 // Set up 4-body polynomials
 		
 	 int dim = 0 ;
@@ -2357,10 +2327,6 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
   {
   
 	 a1 = NEIGHBOR_LIST.LIST_4B_INT[ii].a1;
-
-#ifdef LINK_LAMMPS
-	 if ( a1 < a1start || a1 > a1end ) continue;
-#endif
 			
 	 int a2 = NEIGHBOR_LIST.LIST_4B_INT[ii].a2;
 	 int a3 = NEIGHBOR_LIST.LIST_4B_INT[ii].a3;
