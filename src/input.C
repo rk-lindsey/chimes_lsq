@@ -937,20 +937,6 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 					NEIGHBOR_LIST.MAX_CUTOFF_3B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
 					NEIGHBOR_LIST.MAX_CUTOFF_4B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
 				}	
-				
-				ATOM_PAIRS[TEMP_INT].NBINS[0] = 0;
-				ATOM_PAIRS[TEMP_INT].NBINS[1] = 0;
-				ATOM_PAIRS[TEMP_INT].NBINS[2] = 0;				
-				
-				// Read histogram parameters
-
-				if(CONTENTS.size(c+1+i) == 11)
-				{
-					ATOM_PAIRS[TEMP_INT].NBINS[0] = convert_int(CONTENTS(c+1+i,8),c+i+1);
-					ATOM_PAIRS[TEMP_INT].NBINS[1] = convert_int(CONTENTS(c+1+i,9),c+i+1);
-					ATOM_PAIRS[TEMP_INT].NBINS[2] = convert_int(CONTENTS(c+1+i,10),c+i+1);
-				}					
-					
 			}
 			break;
 		}
@@ -979,17 +965,6 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
 				 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl;
 		}
-	}
-
-	
-	if ( RANK == 0 )
-	{
-		cout << endl;
-		cout << "	Read the following number of ij ik jk bins for pairs: " << endl;
-	
-		for(int i=0; i<NPAIR; i++)
-			cout << "		" << ATOM_PAIRS[i].PRPR_NM  << ": " << ATOM_PAIRS[i].NBINS[0] << " " << ATOM_PAIRS[i].NBINS[1] << " " << ATOM_PAIRS[i].NBINS[2] << endl;					
-		cout << endl;
 	}
 
 	build_int_pair_map(CONTROLS.NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX, PAIR_MAP, INT_PAIR_MAP);

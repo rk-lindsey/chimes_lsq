@@ -43,8 +43,6 @@ class PAIRS	// NEEDS UPDATING
 	  	double LAMBDA;  		      // Morse lambda for CHEBYSHEV type pairs
 	  	double MIN_FOUND_DIST;  	      // Minimum distance between pairs
 		      	      
-	  	vector<double> NBINS;		      // Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
-
 	  	FCUT FORCE_CUTOFF;		      // "CUBIC" "COSINE" or "SIGMOID" currently supported
 
 	  	// Only used in force field
@@ -52,7 +50,7 @@ class PAIRS	// NEEDS UPDATING
 	  	vector<double>        POT_PARAMS;     // Used by splines to compute pressure by integrating spline eq's
 	  	double  	      PAIR_CHRG;
 		      
-	  	PAIRS(): NBINS(3,0.0) 
+	  	PAIRS()
 	  	{
 			      KILLLEN = 0.0;
 			      N_CFG_CONTRIB = 0;
@@ -121,11 +119,6 @@ public:
   bool SPECIAL_S_MAXIM;		// Determine whether s_maxim was set via user input.
   				// Values need to be specified for each contributing pair
   				// [0] -> ij, [1] -> ik, [2] -> il, [3] -> jk, [4] -> jl, [5] -> kl 
-
-  map<vector<int>,int>POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
-	 
-  vector<double> NBINS;		// Number of bins to use for ij, ik, and jk distances when building the population histograms 
-  vector<double> BINWS;		// Binwidths to use for ij, ik, and jk distances when building the population histograms 
 	
   vector<double> PARAMS;
 	
@@ -157,13 +150,6 @@ public:
 
   
   int match_atom_type_idx(string atm_typ);			// Return the atom type index of an atom in the cluster with the given name.
-
-
-  bool init_histogram     (vector<PAIRS> & pairs, map<string,int>& pair_map);	// Sets up the histogram for TRIPLETS.  Returns true on success, false otherwise.
-  void increment_histogram(vector<int> &index);			// Increment the histogram with the given index vector.
-  int get_histogram       (vector<int> &index);			// Get the value of the histogram with the given index vector.  Return 0 if no entry is found.
-
-
   inline double get_smaxim(string TYPE);			// Return the maximum cutoff distance for the specified pair.
   inline double get_sminim(string TYPE);			// Return the minimum inner cutoff distance for the specified pair.
 
@@ -184,9 +170,7 @@ CLUSTER(int natom, int npair):
     	X_MINIM(npair), 
 	X_MAXIM(npair), 
 	X_AVG(npair), 
-	X_DIFF(npair), 
-	NBINS(npair,0), 
-	BINWS(npair,0.1)
+	X_DIFF(npair)
   {
 	 EXCLUDED = false;
 	 SPECIAL_S_MAXIM = false;

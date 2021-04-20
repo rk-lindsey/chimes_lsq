@@ -624,8 +624,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_M
 //////////////////////////////////////////
 
 void   ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> &PAIR_MAP, vector<int> &INT_PAIR_MAP, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS,  NEIGHBORS & NEIGHBOR_LIST);
-//void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
-
 
 //////////////////////////////////////////
 // Distance calculation and smoothing functions
