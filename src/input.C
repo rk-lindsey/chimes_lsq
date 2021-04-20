@@ -924,11 +924,9 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				TEMP_INT = PAIR_MAP[TEMP_STR];
 				
 				ATOM_PAIRS[TEMP_INT].PAIRIDX = TEMP_INT;
-				ATOM_PAIRS[TEMP_INT].CUBIC_SCALE = 1.0;	// Set the default value
 
 				ATOM_PAIRS[TEMP_INT].S_MINIM = convert_double(CONTENTS(c+1+i,3),c+1+i);
 				ATOM_PAIRS[TEMP_INT].S_MAXIM = convert_double(CONTENTS(c+1+i,4),c+1+i);
-				ATOM_PAIRS[TEMP_INT].S_DELTA = convert_double(CONTENTS(c+1+i,5),c+1+i);
 				ATOM_PAIRS[TEMP_INT].LAMBDA  = convert_double(CONTENTS(c+1+i,6),c+1+i);
 				
 				ATOM_PAIRS[TEMP_INT].MIN_FOUND_DIST = 	1.0e10;	// Set an initial minimum distance	
@@ -966,7 +964,6 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 		cout << "# ATM_TY1 #     ";
 		cout << "# S_MINIM #     ";
 		cout << "# S_MAXIM #     ";
-		cout << "# S_DELTA #     ";
 		cout << "# MORSE_LAMBDA #";	
 	}
 	
@@ -980,7 +977,6 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
 				 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
 				 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
-				 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
 				 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl;
 		}
 	}

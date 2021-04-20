@@ -2177,7 +2177,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  {
 			 FF_2BODY[i].PENALTY_DIST     = 0.01;
 			 FF_2BODY[i].PENALTY_SCALE    = 1.0e4;
-			 FF_2BODY[i].CUBIC_SCALE      = 1.0;
 			 FF_2BODY[i].CHEBY_RANGE_HIGH = TMP_HIGH;
 			 FF_2BODY[i].CHEBY_RANGE_LOW  = TMP_LOW;
 		  }
@@ -2219,11 +2218,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  {
 			 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
 		  }
-				 	
-		  PARAMFILE >> FF_2BODY[i].S_DELTA;
-		  
-		  FF_2BODY[i].KILLLEN = FF_2BODY[i].S_DELTA; // Killlen is/can only be used when ff type is cheby
-		  
+
 		if ((! SYSTEM.BOXDIM.IS_RCUT_SAFE(FF_2BODY[i].S_MAXIM, CONTROLS.N_LAYERS)))  
 		{
 			if (isatty(fileno(stdout)) && RANK == 0)
@@ -2346,17 +2341,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		STREAM_PARSER.str("");
 		STREAM_PARSER.clear();	
 	 }
-		
-	 else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING: ") != string::npos)
-	 {
-		STREAM_PARSER.str(LINE);
-		STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-		for(int i=0; i<NO_PAIRS; i++)
-		  FF_2BODY[i].CUBIC_SCALE = double(atof(TEMP_STR.data()));
-		STREAM_PARSER.str("");
-		STREAM_PARSER.clear();	
-	 }		
-		
+				
 	 // Setup triplets
 		
 	 else if(LINE.find("ATOM PAIR TRIPLETS: ") != string::npos)
@@ -2432,63 +2417,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 PARAMFILE >> TEMP_STR;
 			 PARAMFILE >> FF_2BODY[i].PARAMS[j];
 		  }
-				
-		  // If this is a spline type, we will over-write parameter coefficients with 
-		  // a value less than 1.
-
-		  int 	STOP_FILL_IDX = -1;
-		  double 	slope          = -10.0;
-				
-		  if(FF_2BODY[i].PAIRTYP == "SPLINE")
-		  {
-			 if(i==0 && RANK ==0)
-			 {
-				cout << "		Will use a simple linear force model for poorly sampled positions" << endl;
-				cout << "			i.e. for |spline coefficients| < 1.0 at close separation distance..." << endl;					
-			 }
-					
-			 STOP_FILL_IDX = -1;
-										
-			 for(int j=0; j<FF_2BODY[i].SNUM; j++)
-			 {
-				if(fabs(FF_2BODY[i].PARAMS[j])>1.0)
-				{
-				  STOP_FILL_IDX = j;
-				  if(RANK==0)
-					 cout << "			...Generating linear params for pair idx " << i << " for params 0 through " << STOP_FILL_IDX-1 << endl;
-				  break;
-				}
-			 }
 								
-			 if(STOP_FILL_IDX != -1)
-			 {
-				for(int j=0; j<STOP_FILL_IDX; j+=2)
-				{
-				  FF_2BODY[i].PARAMS[j  ] = slope * (STOP_FILL_IDX-j) + FF_2BODY[i].PARAMS[STOP_FILL_IDX];
-				  FF_2BODY[i].PARAMS[j+1] = slope/FF_2BODY[i].S_DELTA;	
-				  if(RANK==0)
-					 cout << "			   " << j << " " << FF_2BODY[i].PARAMS[j] << endl << "			   " << FF_2BODY[i].PARAMS[j+1] << endl;
-				}
-			 }
-					
-			 // Compute the integral of the spline equation for use in analytical pressure
-			 // calculations...
-			 //  We are computing an integral, so we will only have half as many points
-					
-					
-			 FF_2BODY[i].POT_PARAMS.resize(FF_2BODY[i].SNUM/2);
-					
-			 for(int j=0; j<FF_2BODY[i].POT_PARAMS.size(); j++) 
-				FF_2BODY[i].POT_PARAMS[j] = 0;
-					
-			 for(int j=FF_2BODY[i].SNUM/2-2; j>=0; j--) 
-			 {
-				FF_2BODY[i].POT_PARAMS[j] = FF_2BODY[i].POT_PARAMS[j+1] - FF_2BODY[i].S_DELTA *
-				  (FF_2BODY[i].PARAMS[j*2]/2 + FF_2BODY[i].S_DELTA * FF_2BODY[i].PARAMS[j*2+1]/12 + FF_2BODY[i].PARAMS[j*2+2]/2 - FF_2BODY[i].S_DELTA * FF_2BODY[i].PARAMS[j*2+3]/12);
-			 }
-		  }
-
-				
 		  // If applicable, read the charge parameter
 				
 		  if(CONTROLS.FIT_COUL)
@@ -2541,9 +2470,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 #if defined(USE_MPI) && defined(LINK_LAMMPS)
 				  LMP_CHARGE[j] = TMP_CHARGES[j]; // save charges to global variable for LAMMPS
 #endif
-
-				  //FF_2BODY[i].ATM1CHG = TMP_CHARGES[j];
-				  //FF_2BODY[i].ATM2CHG = TMP_CHARGES[j];
 					
 				  break;
 				}
@@ -2730,7 +2656,6 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 		
 	 cout << FF_2BODY[i].S_MINIM << " ";
 	 cout << FF_2BODY[i].S_MAXIM << " ";
-	 cout << FF_2BODY[i].S_DELTA << " ";
 		
 	 if(FF_2BODY[i].PAIRTYP == "CHEBYSHEV")
 	 {
@@ -2740,8 +2665,6 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 		if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE )
 		  cout << FF_2BODY[i].LAMBDA << " ";
 		cout << FF_2BODY[i].PENALTY_DIST << " " << scientific << FF_2BODY[i].PENALTY_SCALE<< " ";
-		cout << FF_2BODY[i].CUBIC_SCALE << " ";
-		
 		cout << FF_2BODY[i].KILLLEN;
 	 }
 		

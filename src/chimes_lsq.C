@@ -553,7 +553,6 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 	header << "# ATM_TY1 #	";
 	header << "# S_MINIM #	";
 	header << "# S_MAXIM #	";
-	header << "# S_DELTA #	";
 	header << "# CHBDIST #	";	// how pair distance is transformed in cheby calc
 	header << "# MORSE_LAMBDA #" << endl;
 
@@ -566,7 +565,6 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 					 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
 					 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
 					 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
-					 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
 					 << setw(16) << left << chtype;
 		if(ATOM_PAIRS[i].CHEBY_TYPE == Cheby_trans::MORSE )
 			header << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl; 
@@ -579,10 +577,7 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 	// Print out only once.
 	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" ) 
 		ATOM_PAIRS[0].FORCE_CUTOFF.print_header(header) ;
-		
-	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
-		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
-	
+			
 	// Print out special cutoffs 
 	TRIPS.print_special(header);
 	QUADS.print_special(header);

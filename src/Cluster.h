@@ -18,7 +18,6 @@ class PAIRS	// NEEDS UPDATING
 	  	double ATM2MAS;       
 	  	double S_MINIM; 		      // Minimum allowed pair distance for fitting
 	  	double S_MAXIM; 		      // Maximum allowed pair distance for fitting
-	  	double S_DELTA; 		      // Fitting "grid" spacing (width)
 		
 		double KILLLEN;			      // Pair distance below which to kill the simulation
 
@@ -40,7 +39,6 @@ class PAIRS	// NEEDS UPDATING
 	  	Cheby_trans CHEBY_TYPE; 	      // Are distances transformed into inverse-r type or morse-type distances?... or not at all? (default)
 	  	double PENALTY_SCALE;		      // For 2B Cheby potentials... "a" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 1.0e8
 	  	double PENALTY_DIST;		      // For 2B Cheby potentials... "penalty_dist" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 0.01
-	  	double CUBIC_SCALE;		      // Factor to multiply to the cubic penalty function, (1-rlen/smax)^3... default value is 1
 		      
 	  	double LAMBDA;  		      // Morse lambda for CHEBYSHEV type pairs
 	  	double MIN_FOUND_DIST;  	      // Minimum distance between pairs
@@ -56,13 +54,13 @@ class PAIRS	// NEEDS UPDATING
 		      
 	  	PAIRS(): NBINS(3,0.0) 
 	  	{
+			      KILLLEN = 0.0;
 			      N_CFG_CONTRIB = 0;
 			      SNUM = 0;
 			      SNUM_3B_CHEBY = 0;
 			      SNUM_4B_CHEBY = 0;
 			      CHEBY_RANGE_HIGH = 1.0;
 			      CHEBY_RANGE_LOW  = -1.0;
-			      CUBIC_SCALE = 1.0;
 
 			      // Set simple defaults.
 			      CHEBY_TYPE = Cheby_trans::NONE ;
