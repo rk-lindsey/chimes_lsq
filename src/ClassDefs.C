@@ -2157,37 +2157,16 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 			if(CONTROLS.FIT_ENER_PER_ATOM) // We're fitting per-atom energies. Read one per line.
 				TRAJ_INPUT >> QM_POT_ENER_PER_ATOM[j];
 
-		if (ATOM_PAIRS[0].PAIRTYP != "DFTBPOLY") // Convert forces to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
-		{
-			// Assume units are in Hartree/bohr
+		// Convert forces from atomic (H/B) to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
 				
-			FORCES[j].X *= 627.50960803*1.889725989;
-			FORCES[j].Y *= 627.50960803*1.889725989;
-			FORCES[j].Z *= 627.50960803*1.889725989;
-				
-				
-			// Assume units are in eV/A
-				
-			/*
-				FORCES[j].X *= 23.0609;
-				FORCES[j].Y *= 23.0609;
-				FORCES[j].Z *= 23.0609;
-			*/
-		}
+		FORCES[j].X *= 627.50960803*1.889725989;
+		FORCES[j].Y *= 627.50960803*1.889725989;
+		FORCES[j].Z *= 627.50960803*1.889725989;
+
 						
 		if(CONTROLS.WRAP_COORDS)	// Apply PBC (for cases of unwrapped coordinates)
 		{
-		
-cout << "DEBUG: FYI, WRAPPING" << endl;		
 			BOXDIM.WRAP_ATOM(COORDS[j], WRAP_IDX[j], true);
-			
-			/* RKL - no longer used - 082319
-			
-			COORDS[j].X -= floor(COORDS[j].X/BOXDIM.X)*BOXDIM.X;
-			COORDS[j].Y -= floor(COORDS[j].Y/BOXDIM.Y)*BOXDIM.Y;
-			COORDS[j].Z -= floor(COORDS[j].Z/BOXDIM.Z)*BOXDIM.Z;
-			
-			*/
 		}			
 			
 		// Assign atom charges.
@@ -2202,7 +2181,7 @@ cout << "DEBUG: FYI, WRAPPING" << endl;
 	}
 		
 	// If layering requested, replicate the system
-//cout << "BUILDING LAYERS " << endl;
+
 	build_layers(CONTROLS.N_LAYERS);
 		
 	if(i==0)

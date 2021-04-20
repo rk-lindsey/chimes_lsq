@@ -347,10 +347,6 @@ class BOX
 
 };
 
-
-
-
-
 class FRAME
 {
 	public:
@@ -405,7 +401,6 @@ class FRAME
 		void READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE, int i);
 		void build_layers(int N_LAYERS) ;
 };
-
 
 struct CHARGE_CONSTRAINT
 {

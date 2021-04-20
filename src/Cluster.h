@@ -6,7 +6,7 @@ class PAIRS	// NEEDS UPDATING
 	public:
 	  	int    PAIRIDX; 		      // Index for the specific pair type (triplet type)
 	  	string PRPR_NM; 		      // The order-specific atom pair. For example, OH, never HO, or something similiar "proper name"
-	  	string PAIRTYP; 		      // Allowed values are CHEBYSHEV, DFTBPOLY, SPLINE, INVERSE_R, LJ, and STILLINGER
+	  	string PAIRTYP; 		      // Only allowed values is CHEBYSHEV
 	  	string ATM1TYP; 		      // Atom chemistry (i.e. C, H, N, O...)
 	  	string ATM2TYP;
 	  	int    ATM1TYPE_IDX;		      // The type index of atom 1

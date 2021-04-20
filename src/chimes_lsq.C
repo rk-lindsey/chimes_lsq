@@ -197,25 +197,19 @@ int main(int argc, char* argv[])
 
 	for (int i=0; i<ATOM_PAIRS.size(); i++)
 	{
-		if ( (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) || (ATOM_PAIRS[i].PAIRTYP == "DFTBPOLY") )	
+		if ( (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) )	
 		{
 			ATOM_PAIRS[i].SNUM = CONTROLS.CHEBY_ORDER;
-			
-			if (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" )
-			{
-				ATOM_PAIRS[i].SNUM_3B_CHEBY = CONTROLS.CHEBY_3B_ORDER;
-				ATOM_PAIRS[i].SNUM_4B_CHEBY = CONTROLS.CHEBY_4B_ORDER;
-				ATOM_PAIRS[i].CHEBY_TYPE    = CONTROLS.CHEBY_TYPE;
-			}
-				
+
+			ATOM_PAIRS[i].SNUM_3B_CHEBY = CONTROLS.CHEBY_3B_ORDER;
+			ATOM_PAIRS[i].SNUM_4B_CHEBY = CONTROLS.CHEBY_4B_ORDER;
+			ATOM_PAIRS[i].CHEBY_TYPE    = CONTROLS.CHEBY_TYPE;
+		}
+		else
+		{
+			cout << "ERROR: Unknown pairtype: " << ATOM_PAIRS[i].PAIRTYP << endl;
 		}
 		
-		else if (ATOM_PAIRS[i].PAIRTYP == "INVRSE_R") 
-			ATOM_PAIRS[i].SNUM = CONTROLS.INVR_PARAMS;
-
-		else // Spline
-			ATOM_PAIRS[i].SNUM = (2+floor((ATOM_PAIRS[i].S_MAXIM - ATOM_PAIRS[i].S_MINIM)/ATOM_PAIRS[i].S_DELTA))*2; //2 is for p0/m0/p1/m1.. 
-	
 		CONTROLS.TOT_SNUM += ATOM_PAIRS[i].SNUM;
 	}
 
@@ -532,10 +526,6 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 	
 	if     (ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV")
 		header << " " << ATOM_PAIRS[0].SNUM << " " << ATOM_PAIRS[0].SNUM_3B_CHEBY << " " << ATOM_PAIRS[0].SNUM_4B_CHEBY << " " << ATOM_PAIRS[0].CHEBY_RANGE_LOW << " " << ATOM_PAIRS[0].CHEBY_RANGE_HIGH << endl;
-	else if(ATOM_PAIRS[0].PAIRTYP == "DFTBPOLY")
-		header << " " << ATOM_PAIRS[0].SNUM << endl;	
-	else if (ATOM_PAIRS[0].PAIRTYP == "INVRSE_R")
-		header << " " << CONTROLS.INVR_PARAMS << endl;
 	else
 		header << endl;
 	

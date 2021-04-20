@@ -2094,11 +2094,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		STREAM_PARSER >> TEMP_STR;
 		STREAM_PARSER >> TEMP_TYPE;
 			
-		if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "INVRSE_R")
-		{
-		  STREAM_PARSER >> TMP_TERMS1;
-		}
-		else if(TEMP_TYPE =="CHEBYSHEV")
+		if(TEMP_TYPE =="CHEBYSHEV")
 		{
 			  
 		  vector<string> tokens ;
@@ -2281,28 +2277,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  FF_2BODY[i].PRPR_NM = FF_2BODY[i].ATM1TYP;
 		  FF_2BODY[i].PRPR_NM.append(FF_2BODY[i].ATM2TYP);	
 
-		  if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "INVRSE_R")
-		  {
-			 FF_2BODY[i].SNUM = TMP_TERMS1;
-		  }
-		  else if(TEMP_TYPE =="SPLINE")
-		  {
-		  	// Expects to read "NONE," since a direct 
-			// transformation style is hard-coded into the spline code 
-		  
-			 string cheby_type;
-			 PARAMFILE >> cheby_type;
-			 
-			 if(cheby_type != "NONE")
-			 {
-			 	cout << "ERROR: Expected to read \"NONE\" for CHBDIST in parameter file " << endl; 
-				cout << "       Read value: "  << cheby_type << endl;
-				exit_run(0);
-			 }
-			 
-			  FF_2BODY[i].SNUM = (2+floor((FF_2BODY[i].S_MAXIM - FF_2BODY[i].S_MINIM)/FF_2BODY[i].S_DELTA))*2;
-		  }		  
-		  else if(TEMP_TYPE =="CHEBYSHEV")
+		  if(TEMP_TYPE =="CHEBYSHEV")
 		  {
 			 string cheby_type ;
 			 PARAMFILE >> cheby_type ;
@@ -2326,14 +2301,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 // Copy all class members.
 			 for(int i=1; i<FF_2BODY.size(); i++)
 				FF_2BODY[i].FORCE_CUTOFF = FF_2BODY[0].FORCE_CUTOFF;										
-		  }
-		  else if(TEMP_TYPE =="LJ")
-		  {
-			 FF_2BODY[i].SNUM = 2 ;
-		  }
-		  else if ( TEMP_TYPE == "CLUSTER" )
-		  {
-			 FF_2BODY[i].SNUM = 0 ;
 		  }
 		  else // Unknown type
 		  {

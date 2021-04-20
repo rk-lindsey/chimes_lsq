@@ -562,14 +562,11 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 		{
 			FF_TYPE = CONTENTS(i+1,0);
 			
-			if (FF_TYPE != "SPLINE" && FF_TYPE != "CHEBYSHEV" && FF_TYPE != "DFTBPOLY" && FF_TYPE != "INVRSE_R") // These are not supported:  && FF_TYPE != "LJ" && FF_TYPE != "STILLIN")
+			if (FF_TYPE != "CHEBYSHEV") // These are not supported:  && FF_TYPE != "LJ" && FF_TYPE != "STILLIN")
 			{
 				cout << endl;
 				cout << "ERROR: Unrecognized pair type. Acceptable options are:" << endl;
-				cout << "SPLINE"   << endl;
 				cout << "CHEBYSHEV"    << endl;
-				cout << "DFTBPOLY" << endl;
-				cout << "INVRSE_R" << endl;
 				exit(1);
 				
 			}
@@ -577,22 +574,10 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 			if ( RANK == 0 )
 			{
 				cout << "	# PAIRTYP #: " << FF_TYPE;
-				
-				if(FF_TYPE != "DFTBPOLY")
-					cout << " ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol." << endl;
-				else
-					cout << " ....NOTE: Forces reported in atomic units." << endl;
+				cout << " ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol." << endl;
 			}
 			
-			if(FF_TYPE == "INVRSE_R")
-			{
-				CONTROLS.INVR_PARAMS = convert_int(CONTENTS(i+1,1),i+1);
-					
-				if ( RANK == 0 ) 
-					cout << "	             " << "Will use the following number of inverse-r params: " << CONTROLS.INVR_PARAMS << endl;					
-			}
-
-			if(FF_TYPE == "DFTBPOLY" || FF_TYPE == "CHEBYSHEV")
+			if(FF_TYPE == "CHEBYSHEV")
 			{
 				CONTROLS.CHEBY_ORDER = convert_int(CONTENTS(i+1,1),i+1);
 				
