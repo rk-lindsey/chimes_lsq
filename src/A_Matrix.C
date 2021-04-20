@@ -109,25 +109,10 @@ void A_MAT::INITIALIZE_FORCES(int ATOMS, int NPARAM)
 
 void A_MAT::INITIALIZE_ENERGIES(int ATOMS,int PARAMS, bool FRAME_ENER)
 {
-	if (FRAME_ENER)
-	{
-		FRAME_ENERGIES.resize(PARAMS);
+	FRAME_ENERGIES.resize(PARAMS);
 		
-		for (int j=0; j<PARAMS; j++)
-			FRAME_ENERGIES[j] = 0.0;
-	}
-	else if (ATOM_ENER)
-	{
-		ATOM_ENERGIES.resize(ATOMS);
-
-		for (int i=0; i<ATOMS; i++)
-		{
-			ATOM_ENERGIES[i].resize(PARAMS);
-		
-			for (int j=0; j<PARAMS; j++)
-				ATOM_ENERGIES[i][j] = 0.0;
-		}
-	}
+	for (int j=0; j<PARAMS; j++)
+		FRAME_ENERGIES[j] = 0.0;
 }	
 	
 void A_MAT::INITIALIZE_STRESSES(int PARAMS, bool DIAG_STRESS, bool ALL_STRESS)
