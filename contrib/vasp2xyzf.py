@@ -123,30 +123,6 @@ while not EXIT_CONDITION:
 		
 	if len(LINE) > 0 and LINE[0] == "TEBEG":
 		TEMPERAT = LINE[2].rstrip(';')	
-
-#X = [float(A[0].rstrip(',')), float(B[0].rstrip(',')), float(C[0].rstrip(','))]
-#Y = [float(A[1].rstrip(',')), float(B[1].rstrip(',')), float(C[1].rstrip(','))]
-#Z = [float(A[2].rstrip(')')), float(B[2].rstrip(')')), float(C[2].rstrip(')'))]
-
-if False:
-	for i in xrange(3):
-		if X[i] != 0.0:
-			X = X[i]
-			break
-	
-	for i in xrange(3):
-		if Y[i] != 0.0:
-			Y = Y[i]
-			break
-		
-	for i in xrange(3):
-		if Z[i] != 0.0:
-			Z = Z[i]
-			break	
-		
-	BOXLENS.append(`(abs(float(X)))`)
-	BOXLENS.append(`(abs(float(Y)))`)
-	BOXLENS.append(`(abs(float(Z)))`)
 	
 BOXLENS.append(' '.join(A))
 BOXLENS.append(' '.join(B))
