@@ -169,16 +169,16 @@ void INPUT::CHECK_FILE()
 
 // Wrapper functions: Process entire input file
 
-void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,	       
-	    		       vector<PAIRS>		 & ATOM_PAIRS, 
+void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,	       
+	    		       vector<PAIRS>	 & ATOM_PAIRS, 
 	    		       CLUSTER_LIST		 & TRIPS, 
 	    		       CLUSTER_LIST		 & QUADS, 
-	    		       map<string,int>  	 & PAIR_MAP,
+	    		       map<string,int>   & PAIR_MAP,
 	    		       vector<int>		 & INT_PAIR_MAP,
 	    		       vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 	    		       NEIGHBORS		 & NEIGHBOR_LIST,
 	    		       vector<int>		 & TMP_ATOMTYPEIDX, 
-	    		       vector<string>		 & TMP_ATOMTYPE)
+	    		       vector<string>	 & TMP_ATOMTYPE)
 {
 	// Actually read the input file 
 	
@@ -186,7 +186,7 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,
 	
 	// Initialize the neighbor list
 	
-	NEIGHBOR_LIST.USE	   = true;
+	NEIGHBOR_LIST.USE = true;
 	
 	// For assigning LSQ variables: "Control Variables" 
 	
@@ -198,8 +198,6 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,
 	PARSE_CONTROLS_FITCOUL(CONTROLS);
 	PARSE_CONTROLS_FITSTRS(CONTROLS);
 	PARSE_CONTROLS_FITENER(CONTROLS);
-	PARSE_CONTROLS_FITEATM(CONTROLS);
-	PARSE_CONTROLS_FITPOVR(CONTROLS);
 	PARSE_CONTROLS_PAIRTYP(CONTROLS);
 	PARSE_CONTROLS_CHBTYPE(CONTROLS);
 	PARSE_CONTROLS_USENEIG(CONTROLS, NEIGHBOR_LIST);
@@ -557,51 +555,8 @@ void INPUT::PARSE_CONTROLS_FITENER(JOB_CONTROL & CONTROLS)
 		}
 	}
 }
-void INPUT::PARSE_CONTROLS_FITEATM(JOB_CONTROL & CONTROLS)
-{
-	int N_CONTENTS = CONTENTS.size();
-	
-	for (int i=0; i<N_CONTENTS; i++)
-	{
-		if (found_input_keyword("FITEATM", CONTENTS(i)))				
-		{
-			if (CONTENTS(i+1,0)=="first"  || CONTENTS(i+1,0)=="First"  || CONTENTS(i+1,0)=="FIRST")
-			{
-				CONTROLS.FIT_ENER_PER_ATOM = true;
-				CONTROLS.FIT_ENER_PER_ATOM = convert_int(CONTENTS(i+1,1),i+1);
-			}
-			else
-			{
-				CONTROLS.FIT_ENER_PER_ATOM = convert_bool(CONTENTS(i+1,0),i+1);
-			}
-			
-			if ( RANK == 0 )
-			{
-				cout << "	# FITENER #: " << bool2str(CONTROLS.FIT_ENER_PER_ATOM);	
-				
-				if(CONTROLS.NENER>=0)
-					cout << "    			 ...will fit energies for first " << CONTROLS.NENER << " frames." << endl;
-			}	
-		}
-	}
-}
-void INPUT::PARSE_CONTROLS_FITPOVR(JOB_CONTROL & CONTROLS)
-{
-	int N_CONTENTS = CONTENTS.size();
-	
-	for (int i=0; i<N_CONTENTS; i++)
-	{
-		if (found_input_keyword("FITPOVR", CONTENTS(i)))						
-		{
-			CONTROLS.FIT_POVER = convert_bool(CONTENTS(i+1,0),i+1);
-			
-			if ( RANK == 0 ) 
-				cout << "	# FITPOVR #: " << bool2str(CONTROLS.FIT_POVER) << endl;		
-			
-			break;
-		}
-	}
-}
+
+
 void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
@@ -695,15 +650,6 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 					if ( RANK == 0 ) 
 						cout << "	             " << "Will transform Chebyshev pair distances to range " << TMP_CHEBY_RANGE_LOW << " to " << TMP_CHEBY_RANGE_HIGH << endl;
 				}
-			}
-
-			// Do some error checks
-	
-			if(CONTROLS.USE_3B_CHEBY && CONTROLS.FIT_POVER)
-			{
-				cout << "ERROR: Overbonding is not compatible with 3-body Chebyshev potentials." << endl;
-				cout << "       Set # FITPOVR # false." << endl;
-				exit(0);				
 			}
 			
 			break;
@@ -1018,42 +964,15 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				ATOM_PAIRS[TEMP_INT].NBINS[1] = 0;
 				ATOM_PAIRS[TEMP_INT].NBINS[2] = 0;				
 				
-				// Read overbonding parameters and histogram parameters
-								
-				if(convert_bool(CONTENTS(c+1+i,7),c+1+i))
+				// Read histogram parameters
+
+				if(CONTENTS.size(c+1+i) == 11)
 				{
-					// Overbonding
+					ATOM_PAIRS[TEMP_INT].NBINS[0] = convert_int(CONTENTS(c+1+i,8),c+i+1);
+					ATOM_PAIRS[TEMP_INT].NBINS[1] = convert_int(CONTENTS(c+1+i,9),c+i+1);
+					ATOM_PAIRS[TEMP_INT].NBINS[2] = convert_int(CONTENTS(c+1+i,10),c+i+1);
+				}					
 					
-					ATOM_PAIRS[TEMP_INT].USE_OVRPRMS = true;
-					ATOM_PAIRS[TEMP_INT].OVER_TO_ATM =      CONTENTS(c+1+i,8+0);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[0]  = convert_double(CONTENTS(c+1+i,8+1),c+1+i);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[1]  = convert_double(CONTENTS(c+1+i,8+2),c+1+i);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[2]  = convert_double(CONTENTS(c+1+i,8+3),c+1+i);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[3]  = convert_double(CONTENTS(c+1+i,8+4),c+1+i);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[4]  = convert_double(CONTENTS(c+1+i,8+5),c+1+i);
-					
-					if(CONTENTS.size(c+1+i) == 17)	// Histograms
-					{
-						ATOM_PAIRS[TEMP_INT].NBINS[0] = convert_double(CONTENTS(c+1+i,14),c+1+i);
-						ATOM_PAIRS[TEMP_INT].NBINS[1] = convert_double(CONTENTS(c+1+i,15),c+1+i);
-						ATOM_PAIRS[TEMP_INT].NBINS[2] = convert_double(CONTENTS(c+1+i,16),c+1+i);
-					}
-				}
-				else
-				{
-					// Overbonding
-					
-					ATOM_PAIRS[TEMP_INT].USE_OVRPRMS = false;
-					
-					// Histograms
-					
-					if(CONTENTS.size(c+1+i) == 11)
-					{
-						ATOM_PAIRS[TEMP_INT].NBINS[0] = convert_int(CONTENTS(c+1+i,8),c+i+1);
-						ATOM_PAIRS[TEMP_INT].NBINS[1] = convert_int(CONTENTS(c+1+i,9),c+i+1);
-						ATOM_PAIRS[TEMP_INT].NBINS[2] = convert_int(CONTENTS(c+1+i,10),c+i+1);
-					}					
-				}		
 			}
 			break;
 		}
@@ -1069,10 +988,7 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 		cout << "# S_MAXIM #     ";
 		cout << "# S_DELTA #     ";
 		cout << "# MORSE_LAMBDA #";	
-		cout << " # USEOVRP #     " << endl;
 	}
-		
-	bool PRINT_OVR = false;
 	
 	for(int i=0; i<NPAIR; i++)
 	{
@@ -1085,49 +1001,10 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
 				 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
 				 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
-				 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << " " 
-				 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS << endl;
+				 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl;
 		}
-			 
-		if(ATOM_PAIRS[i].USE_OVRPRMS)
-			PRINT_OVR = true;
 	}
 
-	// If overbonding parameters are provided, and they are not requested to be fit, 
-	// subtract thier contribution before generating A matrix
-	
-	if(PRINT_OVR && !CONTROLS.FIT_POVER)
-		CONTROLS.IF_SUBTRACT_COORD = true;
-
-	if(PRINT_OVR)
-	{
-		if ( RANK == 0 ) 
-		{
-			cout << "	# PAIRIDX #     ";
-			cout << "# ATM_TY1 #     ";
-			cout << "# ATM_TY1 #     ";				
-			cout << "# P_OVERB #     ";
-			cout << "# R_0_VAL #     ";
-			cout << "# P_1_VAL #     ";
-			cout << "# P_2_VAL #     ";
-			cout << "# LAMBDA6 #" << endl;						
-		}
-
-		for(int i=0; i<NPAIR; i++)
-		{					
-			if ( RANK == 0 ) 
-			{
-				cout << "	" << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-					 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-					 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
-			}												
-		}											
-	}
 	
 	if ( RANK == 0 )
 	{
@@ -1330,14 +1207,6 @@ void INPUT::RUN_SANITY_LSQ(JOB_CONTROL & CONTROLS)
 {
 
 	// Run a few checks to make sure logic is correct
- 
-	if(CONTROLS.IF_SUBTRACT_COORD && CONTROLS.FIT_POVER)
-	{
-		cout << "LOGIC ERROR: Problem with code logic. Both fit_pover and ifsubtract_coord cannot be true." << endl;
-		cout << "             if_subtract_coord should only be true if overbonding parameters have been " << endl;
-		cout << "             specified, and FITPOVR set false." << endl;
-		exit_run(0);
-	}
 
 	if(CONTROLS.IF_SUBTRACT_COUL && CONTROLS.FIT_COUL)
 	{
@@ -1345,14 +1214,7 @@ void INPUT::RUN_SANITY_LSQ(JOB_CONTROL & CONTROLS)
 		cout << "             ifsubtract_coul should only be true if non-zero charges have been specified " << endl;
 		cout << "             and FITCOUL set false." << endl;
 		exit_run(0);
-	}
-
-	if (CONTROLS.IF_SUBTRACT_COORD && RANK == 0)
-	{
-		cout << "Special feature: " << endl;
-		cout << " Will subtract contributions from user-specified overbonding " << endl;
-		cout << " parameters before generating A-matrix." << endl << endl;	
-	}					
+	}				
 
 	if(CONTROLS.USE_PARTIAL_CHARGES && RANK == 0)
 	{

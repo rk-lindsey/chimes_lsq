@@ -44,11 +44,7 @@ class PAIRS	// NEEDS UPDATING
 		      
 	  	double LAMBDA;  		      // Morse lambda for CHEBYSHEV type pairs
 	  	double MIN_FOUND_DIST;  	      // Minimum distance between pairs
-		      
-	  	bool   USE_OVRPRMS;		      // Should overbonding even be computed pair type
-	  	string OVER_TO_ATM;		      // Which atom is overbonding *to* being defined for... for example, overbonding to oxygen
-	  	vector<double> OVRPRMS; 	      // [0] = P_OVERB; [1] = R_0_VAL; [2] = P_1_VAL; [3] = P_2_VAL; [4] = LAMBDA6
-		      
+		      	      
 	  	vector<double> NBINS;		      // Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
 
 	  	FCUT FORCE_CUTOFF;		      // "CUBIC" "COSINE" or "SIGMOID" currently supported
@@ -58,7 +54,7 @@ class PAIRS	// NEEDS UPDATING
 	  	vector<double>        POT_PARAMS;     // Used by splines to compute pressure by integrating spline eq's
 	  	double  	      PAIR_CHRG;
 		      
-	  	PAIRS(): OVRPRMS(5,0.0), NBINS(3,0.0) 
+	  	PAIRS(): NBINS(3,0.0) 
 	  	{
 			      N_CFG_CONTRIB = 0;
 			      SNUM = 0;
@@ -77,8 +73,7 @@ class PAIRS	// NEEDS UPDATING
 			      S_MINIM = X_MINIM ;
 			      S_MAXIM = X_MAXIM ;
 
-			      USE_OVRPRMS = false;
-	  	}     // Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
+	  	}     // Just a constructor to set some defaults
 
 	  	// Set Chebyshev min/max vals.
 	  	void set_cheby_vals();

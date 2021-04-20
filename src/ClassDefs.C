@@ -2316,10 +2316,10 @@ void JOB_CONTROL::LSQ_SETUP(int npairs, int no_atom_types)
 			
 		// Keep track of the total number of lsq parameters.
 		TOT_ALL_PARAMS = TOT_SHORT_RANGE ;
+
 		if ( FIT_COUL )
 			TOT_ALL_PARAMS += npairs ;
-		if ( FIT_POVER )
-			TOT_ALL_PARAMS ++ ;
+
 		if ( FIT_ENER_EVER || FIT_ENER )
 			TOT_ALL_PARAMS += no_atom_types ;
 	

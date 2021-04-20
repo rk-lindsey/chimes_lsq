@@ -119,8 +119,6 @@ class JOB_CONTROL
 	
   		bool   FIT_COUL;	      // Replaces fit_coul... If true, take charges from spline parameters.
 		bool   USE_COULOMB;	      // Replaces if_coulomb... If true, calculate Coulomb forces.
-		bool   USE_OVERCOORD;	      // Replaces if_overcoord... If true, calculate ReaxFF-like overcoordination term.
-		bool   FIT_POVER;	      // Replaces fit_pover... If true, find linear overcoordination parameter from least-squares fitting. -- this needs to be updated for new handling
 		bool   USE_3B_CHEBY;	      // Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
 		bool   USE_4B_CHEBY;	      // If true, calculate 4-Body Chebyshev interaction.
 		vector<string> ATOMTYPES;     // A list of atom types	      
@@ -214,7 +212,6 @@ class JOB_CONTROL
 		bool FIT_ENER_EVER ;	      // Is energy ever included in the fit ?
 		int  NENER;
 		bool CALL_EWALD;	      // Should ewald subroutines be called?
-		bool USE_POVER; 	      // Should overbonding information be printed to the header file?
 
 		int   NFRAMES;  	      // Number of frames in the movie file
 		int   CHEBY_ORDER;	      // Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
@@ -247,7 +244,6 @@ class JOB_CONTROL
   		// Constructor... MD values are set in the read_input function in chimes_md.C
 	
   		JOB_CONTROL(): FIT_COUL(false), 
-		FIT_POVER(false),
 		USE_3B_CHEBY(false), 
 		USE_4B_CHEBY(false), 
 		N_LAYERS(0), 
@@ -670,8 +666,6 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 
 void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, A_MAT & A_MATRIX,
 									map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST) ;
-
-void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, A_MAT & A_MATRIX, vector<PAIRS> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode) ;
 
 void SubtractEwaldForces (FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
 

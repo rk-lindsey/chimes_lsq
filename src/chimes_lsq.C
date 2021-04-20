@@ -503,8 +503,6 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 {
 	ofstream header;
 	header.open("params.header");
-
-	bool USE_POVER ;
 	
 	//////////////////////////////////////////////////	   
 	// THE NEW WAY
@@ -519,21 +517,6 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 		header << "FITCOUL: true" << endl;
 	else
 		header << "FITCOUL: false" << endl;
-	
-	USE_POVER = false;
-	for(int i=0; i<ATOM_PAIRS.size(); i++)
-		if(ATOM_PAIRS[i].USE_OVRPRMS)
-			USE_POVER = true;
-	
-	if(USE_POVER)
-		header << "USEPOVR: true" << endl;
-	else
-		header << "USEPOVR: false" << endl;
-	
-	if(CONTROLS.FIT_POVER)
-		header << "FITPOVR: true" << endl;
-	else
-		header << "FITPOVR: false" << endl;
 	
 	if(CONTROLS.USE_3B_CHEBY)
 		header << "USE3BCH: true" << endl;
@@ -600,42 +583,7 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 		else
 			header << endl;
 	}
-	
 
-	if(USE_POVER)
-	{
-		header << endl;
- 		header << "# PAIRIDX #	";
- 		header << "# ATM_TY1 #	";
- 		header << "# ATM_TY1 #	";				
-		header << "# USEOVRP #	";
-		header << "# TO_ATOM #	";
-		header << "# P_OVERB #	";
- 		header << "# R_0_VAL #	";
- 		header << "# P_1_VAL #	";
- 		header << "# P_2_VAL #	";
- 		header << "# LAMBDA6 #" << endl;	
-			
-		for(int i=0; i<NPAIR; i++)
-		{
-			header << "	"
-						 << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-						 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-						 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-						 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS;
-			if(ATOM_PAIRS[i].USE_OVRPRMS)
-				header	<< setw(16) << left << ATOM_PAIRS[i].OVER_TO_ATM;
-			else
-				header	<< setw(16) << left << "NONE";
-			
-			header
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
-		}		
-	}
 
 	// Quads and triplets both have the same cutoff function parameters.
 	// Print out only once.
@@ -772,17 +720,12 @@ if(!called_before)
 		
 	if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
 	{
-		//SubtractCoordForces(SYSTEM, false, i, A_MATRIX,  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
 		cout << "Feature deprecated - exiting." << endl;
 		exit_run(0);
 	}
 		
 	if (CONTROLS.IF_SUBTRACT_COUL) 
 		SubtractEwaldForces(SYSTEM, NEIGHBOR_LIST, CONTROLS);
-
-	if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
-		SubtractCoordForces(SYSTEM, true, A_MATRIX, ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);			
-
 	
 	CONTROLS.FIT_STRESS        = DUMMY_FIT_STRESS; 
 	CONTROLS.FIT_STRESS_ALL    = DUMMY_FIT_STRESS_ALL;

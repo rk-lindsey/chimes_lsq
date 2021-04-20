@@ -2095,23 +2095,8 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 cout << "	Electrostatics will not be computed." << endl;
 		}
 			
-		if(CONTROLS.USE_OVERCOORD)
-		{
-		  if(RANK==0)
-		  {
-			 cout << "	Overbonding contributions will be considered." << endl;
-				
-			 if(CONTROLS.FIT_POVER)
-				cout << "		p-over will be read from fit parameters." << endl;
-			 else
-				cout << "		p-over will be read from specified parameters." << endl;
-		  }
-		}
-			
 		if(RANK==0)
-		  cout << endl;
-		  
-		  
+		  cout << endl;  
 		
 		if(SYSTEM.QM_ENERGY_OFFSET.size() == 0)
 		{
@@ -2120,9 +2105,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			for(int i=0; i<NO_PAIRS; i++)
 				SYSTEM.QM_ENERGY_OFFSET[i] = 0.0;
 		}
-			
-		
-		
 			
 		PARAMFILE.close();
 		break;
@@ -2398,25 +2380,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  }				
 		}
 
-		if(CONTROLS.USE_OVERCOORD)
-		{		
-		  LINE = get_next_line(PARAMFILE) ;
-		  LINE = get_next_line(PARAMFILE) ;
-		  LINE = get_next_line(PARAMFILE) ;
-
-		  for(int i=0; i<NO_PAIRS; i++)
-		  {
-			 PARAMFILE >> TEMP_STR >> TEMP_STR >> TEMP_STR;	
-			 PARAMFILE >> FF_2BODY[i].USE_OVRPRMS;	
-			 PARAMFILE >> FF_2BODY[i].OVER_TO_ATM;				
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[0];	
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[1];
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[2];
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[3];
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[4];	
-		  }
-		}
-			
 		TEMP_SEARCH_2B = "PAIR ";
 		TEMP_SEARCH_2B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type
 		TEMP_SEARCH_2B.append(" PARAMS");	
@@ -2724,27 +2687,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 	 {	
 		QUADS.read_ff_params(PARAMFILE, TMP_ATOMTYPE) ;
 	 }		
-		
-	 // Read in the fit overbonding parameter
-		
-	 else if(LINE.find("P OVER: ") != string::npos)
-	 {
-		if(CONTROLS.USE_OVERCOORD && CONTROLS.FIT_POVER)
-		{
-		  STREAM_PARSER.str(LINE);
-		  STREAM_PARSER >> TEMP_STR >> TEMP_STR;
-		  STREAM_PARSER >> FF_2BODY[0].OVRPRMS[0];
-		  STREAM_PARSER.str("");
-		  STREAM_PARSER.clear();	
-			
-		  for(int i=1; i<NO_PAIRS; i++)
-			 FF_2BODY[i].OVRPRMS[0] = FF_2BODY[0].OVRPRMS[0];				
-		}
-			
-		if (RANK==0)
-		  cout << "	...Read ReaxFF overbonding FF params..." << endl;
-	 }
-		
+				
 	 // Read the pair maps
 		
 	 else if(LINE.find("PAIRMAPS: ") != string::npos)
@@ -2801,10 +2744,6 @@ static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CO
 		CONTROLS.USE_COULOMB = is_true(tokens[1]) ;
 	 else if ( tokens[0] == "FITCOUL:" ) 
 		CONTROLS.FIT_COUL = is_true(tokens[1]) ;
-	 else if ( tokens[0] == "USEPOVR:" )
-		CONTROLS.USE_OVERCOORD = is_true(tokens[1]) ;
-	 else if ( tokens[0] == "FITPOVR:" )
-		CONTROLS.FIT_POVER = is_true(tokens[1]) ;
 	 else if ( tokens[0] == "USE3BCH:" )
 		CONTROLS.USE_3B_CHEBY = is_true(tokens[1]) ;
 	 else if ( tokens[0] == "USE4BCH:" )
@@ -2822,8 +2761,6 @@ static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CO
   {
 	 cout << "		...Compute electrostatics?      " << boolalpha << CONTROLS.USE_COULOMB << endl;
 	 cout << "		...Use fit charges?             " << boolalpha << CONTROLS.FIT_COUL << endl;
-	 cout << "		...Compute ReaxFF overbonding?  " << boolalpha << CONTROLS.USE_OVERCOORD << endl;
-	 cout << "		...Use fit overbonding param?   " << boolalpha << CONTROLS.FIT_POVER << endl;
 	 cout << "		...Use 3-body Cheby params?     " << boolalpha << CONTROLS.USE_3B_CHEBY << endl;
 	 cout << "		...Use 4-body Cheby params?     " << boolalpha << CONTROLS.USE_4B_CHEBY << endl;
 			
@@ -2911,23 +2848,7 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 		cout << "		" << FF_2BODY[i].PRPR_NM << " " << FF_2BODY[i].PAIR_CHRG << " (" << FF_2BODY[i].PAIR_CHRG*ke << ")" << endl;
 	 cout << endl;
   }	
-	
-  if(CONTROLS.USE_OVERCOORD)
-  {
-	 cout << "	ReaxFF over-coordination parameters: " << endl;
-		
-	 cout << "		pair...pover...r0...p1...p2...lambda6" << endl;
-		
-	 for(int i=0; i<FF_2BODY.size(); i++)
-	 {
-		cout << "		" << FF_2BODY[i].PRPR_NM << " ";
-		cout << FF_2BODY[i].OVRPRMS[0] << " ";
-		cout << FF_2BODY[i].OVRPRMS[1] << " ";
-		cout << FF_2BODY[i].OVRPRMS[2] << " ";
-		cout << FF_2BODY[i].OVRPRMS[3] << " ";
-		cout << FF_2BODY[i].OVRPRMS[4] << endl;
-	 }
-  }	
+  
 
   cout << endl;
 }

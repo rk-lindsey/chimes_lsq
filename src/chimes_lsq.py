@@ -354,12 +354,6 @@ def main():
     FIT_COUL = hf[1].split()
     FIT_COUL = FIT_COUL[1]
 
-    FIT_POVER = hf[3].split()
-    FIT_POVER = FIT_POVER[1]
-
-    USE_POVER = hf[2].split()
-    USE_POVER = USE_POVER[1]
-
     ATOM_TYPES_LINE  = 9
     TOTAL_ATOM_TYPES = hf[ATOM_TYPES_LINE].split()
     TOTAL_ATOM_TYPES = int(TOTAL_ATOM_TYPES[2])
@@ -575,13 +569,6 @@ def main():
 
     # Remaining tidbids
 
-
-    if FIT_POVER == "true":
-        print "P OVER: " + `x[len(x)-1]`
-        OVERCOORD_PARAMS = 1
-    else:
-        OVERCOORD_PARAMS = 0
-
     mapsfile=open(args.map,"r").readlines()
 
     print ""
@@ -591,7 +578,7 @@ def main():
 
     print ""
 
-    total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS + OVERCOORD_PARAMS 
+    total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS 
 
     N_ENER_OFFSETS = int(hf[9].split()[2])
 
@@ -604,7 +591,6 @@ def main():
         sys.stderr.write("COUNTED_TRIP_PARAMS " + str(COUNTED_TRIP_PARAMS) + "\n") 
         sys.stderr.write("COUNTED_QUAD_PARAMS " + str(COUNTED_QUAD_PARAMS) + "\n")
         sys.stderr.write("COUNTED_COUL_PARAMS " + str(COUNTED_COUL_PARAMS) + "\n")
-        sys.stderr.write("OVERCOORD_PARAMS " + str(OVERCOORD_PARAMS) + "\n")
         exit(1)
 
 

@@ -116,7 +116,6 @@ Control  variables	Description                                       Value/Optio
 ``FITCOUL`` *       ``true``/``false``: Fit/use charges              See below for details. 
 ``FITSTRS`` *       Whether/how to include stresses                  See below for details. 
 ``FITENER`` *       Whether/how to include energies                  See below for details. 
-``FITEATM``         (DELETE) Boolean: Fit per-atom energies          (Defunct) N/A.
 ``FITPOVR``         (DELETE) Boolean: Fit ReaxFF overbonding         (Defunct) N/A.
 ``PAIRTYP``         Chebyshev polynomial orders                      Expects ``<O2B> <O3B+1> <O4B+1> -1 1``
 ``CHBTYPE`` *       Pair distance transformation type                See below for details. 

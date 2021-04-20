@@ -13,7 +13,7 @@ using namespace std;
 #include "A_Matrix.h"
 
 
-A_MAT::A_MAT(): FORCES(), STRESSES(), FRAME_ENERGIES(), ATOM_ENERGIES(), OVERBONDING(), CHARGES()
+A_MAT::A_MAT(): FORCES(), STRESSES(), FRAME_ENERGIES(), ATOM_ENERGIES(), CHARGES()
 {
 	// Set up A-matrix
 	
@@ -36,7 +36,6 @@ void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS, vector<
 	STRESSES	.clear();	 
 	FRAME_ENERGIES	.clear();	 
 	ATOM_ENERGIES	.clear();	 
-	OVERBONDING	.clear();      
 	CHARGES		.clear();	         
 	
 	// Initialize everything
@@ -46,7 +45,6 @@ void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS, vector<
 	INITIALIZE_FORCES  (SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE);
 	INITIALIZE_ENERGIES(SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER, CONTROLS.FIT_ENER_PER_ATOM);
 	INITIALIZE_STRESSES(CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_STRESS, CONTROLS.FIT_STRESS_ALL);
-	INITIALIZE_OVERBOND(SYSTEM.ATOMS);
 	INITIALIZE_CHARGES (NPAIRS,SYSTEM.ATOMS);
 }
 
@@ -149,18 +147,6 @@ void A_MAT::INITIALIZE_STRESSES(int PARAMS, bool DIAG_STRESS, bool ALL_STRESS)
 		}
 	}	
 }
-	
-void A_MAT::INITIALIZE_OVERBOND(int ATOMS)
-{
-	OVERBONDING.resize(ATOMS);
-	
-	for (int i=0; i<ATOMS; i++)
-	{
-		OVERBONDING[i].X = 0;
-		OVERBONDING[i].Y = 0;
-		OVERBONDING[i].Z = 0;						
-	}			
-}
 
 void A_MAT::INITIALIZE_CHARGES (int FF_PAIRS,int ATOMS)
 {
@@ -248,8 +234,6 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		if ( CONTROLS.FIT_COUL ) 
 			for(int i=0; i<CHARGES.size(); i++) // Loop over pair types, i.e. OO, OH, HH
 				fileA << CHARGES[i][a].X << "   ";
-		if ( CONTROLS.FIT_POVER ) 
-			fileA << " " << OVERBONDING[a].X;
 
 		add_col_of_ones("FORCE", DO_ENER, fileA);
 		write_natoms(filena);			  
@@ -263,8 +247,6 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		if ( CONTROLS.FIT_COUL ) 
 			for(int i=0; i<CHARGES.size(); i++) // Loop over pair types, i.e. OO, OH, HH
 				fileA << CHARGES[i][a].Y << "   ";
-		if ( CONTROLS.FIT_POVER ) 
-			fileA << " " << OVERBONDING[a].Y;
 		add_col_of_ones("FORCE", DO_ENER, fileA);
 		write_natoms(filena);				  
 		fileA << endl;	
@@ -277,8 +259,6 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		if ( CONTROLS.FIT_COUL ) 
 			for(int i=0; i<CHARGES.size(); i++) // Loop over pair types, i.e. OO, OH, HH
 				fileA << CHARGES[i][a].Z << "   ";
-		if ( CONTROLS.FIT_POVER ) 
-			fileA << " " << OVERBONDING[a].Z;
 		add_col_of_ones("FORCE", DO_ENER, fileA);
 		write_natoms(filena);				  
 		fileA << endl;		
@@ -555,9 +535,6 @@ void A_MAT::PRINT_CONSTRAINTS(	const struct JOB_CONTROL &CONTROLS,
 				for(int k=0; k<CHARGE_CONSTRAINTS.size()+1; k++) // +1 because we n_constr = npairs-1
 					if(CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX[k] == j)
 						fileA << CHARGE_CONSTRAINTS[i].CONSTRAINTS[k] << " ";
-			
-			if ( CONTROLS.FIT_POVER ) 
-				fileA  << " 0.0 ";
 			
 			fileA << endl;	
 			
