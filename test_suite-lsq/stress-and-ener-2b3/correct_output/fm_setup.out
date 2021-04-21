@@ -11,7 +11,6 @@ Input file contents successfully stored.
 	# FITCOUL #: false
 	# FITSTRS #: true ...will fit to all tensor components
 	# FITENER #: false
-	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 12
 	             Will use 3-body order: 0
@@ -31,22 +30,13 @@ Input file contents successfully stored.
 		3  C H
 		4  C O
 		5  H O
-	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               C               C               1.1             8               0.01            1.35             0               
-	1               H               H               0.8             8               0.01            0.675            0               
-	2               O               O               2               8               0.01            2.55             0               
-	3               C               H               0.8             8               0.01            1.1              0               
-	4               C               O               1.1             8               0.01            1.15             0               
-	5               H               O               0.8             8               0.01            0.97             0               
-
-	Read the following number of ij ik jk bins for pairs: 
-		CC: 0 0 0
-		HH: 0 0 0
-		OO: 0 0 0
-		CH: 0 0 0
-		CO: 0 0 0
-		HO: 0 0 0
-
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # MORSE_LAMBDA #
+	0               C               C               1.1             8               1.35            
+	1               H               H               0.8             8               0.675           
+	2               O               O               2               8               2.55            
+	3               C               H               0.8             8               1.1             
+	4               C               O               1.1             8               1.15            
+	5               H               O               0.8             8               0.97            
 		Atom type idxs:  0 0 Pair name:   CC Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   CH Explicit pair index:    1 Unique pair index:    3
 		Atom type idxs:  0 2 Pair name:   CO Explicit pair index:    2 Unique pair index:    4
@@ -56,8 +46,6 @@ Input file contents successfully stored.
 		Atom type idxs:  2 0 Pair name:   OC Explicit pair index:    6 Unique pair index:    4
 		Atom type idxs:  2 1 Pair name:   OH Explicit pair index:    7 Unique pair index:    5
 		Atom type idxs:  2 2 Pair name:   OO Explicit pair index:    8 Unique pair index:    2
-Note: Will use cubic scaling of: 1
-
 WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 ...input file read successful: 
 
@@ -81,6 +69,42 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
+	Processing frame: 1     of: 36
+	Processing frame: 2     of: 36
+	Processing frame: 3     of: 36
+	Processing frame: 4     of: 36
+	Processing frame: 5     of: 36
+	Processing frame: 6     of: 36
+	Processing frame: 7     of: 36
+	Processing frame: 8     of: 36
+	Processing frame: 9     of: 36
+	Processing frame: 10    of: 36
+	Processing frame: 11    of: 36
+	Processing frame: 12    of: 36
+	Processing frame: 13    of: 36
+	Processing frame: 14    of: 36
+	Processing frame: 15    of: 36
+	Processing frame: 16    of: 36
+	Processing frame: 17    of: 36
+	Processing frame: 18    of: 36
+	Processing frame: 19    of: 36
+	Processing frame: 20    of: 36
+	Processing frame: 21    of: 36
+	Processing frame: 22    of: 36
+	Processing frame: 23    of: 36
+	Processing frame: 24    of: 36
+	Processing frame: 25    of: 36
+	Processing frame: 26    of: 36
+	Processing frame: 27    of: 36
+	Processing frame: 28    of: 36
+	Processing frame: 29    of: 36
+	Processing frame: 30    of: 36
+	Processing frame: 31    of: 36
+	Processing frame: 32    of: 36
+	Processing frame: 33    of: 36
+	Processing frame: 34    of: 36
+	Processing frame: 35    of: 36
+	Processing frame: 36    of: 36
 ...matrix population complete: 
 
 Printing matrices...

@@ -1,12 +1,12 @@
 This is a list of each test and what functionality is probed
 
-1  chon-dftbpoly
+1  chon-dftbpoly -- REMOVED !!!
 	- 4 atom types (C,H,O,N as in solvated amino acids?)
 	- DFTBPOLY interactions (9th order standard polynomial)
 	- 2-body interactions
 	- cubic style cutoff  (default used - value not specified in input file)	
 	- Direct transformation (style "NA")
-2  h2o-2bcheby
+2  h2o-2bcheby -- REMOVED !!!
 	- 2 atom types (O,H as in water)
 	- Chebyshev interactions
 	- 2-body interactions
@@ -14,7 +14,7 @@ This is a list of each test and what functionality is probed
 	- overbonding is fit
 	- cubic style cutoff (default used - value not specified in input file)	
 	- Morse-style transformation	
-3  h2o-2bcheby2
+3  h2o-2bcheby2 -- REMOVED !!!
 	- The same as h2o-3bcheby, except more frames, higher O3B, shorter cutoffs, and different Morse Lambda values
 4  h2o-3bcheby
 	- 2 atom types (O,H as in water)
@@ -34,20 +34,20 @@ This is a list of each test and what functionality is probed
 	- charge constraints specified, AND charges are fit
 	- cubic style cutoff	
 	- Morse-style transformation
-8  h2o-dftbpoly
+8  h2o-dftbpoly -- REMOVED !!!
 	- 2 atom types (O,H as in water)
 	- DFTBPOLY interactions (9th order standard polynomial)
 	- 2-body interactions
 	- cubic style cutoff  (default used - value not specified in input file)	
 	- Morse transformation
-9  h2o-invr
+9  h2o-invr -- REMOVED !!!
 	- 2 atom types (O,H as in water)
 	- INVR_R style interactions (4th order)
 	- 2-body interactions
 	- overbonding is fit
 	- cubic style cutoff (default used - value not specified in input file)	
 	- Morse-style transformation	
-10 h2o-splines
+10 h2o-splines -- REMOVED !!!
 	- 2 atom types (O,H as in water)
 	- Spline interactions
 	- 2-body interactions
@@ -55,7 +55,7 @@ This is a list of each test and what functionality is probed
 	- overbonding is fit
 	- cubic style cutoff (default used - value not specified in input file)	
 	- Transformation set to "N/A"	
-11 par-ewald
+11 par-ewald -- REMOVED !!!
 	- Identical to h2o-2bcheby ... indended to test serial v. MPI Ewald calcs
 12 special3b
 	- 2 atom types (C,O as in carbon monoxide)

@@ -13,7 +13,7 @@
 # TIMESTP # ! In fs
 	0.125
 # N_MDSTP # ! Total number of MD steps
-	25
+	50
 # NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
 	1
 # USENEIG # ! Use a neighbor list? HIGHLY reccommended when NLAYERS > 0

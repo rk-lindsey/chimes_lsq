@@ -10,7 +10,6 @@ Input file contents successfully stored.
 	# NLAYERS #: 1
 	# FITCOUL #: false
 	# FITENER #: true
-	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 12
 	             Will use 3-body order: 2
@@ -26,22 +25,14 @@ Input file contents successfully stored.
 		0  N N
 		1  H H
 		2  N H
-	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               N               N               0.934           8               0.1             1.15             0               
-	1               H               H               0.529           8               0.1             0.8              0               
-	2               N               H               0.761           8               0.1             1                0               
-
-	Read the following number of ij ik jk bins for pairs: 
-		NN: 0 0 0
-		HH: 0 0 0
-		NH: 0 0 0
-
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # MORSE_LAMBDA #
+	0               N               N               0.934           8               1.15            
+	1               H               H               0.529           8               0.8             
+	2               N               H               0.761           8               1               
 		Atom type idxs:  0 0 Pair name:   NN Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   NH Explicit pair index:    1 Unique pair index:    2
 		Atom type idxs:  1 0 Pair name:   HN Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
-Note: Will use cubic scaling of: 1
-
 # FCUTTYP #: TERSOFF 0.5      ... for all Chebyshev interactions
 WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 
@@ -138,6 +129,7 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
+	Processing frame: 1     of: 30
 	Latest 3-body outer cutoff values: 
 	0:  5.0000000000000000  5.0000000000000000  5.0000000000000000
 	1:  5.0000000000000000  5.0000000000000000  5.0000000000000000
@@ -152,6 +144,64 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
      Min 3-body cutoff = 0.5290000000000000
 
 Number of 3-body interactions = 187892
+	Processing frame: 2     of: 30
+Number of 3-body interactions = 187406
+	Processing frame: 3     of: 30
+Number of 3-body interactions = 186160
+	Processing frame: 4     of: 30
+Number of 3-body interactions = 187972
+	Processing frame: 5     of: 30
+Number of 3-body interactions = 186227
+	Processing frame: 6     of: 30
+Number of 3-body interactions = 186240
+	Processing frame: 7     of: 30
+Number of 3-body interactions = 186257
+	Processing frame: 8     of: 30
+Number of 3-body interactions = 186946
+	Processing frame: 9     of: 30
+Number of 3-body interactions = 185762
+	Processing frame: 10    of: 30
+Number of 3-body interactions = 188187
+	Processing frame: 11    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 12    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 13    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 14    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 15    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 16    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 17    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 18    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 19    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 20    of: 30
+Number of 3-body interactions = 0
+	Processing frame: 21    of: 30
+Number of 3-body interactions = 4
+	Processing frame: 22    of: 30
+Number of 3-body interactions = 4
+	Processing frame: 23    of: 30
+Number of 3-body interactions = 4
+	Processing frame: 24    of: 30
+Number of 3-body interactions = 4
+	Processing frame: 25    of: 30
+Number of 3-body interactions = 4
+	Processing frame: 26    of: 30
+Number of 3-body interactions = 4
+	Processing frame: 27    of: 30
+Number of 3-body interactions = 4
+	Processing frame: 28    of: 30
+Number of 3-body interactions = 4
+	Processing frame: 29    of: 30
+Number of 3-body interactions = 4
+	Processing frame: 30    of: 30
+Number of 3-body interactions = 4
 ...matrix population complete: 
 
 Printing matrices...
@@ -159,8 +209,8 @@ Printing matrices...
 
 Per-atom type energies will be provided at the end of the parameter file.
 Values will correspond to the following atom types, in order: 
-	N 384
-	H 128
+	N 1
+	H 3
 	Minimum distances between atoms: (Angstr.)
 		0	N N	1.001
 		1	H H	0.698

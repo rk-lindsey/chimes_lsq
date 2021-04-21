@@ -108,8 +108,8 @@ Initializing velocities via box Muller...
    ...setup complete
 
 Running velocity sanity checks...
-	Initial velocity center of mass: (   -0.0987,     0.0199,     0.1508) 
-	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
+	Initial velocity center of mass: (   -0.0101,    -0.0880,    -0.0983) 
+	Final   velocity center of mass: (   -0.0000,     0.0000,     0.0000) 
 	Total Mass     = 576.4864 au
 	Volume         = 638.0841 Ang^3
 	Number density = 0.2498 mol atm/cm^3
@@ -120,8 +120,6 @@ Running velocity sanity checks...
 Reading force field parameters...
 		...Compute electrostatics?      true
 		...Use fit charges?             true
-		...Compute ReaxFF overbonding?  false
-		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     true
 		...Use 4-body Cheby params?     true
 	...Read FF controls...
@@ -193,13 +191,12 @@ Atom properties:
    ...read complete.
 
 Notes on simulation: 
-	Using fpenalty power 3.0000
 	Using the following fcut style for 2B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 3B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 4B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
@@ -210,7 +207,7 @@ Force field summary:
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OO 0.7500 5.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
+		OO 0.7500 5.0000 MORSE 1.2500 0.0100 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -2.0843e+01
 		1 -2.8291e+01
@@ -224,7 +221,7 @@ Force field summary:
 		9 -2.2570e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		HH 7.5000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		HH 7.5000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 1.4399e+01
 		1 -1.6530e+01
@@ -238,7 +235,7 @@ Force field summary:
 		9 -1.2557e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OH 7.5000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		OH 7.5000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -5.1762e+00
 		1 8.0959e+00
@@ -1400,11 +1397,11 @@ Generating fast maps...
 		Atom type idxs:  1 1 1 0 Quadruplet name: HHHHOHHHOHOH Explicit index: 1222 Unique index:    3
 		Atom type idxs:  1 1 1 1 Quadruplet name: HHHHHHHHHHHH Explicit index: 2222 Unique index:    4
 BEGIN SIMULATION:
-RANK: 0 RESET RCUT_PADDING TO: 0.4562441805
-Number of 3-body interactions = 75340
-Number of 4-body interactions = 599149
-Number of 3-body interactions = 75340
-Number of 4-body interactions = 599149
+RANK: 0 RESET RCUT_PADDING TO: 0.4640746022
+Number of 3-body interactions = 76285
+Number of 4-body interactions = 611113
+Number of 3-body interactions = 76285
+Number of 4-body interactions = 611113
 
 Ewald parameters: 
 	Requested Ewald accuracy  =  1.000000e-06
@@ -1419,15 +1416,15 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-       1      0.12       5.2450076     -49.1445683     -43.8995606          1778.3     14.83818725    -43.8995606
+       1      0.12       5.4841048     -49.1445683     -43.6604635          1859.4     15.00480835    -43.6604635
 END SIMULATION
-	Average temperature over run = 1778.2983 K
-	Average pressure    over run = 14.8382 GPa
-	Pressures from diagonal stress tensors over run: 14.8392
+	Average temperature over run = 1859.3633 K
+	Average pressure    over run = 15.0048 GPa
+	Pressures from diagonal stress tensors over run: 15.0059
 	Average stress tensors over run: 
-		sigma_xx: 16.1149 GPa
-		sigma_yy: 13.9592 GPa
-		sigma_zz: 14.4436 GPa
-		sigma_xy: 3.5415 GPa
-		sigma_xz: 0.6166 GPa
-		sigma_yz: 8.2974 GPa
+		sigma_xx: 16.2815 GPa
+		sigma_yy: 14.1259 GPa
+		sigma_zz: 14.6102 GPa
+		sigma_xy: 3.7081 GPa
+		sigma_xz: 0.7832 GPa
+		sigma_yz: 8.4640 GPa

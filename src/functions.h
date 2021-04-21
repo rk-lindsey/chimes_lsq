@@ -616,7 +616,7 @@ inline double get_dist(FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 
 inline int FRAME::get_atomtype_idx(int atom)
 {
-  		return(ATOMTYPE_IDX[atom]-1);
+  		return(ATOMTYPE_IDX[atom]);
 }
 
 //////////////////////////////////////////

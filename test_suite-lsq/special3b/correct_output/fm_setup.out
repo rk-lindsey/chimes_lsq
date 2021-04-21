@@ -11,7 +11,6 @@ Input file contents successfully stored.
 	# FITCOUL #: false
 	# FITSTRS #: false
 	# FITENER #: false
-	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 12
 	             Will use 3-body order: 5
@@ -27,22 +26,14 @@ Input file contents successfully stored.
 		0  C C
 		1  O O
 		2  C O
-	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               C               C               0.988           8               0.01            1.35             0               
-	1               O               O               0.911           8               0.01            2.55             0               
-	2               C               O               0.876           8               0.01            1.15             0               
-
-	Read the following number of ij ik jk bins for pairs: 
-		CC: 0 0 0
-		OO: 0 0 0
-		CO: 0 0 0
-
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # MORSE_LAMBDA #
+	0               C               C               0.988           8               1.35            
+	1               O               O               0.911           8               2.55            
+	2               C               O               0.876           8               1.15            
 		Atom type idxs:  0 0 Pair name:   CC Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   CO Explicit pair index:    1 Unique pair index:    2
 		Atom type idxs:  1 0 Pair name:   OC Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   OO Explicit pair index:    3 Unique pair index:    1
-Note: Will use cubic scaling of: 1
-
 # FCUTTYP #: CUBIC      ... for all Chebyshev interactions
 WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 
@@ -576,6 +567,7 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
+	Processing frame: 1     of: 100
 	Latest 3-body outer cutoff values: 
 	0:  4.4000000000000004  4.4000000000000004  4.4000000000000004
 	1:  4.4000000000000004  4.0000000000000000  4.0000000000000000
@@ -590,8 +582,204 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
      Min 3-body cutoff = 0.8760000000000000
 
 Number of 3-body interactions = 101336
+	Processing frame: 2     of: 100
 Number of 3-body interactions = 99816
+	Processing frame: 3     of: 100
 Number of 3-body interactions = 101790
+	Processing frame: 4     of: 100
+Number of 3-body interactions = 99844
+	Processing frame: 5     of: 100
+Number of 3-body interactions = 101454
+	Processing frame: 6     of: 100
+Number of 3-body interactions = 101111
+	Processing frame: 7     of: 100
+Number of 3-body interactions = 101607
+	Processing frame: 8     of: 100
+Number of 3-body interactions = 99212
+	Processing frame: 9     of: 100
+Number of 3-body interactions = 99433
+	Processing frame: 10    of: 100
+Number of 3-body interactions = 101223
+	Processing frame: 11    of: 100
+Number of 3-body interactions = 102294
+	Processing frame: 12    of: 100
+Number of 3-body interactions = 101143
+	Processing frame: 13    of: 100
+Number of 3-body interactions = 100631
+	Processing frame: 14    of: 100
+Number of 3-body interactions = 100314
+	Processing frame: 15    of: 100
+Number of 3-body interactions = 101102
+	Processing frame: 16    of: 100
+Number of 3-body interactions = 100491
+	Processing frame: 17    of: 100
+Number of 3-body interactions = 99637
+	Processing frame: 18    of: 100
+Number of 3-body interactions = 100960
+	Processing frame: 19    of: 100
+Number of 3-body interactions = 102003
+	Processing frame: 20    of: 100
+Number of 3-body interactions = 100278
+	Processing frame: 21    of: 100
+Number of 3-body interactions = 100810
+	Processing frame: 22    of: 100
+Number of 3-body interactions = 100275
+	Processing frame: 23    of: 100
+Number of 3-body interactions = 101383
+	Processing frame: 24    of: 100
+Number of 3-body interactions = 100921
+	Processing frame: 25    of: 100
+Number of 3-body interactions = 101188
+	Processing frame: 26    of: 100
+Number of 3-body interactions = 102110
+	Processing frame: 27    of: 100
+Number of 3-body interactions = 101627
+	Processing frame: 28    of: 100
+Number of 3-body interactions = 100826
+	Processing frame: 29    of: 100
+Number of 3-body interactions = 100421
+	Processing frame: 30    of: 100
+Number of 3-body interactions = 100522
+	Processing frame: 31    of: 100
+Number of 3-body interactions = 101202
+	Processing frame: 32    of: 100
+Number of 3-body interactions = 99009
+	Processing frame: 33    of: 100
+Number of 3-body interactions = 100085
+	Processing frame: 34    of: 100
+Number of 3-body interactions = 101336
+	Processing frame: 35    of: 100
+Number of 3-body interactions = 99278
+	Processing frame: 36    of: 100
+Number of 3-body interactions = 101429
+	Processing frame: 37    of: 100
+Number of 3-body interactions = 100782
+	Processing frame: 38    of: 100
+Number of 3-body interactions = 102804
+	Processing frame: 39    of: 100
+Number of 3-body interactions = 101524
+	Processing frame: 40    of: 100
+Number of 3-body interactions = 100111
+	Processing frame: 41    of: 100
+Number of 3-body interactions = 101050
+	Processing frame: 42    of: 100
+Number of 3-body interactions = 100543
+	Processing frame: 43    of: 100
+Number of 3-body interactions = 100732
+	Processing frame: 44    of: 100
+Number of 3-body interactions = 102000
+	Processing frame: 45    of: 100
+Number of 3-body interactions = 102455
+	Processing frame: 46    of: 100
+Number of 3-body interactions = 101142
+	Processing frame: 47    of: 100
+Number of 3-body interactions = 101277
+	Processing frame: 48    of: 100
+Number of 3-body interactions = 100928
+	Processing frame: 49    of: 100
+Number of 3-body interactions = 102725
+	Processing frame: 50    of: 100
+Number of 3-body interactions = 101262
+	Processing frame: 51    of: 100
+Number of 3-body interactions = 101461
+	Processing frame: 52    of: 100
+Number of 3-body interactions = 101326
+	Processing frame: 53    of: 100
+Number of 3-body interactions = 101623
+	Processing frame: 54    of: 100
+Number of 3-body interactions = 100761
+	Processing frame: 55    of: 100
+Number of 3-body interactions = 100889
+	Processing frame: 56    of: 100
+Number of 3-body interactions = 100963
+	Processing frame: 57    of: 100
+Number of 3-body interactions = 99979
+	Processing frame: 58    of: 100
+Number of 3-body interactions = 99226
+	Processing frame: 59    of: 100
+Number of 3-body interactions = 99115
+	Processing frame: 60    of: 100
+Number of 3-body interactions = 99247
+	Processing frame: 61    of: 100
+Number of 3-body interactions = 101227
+	Processing frame: 62    of: 100
+Number of 3-body interactions = 101362
+	Processing frame: 63    of: 100
+Number of 3-body interactions = 101050
+	Processing frame: 64    of: 100
+Number of 3-body interactions = 101128
+	Processing frame: 65    of: 100
+Number of 3-body interactions = 100361
+	Processing frame: 66    of: 100
+Number of 3-body interactions = 100372
+	Processing frame: 67    of: 100
+Number of 3-body interactions = 100384
+	Processing frame: 68    of: 100
+Number of 3-body interactions = 101710
+	Processing frame: 69    of: 100
+Number of 3-body interactions = 101864
+	Processing frame: 70    of: 100
+Number of 3-body interactions = 102079
+	Processing frame: 71    of: 100
+Number of 3-body interactions = 101397
+	Processing frame: 72    of: 100
+Number of 3-body interactions = 101602
+	Processing frame: 73    of: 100
+Number of 3-body interactions = 101587
+	Processing frame: 74    of: 100
+Number of 3-body interactions = 101769
+	Processing frame: 75    of: 100
+Number of 3-body interactions = 102730
+	Processing frame: 76    of: 100
+Number of 3-body interactions = 102780
+	Processing frame: 77    of: 100
+Number of 3-body interactions = 99644
+	Processing frame: 78    of: 100
+Number of 3-body interactions = 99483
+	Processing frame: 79    of: 100
+Number of 3-body interactions = 99505
+	Processing frame: 80    of: 100
+Number of 3-body interactions = 99601
+	Processing frame: 81    of: 100
+Number of 3-body interactions = 100875
+	Processing frame: 82    of: 100
+Number of 3-body interactions = 100886
+	Processing frame: 83    of: 100
+Number of 3-body interactions = 100835
+	Processing frame: 84    of: 100
+Number of 3-body interactions = 99974
+	Processing frame: 85    of: 100
+Number of 3-body interactions = 101980
+	Processing frame: 86    of: 100
+Number of 3-body interactions = 102136
+	Processing frame: 87    of: 100
+Number of 3-body interactions = 100565
+	Processing frame: 88    of: 100
+Number of 3-body interactions = 100435
+	Processing frame: 89    of: 100
+Number of 3-body interactions = 103276
+	Processing frame: 90    of: 100
+Number of 3-body interactions = 102298
+	Processing frame: 91    of: 100
+Number of 3-body interactions = 101969
+	Processing frame: 92    of: 100
+Number of 3-body interactions = 101925
+	Processing frame: 93    of: 100
+Number of 3-body interactions = 102066
+	Processing frame: 94    of: 100
+Number of 3-body interactions = 101688
+	Processing frame: 95    of: 100
+Number of 3-body interactions = 101804
+	Processing frame: 96    of: 100
+Number of 3-body interactions = 101794
+	Processing frame: 97    of: 100
+Number of 3-body interactions = 102127
+	Processing frame: 98    of: 100
+Number of 3-body interactions = 100747
+	Processing frame: 99    of: 100
+Number of 3-body interactions = 100305
+	Processing frame: 100   of: 100
+Number of 3-body interactions = 100723
 ...matrix population complete: 
 
 Printing matrices...

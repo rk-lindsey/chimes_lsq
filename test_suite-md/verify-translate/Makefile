@@ -6,9 +6,9 @@ NP ?= 1
 
 check_translate: 
 	./translate.pl < input.xyz > translate.xyz
-	srun -n $(NP)	../chimes_md translate_md.in > translate_4b_force.out	
+	$(RUN_JOB) ../../build/chimes_md translate_md.in > translate_4b_force.out	
 	mv forceout.txt forceout.translate.txt
-	srun -n $(NP)	../chimes_md run_md.in > orig_4b_force.out	
+	$(RUN_JOB) ../../build/chimes_md run_md.in > orig_4b_force.out	
 	mv forceout.txt forceout.orig.txt
 	perl ../../contrib/compare/compare.pl forceout.orig.txt forceout.translate.txt
 

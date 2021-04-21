@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 36 processor(s).
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 Will read from file: run_md.in
@@ -118,8 +118,6 @@ Running velocity sanity checks...
 Reading force field parameters...
 		...Compute electrostatics?      true
 		...Use fit charges?             true
-		...Compute ReaxFF overbonding?  false
-		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     true
 		...Use 4-body Cheby params?     false
 	...Read FF controls...
@@ -170,11 +168,10 @@ PAIR CHEBYSHEV PENALTY SCALING: 100000.0000
    ...read complete.
 
 Notes on simulation: 
-	Using fpenalty power 3.0000
 	Using the following fcut style for 2B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 3B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
@@ -185,7 +182,7 @@ Force field summary:
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OO 1.9390 4.3000 0.1000 MORSE 2.7000 0.1000 1.0000e+05 1.0000e+00 1.0000e-01
+		OO 1.9390 4.3000 MORSE 2.7000 0.1000 1.0000e+05 0.0000e+00
 		Parameters: 
 		0 4.5667e+00
 		1 1.0390e+02
@@ -199,7 +196,7 @@ Force field summary:
 		9 2.1112e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		HH 9.8200e-01 4.1000e+00 1.0000e-01 MORSE 1.6000e+00 1.0000e-01 1.0000e+05 1.0000e+00 1.0000e-01
+		HH 9.8200e-01 4.1000e+00 MORSE 1.6000e+00 1.0000e-01 1.0000e+05 0.0000e+00
 		Parameters: 
 		0 5.0562e+01
 		1 -2.8059e+01
@@ -213,7 +210,7 @@ Force field summary:
 		9 -5.4040e-01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OH 7.2000e-01 4.2000e+00 1.0000e-01 MORSE 1.0000e+00 1.0000e-01 1.0000e+05 1.0000e+00 1.0000e-01
+		OH 7.2000e-01 4.2000e+00 MORSE 1.0000e+00 1.0000e-01 1.0000e+05 0.0000e+00
 		Parameters: 
 		0 -1.4528e+01
 		1 4.7305e+01
@@ -1176,39 +1173,39 @@ RANK: 0 UPDATING ON STEP: 249, WITH PADDING: 0.541
 Number of 3-body interactions = 38717
 RANK: 0 UPDATING ON STEP: 264, WITH PADDING: 0.617
      270     33.75       6.1213899     -55.8479577     -49.7265679          2075.4     14.77243239    -51.4507083
-Warning: (Step 277) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.073864757250511 1.082000000000000  20 64
-	...Penalty potential = 0.053840805600410
-Warning: (Step 278) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.062228080848065 1.082000000000000  20 64
-	...Penalty potential = 0.772941236975221
+Warning: (Step 277) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.074 1.082  20 64
+	...Penalty potential = 0.054
+Warning: (Step 278) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.062 1.082  20 64
+	...Penalty potential = 0.773
 Number of 3-body interactions = 39851
 RANK: 0 UPDATING ON STEP: 279, WITH PADDING: 0.634
-Warning: (Step 279) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.050874019292026 1.082000000000000  20 64
-	...Penalty potential = 3.015568039645209
+Warning: (Step 279) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.051 1.082  20 64
+	...Penalty potential = 3.016
      280     35.00       5.6154004     -55.4442646     -49.8288643          1903.9     14.58382294    -51.4512241
-Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.041300166072335 1.082000000000000  20 64
-	...Penalty potential = 6.741831771188127
-Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.818547516279466 0.820000000000000  45 68
-	...Penalty potential = 0.000306431791717
-Warning: (Step 281) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035417899641806 1.082000000000000  20 64
-	...Penalty potential = 10.107813034730954
-Warning: (Step 281) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.815527792643312 0.820000000000000  45 68
-	...Penalty potential = 0.008944700326972
-Warning: (Step 282) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.034696495440996 1.082000000000000  20 64
-	...Penalty potential = 10.584734088729242
-Warning: (Step 282) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.814555448434525 0.820000000000000  45 68
-	...Penalty potential = 0.016139361381578
-Warning: (Step 283) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.039355942892060 1.082000000000000  20 64
-	...Penalty potential = 7.754888338060454
-Warning: (Step 283) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.815648231392777 0.820000000000000  45 68
-	...Penalty potential = 0.008241331523607
-Warning: (Step 284) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.048240935192006 1.082000000000000  20 64
-	...Penalty potential = 3.847434384409915
-Warning: (Step 284) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.818748008963229 0.820000000000000  45 68
-	...Penalty potential = 0.000196247285861
-Warning: (Step 285) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.059487762440349 1.082000000000000  20 64
-	...Penalty potential = 1.140922090420798
-Warning: (Step 286) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.071441979794203 1.082000000000000  20 64
-	...Penalty potential = 0.117692141822833
+Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.041 1.082  20 64
+	...Penalty potential = 6.742
+Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820  45 68
+	...Penalty potential = 0.000
+Warning: (Step 281) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082  20 64
+	...Penalty potential = 10.108
+Warning: (Step 281) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820  45 68
+	...Penalty potential = 0.009
+Warning: (Step 282) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082  20 64
+	...Penalty potential = 10.585
+Warning: (Step 282) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.815 0.820  45 68
+	...Penalty potential = 0.016
+Warning: (Step 283) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.039 1.082  20 64
+	...Penalty potential = 7.755
+Warning: (Step 283) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820  45 68
+	...Penalty potential = 0.008
+Warning: (Step 284) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.048 1.082  20 64
+	...Penalty potential = 3.847
+Warning: (Step 284) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820  45 68
+	...Penalty potential = 0.000
+Warning: (Step 285) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.059 1.082  20 64
+	...Penalty potential = 1.141
+Warning: (Step 286) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.071 1.082  20 64
+	...Penalty potential = 0.118
      290     36.25       5.6006387     -55.5161679     -49.9155292          1898.9     16.50737349    -51.4499362
      300     37.50       6.0656248     -56.0677926     -50.0021678          2056.5     17.10068864    -51.4509361
 Number of 3-body interactions = 33376

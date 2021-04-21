@@ -950,7 +950,7 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 		cout << "# ATM_TY1 #     ";
 		cout << "# S_MINIM #     ";
 		cout << "# S_MAXIM #     ";
-		cout << "# MORSE_LAMBDA #";	
+		cout << "# MORSE_LAMBDA #" << endl;	
 	}
 	
 	for(int i=0; i<NPAIR; i++)

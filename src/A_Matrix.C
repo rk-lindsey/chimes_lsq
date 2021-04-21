@@ -80,13 +80,15 @@ void A_MAT::INITIALIZE_NATOMS  (int ATOMS, vector<string> & FRAME_ATOMTYPES, vec
 		}
 	}
 	
-	/* For debugging:
+	/*
+	//For debugging:
 	
 	cout << "IINITIALIZATION RESULTS: " << endl;
 	
 	for (int i=0; i<NO_ATOM_TYPES; i++)
 		cout << "	+ " <<  ATOM_TYPES[i] << " " << NO_ATOMS_OF_TYPE[i] << endl;
 	*/
+	
 }
 
 

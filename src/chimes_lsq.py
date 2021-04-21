@@ -20,6 +20,9 @@ from subprocess   import call
 
 def main():
     
+    loc = os.getcwd()
+    
+    
     #############################################
     # Define arguments supported by the lsq code
     #############################################
@@ -29,18 +32,17 @@ def main():
     parser.add_argument("--A",                    type=str,      default='A.txt',         help='A (derivative) matrix') 
     parser.add_argument("--algorithm",            type=str,      default='svd',           help='fitting algorithm')
     parser.add_argument("--dlasso_dlars_path",    type=str     , default='',              help='Path to DLARS and/or DLASSO solver')
-    parser.add_argument("--alpha",                type=float,    default=1.0e-04,         help='Lasso or ridge regularization')
+    parser.add_argument("--alpha",                type=float,    default=1.0e-04,         help='Lasso regularization')
     parser.add_argument("--b",                    type=str,      default='b.txt',         help='b (force) file')
-    parser.add_argument("--cores",                type=int,      default=8,               help='DOWLQN/DLARS number of cores')
+    parser.add_argument("--cores",                type=int,      default=8,               help='DLARS number of cores')
     parser.add_argument("--eps",                  type=float,    default=1.0e-05,         help='svd regularization')
     parser.add_argument("--header",               type=str,      default='params.header', help='parameter file header')
     parser.add_argument("--map",                  type=str,      default='ff_groups.map', help='parameter file map')
-    parser.add_argument("--nodes",                type=int,      default=1,               help='DOWLQN/DLARS number of nodes')
+    parser.add_argument("--nodes",                type=int,      default=1,               help='DLARS number of nodes')
     parser.add_argument("--normalize",            type=str2bool, default=False,           help='Normalize DLARS calculation')
     parser.add_argument("--read_output",          type=str2bool, default=False,           help='Read output from previous DLARS run')
-    parser.add_argument("--restart",              type=str2bool, default=False,           help='Use DOWLQN restart file')
     parser.add_argument("--restart_dlasso_dlars", type=str,      default="",              help='Determines whether dlasso or dlars job will be restarted. Argument is the restart file name ')
-    parser.add_argument("--split_files",          type=str2bool, default=False,           help='LSQ code has split A matrix output.  Works with DOWLQN or DLARS.')
+    parser.add_argument("--split_files",          type=str2bool, default=False,           help='LSQ code has split A matrix output.  Works DLARS.')
     parser.add_argument("--test_suite",           type=str2bool, default=False,           help='output for test suite')
     parser.add_argument("--weights",              type=str,      default="None",          help='weight file')
     parser.add_argument("--active",               type=str2bool, default=False,           help='is this a DLARS/DLASSO run from the active learning driver?')
@@ -48,7 +50,11 @@ def main():
     # Actually parse the arguments
 
     args        = parser.parse_args()
-
+    
+    dlasso_dlars_path = loc + '../../contrib/dlars/src/'
+    
+    if args.dlasso_dlars_path != '':
+        dlasso_dlars_path = args.dlasso_dlars_path
 
     #############################################
     # Import sklearn modules, if needed
@@ -60,7 +66,6 @@ def main():
     if args.algorithm in sk_algos:
         from sklearn import linear_model
         from sklearn import preprocessing
-        
         
     #############################################
     # Read weights, if used
@@ -74,7 +79,6 @@ def main():
         if ( not args.split_files ):
             WEIGHTS= numpy.genfromtxt(args.weights,dtype='float')
 
-
     #################################
     #   Process A and b matrices, sanity check weight dimensions
     #################################
@@ -85,8 +89,8 @@ def main():
     
         A      = numpy.zeros((1,1),dtype=float)
         b      = numpy.genfromtxt(args.b, dtype='float') 
-	    np     = "undefined"
-	    nlines = b.shape[0]
+        np     = "undefined"
+        nlines = b.shape[0]
 
     elif ( (not args.split_files) and (not args.read_output) ) :
         A       = numpy.genfromtxt(args.A , dtype='float')
@@ -102,28 +106,26 @@ def main():
             if np > nlines:
                 print "Error: number of variables > number of equations"
                 exit(1)
-
     else:
         
-	    if not args.read_output:
+        if not args.read_output:
             dimf = open("dim.0000.txt", "r") ;
             line = next(dimf) 
             dim  = (int(x) for x in line.split())
             A    = numpy.zeros((1,1),dtype=float)           # Dummy A matrix - NOT read in.
             b    = numpy.genfromtxt(args.b, dtype='float')  # Dummy b matrix - NOT read in.
             (np, nstart, nend, nlines) = dim
-	    else:
-	        b      = numpy.genfromtxt(args.b, dtype='float') 
-	        np     = "undefined"
-	        nlines = b.shape[0]
+        else:
+            b      = numpy.genfromtxt(args.b, dtype='float') 
+            np     = "undefined"
+            nlines = b.shape[0]
             
     # Sanity check weight dimensions        
-	
+    
     if DO_WEIGHTING and not args.split_files:
         if ( WEIGHTS.shape[0] != nlines ):
             print "Wrong number of lines in WEIGHTS file"
             exit(1)  
-
 
     #################################
     # Apply weighting to A and b
@@ -144,8 +146,6 @@ def main():
             for j in xrange(A.shape[1]): # Loop over cols (variables in fit)
                 weightedA[i][j] = A[i][j]*WEIGHTS[i]
                 weightedb[i]    = b[i]   *WEIGHTS[i]
-
-
 
     #################################
     # Solve the matrix equation
@@ -240,8 +240,6 @@ def main():
         print "Unrecognized fitting algorithm" 
         exit(1)
 
-
-
     #################################
     # Process output from solver(s)
     #################################
@@ -263,7 +261,6 @@ def main():
 
     bic = float(nlines) * log(Z/float(nlines)) + float(nvars) * log(float(nlines))
 
-
     #############################################
     # Setup output
     #############################################
@@ -279,7 +276,6 @@ def main():
     if args.weights !="None":
         print '! Using weighting file:            ',args.weights
     print "!"
-
 
     ####################################
     # Actually process the header file...
@@ -320,7 +316,7 @@ def main():
 
     # 1. Figure out what potential type we have
 
-    POTENTIAL = hf[7].split()
+    POTENTIAL = hf[5].split()
     POTENTIAL = POTENTIAL[1]
 
     print ""
@@ -329,31 +325,29 @@ def main():
 
     # 2. Figure out how many coeffs each atom type will have
 
-    CASE_BY_CASE = False
-
     SNUM_2B = 0
     SNUM_4B = 0
 
     if POTENTIAL == "CHEBYSHEV":
-        TMP = hf[7].split()
+        
+        TMP = hf[5].split()
 
         if len(TMP) >= 4:
             if len(TMP) >= 5:
                 SNUM_4B = int(TMP[4])
 
             SNUM_2B = int(TMP[2])  
-    else:
-        CASE_BY_CASE = True # We'll need to do it per atom pair type.	
+ 
 
     # 3. Print out the parameters
 
     FIT_COUL = hf[1].split()
     FIT_COUL = FIT_COUL[1]
 
-    ATOM_TYPES_LINE  = 9
+    ATOM_TYPES_LINE  = 7
     TOTAL_ATOM_TYPES = hf[ATOM_TYPES_LINE].split()
     TOTAL_ATOM_TYPES = int(TOTAL_ATOM_TYPES[2])
-    ATOM_PAIRS_LINE  = 11+TOTAL_ATOM_TYPES+2
+    ATOM_PAIRS_LINE  = ATOM_TYPES_LINE+2+TOTAL_ATOM_TYPES+2
     TOTAL_PAIRS      = hf[ATOM_PAIRS_LINE].split()
     TOTAL_PAIRS      = int(TOTAL_PAIRS[2])
 
@@ -415,17 +409,6 @@ def main():
         A1 = A1[1]
 
         print "PAIRTYPE PARAMS: " + `i` + " " + A1 + " " + A2 + "\n"
-
-        if CASE_BY_CASE:  
-
-            # Figure out individual SNUM_2B
-
-            MIN = hf[ATOM_PAIRS_LINE+2+i+1].split()
-            MAX = float(MIN[4])
-            DEL = float(MIN[5])
-            MIN = float(MIN[3])
-
-            SNUM_2B = int((2+m.floor((MAX - MIN)/DEL))*2)
 
         for j in range(0, int(SNUM_2B)):
             print `j` + " " + `x[i*SNUM_2B+j]`
@@ -576,7 +559,7 @@ def main():
 
     total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS 
 
-    N_ENER_OFFSETS = int(hf[9].split()[2])
+    N_ENER_OFFSETS = int(hf[7].split()[2])
 
 ## Parameter count could be off by natom_types, if energies are included in the fit
     if (total_params != len(x)) and (len(x) != (total_params+N_ENER_OFFSETS)) :
@@ -638,7 +621,7 @@ def count_nonzero_vars(x):
 #############################################
 #############################################
 
-def fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_files, args.algorithm, args.read_output, args.weights, args.normalize, args.A , args.b, args.restart_dlasso_dlars):
+def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, read_output, weights, normalize, A , b, restart_dlasso_dlars):
 
     # Use the Distributed LARS/LASSO fitting algorithm.  Returns both the solution x and
     # the estimated force vector A * x, which is read from Ax.txt.    
@@ -660,11 +643,11 @@ def fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_
     if not args.read_output:
     
         exepath = "srun -N " + str(args.nodes) + " -n " + str(args.cores) + " "
-	
+        
         exepath = exepath + dlasso_dlars_path + "dlars"
-        	
+        
         if os.path.exists(dlars_file):
-	
+
             command = None
    
             command = exepath + " " + args.A  + " " + args.b + " dim.txt --lambda=" + `args.alpha`
@@ -686,13 +669,13 @@ def fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_
                 command = command + " --normalize=y" 
             else:
                 command = command + " --normalize=n" 
-		
+
             if args.restart_dlasso_dlars != "":
-	    	print "Will run a dlars/dlasso restart job with file:", args.restart_dlasso_dlars
-		
-		    command = command + " --restart=" + args.restart_dlasso_dlars
+                print "Will run a dlars/dlasso restart job with file:", args.restart_dlasso_dlars
+
+                command = command + " --restart=" + args.restart_dlasso_dlars
                 
-            command = command +  " >& dlars.log"
+                command = command +  " >& dlars.log"
 
             print("! DLARS run: " + command + "\n")
 
