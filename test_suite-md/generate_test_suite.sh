@@ -22,7 +22,15 @@ rm -rf *o *dSYM chimes_md
 # Common function for test script initialization.
 source ../src/bash/init_vars.sh
 init_test_vars
-echo "NP = $NP"
+echo "Number of processors = $NP"
+echo "Warning: this script will overwrite all reference test output."
+echo "Continue ? (yes/no)"
+
+read ok_run
+if test "x$ok_run" != "xyes" ; then
+	echo 'Quitting'
+	exit 0
+fi
 
 make -f Makefile-TS-MD chimes_md
 rm -f ../test_suite-lsq/chimes_md;  mv chimes_md  ../test_suite-md/
