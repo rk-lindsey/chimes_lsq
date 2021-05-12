@@ -239,6 +239,8 @@ int main(int argc, char* argv[])
   ifstream PARAMFILE;
   ifstream COORDFILE;
 
+	const int STAT_BUF_SZ = 256 ; // Max length of a statistics output line.
+	
   read_input(INFILE, CONTROLS, FF_PLOTS,NEIGHBOR_LIST);		// Populate object with user defined values
 	
   cout.precision(15);		// Set output precision
@@ -861,6 +863,7 @@ FF_SETUP_2:
   ////////////////////////////////////////////////////////////
 
   STATISTICS.open("md_statistics.out");
+	STATISTICS.precision(6) ;
   
   if (RANK==0)
 	 cout << "BEGIN SIMULATION:" << endl;
@@ -951,31 +954,47 @@ FF_SETUP_2:
 		if ( CONTROLS.STEP == FIRST_STEP ) 
 		{
 		  printf("%8s %9s %15s %15s %15s %15s %15s", "Step", "Time", "Ktot/N", "Vtot/N", "Etot/N", "T", "P");
-				
-		  STATISTICS << "# Step	Time	Ktot/N	Vtot/N	Etot/N	T	P";
+
+			char stat_buf[STAT_BUF_SZ] ;
+			snprintf(stat_buf, STAT_BUF_SZ, "%8s %14s %14s %14s %14s %14s %14s ",
+							 "# Step", "Time",  "Ktot/N",  "Vtot/N", 	"Etot/N", "T", "P");
+
+			STATISTICS << stat_buf ;
 	  
 		  if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
 		  {
 			 printf(" %15s\n", "Econs/N");
-			 STATISTICS << "	Econs/N" << endl;
+
+			 snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s\n", "Econs/N", "P_conf") ;
+			 STATISTICS << stat_buf ;
 		  }
 		  else 
 		  {
 			 printf("\n");
-			 STATISTICS << endl;
+			 snprintf(stat_buf, STAT_BUF_SZ, "%14s\n", "P_conf") ;			 
+			 STATISTICS << stat_buf ;
 		  }
 			
-		  printf("%8s %9s %15s %15s %15s %15s %15s", " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
-		  STATISTICS << "#	(fs)	(kcal/mol)	(kcal/mol)	(kcal/mol)	(K)	(GPa)";
+		  printf("%8s %9s %15s %15s %15s %15s %15s", " ", "(fs)", "(kcal/mol)", "(kcal/mol)",
+						 "(kcal/mol)", "(K)", "(GPa)");
+
+			snprintf(stat_buf, STAT_BUF_SZ, "%8s %14s %14s %14s %14s %14s %14s ",
+							 " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
+
+			STATISTICS << stat_buf ;
+			
 		  if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
 		  {
 			 printf(" %15s\n", "(kcal/mol)");
-			 STATISTICS << "	(kcal/mol)" << endl;
+
+			 snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s\n", "(kcal/mol)", "(GPa)") ;			 
+			 STATISTICS << stat_buf ;
 		  }
 		  else 
 		  {
 			 printf("\n");
-			 STATISTICS << endl;
+			 snprintf(stat_buf, STAT_BUF_SZ, "%14s\n", "(GPa)") ;			 			 
+			 STATISTICS << stat_buf ;
 		  }
 
 		  std::cout.flush();
@@ -1122,22 +1141,35 @@ FF_SETUP_2:
 			(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,
 			SYSTEM.TEMPERATURE, 
 			SYSTEM.PRESSURE);
-			
-			STATISTICS 
-			<< CONTROLS.STEP+1
-			<< "     " 
-			<< (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS
-			<< "  " << Ktot/SYSTEM.ATOMS
-			<< "      " <<SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS
-			<< "        "<<(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS
-			<< " " <<SYSTEM.TEMPERATURE<< "      " 
-			<< SYSTEM.PRESSURE;
-			
-			// Print the econs value
 
-		  	printf("%15.7f\n", CONTROLS.IO_ECONS_VAL);
-		  	STATISTICS << "        " << CONTROLS.IO_ECONS_VAL << endl;
-			
+			char stat_buf[STAT_BUF_SZ] ;
+
+			snprintf(stat_buf, STAT_BUF_SZ, "%8d %14.7e %14.7e %14.7e %14.7e %14.7e %14.7e ",
+							 CONTROLS.STEP+1,
+							 (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS,
+							 Ktot/SYSTEM.ATOMS,
+							 SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,
+							 (Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,
+							 SYSTEM.TEMPERATURE,
+							 SYSTEM.PRESSURE) ;
+		
+			STATISTICS << stat_buf ;
+
+
+			// Print the econs value
+			if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
+		  {
+				snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e\n", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa) ;
+				STATISTICS << stat_buf ;
+		  }
+		  else 
+		  {
+  			snprintf(stat_buf, STAT_BUF_SZ, "%14.7e\n", SYSTEM.PRESSURE_XYZ * GPa) ;				
+				STATISTICS << stat_buf ;
+		  }
+
+			// Should only be printed for NVT-MTK or NPT, but don't want to change reference output.
+			printf("%15.7f\n", CONTROLS.IO_ECONS_VAL);
 		  cout.flush();
 		}	
 		
