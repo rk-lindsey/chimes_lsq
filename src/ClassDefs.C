@@ -441,9 +441,6 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 		STYLE = IN_STYLE;	
 	else if(CONTROLS.FREQ_UPDATE_THERMOSTAT > -1.0)	// Trivial velocity scaling
 		STYLE = "NVT-SCALE";
-	else if(IN_STYLE=="LMP-NVE" || IN_STYLE=="LMP-NVT" || IN_STYLE=="LMP-NPT" ||
-	 (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI" || CONTROLS.ENSEMBLE == "LMP-MIN"))
-		cout << "	...Configuring constraints for a " << IN_STYLE << " simulation." << endl;
 	else
 	{
 		cout << "ERROR: UNKNOWN CONSTRAINT STYLE" << endl;
@@ -2121,10 +2118,6 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 	ACCEL       .resize(ATOMS); // Use for calculated forces in ZCalc_Ewald.
 	CHARGES     .resize(ATOMS);
 	ATOMTYPE_IDX.resize(ATOMS);
-		
-	if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
-		if(CONTROLS.FIT_ENER_PER_ATOM)
-			QM_POT_ENER_PER_ATOM.resize(ATOMS);
 			
 	// Read trajectory, convert to proper units, and apply PBC
 			
@@ -2153,41 +2146,16 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 		TRAJ_INPUT >> FORCES[j].Y;
 		TRAJ_INPUT >> FORCES[j].Z;
 
-		if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
-			if(CONTROLS.FIT_ENER_PER_ATOM) // We're fitting per-atom energies. Read one per line.
-				TRAJ_INPUT >> QM_POT_ENER_PER_ATOM[j];
+		// Convert forces from atomic (H/B) to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
+				
+		FORCES[j].X *= 627.50960803*1.889725989;
+		FORCES[j].Y *= 627.50960803*1.889725989;
+		FORCES[j].Z *= 627.50960803*1.889725989;
 
-		if (ATOM_PAIRS[0].PAIRTYP != "DFTBPOLY") // Convert forces to kcal/mol/Angs (Stillinger's units) ... Note, all atom pairs must be of the same type, so using 0 index is ok.
-		{
-			// Assume units are in Hartree/bohr
-				
-			FORCES[j].X *= 627.50960803*1.889725989;
-			FORCES[j].Y *= 627.50960803*1.889725989;
-			FORCES[j].Z *= 627.50960803*1.889725989;
-				
-				
-			// Assume units are in eV/A
-				
-			/*
-				FORCES[j].X *= 23.0609;
-				FORCES[j].Y *= 23.0609;
-				FORCES[j].Z *= 23.0609;
-			*/
-		}
 						
 		if(CONTROLS.WRAP_COORDS)	// Apply PBC (for cases of unwrapped coordinates)
 		{
-		
-cout << "DEBUG: FYI, WRAPPING" << endl;		
 			BOXDIM.WRAP_ATOM(COORDS[j], WRAP_IDX[j], true);
-			
-			/* RKL - no longer used - 082319
-			
-			COORDS[j].X -= floor(COORDS[j].X/BOXDIM.X)*BOXDIM.X;
-			COORDS[j].Y -= floor(COORDS[j].Y/BOXDIM.Y)*BOXDIM.Y;
-			COORDS[j].Z -= floor(COORDS[j].Z/BOXDIM.Z)*BOXDIM.Z;
-			
-			*/
 		}			
 			
 		// Assign atom charges.
@@ -2202,7 +2170,7 @@ cout << "DEBUG: FYI, WRAPPING" << endl;
 	}
 		
 	// If layering requested, replicate the system
-//cout << "BUILDING LAYERS " << endl;
+
 	build_layers(CONTROLS.N_LAYERS);
 		
 	if(i==0)
@@ -2316,20 +2284,20 @@ void JOB_CONTROL::LSQ_SETUP(int npairs, int no_atom_types)
 			
 		// Keep track of the total number of lsq parameters.
 		TOT_ALL_PARAMS = TOT_SHORT_RANGE ;
+
 		if ( FIT_COUL )
 			TOT_ALL_PARAMS += npairs ;
-		if ( FIT_POVER )
-			TOT_ALL_PARAMS ++ ;
+
 		if ( FIT_ENER_EVER || FIT_ENER )
 			TOT_ALL_PARAMS += no_atom_types ;
 	
 		if((FIT_STRESS  || FIT_STRESS_ALL) && NSTRESS == -1)
 			NSTRESS = NFRAMES;
 		
-		if((FIT_ENER || FIT_ENER_PER_ATOM) && NENER == -1)
+		if(FIT_ENER && NENER == -1)
 			NENER = NFRAMES;		
 	
-		FIT_ENER_EVER = FIT_ENER || FIT_ENER_PER_ATOM ;	// Is energy ever fit ?
+		FIT_ENER_EVER = FIT_ENER;	// Is energy ever fit ?
 
 		if (INFILE.size() == 1)
 			INFILE_FRAMES.push_back(NFRAMES);

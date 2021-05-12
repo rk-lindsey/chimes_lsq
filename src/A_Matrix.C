@@ -13,7 +13,7 @@ using namespace std;
 #include "A_Matrix.h"
 
 
-A_MAT::A_MAT(): FORCES(), STRESSES(), FRAME_ENERGIES(), ATOM_ENERGIES(), OVERBONDING(), CHARGES()
+A_MAT::A_MAT(): FORCES(), STRESSES(), FRAME_ENERGIES(), ATOM_ENERGIES(), CHARGES()
 {
 	// Set up A-matrix
 	
@@ -36,7 +36,6 @@ void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS, vector<
 	STRESSES	.clear();	 
 	FRAME_ENERGIES	.clear();	 
 	ATOM_ENERGIES	.clear();	 
-	OVERBONDING	.clear();      
 	CHARGES		.clear();	         
 	
 	// Initialize everything
@@ -44,9 +43,8 @@ void A_MAT::INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS, vector<
 	INITIALIZE_NATOMS  (SYSTEM.ATOMS,SYSTEM.ATOMTYPE, ATOM_PAIRS);
 		
 	INITIALIZE_FORCES  (SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE);
-	INITIALIZE_ENERGIES(SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER, CONTROLS.FIT_ENER_PER_ATOM);
+	INITIALIZE_ENERGIES(SYSTEM.ATOMS,CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_ENER);
 	INITIALIZE_STRESSES(CONTROLS.TOT_SHORT_RANGE, CONTROLS.FIT_STRESS, CONTROLS.FIT_STRESS_ALL);
-	INITIALIZE_OVERBOND(SYSTEM.ATOMS);
 	INITIALIZE_CHARGES (NPAIRS,SYSTEM.ATOMS);
 }
 
@@ -82,13 +80,15 @@ void A_MAT::INITIALIZE_NATOMS  (int ATOMS, vector<string> & FRAME_ATOMTYPES, vec
 		}
 	}
 	
-	/* For debugging:
+	/*
+	//For debugging:
 	
 	cout << "IINITIALIZATION RESULTS: " << endl;
 	
 	for (int i=0; i<NO_ATOM_TYPES; i++)
 		cout << "	+ " <<  ATOM_TYPES[i] << " " << NO_ATOMS_OF_TYPE[i] << endl;
 	*/
+	
 }
 
 
@@ -109,27 +109,12 @@ void A_MAT::INITIALIZE_FORCES(int ATOMS, int NPARAM)
 	}
 }
 
-void A_MAT::INITIALIZE_ENERGIES(int ATOMS,int PARAMS, bool FRAME_ENER, bool ATOM_ENER)
+void A_MAT::INITIALIZE_ENERGIES(int ATOMS,int PARAMS, bool FRAME_ENER)
 {
-	if (FRAME_ENER)
-	{
-		FRAME_ENERGIES.resize(PARAMS);
+	FRAME_ENERGIES.resize(PARAMS);
 		
-		for (int j=0; j<PARAMS; j++)
-			FRAME_ENERGIES[j] = 0.0;
-	}
-	else if (ATOM_ENER)
-	{
-		ATOM_ENERGIES.resize(ATOMS);
-
-		for (int i=0; i<ATOMS; i++)
-		{
-			ATOM_ENERGIES[i].resize(PARAMS);
-		
-			for (int j=0; j<PARAMS; j++)
-				ATOM_ENERGIES[i][j] = 0.0;
-		}
-	}
+	for (int j=0; j<PARAMS; j++)
+		FRAME_ENERGIES[j] = 0.0;
 }	
 	
 void A_MAT::INITIALIZE_STRESSES(int PARAMS, bool DIAG_STRESS, bool ALL_STRESS)
@@ -148,18 +133,6 @@ void A_MAT::INITIALIZE_STRESSES(int PARAMS, bool DIAG_STRESS, bool ALL_STRESS)
 			STRESSES[j].YZ = 0.0;
 		}
 	}	
-}
-	
-void A_MAT::INITIALIZE_OVERBOND(int ATOMS)
-{
-	OVERBONDING.resize(ATOMS);
-	
-	for (int i=0; i<ATOMS; i++)
-	{
-		OVERBONDING[i].X = 0;
-		OVERBONDING[i].Y = 0;
-		OVERBONDING[i].Z = 0;						
-	}			
 }
 
 void A_MAT::INITIALIZE_CHARGES (int FF_PAIRS,int ATOMS)
@@ -248,8 +221,6 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		if ( CONTROLS.FIT_COUL ) 
 			for(int i=0; i<CHARGES.size(); i++) // Loop over pair types, i.e. OO, OH, HH
 				fileA << CHARGES[i][a].X << "   ";
-		if ( CONTROLS.FIT_POVER ) 
-			fileA << " " << OVERBONDING[a].X;
 
 		add_col_of_ones("FORCE", DO_ENER, fileA);
 		write_natoms(filena);			  
@@ -263,8 +234,6 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		if ( CONTROLS.FIT_COUL ) 
 			for(int i=0; i<CHARGES.size(); i++) // Loop over pair types, i.e. OO, OH, HH
 				fileA << CHARGES[i][a].Y << "   ";
-		if ( CONTROLS.FIT_POVER ) 
-			fileA << " " << OVERBONDING[a].Y;
 		add_col_of_ones("FORCE", DO_ENER, fileA);
 		write_natoms(filena);				  
 		fileA << endl;	
@@ -277,8 +246,6 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		if ( CONTROLS.FIT_COUL ) 
 			for(int i=0; i<CHARGES.size(); i++) // Loop over pair types, i.e. OO, OH, HH
 				fileA << CHARGES[i][a].Z << "   ";
-		if ( CONTROLS.FIT_POVER ) 
-			fileA << " " << OVERBONDING[a].Z;
 		add_col_of_ones("FORCE", DO_ENER, fileA);
 		write_natoms(filena);				  
 		fileA << endl;		
@@ -469,29 +436,6 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		data_count += 3 ;
 		}
 	}
-	else if(CONTROLS.FIT_ENER_PER_ATOM)
-	{
-		// Check if we need to exclude some energy data from the A and b text files.
-		if(N < CONTROLS.NENER)
-		{
-			// Output A.txt 
-			
-			for(int a=0; a<ATOM_ENERGIES.size(); a++)
-			{
-				for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
-					fileA << ATOM_ENERGIES[a][n] << " ";
-				add_col_of_ones("ENERGY", DO_ENER, fileA);
-				fileA << endl;
-
-				// Output b.txt stuff
-				
-				fileb                  << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
-				data_count++ ;
-			
-				fileb_labeled << CONTROLS.INFILE_ENERGY_FLAGS[my_file] << "+2 " << SYSTEM.QM_POT_ENER_PER_ATOM[a] << endl;
-			}
-                }
-	}
 	fileA.flush() ;
 	fileb.flush() ;
 	fileb_labeled.flush() ;
@@ -555,9 +499,6 @@ void A_MAT::PRINT_CONSTRAINTS(	const struct JOB_CONTROL &CONTROLS,
 				for(int k=0; k<CHARGE_CONSTRAINTS.size()+1; k++) // +1 because we n_constr = npairs-1
 					if(CHARGE_CONSTRAINTS[i].PAIRTYPE_IDX[k] == j)
 						fileA << CHARGE_CONSTRAINTS[i].CONSTRAINTS[k] << " ";
-			
-			if ( CONTROLS.FIT_POVER ) 
-				fileA  << " 0.0 ";
 			
 			fileA << endl;	
 			

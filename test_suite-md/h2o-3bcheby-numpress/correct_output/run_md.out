@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 36 processor(s).
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 Will read from file: run_md.in
@@ -112,8 +112,6 @@ Running velocity sanity checks...
 Reading force field parameters...
 		...Compute electrostatics?      true
 		...Use fit charges?             true
-		...Compute ReaxFF overbonding?  false
-		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     true
 		...Use 4-body Cheby params?     false
 	...Read FF controls...
@@ -162,11 +160,10 @@ Atom properties:
    ...read complete.
 
 Notes on simulation: 
-	Using fpenalty power 3.0000
 	Using the following fcut style for 2B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 3B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
@@ -177,7 +174,7 @@ Force field summary:
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
+		OO 0.7500 6.0000 MORSE 1.2500 0.0100 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -1.3987e+02
 		1 -2.1691e+01
@@ -191,7 +188,7 @@ Force field summary:
 		9 -1.0552e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		HH 7.5000e-01 6.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -4.7756e+01
 		1 -7.1332e+01
@@ -205,7 +202,7 @@ Force field summary:
 		9 -3.6734e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		OH 7.5000e-01 6.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 3.4743e+00
 		1 1.3627e+01
@@ -323,10 +320,10 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-      10      1.25       3.8811924       1.0761929       4.9573853          1315.9     39.91846791      4.9428579
+      10      1.25       3.8811924       1.0761929       4.9573853          1315.9     39.91846792      4.9428579
 Number of 3-body interactions = 198060
 RANK: 0 UPDATING ON STEP: 16, WITH PADDING: 0.379
-      20      2.50       3.8029184       1.2092767       5.0121951          1289.4     40.32144362      4.9430936
+      20      2.50       3.8029184       1.2092767       5.0121951          1289.4     40.32144361      4.9430936
 END SIMULATION
 	Average temperature over run = 1314.9462 K
 	Average pressure    over run = 39.6603 GPa

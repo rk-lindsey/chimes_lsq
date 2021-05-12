@@ -7,25 +7,21 @@
 #
 ###############################################################
 
-#module load intel impi
-
-cd ../src
-rm -rf *o *dSYM chimes_md
-
 # Common function for test script initialization.
 source ../src/bash/init_vars.sh
 init_test_vars
 echo "NP = $NP"
 
-if make -f Makefile-TS-MD chimes_md ; then
-	 echo "Succeeded in building chimes_md"
+cd ..
+
+if ./install.sh  ; then
+	echo "Compiling chimes_md succeeded"
 else
-	 echo "Failed to build chimes_md"
-	 exit
+	 echo "Compiling chimes_md failed"
+	 exit 1
 fi
 
-rm -f ../test_suite-lsq/chimes_md;  mv chimes_md  ../test_suite-md/
-cd ../test_suite-md
+cd -
 
 
 ########################################
@@ -70,7 +66,7 @@ do
 	
 	cd $i
 
-	if $RUN_JOB ../chimes_md run_md.in > run_md.out ; then
+	if $RUN_JOB ../../build/chimes_md run_md.in > run_md.out ; then
 		 SUCCESS=1 
 	else
 		 echo "Chimes_md failed"
@@ -127,14 +123,10 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 	 echo " "
 	 echo " ...Beginning by running the lsq test suite... "
 
-	 cd ../src
-	 rm -rf *o *dSYM chimes_lsq
-	 cd ../test_suite-md
-
 	 cd ../test_suite-lsq 
 	 ./run_test_suite.sh "$LSQ_FORCE_JOBS"
 	 
-	 cd ../test_suite-md
+	 cd -
 
 	 echo " "
 	 echo " ...Now running the force comparison tests... "
@@ -160,7 +152,7 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 		  cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
 		  cp ../../test_suite-lsq/$i/current_output/force.txt     .
 
-		  if ../chimes_md run_md.in > run_md.out ; then
+		  if ../../build/chimes_md run_md.in > run_md.out ; then
 				SUCCESS=1
 		  else
 				echo "Chimes_MD failed"
@@ -213,7 +205,7 @@ do
 	 if ! test_dir $i ; then
 		  continue 
 	 fi
-	 cd $i ; make NP=${NP}
+	 cd $i ; RUN_JOB=$RUN_JOB  NP=${NP} make
 	 echo "Testing $i"
 	 if [ $? -ne 0 ] ; then
 		  echo "		...Test failed."

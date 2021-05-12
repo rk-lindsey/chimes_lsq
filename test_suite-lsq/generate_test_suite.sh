@@ -33,17 +33,17 @@ fi
 #
 ###############################################################
 
-cd ../src
-rm -f *.o chimes_lsq
-if make -f Makefile-TS-LSQ chimes_lsq ; then
-	 echo "Compiling chimes_lsq succeeded"
+cd ..
+
+if ./install.sh  ; then
+	echo "Compiling chimes_lsq succeeded"
 else
 	 echo "Compiling chimes_lsq failed"
 	 exit 1
 fi
 
-mv chimes_lsq ../test_suite-lsq/
-cd ../test_suite-lsq
+cd -
+
 
 ###############################################################
 #
@@ -73,16 +73,14 @@ do
 	# test uses only 10 frames because otherwise the test
 	# would take forever 
 
-	if ! test_dir $i ; then
-		 continue 
-	fi
+	if ! test_dir $i ; then continue ; fi
 
 	cd $i
 
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	if [ ! -d correct_output ] ; then mkdir correct_output ; fi
 
-	if $RUN_JOB ../chimes_lsq fm_setup.in > fm_setup.out ; then
+	if $RUN_JOB ../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
 		 echo "Chimes_lsq succeeded"
 		 SUCCESS=1
 	else
@@ -97,8 +95,6 @@ do
 	
 	cd ..
 done
-
-
 
 ###############################################################
 #
@@ -116,6 +112,7 @@ do
 	fi
 
 	cd $i/current_output
+	
 	
 	if $RUN_LSQ_PYTHON_CODE > params.txt ; then
 		 echo "LSQ code succeeded"
@@ -147,7 +144,8 @@ echo "Running Makefile jobs $MAKE_JOBS"
 
 for job in $MAKE_JOBS ; do
 	 cd $job
-	 if make generate ; then
+	 
+	 if RUN_JOB=$RUN_JOB PYTHON=$PYTHON make generate ; then
 		  echo "$job succeeded"
 	 else
 		  echo "$job failed"

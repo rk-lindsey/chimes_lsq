@@ -197,25 +197,19 @@ int main(int argc, char* argv[])
 
 	for (int i=0; i<ATOM_PAIRS.size(); i++)
 	{
-		if ( (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) || (ATOM_PAIRS[i].PAIRTYP == "DFTBPOLY") )	
+		if ( (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) )	
 		{
 			ATOM_PAIRS[i].SNUM = CONTROLS.CHEBY_ORDER;
-			
-			if (ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" )
-			{
-				ATOM_PAIRS[i].SNUM_3B_CHEBY = CONTROLS.CHEBY_3B_ORDER;
-				ATOM_PAIRS[i].SNUM_4B_CHEBY = CONTROLS.CHEBY_4B_ORDER;
-				ATOM_PAIRS[i].CHEBY_TYPE    = CONTROLS.CHEBY_TYPE;
-			}
-				
+
+			ATOM_PAIRS[i].SNUM_3B_CHEBY = CONTROLS.CHEBY_3B_ORDER;
+			ATOM_PAIRS[i].SNUM_4B_CHEBY = CONTROLS.CHEBY_4B_ORDER;
+			ATOM_PAIRS[i].CHEBY_TYPE    = CONTROLS.CHEBY_TYPE;
+		}
+		else
+		{
+			cout << "ERROR: Unknown pairtype: " << ATOM_PAIRS[i].PAIRTYP << endl;
 		}
 		
-		else if (ATOM_PAIRS[i].PAIRTYP == "INVRSE_R") 
-			ATOM_PAIRS[i].SNUM = CONTROLS.INVR_PARAMS;
-
-		else // Spline
-			ATOM_PAIRS[i].SNUM = (2+floor((ATOM_PAIRS[i].S_MAXIM - ATOM_PAIRS[i].S_MINIM)/ATOM_PAIRS[i].S_DELTA))*2; //2 is for p0/m0/p1/m1.. 
-	
 		CONTROLS.TOT_SNUM += ATOM_PAIRS[i].SNUM;
 	}
 
@@ -503,8 +497,6 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 {
 	ofstream header;
 	header.open("params.header");
-
-	bool USE_POVER ;
 	
 	//////////////////////////////////////////////////	   
 	// THE NEW WAY
@@ -520,21 +512,6 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 	else
 		header << "FITCOUL: false" << endl;
 	
-	USE_POVER = false;
-	for(int i=0; i<ATOM_PAIRS.size(); i++)
-		if(ATOM_PAIRS[i].USE_OVRPRMS)
-			USE_POVER = true;
-	
-	if(USE_POVER)
-		header << "USEPOVR: true" << endl;
-	else
-		header << "USEPOVR: false" << endl;
-	
-	if(CONTROLS.FIT_POVER)
-		header << "FITPOVR: true" << endl;
-	else
-		header << "FITPOVR: false" << endl;
-	
 	if(CONTROLS.USE_3B_CHEBY)
 		header << "USE3BCH: true" << endl;
 	else
@@ -549,10 +526,6 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 	
 	if     (ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV")
 		header << " " << ATOM_PAIRS[0].SNUM << " " << ATOM_PAIRS[0].SNUM_3B_CHEBY << " " << ATOM_PAIRS[0].SNUM_4B_CHEBY << " " << ATOM_PAIRS[0].CHEBY_RANGE_LOW << " " << ATOM_PAIRS[0].CHEBY_RANGE_HIGH << endl;
-	else if(ATOM_PAIRS[0].PAIRTYP == "DFTBPOLY")
-		header << " " << ATOM_PAIRS[0].SNUM << endl;	
-	else if (ATOM_PAIRS[0].PAIRTYP == "INVRSE_R")
-		header << " " << CONTROLS.INVR_PARAMS << endl;
 	else
 		header << endl;
 	
@@ -580,7 +553,6 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 	header << "# ATM_TY1 #	";
 	header << "# S_MINIM #	";
 	header << "# S_MAXIM #	";
-	header << "# S_DELTA #	";
 	header << "# CHBDIST #	";	// how pair distance is transformed in cheby calc
 	header << "# MORSE_LAMBDA #" << endl;
 
@@ -593,58 +565,19 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 					 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
 					 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
 					 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
-					 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
 					 << setw(16) << left << chtype;
 		if(ATOM_PAIRS[i].CHEBY_TYPE == Cheby_trans::MORSE )
 			header << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl; 
 		else
 			header << endl;
 	}
-	
 
-	if(USE_POVER)
-	{
-		header << endl;
- 		header << "# PAIRIDX #	";
- 		header << "# ATM_TY1 #	";
- 		header << "# ATM_TY1 #	";				
-		header << "# USEOVRP #	";
-		header << "# TO_ATOM #	";
-		header << "# P_OVERB #	";
- 		header << "# R_0_VAL #	";
- 		header << "# P_1_VAL #	";
- 		header << "# P_2_VAL #	";
- 		header << "# LAMBDA6 #" << endl;	
-			
-		for(int i=0; i<NPAIR; i++)
-		{
-			header << "	"
-						 << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-						 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-						 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-						 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS;
-			if(ATOM_PAIRS[i].USE_OVRPRMS)
-				header	<< setw(16) << left << ATOM_PAIRS[i].OVER_TO_ATM;
-			else
-				header	<< setw(16) << left << "NONE";
-			
-			header
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
-			  << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
-		}		
-	}
 
 	// Quads and triplets both have the same cutoff function parameters.
 	// Print out only once.
 	if ( ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV" ) 
 		ATOM_PAIRS[0].FORCE_CUTOFF.print_header(header) ;
-		
-	if(ATOM_PAIRS[0].CUBIC_SCALE != 1.0)
-		header << endl << "PAIR CHEBYSHEV CUBIC SCALING: " << ATOM_PAIRS[0].CUBIC_SCALE << endl;
-	
+			
 	// Print out special cutoffs 
 	TRIPS.print_special(header);
 	QUADS.print_special(header);
@@ -726,9 +659,7 @@ static int process_frame(	A_MAT &A_MATRIX,
 		
 	bool DUMMY_FIT_STRESS	     = CONTROLS.FIT_STRESS;    
 	bool DUMMY_FIT_STRESS_ALL    = CONTROLS.FIT_STRESS_ALL;
-
-	bool DUMMY_FIT_ENER	     = CONTROLS.FIT_ENER;	 
-	//bool DUMMY_FIT_ENER_PER_ATOM = CONTROLS.FIT_ENER_PER_ATOM;
+	bool DUMMY_FIT_ENER	         = CONTROLS.FIT_ENER;	 
 
 	// Only include stress tensor data for first NSTRESS frames..
 	
@@ -741,7 +672,6 @@ static int process_frame(	A_MAT &A_MATRIX,
 	if((CONTROLS.NENER != -1) && (i >= CONTROLS.NENER))
 	{
 		CONTROLS.FIT_ENER          = false;	
-		//CONTROLS.FIT_ENER_PER_ATOM = false;
 	}
 			
 	// This output is specific to the number of processors.
@@ -772,26 +702,17 @@ if(!called_before)
 		
 	if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
 	{
-		//SubtractCoordForces(SYSTEM, false, i, A_MATRIX,  ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);	
 		cout << "Feature deprecated - exiting." << endl;
 		exit_run(0);
 	}
 		
 	if (CONTROLS.IF_SUBTRACT_COUL) 
 		SubtractEwaldForces(SYSTEM, NEIGHBOR_LIST, CONTROLS);
-
-	if ( CONTROLS.FIT_POVER )	// Fit the overcoordination parameter.
-		SubtractCoordForces(SYSTEM, true, A_MATRIX, ATOM_PAIRS, PAIR_MAP, NEIGHBOR_LIST, true);			
-
 	
 	CONTROLS.FIT_STRESS        = DUMMY_FIT_STRESS; 
 	CONTROLS.FIT_STRESS_ALL    = DUMMY_FIT_STRESS_ALL;
-
 	CONTROLS.FIT_ENER          = DUMMY_FIT_ENER;	
-	//CONTROLS.FIT_ENER_PER_ATOM = DUMMY_FIT_ENER_PER_ATOM;	
-
-
-	CONTROLS.FIT_ENER_EVER = (CONTROLS.FIT_ENER || CONTROLS.FIT_ENER_PER_ATOM);
+	CONTROLS.FIT_ENER_EVER     = CONTROLS.FIT_ENER;
 
 	A_MATRIX.PRINT_FRAME(CONTROLS, SYSTEM, ATOM_PAIRS, CHARGE_CONSTRAINTS, i) ;
 	int total_forces = 3 * A_MATRIX.FORCES.size() ;

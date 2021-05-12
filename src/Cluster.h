@@ -6,7 +6,7 @@ class PAIRS	// NEEDS UPDATING
 	public:
 	  	int    PAIRIDX; 		      // Index for the specific pair type (triplet type)
 	  	string PRPR_NM; 		      // The order-specific atom pair. For example, OH, never HO, or something similiar "proper name"
-	  	string PAIRTYP; 		      // Allowed values are CHEBYSHEV, DFTBPOLY, SPLINE, INVERSE_R, LJ, and STILLINGER
+	  	string PAIRTYP; 		      // Only allowed values is CHEBYSHEV or LJ
 	  	string ATM1TYP; 		      // Atom chemistry (i.e. C, H, N, O...)
 	  	string ATM2TYP;
 	  	int    ATM1TYPE_IDX;		      // The type index of atom 1
@@ -18,7 +18,6 @@ class PAIRS	// NEEDS UPDATING
 	  	double ATM2MAS;       
 	  	double S_MINIM; 		      // Minimum allowed pair distance for fitting
 	  	double S_MAXIM; 		      // Maximum allowed pair distance for fitting
-	  	double S_DELTA; 		      // Fitting "grid" spacing (width)
 		
 		double KILLLEN;			      // Pair distance below which to kill the simulation
 
@@ -40,17 +39,10 @@ class PAIRS	// NEEDS UPDATING
 	  	Cheby_trans CHEBY_TYPE; 	      // Are distances transformed into inverse-r type or morse-type distances?... or not at all? (default)
 	  	double PENALTY_SCALE;		      // For 2B Cheby potentials... "a" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 1.0e8
 	  	double PENALTY_DIST;		      // For 2B Cheby potentials... "penalty_dist" in vpenalty = a*(smin-penalty_dist-rlen)^3 ... default value is 0.01
-	  	double CUBIC_SCALE;		      // Factor to multiply to the cubic penalty function, (1-rlen/smax)^3... default value is 1
 		      
 	  	double LAMBDA;  		      // Morse lambda for CHEBYSHEV type pairs
 	  	double MIN_FOUND_DIST;  	      // Minimum distance between pairs
-		      
-	  	bool   USE_OVRPRMS;		      // Should overbonding even be computed pair type
-	  	string OVER_TO_ATM;		      // Which atom is overbonding *to* being defined for... for example, overbonding to oxygen
-	  	vector<double> OVRPRMS; 	      // [0] = P_OVERB; [1] = R_0_VAL; [2] = P_1_VAL; [3] = P_2_VAL; [4] = LAMBDA6
-		      
-	  	vector<double> NBINS;		      // Number of bins to use for ij, ik, and jk distances when building the 3B population histograms 
-
+		      	      
 	  	FCUT FORCE_CUTOFF;		      // "CUBIC" "COSINE" or "SIGMOID" currently supported
 
 	  	// Only used in force field
@@ -58,15 +50,15 @@ class PAIRS	// NEEDS UPDATING
 	  	vector<double>        POT_PARAMS;     // Used by splines to compute pressure by integrating spline eq's
 	  	double  	      PAIR_CHRG;
 		      
-	  	PAIRS(): OVRPRMS(5,0.0), NBINS(3,0.0) 
+	  	PAIRS()
 	  	{
+			      KILLLEN = 0.0;
 			      N_CFG_CONTRIB = 0;
 			      SNUM = 0;
 			      SNUM_3B_CHEBY = 0;
 			      SNUM_4B_CHEBY = 0;
 			      CHEBY_RANGE_HIGH = 1.0;
 			      CHEBY_RANGE_LOW  = -1.0;
-			      CUBIC_SCALE = 1.0;
 
 			      // Set simple defaults.
 			      CHEBY_TYPE = Cheby_trans::NONE ;
@@ -77,8 +69,7 @@ class PAIRS	// NEEDS UPDATING
 			      S_MINIM = X_MINIM ;
 			      S_MAXIM = X_MAXIM ;
 
-			      USE_OVRPRMS = false;
-	  	}     // Just a constructor to allow the size of the OVRPRMS vector to be pre-specified
+	  	}     // Just a constructor to set some defaults
 
 	  	// Set Chebyshev min/max vals.
 	  	void set_cheby_vals();
@@ -128,11 +119,6 @@ public:
   bool SPECIAL_S_MAXIM;		// Determine whether s_maxim was set via user input.
   				// Values need to be specified for each contributing pair
   				// [0] -> ij, [1] -> ik, [2] -> il, [3] -> jk, [4] -> jl, [5] -> kl 
-
-  map<vector<int>,int>POP_HIST; // Population histogram that s used to set 3B behavior in unsampled regions
-	 
-  vector<double> NBINS;		// Number of bins to use for ij, ik, and jk distances when building the population histograms 
-  vector<double> BINWS;		// Binwidths to use for ij, ik, and jk distances when building the population histograms 
 	
   vector<double> PARAMS;
 	
@@ -164,13 +150,6 @@ public:
 
   
   int match_atom_type_idx(string atm_typ);			// Return the atom type index of an atom in the cluster with the given name.
-
-
-  bool init_histogram     (vector<PAIRS> & pairs, map<string,int>& pair_map);	// Sets up the histogram for TRIPLETS.  Returns true on success, false otherwise.
-  void increment_histogram(vector<int> &index);			// Increment the histogram with the given index vector.
-  int get_histogram       (vector<int> &index);			// Get the value of the histogram with the given index vector.  Return 0 if no entry is found.
-
-
   inline double get_smaxim(string TYPE);			// Return the maximum cutoff distance for the specified pair.
   inline double get_sminim(string TYPE);			// Return the minimum inner cutoff distance for the specified pair.
 
@@ -191,9 +170,7 @@ CLUSTER(int natom, int npair):
     	X_MINIM(npair), 
 	X_MAXIM(npair), 
 	X_AVG(npair), 
-	X_DIFF(npair), 
-	NBINS(npair,0), 
-	BINWS(npair,0.1)
+	X_DIFF(npair)
   {
 	 EXCLUDED = false;
 	 SPECIAL_S_MAXIM = false;

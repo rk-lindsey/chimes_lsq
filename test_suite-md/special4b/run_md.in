@@ -7,7 +7,7 @@
 # RNDSEED # ! Seed. If not specified, default value 123457 is used
 	12357
 # TEMPERA # ! In K
-	10.0
+	2000.0
 # CMPRFRC # ! Compare computed forces against a set of input forces? ...If true, provide name of the file containing the forces for comparison
 	false
 # TIMESTP # ! In fs
@@ -31,7 +31,7 @@
 ###################################
 
 # VELINIT # (options are READ or GEN)
-	GEN
+	READ
 # CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>
 	NVT-MTK HOOVER 10
 # PRSCALC # (options are ANALYTICAL or NUMERICAL)

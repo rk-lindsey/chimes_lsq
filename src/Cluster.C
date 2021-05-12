@@ -751,7 +751,6 @@ void CLUSTER_LIST::parse_fcut(string LINE)
 // Parse the force cutoff parameters for a cluster.
 {
   VEC[0].FORCE_CUTOFF.parse_input(LINE);
-  VEC[0].FORCE_CUTOFF.BODIEDNESS = VEC[0].NATOMS;
 
   // Copy all class members.
   for(int i=1; i<VEC.size(); i++)
@@ -1742,75 +1741,6 @@ string CLUSTER_LIST::tuplet_name(int natom, bool plural, bool caps)
 	 tuplet[0] = toupper(tuplet[0]);
 
   return tuplet;
-}
-
-bool CLUSTER::init_histogram(vector<PAIRS> &pairs, map<string,int>& pair_map)
-// Sets up the histogram for CLUSTER.  Returns true on success,
-// false otherwise.
-{
-		
-  double tmp_max, tmp_min;
-		
-  for ( int j = 0; j < NPAIRS; j++ ) 
-  {
-	 NBINS[j] = pairs[ pair_map[ ATOM_PAIRS[0]] ].NBINS[j];
-	 if(NBINS[j] == 0 ) 
-	 {
-#if VERBOSITY == 1
-		if ( RANK == 0 ) cout << "Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramming. " << endl << endl << endl;
-#endif
-		
-		return false;
-	 }
-	 tmp_max = S_MAXIM[j];
-	 tmp_min = S_MINIM[j];
-	 if(tmp_min == -1)
-		tmp_min = pairs[ pair_map[ ATOM_PAIRS[j]] ].S_MINIM;
-	 if(tmp_max == -1)
-		tmp_max = pairs[ pair_map[ ATOM_PAIRS[j]] ].S_MAXIM;
-	 BINWS[0] = (tmp_max - tmp_min)/NBINS[0];
-  }
-		
-		
-  // Note:  pop_hist is now implemented as a map to allow arbitrary dimensional histograms.
-  // No allocation of pop_hist is necessary.  
-
-  if ( RANK == 0 ) 
-  {
-	 cout << "	" << INDX << " " << fixed << setprecision(1);
-	 for ( int j = 0; j < NPAIRS; j++ ) 
-	 {
-		cout << NBINS[j] << " ";
-	 }
-  }
-
-#if VERBOSITY == 1
-  if ( RANK == 0 ) 
-  {
-	 cout << "...Initial histogram setup complete!" << endl << endl;
-}
-#endif
-  return(true);
-}
-
-void CLUSTER::increment_histogram(vector<int>& index)
-// Increment the histogram with the given index vector.
-{
-
-  if ( POP_HIST.find(index) != POP_HIST.end() ) 
-	 POP_HIST[index]++;
-  else
-	 POP_HIST.insert(make_pair(index, 1));
-}
-
-int CLUSTER::get_histogram(vector<int>& index)
-// Get the value of the histogram with the given index vector.  Return 0 if no entry is found.
-{
-
-  if ( POP_HIST.find(index) != POP_HIST.end() ) 
-	 return(POP_HIST[index]);
-  else
-	 return(0);
 }
 
 void CLUSTER::set_cheby_vals(vector<PAIRS> &FF_2BODY)

@@ -3,9 +3,9 @@
 ##
 
 all:
-	../chimes_md run_md.oh.in > run_md.oh.out
+	../../build/chimes_md run_md.oh.in > run_md.oh.out
 	mv forceout.txt forceout.oh.txt
-	../chimes_md run_md.o.in > run_md.o.out
+	../../build/chimes_md run_md.o.in > run_md.o.out
 	mv forceout.txt forceout.o.txt
 	diff forceout.oh.txt forceout.o.txt
 

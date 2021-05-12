@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 36 processor(s).
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 Will read from file: run_md.in
@@ -118,8 +118,6 @@ Running velocity sanity checks...
 Reading force field parameters...
 		...Compute electrostatics?      true
 		...Use fit charges?             true
-		...Compute ReaxFF overbonding?  false
-		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     true
 		...Use 4-body Cheby params?     true
 	...Read FF controls...
@@ -191,13 +189,12 @@ Atom properties:
    ...read complete.
 
 Notes on simulation: 
-	Using fpenalty power 3.0000
 	Using the following fcut style for 2B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 3B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 4B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
@@ -208,7 +205,7 @@ Force field summary:
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OO 0.7500 5.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
+		OO 0.7500 5.0000 MORSE 1.2500 0.0100 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -2.0843e+01
 		1 -2.8291e+01
@@ -222,7 +219,7 @@ Force field summary:
 		9 -2.2570e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		HH 7.5000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		HH 7.5000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 1.4399e+01
 		1 -1.6530e+01
@@ -236,7 +233,7 @@ Force field summary:
 		9 -1.2557e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OH 7.5000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		OH 7.5000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -5.1762e+00
 		1 8.0959e+00
@@ -1431,7 +1428,7 @@ Ewald parameters:
       12      1.50       3.8693913     -48.0691266     -44.1997353          1311.9     16.29030865    -44.2219890
       13      1.62       3.8642499     -48.0594937     -44.1952438          1310.2     16.46996372    -44.2219581
       14      1.75       3.8619707     -48.0523136     -44.1903429          1309.4     16.63219526    -44.2219301
-      15      1.88       3.8630395     -48.0480645     -44.1850250          1309.7     16.77468144    -44.2219011
+      15      1.88       3.8630395     -48.0480645     -44.1850250          1309.7     16.77468143    -44.2219011
 Number of 3-body interactions = 65877
 Number of 4-body interactions = 486974
 RANK: 0 UPDATING ON STEP: 15, WITH PADDING: 0.378
@@ -1544,7 +1541,7 @@ RANK: 0 UPDATING ON STEP: 90, WITH PADDING: 0.556
 Number of 3-body interactions = 82040
 Number of 4-body interactions = 681163
 RANK: 0 UPDATING ON STEP: 106, WITH PADDING: 0.557
-     107     13.38       6.3282643     -48.6609333     -42.3326691          2145.6     15.80790765    -44.2223758
+     107     13.38       6.3282643     -48.6609334     -42.3326691          2145.6     15.80790765    -44.2223758
      108     13.50       6.3269901     -48.6353674     -42.3083773          2145.1     15.75409448    -44.2223280
      109     13.62       6.3218753     -48.6060988     -42.2842235          2143.4     15.70018760    -44.2222625
      110     13.75       6.3137732     -48.5739931     -42.2602199          2140.7     15.64394013    -44.2221806
@@ -1617,7 +1614,7 @@ RANK: 0 UPDATING ON STEP: 154, WITH PADDING: 0.531
      168     21.00       6.8380586     -48.0651239     -41.2270653          2318.4     13.66487271    -44.2218050
      169     21.12       6.7991112     -48.0198847     -41.2207735          2305.2     13.85814211    -44.2217907
      170     21.25       6.7610018     -47.9758452     -41.2148435          2292.3     14.04582131    -44.2217793
-     171     21.38       6.7239137     -47.9331696     -41.2092559          2279.7     14.22734609    -44.2217696
+     171     21.38       6.7239137     -47.9331696     -41.2092559          2279.7     14.22734609    -44.2217697
 Number of 3-body interactions = 80648
 Number of 4-body interactions = 663580
 RANK: 0 UPDATING ON STEP: 171, WITH PADDING: 0.523

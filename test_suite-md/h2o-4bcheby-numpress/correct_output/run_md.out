@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 36 processor(s).
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 Will read from file: run_md.in
@@ -112,8 +112,6 @@ Running velocity sanity checks...
 Reading force field parameters...
 		...Compute electrostatics?      true
 		...Use fit charges?             true
-		...Compute ReaxFF overbonding?  false
-		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     true
 		...Use 4-body Cheby params?     true
 	...Read FF controls...
@@ -185,13 +183,12 @@ Atom properties:
    ...read complete.
 
 Notes on simulation: 
-	Using fpenalty power 3.0000
 	Using the following fcut style for 2B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 3B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 4B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
@@ -202,7 +199,7 @@ Force field summary:
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OO 0.7500 5.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
+		OO 0.7500 5.0000 MORSE 1.2500 0.0100 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -2.0843e+01
 		1 -2.8291e+01
@@ -216,7 +213,7 @@ Force field summary:
 		9 -2.2570e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		HH 7.5000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		HH 7.5000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 1.4399e+01
 		1 -1.6530e+01
@@ -230,7 +227,7 @@ Force field summary:
 		9 -1.2557e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OH 7.5000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		OH 7.5000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -5.1762e+00
 		1 8.0959e+00
@@ -1412,9 +1409,9 @@ Ewald parameters:
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
        1      0.12       3.9703342     -48.1927242     -44.2223900          1346.1     13.83512904    -44.2223900
-       2      0.25       3.9665360     -48.1888174     -44.2222814          1344.8     14.06116055    -44.2222566
+       2      0.25       3.9665360     -48.1888174     -44.2222814          1344.8     14.06116056    -44.2222566
        3      0.38       3.9604334     -48.1822952     -44.2218618          1342.8     14.29100948    -44.2222427
-       4      0.50       3.9523754     -48.1734058     -44.2210304          1340.0     14.52028232    -44.2222223
+       4      0.50       3.9523754     -48.1734058     -44.2210304          1340.0     14.52028233    -44.2222223
 END SIMULATION
 	Average temperature over run = 1343.4422 K
 	Average pressure    over run = 14.1769 GPa

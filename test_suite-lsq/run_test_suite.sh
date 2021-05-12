@@ -27,7 +27,7 @@ else
 fi
 
 TESTSU_BASE=`pwd -P` #`dirname $0`
-SOURCE_BASE="${TESTSU_BASE}/../src/"
+SOURCE_BASE="${TESTSU_BASE}/../build/"
 
 ###############################################################
 #
@@ -35,17 +35,16 @@ SOURCE_BASE="${TESTSU_BASE}/../src/"
 #
 ###############################################################
 
-cd ../src
-rm -f *o chimes_lsq
-if make -f Makefile-TS-LSQ chimes_lsq ; then
-	 echo 'Succeeded in compiling chimes_lsq'
+cd ..
+
+if ./install.sh  ; then
+	echo "Compiling chimes_lsq succeeded"
 else
-	 echo 'Compiling chimes_lsq failed'
-	 exit
+	 echo "Compiling chimes_lsq failed"
+	 exit 1
 fi
 
-mv chimes_lsq ../test_suite-lsq/
-cd ../test_suite-lsq
+cd -
 
 ###############################################################
 #
@@ -79,7 +78,7 @@ do
 	
 
 	 if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		  if ../chimes_lsq fm_setup.in > fm_setup.out ; then
+		  if ../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
 				echo 'Chimes_lsq succeeded'
 				SUCCESS=1
 		  else
@@ -87,7 +86,7 @@ do
 			  SUCCESS=0
 		 fi
 	else
-		 if $RUN_JOB ../chimes_lsq fm_setup.in > fm_setup.out ; then
+		 if $RUN_JOB ../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
 			  echo 'Chimes_lsq succeeded'
 			  SUCCESS=1
 		 else
@@ -258,7 +257,7 @@ for job in $MAKE_JOBS ; do
 	 
 	 cd $job
 	 
-	 if make all ; then
+	 if RUN_JOB=$RUN_JOB PYTHON=$PYTHON make all ; then
 		  echo "$job succeeded"
 	 else
 		  echo "$job failed"

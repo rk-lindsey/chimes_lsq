@@ -37,23 +37,15 @@
 #include "util.h"
 #include "io_styles.h"
 #include "input.h"
-
-// For LAMMPS linking
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-	#include "lmppath.h"
-	using namespace LAMMPS_NS;
-#endif
 	
 using namespace std;	
 	
 // Define function headers -- general
 
-static void read_input        (string & INFILE, JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST);
+static void read_input        (string & INFILE, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
 static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NATMTYP, vector<string>& TMP_ATOMTYPE, vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES,  vector<double>& TMP_MASS, vector<int> &TMP_SIGN) ;
-static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int N_PLOTS, int NATMTYP, const vector<string>& TMP_ATOMTYPE, const vector<int>& TMP_ATOMTYPEIDX, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS, const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
+static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int NATMTYP, const vector<string>& TMP_ATOMTYPE, const vector<int>& TMP_ATOMTYPEIDX, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS, const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
 static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, const JOB_CONTROL &CONTROLS) ;
-static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE, CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby) ;
 
 // Define function headers -- MPI
 
@@ -63,22 +55,6 @@ static void parse_ff_controls  (string &LINE, ifstream &PARAMFILE, JOB_CONTROL &
 static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifstream &CMPR_FORCEFILE) ;
 static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS) ;
 static void print_for_dftbplus(FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
-
-// Define function headers -- LAMMPS linking. Note both house_md and lammps need to be compiled for mpi use
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-	// Helper functions
-
-	void Write_Lammps_datafile (const FRAME & SYSTEM, const int & NATMTYP, const vector<double> & TMP_MASS);
-	void Write_Lammps_inputfile(const JOB_CONTROL & CONTROLS); 
-
-	// callback function for LAMMPS simulation
-
-	void md_callback(void *, bigint, int, int *, double **, double **);
-
-#endif 
-
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- general
 
@@ -96,29 +72,11 @@ WRITE_TRAJ BAD_CONFIGS_2("XYZ","BAD_2"); // Configs where r_ij < r_cut,in +d_pen
 WRITE_TRAJ BAD_CONFIGS_3("XYZ","BAD_3"); // All other configs, but only printed when (CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0)
 
 
-// Variables that are defined locally for house_md which need to be global for LAMMPS linking
+// Could be defined locally now that LAMMPS contributions have been removed
 
 CLUSTER_LIST TRIPS;                   // Holds all 3-body parameters
 CLUSTER_LIST QUADS;                   // Holds all 4-body parameters
  
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-	// Gloabl variables needed by callback function for LAMMPS  
-	
-	int TOTAL_ATOMS;
-	vector<double>	LMP_CHARGE;		// Global data object to hold charges for the LAMMPS input files     
-	vector<string>  TMP_ATOMTYPE;		// Will be used by lammps to map lammps atom types (int's) back to chemical symbols
-	JOB_CONTROL	CONTROLS;		// Declare the data object that will hold the main simulation control variables
-	map<string,int> PAIR_MAP;		// Input is two of any atom type contained in xyzf file, in any order, output is a pair type index
-  	vector<int> INT_PAIR_MAP ;		
-	map<int,string> PAIR_MAP_REVERSE; 	// Input/output the resverse of PAIR_MAP
-	
-	vector<PAIR_FF> FF_2BODY;		// Holds all 2-body parameters
-
-	NEIGHBORS NEIGHBOR_LIST;		// Declare the class that will handle the neighbor list
-
-#endif
-	
 	
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
@@ -163,7 +121,6 @@ int main(int argc, char* argv[])
   
   string INFILE = argv[1];
 	
-  PES_PLOTS FF_PLOTS;			// Declare the data object that will help set up PES plots
   FRAME      SYSTEM;			// Declare the data object that will hold the system coordinates, velocities, accelrations, etc.
   CONSTRAINT ENSEMBLE_CONTROL;		// Declare the class that will handle integration/constraints
   THERMO_AVG AVG_DATA ;
@@ -177,10 +134,6 @@ int main(int argc, char* argv[])
   	  AVG_DATA.STRESS_TENSOR_SUM_ALL[i].Z = 0.0;
   }
 
-	
-  // These are data objects that are normally defined locally, but need to be global for LAMMPS linking
-	
-#if not defined(LINK_LAMMPS)
 	
   JOB_CONTROL CONTROLS;			// Declare the data object that will hold the main simulation control variables
   CONTROLS.IS_LSQ            = false ; 
@@ -205,8 +158,6 @@ int main(int argc, char* argv[])
 // For parameter file parsing
 		
   vector<string> TMP_ATOMTYPE;
-
-#endif 
 
   double Ktot;
   double Vol;
@@ -239,7 +190,9 @@ int main(int argc, char* argv[])
   ifstream PARAMFILE;
   ifstream COORDFILE;
 
-	const int STAT_BUF_SZ = 256 ; // Max length of a statistics output line.
+  read_input(INFILE, CONTROLS, NEIGHBOR_LIST);		// Populate object with user defined values
+
+  const int STAT_BUF_SZ = 256 ; // Max length of a statistics output line.
 	
   read_input(INFILE, CONTROLS, FF_PLOTS,NEIGHBOR_LIST);		// Populate object with user defined values
 	
@@ -267,12 +220,6 @@ int main(int argc, char* argv[])
   if ( CONTROLS.PRINT_VELOC ) 
 	 OUT_VELOCFILE.open("velocout.txt");	
 	 
-  ////////////////////////////////////////////////////////////
-  // Hop to PES printing, if requested 
-  ////////////////////////////////////////////////////////////
-	
-  if (FF_PLOTS.N_PLOTS > 0)
-	 goto FF_SETUP_1; 
 
   ////////////////////////////////////////////////////////////
   // Open all input files and count the total number of expected atoms
@@ -504,8 +451,6 @@ int main(int argc, char* argv[])
   // Figure out atom charges and masses, based on parameter 
   // file
   ////////////////////////////////////////////////////////////
-	 
-FF_SETUP_1: 
 	
   if(RANK==0) 
 	 cout << "Reading atom info from parameter file..." << endl; 
@@ -513,10 +458,6 @@ FF_SETUP_1:
   // Read in the possible atom types and their features	
 
   read_atom_types(PARAMFILE, CONTROLS, NATMTYP, TMP_ATOMTYPE, TMP_NATOMTYPE, TMP_ATOMTYPEIDX, TMP_CHARGES, TMP_MASS, TMP_SIGN) ;
-	
-  if (FF_PLOTS.N_PLOTS > 0)
-	 goto FF_SETUP_2; 
-	
 
   // Assign atom features to atoms in SYSTEM data object, and the PAIR_FF object
   // Figure out how many atoms of each type we have... this can be useful for
@@ -613,7 +554,7 @@ FF_SETUP_1:
   if((ENSEMBLE_CONTROL.STYLE== "NPT-BEREND")||(ENSEMBLE_CONTROL.STYLE== "NPT-BEREND-ANISO")||(ENSEMBLE_CONTROL.STYLE== "NPT-MTK"))
   {
   	if (!SYSTEM.BOXDIM.IS_ORTHO)
-		EXIT_MSG("ERROR: NPT-BEREND, NPT-BEREND-ANISO, and NPT-MTK only compatible with orthorhombic cells. Try LMP-NPT.");
+		EXIT_MSG("ERROR: NPT-BEREND, NPT-BEREND-ANISO, and NPT-MTK only compatible with orthorhombic cells.");
 }
 
   if ( CONTROLS.RESTART ) 
@@ -663,9 +604,7 @@ FF_SETUP_1:
   // Begin setup of force field data objects...
   ////////////////////////////////////////////////////////////  
 
-FF_SETUP_2:
-
-  read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, SYSTEM, FF_PLOTS.N_PLOTS, NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX,TMP_CHARGES, TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE) ;
+  read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, SYSTEM, NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX,TMP_CHARGES, TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE) ;
 	
   // Set the atom charges
 	
@@ -693,25 +632,23 @@ FF_SETUP_2:
   // Set up the neighbor list
   ////////////////////////////////////////////////////////////
 
-  if(!CONTROLS.PLOT_PES)
-  {
-	 if(RANK == 0)
-		cout << "Initializing the neighbor list..." << endl;
+  if(RANK == 0)
+  	cout << "Initializing the neighbor list..." << endl;
 
-	if (CONTROLS.USE_3B_CHEBY)
-	{
-	 	 TRIPS.update_minmax_cutoffs(FF_2BODY);
-		 NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF;
-	}
-	if (CONTROLS.USE_4B_CHEBY)	       
-	{
-		QUADS.update_minmax_cutoffs(FF_2BODY);
-		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
-	}
-		
-	NEIGHBOR_LIST.INITIALIZE_MD(SYSTEM);
-	NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+  if (CONTROLS.USE_3B_CHEBY)
+  {
+   	 TRIPS.update_minmax_cutoffs(FF_2BODY);
+  	 NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF;
   }
+  if (CONTROLS.USE_4B_CHEBY)	       
+  {
+  	QUADS.update_minmax_cutoffs(FF_2BODY);
+  	NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
+  }
+  	
+  NEIGHBOR_LIST.INITIALIZE_MD(SYSTEM);
+  NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
+  
 	
 	
   ////////////////////////////////////////////////////////////
@@ -750,108 +687,7 @@ FF_SETUP_2:
   }
 
 
-  ////////////////////////////////////////////////////////////
-  // If PES printing is requested, do so here and then 
-  // exit the program
-  ////////////////////////////////////////////////////////////  	
-	
   Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP} ;
-
-  if(RANK==0)
-  {
-	 if (FF_PLOTS.N_PLOTS > 0)
-	 {
-		print_pes(FF_PLOTS, FF_2BODY, PAIR_MAP, PAIR_MAP_REVERSE, TRIPS, QUADS, CONTROLS, cheby) ;
-		exit_run(0);
-	 }
-  }	
-
-  ////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////
-  //
-  // 			LINK TO LAMMPS
-  //
-  ////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-  if(RANK==0)
-	 cout <<	"Running LAMMPS linked code! " << endl;
-	
-  // Note: All lammps stuff is handled by the first proc, regardless of whether serial or not, however
-  //       force calculations (local) are run w/ nmpi procs
-		
-  // Have LAMMPS handle Ewald sums; turn off here. 
-  CONTROLS.USE_COULOMB = false;
-		
-  // Set the total number of atoms in the system 
-		
-  TOTAL_ATOMS = SYSTEM.ATOMS;
-		
-  if(RANK==0)	// Only one rank does file writing
-  {
-	 // Generate the LAMMPS input file based ENTIRELY on the house_md input. 
-	 // The user does not need to provide anything other than the usual chimes_md input!!!!
-
-	 Write_Lammps_datafile (SYSTEM, NATMTYP, TMP_MASS);
-	 Write_Lammps_inputfile(CONTROLS);
-  }
-
-  // Create an instance of lammps
-
-  LAMMPS *lmp = new LAMMPS(0,NULL,MPI_COMM_WORLD);
-		
-  // Feed lammps the input file
-	
-  lmp->input->file("in.lammps");
-
-  // set up the callback function in lammps
-	 	
-  int ifix = lmp->modify->find_fix_by_style("external");
-  FixExternal *fix = (FixExternal *) lmp->modify->fix[ifix];
-  fix->set_callback(md_callback, lmp);
-
-  // Actually run lammps... this is where the time step and simulation length are specified
-  // Note:  LAMMPS output is automatically saved to log.lammps
-	
-  stringstream ss1,ss2;
-  string tmpstr;
-  const char *command;
-  ss1 << "timestep " << CONTROLS.DELTA_T_FS;
-  tmpstr = ss1.str();     
-  command = tmpstr.c_str();
-  if(RANK==0)
-	 cout << command << endl;
-  lmp->input->one(command);
-
-  if      ((CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ANISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-TRI") && (CONTROLS.ENSEMBLE != "LMP-MIN"))
-	 ss2 << "run " << CONTROLS.N_MD_STEPS;
-  else if ((CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO") || (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO") || (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI") || (CONTROLS.ENSEMBLE == "LMP-MIN"))
-	 ss2 << "minimize " << CONTROLS.MIN_E_CONVG_CRIT << " " << CONTROLS.MIN_F_CONVG_CRIT << " " << CONTROLS.MIN_MAX_ITER << " " << CONTROLS.MIN_MAX_EVAL;
-			
-  tmpstr = ss2.str();    
-		
-  command = tmpstr.c_str();
-  if(RANK==0)
-	 cout << command << endl;
-  lmp->input->one(command);
-	
-  if(RANK==0)
-	 cout << "LAMMPS run finished." << endl;
-
-  // exit code here; no need to run simulation code. But first, wait for all the other processes
-  //(i.e. those running lammps) to get here.
-		
-  MPI_Barrier(MPI_COMM_WORLD);
-		
-  // Delete the lammps pointer
-		
-  delete lmp;
-		
-  return 0; 
-
-#endif
 
 
   ////////////////////////////////////////////////////////////
@@ -1270,8 +1106,7 @@ FF_SETUP_2:
 
 
 static void read_input(	string & INFILE,
-			JOB_CONTROL & CONTROLS, 
-			PES_PLOTS & FF_PLOTS, 
+			JOB_CONTROL & CONTROLS,
 			NEIGHBORS & NEIGHBOR_LIST)// UPDATED
 {
 	if (RANK==0)
@@ -1286,9 +1121,7 @@ static void read_input(	string & INFILE,
 	
 	// Read the LSQ input file
 	
-	MD_INPUT.PARSE_INFILE_MD(	CONTROLS, 
-					FF_PLOTS, 
-					NEIGHBOR_LIST);
+	MD_INPUT.PARSE_INFILE_MD(CONTROLS, NEIGHBOR_LIST);
 }
 
 static void print_for_dftbplus(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
@@ -1456,376 +1289,6 @@ static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONS
 }
 
 
-	////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////
-	//
-	//			LAMMPS CALLBACK FUNCTION AND UTILS
-	//
-	////////////////////////////////////////////////////////////  
-	////////////////////////////////////////////////////////////
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-	void Write_Lammps_datafile(const FRAME & SYSTEM, const int & NATMTYP, const vector<double> & TMP_MASS)
-	
-	// Generate an input file to sent to lammps
-	// note: ensemble, timestep, and some other info are hardcoded
-	// note: Velocities could be input here, after positions.
-	// Format:
-	// Velocities
-	//
-	// atom_index vx vy vz [units: Angstroms/fs, for lammps 'units real']
-	// etc. 	
-	{		
-		ofstream LMPFILE;
-		LMPFILE.open("data.lammps");
-	
-		LMPFILE << "# Position data file" << endl << endl;
-	
-		LMPFILE << SYSTEM.ATOMS << " atoms" << endl;
-		LMPFILE << NATMTYP << " atom types" << endl << endl;
-	
-		LMPFILE << "0 " << SYSTEM.BOXDIM.CELL_LX << " xlo xhi" << endl;
-		LMPFILE << "0 " << SYSTEM.BOXDIM.CELL_LY << " ylo yhi" << endl;
-		LMPFILE << "0 " << SYSTEM.BOXDIM.CELL_LZ << " zlo zhi" << endl << endl;  
-	
-		// LAMMPS allow for a triclinic simulation cell; skew parameters included here.
-		LMPFILE << SYSTEM.BOXDIM.XY << " " << SYSTEM.BOXDIM.XZ << " " << SYSTEM.BOXDIM.YZ << " xy xz yz" << endl;  
-		LMPFILE << endl;  
-	
-		LMPFILE << "Masses" << " " << endl << endl;
-		for (int i = 1; i <= NATMTYP; i++)
-			LMPFILE << i << " " << TMP_MASS[i-1] << endl;
-	
-		LMPFILE << endl;  
-	
-		LMPFILE << "Atoms" << endl << endl;  
-		for (int i = 0; i < SYSTEM.ATOMS; i++)
-			LMPFILE << i+1 << " " << SYSTEM.ATOMTYPE_IDX[i]+1 << " " << SYSTEM.CHARGES[i] << " " << SYSTEM.COORDS[i].X << " " << SYSTEM.COORDS[i].Y << " " << SYSTEM.COORDS[i].Z << endl;  
-		
-		LMPFILE.close(); 
-
-	}
-
-	void Write_Lammps_inputfile(const JOB_CONTROL & CONTROLS)
-	// Eventually we should link the pair_style cutoff distance with whatever the max forcefield cutoff is
-	{
-		ofstream LMPINFILE;
-		LMPINFILE.open("in.lammps");
-	
-		// These inputs shouldn't *need* to change, so we'll hard-code them
-
-		LMPINFILE << "units            real" << endl;
-		LMPINFILE << "kspace_style     ewald 1e-4" << endl;
-		LMPINFILE << "atom_style       charge" << endl;
-		LMPINFILE << "atom_modify      map array" << endl;
-		LMPINFILE << "atom_modify      sort 0 0.0" << endl;
-		LMPINFILE << "read_data        data.lammps" << endl;
-		LMPINFILE << "neighbor         1.0 bin" << endl;
-		LMPINFILE << "neigh_modify     delay 0 every 1 check no page 100000 one 10000" << endl << endl;
-		
-		// Set the pairstyle and coefficients
-	
-		LMPINFILE << "pair_style       coul/long 20.0" << endl;	
-		LMPINFILE << "pair_coeff       * *"  << endl << endl;
-	
-		// Initialize the velocity via the temperature (only used if this ISNT a minimization job)
-		
-		if ((CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-ANISO") && (CONTROLS.ENSEMBLE != "LMP-MIN-BOX-TRI") && (CONTROLS.ENSEMBLE != "LMP-MIN"))
-		{
-			LMPINFILE << "velocity         all create " << CONTROLS.TEMPERATURE << " " << CONTROLS.SEED << endl << endl;
-	
-			if      (CONTROLS.ENSEMBLE == "LMP-NVE")
-				LMPINFILE << "fix       1 all nve " << endl;
-			else if (CONTROLS.ENSEMBLE == "LMP-NVT")
-				LMPINFILE << "fix       1 all nvt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << endl; 
-			else if (CONTROLS.ENSEMBLE == "LMP-NPT")
-				LMPINFILE << "fix       1 all npt temp " << CONTROLS.TEMPERATURE << " " << CONTROLS.TEMPERATURE << " " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " iso " << CONTROLS.PRESSURE*GPa2atm << " " << CONTROLS.PRESSURE*GPa2atm <<  " " <<  CONTROLS.FREQ_UPDATE_BAROSTAT << endl;
-			else
-			{
-				cout << "ERROR: Unrecognized ensemble for LAMMPS linking." << endl;
-				cout << endl;
-				cout << "...Currently supported options are \"LMP-NVE,\" \"LMP-NVT,\" \"LMP-NPT\" \"LMP-MIN-BOX-ISO,\" \"LMP-MIN-BOX-ANISO,\" \"LMP-MIN-BOX-TRI,\" and \"LMP-MIN,\"" << endl;
-				exit_run(0);
-			}
-		}
-		else
-		{
-			if      (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO")
-				LMPINFILE << "fix       1 all box/relax iso   "  << CONTROLS.PRESSURE*GPa2atm << endl;
-			else if (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO")
-				LMPINFILE << "fix       1 all box/relax aniso "  << CONTROLS.PRESSURE*GPa2atm << endl;
-			else if (CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI")
-				LMPINFILE << "fix       1 all box/relax tri   "  << CONTROLS.PRESSURE*GPa2atm << endl;
-			//else if (CONTROLS.ENSEMBLE != "LMP-MIN")
-			//	...No fix needed for a plain minimaztion
-		}		LMPINFILE << endl;
-	
-		// I *think* this line converts the potential energy in the thermodynamic output section to the potential energy + thermostat/barostat contributions?
-	
-		LMPINFILE << "fix_modify       1 energy yes" << endl;
-	
-		// Not sure of the exact meaning of this syntax, but I think this is saying use the callback function to compute potential energies and forces?
-	
-		LMPINFILE << "fix              ext all external pf/callback 1 1" << endl;
-	
-		// Again, adding contributions from the callback function to the PE?
-	
-		LMPINFILE << "fix_modify       ext energy yes" << endl << endl;
-	
-		// Custom thermo output ... Make this an optional read-in string from the house_md input file eventually
-	
-		LMPINFILE << "thermo_style     custom step temp etotal ke pe lx ly lz pxx pyy pzz press vol density" << endl;
-		LMPINFILE << "thermo_modify    format float %20.15g flush yes " << endl << endl;
-	
-		// Print frequencies/formats 
-	
-		LMPINFILE << "thermo           " << CONTROLS.FREQ_ENER << endl << endl;;
-		
-		// Dump a plain xyz format and in a lammps format that has boxlengths
-							
-		LMPINFILE << "dump             dump_1 all xyz    " << CONTROLS.FREQ_DFTB_GEN << " traj.xyz " << endl; 	// name of dump, atom group, type of dump, dump frequency, name of dumped file
-		LMPINFILE << "dump             dump_2 all custom " << CONTROLS.FREQ_DFTB_GEN << " traj.lammpstrj element xu yu zu " << endl; 	// name of dump, atom group, type of dump, dump frequency, name of dumped file
-	
-		// Don't do any spacial ordering of molecules
-	
-		LMPINFILE << "atom_modify      sort 0 0.0 " << endl;
-	
-		// Write a restart file every 1000 steps ...Printing alternates between .a and .b
-	
-		LMPINFILE << "restart          100 restart.a restart.b" << endl;
-		
-		// Other dump options that I'm ignoring for now
-		//
-		// dump            1 all custom 5 pos.xyz id type q x y z
-		// dump            2 all custom 5 vel.xyz id type q vx vy vz
-	
-	}
-
-
-
-	void md_callback(void *ptr, bigint ntimestep, int nlocal, int *id, double **x, double **f) 
-	// Callback to house_md with atom IDs and coords from each proc.
-	// Invoke house_md to compute forces, load them into f for LAMMPS to use.
-	// "f" can be NULL if proc owns no atoms
-	{
-	
-		class LAMMPS *lmp = (class LAMMPS *) ptr;
-
-		// Get information about the system that LAMMPS has built based on the lammps input file?
-	    
-		double boxxlo = *((double *) lammps_extract_global(lmp,"boxxlo"));
-		double boxylo = *((double *) lammps_extract_global(lmp,"boxylo"));
-		double boxzlo = *((double *) lammps_extract_global(lmp,"boxzlo"));
-	    
-		double boxxhi = *((double *) lammps_extract_global(lmp,"boxxhi"));
-		double boxyhi = *((double *) lammps_extract_global(lmp,"boxyhi"));
-		double boxzhi = *((double *) lammps_extract_global(lmp,"boxzhi"));
-		
-		double boxxy  = *((double *) lammps_extract_global(lmp,"xy"));
-		double boxxz  = *((double *) lammps_extract_global(lmp,"xz"));
-		double boxyz  = *((double *) lammps_extract_global(lmp,"yz"));
-
-		double xprd = (boxxhi-boxxlo);
-		double yprd = (boxyhi-boxylo);
-		double zprd = (boxzhi-boxzlo);
-  
-
-		double *mass   = (double *) lammps_extract_atom(lmp,"mass"  );
-		double *virial = (double *) lammps_extract_atom(lmp,"virial");
-	    
-		int    *type   = (int *)    lammps_extract_atom(lmp,"type"  );
-		
-		// Now we need to deal with the following:
-		// Lammps only passes a subset of atoms to each house_md process.
-		// If we push those atom subsets into ZCalc, we will get nonsense
-		// because the double loop will only go over that subset of atoms
-		//
-		// Instead, what we do here is to construct the entire system into
-		// SYS, broadcast it to all processors, and then run as usual.
-
-		
-		// Let all processors know how many atoms each processor "has"
-		
-		vector<int> NATOMS_PER_PROC(NPROCS);	// Figure out how many atoms each processor has
-		
-		MPI_Barrier(MPI_COMM_WORLD);
-		
-		MPI_Gather(&nlocal, 1, MPI_INT, &NATOMS_PER_PROC.front(), 1, MPI_INT, 0, MPI_COMM_WORLD);
-		MPI_Bcast (&NATOMS_PER_PROC.front(),NPROCS,MPI_INT,0,MPI_COMM_WORLD);
-
-		// Create SYS with size of total number of atoms in the system
-		
-		int START = 0;
-
-		if(RANK>0)
-			for(int i=0; i<RANK; i++)
-				START += NATOMS_PER_PROC[i]; 
-
-		// Declare and set up the data object that will hold the system coordinates, velocities, accelrations, etc
-		// For the callback force calculation
-		
-		
-		FRAME SYS; 
-
-		SYS.ATOMS      = TOTAL_ATOMS;//nlocal;
-		
-		SYS.BOXDIM.UNLAMMPSIFY(xprd, yprd, zprd, boxxy, boxxz, boxyz);
-		
-		SYS.ATOMTYPE    .resize(TOTAL_ATOMS);
-		SYS.COORDS      .resize(TOTAL_ATOMS);
-		SYS.CHARGES     .resize(TOTAL_ATOMS);
-		SYS.MASS        .resize(TOTAL_ATOMS);
-		SYS.FORCES      .resize(TOTAL_ATOMS);
-		SYS.ACCEL       .resize(TOTAL_ATOMS);
-		SYS.VELOCITY    .resize(TOTAL_ATOMS);
-		SYS.VELOCITY_NEW.resize(TOTAL_ATOMS);
-		SYS.ATOMTYPE_IDX.resize(TOTAL_ATOMS);
-	
-		for (int iter = 0; iter < nlocal; iter++) 
-		{
-
-			int i=START+iter;
-
-  	      		SYS.CHARGES[i] = LMP_CHARGE[type[iter]-1];
-		
-			SYS.COORDS[i].X = x[iter][0];
-			SYS.COORDS[i].Y = x[iter][1];
-			SYS.COORDS[i].Z = x[iter][2];
-		  
-  	      		SYS.MASS[i] = mass[type[iter]];
-	  
-			f[iter][0] = 0;
-			f[iter][1] = 0;
-			f[iter][2] = 0;
-	  
-			SYS.ATOMTYPE_IDX[i] = type[iter];
-			SYS.ATOMTYPE    [i] = TMP_ATOMTYPE[type[iter]-1];
-		  
-			// Wrap the coordinates
-			
-  	   	   	SYS.BOXDIM.WRAP_ATOM(SYS.COORDS[i], SYS.WRAP_IDX[i], true);
-			
-			// Prepare forces
-			
-			SYS.FORCES[i].X = 0;
-			SYS.FORCES[i].Y = 0;
-			SYS.FORCES[i].Z = 0;
-		  
-			// Prepare accelerations
-		  
-			SYS.ACCEL[i].X = 0;
-			SYS.ACCEL[i].Y = 0;
-			SYS.ACCEL[i].Z = 0;	
-		}
-	    
-		// Now we need to sync SYS.COORDS across all processors.. 
-		// Note, masses and velocities have not been updated because they 
-		// do not factor into anything in house_md but kinetic energy calculations, which 
-		// are not used in conjunction with LAMMPS
-
-	    
-		vector<int> STARTS          (NPROCS);
-		vector<int> NCOORDS_PER_PROC(NPROCS);
-		vector<int> STARTS_COORDS   (NPROCS);
-	    
-		SYS.MY_ATOMS       = nlocal;
-		SYS.MY_ATOMS_START = START; 
-
-		for(int i=0; i<NPROCS; i++)
-		{
-			STARTS[i]           = 0;
-			STARTS_COORDS[i]    = 0;
-			NCOORDS_PER_PROC[i] = 3*NATOMS_PER_PROC[i];	
-			
-			for(int j=0; j<i; j++)
-			{
-				STARTS[i]        += NATOMS_PER_PROC[j];
-				STARTS_COORDS[i] += 3*NATOMS_PER_PROC[j];
-			}
-		}
-	    
-	    
-		double *coord = (double *) SYS.COORDS.data();
-		double *force = (double *) SYS.FORCES.data();
-		double *accel = (double *) SYS.ACCEL .data();
-		
-		MPI_Barrier(MPI_COMM_WORLD);
-
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.CHARGES.front(),      &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_DOUBLE, MPI_COMM_WORLD);
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &SYS.ATOMTYPE_IDX.front(), &NATOMS_PER_PROC.front(),       &STARTS.front(),        MPI_INT,    MPI_COMM_WORLD);
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, coord,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, force,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
-		MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, accel,                     &NCOORDS_PER_PROC.front(),      &STARTS_COORDS.front(), MPI_DOUBLE, MPI_COMM_WORLD);
-		
-		for(int i=0; i<TOTAL_ATOMS; i++)
-			SYS.ATOMTYPE[i] = TMP_ATOMTYPE[SYS.ATOMTYPE_IDX[i]-1];
-		
-		// Now we need to build the ghost atoms/neighbor lists
-		
-		SYS.build_layers(CONTROLS.N_LAYERS) ;
-		
-		// Use very little padding because we will update neighbor list for every frame.
-		
-		double PADDING = 0.01;
-		
-		NEIGHBOR_LIST.INITIALIZE(SYS, PADDING);	// Doesn't care about velocity
-		NEIGHBOR_LIST.DO_UPDATE(SYS, CONTROLS);	
-		
-		// Do the actual force calculation using our MD code
-
-		ZCalc(SYS, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
-
-		// Now we need to sync up all the forces, potential energy, and tensors with LAMMPS
-		//... but first, we need to sum the potential energy computed by each process, since 
-		// we're saving it directly to LAMMPS' PE which corresponds to the sum over all processes.
-		
-		MPI_Barrier(MPI_COMM_WORLD);
-		
-		MPI_Allreduce(MPI_IN_PLACE, &SYS.TOT_POT_ENER,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		
-		// Also, need to add up the forces (accel) to account for f[i]+=val, f[j]-=val, for when 
-		// j is on a different proc than i
-		
-		MPI_Allreduce(MPI_IN_PLACE, accel, 3*SYS.ATOMS, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-		
-		// Give LAMMPS the computed forces
-		
-		for (int iter = 0; iter < nlocal; iter++)
-		{
-			int i=START+iter;
-		
-			f[iter][0] = SYS.ACCEL[i].X;
-			f[iter][1] = SYS.ACCEL[i].Y;
-			f[iter][2] = SYS.ACCEL[i].Z;
-		}
-		
-		// Integrate?
-		
-		int ifix = lmp->modify->find_fix_by_style("external");
-		FixExternal *fix = (FixExternal *) lmp->modify->fix[ifix];
-		fix->set_energy(SYS.TOT_POT_ENER);
-		
-		// stress tensor is multiplied by (atm/vol) in LAMMPS; multiply out volume here
-		// virial points to LAMMPS array for stress tensor
-		// XY, YZ, and XZ components need to be included at a later date.
-	    
-		// Set the stresses based on our MD code's calculation
-	    
-		double vol = SYS.BOXDIM.VOL;
-
-		virial[0] =  SYS.PRESSURE_TENSORS_XYZ.X*vol;
-		virial[1] =  SYS.PRESSURE_TENSORS_XYZ.Y*vol;
-		virial[2] =  SYS.PRESSURE_TENSORS_XYZ.Z*vol;
-	    
-		virial[3] = SYS.PRESSURE_TENSORS_XYZ[0].Y*vol; // XY
-		virial[4] = SYS.PRESSURE_TENSORS_XYZ[0].Z*vol; // XZ
-		virial[5] = SYS.PRESSURE_TENSORS_XYZ[1].Z*vol; // YZ
-    
-	}
-	
-#endif
-
 static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NATMTYP, vector<string>& TMP_ATOMTYPE,
 									 vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES, 
 									 vector<double>& TMP_MASS, vector<int> &TMP_SIGN)
@@ -1882,9 +1345,6 @@ static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NAT
 		}
   
 		// We need a globally-defined data object to hold charges for passing into LAMMPS
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-		LMP_CHARGE         .resize(NATMTYP);
-#endif
 			
 		TMP_ATOMTYPE   .resize(NATMTYP);
 		TMP_NATOMTYPE  .resize(NATMTYP);
@@ -1976,7 +1436,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				map<string,int> &PAIR_MAP, 
 				NEIGHBORS &NEIGHBOR_LIST, 
 				FRAME& SYSTEM, 
-				int N_PLOTS, 
 				int NATMTYP,
                            	const vector<string>& TMP_ATOMTYPE, 
 				const vector<int>& TMP_ATOMTYPEIDX,
@@ -2096,7 +1555,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		{
 		  cout << "   ...read complete." << endl << endl;
 		  cout << "Notes on simulation: " << endl;
-		  cout << "	Using fpenalty power " << FPENALTY_POWER << endl;
 		  
 		  cout << "	Using the following fcut style for 2B Chebyshev interactions: ";
 		  FF_2BODY[0].FORCE_CUTOFF.print_params();	
@@ -2127,23 +1585,8 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 cout << "	Electrostatics will not be computed." << endl;
 		}
 			
-		if(CONTROLS.USE_OVERCOORD)
-		{
-		  if(RANK==0)
-		  {
-			 cout << "	Overbonding contributions will be considered." << endl;
-				
-			 if(CONTROLS.FIT_POVER)
-				cout << "		p-over will be read from fit parameters." << endl;
-			 else
-				cout << "		p-over will be read from specified parameters." << endl;
-		  }
-		}
-			
 		if(RANK==0)
-		  cout << endl;
-		  
-		  
+		  cout << endl;  
 		
 		if(SYSTEM.QM_ENERGY_OFFSET.size() == 0)
 		{
@@ -2152,9 +1595,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			for(int i=0; i<NO_PAIRS; i++)
 				SYSTEM.QM_ENERGY_OFFSET[i] = 0.0;
 		}
-			
-		
-		
 			
 		PARAMFILE.close();
 		break;
@@ -2180,11 +1620,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		STREAM_PARSER >> TEMP_STR;
 		STREAM_PARSER >> TEMP_TYPE;
 			
-		if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "INVRSE_R")
-		{
-		  STREAM_PARSER >> TMP_TERMS1;
-		}
-		else if(TEMP_TYPE =="CHEBYSHEV")
+		if(TEMP_TYPE =="CHEBYSHEV")
 		{
 			  
 		  vector<string> tokens ;
@@ -2267,7 +1703,6 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  {
 			 FF_2BODY[i].PENALTY_DIST     = 0.01;
 			 FF_2BODY[i].PENALTY_SCALE    = 1.0e4;
-			 FF_2BODY[i].CUBIC_SCALE      = 1.0;
 			 FF_2BODY[i].CHEBY_RANGE_HIGH = TMP_HIGH;
 			 FF_2BODY[i].CHEBY_RANGE_LOW  = TMP_LOW;
 		  }
@@ -2308,15 +1743,9 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  if(FF_2BODY[i].S_MAXIM > NEIGHBOR_LIST.MAX_CUTOFF)
 		  {
 			 NEIGHBOR_LIST.MAX_CUTOFF    = FF_2BODY[i].S_MAXIM;
-//NEIGHBOR_LIST.MAX_CUTOFF_3B = FF_2BODY[i].S_MAXIM;
-//			 NEIGHBOR_LIST.MAX_CUTOFF_4B = FF_2BODY[i].S_MAXIM;
 		  }
-				 	
-		  PARAMFILE >> FF_2BODY[i].S_DELTA;
-		  
-		  FF_2BODY[i].KILLLEN = FF_2BODY[i].S_DELTA; // Killlen is/can only be used when ff type is cheby
-		  
-		if ((N_PLOTS == 0) && (! SYSTEM.BOXDIM.IS_RCUT_SAFE(FF_2BODY[i].S_MAXIM, CONTROLS.N_LAYERS)))  
+
+		if ((! SYSTEM.BOXDIM.IS_RCUT_SAFE(FF_2BODY[i].S_MAXIM, CONTROLS.N_LAYERS)))  
 		{
 			if (isatty(fileno(stdout)) && RANK == 0)
 			{
@@ -2369,28 +1798,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		  FF_2BODY[i].PRPR_NM = FF_2BODY[i].ATM1TYP;
 		  FF_2BODY[i].PRPR_NM.append(FF_2BODY[i].ATM2TYP);	
 
-		  if(TEMP_TYPE == "DFTBPOLY" || TEMP_TYPE == "INVRSE_R")
-		  {
-			 FF_2BODY[i].SNUM = TMP_TERMS1;
-		  }
-		  else if(TEMP_TYPE =="SPLINE")
-		  {
-		  	// Expects to read "NONE," since a direct 
-			// transformation style is hard-coded into the spline code 
-		  
-			 string cheby_type;
-			 PARAMFILE >> cheby_type;
-			 
-			 if(cheby_type != "NONE")
-			 {
-			 	cout << "ERROR: Expected to read \"NONE\" for CHBDIST in parameter file " << endl; 
-				cout << "       Read value: "  << cheby_type << endl;
-				exit_run(0);
-			 }
-			 
-			  FF_2BODY[i].SNUM = (2+floor((FF_2BODY[i].S_MAXIM - FF_2BODY[i].S_MINIM)/FF_2BODY[i].S_DELTA))*2;
-		  }		  
-		  else if(TEMP_TYPE =="CHEBYSHEV")
+		  if(TEMP_TYPE =="CHEBYSHEV")
 		  {
 			 string cheby_type ;
 			 PARAMFILE >> cheby_type ;
@@ -2410,45 +1818,21 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 // Setup force cutoff type for 2-body
 					
 			 FF_2BODY[0].FORCE_CUTOFF.set_type("CUBIC");
-			 FF_2BODY[0].FORCE_CUTOFF.BODIEDNESS = 2 ;
 					
 			 // Copy all class members.
 			 for(int i=1; i<FF_2BODY.size(); i++)
 				FF_2BODY[i].FORCE_CUTOFF = FF_2BODY[0].FORCE_CUTOFF;										
 		  }
-		  else if(TEMP_TYPE =="LJ")
-		  {
-			 FF_2BODY[i].SNUM = 2 ;
-		  }
-		  else if ( TEMP_TYPE == "CLUSTER" )
-		  {
-			 FF_2BODY[i].SNUM = 0 ;
-		  }
+                  else if(TEMP_TYPE =="LJ")
+                  {
+                         FF_2BODY[i].SNUM = 2 ;
+                  }		  
 		  else // Unknown type
 		  {
 			 cout << "ERROR: Unknown type: " << TEMP_TYPE << endl; 
 		  }				
 		}
 
-		if(CONTROLS.USE_OVERCOORD)
-		{		
-		  LINE = get_next_line(PARAMFILE) ;
-		  LINE = get_next_line(PARAMFILE) ;
-		  LINE = get_next_line(PARAMFILE) ;
-
-		  for(int i=0; i<NO_PAIRS; i++)
-		  {
-			 PARAMFILE >> TEMP_STR >> TEMP_STR >> TEMP_STR;	
-			 PARAMFILE >> FF_2BODY[i].USE_OVRPRMS;	
-			 PARAMFILE >> FF_2BODY[i].OVER_TO_ATM;				
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[0];	
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[1];
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[2];
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[3];
-			 PARAMFILE >> FF_2BODY[i].OVRPRMS[4];	
-		  }
-		}
-			
 		TEMP_SEARCH_2B = "PAIR ";
 		TEMP_SEARCH_2B.append(FF_2BODY[0].PAIRTYP); // Syntax ok b/c all pairs have same FF type
 		TEMP_SEARCH_2B.append(" PARAMS");	
@@ -2487,17 +1871,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		STREAM_PARSER.str("");
 		STREAM_PARSER.clear();	
 	 }
-		
-	 else if(LINE.find("PAIR CHEBYSHEV CUBIC SCALING: ") != string::npos)
-	 {
-		STREAM_PARSER.str(LINE);
-		STREAM_PARSER >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR >> TEMP_STR;
-		for(int i=0; i<NO_PAIRS; i++)
-		  FF_2BODY[i].CUBIC_SCALE = double(atof(TEMP_STR.data()));
-		STREAM_PARSER.str("");
-		STREAM_PARSER.clear();	
-	 }		
-		
+				
 	 // Setup triplets
 		
 	 else if(LINE.find("ATOM PAIR TRIPLETS: ") != string::npos)
@@ -2573,63 +1947,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 PARAMFILE >> TEMP_STR;
 			 PARAMFILE >> FF_2BODY[i].PARAMS[j];
 		  }
-				
-		  // If this is a spline type, we will over-write parameter coefficients with 
-		  // a value less than 1.
-
-		  int 	STOP_FILL_IDX = -1;
-		  double 	slope          = -10.0;
-				
-		  if(FF_2BODY[i].PAIRTYP == "SPLINE")
-		  {
-			 if(i==0 && RANK ==0)
-			 {
-				cout << "		Will use a simple linear force model for poorly sampled positions" << endl;
-				cout << "			i.e. for |spline coefficients| < 1.0 at close separation distance..." << endl;					
-			 }
-					
-			 STOP_FILL_IDX = -1;
-										
-			 for(int j=0; j<FF_2BODY[i].SNUM; j++)
-			 {
-				if(fabs(FF_2BODY[i].PARAMS[j])>1.0)
-				{
-				  STOP_FILL_IDX = j;
-				  if(RANK==0)
-					 cout << "			...Generating linear params for pair idx " << i << " for params 0 through " << STOP_FILL_IDX-1 << endl;
-				  break;
-				}
-			 }
 								
-			 if(STOP_FILL_IDX != -1)
-			 {
-				for(int j=0; j<STOP_FILL_IDX; j+=2)
-				{
-				  FF_2BODY[i].PARAMS[j  ] = slope * (STOP_FILL_IDX-j) + FF_2BODY[i].PARAMS[STOP_FILL_IDX];
-				  FF_2BODY[i].PARAMS[j+1] = slope/FF_2BODY[i].S_DELTA;	
-				  if(RANK==0)
-					 cout << "			   " << j << " " << FF_2BODY[i].PARAMS[j] << endl << "			   " << FF_2BODY[i].PARAMS[j+1] << endl;
-				}
-			 }
-					
-			 // Compute the integral of the spline equation for use in analytical pressure
-			 // calculations...
-			 //  We are computing an integral, so we will only have half as many points
-					
-					
-			 FF_2BODY[i].POT_PARAMS.resize(FF_2BODY[i].SNUM/2);
-					
-			 for(int j=0; j<FF_2BODY[i].POT_PARAMS.size(); j++) 
-				FF_2BODY[i].POT_PARAMS[j] = 0;
-					
-			 for(int j=FF_2BODY[i].SNUM/2-2; j>=0; j--) 
-			 {
-				FF_2BODY[i].POT_PARAMS[j] = FF_2BODY[i].POT_PARAMS[j+1] - FF_2BODY[i].S_DELTA *
-				  (FF_2BODY[i].PARAMS[j*2]/2 + FF_2BODY[i].S_DELTA * FF_2BODY[i].PARAMS[j*2+1]/12 + FF_2BODY[i].PARAMS[j*2+2]/2 - FF_2BODY[i].S_DELTA * FF_2BODY[i].PARAMS[j*2+3]/12);
-			 }
-		  }
-
-				
 		  // If applicable, read the charge parameter
 				
 		  if(CONTROLS.FIT_COUL)
@@ -2677,15 +1995,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				if( (FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j]) 
 					 || (FF_2BODY[i].ATM2TYP == TMP_ATOMTYPE[j] && FF_2BODY[i].ATM1TYP == TMP_ATOMTYPE[j]) )
 				{
-				  TMP_CHARGES[j] = sqrt(fabs(FF_2BODY[i].PAIR_CHRG))*TMP_SIGN[j];
-							
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-				  LMP_CHARGE[j] = TMP_CHARGES[j]; // save charges to global variable for LAMMPS
-#endif
-
-				  //FF_2BODY[i].ATM1CHG = TMP_CHARGES[j];
-				  //FF_2BODY[i].ATM2CHG = TMP_CHARGES[j];
-					
+				  TMP_CHARGES[j] = sqrt(fabs(FF_2BODY[i].PAIR_CHRG))*TMP_SIGN[j];					
 				  break;
 				}
 			 }
@@ -2710,19 +2020,16 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				}
 			 }
 		  }
-		  if(!CONTROLS.PLOT_PES)
+		  for(int a=0; a<SYSTEM.ATOMS;a++)
 		  {
-			 for(int a=0; a<SYSTEM.ATOMS;a++)
-			 {
-				for(int i=0; i<NATMTYP; i++)
-				{
-				  if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
-				  {
-					 SYSTEM.CHARGES[a] = TMP_CHARGES[i];
-					 break;
-				  }			
-				}
-			 }
+		  	for(int i=0; i<NATMTYP; i++)
+		  	{
+		  	  if(SYSTEM.ATOMTYPE[a] == TMP_ATOMTYPE[i])
+		  	  {
+		  		 SYSTEM.CHARGES[a] = TMP_CHARGES[i];
+		  		 break;
+		  	  }			
+		  	}
 		  }
 		  check_charges(SYSTEM, TMP_CHARGES, TMP_ATOMTYPE, FF_2BODY, NATMTYP) ;
 			
@@ -2756,27 +2063,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 	 {	
 		QUADS.read_ff_params(PARAMFILE, TMP_ATOMTYPE) ;
 	 }		
-		
-	 // Read in the fit overbonding parameter
-		
-	 else if(LINE.find("P OVER: ") != string::npos)
-	 {
-		if(CONTROLS.USE_OVERCOORD && CONTROLS.FIT_POVER)
-		{
-		  STREAM_PARSER.str(LINE);
-		  STREAM_PARSER >> TEMP_STR >> TEMP_STR;
-		  STREAM_PARSER >> FF_2BODY[0].OVRPRMS[0];
-		  STREAM_PARSER.str("");
-		  STREAM_PARSER.clear();	
-			
-		  for(int i=1; i<NO_PAIRS; i++)
-			 FF_2BODY[i].OVRPRMS[0] = FF_2BODY[0].OVRPRMS[0];				
-		}
-			
-		if (RANK==0)
-		  cout << "	...Read ReaxFF overbonding FF params..." << endl;
-	 }
-		
+				
 	 // Read the pair maps
 		
 	 else if(LINE.find("PAIRMAPS: ") != string::npos)
@@ -2833,10 +2120,6 @@ static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CO
 		CONTROLS.USE_COULOMB = is_true(tokens[1]) ;
 	 else if ( tokens[0] == "FITCOUL:" ) 
 		CONTROLS.FIT_COUL = is_true(tokens[1]) ;
-	 else if ( tokens[0] == "USEPOVR:" )
-		CONTROLS.USE_OVERCOORD = is_true(tokens[1]) ;
-	 else if ( tokens[0] == "FITPOVR:" )
-		CONTROLS.FIT_POVER = is_true(tokens[1]) ;
 	 else if ( tokens[0] == "USE3BCH:" )
 		CONTROLS.USE_3B_CHEBY = is_true(tokens[1]) ;
 	 else if ( tokens[0] == "USE4BCH:" )
@@ -2854,8 +2137,6 @@ static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CO
   {
 	 cout << "		...Compute electrostatics?      " << boolalpha << CONTROLS.USE_COULOMB << endl;
 	 cout << "		...Use fit charges?             " << boolalpha << CONTROLS.FIT_COUL << endl;
-	 cout << "		...Compute ReaxFF overbonding?  " << boolalpha << CONTROLS.USE_OVERCOORD << endl;
-	 cout << "		...Use fit overbonding param?   " << boolalpha << CONTROLS.FIT_POVER << endl;
 	 cout << "		...Use 3-body Cheby params?     " << boolalpha << CONTROLS.USE_3B_CHEBY << endl;
 	 cout << "		...Use 4-body Cheby params?     " << boolalpha << CONTROLS.USE_4B_CHEBY << endl;
 			
@@ -2900,7 +2181,6 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 		
 	 cout << FF_2BODY[i].S_MINIM << " ";
 	 cout << FF_2BODY[i].S_MAXIM << " ";
-	 cout << FF_2BODY[i].S_DELTA << " ";
 		
 	 if(FF_2BODY[i].PAIRTYP == "CHEBYSHEV")
 	 {
@@ -2910,8 +2190,6 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 		if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE )
 		  cout << FF_2BODY[i].LAMBDA << " ";
 		cout << FF_2BODY[i].PENALTY_DIST << " " << scientific << FF_2BODY[i].PENALTY_SCALE<< " ";
-		cout << FF_2BODY[i].CUBIC_SCALE << " ";
-		
 		cout << FF_2BODY[i].KILLLEN;
 	 }
 		
@@ -2943,138 +2221,11 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
 		cout << "		" << FF_2BODY[i].PRPR_NM << " " << FF_2BODY[i].PAIR_CHRG << " (" << FF_2BODY[i].PAIR_CHRG*ke << ")" << endl;
 	 cout << endl;
   }	
-	
-  if(CONTROLS.USE_OVERCOORD)
-  {
-	 cout << "	ReaxFF over-coordination parameters: " << endl;
-		
-	 cout << "		pair...pover...r0...p1...p2...lambda6" << endl;
-		
-	 for(int i=0; i<FF_2BODY.size(); i++)
-	 {
-		cout << "		" << FF_2BODY[i].PRPR_NM << " ";
-		cout << FF_2BODY[i].OVRPRMS[0] << " ";
-		cout << FF_2BODY[i].OVRPRMS[1] << " ";
-		cout << FF_2BODY[i].OVRPRMS[2] << " ";
-		cout << FF_2BODY[i].OVRPRMS[3] << " ";
-		cout << FF_2BODY[i].OVRPRMS[4] << endl;
-	 }
-  }	
+  
 
   cout << endl;
 }
 
-static void print_pes(PES_PLOTS &FF_PLOTS, vector<PAIRS> &FF_2BODY, map<string,int> &PAIR_MAP, map<int,string> &PAIR_MAP_REVERSE, CLUSTER_LIST& TRIPS, CLUSTER_LIST& QUADS, JOB_CONTROL &CONTROLS, Cheby &cheby)
-// Print the potential energy surface. The quads argument is unused for now.
-{
-
-  vector<CLUSTER>& FF_3BODY = TRIPS.VEC ;
-  
-  int ij, ik, jk;
-  string ATM_TYP_1, ATM_TYP_2, ATM_TYP_3;
-
-
-  ifstream FULL_INFILE_3B;
-  ifstream SCAN_INFILE_3B;
-  ifstream SCAN_INFILE_2B;
-		
-  ofstream FULL_OUTFILE_3B;
-  ofstream SCAN_OUTFILE_3B;
-  ofstream SCAN_OUTFILE_2B;			
-
-  vector<double> IJ_DIST_3B;
-  vector<double> IK_DIST_3B;
-  vector<double> JK_DIST_3B;
-  vector<double> PES_VAL_3B;
-		
-  vector<double> IJ_DIST_2B;
-  vector<double> IK_DIST_2B;
-  vector<double> JK_DIST_2B;
-  vector<double> PES_VAL_2B_IJ;
-  vector<double> PES_VAL_2B_IK;
-  vector<double> PES_VAL_2B_JK;
-		
-  int idx_3b = 0;
-  int scan_2b_idx = 0;
-		
-  for (int i=0; i<FF_PLOTS.N_PLOTS; i++)
-  {
-	 cout << "	Printing force field PES for: " << FF_PLOTS.PES_TYPES[i] << endl;
-			
-	 // Figure out whether this is a 2- or 3-body interaction
-	 // Figure out the index of the interaction type
-	 // If it is 3-body, figure out:
-	 // 1. the individual atom types
-	 // 2. the pair type indicies
-			
-		
-	 IJ_DIST_3B.clear();
-	 IK_DIST_3B.clear();
-	 JK_DIST_3B.clear();
-	 PES_VAL_3B.clear();		
-			
-	 IJ_DIST_2B.clear();
-	 IK_DIST_2B.clear();
-	 JK_DIST_2B.clear();
-			
-	 PES_VAL_2B_IJ.clear();
-	 PES_VAL_2B_IK.clear();
-	 PES_VAL_2B_JK.clear();
-								
-			
-	 if(FF_PLOTS.NBODY[i] == 3)	// Eventually also add a check that tye 3B type is Chebyshev...
-	 {
-		ij =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[0]];
-		ik =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[1]];
-		jk =  PAIR_MAP[FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[2]];
-		
-		/*
-		cout << ij << " " << ik << " " << jk << endl;
-		cout << FF_2BODY[0].ATM1TYP << endl;
-		cout << FF_2BODY[0].ATM2TYP << endl;
-		cout << FF_2BODY[1].ATM1TYP << endl;
-		cout << FF_2BODY[1].ATM2TYP << endl;
-		cout << FF_2BODY[2].ATM1TYP << endl;
-		cout << FF_2BODY[2].ATM2TYP << endl;
-		*/
-			
-		ATM_TYP_1 = FF_2BODY[ij].ATM1TYP;
-		ATM_TYP_2 = FF_2BODY[ij].ATM2TYP;
-		ATM_TYP_3 = FF_2BODY[jk].ATM1TYP;
-				
-		cout << "	Will work with pair types: " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[0] << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[1] << " " << FF_3BODY[FF_PLOTS.TYPE_INDEX[i]].ATOM_PAIRS[2] << endl;
-		cout << "	and atom types:            " << ATM_TYP_1 << " " << ATM_TYP_2 << " " << ATM_TYP_3 << endl;
-				
-				
-		if(FF_PLOTS.DO_4D)
-		{
-		  cout << "ERROR: Functionality depreciated. Code needs updating " << endl; 
-		  exit_run(0);
-		}
-
-		cheby.Print_3B(TRIPS, ATM_TYP_1, ATM_TYP_2, ATM_TYP_3, ij, ik, jk, FF_PLOTS, i);	
-				
-		scan_2b_idx++;				
-	 }
-	 else if(FF_PLOTS.NBODY[i] == 2)
-	 {
-
-		cout << "	Will work with pair types: " << PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]] << endl;
-		cout << "	and atom types:            " << FF_2BODY[i].ATM1TYP << " " << FF_2BODY[i].ATM2TYP << endl;
-					
-		cheby.Print_2B(FF_PLOTS.TYPE_INDEX[i], PAIR_MAP_REVERSE[FF_PLOTS.TYPE_INDEX[i]], FF_PLOTS.INCLUDE_FCUT, FF_PLOTS.INCLUDE_CHARGES, FF_PLOTS.INCLUDE_PENALTY, "");
-	 }
-	 else
-	 {
-		cout << "Functionality not programmed yet." << endl;
-	 }
-
-	 cout << "	...Force field PES printing complete." << endl;
-		
-	 idx_3b++;
-			
-  }
-}
 
 static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifstream &CMPR_FORCEFILE)
 // Read coordinates,  and optionally velocities and forces.  There is support for more than one coordinate

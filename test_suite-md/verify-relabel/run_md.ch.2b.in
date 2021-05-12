@@ -20,7 +20,6 @@
 	params.ch.2b.txt
 # CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)
 	dump2.xyzf
-
 # WRPCRDS # 
 	false		
 	

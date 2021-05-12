@@ -89,16 +89,12 @@ inline int Cheby::get_pair_index(int a1, int a2, const vector<int> &atomtype_idx
 {
   int curr_pair_type_idx ;
 
-#ifndef LINK_LAMMPS
   int idx = atomtype_idx[parent[a1]]*natmtyp + atomtype_idx[parent[a2]] ;
   if ( idx < 0 || idx >= INT_PAIR_MAP.size() ) 
   {
 	 cout << "Index out of range" << endl ;
   }
   curr_pair_type_idx =  INT_PAIR_MAP[idx] ;
-#else
-  curr_pair_type_idx =  INT_PAIR_MAP[(atomtype_idx[a1]-1)*natmtyp + (atomtype_idx[SYSTEM.PARENT[a2]]-1)];
-#endif
   
   return curr_pair_type_idx ;
 }
@@ -688,11 +684,6 @@ void Cheby::Deriv_2B(A_MAT & A_MATRIX)
 					{
 						A_MATRIX.FRAME_ENERGIES[vstart+i]    += fcut * Tn[i+1];
 					}
-					else if(CONTROLS.FIT_ENER_PER_ATOM) 
-					{
-						A_MATRIX.ATOM_ENERGIES[a1     ][vstart+i] += (fcut * Tn[i+1])/2.0;
-						A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+i] += (fcut * Tn[i+1])/2.0;
-					}
 				 }
 			 } else if (false)//( rlen <= FF_2BODY[curr_pair_type_idx].S_MINIM ) 
 			 {
@@ -897,95 +888,6 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 					{
 						if( PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_jk, S_MINIM_JK, S_MAXIM_JK))
 						{		
-
-							// Populate the appropriate histogram
-							
-							if(PAIR_TRIPLETS[curr_triple_type_index].NBINS[0]>0)
-							{
-								
-								ij_bin = -10;
-								ik_bin = -10;
-								jk_bin = -10;
-
-								// Sync up ij ik jk with ATOMPAIR1 ATOMPAIR2  ATOMPAIR3 and NBINS[0] NBINS[1] NBINS[2]
-							
-								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[0])
-								{
-									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);	
-									
-									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[1])
-									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
-									}
-									else
-									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
-									}
-								}
-								
-								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[1])
-								{
-									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);	
-									
-									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[0])
-									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
-									}
-									else
-									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
-									}
-								}
-								
-								if(FF_2BODY[curr_pair_type_idx_ij].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[2])
-								{
-									ij_bin = int(ceil((rlen_ij-S_MINIM_IJ)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[2])-1.0);	
-									
-									if(FF_2BODY[curr_pair_type_idx_ik].PRPR_NM == PAIR_TRIPLETS[curr_triple_type_index].ATOM_PAIRS[0])
-									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
-									}
-									else
-									{
-										ik_bin = int(ceil((rlen_ik-S_MINIM_IK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[1])-1.0);
-										jk_bin = int(ceil((rlen_jk-S_MINIM_JK)/PAIR_TRIPLETS[curr_triple_type_index].BINWS[0])-1.0);
-									}
-								}								
-
-								if(ij_bin == -1)
-									ij_bin++;
-								if(ik_bin == -1)
-									ik_bin++;
-								if(jk_bin == -1)
-									jk_bin++;
-								
-								if(ij_bin<0 || ik_bin<0 || jk_bin<0)
-								{
-									cout << "ERROR: bad bin (1)" << endl;
-									exit_run(0);
-								}
-								
-								if(ij_bin>=PAIR_TRIPLETS[curr_triple_type_index].NBINS[0] ||
-								   ik_bin>=PAIR_TRIPLETS[curr_triple_type_index].NBINS[1] ||
-								   jk_bin>=PAIR_TRIPLETS[curr_triple_type_index].NBINS[2]   )
-								{
-									cout << "ERROR: bad bin (2)" << endl;
-									exit_run(0);
-								}
-							
-								vector<int> bin_vecs(3) ;
-								bin_vecs[0] = ij_bin ;
-								bin_vecs[1] = ik_bin ;
-								bin_vecs[2] = jk_bin ;
-								PAIR_TRIPLETS[curr_triple_type_index].increment_histogram(bin_vecs) ;
-							}
-							
-						
 							// For all types, if r < rcut, then the potential is constant, thus the force  must be zero.
 							// Additional, the potential is then taken to be the potential at r_cut.
 							
@@ -1206,61 +1108,6 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 								{
 									A_MATRIX.FRAME_ENERGIES[vstart+row_offset] += fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
 								}
-								else if(CONTROLS.FIT_ENER_PER_ATOM) 
-					 			{
-					
-									// Method-1:
-									// Assume that the per-atom energy is just the n-body energy (3-body, in this case) dividided evently
-									// across bodies... This is how LAMMPS handles many-body per-atom energy assgignments
-									/*
-								
-									double Eijk_wo_const = fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
-									
-									A_MATRIX.ATOM_ENERGIES[a1     ][vstart+row_offset] += Eijk_wo_const/3.0;
-									A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+row_offset] += Eijk_wo_const/3.0;
-									A_MATRIX.ATOM_ENERGIES[fidx_a3][vstart+row_offset] += Eijk_wo_const/3.0;
-									*/
-									// Method-2:
-									// Assigning per-atom energies here will be a bit tricky. This is an approximate method with many caveats.
-									// Here's how it will work:
-									// 
-									// Assume order = 1, i.e. no summation over orders needed.
-									// 
-									// Assume E_ijk = C_ijk * [ fc_ij * fc_ik * fc_jk ] * [ T_ij * T_ik * T_jk ]
-									//
-									// Then we can say that the effective pair contributions to the E_ijk is:
-									//
-									// X_eff,ij = [fc_ij * T_ij] / [ fc_ij * fc_ik * fc_jk ] * [ T_ij * T_ik * T_jk ]
-									// X_eff,ik = [fc_ik * T_ik] / [ fc_ij * fc_ik * fc_jk ] * [ T_ij * T_ik * T_jk ]
-									// X_eff,jk = [fc_jk * T_jk] / [ fc_ij * fc_ik * fc_jk ] * [ T_ij * T_ik * T_jk ]
-									//
-									// And we can normalize these X_eff,ab values by thier sum:
-									//
-									// X_eff,ij,norm = X_eff,ij / ( X_eff,ij + X_eff,ik + X_eff,jk )
-									// X_eff,ik,norm = X_eff,ik / ( X_eff,ij + X_eff,ik + X_eff,jk )
-									// X_eff,jk,norm = X_eff,jk / ( X_eff,ij + X_eff,ik + X_eff,jk )	
-									//
-									// And finally, use these to approximate (with serveral caveats!) the effective energy on the ith atom:
-									//
-									// E_i,eff = E_ijk/2.0 * (X_eff,ij,norm + X_eff,ik,norm)	
-									
-									double X_eff_ij = (fcut_ij * Tn_ij[pow_ij]) / (fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]);
-									double X_eff_ik = (fcut_ik * Tn_ik[pow_ik]) / (fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]);
-									double X_eff_jk = (fcut_jk * Tn_jk[pow_jk]) / (fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]);
-									
-									double normfac  = X_eff_ij + X_eff_ik + X_eff_jk;
-									
-									X_eff_ij /= normfac;		 
-									X_eff_ik /= normfac;
-									X_eff_jk /= normfac;
-									
-									double Eijk_wo_const = fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
-									
-									A_MATRIX.ATOM_ENERGIES[a1     ][vstart+row_offset] += Eijk_wo_const/2.0 * (X_eff_ij + X_eff_ik);
-									A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+row_offset] += Eijk_wo_const/2.0 * (X_eff_ij + X_eff_jk);
-									A_MATRIX.ATOM_ENERGIES[fidx_a3][vstart+row_offset] += Eijk_wo_const/2.0 * (X_eff_ik + X_eff_jk);
-									
-					 			}
 							}
 						} // end if rlen_jk within cutoffs...
 					} // end if rlen_ik within cutoffs...	
@@ -1711,41 +1558,6 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 						{
 							A_MATRIX.FRAME_ENERGIES[vstart+row_offset]    += TMP_ENER;
 						}
-						else if(CONTROLS.FIT_ENER_PER_ATOM) 
-					 	{
-							// Method-1: See 3-body calculation for explaination
-
-							/*
-							A_MATRIX.ATOM_ENERGIES[a1     ][vstart+row_offset] += TMP_ENER/4.0;
-							A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+row_offset] += TMP_ENER/4.0;
-							A_MATRIX.ATOM_ENERGIES[fidx_a3][vstart+row_offset] += TMP_ENER/4.0;
-							A_MATRIX.ATOM_ENERGIES[fidx_a4][vstart+row_offset] += TMP_ENER/4.0;							
-							*/
-
-							//Method-2: See 3-body calculation for explaination
-
-							double X_eff_ij = (fcut[0] * Tn_ij[powers[0]]) / TMP_ENER;
-							double X_eff_ik = (fcut[1] * Tn_ik[powers[1]]) / TMP_ENER;
-							double X_eff_il = (fcut[2] * Tn_il[powers[2]]) / TMP_ENER;
-							double X_eff_jk = (fcut[3] * Tn_jk[powers[3]]) / TMP_ENER;
-							double X_eff_jl = (fcut[4] * Tn_jl[powers[4]]) / TMP_ENER;
-							double X_eff_kl = (fcut[5] * Tn_kl[powers[5]]) / TMP_ENER;
-							
-							double normfac  =  X_eff_ij +  X_eff_ik +  X_eff_il +  X_eff_jk +  X_eff_jl + X_eff_kl;
-							
-							X_eff_ij /= normfac;
-							X_eff_ik /= normfac;
-							X_eff_il /= normfac;
-							X_eff_jk /= normfac;
-							X_eff_jl /= normfac;
-							X_eff_kl /= normfac;
-							
-							A_MATRIX.ATOM_ENERGIES[a1     ][vstart+row_offset] += TMP_ENER/2.0 * (X_eff_ij + X_eff_ik + X_eff_il);
-							A_MATRIX.ATOM_ENERGIES[fidx_a2][vstart+row_offset] += TMP_ENER/2.0 * (X_eff_ij + X_eff_jk + X_eff_jl);
-							A_MATRIX.ATOM_ENERGIES[fidx_a3][vstart+row_offset] += TMP_ENER/2.0 * (X_eff_ik + X_eff_jk + X_eff_kl);
-							A_MATRIX.ATOM_ENERGIES[fidx_a4][vstart+row_offset] += TMP_ENER/2.0 * (X_eff_il + X_eff_jl + X_eff_kl);
-							
-						}
 					}
 				}	// End loop over 4th atom							
 			}	// End loop over 3rd atom
@@ -1844,13 +1656,7 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
   // Set up for MPI
 	
   int a1start, a1end;	
-
-#ifndef LINK_LAMMPS
   divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
-#else
-  a1start = SYSTEM.MY_ATOMS_START;
-  a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-#endif	
 
   // Set up for neighbor lists
 	
@@ -2105,15 +1911,8 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 	 called_before = true ;
   }
 
-#ifndef LINK_LAMMPS
   divide_atoms(i_start, i_end, NEIGHBOR_LIST.LIST_3B_INT.size());	
-#else
-  // Not sure if this is correct for LAMMPS.  Please check ! (Larry) -- it looks correct (RKL)
-  i_start = 0;
-  i_end = NEIGHBOR_LIST.LIST_3B_INT.size() - 1;
-  a1start = SYSTEM.MY_ATOMS_START;
-  a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-#endif	
+	
 		
   int a1;
   int INTERACTIONS = 0;
@@ -2124,10 +1923,6 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 
 	 a1 = NEIGHBOR_LIST.LIST_3B_INT[ii].a1;
 
-#ifdef LINK_LAMMPS
-	 if ( a1 < a1start || a1 > a1end ) continue;
-#endif
-			
 	 int a2 = NEIGHBOR_LIST.LIST_3B_INT[ii].a2;
 	 int a3 = NEIGHBOR_LIST.LIST_3B_INT[ii].a3;
 
@@ -2397,19 +2192,10 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 
   vector<CLUSTER>& FF_4BODY = QUADS.VEC ;
 
-#ifndef LINK_LAMMPS
   divide_atoms(i_start, i_end, NEIGHBOR_LIST.LIST_4B_INT.size());	
-#else
-  i_start = 0;
-  i_end = NEIGHBOR_LIST.LIST_4B_INT.size() - 1;
-  a1start = SYSTEM.MY_ATOMS_START;
-  a1end   = SYSTEM.MY_ATOMS_START+SYSTEM.MY_ATOMS-1;
-#endif	
 
   if ( ! called_before ) 
   {
-
-
 	 // Set up 4-body polynomials
 		
 	 int dim = 0 ;
@@ -2446,10 +2232,6 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
   {
   
 	 a1 = NEIGHBOR_LIST.LIST_4B_INT[ii].a1;
-
-#ifdef LINK_LAMMPS
-	 if ( a1 < a1start || a1 > a1end ) continue;
-#endif
 			
 	 int a2 = NEIGHBOR_LIST.LIST_4B_INT[ii].a2;
 	 int a3 = NEIGHBOR_LIST.LIST_4B_INT[ii].a3;
@@ -2605,7 +2387,8 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		force_4b[4]  = coeff * deriv_4b[4] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_kl[powers[5]];
 		force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]];
 
-#if(0)
+#if(0) // Print debug info
+		
 		if ( a1 == 1 || fidx_a2 == 1 || fidx_a3 == 1 || fidx_a4 == 1 )
 		{
 		  cout << "Target atom found\n" ;
@@ -2754,379 +2537,3 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
   }		
 }	// If 4-body intereaction.
 
-////////////////////////////////////////////////////////////
-//
-// FUNCTIONS -- PRINTING OF POTENTIAL ENERGY SURFACE
-//
-////////////////////////////////////////////////////////////
-
-void Cheby::Print_2B(int ij, string PAIR_NAME, bool INCLUDE_FCUT, bool INCLUDE_CHARGES, bool INCLUDE_PENALTY, string FILE_TAG)
-// Generating pair distance scans for the 2-b potential. pair distances will range from smin to smax, incremented by sdelta
-{
-
-	double rlen;
-	static double *Tn, *Tnd;
-	static bool called_before = false;
-	
-	double rpenalty;
-	double coeff;			  
-	double fcut0; 
-	double fcut; 				
-	double Vpenalty;
-
-	string OUTFILE = "2b_Cheby_Pot-";
-	OUTFILE.append(PAIR_NAME);
-	
-	if(FILE_TAG != "")
-		OUTFILE.append("_for_3B");
-	
-	OUTFILE.append(".dat");
-	ofstream OUTFILE_2B_POT;
-	OUTFILE_2B_POT.open(OUTFILE.data());	
-	
-	SCAN_FILE_2B = OUTFILE;
-	
-	// A penalty function is added to the potential for r + penalty_dist < smin[ipair]
-	// All pairs have the same penalty scale and distance
-	const double penalty_scale  = FF_2BODY[0].PENALTY_SCALE;	// 1.0e8;
-	const double penalty_dist   = FF_2BODY[0].PENALTY_DIST;  	// 0.01;
-
-	if ( ! called_before ) 
-	{
-		called_before = true;
-		int dim = 0;
-		
-		for ( int i = 0; i < FF_2BODY.size(); i++ ) 
-			if (FF_2BODY[i].SNUM > dim ) 
-				dim = FF_2BODY[i].SNUM;	 
-		
-		dim++;
-		Tn   = new double [dim];
-		Tnd   = new double [dim];
-		
-	}
-  
-	// Main loop for Chebyshev terms:
-	
-	int n_ij = (FF_2BODY[ij].S_MAXIM - FF_2BODY[ij].S_MINIM)/FF_2BODY[ij].S_DELTA;
-	double tempx;
-
-	for (int a=1; a<n_ij; a++)
-	{
-		tempx = 0;
-		
-		rlen = FF_2BODY[ij].S_MINIM + a * FF_2BODY[ij].S_DELTA;
-
-		if(rlen > FF_2BODY[ij].S_MINIM and rlen < FF_2BODY[ij].S_MAXIM)	
-		{
-			// Apply a penalty for distances less than smin - penalty_dist.
-			
-			rpenalty = 0.0;
-			
-			if ( rlen - penalty_dist < FF_2BODY[ij].S_MINIM ) 
-				rpenalty = FF_2BODY[ij].S_MINIM + penalty_dist - rlen;
-
-			// Calculate Cheby polys.
-
-			set_polys(ij, Tn, Tnd, rlen, FF_2BODY[ij].X_DIFF,
-						 FF_2BODY[ij].X_AVG, FF_2BODY[ij].SNUM) ; 
-	
-			// Now compute the force/potential... Coulomb 
-			// Ewald sum not required for a scan-type ("cluster") calculation
-			// ...If charges are zero, nothing will be added to tempx
-			
-			if(INCLUDE_CHARGES)
-				tempx += FF_2BODY[ij].ATM1CHG * FF_2BODY[ij].ATM2CHG / rlen;
-
-			// Now compute the force/potential... Cheby
-
-			fcut0 = (1.0 - rlen/FF_2BODY[ij].S_MAXIM);
-			fcut      = pow(fcut0, FF_2BODY[ij].FORCE_CUTOFF.POWER );
-									 
-			for ( int i = 0; i < FF_2BODY[ij].SNUM; i++ ) 
-			{
-				coeff = FF_2BODY[ij].PARAMS[i]; // This is the Cheby FF paramfor the given power
-
-				if(INCLUDE_FCUT)
-					tempx += coeff * fcut * Tn[i+1];
-				else
-					tempx += coeff * Tn[i+1];
-			}
-			// Add penalty for very short distances, where the fit FF may be unphysical (preserve conservation of E).
-
-			if(INCLUDE_PENALTY)
-			{
-				if ( rpenalty > 0.0 ) 
-				{
-					Vpenalty = 0.0;
-					Vpenalty = rpenalty * rpenalty * rpenalty * penalty_scale;
-					tempx += Vpenalty;
-				}
-			}
-
-
-
-			OUTFILE_2B_POT << rlen << " " << tempx << endl;						
-		} 
-
-	}
-	
-	OUTFILE_2B_POT.close();
-	
-	return;
-}  
-
-void Cheby::Print_3B(CLUSTER_LIST &TRIPS, string & ATM_TYP_1, string & ATM_TYP_2, string & ATM_TYP_3, int ij, int ik, int jk, PES_PLOTS & FF_PLOTS, int scan)	
-// Print heat map slices for 2+3-body cheby potentials
-{
-	
-  // Variables exclusive to 2-body
-
-  double x_diff2b, x_avg2b ;
-  static double *Tn, *Tnd;
-  static double fcut_2b;
-	
-  // 3-body variables that may be shared with 2-body 
-	 		
-  double rlen_ij,  rlen_ik,  rlen_jk;
-	
-  static double *Tn_ij,  *Tn_ik,  *Tn_jk;
-  static double *Tnd_ij, *Tnd_ik, *Tnd_jk;
-  static bool    called_before = false;
-	
-  static int pow_ij, pow_ik, pow_jk;
-			  
-  double fcut_ij,  fcut_ik,  fcut_jk; 			
-	
-  static string TEMP_STR;
-  static int curr_triple_type_index;
-  int curr_pair_type_idx_ij;
-  int curr_pair_type_idx_ik;
-  int curr_pair_type_idx_jk;
-  vector<int> atom_type_idx(3) ;
-
-	
-  double S_MAXIM_IJ, S_MAXIM_IK, S_MAXIM_JK;
-  double S_MINIM_IJ, S_MINIM_IK, S_MINIM_JK;
-	
-  vector<TRIP_FF> & FF_3BODY = TRIPS.VEC ;
-  map<string,int> & TRIAD_MAP = TRIPS.MAP ;
-  vector<int> pair_index(3) ;
-  vector<double> x_diff(3), x_avg(3) ;
-
-  ////////////////////////////////////////////////////////////////////////////////////////
-	
-
-  // A penalty function is added to the potential for r + penalty_dist < smin[ipair]
-  // All pairs have the same penalty scale and distance
-	 
-  if ( ! called_before ) 
-  {
-	 called_before = true;
-		
-	 // Set up 2-body polynomials
-		
-	 int dim = 0;
-		
-	 for ( int i = 0; i < FF_2BODY.size(); i++ ) 
-		if (FF_2BODY[i].SNUM > dim ) 
-		  dim = FF_2BODY[i].SNUM;	 
-		
-	 dim++;
-	 Tn   = new double [dim];
-	 Tnd  = new double [dim];
-		
-	 // Set up 3-body polynomials
-		 
-	 dim = 0;
-
-	 for ( int i = 0; i < FF_2BODY.size(); i++ ) 
-		if (FF_2BODY[i].SNUM_3B_CHEBY > dim ) 
-		  dim = FF_2BODY[i].SNUM_3B_CHEBY;	
-			
-	 dim++;
-
-	 Tn_ij   = new double [dim];
-	 Tn_ik   = new double [dim];
-	 Tn_jk   = new double [dim];
-
-	 Tnd_ij  = new double [dim];
-	 Tnd_ik  = new double [dim];
-	 Tnd_jk  = new double [dim]; 
-	
-  }
-	
-  double TMP_DOUB;
-
-  // Determine the FF type for the given triplet
-
-  TEMP_STR =      FF_2BODY[ij].PRPR_NM;
-  TEMP_STR.append(FF_2BODY[ik].PRPR_NM);	
-  TEMP_STR.append(FF_2BODY[jk].PRPR_NM);	
-
-  curr_pair_type_idx_ij = ij;
-  curr_pair_type_idx_ik = ik;
-  curr_pair_type_idx_jk = jk;
-
-  // Set the 3-body type
-	
-  curr_triple_type_index =  TRIAD_MAP[TEMP_STR];
-
-  atom_type_idx[0] = FF_3BODY[curr_triple_type_index].match_atom_type_idx(ATM_TYP_1) ;
-  atom_type_idx[1] = FF_3BODY[curr_triple_type_index].match_atom_type_idx(ATM_TYP_2) ;
-  atom_type_idx[2] = FF_3BODY[curr_triple_type_index].match_atom_type_idx(ATM_TYP_3) ;
-
-  map_indices_int(FF_3BODY[curr_triple_type_index], atom_type_idx, pair_index) ;
-
-  S_MAXIM_IJ = FF_3BODY[curr_triple_type_index].S_MAXIM[pair_index[0]] ;
-  S_MAXIM_IK = FF_3BODY[curr_triple_type_index].S_MAXIM[pair_index[1]] ;
-  S_MAXIM_JK = FF_3BODY[curr_triple_type_index].S_MAXIM[pair_index[2]] ;
-				
-  S_MINIM_IJ = FF_3BODY[curr_triple_type_index].S_MINIM[pair_index[0]] ;
-  S_MINIM_IK = FF_3BODY[curr_triple_type_index].S_MINIM[pair_index[1]] ;
-  S_MINIM_JK = FF_3BODY[curr_triple_type_index].S_MINIM[pair_index[2]] ;
-
-  // Set the number of slices and steps
-	
-  int SLICES				= 10;
-  int STEPS				= 1000;
-	
-  double POT_ENER;
-
-	
-  cout << "NOTE!!! AUTOMATICALLY INCLUDING 2B PENALTY FUNCTIONS IF 3B TYPE IS CUBIC!!!" << endl;
-		
-  // ASSUMPTIONS: REQUESTED RMIN RMAX VALUES ALL WITHIN **** 3-BODY'S **** FF RANGES!
-	
-  for(int i=0; i<=SLICES; i++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS (prev -1)
-  {	
-	 // Build the output file
-		
-	 string OUTFILE = "Ternary-3b_Cheby_Pot-";
-	 OUTFILE.append(TEMP_STR);
-	 OUTFILE.append("_scan-");
-	 OUTFILE.append(to_string(static_cast<long long>(i+1)));
-	 OUTFILE.append(".dat");
-		
-	 ofstream OUTFILE_3B_POT;
-	 OUTFILE_3B_POT.open(OUTFILE.data());
-				
-	 // Set the ij distance 
-		
-	 rlen_ij = S_MINIM_IJ + i * 1.0; //FF_2BODY[ij].S_DELTA*50;
-		
-	 OUTFILE_3B_POT << "# ij dist = " << fixed << setprecision(2) << rlen_ij << endl;
-	
-	 if (rlen_ij > FF_2BODY[ij].S_MAXIM)
-		break;
-		
-		
-	 for(int j=0; j<STEPS; j++)	
-	 {			
-		rlen_ik = S_MINIM_IK + j * FF_2BODY[ik].S_DELTA;
-			
-		if (rlen_ik > FF_2BODY[ik].S_MAXIM)
-		  break;
-			
-		for(int k=0; k<STEPS; k++)
-		{			
-				
-		  rlen_jk = S_MINIM_JK + k * FF_2BODY[jk].S_DELTA;	
-				
-		  if (rlen_jk > FF_2BODY[jk].S_MAXIM)
-			 break;
-				
-		  // Initialize the potential energy
-		
-		  POT_ENER = 0;
-				
-		  /////////////////////////////////////////////
-		  // EVALUATE THE 2-BODY INTERACTIONS
-		  /////////////////////////////////////////////
-						 
-		  // ij		 
-						 
-		  x_diff2b = FF_2BODY[curr_pair_type_idx_ij].X_DIFF ;
-		  x_avg2b = FF_2BODY[curr_pair_type_idx_ij].X_AVG ;
-		  set_polys(curr_pair_type_idx_ij, Tn, Tnd, rlen_ij, x_diff2b, x_avg2b, FF_2BODY[curr_pair_type_idx_ij].SNUM);
-			
-		  FF_2BODY[curr_pair_type_idx_ij].FORCE_CUTOFF.get_fcut(fcut_2b, TMP_DOUB, rlen_ij, 0.0, 
-																				  FF_2BODY[curr_pair_type_idx_ij].S_MAXIM);
-
-		  for ( int m = 0; m < FF_2BODY[curr_pair_type_idx_ij].SNUM; m++ ) 
-			 POT_ENER += FF_2BODY[curr_pair_type_idx_ij].PARAMS[m] * fcut_2b * Tn[m+1];
-				
-		  if(rlen_ij - FF_2BODY[0].PENALTY_DIST < FF_2BODY[curr_pair_type_idx_ij].S_MINIM )
-			 POT_ENER += pow((FF_2BODY[curr_pair_type_idx_ij].S_MINIM + FF_2BODY[0].PENALTY_DIST - rlen_ij),3.0)*FF_2BODY[0].PENALTY_SCALE;
-				
-		  // ik
-
-		  x_diff2b = FF_2BODY[curr_pair_type_idx_ik].X_DIFF ;
-		  x_avg2b = FF_2BODY[curr_pair_type_idx_ik].X_AVG ;
-		  set_polys(curr_pair_type_idx_ik, Tn, Tnd, rlen_ik, x_diff2b, x_avg2b, FF_2BODY[curr_pair_type_idx_ik].SNUM);
-			
-		  FF_2BODY[curr_pair_type_idx_ik].FORCE_CUTOFF.get_fcut(fcut_2b, TMP_DOUB, rlen_ik, 0.0, FF_2BODY[curr_pair_type_idx_ik].S_MAXIM);
-
-		  for ( int m = 0; m < FF_2BODY[curr_pair_type_idx_ik].SNUM; m++ ) 
-			 POT_ENER += FF_2BODY[curr_pair_type_idx_ik].PARAMS[m] * fcut_2b * Tn[m+1];
-				
-		  if(rlen_ik - FF_2BODY[0].PENALTY_DIST < FF_2BODY[curr_pair_type_idx_ik].S_MINIM )
-			 POT_ENER += pow((FF_2BODY[curr_pair_type_idx_ik].S_MINIM + FF_2BODY[0].PENALTY_DIST - rlen_ik),3.0)*FF_2BODY[0].PENALTY_SCALE;
-				
-		  // jk
-
-		  x_diff2b = FF_2BODY[curr_pair_type_idx_jk].X_DIFF ;
-		  x_avg2b = FF_2BODY[curr_pair_type_idx_jk].X_AVG ;				
-		  set_polys(curr_pair_type_idx_jk, Tn, Tnd, rlen_jk, x_diff2b, x_avg2b, FF_2BODY[curr_pair_type_idx_jk].SNUM);
-			
-		  FF_2BODY[curr_pair_type_idx_jk].FORCE_CUTOFF.get_fcut(fcut_2b, TMP_DOUB, rlen_jk, 0.0, FF_2BODY[curr_pair_type_idx_jk].S_MAXIM);
-
-		  for ( int m = 0; m < FF_2BODY[curr_pair_type_idx_jk].SNUM; m++ ) 
-			 POT_ENER += FF_2BODY[curr_pair_type_idx_jk].PARAMS[m] * fcut_2b * Tn[m+1];
-				
-		  if(rlen_jk - FF_2BODY[0].PENALTY_DIST < FF_2BODY[curr_pair_type_idx_jk].S_MINIM )
-			 POT_ENER += pow((FF_2BODY[curr_pair_type_idx_jk].S_MINIM + FF_2BODY[0].PENALTY_DIST - rlen_jk),3.0)*FF_2BODY[0].PENALTY_SCALE;
-				
-		  /////////////////////////////////////////////
-		  // EVALUATE THE 3-BODY INTERACTIONS
-		  /////////////////////////////////////////////
-
-		  // Set up the polynomials
-
-		  for ( int m = 0 ; m < 3 ; m++ ) 
-		  {
-			 x_avg[m] = FF_3BODY[curr_triple_type_index].X_AVG[pair_index[m]] ;
-			 x_diff[m] = FF_3BODY[curr_triple_type_index].X_DIFF[pair_index[m]] ;
-		  }
-
-		  set_polys(curr_pair_type_idx_ij, Tn_ij, Tnd_ij, rlen_ij, x_diff[0], x_avg[0], FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY);
-		  set_polys(curr_pair_type_idx_ik, Tn_ik, Tnd_ik, rlen_ik, x_diff[1], x_avg[1], FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY);
-		  set_polys(curr_pair_type_idx_jk, Tn_jk, Tnd_jk, rlen_jk, x_diff[2], x_avg[2], FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY);
-								
-		  // Set up the penalty functions
-
-		  FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ij, TMP_DOUB, rlen_ij, S_MINIM_IJ, S_MAXIM_IJ);
-		  FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_ik, TMP_DOUB, rlen_ik, S_MINIM_IK, S_MAXIM_IK);
-		  FF_3BODY[curr_triple_type_index].FORCE_CUTOFF.get_fcut(fcut_jk, TMP_DOUB, rlen_jk, S_MINIM_JK, S_MAXIM_JK);
-			
-		  for(int i=0; i<FF_3BODY[curr_triple_type_index].N_ALLOWED_POWERS; i++) 
-		  {
-			 set_3b_powers(FF_3BODY[curr_triple_type_index], pair_index, i,
-								pow_ij, pow_ik, pow_jk) ;
-			 if( rlen_ij<S_MAXIM_IJ && rlen_ik<S_MAXIM_IK && rlen_jk<S_MAXIM_JK )
-				POT_ENER += FF_3BODY[curr_triple_type_index].PARAMS[i] * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]; 	
-		  }
-			
-		  OUTFILE_3B_POT <<  rlen_ik << "     " <<  rlen_jk << "     " <<  POT_ENER << endl;	
-				
-		} 
-			
-		OUTFILE_3B_POT << endl;
-	
-	 }
-		
-	 OUTFILE_3B_POT.close();
-  }
-	
-  return;
-} 

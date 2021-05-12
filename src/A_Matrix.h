@@ -43,7 +43,6 @@ class A_MAT
 	
 	// Depreciated for now (on the "to-do" list): 
 	
-	vector<XYZ >           OVERBONDING;     // originally "P_OVER_FORCES"  ... [#frames][#atoms]
 	vector<vector<XYZ> >   CHARGES;	        // originally "COULOMB_FORCES" ... [#frames][#pairtypes][#atoms]
 
 	ofstream fileA, fileb, fileb_labeled, filena;
@@ -53,9 +52,8 @@ class A_MAT
 	
 	void INITIALIZE_NATOMS  (int ATOMS, vector<string> & FRAME_ATOMTYPES, vector<PAIRS> & ATOM_PAIRS);
 	void INITIALIZE_FORCES  (int ATOMS, int PARAMS);
-	void INITIALIZE_ENERGIES(int ATOMS, int PARAMS, bool FRAME_ENER, bool ATOM_ENER);
+	void INITIALIZE_ENERGIES(int ATOMS, int PARAMS, bool FRAME_ENER);
 	void INITIALIZE_STRESSES(int PARAMS, bool DIAG_STRESS, bool ALL_STRESS);
-	void INITIALIZE_OVERBOND(int ATOMS);
 	void INITIALIZE_CHARGES (int FF_PAIRS,int ATOMS);
 	void PRINT_FRAME(const struct JOB_CONTROL &CONTROLS, const class FRAME &SYSTEM, const vector<class PAIRS> & ATOM_PAIRS, const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, int N);
 	void PRINT_CONSTRAINTS(const struct JOB_CONTROL &CONTROLS,const vector<struct CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, int NPAIRS);

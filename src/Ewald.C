@@ -290,10 +290,9 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 
 		#endif
 			
-		#ifndef LINK_LAMMPS
-			//	comment out line below for LAMMPS calls, in case of flexible simulation cells
-			called_before = true;
-		#endif
+		//	comment out line below for LAMMPS calls, in case of flexible simulation cells
+		called_before = true;
+
 	}
 
 	TRAJECTORY.TMP_EWALD.resize(PRIM_ATOMS);

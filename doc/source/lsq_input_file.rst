@@ -116,8 +116,6 @@ Control  variables	Description                                       Value/Optio
 ``FITCOUL`` *       ``true``/``false``: Fit/use charges              See below for details. 
 ``FITSTRS`` *       Whether/how to include stresses                  See below for details. 
 ``FITENER`` *       Whether/how to include energies                  See below for details. 
-``FITEATM``         (DELETE) Boolean: Fit per-atom energies          (Defunct) N/A.
-``FITPOVR``         (DELETE) Boolean: Fit ReaxFF overbonding         (Defunct) N/A.
 ``PAIRTYP``         Chebyshev polynomial orders                      Expects ``<O2B> <O3B+1> <O4B+1> -1 1``
 ``CHBTYPE`` *       Pair distance transformation type                See below for details. 
 ``USENEIG``         Neighbor list/distance convention                Auto-select algorithm (``true``) or use small-cell friendly method (``true SMALL``)
@@ -138,17 +136,11 @@ Topology variables      Description                                 Value/Option
 ``ATM_TYX``             ``ATM_TYP`` of atom X in pair ``PAIRIDX``   Used to define interaction pair types. Order does not matter.
 ``S_MINIM``             Inner cutoff for pair ``PAIRIDX``           Generally taken as slightly less than smallest distance sampled in DFT-MD trajectory.
 ``S_MAXIM``             Outer cutoff for pair ``PAIRIDX``           Should be small enough to prevent self-interaction across periodic boundaries.
-``S_DELTA``             (DELETE) Soon to be defunct                 (Defunct) Requires dummy float.
 ``MORSE_LAMBDA``        (RENAME) ``CHEBTYPE`` variable              Morse-type lambda for Morse ``CHEBTYP``. Only used if ``# PAIRTYP #`` is ``CHEBYSHEV``. Generally set to location of first radial distribution peak for each pair type.
-``USEOVERP``            (DELETE) ReaxFF overbonding variable        (Defunct) N/A.
-``NIJBINS``             (DELETE) Defunct                            (Defunct) N/A.
-``NIKBINS``             (DELETE) Defunct                            (Defunct) N/A.
-``NJKBINS``             (DELETE) Defunct                            (Defunct) N/A.
 ``CHGCONS`` *           Charge fitting constraints                  See below for details. 
 ``SPECIAL XB MINIM`` *  Special manybody inner cutoffs              See below for details.
 ``SPECIAL XB MAXIM`` *  Special manybody outer cutoffs              See below for details.
 ``FCUTTYP`` *           Cutoff function style/parameters            See below for details.
-``CUBSCLE``             (DELETE) A depricated ``CHBTYPE`` variable  N/A - Defunct
 ======================  =========================================== ====================================
 
 

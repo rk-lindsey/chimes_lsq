@@ -169,16 +169,16 @@ void INPUT::CHECK_FILE()
 
 // Wrapper functions: Process entire input file
 
-void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,	       
-	    		       vector<PAIRS>		 & ATOM_PAIRS, 
+void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,	       
+	    		       vector<PAIRS>	 & ATOM_PAIRS, 
 	    		       CLUSTER_LIST		 & TRIPS, 
 	    		       CLUSTER_LIST		 & QUADS, 
-	    		       map<string,int>  	 & PAIR_MAP,
+	    		       map<string,int>   & PAIR_MAP,
 	    		       vector<int>		 & INT_PAIR_MAP,
 	    		       vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 	    		       NEIGHBORS		 & NEIGHBOR_LIST,
 	    		       vector<int>		 & TMP_ATOMTYPEIDX, 
-	    		       vector<string>		 & TMP_ATOMTYPE)
+	    		       vector<string>	 & TMP_ATOMTYPE)
 {
 	// Actually read the input file 
 	
@@ -186,7 +186,7 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,
 	
 	// Initialize the neighbor list
 	
-	NEIGHBOR_LIST.USE	   = true;
+	NEIGHBOR_LIST.USE = true;
 	
 	// For assigning LSQ variables: "Control Variables" 
 	
@@ -198,8 +198,6 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,
 	PARSE_CONTROLS_FITCOUL(CONTROLS);
 	PARSE_CONTROLS_FITSTRS(CONTROLS);
 	PARSE_CONTROLS_FITENER(CONTROLS);
-	PARSE_CONTROLS_FITEATM(CONTROLS);
-	PARSE_CONTROLS_FITPOVR(CONTROLS);
 	PARSE_CONTROLS_PAIRTYP(CONTROLS);
 	PARSE_CONTROLS_CHBTYPE(CONTROLS);
 	PARSE_CONTROLS_USENEIG(CONTROLS, NEIGHBOR_LIST);
@@ -211,7 +209,6 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,
 	PARSE_TOPOLOGY_EXCLUDE(TRIPS, QUADS);
 	PARSE_TOPOLOGY_TYPEIDX(CONTROLS, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
 	PARSE_TOPOLOGY_PAIRIDX(CONTROLS, ATOM_PAIRS, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
-	PARSE_TOPOLOGY_CUBSCLE(ATOM_PAIRS);
 	PARSE_TOPOLOGY_CHGCONS(CHARGE_CONSTRAINTS, PAIR_MAP);
 	PARSE_TOPOLOGY_SPECMIN(TRIPS, QUADS);
 	PARSE_TOPOLOGY_SPECMAX(TRIPS, QUADS);
@@ -220,18 +217,14 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL		 & CONTROLS,
 	RUN_SANITY_LSQ(CONTROLS);	
 
 }
-void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST)
+void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 {
 	READ_FILE();
 	
 	// MD controls initialization
 	
-	PARSE_CONTROLS_INITIAL(CONTROLS, FF_PLOTS, NEIGHBOR_LIST);
-	
-	// Variables for printing out PES for a given parameter file
-	
-	PARSE_CONTROLS_PLOTPES(CONTROLS, FF_PLOTS);
-	
+	PARSE_CONTROLS_INITIAL(CONTROLS, NEIGHBOR_LIST);
+		
 	// For self-consistent fitting type runs
 	
 	PARSE_CONTROLS_SLFCNST();
@@ -557,51 +550,8 @@ void INPUT::PARSE_CONTROLS_FITENER(JOB_CONTROL & CONTROLS)
 		}
 	}
 }
-void INPUT::PARSE_CONTROLS_FITEATM(JOB_CONTROL & CONTROLS)
-{
-	int N_CONTENTS = CONTENTS.size();
-	
-	for (int i=0; i<N_CONTENTS; i++)
-	{
-		if (found_input_keyword("FITEATM", CONTENTS(i)))				
-		{
-			if (CONTENTS(i+1,0)=="first"  || CONTENTS(i+1,0)=="First"  || CONTENTS(i+1,0)=="FIRST")
-			{
-				CONTROLS.FIT_ENER_PER_ATOM = true;
-				CONTROLS.FIT_ENER_PER_ATOM = convert_int(CONTENTS(i+1,1),i+1);
-			}
-			else
-			{
-				CONTROLS.FIT_ENER_PER_ATOM = convert_bool(CONTENTS(i+1,0),i+1);
-			}
-			
-			if ( RANK == 0 )
-			{
-				cout << "	# FITENER #: " << bool2str(CONTROLS.FIT_ENER_PER_ATOM);	
-				
-				if(CONTROLS.NENER>=0)
-					cout << "    			 ...will fit energies for first " << CONTROLS.NENER << " frames." << endl;
-			}	
-		}
-	}
-}
-void INPUT::PARSE_CONTROLS_FITPOVR(JOB_CONTROL & CONTROLS)
-{
-	int N_CONTENTS = CONTENTS.size();
-	
-	for (int i=0; i<N_CONTENTS; i++)
-	{
-		if (found_input_keyword("FITPOVR", CONTENTS(i)))						
-		{
-			CONTROLS.FIT_POVER = convert_bool(CONTENTS(i+1,0),i+1);
-			
-			if ( RANK == 0 ) 
-				cout << "	# FITPOVR #: " << bool2str(CONTROLS.FIT_POVER) << endl;		
-			
-			break;
-		}
-	}
-}
+
+
 void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
@@ -612,14 +562,11 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 		{
 			FF_TYPE = CONTENTS(i+1,0);
 			
-			if (FF_TYPE != "SPLINE" && FF_TYPE != "CHEBYSHEV" && FF_TYPE != "DFTBPOLY" && FF_TYPE != "INVRSE_R") // These are not supported:  && FF_TYPE != "LJ" && FF_TYPE != "STILLIN")
+			if (FF_TYPE != "CHEBYSHEV") // These are not supported:  && FF_TYPE != "LJ" && FF_TYPE != "STILLIN")
 			{
 				cout << endl;
 				cout << "ERROR: Unrecognized pair type. Acceptable options are:" << endl;
-				cout << "SPLINE"   << endl;
 				cout << "CHEBYSHEV"    << endl;
-				cout << "DFTBPOLY" << endl;
-				cout << "INVRSE_R" << endl;
 				exit(1);
 				
 			}
@@ -627,22 +574,10 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 			if ( RANK == 0 )
 			{
 				cout << "	# PAIRTYP #: " << FF_TYPE;
-				
-				if(FF_TYPE != "DFTBPOLY")
-					cout << " ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol." << endl;
-				else
-					cout << " ....NOTE: Forces reported in atomic units." << endl;
+				cout << " ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol." << endl;
 			}
 			
-			if(FF_TYPE == "INVRSE_R")
-			{
-				CONTROLS.INVR_PARAMS = convert_int(CONTENTS(i+1,1),i+1);
-					
-				if ( RANK == 0 ) 
-					cout << "	             " << "Will use the following number of inverse-r params: " << CONTROLS.INVR_PARAMS << endl;					
-			}
-
-			if(FF_TYPE == "DFTBPOLY" || FF_TYPE == "CHEBYSHEV")
+			if(FF_TYPE == "CHEBYSHEV")
 			{
 				CONTROLS.CHEBY_ORDER = convert_int(CONTENTS(i+1,1),i+1);
 				
@@ -695,15 +630,6 @@ void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 					if ( RANK == 0 ) 
 						cout << "	             " << "Will transform Chebyshev pair distances to range " << TMP_CHEBY_RANGE_LOW << " to " << TMP_CHEBY_RANGE_HIGH << endl;
 				}
-			}
-
-			// Do some error checks
-	
-			if(CONTROLS.USE_3B_CHEBY && CONTROLS.FIT_POVER)
-			{
-				cout << "ERROR: Overbonding is not compatible with 3-body Chebyshev potentials." << endl;
-				cout << "       Set # FITPOVR # false." << endl;
-				exit(0);				
 			}
 			
 			break;
@@ -998,11 +924,9 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				TEMP_INT = PAIR_MAP[TEMP_STR];
 				
 				ATOM_PAIRS[TEMP_INT].PAIRIDX = TEMP_INT;
-				ATOM_PAIRS[TEMP_INT].CUBIC_SCALE = 1.0;	// Set the default value
 
 				ATOM_PAIRS[TEMP_INT].S_MINIM = convert_double(CONTENTS(c+1+i,3),c+1+i);
 				ATOM_PAIRS[TEMP_INT].S_MAXIM = convert_double(CONTENTS(c+1+i,4),c+1+i);
-				ATOM_PAIRS[TEMP_INT].S_DELTA = convert_double(CONTENTS(c+1+i,5),c+1+i);
 				ATOM_PAIRS[TEMP_INT].LAMBDA  = convert_double(CONTENTS(c+1+i,6),c+1+i);
 				
 				ATOM_PAIRS[TEMP_INT].MIN_FOUND_DIST = 	1.0e10;	// Set an initial minimum distance	
@@ -1013,47 +937,6 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 					NEIGHBOR_LIST.MAX_CUTOFF_3B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
 					NEIGHBOR_LIST.MAX_CUTOFF_4B = ATOM_PAIRS[TEMP_INT].S_MAXIM;
 				}	
-				
-				ATOM_PAIRS[TEMP_INT].NBINS[0] = 0;
-				ATOM_PAIRS[TEMP_INT].NBINS[1] = 0;
-				ATOM_PAIRS[TEMP_INT].NBINS[2] = 0;				
-				
-				// Read overbonding parameters and histogram parameters
-								
-				if(convert_bool(CONTENTS(c+1+i,7),c+1+i))
-				{
-					// Overbonding
-					
-					ATOM_PAIRS[TEMP_INT].USE_OVRPRMS = true;
-					ATOM_PAIRS[TEMP_INT].OVER_TO_ATM =      CONTENTS(c+1+i,8+0);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[0]  = convert_double(CONTENTS(c+1+i,8+1),c+1+i);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[1]  = convert_double(CONTENTS(c+1+i,8+2),c+1+i);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[2]  = convert_double(CONTENTS(c+1+i,8+3),c+1+i);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[3]  = convert_double(CONTENTS(c+1+i,8+4),c+1+i);
-					ATOM_PAIRS[TEMP_INT].OVRPRMS[4]  = convert_double(CONTENTS(c+1+i,8+5),c+1+i);
-					
-					if(CONTENTS.size(c+1+i) == 17)	// Histograms
-					{
-						ATOM_PAIRS[TEMP_INT].NBINS[0] = convert_double(CONTENTS(c+1+i,14),c+1+i);
-						ATOM_PAIRS[TEMP_INT].NBINS[1] = convert_double(CONTENTS(c+1+i,15),c+1+i);
-						ATOM_PAIRS[TEMP_INT].NBINS[2] = convert_double(CONTENTS(c+1+i,16),c+1+i);
-					}
-				}
-				else
-				{
-					// Overbonding
-					
-					ATOM_PAIRS[TEMP_INT].USE_OVRPRMS = false;
-					
-					// Histograms
-					
-					if(CONTENTS.size(c+1+i) == 11)
-					{
-						ATOM_PAIRS[TEMP_INT].NBINS[0] = convert_int(CONTENTS(c+1+i,8),c+i+1);
-						ATOM_PAIRS[TEMP_INT].NBINS[1] = convert_int(CONTENTS(c+1+i,9),c+i+1);
-						ATOM_PAIRS[TEMP_INT].NBINS[2] = convert_int(CONTENTS(c+1+i,10),c+i+1);
-					}					
-				}		
 			}
 			break;
 		}
@@ -1067,12 +950,8 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 		cout << "# ATM_TY1 #     ";
 		cout << "# S_MINIM #     ";
 		cout << "# S_MAXIM #     ";
-		cout << "# S_DELTA #     ";
-		cout << "# MORSE_LAMBDA #";	
-		cout << " # USEOVRP #     " << endl;
+		cout << "# MORSE_LAMBDA #" << endl;	
 	}
-		
-	bool PRINT_OVR = false;
 	
 	for(int i=0; i<NPAIR; i++)
 	{
@@ -1084,59 +963,8 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 				 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
 				 << setw(16) << left << ATOM_PAIRS[i].S_MINIM
 				 << setw(16) << left << ATOM_PAIRS[i].S_MAXIM							 
-				 << setw(16) << left << ATOM_PAIRS[i].S_DELTA
-				 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << " " 
-				 << setw(16) << left << ATOM_PAIRS[i].USE_OVRPRMS << endl;
+				 << setw(16) << left << ATOM_PAIRS[i].LAMBDA << endl;
 		}
-			 
-		if(ATOM_PAIRS[i].USE_OVRPRMS)
-			PRINT_OVR = true;
-	}
-
-	// If overbonding parameters are provided, and they are not requested to be fit, 
-	// subtract thier contribution before generating A matrix
-	
-	if(PRINT_OVR && !CONTROLS.FIT_POVER)
-		CONTROLS.IF_SUBTRACT_COORD = true;
-
-	if(PRINT_OVR)
-	{
-		if ( RANK == 0 ) 
-		{
-			cout << "	# PAIRIDX #     ";
-			cout << "# ATM_TY1 #     ";
-			cout << "# ATM_TY1 #     ";				
-			cout << "# P_OVERB #     ";
-			cout << "# R_0_VAL #     ";
-			cout << "# P_1_VAL #     ";
-			cout << "# P_2_VAL #     ";
-			cout << "# LAMBDA6 #" << endl;						
-		}
-
-		for(int i=0; i<NPAIR; i++)
-		{					
-			if ( RANK == 0 ) 
-			{
-				cout << "	" << setw(16) << left << ATOM_PAIRS[i].PAIRIDX 
-					 << setw(16) << left << ATOM_PAIRS[i].ATM1TYP
-					 << setw(16) << left << ATOM_PAIRS[i].ATM2TYP 
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[0] 
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[1]
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[2] 
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[3]
-					 << setw(16) << left << ATOM_PAIRS[i].OVRPRMS[4] << endl;	
-			}												
-		}											
-	}
-	
-	if ( RANK == 0 )
-	{
-		cout << endl;
-		cout << "	Read the following number of ij ik jk bins for pairs: " << endl;
-	
-		for(int i=0; i<NPAIR; i++)
-			cout << "		" << ATOM_PAIRS[i].PRPR_NM  << ": " << ATOM_PAIRS[i].NBINS[0] << " " << ATOM_PAIRS[i].NBINS[1] << " " << ATOM_PAIRS[i].NBINS[2] << endl;					
-		cout << endl;
 	}
 
 	build_int_pair_map(CONTROLS.NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX, PAIR_MAP, INT_PAIR_MAP);
@@ -1145,29 +973,7 @@ void INPUT::PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_
 		if ( ATOM_PAIRS[i].PAIRTYP == "CHEBYSHEV" ) 
 			ATOM_PAIRS[i].set_cheby_vals();
 }
-void INPUT::PARSE_TOPOLOGY_CUBSCLE(vector<PAIRS> & ATOM_PAIRS)
-{
-	int N_CONTENTS = CONTENTS.size();
-	
-	string SEARCH;
-	
-	for (int i=0; i<N_CONTENTS; i++)
-	{
-		if(CONTENTS.size(i) >= 4)
-		{
-			SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2) + ' ' + CONTENTS(i,3);
-			
-			if (SEARCH == "PAIR CHEBYSHEV CUBIC SCALING:")
-				for(int i=0; i<NPAIR; i++)
-					ATOM_PAIRS[i].CUBIC_SCALE = convert_double(CONTENTS(i,5),i);
 
-			if ( RANK == 0 ) 
-				cout << "Note: Will use cubic scaling of: " << ATOM_PAIRS[0].CUBIC_SCALE << endl << endl; // All types use same scaling
-			
-			break;
-		}
-	}
-}
 void INPUT::PARSE_TOPOLOGY_CHGCONS(vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, map<string,int> & PAIR_MAP)
 {
 	int N_CONTENTS = CONTENTS.size();
@@ -1330,14 +1136,6 @@ void INPUT::RUN_SANITY_LSQ(JOB_CONTROL & CONTROLS)
 {
 
 	// Run a few checks to make sure logic is correct
- 
-	if(CONTROLS.IF_SUBTRACT_COORD && CONTROLS.FIT_POVER)
-	{
-		cout << "LOGIC ERROR: Problem with code logic. Both fit_pover and ifsubtract_coord cannot be true." << endl;
-		cout << "             if_subtract_coord should only be true if overbonding parameters have been " << endl;
-		cout << "             specified, and FITPOVR set false." << endl;
-		exit_run(0);
-	}
 
 	if(CONTROLS.IF_SUBTRACT_COUL && CONTROLS.FIT_COUL)
 	{
@@ -1345,14 +1143,7 @@ void INPUT::RUN_SANITY_LSQ(JOB_CONTROL & CONTROLS)
 		cout << "             ifsubtract_coul should only be true if non-zero charges have been specified " << endl;
 		cout << "             and FITCOUL set false." << endl;
 		exit_run(0);
-	}
-
-	if (CONTROLS.IF_SUBTRACT_COORD && RANK == 0)
-	{
-		cout << "Special feature: " << endl;
-		cout << " Will subtract contributions from user-specified overbonding " << endl;
-		cout << " parameters before generating A-matrix." << endl << endl;	
-	}					
+	}				
 
 	if(CONTROLS.USE_PARTIAL_CHARGES && RANK == 0)
 	{
@@ -1378,14 +1169,13 @@ void INPUT::RUN_SANITY_LSQ(JOB_CONTROL & CONTROLS)
 		
 // MD controls initialization
 
-void INPUT::PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS, NEIGHBORS & NEIGHBOR_LIST) 		
+void INPUT::PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST) 		
 {
 	// Set some defaults
 	
 	CONTROLS.IS_LSQ           = false;
 	CONTROLS.SELF_CONSIST     = false;
 	CONTROLS.SUBTRACT_FORCE   = false;
-	CONTROLS.PLOT_PES         = false;
 	CONTROLS.WRAP_COORDS      = true;
 	CONTROLS.PRINT_VELOC      = false;
 	CONTROLS.NVT_CONV_CUT     = 0.10;
@@ -1412,111 +1202,8 @@ void INPUT::PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS,
 	
 	CONTROLS.PENALTY_THRESH = -1.0;	// Default is to not enforce a max-allowed penalty
 	CONTROLS.IO_ECONS_VAL   =  0.0;
-	
-	FF_PLOTS.INCLUDE_FCUT     = true;
-	FF_PLOTS.INCLUDE_CHARGES  = true;
-	FF_PLOTS.INCLUDE_PENALTY  = true;
-	FF_PLOTS.DO_4D            = false;
 }
 
-// Variables for printing out PES for a given parameter file
-
-void INPUT::PARSE_CONTROLS_PLOTPES(JOB_CONTROL & CONTROLS, PES_PLOTS & FF_PLOTS)
-{
-	int N_CONTENTS = CONTENTS.size();
-	
-	for (int i=0; i<N_CONTENTS; i++)
-	{
-		if (found_input_keyword("PLOTPES", CONTENTS(i)))			
-		{
-			CONTROLS.PLOT_PES = convert_bool(CONTENTS(i+1,0),i+1);
-			
-			if (CONTROLS.PLOT_PES)
-			{
-				if (RANK==0)
-					cout << "	# PLOTPES #: true... will only plot PES's" << endl;	
-			
-				FF_PLOTS.N_PLOTS    = convert_int(CONTENTS(i+1,1),i+1);
-				CONTROLS.PARAM_FILE =      CONTENTS(i+1,2) ;
-			
-				// Parse options
-			
-				for (int j=3; j<CONTENTS.size(i+1); j++)
-				{
-					if(CONTENTS(i+1,j)=="Exclude"  || CONTENTS(i+1,j)=="exclude"  || CONTENTS(i+1,j)=="EXCLUDE")
-					{
-						if(CONTENTS(i+1,j+1)=="Fcut"  || CONTENTS(i+1,j+1)=="fcut"  || CONTENTS(i+1,j+1)=="FCUT")
-						{
-							FF_PLOTS.INCLUDE_FCUT = false;
-							if (RANK==0)
-									cout << "		Excluding cubic scaling (fcut)" << endl;
-						}
-				
-						else if (CONTENTS(i+1,j)=="Charges"  || CONTENTS(i+1,j)=="charges"  || CONTENTS(i+1,j)=="CHARGES")
-						{
-							FF_PLOTS.INCLUDE_CHARGES = false;
-							if (RANK==0)
-									cout << "		Excluding charges" << endl;
-						}	
-						else if (CONTENTS(i+1,j)=="Penalty"  || CONTENTS(i+1,j)=="penalty"  || CONTENTS(i+1,j)=="PENALTY")
-						{
-							FF_PLOTS.INCLUDE_PENALTY = false;
-							if (RANK==0)
-									cout << "		Excluding penalty for 2b (only) scan" << endl;
-						}	
-					}		
-				
-					if(CONTENTS(i+1,j) =="No"  || CONTENTS(i+1,j)=="no"  || CONTENTS(i+1,j)=="NO")
-					{
-						if(CONTENTS(i+1,j+1)=="4D"  || CONTENTS(i+1,j+1)=="4d")
-						{
-							FF_PLOTS.DO_4D = false;
-							if (RANK==0)
-									cout << "		Will not print the 4D 3-body data" << endl;
-						}
-				
-					}
-				}
-			
-				if(FF_PLOTS.INCLUDE_FCUT)
-					cout << "		Including cubic scaling (fcut)" << endl;						
-
-				if(FF_PLOTS.INCLUDE_CHARGES)
-					cout << "		Including charges" << endl;						
-
-				if(FF_PLOTS.INCLUDE_PENALTY)
-					cout << "		Including penalty for 2b (only) scan" << endl;						
-			
-				// Read in the search string in a way that makes spacing not matter
-			
-				for(int j=0; j<FF_PLOTS.N_PLOTS; j++) // Process a line like: "PAIRTYPE PARAMS: 0"
-				{
-					if (RANK==0)
-						cout << endl << "	Processing Individual plot requests " << endl;			
-				
-					if(CONTENTS(i+2+j,0)=="PAIRTYPE")
-						FF_PLOTS.NBODY.push_back(2);
-					else if(CONTENTS(i+2+j,0)=="TRIPLETTYPE")
-						FF_PLOTS.NBODY.push_back(3);
-					else
-						EXIT_MSG("ERROR: Unrecognized interaction type. Allowed values are PAIRTYPE and TRIPLETTYPE: ", CONTENTS(i+2+j,0));
-
-					FF_PLOTS.TYPE_INDEX.push_back(convert_int(CONTENTS(i+2+j,2),i+2+j));
-				
-					FF_PLOTS.PES_TYPES.push_back(join_string_vec(CONTENTS(i+2+j),' '));
-
-				}
-			}
-			else
-			{
-				if (RANK==0)
-					cout << "	# PLOTPES #: false " << endl;	
-			}
-			
-			break;
-		}
-	}	
-}
 
 // For self-consistent fitting type runs
 
@@ -2003,85 +1690,69 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 			
 			*/
 			
-			if(CONTROLS.ENSEMBLE == "LMP-NVE" || CONTROLS.ENSEMBLE == "LMP-NVT" || CONTROLS.ENSEMBLE == "LMP-NPT")
+
+			if(CONTROLS.ENSEMBLE != "NVE")
 			{
-				if(CONTROLS.ENSEMBLE == "LMP-NVT" || CONTROLS.ENSEMBLE == "LMP-NPT")
+				if (CONTROLS.ENSEMBLE == "NVT-MTK" || CONTROLS.ENSEMBLE == "NPT-MTK")
+				{
+					CONTROLS.USE_HOOVER_THRMOSTAT   = true;
+					CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,2),i+1);
+					
+					if (RANK==0)
+						cout << "	# CONSRNT #: HOOVER... a Hoover time of " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " will be used." << endl;
+
+					if(CONTROLS.ENSEMBLE == "NPT-MTK")
+					{
+						if(CONTENTS.size(i+1) == 2)
+							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,1),i+1);
+						else
+							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;	
+							
+						if (RANK==0)
+							cout << "	                   ... and barostat will use  " << CONTROLS.FREQ_UPDATE_BAROSTAT << "." << endl;	
+					}
+				}
+				else if (CONTROLS.ENSEMBLE == "NVT-SCALE" || CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NVT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
+				{
+					CONTROLS.USE_HOOVER_THRMOSTAT   = false;
 					CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,1),i+1);
 
-				if(CONTROLS.ENSEMBLE == "LMP-NPT")
-					CONTROLS.FREQ_UPDATE_BAROSTAT = convert_int(CONTENTS(i+1,1),i+1);
-			}
-			else if(CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-ANISO" || CONTROLS.ENSEMBLE == "LMP-MIN-BOX-TRI" || CONTROLS.ENSEMBLE == "LMP-MIN")
-			{
-				CONTROLS.MIN_E_CONVG_CRIT = convert_double(CONTENTS(i+1,1),i+1);
-				CONTROLS.MIN_F_CONVG_CRIT = convert_double(CONTENTS(i+1,2),i+1);
-				CONTROLS.MIN_MAX_ITER     = convert_int(CONTENTS(i+1,3),i+1);
-				CONTROLS.MIN_MAX_EVAL     = convert_int(CONTENTS(i+1,4),i+1);
-			}
-			else
-			{
-				if(CONTROLS.ENSEMBLE != "NVE")
-				{
-					if (CONTROLS.ENSEMBLE == "NVT-MTK" || CONTROLS.ENSEMBLE == "NPT-MTK")
+					if (CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
 					{
-						CONTROLS.USE_HOOVER_THRMOSTAT   = true;
-						CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,2),i+1);
-						
-						if (RANK==0)
-							cout << "	# CONSRNT #: HOOVER... a Hoover time of " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " will be used." << endl;
-
-						if(CONTROLS.ENSEMBLE == "NPT-MTK")
-						{
-							if(CONTENTS.size(i+1) == 2)
-								CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,1),i+1);
-							else
-								CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;	
-								
-							if (RANK==0)
-								cout << "	                   ... and barostat will use  " << CONTROLS.FREQ_UPDATE_BAROSTAT << "." << endl;	
-						}
+						if(CONTENTS.size(i+1) == 3)
+							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,2),i+1);
+						else
+							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
 					}
-					else if (CONTROLS.ENSEMBLE == "NVT-SCALE" || CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NVT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
-					{
-						CONTROLS.USE_HOOVER_THRMOSTAT   = false;
-						CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,1),i+1);
-
-						if (CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
-						{
-							if(CONTENTS.size(i+1) == 3)
-								CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,2),i+1);
-							else
-								CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
-						}
 		
-						if (RANK==0)
-							cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << "... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." << endl;	
-					}
-					else
-					{
-						cout << "ERROR: Unrecognized # CONSRNT # command: " << join_string_vec(CONTENTS(i+1),' ') << endl;
-						exit_run(1);	
-					}	
+					if (RANK==0)
+						cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << "... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." << endl;	
 				}
-				
-				for (int j=0; j<CONTENTS.size(i+1); j++)
+				else
 				{
-					if (CONTENTS(i+1,j) == "FREEZE")
+					cout << "ERROR: Unrecognized # CONSRNT # command: " << join_string_vec(CONTENTS(i+1),' ') << endl;
+					exit_run(1);	
+				}	
+			}
+			
+			for (int j=0; j<CONTENTS.size(i+1); j++)
+			{
+				if (CONTENTS(i+1,j) == "FREEZE")
+				{
+					CONTROLS.FREEZE_IDX_START = convert_int(CONTENTS(i+1,j+1),i+1);
+					CONTROLS.FREEZE_IDX_STOP  = convert_int(CONTENTS(i+1,j+2),i+1);
+					
+					if(RANK == 0)
 					{
-						CONTROLS.FREEZE_IDX_START = convert_int(CONTENTS(i+1,j+1),i+1);
-						CONTROLS.FREEZE_IDX_STOP  = convert_int(CONTENTS(i+1,j+2),i+1);
-						
-						if(RANK == 0)
-						{
-							cout << "		...Atoms over the following range will be frozen will be frozen (indexed from 0): "; 
-							cout << CONTROLS.FREEZE_IDX_START << " - "  << CONTROLS.FREEZE_IDX_STOP << endl;
-						}
-						
-						break;
-						
+						cout << "		...Atoms over the following range will be frozen will be frozen (indexed from 0): "; 
+						cout << CONTROLS.FREEZE_IDX_START << " - "  << CONTROLS.FREEZE_IDX_STOP << endl;
 					}
+					
+					break;
+					
 				}
 			}
+			
 
 			break;
 		}

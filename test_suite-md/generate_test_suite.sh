@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#!/bin/bash
 
 ########################################
 # Define tests within the test suite
@@ -15,11 +15,8 @@ echo " "
 echo "SETTING UP FOR MD CODE..."
 echo " "
 
-cd ../src
-rm -rf *o *dSYM chimes_md
 
-
-# Common function for test script initialization.
+# Initialize test suite parameters
 source ../src/bash/init_vars.sh
 init_test_vars
 echo "Number of processors = $NP"
@@ -32,9 +29,21 @@ if test "x$ok_run" != "xyes" ; then
 	exit 0
 fi
 
-make -f Makefile-TS-MD chimes_md
-rm -f ../test_suite-lsq/chimes_md;  mv chimes_md  ../test_suite-md/
-cd ../test_suite-md
+
+# Compile the code
+
+cd ..
+
+if ./install.sh  ; then
+	echo "Compiling chimes_lsq succeeded"
+else
+	 echo "Compiling chimes_lsq failed"
+	 exit 1
+fi
+
+cd -
+
+# Determine which tests to run
 
 if [ $# -gt 0 ] ; then
 	 MD_JOBS=$1
@@ -55,7 +64,7 @@ do
 	if [ ! -d correct_output ] ; then mkdir correct_output ; fi
 	
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		 if ../chimes_md run_md.in > run_md.out ; then
+		 if ../../build/chimes_md run_md.in > run_md.out ; then
 			  SUCCESS=1
 		 else
 			  echo "Chimes_md failed"
@@ -63,7 +72,7 @@ do
 		 fi
 			
 	else
-		 if $RUN_JOB ../chimes_md run_md.in > run_md.out ; then
+		 if $RUN_JOB ../../build/chimes_md run_md.in > run_md.out ; then
 			  SUCCESS=1
 		 else
 			  echo "Chimes_md failed"
@@ -87,10 +96,6 @@ echo "SETTING UP FOR LSQ/MD CODE COMPATIBILITY..."
 echo " "
 echo " ...Beginning by running the lsq test suite... "
 
-cd ../src
-rm -rf *o *dSYM chimes_lsq chimes_md
-cd ../test_suite-md
-
 cd ../test_suite-lsq 
 
 for i in ${LSQ_FORCE_JOBS}
@@ -98,7 +103,6 @@ do
 	./run_test_suite.sh $i # $LSQ_FORCE_JOBS
 done
 
-cd ../src
 cd ../test_suite-md
 
 echo " "
@@ -107,8 +111,7 @@ for i in ${LSQ_FORCE_JOBS}
 do
 
 	echo $i
-	exit 0
-
+	
 	if [[ $i == *"lsq2"* ]] ; then
 		continue
 	fi 
@@ -127,7 +130,7 @@ do
 	cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
 	cp ../../test_suite-lsq/$i/current_output/force.txt     .
 	
-	if ../chimes_md run_md.in > run_md.out ; then
+	if ../../build/chimes_md run_md.in > run_md.out ; then
 		 echo 'Chimes_md succeeded'
 		 SUCCESS=1
 	else

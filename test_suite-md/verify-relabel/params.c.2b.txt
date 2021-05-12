@@ -11,10 +11,8 @@
 !
 USECOUL: false
 FITCOUL: false
-USEPOVR: false
-FITPOVR: false
-USE3BCH: true
-USE4BCH: true
+USE3BCH: false
+USE4BCH: false
 
 PAIRTYP: CHEBYSHEV  12 0 0 -1 1
 
@@ -25,8 +23,8 @@ ATOM TYPES: 1
 
 ATOM PAIRS: 1
 
-# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
-	0               C               C               1.305           5              0.01            MORSE           1.54            
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# CHBDIST #	# MORSE_LAMBDA #
+	0               C               C               1.305           5              MORSE           1.54            
 
 FCUT TYPE: CUBIC
 

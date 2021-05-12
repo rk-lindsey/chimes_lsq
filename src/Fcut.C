@@ -27,13 +27,6 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const
 	static bool FIRST_PASS = true;
 
 	// Original cubic style smoothing... does not constrian value at rmin
-
-	if(TYPE == FCUT_TYPE::CUBESTRETCH )
-	{
-		cout << "ERROR: TYPE CUBESTRETCH NO LONGER SUPPORTED...Please clean up code!" << endl;
-		exit_run(0);
-	}
-
 	// Cubic cutoff
 	if(TYPE == FCUT_TYPE::CUBIC)
 	{		
@@ -70,145 +63,9 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const
 		}
 		return;	
 	}
-	else if(BODIEDNESS==3)
-	{
-		cout << "ERROR: Unsupported type... clean up code!" << endl;
-		exit(0);
-	
-		if(TYPE == FCUT_TYPE::COSINE)
-		{
-			fcut0      = 2.0*pi*( (rlen - rmin) /(rmax - rmin) );
-			fcut       = -0.5*cos(fcut0) + 0.5;
-			fcut_deriv =  0.5*sin(fcut0) * (2.0*pi/(rmax - rmin));
-
-			return;
-		}
-		else if(TYPE == FCUT_TYPE::CUBSIG)	// Outer cutoff handled by normal fcut function, inner cutoff is handled by a sigmoid, who is ~1 until r LESS THAN the inner cutoff. does NOT go to zero within rmin<->rmax
-		{
-			if(FIRST_PASS && RANK==0)
-			{
-				cout << "		NOTE: Using cubic-sigmoid steepness and offset of " << fixed << setprecision(3) << STEEPNESS << " and " << fixed << setprecision(3) << OFFSET << endl;
-				FIRST_PASS = false;
-			}
-			
-			A = exp( (rlen - rmin - OFFSET ) * STEEPNESS);	// A_prime is just STEEPNESS*A
-			
-			if (A>10E20) // If A is huge, then a = 1 and a' = 0
-			{
-				a       = 1;
-				a_prime = 0;
-			}
-			else
-			{
-				a       = -1.0/(1.0+A) + 1;
-				a_prime = STEEPNESS*A/(1.0+A)/(1.0+A);
-			}
-			
-			fcut0 = (1.0 - rlen/rmax);
-			b        = pow(fcut0, POWER);
-			b_prime  = pow(fcut0,POWER-1);
-			b_prime *= -1.0 * POWER /rmax;
-			
-			fcut = a*b;
-			
-			fcut_deriv = a_prime*b + b_prime*a;
-
-			return;
-		}
-		
-		else if( TYPE == FCUT_TYPE::SIGMOID) // Both outer and inner cutoffs handed by sigmoid functions
-		{
-			
-			/* FOR DEBUGGING 
-			
-			if(FIRST_PASS && RANK==0)
-			{
-				cout << "		NOTE: Using sigmoid steepness and offset of " << fixed << setprecision(3) << STEEPNESS << " and " << fixed << setprecision(3) << OFFSET << endl;
-				FIRST_PASS = false;
-			}
-			
-			*/
-			
-			A = exp( (rlen - rmin - OFFSET ) * STEEPNESS);	// A_prime is just STEEPNESS*A
-			B = exp( (rlen - rmax + OFFSET ) * STEEPNESS);	// Same for B_prime
-			
-			if (A>10E20) // If A is huge, then a = 1 and a' = 0
-			{
-				a       = 1;
-				a_prime = 0;
-			}
-			else
-			{
-				a       = -1.0/(1.0+A) + 1;
-				a_prime = STEEPNESS*A/(1.0+A)/(1.0+A);
-			}
-				
-			if (B>10E20) // If B is huge, then b = 1 and b' = 0
-			{
-				b       = 1;
-				b_prime = 0;
-			}
-			else
-			{
-				b       =  1.0/(1.0+B);
-				b_prime = -1.0*STEEPNESS*B/(1.0+B)/(1.0+B);
-			}
-
-			fcut       = a*b;
-			fcut_deriv = a_prime*b + b_prime*a;
-			
-			if(std::isinf(fcut)||std::isinf(fcut_deriv))
-				cout << a << " " << b << " " << a_prime << " " << b_prime << " ++ " << A << " " << B << " -- " << fcut << " " << fcut_deriv << endl;
-
-			return;
-		}
-		else if( TYPE== FCUT_TYPE::SIGFLT)
-		{
-			A = exp( (rlen - rmin - OFFSET ) * STEEPNESS);	// A_prime is just STEEPNESS*A
-			B = exp( (rlen - rmax + OFFSET ) * STEEPNESS);	// Same for B_prime
-			
-			if (A>10E20) // If A is huge, then a = 1 and a' = 0
-			{
-				a       = 1;
-				a_prime = 0;
-			}
-			else
-			{
-				a       =  HEIGHT/(1.0+A)+1;
-				a_prime = -1.0*HEIGHT*STEEPNESS*A/(1.0+A)/(1.0+A);
-			}
-				
-			if (B>10E20) // If B is huge, then b = 1 and b' = 0
-			{
-				b       = 1;
-				b_prime = 0;
-			}
-			else
-			{
-				b       =  1.0/(1.0+B);
-				b_prime = -1.0*STEEPNESS*B/(1.0+B)/(1.0+B);
-			}
-
-			fcut       = a*b;
-			fcut_deriv = a_prime*b + b_prime*a;
-			
-			if(std::isinf(fcut)||std::isinf(fcut_deriv))
-				cout << a << " " << b << " " << a_prime << " " << b_prime << " ++ " << A << " " << B << " -- " << fcut << " " << fcut_deriv << endl;
-
-			return;
-		}
-		else
-		{
-			cout << "ERROR: UNDEFINED N-BODY PARAMETER!" << endl;
-			cout << "       Did you forget to set # FCUTTYP #?" << endl;
-			cout << "       Check calls to FCUT::get_fcut." << endl;
-			exit(0);
-		}
-		
-	}
 	else
 	{
-		cout << "ERROR: UNDEFINED N-BODY PARAMETER!" << endl;
+		cout << "ERROR: UNDEFINED CUTOFF TYPE!"  << endl;
 		cout << "       Check calls to FCUT::get_fcut." << endl;
 		exit(0);
 	}
@@ -216,20 +73,11 @@ void FCUT::get_fcut(double & fcut, double & fcut_deriv, const double rlen, const
 
 FCUT::FCUT() 
 {
-#ifndef FPENALTY_POWER
-	POWER = 3;
-#else
-	POWER = FPENALTY_POWER;
-#endif
-
-	BODIEDNESS = 2;
-	
 	TYPE = FCUT_TYPE::CUBIC;
 
 	// More or less random defaults.
-	STEEPNESS = 2.0;
+
 	OFFSET = 0.0;
-	HEIGHT = 1.0;
 
 }
 
@@ -238,30 +86,9 @@ FCUT::FCUT()
 void FCUT::set_type(string s) 
 // Set the type of the cutoff function.
 {
-	if ( s == "CUBESTRETCH" ) 
-	{
-		TYPE = FCUT_TYPE::CUBESTRETCH;
-	} 
-	else if ( s == "CUBIC" ) 
+	if ( s == "CUBIC" ) 
 	{
 		TYPE = FCUT_TYPE::CUBIC;
-	} 
-	else if ( s == "COSINE" ) 
-	{
-		TYPE = FCUT_TYPE::COSINE;
-	} 
-	else if ( s == "CUBSIG" ) 
-	{
-		TYPE = FCUT_TYPE::CUBSIG;
-	} 
-	else if ( s == "SIGMOID" ) 
-	{
-		TYPE = FCUT_TYPE::SIGMOID;
-	} 
-	else if ( s == "SIGFLT" ) 
-	{
-	
-		TYPE = FCUT_TYPE::SIGFLT;
 	} 
 	else if ( s == "TERSOFF" ) 
 	{
@@ -281,23 +108,8 @@ string FCUT::to_string()
 	string str;
 
 	switch ( TYPE ) {
-	case FCUT_TYPE::CUBESTRETCH:
-		str = "CUBESTRETCH";
-		break;
 	case FCUT_TYPE::CUBIC:
 		str = "CUBIC";
-		break;
-	case FCUT_TYPE::COSINE:
-	   str = "COSINE";
-		break;
-	case FCUT_TYPE::CUBSIG:
-		str = "CUBSIG";
-		break;
-	case FCUT_TYPE::SIGMOID:
-		str = "SIGMOID";
-		break;
-	case FCUT_TYPE::SIGFLT:
-		str = "SIGFLT";
 		break;
 	case FCUT_TYPE::TERSOFF:
 		str = "TERSOFF";
@@ -315,9 +127,6 @@ bool FCUT::PROCEED(const double & rlen, const double & rmin, const double & rmax
 {
 
 	if(TYPE == FCUT_TYPE::CUBIC 
-		|| TYPE == FCUT_TYPE::CUBSIG
-		|| TYPE == FCUT_TYPE::CUBESTRETCH 
-		|| TYPE == FCUT_TYPE::SIGFLT
 		|| TYPE == FCUT_TYPE::TERSOFF)
 		if(rlen < rmax)
 			return true;
@@ -347,30 +156,13 @@ void FCUT::parse_input(string line)
 		validate_num_args(nargs, 2, line);
 		OFFSET = stod(tokens[1]);
 	}
-
-	else if(   TYPE == FCUT_TYPE::SIGMOID 
-		|| TYPE == FCUT_TYPE::CUBSIG 
-		|| TYPE == FCUT_TYPE::CUBESTRETCH 
-		|| TYPE == FCUT_TYPE::SIGFLT)
-	{
-		validate_num_args(nargs, 3, line);
-
-		STEEPNESS = stod(tokens[1]) ;
-		OFFSET    = stod(tokens[2]) ;
-	 
-		if ( TYPE == FCUT_TYPE::SIGFLT )
-		{
-			validate_num_args(nargs, 4, line);
-			HEIGHT = stod(tokens[3]) ;
-		}
-	}
 }
 
 void FCUT::print_params()
 // Print the force cutoff parameters
 {
   cout << to_string() << endl;
-  cout << "		...with steepness and offsets of: " << fixed << setprecision(4) << STEEPNESS << " " << OFFSET << endl;
+  cout << "		...with offset of: " << fixed << setprecision(4) << OFFSET << endl;
 }
 
 
@@ -379,10 +171,6 @@ void FCUT::print_header(ostream &header)
 {
   header << endl << "FCUT TYPE: " << to_string();
 		
-  if (TYPE == FCUT_TYPE::SIGMOID || TYPE == FCUT_TYPE::CUBSIG || TYPE == FCUT_TYPE::CUBESTRETCH || TYPE == FCUT_TYPE::SIGFLT)
-	 header << " " << STEEPNESS << " " << OFFSET;
-  if(TYPE == FCUT_TYPE::SIGFLT)
-	 header << " " << HEIGHT;
   if(TYPE == FCUT_TYPE::TERSOFF)
 	 header << " " << OFFSET;	 
 

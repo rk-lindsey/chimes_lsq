@@ -9,7 +9,6 @@ Input file contents successfully stored.
 	# NFRAMES #: 20
 	# NLAYERS #: 1
 	# FITCOUL #: false
-	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 14
 	             Will use 3-body order: 3
@@ -25,22 +24,14 @@ Input file contents successfully stored.
 		0  O O
 		1  H H
 		2  O H
-	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               O               O               1.9             5               0.1             1.75             0               
-	1               H               H               0.9             5               0.1             1.25             0               
-	2               O               H               0.7             5               0.1             1.25             0               
-
-	Read the following number of ij ik jk bins for pairs: 
-		OO: 0 0 0
-		HH: 0 0 0
-		OH: 0 0 0
-
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # MORSE_LAMBDA #
+	0               O               O               1.9             5               1.75            
+	1               H               H               0.9             5               1.25            
+	2               O               H               0.7             5               1.25            
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
 		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
-Note: Will use cubic scaling of: 1
-
 
 	Attempting to read 2 charge constraints...:
 		1	 OO (0) HH (1) OH (2) 1000 4000 4000 0
@@ -496,6 +487,7 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
+	Processing frame: 1     of: 20
 	Latest 3-body outer cutoff values: 
 	0:  6.0000000000000000  6.0000000000000000  6.0000000000000000
 	1:  4.0000000000000000  4.0000000000000000  6.0000000000000000
@@ -526,6 +518,63 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 Number of 3-body interactions = 180048
 Number of 4-body interactions = 452509
+	Processing frame: 2     of: 20
+Number of 3-body interactions = 181810
+Number of 4-body interactions = 438928
+	Processing frame: 3     of: 20
+Number of 3-body interactions = 181627
+Number of 4-body interactions = 449250
+	Processing frame: 4     of: 20
+Number of 3-body interactions = 179972
+Number of 4-body interactions = 441186
+	Processing frame: 5     of: 20
+Number of 3-body interactions = 182143
+Number of 4-body interactions = 421314
+	Processing frame: 6     of: 20
+Number of 3-body interactions = 182440
+Number of 4-body interactions = 419277
+	Processing frame: 7     of: 20
+Number of 3-body interactions = 183169
+Number of 4-body interactions = 445761
+	Processing frame: 8     of: 20
+Number of 3-body interactions = 179292
+Number of 4-body interactions = 447195
+	Processing frame: 9     of: 20
+Number of 3-body interactions = 182203
+Number of 4-body interactions = 440475
+	Processing frame: 10    of: 20
+Number of 3-body interactions = 180192
+Number of 4-body interactions = 442685
+	Processing frame: 11    of: 20
+Number of 3-body interactions = 181807
+Number of 4-body interactions = 434681
+	Processing frame: 12    of: 20
+Number of 3-body interactions = 182106
+Number of 4-body interactions = 429684
+	Processing frame: 13    of: 20
+Number of 3-body interactions = 181103
+Number of 4-body interactions = 442206
+	Processing frame: 14    of: 20
+Number of 3-body interactions = 180530
+Number of 4-body interactions = 425058
+	Processing frame: 15    of: 20
+Number of 3-body interactions = 182391
+Number of 4-body interactions = 450112
+	Processing frame: 16    of: 20
+Number of 3-body interactions = 181466
+Number of 4-body interactions = 436103
+	Processing frame: 17    of: 20
+Number of 3-body interactions = 181114
+Number of 4-body interactions = 447455
+	Processing frame: 18    of: 20
+Number of 3-body interactions = 180602
+Number of 4-body interactions = 441835
+	Processing frame: 19    of: 20
+Number of 3-body interactions = 182481
+Number of 4-body interactions = 430269
+	Processing frame: 20    of: 20
+Number of 3-body interactions = 181998
+Number of 4-body interactions = 429362
 ...matrix population complete: 
 
 Printing matrices...

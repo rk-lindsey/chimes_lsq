@@ -1,0 +1,8 @@
+# Ignore files generated when documentation is built
+/doc/build/
+
+# Ignore compilation build files
+/build/
+
+
+

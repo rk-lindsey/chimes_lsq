@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 36 processor(s).
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 Will read from file: run_md.in
@@ -9,7 +9,7 @@ Input file contents successfully stored.
 	# TEMPERA #: 2000 K
 	# CMPRFRC #: false
 	# TIMESTP #: 0.125 fs
-	# N_MDSTP #: 25
+	# N_MDSTP #: 50
 	# NLAYERS #: 1
 	# USENEIG #: true
 	# PRMFILE #: params.txt
@@ -22,19 +22,19 @@ Input file contents successfully stored.
 		... All reported energies *DO NOT* include single atom contributions
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
-		... printing       1 frames. 
+		... printing       2 frames. 
 	# TRAJEXT #: GEN
 	# FRQENER #: 1
 	# PRNTFRC #: true
 		... and will be printed every 5 frames.
 		... printing every 0.625 fs, 
-		... printing 5 frames. 
+		... printing 10 frames. 
 	# PRNTBAD #: false
 	# FRQRSTR #: 100
 	# PRNTFRC #: true
 		... and will be printed every 5 frames.
 		... printing every 0.625 fs, 
-		... printing 5 frames. 
+		... printing 10 frames. 
 	# FORDFTB #: false
 Setting up the data objects...
    ...setup complete
@@ -118,8 +118,6 @@ Running velocity sanity checks...
 Reading force field parameters...
 		...Compute electrostatics?      false
 		...Use fit charges?             false
-		...Compute ReaxFF overbonding?  false
-		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     true
 		...Use 4-body Cheby params?     true
 	...Read FF controls...
@@ -194,13 +192,12 @@ Attempting to read pairtype...
    ...read complete.
 
 Notes on simulation: 
-	Using fpenalty power 3.0000
 	Using the following fcut style for 2B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 3B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 4B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Electrostatics will not be computed.
 
 Force field summary: 
@@ -211,7 +208,7 @@ Force field summary:
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OO 1.9000 5.0000 0.1000 MORSE 1.7500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
+		OO 1.9000 5.0000 MORSE 1.7500 0.0100 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -1.7654e+03
 		1 -2.0209e+02
@@ -229,7 +226,7 @@ Force field summary:
 		13 2.5460e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		HH 9.0000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		HH 9.0000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -1.3411e+02
 		1 -8.6071e+01
@@ -247,7 +244,7 @@ Force field summary:
 		13 8.5018e-01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OH 7.0000e-01 5.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		OH 7.0000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 9.0444e+01
 		1 1.0459e+02
@@ -721,14 +718,68 @@ RANK: 0 UPDATING ON STEP: 16, WITH PADDING: 0.378
       23      2.88       4.0118739     -10.7956248      -6.7837510          1360.2     31.66546797     -6.8791658
       24      3.00       4.0518804     -10.8262303      -6.7743498          1373.8     31.49932886     -6.8791950
       25      3.12       4.0945275     -10.8589834      -6.7644559          1388.2     31.31394473     -6.8792267
+      26      3.25       4.1393144     -10.8933774      -6.7540630          1403.4     31.11097311     -6.8792594
+      27      3.38       4.1857253     -10.9288915      -6.7431662          1419.2     30.89202139     -6.8792918
+      28      3.50       4.2332507     -10.9650122      -6.7317615          1435.3     30.65853660     -6.8793216
+      29      3.62       4.2814153     -11.0012613      -6.7198461          1451.6     30.41162062     -6.8793462
+      30      3.75       4.3298126     -11.0372302      -6.7074176          1468.0     30.15170991     -6.8793622
+      31      3.88       4.3781527     -11.0726264      -6.6944737          1484.4     29.87819697     -6.8793643
+Number of 3-body interactions = 202164
+Number of 4-body interactions = 497927
+RANK: 0 UPDATING ON STEP: 31, WITH PADDING: 0.397
+      32      4.00       4.4263296     -11.1073398      -6.6810102          1500.7     29.58886074     -6.8793450
+      33      4.12       4.4745293     -11.1415468      -6.6670174          1517.1     29.27907226     -6.8792908
+      34      4.25       4.5234261     -11.1758976      -6.6524715          1533.6     28.94017254     -6.8791748
+      35      4.38       4.5745956     -11.2119065      -6.6373109          1551.0     28.55620724     -6.8789362
+      36      4.50       4.6315055     -11.2528747      -6.6213692          1570.3     28.09658521     -6.8784167
+      37      4.62       4.7022192     -11.3063691      -6.6041500          1594.3     27.49781464     -6.8771470
+      38      4.75       4.8079544     -11.3918777      -6.5839233          1630.1     26.61418784     -6.8734731
+      39      4.88       5.0158799     -11.5691231      -6.5532432          1700.6     25.07184236     -6.8601768
+      40      5.00       5.5946897     -12.0680264      -6.4733367          1896.9     21.88167990     -6.7992960
+Warning: (Step 40) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.891 0.910  13 82
+	...Penalty potential = 0.065
+      41      5.12       7.4097408     -13.5369067      -6.1271659          2512.2     18.17530424     -6.4765281
+Number of 3-body interactions = 487951
+Number of 4-body interactions = 2813050
+RANK: 0 UPDATING ON STEP: 41, WITH PADDING: 1.434
+Warning: (Step 41) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.787 0.910  13 82
+	...Penalty potential = 18.462
+      42      5.25      11.2549912     -13.4600064      -2.2050152          3816.0     20.09879901     -2.5870656
+Warning: (Step 42) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.637 0.910  13 82
+	...Penalty potential = 202.775
+      43      5.38      16.1639344     -11.6943090       4.4696255          5480.3     22.89764702      4.0436962
+Warning: (Step 43) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.452 0.910  13 82
+	...Penalty potential = 961.648
+      44      5.50      19.0264216      -3.9864367      15.0399849          6450.8     25.09138590     14.5671001
+Warning: (Step 44) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.265 0.910  13 82
+	...Penalty potential = 2686.619
+      45      5.62      15.8855264      13.7386302      29.6241566          5385.9     24.73054113     29.1159066
+Warning: (Step 45) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.138 0.910  13 82
+	...Penalty potential = 4605.719
+      46      5.75       9.5775956      33.4907189      43.0683144          3247.2     22.75901192     42.5407863
+Warning: (Step 46) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.151 0.910  13 82
+	...Penalty potential = 4370.803
+      47      5.88      10.4292164      30.9676850      41.3969014          3536.0     22.19686433     40.8566704
+Warning: (Step 47) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.293 0.910  13 82
+	...Penalty potential = 2354.089
+      48      6.00      16.9907233      10.0624409      27.0531642          5760.6     22.69929538     26.4994290
+Warning: (Step 48) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.481 0.910  13 82
+	...Penalty potential = 791.786
+      49      6.12      19.0542515      -6.0505090      13.0037425          6460.3     20.86885592     12.4422846
+Number of 3-body interactions = 1739332
+Number of 4-body interactions = 22908288
+RANK: 0 UPDATING ON STEP: 49, WITH PADDING: 3.115
+Warning: (Step 49) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.658 0.910  13 82
+	...Penalty potential = 160.525
+      50      6.25      17.3309067     -13.6774120       3.6534948          5876.0      9.75837631      3.0963049
 END SIMULATION
-	Average temperature over run = 1325.6183 K
-	Average pressure    over run = 31.3809 GPa
-	Pressures from diagonal stress tensors over run: 31.3809
+	Average temperature over run = 2096.4452 K
+	Average pressure    over run = 28.4486 GPa
+	Pressures from diagonal stress tensors over run: 28.4486
 	Average stress tensors over run: 
-		sigma_xx: 32.9325 GPa
-		sigma_yy: 31.0137 GPa
-		sigma_zz: 30.1964 GPa
-		sigma_xy: 2.1276 GPa
-		sigma_xz: 3.0425 GPa
-		sigma_yz: 2.3833 GPa
+		sigma_xx: 31.1461 GPa
+		sigma_yy: 27.7655 GPa
+		sigma_zz: 26.4340 GPa
+		sigma_xy: 2.4944 GPa
+		sigma_xz: 6.3183 GPa
+		sigma_yz: 1.9677 GPa

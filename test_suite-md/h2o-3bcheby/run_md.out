@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 36 processor(s).
+Code compiled in MPI mode. Will run on 1 processor(s).
 
 Reading the simulation control input file...
 Will read from file: run_md.in
@@ -18,6 +18,8 @@ Input file contents successfully stored.
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
 	# WRPCRDS #: false
+	# ATMENER #: 0
+		... All reported energies *DO NOT* include single atom contributions
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
 		... printing       50 frames. 
@@ -27,6 +29,13 @@ Input file contents successfully stored.
 		... and will be printed every 20 frames.
 		... printing every 2.5 fs, 
 		... printing 50 frames. 
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: true
+		... and will be printed every 20 frames.
+		... printing every 2.5 fs, 
+		... printing 50 frames. 
+	# FORDFTB #: false
 Setting up the data objects...
    ...setup complete
 
@@ -109,8 +118,6 @@ Running velocity sanity checks...
 Reading force field parameters...
 		...Compute electrostatics?      true
 		...Use fit charges?             true
-		...Compute ReaxFF overbonding?  false
-		...Use fit overbonding param?   false
 		...Use 3-body Cheby params?     true
 		...Use 4-body Cheby params?     false
 	...Read FF controls...
@@ -159,11 +166,10 @@ Atom properties:
    ...read complete.
 
 Notes on simulation: 
-	Using fpenalty power 3.0000
 	Using the following fcut style for 2B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Using the following fcut style for 3B Chebyshev interactions: CUBIC
-		...with steepness and offsets of: 2.0000 0.0000
+		...with offset of: 0.0000
 	Ewald summations will be used and charges will be taken from fit values
 
 Force field summary: 
@@ -174,7 +180,7 @@ Force field summary:
 
 	Interaction parameters for each pair type: 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OO 0.7500 6.0000 0.1000 MORSE 1.2500 0.0100 1.0000e+04 1.0000e+00 1.0000e-01
+		OO 0.7500 6.0000 MORSE 1.2500 0.0100 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -1.3987e+02
 		1 -2.1691e+01
@@ -188,7 +194,7 @@ Force field summary:
 		9 -1.0552e+01
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		HH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		HH 7.5000e-01 6.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -4.7756e+01
 		1 -7.1332e+01
@@ -202,7 +208,7 @@ Force field summary:
 		9 -3.6734e+00
 
 		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
-		OH 7.5000e-01 6.0000e+00 1.0000e-01 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 1.0000e+00 1.0000e-01
+		OH 7.5000e-01 6.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 3.4743e+00
 		1 1.3627e+01

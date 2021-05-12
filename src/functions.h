@@ -6,21 +6,9 @@
 	#define FORCECHECK 0
 #endif
 
-#ifndef FPENALTY_POWER
-	#define FPENALTY_POWER 3.0
-#endif
-
 #ifndef WARN
 	#define WARN TRUE
 #endif 
-
-#define GNUPLOT 1
-#define MATLAB  2
-#define PYTHON  3
-
-#ifndef PESFORMAT
-	#define PESFORMAT GNUPLOT
-#endif
 
 #ifndef _HELPERS_
 #define _HELPERS_
@@ -40,25 +28,6 @@
 #include<map>
 
 using namespace std;
-
-// For the LAMMPS version of the MD Code
-
-#if defined(USE_MPI) && defined(LINK_LAMMPS)
-
-	#define  QUOTE_(x) #x
-	#define  QUOTE(x) QUOTE_(x)
-
-	#include "lmppath.h"
-
-	#include QUOTE(LMPPATH/src/library.h)
-	#include QUOTE(LMPPATH/src/fix.h)
-	#include QUOTE(LMPPATH/src/fix_external.h)  
-
-	#include QUOTE(LMPPATH/src/lammps.h)
-	#include QUOTE(LMPPATH/src/input.h)
-	#include QUOTE(LMPPATH/src/modify.h)
-#endif
-
 
 // Maximum number of atom types and powers.
 
@@ -84,8 +53,6 @@ static const double mpers   = 0.02045482828; 	// conversion from internal veloci
 extern string FULL_FILE_3B;	// The 4D PES for 3B FF
 extern string SCAN_FILE_3B;	// The 2D PES scans for 3B
 extern string SCAN_FILE_2B;	// The 2D PES scans for 2B
-
-extern vector<double>  LMP_CHARGE;
 
 // Global variables declared as externs in functions.h, and declared in functions.C -- MPI calculations.   
  
@@ -119,8 +86,6 @@ class JOB_CONTROL
 	
   		bool   FIT_COUL;	      // Replaces fit_coul... If true, take charges from spline parameters.
 		bool   USE_COULOMB;	      // Replaces if_coulomb... If true, calculate Coulomb forces.
-		bool   USE_OVERCOORD;	      // Replaces if_overcoord... If true, calculate ReaxFF-like overcoordination term.
-		bool   FIT_POVER;	      // Replaces fit_pover... If true, find linear overcoordination parameter from least-squares fitting. -- this needs to be updated for new handling
 		bool   USE_3B_CHEBY;	      // Replaces if_3b_cheby... If true, calculate 3-Body Chebyshev interaction.
 		bool   USE_4B_CHEBY;	      // If true, calculate 4-Body Chebyshev interaction.
 		vector<string> ATOMTYPES;     // A list of atom types	      
@@ -136,7 +101,6 @@ class JOB_CONTROL
 		double TEMPERATURE;	      // Replaces TempMD
 		double PRESSURE;	      // Introduced for NPT
 		string ENSEMBLE;	      // NVE, NPT, NVT
-		bool   PLOT_PES;	      // Plot out the potential energy surfaces? IF so, nothing else will be done.
 		bool   CHECK_FORCE;	      // If true, numerically check forces from derivatives of energy.
 		bool   COMPARE_FORCE;	      // Replaces if_read_force... If TRUE, read in read in a set of forces from a file for comparison with those computed by this code
 
@@ -163,10 +127,6 @@ class JOB_CONTROL
 		double FREQ_UPDATE_THERMOSTAT;// Replaces scale_freq and thoover_fs... it's usage depends on whether USE_HOOVER_THERMOSTAT is true or false.. will be cast as int where required
 		double FREQ_UPDATE_BAROSTAT;  // Barostat time constant... defaults to 1000
 		bool   USE_NUMERICAL_PRESS;   // Replaces num_pressure... Whether to calculate pressures by finite difference.
-		double MIN_E_CONVG_CRIT;      // Options for LAMMPS minimization: Stopping criteria for energy and force, max iterations, max energy/force evaluations
-		double MIN_F_CONVG_CRIT;
-		double MIN_MAX_ITER;
-		double MIN_MAX_EVAL;
 
 		// For penalty-function related exit
 
@@ -210,11 +170,9 @@ class JOB_CONTROL
 		bool FIT_STRESS_ALL;	      // Should stress tensors be included in the fit? --> This is ONLY for ALL components, xx, xy, xz ... zz 
 		int  NSTRESS;		      // Only fit stresses for first NSTRESS frames of trajectory
 		bool FIT_ENER;  	      // Should the total frame energy be included in the fit?
-		bool FIT_ENER_PER_ATOM;       // Should the energy of each atom be included in the fit?
 		bool FIT_ENER_EVER ;	      // Is energy ever included in the fit ?
 		int  NENER;
 		bool CALL_EWALD;	      // Should ewald subroutines be called?
-		bool USE_POVER; 	      // Should overbonding information be printed to the header file?
 
 		int   NFRAMES;  	      // Number of frames in the movie file
 		int   CHEBY_ORDER;	      // Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
@@ -247,7 +205,6 @@ class JOB_CONTROL
   		// Constructor... MD values are set in the read_input function in chimes_md.C
 	
   		JOB_CONTROL(): FIT_COUL(false), 
-		FIT_POVER(false),
 		USE_3B_CHEBY(false), 
 		USE_4B_CHEBY(false), 
 		N_LAYERS(0), 
@@ -284,7 +241,6 @@ class JOB_CONTROL
 			COMPARE_FORCE     = false;	// is this variable really necessary for LSQ?
 			CALL_EWALD        = false;
 			FIT_ENER          = false;
-			FIT_ENER_PER_ATOM = false;
 			FIT_STRESS        = false;
 			FIT_STRESS_ALL    = false;
 			NSTRESS           = -1;
@@ -364,18 +320,12 @@ class BOX
 
 };
 
-
-
-
-
 class FRAME
 {
 	public:
   		int ATOMS;             		// Just the parent atoms.
 		int ALL_ATOMS;         	   	// All atoms, including ghosts. 
 
-		int MY_ATOMS;			// Used for lammps linking. Specify how many atoms in SYS the process owns
-		int MY_ATOMS_START;		// Used for lammps linking. Specify what index along SYS starts the process' atoms
 		BOX BOXDIM;			// Dimenions of the primitive box.
 		XYZ STRESS_TENSORS;		// Only used for the diagonal components, xx, yy, zz
 		XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested ... used primarily for the lsq code. When used
@@ -401,7 +351,7 @@ class FRAME
 		vector<XYZ_INT> LAYER_IDX;
 		vector<XYZ_INT> WRAP_IDX;  	// Index of box wrapping for this atom.
 		vector<string> 	ATOMTYPE;
-		vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPS file printing
+		vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPStrj file printing
 		vector<XYZ>	COORDS;
 		vector<XYZ>     ALL_COORDS;  	// Coordinates of atoms + ghosts used for force evaluation.
 		vector<double> 	CHARGES;
@@ -421,47 +371,6 @@ class FRAME
 		void SET_NATOMS_OF_TYPE();
 		void READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE, int i);
 		void build_layers(int N_LAYERS) ;
-};
-
-struct PES_PLOTS
-{
-	int N_PLOTS;
-	vector<string> PES_TYPES;
-	vector<int> NBODY;
-	vector<int> TYPE_INDEX;
-	string TYPE_1;
-	string TYPE_2;
-	string TYPE_3;
-	bool INCLUDE_2B;
-	bool INCLUDE_FCUT;
-	bool INCLUDE_CHARGES;
-	bool INCLUDE_PENALTY;
-	bool DO_4D;	// Do we want to include the 4D 3-body scan data??
-	
-	// Variables used for scans of 3b potential
-	
-	int N_SCAN;
-	
-	vector<int>PARENT_TYPE;
-	
-	vector<int> FIX_PAIR_1;
-	vector<int> FIX_PAIR_2;
-	
-	vector<double> FIX_VAL_1;
-	vector<double> FIX_VAL_2;
-	
-	vector<int> SCAN_PAIR;
-	
-	vector<string> SCAN_TYPE;
-	
-	// Variables used to add 2b to 3b
-	
-	vector<string> 	SEARCH_STRING_2B;
-	vector<XYZ_INT>	IJ_IK_JK_TYPE;
-		
-	
-	PES_PLOTS(): N_PLOTS(0), INCLUDE_2B(0), DO_4D(1), N_SCAN(0) {} 
-		
 };
 
 struct CHARGE_CONSTRAINT
@@ -671,8 +580,6 @@ void divide_atoms(int &a1start, int &a1end, int atoms);
 void ZCalc_Deriv (JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, FRAME & FRAME_SYSTEM, A_MAT & A_MATRIX,
 									map<string,int> & PAIR_MAP,  vector<int> &INT_PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST) ;
 
-void SubtractCoordForces(FRAME & SYSTEM, bool calc_deriv, A_MAT & A_MATRIX, vector<PAIRS> & FF_2BODY, map<string,int> & PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, bool lsq_mode) ;
-
 void SubtractEwaldForces (FRAME &SYSTEM, NEIGHBORS &NEIGHBOR_LIST, JOB_CONTROL &CONTROLS);
 
 void ZCalc_Ewald         (FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
@@ -688,8 +595,6 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_M
 //////////////////////////////////////////
 
 void   ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> &PAIR_MAP, vector<int> &INT_PAIR_MAP, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS,  NEIGHBORS & NEIGHBOR_LIST);
-//void   ZCalc_3B_Cheby_Deriv_HIST(JOB_CONTROL & CONTROLS, vector<PAIRS> & FF_2BODY, vector<TRIPLETS> & PAIR_TRIPLETS, vector<vector <vector< XYZ > > > & A_MATRIX, map<string,int> PAIR_MAP, map<string,int> TRIAD_MAP);		
-
 
 //////////////////////////////////////////
 // Distance calculation and smoothing functions
@@ -711,11 +616,7 @@ inline double get_dist(FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 
 inline int FRAME::get_atomtype_idx(int atom)
 {
-	#ifndef LINK_LAMMPS
   		return(ATOMTYPE_IDX[atom]);
-	#else
-  		return(ATOMTYPE_IDX[atom]-1);
-	#endif
 }
 
 //////////////////////////////////////////
