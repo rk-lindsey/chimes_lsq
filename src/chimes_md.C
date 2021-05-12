@@ -1789,6 +1789,10 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 for(int i=1; i<FF_2BODY.size(); i++)
 				FF_2BODY[i].FORCE_CUTOFF = FF_2BODY[0].FORCE_CUTOFF;										
 		  }
+                  else if(TEMP_TYPE =="LJ")
+                  {
+                         FF_2BODY[i].SNUM = 2 ;
+                  }		  
 		  else // Unknown type
 		  {
 			 cout << "ERROR: Unknown type: " << TEMP_TYPE << endl; 
