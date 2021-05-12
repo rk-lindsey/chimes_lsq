@@ -74,6 +74,9 @@ do
 		 PASS=false
 		 ALL_PASS=false
 	fi
+
+	if [ ! -d current_output ] ; then mkdir current_output ; fi
+	
 	cp *.* current_output
 
 	if [[ $SUCCESS -eq 1 ]] ; then

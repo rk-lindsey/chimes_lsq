@@ -19,7 +19,15 @@ echo " "
 # Initialize test suite parameters
 source ../src/bash/init_vars.sh
 init_test_vars
-echo "NP = $NP"
+echo "Number of processors = $NP"
+echo "Warning: this script will overwrite all reference test output."
+echo "Continue ? (yes/no)"
+
+read ok_run
+if test "x$ok_run" != "xyes" ; then
+	echo 'Quitting'
+	exit 0
+fi
 
 
 # Compile the code
