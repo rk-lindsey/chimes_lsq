@@ -660,6 +660,8 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	  }
 		
 	}
+	else if ( FF_2BODY[0].PAIRTYP == "LJ" ) 
+	  ZCalc_Lj(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
 	else 
     	{
 		cout << "Error: bad pairtype in ZCalc: " << FF_2BODY[0].PAIRTYP << endl;
@@ -686,6 +688,70 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 
   return;
 }
+
+static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
+// Calculate LJ interaction.. first parameter is epsilon, second parameter is sigma. ...eventually SMAX should be used for the pair distance cutoff value...
+{
+  XYZ	RVEC ;
+	double	rlen_mi;
+	int	curr_pair_type_idx;
+	double	fac;
+	string	TEMP_STR;
+	
+	// Set up for MPI
+	
+	int a1start, a1end;
+	int a2start, a2end;
+	int fidx_a2;
+
+		divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+
+	for(int a1=a1start;a1 <= a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS 
+	{
+		a2start = 0;
+		a2end   = NEIGHBOR_LIST.LIST[a1].size();
+		
+		for(int a2idx =a2start; a2idx < a2end;a2idx++)
+		{			
+			int a2 = NEIGHBOR_LIST.LIST[a1][a2idx];
+					
+				curr_pair_type_idx =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+
+			// pair interaction cutoff distance.
+			double rcutoff = FF_2BODY[curr_pair_type_idx].S_MAXIM;
+
+			rlen_mi = get_dist(SYSTEM, RVEC, a1, a2);
+
+
+			if ( rlen_mi < FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2) 
+				EXIT_MSG("Error: close approach", rlen_mi);
+
+			else if ( rlen_mi < rcutoff ) 
+			{
+				SYSTEM.TOT_POT_ENER += 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,12.0) - pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,6.0) );
+				fac = 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( -12.0 * pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,14.0) + 6.0 *    pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,8.0) );
+				fac *= 1.0 / ( FF_2BODY[curr_pair_type_idx].PARAMS[1] * FF_2BODY[curr_pair_type_idx].PARAMS[1] );		
+
+				SYSTEM.PRESSURE_XYZ -= fac * (rlen_mi*rlen_mi);
+				
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X -= fac * rlen_mi * RVEC.X * RVEC.X / rlen_mi;
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y -= fac * rlen_mi * RVEC.Y * RVEC.Y / rlen_mi;
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z -= fac * rlen_mi * RVEC.Z * RVEC.Z / rlen_mi;
+	
+				SYSTEM.ACCEL[a1].X += RVEC.X*fac;
+				SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
+				SYSTEM.ACCEL[a1].Z += RVEC.Z*fac;
+
+				fidx_a2 = SYSTEM.PARENT[a2];
+
+				SYSTEM.ACCEL[fidx_a2].X -= RVEC.X*fac;
+				SYSTEM.ACCEL[fidx_a2].Y -= RVEC.Y*fac;
+				SYSTEM.ACCEL[fidx_a2].Z -= RVEC.Z*fac;
+			}			
+		}
+	}
+}
+
 
 void FRAME::SET_NATOMS_OF_TYPE() // setting NATOMS_OF_TYPE
 {

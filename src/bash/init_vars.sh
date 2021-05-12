@@ -41,6 +41,7 @@ function init_test_vars
 
 	MD_JOBS='h2o-3bcheby 
 	        h2o-4bcheby 
+	        generic-lj
 	        h2o-3bcheby-numpress 
 	        h2o-4bcheby-numpress 
 	        h2o-3bcheby3 
