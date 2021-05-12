@@ -1,4 +1,0 @@
-/Users/lindsey11/My_codes/Forks/chimes_lsq-fork/build/CMakeFiles/rebuild_cache.dir
-/Users/lindsey11/My_codes/Forks/chimes_lsq-fork/build/CMakeFiles/edit_cache.dir
-/Users/lindsey11/My_codes/Forks/chimes_lsq-fork/build/CMakeFiles/chimes_md.dir
-/Users/lindsey11/My_codes/Forks/chimes_lsq-fork/build/CMakeFiles/chimes_lsq.dir
