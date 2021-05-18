@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
 
   const int STAT_BUF_SZ = 256 ; // Max length of a statistics output line.
 	
-  read_input(INFILE, CONTROLS, FF_PLOTS,NEIGHBOR_LIST);		// Populate object with user defined values
+  read_input(INFILE, CONTROLS, NEIGHBOR_LIST);		// Populate object with user defined values
 	
   cout.precision(15);		// Set output precision
 	
