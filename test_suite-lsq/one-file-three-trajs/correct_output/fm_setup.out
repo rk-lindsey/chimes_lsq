@@ -129,7 +129,6 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
-	Processing frame: 1     of: 30
 	Latest 3-body outer cutoff values: 
 	0:  5.0000000000000000  5.0000000000000000  5.0000000000000000
 	1:  5.0000000000000000  5.0000000000000000  5.0000000000000000
@@ -144,64 +143,6 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
      Min 3-body cutoff = 0.5290000000000000
 
 Number of 3-body interactions = 187892
-	Processing frame: 2     of: 30
-Number of 3-body interactions = 187406
-	Processing frame: 3     of: 30
-Number of 3-body interactions = 186160
-	Processing frame: 4     of: 30
-Number of 3-body interactions = 187972
-	Processing frame: 5     of: 30
-Number of 3-body interactions = 186227
-	Processing frame: 6     of: 30
-Number of 3-body interactions = 186240
-	Processing frame: 7     of: 30
-Number of 3-body interactions = 186257
-	Processing frame: 8     of: 30
-Number of 3-body interactions = 186946
-	Processing frame: 9     of: 30
-Number of 3-body interactions = 185762
-	Processing frame: 10    of: 30
-Number of 3-body interactions = 188187
-	Processing frame: 11    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 12    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 13    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 14    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 15    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 16    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 17    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 18    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 19    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 20    of: 30
-Number of 3-body interactions = 0
-	Processing frame: 21    of: 30
-Number of 3-body interactions = 4
-	Processing frame: 22    of: 30
-Number of 3-body interactions = 4
-	Processing frame: 23    of: 30
-Number of 3-body interactions = 4
-	Processing frame: 24    of: 30
-Number of 3-body interactions = 4
-	Processing frame: 25    of: 30
-Number of 3-body interactions = 4
-	Processing frame: 26    of: 30
-Number of 3-body interactions = 4
-	Processing frame: 27    of: 30
-Number of 3-body interactions = 4
-	Processing frame: 28    of: 30
-Number of 3-body interactions = 4
-	Processing frame: 29    of: 30
-Number of 3-body interactions = 4
-	Processing frame: 30    of: 30
-Number of 3-body interactions = 4
 ...matrix population complete: 
 
 Printing matrices...
@@ -209,8 +150,8 @@ Printing matrices...
 
 Per-atom type energies will be provided at the end of the parameter file.
 Values will correspond to the following atom types, in order: 
-	N 1
-	H 3
+	N 384
+	H 128
 	Minimum distances between atoms: (Angstr.)
 		0	N N	1.001
 		1	H H	0.698

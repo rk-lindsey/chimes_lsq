@@ -3592,7 +3592,6 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
-	Processing frame: 1     of: 14
 	Latest 3-body outer cutoff values: 
 	0:  4.4000000000000004  4.4000000000000004  4.4000000000000004
 	1:  4.4000000000000004  4.0000000000000000  4.0000000000000000
@@ -3623,45 +3622,6 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 Number of 3-body interactions = 100785
 Number of 4-body interactions = 261122
-	Processing frame: 2     of: 14
-Number of 3-body interactions = 101236
-Number of 4-body interactions = 259810
-	Processing frame: 3     of: 14
-Number of 3-body interactions = 101994
-Number of 4-body interactions = 247225
-	Processing frame: 4     of: 14
-Number of 3-body interactions = 102256
-Number of 4-body interactions = 255658
-	Processing frame: 5     of: 14
-Number of 3-body interactions = 101050
-Number of 4-body interactions = 260482
-	Processing frame: 6     of: 14
-Number of 3-body interactions = 100757
-Number of 4-body interactions = 266016
-	Processing frame: 7     of: 14
-Number of 3-body interactions = 100522
-Number of 4-body interactions = 263181
-	Processing frame: 8     of: 14
-Number of 3-body interactions = 101006
-Number of 4-body interactions = 263664
-	Processing frame: 9     of: 14
-Number of 3-body interactions = 100762
-Number of 4-body interactions = 265976
-	Processing frame: 10    of: 14
-Number of 3-body interactions = 98491
-Number of 4-body interactions = 159620
-	Processing frame: 11    of: 14
-Number of 3-body interactions = 98339
-Number of 4-body interactions = 171924
-	Processing frame: 12    of: 14
-Number of 3-body interactions = 98065
-Number of 4-body interactions = 172424
-	Processing frame: 13    of: 14
-Number of 3-body interactions = 98439
-Number of 4-body interactions = 168706
-	Processing frame: 14    of: 14
-Number of 3-body interactions = 100658
-Number of 4-body interactions = 174873
 ...matrix population complete: 
 
 Printing matrices...
@@ -3669,8 +3629,8 @@ Printing matrices...
 
 Per-atom type energies will be provided at the end of the parameter file.
 Values will correspond to the following atom types, in order: 
-	C 64
-	O 64
+	C 32
+	O 32
 	Minimum distances between atoms: (Angstr.)
 		0	C C	1.166
 		1	O O	1.209

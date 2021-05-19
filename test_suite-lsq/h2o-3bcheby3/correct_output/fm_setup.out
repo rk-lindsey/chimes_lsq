@@ -916,7 +916,6 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
-	Processing frame: 1     of: 49
 	Latest 3-body outer cutoff values: 
 	0:  4.2999999999999998  4.2999999999999998  4.2999999999999998
 	1:  4.2000000000000002  4.2000000000000002  4.2999999999999998
@@ -937,102 +936,13 @@ Number of 3-body interactions = 25433
 	R-Space accuracy estimate =  5.997380e-07
 	K-space accuracy estimate =  6.801448e-07
 	Number of Ewald K-vectors = 238
-	Processing frame: 2     of: 49
 Number of 3-body interactions = 25612
-	Processing frame: 3     of: 49
-Number of 3-body interactions = 25886
-	Processing frame: 4     of: 49
-Number of 3-body interactions = 26090
-	Processing frame: 5     of: 49
-Number of 3-body interactions = 25671
-	Processing frame: 6     of: 49
-Number of 3-body interactions = 25546
-	Processing frame: 7     of: 49
-Number of 3-body interactions = 25269
-	Processing frame: 8     of: 49
-Number of 3-body interactions = 26167
-	Processing frame: 9     of: 49
-Number of 3-body interactions = 25325
-	Processing frame: 10    of: 49
-Number of 3-body interactions = 25542
-	Processing frame: 11    of: 49
-Number of 3-body interactions = 25256
-	Processing frame: 12    of: 49
-Number of 3-body interactions = 25399
-	Processing frame: 13    of: 49
-Number of 3-body interactions = 25369
-	Processing frame: 14    of: 49
-Number of 3-body interactions = 25877
-	Processing frame: 15    of: 49
-Number of 3-body interactions = 25724
-	Processing frame: 16    of: 49
-Number of 3-body interactions = 25618
-	Processing frame: 17    of: 49
-Number of 3-body interactions = 26178
-	Processing frame: 18    of: 49
-Number of 3-body interactions = 25833
-	Processing frame: 19    of: 49
-Number of 3-body interactions = 25773
-	Processing frame: 20    of: 49
-Number of 3-body interactions = 25465
-	Processing frame: 21    of: 49
-Number of 3-body interactions = 25786
-	Processing frame: 22    of: 49
-Number of 3-body interactions = 25730
-	Processing frame: 23    of: 49
-Number of 3-body interactions = 25650
-	Processing frame: 24    of: 49
-Number of 3-body interactions = 25486
-	Processing frame: 25    of: 49
-Number of 3-body interactions = 24910
-	Processing frame: 26    of: 49
-Number of 3-body interactions = 25806
-	Processing frame: 27    of: 49
-Number of 3-body interactions = 25536
-	Processing frame: 28    of: 49
-Number of 3-body interactions = 25261
-	Processing frame: 29    of: 49
-Number of 3-body interactions = 25196
-	Processing frame: 30    of: 49
-Number of 3-body interactions = 25018
-	Processing frame: 31    of: 49
-Number of 3-body interactions = 25492
-	Processing frame: 32    of: 49
-Number of 3-body interactions = 25894
-	Processing frame: 33    of: 49
-Number of 3-body interactions = 25249
-	Processing frame: 34    of: 49
-Number of 3-body interactions = 26168
-	Processing frame: 35    of: 49
-Number of 3-body interactions = 25146
-	Processing frame: 36    of: 49
-Number of 3-body interactions = 25698
-	Processing frame: 37    of: 49
-Number of 3-body interactions = 25559
-	Processing frame: 38    of: 49
-Number of 3-body interactions = 25438
-	Processing frame: 39    of: 49
-Number of 3-body interactions = 25355
-	Processing frame: 40    of: 49
-Number of 3-body interactions = 25031
-	Processing frame: 41    of: 49
-Number of 3-body interactions = 25090
-	Processing frame: 42    of: 49
-Number of 3-body interactions = 25097
-	Processing frame: 43    of: 49
-Number of 3-body interactions = 25566
-	Processing frame: 44    of: 49
-Number of 3-body interactions = 25079
-	Processing frame: 45    of: 49
-Number of 3-body interactions = 25239
-	Processing frame: 46    of: 49
-Number of 3-body interactions = 25464
-	Processing frame: 47    of: 49
-Number of 3-body interactions = 25402
-	Processing frame: 48    of: 49
-Number of 3-body interactions = 25548
-	Processing frame: 49    of: 49
-Number of 3-body interactions = 25423
+Number of 3-body interactions = 25612
+	Ewald_Deriv:
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-space accuracy estimate =  6.801448e-07
+	Number of Ewald K-vectors = 238
 ...matrix population complete: 
 
 Printing matrices...

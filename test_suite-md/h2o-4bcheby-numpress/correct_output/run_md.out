@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 1 processor(s).
+Code compiled in MPI mode. Will run on 36 processor(s).
 
 Reading the simulation control input file...
 Will read from file: run_md.in
@@ -1409,9 +1409,9 @@ Ewald parameters:
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
        1      0.12       3.9703342     -48.1927242     -44.2223900          1346.1     13.83512904    -44.2223900
-       2      0.25       3.9665360     -48.1888174     -44.2222814          1344.8     14.06116056    -44.2222566
+       2      0.25       3.9665360     -48.1888174     -44.2222814          1344.8     14.06116055    -44.2222566
        3      0.38       3.9604334     -48.1822952     -44.2218618          1342.8     14.29100948    -44.2222427
-       4      0.50       3.9523754     -48.1734058     -44.2210304          1340.0     14.52028233    -44.2222223
+       4      0.50       3.9523754     -48.1734058     -44.2210304          1340.0     14.52028232    -44.2222223
 END SIMULATION
 	Average temperature over run = 1343.4422 K
 	Average pressure    over run = 14.1769 GPa

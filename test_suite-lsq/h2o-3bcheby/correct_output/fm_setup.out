@@ -132,7 +132,6 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
-	Processing frame: 1     of: 33
 	Latest 3-body outer cutoff values: 
 	0:  6.0000000000000000  6.0000000000000000  6.0000000000000000
 	1:  6.0000000000000000  6.0000000000000000  6.0000000000000000
@@ -153,70 +152,6 @@ Number of 3-body interactions = 180048
 	R-Space accuracy estimate =  5.997380e-07
 	K-space accuracy estimate =  6.801448e-07
 	Number of Ewald K-vectors = 238
-	Processing frame: 2     of: 33
-Number of 3-body interactions = 181810
-	Processing frame: 3     of: 33
-Number of 3-body interactions = 181627
-	Processing frame: 4     of: 33
-Number of 3-body interactions = 179972
-	Processing frame: 5     of: 33
-Number of 3-body interactions = 182143
-	Processing frame: 6     of: 33
-Number of 3-body interactions = 182440
-	Processing frame: 7     of: 33
-Number of 3-body interactions = 183169
-	Processing frame: 8     of: 33
-Number of 3-body interactions = 179292
-	Processing frame: 9     of: 33
-Number of 3-body interactions = 182203
-	Processing frame: 10    of: 33
-Number of 3-body interactions = 180192
-	Processing frame: 11    of: 33
-Number of 3-body interactions = 181807
-	Processing frame: 12    of: 33
-Number of 3-body interactions = 182106
-	Processing frame: 13    of: 33
-Number of 3-body interactions = 181103
-	Processing frame: 14    of: 33
-Number of 3-body interactions = 180530
-	Processing frame: 15    of: 33
-Number of 3-body interactions = 182391
-	Processing frame: 16    of: 33
-Number of 3-body interactions = 181466
-	Processing frame: 17    of: 33
-Number of 3-body interactions = 181114
-	Processing frame: 18    of: 33
-Number of 3-body interactions = 180602
-	Processing frame: 19    of: 33
-Number of 3-body interactions = 182481
-	Processing frame: 20    of: 33
-Number of 3-body interactions = 181998
-	Processing frame: 21    of: 33
-Number of 3-body interactions = 180716
-	Processing frame: 22    of: 33
-Number of 3-body interactions = 182484
-	Processing frame: 23    of: 33
-Number of 3-body interactions = 181063
-	Processing frame: 24    of: 33
-Number of 3-body interactions = 180739
-	Processing frame: 25    of: 33
-Number of 3-body interactions = 179031
-	Processing frame: 26    of: 33
-Number of 3-body interactions = 181432
-	Processing frame: 27    of: 33
-Number of 3-body interactions = 179754
-	Processing frame: 28    of: 33
-Number of 3-body interactions = 179488
-	Processing frame: 29    of: 33
-Number of 3-body interactions = 182457
-	Processing frame: 30    of: 33
-Number of 3-body interactions = 181858
-	Processing frame: 31    of: 33
-Number of 3-body interactions = 180566
-	Processing frame: 32    of: 33
-Number of 3-body interactions = 181160
-	Processing frame: 33    of: 33
-Number of 3-body interactions = 181578
 ...matrix population complete: 
 
 Printing matrices...

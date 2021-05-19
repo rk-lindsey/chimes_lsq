@@ -11,8 +11,6 @@
 !
 USECOUL: true
 FITCOUL: true
-USEPOVR: false
-FITPOVR: false
 USE3BCH: true
 USE4BCH: false
 

@@ -1194,7 +1194,6 @@ Setting up the matrices for A, Coulomb forces, and overbonding...
 
 ...Populating the matrices for A, Coulomb forces, and overbonding...
 
-	Processing frame: 1     of: 33
 	Latest 3-body outer cutoff values: 
 	0:  5.0000000000000000  5.0000000000000000  5.0000000000000000
 	1:  5.0000000000000000  5.0000000000000000  5.0000000000000000
@@ -1232,102 +1231,6 @@ Number of 4-body interactions = 452509
 	R-Space accuracy estimate =  5.997380e-07
 	K-space accuracy estimate =  6.801448e-07
 	Number of Ewald K-vectors = 238
-	Processing frame: 2     of: 33
-Number of 3-body interactions = 61374
-Number of 4-body interactions = 438928
-	Processing frame: 3     of: 33
-Number of 3-body interactions = 62263
-Number of 4-body interactions = 449250
-	Processing frame: 4     of: 33
-Number of 3-body interactions = 61338
-Number of 4-body interactions = 441186
-	Processing frame: 5     of: 33
-Number of 3-body interactions = 59916
-Number of 4-body interactions = 421314
-	Processing frame: 6     of: 33
-Number of 3-body interactions = 59759
-Number of 4-body interactions = 419277
-	Processing frame: 7     of: 33
-Number of 3-body interactions = 61939
-Number of 4-body interactions = 445761
-	Processing frame: 8     of: 33
-Number of 3-body interactions = 61940
-Number of 4-body interactions = 447195
-	Processing frame: 9     of: 33
-Number of 3-body interactions = 61707
-Number of 4-body interactions = 440475
-	Processing frame: 10    of: 33
-Number of 3-body interactions = 61598
-Number of 4-body interactions = 442685
-	Processing frame: 11    of: 33
-Number of 3-body interactions = 61096
-Number of 4-body interactions = 434681
-	Processing frame: 12    of: 33
-Number of 3-body interactions = 60603
-Number of 4-body interactions = 429684
-	Processing frame: 13    of: 33
-Number of 3-body interactions = 61849
-Number of 4-body interactions = 442206
-	Processing frame: 14    of: 33
-Number of 3-body interactions = 60416
-Number of 4-body interactions = 425058
-	Processing frame: 15    of: 33
-Number of 3-body interactions = 62269
-Number of 4-body interactions = 450112
-	Processing frame: 16    of: 33
-Number of 3-body interactions = 61150
-Number of 4-body interactions = 436103
-	Processing frame: 17    of: 33
-Number of 3-body interactions = 62147
-Number of 4-body interactions = 447455
-	Processing frame: 18    of: 33
-Number of 3-body interactions = 61522
-Number of 4-body interactions = 441835
-	Processing frame: 19    of: 33
-Number of 3-body interactions = 60633
-Number of 4-body interactions = 430269
-	Processing frame: 20    of: 33
-Number of 3-body interactions = 60847
-Number of 4-body interactions = 429362
-	Processing frame: 21    of: 33
-Number of 3-body interactions = 62310
-Number of 4-body interactions = 450087
-	Processing frame: 22    of: 33
-Number of 3-body interactions = 61905
-Number of 4-body interactions = 445868
-	Processing frame: 23    of: 33
-Number of 3-body interactions = 60666
-Number of 4-body interactions = 431441
-	Processing frame: 24    of: 33
-Number of 3-body interactions = 60374
-Number of 4-body interactions = 427039
-	Processing frame: 25    of: 33
-Number of 3-body interactions = 62648
-Number of 4-body interactions = 450445
-	Processing frame: 26    of: 33
-Number of 3-body interactions = 60093
-Number of 4-body interactions = 425400
-	Processing frame: 27    of: 33
-Number of 3-body interactions = 61134
-Number of 4-body interactions = 435230
-	Processing frame: 28    of: 33
-Number of 3-body interactions = 62338
-Number of 4-body interactions = 449872
-	Processing frame: 29    of: 33
-Number of 3-body interactions = 60708
-Number of 4-body interactions = 431104
-	Processing frame: 30    of: 33
-Number of 3-body interactions = 60593
-Number of 4-body interactions = 428095
-	Processing frame: 31    of: 33
-Number of 3-body interactions = 62112
-Number of 4-body interactions = 445040
-	Processing frame: 32    of: 33
-Number of 3-body interactions = 61548
-Number of 4-body interactions = 439279
-	Processing frame: 33    of: 33
-Number of 3-body interactions = 61714
-Number of 4-body interactions = 442907
 ...matrix population complete: 
 
 Printing matrices...
