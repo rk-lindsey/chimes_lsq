@@ -9,7 +9,7 @@
 PREFX=${1-""} # Empty by default
 
 
-for i in `cat build/install_manifest.txt`
+for i in `cat build/install_manifest.txt 2>/dev/null`
 do
 	echo "Removing installed file $i"
 	rm -f $i
