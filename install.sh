@@ -1,5 +1,5 @@
 #!/bin/bash
-  
+
 # Builds all relevant chimes_calculator executables/library files
 # Run with:
 # ./install.sh
@@ -13,6 +13,13 @@ PREFX=${2-""} # Empty by default
 VERBO=${3-1}  # Verbosity set to 1 by default
 DOMPI=${4-1}  # Compile with MPI support by default
 
+# Setup compilers
+
+module load intel/18.0.1
+module load impi/2018.0
+
+ICC=`which icc`    # /usr/tce/packages/intel/intel-18.0.1/bin/icc
+MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mpicxx
 
 # Clean up previous installation,
 
@@ -25,7 +32,7 @@ cd build
 
 # Generate cmake flags
 
-my_flags=""
+my_flags=" -DCMAKE_CXX_COMPILER=${ICC}"
 
 if [ ! -z $PREFX ] ; then
         my_flags="-DCMAKE_INSTALL_PREFIX=${PREFX}"
@@ -45,6 +52,7 @@ fi
 
 if [ $DOMPI -eq 1 ] ;then
         my_flags="${my_flags} -DUSE_MPI=1" 
+	my_flags="${my_flags} -DMPI_CXX_COMPILER=${MPI}"
 else
         my_flags="${my_flags} -DUSE_MPI=0" 
 fi

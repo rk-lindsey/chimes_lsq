@@ -9,7 +9,6 @@ Input file contents successfully stored.
 	# NFRAMES #: 33
 	# NLAYERS #: 1
 	# FITCOUL #: true
-	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 10
 	             Will use 3-body order: 6
@@ -25,22 +24,14 @@ Input file contents successfully stored.
 		0  O O
 		1  H H
 		2  O H
-	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               O               O               0.75            5               0.1             1.25             0               
-	1               H               H               0.75            5               0.1             1.25             0               
-	2               O               H               0.75            5               0.1             1.25             0               
-
-	Read the following number of ij ik jk bins for pairs: 
-		OO: 0 0 0
-		HH: 0 0 0
-		OH: 0 0 0
-
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # MORSE_LAMBDA #
+	0               O               O               0.75            5               1.25            
+	1               H               H               0.75            5               1.25            
+	2               O               H               0.75            5               1.25            
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
 		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
 		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
-Note: Will use cubic scaling of: 1
-
 
 	Attempting to read 2 charge constraints...:
 		1	 OO (0) HH (1) OH (2) 10000 40000 40000 0

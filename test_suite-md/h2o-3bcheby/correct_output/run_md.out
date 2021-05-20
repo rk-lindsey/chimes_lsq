@@ -1,4 +1,4 @@
-Code compiled in MPI mode. Will run on 1 processor(s).
+Code compiled in MPI mode. Will run on 36 processor(s).
 
 Reading the simulation control input file...
 Will read from file: run_md.in

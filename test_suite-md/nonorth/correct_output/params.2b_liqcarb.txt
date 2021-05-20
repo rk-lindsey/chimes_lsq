@@ -6,8 +6,6 @@
 
 USECOUL: false
 FITCOUL: false
-USEPOVR: false
-FITPOVR: false
 USE3BCH: false
 USE4BCH: false
 
