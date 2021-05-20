@@ -1,4 +1,4 @@
-# Ignore files generated when documentation is built
+mx# Ignore files generated when documentation is built
 /doc/build/
 
 # Ignore compilation build files
@@ -15,7 +15,7 @@
 /test_suite-lsq/*/ff_group*
 /test_suite-lsq/*/force*
 /test_suite-lsq/lsq2/params.svd.1.0e-04.txt
-
+/test_suite-lsq/*/correct_output/params.txt-tailed
 
 /test_suite-md/*/current_output/*
 /test_suite-md/slurm*
