@@ -1,4 +1,4 @@
-mx# Ignore files generated when documentation is built
+# Ignore files generated when documentation is built
 /doc/build/
 
 # Ignore compilation build files
@@ -36,3 +36,16 @@ mx# Ignore files generated when documentation is built
 /test_suite-md/verify-lsq-forces-h2o-3bcheby/params.txt
 /test_suite-md/verify-lsq-forces-special3b/params.txt
 /test_suite-md/verify-lsq-forces-special4b/params.txt
+
+
+/test_suite-md/*/correct_output/output.xyz-diff.txt
+/test_suite-md/*/correct_output/run_md.out-diff.txt
+/test_suite-md/*/correct_output/traj.gen-diff.txt
+/test_suite-md/verify-invert/invert_3b_force.out
+/test_suite-md/verify-invert/orig_3b_force.out
+/test_suite-md/verify-relabel*/*out
+/test_suite-md/verify-scramble/*out
+/test_suite-md/verify-scramble/orig.sort.txt
+/test_suite-md/verify-scramble/scramble.sort.txt
+/test_suite-md/verify-translate/*out
+
