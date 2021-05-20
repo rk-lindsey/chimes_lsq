@@ -631,9 +631,9 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
         print "Please run again with --dlasso_dlars_path </absolute/path/to/dlars/dlasso/src/>"
         exit(0)
 
-    if args.algorithm == 'dlasso' :
+    if algorithm == 'dlasso' :
         print '! DLARS code for LASSO used'
-    elif args.algorithm == 'dlars' :
+    elif algorithm == 'dlars' :
         print '! DLARS code for LARS used'
     else:
         print "Bad algorithm in fit_dlars:" + args.algorithm
