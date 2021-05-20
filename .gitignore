@@ -14,8 +14,14 @@ mx# Ignore files generated when documentation is built
 /test_suite-lsq/*/b-labeled*
 /test_suite-lsq/*/ff_group*
 /test_suite-lsq/*/force*
-/test_suite-lsq/lsq2/params.svd.1.0e-04.txt
 /test_suite-lsq/*/correct_output/params.txt-tailed
+/test_suite-lsq/*/correct_output/tol_status.dat
+/test_suite-lsq/lsq2/params.svd.1.0e-04.txt
+/test_suite-lsq/lsq2/params.dlars.1.0e-04.txt
+/test_suite-lsq/lsq2/params*cmp
+/test_suite-lsq/lsq2/fm_setup.split.out
+/test_suite-lsq/lsq2/correct_output/params.lassolars.1.0e-04.diff
+
 
 /test_suite-md/*/current_output/*
 /test_suite-md/slurm*
