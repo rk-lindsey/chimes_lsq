@@ -631,18 +631,18 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
         print "Please run again with --dlasso_dlars_path </absolute/path/to/dlars/dlasso/src/>"
         exit(0)
 
-    if args.algorithm == 'dlasso' :
+    if algorithm == 'dlasso' :
         print '! DLARS code for LASSO used'
-    elif args.algorithm == 'dlars' :
+    elif algorithm == 'dlars' :
         print '! DLARS code for LARS used'
     else:
-        print "Bad algorithm in fit_dlars:" + args.algorithm
+        print "Bad algorithm in fit_dlars:" + algorithm
         exit(1)
-    print '! DLARS alpha = ' + str(args.alpha)
+    print '! DLARS alpha = ' + str(alpha)
 
-    if not args.read_output:
+    if not read_output:
     
-        exepath = "srun -N " + str(args.nodes) + " -n " + str(args.cores) + " "
+        exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " "
         
         exepath = exepath + dlasso_dlars_path + "dlars"
         
@@ -650,30 +650,30 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
 
             command = None
    
-            command = exepath + " " + args.A  + " " + args.b + " dim.txt --lambda=" + `args.alpha`
+            command = exepath + " " + A  + " " + b + " dim.txt --lambda=" + `alpha`
 
             #else:
-            #    command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, args.alpha))
+            #    command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha))
 
-            if ( args.split_files ) :
+            if ( split_files ) :
                 command = command + " --split_files"
-            if ( args.algorithm == 'dlars' ):
+            if ( algorithm == 'dlars' ):
                 command = command + " --algorithm=lars"
-            elif ( args.algorithm == 'dlasso' ):
+            elif ( algorithm == 'dlasso' ):
                 command = command + " --algorithm=lasso"
 
-            if ( args.weights != 'None' ):
-                command = command + " --weights=" + args.weights
+            if ( weights != 'None' ):
+                command = command + " --weights=" + weights
 
-            if ( args.normalize ):
+            if ( normalize ):
                 command = command + " --normalize=y" 
             else:
                 command = command + " --normalize=n" 
 
-            if args.restart_dlasso_dlars != "":
-                print "Will run a dlars/dlasso restart job with file:", args.restart_dlasso_dlars
+            if restart_dlasso_dlars != "":
+                print "Will run a dlars/dlasso restart job with file:", restart_dlasso_dlars
 
-                command = command + " --restart=" + args.restart_dlasso_dlars
+                command = command + " --restart=" + restart_dlasso_dlars
                 
                 command = command +  " >& dlars.log"
 

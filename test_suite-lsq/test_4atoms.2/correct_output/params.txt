@@ -1,6 +1,7 @@
+! svd algorithm used
 ! eps (= args.eps*dmax) =   0.001936260365093559
 ! SVD regularization factor =  1e-05
-! Date  2021-05-19
+! Date  2021-05-20
 !
 ! Number of variables            =  1308
 ! Number of equations            =  3000
