@@ -249,11 +249,11 @@ for job in $MAKE_JOBS ; do
 		  continue 
 	 fi
 	 
-	 if [[ $job == "lsq2" ]] ; then
-	 	cd ../contrib/owlqn/source/
-	 	make
-	 	cd - 
-         fi
+	 #if [[ $job == "lsq2" ]] ; then
+	 #	cd ../contrib/owlqn/source/
+	 #	make
+	 #	cd - 
+         #fi
 	 
 	 cd $job
 	 
