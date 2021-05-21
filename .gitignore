@@ -33,9 +33,7 @@
 /test_suite-md/*/forceout*
 /test_suite-md/*/ff_group*
 /test_suite-md/*/force*
-/test_suite-md/verify-lsq-forces-h2o-3bcheby/params.txt
-/test_suite-md/verify-lsq-forces-special3b/params.txt
-/test_suite-md/verify-lsq-forces-special4b/params.txt
+/test_suite-md/verify-lsq-forces-*/params.txt
 /test_suite-md/*/*bak
 /test_suite-md/*bak
 /test_suite-md/*/*diff.txt

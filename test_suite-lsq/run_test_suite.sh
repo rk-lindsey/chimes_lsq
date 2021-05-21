@@ -176,13 +176,14 @@ do
 	
 			  if [ "$j" == params.txt ]; then
 					j=params.txt-tailed
-					tail -n+4 params.txt > $j
-					tail -n+4 ../correct_output/params.txt > ../correct_output/$j
+					awk '!/Date/{print}' params.txt > $j
+					awk '!/Date/{print}' ../correct_output/params.txt > ../correct_output/$j
 			  fi
+			  
 		
 			  # Ignore the date when running diff...
-		
-			  diff ../correct_output/$j $j | awk '!/#/{print}' > ../diff-$j.out
+
+			  diff ../correct_output/$j $j > ../diff-$j.out
 	
 			  NO_DIFF_LINES=`cat ../diff-$j.out | wc -l`
 	
