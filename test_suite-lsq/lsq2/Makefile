@@ -3,6 +3,7 @@ NODES=1
 #RUN_JOB="" # srun -n $(NP) -N $(NODES)
 PYTHON=python2.7 # /usr/tce/bin/python
 COMPARE=perl ../../contrib/compare/compare.pl
+DLARS_PATH="../../src/contrib/dlars/src
 
 # Don't run lasso test by default.  Takes too long, get poor result.
 all: A.txt svd lassolars dlars
@@ -34,10 +35,11 @@ ridgecv: params.ridgecv.cmp
 lasso: params.lasso.cmp
 
 dlars: params.dlars.1.0e-04.cmp params.dlasso.1.0e-04.cmp params.dlasso.norm.cmp params.dlasso.read.cmp
+	cd $DLARS_PATH
+	make dlars
 
 params.lasso.txt : A.txt
 	$(PYTHON) ../../src/chimes_lsq.py --algorithm=lasso --alpha=1.0e-04 > params.lasso.txt	
-	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	mv params.lasso.txt current_output/
 
@@ -97,22 +99,22 @@ params.svd.1.0e-05.txt: A.txt
 	mv params.svd.1.0e-05.txt current_output/
 
 params.dlars.1.0e-04.txt: A.0000.txt
-	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlars --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false > params.dlars.1.0e-04.txt
+	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlars --dlasso_dlars_path=${DLARS_PATH}--alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false > params.dlars.1.0e-04.txt
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	mv params.dlars.1.0e-04.txt current_output
 
 params.dlasso.1.0e-04.txt: A.0000.txt
-	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlasso --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false > params.dlasso.1.0e-04.txt
+	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlasso --dlasso_dlars_path=${DLARS_PATH} --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false > params.dlasso.1.0e-04.txt
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	mv params.dlasso.1.0e-04.txt current_output
 
 params.dlasso.norm.txt: A.0000.txt
-	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlasso --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=true > params.dlasso.norm.txt
+	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlasso --dlasso_dlars_path=${DLARS_PATH} --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=true > params.dlasso.norm.txt
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	mv params.dlasso.norm.txt current_output
 
 params.dlasso.read.txt: A.0000.txt params.dlasso.norm.txt
-	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlasso --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=true --read_output=true > params.dlasso.read.txt
+	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlasso --dlasso_dlars_path=${DLARS_PATH} --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=true --read_output=true > params.dlasso.read.txt
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	mv params.dlasso.read.txt current_output
 
