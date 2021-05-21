@@ -176,13 +176,14 @@ do
 	
 			  if [ "$j" == params.txt ]; then
 					j=params.txt-tailed
-					tail -n+2 params.txt > $j
-					tail -n+2 ../correct_output/params.txt > ../correct_output/$j
+					awk '!/Date/{print}' params.txt > $j
+					awk '!/Date/{print}' ../correct_output/params.txt > ../correct_output/$j
 			  fi
+			  
 		
 			  # Ignore the date when running diff...
-		
-			  diff ../correct_output/$j $j | awk '!/#/{print}' > ../diff-$j.out
+
+			  diff ../correct_output/$j $j > ../diff-$j.out
 	
 			  NO_DIFF_LINES=`cat ../diff-$j.out | wc -l`
 	
@@ -201,7 +202,7 @@ do
 						 # direct them to the diff file to look at to make
 						 # sure that is the only difference
 				
-						 paste ../correct_output/test_suite_params.txt test_suite_params.txt > check_tol.dat
+						 paste ../correct_output/$j $j > check_tol.dat
 						 awk 'BEGIN{tol=10^-9;any=0}{val=$2-$4;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat  | tee tol_status.dat
 						 rm -f check_tol.dat
 					fi

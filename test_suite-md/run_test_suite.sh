@@ -162,6 +162,8 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 				PASS=false
 				ALL_PASS=false
 		  fi
+		  
+		  if [ ! -d current_output ] ; then mkdir current_output; fi
 
 		  cp *.* current_output
 
