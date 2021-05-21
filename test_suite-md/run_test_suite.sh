@@ -162,8 +162,13 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 				PASS=false
 				ALL_PASS=false
 		  fi
+		  
+		  echo "SAN:"
+		  pwd
 
 		  cp *.* current_output
+		  
+		  echo "END SAN"
 
 		  if [[ $SUCCESS -eq 1 ]] ; then
 				for j in run_md.out forceout-labeled.txt
