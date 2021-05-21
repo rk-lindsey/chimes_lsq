@@ -38,7 +38,6 @@ dlars: params.dlars.1.0e-04.cmp params.dlasso.1.0e-04.cmp params.dlasso.norm.cmp
 params.lasso.txt : A.txt
 	$(PYTHON) ../../src/chimes_lsq.py --algorithm=lasso --alpha=1.0e-04 > params.lasso.txt	
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
-	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	mv params.lasso.txt current_output/
 
 params.ridgecv.txt : A.txt
