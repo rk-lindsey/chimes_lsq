@@ -3,7 +3,7 @@ NODES=1
 #RUN_JOB="" # srun -n $(NP) -N $(NODES)
 PYTHON=python2.7 # /usr/tce/bin/python
 COMPARE=perl ../../contrib/compare/compare.pl
-DLARS_PATH=../../contrib/dlars/src
+DLARS_PATH=../../contrib/dlars/src/
 
 # Don't run lasso test by default.  Takes too long, get poor result.
 all: A.txt svd lassolars dlars
