@@ -12,6 +12,8 @@
 
 # Common function for test script initialization.
 source ../src/bash/init_vars.sh
+DLARS_PATH=../contrib/dlars/src
+
 init_test_vars
 echo "NP = $NP"
 
@@ -250,11 +252,14 @@ for job in $MAKE_JOBS ; do
 		  continue 
 	 fi
 	 
-	 #if [[ $job == "lsq2" ]] ; then
-	 #	cd ../contrib/owlqn/source/
-	 #	make
-	 #	cd - 
-         #fi
+	 if [[ $job == "lsq2" ]] ; then
+	 	#cd ../contrib/owlqn/source/
+	 	#make
+	 	#cd - 
+		cd $DLARS_PATH
+		make
+		cd -
+         fi
 	 
 	 cd $job
 	 
