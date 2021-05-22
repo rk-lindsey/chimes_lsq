@@ -97,7 +97,7 @@ params.svd.1.0e-05.txt: A.txt
 	mv params.svd.1.0e-05.txt current_output/
 
 params.dlars.1.0e-04.txt: A.0000.txt
-	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlars --dlasso_dlars_path=${DLARS_PATH}--alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false > params.dlars.1.0e-04.txt
+	$(PYTHON) ../../src/chimes_lsq.py --algorithm=dlars --dlasso_dlars_path=${DLARS_PATH} --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false > params.dlars.1.0e-04.txt
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	mv params.dlars.1.0e-04.txt current_output
 
