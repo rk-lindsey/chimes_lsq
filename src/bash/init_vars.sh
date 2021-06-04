@@ -70,11 +70,13 @@ function init_test_vars
 	 elif [ "$SYS_TYPE" == "toss_3_x86_64_ib" ] ; then
 		  module load impi/2018.0
 		  module load intel/18.0.1
+		  module load python/2.7.16
 		  NP=36
 		  RUN_JOB="srun -n $NP"
 	 elif [ "$SYS_TYPE" == "toss_3_x86_64" ] ; then
 		  module load impi/2018.0
 		  module load intel/18.0.1
+		  module load python/2.7.16		  
 		  NP=36
 		  RUN_JOB="srun -n $NP"
 	 else

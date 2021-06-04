@@ -1,7 +1,8 @@
+## These variables are defaults.
 NP=36
 NODES=1
-#RUN_JOB="" # srun -n $(NP) -N $(NODES)
-#PYTHON=python2.7 # /usr/tce/bin/python
+RUN_JOB=srun -n $(NP) -N $(NODES)
+PYTHON=python # /usr/tce/bin/python
 COMPARE=perl ../../contrib/compare/compare.pl
 
 # Don't run lasso test by default.  Takes too long, get poor result.
@@ -16,8 +17,9 @@ A.txt:
 A.0000.txt:
 	$(RUN_JOB) ../../build/chimes_lsq fm_setup.split.in > fm_setup.split.out
 
+## Fail on a significant numerical difference, failure will be reported by ../run_test_suite.sh
 %.cmp : %.txt
-	-$(COMPARE) current_output/$*.txt correct_output/$*.txt >& $*.cmp
+	$(COMPARE) current_output/$*.txt correct_output/$*.txt >& $*.cmp
 
 svd: params.svd.1.0e-04.cmp params.svd.1.0e-05.cmp params.svd.weight.cmp
 

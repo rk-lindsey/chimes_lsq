@@ -1,9 +1,9 @@
+! Date  2021-06-03
+!
+! Number of variables            =  419
+! Number of equations            =  9506
 ! LARS implementation of LASSO used
 ! LASSO alpha =  0.0001
-! Date  2021-05-20
-!
-! Number of variables            =  197
-! Number of equations            =  9506
 ! RMS force error                =  5.883987675009939
 ! max abs variable               =  1432.8246530869003
 ! number of fitting vars         =  197
