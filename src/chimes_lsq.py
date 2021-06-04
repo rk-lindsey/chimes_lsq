@@ -51,7 +51,7 @@ def main():
 
     args        = parser.parse_args()
     
-    dlasso_dlars_path = loc + '../../contrib/dlars/src/'
+    dlasso_dlars_path = loc + '/../../contrib/dlars/src/'
     
     if args.dlasso_dlars_path != '':
         dlasso_dlars_path = args.dlasso_dlars_path
@@ -62,7 +62,7 @@ def main():
 
     # Algorithms requiring sklearn.
     sk_algos = ["lasso", "lassolars", "lars"] ;
-        
+
     if args.algorithm in sk_algos:
         from sklearn import linear_model
         from sklearn import preprocessing
@@ -147,6 +147,21 @@ def main():
                 weightedA[i][j] = A[i][j]*WEIGHTS[i]
                 weightedb[i]    = b[i]   *WEIGHTS[i]
 
+
+    ################################                
+    #  Header for output
+    ################################
+    
+    print "! Date ", date.today()
+    print "!"
+
+    if np != "undefined" :
+        print "! Number of variables            = ", np
+
+    print "! Number of equations            = ", nlines
+
+    
+                
     #################################
     # Solve the matrix equation
     #################################
@@ -265,10 +280,6 @@ def main():
     # Setup output
     #############################################
     
-    print "! Date ", date.today() 
-    print "!"
-    print "! Number of variables            = ", np
-    print "! Number of equations            = ", nlines
     print "! RMS force error                = " , sqrt(Z/float(nlines))
     print "! max abs variable               = ",  max(abs(x))
     print "! number of fitting vars         = ", nvars
@@ -282,7 +293,7 @@ def main():
     ####################################
 
     hf = open(args.header ,"r").readlines()
-
+    
     BREAK_COND = False
 
     # Figure out whether we have triplets and/or quadruplets
@@ -579,6 +590,13 @@ def main():
         for i in xrange(N_ENER_OFFSETS):
             print "ENERGY OFFSET " + `i+1` + " " + str(x[total_params+i])
 
+    if args.test_suite:
+        test_suite_params=open("test_suite_params.txt","w")		
+        for i in range(0,len(x)):
+            phrase = `i` + " " + `x[i]` + '\n'
+            test_suite_params.write(phrase)
+        test_suite_params.close()
+
     print "ENDFILE"		
     return 0
 
@@ -643,8 +661,9 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
     if not read_output:
     
         exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " "
-        
-        exepath = exepath + dlasso_dlars_path + "dlars"
+        exepath = exepath + dlasso_dlars_path + "/dlars"
+
+        dlars_file = dlasso_dlars_path + "dlars"
         
         if os.path.exists(dlars_file):
 
@@ -675,7 +694,7 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
 
                 command = command + " --restart=" + restart_dlasso_dlars
                 
-                command = command +  " >& dlars.log"
+            command = command +  " >& dlars.log"
 
             print("! DLARS run: " + command + "\n")
 

@@ -37,11 +37,13 @@ SOURCE_BASE="${TESTSU_BASE}/../build/"
 
 cd ..
 
-if ./install.sh  ; then
+if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
+    if ./install.sh  ; then
 	echo "Compiling chimes_lsq succeeded"
-else
-	 echo "Compiling chimes_lsq failed"
-	 exit 1
+    else
+	echo "Compiling chimes_lsq failed"
+	exit 1
+    fi
 fi
 
 cd -
@@ -202,7 +204,7 @@ do
 						 # direct them to the diff file to look at to make
 						 # sure that is the only difference
 				
-						 paste ../correct_output/$j $j > check_tol.dat
+						 paste ../correct_output/test_suite_params.txt test_suite_params.txt > check_tol.dat
 						 awk 'BEGIN{tol=10^-9;any=0}{val=$2-$4;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat  | tee tol_status.dat
 						 rm -f check_tol.dat
 					fi
@@ -242,29 +244,33 @@ do
 	fi
 done
 
-echo "Running Makefile jobs"
+echo "Running Makefile jobs $MAKE_JOBS"
+pwd ;
 
 for job in $MAKE_JOBS ; do
 
-	 if ! test_dir $i ; then
-		  continue 
-	 fi
+    echo "Running $job"
+    
+    if ! test_dir $job ; then
+	echo "Directory $job does not exist"
+	continue 
+    fi
 	 
-	 #if [[ $job == "lsq2" ]] ; then
-	 #	cd ../contrib/owlqn/source/
-	 #	make
-	 #	cd - 
-         #fi
+    if [[ $job == "lsq2" ]] ; then
+    	cd ../contrib/dlars/src
+	make
+	cd - 
+    fi
 	 
-	 cd $job
+    cd $job
 	 
-	 if RUN_JOB=$RUN_JOB PYTHON=$PYTHON make all ; then
-		  echo "$job succeeded"
-	 else
-		  echo "$job failed"
-		  ALL_PASSED=FALSE
-		  PASSED=FALSE
-	 fi
+    if RUN_JOB=$RUN_JOB PYTHON=$PYTHON make all ; then
+	echo "$job succeeded"
+    else
+	echo "$job failed"
+	ALL_PASSED=FALSE
+	PASSED=FALSE
+    fi
 done
 
 if   [ "$ALL_PASSED" = true ] ; then
