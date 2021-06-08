@@ -17,9 +17,8 @@ A.txt:
 A.0000.txt:
 	$(RUN_JOB) ../../build/chimes_lsq fm_setup.split.in > fm_setup.split.out
 
-## Fail on a significant numerical difference, failure will be reported by ../run_test_suite.sh
 %.cmp : %.txt
-	$(COMPARE) current_output/$*.txt correct_output/$*.txt >& $*.cmp
+	-$(COMPARE) current_output/$*.txt correct_output/$*.txt >& $*.cmp
 
 svd: params.svd.1.0e-04.cmp params.svd.1.0e-05.cmp params.svd.weight.cmp
 

@@ -264,7 +264,7 @@ for job in $MAKE_JOBS ; do
 	 
     cd $job
 	 
-    if RUN_JOB=$RUN_JOB PYTHON=$PYTHON make all ; then
+    if make RUN_JOB="$RUN_JOB" PYTHON=$PYTHON all ; then
 	echo "$job succeeded"
     else
 	echo "$job failed"

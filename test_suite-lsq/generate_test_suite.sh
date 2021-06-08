@@ -36,10 +36,10 @@ fi
 cd ..
 
 if ./install.sh  ; then
-	echo "Compiling chimes_lsq succeeded"
+    echo "Compiling chimes_lsq succeeded"
 else
-	 echo "Compiling chimes_lsq failed"
-	 exit 1
+    echo "Compiling chimes_lsq failed"
+    exit 1
 fi
 
 cd -
@@ -53,18 +53,18 @@ cd -
 
 if [ $# -eq 0 ] ; then # Use default JOBS.  
 	#  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
-	 JOBS=$LSQ_ALL_JOBS
-	 MAKE_JOBS=$LSQ_MAKE_JOBS
+    JOBS=$LSQ_ALL_JOBS
+    MAKE_JOBS=$LSQ_MAKE_JOBS
 else  # Take JOBS from command line.
-	 JOBS=$1
-	 MAKE_JOBS=$2
+    JOBS=$1
+    MAKE_JOBS=$2
 fi
 
 echo ""
 echo "SETTING UP FOR CHIMES_LS..."
 
 if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-	 RUN_JOB=""
+    RUN_JOB=""
 fi
 
 for i in $JOBS
@@ -143,13 +143,27 @@ done
 echo "Running Makefile jobs $MAKE_JOBS"
 
 for job in $MAKE_JOBS ; do
-	 cd $job
+
+    echo "Running $job"
+    
+    if ! test_dir $job ; then
+	echo "Directory $job does not exist"
+	continue 
+    fi
+
+    if [[ $job == "lsq2" ]] ; then
+    	cd ../contrib/dlars/src
+	make
+	cd - 
+    fi
+    
+    cd $job
 	 
-	 if RUN_JOB=$RUN_JOB PYTHON=$PYTHON make generate ; then
-		  echo "$job succeeded"
-	 else
-		  echo "$job failed"
-	 fi
+    if make RUN_JOB="$RUN_JOB" PYTHON=$PYTHON generate ; then
+	echo "$job succeeded"
+    else
+	echo "$job failed"
+    fi
 done
 
 exit 0
