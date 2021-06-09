@@ -24,7 +24,9 @@ function init_test_vars
     LSQ_ALL_JOBS='h2o-3bcheby 
 	            h2o-3bcheby2 
 	            h2o-3bcheby3 
-	            h2o-4bcheby 
+	            h2o-4bcheby
+		    fitstrs
+		    fitstrs3b
 	            test_4atoms 
 	            test_4atoms.2 
 	            special3b 

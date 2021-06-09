@@ -6,7 +6,7 @@ PYTHON=python # /usr/tce/bin/python
 COMPARE=perl ../../contrib/compare/compare.pl
 
 # Don't run lasso test by default.  Takes too long, get poor result.
-all: A.txt svd lassolars dlars
+all: A.txt svd lassolars dlars ridge ridgecv 
 
 generate: all
 	cp current_output/* correct_output/

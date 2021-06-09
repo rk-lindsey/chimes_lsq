@@ -46,7 +46,8 @@ def main():
     parser.add_argument("--test_suite",           type=str2bool, default=False,           help='output for test suite')
     parser.add_argument("--weights",              type=str,      default="None",          help='weight file')
     parser.add_argument("--active",               type=str2bool, default=False,           help='is this a DLARS/DLASSO run from the active learning driver?')
-
+    parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
+    
     # Actually parse the arguments
 
     args        = parser.parse_args()
@@ -61,7 +62,7 @@ def main():
     #############################################
 
     # Algorithms requiring sklearn.
-    sk_algos = ["lasso", "lassolars", "lars"] ;
+    sk_algos = ["lasso", "ridge", "lassolars", "lars", "ridgecv"] ;
 
     if args.algorithm in sk_algos:
         from sklearn import linear_model
@@ -212,6 +213,26 @@ def main():
             x = dot(x,dot(transpose(U),weightedb))
         else:
             x = dot(x,dot(transpose(U),b))
+
+    elif args.algorithm == 'ridge':
+        print '! ridge regression used'
+        reg = linear_model.Ridge(alpha=args.alpha,fit_intercept=False)
+
+        # Fit the data.
+        reg.fit(A,b)
+
+        x = reg.coef_
+        nvars = np
+        print "! Ridge alpha = %11.4e" % args.alpha
+
+    elif args.algorithm == 'ridgecv':
+        alpha_ar = [1.0e-06, 3.2e-06, 1.0e-05, 3.2e-05, 1.0e-04, 3.2e-04, 1.0e-03, 3.2e-03]
+        reg = linear_model.RidgeCV(alphas=alpha_ar,fit_intercept=False,cv=args.folds)
+        reg.fit(A,b)
+        print '! ridge CV regression used'
+        print "! ridge CV alpha = %11.4e"  % reg.alpha_
+        x = reg.coef_
+        nvars = np
 
     elif args.algorithm == 'lasso':
         

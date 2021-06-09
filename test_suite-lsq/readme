@@ -138,3 +138,9 @@ This is a list of each test and what functionality is probed
 	- Tersoff style cutoff	
 	- Morse-style transformation	
 	
+22 fitstrs
+   - Test of fitting to stresses for H2O with a 4 body interaction.
+
+23 fitstrs3b
+   - Test of fitting to stresses for H2O with a 3 body interaction.
+
