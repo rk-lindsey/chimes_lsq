@@ -26,6 +26,7 @@ function init_test_vars
 	            h2o-3bcheby2 
 	            h2o-3bcheby3 
 	            h2o-4bcheby
+                    h2o-invr
 		    fitstrs
 		    fitstrs3b
 	            test_4atoms 
