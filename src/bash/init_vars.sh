@@ -21,7 +21,8 @@ function init_test_vars
 
     RUN_LSQ_PYTHON_CODE="$PYTHON $PATH_TO_LSQ_PY_CODE --eps ${EPS_FAC} --test_suite true"
 
-    LSQ_ALL_JOBS='h2o-3bcheby 
+    LSQ_ALL_JOBS='h2o-2bcheby  
+    		    h2o-3bcheby 
 	            h2o-3bcheby2 
 	            h2o-3bcheby3 
 	            h2o-4bcheby
