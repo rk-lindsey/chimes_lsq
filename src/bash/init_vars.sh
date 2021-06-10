@@ -43,7 +43,8 @@ function init_test_vars
 
     LSQ_MAKE_JOBS='lsq2'
 
-	MD_JOBS='h2o-3bcheby 
+	MD_JOBS='h2o-2bcheby
+           h2o-3bcheby 
 	        h2o-4bcheby 
 	        generic-lj
 	        h2o-3bcheby-numpress 

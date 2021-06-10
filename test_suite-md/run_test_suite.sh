@@ -14,12 +14,15 @@ echo "NP = $NP"
 
 cd ..
 
-if ./install.sh  ; then
+SOURCE_BASE="${TESTSU_BASE}/../build/"
+if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
+    if ./install.sh  ; then
 	echo "Compiling chimes_md succeeded"
-else
-	 echo "Compiling chimes_md failed"
-	 exit 1
-fi
+    else
+	echo "Compiling chimes_md failed"
+	exit 1
+    fi
+fi    
 
 cd -
 
