@@ -38,12 +38,13 @@ function init_test_vars
 	            stress-and-ener-2b2
 	            stress-and-ener-2b3
 	            two-traj-files
-	            one-file-three-trajs'
-                #nonorth'
+	            one-file-three-trajs
+                    nonorth'
 
     LSQ_MAKE_JOBS='lsq2'
 
 	MD_JOBS='h2o-2bcheby
+           h2o-2bcheby-genvel
            h2o-3bcheby 
 	        h2o-4bcheby 
 	        generic-lj
@@ -51,8 +52,8 @@ function init_test_vars
 	        h2o-4bcheby-numpress 
 	        h2o-3bcheby3 
 	        special3b 
-	        special4b'
-	        #nonorth'
+	        special4b
+	        nonorth'
 
     MD_MAKE_JOBS='verify-invert 
 	        verify-translate 

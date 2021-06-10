@@ -141,3 +141,8 @@ This is a list of each test and what functionality is probed
 23 fitstrs3b
    - Test of fitting to stresses for H2O with a 3 body interaction.
 
+24 nonorth
+   - Test of non-orthorhombic unit cell.
+   - Forces come from test_suite-md/nonorth MD run.
+   - RMS force error should be very low.
+   

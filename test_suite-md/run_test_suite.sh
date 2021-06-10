@@ -66,10 +66,14 @@ do
 	 fi
 
 	 PASS=true
-	
-	cd $i
 
-	if $RUN_JOB ../../build/chimes_md run_md.in > run_md.out ; then
+	if [ ! -d $i/current_output ] ; then mkdir $i/current_output ; fi
+
+	cp $i/* $i/current_output 2> /dev/null
+	
+	cd $i/current_output
+
+	if $RUN_JOB ../../../build/chimes_md run_md.in > run_md.out ; then
 		 SUCCESS=1 
 	else
 		 echo "Chimes_md failed"
@@ -78,24 +82,22 @@ do
 		 ALL_PASS=false
 	fi
 
-	if [ ! -d current_output ] ; then mkdir current_output ; fi
+	cd ..
 	
-	cp *.* current_output
-
 	if [[ $SUCCESS -eq 1 ]] ; then
 	
 		 for j in run_md.out traj.gen output.xyz 
 		 do
 			  if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-					diff current_output/$j correct_output/$j > $j-diff.txt
+					diff current_output/$j correct_output/$j > current_output/$j-diff.txt
 					
-					LINES=`wc -l $j-diff.txt | awk '{print $1}'`
+					LINES=`wc -l current_output/$j-diff.txt | awk '{print $1}'`
 					
 					if [ $LINES -gt 0 ] ; then
 						 echo " "
 						 echo "		Differences found in $j files:"
 						 echo " "
-						 cat $j-diff.txt
+						 cat current_output/$j-diff.txt
 
 						 PASS=false
 						 ALL_PASS=false
@@ -106,7 +108,7 @@ do
 	
 	if [ "$PASS" = true ] ; then
 		echo "		...Test passed."
-		rm -f ../diff-*
+		rm -f current_output/diff-*
 	else
 		echo "		...Test failed."
 	fi	
@@ -174,7 +176,7 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 				for j in run_md.out forceout-labeled.txt
 				do
 					 if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-						  diff current_output/$j correct_output/$j > $j-diff.txt
+						  diff current_output/$j correct_output/$j > current_output/$j-diff.txt
 						  
 						  LINES=`wc -l $j-diff.txt | awk '{print $1}'`
 						  
@@ -183,7 +185,7 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 								echo "		Differences found in $j files:"
 								echo " "
 
-								cat $j-diff.txt
+								cat current_output/$j-diff.txt
 
 								PASS=false
 								ALL_PASS=false
@@ -194,7 +196,7 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 	
 		  if [ "$PASS" = true ] ; then
 				echo "		...Test passed."
-				rm -f ../diff-*
+				rm -f current_output/diff-*
 		  else
 				echo "		...Test failed."
 		  fi	
