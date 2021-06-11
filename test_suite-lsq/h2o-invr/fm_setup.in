@@ -30,7 +30,7 @@
 # PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# MORSE_LAMBDA #	# USEOVRP #
 1		O		O		0.6		6.0		0.1		1.25			false
 2		O		H		0.6		6.0		0.1		1.25			false
-3		H		H		0.6		6.0		0.1		1.25			false														0		0		0
+3		H		H		0.6		6.0		0.1		1.25			false
 
 # ENDFILE #
 
