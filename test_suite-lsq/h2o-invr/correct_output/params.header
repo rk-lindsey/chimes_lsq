@@ -1,0 +1,63 @@
+USECOUL: false
+FITCOUL: false
+USE3BCH: true
+USE4BCH: false
+
+PAIRTYP: CHEBYSHEV  10 2 0 -1 1
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		0		15.9994
+1		H		0		1.0079
+
+ATOM PAIRS: 3
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0.6             6               INVRSE_R        
+	1               H               H               0.6             6               INVRSE_R        
+	2               O               H               0.6             6               INVRSE_R        
+
+FCUT TYPE: CUBIC
+
+ATOM PAIR TRIPLETS: 4
+
+ INDEX: 0 ATOMS: O O O
+ PAIRS: OO OO OO  2 parameters, 4 total parameters 
+     index  |  powers  |  equiv index  |  param index  
+   ----------------------------------------------------
+      0       0  1  1         0               0       
+      1       1  0  1         0               0       
+      2       1  1  0         0               0       
+      3       1  1  1         3               1       
+
+ INDEX: 1 ATOMS: H O O
+ PAIRS: OH OH OO  3 parameters, 4 total parameters 
+     index  |  powers  |  equiv index  |  param index  
+   ----------------------------------------------------
+      0       0  1  1         0               0       
+      1       1  0  1         0               0       
+      2       1  1  0         2               1       
+      3       1  1  1         3               2       
+
+ INDEX: 2 ATOMS: H H O
+ PAIRS: HH OH OH  3 parameters, 4 total parameters 
+     index  |  powers  |  equiv index  |  param index  
+   ----------------------------------------------------
+      0       0  1  1         0               0       
+      1       1  0  1         1               1       
+      2       1  1  0         1               1       
+      3       1  1  1         3               2       
+
+ INDEX: 3 ATOMS: H H H
+ PAIRS: HH HH HH  2 parameters, 4 total parameters 
+     index  |  powers  |  equiv index  |  param index  
+   ----------------------------------------------------
+      0       0  1  1         0               0       
+      1       1  0  1         0               0       
+      2       1  1  0         0               0       
+      3       1  1  1         3               1       
+
+
+ATOM PAIR QUADRUPLETS: 0
+

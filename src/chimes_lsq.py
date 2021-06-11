@@ -46,7 +46,8 @@ def main():
     parser.add_argument("--test_suite",           type=str2bool, default=False,           help='output for test suite')
     parser.add_argument("--weights",              type=str,      default="None",          help='weight file')
     parser.add_argument("--active",               type=str2bool, default=False,           help='is this a DLARS/DLASSO run from the active learning driver?')
-
+    parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
+    
     # Actually parse the arguments
 
     args        = parser.parse_args()
@@ -61,7 +62,7 @@ def main():
     #############################################
 
     # Algorithms requiring sklearn.
-    sk_algos = ["lasso", "lassolars", "lars"] ;
+    sk_algos = ["lasso", "ridge", "lassolars", "lars", "ridgecv"] ;
 
     if args.algorithm in sk_algos:
         from sklearn import linear_model
@@ -203,8 +204,8 @@ def main():
                 Dmat[i][i]=1.0/D[i]
                 nvars += 1
 
-        print "! eps (= args.eps*dmax) =  ", eps        
-        print "! SVD regularization factor = ", args.eps
+        print "! eps (= args.eps*dmax)          =  %11.4e" % eps        
+        print "! SVD regularization factor      = %11.4e" % args.eps
 
         x=dot(transpose(VT),Dmat)
 
@@ -213,12 +214,32 @@ def main():
         else:
             x = dot(x,dot(transpose(U),b))
 
+    elif args.algorithm == 'ridge':
+        print '! ridge regression used'
+        reg = linear_model.Ridge(alpha=args.alpha,fit_intercept=False)
+
+        # Fit the data.
+        reg.fit(A,b)
+
+        x = reg.coef_
+        nvars = np
+        print "! Ridge alpha = %11.4e" % args.alpha
+
+    elif args.algorithm == 'ridgecv':
+        alpha_ar = [1.0e-06, 3.2e-06, 1.0e-05, 3.2e-05, 1.0e-04, 3.2e-04, 1.0e-03, 3.2e-03]
+        reg = linear_model.RidgeCV(alphas=alpha_ar,fit_intercept=False,cv=args.folds)
+        reg.fit(A,b)
+        print '! ridge CV regression used'
+        print "! ridge CV alpha = %11.4e"  % reg.alpha_
+        x = reg.coef_
+        nvars = np
+
     elif args.algorithm == 'lasso':
         
         # Make the sklearn call
         
         print '! Lasso regression used'
-        print '! Lasso alpha = ' + str(args.alpha)
+        print '! Lasso alpha = %11.4e' % args.alpha
         reg   = linear_model.Lasso(alpha=args.alpha,fit_intercept=False,max_iter=100000)
         reg.fit(A,b)
         x     = reg.coef_
@@ -230,7 +251,7 @@ def main():
         # Make the sklearn call
         
         print '! LARS implementation of LASSO used'
-        print '! LASSO alpha = ', args.alpha
+        print '! LASSO alpha = %11.4e' % args.alpha
 
         if DO_WEIGHTING:
             reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000, copy_X=False)
@@ -280,10 +301,10 @@ def main():
     # Setup output
     #############################################
     
-    print "! RMS force error                = " , sqrt(Z/float(nlines))
-    print "! max abs variable               = ",  max(abs(x))
+    print "! RMS force error                = %11.4e" % sqrt(Z/float(nlines))
+    print "! max abs variable               = %11.4e" %  max(abs(x))
     print "! number of fitting vars         = ", nvars
-    print "! Bayesian Information Criterion = ", bic
+    print "! Bayesian Information Criterion = %11.4e" % bic
     if args.weights !="None":
         print '! Using weighting file:            ',args.weights
     print "!"
@@ -422,10 +443,10 @@ def main():
         print "PAIRTYPE PARAMS: " + `i` + " " + A1 + " " + A2 + "\n"
 
         for j in range(0, int(SNUM_2B)):
-            print `j` + " " + `x[i*SNUM_2B+j]`
+            print "%3d %21.13e" % (j,x[i*SNUM_2B+j])
 
         if FIT_COUL == "true":
-            print "q_" + A1 + " x q_" + A2 + " " + `x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + SNUM_4B + i]`
+            print "q_%s x q_%s %21.13e" % (A1,A2,x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + SNUM_4B + i]) 
             COUNTED_COUL_PARAMS += 1
 
         print " "
@@ -478,7 +499,7 @@ def main():
                     LINE       = hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip('\n')
                     LINE_SPLIT = LINE.split()
 
-                    print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]`
+                    print "%s %21.13e" % (LINE, x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])])
 
                 TRIP_PAR_IDX += int(UNIQ)
                 COUNTED_TRIP_PARAMS += int(UNIQ)
@@ -548,7 +569,7 @@ def main():
                     UNIQ_QUAD_IDX = int(LINE_SPLIT[8])
                     #print 'UNIQ_QUAD_IDX', str(UNIQ_QUAD_IDX)
 
-                    print LINE + " " + `x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]`
+                    print "%s %21.13e" % (LINE,x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX])
 
                 QUAD_PAR_IDX += int(UNIQ)
                 COUNTED_QUAD_PARAMS += int(UNIQ)
@@ -588,12 +609,12 @@ def main():
         print "NO ENERGY OFFSETS: ", N_ENER_OFFSETS
     
         for i in xrange(N_ENER_OFFSETS):
-            print "ENERGY OFFSET " + `i+1` + " " + str(x[total_params+i])
+            print "ENERGY OFFSET %d %21.13e" % (i+1,x[total_params+i])
 
     if args.test_suite:
         test_suite_params=open("test_suite_params.txt","w")		
         for i in range(0,len(x)):
-            phrase = `i` + " " + `x[i]` + '\n'
+            phrase = "%5d %21.13e\n" % (i,x[i])
             test_suite_params.write(phrase)
         test_suite_params.close()
 
@@ -656,7 +677,7 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
     else:
         print "Bad algorithm in fit_dlars:" + algorithm
         exit(1)
-    print '! DLARS alpha = ' + str(alpha)
+    print '! DLARS alpha = %10.4e' % alpha
 
     if not read_output:
     

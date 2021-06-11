@@ -1,7 +1,5 @@
 USECOUL: false
 FITCOUL: false
-USEPOVR: false
-FITPOVR: false
 USE3BCH: true
 USE4BCH: false
 
@@ -15,10 +13,10 @@ ATOM TYPES: 2
 
 ATOM PAIRS: 3
 
-# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #	# CHBDIST #	# MORSE_LAMBDA #
-	0               O               O               0.75            6               0.1             MORSE           1.25            
-	1               H               H               0.75            6               0.1             MORSE           1.25            
-	2               O               H               0.75            6               0.1             MORSE           1.25            
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0.75            6               MORSE           1.25            
+	1               H               H               0.75            6               MORSE           1.25            
+	2               O               H               0.75            6               MORSE           1.25            
 
 FCUT TYPE: CUBIC
 

@@ -21,10 +21,14 @@ function init_test_vars
 
     RUN_LSQ_PYTHON_CODE="$PYTHON $PATH_TO_LSQ_PY_CODE --eps ${EPS_FAC} --test_suite true"
 
-    LSQ_ALL_JOBS='h2o-3bcheby 
+    LSQ_ALL_JOBS='h2o-2bcheby  
+    		    h2o-3bcheby 
 	            h2o-3bcheby2 
 	            h2o-3bcheby3 
-	            h2o-4bcheby 
+	            h2o-4bcheby
+                    h2o-invr
+		    fitstrs
+		    fitstrs3b
 	            test_4atoms 
 	            test_4atoms.2 
 	            special3b 
@@ -34,20 +38,22 @@ function init_test_vars
 	            stress-and-ener-2b2
 	            stress-and-ener-2b3
 	            two-traj-files
-	            one-file-three-trajs'
-                #nonorth'
+	            one-file-three-trajs
+                    nonorth'
 
     LSQ_MAKE_JOBS='lsq2'
 
-	MD_JOBS='h2o-3bcheby 
+	MD_JOBS='h2o-2bcheby
+           h2o-2bcheby-genvel
+           h2o-3bcheby 
 	        h2o-4bcheby 
 	        generic-lj
 	        h2o-3bcheby-numpress 
 	        h2o-4bcheby-numpress 
 	        h2o-3bcheby3 
 	        special3b 
-	        special4b'
-	        #nonorth'
+	        special4b
+	        nonorth'
 
     MD_MAKE_JOBS='verify-invert 
 	        verify-translate 
