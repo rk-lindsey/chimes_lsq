@@ -8,24 +8,12 @@ project(ChIMES_LSQ
 	VERSION 1.0.0
 	DESCRIPTION "Utilities to generate ChIMES models"
 	LANGUAGES CXX)
-
-# Set default build type and build flags
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
-set(CMAKE_CXX_FLAGS "") # Can be updated if we want to adde extra flags 
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
-#set( CMAKE_VERBOSE_MAKEFILE on ) # Uncomment if you want to see compiler flags
     
 # set default preprocessor flag values
  
-set(DEBUG_CHEBY "0" CACHE STRING "Debug verbosity level")
-set(VERBOSITY   "1" CACHE STRING "General verbosity level")
-set(USE_MPI     "1" CACHE STRING "Use MPI")
+set(DEBUG     "0" CACHE STRING "Debug level")
+set(VERBOSITY "1" CACHE STRING "Verbosity level")
+set(USE_MPI   "1" CACHE STRING "Use MPI")
 
 # Set preprocessor flags to user-specified values, if available
 
@@ -65,6 +53,7 @@ add_executable(chimes_lsq
 
 target_include_directories(chimes_lsq PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_features   (chimes_lsq PRIVATE cxx_std_11)
+target_compile_options    (chimes_lsq PRIVATE -O3)
 target_link_libraries     (chimes_lsq ${MPI_LIBRARIES})
 
 IF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
@@ -95,6 +84,7 @@ add_executable(chimes_md
 
 target_include_directories(chimes_md PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_features   (chimes_md PRIVATE cxx_std_11)
+target_compile_options    (chimes_md PRIVATE -O3)
 target_link_libraries     (chimes_md ${MPI_LIBRARIES})
 
 IF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
