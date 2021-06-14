@@ -4,13 +4,13 @@
 # Run with:
 # ./install.sh
 # or
-# ./install.sh <debug option (0 or 1)> <install prefix (full path)> <verbosity option (0 or 1)> <MPI option (0 or 1)>
+# ./install.sh <debug option (0 or 1)> <install prefix (full path)> <verbosity option (0 or 1 or 2 or 3)> <MPI option (0 or 1)>
 
 
 
-DEBUG=${1-0}  # False (0) by default.
+DEBUG=${1-0}  # False (0) by default; if false, compiles with -O3, otherwise, uses -g
 PREFX=${2-""} # Empty by default
-VERBO=${3-1}  # Verbosity set to 1 by default
+VERBO=${3-1}  # Verbosity set to 1 by default, 0 gives minimal output, 3 gives minimal with DEBUG_CHEBY output, 4 gives all output
 DOMPI=${4-1}  # Compile with MPI support by default
 
 # Setup compilers
@@ -39,15 +39,23 @@ if [ ! -z $PREFX ] ; then
 fi
 
 if [ $DEBUG -eq 1 ] ;then
-        my_flags="${my_flags} -DDEBUG=1" 
+	my_flags="${my_flags} -DCMAKE_BUILD_TYPE=Debug"
 else
-        my_flags="${my_flags} -DDEBUG=0" 
+	my_flags="${my_flags} -DCMAKE_BUILD_TYPE=Release"
 fi
 
-if [ $VERBO -eq 1 ] ;then
-        my_flags="${my_flags} -DVERBOSITY=1" 
-else
+if   [ $VERBO -eq 0 ] ;then
         my_flags="${my_flags} -DVERBOSITY=0" 
+	my_flags="${my_flags} -DDEBUG_CHEBY=0" 
+elif [ $VERBO -eq 1 ] ; then
+        my_flags="${my_flags} -DVERBOSITY=1" 
+	my_flags="${my_flags} -DDEBUG_CHEBY=0" 
+elif [ $VERBO -eq 2 ] ; then
+        my_flags="${my_flags} -DVERBOSITY=0" 
+	my_flags="${my_flags} -DDEBUG_CHEBY=1" 	
+elif [ $VERBO -eq 3 ] ; then
+        my_flags="${my_flags} -DVERBOSITY=1" 
+	my_flags="${my_flags} -DDEBUG_CHEBY=1" 	
 fi
 
 if [ $DOMPI -eq 1 ] ;then
