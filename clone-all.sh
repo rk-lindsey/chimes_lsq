@@ -17,7 +17,7 @@ fi
 
 cd imports
 
-CHIMES_REPOS="ai_driver chimes_calculator chimes_developer_notes chimes_git_guide dlars molanal owlqn"
+CHIMES_REPOS="al_driver chimes_calculator chimes_developer_notes chimes_git_guide dlars owlqn"
 for repo in $CHIMES_REPOS ; do
 	 if [ ! -d $repo ] ; then
 		  git clone ssh://git@mybitbucket.llnl.gov:7999/~$BITBUCKET_USER/$repo.git $repo
