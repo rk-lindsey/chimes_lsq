@@ -11,7 +11,7 @@
 
 using namespace std;
 
-NEIGHBORS::NEIGHBORS()		// Constructor 
+NEIGHBORS::NEIGHBORS()
 {
 	RCUT_PADDING  =  0.3;
 	DISPLACEMENT  =  0.0;
@@ -31,26 +31,38 @@ NEIGHBORS::NEIGHBORS()		// Constructor
 	
 	// New for triclinic support
 	UPDATE_WITH_BIG = true;
+
+	PERM_SCALE.resize(MAX_BODIEDNESS+1) ;
+	for ( int j = 0 ; j < MAX_BODIEDNESS + 1 ; j++ ) {
+		 PERM_SCALE[j] = 1.0 ;
+	}
 	
 }
 NEIGHBORS::~NEIGHBORS(){}	// Deconstructor
 
 void NEIGHBORS::INITIALIZE(FRAME & SYSTEM)		// (overloaded) class constructor -- if no padding specified, default to 0.3
 {
-		LIST          .resize(SYSTEM.ATOMS);
-		LIST_EWALD    .resize(SYSTEM.ATOMS);
-		LIST_UNORDERED.resize(SYSTEM.ATOMS);
-		LIST_3B       .resize(SYSTEM.ALL_ATOMS);
-		LIST_4B       .resize(SYSTEM.ALL_ATOMS);
+	 LIST          .resize(SYSTEM.ATOMS);
+	 LIST_EWALD    .resize(SYSTEM.ATOMS);
+	 LIST_UNORDERED.resize(SYSTEM.ATOMS);
+	 LIST_3B       .resize(SYSTEM.ALL_ATOMS);
+	 LIST_4B       .resize(SYSTEM.ALL_ATOMS);
 		
-		// UPDATE_WITH_BIG will is true by default
-		// If it is already false at this point, it is because the user requested it
-		// a small update may be requested for cell vectors that don't obey our requirements (all positive)
+	 // UPDATE_WITH_BIG is true by default
+	 // If it is already false at this point, it is because the user requested it
+	 // a small update may be requested for cell vectors that don't obey our requirements (all positive)
 
-		if ((UPDATE_WITH_BIG == true) && (SYSTEM.ALL_ATOMS < 200))
+	 double max_cutoff = MAX_ALL_CUTOFFS() ;
+	 if (   SYSTEM.BOXDIM.EXTENT_X <= max_cutoff
+					|| SYSTEM.BOXDIM.EXTENT_Y <= max_cutoff
+					|| SYSTEM.BOXDIM.EXTENT_Z <= max_cutoff ) {
+			if ( RANK == 0 ) {
+				 cout << "Warning:  system size <= cutoff.  Using explicit permutation / small system neighbor algorithm.\n" ;
+				 cout << "Warning:  many-body interactions will be substantially slower.\n" ;
+			}
 			UPDATE_WITH_BIG = false;
+	 }
 
-		
 }
 
 void NEIGHBORS::INITIALIZE_MD(FRAME & SYSTEM)		// (overloaded) class constructor -- if no padding specified, default to 0.3
@@ -99,18 +111,43 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	if (UPDATE_WITH_BIG && USE)
 		DO_UPDATE_BIG(SYSTEM, CONTROLS);
 	else
-		DO_UPDATE_SMALL(SYSTEM, CONTROLS);
+		 DO_UPDATE_SMALL(SYSTEM, CONTROLS);
 
 	if ( CONTROLS.USE_3B_CHEBY ) 
 	  UPDATE_3B_INTERACTION(SYSTEM, CONTROLS);
 	
 	if ( CONTROLS.USE_4B_CHEBY ) 
 	  UPDATE_4B_INTERACTION(SYSTEM, CONTROLS);
-}	
-void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)	
+}
+
+double NEIGHBORS::MAX_ALL_CUTOFFS()
+// Returns the maximum of all cutoff values
+{
+	 double val = -1.0 ;
+
+	 if ( MAX_CUTOFF > val )    val = MAX_CUTOFF ;
+	 if ( MAX_CUTOFF_3B > val ) val = MAX_CUTOFF_3B ;
+	 if ( MAX_CUTOFF_4B > val ) val = MAX_CUTOFF_4B ;
+	 if ( EWALD_CUTOFF > val )  val = EWALD_CUTOFF ;
+	 return val ;
+}
+
+void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
+// This implements the "unordered" neighbor list convention where i < j and i > j are
+// explicitly included.  This is necessary for correct evalution of interactions between
+// atom i and its self-image when the cutoff is greater than or equal to the box size
+// (small box size limit).
 {
 
 	XYZ RAB;
+
+	// Set scaling factors for permutations of unordered interactions.
+	// PERM_SCALE[n] is the scaling factor for the n-body interaction.
+	PERM_SCALE[0] = 1.0 ;
+	PERM_SCALE[1] = 1.0 ;	
+	for ( int j = 2 ; j < PERM_SCALE.size() ; j++ ) {
+		PERM_SCALE[j] = PERM_SCALE[j-1] / j ;
+	}
 	
 	if(!FIRST_CALL)	// Clear out the second dimension so we can start over again
 	{
@@ -137,20 +174,17 @@ void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			if (rlen < MAX_CUTOFF + RCUT_PADDING)
 				LIST_UNORDERED[a1].push_back(a2);
 
-			if ((SYSTEM.PARENT[a2]>=a1) && (a2 > a1))
-			{
-				if(rlen < (MAX_CUTOFF + RCUT_PADDING)) 			// Select atoms in neighbor list according to parents.
-					LIST[a1].push_back(a2);	
+			if(rlen < (MAX_CUTOFF + RCUT_PADDING)) 			// Select atoms in neighbor list according to parents.
+				LIST[a1].push_back(a2);	
 
-				if (rlen < (EWALD_CUTOFF + RCUT_PADDING) )	
-					LIST_EWALD[a1].push_back(a2);	
+			if (rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
+				LIST_3B[a1].push_back(a2);
 
-				if (rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
-					LIST_3B[a1].push_back(a2);
-
-				if (rlen < MAX_CUTOFF_4B + RCUT_PADDING)	
-					LIST_4B[a1].push_back(a2);
-			}
+			if (rlen < MAX_CUTOFF_4B + RCUT_PADDING)	
+				LIST_4B[a1].push_back(a2);
+			
+			if (rlen < (EWALD_CUTOFF + RCUT_PADDING) )	
+				 LIST_EWALD[a1].push_back(a2);	
 		}
 	}
 
@@ -174,6 +208,10 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		LIST_UNORDERED.resize(SYSTEM.ATOMS);	
 		LIST_3B       .resize(SYSTEM.ATOMS);
 		LIST_4B       .resize(SYSTEM.ATOMS);	
+	}
+
+	for ( int j = 0 ; j < PERM_SCALE.size() ; j++ ) {
+		 PERM_SCALE[j] = 1.0 ;
 	}
 	
 	// Find maximum distance to search for neighbors.
@@ -403,6 +441,7 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		}
 	}
 }
+
 void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
 {
 	if(FIRST_CALL || SECOND_CALL)
@@ -1170,6 +1209,7 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 	INTERACTION_3B inter;
 
 	LIST_3B_INT.clear();
+
 	for ( int i = 0; i < SYSTEM.ATOMS; i++ ) 
 	{
 		int ai = i;
@@ -1180,9 +1220,15 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 			{
 				int ak = LIST_3B[i][k];
 
-				if ( aj == ak || SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] ) 
+				if ( aj == ak )
+				{
 					continue;
-
+				}
+				else if ( PERM_SCALE[3] == 1.0 && SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] )
+				{
+					 continue ;
+				}
+				
 				// The j-k list is possibly outside of the cutoff, so test it here.
 				double rlen = get_dist(SYSTEM, RAB, aj, ak);
 	
@@ -1228,7 +1274,7 @@ void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 			  if (aj == ak )
 				 continue;
 
-			  if( SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] )
+			  if( PERM_SCALE[4] == 1.0 && SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] )
 				 continue;
 
 			  if( get_dist(SYSTEM, RAB, aj, ak) >  MAX_CUTOFF_4B + RCUT_PADDING)
@@ -1243,7 +1289,7 @@ void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 					if (aj == al || ak == al)
 						continue;
 					
-					if( SYSTEM.PARENT[ak] > SYSTEM.PARENT[al] || SYSTEM.PARENT[aj] > SYSTEM.PARENT[al] )
+					if( PERM_SCALE[4] == 1.0 && (SYSTEM.PARENT[ak] > SYSTEM.PARENT[al] || SYSTEM.PARENT[aj] > SYSTEM.PARENT[al]) )
 						continue;
 					
 					// We know ij, ik, il, and jk distances are within the allowed cutoffs, but we still need to check jl, and kl

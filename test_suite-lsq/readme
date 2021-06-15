@@ -146,3 +146,7 @@ This is a list of each test and what functionality is probed
    - Forces come from test_suite-md/nonorth MD run.
    - RMS force error should be very low.
    
+25 h2o-4bcheby-small
+   - Test of the non-ordered neighbor list for "small" unit cells.
+	- Should have almost the same output as h2o-4bcheby.
+

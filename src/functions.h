@@ -420,8 +420,8 @@ class NEIGHBORS
 		void DO_UPDATE_BIG   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
 		void UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS);  // Update 3-Body interaction list.
 		void UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS);  // Update 4-Body interaction list.
-		
-	public:
+
+public:
 
 		bool   UPDATE_WITH_BIG;			// Should we update our neighbor list with DO_UPDATE_BIG? If false, uses DO_UPDATE_SMALL
 		double RCUT_PADDING;			// Neighborlist cutoff is r_max + rcut_padding
@@ -433,8 +433,10 @@ class NEIGHBORS
 		double MAX_CUTOFF_4B;
 		double EWALD_CUTOFF;           		// The cutoff for Ewald interactions.
 		double UPDATE_FREQ;            		// Target update frequency.
-		
-		vector<vector<int> > LIST;		// The actual (2B) neighbor list. Of size [atoms][neighbors]
+
+	vector<double> PERM_SCALE ;       // Scaling factor for self-interactions.
+	 
+	vector<vector<int> > LIST;		// The actual (2B) neighbor list. Of size [atoms][neighbors]
 		vector<vector<int> > LIST_EWALD;	// The Ewald neighbor list. Of size [atoms][neighbors]
 		vector<vector<int> > LIST_UNORDERED;	// All neighbors of particle i with i not equal to j.
 		vector<vector<int> > LIST_3B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
@@ -450,6 +452,8 @@ class NEIGHBORS
 		void INITIALIZE(FRAME & SYSTEM, double & PAD);
 		void DO_UPDATE (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
 
+	 double MAX_ALL_CUTOFFS() ;
+	 
 		NEIGHBORS();
 		~NEIGHBORS();
 };

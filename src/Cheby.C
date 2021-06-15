@@ -646,7 +646,8 @@ void Cheby::Deriv_2B(A_MAT & A_MATRIX)
 
 				 for ( int i=0; i<FF_2BODY[curr_pair_type_idx].SNUM; i++ ) 
 				 {
-					tmp_doub = (fcut * Tnd[i+1] + fcutderiv * Tn[i+1] );
+					// Self-scaling needed for very small cells with self-interactions.  It is 1 for the big cell neighbor list.
+					tmp_doub = NEIGHBOR_LIST.PERM_SCALE[2] * (fcut * Tnd[i+1] + fcutderiv * Tn[i+1] );
 
 					// Finally, account for the x, y, and z unit vectors
 
@@ -682,7 +683,7 @@ void Cheby::Deriv_2B(A_MAT & A_MATRIX)
 
 					if(CONTROLS.FIT_ENER) 
 					{
-						A_MATRIX.FRAME_ENERGIES[vstart+i]    += fcut * Tn[i+1];
+						A_MATRIX.FRAME_ENERGIES[vstart+i]    +=  NEIGHBOR_LIST.PERM_SCALE[2] * fcut * Tn[i+1];
 					}
 				 }
 			 } else if (false)//( rlen <= FF_2BODY[curr_pair_type_idx].S_MINIM ) 
@@ -818,6 +819,8 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 	int a2start, a2end, a2;
 	int a3start, a3end, a3;
 
+	double perm_scale = NEIGHBOR_LIST.PERM_SCALE[3] ;
+	
 	for(int a1=a1start; a1<=a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS (prev -1)
 	{
 		a2start = 0;
@@ -838,9 +841,15 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 			for(int a3idx=a3start; a3idx<a3end; a3idx++)	
 			{			
 				a3 = NEIGHBOR_LIST.LIST_3B[a1][a3idx];
-				
-				if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) 
-					continue;
+
+				// If perm_scale == 1.0, we are using unique neighbors.  If < 1.0, we are using
+				// unordered neighbors for small cells.
+				if ( a3 == a2 )
+				{
+					 continue ;
+				} else if ( perm_scale == 1.0 && SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) {
+					 continue;
+				}
 
 				curr_pair_type_idx_ij =  get_pair_index(a1, a2, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,SYSTEM.PARENT) ;
 				curr_pair_type_idx_ik =  get_pair_index(a1, a3, SYSTEM.ATOMTYPE_IDX, CONTROLS.NATMTYP,SYSTEM.PARENT) ;
@@ -996,24 +1005,24 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 								 set_3b_powers(PAIR_TRIPLETS[curr_triple_type_index], pair_index, i,
 													pow_ij, pow_ik, pow_jk) ;
 
-							    deriv_ij =  fcut_ij * Tnd_ij[pow_ij] + fcutderiv_ij * Tn_ij[pow_ij];
-							    deriv_ik =  fcut_ik * Tnd_ik[pow_ik] + fcutderiv_ik * Tn_ik[pow_ik];
-							    deriv_jk =  fcut_jk * Tnd_jk[pow_jk] + fcutderiv_jk * Tn_jk[pow_jk];	
+								 deriv_ij =  fcut_ij * Tnd_ij[pow_ij] + fcutderiv_ij * Tn_ij[pow_ij] ;
+								 deriv_ik =  fcut_ik * Tnd_ik[pow_ik] + fcutderiv_ik * Tn_ik[pow_ik] ;
+								 deriv_jk =  fcut_jk * Tnd_jk[pow_jk] + fcutderiv_jk * Tn_jk[pow_jk] ;	
 								
 								if(FORCE_IS_ZERO_IJ)
 									force_wo_coeff_ij = 0;
 								else
-									force_wo_coeff_ij = deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk];
+									 force_wo_coeff_ij = perm_scale * (deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk]);
 								
 								if(FORCE_IS_ZERO_IK)
 									force_wo_coeff_ik = 0;
 								else
-									force_wo_coeff_ik = deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk];
+									 force_wo_coeff_ik = perm_scale * (deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk]);
 								
 								if(FORCE_IS_ZERO_JK)
 									force_wo_coeff_jk = 0;
 								else
-									force_wo_coeff_jk = deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik];
+									 force_wo_coeff_jk = perm_scale * (deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik]) ;
 						
 								// ij pairs
 
@@ -1106,7 +1115,7 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 
 								if(CONTROLS.FIT_ENER) 
 								{
-									A_MATRIX.FRAME_ENERGIES[vstart+row_offset] += fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk];
+									A_MATRIX.FRAME_ENERGIES[vstart+row_offset] += fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk] * perm_scale ;
 								}
 							}
 						} // end if rlen_jk within cutoffs...
@@ -1197,6 +1206,7 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 
 	vector<QUADRUPLETS>& PAIR_QUADRUPLETS = QUADS.VEC ;
 
+	
 	if (!called_before) 
 	{
 		called_before = true;
@@ -1251,6 +1261,8 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 	int a3start, a3end, a3;
 	int a4start, a4end, a4;	
 
+	double perm_scale = NEIGHBOR_LIST.PERM_SCALE[4] ;
+	
 	for(int a1=a1start; a1<=a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS (prev -1)
 	{
 		a2start = 0;
@@ -1268,9 +1280,15 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 			for(int a3idx=a3start; a3idx<a3end; a3idx++)	
 			{			
 				a3 = NEIGHBOR_LIST.LIST_4B[a1][a3idx];
-				
-				if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) 
-					continue;
+
+				// If perm_scale == 1.0, we are using unique neighbors.  If < 1.0, we are using
+				// unordered neighbors for small cells.
+				if ( a3 == a2 )
+				{
+					 continue ;
+				} else if ( perm_scale == 1.0 && SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) {
+					 continue;
+				}
 				
 				a4start = 0;
 				a4end   = NEIGHBOR_LIST.LIST_4B[a1].size();
@@ -1280,8 +1298,14 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 					a4 = NEIGHBOR_LIST.LIST_4B[a1][a4idx];
 				
 					// Already checked a2 == a3 and SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] in a3idx loop.
-					if ( a2 == a4  || a3 == a4 || SYSTEM.PARENT[a3] > SYSTEM.PARENT[a4] ) 
-						continue;
+
+					if ( a2 == a4  || a3 == a4 )
+					{
+						 continue;
+					} else if ( perm_scale == 1.0 && SYSTEM.PARENT[a3] > SYSTEM.PARENT[a4] )
+					{
+						 continue ;
+					}
 				
 					// Determine the pair types and the triplet type
 	
@@ -1434,13 +1458,13 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 						
 						for (int f=0; f<6; f++)	
 							powers[f] = PAIR_QUADRUPLETS[curr_quad_type_index].ALLOWED_POWERS[i][pow_map[f]];
-
-					    	 deriv[0] =  fcut[0] * Tnd_ij[powers[0]] + fcut_deriv[0] * Tn_ij[powers[0]];
-						 deriv[1] =  fcut[1] * Tnd_ik[powers[1]] + fcut_deriv[1] * Tn_ik[powers[1]];
-						 deriv[2] =  fcut[2] * Tnd_il[powers[2]] + fcut_deriv[2] * Tn_il[powers[2]];
-						 deriv[3] =  fcut[3] * Tnd_jk[powers[3]] + fcut_deriv[3] * Tn_jk[powers[3]];
-						 deriv[4] =  fcut[4] * Tnd_jl[powers[4]] + fcut_deriv[4] * Tn_jl[powers[4]];
-						 deriv[5] =  fcut[5] * Tnd_kl[powers[5]] + fcut_deriv[5] * Tn_kl[powers[5]];
+						
+						deriv[0] = perm_scale * (fcut[0] * Tnd_ij[powers[0]] + fcut_deriv[0] * Tn_ij[powers[0]]) ;
+						deriv[1] = perm_scale * (fcut[1] * Tnd_ik[powers[1]] + fcut_deriv[1] * Tn_ik[powers[1]]) ;
+						deriv[2] = perm_scale * (fcut[2] * Tnd_il[powers[2]] + fcut_deriv[2] * Tn_il[powers[2]]) ;
+						deriv[3] = perm_scale * (fcut[3] * Tnd_jk[powers[3]] + fcut_deriv[3] * Tn_jk[powers[3]]) ;
+						deriv[4] = perm_scale * (fcut[4] * Tnd_jl[powers[4]] + fcut_deriv[4] * Tn_jl[powers[4]]) ;
+						deriv[5] = perm_scale * (fcut[5] * Tnd_kl[powers[5]] + fcut_deriv[5] * Tn_kl[powers[5]]) ;
 
 						force_wo_coeff[0] = deriv[0] * fcut[1] * fcut[2] * fcut[3] * fcut[4] * fcut[5]  * Tn_ik[powers[1]]  * Tn_il[powers[2]]  * Tn_jk[powers[3]]  * Tn_jl[powers[4]]  * Tn_kl[powers[5]];
 						force_wo_coeff[1] = deriv[1] * fcut[0] * fcut[2] * fcut[3] * fcut[4] * fcut[5]  * Tn_ij[powers[0]]  * Tn_il[powers[2]]  * Tn_jk[powers[3]]  * Tn_jl[powers[4]]  * Tn_kl[powers[5]];
@@ -1546,6 +1570,8 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 							  * fcut[3] 
 							  * fcut[4] 
 							  * fcut[5];
+
+						TMP_ENER *= perm_scale ;
 							  
 						TMP_ENER *=  Tn_ij[powers[0]] 
 						           * Tn_ik[powers[1]] 
@@ -1669,6 +1695,8 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
   // EVALUATE THE 2-BODY INTERACTIONS
   /////////////////////////////////////////////
 	
+	double perm_scale = NEIGHBOR_LIST.PERM_SCALE[2] ;
+	
   if(FF_2BODY[0].SNUM>0)
   {
 	 for(int a1=a1start; a1<=a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS (prev -1)
@@ -1715,7 +1743,7 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 				
 			 for ( int i = 0; i < FF_2BODY[curr_pair_type_idx_ij].SNUM; i++ ) 
 			 {
-				double coeff                = FF_2BODY[curr_pair_type_idx_ij].PARAMS[i]; // This is the Cheby FF param for the given power
+				double coeff                = perm_scale * FF_2BODY[curr_pair_type_idx_ij].PARAMS[i]; // This is the Cheby FF param for the given power
 				SYSTEM.TOT_POT_ENER += coeff * fcut_2b * Tn[i+1];
 				deriv                = (fcut_2b * Tnd[i+1] + fcutderiv_2b * Tn[i+1]);
 				SYSTEM.PRESSURE_XYZ -= coeff * deriv * rlen_ij;		
@@ -1918,7 +1946,10 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
   int INTERACTIONS = 0;
 
   // Loop over a1, a2, a3 interaction triples, not atoms
-  for ( int ii = i_start; ii <= i_end; ii++ ) 
+
+	double perm_scale = NEIGHBOR_LIST.PERM_SCALE[3] ;
+	
+	for ( int ii = i_start; ii <= i_end; ii++ ) 
   {
 
 	 a1 = NEIGHBOR_LIST.LIST_3B_INT[ii].a1;
@@ -1926,11 +1957,6 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 	 int a2 = NEIGHBOR_LIST.LIST_3B_INT[ii].a2;
 	 int a3 = NEIGHBOR_LIST.LIST_3B_INT[ii].a3;
 
-	 if ( a3 == a2 || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] ) {
-		cout << "Bad pair found " << a3 << a2 << endl;
-		cout << "Parents " << SYSTEM.PARENT[a2] << SYSTEM.PARENT[a3] << endl;
-	 }
-			
 	 vector<int> atom_type_index(3) ;
 
 	 atom_type_index[0] = SYSTEM.get_atomtype_idx(a1) ;
@@ -2027,7 +2053,7 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 				set_3b_powers(FF_3BODY[curr_triple_type_index], pair_index, i,
 								  pow_ij, pow_ik, pow_jk) ;
 			      
-				coeff = FF_3BODY[curr_triple_type_index].PARAMS[i];
+				coeff = perm_scale * FF_3BODY[curr_triple_type_index].PARAMS[i] ;
 			      
 				SYSTEM.TOT_POT_ENER += coeff * fcut_ij * fcut_ik * fcut_jk * Tn_ij[pow_ij] * Tn_ik[pow_ik] * Tn_jk[pow_jk]; 
 
@@ -2228,6 +2254,8 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		
   // Loop over a1, a2, a3, a4 interaction quadruplets, not atoms
 
+	double perm_scale = NEIGHBOR_LIST.PERM_SCALE[4] ;
+	
   for ( int ii = i_start; ii <= i_end; ii++ ) 
   {
   
@@ -2237,17 +2265,6 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 	 int a3 = NEIGHBOR_LIST.LIST_4B_INT[ii].a3;
 	 int a4 = NEIGHBOR_LIST.LIST_4B_INT[ii].a4;
 
-	 if ( a3 == a2 || a4 == a2 || a3 == a4 ) 
-	 {
-		cout << "Bad pair found " << a1 << ", " << a2 << ", " << a3 << ", " << a4 << endl;
-		cout << "Parents " << SYSTEM.PARENT[a1] << ", " << SYSTEM.PARENT[a2] << ", " <<  SYSTEM.PARENT[a3] << ", " <<  SYSTEM.PARENT[a4] << endl;
-	 }
-	 if (SYSTEM.PARENT[a2] > SYSTEM.PARENT[a3] || SYSTEM.PARENT[a2] > SYSTEM.PARENT[a4] || SYSTEM.PARENT[a3] > SYSTEM.PARENT[a4]) 
-	 {
-		cout << "Bad pair found " << a1 << ", " << a2 << ", " << a3 << ", " << a4 << endl;
-		cout << "Parents " << SYSTEM.PARENT[a1] << ", " << SYSTEM.PARENT[a2] << ", " <<  SYSTEM.PARENT[a3] << ", " <<  SYSTEM.PARENT[a4] << endl;
-	 }			
-			
 	 int fidx_a2 = SYSTEM.PARENT[a2];
 	 int fidx_a3 = SYSTEM.PARENT[a3];
 	 int fidx_a4 = SYSTEM.PARENT[a4];
@@ -2353,7 +2370,7 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 			
 	 for(int i=0; i<FF_4BODY[curr_quad_type_index].N_ALLOWED_POWERS; i++) 
 	 {
-		double coeff = FF_4BODY[curr_quad_type_index].PARAMS[i];
+		double coeff = perm_scale * FF_4BODY[curr_quad_type_index].PARAMS[i];
 
 		for ( int f = 0 ; f < 6 ; f++ ) 
 		  powers[f] = FF_4BODY[curr_quad_type_index].ALLOWED_POWERS[i][pow_map[f]] ;
