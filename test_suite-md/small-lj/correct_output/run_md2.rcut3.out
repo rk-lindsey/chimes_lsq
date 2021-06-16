@@ -1,0 +1,166 @@
+Code compiled in serial mode. Will run on 1 processor(s).
+
+Reading the simulation control input file...
+Will read from file: run_md2.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# RNDSEED #: 12357
+	# TEMPERA #: 20 K
+	# CONVCUT #: 100000 % of set T
+	# CMPRFRC #: false
+	# TIMESTP #: 0.01 fs
+	# N_MDSTP #: 2
+	# NLAYERS #: 2
+	# USENEIG #: true
+	# PRMFILE #: params.lj.txt
+	# CRDFILE #: input2.xyz
+	# VELINIT #: READ ... reading velocities from coordinate file
+	# PRSCALC #: ANALYTICAL
+	# WRPCRDS #: true
+	# ATMENER #: 0
+		... All reported energies *DO NOT* include single atom contributions
+	# FRQTRAJ #: 1
+		... printing every 0.01 fs, 
+		... printing       2 frames. 
+	# TRAJEXT #: GEN
+	# FRQENER #: 1
+	# PRNTFRC #: true
+		... and will be printed every 742151304 frames.
+		... printing every 7.42151e+06 fs, 
+		... printing 0 frames. 
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: true
+		... and will be printed every 742151304 frames.
+		... printing every 7.42151e+06 fs, 
+		... printing 0 frames. 
+	# FORDFTB #: false
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+     ...Read the following coordinate file extension: xyz
+     ...Read the following number of atoms: 4
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8 0 0
+       Cell vectors (b)                0 16 0
+       Cell vectors (c)                0 0 16
+       Layers:                         2
+       Ghost cell vectors (a) 	        40 0 0
+       Ghost cell vectors (a) 	        0 80 0
+       Ghost cell vectors (a) 	        0 0 80
+       Invr. cell vectors (a) 	        0.125 -0 0
+       Invr. cell vectors (b) 	        -0 0.0625 -0
+       Invr. cell vectors (c) 	        0 -0 0.0625
+       Lat. constants (a,b,c) 	        8 16 16
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8 16 16
+       LMP cell lengths (lx,ly,lz)     8 16 16
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     2048
+
+	...Reading velocities from last three fields of atom info lines in xyzf file... 
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8 0 0
+       Cell vectors (b)                0 16 0
+       Cell vectors (c)                0 0 16
+       Layers:                         2
+       Ghost cell vectors (a) 	        40 0 0
+       Ghost cell vectors (a) 	        0 80 0
+       Ghost cell vectors (a) 	        0 0 80
+       Invr. cell vectors (a) 	        0.125 -0 0
+       Invr. cell vectors (b) 	        -0 0.0625 -0
+       Invr. cell vectors (c) 	        0 -0 0.0625
+       Lat. constants (a,b,c) 	        8 16 16
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            8 16 16
+       LMP cell lengths (lx,ly,lz)     8 16 16
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     2048
+
+   ...read complete for file input2.xyz
+
+Reading atom info from parameter file...
+	Read 1 atom types:
+		0     O , q (e):  0.000, mass (amu):   1.0000
+   ...read complete
+
+	Real atoms:                 4
+	Total atoms (ghost):        500
+	cell vectors (a)            8.0000 0.0000 0.0000
+	cell vectors (b)            0.0000 16.0000 0.0000
+	cell vectors (c)            0.0000 0.0000 16.0000
+	Layers:                     2
+	Effective cell vectors (a): 40.0000 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 80.0000 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 80.0000
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVE simulation.
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+	Total Mass     = 4.0000 au
+	Volume         = 2048.0000 Ang^3
+	Number density = 0.0032 mol atm/cm^3
+	Mass density   = 0.0032 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      false
+		...Use fit charges?             false
+		...Compute ReaxFF overbonding?  false
+		...Use fit overbonding param?   false
+		...Use 3-body Cheby params?     false
+		...Use 4-body Cheby params?     false
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Reading all remaining force field parameters...
+	...Read 2-body FF params...
+   ...read complete.
+
+Notes on simulation: 
+	Using fpenalty power 3.0000
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with steepness and offsets of: 2.0000 0.0000
+	Electrostatics will not be computed.
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		LJ 2
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...sdelta...
+		OO 0.1000 3.0000 0.1000 
+		Parameters: 
+		0 1.0000
+		1 1.0000
+
+
+Initializing the neighbor list...
+NEIGHBOR LIST MAX CUTOFF IS: 3.00000
+USING PADDING: 0.300
+
+Generating fast maps... 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.0061364752
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)
+       1      0.01       0.5000000      -0.0745578       0.4254422           223.7      0.00255100      0.4254422
+       2      0.02       0.5000562      -0.0746140       0.4254422           223.7      0.00255010      0.4254422
+END SIMULATION
+	Average temperature over run = 223.6887 K
+	Average pressure    over run = 0.0026 GPa

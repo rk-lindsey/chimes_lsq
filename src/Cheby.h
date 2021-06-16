@@ -5,6 +5,7 @@
 	#define CHECK_CHEBY_RANGE 1	// (true)
 #endif
 
+#define MAX_BODIEDNESS 4
 
 class Cheby
 {

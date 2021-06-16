@@ -1,0 +1,36 @@
+! Date  2016-06-14
+! Number of columns =  34
+! Number of rows    =  14114
+! RMS force error   =  13.9161502676
+! max variable      =  136.955400283
+
+USECOUL: false
+FITCOUL: false
+USEPOVR: false
+FITPOVR: false
+USE3BCH: false
+
+PAIRTYP: LJ
+
+ATOM TYPES: 1
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		 0.0		1.0
+
+ATOM PAIRS: 1
+
+!# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# S_DELTA #
+	0               O               O               0.1             3               0.1	   
+	
+ATOM PAIR TRIPLETS: 0
+
+PAIR LJ PARAMS 
+
+PAIRTYPE PARAMS: 0 O O
+0 1.0
+1 1.0
+ 
+PAIRMAPS: 1
+0 OO
+
+ENDFILE

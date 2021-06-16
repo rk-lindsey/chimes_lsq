@@ -1504,20 +1504,19 @@ void INPUT::PARSE_CONTROLS_USENEIG(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_
 			if (RANK==0)
 				cout << "	# USENEIG #: " << bool2str(NEIGHBOR_LIST.USE) << endl;
 				
-			if (CONTENTS.size(i+1) == 2)
+			if (CONTENTS.size(i+1) == 2 && NEIGHBOR_LIST.USE )
 			{
 				if (CONTENTS(i+1,1) == "SMALL")
 				{
 					NEIGHBOR_LIST.UPDATE_WITH_BIG = false;
+					if ( RANK == 0 )
+						 cout << "		Will update the neighbor list through the \"small\" method " << endl;
 				}
 				else
 				{
 					EXIT_MSG("ERROR: Unrecognized # USENEIG # option: ", CONTENTS(i+1,1));
 				}
-				
-				cout << "		Will force update through the \"small\" method " << endl;
 			}
-					
 		
 			break;
 		}
@@ -1911,7 +1910,10 @@ void INPUT::PARSE_CONTROLS_PRNTFRC(JOB_CONTROL & CONTROLS)
 					CONTROLS.FREQ_FORCE = CONTROLS.FREQ_DFTB_GEN;
 				else
 					CONTROLS.FREQ_FORCE = convert_int(CONTENTS(i+1,1),i+1);
-			}
+			} else {
+				 // Default: print every step if PRNTFRC requested.
+				 CONTROLS.FREQ_FORCE = 1 ;
+			} 
 		
 			break;
 		}

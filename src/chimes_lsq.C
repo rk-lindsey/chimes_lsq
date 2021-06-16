@@ -643,78 +643,78 @@ static int process_frame(	A_MAT &A_MATRIX,
 // Process the ith frame of the A_MATRIX.
 {
 
-	static bool called_before = false;
+	 static bool called_before = false;
 
-	double 	NEIGHBOR_PADDING = 0.3;
+	 double 	NEIGHBOR_PADDING = 0.3;
 
-	// NOTE: WE CONTINUALLY RE-USE THE 0th entry of A_MATRIX TO SAVE MEMORY.
-	A_MATRIX.INITIALIZE(CONTROLS, SYSTEM, ATOM_PAIRS.size(),ATOM_PAIRS) ;
+	 // NOTE: WE CONTINUALLY RE-USE THE 0th entry of A_MATRIX TO SAVE MEMORY.
+	 A_MATRIX.INITIALIZE(CONTROLS, SYSTEM, ATOM_PAIRS.size(),ATOM_PAIRS) ;
 
-	if (RANK == 0 && i == istart )
-	{
-		cout << "...matrix setup complete: " << endl << endl;
-		cout << "...Populating the matrices for A, Coulomb forces, and overbonding..." << endl << endl;
-	}
+	 if (RANK == 0 && i == istart )
+	 {
+			cout << "...matrix setup complete: " << endl << endl;
+			cout << "...Populating the matrices for A, Coulomb forces, and overbonding..." << endl << endl;
+	 }
 	
 		
-	bool DUMMY_FIT_STRESS	     = CONTROLS.FIT_STRESS;    
-	bool DUMMY_FIT_STRESS_ALL    = CONTROLS.FIT_STRESS_ALL;
-	bool DUMMY_FIT_ENER	         = CONTROLS.FIT_ENER;	 
+	 bool DUMMY_FIT_STRESS	     = CONTROLS.FIT_STRESS;    
+	 bool DUMMY_FIT_STRESS_ALL    = CONTROLS.FIT_STRESS_ALL;
+	 bool DUMMY_FIT_ENER	         = CONTROLS.FIT_ENER;	 
 
-	// Only include stress tensor data for first NSTRESS frames..
+	 // Only include stress tensor data for first NSTRESS frames..
 	
-	if((CONTROLS.NSTRESS != -1) && (i >= CONTROLS.NSTRESS))
-	{
-		CONTROLS.FIT_STRESS     = false;	
-		CONTROLS.FIT_STRESS_ALL = false;
-	}
+	 if((CONTROLS.NSTRESS != -1) && (i >= CONTROLS.NSTRESS))
+	 {
+			CONTROLS.FIT_STRESS     = false;	
+			CONTROLS.FIT_STRESS_ALL = false;
+	 }
 		
-	if((CONTROLS.NENER != -1) && (i >= CONTROLS.NENER))
-	{
-		CONTROLS.FIT_ENER          = false;	
-	}
+	 if((CONTROLS.NENER != -1) && (i >= CONTROLS.NENER))
+	 {
+			CONTROLS.FIT_ENER          = false;	
+	 }
 			
-	// This output is specific to the number of processors.
+	 // This output is specific to the number of processors.
 		
-	if(NPROCS==1)
-		cout << "	Processing frame: " << setw(5) << i+1 << " of: " << CONTROLS.NFRAMES << endl;
+	 if(NPROCS==1)
+			cout << "	Processing frame: " << setw(5) << i+1 << " of: " << CONTROLS.NFRAMES << endl;
 
-	// Use very little padding because we will update neighbor list for every frame.
-if(!called_before)
-{
-	called_before = true;
+	 // Use very little padding because we will update neighbor list for every frame.
+	 if(!called_before)
+	 {
+			called_before = true;
 	
-	if (CONTROLS.USE_3B_CHEBY)
-	{
-	 	 TRIPS.update_minmax_cutoffs(ATOM_PAIRS);
-		 NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF;
-	}
-	if (CONTROLS.USE_4B_CHEBY)	       
-	{
-		QUADS.update_minmax_cutoffs(ATOM_PAIRS);
-		NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
-	}
-}		
-	NEIGHBOR_LIST.INITIALIZE(SYSTEM, NEIGHBOR_PADDING);
-	NEIGHBOR_LIST.DO_UPDATE (SYSTEM, CONTROLS);		
+			if (CONTROLS.USE_3B_CHEBY)
+			{
+				 TRIPS.update_minmax_cutoffs(ATOM_PAIRS);
+				 NEIGHBOR_LIST.MAX_CUTOFF_3B = TRIPS.MAX_CUTOFF;
+			}
+			if (CONTROLS.USE_4B_CHEBY)	       
+			{
+				 QUADS.update_minmax_cutoffs(ATOM_PAIRS);
+				 NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
+			}
+	 }		
+	 NEIGHBOR_LIST.INITIALIZE(SYSTEM, NEIGHBOR_PADDING);
+	 NEIGHBOR_LIST.DO_UPDATE (SYSTEM, CONTROLS);		
 
-	ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, SYSTEM, A_MATRIX, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
+	 ZCalc_Deriv(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, SYSTEM, A_MATRIX, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
 		
-	if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
-	{
-		cout << "Feature deprecated - exiting." << endl;
-		exit_run(0);
-	}
+	 if ( CONTROLS.IF_SUBTRACT_COORD ) // Subtract over-coordination forces from force to be output.
+	 {
+			cout << "Feature deprecated - exiting." << endl;
+			exit_run(0);
+	 }
 		
-	if (CONTROLS.IF_SUBTRACT_COUL) 
-		SubtractEwaldForces(SYSTEM, NEIGHBOR_LIST, CONTROLS);
+	 if (CONTROLS.IF_SUBTRACT_COUL) 
+			SubtractEwaldForces(SYSTEM, NEIGHBOR_LIST, CONTROLS);
 	
-	CONTROLS.FIT_STRESS        = DUMMY_FIT_STRESS; 
-	CONTROLS.FIT_STRESS_ALL    = DUMMY_FIT_STRESS_ALL;
-	CONTROLS.FIT_ENER          = DUMMY_FIT_ENER;	
-	CONTROLS.FIT_ENER_EVER     = CONTROLS.FIT_ENER;
+	 CONTROLS.FIT_STRESS        = DUMMY_FIT_STRESS; 
+	 CONTROLS.FIT_STRESS_ALL    = DUMMY_FIT_STRESS_ALL;
+	 CONTROLS.FIT_ENER          = DUMMY_FIT_ENER;	
+	 CONTROLS.FIT_ENER_EVER     = CONTROLS.FIT_ENER;
 
-	A_MATRIX.PRINT_FRAME(CONTROLS, SYSTEM, ATOM_PAIRS, CHARGE_CONSTRAINTS, i) ;
-	int total_forces = 3 * A_MATRIX.FORCES.size() ;
-	return total_forces ;
+	 A_MATRIX.PRINT_FRAME(CONTROLS, SYSTEM, ATOM_PAIRS, CHARGE_CONSTRAINTS, i) ;
+	 int total_forces = 3 * A_MATRIX.FORCES.size() ;
+	 return total_forces ;
 }
