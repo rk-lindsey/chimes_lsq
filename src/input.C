@@ -1702,8 +1702,8 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 
 					if(CONTROLS.ENSEMBLE == "NPT-MTK")
 					{
-						if(CONTENTS.size(i+1) == 2)
-							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,1),i+1);
+						if(CONTENTS.size(i+1) == 4)
+							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,3),i+1);
 						else
 							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;	
 							

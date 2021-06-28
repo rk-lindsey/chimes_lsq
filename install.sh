@@ -18,7 +18,11 @@ DOMPI=${4-1}  # Compile with MPI support by default
 module load intel/18.0.1
 module load impi/2018.0
 
+#module load gcc/10.2.1
+#module load mvapich2
+
 ICC=`which icc`    # /usr/tce/packages/intel/intel-18.0.1/bin/icc
+#ICC=`which g++`    # /usr/tce/packages/intel/intel-18.0.1/bin/icc
 MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mpicxx
 
 # Clean up previous installation,
@@ -39,7 +43,7 @@ if [ ! -z $PREFX ] ; then
 fi
 
 if [ $DEBUG -eq 1 ] ;then
-	my_flags="${my_flags} -DCMAKE_BUILD_TYPE=Debug"
+	my_flags="${my_flags} -Wall -DCMAKE_BUILD_TYPE=Debug"
 else
 	my_flags="${my_flags} -DCMAKE_BUILD_TYPE=Release"
 fi

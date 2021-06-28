@@ -255,6 +255,7 @@ int main(int argc, char* argv[])
 		
 	 SYSTEM.ATOMTYPE     .resize(SYSTEM.ATOMS);
 	 SYSTEM.COORDS       .resize(SYSTEM.ATOMS);
+	 SYSTEM.COORDS0      .resize(SYSTEM.ATOMS);	 
 	 SYSTEM.CHARGES      .resize(SYSTEM.ATOMS);
 	 SYSTEM.MASS         .resize(SYSTEM.ATOMS);
 	 SYSTEM.FORCES       .resize(SYSTEM.ATOMS);
@@ -549,16 +550,17 @@ int main(int argc, char* argv[])
 	
   ENSEMBLE_CONTROL.INITIALIZE(CONTROLS.ENSEMBLE, CONTROLS, SYSTEM.ATOMS);
   
-  if((ENSEMBLE_CONTROL.STYLE== "NPT-BEREND")||(ENSEMBLE_CONTROL.STYLE== "NPT-BEREND-ANISO")||(ENSEMBLE_CONTROL.STYLE== "NPT-MTK"))
+  if(  (ENSEMBLE_CONTROL.STYLE == "NPT-BEREND")
+		 ||(ENSEMBLE_CONTROL.STYLE == "NPT-BEREND-ANISO")
+		 ||(ENSEMBLE_CONTROL.STYLE == "NPT-MTK") )
   {
-  	if (!SYSTEM.BOXDIM.IS_ORTHO)
-		EXIT_MSG("ERROR: NPT-BEREND, NPT-BEREND-ANISO, and NPT-MTK only compatible with orthorhombic cells.");
-}
+		 SYSTEM.BOXDIM.IS_VARIABLE = true ;
+		 if (!SYSTEM.BOXDIM.IS_ORTHO)
+				EXIT_MSG("ERROR: NPT-BEREND, NPT-BEREND-ANISO, and NPT-MTK only compatible with orthorhombic cells.");
+	}
 
   if ( CONTROLS.RESTART ) 
 	 read_restart_params(COORDFILE, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, SYSTEM) ;
-
-  Vol = SYSTEM.BOXDIM.VOL;
 
   if ( CONTROLS.INIT_VEL ) // Use box Muller to initialize velocities
   {
@@ -585,6 +587,7 @@ int main(int argc, char* argv[])
   for(int a=0; a<SYSTEM.ATOMS; a++)
 	 TEMP_MASS  += SYSTEM.MASS[a];
 
+  Vol = SYSTEM.BOXDIM.VOL;
   dens_mol  = (SYSTEM.ATOMS * 1.0e24) / (6.0221e23 * Vol);
   dens_mass = (TEMP_MASS/Vol)*(1e24/6.0221e23);
 
@@ -644,7 +647,7 @@ int main(int argc, char* argv[])
   	NEIGHBOR_LIST.MAX_CUTOFF_4B = QUADS.MAX_CUTOFF;
   }
   	
-  NEIGHBOR_LIST.INITIALIZE_MD(SYSTEM);
+  NEIGHBOR_LIST.INITIALIZE_MD(SYSTEM,CONTROLS);
   NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
   
 	
@@ -715,7 +718,7 @@ int main(int argc, char* argv[])
 
 	 if(CONTROLS.STEP>FIRST_STEP && RANK==0)	
 	 {
-		ENSEMBLE_CONTROL.UPDATE_COORDS(SYSTEM, CONTROLS);	// Update coordinates and ghost atoms
+			ENSEMBLE_CONTROL.UPDATE_COORDS(SYSTEM, CONTROLS, NEIGHBOR_LIST);	// Update coordinates and ghost atoms
 			
 		if(CONTROLS.WRAP_COORDS)				// Wrap the coordinates:
 		{
@@ -727,9 +730,15 @@ int main(int argc, char* argv[])
 	 }
 		
 #ifdef USE_MPI
-	 sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-	 sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-	 MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);				// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
+	 sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true,
+								 SYSTEM.BOXDIM);
+
+	 // Its faster to recalculate the ghost atoms than to communicate them with MPI.
+	 if ( RANK != 0 ) SYSTEM.update_ghost(CONTROLS.N_LAYERS, false) ;
+
+	 //sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false,
+	 //SYSTEM.BOXDIM);	
+	 //MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);				// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
 #endif
 
 	 NEIGHBOR_LIST.UPDATE_LIST(SYSTEM, CONTROLS);
@@ -752,7 +761,7 @@ int main(int argc, char* argv[])
 	  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y,
 	  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z,
 	  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X,
-	  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y,
+							SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y,
 	  SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z);
 #endif
 
@@ -795,13 +804,20 @@ int main(int argc, char* argv[])
 
 			STATISTICS << stat_buf ;
 	  
-		  if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
+		  if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" ) 
 		  {
 			 printf(" %15s\n", "Econs/N");
 
 			 snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s\n", "Econs/N", "P_conf") ;
 			 STATISTICS << stat_buf ;
 		  }
+			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
+			{
+				printf("%15s %15s\n", "Econs/N", "Volume");
+				 
+				snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s %14s\n", "Econs/N", "P_conf", "Volume") ;
+				 STATISTICS << stat_buf ;
+			}
 		  else 
 		  {
 			 printf("\n");
@@ -817,19 +833,26 @@ int main(int argc, char* argv[])
 
 			STATISTICS << stat_buf ;
 			
-		  if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
-		  {
-			 printf(" %15s\n", "(kcal/mol)");
+		  if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" ) 
+				{
+					printf(" %15s\n", "(kcal/mol)");
 
-			 snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s\n", "(kcal/mol)", "(GPa)") ;			 
-			 STATISTICS << stat_buf ;
-		  }
+					snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s\n", "(kcal/mol)", "(GPa)") ;			 
+					STATISTICS << stat_buf ;
+				}
+			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
+				{
+					printf(" %15s %15s\n", "(kcal/mol)", "(Ang.^3)");
+					
+					snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s %14s\n", "(kcal/mol)", "(GPa)", "(Ang.^3)") ;			 
+					STATISTICS << stat_buf ;
+				}
 		  else 
-		  {
-			 printf("\n");
-			 snprintf(stat_buf, STAT_BUF_SZ, "%14s\n", "(GPa)") ;			 			 
-			 STATISTICS << stat_buf ;
-		  }
+				{
+					printf("\n");
+					snprintf(stat_buf, STAT_BUF_SZ, "%14s\n", "(GPa)") ;			 			 
+					STATISTICS << stat_buf ;
+				}
 
 		  std::cout.flush();
 		}			
@@ -926,17 +949,17 @@ int main(int argc, char* argv[])
 			CONTROLS.IO_ECONS_VAL = (Ktot + SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS;
 	}
 	#ifdef USE_MPI
-		MPI_Bcast(&CONTROLS.IO_ECONS_VAL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
+	MPI_Bcast(&CONTROLS.IO_ECONS_VAL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
 	#endif
 	 
 	 
+	Vol = SYSTEM.BOXDIM.VOL;
 	 	 
 	 if(RANK==0)
 	 {
+	
 		SYSTEM.PRESSURE = (SYSTEM.PRESSURE_XYZ + 2.0 * Ktot / (3.0 * Vol)) * GPa;	// GPa = Unit conversion factor to GPa.
 			
-		AVG_DATA.PRESS_SUM += SYSTEM.PRESSURE;
-
 		SYSTEM.PRESSURE_TENSORS_ALL[0].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X + 2.0 / 3.0 * Ktot / Vol) * GPa;
 		SYSTEM.PRESSURE_TENSORS_ALL[0].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
 		SYSTEM.PRESSURE_TENSORS_ALL[0].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
@@ -948,6 +971,9 @@ int main(int argc, char* argv[])
 		SYSTEM.PRESSURE_TENSORS_ALL[2].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X + 2.0 / 3.0 * Ktot / Vol) * GPa;
 		SYSTEM.PRESSURE_TENSORS_ALL[2].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
 		SYSTEM.PRESSURE_TENSORS_ALL[2].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
+
+		AVG_DATA.PRESS_SUM += SYSTEM.PRESSURE;
+		AVG_DATA.PV_SUM += Vol * SYSTEM.PRESSURE/GPa ;
 
 		AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X += SYSTEM.PRESSURE_TENSORS_ALL[0].X;
 		AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Y += SYSTEM.PRESSURE_TENSORS_ALL[0].Y;
@@ -961,6 +987,8 @@ int main(int argc, char* argv[])
 		AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Y += SYSTEM.PRESSURE_TENSORS_ALL[2].Y;
 		AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z += SYSTEM.PRESSURE_TENSORS_ALL[2].Z;
 				
+		AVG_DATA.VOLUME_SUM += Vol ;
+
 		////////////////////////////////////////////////////////////
 		// Periodically print simulation output
 		////////////////////////////////////////////////////////////
@@ -991,19 +1019,28 @@ int main(int argc, char* argv[])
 
 
 			// Print the econs value
-			if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT") 
+			if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" ) 
 		  {
-				snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e\n", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa) ;
-				STATISTICS << stat_buf ;
-		  }
+				 snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e\n", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa) ;
+				 STATISTICS << stat_buf ;
+		  } else if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
+			{
+				 snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e %14.7e\n", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa, SYSTEM.BOXDIM.VOL) ;
+				 STATISTICS << stat_buf ;
+			}
 		  else 
 		  {
   			snprintf(stat_buf, STAT_BUF_SZ, "%14.7e\n", SYSTEM.PRESSURE_XYZ * GPa) ;				
 				STATISTICS << stat_buf ;
 		  }
 
-			// Should only be printed for NVT-MTK or NPT, but don't want to change reference output.
-			printf("%15.7f\n", CONTROLS.IO_ECONS_VAL);
+			printf("%15.7f", CONTROLS.IO_ECONS_VAL);
+			if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" ) {
+				 printf(" %15.7f\n", SYSTEM.BOXDIM.VOL) ;
+			} else {
+				 printf("\n") ;
+			}
+			
 		  cout.flush();
 		}	
 		
@@ -1020,9 +1057,10 @@ int main(int argc, char* argv[])
 	 if((ENSEMBLE_CONTROL.STYLE=="NVT-SCALE") && ((CONTROLS.STEP+1) % int(CONTROLS.FREQ_UPDATE_THERMOSTAT) == 0) )
 	 {
 #ifdef USE_MPI
-		sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS    , true);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-		sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
-		MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
+			sync_position(SYSTEM.COORDS    , NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ATOMS, true, SYSTEM.BOXDIM);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
+			sync_position(SYSTEM.ALL_COORDS, NEIGHBOR_LIST, SYSTEM.VELOCITY, SYSTEM.ALL_ATOMS, false, SYSTEM.BOXDIM);	// Sync the main coords. Don't need to sync veloc since only proc 1 handles constraints
+
+			//MPI_Bcast(&NEIGHBOR_LIST.MAX_VEL, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);					// Sync the maximum velocites so all procs use the right padding to generate their neigh lists
 #endif
 	 }		
 	
@@ -1091,13 +1129,27 @@ int main(int argc, char* argv[])
 		cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;	   
 	 }
 
+	 if ( SYSTEM.BOXDIM.IS_VARIABLE )
+		 {
+			 cout << "        Average volume over run = " << fixed << setprecision(4) << right << AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS << " Ang.^3" << endl ;
+			 cout << "        Average PV over run     = " << fixed << setprecision(4) << right << AVG_DATA.PV_SUM / CONTROLS.N_MD_STEPS  << " kcal/mol "  
+<< endl ;
+			 if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
+				 {
+					 // Allows a check on pressure and volume fluctuation magnitude, which should be correctly reproduced
+					 // by NPT-NTK algorithm.
+					 // See Martyna, Tobias, Klein JCP 101, 4177(1994) Appendix A.					 
+					 cout << "        Average of PV predicted by virial theorem = " << fixed << setprecision(4) << right <<
+						 (CONTROLS.PRESSURE / GPa) * AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS - Kb * CONTROLS.TEMPERATURE
+								<< " kcal/mol" << endl ;
+				 }
+		 }
+	 
 	 // Write the final configuration to file.
 	 write_xyzv(SYSTEM, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, "output.xyz", false);
 			
 	 STATISTICS.close();
-  }
-
-  // MPI -- End our setup
+	} // if ( RANK == 0 ) 
 	
 	normal_exit() ;
 }       

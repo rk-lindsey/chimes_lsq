@@ -253,124 +253,138 @@ class JOB_CONTROL
 
 class BOX
 {
+	 /*
+
+		 Notes for usage with LAMMPS linking: 	Box origin must be at 0,0,0, and all cell vector components must be positive 
+
+	 */
 	
-	/*
+public:
+		
+	 // General cell properties
+		
+	 
+	 double VOL;				// Cell volume
+		
+	 // Cell geometery... if IS_ORTHO is true, ONLY CELL_AX, CELL_BY, and CELL_CZ are ever modified
 
-	Notes for usage with LAMMPS linking: 	Box origin must be at 0,0,0, and all cell vector components must be positive 
+	 double CELL_AX, CELL_AY, CELL_AZ;	// Cell vectors (transpose gives h-mat)
+	 double CELL_BX, CELL_BY, CELL_BZ;
+	 double CELL_CX, CELL_CY, CELL_CZ;
 
-	*/
-	
-	public:
+	 vector<double> HMAT;
+	 vector<double> INVR_HMAT;
 		
-		// General cell properties
+	 double LATCON_A,  LATCON_B, LATCON_C;	// Cell lattice constants
+	 double LAT_ALPHA, LAT_BETA, LAT_GAMMA;	// Cell lattice angles
 		
-		bool   IS_ORTHO;			// Is this an orthorhombic cell? If so, we'll use the more computationally efficient operations
+	 double CELL_LX, CELL_LY, CELL_LZ;	// Cell vector lengths (for LAMMPS)
 		
-		double VOL;				// Cell volume
+	 double XY, XZ, YZ;			// Cell tilt angles (for LAMMPS)
 		
-		// Cell geometery... if IS_ORTHO is true, ONLY CELL_AX, CELL_BY, and CELL_CZ are ever modified
+	 double EXTENT_X, EXTENT_Y, EXTENT_Z;	// Cell extent in the x, y, and z directions
 
-		double CELL_AX, CELL_AY, CELL_AZ;	// Cell vectors (transpose gives h-mat)
-		double CELL_BX, CELL_BY, CELL_BZ;
-		double CELL_CX, CELL_CY, CELL_CZ;
+	 bool   IS_ORTHO;			// Is this an orthorhombic cell? If so, we'll use the more computationally efficient operations
 
-		vector<double> HMAT;
-		vector<double> INVR_HMAT;
+	 bool IS_VARIABLE ;     // Does this box vary in time ?
+
+	 BOX();
+	 BOX(const BOX & COPY_FROM);
+	 ~BOX();
 		
-		double LATCON_A,  LATCON_B, LATCON_C;	// Cell lattice constants
-		double LAT_ALPHA, LAT_BETA, LAT_GAMMA;	// Cell lattice angles
-		
-		double CELL_LX, CELL_LY, CELL_LZ;	// Cell vector lengths (for LAMMPS)
-		
-		double XY, XZ, YZ;			// Cell tilt angles (for LAMMPS)
-		
-		double EXTENT_X, EXTENT_Y, EXTENT_Z;	// Cell extent in the x, y, and z directions
-		
-		BOX();
-		BOX(const BOX & COPY_FROM);
-		~BOX();
-		
-		void READ_BOX();					// Reads box geometery (orth or non-orth) from .xyz(f) file
-		void WRITE_BOX(int LAYERS);
+	 void READ_BOX();					// Reads box geometery (orth or non-orth) from .xyz(f) file
+	 void WRITE_BOX(int LAYERS);
 				
-		void   UPDATE_INVER_CELL();				// Computes the inverse h-mat from the h-mat
-		void   UPDATE_LAT_VALUES(); 
-		void   UPDATE_EXTENT();
-		double UPDATE_VOLUME();					// Computes cell volume and saves to VOL
-		void   UPDATE_CELL();					// Updates all cell geometry variables, assuming the h-matrix has been externally modified
+	 void   UPDATE_INVER_CELL();				// Computes the inverse h-mat from the h-mat
+	 void   UPDATE_LAT_VALUES(); 
+	 void   UPDATE_EXTENT();
+	 double UPDATE_VOLUME();					// Computes cell volume and saves to VOL
+	 void   UPDATE_CELL();					// Updates all cell geometry variables, assuming the h-matrix has been externally modified
 		
-		//void PREPARE_COORDS();					// Properly rotates/aligns/shifts coordinate origin to 0,0,0
-		
-		void UNLAMMPSIFY(double lx, double ly, double lz, double xy, double xz, double yz); //Converts LAMMPS  (lx,ly,lz) = (xhi-xlo,yhi-ylo,zhi-zlo) and tilt factors (xy,xz,yz) to lattice constants and angles alpha, beta, and gamma
-		void LAMMPSIFY(); // ??		
-		
-		void WRAP_ATOM(XYZ & UNWRAPPED_ATOM, XYZ_INT & WRAP_IDX, bool UPDATE_WRAPDIM);												// Wraps an atom in box ... Saves wrapped coordinates to UN_WRAPPED_ATOM
-		void WRAP_ATOM(XYZ & UNWRAPPED_ATOM, XYZ & WRAPPED_ATOM, XYZ_INT & WRAP_IDX, bool UPDATE_WRAPDIM);			// Wraps an atom in box ... Saves wrapped coordinates to WRAPPED_ATOM or UN_WRAPPED_ATOM
-	
-		void LAYER_ATOM(XYZ & REFERENCE_ATOM, XYZ_INT & LAYER_INDEX);				// Creates replicate atoms (ghost or real) ... Saves replicate coordinates in REFERENCE_ATOM
-		void LAYER_ATOM(XYZ & REFERENCE_ATOM, XYZ_INT & LAYER_INDEX, XYZ & LAYERED_ATOM);	// Creates replicate atoms (ghost or real) ... Saves replicate coordinates in REFERENCE_ATOM or LAYERED_ATOM
-	
-		bool IS_RCUT_SAFE(double CUTOFF, int LAYERS);					// Returns "true" if rcut is less than half the shortest cell vector (general for triclinic systems)
-		
-		void SCALE_BY_FACTOR(double FACTOR);
-		void SCALE_BY_FACTOR(double FACTOR, bool SCALE_ATOMS, XYZ & ATOM);		// Multiplies cell vectors times a scalar and shifts atoms accordingly, if requested
-		
-		void GET_DISTANCE(const XYZ & ATOM1, const XYZ & ATOM2, XYZ & RAB, bool USE_MIC);// Updates RAB to contain distance vectors
+	 //void PREPARE_COORDS();					// Properly rotates/aligns/shifts coordinate origin to 0,0,0
 
+   // Converts LAMMPS  (lx,ly,lz) = (xhi-xlo,yhi-ylo,zhi-zlo) and tilt factors (xy,xz,yz) to lattice constants and angles alpha, beta, and gamma	 
+	 void UNLAMMPSIFY(double lx, double ly, double lz, double xy, double xz, double yz); 
+
+	 void LAMMPSIFY(); // ??		
+
+   // Wraps an atom in box ... Saves wrapped coordinates to UN_WRAPPED_ATOM	 
+	 void WRAP_ATOM(XYZ & UNWRAPPED_ATOM, XYZ_INT & WRAP_IDX, bool UPDATE_WRAPDIM);												
+
+   // Wraps an atom in box ... Saves wrapped coordinates to WRAPPED_ATOM or UN_WRAPPED_ATOM
+	 void WRAP_ATOM(XYZ & UNWRAPPED_ATOM, XYZ & WRAPPED_ATOM, XYZ_INT & WRAP_IDX, bool UPDATE_WRAPDIM);			
+
+   // Creates replicate atoms (ghost or real) ... Saves replicate coordinates in REFERENCE_ATOM	 
+	 void LAYER_ATOM(XYZ & REFERENCE_ATOM, XYZ_INT & LAYER_INDEX);				
+
+	// Creates replicate atoms (ghost or real) ... Saves replicate coordinates in REFERENCE_ATOM or LAYERED_ATOM	 
+	 void LAYER_ATOM(XYZ & REFERENCE_ATOM, XYZ_INT & LAYER_INDEX, XYZ & LAYERED_ATOM);
+
+   // Returns "true" if rcut is less than half the shortest cell vector (general for triclinic systems)	 
+	 bool IS_RCUT_SAFE(double CUTOFF, int LAYERS);					
+		
+	 void SCALE_BY_FACTOR(double FACTOR);
+
+   // Multiplies cell vectors times a scalar and shifts atoms accordingly, if requested
+	 void SCALE_BY_FACTOR(double FACTOR, bool SCALE_ATOMS, XYZ & ATOM);		
+
+   // Updates RAB to contain distance vectors	 
+	 void GET_DISTANCE(const XYZ & ATOM1, const XYZ & ATOM2, XYZ & RAB, bool USE_MIC);
 
 };
 
 class FRAME
 {
-	public:
-  		int ATOMS;             		// Just the parent atoms.
-		int ALL_ATOMS;         	   	// All atoms, including ghosts. 
+public:
+	 int ATOMS;             		// Just the parent atoms.
+	 int ALL_ATOMS;         	   	// All atoms, including ghosts. 
 
-		BOX BOXDIM;			// Dimenions of the primitive box.
-		XYZ STRESS_TENSORS;		// Only used for the diagonal components, xx, yy, zz
-		XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested ... used primarily for the lsq code. When used
-		XYZ STRESS_TENSORS_Y;		// by the MD code, stores stress tensors for comparative purposes (e.g. from DFT)
-		XYZ STRESS_TENSORS_Z;
+	 BOX BOXDIM;			// Dimenions of the primitive box.
+	 XYZ STRESS_TENSORS;		// Only used for the diagonal components, xx, yy, zz
+	 XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested ... used primarily for the lsq code. When used
+	 XYZ STRESS_TENSORS_Y;		// by the MD code, stores stress tensors for comparative purposes (e.g. from DFT)
+	 XYZ STRESS_TENSORS_Z;
 
-		double         QM_POT_ENER;		// This is the potential energy of the QM calculation!
-		vector<double> QM_ENERGY_OFFSET;    	// This is the energy offset between MD and QM energy, as determined by lsq[2].py.
-		vector<double> QM_POT_ENER_PER_ATOM;	// And this is for each atom in the frame, from QM
-		vector<int>    NATOMS_OF_TYPE;	    	// How many atoms of each type there are
+	 double         QM_POT_ENER;		// This is the potential energy of the QM calculation!
+	 vector<double> QM_ENERGY_OFFSET;    	// This is the energy offset between MD and QM energy, as determined by lsq[2].py.
+	 vector<double> QM_POT_ENER_PER_ATOM;	// And this is for each atom in the frame, from QM
+	 vector<int>    NATOMS_OF_TYPE;	    	// How many atoms of each type there are
 
-		double 	TEMPERATURE;				// This is the RUNNING temperature, not the set temperature!
-		double 	PRESSURE;					// This is the RUNNING pressure, not the set pressure!
-		double 	AVG_TEMPERATURE;			// Only used for velocity scaling-type thermostats
-		double 	PRESSURE_XYZ;				// This is the running pressure sans the ideal gas term
-		//XYZ	PRESSURE_TENSORS_XYZ;			// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term
-		vector<XYZ> PRESSURE_TENSORS_XYZ_ALL; 		// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term ... includes off-diagonals
-		//XYZ	PRESSURE_TENSORS;			// Adds in the ideal gas term
-		vector<XYZ> PRESSURE_TENSORS_ALL;		// Adds in the ideal gas term ... includes off-diagonals
-		double	TOT_POT_ENER;				// Replaces VTOT
+	 double 	TEMPERATURE;				// This is the RUNNING temperature, not the set temperature!
+	 double 	PRESSURE;					// This is the RUNNING pressure, not the set pressure!
+	 double 	AVG_TEMPERATURE;			// Only used for velocity scaling-type thermostats
+	 double 	PRESSURE_XYZ;				// This is the running pressure sans the ideal gas term
+	 //XYZ	PRESSURE_TENSORS_XYZ;			// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term
+	 vector<XYZ> PRESSURE_TENSORS_XYZ_ALL; 		// These are the RUNNING pressure tensors, no the set pressure tensors! ...sans the ideal gas term ... includes off-diagonals
+	 //XYZ	PRESSURE_TENSORS;			// Adds in the ideal gas term
+	 vector<XYZ> PRESSURE_TENSORS_ALL;		// Adds in the ideal gas term ... includes off-diagonals
+	 double	TOT_POT_ENER;				// Replaces VTOT
 
-		vector<int>	PARENT;
-		vector<XYZ_INT> LAYER_IDX;
-		vector<XYZ_INT> WRAP_IDX;  	// Index of box wrapping for this atom.
-		vector<string> 	ATOMTYPE;
-		vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPStrj file printing
-		vector<XYZ>	COORDS;
-		vector<XYZ>     ALL_COORDS;  	// Coordinates of atoms + ghosts used for force evaluation.
-		vector<double> 	CHARGES;
-		vector<double> 	MASS;
-		vector<XYZ>	FORCES;
-		vector<XYZ>     ACCEL;
-		vector<XYZ>     TMP_EWALD;	// Holds temporary ewald accels/forces
-		vector<XYZ>     VELOCITY;
-		vector<XYZ>	VELOCITY_NEW;
-		vector<XYZ>     VELOCITY_ITER;
+	 vector<int> PARENT;
+	 vector<XYZ_INT> LAYER_IDX;
+	 vector<XYZ_INT> WRAP_IDX;  	// Index of box wrapping for this atom.
+	 vector<string> ATOMTYPE;
+	 vector<int> 	ATOMTYPE_IDX;	// Only used for dftbgen and LAMMPStrj file printing
+	 vector<XYZ> COORDS;         // Current step coordinates.
+	 vector<XYZ> COORDS0;        // Prior step coordinates.	 
+	 vector<XYZ>     ALL_COORDS;  	// Coordinates of atoms + ghosts used for force evaluation.
+	 vector<double> 	CHARGES;
+	 vector<double> 	MASS;
+	 vector<XYZ>	FORCES;
+	 vector<XYZ>     ACCEL;
+	 vector<XYZ>     TMP_EWALD;	// Holds temporary ewald accels/forces
+	 vector<XYZ>     VELOCITY;
+	 vector<XYZ>	VELOCITY_NEW;
+	 vector<XYZ>     VELOCITY_ITER;
 
-		// Update ghost atom positions.
+	 // Update ghost atom positions.
 
-		void 		update_ghost(int n_layers, bool UPDATE_WRAPDIM);
-		inline int 	get_atomtype_idx(int atom);
+	 void 		update_ghost(int n_layers, bool UPDATE_WRAPDIM);
+	 inline int 	get_atomtype_idx(int atom);
 
-		void SET_NATOMS_OF_TYPE();
-		void READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE, int i);
-		void build_layers(int N_LAYERS) ;
+	 void SET_NATOMS_OF_TYPE();
+	 void READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const vector<PAIRS> &ATOM_PAIRS, const vector<string> &TMP_ATOMTYPE, int i);
+	 void build_layers(int N_LAYERS) ;
 };
 
 struct CHARGE_CONSTRAINT
@@ -408,156 +422,161 @@ class INTERACTION_4B
   
 class NEIGHBORS
 {
-	private:
+private:
 
-		bool   FIRST_CALL;						// Is this the first call? if so, need to build initial list
-		bool   SECOND_CALL;						// Is this the second call? If so, pick the padding distance.
-		double DISPLACEMENT;
-		double SAFETY;                 					// Safety factor in calculating neighbors.
+	 bool   FIRST_CALL;						// Is this the first call? if so, need to build initial list
+	 bool   SECOND_CALL;						// Is this the second call? If so, pick the padding distance.
+	 double DISPLACEMENT;
+	 double SAFETY;                 					// Safety factor in calculating neighbors.
 		
-		void FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Updates ghost atoms based on pbc-wrapped real atoms
-		void DO_UPDATE_SMALL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
-		void DO_UPDATE_BIG   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
-		void UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS);  // Update 3-Body interaction list.
-		void UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS);  // Update 4-Body interaction list.
+	 void FIX_LAYERS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Updates ghost atoms based on pbc-wrapped real atoms
+	 void DO_UPDATE_SMALL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+	 void DO_UPDATE_BIG   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+	 void UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS);  // Update 3-Body interaction list.
+	 void UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS);  // Update 4-Body interaction list.
 
 public:
 
-		bool   UPDATE_WITH_BIG;			// Should we update our neighbor list with DO_UPDATE_BIG? If false, uses DO_UPDATE_SMALL
-		double RCUT_PADDING;			// Neighborlist cutoff is r_max + rcut_padding
-		bool   USE;				// Do we even want to use a neighbor list?
-		double CURR_VEL;
-		double MAX_VEL;
-		double MAX_CUTOFF;			// The maximum of all force field outer cutoffs (r_max and s_max)
-		double MAX_CUTOFF_3B;
-		double MAX_CUTOFF_4B;
-		double EWALD_CUTOFF;           		// The cutoff for Ewald interactions.
-		double UPDATE_FREQ;            		// Target update frequency.
+	 bool   UPDATE_WITH_BIG;			// Should we update our neighbor list with DO_UPDATE_BIG? If false, uses DO_UPDATE_SMALL
+	 double RCUT_PADDING;			// Neighborlist cutoff is r_max + rcut_padding
+	 bool   USE;				// Do we even want to use a neighbor list?
+	 double CURR_VEL;
+	 double MAX_VEL;
+	 double MAX_COORD_STEP;	 // The maximum step of any coordinate.
+	 double MAX_CUTOFF;			// The maximum of all force field outer cutoffs (r_max and s_max)
+	 double MAX_CUTOFF_3B;
+	 double MAX_CUTOFF_4B;
+	 double EWALD_CUTOFF;           		// The cutoff for Ewald interactions.
+	 double UPDATE_FREQ;            		// Target update frequency.
 
-	vector<double> PERM_SCALE ;       // Scaling factor for self-interactions.
+	 vector<double> PERM_SCALE ;       // Scaling factor for self-interactions.
 	 
-	vector<vector<int> > LIST;		// The actual (2B) neighbor list. Of size [atoms][neighbors]
-		vector<vector<int> > LIST_EWALD;	// The Ewald neighbor list. Of size [atoms][neighbors]
-		vector<vector<int> > LIST_UNORDERED;	// All neighbors of particle i with i not equal to j.
-		vector<vector<int> > LIST_3B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
-		vector<vector<int> > LIST_4B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
+	 vector<vector<int> > LIST;		// The actual (2B) neighbor list. Of size [atoms][neighbors]
+	 vector<vector<int> > LIST_EWALD;	// The Ewald neighbor list. Of size [atoms][neighbors]
+	 vector<vector<int> > LIST_UNORDERED;	// All neighbors of particle i with i not equal to j.
+	 vector<vector<int> > LIST_3B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
+	 vector<vector<int> > LIST_4B;		// The 3B neighbor list (3B interactions likely have a shorter cutoff)
 
-		vector<INTERACTION_3B> LIST_3B_INT;    // A flat list of all 3-body interactions.
-		vector<INTERACTION_4B> LIST_4B_INT;    // A flat list of all 3-body interactions.
+	 vector<INTERACTION_3B> LIST_3B_INT;    // A flat list of all 3-body interactions.
+	 vector<INTERACTION_4B> LIST_4B_INT;    // A flat list of all 3-body interactions.
 
-		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Will check if lists need updating, and will call DO_UPDATE do so if need be
-		void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE);
-		void INITIALIZE(FRAME & SYSTEM);
-		void INITIALIZE_MD(FRAME & SYSTEM);
-		void INITIALIZE(FRAME & SYSTEM, double & PAD);
-		void DO_UPDATE (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
+	 void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Will check if lists need updating, and will call DO_UPDATE do so if need be
+	 //void UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE);
+	 void INITIALIZE(FRAME & SYSTEM);
+	 void INITIALIZE_MD(FRAME & SYSTEM, JOB_CONTROL &CONTROLS) ;
+	 void INITIALIZE(FRAME & SYSTEM, double & PAD);
+	 void DO_UPDATE (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Builds and/or updates neighbor list
 
 	 double MAX_ALL_CUTOFFS() ;
 	 
-		NEIGHBORS();
-		~NEIGHBORS();
+	 NEIGHBORS();
+	 ~NEIGHBORS();
 };
 
 class CONSTRAINT
 {
-	// NOTE: If velocity scaling is requested, it is taKIN_ENERn care of OUTSIDE of this currently
-	//... Eventually all temperature and pressure trackng should be done in here
-	//... possible also energetic tracking
+	 // NOTE: If velocity scaling is requested, it is taKIN_ENERn care of OUTSIDE of this currently
+	 //... Eventually all temperature and pressure trackng should be done in here
+	 //... possible also energetic tracking
 	
-	private:
+private:
 		
-		double THERM_POSIT_T;		// thermostat position (chi)
-		double THERM_VELOC_T;		// Thermostat velocity (chi-dot)... was "visco"
-		double THERM_INERT_T;		// Thermostat inertia term ("G")
-		double THERM_INERT_Q;		// Thermostat inertia ("Q")
-		double THERM_POSIT_0;
-		double THERM_INERT_0;
-		double THERM_VELOC_0;
+	 double THERM_POSIT_T;		// thermostat position (chi)
+	 double THERM_VELOC_T;		// Thermostat velocity (chi-dot)... was "visco"
+	 double THERM_FORCE_T;		// Thermostat force ("G")
+	 double THERM_INERT_Q;		// Thermostat inertia ("Q")
+	 double THERM_POSIT_0;
+	 double THERM_FORCE_0;
+	 double THERM_VELOC_0;
 			
-		double BAROS_POSIT_T;		// ("epsilon")
-		double BAROS_VELOC_T;		// ("epsilon-dot")
-		double BAROS_FORCE_T;		// ("F-epsilon")
-		double BAROS_INERT_W;
-		double BAROS_POSIT_0;		// ("epsilon")
-		double BAROS_FORCE_0;
-		double BAROS_VELOC_0;	
+	 double BAROS_POSIT_T;		// ("epsilon")
+	 double BAROS_VELOC_T;		// ("epsilon-dot")
+	 double BAROS_FORCE_T;		// ("F-epsilon")
+	 double BAROS_INERT_W;
+	 double BAROS_POSIT_0;		// ("epsilon")
+	 double BAROS_FORCE_0;
+	 double BAROS_VELOC_0;	
 		
-		//Barostat variables
+	 //Barostat variables
 
-		double BAROS_SCALE;
-		double VOLUME_0;
-		double VOLUME_T;
+	 double BAROS_SCALE;
+	 double VOLUME_0;
+	 double VOLUME_T;
 		
-		// Berendsen barostat variables
+	 // Berendsen barostat variables
 		
-		double BEREND_MU;		// Berendsen scaling factor
-		XYZ    BEREND_ANI_MU;	// Berendsen anisotropic scaling factor
-		double BEREND_KP;		// Berendsen compressibility divided by time constant... 
+	 double BEREND_MU;		// Berendsen scaling factor
+	 XYZ    BEREND_ANI_MU;	// Berendsen anisotropic scaling factor
+	 double BEREND_KP;		// Berendsen compressibility divided by time constant... 
 		
-		// Berendsen thermostat variables ... borrows berend kp
+	 // Berendsen thermostat variables ... borrows berend kp
 		
-		double BEREND_ETA;	// scaling factor
-		double BEREND_TAU;	// time constant
+	 double BEREND_ETA;	// scaling factor
+	 double BEREND_TAU;	// time constant
 		
-		// Thermostat variables
+	 // Thermostat variables
 
-		double TIME;		// Hoover time in fs
-		double TIME_BARO;	// Barostat time in fs
-		double N_DOF;		// # degrees of freedom
-		double VSCALEH;		// Replaces 
-		double KIN_ENER;	// Kinetic energy
+	 double TIME;		// Hoover time in fs
+	 double TIME_BARO;	// Barostat time in fs
+	 double N_DOF;		// # degrees of freedom
+	 double VSCALEH;		// Replaces 
+	 double KIN_ENER;	// Kinetic energy
 			
-	public:
+public:
 		
-		string STYLE;		// NPT, NVT-MTK, NVT-SCALE, NVE
+	 string STYLE;		// NPT, NVT-MTK, NVT-SCALE, NVE
 
-		void WRITE(ofstream &STREAM);  // Write variables to file.
-		void READ(ifstream &STREAM);   // Read variables from file.
+	 void WRITE(ofstream &STREAM);  // Write variables to file.
+	 void READ(ifstream &STREAM);   // Read variables from file.
 
-		void INITIALIZE          (string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS); 
+	 void INITIALIZE          (string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS); 
 		
-		void INIT_VEL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Use box Muller to initialize velocities
-		void CHECK_VEL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS); //Test/fix velocity center of mass
+	 void INIT_VEL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);	// Use box Muller to initialize velocities
+	 void CHECK_VEL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS); //Test/fix velocity center of mass
 		
+	 XYZ CENTER_OF_MASS(const FRAME &SYSTEM) ;
+ 	 void UPDATE_COORDS       (FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS &NEIGHBORS);
+	 void UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
+	 void UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
+	 void SCALE_VELOCITIES    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
+	 void UPDATE_TEMPERATURE  (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
+	 double CONSERVED_QUANT   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
 		
-		void UPDATE_COORDS       (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
-		void UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
-		void UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
-		void SCALE_VELOCITIES    (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
-		void UPDATE_TEMPERATURE  (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
-		double CONSERVED_QUANT   (FRAME & SYSTEM, JOB_CONTROL & CONTROLS);
-		
-		CONSTRAINT();
-		~CONSTRAINT();
+	 CONSTRAINT();
+	 ~CONSTRAINT();
 		
 };
 
 
 class THERMO_AVG 
 {
-	// Time average of thermodynamic properties.
+	 // Time average of thermodynamic properties.
 	
-	public:
+public:
 		
-		double 	TEMP_SUM;
-		double 	PRESS_SUM;
-		XYZ 	STRESS_TENSOR_SUM;
-		vector<XYZ> 	STRESS_TENSOR_SUM_ALL;
+	 double	TEMP_SUM;
+	 double	PRESS_SUM;
+	 double VOLUME_SUM ;
+	 double PV_SUM ;
+	 XYZ 	STRESS_TENSOR_SUM;
+	 vector<XYZ> STRESS_TENSOR_SUM_ALL;
 		
-		void WRITE(ofstream &fout);
-		void READ(ifstream &fin);
+	 void WRITE(ofstream &fout);
+	 void READ(ifstream &fin);
 		
-		THERMO_AVG() 
-		{
-	  		// Zero the initial value of all sums.
+	 THERMO_AVG() 
+			{
+				 // Zero the initial value of all sums.
 		
-			TEMP_SUM  = 0.0;
-			PRESS_SUM = 0.0;
-			
-			STRESS_TENSOR_SUM.X = 0.0;
-			STRESS_TENSOR_SUM.Y = 0.0;
-			STRESS_TENSOR_SUM.Z = 0.0;
-		}
+				 TEMP_SUM  = 0.0;
+				 PRESS_SUM = 0.0;
+				 VOLUME_SUM = 0.0 ;
+				 PV_SUM = 0.0 ;
+				 
+				 STRESS_TENSOR_SUM.X = 0.0;
+				 STRESS_TENSOR_SUM.Y = 0.0;
+				 STRESS_TENSOR_SUM.Z = 0.0;
+			}
 };
 
 
@@ -654,17 +673,19 @@ void check_charges(FRAME &SYSTEM, vector<double>& TMP_CHARGES, const vector<stri
 void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS) ;
 
 #ifdef USE_MPI
-	void sync_position      (vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel);
-	void sum_forces         (vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure,
-					double &tens_xx,
-					double &tens_xy,
-					double &tens_xz,
-					double &tens_yx,
-					double &tens_yy,
-					double &tens_yz,
-					double &tens_zx,
-					double &tens_zy,
-					double &tens_zz);
+void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec,
+									 int atoms, bool sync_vel, BOX &BOXDIM) ;
+
+void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure,
+								double &tens_xx,
+								double &tens_xy,
+								double &tens_xz,
+								double &tens_yx,
+								double &tens_yy,
+								double &tens_yz,
+								double &tens_zx,
+								double &tens_zy,
+								double &tens_zz);
 #endif
 
 #endif

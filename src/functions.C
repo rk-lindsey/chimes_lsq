@@ -259,6 +259,20 @@ double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS)		// U
 			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Y * SYSTEM.VELOCITY_NEW[a1].Y;
 			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Z * SYSTEM.VELOCITY_NEW[a1].Z;
 		}		
+	} 
+	else if(TYPE == "ITER")
+	{
+		 for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+		 {
+				// Don't account for frozen atoms
+		
+				if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))
+					 continue;
+			
+				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_ITER[a1].X * SYSTEM.VELOCITY_ITER[a1].X;
+				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_ITER[a1].Y * SYSTEM.VELOCITY_ITER[a1].Y;
+				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_ITER[a1].Z * SYSTEM.VELOCITY_ITER[a1].Z;
+		 }
 	}
 	else
 	{
@@ -905,17 +919,10 @@ void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIP
 
 // MPI -- Related functions -- See headers at top of file
 
-#ifdef USE_MPI
-	void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure,
-	double &tens_xx,
-	double &tens_xy,
-	double &tens_xz,
-	double &tens_yx,
-	double &tens_yy,
-	double &tens_yz,
-	double &tens_zx,
-	double &tens_zy,
-	double &tens_zz)
+void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure,
+								double &tens_xx, double &tens_xy,	double &tens_xz,
+								double &tens_yx, double &tens_yy,	double &tens_yz,
+								double &tens_zx, double &tens_zy,	double &tens_zz)
 	
 	// Add up forces, potential energy, and pressure from all processes.  
 	{
@@ -940,50 +947,114 @@ void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIP
 
 	}
 
-	void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 
+#ifdef USE_MPI
+void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec,
+									 int atoms, bool sync_vel, BOX &BOXDIM) 
 	// Broadcast the position, neighborlists,  and optionally the velocity to all nodes.
 	// Velocity-broadcast is only necessary for velocity-dependent forces (not currently implemented).
-	{
-		#ifdef USE_MPI
-	
-			// Convert out vectors to arrays so they are MPI friendly
-	
-			double *coord = (double *) coord_vec.data();
+{
+	 // Convert out vectors to arrays so they are MPI friendly
 
-			if ( sizeof(XYZ) != 3*sizeof(double) ) 
+	 int buf_sz = 3 * atoms ;
+
+	 if ( sync_vel ) buf_sz *= 2 ;
+
+	 if ( BOXDIM.IS_VARIABLE ) buf_sz += 3 ;
+
+	 // One extra for MAX_COORD_STEP.
+	 buf_sz++ ;
+	 
+	 vector<double> buffer(buf_sz) ;
+
+	 for ( int i = 0 ; i < atoms ; i++ )
+	 {
+			buffer[3*i]   = coord_vec[i].X ;
+			buffer[3*i+1] = coord_vec[i].Y ;
+			buffer[3*i+2] = coord_vec[i].Z ;
+	 }
+	 int count = 3 * atoms ;
+	 
+	 if ( sync_vel )
+	 {
+			count += 3 * atoms ;
+			for ( int i = 0 ; i < atoms ; i++ )
 			{
-				printf("Error: compiler padding in XYZ structure detected\n");
-				exit_run(1);
+				 buffer[3*atoms+3*i]   = velocity_vec[i].X ;
+				 buffer[3*atoms+3*i+1] = velocity_vec[i].Y ;
+				 buffer[3*atoms+3*i+2] = velocity_vec[i].Z ;				 				 
+			}
+	 }
+
+	 if ( BOXDIM.IS_VARIABLE )
+	 {
+			if ( BOXDIM.IS_ORTHO )
+			{
+				 buffer[count]   = BOXDIM.CELL_AX ;
+				 buffer[count+1] = BOXDIM.CELL_BY ;
+				 buffer[count+2] = BOXDIM.CELL_CZ ;
+			}
+			else
+			{
+				 EXIT_MSG("Variable non-orthorhombic boxes are not supported") ;
+			}
+	 }
+
+	 buffer[buf_sz-1] = neigh_list.MAX_COORD_STEP ;
+	 
+	 MPI_Bcast(buffer.data(), buf_sz, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+	 // Unpack the buffer
+	 if ( RANK != 0 )
+	 {
+			for ( int i = 0 ; i < atoms ; i++ )
+			{
+				 coord_vec[i].X = buffer[3*i] ;
+				 coord_vec[i].Y = buffer[3*i+1] ;
+				 coord_vec[i].Z = buffer[3*i+2] ;
+			}
+	 
+			if ( sync_vel )
+			{
+				 for ( int i = 0 ; i < atoms ; i++ )
+				 {
+						velocity_vec[i].X = buffer[3*atoms+3*i] ;
+						velocity_vec[i].Y = buffer[3*atoms+3*i+1] ;
+						velocity_vec[i].Z = buffer[3*atoms+3*i+2] ;				 				 
+				 }
 			}
 
-			MPI_Bcast(coord, 3*atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+			if ( BOXDIM.IS_VARIABLE )
+			{
+				 BOXDIM.CELL_AX = buffer[count] ;
+				 BOXDIM.CELL_BY = buffer[count+1] ;
+				 BOXDIM.CELL_CZ = buffer[count+2] ;
+				 BOXDIM.UPDATE_CELL();			
+			}
+
+			neigh_list.MAX_COORD_STEP = buffer[buf_sz-1] ;
+	 }
+	 
+#ifdef LOG_POS
 		
-			#ifdef LOG_POS
-		
-				char buf[20];
-				sprintf(buf, "%d.%d", RANK,NPROCS);
-				string pos_out = string("pos.") + string(buf) + string(".out");
-				ofstream outx;
-				outx.open(pos_out.c_str());
-				outx.precision(15);
+	 char buf[20];
+	 sprintf(buf, "%d.%d", RANK,NPROCS);
+	 string pos_out = string("pos.") + string(buf) + string(".out");
+	 ofstream outx;
+	 outx.open(pos_out.c_str());
+	 outx.precision(15);
 	
-				for (int i=0; i<3*atoms; i++)
-					outx << i << " " << coord[i] << " " << endl;
+	 for (int i=0; i<3*atoms; i++)
+			outx << i << " " << coord[i] << " " << endl;
 	
-				outx.close();
+	 outx.close();
 			
-			#endif
-	
-				if ( sync_vel )
-				{
-					double *velocity = (double *) velocity_vec.data();
-					MPI_Bcast(velocity, 3 * atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-				}
-				
-		#endif
-	}
+#endif // LOG_POS
+}
 
 #endif // USE_MPI
+
+
+
 
 
 
