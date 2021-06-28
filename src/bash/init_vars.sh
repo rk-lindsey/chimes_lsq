@@ -53,10 +53,11 @@ function init_test_vars
 	        h2o-3bcheby-numpress 
 	        h2o-4bcheby-numpress 
 	        h2o-3bcheby3 
+	        nonorth
+           npt-lj
 			  small-lj
 	        special3b 
-	        special4b
-	        nonorth'
+	        special4b'
 
     MD_MAKE_JOBS='verify-invert 
 	        verify-translate 

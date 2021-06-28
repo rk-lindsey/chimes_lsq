@@ -87,7 +87,7 @@ do
 		 cp *.* ../correct_output
 	fi
 	
-	cd ..
+	cd -
 done
 
 
@@ -145,7 +145,7 @@ do
 		 cp *.* correct_output
 	fi
 	
-	cd ..
+	cd -
 done	
 
 

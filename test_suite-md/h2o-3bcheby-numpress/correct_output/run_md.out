@@ -321,8 +321,8 @@ Ewald parameters:
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
       10      1.25       3.8811924       1.0761929       4.9573853          1315.9     39.91846791      4.9428579
-Number of 3-body interactions = 198060
-RANK: 0 UPDATING ON STEP: 16, WITH PADDING: 0.379
+Number of 3-body interactions = 198376
+ Updating neighbor list on step: 16, with padding: 0.380
       20      2.50       3.8029184       1.2092767       5.0121951          1289.4     40.32144362      4.9430936
 END SIMULATION
 	Average temperature over run = 1314.9462 K
