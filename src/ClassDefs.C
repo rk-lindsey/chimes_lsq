@@ -902,14 +902,20 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS
 	{
 		
 		VOLUME_0 = SYSTEM.BOXDIM.UPDATE_VOLUME();
-		BEREND_MU = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE)/GPa,1.0/3.0);
+		KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
 
-		if(BEREND_MU < 0)
+		// Use PRESSURE_XYZ + 2 KIN_ENER / (3V) so that kinetic energy contribution to pressure is updated.
+		double P = SYSTEM.PRESSURE_XYZ + 2.0 * KIN_ENER / (3.0 * VOLUME_0) ;
+
+		double mu_fac = 1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE/GPa-P) ;
+		if( mu_fac < 0.0 )
 		{
-			cout << "ERROR: Negative Berendsen scaling factor computed. Increase BAROSCALE." << endl;
-			cout << SYSTEM.PRESSURE << " " << CONTROLS.PRESSURE << " " << BEREND_MU << endl;
+			cout << "ERROR: Negative Berendsen scaling factor computed. Increase barostat time or decrease time step." << endl;
+			cout << SYSTEM.PRESSURE << " " << CONTROLS.PRESSURE << " " << mu_fac << endl;
 			exit_run(0);
 		}
+		BEREND_MU = pow(mu_fac,1.0/3.0);
+
 	
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)	
 		{	
@@ -941,11 +947,27 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS
 	if(STYLE=="NPT-BEREND-ANISO")
 	{
 		VOLUME_0 = SYSTEM.BOXDIM.UPDATE_VOLUME();
-		
-		BEREND_ANI_MU.X = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS_ALL[0].X)/GPa,1.0/3.0);
-		BEREND_ANI_MU.Y = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS_ALL[1].Y)/GPa,1.0/3.0);
-		BEREND_ANI_MU.Z = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS_ALL[2].Z)/GPa,1.0/3.0);
-		
+		KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
+
+		XYZ pdiag ;
+		pdiag.X = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X + 2.0 / 3.0 * KIN_ENER / VOLUME_0 ;
+		pdiag.Y = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y + 2.0 / 3.0 * KIN_ENER / VOLUME_0 ;
+		pdiag.Z = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z + 2.0 / 3.0 * KIN_ENER / VOLUME_0 ;
+
+		XYZ mu_fac ;
+
+		mu_fac.X = 1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE/GPa-pdiag.X) ;
+		mu_fac.Y = 1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE/GPa-pdiag.Y) ;
+		mu_fac.Z = 1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE/GPa-pdiag.Z) ;
+
+		if ( mu_fac.X < 0.0 || mu_fac.Y < 0.0 || mu_fac.Z < 0.0 ) 
+		{
+			EXIT_MSG("ERROR: Negative Berendsen scaling factor computed. Increase barostat time or decrease time step.") ;
+		}
+			
+		BEREND_ANI_MU.X = pow(mu_fac.X,1.0/3.0);
+		BEREND_ANI_MU.Y = pow(mu_fac.Y,1.0/3.0);
+		BEREND_ANI_MU.Z = pow(mu_fac.Z,1.0/3.0);
 	
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)	
 		{	
@@ -1136,13 +1158,19 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 
 			if(STYLE=="NVT-BEREND" || STYLE=="NPT-BEREND" || STYLE=="NPT-BEREND-ANISO")
 				{
+					UPDATE_TEMPERATURE(SYSTEM, CONTROLS) ;
+					double eta_fac = 1.0 + CONTROLS.DELTA_T/BEREND_TAU*(CONTROLS.TEMPERATURE/SYSTEM.TEMPERATURE-1.0) ;
+					if ( eta_fac > 0.0 ) {
+						BEREND_ETA = pow(eta_fac,0.5);
+					} else {
+						EXIT_MSG("ERROR: Berend temperature scale became negative.  Decrease time step or increase Berendsen thermostat time") ;
+					}
+							
 					for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 						{
 							if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
 								continue;
-	
-							BEREND_ETA = pow(1.0 + CONTROLS.DELTA_T/BEREND_TAU*(CONTROLS.TEMPERATURE/SYSTEM.TEMPERATURE-1.0),0.5);
-		
+
 							SYSTEM.VELOCITY[a1].X *= BEREND_ETA;
 							SYSTEM.VELOCITY[a1].Y *= BEREND_ETA;
 							SYSTEM.VELOCITY[a1].Z *= BEREND_ETA;
@@ -1438,7 +1466,7 @@ void CONSTRAINT::SCALE_VELOCITIES(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 void CONSTRAINT::UPDATE_TEMPERATURE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
-	static double Ktot;
+	double Ktot;
 	Ktot = kinetic_energy(SYSTEM, CONTROLS);	//calculate kinetic energy for scaling:
 
 	SYSTEM.TEMPERATURE = 2.0 * Ktot / (N_DOF * Kb);

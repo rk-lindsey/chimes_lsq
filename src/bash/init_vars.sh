@@ -55,6 +55,9 @@ function init_test_vars
 	        h2o-3bcheby3 
 	        nonorth
            npt-lj
+			  npt-berend
+			  npt-berend-aniso
+			  nvt-berend
 			  small-lj
 	        special3b 
 	        special4b'

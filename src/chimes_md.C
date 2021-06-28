@@ -818,6 +818,13 @@ int main(int argc, char* argv[])
 				snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s %14s\n", "Econs/N", "P_conf", "Volume") ;
 				 STATISTICS << stat_buf ;
 			}
+			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-BEREND" || ENSEMBLE_CONTROL.STYLE == "NPT-BEREND-ANISO" )
+			{
+				printf("%15s\n", "Volume");
+				 
+				snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s\n", "P_conf", "Volume") ;
+				 STATISTICS << stat_buf ;
+			}
 		  else 
 		  {
 			 printf("\n");
@@ -847,6 +854,13 @@ int main(int argc, char* argv[])
 					snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s %14s\n", "(kcal/mol)", "(GPa)", "(Ang.^3)") ;			 
 					STATISTICS << stat_buf ;
 				}
+			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-BEREND" || ENSEMBLE_CONTROL.STYLE == "NPT-BEREND-ANISO" )
+				{
+					printf(" %15s\n", "(Ang.^3)");
+					
+					snprintf(stat_buf, STAT_BUF_SZ, "%14s %14s\n", "(GPa)", "(Ang.^3)") ;			 
+					STATISTICS << stat_buf ;
+				}			
 		  else 
 				{
 					printf("\n");
@@ -1023,21 +1037,35 @@ int main(int argc, char* argv[])
 		  {
 				 snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e\n", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa) ;
 				 STATISTICS << stat_buf ;
-		  } else if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
+		  }
+			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
 			{
 				 snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e %14.7e\n", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa, SYSTEM.BOXDIM.VOL) ;
 				 STATISTICS << stat_buf ;
 			}
+			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-BEREND" || ENSEMBLE_CONTROL.STYLE == "NPT-BEREND-ANISO" )
+			{
+				 snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e\n", SYSTEM.PRESSURE_XYZ * GPa, SYSTEM.BOXDIM.VOL) ;
+				 STATISTICS << stat_buf ;
+			}			
 		  else 
 		  {
   			snprintf(stat_buf, STAT_BUF_SZ, "%14.7e\n", SYSTEM.PRESSURE_XYZ * GPa) ;				
 				STATISTICS << stat_buf ;
 		  }
 
-			printf("%15.7f", CONTROLS.IO_ECONS_VAL);
-			if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" ) {
+			if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT-MKT" )
+			{
+				 printf("%15.7f", CONTROLS.IO_ECONS_VAL);
+			} 
+			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK"
+								|| ENSEMBLE_CONTROL.STYLE == "NPT-BEREND"
+								|| ENSEMBLE_CONTROL.STYLE == "NPT-BEREND-ANISO" )
+			{
 				 printf(" %15.7f\n", SYSTEM.BOXDIM.VOL) ;
-			} else {
+			}
+			else
+			{
 				 printf("\n") ;
 			}
 			
