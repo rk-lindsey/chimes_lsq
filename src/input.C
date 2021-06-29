@@ -1702,8 +1702,8 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 
 					if(CONTROLS.ENSEMBLE == "NPT-MTK")
 					{
-						if(CONTENTS.size(i+1) == 2)
-							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,1),i+1);
+						if(CONTENTS.size(i+1) == 4)
+							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,3),i+1);
 						else
 							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;	
 							
@@ -1711,7 +1711,10 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 							cout << "	                   ... and barostat will use  " << CONTROLS.FREQ_UPDATE_BAROSTAT << "." << endl;	
 					}
 				}
-				else if (CONTROLS.ENSEMBLE == "NVT-SCALE" || CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NVT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
+				else if (   CONTROLS.ENSEMBLE == "NVT-SCALE"
+								 || CONTROLS.ENSEMBLE == "NPT-BEREND"
+								 || CONTROLS.ENSEMBLE == "NVT-BEREND"
+								 || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
 				{
 					CONTROLS.USE_HOOVER_THRMOSTAT   = false;
 					CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,1),i+1);
@@ -1724,8 +1727,17 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
 					}
 		
-					if (RANK==0)
-						cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << "... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." << endl;	
+					if (RANK==0 && CONTROLS.ENSEMBLE == "NVT-SCALE" ) 
+						 cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << "... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." ;
+					else if ( RANK == 0 ) 
+						 cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << " Velocity scaling time = " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " fs " ;
+
+					if ( RANK == 0 && (CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO") ) 
+						 cout << " Volume scaling time = " << CONTROLS.FREQ_UPDATE_BAROSTAT << " fs " ;
+
+					if ( RANK == 0 ) 
+						 cout << endl ;
+								
 				}
 				else
 				{
