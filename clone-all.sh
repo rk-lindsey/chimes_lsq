@@ -7,19 +7,22 @@
 
 ## BITBUCKET_USER should be your LLNL OUN.  Set in your .profile if LLNL_USER is not defined.
 ## BITBUCKET_SITE will vary depending on location.
+CHIMES_REPOS="al_driver chimes_calculator chimes_developer_notes chimes_git_guide dlars owlqn"
 
-if [ ! -z "$LLNL_USER" ] ; then
-    # We are on LC.
-    BITBUCKET_USER=$LLNL_USER ;
+## Some repos require specific branches.  Set the correct branches below.
+calculator_branch="develop"
+
+echo "Are you on an Livermore Computing system ? (y/n)"
+read IS_LC
+
+echo "Enter your LLNL OUN"
+read BITBUCKET_USER
+
+if [ "$IS_LC" == 'y' ] ; then
     BITBUCKET_SITE=ssh://git@mybitbucket.llnl.gov:7999/
 else    
-    if [ -z "$BITBUCKET_USER" ] ; then 
-	echo "Enter your LLNL OUN"
-	read BITBUCKET_USER
-    fi
     BITBUCKET_SITE=https://mybitbucket.llnl.gov/scm/
 fi
-    
 
 if [ ! -d "imports" ] ; then
 	 mkdir imports
@@ -27,11 +30,15 @@ fi
 
 cd imports
 
-CHIMES_REPOS="al_driver chimes_calculator chimes_developer_notes chimes_git_guide dlars owlqn"
 for repo in $CHIMES_REPOS ; do
     if [ ! -d $repo ] ; then
 	echo "Cloning  ${BITBUCKET_SITE}~${BITBUCKET_USER}/${repo}.git"
 	git clone ${BITBUCKET_SITE}~${BITBUCKET_USER}/${repo}.git $repo
+	if [ $repo = "chimes_calculator" ] ; then
+	    cd $repo
+	    git checkout $calculator_branch
+	    cd -
+	fi
 	if [ $? -ne 0 ] ; then
 	    echo 'git clone failed'
 	    exit

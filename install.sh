@@ -36,7 +36,7 @@ cd build
 
 # Generate cmake flags
 
-my_flags=" -DCMAKE_CXX_COMPILER=${ICC}"
+my_flags="-DCMAKE_CXX_COMPILER=${ICC}"
 
 if [ ! -z $PREFX ] ; then
         my_flags="-DCMAKE_INSTALL_PREFIX=${PREFX}"
@@ -68,7 +68,6 @@ if [ $DOMPI -eq 1 ] ;then
 else
         my_flags="${my_flags} -DUSE_MPI=0" 
 fi
-
 
 echo "compiling with flags: $my_flags"
 
