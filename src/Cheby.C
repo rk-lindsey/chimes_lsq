@@ -1802,21 +1802,40 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 				  cout << COUT_STYLE.BOLD << COUT_STYLE.MAGENTA << "Warning: (Step " << CONTROLS.STEP << ")Adding penalty in 2B Cheby calc, r < rmin+penalty_dist " << fixed << rlen_ij << " " << FF_2BODY[curr_pair_type_idx_ij].S_MINIM+penalty_dist << " " << TEMP_STR << " " << a1 << " " << a2 << COUT_STYLE.ENDSTYLE << endl;
 				else
 				  cout << "Warning: (Step " << CONTROLS.STEP << ") Adding penalty in 2B Cheby calc, r < rmin+penalty_dist " << fixed << rlen_ij << " " << FF_2BODY[curr_pair_type_idx_ij].S_MINIM+penalty_dist << " " << TEMP_STR << " " << a1 << " " << a2 << endl;
-					
-				SYSTEM.ACCEL[fidx_a2].X += 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.X / rlen_ij;
-				SYSTEM.ACCEL[fidx_a2].Y += 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Y / rlen_ij;
-				SYSTEM.ACCEL[fidx_a2].Z += 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Z / rlen_ij;
-					
-				SYSTEM.ACCEL[a1].X -= 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.X / rlen_ij;
-				SYSTEM.ACCEL[a1].Y -= 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Y / rlen_ij;
-				SYSTEM.ACCEL[a1].Z -= 3.0 * rpenalty * rpenalty * penalty_scale * RAB_IJ.Z / rlen_ij;							
+
+
+				// Re-wrote a negative coeff to be consistent with non-penalty evaluation. (LEF) 07/30/21.
+				double coeff = -3.0 * rpenalty * rpenalty * penalty_scale ;
+				
+				SYSTEM.ACCEL[a1].X += coeff * RAB_IJ.X / rlen_ij;
+				SYSTEM.ACCEL[a1].Y += coeff * RAB_IJ.Y / rlen_ij;
+				SYSTEM.ACCEL[a1].Z += coeff * RAB_IJ.Z / rlen_ij;							
+
+				SYSTEM.ACCEL[fidx_a2].X -= coeff * RAB_IJ.X / rlen_ij;
+				SYSTEM.ACCEL[fidx_a2].Y -= coeff * RAB_IJ.Y / rlen_ij;
+				SYSTEM.ACCEL[fidx_a2].Z -= coeff * RAB_IJ.Z / rlen_ij;
 					
 				Vpenalty = rpenalty * rpenalty * rpenalty * penalty_scale;
 				SYSTEM.TOT_POT_ENER += Vpenalty;
 				cout << "	...Penalty potential = "<< Vpenalty << endl;
 
-				// Enforce penalty threshold
+				// Update pressure due to penalty potential (LEF) 07/30/21
+
+				SYSTEM.PRESSURE_XYZ -= coeff * rlen_ij;
 				
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X -= coeff * RAB_IJ.X * RAB_IJ.X / rlen_ij; // xx
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y -= coeff * RAB_IJ.X * RAB_IJ.Y / rlen_ij; // xy
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z -= coeff * RAB_IJ.X * RAB_IJ.Z / rlen_ij; // xz
+
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y;  // yx
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y -= coeff * RAB_IJ.Y * RAB_IJ.Y / rlen_ij; // yy
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z -= coeff * RAB_IJ.Y * RAB_IJ.Z / rlen_ij; // yz
+
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z;  // zx
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y  = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z;  // xy
+				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z -= coeff * RAB_IJ.Z * RAB_IJ.Z / rlen_ij; // zz
+				
+				// Enforce penalty threshold
 				if ((CONTROLS.PENALTY_THRESH > 0) && (CONTROLS.STEP > 0))
 				{
 					if( Vpenalty > (CONTROLS.PENALTY_THRESH * abs(CONTROLS.IO_ECONS_VAL)))
