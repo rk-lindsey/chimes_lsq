@@ -59,6 +59,8 @@ function init_test_vars
                  npt-berend-aniso
                  nvt-berend
                  serial-chimes
+                 serial-chimes-3b2
+                 serial-chimes4b
                  small-lj
                  special3b 
                  special4b'
