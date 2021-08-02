@@ -1879,8 +1879,23 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 string cheby_type ;
 			 PARAMFILE >> cheby_type ;
 
+			 // Test for older style input with S_DELTA.
+			 stringstream s_test(cheby_type) ;
+			 double d_test ;
+
+			 s_test >> d_test ;
+			 if ( ! s_test.fail() )
+			 {
+				 // Numeric input found where cheby type should be.
+				 if ( RANK == 0 ) cout << "Detected S_DELTA specification in Cheby pair parameters (not used)\n" ;
+				 PARAMFILE >> cheby_type ;
+                 						 
+			 }
+						 
+
 			 FF_2BODY[i].CHEBY_TYPE = Cheby::get_trans_type(cheby_type) ;
 
+						 
 			 if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE)
 				PARAMFILE >> FF_2BODY[i].LAMBDA;	
 					

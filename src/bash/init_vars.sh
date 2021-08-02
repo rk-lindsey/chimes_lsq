@@ -50,6 +50,7 @@ function init_test_vars
                  h2o-3bcheby 
                  h2o-4bcheby 
                  h2o-4bcheby-small
+                 hn3-published
                  generic-lj
                  h2o-3bcheby-numpress 
                  h2o-4bcheby-numpress 
