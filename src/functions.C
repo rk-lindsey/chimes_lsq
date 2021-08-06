@@ -14,12 +14,15 @@
 #include "io_styles.h"
 #include "A_Matrix.h"
 
+#include "../imports/chimes_calculator/serial_interface/src/serial_chimes_interface.h"
+
 #ifdef USE_MPI
 	#include <mpi.h>
 #endif
 
 using namespace std;
 
+static void ZCalc_Serial_Chimes(FRAME &SYSTEM, PAIR_FF &FF_2BODY) ;
 
 //////////////////////////////////////////
 //
@@ -675,13 +678,19 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	  }
 		
 	}
-	else if ( FF_2BODY[0].PAIRTYP == "LJ" ) 
+	else if ( FF_2BODY[0].PAIRTYP == "LJ" )
+	{
 	  ZCalc_Lj(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
+	}
+	else if ( FF_2BODY[0].PAIRTYP == "SERIAL_CHIMES" )
+	{
+		 ZCalc_Serial_Chimes(SYSTEM, FF_2BODY[0]) ;
+	}
 	else 
-    	{
-		cout << "Error: bad pairtype in ZCalc: " << FF_2BODY[0].PAIRTYP << endl;
-		exit_run(1);
-    	}	
+	{
+		 cout << "Error: bad pairtype in ZCalc: " << FF_2BODY[0].PAIRTYP << endl;
+		 exit_run(1);
+	}	
 	
 	if ( CONTROLS.USE_COULOMB ) 
 		ZCalc_Ewald(SYSTEM, CONTROLS, NEIGHBOR_LIST);
@@ -1054,7 +1063,75 @@ void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& 
 #endif // USE_MPI
 
 
+static void ZCalc_Serial_Chimes(FRAME &SYSTEM, PAIR_FF &FF_2BODY)
+// Force evaluation using serial Chimes calculator interface.
+{
+    // Only rank 0 does calculation for serial chimes.
+    if ( RANK == 0 ) {
+        int natoms = SYSTEM.ATOMS ;
+        vector<double> xcrds(natoms) ;
+        vector<double> ycrds(natoms) ;
+        vector<double> zcrds(natoms) ;
+        vector<vector<double>> force(natoms) ;
+        vector<double> cell_a(3);
+        vector<double> cell_b(3);
+        vector<double> cell_c(3);
+        vector<double> stress(9,0.0); 
+        double energy = 0.0 ;
+		 
+        vector<string> atom_types(SYSTEM.ATOMTYPE.size()) ;
+		 
+        for ( int j = 0 ; j < natoms ; j++ )
+        {
+            xcrds[j] = SYSTEM.COORDS[j].X ;
+            ycrds[j] = SYSTEM.COORDS[j].Y ;
+            zcrds[j] = SYSTEM.COORDS[j].Z ;								
+            force[j].resize(3,0.0);
+        }
 
+        for ( int j = 0 ; j < atom_types.size() ; j++ )
+        {
+            atom_types[j] = SYSTEM.ATOMTYPE[j] ;
+        }
+		 
+        cell_a[0] = SYSTEM.BOXDIM.CELL_AX ;
+        cell_a[1] = SYSTEM.BOXDIM.CELL_AY ;
+        cell_a[2] = SYSTEM.BOXDIM.CELL_AZ ;		 		 
 
+        cell_b[0] = SYSTEM.BOXDIM.CELL_BX ;
+        cell_b[1] = SYSTEM.BOXDIM.CELL_BY ;
+        cell_b[2] = SYSTEM.BOXDIM.CELL_BZ ;		 		 
+
+        cell_c[0] = SYSTEM.BOXDIM.CELL_CX ;
+        cell_c[1] = SYSTEM.BOXDIM.CELL_CY ;
+        cell_c[2] = SYSTEM.BOXDIM.CELL_CZ ;		 		 
+
+        FF_2BODY.chimes.calculate(xcrds, ycrds, zcrds, cell_a, cell_b, cell_c, atom_types, energy, force, stress);
+
+        for ( int j = 0 ; j < natoms ; j++ )
+        {
+            SYSTEM.ACCEL[j].X = force[j][0] ;
+            SYSTEM.ACCEL[j].Y = force[j][1] ;
+            SYSTEM.ACCEL[j].Z = force[j][2] ;
+        }
+        SYSTEM.TOT_POT_ENER = energy ;
+
+        // Unit conversions to CHIMES_MD internals.
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X = stress[0] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y = stress[1] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z = stress[2] * SYSTEM.BOXDIM.VOL ;
+
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X = stress[3] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y = stress[4] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z = stress[5] * SYSTEM.BOXDIM.VOL ;
+
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X = stress[6] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y = stress[7] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z = stress[8] * SYSTEM.BOXDIM.VOL ;		 		 		 		 
+        SYSTEM.PRESSURE_XYZ = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X
+            + SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y
+            + SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z ;
+    }
+}
 
 

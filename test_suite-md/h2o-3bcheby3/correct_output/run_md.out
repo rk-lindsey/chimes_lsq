@@ -1181,7 +1181,7 @@ Warning: (Step 278) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.062
 	...Penalty potential = 0.772941236975508
 Warning: (Step 279) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.050874019292025 1.082000000000000  20 64
 	...Penalty potential = 3.015568039645726
-     280     35.00       5.6154004     -55.4442646     -49.8288643          1903.9     14.58382294    -51.4512241
+     280     35.00       5.6154004     -55.4442646     -49.8288643          1903.9     15.69241655    -51.4512241
 Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.041300166072333 1.082000000000000  20 64
 	...Penalty potential = 6.741831771189010
 Warning: (Step 280) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.818547516279468 0.820000000000000  45 68
@@ -1372,12 +1372,12 @@ Number of 3-body interactions = 33559
     1000    125.00       6.0232343     -56.4862050     -50.4629706          2042.2     13.44826872    -51.4501018
 END SIMULATION
 	Average temperature over run = 1988.8821 K
-	Average pressure    over run = 14.3582 GPa
-	Pressures from diagonal stress tensors over run: 14.3595
+	Average pressure    over run = 14.3708 GPa
+	Pressures from diagonal stress tensors over run: 14.3721
 	Average stress tensors over run: 
-		sigma_xx: 15.0429 GPa
-		sigma_yy: 13.3421 GPa
-		sigma_zz: 14.6935 GPa
-		sigma_xy: 3.8255 GPa
-		sigma_xz: 4.3799 GPa
-		sigma_yz: 3.4382 GPa
+		sigma_xx: 15.0548 GPa
+		sigma_yy: 13.3674 GPa
+		sigma_zz: 14.6942 GPa
+		sigma_xy: 3.8082 GPa
+		sigma_xz: 4.3773 GPa
+		sigma_yz: 3.4420 GPa

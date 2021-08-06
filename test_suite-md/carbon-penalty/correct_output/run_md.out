@@ -1,0 +1,324 @@
+Code compiled in MPI mode. Will run on 36 processor(s).
+
+Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# RNDSEED #: 12357
+	# TEMPERA #: 0 K
+	# CMPRFRC #: false
+	# TIMESTP #: 0 fs
+	# N_MDSTP #: 1
+	# NLAYERS #: 1
+	# USENEIG #: true
+	# PRMFILE #: published_params.liqC.2+3b.cubic.txt
+	# CRDFILE #: liqC-penalty_#000.xyz
+	# VELINIT #: GEN ... generating velocites via box Muller
+	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
+	# PRSCALC #: ANALYTICAL
+	# WRPCRDS #: false
+	# ATMENER #: 0
+		... All reported energies *DO NOT* include single atom contributions
+	# FRQTRAJ #: 1
+	# TRAJEXT #: GEN
+	# FRQENER #: 1
+	# PRNTFRC #: true
+		... and will be printed every 1 frames.
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: true
+		... and will be printed every 1 frames.
+	# FORDFTB #: false
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+     ...Read the following coordinate file extension: xyz
+     ...Read the following number of atoms: 11
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                11.6800003051758 0 0
+       Cell vectors (b)                0 11.68 0
+       Cell vectors (c)                0 0 11.68
+       Layers:                         1
+       Ghost cell vectors (a) 	        35.0400009155273 0 0
+       Ghost cell vectors (a) 	        0 35.04 0
+       Ghost cell vectors (a) 	        0 0 35.04
+       Invr. cell vectors (a) 	        0.0856164361191727 -0 0
+       Invr. cell vectors (b) 	        -0 0.0856164383561644 -0
+       Invr. cell vectors (c) 	        0 -0 0.0856164383561644
+       Lat. constants (a,b,c) 	        11.6800003051758 11.68 11.68
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            11.6800003051758 11.68 11.68
+       LMP cell lengths (lx,ly,lz)     11.6800003051758 11.68 11.68
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     1593.41367363281
+
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                11.6800003051758 0 0
+       Cell vectors (b)                0 11.68 0
+       Cell vectors (c)                0 0 11.68
+       Layers:                         1
+       Ghost cell vectors (a) 	        35.0400009155273 0 0
+       Ghost cell vectors (a) 	        0 35.04 0
+       Ghost cell vectors (a) 	        0 0 35.04
+       Invr. cell vectors (a) 	        0.0856164361191727 -0 0
+       Invr. cell vectors (b) 	        -0 0.0856164383561644 -0
+       Invr. cell vectors (c) 	        0 -0 0.0856164383561644
+       Lat. constants (a,b,c) 	        11.6800003051758 11.68 11.68
+       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Cell extents (x,y,z)            11.6800003051758 11.68 11.68
+       LMP cell lengths (lx,ly,lz)     11.6800003051758 11.68 11.68
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     1593.41367363281
+
+   ...read complete for file liqC-penalty_#000.xyz
+
+Reading atom info from parameter file...
+	Read 1 atom types:
+		0     C , q (e):  0.000, mass (amu):  12.0110
+   ...read complete
+
+	Real atoms:                 11
+	Total atoms (ghost):        297
+	cell vectors (a)            11.6800 0.0000 0.0000
+	cell vectors (b)            0.0000 11.6800 0.0000
+	cell vectors (c)            0.0000 0.0000 11.6800
+	Layers:                     1
+	Effective cell vectors (a): 35.0400 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 35.0400 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 35.0400
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVT-MTK simulation.
+	...Setting thermostat time constant to: 10.0000
+Initializing velocities via box Muller...
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+	Total Mass     = 132.1210 au
+	Volume         = 1593.4137 Ang^3
+	Number density = 0.0115 mol atm/cm^3
+	Mass density   = 0.1377 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      false
+		...Use fit charges?             false
+		...Use 3-body Cheby params?     true
+		...Use 4-body Cheby params?     false
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+PAIR CHEBYSHEV PENALTY DIST: 0.1000
+PAIR CHEBYSHEV PENALTY SCALING: 10000.0000
+	...Read FF triplet specifications...
+	...Reading all remaining force field parameters...
+	...Read 2-body FF params...
+	...Read 3-body FF params...
+	Reading  1 pairs for mapping
+	........Reading pair: CC with mapped index: 0
+	...Read FF pairmaps...
+
+	Reading  1 triplet for mapping
+	........Reading triplet: CCCCCC with mapped index: 0
+	...Read FF triplet maps...
+   ...read complete.
+
+Notes on simulation: 
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Using the following fcut style for 3B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Electrostatics will not be computed.
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		CHEBYSHEV 12
+	Performing pair distance transformations over range: 
+		-1.0000 to 1.0000
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		CC 1.0000 3.1500 MORSE 1.2500 0.1000 1.0000e+04 0.0000e+00
+		Parameters: 
+		0 -1.9333e+02
+		1 1.4850e+02
+		2 2.1446e+02
+		3 -1.6406e+02
+		4 1.0257e+02
+		5 -3.7148e+01
+		6 1.9574e+01
+		7 -1.2076e+01
+		8 5.6280e+00
+		9 -8.9531e-01
+		10 -1.1986e-01
+		11 7.3125e-01
+
+
+	The following unique triplets of atoms have been identified:
+
+    Cluster index       : 0
+    Atoms in the cluster: C C C 
+    Pairs in the cluster: CC CC CC 
+    Number of unique sets of powers: 30 (112 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        8138.7154
+		      1       0   1   2         1               1        -14839.6206
+		      2       0   1   3         2               2        -231.1738
+		      3       0   1   4         3               3        1501.6320
+		      4       0   2   1         1               1        -14839.6206
+		      5       0   2   2         5               4        6313.7885
+		      6       0   2   3         6               5        -16032.4079
+		      7       0   2   4         7               6        4864.2158
+		      8       0   3   1         2               2        -231.1738
+		      9       0   3   2         6               5        -16032.4079
+		      10      0   3   3         10              7        10056.5430
+		      11      0   3   4         11              8        -8178.1774
+		      12      0   4   1         3               3        1501.6320
+		      13      0   4   2         7               6        4864.2158
+		      14      0   4   3         11              8        -8178.1774
+		      15      0   4   4         15              9        409.8225
+		      16      1   0   1         0               0        8138.7154
+		      17      1   0   2         1               1        -14839.6206
+		      18      1   0   3         2               2        -231.1738
+		      19      1   0   4         3               3        1501.6320
+		      20      1   1   0         0               0        8138.7154
+		      21      1   1   1         21              10       -3189.0621
+		      22      1   1   2         22              11       -9786.4762
+		      23      1   1   3         23              12       10338.3467
+		      24      1   1   4         24              13       -5248.8534
+		      25      1   2   0         1               1        -14839.6206
+		      26      1   2   1         22              11       -9786.4762
+		      27      1   2   2         27              14       10875.8885
+		      28      1   2   3         28              15       139.6271
+		      29      1   2   4         29              16       -462.5725
+		      30      1   3   0         2               2        -231.1738
+		      31      1   3   1         23              12       10338.3467
+		      32      1   3   2         28              15       139.6271
+		      33      1   3   3         33              17       -3980.6745
+		      34      1   3   4         34              18       8016.0846
+		      35      1   4   0         3               3        1501.6320
+		      36      1   4   1         24              13       -5248.8534
+		      37      1   4   2         29              16       -462.5725
+		      38      1   4   3         34              18       8016.0846
+		      39      1   4   4         39              19       463.5664
+		      40      2   0   1         1               1        -14839.6206
+		      41      2   0   2         5               4        6313.7885
+		      42      2   0   3         6               5        -16032.4079
+		      43      2   0   4         7               6        4864.2158
+		      44      2   1   0         1               1        -14839.6206
+		      45      2   1   1         22              11       -9786.4762
+		      46      2   1   2         27              14       10875.8885
+		      47      2   1   3         28              15       139.6271
+		      48      2   1   4         29              16       -462.5725
+		      49      2   2   0         5               4        6313.7885
+		      50      2   2   1         27              14       10875.8885
+		      51      2   2   2         51              20       -28355.0456
+		      52      2   2   3         52              21       -15378.3385
+		      53      2   2   4         53              22       6038.2312
+		      54      2   3   0         6               5        -16032.4079
+		      55      2   3   1         28              15       139.6271
+		      56      2   3   2         52              21       -15378.3385
+		      57      2   3   3         57              23       14555.2621
+		      58      2   3   4         58              24       -12866.0517
+		      59      2   4   0         7               6        4864.2158
+		      60      2   4   1         29              16       -462.5725
+		      61      2   4   2         53              22       6038.2312
+		      62      2   4   3         58              24       -12866.0517
+		      63      2   4   4         63              25       1118.5039
+		      64      3   0   1         2               2        -231.1738
+		      65      3   0   2         6               5        -16032.4079
+		      66      3   0   3         10              7        10056.5430
+		      67      3   0   4         11              8        -8178.1774
+		      68      3   1   0         2               2        -231.1738
+		      69      3   1   1         23              12       10338.3467
+		      70      3   1   2         28              15       139.6271
+		      71      3   1   3         33              17       -3980.6745
+		      72      3   1   4         34              18       8016.0846
+		      73      3   2   0         6               5        -16032.4079
+		      74      3   2   1         28              15       139.6271
+		      75      3   2   2         52              21       -15378.3385
+		      76      3   2   3         57              23       14555.2621
+		      77      3   2   4         58              24       -12866.0517
+		      78      3   3   0         10              7        10056.5430
+		      79      3   3   1         33              17       -3980.6745
+		      80      3   3   2         57              23       14555.2621
+		      81      3   3   3         81              26       -10476.1197
+		      82      3   3   4         82              27       12183.6055
+		      83      3   4   0         11              8        -8178.1774
+		      84      3   4   1         34              18       8016.0846
+		      85      3   4   2         58              24       -12866.0517
+		      86      3   4   3         82              27       12183.6055
+		      87      3   4   4         87              28       -7671.9832
+		      88      4   0   1         3               3        1501.6320
+		      89      4   0   2         7               6        4864.2158
+		      90      4   0   3         11              8        -8178.1774
+		      91      4   0   4         15              9        409.8225
+		      92      4   1   0         3               3        1501.6320
+		      93      4   1   1         24              13       -5248.8534
+		      94      4   1   2         29              16       -462.5725
+		      95      4   1   3         34              18       8016.0846
+		      96      4   1   4         39              19       463.5664
+		      97      4   2   0         7               6        4864.2158
+		      98      4   2   1         29              16       -462.5725
+		      99      4   2   2         53              22       6038.2312
+		      100     4   2   3         58              24       -12866.0517
+		      101     4   2   4         63              25       1118.5039
+		      102     4   3   0         11              8        -8178.1774
+		      103     4   3   1         34              18       8016.0846
+		      104     4   3   2         58              24       -12866.0517
+		      105     4   3   3         82              27       12183.6055
+		      106     4   3   4         87              28       -7671.9832
+		      107     4   4   0         15              9        409.8225
+		      108     4   4   1         39              19       463.5664
+		      109     4   4   2         63              25       1118.5039
+		      110     4   4   3         87              28       -7671.9832
+		      111     4   4   4         111             29       365.4712
+
+
+Initializing the neighbor list...
+	Latest 3-body outer cutoff values: 
+	0:  3.1500  3.1500  3.1500
+     Max 3-body cutoff = 3.1500
+	Latest 3-body inner cutoff values: 
+	0:  1.0000  1.0000  1.0000
+     Min 3-body cutoff = 1.0000
+
+NEIGHBOR LIST MAX CUTOFF IS: 3.15000
+USING PADDING: 0.300
+Number of 3-body interactions = 6
+
+Generating fast maps... 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   CC Explicit pair index:    0 Unique pair index:    0
+
+	Triplet maps:
+		Atom type idxs:  0 0 0 Triplet name:       CCCCCC Explicit index:  111 Unique index:    0
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.0000000000
+Number of 3-body interactions = 3
+Warning: (Step 0) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.9000000000 1.1000000000  0 1
+	...Penalty potential = 80.0000000000
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
+       1      0.00       0.0000000      11.9204161      11.9204161             0.0      3.52112403     11.9204161
+END SIMULATION
+	Average temperature over run = 0.0000 K
+	Average pressure    over run = 3.5211 GPa
+	Pressures from diagonal stress tensors over run: 3.5211
+	Average stress tensors over run: 
+		sigma_xx: 9.9477 GPa
+		sigma_yy: 0.2913 GPa
+		sigma_zz: 0.3244 GPa
+		sigma_xy: 0.0260 GPa
+		sigma_xz: 0.0428 GPa
+		sigma_yz: 0.1783 GPa

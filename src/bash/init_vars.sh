@@ -22,45 +22,50 @@ function init_test_vars
     RUN_LSQ_PYTHON_CODE="$PYTHON $PATH_TO_LSQ_PY_CODE --eps ${EPS_FAC} --test_suite true"
 
     LSQ_ALL_JOBS='h2o-2bcheby  
-	     		    h2o-3bcheby 
-					 h2o-3bcheby2 
-	             h2o-3bcheby3 
-	             h2o-4bcheby
-  					 h2o-4bcheby-small
-                h2o-invr
-					 fitstrs
-					 fitstrs3b
-	            test_4atoms 
-	            test_4atoms.2 
-	            special3b 
-	            special4b
-	            stress-and-ener-4b
-	            stress-and-ener-2b1
-	            stress-and-ener-2b2
-	            stress-and-ener-2b3
-	            two-traj-files
-	            one-file-three-trajs
-               nonorth'
+                  h2o-3bcheby 
+                  h2o-3bcheby2 
+                  h2o-3bcheby3 
+                  h2o-4bcheby
+                  h2o-4bcheby-small
+                  h2o-invr
+                  fitstrs
+                  fitstrs3b
+                  test_4atoms 
+                  test_4atoms.2 
+                  special3b 
+                  special4b
+                  stress-and-ener-4b
+                  stress-and-ener-2b1
+                  stress-and-ener-2b2
+                  stress-and-ener-2b3
+                  two-traj-files
+                  one-file-three-trajs
+                  nonorth'
 
     LSQ_MAKE_JOBS='lsq2'
 
-	MD_JOBS='h2o-2bcheby
-           h2o-2bcheby-genvel
-           h2o-3bcheby 
-	        h2o-4bcheby 
-           h2o-4bcheby-small
-	        generic-lj
-	        h2o-3bcheby-numpress 
-	        h2o-4bcheby-numpress 
-	        h2o-3bcheby3 
-	        nonorth
-           npt-lj
-			  npt-berend
-			  npt-berend-aniso
-			  nvt-berend
-			  small-lj
-	        special3b 
-	        special4b'
+        MD_JOBS='carbon-penalty
+                 h2o-2bcheby
+                 h2o-2bcheby-genvel
+                 h2o-3bcheby 
+                 h2o-4bcheby 
+                 h2o-4bcheby-small
+                 hn3-published
+                 generic-lj
+                 h2o-3bcheby-numpress 
+                 h2o-4bcheby-numpress 
+                 h2o-3bcheby3 
+                 nonorth
+                 npt-lj
+                 npt-berend
+                 npt-berend-aniso
+                 nvt-berend
+                 serial-chimes
+                 serial-chimes-3b2
+                 serial-chimes4b
+                 small-lj
+                 special3b 
+                 special4b'
 
     MD_MAKE_JOBS='verify-invert 
 	        verify-translate 

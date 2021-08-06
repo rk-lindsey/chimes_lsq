@@ -113,6 +113,7 @@ class JOB_CONTROL
 		int    REAL_REPLICATES;       // Number of real replicate layers to create. Only goes in the positive direction, so 1 replicate corresponds to 8*attoms
 		double SCALE_SYSTEM_BY;       // Amount to scale boxlengths/coordinates by
 		string PARAM_FILE;	      // Replaces params_file...
+		bool   SERIAL_CHIMES ;    // Use serial chimes calculator ?
 		vector<string> COORD_FILE;    // Replaces xyz_file... Can be a list of files, which will be assembled together along the z-axis to form a single cell
 		bool   SELF_CONSIST;	      // Is this part of a self-consistent DFT MD --> FIT --> MM MD --> CYCLE type calculation?
 		double NVT_CONV_CUT;	      // What is the cutoff for "conservation"... Will kill the program if the current temperature and set temperature differ by more than this fraction
@@ -212,7 +213,7 @@ class JOB_CONTROL
 		TOT_SNUM(0), 
 		COUL_CONSV(false), 
 		IF_SUBTRACT_COORD(false),
-		IF_SUBTRACT_COUL(false), 
+		IF_SUBTRACT_COUL(false),
 		USE_PARTIAL_CHARGES(false)
 		{
 			NFRAMES         = 0;	// Number of frames in the movie file
@@ -230,7 +231,7 @@ class JOB_CONTROL
 			USE_4B_CHEBY = false;	//If true, calculate 4-Body Chebyshev interaction.
 			SPLIT_FILES  = false ;
 			TOT_ALL_PARAMS = 0 ;
-		
+			SERIAL_CHIMES = false ;
 			USE_KILL_LEN = false;
 			//IO_ECONS_VAL = 0.0;
 		

@@ -606,7 +606,7 @@ int main(int argc, char* argv[])
   ////////////////////////////////////////////////////////////  
 
   read_ff_params(PARAMFILE, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, SYSTEM, NATMTYP, TMP_ATOMTYPE, TMP_ATOMTYPEIDX,TMP_CHARGES, TMP_MASS, TMP_SIGN, PAIR_MAP_REVERSE) ;
-	
+
   // Set the atom charges
 	
   for(int a=0; a<FF_2BODY.size(); a++)
@@ -1009,67 +1009,65 @@ int main(int argc, char* argv[])
 		
 		if ( (CONTROLS.STEP+1) % CONTROLS.FREQ_ENER == 0 && RANK == 0 ) 
 		{
-		 	printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.8f", 
-			CONTROLS.STEP+1, 
-			(CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS, 
-			Ktot/SYSTEM.ATOMS,
-			SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,
-			(Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,
-			SYSTEM.TEMPERATURE, 
-			SYSTEM.PRESSURE);
+			printf("%8d %9.2f %15.7f %15.7f %15.7f %15.1f %15.8f", 
+				   CONTROLS.STEP+1, 
+				   (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS, 
+				   Ktot/SYSTEM.ATOMS,
+				   SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,
+				   (Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,
+				   SYSTEM.TEMPERATURE, 
+				   SYSTEM.PRESSURE);
 
 			char stat_buf[STAT_BUF_SZ] ;
 
 			snprintf(stat_buf, STAT_BUF_SZ, "%8d %14.7e %14.7e %14.7e %14.7e %14.7e %14.7e ",
-							 CONTROLS.STEP+1,
-							 (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS,
-							 Ktot/SYSTEM.ATOMS,
-							 SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,
-							 (Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,
-							 SYSTEM.TEMPERATURE,
-							 SYSTEM.PRESSURE) ;
+					 CONTROLS.STEP+1,
+					 (CONTROLS.STEP+1)*CONTROLS.DELTA_T_FS,
+					 Ktot/SYSTEM.ATOMS,
+					 SYSTEM.TOT_POT_ENER/SYSTEM.ATOMS,
+					 (Ktot+SYSTEM.TOT_POT_ENER)/SYSTEM.ATOMS,
+					 SYSTEM.TEMPERATURE,
+					 SYSTEM.PRESSURE) ;
 		
 			STATISTICS << stat_buf ;
 
 
 			// Print the econs value
 			if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" ) 
-		  {
-				 snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e\n", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa) ;
-				 STATISTICS << stat_buf ;
-		  }
+			{
+				snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e ", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa) ;
+				STATISTICS << stat_buf ;
+			}
 			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
 			{
-				 snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e %14.7e\n", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa, SYSTEM.BOXDIM.VOL) ;
-				 STATISTICS << stat_buf ;
+				snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e %14.7e ", CONTROLS.IO_ECONS_VAL, SYSTEM.PRESSURE_XYZ * GPa, SYSTEM.BOXDIM.VOL) ;
+				STATISTICS << stat_buf ;
 			}
 			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-BEREND" || ENSEMBLE_CONTROL.STYLE == "NPT-BEREND-ANISO" )
 			{
-				 snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e\n", SYSTEM.PRESSURE_XYZ * GPa, SYSTEM.BOXDIM.VOL) ;
-				 STATISTICS << stat_buf ;
-			}			
-		  else 
-		  {
-  			snprintf(stat_buf, STAT_BUF_SZ, "%14.7e\n", SYSTEM.PRESSURE_XYZ * GPa) ;				
+				snprintf(stat_buf, STAT_BUF_SZ, "%14.7e %14.7e ", SYSTEM.PRESSURE_XYZ * GPa, SYSTEM.BOXDIM.VOL) ;
 				STATISTICS << stat_buf ;
-		  }
+			}			
+			else 
+			{
+				snprintf(stat_buf, STAT_BUF_SZ, "%14.7e ", SYSTEM.PRESSURE_XYZ * GPa) ;				
+				STATISTICS << stat_buf ;
+			}
 
 			if ( ENSEMBLE_CONTROL.STYLE == "NVT-MTK" || ENSEMBLE_CONTROL.STYLE == "NPT-MKT" )
 			{
-				 printf("%15.7f", CONTROLS.IO_ECONS_VAL);
+				printf("%15.7f", CONTROLS.IO_ECONS_VAL);
 			} 
 			else if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK"
-								|| ENSEMBLE_CONTROL.STYLE == "NPT-BEREND"
-								|| ENSEMBLE_CONTROL.STYLE == "NPT-BEREND-ANISO" )
+					  || ENSEMBLE_CONTROL.STYLE == "NPT-BEREND"
+					  || ENSEMBLE_CONTROL.STYLE == "NPT-BEREND-ANISO" )
 			{
-				 printf(" %15.7f\n", SYSTEM.BOXDIM.VOL) ;
+				printf(" %15.7f", SYSTEM.BOXDIM.VOL) ;
 			}
-			else
-			{
-				 printf("\n") ;
-			}
-			
-		  cout.flush();
+
+			printf("\n") ;
+			STATISTICS << endl ;
+			cout.flush();
 		}	
 		
 		////////////////////////////////////////////////////////////
@@ -1745,7 +1743,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 exit_run(0);
 		  }
 
-		}			
+		}
 			
 		STREAM_PARSER.str("");
 		STREAM_PARSER.clear();	
@@ -1881,8 +1879,23 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 string cheby_type ;
 			 PARAMFILE >> cheby_type ;
 
+			 // Test for older style input with S_DELTA.
+			 stringstream s_test(cheby_type) ;
+			 double d_test ;
+
+			 s_test >> d_test ;
+			 if ( ! s_test.fail() )
+			 {
+				 // Numeric input found where cheby type should be.
+				 if ( RANK == 0 ) cout << "Detected S_DELTA specification in Cheby pair parameters (not used)\n" ;
+				 PARAMFILE >> cheby_type ;
+                 						 
+			 }
+						 
+
 			 FF_2BODY[i].CHEBY_TYPE = Cheby::get_trans_type(cheby_type) ;
 
+						 
 			 if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE)
 				PARAMFILE >> FF_2BODY[i].LAMBDA;	
 					
@@ -1901,10 +1914,10 @@ static void read_ff_params(	ifstream & PARAMFILE,
 			 for(int i=1; i<FF_2BODY.size(); i++)
 				FF_2BODY[i].FORCE_CUTOFF = FF_2BODY[0].FORCE_CUTOFF;										
 		  }
-                  else if(TEMP_TYPE =="LJ")
-                  {
-                         FF_2BODY[i].SNUM = 2 ;
-                  }		  
+		  else if(TEMP_TYPE =="LJ")
+		  {
+			  FF_2BODY[i].SNUM = 2 ;
+		  }
 		  else // Unknown type
 		  {
 			 cout << "ERROR: Unknown type: " << TEMP_TYPE << endl; 
@@ -2185,7 +2198,17 @@ static void read_ff_params(	ifstream & PARAMFILE,
 	 {
 		QUADS.read_maps(PARAMFILE, LINE) ;
 	 }
-  }	
+  }
+
+	if ( CONTROLS.SERIAL_CHIMES )
+	{
+		if ( RANK == 0 )
+			cout << "Will read serial chimes calculator file from " << CONTROLS.PARAM_FILE ;
+		 
+		FF_2BODY[0].chimes.init_chimesFF(CONTROLS.PARAM_FILE,RANK) ;
+		FF_2BODY[0].PAIRTYP = "SERIAL_CHIMES" ;
+	}
+		 
 }
 
 static void parse_ff_controls(string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CONTROLS )

@@ -19,7 +19,7 @@ set(CMAKE_CXX_FLAGS "") # Can be updated if we want to adde extra flags
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-#set( CMAKE_VERBOSE_MAKEFILE on ) # Uncomment if you want to see compiler flags
+set(CMAKE_VERBOSE_MAKEFILE on) # Uncomment if you want to see compiler flags
     
 # set default preprocessor flag values
  
@@ -37,6 +37,7 @@ add_definitions(-DUSE_MPI=${USE_MPI})
 
 find_package(MPI REQUIRED)
 include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+include_directories(imports/chimes_calculator/chimesFF/src)
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
@@ -66,6 +67,8 @@ add_executable(chimes_lsq
 target_include_directories(chimes_lsq PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_features   (chimes_lsq PRIVATE cxx_std_11)
 target_link_libraries     (chimes_lsq ${MPI_LIBRARIES})
+target_link_directories   (chimes_lsq PUBLIC imports/chimes_calculator/build)
+target_link_libraries     (chimes_lsq lib-C_wrapper-serial_interface.so)
 
 IF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
 	install(TARGETS chimes_lsq DESTINATION ${CMAKE_INSTALL_PREFIX}/src OPTIONAL)
@@ -93,9 +96,13 @@ add_executable(chimes_md
 
 # Define properties for the executable target
 
+
 target_include_directories(chimes_md PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_features   (chimes_md PRIVATE cxx_std_11)
 target_link_libraries     (chimes_md ${MPI_LIBRARIES})
+target_link_directories   (chimes_md PUBLIC imports/chimes_calculator/build)
+target_link_libraries     (chimes_md lib-C_wrapper-serial_interface.so)
+
 
 IF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
 	install(TARGETS chimes_md DESTINATION ${CMAKE_INSTALL_PREFIX}/src OPTIONAL)

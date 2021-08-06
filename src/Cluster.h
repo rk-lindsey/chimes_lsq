@@ -1,6 +1,9 @@
 
 #ifndef _Cluster_h  // Protects against double-inclusion.
 
+
+#include "../imports/chimes_calculator/serial_interface/src/serial_chimes_interface.h"
+
 class PAIRS	// NEEDS UPDATING
 {
 	public:
@@ -49,26 +52,29 @@ class PAIRS	// NEEDS UPDATING
 	  	vector<double>        PARAMS;
 	  	vector<double>        POT_PARAMS;     // Used by splines to compute pressure by integrating spline eq's
 	  	double  	      PAIR_CHRG;
-		      
-	  	PAIRS()
+
+		serial_chimes_interface chimes ;
+		string serial_chimes_file ;
+	 
+	 PAIRS() : chimes(false)
 	  	{
-			      KILLLEN = 0.0;
-			      N_CFG_CONTRIB = 0;
-			      SNUM = 0;
-			      SNUM_3B_CHEBY = 0;
-			      SNUM_4B_CHEBY = 0;
-			      CHEBY_RANGE_HIGH = 1.0;
-			      CHEBY_RANGE_LOW  = -1.0;
+			KILLLEN = 0.0;
+			N_CFG_CONTRIB = 0;
+			SNUM = 0;
+			SNUM_3B_CHEBY = 0;
+			SNUM_4B_CHEBY = 0;
+			CHEBY_RANGE_HIGH = 1.0;
+			CHEBY_RANGE_LOW  = -1.0;
 
-			      // Set simple defaults.
-			      CHEBY_TYPE = Cheby_trans::NONE ;
-			      X_MINIM = 0.8 ;
-			      X_MAXIM = 5.0 ;
-			      X_AVG = (X_MINIM + X_MAXIM)/2.0 ;
-			      X_DIFF = (X_MAXIM-X_MINIM) ;
-			      S_MINIM = X_MINIM ;
-			      S_MAXIM = X_MAXIM ;
-
+			// Set simple defaults.
+			CHEBY_TYPE = Cheby_trans::NONE ;
+			X_MINIM = 0.8 ;
+			X_MAXIM = 5.0 ;
+			X_AVG = (X_MINIM + X_MAXIM)/2.0 ;
+			X_DIFF = (X_MAXIM-X_MINIM) ;
+			S_MINIM = X_MINIM ;
+			S_MAXIM = X_MAXIM ;
+				 
 	  	}     // Just a constructor to set some defaults
 
 	  	// Set Chebyshev min/max vals.
