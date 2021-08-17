@@ -73,7 +73,7 @@ private:
 
   // Evaluate Chebyshev polynomials.
   void set_polys(int index, double *Tn, double *Tnd, const double rlen, double x_diff, double x_avg, 
-							 double SNUM);
+				 int snum, double smin);
 
   // Does the cheby distance transformation with pre-calculated limits.										
   inline void transform(double rlen, double x_diff, double x_avg, double lambda, 

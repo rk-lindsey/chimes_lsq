@@ -204,15 +204,30 @@ string Cheby::get_trans_string(Cheby_trans trans)
 }
 
 
-void Cheby::set_polys(int index, double *Tn, double *Tnd, const double rlen, double x_diff, double x_avg, double SNUM)
+void Cheby::set_polys(int index, double *Tn, double *Tnd, double rlen, double x_diff, double x_avg, int SNUM,
+	                  double s_minim)
 // Sets the value of the Chebyshev polynomials (Tn) and their derivatives (Tnd).  Tnd is the derivative
 // with respect to the interatomic distance, not the transformed distance (x).
+// If rlen < s_minim, then the Chebyshev polynomial Tn is evaluated at s_minim, and Tnd is set to zero.
+// The case rlen > s_maxim is not treated, because it is assumed that the cutoff function will be zero
+// for rlen > s_maxim.
 {
   double x = 0 ;
   double exprlen = 0 ;
+  bool out_of_range ;
+  double rlen_orig ;
+  
+  if ( rlen < s_minim )
+  {
+	  out_of_range = true ;
+	  rlen_orig = rlen ;
+	  rlen = s_minim ;
+  }
+  else
+	  out_of_range = false ;
+	  
 
   // Do the Cheby distance transformation
-
   PAIRS & ff_2body = FF_2BODY[index] ;
 
   transform(
@@ -255,32 +270,52 @@ void Cheby::set_polys(int index, double *Tn, double *Tnd, const double rlen, dou
   // Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
 	 
   // First two 1st-kind Chebys:
-		
-  Tn[0] = 1.0;
-  Tn[1] = x;
-	
-  // Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
 
-  Tnd[0] = 1.0;
-  Tnd[1] = 2.0 * x;
-	
-  // Use recursion to set up the higher n-value Tn and Tnd's
-
-  for ( int i = 2; i <= SNUM; i++ ) 
+  if ( ! out_of_range )
   {
-	 Tn[i]  = 2.0 * x *  Tn[i-1] -  Tn[i-2];
-	 Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
-  }
+	  Tn[0] = 1.0;
+	  Tn[1] = x;
 	
-  // Now multiply by n to convert Tnd's to actual derivatives of Tn
+	  // Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
 
-  double dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, rlen, ff_2body.LAMBDA, ff_2body.CHEBY_TYPE, exprlen);
+	  Tnd[0] = 1.0;
+	  Tnd[1] = 2.0 * x;
+	
+	  // Use recursion to set up the higher n-value Tn and Tnd's
 
-  for ( int i = SNUM; i >= 1; i-- ) 
-	 Tnd[i] = i * dx_dr * Tnd[i-1];
+	  for ( int i = 2; i <= SNUM; i++ ) 
+	  {
+		  Tn[i]  = 2.0 * x *  Tn[i-1] -  Tn[i-2];
+		  Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
+	  }
+	
+	  // Now multiply by n to convert Tnd's to actual derivatives of Tn
 
-  Tnd[0] = 0.0;
+	  double dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, rlen, ff_2body.LAMBDA, ff_2body.CHEBY_TYPE, exprlen);
 
+	  for ( int i = SNUM; i >= 1; i-- ) 
+		  Tnd[i] = i * dx_dr * Tnd[i-1];
+
+	  Tnd[0] = 0.0;
+  }
+  else
+  {
+	  // If we are out of range, Tn = Tn(xmin), and Tnd = 0.0.
+	  Tn[0] = 1.0;
+	  Tn[1] = x;
+	
+	  // Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
+
+	  Tnd[0] = 0.0 ;
+	  Tnd[1] = 0.0 ;
+	  // Use recursion to set up the higher n-value Tn and Tnd's
+
+	  for ( int i = 2; i <= SNUM; i++ ) 
+	  {
+		  Tn[i]  = 2.0 * x *  Tn[i-1] -  Tn[i-2];
+		  Tnd[i] = 0.0 ;
+	  }
+  }
 }
 
 inline void Cheby::set_3b_powers(const TRIPLETS & FF_3BODY, const vector<int> &pair_index, int POWER_SET,
@@ -617,7 +652,8 @@ void Cheby::Deriv_2B(A_MAT & A_MATRIX)
 				 // Do the distance transformation
 				 double x_diff = FF_2BODY[curr_pair_type_idx].X_DIFF ;
 				 double x_avg  = FF_2BODY[curr_pair_type_idx].X_AVG ;
-				 set_polys(curr_pair_type_idx, Tn, Tnd, rlen, x_diff, x_avg, FF_2BODY[curr_pair_type_idx].SNUM ) ;
+				 set_polys(curr_pair_type_idx, Tn, Tnd, rlen, x_diff, x_avg, FF_2BODY[curr_pair_type_idx].SNUM,
+					 FF_2BODY[curr_pair_type_idx].S_MINIM) ;
 
 				 // fcut and fcutderv are the cutoff functions (1-r/rcut)**3 and its
 				 // derivative -3 (1-r/rcut)**2/rcut.  This ensures that
@@ -740,7 +776,6 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 	int jk_bin;
 	
 	double rlen_ij,  rlen_ik,  rlen_jk;
-	double rlen_ij_dummy, rlen_ik_dummy, rlen_jk_dummy;
 	int vstart;
 	static int n_2b_cheby_terms, n_3b_cheby_terms;
 	static double *Tn_ij,  *Tn_ik,  *Tn_jk;
@@ -767,8 +802,6 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 	double inv_vol = 1.0 / SYSTEM.BOXDIM.VOL;;
 
 	vector<CLUSTER> &PAIR_TRIPLETS = TRIPS.VEC ;
-
-	bool FORCE_IS_ZERO_IJ, FORCE_IS_ZERO_IK, FORCE_IS_ZERO_JK;
 
 	vector<int> pair_index(3) ;
 	vector<double> x_diff(3), x_avg(3) ;
@@ -889,39 +922,12 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 				// within the allowed range.
 				// Unlike the 2-body Cheby, extrapolation/refitting to handle behavior outside of fitting regime is not straightforward.
 				
-				FORCE_IS_ZERO_IJ = FORCE_IS_ZERO_IK = FORCE_IS_ZERO_JK = false;		
-
 				if( PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_ij, S_MINIM_IJ, S_MAXIM_IJ))
 				{
 					if( PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_ik, S_MINIM_IK, S_MAXIM_IK))
 					{
 						if( PAIR_TRIPLETS[curr_triple_type_index].FORCE_CUTOFF.PROCEED(rlen_jk, S_MINIM_JK, S_MAXIM_JK))
 						{		
-							// For all types, if r < rcut, then the potential is constant, thus the force  must be zero.
-							// Additional, the potential is then taken to be the potential at r_cut.
-							
-							rlen_ij_dummy = rlen_ij;
-							rlen_ik_dummy = rlen_ik;
-							rlen_jk_dummy = rlen_jk;
-							
-							if(rlen_ij < S_MINIM_IJ) 
-							{
-								rlen_ij_dummy = S_MINIM_IJ;
-								FORCE_IS_ZERO_IJ = true;
-							}
-							
-							if(rlen_ik < S_MINIM_IK)
-							{
-								rlen_ik_dummy = S_MINIM_IK;
-								FORCE_IS_ZERO_IK = true;
-							}
-							
-							if(rlen_jk < S_MINIM_JK)
-							{
-								rlen_jk_dummy = S_MINIM_JK;
-								FORCE_IS_ZERO_JK = true;
-							}
-		
 							// Everything is within allowed ranges.
 							
 							// Track the minimum triplet distances for each given pair
@@ -962,9 +968,12 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 							  x_diff[jj] = PAIR_TRIPLETS[curr_triple_type_index].X_DIFF[pair_index[jj]] ;
 							}							
 							
-							set_polys(curr_pair_type_idx_ij, Tn_ij, Tnd_ij, rlen_ij_dummy, x_diff[0], x_avg[0], FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY);			
-							set_polys(curr_pair_type_idx_ik, Tn_ik, Tnd_ik, rlen_ik_dummy, x_diff[1], x_avg[1], FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY);			
-							set_polys(curr_pair_type_idx_jk, Tn_jk, Tnd_jk, rlen_jk_dummy, x_diff[2], x_avg[2], FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY);			
+							set_polys(curr_pair_type_idx_ij, Tn_ij, Tnd_ij, rlen_ij, x_diff[0], x_avg[0],
+									  FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY, S_MINIM_IJ) ;
+							set_polys(curr_pair_type_idx_ik, Tn_ik, Tnd_ik, rlen_ik, x_diff[1], x_avg[1],
+									  FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY, S_MINIM_IK) ;
+							set_polys(curr_pair_type_idx_jk, Tn_jk, Tnd_jk, rlen_jk, x_diff[2], x_avg[2],
+									  FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY, S_MINIM_JK);			
 
 							// At this point we've completed all pre-calculations needed to populate the A matrix. Now we need to figure out 
 							// where within the matrix to put the data, and to do so. 
@@ -1009,20 +1018,11 @@ void Cheby::Deriv_3B(A_MAT & A_MATRIX, CLUSTER_LIST &TRIPS)
 								 deriv_ik =  fcut_ik * Tnd_ik[pow_ik] + fcutderiv_ik * Tn_ik[pow_ik] ;
 								 deriv_jk =  fcut_jk * Tnd_jk[pow_jk] + fcutderiv_jk * Tn_jk[pow_jk] ;	
 								
-								if(FORCE_IS_ZERO_IJ)
-									force_wo_coeff_ij = 0;
-								else
-									 force_wo_coeff_ij = perm_scale * (deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk]);
+								 force_wo_coeff_ij = perm_scale * (deriv_ij * fcut_ik * fcut_jk * Tn_ik[pow_ik] * Tn_jk[pow_jk]);
 								
-								if(FORCE_IS_ZERO_IK)
-									force_wo_coeff_ik = 0;
-								else
-									 force_wo_coeff_ik = perm_scale * (deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk]);
+								 force_wo_coeff_ik = perm_scale * (deriv_ik * fcut_ij * fcut_jk * Tn_ij[pow_ij] * Tn_jk[pow_jk]);
 								
-								if(FORCE_IS_ZERO_JK)
-									force_wo_coeff_jk = 0;
-								else
-									 force_wo_coeff_jk = perm_scale * (deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik]) ;
+								 force_wo_coeff_jk = perm_scale * (deriv_jk * fcut_ij * fcut_ik * Tn_ij[pow_ij] * Tn_ik[pow_ik]) ;
 						
 								// ij pairs
 
@@ -1167,7 +1167,6 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 	vector<XYZ> RAB (6);	// Replaces RAB_IJ, RAB_IK...
 	
 	vector<double> rlen(6);		// Replaces rlen_ij, rlen_ik...
-	vector<double> rlen_dummy(6);	// Replaces rlen_ij_dummy, rlen_ik_dummy
 
 	int vstart;
 	static int n_2b_cheby_terms, n_4b_cheby_terms;
@@ -1195,8 +1194,6 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 	vector<double> x_diff(6) ;
 
 	double inv_vol = 1.0 / SYSTEM.BOXDIM.VOL;
-	
-	vector<bool> FORCE_IS_ZERO(6);	// replaces FORCE_IS_ZERO_IJ, FORCE_IS_ZERO_IK, FORCE_IS_ZERO_JK;
 	
 	double TMP_ENER;
 	
@@ -1382,21 +1379,6 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 					
 					// At this point, all distances are within allowed ranges. We can now proceed to the force derivative calculation
 					
-					// For all types, if r < rcut, then the potential is constant, thus the force  must be zero.
-					// Additionally, the potential is then taken to be the potential at r_cut.
-					
-					for (int f=0; f<6; f++)
-					{
-						if(rlen[f] < S_MINIM[f])
-						{
-							rlen_dummy[f] = S_MINIM[f];
-							FORCE_IS_ZERO[f] = true;
-						} else {
-						  rlen_dummy[f] = rlen[f];
-						  FORCE_IS_ZERO[f] = false;
-						}
-					}
-
 					// Track the minimum quadruplet distances for each given pair
 					
 					if (PAIR_QUADRUPLETS[curr_quad_type_index].MIN_FOUND[0] == -1) 	// Then this is our first check. Just set all equal to current distances
@@ -1422,12 +1404,18 @@ void Cheby::Deriv_4B(A_MAT & A_MATRIX, int n_3b_cheby_terms, CLUSTER_LIST& QUADS
 
 					// Set up the polynomials
 	
-					set_polys(curr_pair_type_idx[0], Tn_ij, Tnd_ij, rlen_dummy[0], x_diff[0], x_avg[0], FF_2BODY[curr_pair_type_idx[0]].SNUM_4B_CHEBY);
-					set_polys(curr_pair_type_idx[1], Tn_ik, Tnd_ik, rlen_dummy[1], x_diff[1], x_avg[1], FF_2BODY[curr_pair_type_idx[1]].SNUM_4B_CHEBY);
-					set_polys(curr_pair_type_idx[2], Tn_il, Tnd_il, rlen_dummy[2], x_diff[2], x_avg[2], FF_2BODY[curr_pair_type_idx[2]].SNUM_4B_CHEBY);
-					set_polys(curr_pair_type_idx[3], Tn_jk, Tnd_jk, rlen_dummy[3], x_diff[3], x_avg[3], FF_2BODY[curr_pair_type_idx[3]].SNUM_4B_CHEBY);
-					set_polys(curr_pair_type_idx[4], Tn_jl, Tnd_jl, rlen_dummy[4], x_diff[4], x_avg[4], FF_2BODY[curr_pair_type_idx[4]].SNUM_4B_CHEBY);
-					set_polys(curr_pair_type_idx[5], Tn_kl, Tnd_kl, rlen_dummy[5], x_diff[5], x_avg[5], FF_2BODY[curr_pair_type_idx[5]].SNUM_4B_CHEBY);
+					set_polys(curr_pair_type_idx[0], Tn_ij, Tnd_ij, rlen[0], x_diff[0], x_avg[0],
+							  FF_2BODY[curr_pair_type_idx[0]].SNUM_4B_CHEBY, S_MINIM[0]) ;
+					set_polys(curr_pair_type_idx[1], Tn_ik, Tnd_ik, rlen[1], x_diff[1], x_avg[1],
+							  FF_2BODY[curr_pair_type_idx[1]].SNUM_4B_CHEBY, S_MINIM[1]);
+					set_polys(curr_pair_type_idx[2], Tn_il, Tnd_il, rlen[2], x_diff[2], x_avg[2],
+							  FF_2BODY[curr_pair_type_idx[2]].SNUM_4B_CHEBY, S_MINIM[2]);
+					set_polys(curr_pair_type_idx[3], Tn_jk, Tnd_jk, rlen[3], x_diff[3], x_avg[3],
+							  FF_2BODY[curr_pair_type_idx[3]].SNUM_4B_CHEBY, S_MINIM[3]);
+					set_polys(curr_pair_type_idx[4], Tn_jl, Tnd_jl, rlen[4], x_diff[4], x_avg[4],
+							  FF_2BODY[curr_pair_type_idx[4]].SNUM_4B_CHEBY, S_MINIM[4]);
+					set_polys(curr_pair_type_idx[5], Tn_kl, Tnd_kl, rlen[5], x_diff[5], x_avg[5],
+							  FF_2BODY[curr_pair_type_idx[5]].SNUM_4B_CHEBY, S_MINIM[5]);
 
 					// At this point we've completed all pre-calculations needed to populate the A matrix. Now we need to figure out 
 					// where within the matrix to put the data, and to do so. 
@@ -1734,7 +1722,8 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 							 
 			 xdiff_2b = FF_2BODY[curr_pair_type_idx_ij].X_DIFF ;
 			 xavg_2b  = FF_2BODY[curr_pair_type_idx_ij].X_AVG ;
-			 set_polys(curr_pair_type_idx_ij, Tn, Tnd, rlen_ij, xdiff_2b, xavg_2b, FF_2BODY[curr_pair_type_idx_ij].SNUM);
+			 set_polys(curr_pair_type_idx_ij, Tn, Tnd, rlen_ij, xdiff_2b, xavg_2b,
+					   FF_2BODY[curr_pair_type_idx_ij].SNUM, FF_2BODY[curr_pair_type_idx_ij].S_MINIM);
 				
 			 FF_2BODY[curr_pair_type_idx_ij].FORCE_CUTOFF.get_fcut(fcut_2b, fcutderiv_2b, rlen_ij, FF_2BODY[curr_pair_type_idx_ij].S_MINIM,
 																					 FF_2BODY[curr_pair_type_idx_ij].S_MAXIM);
@@ -1806,7 +1795,7 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 
 				// Re-wrote a negative coeff to be consistent with non-penalty evaluation. (LEF) 07/30/21.
 				double coeff = -3.0 * rpenalty * rpenalty * penalty_scale ;
-				
+
 				SYSTEM.ACCEL[a1].X += coeff * RAB_IJ.X / rlen_ij;
 				SYSTEM.ACCEL[a1].Y += coeff * RAB_IJ.Y / rlen_ij;
 				SYSTEM.ACCEL[a1].Z += coeff * RAB_IJ.Z / rlen_ij;							
@@ -1912,7 +1901,6 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 
 		
   double rlen_ij,  rlen_ik,  rlen_jk;
-  double rlen_ij_dummy, rlen_ik_dummy, rlen_jk_dummy;
 	
   static double *Tn_ij,  *Tn_ik,  *Tn_jk;
   static double *Tnd_ij, *Tnd_ik, *Tnd_jk;
@@ -1969,7 +1957,7 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 	double perm_scale = NEIGHBOR_LIST.PERM_SCALE[3] ;
 	
 	for ( int ii = i_start; ii <= i_end; ii++ ) 
-  {
+	{
 
 	 a1 = NEIGHBOR_LIST.LIST_3B_INT[ii].a1;
 
@@ -2028,24 +2016,15 @@ void Cheby::Force_3B(CLUSTER_LIST &TRIPS)
 			 INTERACTIONS++;
 			 //cout << a1 << " " << a2 << " " << a3 << " " << endl;
 
-			 rlen_ij_dummy = rlen_ij;
-			 rlen_ik_dummy = rlen_ik;
-			 rlen_jk_dummy = rlen_jk;
-			  
-			 if(rlen_ij < s_minim[0])
-				rlen_ij_dummy = s_minim[0] ;
-			  
-			 if(rlen_ik < s_minim[1])
-				rlen_ik_dummy = s_minim[1] ;
-							
-			 if(rlen_jk < s_minim[2])
-				rlen_jk_dummy = s_minim[2] ;
 
 			 // Set up the polynomials
 			  
-			 set_polys(curr_pair_type_idx_ij, Tn_ij, Tnd_ij, rlen_ij_dummy, x_diff[0], x_avg[0], FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY);
-			 set_polys(curr_pair_type_idx_ik, Tn_ik, Tnd_ik, rlen_ik_dummy, x_diff[1], x_avg[1], FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY);
-			 set_polys(curr_pair_type_idx_jk, Tn_jk, Tnd_jk, rlen_jk_dummy, x_diff[2], x_avg[2], FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY);
+			 set_polys(curr_pair_type_idx_ij, Tn_ij, Tnd_ij, rlen_ij, x_diff[0], x_avg[0],
+					   FF_2BODY[curr_pair_type_idx_ij].SNUM_3B_CHEBY, s_minim[0]);
+			 set_polys(curr_pair_type_idx_ik, Tn_ik, Tnd_ik, rlen_ik, x_diff[1], x_avg[1],
+					   FF_2BODY[curr_pair_type_idx_ik].SNUM_3B_CHEBY, s_minim[1]);
+			 set_polys(curr_pair_type_idx_jk, Tn_jk, Tnd_jk, rlen_jk, x_diff[2], x_avg[2],
+					   FF_2BODY[curr_pair_type_idx_jk].SNUM_3B_CHEBY, s_minim[2]);
 																	
 			 // Apply the FF
 
@@ -2212,7 +2191,6 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
   vector<XYZ> RAB (6);	// Replaces RAB_IJ, RAB_IK...
 	
   vector<double> rlen(6);			// Replaces rlen_ij, rlen_ik...
-  vector<double> rlen_dummy(6);	// Replaces rlen_ij_dummy, rlen_ik_dummy
 
   static double *Tn_4b_ij,  *Tn_4b_ik,  *Tn_4b_il,  *Tn_4b_jk,  *Tn_4b_jl,  *Tn_4b_kl;
   static double *Tnd_4b_ij, *Tnd_4b_ik, *Tnd_4b_il, *Tnd_4b_jk, *Tnd_4b_jl, *Tnd_4b_kl;
@@ -2357,28 +2335,21 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 	 if( !FF_4BODY[curr_quad_type_index].FORCE_CUTOFF.PROCEED(rlen[5], S_MINIM[5], S_MAXIM[5]))
 		continue;
 				
-// At this point, all distances are within allowed ranges. We can now proceed to the force derivative calculation
+     // At this point, all distances are within allowed ranges. We can now proceed to the force derivative calculation
 			
-	 // For all types, if r < rcut, then the potential is constant, thus the force  must be zero.
-	 // Additionally, the potential is then taken to be the potential at r_cut.
-
-	 for (int f=0; f<6; f++)
-	 {
-		rlen_dummy[f] = rlen[f];
-				
-		if(rlen[f] < S_MINIM[f])
-		  rlen_dummy[f] = S_MINIM[f];
-	 }
-
-	 
 	 // Set up the polynomials
-
-	 set_polys(curr_pair_type_idx[0], Tn_4b_ij, Tnd_4b_ij, rlen_dummy[0], x_diff[0], x_avg[0], FF_2BODY[curr_pair_type_idx[0]].SNUM_4B_CHEBY);
-	 set_polys(curr_pair_type_idx[1], Tn_4b_ik, Tnd_4b_ik, rlen_dummy[1], x_diff[1], x_avg[1], FF_2BODY[curr_pair_type_idx[1]].SNUM_4B_CHEBY);
-	 set_polys(curr_pair_type_idx[2], Tn_4b_il, Tnd_4b_il, rlen_dummy[2], x_diff[2], x_avg[2], FF_2BODY[curr_pair_type_idx[2]].SNUM_4B_CHEBY);
-	 set_polys(curr_pair_type_idx[3], Tn_4b_jk, Tnd_4b_jk, rlen_dummy[3], x_diff[3], x_avg[3], FF_2BODY[curr_pair_type_idx[3]].SNUM_4B_CHEBY);
-	 set_polys(curr_pair_type_idx[4], Tn_4b_jl, Tnd_4b_jl, rlen_dummy[4], x_diff[4], x_avg[4], FF_2BODY[curr_pair_type_idx[4]].SNUM_4B_CHEBY);
-	 set_polys(curr_pair_type_idx[5], Tn_4b_kl, Tnd_4b_kl, rlen_dummy[5], x_diff[5], x_avg[5], FF_2BODY[curr_pair_type_idx[5]].SNUM_4B_CHEBY);
+	 set_polys(curr_pair_type_idx[0], Tn_4b_ij, Tnd_4b_ij, rlen[0], x_diff[0], x_avg[0],
+			   FF_2BODY[curr_pair_type_idx[0]].SNUM_4B_CHEBY, S_MINIM[0]);
+	 set_polys(curr_pair_type_idx[1], Tn_4b_ik, Tnd_4b_ik, rlen[1], x_diff[1], x_avg[1]
+			   , FF_2BODY[curr_pair_type_idx[1]].SNUM_4B_CHEBY, S_MINIM[1]);
+	 set_polys(curr_pair_type_idx[2], Tn_4b_il, Tnd_4b_il, rlen[2], x_diff[2], x_avg[2],
+			   FF_2BODY[curr_pair_type_idx[2]].SNUM_4B_CHEBY, S_MINIM[2]);
+	 set_polys(curr_pair_type_idx[3], Tn_4b_jk, Tnd_4b_jk, rlen[3], x_diff[3], x_avg[3],
+			   FF_2BODY[curr_pair_type_idx[3]].SNUM_4B_CHEBY, S_MINIM[3]);
+	 set_polys(curr_pair_type_idx[4], Tn_4b_jl, Tnd_4b_jl, rlen[4], x_diff[4], x_avg[4],
+			   FF_2BODY[curr_pair_type_idx[4]].SNUM_4B_CHEBY, S_MINIM[4]);
+	 set_polys(curr_pair_type_idx[5], Tn_4b_kl, Tnd_4b_kl, rlen[5], x_diff[5], x_avg[5],
+			   FF_2BODY[curr_pair_type_idx[5]].SNUM_4B_CHEBY, S_MINIM[5]);
 
 	 // Set up the smoothing functions
 			
@@ -2416,12 +2387,18 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		deriv_4b[4] = fcut_4b[4] * Tnd_4b_jl[powers[4]] + fcut_deriv_4b[4] * Tn_4b_jl[powers[4]];
 		deriv_4b[5] = fcut_4b[5] * Tnd_4b_kl[powers[5]] + fcut_deriv_4b[5] * Tn_4b_kl[powers[5]];
 				
-		force_4b[0]  = coeff * deriv_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
-		force_4b[1]  = coeff * deriv_4b[1] * fcut_4b[0] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ij[powers[0]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
-		force_4b[2]  = coeff * deriv_4b[2] * fcut_4b[0] * fcut_4b[1] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
-		force_4b[3]  = coeff * deriv_4b[3] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[4] * fcut_4b[5] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
-		force_4b[4]  = coeff * deriv_4b[4] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_kl[powers[5]];
-		force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]];
+		force_4b[0]  = coeff * deriv_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]
+			* Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[1]  = coeff * deriv_4b[1] * fcut_4b[0] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]
+			* Tn_4b_ij[powers[0]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[2]  = coeff * deriv_4b[2] * fcut_4b[0] * fcut_4b[1] * fcut_4b[3] * fcut_4b[4] * fcut_4b[5]
+			* Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[3]  = coeff * deriv_4b[3] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[4] * fcut_4b[5]
+			* Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jl[powers[4]]  * Tn_4b_kl[powers[5]];
+		force_4b[4]  = coeff * deriv_4b[4] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[5]
+			* Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_kl[powers[5]];
+		force_4b[5]  = coeff * deriv_4b[5] * fcut_4b[0] * fcut_4b[1] * fcut_4b[2] * fcut_4b[3] * fcut_4b[4]
+			* Tn_4b_ij[powers[0]]  * Tn_4b_ik[powers[1]]  * Tn_4b_il[powers[2]]  * Tn_4b_jk[powers[3]]  * Tn_4b_jl[powers[4]];
 
 #if(0) // Print debug info
 		
@@ -2432,12 +2409,6 @@ void Cheby::Force_4B(CLUSTER_LIST &QUADS)
 		  cout << std::scientific ;
 		  cout.precision(10) ;
 		  cout << "A1 = " << a1 << " A2 = " << fidx_a2 << " A3 = " << fidx_a3 << " A4 = " << fidx_a4 << endl ;
-		  cout << "rlen_dummy: " ;
-		  for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
-		  {
-			 cout << " " << rlen_dummy[ifl] ;
-		  }
-		  cout << endl ;
 		  cout << "Force_wo_coeff: " ;
 		  for ( int ifl = 0 ; ifl < 6 ; ifl++ ) 
 		  {
