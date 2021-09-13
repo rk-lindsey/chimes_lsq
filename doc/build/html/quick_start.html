@@ -1,0 +1,395 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Quick Start Guide &mdash; chimes_lsq 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ChIMES Overview" href="chimes_overview.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> chimes_lsq
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-obtain-the-tutorial-files">Step 1: Obtain the tutorial files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-inspect-the-input">Step 2: Inspect the input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-generate-the-design-matrix">Step 3: Generate the design matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-4-solve-for-chimes-parameters">Step 4: Solve for ChIMES parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-5-prepare-for-md-simulation">Step 5: Prepare for MD simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="chimes_overview.html">ChIMES Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html">Generating a ChIMES model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="legal.html">Legal</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">chimes_lsq</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Quick Start Guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/quick_start.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="quick-start-guide">
+<span id="page-quick-start"></span><h1>Quick Start Guide<a class="headerlink" href="#quick-start-guide" title="Permalink to this headline">¶</a></h1>
+<p>This page provides a step-by-step guide for generating a 2+3-body ChIMES model for a 1:1 C:O mixture at 9350 K and 2.5 g/cc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We <em>highly</em> recommend users read the <a class="reference internal" href="chimes_overview.html#page-overview"><span class="std std-ref">ChIMES Overview</span></a> and <a class="reference internal" href="lsq_input_file.html#page-running"><span class="std std-ref">Generating a ChIMES model</span></a> before attempting to generate a simulation-ready model.</p>
+</div>
+<hr class="docutils" />
+<div class="section" id="step-1-obtain-the-tutorial-files">
+<h2>Step 1: Obtain the tutorial files<a class="headerlink" href="#step-1-obtain-the-tutorial-files" title="Permalink to this headline">¶</a></h2>
+<p>Follow instructions on the <a class="reference internal" href="getting_started.html#page-getting-started"><span class="std std-ref">Getting Started</span></a> page to obtain a copy of the ChIMES LSQ repository and compile the code. Next, in a terminal, create a new folder called <code class="docutils literal notranslate"><span class="pre">tutorial</span></code> in your desired location, and copy the tutorial files there:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp /path/to/chimes_lsq/test_suite-lsq/special3b/fm_setup.in                   /my/tutorial_folder
+cp /path/to/chimes_lsq/test_suite-lsq/special3b/9350.combine-scs-2-a.fit.xyzf /my/tutorial_folder
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-2-inspect-the-input">
+<h2>Step 2: Inspect the input<a class="headerlink" href="#step-2-inspect-the-input" title="Permalink to this headline">¶</a></h2>
+<p>Aside from the <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> code, a minimum of two input files are needed to generate a ChIMES model: A training trajectory and a <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> configuration file (<code class="docutils literal notranslate"><span class="pre">9350.combine-scs-2-a.fit.xyzf</span></code> and <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code> in this example, respectively). By running <code class="docutils literal notranslate"><span class="pre">head</span> <span class="pre">9350*</span></code> in the tutorial folder, one can see that the trajecotry file is in an extended xyz format, where for a given frame, the first line provides the number of atoms, the next line, the three box lengths (Å), and the remaining lines provide an atom type, <em>x</em>, <em>y</em>, and <em>z</em> coordinates (Å), and the corresponding <em>x</em>, <em>y</em>, and <em>z</em> components of the forces acting on those atoms, in H/B. Frame information is repeated in this format <span class="math notranslate nohighlight">\(n_{\mathrm{frames}}\)</span> times.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In this example, we’re only concerned with generating a ChIMES model based on forces, but in practice, one can also fit to energies and/or stresses as well. Similarly, in this example we’re concerned with an orthorhombic system, but triclinic cells can be used as well. For additional details, see the <a class="reference internal" href="lsq_input_file.html#sec-input-files"><span class="std std-ref">Input Files and Options</span></a> section of <a class="reference internal" href="lsq_input_file.html#page-running"><span class="std std-ref">Generating a ChIMES model</span></a>.</p>
+</div>
+<p>Next, open the configuration file, <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code>, in your text editor of choice. Add the lines that are highlighted below.</p>
+<p>The “control variables” section is as given below. Note that <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">VARNAME</span> <span class="pre">#</span></code> are <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> key words and should not be edited; key word settings are specified on the following line.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>ChIMES configuration file comments can either be made as new lines prepended with a hash (“#”), or at the end of a line, prepended with an exclamation mark (!).</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">####### CONTROL VARIABLES #######</span>
+
+<span class="c1"># TRJFILE #</span>
+        <span class="m">9350</span>.combine-scs-2-a.fit.xyzf   ! Training trajectory file
+<span class="c1"># NFRAMES #</span>
+        <span class="m">100</span>                             ! Number of frames in training trajectory file
+<span class="c1"># NLAYERS #</span>
+        <span class="m">1</span>                               ! Number of replicate layers
+<span class="c1"># FITCOUL #</span>
+        <span class="nb">false</span>                           ! Fit charges?
+<span class="c1"># FITSTRS #</span>
+        <span class="nb">false</span>                           ! Fit stresses? If so, how?
+<span class="c1"># FITENER #</span>
+        <span class="nb">false</span>                           ! Fit energies? If so, how?
+<span class="c1"># PAIRTYP #</span>
+        CHEBYSHEV <span class="m">12</span> <span class="m">5</span> <span class="m">0</span>                ! Polynomial orders - See note below!!!
+<span class="c1"># CHBTYPE #</span>
+        MORSE                           ! Coordinate transformation style
+<span class="hll"><span class="c1"># SPLITFI #</span>
+</span><span class="hll">        <span class="nb">false</span>                           ! Should the design matrix be split into multiple files?
+</span></pre></div>
+</div>
+<p>Next comes the “topology variables”, which specify atom-type and interaction-cluster-type-specific aspects of the model:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">####### TOPOLOGY VARIABLES #######</span>
+
+<span class="c1"># Specify the total number of atom types being fit</span>
+
+<span class="c1"># NATMTYP #</span>
+        <span class="m">2</span>
+
+<span class="c1"># For each atom type, specify the type index, atom type, fixed charge, and mass.</span>
+
+<span class="c1"># TYPEIDX #     # ATM_TYP #     # ATMCHRG #     # ATMMASS #</span>
+<span class="m">1</span>               C                <span class="m">0</span>.0            <span class="m">12</span>.011
+<span class="m">2</span>               O                <span class="m">0</span>.0            <span class="m">15</span>.999
+
+<span class="c1"># Next, figure out how many pair types can be generated. Specify the pair type index, constituent atom types,</span>
+<span class="c1"># inner cutoff (s_minim), outer cutoff (s_maxim), and Morse Transformation variable. Note that s_delta is a</span>
+<span class="c1"># vestigial field that can use any floating point number as a place holder.</span>
+
+<span class="c1"># PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA #</span>
+<span class="m">1</span>               C               C               <span class="m">0</span>.988           <span class="m">8</span>.00            <span class="m">0</span>.01            <span class="m">1</span>.35
+<span class="m">2</span>               O               O               <span class="m">0</span>.911           <span class="m">8</span>.00            <span class="m">0</span>.01            <span class="m">2</span>.55
+<span class="m">3</span>               C               O               <span class="m">0</span>.876           <span class="m">8</span>.00            <span class="m">0</span>.01            <span class="m">1</span>.15
+</pre></div>
+</div>
+<p>Model efficiency can be increased by using many-body cutoffs that are shorter than those used for two-body interactions (specified above). The <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code> section below shows how to do so for 3-body interactions. Here, we want to do so for each of the 4 possible 3-body interaction types (specified by <code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">3B</span> <span class="pre">S_MAXIM:</span> <span class="pre">SPECIFIC</span> <span class="pre">4</span></code>). The following line shows how this is done for a 3-body interaction comprised entirely of carbon atoms. For 3 carbon atoms, C, we have 3 atom pairs, CC, CC, CC, which yields a cluster “name” of CCCCCC. For each of these constituent atom pairs, we want to use 3-body outer cutoffs of 4.4 Å. For a C O O cluster, we have pairs CO, CO, OO, for which we would like to use respective 3-body outer cutoffs of 4.0, 4.0, and 6.5.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>SPECIAL 3B S_MAXIM: SPECIFIC <span class="m">4</span>
+CCCCCC CC CC CC <span class="m">4</span>.4 <span class="m">4</span>.4 <span class="m">4</span>.4
+COCOCC CC CO CO <span class="m">4</span>.4 <span class="m">4</span>.0 <span class="m">4</span>.0
+OOCOCO CO CO OO <span class="m">4</span>.0 <span class="m">4</span>.0 <span class="m">6</span>.5
+OOOOOO OO OO OO <span class="m">6</span>.5 <span class="m">6</span>.5 <span class="m">6</span>.5
+</pre></div>
+</div>
+<p>Finally, we specify that we will use a cubic smoothing function, and then specify the end of the configuration file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># FCUTTYP #</span>
+        CUBIC
+
+<span class="c1"># ENDFILE #</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The polynomial orders listed in the input file for <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRTYP</span> <span class="pre">#</span> <span class="pre">CHEBYSHEV</span></code> should be read as &lt;O2B&gt; &lt;O3B+1&gt; &lt;O4B+1&gt;, when O3B and O4B are greater than zero. For example, <code class="docutils literal notranslate"><span class="pre">CHEBYSHEV</span> <span class="pre">12</span> <span class="pre">5</span> <span class="pre">0</span></code> actually indicates a model that is 12th order in 2-body interactions, and 4th order in 3-body interactions.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Note: All of the following information is provided in published ChIMES manuscripts.</p>
+<ul>
+<li><p>Inner cutoffs are set to the lowest sampled distance (<span class="math notranslate nohighlight">\(r_{\mathrm{samp,min}}\)</span>) in for each given pair type the training trajectory, or slightly less:math:<cite>r_{mathrm{samp,min}}-0.02</cite>.</p></li>
+<li><p>2-body outer cutoffs are usually set to encompass at least the 2nd non-bonded solvation shell, and usually set to about 8 Å.</p></li>
+<li><p>3-body outer cutoffs are usually set to encompass the 1st non-bonded solvation shell.</p></li>
+<li><p>4-body outer cutoffs are usually set to between the first or second RDF minimum; choice depends on the nature of the system (i.e. do extended 4-body interactions like molecular torsions need to be described, or is the system characterized by short-ranged interactions like in metallic clusters?</p></li>
+<li><p>The Morse lambda is usually set to distance corresponding to the the first (bonding) peak in the in the pair RDF.</p></li>
+<li><p>There is  no hard-and-fast rule for setting the 2/3/4-body polynomial orders, but 12/7/3 (i.e., <code class="docutils literal notranslate"><span class="pre">CHEBYSHEV</span> <span class="pre">12</span> <span class="pre">8</span> <span class="pre">4</span></code>) is usually a good starting point.</p></li>
+<li><p>Weighting is often needed when energies and stresses tensors are included in the fit. Typical respective weighting factors are 0.1 – 5.0 and 200 – 500. This will be discussed in greater detail in the following section.</p></li>
+<li><p>If a TERSOFF smoothing function is used (i.e., <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">FCUTTYP</span> <span class="pre">#</span> <span class="pre">TERSOFF</span> <span class="pre">&lt;var&gt;</span></code>) The TERSOFF var determines when the smooth step cutoff function kicks in and is typically set to between 0.25 and 0.50, where larger values modify the interaction at shorter distances, but can make it easier to obtain a smooth interaction.</p></li>
+<li><p>Be mindful of outer cutoff distances with respect to box lengths.</p></li>
+<li><p>If you don’t want to determine all pair/triplet/quadruplet interaction types and inner cutoffs by hand, setup a dummy fm_setup.in file with:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CHEBYSHEV</span> <span class="pre">2</span> <span class="pre">2</span> <span class="pre">2</span></code></p></li>
+<li><p>2-body inner cutoffs = 0.0</p></li>
+<li><p>2-body outer cutoffs = 0.5</p></li>
+<li><p>Do not explicitly set 3- or 4-body outer cutoffs (the code will use the 2-body value for them)</p></li>
+<li><p>Run the chimes_lsq code using this file</p></li>
+<li><p>Check the bottom section of the output, which lists all this information for you</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="step-3-generate-the-design-matrix">
+<h2>Step 3: Generate the design matrix<a class="headerlink" href="#step-3-generate-the-design-matrix" title="Permalink to this headline">¶</a></h2>
+<p>As described in <a class="reference internal" href="chimes_overview.html#page-overview"><span class="std std-ref">ChIMES Overview</span></a> and <a class="reference internal" href="lsq_input_file.html#page-running"><span class="std std-ref">Generating a ChIMES model</span></a>, ChIMES is parameterically linear, meaning the fitting problem can be recast as a matrix equation of the form <span class="math notranslate nohighlight">\(\mathbf{Ax=b}\)</span>. The purpose of <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> is to generate <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{b}\)</span> based on the user-defined ChIMES hyperparamters (i.e., contents of <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code>), and training trajectory (e.g., <code class="docutils literal notranslate"><span class="pre">9350.combine-scs-2-a.fit.xyzf</span></code>). To do this, simply run the following from your tutorial folder:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">chimes_lsq</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">chimes_lsq</span> <span class="n">fm_setup</span><span class="o">.</span><span class="ow">in</span> <span class="o">|</span> <span class="n">tee</span> <span class="n">fm_setup</span><span class="o">.</span><span class="n">log</span>
+</pre></div>
+</div>
+<p>Running <code class="docutils literal notranslate"><span class="pre">ls</span></code> will show generation of <code class="docutils literal notranslate"><span class="pre">A.txt</span></code> and <code class="docutils literal notranslate"><span class="pre">b.txt</span></code> files, which we will use to determine our model parameters (i.e. <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> in the equation <span class="math notranslate nohighlight">\(\mathbf{Ax=b}\)</span>). Several other files are produced including:</p>
+<ul class="simple">
+<li><p>dim.txt: A-matrix dimension &lt;# columns&gt; &lt;#rows&gt;</p></li>
+<li><p>natoms.txt: For each line in b.txt, provides the number of atoms that were in the corresponding frame</p></li>
+<li><p>b-labeled.txt: Indicates the atom type for each force component, and if applicable, labels stress tensor components (prependid with “s_”), and system energies (labeled “+1”).</p></li>
+<li><p>params.header: Formatted output containing ChIMES hyperparameters</p></li>
+<li><p>ff_groups.map: Assigns cluster type indices for cluster name permutations</p></li>
+</ul>
+</div>
+<div class="section" id="step-4-solve-for-chimes-parameters">
+<h2>Step 4: Solve for ChIMES parameters<a class="headerlink" href="#step-4-solve-for-chimes-parameters" title="Permalink to this headline">¶</a></h2>
+<p>We will use principal component analysis (PCA) based on the singular value decomposition (SVD) of the force derivative matrix with the (default) regularization of 1E-5 to solve for ChIMES parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">chimes_lsq</span><span class="o">/</span><span class="n">source</span><span class="o">/</span><span class="n">chimes_lsq</span><span class="o">.</span><span class="n">py</span> <span class="o">&gt;</span> <span class="n">params</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>Note, this step can take a few minutes to run.</p>
+<p>Once complete, the script produces two files, <code class="docutils literal notranslate"><span class="pre">params.txt</span></code>, the ChIMES parameter file, and <code class="docutils literal notranslate"><span class="pre">force.txt</span></code>, the forces (and optionally stresses and energies) predicted for the training trajectory based on the presently developed ChIMES model. To inspect the RMS error in predicted forces (kcal/mol/Å), run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grep</span> <span class="o">-</span><span class="n">F</span> <span class="s2">&quot;RMS force error&quot;</span> <span class="n">params</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>and to visualize model peformance, run:</p>
+<blockquote>
+<div><p>paste b.txt force.txt &gt; compare.txt
+xmgrace compare.txt</p>
+</div></blockquote>
+</div>
+<div class="section" id="step-5-prepare-for-md-simulation">
+<h2>Step 5: Prepare for MD simulation<a class="headerlink" href="#step-5-prepare-for-md-simulation" title="Permalink to this headline">¶</a></h2>
+<p>Before using resulting parameters in MD simulations, be sure to add penalty function parameters. To do so, locate the containing <code class="docutils literal notranslate"><span class="pre">FCUT</span> <span class="pre">TYPE:</span> <span class="pre">CUBIC</span></code>, and enter add the highlighted text:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # CHBDIST #     # MORSE_LAMBDA #</span>
+        <span class="mi">0</span>               <span class="n">C</span>               <span class="n">C</span>               <span class="mf">0.988</span>           <span class="mi">8</span>               <span class="n">MORSE</span>           <span class="mf">1.35</span>
+        <span class="mi">1</span>               <span class="n">O</span>               <span class="n">O</span>               <span class="mf">0.911</span>           <span class="mi">8</span>               <span class="n">MORSE</span>           <span class="mf">2.55</span>
+        <span class="mi">2</span>               <span class="n">C</span>               <span class="n">O</span>               <span class="mf">0.876</span>           <span class="mi">8</span>               <span class="n">MORSE</span>           <span class="mf">1.15</span>
+
+<span class="n">FCUT</span> <span class="n">TYPE</span><span class="p">:</span> <span class="n">CUBIC</span>
+
+<span class="hll"><span class="n">PAIR</span> <span class="n">CHEBYSHEV</span> <span class="n">PENALTY</span> <span class="n">DIST</span><span class="p">:</span>    <span class="mf">0.02</span>
+</span><span class="hll"><span class="n">PAIR</span> <span class="n">CHEBYSHEV</span> <span class="n">PENALTY</span> <span class="n">SCALING</span><span class="p">:</span> <span class="mf">1E6</span>
+</span>
+<span class="n">SPECIAL</span> <span class="mi">3</span><span class="n">B</span> <span class="n">S_MAXIM</span><span class="p">:</span> <span class="n">SPECIFIC</span> <span class="mi">4</span>
+<span class="n">CCCCCC</span> <span class="n">CC</span> <span class="n">CC</span> <span class="n">CC</span> <span class="mf">4.40000</span> <span class="mf">4.40000</span> <span class="mf">4.40000</span>
+<span class="n">CCCOCO</span> <span class="n">CC</span> <span class="n">CO</span> <span class="n">CO</span> <span class="mf">4.40000</span> <span class="mf">4.00000</span> <span class="mf">4.00000</span>
+<span class="n">COCOOO</span> <span class="n">CO</span> <span class="n">CO</span> <span class="n">OO</span> <span class="mf">4.00000</span> <span class="mf">4.00000</span> <span class="mf">6.50000</span>
+<span class="n">OOOOOO</span> <span class="n">OO</span> <span class="n">OO</span> <span class="n">OO</span> <span class="mf">6.50000</span> <span class="mf">6.50000</span> <span class="mf">6.50000</span>
+</pre></div>
+</div>
+<p>Simulations using the resulting model can now be run with <code class="docutils literal notranslate"><span class="pre">chimes_md</span></code> (ancillary support), or <a class="reference external" href="https://github.com/rk-lindsey/chimes_calculator">the ChIMES Calculator</a></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This tutorial is only intended to familiarize the user with <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code>. Generating an accurate and stable machine learned model requires careful consideration of the target application, relevant training data, and suitable model hyperparameters. The <a class="reference internal" href="chimes_overview.html#page-overview"><span class="std std-ref">ChIMES Overview</span></a> and <a class="reference internal" href="lsq_input_file.html#page-running"><span class="std std-ref">Generating a ChIMES model</span></a> pages provide a more in-depth discussion of some of these topics and their relation to <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code>. We also recommend reviewing the <a class="reference internal" href="citing.html#page-citing"><span class="std std-ref">ChIMES literature</span></a> to see how models for complex problems are developed.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="chimes_overview.html" class="btn btn-neutral float-right" title="ChIMES Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Rebecca K. Lindsey, Nir Goldman, &amp; Laurence E. Fried
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,33 +12,31 @@
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ChIMES Overview" href="chimes_overview.html" />
+    <link rel="next" title="Quick Start Guide" href="quick_start.html" />
     <link rel="prev" title="ChIMES Parameter Generator Documentation" href="index.html" /> 
 </head>
 
@@ -52,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> chimes_lsq
+            <a href="index.html" class="icon icon-home"> chimes_lsq
           
 
           
@@ -75,7 +74,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -94,17 +92,18 @@
 <li class="toctree-l2"><a class="reference internal" href="#compiling-and-running-the-code">Compiling and running the code</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chimes_overview.html">ChIMES Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lsq_input_file.html">Generating a ChIMES model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="legal.html">Legal</a></li>
 </ul>
 
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -143,7 +142,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>Getting Started</li>
     
@@ -165,36 +164,35 @@
            <div itemprop="articleBody">
             
   <div class="section" id="getting-started">
-<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<span id="page-getting-started"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="#sec-obtaining"><span class="std std-ref">Obtaining the code</span></a></li>
-<li><a class="reference internal" href="#sec-compiling"><span class="std std-ref">Compiling and running</span></a></li>
+<li><p><a class="reference internal" href="#sec-obtaining"><span class="std std-ref">Obtaining the code</span></a></p></li>
+<li><p><a class="reference internal" href="#sec-compiling"><span class="std std-ref">Compiling and running</span></a></p></li>
 </ul>
 <hr class="docutils" />
 <div class="section" id="obtaining-the-code-for-llnl-employees">
 <span id="sec-obtaining"></span><h2>Obtaining the code (For LLNL Employees):<a class="headerlink" href="#obtaining-the-code-for-llnl-employees" title="Permalink to this headline">¶</a></h2>
 <p>Note that <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> is stored in a <a class="reference external" href="https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse">LLNL-hosted Bitbucket repository</a>. The following steps must be completed to obtain/access <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code>:</p>
 <ul>
-<li><p class="first">Send an e-mail to lindsey11 titled “ChIMES LSQ BB Acess Request” to be granted access.</p>
-</li>
-<li><p class="first">If the code is being copied to the LC: Set up SSH RSA keys</p>
+<li><p>Send an e-mail to lindsey11 titled “ChIMES LSQ BB Acess Request” to be granted access.</p></li>
+<li><p>If the code is being copied to the LC: Set up SSH RSA keys</p>
 <blockquote>
 <div><ul class="simple">
-<li><a class="reference external" href="https://www.ssh.com/ssh/keygen/">Generate your keys</a>. Use the default location and do not leave the pass-phrase blank.</li>
-<li>Copy the contents of your key to the LLNL-hosted Bitbucket and add them to your account <a class="reference external" href="https://mybitbucket.llnl.gov/plugins/servlet/ssh/account/keys">(accessible here)</a></li>
+<li><p><a class="reference external" href="https://www.ssh.com/ssh/keygen/">Generate your keys</a>. Use the default location and do not leave the pass-phrase blank.</p></li>
+<li><p>Copy the contents of your key to the LLNL-hosted Bitbucket and add them to your account <a class="reference external" href="https://mybitbucket.llnl.gov/plugins/servlet/ssh/account/keys">(accessible here)</a></p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p>Once access is granted and, if applicable, keys have been configured, <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> it can be obtained three ways, which are described below:</p>
 <ol class="arabic simple">
-<li>Forking (recommended for developers/contributors)</li>
-<li>Cloning</li>
-<li>Downloading as an archive</li>
+<li><p>Forking (recommended for developers/contributors)</p></li>
+<li><p>Cloning</p></li>
+<li><p>Downloading as an archive</p></li>
 </ol>
 <div class="section" id="forking">
 <h3>1. Forking<a class="headerlink" href="#forking" title="Permalink to this headline">¶</a></h3>
-<p>On the <a class="reference external" href="https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse">LLNL-hosted Bitbucket repository</a> page, click the fork button (fourth button down from the top left, which looks like a two-prong trident). This will create a copy of <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> in your LLNL Bitbucket account. You can clone, edit, and commit to this repository as you see fit, and any contribibutions to the original “parent” reposoitory via the pull request mechanism. For additional details, see <span class="xref std std-ref">Contributing</span>.</p>
+<p>On the <a class="reference external" href="https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse">LLNL-hosted Bitbucket repository</a> page, click the fork button (fourth button down from the top left, which looks like a two-prong trident). This will create a copy of <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> in your LLNL Bitbucket account. You can clone, edit, and commit to this repository as you see fit, and any contribibutions to the original “parent” reposoitory via the pull request mechanism. For additional details, see <a class="reference internal" href="contributing.html#page-contributing"><span class="std std-ref">Contributing</span></a>.</p>
 </div>
 <div class="section" id="cloning">
 <h3>2. Cloning<a class="headerlink" href="#cloning" title="Permalink to this headline">¶</a></h3>
@@ -226,7 +224,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="chimes_overview.html" class="btn btn-neutral float-right" title="ChIMES Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="quick_start.html" class="btn btn-neutral float-right" title="Quick Start Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="ChIMES Parameter Generator Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -238,19 +236,11 @@
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2020, Rebecca K. Lindsey, Nir Goldman, &amp; Laurence E. Fried
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -261,6 +251,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {
