@@ -35,19 +35,22 @@ where :math:`E_{n_\mathrm{B}}` is the total ChIMES system energy, :math:`n_{\mat
 :math:`{}^{n}\!E_{i_1i_2\dots i_n}` is the :math:`n`-body ChIMES energy for 
 a given set of :math:`n` atoms with indices :math:`i = {i_1, i_2, \dots , i_n}`, and :math:`n_a` is the total number of atoms in the system. In the 
 ChIMES framework, single-body energies are constant values and :math:`n`-body energies are constructed from the product of
-polynomials of transformed atom pair distances. Thus, a 2-body interaction would involve a single pair, :math:`ij`, while a 
-three-body interaction would involve three pairs, :math:`ij, ik,` and :math:`jk`, a 4-body interaction would involve :math:`4\choose 2` pairs, 
+polynomials of transformed atom pair distances. Thus, a 2-body interaction would involve a single pair distance, :math:`ij` and corresponding polynomial :math:`T_n(s_{ij})`, where :math:`s_{ij}` is the pair distance transformed to a range of :math:`[-1:1]`. Similarly, a 
+three-body interaction would :math:`3\choose 2` or three pairs, :math:`ij, ik,` and :math:`jk`, and a corresponding three-body polynomial, :math:`T_\alpha(s_{ij}) T_\beta(s_{ik}) T_\gamma(s_{jk})`. A 4-body interaction would involve :math:`4\choose 2 = 6` pairs, 
 and so on. Currently, the ChIMES parameter generator supports up to 4-body interactions.
 
 
 ChIMES atom cluster energies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Taking a 3-body interaction as an example, we define the following: :math:`\mathbf{A}=\{i,j,k\}` is th eindex over atoms within an atom interaction cluster, with the corresponding set of pairs given by :math:`\mathbf{P}=\{ij,ik,jk\}`, thier element pair types by :math:`\mathbf{E}=\{e_ie_j, e_ie_k, e_je_k\}`, and the polynomial order for each pair given by :math:`\mathbf{O}=\{\alpha , \beta , \gamma\}`. Two mapping functions are used to relate pair indices :math:`\mathbf{P}` to the three aforementioned pair properties: :math:`m_1 = \mathbf{P}\to \mathbf{E}` and :math:`m_2 = \mathbf{P}\to \mathbf{O}`, where an index :math:`y` refers to a particular component of :math:`\mathbf{P}`, defining an interaction pair.
 
-Using these definitions, the generalized ChIMES energy for a cluster of :math:`n` atoms is written:
+.. Taking a 3-body interaction as an example, we define the following: :math:`\mathbf{A}=\{i,j,k\}` is the index over atoms within an atom interaction cluster, with the corresponding set of pairs given by :math:`\mathbf{P}=\{ij,ik,jk\}`, their element pair types by :math:`\mathbf{E}=\{e_ie_j, e_ie_k, e_je_k\}`, and the polynomial order for each pair given by :math:`\mathbf{O}=\{\alpha , \beta , \gamma\}`. 
 
-.. math::
+.. Two mapping functions are used to relate pair indices :math:`\mathbf{P}` to the three aforementioned pair properties: :math:`m_1 = \mathbf{P}\to \mathbf{E}` and :math:`m_2 = \mathbf{P}\to \mathbf{O}`, where an index :math:`y` refers to a particular component of :math:`\mathbf{P}`, defining an interaction pair.
+
+.. Using these definitions, the generalized ChIMES energy for a cluster of :math:`n` atoms is written:
+
+.. .. math::
    :nowrap:
    
    \begin{equation}
@@ -55,10 +58,10 @@ Using these definitions, the generalized ChIMES energy for a cluster of :math:`n
    
    \end{equation}
    
-where the :math:`\sum_{\mathbf{O}}` notation indicates a multiple sum for which there are :math:`\binom{n}{2}` distinct indices, :math:`\mathcal{O}^*` is the maximum polynomial order for a :math:`n`-body interaction, and the asterisk indicates a sufficient number of non-zero terms exist that the graph formed by the edges of interacting atoms connects all :math:`n` atoms, which guarantees a true :math:`n`-body interaction. :math:`T_{m_2(y)}(s_y^{m_1(y)})` is a Chebyshev polynomial of order :math:`m_2(y)` that depends on pair distance :math:`s_y^{m_1(y)}` for pair :math:`y` of atom types :math:`m_1(y)` that has been transformed from :math:`r_y` to ensure it existis in the [-1,1] domain over which Chebyshev polynomials are defined, and :math:`f_s^{m_1(y)} (r_y)` is a cutoff function that ensures smooth behavior at the outer cutoff.
+.. where the :math:`\sum_{\mathbf{O}}` notation indicates a multiple sum for which there are :math:`\binom{n}{2}` distinct indices, :math:`\mathcal{O}^*` is the maximum polynomial order for a :math:`n`-body interaction, and the asterisk indicates a sufficient number of non-zero terms exist such that the graph formed by the edges of interacting atoms connects all :math:`n` atoms, which guarantees a true :math:`n`-body interaction. :math:`T_{m_2(y)}(s_y^{m_1(y)})` is a Chebyshev polynomial of order :math:`m_2(y)` that depends on pair distance :math:`s_y^{m_1(y)}` for pair :math:`y` of atom types :math:`m_1(y)` that has been transformed from :math:`r_y` to ensure it existis in the [-1,1] domain over which Chebyshev polynomials are defined, and :math:`f_s^{m_1(y)} (r_y)` is a cutoff function that ensures smooth behavior at the outer cutoff.
 
 
-Using the above definition of :math:`^{n}\!E` on arrives at the following for a two-body interaction:
+Using the above definition of :math:`^{n}\!E`, one arrives at the following for a two-body interaction:
 
 .. math::
    :nowrap:
@@ -68,7 +71,7 @@ Using the above definition of :math:`^{n}\!E` on arrives at the following for a 
    
    \end{equation}
    
-Note that an additional penalty term, :math:`f_p^{e_ie_j}` is added to each two-body interaction, described in greater detail below.
+Here, :math:`\mathcal{O}_{2B}` is the maximum two-body polynomial order, :math:`c_{\alpha}^{e_ie_j}` is the permutationally invariant linear coefficient of polynomial of order :math:`\alpha`, :math:`e_ie_j` are the element pairs of atoms :math:`i` and :math:`j`, and :math:`T_{\alpha}(s_{ij}^{e_ie_j})` is the Chebyshev polynomial of the first kind computed for the transformed distance :math:`s_{ij}^{e_ie_j}`. The function :math:`f_s^{e_ie_j}(r_{ij})` is a smooth cutoff function, discussed below (:ref:`smooth cutoff function  <sec-cutoff>`). Note that an additional penalty term, :math:`f_p^{e_ie_j}` is added to each two-body interaction, described in greater detail below.
 
 For a higher-body interaction, e.g. between three atoms, one obtains the following:
 
@@ -99,6 +102,8 @@ where :math:`r_{\mathrm{c,in}}`, :math:`A_{\mathrm{p}}`, and :math:`d^{m_1(y)}_{
 
 ChIMES smoothing functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _sec-cutoff:
 
 ChIMES models include smoothing functions for each constituent pair interaction, ensuring smoothness as outer cutoffs, :math:`r_{\mathrm{c,out}}^{m_1(y)}` are approached. Currently, two smoothing function forms are supported, "cubic" and "Tersoff". The former has been shown to work reasonably well for models including up to 3-body interactions, but the Tersoff form is best for models including higher-bodied interactions since it can be tuned to minimzed the smoothing function cutoff on the overall interactions (see **[papers]** for further details).
 

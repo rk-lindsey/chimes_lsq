@@ -32,6 +32,7 @@ For additional information, see:
    :maxdepth: 1
    
    getting_started
+   quick_start
    chimes_overview
    lsq_input_file
    units

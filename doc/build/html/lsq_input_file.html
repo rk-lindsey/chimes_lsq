@@ -1,7 +1,8 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html4" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -11,30 +12,28 @@
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
   
   
   
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Units" href="units.html" />
@@ -52,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> chimes_lsq
+            <a href="index.html" class="icon icon-home"> chimes_lsq
           
 
           
@@ -75,7 +74,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -85,6 +83,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chimes_overview.html">ChIMES Overview</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Generating a ChIMES model</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#essential-workflow">Essential workflow</a><ul>
@@ -135,13 +134,13 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
 <li class="toctree-l1"><a class="reference internal" href="citing.html">Citing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="legal.html">Legal</a></li>
 </ul>
 
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -180,7 +179,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>Generating a ChIMES model</li>
     
@@ -228,11 +227,11 @@ F_{\mathrm{obj}} = \frac{1}{n_\mathrm{f}3n_{\mathrm{a}}}
 \end{equation}.</div><p>As discussed in further detail below, we note that per-configuration energies and stress tensors can be considered in ChIMES fits, in additional to per-atom forces.</p>
 <p>Additional details are provided below in the following sections:</p>
 <ul class="simple">
-<li><a class="reference internal" href="#sec-workflow"><span class="std std-ref">Essential workflow</span></a></li>
-<li><a class="reference internal" href="#sec-input-files"><span class="std std-ref">Input files and options</span></a></li>
-<li><a class="reference internal" href="#sec-running"><span class="std std-ref">Running</span></a></li>
-<li><a class="reference internal" href="#sec-solving"><span class="std std-ref">Solving for ChIMES parameters</span></a></li>
-<li><a class="reference internal" href="#sec-caveats"><span class="std std-ref">Caveats</span></a></li>
+<li><p><a class="reference internal" href="#sec-workflow"><span class="std std-ref">Essential workflow</span></a></p></li>
+<li><p><a class="reference internal" href="#sec-input-files"><span class="std std-ref">Input files and options</span></a></p></li>
+<li><p><a class="reference internal" href="#sec-running"><span class="std std-ref">Running</span></a></p></li>
+<li><p><a class="reference internal" href="#sec-solving"><span class="std std-ref">Solving for ChIMES parameters</span></a></p></li>
+<li><p><a class="reference internal" href="#sec-caveats"><span class="std std-ref">Caveats</span></a></p></li>
 </ul>
 <hr class="docutils" />
 <div class="section" id="essential-workflow">
@@ -241,32 +240,32 @@ F_{\mathrm{obj}} = \frac{1}{n_\mathrm{f}3n_{\mathrm{a}}}
 <div class="section" id="reference-data-preparation">
 <h3>1. Reference data preparation<a class="headerlink" href="#reference-data-preparation" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>DFT-MD simulations are run for the target material over the target thermodynamic condition(s)</li>
-<li>Per-atom forces and optionally the system energy and stress tensor are extracted from the trajectory and saved in a “training trajectory” file, in a <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> compatible format</li>
+<li><p>DFT-MD simulations are run for the target material over the target thermodynamic condition(s)</p></li>
+<li><p>Per-atom forces and optionally the system energy and stress tensor are extracted from the trajectory and saved in a “training trajectory” file, in a <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> compatible format</p></li>
 </ul>
 </div>
 <div class="section" id="hyperparameter-selection">
 <h3>2. Hyperparameter selection<a class="headerlink" href="#hyperparameter-selection" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>ChIMES model hyperparameters (e.g. bodiedness, polynomial orders, cutoffs, transformation function parameters, etc.) are specified in the <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> input file (e.g., typically named <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code>), along with the training trajectory file</li>
+<li><p>ChIMES model hyperparameters (e.g. bodiedness, polynomial orders, cutoffs, transformation function parameters, etc.) are specified in the <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> input file (e.g., typically named <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code>), along with the training trajectory file</p></li>
 </ul>
 </div>
 <div class="section" id="design-matrix-generation">
 <h3>3. Design matrix generation<a class="headerlink" href="#design-matrix-generation" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> is executed to produce the design matrix (<code class="docutils literal notranslate"><span class="pre">A.txt</span></code>), the vector of forces (and optionally energies and stresses) from DFT (<code class="docutils literal notranslate"><span class="pre">b.txt</span></code>), and other metadata files (e.g. <code class="docutils literal notranslate"><span class="pre">params.header</span></code>, <code class="docutils literal notranslate"><span class="pre">ff_groups.map</span></code>)</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> is executed to produce the design matrix (<code class="docutils literal notranslate"><span class="pre">A.txt</span></code>), the vector of forces (and optionally energies and stresses) from DFT (<code class="docutils literal notranslate"><span class="pre">b.txt</span></code>), and other metadata files (e.g. <code class="docutils literal notranslate"><span class="pre">params.header</span></code>, <code class="docutils literal notranslate"><span class="pre">ff_groups.map</span></code>)</p></li>
 </ul>
 </div>
 <div class="section" id="design-matrix-optimization">
 <h3>4. Design matrix optimization<a class="headerlink" href="#design-matrix-optimization" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>ChIMES paramteters are generated via the <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code> utility, which also allows for consideration of an optional weight</li>
+<li><p>ChIMES paramteters are generated via the <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code> utility, which also allows for consideration of an optional weight</p></li>
 </ul>
 </div>
 <div class="section" id="performing-calculations-with-chimes">
 <h3>5. Performing calculations with ChIMES<a class="headerlink" href="#performing-calculations-with-chimes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>ChIMES calculations and simulations are performed through the <a class="reference external" href="https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_calculator/browse">ChIMES Calculator</a>, which can be linked to a variety of simulation software packages</li>
+<li><p>ChIMES calculations and simulations are performed through the <a class="reference external" href="https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_calculator/browse">ChIMES Calculator</a>, which can be linked to a variety of simulation software packages</p></li>
 </ul>
 <hr class="docutils" />
 </div>
@@ -274,170 +273,170 @@ F_{\mathrm{obj}} = \frac{1}{n_\mathrm{f}3n_{\mathrm{a}}}
 <div class="section" id="input-files-and-options">
 <span id="sec-input-files"></span><h2>Input files and options<a class="headerlink" href="#input-files-and-options" title="Permalink to this headline">¶</a></h2>
 <p>Note: Asterisks (*) indicate options described in greater detail below</p>
-<table border="1" class="docutils">
+<table class="docutils align-default">
 <colgroup>
-<col width="9%" />
-<col width="23%" />
-<col width="68%" />
+<col style="width: 9%" />
+<col style="width: 23%" />
+<col style="width: 68%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Control  variables</th>
-<th class="head">Description</th>
-<th class="head">Value/Options/Notes</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Control  variables</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Value/Options/Notes</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code> *</td>
-<td>Training trajectory file(s)</td>
-<td>See below for details.</td>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code> *</p></td>
+<td><p>Training trajectory file(s)</p></td>
+<td><p>See below for details.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">WRAPTRJ</span></code></td>
-<td><code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>: Coorindate wrapping</td>
-<td>Automatically disabled when <a class="reference external" href="https://doi.org/10.1006/jcph.1995.1039">ghost atoms</a> (layers) are used.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">WRAPTRJ</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>: Coorindate wrapping</p></td>
+<td><p>Automatically disabled when <a class="reference external" href="https://doi.org/10.1006/jcph.1995.1039">ghost atoms</a> (layers) are used.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code></td>
-<td><code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>: {A,b}.txt file splitting</td>
-<td>Should not be used unless DLARS/DLASSO solvers are used.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>: {A,b}.txt file splitting</p></td>
+<td><p>Should not be used unless DLARS/DLASSO solvers are used.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">NFRAMES</span></code></td>
-<td>Number of training frames</td>
-<td>Any integer &gt; 0.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">NFRAMES</span></code></p></td>
+<td><p>Number of training frames</p></td>
+<td><p>Any integer &gt; 0.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">NLAYERS</span></code></td>
-<td>Number of supercell ghost layers</td>
-<td>A value of 0 yields the original box. A value of 1 yields a single shell of replicated boxes around the original box (i.e. 27 boxes).</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NLAYERS</span></code></p></td>
+<td><p>Number of supercell ghost layers</p></td>
+<td><p>A value of 0 yields the original box. A value of 1 yields a single shell of replicated boxes around the original box (i.e. 27 boxes).</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> *</td>
-<td><code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>: Fit/use charges</td>
-<td>See below for details.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> *</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>: Fit/use charges</p></td>
+<td><p>See below for details.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">FITSTRS</span></code> *</td>
-<td>Whether/how to include stresses</td>
-<td>See below for details.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">FITSTRS</span></code> *</p></td>
+<td><p>Whether/how to include stresses</p></td>
+<td><p>See below for details.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">FITENER</span></code> *</td>
-<td>Whether/how to include energies</td>
-<td>See below for details.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FITENER</span></code> *</p></td>
+<td><p>Whether/how to include energies</p></td>
+<td><p>See below for details.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">FITEATM</span></code></td>
-<td>(DELETE) Boolean: Fit per-atom energies</td>
-<td>(Defunct) N/A.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">FITEATM</span></code></p></td>
+<td><p>(DELETE) Boolean: Fit per-atom energies</p></td>
+<td><p>(Defunct) N/A.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">FITPOVR</span></code></td>
-<td>(DELETE) Boolean: Fit ReaxFF overbonding</td>
-<td>(Defunct) N/A.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FITPOVR</span></code></p></td>
+<td><p>(DELETE) Boolean: Fit ReaxFF overbonding</p></td>
+<td><p>(Defunct) N/A.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">PAIRTYP</span></code></td>
-<td>Chebyshev polynomial orders</td>
-<td>Expects <code class="docutils literal notranslate"><span class="pre">&lt;O2B&gt;</span> <span class="pre">&lt;O3B+1&gt;</span> <span class="pre">&lt;O4B+1&gt;</span> <span class="pre">-1</span> <span class="pre">1</span></code></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PAIRTYP</span></code></p></td>
+<td><p>Chebyshev polynomial orders</p></td>
+<td><p>Expects <code class="docutils literal notranslate"><span class="pre">&lt;O2B&gt;</span> <span class="pre">&lt;O3B+1&gt;</span> <span class="pre">&lt;O4B+1&gt;</span> <span class="pre">-1</span> <span class="pre">1</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">CHBTYPE</span></code> *</td>
-<td>Pair distance transformation type</td>
-<td>See below for details.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CHBTYPE</span></code> *</p></td>
+<td><p>Pair distance transformation type</p></td>
+<td><p>See below for details.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">USENEIG</span></code></td>
-<td>Neighbor list/distance convention</td>
-<td>Auto-select algorithm (<code class="docutils literal notranslate"><span class="pre">true</span></code>) or use small-cell friendly method (<code class="docutils literal notranslate"><span class="pre">true</span> <span class="pre">SMALL</span></code>)</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">USENEIG</span></code></p></td>
+<td><p>Neighbor list/distance convention</p></td>
+<td><p>Auto-select algorithm (<code class="docutils literal notranslate"><span class="pre">true</span></code>) or use small-cell friendly method (<code class="docutils literal notranslate"><span class="pre">true</span> <span class="pre">SMALL</span></code>)</p></td>
 </tr>
 </tbody>
 </table>
 <p>Note: Asterisks (*) indicate options described in greater detail below</p>
-<table border="1" class="docutils">
+<table class="docutils align-default">
 <colgroup>
-<col width="9%" />
-<col width="18%" />
-<col width="73%" />
+<col style="width: 9%" />
+<col style="width: 18%" />
+<col style="width: 73%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Topology variables</th>
-<th class="head">Description</th>
-<th class="head">Value/Options/Notes</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Topology variables</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Value/Options/Notes</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">NATMTYP</span></code></td>
-<td>Number of atom types</td>
-<td>Number of unique atom types in trajectory.</td>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NATMTYP</span></code></p></td>
+<td><p>Number of atom types</p></td>
+<td><p>Number of unique atom types in trajectory.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">TYPEIDX</span></code></td>
-<td>Atom type index</td>
-<td>Integers, ranging from 1 to <code class="docutils literal notranslate"><span class="pre">NATMTYP</span></code>. Values form a column below <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">TYPEIDX</span> <span class="pre">#</span></code>.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TYPEIDX</span></code></p></td>
+<td><p>Atom type index</p></td>
+<td><p>Integers, ranging from 1 to <code class="docutils literal notranslate"><span class="pre">NATMTYP</span></code>. Values form a column below <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">TYPEIDX</span> <span class="pre">#</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ATM_TYP</span></code></td>
-<td>Atom type chemical symbol</td>
-<td>Any string. Chemical symbol for each unique atom type.  Values form a column below <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">ATM_TYP</span> <span class="pre">#</span></code>.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ATM_TYP</span></code></p></td>
+<td><p>Atom type chemical symbol</p></td>
+<td><p>Any string. Chemical symbol for each unique atom type.  Values form a column below <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">ATM_TYP</span> <span class="pre">#</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">ATMCHRG</span></code></td>
-<td>Atom type charge</td>
-<td>If <code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> is false: a partial atomic charge for each atom type. If <code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> is true: a positive or negative sign, to indicate how pair charge signs should be assigned.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ATMCHRG</span></code></p></td>
+<td><p>Atom type charge</p></td>
+<td><p>If <code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> is false: a partial atomic charge for each atom type. If <code class="docutils literal notranslate"><span class="pre">FITCOUL</span></code> is true: a positive or negative sign, to indicate how pair charge signs should be assigned.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ATMMASS</span></code></td>
-<td>Atom type mass</td>
-<td>Floats &gt; 0.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ATMMASS</span></code></p></td>
+<td><p>Atom type mass</p></td>
+<td><p>Floats &gt; 0.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">EXCLUDE</span></code> *</td>
-<td>Interaction to excude/ignore</td>
-<td>Sets of n-body <a href="#id1"><span class="problematic" id="id2">``</span></a>ATM_TYP``s. Rarely used.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EXCLUDE</span></code> *</p></td>
+<td><p>Interaction to excude/ignore</p></td>
+<td><p>Sets of n-body <a href="#id1"><span class="problematic" id="id2">``</span></a>ATM_TYP``s. Rarely used.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></td>
-<td>Pair type index</td>
-<td>Ascending integers from 1 to the number of unique atom pair types. Values form a column below <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRIDX</span> <span class="pre">#</span></code>.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></p></td>
+<td><p>Pair type index</p></td>
+<td><p>Ascending integers from 1 to the number of unique atom pair types. Values form a column below <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRIDX</span> <span class="pre">#</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">ATM_TYX</span></code></td>
-<td><code class="docutils literal notranslate"><span class="pre">ATM_TYP</span></code> of atom X in pair <code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></td>
-<td>Used to define interaction pair types. Order does not matter.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ATM_TYX</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ATM_TYP</span></code> of atom X in pair <code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></p></td>
+<td><p>Used to define interaction pair types. Order does not matter.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">S_MINIM</span></code></td>
-<td>Inner cutoff for pair <code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></td>
-<td>Generally taken as slightly less than smallest distance sampled in DFT-MD trajectory.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">S_MINIM</span></code></p></td>
+<td><p>Inner cutoff for pair <code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></p></td>
+<td><p>Generally taken as slightly less than smallest distance sampled in DFT-MD trajectory.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">S_MAXIM</span></code></td>
-<td>Outer cutoff for pair <code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></td>
-<td>Should be small enough to prevent self-interaction across periodic boundaries.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">S_MAXIM</span></code></p></td>
+<td><p>Outer cutoff for pair <code class="docutils literal notranslate"><span class="pre">PAIRIDX</span></code></p></td>
+<td><p>Should be small enough to prevent self-interaction across periodic boundaries.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">S_DELTA</span></code></td>
-<td>(DELETE) Soon to be defunct</td>
-<td>(Defunct) Requires dummy float.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">S_DELTA</span></code></p></td>
+<td><p>(DELETE) Soon to be defunct</p></td>
+<td><p>(Defunct) Requires dummy float.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">MORSE_LAMBDA</span></code></td>
-<td>(RENAME) <code class="docutils literal notranslate"><span class="pre">CHEBTYPE</span></code> variable</td>
-<td>Morse-type lambda for Morse <code class="docutils literal notranslate"><span class="pre">CHEBTYP</span></code>. Only used if <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRTYP</span> <span class="pre">#</span></code> is <code class="docutils literal notranslate"><span class="pre">CHEBYSHEV</span></code>. Generally set to location of first radial distribution peak for each pair type.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MORSE_LAMBDA</span></code></p></td>
+<td><p>(RENAME) <code class="docutils literal notranslate"><span class="pre">CHEBTYPE</span></code> variable</p></td>
+<td><p>Morse-type lambda for Morse <code class="docutils literal notranslate"><span class="pre">CHEBTYP</span></code>. Only used if <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRTYP</span> <span class="pre">#</span></code> is <code class="docutils literal notranslate"><span class="pre">CHEBYSHEV</span></code>. Generally set to location of first radial distribution peak for each pair type.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">USEOVERP</span></code></td>
-<td>(DELETE) ReaxFF overbonding variable</td>
-<td>(Defunct) N/A.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">USEOVERP</span></code></p></td>
+<td><p>(DELETE) ReaxFF overbonding variable</p></td>
+<td><p>(Defunct) N/A.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">NIJBINS</span></code></td>
-<td>(DELETE) Defunct</td>
-<td>(Defunct) N/A.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">NIJBINS</span></code></p></td>
+<td><p>(DELETE) Defunct</p></td>
+<td><p>(Defunct) N/A.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">NIKBINS</span></code></td>
-<td>(DELETE) Defunct</td>
-<td>(Defunct) N/A.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NIKBINS</span></code></p></td>
+<td><p>(DELETE) Defunct</p></td>
+<td><p>(Defunct) N/A.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">NJKBINS</span></code></td>
-<td>(DELETE) Defunct</td>
-<td>(Defunct) N/A.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">NJKBINS</span></code></p></td>
+<td><p>(DELETE) Defunct</p></td>
+<td><p>(Defunct) N/A.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">CHGCONS</span></code> *</td>
-<td>Charge fitting constraints</td>
-<td>See below for details.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CHGCONS</span></code> *</p></td>
+<td><p>Charge fitting constraints</p></td>
+<td><p>See below for details.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MINIM</span></code> *</td>
-<td>Special manybody inner cutoffs</td>
-<td>See below for details.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MINIM</span></code> *</p></td>
+<td><p>Special manybody inner cutoffs</p></td>
+<td><p>See below for details.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MAXIM</span></code> *</td>
-<td>Special manybody outer cutoffs</td>
-<td>See below for details.</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SPECIAL</span> <span class="pre">XB</span> <span class="pre">MAXIM</span></code> *</p></td>
+<td><p>Special manybody outer cutoffs</p></td>
+<td><p>See below for details.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">FCUTTYP</span></code> *</td>
-<td>Cutoff function style/parameters</td>
-<td>See below for details.</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FCUTTYP</span></code> *</p></td>
+<td><p>Cutoff function style/parameters</p></td>
+<td><p>See below for details.</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">CUBSCLE</span></code></td>
-<td>(DELETE) A depricated <code class="docutils literal notranslate"><span class="pre">CHBTYPE</span></code> variable</td>
-<td>N/A - Defunct</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CUBSCLE</span></code></p></td>
+<td><p>(DELETE) A depricated <code class="docutils literal notranslate"><span class="pre">CHBTYPE</span></code> variable</p></td>
+<td><p>N/A - Defunct</p></td>
 </tr>
 </tbody>
 </table>
@@ -480,42 +479,37 @@ Note that stress tensors and energies are optional and thier inclusion is indica
 <h4><code class="docutils literal notranslate"><span class="pre">FITSTRS</span></code><a class="headerlink" href="#fitstrs" title="Permalink to this headline">¶</a></h4>
 <p>This keyword controls if and how per-configuration stress tensors are included in the fit. Options are:</p>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">false</span></code>:</dt>
-<dd><ul class="first last">
-<li>Do not include any stress tensor information in the fit</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">false</span></code>:</dt><dd><ul>
+<li><p>Do not include any stress tensor information in the fit</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">true</span></code>:</dt>
-<dd><ul class="first last">
-<li>Fit to stress tensors for all training trajectory frames, but only expect/consider <span class="math notranslate nohighlight">\(xx\)</span>, <span class="math notranslate nohighlight">\(yy\)</span>, and <span class="math notranslate nohighlight">\(zz\)</span> stress tensor components</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">true</span></code>:</dt><dd><ul>
+<li><p>Fit to stress tensors for all training trajectory frames, but only expect/consider <span class="math notranslate nohighlight">\(xx\)</span>, <span class="math notranslate nohighlight">\(yy\)</span>, and <span class="math notranslate nohighlight">\(zz\)</span> stress tensor components</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">ALL</span></code>:</dt>
-<dd><ul class="first last">
-<li>Fit to stress tensors for all training trajectory frames, and expect/consider all stress tensor components</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">ALL</span></code>:</dt><dd><ul>
+<li><p>Fit to stress tensors for all training trajectory frames, and expect/consider all stress tensor components</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">FIRST</span> <span class="pre">&lt;integer&gt;</span></code>:</dt>
-<dd><ul class="first last">
-<li>Fit to stress tensors for the overall first <code class="docutils literal notranslate"><span class="pre">&lt;integer&gt;</span></code> training trajectory frames, but only expect/consider <span class="math notranslate nohighlight">\(xx\)</span>, <span class="math notranslate nohighlight">\(yy\)</span>, and <span class="math notranslate nohighlight">\(zz\)</span></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">FIRST</span> <span class="pre">&lt;integer&gt;</span></code>:</dt><dd><ul>
+<li><p>Fit to stress tensors for the overall first <code class="docutils literal notranslate"><span class="pre">&lt;integer&gt;</span></code> training trajectory frames, but only expect/consider <span class="math notranslate nohighlight">\(xx\)</span>, <span class="math notranslate nohighlight">\(yy\)</span>, and <span class="math notranslate nohighlight">\(zz\)</span></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">FIRSTALL</span> <span class="pre">&lt;integer&gt;</span></code>:</dt>
-<dd><ul class="first last">
-<li>Fit to stress tensors for the overall first <code class="docutils literal notranslate"><span class="pre">&lt;integer&gt;</span></code> training trajectory frames, and expect/consider all stress tensor components</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">FIRSTALL</span> <span class="pre">&lt;integer&gt;</span></code>:</dt><dd><ul>
+<li><p>Fit to stress tensors for the overall first <code class="docutils literal notranslate"><span class="pre">&lt;integer&gt;</span></code> training trajectory frames, and expect/consider all stress tensor components</p></li>
 </ul>
 </dd>
 </dl>
@@ -526,26 +520,23 @@ Note that stress tensors and energies are optional and thier inclusion is indica
 <h4><code class="docutils literal notranslate"><span class="pre">FITENER</span></code><a class="headerlink" href="#fitener" title="Permalink to this headline">¶</a></h4>
 <p>This keyword controls if and how per-configuration energies are included in the fit. Options are:</p>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">false</span></code>:</dt>
-<dd><ul class="first last">
-<li>Do not include any energy information in the fit</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">false</span></code>:</dt><dd><ul>
+<li><p>Do not include any energy information in the fit</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">true</span></code>:</dt>
-<dd><ul class="first last">
-<li>Include/expect an energy for each configuration in the training trajectory(s)</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">true</span></code>:</dt><dd><ul>
+<li><p>Include/expect an energy for each configuration in the training trajectory(s)</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">FIRST</span> <span class="pre">&lt;integer&gt;</span></code>:</dt>
-<dd><ul class="first last">
-<li>Include/expect an energy for the overall first  <code class="docutils literal notranslate"><span class="pre">&lt;integer&gt;</span></code> configurations in the training trajectory(s)</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">FIRST</span> <span class="pre">&lt;integer&gt;</span></code>:</dt><dd><ul>
+<li><p>Include/expect an energy for the overall first  <code class="docutils literal notranslate"><span class="pre">&lt;integer&gt;</span></code> configurations in the training trajectory(s)</p></li>
 </ul>
 </dd>
 </dl>
@@ -633,137 +624,128 @@ OOOOOO OO OO OO <span class="m">6</span>.5 <span class="m">6</span>.5 <span clas
 <h4>Output files<a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">A.txt</span></code> (The ChIMES design matrix)</p>
 <ul>
-<li><p class="first">For force- or force- and stress-only fits, column contain each value <span class="math notranslate nohighlight">\(\frac{\partial X _{a,\mathrm{ChIMES} \{c\}}}{\partial c_{b}}\)</span> for a given coefficient <span class="math notranslate nohighlight">\(c\)</span> with index <span class="math notranslate nohighlight">\(b\)</span>.</p>
+<li><p>For force- or force- and stress-only fits, column contain each value <span class="math notranslate nohighlight">\(\frac{\partial X _{a,\mathrm{ChIMES} \{c\}}}{\partial c_{b}}\)</span> for a given coefficient <span class="math notranslate nohighlight">\(c\)</span> with index <span class="math notranslate nohighlight">\(b\)</span>.</p>
 <blockquote>
 <div><ul class="simple">
-<li>If energies are included in the fit, the final columns are the number of atoms of each type in corresponding training trajectory frame</li>
+<li><p>If energies are included in the fit, the final columns are the number of atoms of each type in corresponding training trajectory frame</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Each row corresponds to the <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(j\)</span>, or <span class="math notranslate nohighlight">\(k^{\mathrm{th}}\)</span> for component of a given atom in the corresponding training trajectory frame</p>
+<li><p>Each row corresponds to the <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(j\)</span>, or <span class="math notranslate nohighlight">\(k^{\mathrm{th}}\)</span> for component of a given atom in the corresponding training trajectory frame</p>
 <blockquote>
 <div><ul class="simple">
-<li>Thus, 2-body only, force-only fit with polynomial order 10 for a 25 frame trajectory containing 300 atoms, <code class="docutils literal notranslate"><span class="pre">A.txt</span></code> would contain <span class="math notranslate nohighlight">\(25 \times 300 \times 3 = 22,500\)</span> rows and 10 columns.</li>
+<li><p>Thus, 2-body only, force-only fit with polynomial order 10 for a 25 frame trajectory containing 300 atoms, <code class="docutils literal notranslate"><span class="pre">A.txt</span></code> would contain <span class="math notranslate nohighlight">\(25 \times 300 \times 3 = 22,500\)</span> rows and 10 columns.</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Rather than a single <code class="docutils literal notranslate"><span class="pre">A.txt</span></code> file, several <code class="docutils literal notranslate"><span class="pre">A.&lt;zero-padded-number&gt;.txt</span></code> files are produced, which contain a subset of chimes design matrix rows. See <code class="docutils literal notranslate"><span class="pre">dim.txt</span></code> below for additional details.</li>
+<li><p>Rather than a single <code class="docutils literal notranslate"><span class="pre">A.txt</span></code> file, several <code class="docutils literal notranslate"><span class="pre">A.&lt;zero-padded-number&gt;.txt</span></code> files are produced, which contain a subset of chimes design matrix rows. See <code class="docutils literal notranslate"><span class="pre">dim.txt</span></code> below for additional details.</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">b.txt</span></code> (DFT forces, and optional stresses and energies)</p>
 <ul>
-<li><p class="first">This file contains the DFT per-atom forces and optionally configuration stresses and energies extracted from the training trajectory</p>
-</li>
-<li><p class="first">Each row corresponds to the <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(j\)</span>, or <span class="math notranslate nohighlight">\(k^{\mathrm{th}}\)</span> for component of a given atom in the corresponding training trajectory frame</p>
+<li><p>This file contains the DFT per-atom forces and optionally configuration stresses and energies extracted from the training trajectory</p></li>
+<li><p>Each row corresponds to the <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(j\)</span>, or <span class="math notranslate nohighlight">\(k^{\mathrm{th}}\)</span> for component of a given atom in the corresponding training trajectory frame</p>
 <blockquote>
 <div><ul class="simple">
-<li>Thus, 2-body only, force-only fit for a 25 frame trajectory containing 300 atoms, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code> would contain <span class="math notranslate nohighlight">\(25 \times 300 \times 3 = 22,500\)</span> rows, irrespective of model complexity (i.e. bodiedness and polynomial order).</li>
+<li><p>Thus, 2-body only, force-only fit for a 25 frame trajectory containing 300 atoms, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code> would contain <span class="math notranslate nohighlight">\(25 \times 300 \times 3 = 22,500\)</span> rows, irrespective of model complexity (i.e. bodiedness and polynomial order).</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Rather than a single <code class="docutils literal notranslate"><span class="pre">b.txt</span></code> file, several <code class="docutils literal notranslate"><span class="pre">b.&lt;zero-padded-number&gt;.txt</span></code> files are produced, which contain a subset of <code class="docutils literal notranslate"><span class="pre">b.txt</span></code> rows. See <code class="docutils literal notranslate"><span class="pre">dim.txt</span></code> below for additional details.</li>
+<li><p>Rather than a single <code class="docutils literal notranslate"><span class="pre">b.txt</span></code> file, several <code class="docutils literal notranslate"><span class="pre">b.&lt;zero-padded-number&gt;.txt</span></code> files are produced, which contain a subset of <code class="docutils literal notranslate"><span class="pre">b.txt</span></code> rows. See <code class="docutils literal notranslate"><span class="pre">dim.txt</span></code> below for additional details.</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code> (DFT forces, and optional stresses and energies, labeled)</p>
 <ul>
-<li><p class="first">This file is a replicate of b.txt which contains additional information on each entry. If the row corresponds to a force, the first and second row entries will provide atom chemical symbol and corresponding DFT force. For energies, rows are label  with a “+1”, and for stresses, “s_ab”, where ab indicates the coresponding tensor component (e.g. xx, yy, zz, etc.).</p>
-</li>
-<li><p class="first">Additional annotation in the <cite>b-labeled.txt file</cite> can be realized by decoration of the optional <code class="docutils literal notranslate"><span class="pre">traj_list.dat</span></code> file, when the <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code> keyword <code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code> uses the <code class="docutils literal notranslate"><span class="pre">MULTI</span></code> option.</p>
-</li>
-<li><p class="first">If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
+<li><p>This file is a replicate of b.txt which contains additional information on each entry. If the row corresponds to a force, the first and second row entries will provide atom chemical symbol and corresponding DFT force. For energies, rows are label  with a “+1”, and for stresses, “s_ab”, where ab indicates the coresponding tensor component (e.g. xx, yy, zz, etc.).</p></li>
+<li><p>Additional annotation in the <cite>b-labeled.txt file</cite> can be realized by decoration of the optional <code class="docutils literal notranslate"><span class="pre">traj_list.dat</span></code> file, when the <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code> keyword <code class="docutils literal notranslate"><span class="pre">TRJFILE</span></code> uses the <code class="docutils literal notranslate"><span class="pre">MULTI</span></code> option.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Rather than a single <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code> file, several <code class="docutils literal notranslate"><span class="pre">b-labeled.&lt;zero-padded-number&gt;.txt</span></code> files are produced, which contain a subset of <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code> rows. See <code class="docutils literal notranslate"><span class="pre">dim.txt</span></code> below for additional details.</li>
+<li><p>Rather than a single <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code> file, several <code class="docutils literal notranslate"><span class="pre">b-labeled.&lt;zero-padded-number&gt;.txt</span></code> files are produced, which contain a subset of <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code> rows. See <code class="docutils literal notranslate"><span class="pre">dim.txt</span></code> below for additional details.</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">dim.txt</span></code> (Output file dimensions)</p>
 <ul>
-<li><p class="first">If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is false:</p>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is false:</p>
 <blockquote>
 <div><ul class="simple">
-<li>The first value in <code class="docutils literal notranslate"><span class="pre">dim.txt</span></code> is the number of columns in <code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, and the second is the number of rows in <code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">natoms.txt</span></code>.</li>
+<li><p>The first value in <code class="docutils literal notranslate"><span class="pre">dim.txt</span></code> is the number of columns in <code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, and the second is the number of rows in <code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">natoms.txt</span></code>.</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">natoms.txt</span></code> are split into sub-files containing approximately the same number of lines, named like <code class="docutils literal notranslate"><span class="pre">file.&lt;zero-padded-number&gt;.txt</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">A.0001.txt</span></code>. Corresponding <code class="docutils literal notranslate"><span class="pre">dim.&lt;zero-padded-number&gt;.txt</span></code> files are produced, where the first value  is the number of columns in the <code class="docutils literal notranslate"><span class="pre">A.&lt;zero-padded-number&gt;.txt</span></code> (which is the same in all files), and the last value is the total number of rows that would be present in each of <code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">natoms.txt</span></code> if they were output in thier unsplit form. Finally, the second and third columns in <code class="docutils literal notranslate"><span class="pre">file.&lt;zero-padded-number&gt;.txt</span></code> indicate the first and last row of the unsplit file contained in <code class="docutils literal notranslate"><span class="pre">file.&lt;zero-padded-number&gt;.txt</span></code>.</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">natoms.txt</span></code> are split into sub-files containing approximately the same number of lines, named like <code class="docutils literal notranslate"><span class="pre">file.&lt;zero-padded-number&gt;.txt</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">A.0001.txt</span></code>. Corresponding <code class="docutils literal notranslate"><span class="pre">dim.&lt;zero-padded-number&gt;.txt</span></code> files are produced, where the first value  is the number of columns in the <code class="docutils literal notranslate"><span class="pre">A.&lt;zero-padded-number&gt;.txt</span></code> (which is the same in all files), and the last value is the total number of rows that would be present in each of <code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">natoms.txt</span></code> if they were output in thier unsplit form. Finally, the second and third columns in <code class="docutils literal notranslate"><span class="pre">file.&lt;zero-padded-number&gt;.txt</span></code> indicate the first and last row of the unsplit file contained in <code class="docutils literal notranslate"><span class="pre">file.&lt;zero-padded-number&gt;.txt</span></code>.</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">natoms.txt</span></code> (Number of atoms in training trajectory)</p>
 <ul>
-<li><p class="first">If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is false:</p>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is false:</p>
 <blockquote>
 <div><ul class="simple">
-<li>For each row in <code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code>, provides the number of atoms in the training trajectory frame from which information in the row originated. Useful for weighting or evaluating per-atom quantities.</li>
+<li><p>For each row in <code class="docutils literal notranslate"><span class="pre">A.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">b-labeled.txt</span></code>, provides the number of atoms in the training trajectory frame from which information in the row originated. Useful for weighting or evaluating per-atom quantities.</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">SPLITFI</span></code> is true:</p>
 <blockquote>
 <div><ul class="simple">
-<li>For each row in <code class="docutils literal notranslate"><span class="pre">A.&lt;zero-padded-number&gt;.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.&lt;zero-padded-number&gt;.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">b-labeled.&lt;zero-padded-number&gt;.txt</span></code>, provides the number of atoms in the training trajectory frame from which information in the row originated. Useful for weighting or evaluating per-atom quantities.</li>
+<li><p>For each row in <code class="docutils literal notranslate"><span class="pre">A.&lt;zero-padded-number&gt;.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">b.&lt;zero-padded-number&gt;.txt</span></code>, and <code class="docutils literal notranslate"><span class="pre">b-labeled.&lt;zero-padded-number&gt;.txt</span></code>, provides the number of atoms in the training trajectory frame from which information in the row originated. Useful for weighting or evaluating per-atom quantities.</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">params.header</span></code>  (metadata)</p>
 <ul class="simple">
-<li>Contains metadata (e.g. hyperparameters, headers, etc.) from <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code>.</li>
+<li><p>Contains metadata (e.g. hyperparameters, headers, etc.) from <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code>.</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">ff_groups.map</span></code>  (metadata)</p>
 <ul class="simple">
-<li>Contains metadata (e.g. mapping between many-body atom types and thier corresponding integer type).</li>
+<li><p>Contains metadata (e.g. mapping between many-body atom types and thier corresponding integer type).</p></li>
 </ul>
 </div>
 <div class="section" id="tips-and-tricks">
 <h4>Tips and tricks<a class="headerlink" href="#tips-and-tricks" title="Permalink to this headline">¶</a></h4>
 <ul>
-<li><p class="first">Inner cutoffs are typically set to the lowest sampled distance for each given pair type in the training trajectory</p>
-</li>
-<li><p class="first">For molecular systems:</p>
+<li><p>Inner cutoffs are typically set to the lowest sampled distance for each given pair type in the training trajectory</p></li>
+<li><p>For molecular systems:</p>
 <blockquote>
 <div><ul class="simple">
-<li>2-body outer cutoffs are usually set to encompass at least the second non-bonded solvation shell (determined by examination of the DFT-MD generated radial pair distribution functions, RDFs), or around 8 Å</li>
-<li>3-body outer cutoffs are usually set to encompass the first non-bonded solvation shell</li>
-<li>4-body outer cutoffs are usually set to between the first or second RDF minimum; choice depends on the nature of the system (i.e. do we need to describe extended 4-body interactions like molecular torsions, or more short-ranged interactions like those found in small molecules?</li>
+<li><p>2-body outer cutoffs are usually set to encompass at least the second non-bonded solvation shell (determined by examination of the DFT-MD generated radial pair distribution functions, RDFs), or around 8 Å</p></li>
+<li><p>3-body outer cutoffs are usually set to encompass the first non-bonded solvation shell</p></li>
+<li><p>4-body outer cutoffs are usually set to between the first or second RDF minimum; choice depends on the nature of the system (i.e. do we need to describe extended 4-body interactions like molecular torsions, or more short-ranged interactions like those found in small molecules?</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">The “Morse parameter” is usually set to the distance corresponding to the the first (bonding) peak in the in the pair RDF</p>
-</li>
-<li><p class="first">There is no hard-and-fast rule for setting the 2/3/4-body polynomial orders, but 12/7/3 is generally a good starting point</p>
-</li>
-<li><p class="first">Weighting is often needed when energies and stresses tensors are included in the fit. Typical respective weighting factors are 0.1 – 5.0 and 200 – 500</p>
-</li>
-<li><p class="first">If a Tersoff-style cutoff function is used, a Tersoff variable of between 0.25 and 0.75 is reasonable, where larger values modify the interaction at shorter distances, but can make it easier to obtain a smooth interaction</p>
-</li>
-<li><p class="first">Be mindful of outer cutoff distances with respect to box lengths. Training data are typically generated with small (i.e. DFT-friendly) cells</p>
-</li>
-<li><p class="first">If you don’t want to determine all pair/triplet/quadruplet interaction types and inner cutoffs for <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code> by hand, setup a dummy <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code> file with:</p>
+<li><p>The “Morse parameter” is usually set to the distance corresponding to the the first (bonding) peak in the in the pair RDF</p></li>
+<li><p>There is no hard-and-fast rule for setting the 2/3/4-body polynomial orders, but 12/7/3 is generally a good starting point</p></li>
+<li><p>Weighting is often needed when energies and stresses tensors are included in the fit. Typical respective weighting factors are 0.1 – 5.0 and 200 – 500</p></li>
+<li><p>If a Tersoff-style cutoff function is used, a Tersoff variable of between 0.25 and 0.75 is reasonable, where larger values modify the interaction at shorter distances, but can make it easier to obtain a smooth interaction</p></li>
+<li><p>Be mindful of outer cutoff distances with respect to box lengths. Training data are typically generated with small (i.e. DFT-friendly) cells</p></li>
+<li><p>If you don’t want to determine all pair/triplet/quadruplet interaction types and inner cutoffs for <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code> by hand, setup a dummy <code class="docutils literal notranslate"><span class="pre">fm_setup.in</span></code> file with:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRTYP#</span></code> set to <code class="docutils literal notranslate"><span class="pre">CHEBYSHEV</span> <span class="pre">2</span> <span class="pre">2</span> <span class="pre">2</span> <span class="pre">-1</span> <span class="pre">1</span></code>,</li>
-<li>2-body inner cutoffs = 0.0</li>
-<li>2-body outer cutoffs = something tiny (i.e. 0.5)</li>
-<li>Do not explicitly set 3- or 4-body outer cutoffs (the code will use the 2-body value for them)</li>
-<li>Run the <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> code using this file</li>
-<li>Check the bottom section of the output, which lists all this information for you</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">PAIRTYP#</span></code> set to <code class="docutils literal notranslate"><span class="pre">CHEBYSHEV</span> <span class="pre">2</span> <span class="pre">2</span> <span class="pre">2</span> <span class="pre">-1</span> <span class="pre">1</span></code>,</p></li>
+<li><p>2-body inner cutoffs = 0.0</p></li>
+<li><p>2-body outer cutoffs = something tiny (i.e. 0.5)</p></li>
+<li><p>Do not explicitly set 3- or 4-body outer cutoffs (the code will use the 2-body value for them)</p></li>
+<li><p>Run the <code class="docutils literal notranslate"><span class="pre">chimes_lsq</span></code> code using this file</p></li>
+<li><p>Check the bottom section of the output, which lists all this information for you</p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -782,38 +764,38 @@ OOOOOO OO OO OO <span class="m">6</span>.5 <span class="m">6</span>.5 <span clas
 <div class="section" id="supported-solvers">
 <h4>Supported solvers<a class="headerlink" href="#supported-solvers" title="Permalink to this headline">¶</a></h4>
 <p>Note: Asterisks (*) indicate options described in greater detail below</p>
-<table border="1" class="docutils">
+<table class="docutils align-default">
 <colgroup>
-<col width="5%" />
-<col width="23%" />
-<col width="72%" />
+<col style="width: 5%" />
+<col style="width: 23%" />
+<col style="width: 72%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Method</th>
-<th class="head">Additional dependencies</th>
-<th class="head">Related <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code> flags</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Additional dependencies</p></th>
+<th class="head"><p>Related <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code> flags</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>SVD</td>
-<td>None</td>
-<td><code class="docutils literal notranslate"><span class="pre">--eps</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code></td>
+<tbody>
+<tr class="row-even"><td><p>SVD</p></td>
+<td><p>None</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--eps</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code></p></td>
 </tr>
-<tr class="row-odd"><td>LASSO</td>
-<td><a class="reference external" href="https://scikit-learn.org/stable/">sklearn</a></td>
-<td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code></td>
+<tr class="row-odd"><td><p>LASSO</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/">sklearn</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code></p></td>
 </tr>
-<tr class="row-even"><td>LASSOLARS</td>
-<td><a class="reference external" href="https://scikit-learn.org/stable/">sklearn</a></td>
-<td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code></td>
+<tr class="row-even"><td><p>LASSOLARS</p></td>
+<td><p><a class="reference external" href="https://scikit-learn.org/stable/">sklearn</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code></p></td>
 </tr>
-<tr class="row-odd"><td>DLARS*</td>
-<td>DLARS</td>
-<td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code> (<code class="docutils literal notranslate"><span class="pre">--dlasso_dlars_path</span></code>) <code class="docutils literal notranslate"><span class="pre">--nodes</span></code> <code class="docutils literal notranslate"><span class="pre">--cores</span></code> <code class="docutils literal notranslate"><span class="pre">--read_output</span></code> <code class="docutils literal notranslate"><span class="pre">--restart</span></code> <code class="docutils literal notranslate"><span class="pre">--split_files</span></code></td>
+<tr class="row-odd"><td><p>DLARS*</p></td>
+<td><p>DLARS</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code> (<code class="docutils literal notranslate"><span class="pre">--dlasso_dlars_path</span></code>) <code class="docutils literal notranslate"><span class="pre">--nodes</span></code> <code class="docutils literal notranslate"><span class="pre">--cores</span></code> <code class="docutils literal notranslate"><span class="pre">--read_output</span></code> <code class="docutils literal notranslate"><span class="pre">--restart</span></code> <code class="docutils literal notranslate"><span class="pre">--split_files</span></code></p></td>
 </tr>
-<tr class="row-even"><td>DLASSO*</td>
-<td>DLARS</td>
-<td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code> (<code class="docutils literal notranslate"><span class="pre">--dlasso_dlars_path</span></code>) <code class="docutils literal notranslate"><span class="pre">--nodes</span></code> <code class="docutils literal notranslate"><span class="pre">--cores</span></code> <code class="docutils literal notranslate"><span class="pre">--read_output</span></code> <code class="docutils literal notranslate"><span class="pre">--restart</span></code> <code class="docutils literal notranslate"><span class="pre">--split_files</span></code></td>
+<tr class="row-even"><td><p>DLASSO*</p></td>
+<td><p>DLARS</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--alpha</span></code> <code class="docutils literal notranslate"><span class="pre">--normalize</span></code> <code class="docutils literal notranslate"><span class="pre">--weights</span></code> (<code class="docutils literal notranslate"><span class="pre">--dlasso_dlars_path</span></code>) <code class="docutils literal notranslate"><span class="pre">--nodes</span></code> <code class="docutils literal notranslate"><span class="pre">--cores</span></code> <code class="docutils literal notranslate"><span class="pre">--read_output</span></code> <code class="docutils literal notranslate"><span class="pre">--restart</span></code> <code class="docutils literal notranslate"><span class="pre">--split_files</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -824,105 +806,105 @@ OOOOOO OO OO OO <span class="m">6</span>.5 <span class="m">6</span>.5 <span clas
 </div>
 <div class="section" id="options-and-flags">
 <h4>Options and flags<a class="headerlink" href="#options-and-flags" title="Permalink to this headline">¶</a></h4>
-<table border="1" class="docutils">
+<table class="docutils align-default">
 <colgroup>
-<col width="18%" />
-<col width="8%" />
-<col width="10%" />
-<col width="64%" />
+<col style="width: 18%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 64%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Flag</th>
-<th class="head">Option type</th>
-<th class="head">Default value</th>
-<th class="head">Description</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Option type</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--A</span></code></td>
-<td>str</td>
-<td>A.txt</td>
-<td>Design matrix</td>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--A</span></code></p></td>
+<td><p>str</p></td>
+<td><p>A.txt</p></td>
+<td><p>Design matrix</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--algorithm</span></code></td>
-<td>str</td>
-<td>svd</td>
-<td>Fitting algorithm (Supported options: svd, lasso, lassolars, dlars, and dlasso)</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--algorithm</span></code></p></td>
+<td><p>str</p></td>
+<td><p>svd</p></td>
+<td><p>Fitting algorithm (Supported options: svd, lasso, lassolars, dlars, and dlasso)</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--dlasso_dlars_path</span></code></td>
-<td>str</td>
-<td>N/A</td>
-<td>Path to DLARS/DLASSO solver</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--dlasso_dlars_path</span></code></p></td>
+<td><p>str</p></td>
+<td><p>N/A</p></td>
+<td><p>Path to DLARS/DLASSO solver</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--alpha</span></code></td>
-<td>float</td>
-<td>1.0e-04</td>
-<td>Lasso or ridge regularization</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--alpha</span></code></p></td>
+<td><p>float</p></td>
+<td><p>1.0e-04</p></td>
+<td><p>Lasso or ridge regularization</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--b</span></code></td>
-<td>str</td>
-<td>b.txt</td>
-<td>Reference force file</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--b</span></code></p></td>
+<td><p>str</p></td>
+<td><p>b.txt</p></td>
+<td><p>Reference force file</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--cores</span></code></td>
-<td>int</td>
-<td>8</td>
-<td>DLARS/DLASSO number of cores</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--cores</span></code></p></td>
+<td><p>int</p></td>
+<td><p>8</p></td>
+<td><p>DLARS/DLASSO number of cores</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--eps</span></code></td>
-<td>float</td>
-<td>1.0e-05</td>
-<td>SVD regularization</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--eps</span></code></p></td>
+<td><p>float</p></td>
+<td><p>1.0e-05</p></td>
+<td><p>SVD regularization</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--header</span></code></td>
-<td>str</td>
-<td>params.header</td>
-<td>Parameter file header</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--header</span></code></p></td>
+<td><p>str</p></td>
+<td><p>params.header</p></td>
+<td><p>Parameter file header</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--map</span></code></td>
-<td>str</td>
-<td>ff_groups.map</td>
-<td>Parameter file map</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--map</span></code></p></td>
+<td><p>str</p></td>
+<td><p>ff_groups.map</p></td>
+<td><p>Parameter file map</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--nodes</span></code></td>
-<td>int</td>
-<td>1</td>
-<td>DLARS/DLASSO number of nodes</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--nodes</span></code></p></td>
+<td><p>int</p></td>
+<td><p>1</p></td>
+<td><p>DLARS/DLASSO number of nodes</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--normalize</span></code></td>
-<td>bool</td>
-<td>False</td>
-<td>Normalize DLARS/DLASSO calculation</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--normalize</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>False</p></td>
+<td><p>Normalize DLARS/DLASSO calculation</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--read_output</span></code></td>
-<td>bool</td>
-<td>False</td>
-<td>Read output from previous DLARS run</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--read_output</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>False</p></td>
+<td><p>Read output from previous DLARS run</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--restart_dlasso_dlars</span></code></td>
-<td>str</td>
-<td>N/A</td>
-<td>Determines whether dlasso or dlars job will be restarted. Argument is the restart file name</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--restart_dlasso_dlars</span></code></p></td>
+<td><p>str</p></td>
+<td><p>N/A</p></td>
+<td><p>Determines whether dlasso or dlars job will be restarted. Argument is the restart file name</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--split_files</span></code></td>
-<td>bool</td>
-<td>False</td>
-<td>LSQ code has split A matrix output (DLARS/DLASSO)</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--split_files</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>False</p></td>
+<td><p>LSQ code has split A matrix output (DLARS/DLASSO)</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--test_suite</span></code></td>
-<td>bool</td>
-<td>False</td>
-<td>Output for test suite</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--test_suite</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>False</p></td>
+<td><p>Output for test suite</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">--weights</span></code></td>
-<td>str</td>
-<td>N/A</td>
-<td>Weight file</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--weights</span></code></p></td>
+<td><p>str</p></td>
+<td><p>N/A</p></td>
+<td><p>Weight file</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">--active</span></code></td>
-<td>bool</td>
-<td>False</td>
-<td>Is this a DLARS/DLASSO run from the active learning driver?</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--active</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>False</p></td>
+<td><p>Is this a DLARS/DLASSO run from the active learning driver?</p></td>
 </tr>
 </tbody>
 </table>
@@ -950,9 +932,9 @@ paste b-labeled.txt force.txt <span class="p">|</span> awk -v <span class="nv">w
 <div class="section" id="id6">
 <h4>Tips and tricks<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
-<li>Weighting and regularization can all impact quality of resulting models, and their values should be considered model hyperparameters and carefully explored for each fitting problem.</li>
-<li>For LARS or LASSO-based solvers, regularization of 1.0e-2 or 1E-5 are reasonable starting points for un-normalized and normalized fits, respectively</li>
-<li>Running <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code> can be memory intensive. Check the size of A.txt relative to the available memory (RAM) on the workhorse machine prior to running.</li>
+<li><p>Weighting and regularization can all impact quality of resulting models, and their values should be considered model hyperparameters and carefully explored for each fitting problem.</p></li>
+<li><p>For LARS or LASSO-based solvers, regularization of 1.0e-2 or 1E-5 are reasonable starting points for un-normalized and normalized fits, respectively</p></li>
+<li><p>Running <code class="docutils literal notranslate"><span class="pre">chimes_lsq.py</span></code> can be memory intensive. Check the size of A.txt relative to the available memory (RAM) on the workhorse machine prior to running.</p></li>
 </ul>
 </div>
 <div class="section" id="checking-fit-quality">
@@ -974,41 +956,40 @@ xmgrace compare*txt
 <span id="sec-issues"></span><h2>Common Issues<a class="headerlink" href="#common-issues" title="Permalink to this headline">¶</a></h2>
 <p><strong>My model is requiring SO many iterations to become stable</strong></p>
 <ul>
-<li><p class="first">Have you set reasonable inner cutoffs (i.e. 0.02 to 0.002 less than the smallest observed distance, set individually for each pair type)?</p>
-</li>
-<li><p class="first">Have you remembered to set the penalty parameters (i.e. <span class="math notranslate nohighlight">\(A_{\mathrm{p}}\)</span> from 1.0e5 to 1.0e6, <span class="math notranslate nohighlight">\(d_{\mathrm{p}}\)</span> from 0.01 to 0.05)?</p>
-</li>
-<li><p class="first">Have you tried using a smaller timestep during the early training stages? (e.g., if DFT simulations for a C/H/O/N system used a 0.5 fs timestep)?</p>
+<li><p>Have you set reasonable inner cutoffs (i.e. 0.02 to 0.002 less than the smallest observed distance, set individually for each pair type)?</p></li>
+<li><p>Have you remembered to set the penalty parameters (i.e. <span class="math notranslate nohighlight">\(A_{\mathrm{p}}\)</span> from 1.0e5 to 1.0e6, <span class="math notranslate nohighlight">\(d_{\mathrm{p}}\)</span> from 0.01 to 0.05)?</p></li>
+<li><p>Have you tried using a smaller timestep during the early training stages? (e.g., if DFT simulations for a C/H/O/N system used a 0.5 fs timestep)?</p>
 <blockquote>
 <div><ul class="simple">
-<li>ChIMES training simulations should use something closer to 0.1 – 0.2</li>
-<li>Small timesteps allow the ChIMES simulations to remain stable for longer, which can help make iteratively-obtained training data more informative</li>
+<li><p>ChIMES training simulations should use something closer to 0.1 – 0.2</p></li>
+<li><p>Small timesteps allow the ChIMES simulations to remain stable for longer, which can help make iteratively-obtained training data more informative</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p><strong>My model is yielding very bad RDFs/is missing significant RDF features</strong></p>
 <ul class="simple">
-<li>Have you accidentally grabbed only sequential configurations?</li>
-<li>Have you watched your DFT trajectory to make sure the system exhibits significant evolution?<ul>
-<li>For example physical properties of a melted material will generally not be recovered from training to only solid phase data</li>
+<li><p>Have you accidentally grabbed only sequential configurations?</p></li>
+<li><p>Have you watched your DFT trajectory to make sure the system exhibits significant evolution?</p>
+<ul>
+<li><p>For example physical properties of a melted material will generally not be recovered from training to only solid phase data</p></li>
 </ul>
 </li>
-<li>Have you checked that your actual training trajectory contains those features? For example, you can quickly check by computing your RDFs directly from the training trajectory and checking you peaks in all the expected positions.</li>
+<li><p>Have you checked that your actual training trajectory contains those features? For example, you can quickly check by computing your RDFs directly from the training trajectory and checking you peaks in all the expected positions.</p></li>
 </ul>
 <p><strong>My model just isn’t as good as expected</strong></p>
 <ul>
-<li><p class="first">Are you using an appropriate bodiedness/polynomial order?</p>
+<li><p>Are you using an appropriate bodiedness/polynomial order?</p>
 <blockquote>
 <div><ul class="simple">
-<li>Holdout cross-validation on the original training set can give you an idea of what to use.</li>
+<li><p>Holdout cross-validation on the original training set can give you an idea of what to use.</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Are your cutoffs appropriate?</p>
+<li><p>Are your cutoffs appropriate?</p>
 <blockquote>
 <div><ul class="simple">
-<li>Cutoffs cannot be arbitrarily short (they should encapsulate the relevant physics) <em>or</em> long (they should preclude self-interaction across the training periodic boundary conditions)</li>
+<li><p>Cutoffs cannot be arbitrarily short (they should encapsulate the relevant physics) <em>or</em> long (they should preclude self-interaction across the training periodic boundary conditions)</p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -1017,9 +998,9 @@ xmgrace compare*txt
 <div class="section" id="caveats">
 <span id="sec-caveats"></span><h2>Caveats<a class="headerlink" href="#caveats" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>ChIMES models are not inherently transferable - training set generation should be carefully considered prior to model generation</li>
-<li>High-complexity (e.g. bodiedness and polynomial order) models for complex molecular materials (e.g. C-containing) will not generally be stable for dynamics the first time through - in these cases, iterative model fitting is usually required. See <a class="reference external" href="https://doi.org/10.1063/5.0021965">link</a> for additional details.</li>
-<li>ChIMES will attempt to generate single-atom energies - these values <em>cannot</em> be accurately determined unless the training set contains frames with varied atomic composition, otherwise, ChIMES assigns one atom the sum of single-atom energies for each atom type.</li>
+<li><p>ChIMES models are not inherently transferable - training set generation should be carefully considered prior to model generation</p></li>
+<li><p>High-complexity (e.g. bodiedness and polynomial order) models for complex molecular materials (e.g. C-containing) will not generally be stable for dynamics the first time through - in these cases, iterative model fitting is usually required. See <a class="reference external" href="https://doi.org/10.1063/5.0021965">link</a> for additional details.</p></li>
+<li><p>ChIMES will attempt to generate single-atom energies - these values <em>cannot</em> be accurately determined unless the training set contains frames with varied atomic composition, otherwise, ChIMES assigns one atom the sum of single-atom energies for each atom type.</p></li>
 </ul>
 </div>
 </div>
@@ -1044,19 +1025,11 @@ xmgrace compare*txt
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2020, Rebecca K. Lindsey, Nir Goldman, &amp; Laurence E. Fried
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1067,6 +1040,7 @@ xmgrace compare*txt
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {
