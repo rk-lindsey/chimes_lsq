@@ -212,67 +212,150 @@ void Cheby::set_polys(int index, double *Tn, double *Tnd, double rlen, double x_
 // The case rlen > s_maxim is not treated, because it is assumed that the cutoff function will be zero
 // for rlen > s_maxim.
 {
+	double x = 0 ;
+	double exprlen = 0 ;
+
+	// // DEBUG !!
+	// vector<double> Tn1(SNUM+1), Tnd1(SNUM+1) ;
+	// double delta = 0.00001 ;
+	
+	// rlen = s_minim - 0.1 ;
+	// set_polys_out_of_range(index, Tn, Tnd, rlen, x_diff, x_avg, SNUM, s_minim) ;
+
+	// rlen += delta ;
+	// set_polys_out_of_range(index, Tn1.data(), Tnd1.data(), rlen, x_diff, x_avg, SNUM, s_minim) ;
+
+	// for ( int i = 0 ; i <= SNUM ; i++ ) {
+	// 	double deriv = (Tn1[i] - Tn[i]) / delta ;
+	// 	printf("i = %d Tn = %13.8e Tnd = %13.8e deriv = %13.8e\n",
+	// 		   i, Tn[i], Tnd[i], deriv) ;
+	// }
+	// exit(0) ;
+	// // END DEBUG !!
+	
+	if ( rlen < s_minim )
+	{
+		set_polys_out_of_range(index, Tn, Tnd, rlen, x_diff, x_avg, SNUM, s_minim) ;
+		return ;
+	}
+
+	// Do the Cheby distance transformation
+	PAIRS & ff_2body = FF_2BODY[index] ;
+
+	transform(
+		rlen, 
+		x_diff, 
+		x_avg, 
+		ff_2body.LAMBDA, 
+		ff_2body.CHEBY_TYPE, 
+		x,
+		exprlen) ;
+		
+	// Generate Chebyshev polynomials by recursion. 
+	// 
+	// What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
+	// We need to calculate the derivative of these polynomials.
+	// Derivatives are defined through use of Cheby polynomials of the 2nd kind "U_n(x)", as:
+	//
+	// d/dx[ T_n(x) = n * U_n-1(x)] 
+	// 
+	// So we need to first set up the 1st-kind polynomials ("Tn[]")
+	// Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
+	 
+	// First two 1st-kind Chebys:
+
+	Tn[0] = 1.0;
+	Tn[1] = x;
+	
+	// Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
+
+	Tnd[0] = 1.0;
+	Tnd[1] = 2.0 * x;
+	
+	// Use recursion to set up the higher n-value Tn and Tnd's
+
+	for ( int i = 2; i <= SNUM; i++ ) 
+	{
+		Tn[i]  = 2.0 * x *  Tn[i-1] -  Tn[i-2];
+		Tnd[i] = 2.0 * x * Tnd[i-1] - Tnd[i-2];
+	}
+	
+	// Now multiply by n to convert Tnd's to actual derivatives of Tn
+
+	double dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, rlen, ff_2body.LAMBDA, ff_2body.CHEBY_TYPE, exprlen);
+
+	for ( int i = SNUM; i >= 1; i-- ) 
+		Tnd[i] = i * dx_dr * Tnd[i-1];
+
+	Tnd[0] = 0.0;
+
+}
+
+void Cheby::set_polys_out_of_range(int index, double *Tn, double *Tnd, double rlen, double x_diff, double x_avg, int SNUM,
+								   double s_minim)
+// Sets the value of the Chebyshev polynomials (Tn) and their derivatives (Tnd) when rlen is < s_minim.
+// Tnd is the derivative
+// with respect to the interatomic distance, not the transformed distance (x).
+//	
+// The treatment is controlled by Cheby::cheby_fix_type, which can be one of
+//	Cheby_fix::SMOOTH: The derivative Tnd is continuously set to zero inside the cutoff.
+//  The exponential smoothing distance is set to Cheby::inner_smooth_distance.
+//	Cheby_fix::ZERO_DERIV: Tnd is discontinuously set to zero inside the inner cutoff.
+//	Cheby_fix::CONSTANT_DERIV: Tnd is set to its value at the inner cutoff.
+//	Tn is always set to be consistent with Tnd.
+	
+// The case rlen > s_maxim is not treated, because it is assumed that the outer cutoff
+// function will be zero for rlen > s_maxim.
+{
   double x = 0 ;
   double exprlen = 0 ;
-  bool out_of_range ;
-  double rlen_orig ;
-  
-  if ( rlen < s_minim )
-  {
-	  out_of_range = true ;
-	  rlen_orig = rlen ;
-	  rlen = s_minim ;
-  }
-  else
-	  out_of_range = false ;
-	  
-
-  // Do the Cheby distance transformation
   PAIRS & ff_2body = FF_2BODY[index] ;
 
-  transform(
-	 rlen, 
-	 x_diff, 
-	 x_avg, 
-	 ff_2body.LAMBDA, 
-	 ff_2body.CHEBY_TYPE, 
-	 x,
-	 exprlen) ;
-		
-#if CHECK_CHEBY_RANGE == 1	
-  x = fix_val(x) ;
-
-  // Now change the range, if the user requested
-	
-  x = x*DERIV_CONST + ff_2body.CHEBY_RANGE_LOW - -1.0*DERIV_CONST;
-		
-  // Sanity check
-	
-  if ( x < ff_2body.CHEBY_RANGE_LOW || x > ff_2body.CHEBY_RANGE_HIGH )
+  if ( cheby_fix_type == Cheby_fix::ZERO_DERIV )
   {
-	 cout << "ERROR: transformed (3B) x falls outside user-defined range." << endl;
-	 cout << "x: " << x << endl;
-	 cout << "high/low: " << ff_2body.CHEBY_RANGE_HIGH << " " << ff_2body.CHEBY_RANGE_LOW  << endl;
-	 exit_run(0);
-  }	
-		
-#endif
-		
-  // Generate Chebyshev polynomials by recursion. 
-  // 
-  // What we're doing here. Want to fit using Cheby polynomials of the 1st kinD[i]. "T_n(x)."
-  // We need to calculate the derivative of these polynomials.
-  // Derivatives are defined through use of Cheby polynomials of the 2nd kind "U_n(x)", as:
-  //
-  // d/dx[ T_n(x) = n * U_n-1(x)] 
-  // 
-  // So we need to first set up the 1st-kind polynomials ("Tn[]")
-  // Then, to compute the derivatives ("Tnd[]"), first set equal to the 2nd-kind, then multiply by n to get the der's
-	 
-  // First two 1st-kind Chebys:
+      // Do the Cheby distance transformation at the minimum allowed value.
+	  // Tnd's are all zero.
 
-  if ( ! out_of_range )
+	  transform(
+		  s_minim, 
+		  x_diff, 
+		  x_avg, 
+		  ff_2body.LAMBDA, 
+		  ff_2body.CHEBY_TYPE, 
+		  x,
+		  exprlen) ;
+		
+	  // Generate Chebyshev polynomials by recursion. 
+	  // 
+	  Tn[0] = 1.0;
+	  Tn[1] = x;
+
+	  Tnd[0] = 0.0;
+	  Tnd[1] = 0.0 ;
+	
+	  // Use recursion to set up the higher n-value Tn and Tnd's
+
+	  for ( int i = 2; i <= SNUM; i++ ) 
+	  {
+		  Tn[i]  = 2.0 * x *  Tn[i-1] -  Tn[i-2];
+		  Tnd[i] = 0.0 ;
+	  }
+	
+  }
+  else if ( cheby_fix_type == Cheby_fix::CONSTANT_DERIV )
   {
+	  // Evaluate Tnd at the minimum allowed value.
+	  // Set Tn to be consistent with Tnd.
+	  
+	  transform(
+		  s_minim, 
+		  x_diff, 
+		  x_avg, 
+		  ff_2body.LAMBDA, 
+		  ff_2body.CHEBY_TYPE, 
+		  x,
+		  exprlen) ;
+
 	  Tn[0] = 1.0;
 	  Tn[1] = x;
 	
@@ -291,30 +374,71 @@ void Cheby::set_polys(int index, double *Tn, double *Tnd, double rlen, double x_
 	
 	  // Now multiply by n to convert Tnd's to actual derivatives of Tn
 
+	  double dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, s_minim, ff_2body.LAMBDA, ff_2body.CHEBY_TYPE, exprlen);
+
+	  for ( int i = SNUM; i >= 1; i-- ) 
+		  Tnd[i] = i * dx_dr * Tnd[i-1];
+
+	  Tnd[0] = 0.0;
+
+	  // Correct Tn outside of the range.  Tnd is a constant.
+	  for ( int i = 0 ; i <= SNUM ; i++ )
+	  {
+		  Tn[i] += Tnd[i] * (rlen - s_minim) ;
+	  }
+  }
+  else if ( cheby_fix_type == Cheby_fix::SMOOTH )
+  {
+	  // Smoothly damp the derivative to be zero.
+
+	  const double damp_len = 0.05 ;
+	  
+	  transform(
+		  s_minim, 
+		  x_diff, 
+		  x_avg, 
+		  ff_2body.LAMBDA, 
+		  ff_2body.CHEBY_TYPE, 
+		  x,
+		  exprlen) ;
+
+	  Tn[0] = 1.0;
+	  Tn[1] = x;
+
+	  // Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
+
+	  Tnd[0] = 1.0;
+	  Tnd[1] = 2.0 * x;
+	
+	  // Use recursion to set up the higher n-value Tn and Tnd's
+	  for ( int i = 2; i <= SNUM; i++ ) 
+	  {
+		  Tn[i]	    = 2.0 * x *  Tn[i-1] -  Tn[i-2];
+		  Tnd[i]    = 2.0 * x * Tnd[i-1] - Tnd[i-2];
+	  }
+	
+	  // Now multiply by n to convert Tnd's to actual derivatives of Tn
 	  double dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, rlen, ff_2body.LAMBDA, ff_2body.CHEBY_TYPE, exprlen);
 
 	  for ( int i = SNUM; i >= 1; i-- ) 
 		  Tnd[i] = i * dx_dr * Tnd[i-1];
 
 	  Tnd[0] = 0.0;
+
+	  // Exponential damping of the derivative.
+	  double damp_fac = exp( (rlen-s_minim) / damp_len ) ;
+	  
+	  // Correct Tn outside of the range using the damping factor.
+	  for ( int i = 0 ; i <= SNUM ; i++ )
+	  {
+		  Tn[i]	 += damp_len * (damp_fac-1.0)  * Tnd[i] ;
+		  Tnd[i] *= damp_fac ;
+	  }	  
   }
   else
   {
-	  // If we are out of range, Tn = Tn(xmin), and Tnd = 0.0.
-	  Tn[0] = 1.0;
-	  Tn[1] = x;
-	
-	  // Start the derivative setup. Set the first two 1st-kind Cheby's equal to the first two of the 2nd-kind
-
-	  Tnd[0] = 0.0 ;
-	  Tnd[1] = 0.0 ;
-	  // Use recursion to set up the higher n-value Tn and Tnd's
-
-	  for ( int i = 2; i <= SNUM; i++ ) 
-	  {
-		  Tn[i]  = 2.0 * x *  Tn[i-1] -  Tn[i-2];
-		  Tnd[i] = 0.0 ;
-	  }
+	  cout << "Error: unknown Cheby fix type\n" ;
+	  exit_run(0) ;
   }
 }
 
@@ -1867,26 +1991,30 @@ void Cheby::Force_all(CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
 	 Force_4B(QUADS) ;
   }
 	
-  // Check if a truly bad configuration was found, and if so, print it out
+  if (CONTROLS.PRINT_BAD_CFGS)
+  {
+
+	  // Check if a truly bad configuration was found, and if so, print it out
 	
+	  // traj file for BAD_CONFIG_1 should only contain configs where rij<rcutin
+	  // and BAD_CONFIG_2 should only contain configs where rcutin < rij < rcutin+dp.
+  
+
 #ifdef USE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  MPI_Allreduce(MPI_IN_PLACE, &BAD_CONFIG_1_FOUND,1,MPI_INT, MPI_SUM,MPI_COMM_WORLD);
-  MPI_Allreduce(MPI_IN_PLACE, &BAD_CONFIG_2_FOUND,1,MPI_INT, MPI_SUM,MPI_COMM_WORLD);
+	  MPI_Barrier(MPI_COMM_WORLD);
+	  MPI_Allreduce(MPI_IN_PLACE, &BAD_CONFIG_1_FOUND,1,MPI_INT, MPI_SUM,MPI_COMM_WORLD);
+	  MPI_Allreduce(MPI_IN_PLACE, &BAD_CONFIG_2_FOUND,1,MPI_INT, MPI_SUM,MPI_COMM_WORLD);
 #endif
 
-  // traj file for BAD_CONFIG_1 should only contain configs where rij<rcutin
-  // and BAD_CONFIG_2 should only contain configs where rcutin < rij < rcutin+dp.
-  
-  if ((RANK == 0) && CONTROLS.PRINT_BAD_CFGS)
-  {
-  
-	if      (BAD_CONFIG_1_FOUND>0)
-  	BAD_CONFIGS_1.PRINT_FRAME(CONTROLS, SYSTEM);
-	else if (BAD_CONFIG_2_FOUND>0)
-	BAD_CONFIGS_2.PRINT_FRAME(CONTROLS, SYSTEM);
-	else if((CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0)) 
-		BAD_CONFIGS_3.PRINT_FRAME(CONTROLS, SYSTEM);
+	  if ( RANK == 0 )
+	  {
+		  if (BAD_CONFIG_1_FOUND>0)
+			  BAD_CONFIGS_1.PRINT_FRAME(CONTROLS, SYSTEM);
+		  else if (BAD_CONFIG_2_FOUND>0)
+			  BAD_CONFIGS_2.PRINT_FRAME(CONTROLS, SYSTEM);
+		  else if((CONTROLS.FREQ_DFTB_GEN>0) && ((CONTROLS.STEP+1) % CONTROLS.FREQ_DFTB_GEN == 0)) 
+			  BAD_CONFIGS_3.PRINT_FRAME(CONTROLS, SYSTEM);
+	  }
    }
 } 
 
