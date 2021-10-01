@@ -391,7 +391,7 @@ void Cheby::set_polys_out_of_range(int index, double *Tn, double *Tnd, double rl
   {
 	  // Smoothly damp the derivative to be zero.
 
-	  const double damp_len = 0.05 ;
+	  const double damp_len = inner_smooth_distance ;
 	  
 	  transform(
 		  s_minim, 
