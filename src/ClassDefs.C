@@ -415,6 +415,7 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		{
 			if(USE) {
 				// RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// should give a distance in AA
+				// RCUT_PADDING = MAX_COORD_STEP * UPDATE_FREQ ;
 				RCUT_PADDING = MAX_COORD_STEP * UPDATE_FREQ ;
 			}
 			
@@ -432,7 +433,9 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			//
 			DISPLACEMENT += MAX_COORD_STEP ;
 
-			if(DISPLACEMENT>0.5*RCUT_PADDING)
+			//if(DISPLACEMENT>0.5*RCUT_PADDING)
+			// Use 0.49 instead of the theoretical 0.5 to avoid roundoff errors.
+			if(DISPLACEMENT>0.49*RCUT_PADDING)								
 			{
 				if (USE) {
 					// RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// Update padding in case max_vel changed. (LEF).
@@ -1059,15 +1062,6 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS
 		VOLUME_T = SYSTEM.BOXDIM.VOL ;
 	}
 	
-	///////////////////////////////////////////////
-	// Refresh ghost atom positions
-	///////////////////////////////////////////////
-
-	// Set the first NATOMS of ghost atoms to have the coordinates of the "real" coords
-
-	SYSTEM.update_ghost(CONTROLS.N_LAYERS, false) ;
-
-
 	NEIGHBORS.MAX_COORD_STEP = 0.0 ;
 	for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 	{
@@ -1078,6 +1072,15 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS
 		if ( step > NEIGHBORS.MAX_COORD_STEP ) NEIGHBORS.MAX_COORD_STEP = step ;
 
 	}
+
+	///////////////////////////////////////////////
+	// Refresh ghost atom positions
+	// Set the first NATOMS of ghost atoms to have the coordinates of the "real" coords
+	///////////////////////////////////////////////
+
+	SYSTEM.update_ghost(CONTROLS.N_LAYERS, false) ;
+
+
 
 }
 

@@ -15,6 +15,9 @@ DOMPI=${4-1}  # Compile with MPI support by default
 
 # Setup compilers
 
+#module load intel/2021.3
+#module load mvapich2
+
 module load intel/18.0.1
 module load impi/2018.0
 

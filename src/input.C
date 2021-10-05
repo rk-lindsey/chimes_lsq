@@ -200,6 +200,7 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,
 	PARSE_CONTROLS_FITENER(CONTROLS);
 	PARSE_CONTROLS_PAIRTYP(CONTROLS);
 	PARSE_CONTROLS_CHBTYPE(CONTROLS);
+	PARSE_CONTROLS_CHEBYFIX(CONTROLS);
 	PARSE_CONTROLS_USENEIG(CONTROLS, NEIGHBOR_LIST);
 	
 	// For assigning LSQ variables: "Topology Variables" 
@@ -217,6 +218,7 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,
 	RUN_SANITY_LSQ(CONTROLS);	
 
 }
+
 void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 {
 	READ_FILE();
@@ -247,6 +249,7 @@ void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 	PARSE_CONTROLS_PRMFILE(CONTROLS);
 	PARSE_CONTROLS_SERIAL_CHIMES(CONTROLS) ;
 	PARSE_CONTROLS_CRDFILE(CONTROLS);
+	PARSE_CONTROLS_CHEBYFIX(CONTROLS);
 	
 	// " Simulation options"
 	
@@ -659,6 +662,43 @@ void INPUT::PARSE_CONTROLS_CHBTYPE(JOB_CONTROL & CONTROLS)
 		}
 	}
 }
+
+void INPUT::PARSE_CONTROLS_CHEBYFIX(JOB_CONTROL & CONTROLS)
+{
+	int N_CONTENTS = CONTENTS.size();
+	
+	for (int i=0; i<N_CONTENTS; i++)
+	{
+		if (found_input_keyword("CHEBYFIX", CONTENTS(i)))			
+		{
+			string fix_type = CONTENTS(i+1,0) ;
+			if(fix_type == "ZERO_DERIV" )
+			{
+				CONTROLS.cheby_fix_type = Cheby_fix::ZERO_DERIV ;
+			}
+			else if ( fix_type == "CONSTANT_DERIV" )
+			{
+				CONTROLS.cheby_fix_type = Cheby_fix::CONSTANT_DERIV ;				
+			}
+			else if ( fix_type == "SMOOTH" )
+			{
+				CONTROLS.cheby_fix_type = Cheby_fix::SMOOTH ;
+				CONTROLS.cheby_smooth_distance = convert_double(CONTENTS(i+1,1),i+1) ;
+			}
+			else 
+			{
+				EXIT_MSG("ERROR: CHEBYFIX was not recognized") ;
+			}
+			if ( RANK == 0 )
+			{
+				cout << "\t# CHEBYFIX #: " << fix_type << endl ;
+				if ( fix_type == "SMOOTH" )
+					cout << "\t\tCheby smoothing distance = " << CONTROLS.cheby_smooth_distance << endl ;
+			}
+		}
+	}
+}
+
 
 
 // For assigning LSQ variables: "Topology Variables" 

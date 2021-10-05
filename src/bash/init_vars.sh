@@ -65,7 +65,8 @@ function init_test_vars
                  serial-chimes4b
                  small-lj
                  special3b 
-                 special4b'
+                 special4b
+                 chebyfix'
 
     MD_MAKE_JOBS='verify-invert 
 	        verify-translate 
