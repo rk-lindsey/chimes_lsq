@@ -310,13 +310,13 @@ Warning: (Step 0) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.90000
 	...Penalty potential = 80.0000000000
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-       1      0.00       0.0000000      11.9204161      11.9204161             0.0      3.52112403     11.9204161
+       1      0.00       0.0000000      11.9204161      11.9204161             0.0      1.93000796     11.9204161
 END SIMULATION
 	Average temperature over run = 0.0000 K
-	Average pressure    over run = 3.5211 GPa
-	Pressures from diagonal stress tensors over run: 3.5211
+	Average pressure    over run = 1.9300 GPa
+	Pressures from diagonal stress tensors over run: 1.9300
 	Average stress tensors over run: 
-		sigma_xx: 9.9477 GPa
+		sigma_xx: 5.1743 GPa
 		sigma_yy: 0.2913 GPa
 		sigma_zz: 0.3244 GPa
 		sigma_xy: 0.0260 GPa

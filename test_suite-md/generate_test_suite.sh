@@ -59,8 +59,8 @@ do
 	echo "Running $i test..."
 	
 	
-	if [ ! -d current_output ] ; then mkdir current_output ; fi
-	if [ ! -d correct_output ] ; then mkdir correct_output ; fi
+	if [ ! -d $i/current_output ] ; then mkdir $i/current_output ; fi
+	if [ ! -d $i/correct_output ] ; then mkdir $i/correct_output ; fi
 
 	cp $i/* $i/current_output 2> /dev/null
 	cd $i/current_output

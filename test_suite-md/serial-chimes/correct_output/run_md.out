@@ -446,19 +446,19 @@ Number of 3-body interactions = 198376
 Number of 3-body interactions = 208712
  Updating neighbor list on step: 30, with padding: 0.426
       40      5.00       4.1315373       1.1228415       5.2543788          1400.8     35.37515915      4.9429798
-Number of 3-body interactions = 203292
- Updating neighbor list on step: 46, with padding: 0.409
+Number of 3-body interactions = 204040
+ Updating neighbor list on step: 45, with padding: 0.411
       50      6.25       4.3099613       1.1335136       5.4434749          1461.3     33.02348936      4.9430742
       60      7.50       4.5849127       1.0952968       5.6802095          1554.5     32.25699139      4.9430530
-Number of 3-body interactions = 201947
- Updating neighbor list on step: 62, with padding: 0.407
+Number of 3-body interactions = 201999
+ Updating neighbor list on step: 61, with padding: 0.407
       70      8.75       4.9176807       1.0481631       5.9658439          1667.3     33.37557740      4.9430574
-Number of 3-body interactions = 212604
- Updating neighbor list on step: 77, with padding: 0.460
+Number of 3-body interactions = 211831
+ Updating neighbor list on step: 76, with padding: 0.455
       80     10.00       5.3102125       0.9897410       6.2999536          1800.4     35.98967404      4.9430106
       90     11.25       5.7212423       0.9562764       6.6775187          1939.8     38.43966433      4.9430986
-Number of 3-body interactions = 218685
- Updating neighbor list on step: 92, with padding: 0.497
+Number of 3-body interactions = 216978
+ Updating neighbor list on step: 91, with padding: 0.489
      100     12.50       6.1547426       0.9348230       7.0895656          2086.7     39.27088301      4.9429958
 END SIMULATION
 	Average temperature over run = 1551.8480 K
