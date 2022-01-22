@@ -51,7 +51,7 @@
 # FRQENER # ! Frequency to output energies
 	1	
 # PRNTFRC # ! Print computed forces? Forces are printed to force_out.txt 
-	true 5
+	true ENERGY_STRESS 5
 # PRNTBAD #
         true
 	

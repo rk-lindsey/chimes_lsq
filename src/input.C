@@ -1902,7 +1902,7 @@ void INPUT::PARSE_CONTROLS_ATMENER(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
 	
-	CONTROLS.INCLUDE_ATOM_OFFSETS = false;
+	CONTROLS.INCLUDE_ATOM_OFFSETS = true ;
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
@@ -1914,7 +1914,7 @@ void INPUT::PARSE_CONTROLS_ATMENER(JOB_CONTROL & CONTROLS)
 	}
 	
 	if (RANK==0)
-		cout << "	# ATMENER #: " << CONTROLS.INCLUDE_ATOM_OFFSETS << endl;
+		cout << "	# ATMENER #: " << bool2str(CONTROLS.INCLUDE_ATOM_OFFSETS) << endl;
 	
 	if ( CONTROLS.INCLUDE_ATOM_OFFSETS && RANK==0)
 		cout << "		... All reported energies include single atom contributions if available" << endl;
@@ -1986,12 +1986,21 @@ void INPUT::PARSE_CONTROLS_PRNTFRC(JOB_CONTROL & CONTROLS)
 		{
 			CONTROLS.PRINT_FORCE = convert_bool(CONTENTS(i+1,0),i+1);
 			
-			if(CONTENTS.size(i+1) == 2 )
+			if(CONTENTS.size(i+1) >= 2 )
 			{
 				if(CONTENTS(i+1,1) == "FRQDFTB")
+				{
 					CONTROLS.FREQ_FORCE = CONTROLS.FREQ_DFTB_GEN;
+				}
+				else if ( CONTENTS(i+1,1) == "ENERGY_STRESS" ) {
+					CONTROLS.PRINT_ENERGY_STRESS = true ;
+					if ( CONTENTS.size(i+1) == 3 ) 
+						CONTROLS.FREQ_FORCE = convert_int(CONTENTS(i+1,2),i+1);
+				} 
 				else
+				{
 					CONTROLS.FREQ_FORCE = convert_int(CONTENTS(i+1,1),i+1);
+				}
 			} else {
 				 // Default: print every step if PRNTFRC requested.
 				 CONTROLS.FREQ_FORCE = 1 ;

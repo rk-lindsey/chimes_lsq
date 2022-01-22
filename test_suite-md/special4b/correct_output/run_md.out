@@ -18,8 +18,8 @@ Input file contents successfully stored.
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
 	# WRPCRDS #: false
-	# ATMENER #: 0
-		... All reported energies *DO NOT* include single atom contributions
+	# ATMENER #: true
+		... All reported energies include single atom contributions if available
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
 		... printing       2 frames. 
@@ -738,45 +738,45 @@ Number of 4-body interactions = 496953
       40      5.00       5.5946897     -12.0680264      -6.4733367          1896.9     21.88167990     -6.7992960
 Warning: (Step 40) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.891315878713107 0.910000000000000  13 82
 	...Penalty potential = 0.065225592591284
-      41      5.12       6.1725930     -13.5369067      -7.3643137          2092.8     28.17628259     -7.7114628
-Number of 3-body interactions = 378180
-Number of 4-body interactions = 1742782
- Updating neighbor list on step: 41, with padding: 1.121
-Warning: (Step 41) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.830782716759628 0.910000000000000  13 82
-	...Penalty potential = 4.971183936134106
-      42      5.25       6.2074637     -13.5608742      -7.3534106          2104.6     28.39186361     -7.7227628
-Warning: (Step 42) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.771639766082039 0.910000000000000  13 82
-	...Penalty potential = 26.487066550968887
-      43      5.38       6.0728781     -13.4108612      -7.3379831          2059.0     28.98762985     -7.7292599
-Warning: (Step 43) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.719009323686572 0.910000000000000  13 82
-	...Penalty potential = 69.668506375812811
-      44      5.50       5.7214206     -13.0321064      -7.3106858          1939.8     29.62914574     -7.7229646
-Warning: (Step 44) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.679769199221135 0.910000000000000  13 82
-	...Penalty potential = 122.036648515100268
-      45      5.62       5.2791543     -12.5514170      -7.2722627          1789.9     30.01994040     -7.7041794
-Warning: (Step 45) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.660485291511826 0.910000000000000  13 82
-	...Penalty potential = 155.341843581312560
-      46      5.75       5.0217072     -12.2597949      -7.2380877          1702.6     30.02363689     -7.6885620
-Warning: (Step 46) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.664855883505569 0.910000000000000  13 82
-	...Penalty potential = 147.320920463574566
-      47      5.88       5.1637177     -12.3871990      -7.2234813          1750.7     29.63004697     -7.6925461
-Warning: (Step 47) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.692054275716206 0.910000000000000  13 82
-	...Penalty potential = 103.524957290173404
-      48      6.00       5.6533045     -12.8761285      -7.2228240          1916.7     28.84696057     -7.7118441
-Warning: (Step 48) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.737074766094127 0.910000000000000  13 82
-	...Penalty potential = 51.710068774824826
-      49      6.12       6.2236195     -13.4398168      -7.2161973          2110.1     27.72674794     -7.7272016
-Warning: (Step 49) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.792832538611546 0.910000000000000  13 82
-	...Penalty potential = 16.084999847399306
-      50      6.25       6.6366047     -13.8298438      -7.1932391          2250.1     26.46991233     -7.7279344
+      41      5.12       6.6466156     -13.7378172      -7.0912016          2253.5     23.97468164     -7.4392010
+Number of 3-body interactions = 471717
+Warning: (Step 41) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.812512135011792 0.910000000000000  13 82
+	...Penalty potential = 9.265133427037826
+Number of 4-body interactions = 2651375
+ Updating neighbor list on step: 41, with padding: 1.391
+      42      5.25       7.1933894     -13.8979744      -6.7045850          2438.9     29.29732805     -7.0772250
+Warning: (Step 42) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.736048670045291 0.910000000000000  13 82
+	...Penalty potential = 52.636046335107245
+      43      5.38       6.8630920     -13.5552281      -6.6921362          2326.9     30.28096559     -7.0893325
+Warning: (Step 43) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.670153706245168 0.910000000000000  13 82
+	...Penalty potential = 137.974565676425698
+      44      5.50       6.1177639     -12.7677712      -6.6500074          2074.2     31.14957531     -7.0695508
+Warning: (Step 44) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.625613948243341 0.910000000000000  13 82
+	...Penalty potential = 229.998432076278220
+      45      5.62       5.3075474     -11.8945756      -6.5870281          1799.5     31.50394380     -7.0261673
+Warning: (Step 45) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.611695569028260 0.910000000000000  13 82
+	...Penalty potential = 265.447789465829942
+      46      5.75       5.0375599     -11.5861942      -6.5486343          1708.0     31.34261573     -7.0056778
+Warning: (Step 46) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.631669481143318 0.910000000000000  13 82
+	...Penalty potential = 215.616746024901374
+      47      5.88       5.5794994     -12.1379265      -6.5584271          1891.7     30.74745469     -7.0340947
+Warning: (Step 47) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.681030484214059 0.910000000000000  13 82
+	...Penalty potential = 120.041937703836197
+      48      6.00       6.5610766     -13.1404130      -6.5793364          2224.5     29.64882152     -7.0763963
+Warning: (Step 48) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.749846155389339 0.910000000000000  13 82
+	...Penalty potential = 41.078266304588112
+      49      6.12       7.3812010     -13.9496302      -6.5684291          2502.6     28.12518789     -7.0898023
+Warning: (Step 49) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.827347294469717 0.910000000000000  13 82
+	...Penalty potential = 5.646394560547102
+      50      6.25       7.7630633     -14.2899984      -6.5269351          2632.0     26.64035380     -7.0741273
 END SIMULATION
-	Average temperature over run = 1520.2648 K
-	Average pressure    over run = 30.0211 GPa
-	Pressures from diagonal stress tensors over run: 30.0211
+	Average temperature over run = 1562.9734 K
+	Average pressure    over run = 30.1173 GPa
+	Pressures from diagonal stress tensors over run: 30.1173
 	Average stress tensors over run: 
-		sigma_xx: 31.8782 GPa
-		sigma_yy: 29.4129 GPa
-		sigma_zz: 28.7722 GPa
-		sigma_xy: 3.2356 GPa
-		sigma_xz: 4.9945 GPa
-		sigma_yz: 2.5408 GPa
+		sigma_xx: 31.9549 GPa
+		sigma_yy: 29.5305 GPa
+		sigma_zz: 28.8663 GPa
+		sigma_xy: 3.3232 GPa
+		sigma_xz: 5.1179 GPa
+		sigma_yz: 2.6645 GPa
