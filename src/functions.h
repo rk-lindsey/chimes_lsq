@@ -153,7 +153,9 @@ public:
 	bool   RESTART; 	      // If true, read a restart file.
 	int    FREQ_VELOC;
 	int    FREQ_ENER;	      // Replaces energy_freq... How often to output energy
-	bool   PRINT_FORCE;	      // Replaces if_output_force... If TRUE, write out calculated forces.    
+	bool   PRINT_FORCE;	      // Replaces if_output_force... If TRUE, write out calculated forces.
+	bool   PRINT_ENERGY_STRESS ;  // If TRUE, add a header with potential energy and configurational stress
+	                              // to force output file.
 	bool   PRINT_BAD_CFGS;        // Print any config where r < r_cut
 	int    FREQ_FORCE;	      // How often to print the forces        
 	int    SELF_CONSIST_FREQ;     // How frequently to print POSCAR file
@@ -249,8 +251,9 @@ public:
 		FIT_ENER_EVER = false ;
 			
 
-		cheby_fix_type = Cheby_fix::ZERO_DERIV ;
-		cheby_smooth_distance = 0.02 ;
+		// Default is the same as the ChIMES calculator.
+		cheby_fix_type = Cheby_fix::SMOOTH ;
+		cheby_smooth_distance = 0.01 ;
 		
 		COMPARE_FORCE     = false;	// is this variable really necessary for LSQ?
 		CALL_EWALD        = false;

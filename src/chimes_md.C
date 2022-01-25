@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
   WRITE_TRAJ FORCEFILE;
 
   if ( CONTROLS.PRINT_FORCE ) 
-		FORCEFILE.INIT("XYZF_FORCE","FORCE");	// This is the forcout* files
+	  FORCEFILE.INIT("XYZF_FORCE","FORCE",CONTROLS.PRINT_ENERGY_STRESS);	// This is the forcout* files
 
   // velocity
 
@@ -1609,9 +1609,17 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				ntokens = parse_space(LINE,tokens) ;
 				
 				// Determine the number of offsets (atom types)
-				SYSTEM.QM_ENERGY_OFFSET.resize(stoi(tokens[3])); 
+				if ( ntokens < 4 )
+					EXIT_MSG("MISSING NUMBER OF ENERGY OFFSETS\n") ;
+
+				int num_offsets = stoi(tokens[3]) ;
+
+				if ( num_offsets != CONTROLS.ATOMTYPES.size() )
+					EXIT_MSG("AN ENERGY OFFSET IS REQUIRED FOR EVERY ATOM TYPE") ;
+					
+				SYSTEM.QM_ENERGY_OFFSET.resize(num_offsets) ;
 				
-				for (int i=0; i<SYSTEM.QM_ENERGY_OFFSET.size(); i++)
+				for (int i=0; i< num_offsets ; i++)
 				{
 					LINE = get_next_line(PARAMFILE);
 					ntokens = parse_space(LINE,tokens);
@@ -1666,10 +1674,7 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		
 		if(SYSTEM.QM_ENERGY_OFFSET.size() == 0)
 		{
-			SYSTEM.QM_ENERGY_OFFSET.resize(NO_PAIRS);
-			
-			for(int i=0; i<NO_PAIRS; i++)
-				SYSTEM.QM_ENERGY_OFFSET[i] = 0.0;
+			SYSTEM.QM_ENERGY_OFFSET.resize(CONTROLS.ATOMTYPES.size(),0.0) ;
 		}
 			
 		PARAMFILE.close();

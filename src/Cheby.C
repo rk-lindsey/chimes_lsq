@@ -418,7 +418,7 @@ void Cheby::set_polys_out_of_range(int index, double *Tn, double *Tnd, double rl
 	  }
 	
 	  // Now multiply by n to convert Tnd's to actual derivatives of Tn
-	  double dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, rlen, ff_2body.LAMBDA, ff_2body.CHEBY_TYPE, exprlen);
+	  double dx_dr = DERIV_CONST*cheby_var_deriv(x_diff, s_minim, ff_2body.LAMBDA, ff_2body.CHEBY_TYPE, exprlen);
 
 	  for ( int i = SNUM; i >= 1; i-- ) 
 		  Tnd[i] = i * dx_dr * Tnd[i-1];

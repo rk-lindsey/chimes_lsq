@@ -316,6 +316,9 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	REPLICATE.WRAP_IDX    .resize(REPLICATE.ATOMS) ;
 	REPLICATE.MASS        .resize(REPLICATE.ATOMS);
 
+	// Vector copy.
+	REPLICATE.QM_ENERGY_OFFSET = SYSTEM.QM_ENERGY_OFFSET ;
+	
 	for(int i=a1start; i<a1end; i++)
 	{
 		REPLICATE.FORCES[i] = SYSTEM.FORCES[i] ;
@@ -662,13 +665,10 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	}
 	if ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" ) 
 	{
-	  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP};
-	  cheby.Force_all(TRIPS, QUADS);
-	  
-	  // Add the per-atom contributions to energy, if requested
-	  
+
 	  if(CONTROLS.INCLUDE_ATOM_OFFSETS)
 	  {
+		  // Add the per-atom contributions to energy, if requested
 	  
 	  	int a1start, a1end;
 	  	divide_atoms(a1start, a1end, SYSTEM.ATOMS);
@@ -676,7 +676,10 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	  	for(int a=a1start;a<=a1end;a++)
 	  		SYSTEM.TOT_POT_ENER += SYSTEM.QM_ENERGY_OFFSET[ SYSTEM.ATOMTYPE_IDX[a] ];
 	  }
-		
+
+	  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP};
+	  cheby.Force_all(TRIPS, QUADS);
+	  
 	}
 	else if ( FF_2BODY[0].PAIRTYP == "LJ" )
 	{

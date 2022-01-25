@@ -1,6 +1,3 @@
-	Parameter index 0  differences exceeded tolerance(+/- 1e-09 ):  1.07491e-09
-	Parameter index 1  differences exceeded tolerance(+/- 1e-09 ):  2.61161e-09
-	Parameter index 2  differences exceeded tolerance(+/- 1e-09 ):  1.80751e-09
-	Parameter index 4  differences exceeded tolerance(+/- 1e-09 ):  -1.77101e-09
-	Parameter index 7  differences exceeded tolerance(+/- 1e-09 ):  1.19371e-09
-	Parameter index 31  differences exceeded tolerance(+/- 1e-09 ):  -1.46557e-09
+	Parameter index 3  differences exceeded tolerance(+/- 1e-09 ):  1.40017e-09
+	Parameter index 6  differences exceeded tolerance(+/- 1e-09 ):  -1.80012e-09
+	Parameter index 7  differences exceeded tolerance(+/- 1e-09 ):  -1.60003e-09

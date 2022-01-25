@@ -40,16 +40,18 @@ class WRITE_TRAJ
 		WRITE_TRAJ();
 		WRITE_TRAJ(string CONTENTS_STR);	
 		WRITE_TRAJ(string EXTENSION_STR, string CONTENTS_STR);
-		void INIT(string EXTENSION_STR, string CONTENTS_STR);
+		void INIT(string EXTENSION_STR, string CONTENTS_STR, bool print_energy_stress = false);
 		~WRITE_TRAJ();
 		
 		void PRINT_FRAME(JOB_CONTROL & CONTROLS, FRAME & SYSTEM);
 
 	private:
 	
-		bool		FIRST_CALL;	// If this is the first call, figure out system atom type ordering	
-		TRAJ_EXT 	EXTENSION;	// File extension
-		TRAJ_TYPE 	CONTENTS;	// File type (contents)
+		bool		FIRST_CALL;	// If this is the first call, figure out system atom type ordering
+		bool		ENERGY_STRESS ;		// If true, print a header with energy and stress for use in chimes
+										// calculator testing.
+		TRAJ_EXT	EXTENSION;	// File extension
+		TRAJ_TYPE	CONTENTS;	// File type (contents)
 		string		FILENAME;	// Name for the trajectory file
 		ofstream	TRAJFILE;	// The atual file object
 		ofstream	TRAJFRCF;	// A file of forces for the traj - only used for TRAJ_TYPE == "XYZF_FORCE"

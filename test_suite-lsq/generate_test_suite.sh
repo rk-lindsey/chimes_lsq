@@ -80,20 +80,22 @@ do
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	if [ ! -d correct_output ] ; then mkdir correct_output ; fi
 
-	if $RUN_JOB ../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
+	cd current_output
+	cp ../*.txt ../*.in ../*.xyzf ../*.dat ./ >& /dev/null	
+
+	if $RUN_JOB ../../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
 		 echo "Chimes_lsq succeeded"
 		 SUCCESS=1
 	else
 		 echo "Chimes_lsq failed"
 		 SUCCESS=0
 	fi	
-
+        
 	if [[ $SUCCESS -eq 1 ]] ; then
- 		 cp A.txt b.txt params.header fm_setup.out ff_groups.map correct_output	
-		 mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
+ 		 cp A.txt b.txt params.header fm_setup.out ff_groups.map ../correct_output
 	fi
 	
-	cd ..
+	cd ../..
 done
 
 ###############################################################
