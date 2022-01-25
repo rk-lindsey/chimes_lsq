@@ -19,7 +19,7 @@ Input file contents successfully stored.
 	# NATMTYP #: 2
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
  	1              O              0              15.9994        
- 	2              H              0              1.0079         
+ 	2              H              -0             1.0079         
 
 	The following unique pair types have been identified:
 		0  O O

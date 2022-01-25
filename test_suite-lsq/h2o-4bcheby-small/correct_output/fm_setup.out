@@ -16,7 +16,7 @@ Input file contents successfully stored.
 	             Will transform Chebyshev pair distances to range -1 to 1
 	# CHBTYPE #: MORSE
 	# USENEIG #: true
-		Will force update through the "small" method 
+		Will update the neighbor list through the "small" method 
 	# NATMTYP #: 2
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
  	1              O              -		15.9994        

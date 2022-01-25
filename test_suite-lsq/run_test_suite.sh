@@ -75,34 +75,32 @@ do
 		  mkdir $i/current_output
 	 fi
 
-	 cd $i
-	 rm -rf A.txt b.txt params.header diff-* b-labeled.txt 
-	
+	 cd $i/current_output
 
+	 cp ../*.txt ../*.in ../*.xyzf ../*.dat ./ >& /dev/null
+	 
 	 if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		  if ../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
-				echo 'Chimes_lsq succeeded'
-				SUCCESS=1
-		  else
-			  echo 'Chimes_lsq failed'
-			  SUCCESS=0
-		 fi
+	     if ../../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
+		 echo 'Chimes_lsq succeeded'
+		 SUCCESS=1
+	     else
+		 echo 'Chimes_lsq failed'
+		 SUCCESS=0
+	     fi
 	else
-		 if $RUN_JOB ../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
-			  echo 'Chimes_lsq succeeded'
-			  SUCCESS=1
-		 else
-			  echo 'Chimes_lsq failed'
-			  SUCCESS=0
-			  PASS=false
-			  ALL_PASSED=false
-		 fi
+	    if $RUN_JOB ../../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
+		echo 'Chimes_lsq succeeded'
+		SUCCESS=1
+	    else
+		echo 'Chimes_lsq failed'
+		SUCCESS=0
+		PASS=false
+		ALL_PASSED=false
+	    fi
 	fi
 
-	rm -f current_output/*
-
-	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output	
-
+        # There seems to be an NFS filesystem lag in finding output files.
+	cd ..
 	if [[ $SUCCESS -eq 1 ]] ; then
 
 		 for j in A.txt b.txt params.header fm_setup.out
@@ -276,14 +274,14 @@ done
 if   [ "$ALL_PASSED" = true ] ; then
 	echo "ALL TESTS PASSED"
 elif [ "$ALL_PASSED" = false ] ; then
-	echo "AT LEAST ONE EACH OF SETUP AND SVD TEST(S) FAILED..."
+	echo 'AT LEAST ONE EACH OF SETUP AND SVD TEST(S) FAILED...'
 	echo "Check individual results above to confirm if test had technical pass."
 elif [ "$SVD_PASSED" = false ] ; then
 	echo "TEST(S) FAILED FOR SVD SCRIPT"
 elif [ "$SET_PASSED" = false ] ; then
 	echo "TEST(S) FAILED FOR SETUP SCRIPT"
 else
-	echo "ERROR: BAD LOGIC IN TEST SUITE DRIVER (THIS SCRIPT)"
+	echo 'ERROR: BAD LOGIC IN TEST SUITE DRIVER (THIS SCRIPT)'
 	echo "ALL/SVD PASSED: $ALL_PASSED $SVD_PASSEDs" 
 fi
 	

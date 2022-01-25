@@ -22,84 +22,86 @@ function init_test_vars
     RUN_LSQ_PYTHON_CODE="$PYTHON $PATH_TO_LSQ_PY_CODE --eps ${EPS_FAC} --test_suite true"
 
     LSQ_ALL_JOBS='h2o-2bcheby  
-                  h2o-3bcheby 
-                  h2o-3bcheby2 
-                  h2o-3bcheby3 
-                  h2o-4bcheby
-                  h2o-4bcheby-small
-                  h2o-invr
-                  fitstrs
-                  fitstrs3b
-                  test_4atoms 
-                  test_4atoms.2 
-                  special3b 
-                  special4b
-                  stress-and-ener-4b
-                  stress-and-ener-2b1
-                  stress-and-ener-2b2
-                  stress-and-ener-2b3
-                  two-traj-files
-                  one-file-three-trajs
-                  nonorth'
+		  h2o-3bcheby 
+		  h2o-3bcheby2 
+		  h2o-3bcheby3 
+		  h2o-4bcheby
+		  h2o-4bcheby-small
+		  h2o-invr
+		  fitstrs
+		  fitstrs3b
+		  test_4atoms 
+		  test_4atoms.2 
+		  special3b 
+		  special4b
+		  stress-and-ener-4b
+		  stress-and-ener-2b1
+		  stress-and-ener-2b2
+		  stress-and-ener-2b3
+		  two-traj-files
+		  one-file-three-trajs'
+
 
     LSQ_MAKE_JOBS='lsq2'
 
-        MD_JOBS='carbon-penalty
-                 h2o-2bcheby
-                 h2o-2bcheby-genvel
-                 h2o-3bcheby 
-                 h2o-4bcheby 
-                 hn3-published
-                 generic-lj
-                 h2o-3bcheby-numpress 
-                 h2o-4bcheby-numpress 
-                 h2o-3bcheby3 
-                 nonorth
-                 npt-lj
-                 npt-berend
-                 npt-berend-aniso
-                 nvt-berend
-                 serial-chimes
-                 serial-chimes-3b2
-                 serial-chimes4b
-                 small-lj
-                 special3b 
-                 special4b
-                 chebyfix'
+	MD_JOBS='carbon-penalty
+		 h2o-2bcheby
+		 h2o-2bcheby-genvel
+		 h2o-3bcheby 
+		 h2o-4bcheby 
+		 hn3-published
+		 generic-lj
+		 h2o-3bcheby-numpress 
+		 h2o-4bcheby-numpress 
+		 h2o-3bcheby3 
+		 nonorth
+		 npt-lj
+		 npt-berend
+		 npt-berend-aniso
+		 nvt-berend
+		 serial-chimes
+		 serial-chimes-3b2
+		 serial-chimes4b
+		 small-lj
+		 special3b 
+		 special4b
+		 chebyfix'
 
     MD_MAKE_JOBS='verify-invert 
-	        verify-translate 
-	        verify-scramble 
-	        h2o-4bcheby-numforce 
-	        verify-relabel 
-	        verify-relabel.2'
+		verify-translate 
+		verify-scramble 
+		h2o-4bcheby-numforce 
+		verify-relabel 
+		verify-relabel.2'
 
 	LSQ_FORCE_JOBS='h2o-3bcheby 
-	        h2o-4bcheby 
-	        special3b 
-	        special4b'
+		h2o-4bcheby 
+		special3b 
+		special4b'
 
 	 if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
-		  source /usr/local/tools/dotkit/init.sh
-		  use ic-17.0.174
-		  use mvapich2-intel-2.2
-		  NP=24
-		  RUN_JOB="srun -n $NP"
+	     source /usr/local/tools/dotkit/init.sh
+	     use ic-17.0.174
+	     use mvapich2-intel-2.2
+	     NP=24
+	     RUN_JOB="srun -n $NP"
 	 elif [ "$SYS_TYPE" == "toss_3_x86_64_ib" ] ; then
-		  module load impi/2018.0
-		  module load intel/18.0.1
-		  module load python/2.7.16
-		  NP=36
-		  RUN_JOB="srun -n $NP"
+	     module load cmake/3.14.5
+	     module load impi/2018.0
+	     module load intel/18.0.1
+	     module load python/2.7.16
+	     NP=36
+	     RUN_JOB="srun -n $NP"
 	 elif [ "$SYS_TYPE" == "toss_3_x86_64" ] ; then
-		  module load impi/2018.0
-		  module load intel/18.0.1
-		  module load python/2.7.16		  
-		  NP=36
-		  RUN_JOB="srun -n $NP"
+	     module load cmake/3.14.5	     
+	     module load impi/2018.0
+	     module load intel/18.0.1
+	     module load python/2.7.16		  
+	     NP=36
+	     RUN_JOB="srun -n $NP"
 	 else
-		  NP=1
-		  RUN_JOB=""
+	     NP=1
+	     RUN_JOB=""
 	 fi
 	 # Number of threads for SVD decomposition
 	 NUM_THREADS=$NP
