@@ -2016,7 +2016,9 @@ void INPUT::PARSE_CONTROLS_PRNTFRC(JOB_CONTROL & CONTROLS)
 		if(CONTROLS.PRINT_FORCE)
 		{
 			cout << "		... and will be printed every " << CONTROLS.FREQ_FORCE << " frames."<< endl;	
-		
+			if ( CONTROLS.PRINT_ENERGY_STRESS )
+				cout << "       ... with energy/stress header before forces" << endl ;
+			
 			if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0)
 			{
 				cout << "		... printing every " << CONTROLS.FREQ_FORCE*CONTROLS.DELTA_T_FS << " fs, " << endl;

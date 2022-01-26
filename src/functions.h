@@ -226,7 +226,8 @@ public:
 				   COUL_CONSV(false), 
 				   IF_SUBTRACT_COORD(false),
 				   IF_SUBTRACT_COUL(false),
-				   USE_PARTIAL_CHARGES(false)
+				   USE_PARTIAL_CHARGES(false),
+				   PRINT_ENERGY_STRESS(false)
 	{
 		NFRAMES         = 0;	// Number of frames in the movie file
 		CHEBY_ORDER     = 0;	// Order of Chebyshev polynomial if used... set to 8 for DFTB Erep polynomial
