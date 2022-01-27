@@ -3,6 +3,7 @@ class DLARS
 {
 public:
 	Matrix &X ;         // The matrix of data vs properties
+	Matrix pre_con ;   // A pre-conditioning matrix for conjugate gradient.
 	Vector y ;         // The vector of data
 	Vector mu ;        // The predicted values of data
 	Vector beta ;      // The scaled fitting coefficients
@@ -371,12 +372,13 @@ public:
 					}
 				} else {
 
+#ifdef TIMING
 					auto time2 = std::chrono::system_clock::now() ;
 					std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
 					if ( RANK == 0 ) {
 						cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
 					}
-					
+#endif
 					return true ;
 				}
 			}
@@ -388,18 +390,34 @@ public:
 						G_row.set(j, G_A.get(nactive-1, j) ) ;
 					}
 					chol.realloc(nactive, nactive) ;
+					auto time1_add = std::chrono::system_clock::now() ;
 					succeeded = chol.cholesky_add_row(chol0, G_row) ;
+					auto time2_add = std::chrono::system_clock::now() ;
+					std::chrono::duration<double> elapsed_seconds = time2_add - time1_add ;
+
+#ifdef TIMING
+					if ( RANK == 0 ) {
+						cout << "Time adding cholesky row = " << elapsed_seconds.count() << endl ;
+					}
+#endif					
+					
 					if ( succeeded ) {
 						// Back-substitute using the updated cholesky matrix.
+						auto time1_back = std::chrono::system_clock::now() ;						
 						succeeded = chol_backsub() ;
 						if ( succeeded ) {
 							solve_succeeded = true ;
 
 							auto time2 = std::chrono::system_clock::now() ;
 							std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
+							std::chrono::duration<double> backsub_seconds = time2 - time1_back ;
+
+#ifdef TIMING							
 							if ( RANK == 0 ) {
+								cout << "Time back-substituting = " << backsub_seconds.count() << endl ;
 								cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
 							}
+#endif							
 							
 							return true ;
 						}
@@ -411,6 +429,7 @@ public:
 						
 					} 
 				} else if ( nactive == A_last.dim - 1 && nactive > 2 ) {
+					auto time1_back = std::chrono::system_clock::now() ;											
 					succeeded = chol.cholesky_remove_row(remove_prop) ;
 					if ( succeeded ) {
 						// Back-substitute using the updated cholesky matrix.
@@ -420,9 +439,13 @@ public:
 
 							auto time2 = std::chrono::system_clock::now() ;
 							std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
+							std::chrono::duration<double> backsub_seconds = time2 - time1_back ;														
+#ifdef TIMING								
 							if ( RANK == 0 ) {
-								cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
+  								cout << "Time back-substituting = " << backsub_seconds.count() << endl ;							               				cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
+								
 							}
+#endif
 							
 							return true ;
 						} else {
@@ -438,6 +461,7 @@ public:
 			// Try non-incremental if incremental failed or not possible/requested.
 			if ( ! succeeded ) {
 				chol.realloc(nactive, nactive) ;
+				auto time1_chol = std::chrono::system_clock::now() ;											
 				if ( ! G_A.cholesky(chol) ) {
 					if ( RANK == 0 ) cout << "Non-incremental Cholesky failed" << endl ;
 					for ( int j = 0 ; j < nactive ; j++ ) {
@@ -456,12 +480,21 @@ public:
 					}
 					solve_succeeded = false ;
 					return false ;
+				} 
+				auto time2_chol = std::chrono::system_clock::now() ;
+				std::chrono::duration<double> chol_seconds = time2_chol - time1_chol ;
+#ifdef TIMING				
+				if ( RANK == 0 ) {
+					cout << "Time solving full cholesky = " << chol_seconds.count() << endl ;
 				}
+#endif				
+				
 			}
 			solve_succeeded = chol_backsub() ;
 
 			auto time2 = std::chrono::system_clock::now() ;
 			std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
+
 			if ( RANK == 0 ) {
 				cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
 			}			
@@ -476,7 +509,8 @@ public:
 			//cout << "Cholesky " << endl ;
       //chol.print() ;
 			const double eps_fail = 1.0e-04 ;  // Max allowed solution error.
-			// Solve for G_A^-1 * unity
+
+      // Solve for G_A^-1 * unity
 			Vector unity(nactive, 1.0) ;
 			chol.cholesky_sub(G_A_Inv_I, unity) ;
 
@@ -525,6 +559,7 @@ public:
 		{
 
 			const double eps_fail = 1.0e-04 ;  // Max allowed solution error.
+			const double eps_con_grad = 1.0e-08 ;  // Conjugate gradient error tolerance.
 
 			// Solve for G_A^-1 * unity
 			Vector unity(nactive, 1.0) ;
@@ -533,55 +568,84 @@ public:
 			// 	// cout << "G_A_Inv_I guess = \n" ;
 			// 	G_A_Inv_I.print(cout) ;
 			// }
-
+			bool use_ssor = false ;
+			bool use_chol_precon = true ;
 
 			if ( use_precondition ) {
-				// SSOR preconditioner
-				Matrix K(nactive, nactive) ;
-				Matrix pre_con(nactive, nactive) ;			
-				double omega = 1.1 ;
-				double omega_scale = sqrt(2.0-omega) ;
+				if ( use_ssor ) {
+					// SSOR preconditioner
+
+					pre_con.realloc(nactive, nactive) ;			
+					Matrix K(nactive, nactive) ;
+					double omega = 1.1 ;
+					double omega_scale = sqrt(2.0-omega) ;
 			
-				for ( int i = 0 ; i < nactive ; i++ ) {
-					for ( int j = 0 ; j <= i ; j++ ) {
-						if ( i != j ) {
-							double val = -omega_scale * sqrt(omega/G_A.get(i,i))
-								* omega * G_A.get(i,j) / G_A.get(j,j) ;
-							K.set(i,j,val) ;
-						} else {
-							double val = omega_scale * sqrt(omega/G_A.get(i,i))
-								* (1.0-omega) ;
-							K.set(i,i,val) ;
+					for ( int i = 0 ; i < nactive ; i++ ) {
+						for ( int j = 0 ; j <= i ; j++ ) {
+							if ( i != j ) {
+								double val = -omega_scale * sqrt(omega/G_A.get(i,i))
+									* omega * G_A.get(i,j) / G_A.get(j,j) ;
+								K.set(i,j,val) ;
+							} else {
+								double val = omega_scale * sqrt(omega/G_A.get(i,i))
+									* (1.0-omega) ;
+								K.set(i,i,val) ;
+							}
+						}
+						for ( int j = i+1 ; j < nactive ; j++ ) {
+							K.set(i,j,0.0) ;
 						}
 					}
-					for ( int j = i+1 ; j < nactive ; j++ ) {
-						K.set(i,j,0.0) ;
-					}
-				}
-				// pre_con = K^T * K
-				for ( int i = 0 ; i < nactive ; i++ ) {
-					for ( int j = 0 ; j < nactive ; j++ ) {
-						double sum = 0.0 ;
-						for ( int k = 0 ; k < nactive ; k++ ) {
-							sum += K.get(k,i) * K.get(k,j) ;
-						}
-						// Approximate pre-conditioner.
-						pre_con.set(i,j,sum) ;
+					// pre_con = K^T * K
+					for ( int i = 0 ; i < nactive ; i++ ) {
+						for ( int j = 0 ; j < nactive ; j++ ) {
+							double sum = 0.0 ;
+							for ( int k = 0 ; k < nactive ; k++ ) {
+								sum += K.get(k,i) * K.get(k,j) ;
+							}
+							// Approximate pre-conditioner.
+							pre_con.set(i,j,sum) ;
 
+							// Use diagonal matrix.
+							//pre_con.set(i,j,0.0) ;
+						}
 						// Use diagonal matrix.
-						//pre_con.set(i,j,0.0) ;
+						// pre_con.set(i,i,1.0/G_A.get(i,i)) ;
 					}
-					// Use diagonal matrix.
-					// pre_con.set(i,i,1.0/G_A.get(i,i)) ;
-				}
 
-				if ( ! G_A.pre_con_grad(G_A_Inv_I, unity, pre_con, nactive+10, 10, 1.0e-06) ) {
+				} else if ( use_chol_precon ) {
+					// Test: use the inverse of G_A to precondition.
+					pre_con.resize(nactive, nactive) ;
+
+					if ( nactive == A_last.dim + 1 && nactive > 2 ) {
+						// Add 1 row to pre-conditioner.
+						pre_con.set(nactive-1, nactive-1, 1.0) ;
+
+						// DEBUG !
+						//if ( RANK == 0 ) {
+						//cout << "Updated preconditioner\n" ;
+						//pre_con.print() ;
+					    //}
+						
+					} else {
+						// Full calculation of pre-conditioner.
+						Matrix chol_precon(nactive, nactive) ;
+						
+						if ( ! G_A.cholesky(chol_precon) ) {
+							if ( RANK == 0 ) cout << "Cholesky decomposition for pre-conditioning failed\n" ;
+						}
+					
+						chol_precon.cholesky_invert(pre_con) ;
+					}
+				}
+					
+				if ( ! G_A.pre_con_grad(G_A_Inv_I, unity, pre_con, nactive+10, 10, eps_con_grad) ) {
 					if ( RANK == 0 ) cout << "Pre-conditioned conjugate gradient failed\n" ;
 					return false ;
 				}
 			} else { // ! use_precondition
 			
-				if ( ! G_A.con_grad(G_A_Inv_I, unity, nactive+10, 10, 1.0e-06) ) {
+				if ( ! G_A.con_grad(G_A_Inv_I, unity, nactive+10, 10, eps_con_grad) ) {
 					if ( RANK == 0 ) cout << "Conjugate gradient failed\n" ;
 					return false ; 
 				} 
@@ -926,6 +990,8 @@ public:
 			beta.print_sparse(rst) ;
 			rst << "Exclude " << endl ;
 			exclude.print_sparse(rst) ;
+			rst << "Mu" << endl ;
+			mu.print_sparse(rst) ;
 		}
 		rst.close() ;
 	}
@@ -943,9 +1009,28 @@ public:
 			}
 
 			iterations++ ;
+			auto time1 = std::chrono::system_clock::now() ;			
 			predict() ;
-			objective_func() ;
+			auto time2 = std::chrono::system_clock::now() ;
+			std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
 
+#ifdef TIMING			
+			if ( RANK == 0 ) {
+				cout << "Time making prediction = " << elapsed_seconds.count() << endl ;
+			}
+#endif			
+			
+			objective_func() ;
+			auto time3 = std::chrono::system_clock::now() ;
+			elapsed_seconds = time3 - time2 ;
+
+#ifdef TIMING			
+			if ( RANK == 0 ) {
+				cout << "Time calculating objective function = " << elapsed_seconds.count() << endl ;
+			}
+#endif			
+
+			
 			if ( RANK == 0 ) {
 				trajfile << "Iteration " << iterations << endl ;
 				print_error(trajfile) ;
@@ -955,7 +1040,15 @@ public:
 			}
 		
 			correlation() ;
+			auto time4 = std::chrono::system_clock::now() ;
+			elapsed_seconds = time4 - time3 ;
 
+#ifdef TIMING
+			if ( RANK == 0 ) {
+				cout << "Time calculating correlation = " << elapsed_seconds.count() << endl ;
+			}
+#endif
+			
 #ifdef VERBOSE
 			if ( RANK == 0 ) {
 				cout << "Pre-step beta: " << endl ;
@@ -968,17 +1061,55 @@ public:
 			}
 #endif			
 			update_active_set() ;
+			auto time5 = std::chrono::system_clock::now() ;
+			elapsed_seconds = time5 - time4 ;
+
+#ifdef TIMING			
+			if ( RANK == 0 ) {
+				cout << "Time updating active set = " << elapsed_seconds.count() << endl ;
+			}
+#endif			
 
 			// build the X_A array.
 			build_X_A() ;
+
+			auto time6 = std::chrono::system_clock::now() ;
+			elapsed_seconds = time6 - time5 ;
+
+#ifdef TIMING			
+			if ( RANK == 0 ) {
+				cout << "Time building X_A = " << elapsed_seconds.count() << endl ;
+			}
+#endif			
+
+			
 			build_G_A() ;
 
+			auto time7 = std::chrono::system_clock::now() ;
+			elapsed_seconds = time7 - time6 ;
+
+#ifdef TIMING			
+			if ( RANK == 0 ) {
+				cout << "Time building G_A = " << elapsed_seconds.count() << endl ;
+			}
+#endif			
+			
 			if ( ! solve_G_A(true) ) {
 				remove_prop = -1 ;
 				add_prop = -1 ;
 				cout << "Iteration failed" << endl ;
 				return -1 ;
 			}
+
+			auto time8 = std::chrono::system_clock::now() ;
+			elapsed_seconds = time8 - time7 ;
+
+#ifdef TIMING			
+			if ( RANK == 0 ) {
+				cout << "Time solving G_A = " << elapsed_seconds.count() << endl ;
+			}
+#endif			
+			
 			
 #ifdef VERBOSE
 			if ( RANK == 0 ) {
@@ -994,8 +1125,36 @@ public:
 
 			build_u_A() ;
 
+			auto time9 = std::chrono::system_clock::now() ;
+			elapsed_seconds = time9 - time8 ;
+
+#ifdef TIMING			
+			if ( RANK == 0 ) {
+				cout << "Time building u_A = " << elapsed_seconds.count() << endl ;
+			}
+#endif			
+
 			update_step_gamma() ;
+
+			auto time10 = std::chrono::system_clock::now() ;
+			elapsed_seconds = time10 - time9 ;
+
+#ifdef TIMING			
+			if ( RANK == 0 ) {
+				cout << "Time updating gamma = " << elapsed_seconds.count() << endl ;
+			}
+#endif			
+			
 			update_beta() ;
+
+			auto time11 = std::chrono::system_clock::now() ;
+			elapsed_seconds = time11 - time10 ;
+
+#ifdef TIMING			
+			if ( RANK == 0 ) {
+				cout << "Time updating beta = " << elapsed_seconds.count() << endl ;
+			}
+#endif			
 
 			if ( RANK == 0 ) {
 				cout << "Beta: " << endl ;
@@ -1058,19 +1217,39 @@ public:
 			if ( line.find("Exclude") != string::npos ) {
 				exclude.read_sparse(inf) ;
 			}
+
+			if ( line.find("Mu") != string::npos ) {
+				mu.read_sparse(inf) ;
+			}
 		}
+		
 		inf.close() ;
 		
 		nactive = A.dim ;
 		iterations = iter - 1 ;
-		
-		predict_all() ;
+
+		bool con_grad_save = solve_con_grad ;
+		solve_con_grad = false ;
+		//predict_all() ;
 		objective_func() ;
 		correlation() ;
 		build_X_A() ;
 		build_G_A() ;
 		solve_G_A(false) ;
 
+		// Full calculation of pre-conditioner.
+		if ( use_precondition ) {
+			pre_con.resize(nactive, nactive) ;
+			Matrix chol_precon(nactive, nactive) ;
+						
+			if ( ! G_A.cholesky(chol_precon) ) {
+				if ( RANK == 0 ) cout << "Cholesky decomposition for pre-conditioning failed\n" ;
+			}
+			chol_precon.cholesky_invert(pre_con) ;
+		}
+		
+		solve_con_grad = con_grad_save ;
+		
 		return iter -1 ;
 	}
 };

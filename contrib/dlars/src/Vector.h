@@ -1,4 +1,8 @@
 // Used by all classes to safely stop the calculation.
+#ifdef USE_MKL
+#include <mkl.h>
+#endif
+
 void stop_run(int stat) {
 #ifdef USE_MPI
 	MPI_Abort(MPI_COMM_WORLD,stat) ;
@@ -234,33 +238,50 @@ public:
 			cout << "Error: dot product with unmatched dimensions\n" ;
 			exit(1) ;
 		}
+#ifdef USE_BLAS
+		double val = cblas_ddot(dim, vec2.vec, 1, vec, 1) ;
+#else		
 		double val = 0.0 ;
 		for ( int j = 0 ; j < dim ; j++ ) {
 			val += vec2.get(j) * vec[j] ;
 		}
+#endif		
 		return (val) ;
 	}
 	void scale(Vector &out, double val) 
 	// Scale the vector by the given value, put result in Out.
 		{
+#ifdef USE_BLAS
+			cblas_dcopy(dim, vec, 1, out.vec, 1) ;
+			cblas_dscal(dim, val, out.vec, 1) ;
+#else			
 			for ( int j = 0 ; j < dim ; j++ ) {
 				out.set(j, val * vec[j] ) ;
 			}
+#endif			
 		}
 	void scale(Vector &out, const Vector &vals) 
 	// Multiply the vector by the given array of values, put result in Out.
 		{
+#ifdef USE_MKL
+			vdMul(dim, vec, vals.vec, vec) ;
+#else			
 			for ( int j = 0 ; j < dim ; j++ ) {
 				out.set(j, vals.get(j) * vec[j] ) ;
 			}
+#endif			
 		}
 	double l1norm()
 	// Returns L1 norm (sum of abs values).
 		{
+#ifdef USE_BLAS
+			double norm = cblas_dasum(dim, vec, 1) ;
+#else			
 			double norm = 0 ;
 			for ( int i = 0 ; i < dim ; i++ ) {
 				norm += fabs(vec[i]) ;
 			}
+#endif			
 			return norm ;
 		}
 	void remove(int idx)
@@ -294,9 +315,13 @@ public:
 					cout << "Error in add: dim mismatch\n" ;
 			exit(1) ;
 		}
+#ifdef USE_MKL
+		vdAdd(dim, vec, in.vec, vec) ;
+#else		
 		for ( int k = 0 ; k < dim ; k++ ) {
 			vec[k] += in.get(k) ;
 		}
+#endif		
 	}
 	void subtract(const Vector &in)
 	// Subtract the vector from vec.
@@ -305,9 +330,13 @@ public:
 			cout << "Error in add: dim mismatch\n" ;
 			exit(1) ;
 		}
+#ifdef USE_MKL
+		vdSub(dim, vec, in.vec, vec) ;
+#else		
 		for ( int k = 0 ; k < dim ; k++ ) {
 			vec[k] -= in.get(k) ;
 		}
+#endif		
 	}
 	void add_mult(const Vector &in, double factor)
 		// Set out = out + factor * in
@@ -316,9 +345,13 @@ public:
 			cout << "Error in add_mult: dim mismatch\n" ;
 			exit(1) ;
 		}
+#ifdef USE_BLAS
+		cblas_daxpy(dim, factor, in.vec, 1, vec, 1) ;
+#else		
 		for ( int k = 0 ; k < dim ; k++ ) {
 			vec[k] += factor * in.get(k) ;
 		}
+#endif		
 	}
 	void assign_mult(const Vector &in1, const Vector &in2, double factor)
 		// Set vec = in1 + factor * in2
@@ -327,9 +360,14 @@ public:
 			cout << "Error in add_mult: dim mismatch\n" ;
 			exit(1) ;
 		}
+#ifdef USE_BLAS
+		cblas_dcopy(dim, in1.vec, 1, vec, 1) ;
+		cblas_daxpy(dim, factor, in2.vec, 1, vec, 1) ;
+#else		
 		for ( int k = 0 ; k < dim ; k++ ) {
 			vec[k] = in1.get(k) + factor * in2.get(k) ;
 		}
+#endif		
 	}
 	
 	void clear()

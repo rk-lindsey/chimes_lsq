@@ -319,6 +319,69 @@ public:
 			dim2 = d2 ;
 			mat = new double[num_rows * d2] ;
 		}
+
+		void resize(int d1, int d2)
+		// Resize a matrix, preserving its values and setting any new values to 0.
+		{
+			if ( dim1 == 0 || dim2 == 0 ) {
+				realloc(d1,d2) ;
+				for ( int j = 0 ; j < d1 ; j++ ) {
+					for ( int k = 0 ; k < d2 ; k++ ) {
+						set(j,k,0.0) ;
+					}
+				}
+				return ;
+			}
+
+			// New dimensions.
+			int row_start1, row_end1, num_rows1 ;
+			
+			if ( ! distributed ) {
+				row_start1 = 0 ;
+				row_end1 = d1 - 1 ;
+				num_rows1 = row_end1 - row_start1 + 1 ;
+			} else if ( d1 != dim1 ) {
+				// Do not change distribution parameters unless dim1 changes.
+				row_start1 = (d1 * RANK) / NPROCS ;
+				if ( RANK < NPROCS - 1 ) {
+					row_end1 = (d1 * (RANK+1)) / NPROCS - 1 ;
+				} else {
+					row_end1 = d1 - 1 ;
+				}
+				num_rows1 = row_end1 - row_start1 + 1 ;
+			}
+			
+			double *scale1 = new double[d2] ;
+			double *shift1 = new double[d2] ;
+			double *mat1   = new double[num_rows1 * d2] ;
+
+			for ( int i = 0 ; i < d1 && i < dim1 ; i++ ) {
+				for ( int j = 0 ; j < d2 && j < dim2 ; j++ ) {
+					mat1[(i-row_start1) * d2 + j] = get(i,j) ;
+				}
+			}
+			for ( int i = 0 ; i < d1 ; i++ ) {
+				for ( int j = 0 ; j < d2 ; j++ ) {
+					if ( i >= dim1 || j >= dim2 ) {
+						mat1[(i-row_start1) * d2 + j] = 0.0 ;
+					}
+				}
+			}
+			dim1 = d1 ;
+			dim2 = d2 ;
+			row_start = row_start1 ;
+			row_end = row_end1 ;
+			num_rows = num_rows1 ;
+
+			delete [] mat ;
+			delete [] scale ;
+			delete [] shift ;
+
+			mat = mat1 ;
+			scale = scale1 ;
+			shift = shift1 ;
+		}
+		
 	inline double get(int i, int j) const
 		{
 #ifdef DEBUG						
@@ -811,6 +874,26 @@ public:
 #endif				
 		}
 
+	void cholesky_invert(Matrix &out)
+	// Invert a cholesky decomposed matrix, storing the result in out
+	// This is done by solving a linear equation n times.
+	{
+		if ( out.dim2 != dim2 || out.dim1 != dim1 || dim1 != dim2 ) {
+			cout << "Array dimension mismatch" << endl ;
+			stop_run(1) ;
+		}
+		for ( int j = 0 ; j < dim1 ; j++ ) {
+			Vector b(dim1, 0.0) ;
+			Vector x(dim1, 0.0) ;
+			b.set(j, 1.0) ;
+			cholesky_sub(x, b) ;
+
+			for ( int k = 0 ; k < dim1 ; k++ ) {
+				out.set(k,j, x.get(k) ) ;
+			}
+		}
+	}
+		
 	void dot_transpose(Vector &out, const Vector &in)
 	// Find Transpose(matrix) * in = out
 		{

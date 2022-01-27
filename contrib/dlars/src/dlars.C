@@ -105,7 +105,8 @@ int main(int argc, char **argv)
 	bool split_files = false ;        // Read input matrix from split files ?
 	bool normalize=true ;             // Whether to normalize the X matrix.
 	bool con_grad = false ;           // Whether to use congugate gradient algorithm to solve linear equations.
-	bool use_precondition = false ;
+
+	bool use_precondition = true ;
 	
 	// Stopping criteria.  Default is to calculate all possible solutions.
 	
