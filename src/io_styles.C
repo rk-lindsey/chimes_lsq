@@ -34,6 +34,7 @@ using namespace std;
 WRITE_TRAJ::WRITE_TRAJ()
 {
 	FIRST_CALL = true;
+	ENERGY_STRESS = false ;
 }
 
 WRITE_TRAJ::WRITE_TRAJ(string CONTENTS_STR) // Default extension is .gen
@@ -61,13 +62,15 @@ WRITE_TRAJ::~WRITE_TRAJ()
 
 // Initializer called by constructor
 
-void WRITE_TRAJ::INIT(string EXTENSION_STR, string CONTENTS_STR)
+void WRITE_TRAJ::INIT(string EXTENSION_STR, string CONTENTS_STR, bool print_energy_stress /* = false */)
 {
 	FIRST_CALL = true;
 
 	SET_EXTENSION(EXTENSION_STR);	
 	SET_CONTENTS (CONTENTS_STR);
 	SET_FILENAME();
+
+	ENERGY_STRESS = print_energy_stress ;
 	
 	TRAJFILE.open(FILENAME.data());
 
@@ -439,6 +442,16 @@ void WRITE_TRAJ::PRINT_FRAME_XYZF_FORCE(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 
 	double factor = 1.0;
 
+	if ( WRITE_TRAJ::ENERGY_STRESS ) {
+		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.TOT_POT_ENER << endl ;
+		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X * GPa << endl ;
+		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y * GPa << endl ;
+		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z * GPa << endl ;
+		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y * GPa << endl ;
+		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z * GPa << endl ;
+		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z * GPa << endl ;
+	}
+		
 	for(int i=0;i<SYSTEM.ATOMS;i++)
 	{
 		if (CONTENTS == TRAJ_TYPE::STANDARD)

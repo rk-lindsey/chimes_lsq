@@ -14,12 +14,15 @@
 #include "io_styles.h"
 #include "A_Matrix.h"
 
+#include "../imports/chimes_calculator/serial_interface/src/serial_chimes_interface.h"
+
 #ifdef USE_MPI
 	#include <mpi.h>
 #endif
 
 using namespace std;
 
+static void ZCalc_Serial_Chimes(FRAME &SYSTEM, PAIR_FF &FF_2BODY) ;
 
 //////////////////////////////////////////
 //
@@ -259,6 +262,20 @@ double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS)		// U
 			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Y * SYSTEM.VELOCITY_NEW[a1].Y;
 			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Z * SYSTEM.VELOCITY_NEW[a1].Z;
 		}		
+	} 
+	else if(TYPE == "ITER")
+	{
+		 for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+		 {
+				// Don't account for frozen atoms
+		
+				if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))
+					 continue;
+			
+				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_ITER[a1].X * SYSTEM.VELOCITY_ITER[a1].X;
+				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_ITER[a1].Y * SYSTEM.VELOCITY_ITER[a1].Y;
+				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_ITER[a1].Z * SYSTEM.VELOCITY_ITER[a1].Z;
+		 }
 	}
 	else
 	{
@@ -299,6 +316,9 @@ void REPLICATE_SYSTEM(const FRAME & SYSTEM, FRAME & REPLICATE)
 	REPLICATE.WRAP_IDX    .resize(REPLICATE.ATOMS) ;
 	REPLICATE.MASS        .resize(REPLICATE.ATOMS);
 
+	// Vector copy.
+	REPLICATE.QM_ENERGY_OFFSET = SYSTEM.QM_ENERGY_OFFSET ;
+	
 	for(int i=a1start; i<a1end; i++)
 	{
 		REPLICATE.FORCES[i] = SYSTEM.FORCES[i] ;
@@ -645,13 +665,10 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	}
 	if ( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" ) 
 	{
-	  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP};
-	  cheby.Force_all(TRIPS, QUADS);
-	  
-	  // Add the per-atom contributions to energy, if requested
-	  
+
 	  if(CONTROLS.INCLUDE_ATOM_OFFSETS)
 	  {
+		  // Add the per-atom contributions to energy, if requested
 	  
 	  	int a1start, a1end;
 	  	divide_atoms(a1start, a1end, SYSTEM.ATOMS);
@@ -659,15 +676,24 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 	  	for(int a=a1start;a<=a1end;a++)
 	  		SYSTEM.TOT_POT_ENER += SYSTEM.QM_ENERGY_OFFSET[ SYSTEM.ATOMTYPE_IDX[a] ];
 	  }
-		
+
+	  Cheby cheby{CONTROLS, SYSTEM, NEIGHBOR_LIST, FF_2BODY, INT_PAIR_MAP};
+	  cheby.Force_all(TRIPS, QUADS);
+	  
 	}
-	else if ( FF_2BODY[0].PAIRTYP == "LJ" ) 
+	else if ( FF_2BODY[0].PAIRTYP == "LJ" )
+	{
 	  ZCalc_Lj(SYSTEM, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST);
+	}
+	else if ( FF_2BODY[0].PAIRTYP == "SERIAL_CHIMES" )
+	{
+		 ZCalc_Serial_Chimes(SYSTEM, FF_2BODY[0]) ;
+	}
 	else 
-    	{
-		cout << "Error: bad pairtype in ZCalc: " << FF_2BODY[0].PAIRTYP << endl;
-		exit_run(1);
-    	}	
+	{
+		 cout << "Error: bad pairtype in ZCalc: " << FF_2BODY[0].PAIRTYP << endl;
+		 exit_run(1);
+	}	
 	
 	if ( CONTROLS.USE_COULOMB ) 
 		ZCalc_Ewald(SYSTEM, CONTROLS, NEIGHBOR_LIST);
@@ -693,64 +719,66 @@ void ZCalc(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, m
 static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST)
 // Calculate LJ interaction.. first parameter is epsilon, second parameter is sigma. ...eventually SMAX should be used for the pair distance cutoff value...
 {
-  XYZ	RVEC ;
-	double	rlen_mi;
-	int	curr_pair_type_idx;
-	double	fac;
-	string	TEMP_STR;
+	 XYZ	RVEC ;
+	 double	rlen_mi;
+	 int	curr_pair_type_idx;
+	 double	fac;
+	 string	TEMP_STR;
 	
-	// Set up for MPI
+	 // Set up for MPI
 	
-	int a1start, a1end;
-	int a2start, a2end;
-	int fidx_a2;
+	 int a1start, a1end;
+	 int a2start, a2end;
+	 int fidx_a2;
 
-		divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
+	 double perm_scale = NEIGHBOR_LIST.PERM_SCALE[2] ;
+	
+	 divide_atoms(a1start, a1end, SYSTEM.ATOMS);	// Divide atoms on a per-processor basis.
 
-	for(int a1=a1start;a1 <= a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS 
-	{
-		a2start = 0;
-		a2end   = NEIGHBOR_LIST.LIST[a1].size();
+	 for(int a1=a1start;a1 <= a1end; a1++)		// Double sum over atom pairs -- MPI'd over SYSTEM.ATOMS 
+	 {
+			a2start = 0;
+			a2end   = NEIGHBOR_LIST.LIST[a1].size();
 		
-		for(int a2idx =a2start; a2idx < a2end;a2idx++)
-		{			
-			int a2 = NEIGHBOR_LIST.LIST[a1][a2idx];
+			for(int a2idx =a2start; a2idx < a2end;a2idx++)
+			{			
+				 int a2 = NEIGHBOR_LIST.LIST[a1][a2idx];
 					
-				curr_pair_type_idx =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
+				 curr_pair_type_idx =  INT_PAIR_MAP[SYSTEM.ATOMTYPE_IDX[a1]*CONTROLS.NATMTYP + SYSTEM.ATOMTYPE_IDX[SYSTEM.PARENT[a2]]];
 
-			// pair interaction cutoff distance.
-			double rcutoff = FF_2BODY[curr_pair_type_idx].S_MAXIM;
+				 // pair interaction cutoff distance.
+				 double rcutoff = FF_2BODY[curr_pair_type_idx].S_MAXIM;
 
-			rlen_mi = get_dist(SYSTEM, RVEC, a1, a2);
+				 rlen_mi = get_dist(SYSTEM, RVEC, a1, a2);
 
 
-			if ( rlen_mi < FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2) 
-				EXIT_MSG("Error: close approach", rlen_mi);
+				 if ( rlen_mi < FF_2BODY[curr_pair_type_idx].PARAMS[1]/2.2) 
+						EXIT_MSG("Error: close approach", rlen_mi);
 
-			else if ( rlen_mi < rcutoff ) 
-			{
-				SYSTEM.TOT_POT_ENER += 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,12.0) - pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,6.0) );
-				fac = 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( -12.0 * pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,14.0) + 6.0 *    pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,8.0) );
-				fac *= 1.0 / ( FF_2BODY[curr_pair_type_idx].PARAMS[1] * FF_2BODY[curr_pair_type_idx].PARAMS[1] );		
+				 else if ( rlen_mi < rcutoff ) 
+				 {
+						SYSTEM.TOT_POT_ENER += perm_scale * 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,12.0) - pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,6.0) );
+						fac = perm_scale * 4.0 * FF_2BODY[curr_pair_type_idx].PARAMS[0] * ( -12.0 * pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,14.0) + 6.0 *    pow(FF_2BODY[curr_pair_type_idx].PARAMS[1]/rlen_mi,8.0) );
+						fac *= 1.0 / ( FF_2BODY[curr_pair_type_idx].PARAMS[1] * FF_2BODY[curr_pair_type_idx].PARAMS[1] );		
 
-				SYSTEM.PRESSURE_XYZ -= fac * (rlen_mi*rlen_mi);
+						SYSTEM.PRESSURE_XYZ -= fac * (rlen_mi*rlen_mi);
 				
-				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X -= fac * rlen_mi * RVEC.X * RVEC.X / rlen_mi;
-				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y -= fac * rlen_mi * RVEC.Y * RVEC.Y / rlen_mi;
-				SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z -= fac * rlen_mi * RVEC.Z * RVEC.Z / rlen_mi;
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X -= fac * rlen_mi * RVEC.X * RVEC.X / rlen_mi;
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y -= fac * rlen_mi * RVEC.Y * RVEC.Y / rlen_mi;
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z -= fac * rlen_mi * RVEC.Z * RVEC.Z / rlen_mi;
 	
-				SYSTEM.ACCEL[a1].X += RVEC.X*fac;
-				SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
-				SYSTEM.ACCEL[a1].Z += RVEC.Z*fac;
+						SYSTEM.ACCEL[a1].X += RVEC.X*fac;
+						SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
+						SYSTEM.ACCEL[a1].Z += RVEC.Z*fac;
 
-				fidx_a2 = SYSTEM.PARENT[a2];
+						fidx_a2 = SYSTEM.PARENT[a2];
 
-				SYSTEM.ACCEL[fidx_a2].X -= RVEC.X*fac;
-				SYSTEM.ACCEL[fidx_a2].Y -= RVEC.Y*fac;
-				SYSTEM.ACCEL[fidx_a2].Z -= RVEC.Z*fac;
-			}			
-		}
-	}
+						SYSTEM.ACCEL[fidx_a2].X -= RVEC.X*fac;
+						SYSTEM.ACCEL[fidx_a2].Y -= RVEC.Y*fac;
+						SYSTEM.ACCEL[fidx_a2].Z -= RVEC.Z*fac;
+				 }			
+			}
+	 }
 }
 
 
@@ -903,17 +931,10 @@ void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIP
 
 // MPI -- Related functions -- See headers at top of file
 
-#ifdef USE_MPI
-	void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure,
-	double &tens_xx,
-	double &tens_xy,
-	double &tens_xz,
-	double &tens_yx,
-	double &tens_yy,
-	double &tens_yz,
-	double &tens_zx,
-	double &tens_zy,
-	double &tens_zz)
+void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &pressure,
+								double &tens_xx, double &tens_xy,	double &tens_xz,
+								double &tens_yx, double &tens_yy,	double &tens_yz,
+								double &tens_zx, double &tens_zy,	double &tens_zz)
 	
 	// Add up forces, potential energy, and pressure from all processes.  
 	{
@@ -938,50 +959,182 @@ void parse_fcut_input(string line, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST &TRIP
 
 	}
 
-	void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec, int atoms, bool sync_vel) 
+#ifdef USE_MPI
+void sync_position(vector<XYZ>& coord_vec, NEIGHBORS & neigh_list, vector<XYZ>& velocity_vec,
+									 int atoms, bool sync_vel, BOX &BOXDIM) 
 	// Broadcast the position, neighborlists,  and optionally the velocity to all nodes.
 	// Velocity-broadcast is only necessary for velocity-dependent forces (not currently implemented).
-	{
-		#ifdef USE_MPI
-	
-			// Convert out vectors to arrays so they are MPI friendly
-	
-			double *coord = (double *) coord_vec.data();
+{
+	 // Convert out vectors to arrays so they are MPI friendly
 
-			if ( sizeof(XYZ) != 3*sizeof(double) ) 
+	 int buf_sz = 3 * atoms ;
+
+	 if ( sync_vel ) buf_sz *= 2 ;
+
+	 if ( BOXDIM.IS_VARIABLE ) buf_sz += 3 ;
+
+	 // One extra for MAX_COORD_STEP.
+	 buf_sz++ ;
+	 
+	 vector<double> buffer(buf_sz) ;
+
+	 for ( int i = 0 ; i < atoms ; i++ )
+	 {
+			buffer[3*i]   = coord_vec[i].X ;
+			buffer[3*i+1] = coord_vec[i].Y ;
+			buffer[3*i+2] = coord_vec[i].Z ;
+	 }
+	 int count = 3 * atoms ;
+	 
+	 if ( sync_vel )
+	 {
+			count += 3 * atoms ;
+			for ( int i = 0 ; i < atoms ; i++ )
 			{
-				printf("Error: compiler padding in XYZ structure detected\n");
-				exit_run(1);
+				 buffer[3*atoms+3*i]   = velocity_vec[i].X ;
+				 buffer[3*atoms+3*i+1] = velocity_vec[i].Y ;
+				 buffer[3*atoms+3*i+2] = velocity_vec[i].Z ;				 				 
+			}
+	 }
+
+	 if ( BOXDIM.IS_VARIABLE )
+	 {
+			if ( BOXDIM.IS_ORTHO )
+			{
+				 buffer[count]   = BOXDIM.CELL_AX ;
+				 buffer[count+1] = BOXDIM.CELL_BY ;
+				 buffer[count+2] = BOXDIM.CELL_CZ ;
+			}
+			else
+			{
+				 EXIT_MSG("Variable non-orthorhombic boxes are not supported") ;
+			}
+	 }
+
+	 buffer[buf_sz-1] = neigh_list.MAX_COORD_STEP ;
+	 
+	 MPI_Bcast(buffer.data(), buf_sz, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+	 // Unpack the buffer
+	 if ( RANK != 0 )
+	 {
+			for ( int i = 0 ; i < atoms ; i++ )
+			{
+				 coord_vec[i].X = buffer[3*i] ;
+				 coord_vec[i].Y = buffer[3*i+1] ;
+				 coord_vec[i].Z = buffer[3*i+2] ;
+			}
+	 
+			if ( sync_vel )
+			{
+				 for ( int i = 0 ; i < atoms ; i++ )
+				 {
+						velocity_vec[i].X = buffer[3*atoms+3*i] ;
+						velocity_vec[i].Y = buffer[3*atoms+3*i+1] ;
+						velocity_vec[i].Z = buffer[3*atoms+3*i+2] ;				 				 
+				 }
 			}
 
-			MPI_Bcast(coord, 3*atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+			if ( BOXDIM.IS_VARIABLE )
+			{
+				 BOXDIM.CELL_AX = buffer[count] ;
+				 BOXDIM.CELL_BY = buffer[count+1] ;
+				 BOXDIM.CELL_CZ = buffer[count+2] ;
+				 BOXDIM.UPDATE_CELL();			
+			}
+
+			neigh_list.MAX_COORD_STEP = buffer[buf_sz-1] ;
+	 }
+	 
+#ifdef LOG_POS
 		
-			#ifdef LOG_POS
-		
-				char buf[20];
-				sprintf(buf, "%d.%d", RANK,NPROCS);
-				string pos_out = string("pos.") + string(buf) + string(".out");
-				ofstream outx;
-				outx.open(pos_out.c_str());
-				outx.precision(15);
+	 char buf[20];
+	 sprintf(buf, "%d.%d", RANK,NPROCS);
+	 string pos_out = string("pos.") + string(buf) + string(".out");
+	 ofstream outx;
+	 outx.open(pos_out.c_str());
+	 outx.precision(15);
 	
-				for (int i=0; i<3*atoms; i++)
-					outx << i << " " << coord[i] << " " << endl;
+	 for (int i=0; i<3*atoms; i++)
+			outx << i << " " << coord[i] << " " << endl;
 	
-				outx.close();
+	 outx.close();
 			
-			#endif
-	
-				if ( sync_vel )
-				{
-					double *velocity = (double *) velocity_vec.data();
-					MPI_Bcast(velocity, 3 * atoms, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-				}
-				
-		#endif
-	}
+#endif // LOG_POS
+}
 
 #endif // USE_MPI
 
+
+static void ZCalc_Serial_Chimes(FRAME &SYSTEM, PAIR_FF &FF_2BODY)
+// Force evaluation using serial Chimes calculator interface.
+{
+    // Only rank 0 does calculation for serial chimes.
+    if ( RANK == 0 ) {
+        int natoms = SYSTEM.ATOMS ;
+        vector<double> xcrds(natoms) ;
+        vector<double> ycrds(natoms) ;
+        vector<double> zcrds(natoms) ;
+        vector<vector<double>> force(natoms) ;
+        vector<double> cell_a(3);
+        vector<double> cell_b(3);
+        vector<double> cell_c(3);
+        vector<double> stress(9,0.0); 
+        double energy = 0.0 ;
+		 
+        vector<string> atom_types(SYSTEM.ATOMTYPE.size()) ;
+		 
+        for ( int j = 0 ; j < natoms ; j++ )
+        {
+            xcrds[j] = SYSTEM.COORDS[j].X ;
+            ycrds[j] = SYSTEM.COORDS[j].Y ;
+            zcrds[j] = SYSTEM.COORDS[j].Z ;								
+            force[j].resize(3,0.0);
+        }
+
+        for ( int j = 0 ; j < atom_types.size() ; j++ )
+        {
+            atom_types[j] = SYSTEM.ATOMTYPE[j] ;
+        }
+		 
+        cell_a[0] = SYSTEM.BOXDIM.CELL_AX ;
+        cell_a[1] = SYSTEM.BOXDIM.CELL_AY ;
+        cell_a[2] = SYSTEM.BOXDIM.CELL_AZ ;		 		 
+
+        cell_b[0] = SYSTEM.BOXDIM.CELL_BX ;
+        cell_b[1] = SYSTEM.BOXDIM.CELL_BY ;
+        cell_b[2] = SYSTEM.BOXDIM.CELL_BZ ;		 		 
+
+        cell_c[0] = SYSTEM.BOXDIM.CELL_CX ;
+        cell_c[1] = SYSTEM.BOXDIM.CELL_CY ;
+        cell_c[2] = SYSTEM.BOXDIM.CELL_CZ ;		 		 
+
+        FF_2BODY.chimes.calculate(xcrds, ycrds, zcrds, cell_a, cell_b, cell_c, atom_types, energy, force, stress);
+
+        for ( int j = 0 ; j < natoms ; j++ )
+        {
+            SYSTEM.ACCEL[j].X = force[j][0] ;
+            SYSTEM.ACCEL[j].Y = force[j][1] ;
+            SYSTEM.ACCEL[j].Z = force[j][2] ;
+        }
+        SYSTEM.TOT_POT_ENER = energy ;
+
+        // Unit conversions to CHIMES_MD internals.
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X = stress[0] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y = stress[1] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z = stress[2] * SYSTEM.BOXDIM.VOL ;
+
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X = stress[3] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y = stress[4] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z = stress[5] * SYSTEM.BOXDIM.VOL ;
+
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X = stress[6] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y = stress[7] * SYSTEM.BOXDIM.VOL ;
+        SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z = stress[8] * SYSTEM.BOXDIM.VOL ;		 		 		 		 
+        SYSTEM.PRESSURE_XYZ = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X
+            + SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y
+            + SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z ;
+    }
+}
 
 

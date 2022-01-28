@@ -318,8 +318,10 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 		TRAJECTORY.TMP_EWALD[a1].Z = 0;
 	}
 
+	// Scaling for permutations of atoms when the cutoff is >= box size.
+	double perm_scale = NEIGHBOR_LIST.PERM_SCALE[2] ;
+
 	// Main loop Ewald Coulomb energy/forces:
-	
 	for(int a1 = a1start; a1 <= a1end; a1++)	// Double sum over atom pairs (outer loop is MPI'd over TRAJECTORY.ATOMS)
 	{
 		a2start = 0;
@@ -348,6 +350,9 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 
 				tempx *= ke;
 
+				tempx *= perm_scale ;
+				tempy *= perm_scale ;
+				
 				TRAJECTORY.TMP_EWALD[a1].X += RVEC.X * tempx;
 				TRAJECTORY.TMP_EWALD[a1].Y += RVEC.Y * tempx;
 				TRAJECTORY.TMP_EWALD[a1].Z += RVEC.Z * tempx;
@@ -441,268 +446,273 @@ void optimal_ewald_params(double accuracy, int nat, double &alpha, double & rc, 
 
 void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_MAT & A_MATRIX, map<string,int> & PAIR_MAP,NEIGHBORS & NEIGHBOR_LIST, JOB_CONTROL & CONTROLS)
 {
-	XYZ RVEC; // Replaces  Rvec[3];
+	 XYZ RVEC; // Replaces  Rvec[3];
 
-	// Main loop Ewald Coulomb:
+	 // Main loop Ewald Coulomb:
   
-	string			TEMP_STR;
-	int			i_pair;
-	const  int 		maxk     = 10000;	// Max number of kspace vectors
-	static int 		kmax;					
-	const  int 		ksqmax   = 50;			
-	static double 		alphasq  = 0.7;			
-	const  double 		PI       = 3.14159265359;
-	static int    		totk     = 0;
-	int    			ksq;
-	double 			Kfac;
-	XYZ    			R_K; 
-	double 			rksq;
-	double 			alpha    = sqrt(alphasq);
-	static double 		r_cut;						
-	const  double 		accuracy = EWALD_ACCURACY;
-	double 			tempd, tempd2, tempd3, tempd4;
+	 string			TEMP_STR;
+	 int			i_pair;
+	 const  int 		maxk     = 10000;	// Max number of kspace vectors
+	 static int 		kmax;					
+	 const  int 		ksqmax   = 50;			
+	 static double 		alphasq  = 0.7;			
+	 const  double 		PI       = 3.14159265359;
+	 static int    		totk     = 0;
+	 int    			ksq;
+	 double 			Kfac;
+	 XYZ    			R_K; 
+	 double 			rksq;
+	 double 			alpha    = sqrt(alphasq);
+	 static double 		r_cut;						
+	 const  double 		accuracy = EWALD_ACCURACY;
+	 double 			tempd, tempd2, tempd3, tempd4;
 	
-	double 			Volume;
-	XYZ 			D_XYZ; 						
-	double 			rlen_mi;
-	static vector<XYZ>	SIN_XYZ; 				
-	static vector<XYZ>	COS_XYZ; 				
-	double 			ke = 1.0;	// this is the unit conversion to achieve charges in nice electron units. currently we apply this conversion at MD-level, not here.
-	static double 		*Kfac_v;
-	static vector<XYZ_INT>	K_V(maxk); 
-	static XYZ    		LAST_BOXDIMS;
-	int			a2start, a2end, a2;
+	 double 			Volume;
+	 XYZ 			D_XYZ; 						
+	 double 			rlen_mi;
+	 static vector<XYZ>	SIN_XYZ; 				
+	 static vector<XYZ>	COS_XYZ; 				
+	 double 			ke = 1.0;	// this is the unit conversion to achieve charges in nice electron units. currently we apply this conversion at MD-level, not here.
+	 static double 		*Kfac_v;
+	 static vector<XYZ_INT>	K_V(maxk); 
+	 static XYZ    		LAST_BOXDIMS;
+	 int			a2start, a2end, a2;
 	
-	Volume = FRAME_TRAJECTORY.BOXDIM.VOL;
+	 Volume = FRAME_TRAJECTORY.BOXDIM.VOL;
 	
-	bool BOX_CHANGED = false;
+	 bool BOX_CHANGED = false;
 	
-	if (LAST_BOXDIMS.X != FRAME_TRAJECTORY.BOXDIM.CELL_AX  || LAST_BOXDIMS.Y != FRAME_TRAJECTORY.BOXDIM.CELL_BY  || LAST_BOXDIMS.Z != FRAME_TRAJECTORY.BOXDIM.CELL_CZ)
-		BOX_CHANGED = true;
-	if(NPROCS>1)
-		BOX_CHANGED = true;
+	 if (LAST_BOXDIMS.X != FRAME_TRAJECTORY.BOXDIM.CELL_AX  || LAST_BOXDIMS.Y != FRAME_TRAJECTORY.BOXDIM.CELL_BY  || LAST_BOXDIMS.Z != FRAME_TRAJECTORY.BOXDIM.CELL_CZ)
+			BOX_CHANGED = true;
+	 if(NPROCS>1)
+			BOX_CHANGED = true;
 			
-	if (BOX_CHANGED) // NOTE: This is modifying STATIC variables.. meaning they exist even after the block exits
-	{
-		double r_acc, k_acc;
+	 if (BOX_CHANGED) // NOTE: This is modifying STATIC variables.. meaning they exist even after the block exits
+	 {
+			double r_acc, k_acc;
 
-		LAST_BOXDIMS.X = FRAME_TRAJECTORY.BOXDIM.CELL_AX ;
-		LAST_BOXDIMS.Y = FRAME_TRAJECTORY.BOXDIM.CELL_BY ;
-		LAST_BOXDIMS.Z = FRAME_TRAJECTORY.BOXDIM.CELL_CZ ;
+			LAST_BOXDIMS.X = FRAME_TRAJECTORY.BOXDIM.CELL_AX ;
+			LAST_BOXDIMS.Y = FRAME_TRAJECTORY.BOXDIM.CELL_BY ;
+			LAST_BOXDIMS.Z = FRAME_TRAJECTORY.BOXDIM.CELL_CZ ;
 
-		optimal_ewald_params(accuracy, FRAME_TRAJECTORY.ATOMS, alpha, r_cut, kmax,r_acc, k_acc, FRAME_TRAJECTORY.BOXDIM);	
+			optimal_ewald_params(accuracy, FRAME_TRAJECTORY.ATOMS, alpha, r_cut, kmax,r_acc, k_acc, FRAME_TRAJECTORY.BOXDIM);	
 
-		// Update the neighbor list based on the Ewald cutoff.
-		NEIGHBOR_LIST.EWALD_CUTOFF = r_cut ;
-		NEIGHBOR_LIST.DO_UPDATE(FRAME_TRAJECTORY,CONTROLS) ;
+			// Update the neighbor list based on the Ewald cutoff.
+			NEIGHBOR_LIST.EWALD_CUTOFF = r_cut ;
+			NEIGHBOR_LIST.DO_UPDATE(FRAME_TRAJECTORY,CONTROLS) ;
 		
-		alphasq = alpha * alpha;
+			alphasq = alpha * alpha;
 		
-		#if VERBOSITY == 1
-		if ( RANK == 0 ) 
-		{
-			printf("\tEwald_Deriv:\n");
-			printf("\tR-Space Ewald cutoff      = %13.6e\n", r_cut);
-	   	 	printf("\tR-Space accuracy estimate = %13.6e\n", r_acc);
-	   	 	printf("\tK-space accuracy estimate = %13.6e\n", k_acc);		
-		}
-		#endif
+#if VERBOSITY == 1
+			if ( RANK == 0 ) 
+			{
+				 printf("\tEwald_Deriv:\n");
+				 printf("\tR-Space Ewald cutoff      = %13.6e\n", r_cut);
+				 printf("\tR-Space accuracy estimate = %13.6e\n", r_acc);
+				 printf("\tK-space accuracy estimate = %13.6e\n", k_acc);		
+			}
+#endif
 
 	    Kfac_v = new double [maxk];	// DECLARING STUFF LIKE THIS IN A FUNCTION A MILLION TIMES WILL KILL EFFICIENCY... CAN WE MAKE THESE GLOBAL-ISH?		
-		SIN_XYZ.resize(maxk); // Replaces sinx, siny, sinz
-		COS_XYZ.resize(maxk);
+			SIN_XYZ.resize(maxk); // Replaces sinx, siny, sinz
+			COS_XYZ.resize(maxk);
   
-		totk = 0;
+			totk = 0;
 
 	    double min_vfac = 1.0e8;
 	
-		for(int kx=0;kx<=kmax;kx++) 
-		{
-			for(int ky=0;ky<=kmax;ky++)
+			for(int kx=0;kx<=kmax;kx++) 
 			{
-				for(int kz=0;kz<=kmax;kz++)
-				{
-					ksq = kx*kx + ky*ky + kz*kz;
-				  
-					if(ksq!=0 and ksq<ksqmax)
-					{
-
-						R_K.X = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_AX ) * kx;
-						K_V[totk].X = kx;
-	
-						R_K.Y = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_BY ) * ky;
-						K_V[totk].Y = ky;
-
-						R_K.Z = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_CZ ) * kz;
-						K_V[totk].Z = kz;
-					
-						rksq = R_K.X*R_K.X + R_K.Y*R_K.Y + R_K.Z*R_K.Z;
-
-    					// Note:  The original version of the Ewald evaluator did not work 
-    					// when the lattice constants were different.
-    					 
-    					Kfac_v[totk] = exp(-rksq/(4.0*alphasq))/rksq;
-				
-						if ( Kfac_v[totk] < min_vfac ) 
-							min_vfac = Kfac_v[totk];
-						
-						totk++;
-				
-						if(totk>maxk)
+				 for(int ky=0;ky<=kmax;ky++)
+				 {
+						for(int kz=0;kz<=kmax;kz++)
 						{
-							cout << "totk = " << totk << " greater than maxk = " << maxk << endl;
-							exit_run(1);
+							 ksq = kx*kx + ky*ky + kz*kz;
+				  
+							 if(ksq!=0 and ksq<ksqmax)
+							 {
+
+									R_K.X = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_AX ) * kx;
+									K_V[totk].X = kx;
+	
+									R_K.Y = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_BY ) * ky;
+									K_V[totk].Y = ky;
+
+									R_K.Z = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_CZ ) * kz;
+									K_V[totk].Z = kz;
+					
+									rksq = R_K.X*R_K.X + R_K.Y*R_K.Y + R_K.Z*R_K.Z;
+
+									// Note:  The original version of the Ewald evaluator did not work 
+									// when the lattice constants were different.
+    					 
+									Kfac_v[totk] = exp(-rksq/(4.0*alphasq))/rksq;
+				
+									if ( Kfac_v[totk] < min_vfac ) 
+										 min_vfac = Kfac_v[totk];
+						
+									totk++;
+				
+									if(totk>maxk)
+									{
+										 cout << "totk = " << totk << " greater than maxk = " << maxk << endl;
+										 exit_run(1);
+									}
+							 }
 						}
-					}
-				}
+				 }
 			}
-		}
 		
-		#if VERBOSITY == 1
-		if ( RANK == 0 ) cout << "	Number of Ewald K-vectors = " << totk << endl;
-		#endif
-	}
-	
-    for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++) //Ewald real-space sum.
-    {
-		a2start = 0;
-		a2end   = NEIGHBOR_LIST.LIST_EWALD[a1].size();
+#if VERBOSITY == 1
+			if ( RANK == 0 ) cout << "	Number of Ewald K-vectors = " << totk << endl;
+#endif
+	 }
 
-		for(int a2idx=a2start; a2idx<a2end; a2idx++)	
-		{
-			a2 = NEIGHBOR_LIST.LIST_EWALD[a1][a2idx] ;
-			int fidx_a2 = FRAME_TRAJECTORY.PARENT[a2] ;
+	 // Scaling for permutations of atoms when the cutoff is >= box size.
+	 double perm_scale = NEIGHBOR_LIST.PERM_SCALE[2] ;
+	
+	 for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++) //Ewald real-space sum.
+	 {
+			a2start = 0;
+			a2end   = NEIGHBOR_LIST.LIST_EWALD[a1].size();
+
+			for(int a2idx=a2start; a2idx<a2end; a2idx++)	
+			{
+				 a2 = NEIGHBOR_LIST.LIST_EWALD[a1][a2idx] ;
+				 int fidx_a2 = FRAME_TRAJECTORY.PARENT[a2] ;
 		  
-			TEMP_STR = FRAME_TRAJECTORY.ATOMTYPE[a1];
-			TEMP_STR.append(FRAME_TRAJECTORY.ATOMTYPE[fidx_a2]);
+				 TEMP_STR = FRAME_TRAJECTORY.ATOMTYPE[a1];
+				 TEMP_STR.append(FRAME_TRAJECTORY.ATOMTYPE[fidx_a2]);
 							
-			i_pair = PAIR_MAP[TEMP_STR];		  
+				 i_pair = PAIR_MAP[TEMP_STR];		  
 
-			rlen_mi = get_dist(FRAME_TRAJECTORY, RVEC, a1, a2) ;
+				 rlen_mi = get_dist(FRAME_TRAJECTORY, RVEC, a1, a2) ;
 
-			D_XYZ.X = RVEC.X;
-			D_XYZ.Y = RVEC.Y;
-			D_XYZ.Z = RVEC.Z;
+				 D_XYZ.X = RVEC.X;
+				 D_XYZ.Y = RVEC.Y;
+				 D_XYZ.Z = RVEC.Z;
 			
 
-			if ( rlen_mi < r_cut ) 
-			{
-				//Note that for least-squares problem, the terms are Force/(Q[a1]*Q[a2]) because Q*Q is the linear multiplier.
+				 if ( rlen_mi < r_cut ) 
+				 {
+						//Note that for least-squares problem, the terms are Force/(Q[a1]*Q[a2]) because Q*Q is the linear multiplier.
 		    
-				tempd = ( (-2.0/sqrt(PI))*exp(-1*alpha*alpha*rlen_mi*rlen_mi)*rlen_mi*alpha - erfc(alpha*rlen_mi))/(rlen_mi*rlen_mi); //tempd is the derivate of tempy--force.
-				tempd *= -1.0;
-				tempd *= 2.0;  // Sum a1 > a2, not all a2
-				tempd *= ke;
-				tempd *= 0.5 / rlen_mi;
+						tempd = ( (-2.0/sqrt(PI))*exp(-1*alpha*alpha*rlen_mi*rlen_mi)*rlen_mi*alpha - erfc(alpha*rlen_mi))/(rlen_mi*rlen_mi); //tempd is the derivative of tempy--force.
+						tempd *= -1.0;
+						tempd *= 2.0;  // Sum a1 > a2, not all a2
+						tempd *= ke;
+						tempd *= 0.5 / rlen_mi;
 
-				A_MATRIX.CHARGES[i_pair][a1].X += tempd * D_XYZ.X;//populate terms according to x,y,z component.
-				A_MATRIX.CHARGES[i_pair][a1].Y += tempd * D_XYZ.Y;
-				A_MATRIX.CHARGES[i_pair][a1].Z += tempd * D_XYZ.Z;
+						tempd *= perm_scale ;
 				
-				A_MATRIX.CHARGES[i_pair][fidx_a2].X -= tempd * D_XYZ.X;//populate terms according to x,y,z component.
-				A_MATRIX.CHARGES[i_pair][fidx_a2].Y -= tempd * D_XYZ.Y;
-				A_MATRIX.CHARGES[i_pair][fidx_a2].Z -= tempd * D_XYZ.Z;					
+						A_MATRIX.CHARGES[i_pair][a1].X += tempd * D_XYZ.X;//populate terms according to x,y,z component.
+						A_MATRIX.CHARGES[i_pair][a1].Y += tempd * D_XYZ.Y;
+						A_MATRIX.CHARGES[i_pair][a1].Z += tempd * D_XYZ.Z;
+				
+						A_MATRIX.CHARGES[i_pair][fidx_a2].X -= tempd * D_XYZ.X;//populate terms according to x,y,z component.
+						A_MATRIX.CHARGES[i_pair][fidx_a2].Y -= tempd * D_XYZ.Y;
+						A_MATRIX.CHARGES[i_pair][fidx_a2].Z -= tempd * D_XYZ.Z;					
+				 }
 			}
-		}
-	}
+	 }
 	
-    for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++) //Ewald K-space sum.	// -- this is where the slow down occurs
-    {
-		for(int a2=0; a2<a1;a2++)
-		{
-			TEMP_STR = FRAME_TRAJECTORY.ATOMTYPE[a1];
-			TEMP_STR.append(FRAME_TRAJECTORY.ATOMTYPE[a2]);
-							
-			i_pair = PAIR_MAP[TEMP_STR];
-				
-			RVEC.X = FRAME_TRAJECTORY.COORDS[a2].X - FRAME_TRAJECTORY.COORDS[a1].X;
-			RVEC.Y = FRAME_TRAJECTORY.COORDS[a2].Y - FRAME_TRAJECTORY.COORDS[a1].Y;
-			RVEC.Z = FRAME_TRAJECTORY.COORDS[a2].Z - FRAME_TRAJECTORY.COORDS[a1].Z;
-
-			// Evaluate sin factors for this pair of atoms. -- NEEDS UPDATING TO HANDLE SIN_XYZ, COS_XYZ, RVEC and FRAME_TRAJECTORY.BOXDIM !!!!
-			generate_trig(SIN_XYZ, COS_XYZ, RVEC, FRAME_TRAJECTORY.BOXDIM, kmax);
-			
-			// Sum over all k vectors.
-			for ( int ik = 0; ik < totk; ik++ ) 
+	 for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++) //Ewald K-space sum.	// -- this is where the slow down occurs
+	 {
+			for(int a2=0; a2<a1;a2++)
 			{
-				R_K.X = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_AX ) *  K_V[ik].X;
-				R_K.Y = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_BY ) *  K_V[ik].Y;
-				R_K.Z = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_CZ ) *  K_V[ik].Z;
+				 TEMP_STR = FRAME_TRAJECTORY.ATOMTYPE[a1];
+				 TEMP_STR.append(FRAME_TRAJECTORY.ATOMTYPE[a2]);
+							
+				 i_pair = PAIR_MAP[TEMP_STR];
+				
+				 RVEC.X = FRAME_TRAJECTORY.COORDS[a2].X - FRAME_TRAJECTORY.COORDS[a1].X;
+				 RVEC.Y = FRAME_TRAJECTORY.COORDS[a2].Y - FRAME_TRAJECTORY.COORDS[a1].Y;
+				 RVEC.Z = FRAME_TRAJECTORY.COORDS[a2].Z - FRAME_TRAJECTORY.COORDS[a1].Z;
 
-				Kfac =  Kfac_v[ik];//exp(-1.0*rksq/(4.0*alpha*alpha))/rksq;
+				 // Evaluate sin factors for this pair of atoms. -- NEEDS UPDATING TO HANDLE SIN_XYZ, COS_XYZ, RVEC and FRAME_TRAJECTORY.BOXDIM !!!!
+				 generate_trig(SIN_XYZ, COS_XYZ, RVEC, FRAME_TRAJECTORY.BOXDIM, kmax);
+			
+				 // Sum over all k vectors.
+				 for ( int ik = 0; ik < totk; ik++ ) 
+				 {
+						R_K.X = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_AX ) *  K_V[ik].X;
+						R_K.Y = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_BY ) *  K_V[ik].Y;
+						R_K.Z = ( 2.0 * PI / FRAME_TRAJECTORY.BOXDIM.CELL_CZ ) *  K_V[ik].Z;
 
-				tempd = add_sines(K_V[ik].X, K_V[ik].Y, K_V[ik].Z, SIN_XYZ, COS_XYZ);
+						Kfac =  Kfac_v[ik];//exp(-1.0*rksq/(4.0*alpha*alpha))/rksq;
 
-				tempd *= ke;
-				tempd *= 2.0; // Sum a1 > a2, not all a2.
-				tempd *= Kfac * 0.5*(4*PI/Volume);
-				tempd3 = 0.0;
+						tempd = add_sines(K_V[ik].X, K_V[ik].Y, K_V[ik].Z, SIN_XYZ, COS_XYZ);
 
-				if (  K_V[ik].Y > 0 ) 
-				{
-					tempd2 = add_sines(K_V[ik].X, -K_V[ik].Y, K_V[ik].Z, SIN_XYZ, COS_XYZ);
-
-					tempd2 *= ke;
-					tempd2 *= 2.0; // Sum a1 > a2, not all a2.
-					tempd2 *= Kfac * 0.5*(4*PI/Volume);
-
-					if (  K_V[ik].Z > 0 ) 
-					{
-						tempd3 = add_sines(K_V[ik].X, -K_V[ik].Y, -K_V[ik].Z, SIN_XYZ, COS_XYZ);
-						tempd3 *= ke;
-						tempd3 *= 2.0; // Sum a1 > a2, not all a2.
-						tempd3 *= Kfac * 0.5*(4*PI/Volume);
-					}
-					else 
+						tempd *= ke;
+						tempd *= 2.0; // Sum a1 > a2, not all a2.
+						tempd *= Kfac * 0.5*(4*PI/Volume);
 						tempd3 = 0.0;
+
+						if (  K_V[ik].Y > 0 ) 
+						{
+							 tempd2 = add_sines(K_V[ik].X, -K_V[ik].Y, K_V[ik].Z, SIN_XYZ, COS_XYZ);
+
+							 tempd2 *= ke;
+							 tempd2 *= 2.0; // Sum a1 > a2, not all a2.
+							 tempd2 *= Kfac * 0.5*(4*PI/Volume);
+
+							 if (  K_V[ik].Z > 0 ) 
+							 {
+									tempd3 = add_sines(K_V[ik].X, -K_V[ik].Y, -K_V[ik].Z, SIN_XYZ, COS_XYZ);
+									tempd3 *= ke;
+									tempd3 *= 2.0; // Sum a1 > a2, not all a2.
+									tempd3 *= Kfac * 0.5*(4*PI/Volume);
+							 }
+							 else 
+									tempd3 = 0.0;
 					 
-				} 
-				else 
-					tempd2 = 0.0;
+						} 
+						else 
+							 tempd2 = 0.0;
 
 
-				if (  K_V[ik].Z > 0 ) 
-				{
-					tempd4 = add_sines(K_V[ik].X, K_V[ik].Y, -K_V[ik].Z, SIN_XYZ, COS_XYZ);
-					tempd4 *= ke;
-					tempd4 *= 2.0; // Sum a1 > a2, not all a2.
-					tempd4 *= Kfac * 0.5*(4*PI/Volume);
-				}
-				else 
-					tempd4 = 0.0;
+						if (  K_V[ik].Z > 0 ) 
+						{
+							 tempd4 = add_sines(K_V[ik].X, K_V[ik].Y, -K_V[ik].Z, SIN_XYZ, COS_XYZ);
+							 tempd4 *= ke;
+							 tempd4 *= 2.0; // Sum a1 > a2, not all a2.
+							 tempd4 *= Kfac * 0.5*(4*PI/Volume);
+						}
+						else 
+							 tempd4 = 0.0;
 	  
 
-				if (  K_V[ik].X > 0 ) 
-				{
-					tempd  *= 2.0; // Sum kx >= 0, not all kx;
-					tempd2 *= 2.0; 
-					tempd3 *= 2.0; 
-					tempd4 *= 2.0; 
-				}
+						if (  K_V[ik].X > 0 ) 
+						{
+							 tempd  *= 2.0; // Sum kx >= 0, not all kx;
+							 tempd2 *= 2.0; 
+							 tempd3 *= 2.0; 
+							 tempd4 *= 2.0; 
+						}
 
-				A_MATRIX.CHARGES[i_pair][a1].X += ( tempd + tempd2 + tempd3 + tempd4 ) * R_K.X;
-				A_MATRIX.CHARGES[i_pair][a1].Y += ( tempd - tempd2 - tempd3 + tempd4 ) * R_K.Y;
-				A_MATRIX.CHARGES[i_pair][a1].Z += ( tempd + tempd2 - tempd3 - tempd4 ) * R_K.Z;
+						A_MATRIX.CHARGES[i_pair][a1].X += ( tempd + tempd2 + tempd3 + tempd4 ) * R_K.X;
+						A_MATRIX.CHARGES[i_pair][a1].Y += ( tempd - tempd2 - tempd3 + tempd4 ) * R_K.Y;
+						A_MATRIX.CHARGES[i_pair][a1].Z += ( tempd + tempd2 - tempd3 - tempd4 ) * R_K.Z;
 		
-				A_MATRIX.CHARGES[i_pair][a2].X -= ( tempd + tempd2 + tempd3 + tempd4 ) * R_K.X;
-				A_MATRIX.CHARGES[i_pair][a2].Y -= ( tempd - tempd2 - tempd3 + tempd4 ) * R_K.Y;
-				A_MATRIX.CHARGES[i_pair][a2].Z -= ( tempd + tempd2 - tempd3 - tempd4 ) * R_K.Z;	
+						A_MATRIX.CHARGES[i_pair][a2].X -= ( tempd + tempd2 + tempd3 + tempd4 ) * R_K.X;
+						A_MATRIX.CHARGES[i_pair][a2].Y -= ( tempd - tempd2 - tempd3 + tempd4 ) * R_K.Y;
+						A_MATRIX.CHARGES[i_pair][a2].Z -= ( tempd + tempd2 - tempd3 - tempd4 ) * R_K.Z;	
 
 												
-		  	}		
-		}
-	}	
+				 }		
+			}
+	 }	
 	
-	for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++)
-	{
-		for(int i_pair=0; i_pair<ATOM_PAIRS.size(); i_pair++)
-		{				
-			A_MATRIX.CHARGES[i_pair][a1].X *= -1.0;
-			A_MATRIX.CHARGES[i_pair][a1].Y *= -1.0;
-			A_MATRIX.CHARGES[i_pair][a1].Z *= -1.0;		
-		}
-	}
-	return;
+	 for(int a1=0;a1<FRAME_TRAJECTORY.ATOMS;a1++)
+	 {
+			for(int i_pair=0; i_pair<ATOM_PAIRS.size(); i_pair++)
+			{				
+				 A_MATRIX.CHARGES[i_pair][a1].X *= -1.0;
+				 A_MATRIX.CHARGES[i_pair][a1].Y *= -1.0;
+				 A_MATRIX.CHARGES[i_pair][a1].Z *= -1.0;		
+			}
+	 }
+	 return;
 }
 
 static double add_sines(int kx, int ky, int kz, vector<XYZ> & SIN_XYZ, vector<XYZ> & COS_XYZ) 

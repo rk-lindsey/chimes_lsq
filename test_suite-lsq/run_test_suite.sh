@@ -39,11 +39,13 @@ SOURCE_BASE="${TESTSU_BASE}/../build/"
 
 cd ..
 
-if ./install.sh  ; then
+if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
+    if ./install.sh  ; then
 	echo "Compiling chimes_lsq succeeded"
-else
-	 echo "Compiling chimes_lsq failed"
-	 exit 1
+    else
+	echo "Compiling chimes_lsq failed"
+	exit 1
+    fi
 fi
 
 cd -
@@ -75,34 +77,32 @@ do
 		  mkdir $i/current_output
 	 fi
 
-	 cd $i
-	 rm -rf A.txt b.txt params.header diff-* b-labeled.txt 
-	
+	 cd $i/current_output
 
+	 cp ../*.txt ../*.in ../*.xyzf ../*.dat ./ >& /dev/null
+	 
 	 if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		  if ../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
-				echo 'Chimes_lsq succeeded'
-				SUCCESS=1
-		  else
-			  echo 'Chimes_lsq failed'
-			  SUCCESS=0
-		 fi
+	     if ../../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
+		 echo 'Chimes_lsq succeeded'
+		 SUCCESS=1
+	     else
+		 echo 'Chimes_lsq failed'
+		 SUCCESS=0
+	     fi
 	else
-		 if $RUN_JOB ../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
-			  echo 'Chimes_lsq succeeded'
-			  SUCCESS=1
-		 else
-			  echo 'Chimes_lsq failed'
-			  SUCCESS=0
-			  PASS=false
-			  ALL_PASSED=false
-		 fi
+	    if $RUN_JOB ../../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
+		echo 'Chimes_lsq succeeded'
+		SUCCESS=1
+	    else
+		echo 'Chimes_lsq failed'
+		SUCCESS=0
+		PASS=false
+		ALL_PASSED=false
+	    fi
 	fi
 
-	rm -f current_output/*
-
-	mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output	
-
+        # There seems to be an NFS filesystem lag in finding output files.
+	cd ..
 	if [[ $SUCCESS -eq 1 ]] ; then
 
 		 for j in A.txt b.txt params.header fm_setup.out
@@ -204,14 +204,14 @@ do
 						 # direct them to the diff file to look at to make
 						 # sure that is the only difference
 				
-						 paste ../correct_output/$j $j > check_tol.dat
+						 paste ../correct_output/test_suite_params.txt test_suite_params.txt > check_tol.dat
 						 awk 'BEGIN{tol=10^-9;any=0}{val=$2-$4;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat  | tee tol_status.dat
 						 rm -f check_tol.dat
 					fi
 					echo " "
 			
 					TECHNICAL_PASS_STATUS=`grep "No" tol_status.dat`
-
+W
 			
 					if [[ "$TECHNICAL_PASS_STATUS" != *"No"* ]]; then
 						 TECHNICAL_PASS=false
@@ -244,45 +244,45 @@ do
 	fi
 done
 
-echo "Running Makefile jobs"
+echo "Running Makefile jobs $MAKE_JOBS"
+pwd ;
 
 for job in $MAKE_JOBS ; do
 
-	 if ! test_dir $i ; then
-		  continue 
-	 fi
+    echo "Running $job"
+    
+    if ! test_dir $job ; then
+	echo "Directory $job does not exist"
+	continue 
+    fi
 	 
-	 if [[ $job == "lsq2" ]] ; then
-	 	#cd ../contrib/owlqn/source/
-	 	#make
-	 	#cd - 
-		cd $DLARS_PATH
-		make
-		cd -
-         fi
+    if [[ $job == "lsq2" ]] ; then
+    	cd ../contrib/dlars/src
+	make
+	cd - 
+    fi	 
+    cd $job
 	 
-	 cd $job
-	 
-	 if RUN_JOB=$RUN_JOB PYTHON=$PYTHON make all ; then
-		  echo "$job succeeded"
-	 else
-		  echo "$job failed"
-		  ALL_PASSED=FALSE
-		  PASSED=FALSE
-	 fi
+    if make RUN_JOB="$RUN_JOB" PYTHON=$PYTHON all ; then
+	echo "$job succeeded"
+    else
+	echo "$job failed"
+	ALL_PASSED=FALSE
+	PASSED=FALSE
+    fi
 done
 
 if   [ "$ALL_PASSED" = true ] ; then
 	echo "ALL TESTS PASSED"
 elif [ "$ALL_PASSED" = false ] ; then
-	echo "AT LEAST ONE EACH OF SETUP AND SVD TEST(S) FAILED..."
+	echo 'AT LEAST ONE EACH OF SETUP AND SVD TEST(S) FAILED...'
 	echo "Check individual results above to confirm if test had technical pass."
 elif [ "$SVD_PASSED" = false ] ; then
 	echo "TEST(S) FAILED FOR SVD SCRIPT"
 elif [ "$SET_PASSED" = false ] ; then
 	echo "TEST(S) FAILED FOR SETUP SCRIPT"
 else
-	echo "ERROR: BAD LOGIC IN TEST SUITE DRIVER (THIS SCRIPT)"
+	echo 'ERROR: BAD LOGIC IN TEST SUITE DRIVER (THIS SCRIPT)'
 	echo "ALL/SVD PASSED: $ALL_PASSED $SVD_PASSEDs" 
 fi
 	

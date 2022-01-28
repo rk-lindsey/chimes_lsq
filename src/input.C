@@ -200,6 +200,7 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,
 	PARSE_CONTROLS_FITENER(CONTROLS);
 	PARSE_CONTROLS_PAIRTYP(CONTROLS);
 	PARSE_CONTROLS_CHBTYPE(CONTROLS);
+	PARSE_CONTROLS_CHEBYFIX(CONTROLS);
 	PARSE_CONTROLS_USENEIG(CONTROLS, NEIGHBOR_LIST);
 	
 	// For assigning LSQ variables: "Topology Variables" 
@@ -217,6 +218,7 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,
 	RUN_SANITY_LSQ(CONTROLS);	
 
 }
+
 void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 {
 	READ_FILE();
@@ -245,7 +247,9 @@ void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 	PARSE_CONTROLS_NLAYERS(CONTROLS);
 	PARSE_CONTROLS_USENEIG(CONTROLS, NEIGHBOR_LIST);
 	PARSE_CONTROLS_PRMFILE(CONTROLS);
+	PARSE_CONTROLS_SERIAL_CHIMES(CONTROLS) ;
 	PARSE_CONTROLS_CRDFILE(CONTROLS);
+	PARSE_CONTROLS_CHEBYFIX(CONTROLS);
 	
 	// " Simulation options"
 	
@@ -658,6 +662,43 @@ void INPUT::PARSE_CONTROLS_CHBTYPE(JOB_CONTROL & CONTROLS)
 		}
 	}
 }
+
+void INPUT::PARSE_CONTROLS_CHEBYFIX(JOB_CONTROL & CONTROLS)
+{
+	int N_CONTENTS = CONTENTS.size();
+	
+	for (int i=0; i<N_CONTENTS; i++)
+	{
+		if (found_input_keyword("CHEBYFIX", CONTENTS(i)))			
+		{
+			string fix_type = CONTENTS(i+1,0) ;
+			if(fix_type == "ZERO_DERIV" )
+			{
+				CONTROLS.cheby_fix_type = Cheby_fix::ZERO_DERIV ;
+			}
+			else if ( fix_type == "CONSTANT_DERIV" )
+			{
+				CONTROLS.cheby_fix_type = Cheby_fix::CONSTANT_DERIV ;				
+			}
+			else if ( fix_type == "SMOOTH" )
+			{
+				CONTROLS.cheby_fix_type = Cheby_fix::SMOOTH ;
+				CONTROLS.cheby_smooth_distance = convert_double(CONTENTS(i+1,1),i+1) ;
+			}
+			else 
+			{
+				EXIT_MSG("ERROR: CHEBYFIX was not recognized") ;
+			}
+			if ( RANK == 0 )
+			{
+				cout << "\t# CHEBYFIX #: " << fix_type << endl ;
+				if ( fix_type == "SMOOTH" )
+					cout << "\t\tCheby smoothing distance = " << CONTROLS.cheby_smooth_distance << endl ;
+			}
+		}
+	}
+}
+
 
 
 // For assigning LSQ variables: "Topology Variables" 
@@ -1504,25 +1545,25 @@ void INPUT::PARSE_CONTROLS_USENEIG(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_
 			if (RANK==0)
 				cout << "	# USENEIG #: " << bool2str(NEIGHBOR_LIST.USE) << endl;
 				
-			if (CONTENTS.size(i+1) == 2)
+			if (CONTENTS.size(i+1) == 2 && NEIGHBOR_LIST.USE )
 			{
 				if (CONTENTS(i+1,1) == "SMALL")
 				{
 					NEIGHBOR_LIST.UPDATE_WITH_BIG = false;
+					if ( RANK == 0 )
+						 cout << "		Will update the neighbor list through the \"small\" method " << endl;
 				}
 				else
 				{
 					EXIT_MSG("ERROR: Unrecognized # USENEIG # option: ", CONTENTS(i+1,1));
 				}
-				
-				cout << "		Will force update through the \"small\" method " << endl;
 			}
-					
 		
 			break;
 		}
 	}	
 }
+
 void INPUT::PARSE_CONTROLS_PRMFILE(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
@@ -1540,6 +1581,34 @@ void INPUT::PARSE_CONTROLS_PRMFILE(JOB_CONTROL & CONTROLS)
 		}
 	}	
 }
+
+
+void INPUT::PARSE_CONTROLS_SERIAL_CHIMES(JOB_CONTROL & CONTROLS)
+{
+	int N_CONTENTS = CONTENTS.size();
+
+	int i = 0 ;
+	for ( ; i<N_CONTENTS; i++)
+	{
+		if (found_input_keyword("SERIAL_CHIMES", CONTENTS(i)))		
+		{
+			 CONTROLS.SERIAL_CHIMES = convert_bool(CONTENTS(i+1,0),i+1);
+
+			 if ( RANK == 0 )
+			 {
+				 cout << "	# SERIAL_CHIMES #: " ;
+				 if ( CONTROLS.SERIAL_CHIMES ) {
+					 cout << "TRUE" << endl ;
+				 } else {
+					 cout << "FALSE" << endl ;
+				 }
+			 }
+			 break ;					 ;
+		}
+	}
+
+}
+
 void INPUT::PARSE_CONTROLS_CRDFILE(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
@@ -1703,8 +1772,8 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 
 					if(CONTROLS.ENSEMBLE == "NPT-MTK")
 					{
-						if(CONTENTS.size(i+1) == 2)
-							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,1),i+1);
+						if(CONTENTS.size(i+1) == 4)
+							CONTROLS.FREQ_UPDATE_BAROSTAT = convert_double(CONTENTS(i+1,3),i+1);
 						else
 							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;	
 							
@@ -1712,7 +1781,10 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 							cout << "	                   ... and barostat will use  " << CONTROLS.FREQ_UPDATE_BAROSTAT << "." << endl;	
 					}
 				}
-				else if (CONTROLS.ENSEMBLE == "NVT-SCALE" || CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NVT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
+				else if (   CONTROLS.ENSEMBLE == "NVT-SCALE"
+								 || CONTROLS.ENSEMBLE == "NPT-BEREND"
+								 || CONTROLS.ENSEMBLE == "NVT-BEREND"
+								 || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO")
 				{
 					CONTROLS.USE_HOOVER_THRMOSTAT   = false;
 					CONTROLS.FREQ_UPDATE_THERMOSTAT = convert_double(CONTENTS(i+1,1),i+1);
@@ -1725,8 +1797,17 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 							CONTROLS.FREQ_UPDATE_BAROSTAT = 1000;		
 					}
 		
-					if (RANK==0)
-						cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << "... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." << endl;	
+					if (RANK==0 && CONTROLS.ENSEMBLE == "NVT-SCALE" ) 
+						 cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << "... Velocities will be scaled every " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " MD steps." ;
+					else if ( RANK == 0 ) 
+						 cout << "	# CONSRNT #: " << CONTROLS.ENSEMBLE << " Velocity scaling time = " << CONTROLS.FREQ_UPDATE_THERMOSTAT << " fs " ;
+
+					if ( RANK == 0 && (CONTROLS.ENSEMBLE == "NPT-BEREND" || CONTROLS.ENSEMBLE == "NPT-BEREND-ANISO") ) 
+						 cout << " Volume scaling time = " << CONTROLS.FREQ_UPDATE_BAROSTAT << " fs " ;
+
+					if ( RANK == 0 ) 
+						 cout << endl ;
+								
 				}
 				else
 				{
@@ -1821,7 +1902,7 @@ void INPUT::PARSE_CONTROLS_ATMENER(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
 	
-	CONTROLS.INCLUDE_ATOM_OFFSETS = false;
+	CONTROLS.INCLUDE_ATOM_OFFSETS = true ;
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
@@ -1833,7 +1914,7 @@ void INPUT::PARSE_CONTROLS_ATMENER(JOB_CONTROL & CONTROLS)
 	}
 	
 	if (RANK==0)
-		cout << "	# ATMENER #: " << CONTROLS.INCLUDE_ATOM_OFFSETS << endl;
+		cout << "	# ATMENER #: " << bool2str(CONTROLS.INCLUDE_ATOM_OFFSETS) << endl;
 	
 	if ( CONTROLS.INCLUDE_ATOM_OFFSETS && RANK==0)
 		cout << "		... All reported energies include single atom contributions if available" << endl;
@@ -1905,13 +1986,25 @@ void INPUT::PARSE_CONTROLS_PRNTFRC(JOB_CONTROL & CONTROLS)
 		{
 			CONTROLS.PRINT_FORCE = convert_bool(CONTENTS(i+1,0),i+1);
 			
-			if(CONTENTS.size(i+1) == 2 )
+			if(CONTENTS.size(i+1) >= 2 )
 			{
 				if(CONTENTS(i+1,1) == "FRQDFTB")
+				{
 					CONTROLS.FREQ_FORCE = CONTROLS.FREQ_DFTB_GEN;
+				}
+				else if ( CONTENTS(i+1,1) == "ENERGY_STRESS" ) {
+					CONTROLS.PRINT_ENERGY_STRESS = true ;
+					if ( CONTENTS.size(i+1) == 3 ) 
+						CONTROLS.FREQ_FORCE = convert_int(CONTENTS(i+1,2),i+1);
+				} 
 				else
+				{
 					CONTROLS.FREQ_FORCE = convert_int(CONTENTS(i+1,1),i+1);
-			}
+				}
+			} else {
+				 // Default: print every step if PRNTFRC requested.
+				 CONTROLS.FREQ_FORCE = 1 ;
+			} 
 		
 			break;
 		}
@@ -1923,7 +2016,9 @@ void INPUT::PARSE_CONTROLS_PRNTFRC(JOB_CONTROL & CONTROLS)
 		if(CONTROLS.PRINT_FORCE)
 		{
 			cout << "		... and will be printed every " << CONTROLS.FREQ_FORCE << " frames."<< endl;	
-		
+			if ( CONTROLS.PRINT_ENERGY_STRESS )
+				cout << "       ... with energy/stress header before forces" << endl ;
+			
 			if (CONTROLS.DELTA_T_FS > 0 && CONTROLS.N_MD_STEPS > 0)
 			{
 				cout << "		... printing every " << CONTROLS.FREQ_FORCE*CONTROLS.DELTA_T_FS << " fs, " << endl;

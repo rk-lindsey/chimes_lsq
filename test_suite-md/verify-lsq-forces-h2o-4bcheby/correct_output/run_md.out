@@ -19,8 +19,8 @@ Input file contents successfully stored.
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
 	# WRPCRDS #: false
-	# ATMENER #: 0
-		... All reported energies *DO NOT* include single atom contributions
+	# ATMENER #: true
+		... All reported energies include single atom contributions if available
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
 		... printing       0 frames. 
@@ -139,7 +139,7 @@ Attempting to read pairtype...
      Pair charges modified for exact neutrality:
        OO 123.389818417
        HH 30.847453078
-       OH -61.694907682
+       OH -61.694907683
 Atom properties:
 		0     O , q (e): -0.610, mass (amu):  15.9994
 		1     H , q (e):  0.305, mass (amu):   1.0079

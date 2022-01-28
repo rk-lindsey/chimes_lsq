@@ -11,7 +11,7 @@
 
 using namespace std;
 
-NEIGHBORS::NEIGHBORS()		// Constructor 
+NEIGHBORS::NEIGHBORS()
 {
 	RCUT_PADDING  =  0.3;
 	DISPLACEMENT  =  0.0;
@@ -22,6 +22,7 @@ NEIGHBORS::NEIGHBORS()		// Constructor
 	SECOND_CALL   = true;
 	USE           = false;
 	MAX_VEL       =  0.0;
+	MAX_COORD_STEP = 0.0 ;
 	CURR_VEL      =  0.0;
 	
 	// New from Larry
@@ -31,29 +32,41 @@ NEIGHBORS::NEIGHBORS()		// Constructor
 	
 	// New for triclinic support
 	UPDATE_WITH_BIG = true;
+
+	PERM_SCALE.resize(MAX_BODIEDNESS+1) ;
+	for ( int j = 0 ; j < MAX_BODIEDNESS + 1 ; j++ ) {
+		 PERM_SCALE[j] = 1.0 ;
+	}
 	
 }
 NEIGHBORS::~NEIGHBORS(){}	// Deconstructor
 
 void NEIGHBORS::INITIALIZE(FRAME & SYSTEM)		// (overloaded) class constructor -- if no padding specified, default to 0.3
 {
-		LIST          .resize(SYSTEM.ATOMS);
-		LIST_EWALD    .resize(SYSTEM.ATOMS);
-		LIST_UNORDERED.resize(SYSTEM.ATOMS);
-		LIST_3B       .resize(SYSTEM.ALL_ATOMS);
-		LIST_4B       .resize(SYSTEM.ALL_ATOMS);
+	 LIST          .resize(SYSTEM.ATOMS);
+	 LIST_EWALD    .resize(SYSTEM.ATOMS);
+	 LIST_UNORDERED.resize(SYSTEM.ATOMS);
+	 LIST_3B       .resize(SYSTEM.ALL_ATOMS);
+	 LIST_4B       .resize(SYSTEM.ALL_ATOMS);
 		
-		// UPDATE_WITH_BIG will is true by default
-		// If it is already false at this point, it is because the user requested it
-		// a small update may be requested for cell vectors that don't obey our requirements (all positive)
+	 // UPDATE_WITH_BIG is true by default
+	 // If it is already false at this point, it is because the user requested it
+	 // a small update may be requested for cell vectors that don't obey our requirements (all positive)
 
-		if ((UPDATE_WITH_BIG == true) && (SYSTEM.ALL_ATOMS < 200))
+	 double max_cutoff = MAX_ALL_CUTOFFS() ;
+	 if (   SYSTEM.BOXDIM.EXTENT_X <= max_cutoff
+					|| SYSTEM.BOXDIM.EXTENT_Y <= max_cutoff
+					|| SYSTEM.BOXDIM.EXTENT_Z <= max_cutoff ) {
+			if ( RANK == 0 ) {
+				 cout << "Warning:  system size <= cutoff.  Using explicit permutation / small system neighbor algorithm.\n" ;
+				 cout << "Warning:  many-body interactions will be substantially slower.\n" ;
+			}
 			UPDATE_WITH_BIG = false;
+	 }
 
-		
 }
 
-void NEIGHBORS::INITIALIZE_MD(FRAME & SYSTEM)		// (overloaded) class constructor -- if no padding specified, default to 0.3
+void NEIGHBORS::INITIALIZE_MD(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)		// (overloaded) class constructor -- if no padding specified, default to 0.3
 {
 	INITIALIZE(SYSTEM);
 		
@@ -71,6 +84,7 @@ void NEIGHBORS::INITIALIZE_MD(FRAME & SYSTEM)		// (overloaded) class constructor
 			if(CURR_VEL > MAX_VEL)
 				MAX_VEL = CURR_VEL;
 		}
+		MAX_COORD_STEP = MAX_VEL * CONTROLS.DELTA_T ;
 	}
 }
 
@@ -99,18 +113,43 @@ void NEIGHBORS::DO_UPDATE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	if (UPDATE_WITH_BIG && USE)
 		DO_UPDATE_BIG(SYSTEM, CONTROLS);
 	else
-		DO_UPDATE_SMALL(SYSTEM, CONTROLS);
+		 DO_UPDATE_SMALL(SYSTEM, CONTROLS);
 
 	if ( CONTROLS.USE_3B_CHEBY ) 
 	  UPDATE_3B_INTERACTION(SYSTEM, CONTROLS);
 	
 	if ( CONTROLS.USE_4B_CHEBY ) 
 	  UPDATE_4B_INTERACTION(SYSTEM, CONTROLS);
-}	
-void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)	
+}
+
+double NEIGHBORS::MAX_ALL_CUTOFFS()
+// Returns the maximum of all cutoff values
+{
+	 double val = -1.0 ;
+
+	 if ( MAX_CUTOFF > val )    val = MAX_CUTOFF ;
+	 if ( MAX_CUTOFF_3B > val ) val = MAX_CUTOFF_3B ;
+	 if ( MAX_CUTOFF_4B > val ) val = MAX_CUTOFF_4B ;
+	 if ( EWALD_CUTOFF > val )  val = EWALD_CUTOFF ;
+	 return val ;
+}
+
+void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
+// This implements the "unordered" neighbor list convention where i < j and i > j are
+// explicitly included.  This is necessary for correct evalution of interactions between
+// atom i and its self-image when the cutoff is greater than or equal to the box size
+// (small box size limit).
 {
 
 	XYZ RAB;
+
+	// Set scaling factors for permutations of unordered interactions.
+	// PERM_SCALE[n] is the scaling factor for the n-body interaction.
+	PERM_SCALE[0] = 1.0 ;
+	PERM_SCALE[1] = 1.0 ;	
+	for ( int j = 2 ; j < PERM_SCALE.size() ; j++ ) {
+		PERM_SCALE[j] = PERM_SCALE[j-1] / j ;
+	}
 	
 	if(!FIRST_CALL)	// Clear out the second dimension so we can start over again
 	{
@@ -137,20 +176,17 @@ void NEIGHBORS::DO_UPDATE_SMALL(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			if (rlen < MAX_CUTOFF + RCUT_PADDING)
 				LIST_UNORDERED[a1].push_back(a2);
 
-			if ((SYSTEM.PARENT[a2]>=a1) && (a2 > a1))
-			{
-				if(rlen < (MAX_CUTOFF + RCUT_PADDING)) 			// Select atoms in neighbor list according to parents.
-					LIST[a1].push_back(a2);	
+			if(rlen < (MAX_CUTOFF + RCUT_PADDING)) 			// Select atoms in neighbor list according to parents.
+				LIST[a1].push_back(a2);	
 
-				if (rlen < (EWALD_CUTOFF + RCUT_PADDING) )	
-					LIST_EWALD[a1].push_back(a2);	
+			if (rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
+				LIST_3B[a1].push_back(a2);
 
-				if (rlen < MAX_CUTOFF_3B + RCUT_PADDING)	
-					LIST_3B[a1].push_back(a2);
-
-				if (rlen < MAX_CUTOFF_4B + RCUT_PADDING)	
-					LIST_4B[a1].push_back(a2);
-			}
+			if (rlen < MAX_CUTOFF_4B + RCUT_PADDING)	
+				LIST_4B[a1].push_back(a2);
+			
+			if (rlen < (EWALD_CUTOFF + RCUT_PADDING) )	
+				 LIST_EWALD[a1].push_back(a2);	
 		}
 	}
 
@@ -174,6 +210,10 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		LIST_UNORDERED.resize(SYSTEM.ATOMS);	
 		LIST_3B       .resize(SYSTEM.ATOMS);
 		LIST_4B       .resize(SYSTEM.ATOMS);	
+	}
+
+	for ( int j = 0 ; j < PERM_SCALE.size() ; j++ ) {
+		 PERM_SCALE[j] = 1.0 ;
 	}
 	
 	// Find maximum distance to search for neighbors.
@@ -373,8 +413,11 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 		if( (SECOND_CALL))	// Update the cutoff padding
 		{
-			if(USE)
-				RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// should give a distance in AA
+			if(USE) {
+				// RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// should give a distance in AA
+				// RCUT_PADDING = MAX_COORD_STEP * UPDATE_FREQ ;
+				RCUT_PADDING = MAX_COORD_STEP * UPDATE_FREQ ;
+			}
 			
 			if(RANK == 0)
 				cout << "RANK: " << RANK << " RESET RCUT_PADDING TO: " << fixed << setprecision(10) << RCUT_PADDING << endl;
@@ -384,50 +427,106 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		}
 		else
 		{
-			DISPLACEMENT += MAX_VEL * CONTROLS.DELTA_T;
+			// DISPLACEMENT += MAX_VEL * CONTROLS.DELTA_T;
+			// For NPT dynamics, the time derivative of the position is not equal to the velocity,
+			// so displacements should be based on direct evaluation of position steps.
+			//
+			DISPLACEMENT += MAX_COORD_STEP ;
 
-			if(DISPLACEMENT>0.5*RCUT_PADDING)
+			//if(DISPLACEMENT>0.5*RCUT_PADDING)
+			// Use 0.49 instead of the theoretical 0.5 to avoid roundoff errors.
+			if(DISPLACEMENT>0.49*RCUT_PADDING)								
 			{
-				if (USE) 
-					RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// Update padding in case max_vel changed. (LEF).
+				if (USE) {
+					// RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// Update padding in case max_vel changed. (LEF).
+					RCUT_PADDING = MAX_COORD_STEP * UPDATE_FREQ ;
+				}
 				
 				DO_UPDATE(SYSTEM, CONTROLS);
 				
-				DISPLACEMENT = 0;
-				MAX_VEL      = 0;
+				DISPLACEMENT = 0.0 ;
+				MAX_VEL      = 0.0 ;
+				MAX_COORD_STEP = 0.0 ;
 
+#if VERBOSITY >= 1				
 				if(RANK == 0)
-					cout << "RANK: " << RANK << " UPDATING ON STEP: " << CONTROLS.STEP << ", WITH PADDING: " << fixed << setprecision(3) << RCUT_PADDING <<  endl;
-				
+					cout << " Updating neighbor list on step: " << CONTROLS.STEP << ", with padding: " << fixed << setprecision(3) << RCUT_PADDING <<  endl;
+#endif
 			}
 		}
 	}
 }
-void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
-{
-	if(FIRST_CALL || SECOND_CALL)
-		UPDATE_LIST(SYSTEM, CONTROLS);
-	else
-	{
-		DISPLACEMENT += MAX_VEL * CONTROLS.DELTA_T;
+
+// void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, bool FORCE)
+// {
+// 	if(FIRST_CALL || SECOND_CALL)
+// 		UPDATE_LIST(SYSTEM, CONTROLS);
+// 	else
+// 	{
+// 		DISPLACEMENT += MAX_VEL * CONTROLS.DELTA_T;
 		
-		DO_UPDATE(SYSTEM, CONTROLS);
+// 		DO_UPDATE(SYSTEM, CONTROLS);
 	
-		if(RANK == 0)
-			cout << "RANK: " << RANK << " FORCING UPDATING ON STEP: " << CONTROLS.STEP << ", WITH PADDING: " << fixed << setprecision(3) << RCUT_PADDING <<  endl;
-	}
-}
+// 		if(RANK == 0)
+// 			cout << "RANK: " << RANK << " FORCING UPDATING ON STEP: " << CONTROLS.STEP << ", WITH PADDING: " << fixed << setprecision(3) << RCUT_PADDING <<  endl;
+// 	}
+// }
 
 
 
-CONSTRAINT::CONSTRAINT(){}	// Constructor
+CONSTRAINT::CONSTRAINT()
+{
+	BEREND_MU = 1.0 ;
+
+	THERM_POSIT_T = 0.0 ;
+	THERM_VELOC_T = 0.0 ;
+	THERM_FORCE_T = 0.0 ;
+	THERM_INERT_Q = 1.0 ;
+	THERM_POSIT_0 = 0.0 ;
+	THERM_FORCE_0 = 0.0 ;
+	THERM_VELOC_0 = 0.0 ;
+			
+	BAROS_POSIT_T = 0.0 ;
+	BAROS_VELOC_T = 0.0 ;
+	BAROS_FORCE_T = 0.0 ;
+	BAROS_INERT_W = 0.0 ;
+	BAROS_POSIT_0 = 0.0 ;
+	BAROS_FORCE_0 = 0.0 ;
+	BAROS_VELOC_0 = 0.0 ;	
+		
+	 //Barostat variables
+
+	BAROS_SCALE = 1.0 ;
+	VOLUME_0 = 1.0 ;
+	VOLUME_T = 1.0 ;
+		
+	 // Berendsen barostat variables
+		
+	BEREND_MU = 1.0 ;		
+	BEREND_ANI_MU.X = 0.0 ;
+	BEREND_ANI_MU.Y = 0.0 ;
+	BEREND_ANI_MU.Z = 0.0 ;			
+	BEREND_KP = 1.0 ;	
+		
+	BEREND_ETA = 1.0 ;	
+	BEREND_TAU = 1.0 ;	
+		
+	 // Thermostat variables
+
+	TIME = 0.0 ;		
+	TIME_BARO = 0.0 ;
+	N_DOF = 0 ;		
+	VSCALEH = 1.0 ;		
+	KIN_ENER = 1.0 ;	
+
+}	// Constructor
 CONSTRAINT::~CONSTRAINT(){}	// Deconstructor
 
 void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 {
 	STYLE = IN_STYLE;
 	
-	if(IN_STYLE=="NPT-MTK")				// Attempts to use MTK Thermostat and barostat
+	if(IN_STYLE=="NPT-MTK")				
 		STYLE = IN_STYLE;
 	else if(IN_STYLE=="NPT-BEREND")			// Uses position scaling to barostat
 		STYLE = IN_STYLE;
@@ -461,6 +560,8 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	}
 
 	N_DOF = 3*ATOMS - 3;
+
+
 	THERM_INERT_Q  = N_DOF * Kb * CONTROLS.TEMPERATURE * TIME * TIME / Tfs / Tfs; // Need to convert from fs to sim units ... omega (Frequency) is inverse time
 	BAROS_INERT_W = (N_DOF + 3.0) * Kb * CONTROLS.TEMPERATURE * (TIME_BARO) * (TIME_BARO)/ Tfs / Tfs;
 	
@@ -469,7 +570,7 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	
 	THERM_POSIT_T = 0;
 	THERM_VELOC_T = 0;
-	THERM_INERT_T = 0;
+	THERM_FORCE_T = 0;
 	
 	BAROS_POSIT_T = 0;
 	BAROS_VELOC_T = 0;
@@ -477,7 +578,7 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	
 	THERM_POSIT_0 = 0;
 	THERM_VELOC_0 = 0;
-	THERM_INERT_0 = 0;
+	THERM_FORCE_0 = 0;
 	
 	BAROS_POSIT_0 = 0;
 	BAROS_VELOC_0 = 0;
@@ -490,7 +591,27 @@ void CONSTRAINT::INITIALIZE(string IN_STYLE, JOB_CONTROL & CONTROLS, int ATOMS)
 	
 }
 
+XYZ CONSTRAINT::CENTER_OF_MASS(const FRAME &SYSTEM)
+// Returns the center of mass of the system.
+{
+	XYZ com{0.0,0.0,0.0} ;
 
+	double total_mass = 0.0 ;
+	for ( int a = 0 ; a < SYSTEM.ATOMS ; a++ ) {
+		com.X += SYSTEM.COORDS[a].X * SYSTEM.MASS[a] ;
+		com.Y += SYSTEM.COORDS[a].Y * SYSTEM.MASS[a] ;
+		com.Z += SYSTEM.COORDS[a].Z * SYSTEM.MASS[a] ;
+
+		total_mass += SYSTEM.MASS[a] ;
+	}
+	com.X /= total_mass ;
+	com.Y /= total_mass ;
+	com.Z /= total_mass ;
+
+	return(com) ;
+}
+
+		
 void CONSTRAINT::INIT_VEL (FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
 	// Use box Muller to initialize velocities
@@ -669,10 +790,10 @@ void CONSTRAINT::WRITE(ofstream &output)
 {
 	output << THERM_POSIT_T << endl;
 	output << THERM_VELOC_T << endl;
-	output << THERM_INERT_T << endl;
+	output << THERM_FORCE_T << endl;
 	output << THERM_INERT_Q << endl;
 	output << THERM_POSIT_0 << endl;
-	output << THERM_INERT_0 << endl;
+	output << THERM_FORCE_0 << endl;
 	output << THERM_VELOC_0 << endl;
 
 	output << BAROS_POSIT_T << endl;
@@ -709,10 +830,10 @@ void CONSTRAINT::READ(ifstream &input)
 {
 	input >> THERM_POSIT_T;
 	input >> THERM_VELOC_T;
-	input >> THERM_INERT_T;
+	input >> THERM_FORCE_T;
 	input >> THERM_INERT_Q;
 	input >> THERM_POSIT_0;
-	input >> THERM_INERT_0;
+	input >> THERM_FORCE_0;
 	input >> THERM_VELOC_0;
 
 	input >> BAROS_POSIT_T;
@@ -744,11 +865,11 @@ void CONSTRAINT::READ(ifstream &input)
 }
 
 
-void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
+void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS &NEIGHBORS)
 {
 	THERM_POSIT_0 = THERM_POSIT_T;
 	THERM_VELOC_0 = THERM_VELOC_T;
-	THERM_INERT_0 = THERM_INERT_T;
+	THERM_FORCE_0 = THERM_FORCE_T;
 	
 	BAROS_POSIT_0 = BAROS_POSIT_T;
 	BAROS_VELOC_0 = BAROS_VELOC_T;
@@ -762,12 +883,18 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 	for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 	{
+	
+		SYSTEM.COORDS0[a1].X = SYSTEM.COORDS[a1].X ;
+		SYSTEM.COORDS0[a1].Y = SYSTEM.COORDS[a1].Y ;
+		SYSTEM.COORDS0[a1].Z = SYSTEM.COORDS[a1].Z ;		
+
 		if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
 			continue;
 		
 		SYSTEM.COORDS[a1].X += SYSTEM.VELOCITY[a1].X * CONTROLS.DELTA_T + 0.5*SYSTEM.ACCEL[a1].X * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
 		SYSTEM.COORDS[a1].Y += SYSTEM.VELOCITY[a1].Y * CONTROLS.DELTA_T + 0.5*SYSTEM.ACCEL[a1].Y * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
 		SYSTEM.COORDS[a1].Z += SYSTEM.VELOCITY[a1].Z * CONTROLS.DELTA_T + 0.5*SYSTEM.ACCEL[a1].Z * CONTROLS.DELTA_T * CONTROLS.DELTA_T;
+
 	}
 
 	///////////////////////////////////////////////
@@ -778,14 +905,20 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	{
 		
 		VOLUME_0 = SYSTEM.BOXDIM.UPDATE_VOLUME();
-		BEREND_MU = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE)/GPa,1.0/3.0);
+		KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
 
-		if(BEREND_MU < 0)
+		// Use PRESSURE_XYZ + 2 KIN_ENER / (3V) so that kinetic energy contribution to pressure is updated.
+		double P = SYSTEM.PRESSURE_XYZ + 2.0 * KIN_ENER / (3.0 * VOLUME_0) ;
+
+		double mu_fac = 1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE/GPa-P) ;
+		if( mu_fac < 0.0 )
 		{
-			cout << "ERROR: Negative Berendsen scaling factor computed. Increase BAROSCALE." << endl;
-			cout << SYSTEM.PRESSURE << " " << CONTROLS.PRESSURE << " " << BEREND_MU << endl;
+			cout << "ERROR: Negative Berendsen scaling factor computed. Increase barostat time or decrease time step." << endl;
+			cout << SYSTEM.PRESSURE << " " << CONTROLS.PRESSURE << " " << mu_fac << endl;
 			exit_run(0);
 		}
+		BEREND_MU = pow(mu_fac,1.0/3.0);
+
 	
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)	
 		{	
@@ -817,11 +950,27 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	if(STYLE=="NPT-BEREND-ANISO")
 	{
 		VOLUME_0 = SYSTEM.BOXDIM.UPDATE_VOLUME();
-		
-		BEREND_ANI_MU.X = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS_ALL[0].X)/GPa,1.0/3.0);
-		BEREND_ANI_MU.Y = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS_ALL[1].Y)/GPa,1.0/3.0);
-		BEREND_ANI_MU.Z = pow(1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE-SYSTEM.PRESSURE_TENSORS_ALL[2].Z)/GPa,1.0/3.0);
-		
+		KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
+
+		XYZ pdiag ;
+		pdiag.X = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X + 2.0 / 3.0 * KIN_ENER / VOLUME_0 ;
+		pdiag.Y = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y + 2.0 / 3.0 * KIN_ENER / VOLUME_0 ;
+		pdiag.Z = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z + 2.0 / 3.0 * KIN_ENER / VOLUME_0 ;
+
+		XYZ mu_fac ;
+
+		mu_fac.X = 1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE/GPa-pdiag.X) ;
+		mu_fac.Y = 1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE/GPa-pdiag.Y) ;
+		mu_fac.Z = 1.0 - CONTROLS.DELTA_T/BEREND_KP*(CONTROLS.PRESSURE/GPa-pdiag.Z) ;
+
+		if ( mu_fac.X < 0.0 || mu_fac.Y < 0.0 || mu_fac.Z < 0.0 ) 
+		{
+			EXIT_MSG("ERROR: Negative Berendsen scaling factor computed. Increase barostat time or decrease time step.") ;
+		}
+			
+		BEREND_ANI_MU.X = pow(mu_fac.X,1.0/3.0);
+		BEREND_ANI_MU.Y = pow(mu_fac.Y,1.0/3.0);
+		BEREND_ANI_MU.Z = pow(mu_fac.Z,1.0/3.0);
 	
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)	
 		{	
@@ -865,23 +1014,29 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		
 		// Update thermostat position
 
-		THERM_POSIT_T = THERM_POSIT_0 + THERM_VELOC_0 * CONTROLS.DELTA_T + 0.5 * CONTROLS.DELTA_T * CONTROLS.DELTA_T * THERM_INERT_0;
+		THERM_POSIT_T = THERM_POSIT_0 + THERM_VELOC_0 * CONTROLS.DELTA_T + 0.5 * CONTROLS.DELTA_T * CONTROLS.DELTA_T * THERM_FORCE_0;
 	}
 
 	///////////////////////////////////////////////
 	// Do MTTK barostatting part - NPT-MTK
 	///////////////////////////////////////////////
 	
-	if(STYLE=="NPT-MTK") //  HOOVER BAROSTAT: Not working properly yet!
+	if(STYLE=="NPT-MTK") 
 	{
 		// Update barostat position, compute scaling
 
-		BAROS_POSIT_T = BAROS_POSIT_0 + BAROS_VELOC_0*CONTROLS.DELTA_T + 0.5*CONTROLS.DELTA_T*CONTROLS.DELTA_T*BAROS_FORCE_0/BAROS_INERT_W  - 0.5*CONTROLS.DELTA_T*CONTROLS.DELTA_T*BAROS_VELOC_0*THERM_VELOC_0;
+		BAROS_POSIT_T = BAROS_POSIT_0 + BAROS_VELOC_0*CONTROLS.DELTA_T
+			+ 0.5*CONTROLS.DELTA_T*CONTROLS.DELTA_T*BAROS_FORCE_0/BAROS_INERT_W
+			- 0.5*CONTROLS.DELTA_T*CONTROLS.DELTA_T*BAROS_VELOC_0*THERM_VELOC_0;
+		
 		BAROS_SCALE   = exp(BAROS_POSIT_T - BAROS_POSIT_0);
+
+		XYZ com = CENTER_OF_MASS(SYSTEM) ;
 
 		for(int a1=0;a1<SYSTEM.ATOMS;a1++)	
 		{	
-			if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
+			if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))
+      // Don't account for frozen atoms
 			{
 				// Atom freezing doesn't work for a barostat!
 				cout << "ERROR: Atoms cannot be frozen in an NPT ensemble." << endl;
@@ -892,10 +1047,10 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			SYSTEM.COORDS[a1].Y -= 0.5 * CONTROLS.DELTA_T * CONTROLS.DELTA_T * (2.0 + 3.0/(N_DOF))*BAROS_VELOC_0 * SYSTEM.VELOCITY[a1].Y;
 			SYSTEM.COORDS[a1].Z -= 0.5 * CONTROLS.DELTA_T * CONTROLS.DELTA_T * (2.0 + 3.0/(N_DOF))*BAROS_VELOC_0 * SYSTEM.VELOCITY[a1].Z;	
 
-			
-			SYSTEM.COORDS[a1].X *= BAROS_SCALE;	
-			SYSTEM.COORDS[a1].Y *= BAROS_SCALE;
-			SYSTEM.COORDS[a1].Z *= BAROS_SCALE;				
+			// AVOID MOTION OF THE CENTER OF MASS DUE TO BAROSTAT SCALING OF BOX SIZE.
+			SYSTEM.COORDS[a1].X = BAROS_SCALE*(SYSTEM.COORDS[a1].X - com.X) + com.X ;	
+			SYSTEM.COORDS[a1].Y = BAROS_SCALE*(SYSTEM.COORDS[a1].Y - com.Y) + com.Y ;	
+			SYSTEM.COORDS[a1].Z = BAROS_SCALE*(SYSTEM.COORDS[a1].Z - com.Z) + com.Z ;	;				
 		}
 	
 		SYSTEM.BOXDIM.CELL_AX *= BAROS_SCALE;
@@ -904,17 +1059,29 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	
 		SYSTEM.BOXDIM.UPDATE_CELL();
 
-		VOLUME_T = SYSTEM.BOXDIM.UPDATE_VOLUME();
+		VOLUME_T = SYSTEM.BOXDIM.VOL ;
 	}
 	
+	NEIGHBORS.MAX_COORD_STEP = 0.0 ;
+	for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+	{
+		double step = sqrt( (SYSTEM.COORDS0[a1].X-SYSTEM.COORDS[a1].X) *  (SYSTEM.COORDS0[a1].X-SYSTEM.COORDS[a1].X) +
+												(SYSTEM.COORDS0[a1].Y-SYSTEM.COORDS[a1].Y) *  (SYSTEM.COORDS0[a1].Y-SYSTEM.COORDS[a1].Y) +
+												(SYSTEM.COORDS0[a1].Z-SYSTEM.COORDS[a1].Z) *  (SYSTEM.COORDS0[a1].Z-SYSTEM.COORDS[a1].Z) ) ;
+
+		if ( step > NEIGHBORS.MAX_COORD_STEP ) NEIGHBORS.MAX_COORD_STEP = step ;
+
+	}
+
 	///////////////////////////////////////////////
 	// Refresh ghost atom positions
+	// Set the first NATOMS of ghost atoms to have the coordinates of the "real" coords
 	///////////////////////////////////////////////
 
-	// Set the first NATOMS of ghost atoms to have the coordinates of the "real" coords
-
 	SYSTEM.update_ghost(CONTROLS.N_LAYERS, false) ;
-		
+
+
+
 }
 
 void CONSTRAINT::UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
@@ -965,120 +1132,296 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_1(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			SYSTEM.VELOCITY_ITER[a1].Y -= 0.5 * (2.0 + 3.0/(N_DOF))*BAROS_VELOC_0 * SYSTEM.VELOCITY[a1].Y * CONTROLS.DELTA_T;
 			SYSTEM.VELOCITY_ITER[a1].Z -= 0.5 * (2.0 + 3.0/(N_DOF))*BAROS_VELOC_0 * SYSTEM.VELOCITY[a1].Z * CONTROLS.DELTA_T;
 
-			SYSTEM.VELOCITY_ITER[a1].X *= BAROS_SCALE;
-			SYSTEM.VELOCITY_ITER[a1].Y *= BAROS_SCALE;
-			SYSTEM.VELOCITY_ITER[a1].Z *= BAROS_SCALE;
+			SYSTEM.VELOCITY_ITER[a1].X *= BAROS_SCALE ;
+			SYSTEM.VELOCITY_ITER[a1].Y *= BAROS_SCALE ;
+			SYSTEM.VELOCITY_ITER[a1].Z *= BAROS_SCALE ;			
 		}
 	}	
 }
 
 void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 {
-
-	static double dV = CONTROLS.DELTA_T*VOLUME_T; //(VOLUME_T-VOLUME_0);
-	static double dP = (SYSTEM.PRESSURE - CONTROLS.PRESSURE)/GPa;
+	const double tol_iter = 1.0e-16 ;
 
 	if(STYLE=="NVE" || STYLE=="NVT-SCALE" || STYLE == "NPT-BEREND" || STYLE == "NVT-BEREND" || STYLE=="NPT-BEREND-ANISO")
-	{
-		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-		{
-			if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
-				continue;
-
-			SYSTEM.VELOCITY[a1].X = SYSTEM.VELOCITY_ITER[a1].X + 0.5*SYSTEM.ACCEL[a1].X * CONTROLS.DELTA_T;
-			SYSTEM.VELOCITY[a1].Y = SYSTEM.VELOCITY_ITER[a1].Y + 0.5*SYSTEM.ACCEL[a1].Y * CONTROLS.DELTA_T;
-			SYSTEM.VELOCITY[a1].Z = SYSTEM.VELOCITY_ITER[a1].Z + 0.5*SYSTEM.ACCEL[a1].Z * CONTROLS.DELTA_T;
-		}
-		
-		///////////////////////////////////////////////
-		// Do Berendsen thermostatting
-		///////////////////////////////////////////////
-
-		if(STYLE=="NVT-BEREND" || STYLE=="NPT-BEREND" || STYLE=="NPT-BEREND-ANISO")
 		{
 			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-			{
-				if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
-					continue;
-	
-				BEREND_ETA = pow(1.0 + CONTROLS.DELTA_T/BEREND_TAU*(CONTROLS.TEMPERATURE/SYSTEM.TEMPERATURE-1.0),0.5);
-		
-				SYSTEM.VELOCITY[a1].X *= BEREND_ETA;
-				SYSTEM.VELOCITY[a1].Y *= BEREND_ETA;
-				SYSTEM.VELOCITY[a1].Z *= BEREND_ETA;
-			}
-		}
-		
-		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-		{
-			if(NEIGHBOR_LIST.USE)
-			{
-				NEIGHBOR_LIST.CURR_VEL 
-				      = sqrt(SYSTEM.VELOCITY[a1].X*SYSTEM.VELOCITY[a1].X 
-				           + SYSTEM.VELOCITY[a1].Y*SYSTEM.VELOCITY[a1].Y 
-		      	           + SYSTEM.VELOCITY[a1].Z*SYSTEM.VELOCITY[a1].Z);
+				{
+					if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
+						continue;
 
-				if(NEIGHBOR_LIST.CURR_VEL > NEIGHBOR_LIST.MAX_VEL)
-					NEIGHBOR_LIST.MAX_VEL = NEIGHBOR_LIST.CURR_VEL;
-			}
-		}		
-	}
-	else
-	{
-		if(STYLE=="NVT-MTK")	
+					SYSTEM.VELOCITY[a1].X = SYSTEM.VELOCITY_ITER[a1].X + 0.5*SYSTEM.ACCEL[a1].X * CONTROLS.DELTA_T;
+					SYSTEM.VELOCITY[a1].Y = SYSTEM.VELOCITY_ITER[a1].Y + 0.5*SYSTEM.ACCEL[a1].Y * CONTROLS.DELTA_T;
+					SYSTEM.VELOCITY[a1].Z = SYSTEM.VELOCITY_ITER[a1].Z + 0.5*SYSTEM.ACCEL[a1].Z * CONTROLS.DELTA_T;
+				}
+		
+			///////////////////////////////////////////////
+			// Do Berendsen thermostatting
+			///////////////////////////////////////////////
+
+			if(STYLE=="NVT-BEREND" || STYLE=="NPT-BEREND" || STYLE=="NPT-BEREND-ANISO")
+				{
+					UPDATE_TEMPERATURE(SYSTEM, CONTROLS) ;
+					double eta_fac = 1.0 + CONTROLS.DELTA_T/BEREND_TAU*(CONTROLS.TEMPERATURE/SYSTEM.TEMPERATURE-1.0) ;
+					if ( eta_fac > 0.0 ) {
+						BEREND_ETA = pow(eta_fac,0.5);
+					} else {
+						EXIT_MSG("ERROR: Berend temperature scale became negative.  Decrease time step or increase Berendsen thermostat time") ;
+					}
+							
+					for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+						{
+							if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
+								continue;
+
+							SYSTEM.VELOCITY[a1].X *= BEREND_ETA;
+							SYSTEM.VELOCITY[a1].Y *= BEREND_ETA;
+							SYSTEM.VELOCITY[a1].Z *= BEREND_ETA;
+						}
+				}
+		
+			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+				{
+					if(NEIGHBOR_LIST.USE)
+						{
+							NEIGHBOR_LIST.CURR_VEL 
+								= sqrt(SYSTEM.VELOCITY[a1].X*SYSTEM.VELOCITY[a1].X 
+											 + SYSTEM.VELOCITY[a1].Y*SYSTEM.VELOCITY[a1].Y 
+											 + SYSTEM.VELOCITY[a1].Z*SYSTEM.VELOCITY[a1].Z);
+
+							if(NEIGHBOR_LIST.CURR_VEL > NEIGHBOR_LIST.MAX_VEL)
+								NEIGHBOR_LIST.MAX_VEL = NEIGHBOR_LIST.CURR_VEL;
+						}
+				}
+			return ;
+		}
+	else if( STYLE=="NVT-MTK" )	
 		{
 			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS);
-			THERM_INERT_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
-		}
-		else // NPT-MTK
-		{	
-			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS);	
+			THERM_FORCE_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
+			THERM_VELOC_T = THERM_VELOC_0 + (THERM_FORCE_0 + THERM_FORCE_T) * 0.5 * CONTROLS.DELTA_T;
 			
-			BAROS_FORCE_T = 3.0/(N_DOF) * 2.0 * KIN_ENER + dV*dP;
-			THERM_INERT_T = ( 2.0 * KIN_ENER + BAROS_INERT_W * BAROS_VELOC_T * BAROS_VELOC_T - (N_DOF+1)*(Kb * CONTROLS.TEMPERATURE) ) / (THERM_INERT_Q);
-		}
+			double vscale_last = 0.0 ;
+			double therm_veloc_last = THERM_VELOC_T ;
+			double therm_force_last = THERM_FORCE_T ;
+			int itr ;
+			int itr_max = 10 ;
+			
+			// Iterative determination of velocities... See Martyna, Tobias, Klein JCP 101, 4177(1994) Appendix D.
+			// For treatment of center of mass, see Melchiotta, Ciccotti, Holian, JCP 105, 346 (1996) and ref. therein.
+			double err ;
+			for ( itr = 0; itr < itr_max ; itr++ ) 
+				{
+					err = -1.0 ;
+					THERM_VELOC_T = THERM_VELOC_0 + (THERM_FORCE_0 + THERM_FORCE_T) * 0.5 * CONTROLS.DELTA_T;
 
-		for ( int itr = 0; itr < 10; itr++ ) // Iterative determination of velocities... See Martyna, Tobias, Klein JCP 101, 4177(1994) Appendix D.
+#if VERBOSITY >= 2 												
+					if ( RANK == 0 )
+						printf("THERM_VEL = %21.14e THERM_FORCE = %21.14e\n", THERM_VELOC_T, THERM_FORCE_T) ;
+#endif												
+					 
+					VSCALEH = 1.0 + 0.5 * CONTROLS.DELTA_T * THERM_VELOC_T;
+
+					for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+						{
+							if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
+								continue;
+				
+							SYSTEM.VELOCITY_NEW[a1].X = (SYSTEM.VELOCITY_ITER[a1].X + 0.5*SYSTEM.ACCEL[a1].X*CONTROLS.DELTA_T) / VSCALEH;
+							SYSTEM.VELOCITY_NEW[a1].Y = (SYSTEM.VELOCITY_ITER[a1].Y + 0.5*SYSTEM.ACCEL[a1].Y*CONTROLS.DELTA_T) / VSCALEH;
+							SYSTEM.VELOCITY_NEW[a1].Z = (SYSTEM.VELOCITY_ITER[a1].Z + 0.5*SYSTEM.ACCEL[a1].Z*CONTROLS.DELTA_T) / VSCALEH;
+						}
+					 
+					KIN_ENER = kinetic_energy(SYSTEM,"NEW", CONTROLS);
+					THERM_FORCE_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
+
+					if (fabs(therm_veloc_last - THERM_VELOC_T) > err ) err = fabs(therm_veloc_last - THERM_VELOC_T) ;
+					if (fabs(therm_force_last - THERM_FORCE_T) > err ) err = fabs(therm_force_last - THERM_FORCE_T) ;
+					if (fabs(vscale_last - VSCALEH) > err )            err = fabs(vscale_last - VSCALEH) ;
+					
+					//if ( err < tol_iter )
+					//break ;
+
+					vscale_last = VSCALEH ;
+					therm_force_last = THERM_FORCE_T ;
+					therm_veloc_last = THERM_VELOC_T ;
+				}
+
+			if ( err > tol_iter && RANK == 0 ) {
+				 cout << "Warning: NVT-MTK velocity iteration did not converge.\n" ;
+			}
+			// if ( itr == itr_max && RANK == 0 ) {
+			//    cout << "Warning: NVT-MTK velocity iteration did not converge.\n" ;
+			// } else if ( RANK == 0 )
+			// {
+			// 	 cout << "NVT-MTK converged in " << itr + 1 << " iterations\n" ;
+			// 	 printf("Error = %21.14e \n", fabs(VSCALEH - vscale_last) ) ;
+			// }
+
+		}
+	else if ( STYLE == "NPT-MTK" ) // NPT-MTK
 		{
-			if(STYLE=="NVT-MTK")
-			{
-				THERM_VELOC_T = THERM_VELOC_0 + (THERM_INERT_0 + THERM_INERT_T) * 0.5 * CONTROLS.DELTA_T;
-				VSCALEH = 1.0 + 0.5 * CONTROLS.DELTA_T * THERM_VELOC_T;
-			}
-			else // NPT-MTK
-			{
-				// Need to solve for barostat veloc, since defined in terms of itself
-				
-				THERM_VELOC_T = THERM_VELOC_0 + (THERM_INERT_0 + THERM_INERT_T) * 0.5 * CONTROLS.DELTA_T;
-				BAROS_VELOC_T = 0.5*CONTROLS.DELTA_T*(BAROS_VELOC_0 + BAROS_FORCE_0/BAROS_INERT_W - BAROS_VELOC_0*THERM_VELOC_0 + BAROS_FORCE_T/BAROS_INERT_W)/(1.0 + 0.5 * CONTROLS.DELTA_T * THERM_VELOC_T);
-
-				VSCALEH = 1.0 + 0.5 * CONTROLS.DELTA_T * (THERM_VELOC_T + (2.0 + 3.0/(N_DOF))*BAROS_VELOC_T);
-			}
-			
+			// Advance velocity without thermostat/barostat
 			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-			{
-				if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
-					continue;
+				{
+					if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
+						continue;
 				
-				SYSTEM.VELOCITY_NEW[a1].X = (SYSTEM.VELOCITY_ITER[a1].X + 0.5*SYSTEM.ACCEL[a1].X*CONTROLS.DELTA_T) / VSCALEH;
-				SYSTEM.VELOCITY_NEW[a1].Y = (SYSTEM.VELOCITY_ITER[a1].Y + 0.5*SYSTEM.ACCEL[a1].Y*CONTROLS.DELTA_T) / VSCALEH;
-				SYSTEM.VELOCITY_NEW[a1].Z = (SYSTEM.VELOCITY_ITER[a1].Z + 0.5*SYSTEM.ACCEL[a1].Z*CONTROLS.DELTA_T) / VSCALEH;
-			}
+					SYSTEM.VELOCITY_ITER[a1].X +=  0.5*SYSTEM.ACCEL[a1].X*CONTROLS.DELTA_T ;
+					SYSTEM.VELOCITY_ITER[a1].Y +=  0.5*SYSTEM.ACCEL[a1].Y*CONTROLS.DELTA_T ;
+					SYSTEM.VELOCITY_ITER[a1].Z +=  0.5*SYSTEM.ACCEL[a1].Z*CONTROLS.DELTA_T ;
+				}
 
-			if(STYLE=="NVT-MTK")
-			{
-				KIN_ENER = kinetic_energy(SYSTEM,"NEW", CONTROLS);
-				THERM_INERT_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
-			}
-			else // NPT-MTK
-			{
-				KIN_ENER = kinetic_energy(SYSTEM,"NEW", CONTROLS);
-				BAROS_FORCE_T = 3.0/(N_DOF) * 2.0 * KIN_ENER + dV*dP;
-				THERM_INERT_T = ( 2.0 * KIN_ENER + BAROS_INERT_W * BAROS_VELOC_T * BAROS_VELOC_T - (N_DOF+1)*(Kb * CONTROLS.TEMPERATURE) ) / (THERM_INERT_Q);
-			}
+			//
+			// Generate initial guess for iterative calculation of velocities.
+			//
+			
+			// Update thermostat/barostat.
+			KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
 
+			// Use PRESSURE_XYZ + 2 KIN_ENER / (3V) so that kinetic energy contribution to pressure is updated.
+			double dP = SYSTEM.PRESSURE_XYZ + 2.0 * KIN_ENER / (3.0 * VOLUME_T) - CONTROLS.PRESSURE/GPa;
+
+			BAROS_FORCE_T = 3.0/(N_DOF) * 2.0 * KIN_ENER + 3.0 * VOLUME_T * dP;				
+			THERM_FORCE_T = ( 2.0 * KIN_ENER + BAROS_INERT_W * BAROS_VELOC_0 * BAROS_VELOC_0
+												- (N_DOF + 1.0) * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
+			THERM_VELOC_T = THERM_VELOC_0 + (THERM_FORCE_0 + THERM_FORCE_T) * 0.5 * CONTROLS.DELTA_T;
+
+			// USE BAROS_VELOC_0 on RHS of equation for guess.  BAROS_VELOS_T is not yet evaluated.
+			BAROS_VELOC_T = BAROS_VELOC_0 + 0.5*CONTROLS.DELTA_T*(BAROS_FORCE_0/BAROS_INERT_W
+																														- BAROS_VELOC_0*THERM_VELOC_0
+																														+ BAROS_FORCE_T/BAROS_INERT_W
+																														- BAROS_VELOC_0*THERM_VELOC_T
+																														) ;
+			VSCALEH = 1.0 + 0.5 * CONTROLS.DELTA_T * (THERM_VELOC_T + (2.0 + 3.0/(N_DOF))*BAROS_VELOC_T);
+			
+			// Update velocity with thermostat/barostat
+			for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+				{
+					if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
+						continue;
+				
+					SYSTEM.VELOCITY_NEW[a1].X = SYSTEM.VELOCITY_ITER[a1].X / VSCALEH ;
+					SYSTEM.VELOCITY_NEW[a1].Y = SYSTEM.VELOCITY_ITER[a1].Y / VSCALEH ;
+					SYSTEM.VELOCITY_NEW[a1].Z = SYSTEM.VELOCITY_ITER[a1].Z / VSCALEH ;
+				}
+
+			double baros_veloc_last = BAROS_VELOC_T ;
+			double therm_veloc_last = THERM_VELOC_T ;
+			double therm_force_last = THERM_FORCE_T ;
+			double baros_force_last = BAROS_FORCE_T ;						
+
+			//  Iterative determination of velocities.
+			//  I made a conservative choice to always perform the same number of iterations, but
+			//  the iteration loop could be terminated after convergence is achieved. (LEF 6/24/21)
+			//
+			int itr_max = 10 ;
+			int itr ;
+			double err = -1.0 ;
+			
+			for ( itr = 0 ; itr < itr_max ; itr++ )
+				{
+
+
+
+					// Update atomic velocity using new thermostat/barostat/velocity
+					 // 
+					err = -1.0 ;
+					for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+						{
+							if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
+								continue;
+
+							XYZ V_OLD ;
+							V_OLD.X = SYSTEM.VELOCITY_NEW[a1].X ;
+							V_OLD.Y = SYSTEM.VELOCITY_NEW[a1].Y ;
+							V_OLD.Z = SYSTEM.VELOCITY_NEW[a1].Z ;														
+
+#if(0)
+							// COMMENTED OUT !! THIS ITERATION METHOD WAS LESS STABLE THAN SCALING BY VSCALEH.
+							// FORMALLY, I THINK THEY'RE THE SAME.  (LEF 6/24/21).
+							SYSTEM.VELOCITY_NEW[a1].X = SYSTEM.VELOCITY_ITER[a1].X
+								 - 0.5 * SYSTEM.VELOCITY_NEW[a1].X * ( (2.0 + 3.0/(N_DOF))*BAROS_VELOC_T 
+																											 + THERM_VELOC_T) * CONTROLS.DELTA_T ;
+
+							SYSTEM.VELOCITY_NEW[a1].Y = SYSTEM.VELOCITY_ITER[a1].Y
+								 - 0.5 *  SYSTEM.VELOCITY_NEW[a1].Y * ( (2.0 + 3.0/(N_DOF))*BAROS_VELOC_T
+																												+ THERM_VELOC_T) * CONTROLS.DELTA_T ;
+
+							SYSTEM.VELOCITY_NEW[a1].Z = SYSTEM.VELOCITY_ITER[a1].Z
+								 - 0.5 *  SYSTEM.VELOCITY_NEW[a1].Z * ( (2.0 + 3.0/(N_DOF))*BAROS_VELOC_T *
+																												+ THERM_VELOC_T) * CONTROLS.DELTA_T ;
+#else
+							// SCALE VELOCITIES BY VSCALEH factor, as in NVT.
+							SYSTEM.VELOCITY_NEW[a1].X = SYSTEM.VELOCITY_ITER[a1].X / VSCALEH;
+							SYSTEM.VELOCITY_NEW[a1].Y = SYSTEM.VELOCITY_ITER[a1].Y / VSCALEH;
+							SYSTEM.VELOCITY_NEW[a1].Z = SYSTEM.VELOCITY_ITER[a1].Z / VSCALEH;
+#endif
+							// Keep track of self-consistency error.
+							if ( fabs(V_OLD.X - SYSTEM.VELOCITY_NEW[a1].X) > err ) err =  fabs(V_OLD.X - SYSTEM.VELOCITY_NEW[a1].X) ;
+							if ( fabs(V_OLD.Y - SYSTEM.VELOCITY_NEW[a1].Y) > err ) err =  fabs(V_OLD.Y - SYSTEM.VELOCITY_NEW[a1].Y) ;
+							if ( fabs(V_OLD.Z - SYSTEM.VELOCITY_NEW[a1].Z) > err ) err =  fabs(V_OLD.Z - SYSTEM.VELOCITY_NEW[a1].Z) ;							
+						}
+
+					KIN_ENER = kinetic_energy(SYSTEM,"NEW", CONTROLS);
+
+					// Use PRESSURE_XYZ + 2 * KIN_ENER / (3 V) so that kinetic energy contribution to pressure is updated.
+					dP = SYSTEM.PRESSURE_XYZ + 2.0 * KIN_ENER / (3.0 * VOLUME_T) - CONTROLS.PRESSURE/GPa;
+
+					BAROS_FORCE_T = 3.0/(N_DOF) * 2.0 * KIN_ENER + 3.0 * VOLUME_T * dP;
+					THERM_FORCE_T = ( 2.0 * KIN_ENER + BAROS_INERT_W * BAROS_VELOC_T * BAROS_VELOC_T
+														- (N_DOF + 1.0) * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
+					THERM_VELOC_T = THERM_VELOC_0 + (THERM_FORCE_0 + THERM_FORCE_T) * 0.5 * CONTROLS.DELTA_T;
+					BAROS_VELOC_T = BAROS_VELOC_0 + 0.5*CONTROLS.DELTA_T*(BAROS_FORCE_0/BAROS_INERT_W
+																																- BAROS_VELOC_0*THERM_VELOC_0
+																																+ BAROS_FORCE_T/BAROS_INERT_W
+																																- BAROS_VELOC_T*THERM_VELOC_T
+																																) ;
+					VSCALEH = 1.0 + 0.5 * CONTROLS.DELTA_T * (THERM_VELOC_T + (2.0 + 3.0/(N_DOF))*BAROS_VELOC_T);					
+
+					if( fabs(baros_veloc_last - BAROS_VELOC_T) > err ) err = fabs(baros_veloc_last - BAROS_VELOC_T) ;
+					if (fabs(therm_veloc_last - THERM_VELOC_T) > err ) err =  fabs(therm_veloc_last - THERM_VELOC_T) ;
+					if (fabs(therm_force_last - THERM_FORCE_T) > err ) err = fabs(therm_force_last - THERM_FORCE_T) ;
+					if (fabs(baros_force_last - BAROS_FORCE_T) > err ) err = fabs(baros_force_last - BAROS_FORCE_T) ;
+					
+#if VERBOSITY >= 2 												
+					if ( RANK == 0 )
+					{
+						 printf("BAROS_VEL   = %21.14e THERM_VEL   = %21.14e\n", BAROS_VELOC_T, THERM_VELOC_T) ;
+						 printf("BAROS_FORCE = %21.14e THERM_FORCE = %21.14e\n", BAROS_FORCE_T, THERM_FORCE_T) ;
+					}
+#endif												
+					// if ( err < tol_iter ) 
+					// 	{
+					// 		//#if VERBOSITY >= 2						
+					// 		 if ( RANK == 0 )
+					// 		 {
+					// 				cout << "NPT-MTK converged in " << itr + 1 << " iterations\n" ;
+					// 				printf("Error = %21.14e \n", err) ;
+					// 		 }
+							
+					// 		//#endif
+					//
+					// 		 // break ;
+					// 	}
+
+					baros_veloc_last = BAROS_VELOC_T ;
+					therm_veloc_last = THERM_VELOC_T ;
+					therm_force_last = THERM_FORCE_T ;
+					baros_force_last = BAROS_FORCE_T ;										
+
+				}
+
+			if ( err > tol_iter && RANK == 0 ) {
+				 cout << "Warning: NPT-MTK iteration did not converge\n" ;
+			}
 		}
-		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+	else
+		{
+			EXIT_MSG("Error: an unknown constraint style") ;
+		}
+	
+	for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 		{
 			if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))	// Don't account for frozen atoms
 				continue;
@@ -1088,17 +1431,16 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 			SYSTEM.VELOCITY[a1].Z = SYSTEM.VELOCITY_NEW[a1].Z;
 			
 			if(NEIGHBOR_LIST.USE)
-			{
-				NEIGHBOR_LIST.CURR_VEL 
-				      = sqrt(SYSTEM.VELOCITY[a1].X*SYSTEM.VELOCITY[a1].X 
+				{
+					NEIGHBOR_LIST.CURR_VEL 
+						= sqrt(SYSTEM.VELOCITY[a1].X*SYSTEM.VELOCITY[a1].X 
 				           + SYSTEM.VELOCITY[a1].Y*SYSTEM.VELOCITY[a1].Y 
-		      	           + SYSTEM.VELOCITY[a1].Z*SYSTEM.VELOCITY[a1].Z);
+									 + SYSTEM.VELOCITY[a1].Z*SYSTEM.VELOCITY[a1].Z);
 
-				if(NEIGHBOR_LIST.CURR_VEL > NEIGHBOR_LIST.MAX_VEL)
-					NEIGHBOR_LIST.MAX_VEL = NEIGHBOR_LIST.CURR_VEL;
-			}
+					if(NEIGHBOR_LIST.CURR_VEL > NEIGHBOR_LIST.MAX_VEL)
+						NEIGHBOR_LIST.MAX_VEL = NEIGHBOR_LIST.CURR_VEL;
+				}
 		}
-	}
 }
 
 void CONSTRAINT::SCALE_VELOCITIES(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
@@ -1127,7 +1469,7 @@ void CONSTRAINT::SCALE_VELOCITIES(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 void CONSTRAINT::UPDATE_TEMPERATURE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
-	static double Ktot;
+	double Ktot;
 	Ktot = kinetic_energy(SYSTEM, CONTROLS);	//calculate kinetic energy for scaling:
 
 	SYSTEM.TEMPERATURE = 2.0 * Ktot / (N_DOF * Kb);
@@ -1136,29 +1478,33 @@ void CONSTRAINT::UPDATE_TEMPERATURE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 double CONSTRAINT::CONSERVED_QUANT (FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
-	static double THERM_KE, THERM_PE, BAROS_KE, BAROS_PE;
-	static double TEMP_VOL;
+	 double THERM_KE, THERM_PE, BAROS_KE, BAROS_PE;
+	 double TEMP_VOL;
 	
-	if(STYLE=="NVT-MTK")
-	{
-		THERM_KE = 0.5 * THERM_VELOC_T * THERM_VELOC_T * THERM_INERT_Q;
-		THERM_PE = N_DOF * Kb * CONTROLS.TEMPERATURE * THERM_POSIT_T;
+	 if(STYLE=="NVT-MTK")
+	 {
+			THERM_KE = 0.5 * THERM_VELOC_T * THERM_VELOC_T * THERM_INERT_Q;
+			THERM_PE = N_DOF * Kb * CONTROLS.TEMPERATURE * THERM_POSIT_T;
 
-		return  THERM_KE + THERM_PE;
-	}
-	else // NPT-MTK
-	{
-		TEMP_VOL = SYSTEM.BOXDIM.VOL;
+			return  THERM_KE + THERM_PE;
+	 }
+	 else if ( STYLE == "NPT-MTK" ) // NPT-MTK
+	 {
+			TEMP_VOL = SYSTEM.BOXDIM.VOL;
 	
-		THERM_KE = 0.5 * THERM_VELOC_T * THERM_VELOC_T * THERM_INERT_Q;
-		BAROS_KE = 0.5 * BAROS_VELOC_T * BAROS_VELOC_T * BAROS_INERT_W;
-	
-		THERM_PE = N_DOF * Kb * CONTROLS.TEMPERATURE * THERM_POSIT_T;
-		BAROS_PE = CONTROLS.PRESSURE/GPa*TEMP_VOL;
-		
-		return THERM_KE + THERM_PE + BAROS_KE + BAROS_PE;
-	}
+			THERM_KE = 0.5 * THERM_VELOC_T * THERM_VELOC_T * THERM_INERT_Q;
+			BAROS_KE = 0.5 * BAROS_VELOC_T * BAROS_VELOC_T * BAROS_INERT_W;
 
+			THERM_PE = (N_DOF + 1) * Kb * CONTROLS.TEMPERATURE * THERM_POSIT_T;
+			BAROS_PE = CONTROLS.PRESSURE/GPa*TEMP_VOL;
+
+			return THERM_KE + THERM_PE + BAROS_KE + BAROS_PE;
+	 } else {
+			EXIT_MSG("ERROR: a conserved quantity was requested for an unrecognized constraint style") ;
+	 }
+
+	 // Fix compiler warning.  Code not reached.
+	 return 0.0 ;
 	
 }
 
@@ -1170,6 +1516,7 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 	INTERACTION_3B inter;
 
 	LIST_3B_INT.clear();
+
 	for ( int i = 0; i < SYSTEM.ATOMS; i++ ) 
 	{
 		int ai = i;
@@ -1180,9 +1527,15 @@ void NEIGHBORS::UPDATE_3B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 			{
 				int ak = LIST_3B[i][k];
 
-				if ( aj == ak || SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] ) 
+				if ( aj == ak )
+				{
 					continue;
-
+				}
+				else if ( PERM_SCALE[3] == 1.0 && SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] )
+				{
+					 continue ;
+				}
+				
 				// The j-k list is possibly outside of the cutoff, so test it here.
 				double rlen = get_dist(SYSTEM, RAB, aj, ak);
 	
@@ -1228,7 +1581,7 @@ void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 			  if (aj == ak )
 				 continue;
 
-			  if( SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] )
+			  if( PERM_SCALE[4] == 1.0 && SYSTEM.PARENT[aj] > SYSTEM.PARENT[ak] )
 				 continue;
 
 			  if( get_dist(SYSTEM, RAB, aj, ak) >  MAX_CUTOFF_4B + RCUT_PADDING)
@@ -1243,7 +1596,7 @@ void NEIGHBORS::UPDATE_4B_INTERACTION(FRAME & SYSTEM, JOB_CONTROL &CONTROLS)
 					if (aj == al || ak == al)
 						continue;
 					
-					if( SYSTEM.PARENT[ak] > SYSTEM.PARENT[al] || SYSTEM.PARENT[aj] > SYSTEM.PARENT[al] )
+					if( PERM_SCALE[4] == 1.0 && (SYSTEM.PARENT[ak] > SYSTEM.PARENT[al] || SYSTEM.PARENT[aj] > SYSTEM.PARENT[al]) )
 						continue;
 					
 					// We know ij, ik, il, and jk distances are within the allowed cutoffs, but we still need to check jl, and kl
@@ -1277,6 +1630,8 @@ void THERMO_AVG::WRITE(ofstream &fout)
 	fout << STRESS_TENSOR_SUM.X << endl;
 	fout << STRESS_TENSOR_SUM.Y << endl;
 	fout << STRESS_TENSOR_SUM.Z << endl;
+	fout << VOLUME_SUM << endl ;
+	fout << PV_SUM << endl ;
 }
 
 
@@ -1288,6 +1643,8 @@ void THERMO_AVG::READ(ifstream &fin)
 	fin >> STRESS_TENSOR_SUM.X ;
 	fin >> STRESS_TENSOR_SUM.Y ;
 	fin >> STRESS_TENSOR_SUM.Z ;
+	fin >> VOLUME_SUM ;
+	fin >> PV_SUM ;
 }
 
 
@@ -1295,7 +1652,8 @@ void THERMO_AVG::READ(ifstream &fin)
 BOX::BOX()
 {
 	IS_ORTHO = true;
-
+	IS_VARIABLE = false ;
+	
 	CELL_AX = 0.0;
 	CELL_AY = 0.0;
 	CELL_AZ = 0.0;
