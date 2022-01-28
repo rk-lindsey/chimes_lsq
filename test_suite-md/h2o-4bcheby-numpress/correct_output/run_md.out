@@ -18,8 +18,8 @@ Input file contents successfully stored.
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: NUMERICAL
 	# WRPCRDS #: false
-	# ATMENER #: 0
-		... All reported energies *DO NOT* include single atom contributions
+	# ATMENER #: true
+		... All reported energies include single atom contributions if available
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
 		... printing       0 frames. 

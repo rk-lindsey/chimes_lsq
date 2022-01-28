@@ -1,0 +1,26 @@
+USECOUL: true
+FITCOUL: true
+USE3BCH: false
+USE4BCH: false
+
+PAIRTYP: CHEBYSHEV  8 0 0 -1 1
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		-		15.9994
+1		H		+		1.0079
+
+ATOM PAIRS: 3
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0.6             6               MORSE           1.25            
+	1               H               H               0.6             6               MORSE           1.25            
+	2               O               H               0.6             6               MORSE           1.25            
+
+FCUT TYPE: CUBIC
+
+ATOM PAIR TRIPLETS: 0
+
+ATOM PAIR QUADRUPLETS: 0
+

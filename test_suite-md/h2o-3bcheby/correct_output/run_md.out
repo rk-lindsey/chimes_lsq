@@ -18,8 +18,8 @@ Input file contents successfully stored.
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: ANALYTICAL
 	# WRPCRDS #: false
-	# ATMENER #: 0
-		... All reported energies *DO NOT* include single atom contributions
+	# ATMENER #: true
+		... All reported energies include single atom contributions if available
 	# FRQTRAJ #: 20
 		... printing every 2.5 fs, 
 		... printing       50 frames. 
@@ -327,230 +327,234 @@ Ewald parameters:
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
       10      1.25       3.8811924       1.0761929       4.9573853          1315.9     39.91817598      4.9428579
-Number of 3-body interactions = 198060
-RANK: 0 UPDATING ON STEP: 16, WITH PADDING: 0.379
+Number of 3-body interactions = 198376
+ Updating neighbor list on step: 16, with padding: 0.380
       20      2.50       3.8029184       1.2092767       5.0121951          1289.4     40.32066051      4.9430936
       30      3.75       3.9701659       1.1398858       5.1100517          1346.1     38.36607927      4.9428861
 Number of 3-body interactions = 208712
-RANK: 0 UPDATING ON STEP: 30, WITH PADDING: 0.426
+ Updating neighbor list on step: 30, with padding: 0.426
       40      5.00       4.1315373       1.1228415       5.2543788          1400.8     35.37515915      4.9429798
-Number of 3-body interactions = 207389
-RANK: 0 UPDATING ON STEP: 45, WITH PADDING: 0.427
+Number of 3-body interactions = 204040
+ Updating neighbor list on step: 45, with padding: 0.411
       50      6.25       4.3099613       1.1335136       5.4434749          1461.3     33.02348936      4.9430742
       60      7.50       4.5849127       1.0952968       5.6802095          1554.5     32.25699139      4.9430530
-Number of 3-body interactions = 202560
-RANK: 0 UPDATING ON STEP: 61, WITH PADDING: 0.410
+Number of 3-body interactions = 201999
+ Updating neighbor list on step: 61, with padding: 0.407
       70      8.75       4.9176807       1.0481631       5.9658439          1667.3     33.37557740      4.9430574
-Number of 3-body interactions = 211258
-RANK: 0 UPDATING ON STEP: 76, WITH PADDING: 0.452
+Number of 3-body interactions = 211831
+ Updating neighbor list on step: 76, with padding: 0.455
       80     10.00       5.3102125       0.9897410       6.2999536          1800.4     35.98967404      4.9430106
       90     11.25       5.7212423       0.9562764       6.6775187          1939.8     38.43966433      4.9430986
-Number of 3-body interactions = 216495
-RANK: 0 UPDATING ON STEP: 91, WITH PADDING: 0.486
+Number of 3-body interactions = 216978
+ Updating neighbor list on step: 91, with padding: 0.489
      100     12.50       6.1547426       0.9348230       7.0895656          2086.7     39.27088301      4.9429958
-Number of 3-body interactions = 231479
-RANK: 0 UPDATING ON STEP: 105, WITH PADDING: 0.562
+Number of 3-body interactions = 230725
+ Updating neighbor list on step: 105, with padding: 0.558
      110     13.75       6.3675722       1.1507424       7.5183145          2158.9     38.22955531      4.9430633
      120     15.00       6.4073940       1.5303909       7.9377849          2172.4     35.68117282      4.9434635
-Number of 3-body interactions = 231819
-RANK: 0 UPDATING ON STEP: 121, WITH PADDING: 0.555
+Number of 3-body interactions = 225850
+ Updating neighbor list on step: 121, with padding: 0.529
      130     16.25       6.5997746       1.7470579       8.3468325          2237.6     33.67797243      4.9432609
-Number of 3-body interactions = 237308
-RANK: 0 UPDATING ON STEP: 137, WITH PADDING: 0.586
+Number of 3-body interactions = 236686
+ Updating neighbor list on step: 136, with padding: 0.583
      140     17.50       6.7168009       2.0251798       8.7419808          2277.3     33.86574638      4.9434684
      150     18.75       6.9014346       2.2137150       9.1151496          2339.9     36.05147513      4.9434887
-Number of 3-body interactions = 250087
-RANK: 0 UPDATING ON STEP: 152, WITH PADDING: 0.643
+Number of 3-body interactions = 248280
+ Updating neighbor list on step: 150, with padding: 0.637
      160     20.00       7.2015878       2.2623971       9.4639848          2441.7     39.22999018      4.9432125
-Number of 3-body interactions = 253318
-RANK: 0 UPDATING ON STEP: 167, WITH PADDING: 0.662
+Number of 3-body interactions = 249087
+ Updating neighbor list on step: 165, with padding: 0.638
      170     21.25       7.3914469       2.3848885       9.7763354          2506.0     41.60692998      4.9435030
      180     22.50       7.7332353       2.3041522      10.0373875          2621.9     41.60594030      4.9432353
-Number of 3-body interactions = 244408
-RANK: 0 UPDATING ON STEP: 184, WITH PADDING: 0.619
+Number of 3-body interactions = 230538
+ Updating neighbor list on step: 182, with padding: 0.554
      190     23.75       7.8068847       2.4270035      10.2338882          2646.9     40.56654432      4.9429379
+Number of 3-body interactions = 234813
+ Updating neighbor list on step: 197, with padding: 0.580
      200     25.00       7.2129267       3.1381348      10.3510615          2445.5     39.16969017      4.9441545
-Number of 3-body interactions = 234151
-RANK: 0 UPDATING ON STEP: 201, WITH PADDING: 0.580
      210     26.25       7.2425745       3.1650787      10.4076532          2455.6     37.17451539      4.9434446
-Number of 3-body interactions = 235449
-RANK: 0 UPDATING ON STEP: 217, WITH PADDING: 0.580
+Number of 3-body interactions = 231402
+ Updating neighbor list on step: 212, with padding: 0.561
      220     27.50       7.4331004       2.9810912      10.4141916          2520.2     36.65446199      4.9435911
+Number of 3-body interactions = 255505
+ Updating neighbor list on step: 226, with padding: 0.672
      230     28.75       7.4830219       2.8764666      10.3594885          2537.1     39.10232236      4.9429521
-Number of 3-body interactions = 255962
-RANK: 0 UPDATING ON STEP: 231, WITH PADDING: 0.671
      240     30.00       7.1166862       3.1321705      10.2488567          2412.9     42.70176938      4.9439008
-Number of 3-body interactions = 237390
-RANK: 0 UPDATING ON STEP: 249, WITH PADDING: 0.589
+Number of 3-body interactions = 227606
+ Updating neighbor list on step: 244, with padding: 0.544
      250     31.25       7.2001769       2.8906696      10.0908465          2441.2     43.73630560      4.9435503
+Number of 3-body interactions = 235985
+ Updating neighbor list on step: 259, with padding: 0.581
      260     32.50       7.4371071       2.4402117       9.8773188          2521.5     42.67835440      4.9430139
-Number of 3-body interactions = 238997
-RANK: 0 UPDATING ON STEP: 265, WITH PADDING: 0.596
      270     33.75       7.1341492       2.4718149       9.6059641          2418.8     40.83423136      4.9431487
+Number of 3-body interactions = 237086
+ Updating neighbor list on step: 274, with padding: 0.585
      280     35.00       6.4581606       2.8550627       9.3132233          2189.6     39.17761573      4.9437746
-Number of 3-body interactions = 239669
-RANK: 0 UPDATING ON STEP: 280, WITH PADDING: 0.597
      290     36.25       6.1314192       2.8904624       9.0218816          2078.8     37.77258710      4.9435958
-Number of 3-body interactions = 234337
-RANK: 0 UPDATING ON STEP: 296, WITH PADDING: 0.574
+Number of 3-body interactions = 228391
+ Updating neighbor list on step: 290, with padding: 0.543
      300     37.50       6.0113786       2.7211327       8.7325113          2038.1     37.13048936      4.9435743
+Number of 3-body interactions = 215477
+ Updating neighbor list on step: 306, with padding: 0.491
      310     38.75       6.0181123       2.4230927       8.4412050          2040.4     37.80272226      4.9433518
-Number of 3-body interactions = 220520
-RANK: 0 UPDATING ON STEP: 313, WITH PADDING: 0.517
      320     40.00       5.9768241       2.1695100       8.1463340          2026.4     39.96523384      4.9430635
-Number of 3-body interactions = 242843
-RANK: 0 UPDATING ON STEP: 327, WITH PADDING: 0.612
+Number of 3-body interactions = 241115
+ Updating neighbor list on step: 320, with padding: 0.603
      330     41.25       5.6525911       2.2052582       7.8578494          1916.5     42.40862109      4.9429796
+Number of 3-body interactions = 202393
+ Updating neighbor list on step: 338, with padding: 0.422
      340     42.50       5.4166851       2.1793763       7.5960613          1836.5     42.55290873      4.9435835
-Number of 3-body interactions = 232730
-RANK: 0 UPDATING ON STEP: 344, WITH PADDING: 0.562
      350     43.75       5.7585501       1.5799586       7.3385087          1952.4     39.79424701      4.9425206
+Number of 3-body interactions = 228821
+ Updating neighbor list on step: 351, with padding: 0.545
      360     45.00       5.5420448       1.5420770       7.0841219          1879.0     37.23679041      4.9429800
-Number of 3-body interactions = 228739
-RANK: 0 UPDATING ON STEP: 360, WITH PADDING: 0.545
+Number of 3-body interactions = 211524
+ Updating neighbor list on step: 368, with padding: 0.465
      370     46.25       5.1063043       1.7504398       6.8567441          1731.3     36.06138436      4.9432423
-Number of 3-body interactions = 214839
-RANK: 0 UPDATING ON STEP: 378, WITH PADDING: 0.480
      380     47.50       4.8488951       1.8163882       6.6652834          1644.0     35.88100002      4.9433127
+Number of 3-body interactions = 211093
+ Updating neighbor list on step: 383, with padding: 0.460
      390     48.75       4.7711186       1.7342947       6.5054133          1617.6     36.39546545      4.9430700
-Number of 3-body interactions = 212242
-RANK: 0 UPDATING ON STEP: 394, WITH PADDING: 0.465
+Number of 3-body interactions = 211467
+ Updating neighbor list on step: 398, with padding: 0.459
      400     50.00       4.6407659       1.7368260       6.3775920          1573.4     37.36408578      4.9431245
      410     51.25       4.5131730       1.7704687       6.2836417          1530.2     38.11651127      4.9431171
-Number of 3-body interactions = 211284
-RANK: 0 UPDATING ON STEP: 410, WITH PADDING: 0.460
+Number of 3-body interactions = 202242
+ Updating neighbor list on step: 414, with padding: 0.416
      420     52.50       4.5242230       1.7001701       6.2243930          1533.9     38.09522780      4.9432243
-Number of 3-body interactions = 205568
-RANK: 0 UPDATING ON STEP: 426, WITH PADDING: 0.433
+Number of 3-body interactions = 208606
+ Updating neighbor list on step: 429, with padding: 0.449
      430     53.75       4.7806267       1.4151120       6.1957387          1620.9     37.69853511      4.9426519
      440     55.00       4.6673515       1.5287315       6.1960830          1582.4     37.98378839      4.9428332
-Number of 3-body interactions = 209629
-RANK: 0 UPDATING ON STEP: 441, WITH PADDING: 0.449
+Number of 3-body interactions = 208814
+ Updating neighbor list on step: 446, with padding: 0.442
      450     56.25       4.4918043       1.7347868       6.2265911          1522.9     38.41391792      4.9434496
-Number of 3-body interactions = 217342
-RANK: 0 UPDATING ON STEP: 456, WITH PADDING: 0.483
      460     57.50       4.8500749       1.4402354       6.2903103          1644.4     37.92624887      4.9427611
+Number of 3-body interactions = 210714
+ Updating neighbor list on step: 460, with padding: 0.446
      470     58.75       4.9262841       1.4603191       6.3866032          1670.2     37.55850089      4.9428851
-Number of 3-body interactions = 215049
-RANK: 0 UPDATING ON STEP: 472, WITH PADDING: 0.471
+Number of 3-body interactions = 202611
+ Updating neighbor list on step: 476, with padding: 0.411
      480     60.00       4.7808404       1.7260230       6.5068634          1620.9     37.67103662      4.9434379
-Number of 3-body interactions = 207595
-RANK: 0 UPDATING ON STEP: 489, WITH PADDING: 0.440
      490     61.25       5.0443023       1.6110379       6.6553402          1710.3     37.12663854      4.9430818
+Number of 3-body interactions = 211530
+ Updating neighbor list on step: 491, with padding: 0.457
      500     62.50       5.3782808       1.4599521       6.8382329          1823.5     35.95284315      4.9430329
-Number of 3-body interactions = 213424
-RANK: 0 UPDATING ON STEP: 504, WITH PADDING: 0.467
+Number of 3-body interactions = 206709
+ Updating neighbor list on step: 506, with padding: 0.435
      510     63.75       5.6461935       1.4001204       7.0463140          1914.3     35.18077525      4.9432847
-Number of 3-body interactions = 224022
-RANK: 0 UPDATING ON STEP: 519, WITH PADDING: 0.523
      520     65.00       6.0311590       1.2430818       7.2742408          2044.8     35.33905939      4.9431508
+Number of 3-body interactions = 226470
+ Updating neighbor list on step: 520, with padding: 0.534
      530     66.25       6.4305449       1.0822342       7.5127792          2180.2     36.50423396      4.9430440
-Number of 3-body interactions = 234821
-RANK: 0 UPDATING ON STEP: 534, WITH PADDING: 0.569
+Number of 3-body interactions = 233031
+ Updating neighbor list on step: 534, with padding: 0.559
      540     67.50       6.6866728       1.0604578       7.7471307          2267.1     38.22158882      4.9429856
+Number of 3-body interactions = 234399
+ Updating neighbor list on step: 549, with padding: 0.570
      550     68.75       6.7056562       1.2529411       7.9585973          2273.5     39.31794455      4.9430126
-Number of 3-body interactions = 234831
-RANK: 0 UPDATING ON STEP: 550, WITH PADDING: 0.572
      560     70.00       6.6777434       1.4634761       8.1412195          2264.1     39.21648138      4.9433225
-Number of 3-body interactions = 236018
-RANK: 0 UPDATING ON STEP: 565, WITH PADDING: 0.579
+Number of 3-body interactions = 227890
+ Updating neighbor list on step: 564, with padding: 0.540
      570     71.25       6.7668989       1.5293141       8.2962129          2294.3     38.07508610      4.9429820
+Number of 3-body interactions = 228929
+ Updating neighbor list on step: 579, with padding: 0.545
      580     72.50       6.5928391       1.8286331       8.4214721          2235.3     37.00519164      4.9434354
-Number of 3-body interactions = 230411
-RANK: 0 UPDATING ON STEP: 582, WITH PADDING: 0.549
      590     73.75       6.5135029       2.0051170       8.5186199          2208.4     36.53616694      4.9432938
-Number of 3-body interactions = 235880
-RANK: 0 UPDATING ON STEP: 597, WITH PADDING: 0.581
+Number of 3-body interactions = 234961
+ Updating neighbor list on step: 594, with padding: 0.576
      600     75.00       6.4515898       2.1426668       8.5942566          2187.4     36.56646405      4.9433371
+Number of 3-body interactions = 240678
+ Updating neighbor list on step: 609, with padding: 0.597
      610     76.25       6.4339917       2.2162531       8.6502448          2181.4     37.12084790      4.9435176
-Number of 3-body interactions = 241095
-RANK: 0 UPDATING ON STEP: 612, WITH PADDING: 0.599
      620     77.50       6.7654549       1.9214797       8.6869345          2293.8     38.33556313      4.9429363
-Number of 3-body interactions = 241945
-RANK: 0 UPDATING ON STEP: 627, WITH PADDING: 0.605
+Number of 3-body interactions = 240499
+ Updating neighbor list on step: 624, with padding: 0.598
      630     78.75       6.7899620       1.9058531       8.6958151          2302.1     39.79870640      4.9431790
+Number of 3-body interactions = 244607
+ Updating neighbor list on step: 639, with padding: 0.621
      640     80.00       6.7515840       1.9213297       8.6729137          2289.1     40.11753031      4.9433517
-Number of 3-body interactions = 245814
-RANK: 0 UPDATING ON STEP: 642, WITH PADDING: 0.625
      650     81.25       6.8280894       1.7894039       8.6174933          2315.0     38.98024018      4.9428234
-Number of 3-body interactions = 244541
-RANK: 0 UPDATING ON STEP: 658, WITH PADDING: 0.623
+Number of 3-body interactions = 244407
+ Updating neighbor list on step: 655, with padding: 0.618
      660     82.50       6.3894583       2.1444853       8.5339435          2166.3     38.26269820      4.9432686
      670     83.75       5.9194599       2.5211131       8.4405731          2007.0     38.09478327      4.9436258
-Number of 3-body interactions = 243315
-RANK: 0 UPDATING ON STEP: 673, WITH PADDING: 0.623
+Number of 3-body interactions = 221223
+ Updating neighbor list on step: 671, with padding: 0.517
      680     85.00       5.8701392       2.4788034       8.3489427          1990.2     38.03247809      4.9432975
+Number of 3-body interactions = 243437
+ Updating neighbor list on step: 685, with padding: 0.620
      690     86.25       5.8902337       2.3673357       8.2575694          1997.1     38.50153284      4.9431581
-Number of 3-body interactions = 242699
-RANK: 0 UPDATING ON STEP: 690, WITH PADDING: 0.621
      700     87.50       5.7378319       2.4306413       8.1684731          1945.4     39.41420192      4.9432589
-Number of 3-body interactions = 238436
-RANK: 0 UPDATING ON STEP: 706, WITH PADDING: 0.595
+Number of 3-body interactions = 217005
+ Updating neighbor list on step: 702, with padding: 0.491
      710     88.75       5.5886504       2.4979241       8.0865744          1894.8     39.86811600      4.9433310
+Number of 3-body interactions = 222835
+ Updating neighbor list on step: 717, with padding: 0.518
      720     90.00       5.6066793       2.4077833       8.0144627          1900.9     38.93552239      4.9432140
-Number of 3-body interactions = 222760
-RANK: 0 UPDATING ON STEP: 724, WITH PADDING: 0.518
      730     91.25       5.5609725       2.3894314       7.9504039          1885.4     37.31017079      4.9429646
+Number of 3-body interactions = 212715
+ Updating neighbor list on step: 733, with padding: 0.468
      740     92.50       5.1802538       2.7201377       7.9003915          1756.3     36.19877210      4.9434754
-Number of 3-body interactions = 216826
-RANK: 0 UPDATING ON STEP: 741, WITH PADDING: 0.484
+Number of 3-body interactions = 213954
+ Updating neighbor list on step: 749, with padding: 0.471
      750     93.75       5.0151956       2.8563679       7.8715635          1700.4     35.64152307      4.9435290
-Number of 3-body interactions = 223708
-RANK: 0 UPDATING ON STEP: 757, WITH PADDING: 0.522
      760     95.00       5.1118316       2.7538474       7.8656790          1733.1     35.56012517      4.9433155
+Number of 3-body interactions = 227395
+ Updating neighbor list on step: 763, with padding: 0.538
      770     96.25       5.1968222       2.6847813       7.8816035          1762.0     36.07981297      4.9434410
-Number of 3-body interactions = 226808
-RANK: 0 UPDATING ON STEP: 772, WITH PADDING: 0.538
+Number of 3-body interactions = 219731
+ Updating neighbor list on step: 779, with padding: 0.504
      780     97.50       5.4256319       2.4915631       7.9171950          1839.5     36.76557481      4.9434905
-Number of 3-body interactions = 231959
-RANK: 0 UPDATING ON STEP: 788, WITH PADDING: 0.563
      790     98.75       5.8757207       2.0924473       7.9681680          1992.1     37.59713210      4.9429467
+Number of 3-body interactions = 221798
+ Updating neighbor list on step: 793, with padding: 0.509
      800    100.00       6.0747671       1.9498779       8.0246449          2059.6     38.09540253      4.9432377
-Number of 3-body interactions = 231371
-RANK: 0 UPDATING ON STEP: 804, WITH PADDING: 0.557
+Number of 3-body interactions = 221358
+ Updating neighbor list on step: 809, with padding: 0.508
      810    101.25       6.2580675       1.8182905       8.0763580          2121.8     37.50011845      4.9431819
      820    102.50       6.3924691       1.7250255       8.1174945          2167.3     36.20258135      4.9429686
-Number of 3-body interactions = 224792
-RANK: 0 UPDATING ON STEP: 821, WITH PADDING: 0.522
+Number of 3-body interactions = 221368
+ Updating neighbor list on step: 824, with padding: 0.504
      830    103.75       6.2225700       1.9210255       8.1435956          2109.7     35.34433873      4.9432887
-Number of 3-body interactions = 221789
-RANK: 0 UPDATING ON STEP: 837, WITH PADDING: 0.508
      840    105.00       5.9684457       2.1896378       8.1580835          2023.6     35.34641847      4.9432859
+Number of 3-body interactions = 219445
+ Updating neighbor list on step: 840, with padding: 0.498
      850    106.25       5.9922823       2.1771244       8.1694067          2031.7     35.41695859      4.9433226
-Number of 3-body interactions = 221206
-RANK: 0 UPDATING ON STEP: 853, WITH PADDING: 0.503
+Number of 3-body interactions = 229835
+ Updating neighbor list on step: 855, with padding: 0.547
      860    107.50       6.2749812       1.9022079       8.1771891          2127.5     35.38113586      4.9431337
-Number of 3-body interactions = 233371
-RANK: 0 UPDATING ON STEP: 867, WITH PADDING: 0.572
      870    108.75       6.4111224       1.7622661       8.1733886          2173.7     35.71344093      4.9432702
+Number of 3-body interactions = 219496
+ Updating neighbor list on step: 871, with padding: 0.497
      880    110.00       6.5137613       1.6375660       8.1513273          2208.5     36.29399947      4.9428550
-Number of 3-body interactions = 232134
-RANK: 0 UPDATING ON STEP: 884, WITH PADDING: 0.561
+Number of 3-body interactions = 233526
+ Updating neighbor list on step: 885, with padding: 0.567
      890    111.25       6.4010221       1.7089717       8.1099939          2170.2     36.41703345      4.9432092
-Number of 3-body interactions = 246915
-RANK: 0 UPDATING ON STEP: 899, WITH PADDING: 0.619
      900    112.50       6.4181098       1.6327905       8.0509004          2176.0     35.97130722      4.9430297
+Number of 3-body interactions = 249069
+ Updating neighbor list on step: 900, with padding: 0.631
      910    113.75       6.2652430       1.7099200       7.9751630          2124.2     35.63677619      4.9430154
-Number of 3-body interactions = 252880
-RANK: 0 UPDATING ON STEP: 914, WITH PADDING: 0.650
+Number of 3-body interactions = 226185
+ Updating neighbor list on step: 916, with padding: 0.524
      920    115.00       5.9728931       1.9191792       7.8920723          2025.1     35.52448336      4.9435718
      930    116.25       6.0169944       1.7887974       7.8057918          2040.0     35.33008002      4.9430584
-Number of 3-body interactions = 233539
-RANK: 0 UPDATING ON STEP: 932, WITH PADDING: 0.559
+Number of 3-body interactions = 233814
+ Updating neighbor list on step: 932, with padding: 0.561
      940    117.50       5.9303728       1.7866960       7.7170687          2010.7     35.22932528      4.9432489
-Number of 3-body interactions = 235451
-RANK: 0 UPDATING ON STEP: 947, WITH PADDING: 0.571
+Number of 3-body interactions = 218490
+ Updating neighbor list on step: 948, with padding: 0.496
      950    118.75       5.8686874       1.7597776       7.6284650          1989.8     35.76841350      4.9431952
      960    120.00       5.8130909       1.7277437       7.5408346          1970.9     37.28166188      4.9428459
-Number of 3-body interactions = 222105
-RANK: 0 UPDATING ON STEP: 964, WITH PADDING: 0.509
+Number of 3-body interactions = 213884
+ Updating neighbor list on step: 964, with padding: 0.470
      970    121.25       5.7266409       1.7318677       7.4585085          1941.6     38.78192892      4.9431303
+Number of 3-body interactions = 218460
+ Updating neighbor list on step: 979, with padding: 0.486
      980    122.50       5.9116271       1.4670765       7.3787036          2004.3     38.94532476      4.9426939
-Number of 3-body interactions = 218231
-RANK: 0 UPDATING ON STEP: 981, WITH PADDING: 0.486
      990    123.75       5.8004511       1.4982427       7.2986938          1966.6     38.24695876      4.9426561
-Number of 3-body interactions = 223559
-RANK: 0 UPDATING ON STEP: 996, WITH PADDING: 0.509
+Number of 3-body interactions = 221153
+ Updating neighbor list on step: 994, with padding: 0.497
     1000    125.00       5.3272050       1.9005899       7.2277949          1806.2     36.97515805      4.9433397
 END SIMULATION
 	Average temperature over run = 2006.7656 K

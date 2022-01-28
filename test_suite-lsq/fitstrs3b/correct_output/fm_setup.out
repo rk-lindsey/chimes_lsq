@@ -1,12 +1,15 @@
 
 Reading input file...
+Will read from file: fm_setup.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
 	# TRJFILE #: run_5.OUTCAR.xyzf
-	# WRAPTRJ #: 1
+	# WRAPTRJ #: true
 	# NFRAMES #: 33
 	# NLAYERS #: 1
 	# FITCOUL #: false
 	# FITSTRS #: true
-	# FITPOVR #: false
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 10
 	             Will use 3-body order: 2
@@ -16,22 +19,16 @@ Reading input file...
 	# NATMTYP #: 2
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
  	1              O              0              15.9994        
- 	2              H              0              1.0079         
+ 	2              H              -0             1.0079         
 
 	The following unique pair types have been identified:
 		0  O O
 		1  H H
 		2  O H
-	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA # # USEOVRP #     
-	0               O               O               0.75            6               0.1             1.25             0               
-	1               H               H               0.75            6               0.1             1.25             0               
-	2               O               H               0.75            6               0.1             1.25             0               
-
-	Read the following number of ij ik jk bins for pairs: 
-		OO: 0 0 0
-		HH: 0 0 0
-		OH: 0 0 0
-
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # MORSE_LAMBDA #
+	0               O               O               0.75            6               1.25            
+	1               H               H               0.75            6               1.25            
+	2               O               H               0.75            6               1.25            
 		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
 		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
 		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
@@ -42,9 +39,7 @@ Reading input file...
 		2	 OO (0) HH (1) OH (2) 1000 -4000 0 0
 
 # FCUTTYP #: CUBIC      ... for all Chebyshev interactions
-
-Note: Will use cubic scaling of: 1
-
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
 
 	Made the following triplets: 0    
 
@@ -120,30 +115,42 @@ Note: Will use cubic scaling of: 1
 The number of two-body non-coulomb parameters is: 30
 The number of three-body Chebyshev parameters is: 10
 
-Reading in the trajectory file...
+Succefully opened the trajectory file...
+Setting up the matrices for A, Coulomb forces, and overbonding...
 	Reporting outcome of layering for first frame ONLY: 
 	Real atoms:                   96
 	Total atoms (ghost):          2592
-	Real box dimesntions:         9.855000 9.855000 9.855000
-	Total box dimensions (ghost): 29.565000 29.565000 29.565000
-
-WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
-...trajectory file read successful: 
-
-Setting up the matricies for A, Coulomb forces, and overbonding...
+	cell vectors (a)            9.855000 0.000000 0.000000
+	cell vectors (b)            0.000000 9.855000 0.000000
+	cell vectors (c)            0.000000 0.000000 9.855000
+	cell volume (A^3)           957.127701
+	Extent (x,y,z)              9.855000 9.855000 9.855000
+	Layers:                     1
+	Effective cell vectors (a): 29.565000 0.000000 0.000000
+	Effective cell vectors (a): 0.000000 29.565000 0.000000
+	Effective cell vectors (a): 0.000000 0.000000 29.565000
 ...matrix setup complete: 
 
-Setting up the histograms to handle sparse 3b-distance populations...
-Found at least one 3b-population histogram nbins = 0. Will not do ANY histogramming. 
+...Populating the matrices for A, Coulomb forces, and overbonding...
 
-
-...Populating the matricies for A, Coulomb forces, and overbonding...
+	Latest 3-body outer cutoff values: 
+	0:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	1:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	2:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	3:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+     Max 3-body cutoff = 6.0000000000000000
+	Latest 3-body inner cutoff values: 
+	0:  0.7500000000000000  0.7500000000000000  0.7500000000000000
+	1:  0.7500000000000000  0.7500000000000000  0.7500000000000000
+	2:  0.7500000000000000  0.7500000000000000  0.7500000000000000
+	3:  0.7500000000000000  0.7500000000000000  0.7500000000000000
+     Min 3-body cutoff = 0.7500000000000000
 
 Number of 3-body interactions = 78874
 ...matrix population complete: 
 
-Printing matricies...
-	...A matrix length: 33
+Printing matrices...
+	...A matrix length (forces): 9504
 
 	Minimum distances between atoms: (Angstr.)
 		0	O O	2.173

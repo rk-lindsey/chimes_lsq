@@ -36,10 +36,10 @@ fi
 cd ..
 
 if ./install.sh  ; then
-	echo "Compiling chimes_lsq succeeded"
+    echo "Compiling chimes_lsq succeeded"
 else
-	 echo "Compiling chimes_lsq failed"
-	 exit 1
+    echo "Compiling chimes_lsq failed"
+    exit 1
 fi
 
 cd -
@@ -53,18 +53,18 @@ cd -
 
 if [ $# -eq 0 ] ; then # Use default JOBS.  
 	#  h2o-3bcheby2' -- gives a diff answer than old code b/c of layer bug in old code
-	 JOBS=$LSQ_ALL_JOBS
-	 MAKE_JOBS=$LSQ_MAKE_JOBS
+    JOBS=$LSQ_ALL_JOBS
+    MAKE_JOBS=$LSQ_MAKE_JOBS
 else  # Take JOBS from command line.
-	 JOBS=$1
-	 MAKE_JOBS=$2
+    JOBS=$1
+    MAKE_JOBS=$2
 fi
 
 echo ""
 echo "SETTING UP FOR CHIMES_LS..."
 
 if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-	 RUN_JOB=""
+    RUN_JOB=""
 fi
 
 for i in $JOBS
@@ -80,20 +80,22 @@ do
 	if [ ! -d current_output ] ; then mkdir current_output ; fi
 	if [ ! -d correct_output ] ; then mkdir correct_output ; fi
 
-	if $RUN_JOB ../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
+	cd current_output
+	cp ../*.txt ../*.in ../*.xyzf ../*.dat ./ >& /dev/null	
+
+	if $RUN_JOB ../../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
 		 echo "Chimes_lsq succeeded"
 		 SUCCESS=1
 	else
 		 echo "Chimes_lsq failed"
 		 SUCCESS=0
 	fi	
-
+        
 	if [[ $SUCCESS -eq 1 ]] ; then
- 		 cp A.txt b.txt params.header fm_setup.out ff_groups.map correct_output	
-		 mv A.txt b.txt params.header fm_setup.out ff_groups.map current_output
+ 		 cp A.txt b.txt params.header fm_setup.out ff_groups.map ../correct_output
 	fi
 	
-	cd ..
+	cd ../..
 done
 
 ###############################################################
@@ -143,13 +145,27 @@ done
 echo "Running Makefile jobs $MAKE_JOBS"
 
 for job in $MAKE_JOBS ; do
-	 cd $job
+
+    echo "Running $job"
+    
+    if ! test_dir $job ; then
+	echo "Directory $job does not exist"
+	continue 
+    fi
+
+    if [[ $job == "lsq2" ]] ; then
+    	cd ../contrib/dlars/src
+	make
+	cd - 
+    fi
+    
+    cd $job
 	 
-	 if RUN_JOB=$RUN_JOB PYTHON=$PYTHON make generate ; then
-		  echo "$job succeeded"
-	 else
-		  echo "$job failed"
-	 fi
+    if make RUN_JOB="$RUN_JOB" PYTHON=$PYTHON generate ; then
+	echo "$job succeeded"
+    else
+	echo "$job failed"
+    fi
 done
 
 exit 0

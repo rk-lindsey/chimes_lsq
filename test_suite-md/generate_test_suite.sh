@@ -58,13 +58,15 @@ do
 	echo " "
 	echo "Running $i test..."
 	
-	cd $i
 	
-	if [ ! -d current_output ] ; then mkdir current_output ; fi
-	if [ ! -d correct_output ] ; then mkdir correct_output ; fi
+	if [ ! -d $i/current_output ] ; then mkdir $i/current_output ; fi
+	if [ ! -d $i/correct_output ] ; then mkdir $i/correct_output ; fi
+
+	cp $i/* $i/current_output 2> /dev/null
+	cd $i/current_output
 	
 	if [[ $NP -eq 0 || $NP -eq 1 ]] ; then
-		 if ../../build/chimes_md run_md.in > run_md.out ; then
+		 if ../../../build/chimes_md run_md.in > run_md.out ; then
 			  SUCCESS=1
 		 else
 			  echo "Chimes_md failed"
@@ -72,7 +74,7 @@ do
 		 fi
 			
 	else
-		 if $RUN_JOB ../../build/chimes_md run_md.in > run_md.out ; then
+		 if $RUN_JOB ../../../build/chimes_md run_md.in > run_md.out ; then
 			  SUCCESS=1
 		 else
 			  echo "Chimes_md failed"
@@ -80,12 +82,12 @@ do
 		 fi
 			  
 	fi		
-	cp *.* current_output
+
 	if [[ $SUCCESS -eq 1 ]] ; then
-		 cp *.* correct_output
+		 cp *.* ../correct_output
 	fi
 	
-	cd ..
+	cd -
 done
 
 
@@ -143,7 +145,7 @@ do
 		 cp *.* correct_output
 	fi
 	
-	cd ..
+	cd -
 done	
 
 
