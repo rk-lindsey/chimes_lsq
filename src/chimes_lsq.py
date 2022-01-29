@@ -681,12 +681,11 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
 
     if not read_output:
     
-        exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " "
-        exepath = exepath + dlasso_dlars_path + "/dlars"
-
         dlars_file = dlasso_dlars_path + "dlars"
         
-        if os.path.exists(exepath):
+        if os.path.exists(dlars_file):
+	
+	    exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " " + dlars_file
 
             command = None
    
@@ -723,7 +722,7 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
                 print(command + " failed")
                 sys.exit(1)
         else:
-            print exepath + " does not exist"
+            print dlars_file + " does not exist"
             sys.exit(1)
     else:
         print "! Reading output from prior DLARS calculation"

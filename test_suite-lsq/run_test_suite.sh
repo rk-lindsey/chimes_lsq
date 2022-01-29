@@ -21,8 +21,7 @@ if [ $# -eq 0 ]
 then
 	 JOBS=$LSQ_ALL_JOBS
 	 MAKE_JOBS=$LSQ_MAKE_JOBS
-	 
-	 echo "here" 
+
 else
 	 JOBS=$1
 	 MAKE_JOBS=$2
