@@ -5,17 +5,20 @@ CXX=mpicxx
 ##CXX=g++ --std=c++11 -g -Wall -DDEBUG
 #CXX=g++ --std=c++11 -O3 -Wall
 
-# Before compiling, switch to gcc/8.1
-#	module load gcc/8.1.0
+## Use intel threads.
 ## module load intel/oneapi.2021.3
 ## module load mkl/2020.0
-CFLAGS= -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DUSE_MKL -DUSE_BLAS
-LINKFLAGS= -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lpthread -lm -ldl
+CFLAGS= -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DUSE_MKL -DUSE_BLAS -DTIMING -qopenmp -DUSE_OPENMP
+CFLAGSDBG= -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DTIMING -qopenmp -DUSE_OPENMP
+LINKFLAGS= -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
 
-dlars: dlars.C Vector.h IntVector.h Matrix.h DLARS.h
+opt: dlars.C Vector.h IntVector.h Matrix.h DLARS.h
 	$(CXX) $(CFLAGS) dlars.C $(LINKFLAGS) -o dlars
 
-realclean:
+debug: dlars.C Vector.h IntVector.h Matrix.h DLARS.h
+	$(CXX) $(CFLAGSDBG) dlars.C $(LINKFLAGS) -o dlars
+
+clean:
 	rm dlars
 
 

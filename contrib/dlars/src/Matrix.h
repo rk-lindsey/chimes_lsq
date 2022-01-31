@@ -1,3 +1,9 @@
+#ifdef USE_MKL
+#include <mkl.h>
+#endif
+//#ifdef USE_BLAS
+//#include <cblas.h>
+//#endif
 
 class Matrix {
 public:
@@ -191,6 +197,8 @@ public:
 		int my_file = ( rank_div > total_files - 1 ) ? total_files - 1 : rank_div ;
 		int my_offset = RANK % proc_fac ;
 
+                cout << "Assigning " << proc_fac << " MPI processes per file\n" ;
+                  
 #ifdef VERBOSE		
 		cout << "RANK = " << RANK << " proc_fac = " << proc_fac << " my_file = " << my_file << " my_offset = " << my_offset << endl ;
 #endif		
@@ -335,7 +343,7 @@ public:
 
 			// New dimensions.
 			int row_start1, row_end1, num_rows1 ;
-			
+
 			if ( ! distributed ) {
 				row_start1 = 0 ;
 				row_end1 = d1 - 1 ;
@@ -349,6 +357,10 @@ public:
 					row_end1 = d1 - 1 ;
 				}
 				num_rows1 = row_end1 - row_start1 + 1 ;
+			} else {
+				row_start1 = row_start ;
+				row_end1 = row_end ;
+				num_rows1 = num_rows ;
 			}
 			
 			double *scale1 = new double[d2] ;
@@ -474,6 +486,73 @@ public:
 			tmp2 = tmp ;
 #endif
 			return tmp2 ;
+		}
+
+
+         void mult_T(int j, Vector& out)
+	// Calculate the jth row of X^T * X, where X is the current matrix.
+        // Places the result in out.
+		{
+                  Vector tmp(dim2, 0.0) ;
+// #ifdef USE_BLAS
+//                   // get(l,k) below plays the role of a matrix, while get(l,j)
+//                   // plays the role of a vector with a stride equal to dim2.
+//                   cblas_dgemv(CblasRowMajor, CblasTrans, dim2, row_end-row_start+1, 1.0,
+//                               &mat[row_start*dim1], dim2, &mat[row_start*dim1+j],
+//                               dim2, 0.0, tmp.vec, 1) ;
+// #else  // USE_BLAS                                    
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(j,tmp) default(none)
+#endif					
+                  for ( int k = 0 ; k < dim2 ; k++ ) {
+                    for ( int l = row_start ; l <= row_end ; l++ ) {
+                      tmp.add(k, get(l, j) * get(l, k) );
+                    }
+                  }
+// #endif // USE_BLAS                  
+
+#ifdef USE_MPI
+                  MPI_Allreduce(tmp.vec, out.vec, dim2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
+#else // USE_MPI
+                  for ( int k = 0 ; k < dim2 ; k++ ) {
+                    out.set(k, tmp.get(k)) ;
+                  }
+#endif // USE_MPI
+		}
+
+  
+         void mult_T_lower(int j, Vector& out)
+	// Calculate the jth row of X^T * X, where X is the current matrix.
+        // Only the lower half k <= j are calculated in out[k].
+        // Places the result in out.
+		{
+                  Vector tmp(j+1, 0.0) ;
+
+// #ifdef USE_BLAS
+//                   // get(l,k) below plays the role of a matrix, while get(l,j)
+//                   // plays the role of a vector with a stride equal to dim2.
+//                   cblas_dgemv(CblasRowMajor, CblasTrans, j+1, row_end-row_start+1, 1.0,
+//                               &mat[row_start*dim1], dim2, &mat[row_start*dim1+j],
+//                               dim2, 0.0, tmp.vec, 1) ;
+// #else  // USE_BLAS                  
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(j,tmp) default(none)
+#endif	// USE_OPENMP				
+                  for ( int k = 0 ; k <= j ; k++ ) {
+                    for ( int l = row_start ; l <= row_end ; l++ ) {
+                      tmp.add(k, get(l, k)  * get(l, j)  );
+                    }
+                  }
+// #endif // USE_BLAS
+                  
+#ifdef USE_MPI
+                  MPI_Allreduce(tmp.vec, out.vec, j+1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
+#else // USE_MPI
+                  for ( int k = 0 ; k <= j ; k++ ) {
+                    out.set(k, tmp.get(k)) ;
+                  }
+#endif // USE_MPI
 		}
 
 	void normalize()
@@ -779,6 +858,37 @@ public:
 				cout << "Dimension mismatch" ;
 				stop_run(1) ;
 			}
+
+			double condition ;
+			double diag_min = 1.0e50 ;
+			double diag_max = 0.0 ;
+
+			// Print an estimate of the condition number.
+			for ( int j = 0 ; j < dim1 ; j++ ) {
+				if ( get(j,j) > diag_max ) {
+					diag_max = get(j,j) ;
+				}
+				if ( get(j,j) < diag_min ) {
+					diag_min = get(j,j) ;
+				}
+				if ( get(j,j) < 0.0 ) {
+					cout << "Warning: Negative diagonal of cholesky decomp found!\n" ;
+				}
+			}
+			if ( diag_min > 0.0 ) {
+				condition = diag_max * diag_max / ( diag_min * diag_min) ;
+			} else {
+				condition = 1.0e50 ;
+			}
+
+#if(0)
+                        // DEBUG !!
+                        int prec = cout.precision() ;
+			cout << "Estimated Cholesky condition number = " <<
+                          std::scientific << std::setprecision(3) << condition << endl ;
+                        cout.precision(prec) ;
+#endif                        
+                        
 			Vector xtmp(dim1) ;
 			Matrix& mat=*this ;
 			
@@ -843,15 +953,36 @@ public:
 				cout << "Array dimension mismatch" << endl ;
 				stop_run(1) ;
 			}
-			for ( int j = row_start ; j <= row_end ; j++ ) {
-				double sum = 0.0 ;
-				for ( int k = 0 ; k < dim2 ; k++ ) {
-					sum += get(j,k) * in.get(k) ;
+			if ( ! distributed ) {
+#ifdef USE_BLAS			
+				cblas_dgemv(CblasRowMajor, CblasNoTrans, dim1, dim2, 1.0,
+							mat, dim2, in.vec, 1, 0.0, out.vec, 1) ;
+#else				
+				for ( int j = 0 ; j < dim1 ; j++ ) {
+					double sum = 0.0 ;
+					for ( int k = 0 ; k < dim2 ; k++ ) {
+						sum += get(j,k) * in.get(k) ;
+					}
+					out.set(j, sum) ;
 				}
-				out.set(j, sum) ;
-			}
+#endif			
+			} else {
+#ifdef USE_BLAS
+				// Perform matrix-vector multiply on just the rows owned by this process.
+				// Put results into offset indices of out.vec[].
+				cblas_dgemv(CblasRowMajor, CblasNoTrans, num_rows, dim2, 1.0,
+							mat, dim2, in.vec, 1, 0.0, out.vec + row_start, 1) ;
+#else				
+				for ( int j = row_start ; j <= row_end ; j++ ) {
+					double sum = 0.0 ;
+					for ( int k = 0 ; k < dim2 ; k++ ) {
+						sum += get(j,k) * in.get(k) ;
+					}
+					out.set(j, sum) ;
+				}
+#endif // USE_BLAS
+				
 #ifdef USE_MPI
-			if ( distributed ) {
 				Vector out2(dim1, 0.0) ;    // Temporary array to collect out.vec values.
 				IntVector countv(NPROCS) ;  // The number of items to receive from each process.
 				IntVector displs(NPROCS) ;  // Storage displacements in out2 for each process.
@@ -865,7 +996,7 @@ public:
 					displs.set(j, displs.get(j-1) + countv.get(j-1) ) ;
 				}
 				MPI_Allgatherv(&(out.vec[row_start]), countv.get(RANK),
-											 MPI_DOUBLE, out2.vec, countv.vec, displs.vec, MPI_DOUBLE, MPI_COMM_WORLD) ;
+							   MPI_DOUBLE, out2.vec, countv.vec, displs.vec, MPI_DOUBLE, MPI_COMM_WORLD) ;
 				
 				for ( int j = 0 ; j < dim1 ; j++ ) {
 					out.set(j, out2.get(j) ) ;
@@ -901,26 +1032,46 @@ public:
 				cout << "Array dimension mismatch" << endl ;
 				stop_run(1) ;
 			}
-			Vector sumv(dim2,0.0) ;			
-			for ( int j = 0 ; j < dim2 ; j++ ) {
-				for ( int k = row_start ; k <= row_end ; k++ ) {
-					sumv.add(j, get(k,j) * in.get(k) ) ;
+			if ( ! distributed ) {
+#ifdef USE_BLAS
+				// Perform matrix-vector multiply on all rows.
+				cblas_dgemv(CblasRowMajor, CblasTrans, dim1, dim2, 1.0,
+							mat, dim2, in.vec, 1, 0.0, out.vec, 1) ;
+#else								
+				Vector sumv(dim2,0.0) ;			
+				for ( int j = 0 ; j < dim2 ; j++ ) {
+					for ( int k = 0 ; k < dim1 ; k++ ) {
+						sumv.add(j, get(k,j) * in.get(k) ) ;
+					}
 				}
-			}
-#ifdef USE_MPI
-			if ( distributed ) {
-				MPI_Allreduce(sumv.vec, out.vec, dim2,
-											MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
-			} else {
 				for ( int j = 0 ; j < dim2 ; j++ ) {
 					out.set(j, sumv.get(j)) ;
 				}
-			}
-#else				
-			for ( int j = 0 ; j < dim2 ; j++ ) {
-				out.set(j, sumv.get(j)) ;
-			}
 #endif				
+			} else {
+				Vector sumv(dim2,0.0) ;			
+#ifdef USE_BLAS
+				// Perform matrix-vector multiply on only rows owned by this process.
+				// The in.vec needs to be offset.
+				cblas_dgemv(CblasRowMajor, CblasTrans, num_rows, dim2, 1.0,
+							mat, dim2, in.vec + row_start, 1, 0.0, sumv.vec, 1) ;
+#else				
+				for ( int j = 0 ; j < dim2 ; j++ ) {
+					for ( int k = row_start ; k <= row_end ; k++ ) {
+						sumv.add(j, get(k,j) * in.get(k) ) ;
+					}
+				}
+#endif // USE_BLAS
+				
+#ifdef USE_MPI
+				MPI_Allreduce(sumv.vec, out.vec, dim2,
+							  MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
+#else				
+				for ( int j = 0 ; j < dim2 ; j++ ) {
+					out.set(j, sumv.get(j)) ;
+				}					
+#endif // USE_MPI
+			}
 		}
 
 	bool con_grad(Vector &x, const Vector &b, int max_iter, int max_restart,
@@ -1112,5 +1263,23 @@ public:
 			}
 			return false ;
 		} // End of pre_con_grad
-	
+
+	double memory()
+	// Returns memory used on the current rank in MB.
+	{
+		return( (double) (row_end - row_start + 1) * dim2 * 8 / (1024.0 * 1024.0) ) ;
+	}
+
+        double print_memory(string name) 
+        {
+          double mem = memory() ;
+
+          int prec = cout.precision() ;
+          cout << "Memory in " << name << " = " << std::fixed << std::setprecision(1) << mem << " MB " << endl ;
+          cout.precision(prec) ;
+          cout << std::scientific ;
+          
+          return mem ;
+        }
+  
 } ;

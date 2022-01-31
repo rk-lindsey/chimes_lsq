@@ -35,12 +35,12 @@ public:
 	bool do_lasso ;   // If TRUE, do a lasso calculation.  If false, do a regular LARS calculation.
 	bool solve_succeeded ; // If true, the solve of G_A succeeded.
 	bool solve_con_grad ;  // If true, solve G_A by conjugate gradient instead of cholesky decomp.
-  bool use_precondition  ; // If true, use preconditioning in conjugate gradient.
+        bool use_precondition  ; // If true, use preconditioning in conjugate gradient.
 
 	double obj_func_val ;  // Latest value of the objective function.
 	int iterations ;    // The number of solver iterations.
 	ofstream trajfile ;  // Output file for the trajectory (solution history).
-	
+
   DLARS(Matrix &Xin, Vector &yin, double lamin): X(Xin), y(Xin.dim1), mu(Xin.dim1),
 		beta(Xin.dim2), c(Xin.dim2), A(0),  exclude(Xin.dim2, 0), sign(0), lambda(lamin)
 		{
@@ -214,17 +214,27 @@ public:
 				decrement_G_A() ;
 			} else {
 				// Unusual event: rebuild the array.
-				G_A.realloc(nactive, nactive) ;
-				for ( int j = 0 ; j < nactive ; j++ ) {
-					for ( int k = 0 ; k <= j  ; k++ ) {
-						
-						double tmp = X_A.mult_T(j,k) ;
-						G_A.set(j, k, tmp) ;
-					}
+				if ( RANK == 0 ) {
+					// Only store G_A on rank 0.
+					G_A.realloc(nactive, nactive) ;
 				}
 				for ( int j = 0 ; j < nactive ; j++ ) {
-					for ( int k = j + 1 ; k < nactive  ; k++ ) {
-						G_A.set(j, k, G_A.get(k,j) ) ;
+                                  Vector tmp(nactive) ;
+
+                                  // All processes are used in X_A.mult_T because X_A is a distributed
+                                  // matrix.
+                                  X_A.mult_T_lower(j, tmp) ;
+                                  if ( RANK == 0 ) {
+                                    for ( int k = 0 ; k <= j  ; k++ ) {
+                                      G_A.set(j, k, tmp.get(k)) ;                                    
+                                    }
+                                  }
+				}
+				if ( RANK == 0 ) {
+					for ( int j = 0 ; j < nactive ; j++ ) {
+						for ( int k = j + 1 ; k < nactive  ; k++ ) {
+							G_A.set(j, k, G_A.get(k,j) ) ;
+						}
 					}
 				}
 			}
@@ -249,43 +259,54 @@ public:
 					break ;
 				}
 			}
-			Matrix G_New(nactive, nactive) ;
+			Matrix G_New ;
 
-			// Copy unchanged elements of the array.
-			for ( int i = 0 ; i < newc ; i++ ) {
-				for ( int j = 0 ; j <= i ; j++ ) {
-					G_New.set(j,i, G_A.get(j,i)) ;
+			if ( RANK == 0 ) {
+				G_New.resize(nactive, nactive) ;
+
+				// Copy unchanged elements of the array.
+				for ( int i = 0 ; i < newc ; i++ ) {
+					for ( int j = 0 ; j <= i ; j++ ) {
+						G_New.set(j,i, G_A.get(j,i)) ;
+					}
 				}
-			}
-			// Copy shifted elements of the existing array.
-			for ( int i = newc ; i < nactive - 1 ; i++ ) {
-				for ( int j = 0 ; j < newc ; j++ ) {
-					G_New.set(j,i+1, G_A.get(j,i)) ;
-				}
-				for ( int j = newc ; j <= i ; j++ ) {
-					G_New.set(j+1,i+1, G_A.get(j,i)) ;
+
+				// Copy shifted elements of the existing array.
+				for ( int i = newc ; i < nactive - 1 ; i++ ) {
+					for ( int j = 0 ; j < newc ; j++ ) {
+						G_New.set(j,i+1, G_A.get(j,i)) ;
+					}
+					for ( int j = newc ; j <= i ; j++ ) {
+						G_New.set(j+1,i+1, G_A.get(j,i)) ;
+					}
 				}
 			}
 			// Calculate the new elements.
+                        Vector tmp(nactive) ;
+                        X_A.mult_T(newc, tmp) ;
 			for ( int k = 0 ; k < nactive ; k++ ) {
-				double tmp = X_A.mult_T(newc, k) ;
+                            //double tmp = X_A.mult_T(newc, k) ;
 				
-				//for ( int l = 0 ; l < ndata ; l++ ) {
-				//tmp += X_A.get(l, newc) * X_A.get(l, k) ;
-				//}
-				if ( newc <= k ) {
-					G_New.set(newc, k, tmp) ;
-				} else {
-					G_New.set(k, newc, tmp) ;
-				}
+                          //for ( int l = 0 ; l < ndata ; l++ ) {
+                          //tmp += X_A.get(l, newc) * X_A.get(l, k) ;
+                          //}
+                          if ( RANK == 0 ) {
+                            if ( newc <= k ) {
+                              G_New.set(newc, k, tmp.get(k)) ;
+                            } else {
+                              G_New.set(k, newc, tmp.get(k)) ;
+                            }
+                          }
 			}
 
 			// Copy elements back into the reallocated array.
-			G_A.realloc(nactive, nactive) ;
-			for ( int i = 0 ; i < nactive ; i++ ) {
-				for ( int j = 0 ; j <= i ; j++ ) {
-					G_A.set(i,j, G_New.get(j,i)) ;
-					G_A.set(j,i, G_New.get(j,i)) ;
+			if ( RANK == 0 ) {
+				G_A.realloc(nactive, nactive) ;
+				for ( int i = 0 ; i < nactive ; i++ ) {
+					for ( int j = 0 ; j <= i ; j++ ) {
+						G_A.set(i,j, G_New.get(j,i)) ;
+						G_A.set(j,i, G_New.get(j,i)) ;
+					}
 				}
 			}
 		}
@@ -293,6 +314,8 @@ public:
 	void decrement_G_A()
 	// Decrement the G_A array by one column and one row.
 		{
+			if ( RANK != 0 ) return ;
+			
 			int delc = 0 ;
 			// Find the new index.
 			if ( nactive != A.dim ) {
@@ -996,6 +1019,22 @@ public:
 		rst.close() ;
 	}
 
+	void broadcast_solution()
+	// Broadcast results of solving G_A.
+	{
+#ifdef USE_MPI
+		if ( RANK != 0 ) {
+			G_A_Inv_I.realloc(nactive) ;
+			A.realloc(nactive) ;
+		}
+		
+		MPI_Bcast(&nactive, 1, MPI_INT, 0, MPI_COMM_WORLD) ;
+		MPI_Bcast(A.vec, nactive, MPI_INT, 0, MPI_COMM_WORLD) ;
+		MPI_Bcast(G_A_Inv_I.vec, nactive, MPI_DOUBLE, 0, MPI_COMM_WORLD) ;
+		MPI_Bcast(&A_A, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD) ;
+#endif
+	}
+
 	int iteration()
 	// Perform a single iteration of the LARS algorithm.
 	// Return 0 when no more iterations can be performed.
@@ -1082,7 +1121,6 @@ public:
 			}
 #endif			
 
-			
 			build_G_A() ;
 
 			auto time7 = std::chrono::system_clock::now() ;
@@ -1093,8 +1131,8 @@ public:
 				cout << "Time building G_A = " << elapsed_seconds.count() << endl ;
 			}
 #endif			
-			
-			if ( ! solve_G_A(true) ) {
+
+			if ( RANK == 0 && ! solve_G_A(true) ) {
 				remove_prop = -1 ;
 				add_prop = -1 ;
 				cout << "Iteration failed" << endl ;
@@ -1109,7 +1147,8 @@ public:
 				cout << "Time solving G_A = " << elapsed_seconds.count() << endl ;
 			}
 #endif			
-			
+
+			broadcast_solution() ;
 			
 #ifdef VERBOSE
 			if ( RANK == 0 ) {
@@ -1164,6 +1203,20 @@ public:
 				//print_unscaled(cout) ;
 			}
 
+			if ( RANK == 0 ) {
+                          double total_mem = 0.0 ;
+                          int prec = cout.precision() ;
+                          cout << "Matrix memory usage on Rank 0:" << endl ;
+                          total_mem += X.print_memory("X") ;
+                          total_mem += X_A.print_memory("X_A") ;
+                          total_mem += G_A.print_memory("G_A") ;
+                          total_mem += chol.print_memory("chol") ;
+                          total_mem += pre_con.print_memory("pre_con") ;
+                          cout << "Total memory = " << std::fixed << std::setprecision(1) << total_mem
+                               << endl ;
+                          cout.precision(prec) ;
+                          cout << std::scientific ;
+                        }
 			return 1 ;
 
 		}
@@ -1235,7 +1288,11 @@ public:
 		correlation() ;
 		build_X_A() ;
 		build_G_A() ;
-		solve_G_A(false) ;
+		
+		if ( RANK == 0 ) {
+			solve_G_A(false) ;
+		}
+		broadcast_solution() ;
 
 		// Full calculation of pre-conditioner.
 		if ( use_precondition ) {
@@ -1252,4 +1309,6 @@ public:
 		
 		return iter -1 ;
 	}
+
+		
 };

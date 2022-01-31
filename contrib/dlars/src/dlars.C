@@ -13,6 +13,7 @@
 
 #include<math.h>
 #include<iostream>
+#include<iomanip>
 #include<fstream>
 #include<sstream>
 #include<string.h>
@@ -106,7 +107,7 @@ int main(int argc, char **argv)
 	bool normalize=true ;             // Whether to normalize the X matrix.
 	bool con_grad = false ;           // Whether to use congugate gradient algorithm to solve linear equations.
 
-	bool use_precondition = true ;
+	bool use_precondition = false ;
 	
 	// Stopping criteria.  Default is to calculate all possible solutions.
 	
