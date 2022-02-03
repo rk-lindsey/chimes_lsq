@@ -12,11 +12,11 @@ CFLAGS= -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP6
 CFLAGSDBG= -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DTIMING -qopenmp -DUSE_OPENMP
 LINKFLAGS= -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
 
-opt: dlars.C Vector.h IntVector.h Matrix.h DLARS.h
-	$(CXX) $(CFLAGS) dlars.C $(LINKFLAGS) -o dlars
+opt: dlars.C Matrix.C Vector.h IntVector.h Matrix.h DLARS.h
+	$(CXX) $(CFLAGS) dlars.C Matrix.C $(LINKFLAGS) -o dlars
 
 debug: dlars.C Vector.h IntVector.h Matrix.h DLARS.h
-	$(CXX) $(CFLAGSDBG) dlars.C $(LINKFLAGS) -o dlars
+	$(CXX) $(CFLAGSDBG) dlars.C Matrix.C $(LINKFLAGS) -o dlars
 
 clean:
 	rm dlars

@@ -3,13 +3,7 @@
 #include <mkl.h>
 #endif
 
-void stop_run(int stat) {
-#ifdef USE_MPI
-	MPI_Abort(MPI_COMM_WORLD,stat) ;
-#else
-	exit(stat) ;
-#endif
-}
+void stop_run(int stat) ;
 
 class Vector {
 public:

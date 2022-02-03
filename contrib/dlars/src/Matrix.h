@@ -14,8 +14,32 @@ public:
 	bool distributed ;    // Is this matrix distributed over processes ?
 	int row_start, row_end ;  // Starting and ending row for parallel calculations.
 	int num_rows ;    // Number of rows stored on this process.
-	
-	Matrix(const Matrix &matin) {
+
+	bool cholesky(Matrix &chol) ;
+	bool cholesky_distribute(Matrix &chol) ;  
+	bool cholesky_add_row(const Matrix &chol0, const Vector &newr)  ;
+	void cholesky_sub(Vector &x, const Vector &b) ;
+	bool cholesky_remove_row(int id ) ;
+	void cholesky_sub_distribute(Vector &x, const Vector &b) ;
+	int rank_from_row(int j) {
+		for ( int k = 0 ; k < NPROCS ; k++ ) {
+			int r_start = (dim1 * k) / NPROCS ;
+			int r_end = 0 ;
+			// Repeat assignment for each rank, see which works with row j.
+			if ( k < NPROCS - 1 ) {
+				r_end = (dim1 * (k+1)) / NPROCS - 1 ;
+			} else {
+				r_end = dim1 - 1 ;
+			}
+			if ( r_start <= j && j <= r_end ) {
+				return k ;
+			}
+		}
+		cout << "Error: Did not find a rank for row " << j << endl ;
+		stop_run(1) ;
+		return -1 ;
+	}
+		Matrix(const Matrix &matin) {
 		// Create a matrix that is a copy of another.
 		dim1 = matin.dim1 ;
 		dim2 = matin.dim2 ;
@@ -197,7 +221,7 @@ public:
 		int my_file = ( rank_div > total_files - 1 ) ? total_files - 1 : rank_div ;
 		int my_offset = RANK % proc_fac ;
 
-                cout << "Assigning " << proc_fac << " MPI processes per file\n" ;
+		if ( RANK == 0 ) cout << "Assigning " << proc_fac << " MPI processes per file\n" ;
                   
 #ifdef VERBOSE		
 		cout << "RANK = " << RANK << " proc_fac = " << proc_fac << " my_file = " << my_file << " my_offset = " << my_offset << endl ;
@@ -431,8 +455,15 @@ public:
 		return get(j, i) ;
 	}
 	void distribute()
-	// Settings to distribute a matrix across processes.
+	// Settings to distribute a matrix across processes.  Assumes the number of rows have already been set in dim1.
+	{
+		distribute(dim1) ;
+	}
+	
+	void distribute(int total_rows)
+	// Settings to distribute a matrix across processes, given the total number of rows.
 		{
+			dim1 = total_rows ;
 			row_start = (dim1 * RANK) / NPROCS ;
 			if ( RANK < NPROCS - 1 ) {
 				row_end = (dim1 * (RANK+1)) / NPROCS - 1 ;
@@ -494,14 +525,6 @@ public:
         // Places the result in out.
 		{
                   Vector tmp(dim2, 0.0) ;
-// #ifdef USE_BLAS
-//                   // get(l,k) below plays the role of a matrix, while get(l,j)
-//                   // plays the role of a vector with a stride equal to dim2.
-//                   cblas_dgemv(CblasRowMajor, CblasTrans, dim2, row_end-row_start+1, 1.0,
-//                               &mat[row_start*dim1], dim2, &mat[row_start*dim1+j],
-//                               dim2, 0.0, tmp.vec, 1) ;
-// #else  // USE_BLAS                                    
-
 #ifdef USE_OPENMP		
 #pragma omp parallel for shared(j,tmp) default(none)
 #endif					
@@ -510,7 +533,6 @@ public:
                       tmp.add(k, get(l, j) * get(l, k) );
                     }
                   }
-// #endif // USE_BLAS                  
 
 #ifdef USE_MPI
                   MPI_Allreduce(tmp.vec, out.vec, dim2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
@@ -529,13 +551,6 @@ public:
 		{
                   Vector tmp(j+1, 0.0) ;
 
-// #ifdef USE_BLAS
-//                   // get(l,k) below plays the role of a matrix, while get(l,j)
-//                   // plays the role of a vector with a stride equal to dim2.
-//                   cblas_dgemv(CblasRowMajor, CblasTrans, j+1, row_end-row_start+1, 1.0,
-//                               &mat[row_start*dim1], dim2, &mat[row_start*dim1+j],
-//                               dim2, 0.0, tmp.vec, 1) ;
-// #else  // USE_BLAS                  
 #ifdef USE_OPENMP		
 #pragma omp parallel for shared(j,tmp) default(none)
 #endif	// USE_OPENMP				
@@ -544,7 +559,6 @@ public:
                       tmp.add(k, get(l, k)  * get(l, j)  );
                     }
                   }
-// #endif // USE_BLAS
                   
 #ifdef USE_MPI
                   MPI_Allreduce(tmp.vec, out.vec, j+1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
@@ -654,283 +668,39 @@ public:
     		   }
    		}
 		}
-	bool cholesky(Matrix &chol)
-	// Calculate the cholesky decomposition of the current matrix, and store in chol.
-	// Uses the upper triangular variant, A = R^T * R.  R is calculated.
-		{
-			double eps = 1.0e-10 ;
-			if ( dim1 != dim2 ) {
-				cout << "Error: Cholesky decomposition only works for square matrices " << endl ;
-			}
-			for ( int j = 0 ; j < dim1 ; j++ ) {
-				for ( int k = 0 ; k < dim1 ; k++ ) {
-					if ( fabs( get(j,k) - get(k,j) ) > 1.0e-10 ) {
-						cout << "Error: Cholesky decomposition only works for symmetric matrices " << endl ;
-					}
-				}
-			}
-			for ( int j = 0 ; j < dim1 ; j++ ) {
-				// Diagonal elements.
-				double diag ;
-				diag = get(j,j) ;
-				for ( int k = 0 ; k < j ; k++ ) {
-					diag -= chol.get(k,j) * chol.get(k,j) ;
-				}
-				if ( diag < eps * eps ) 
-					return false ;
-				diag = sqrt(diag) ;
-				chol.set(j,j,diag) ;
-				for ( int k = j+1 ; k < dim1 ; k++ ) {
-					double offdiag = 0.0 ;
-					offdiag = get(j,k) ;
-					for ( int l = 0 ; l < j ; l++ ) {
-						offdiag -= chol.get(l,j) * chol.get(l,k) ;
-					}
-					offdiag /= chol.get(j,j) ;
-					chol.set(j,k,offdiag) ;
-				}
-
-			}
-			for ( int j = 0 ; j < dim1 ; j++ ) {
-				for ( int k = 0 ; k < j ; k++ ) {
-					chol.set(j,k,0.0) ;
-				}
-			}
-			return true ;
-		}
-
-	bool cholesky_add_row(const Matrix &chol0, const Vector &newr)
-	// Given cholesky decomposition of a matrix in chol0
-	// find the cholesky decomposition of a new matrix formed by adding
-	// the specified row (newr) to the original matrix (not given).
-	// The new row is placed in the last index.
-		{
-			if ( dim1 != dim2 ) {
-				cout << "Error: Cholesky decomposition only works for square matrices " << endl ;
-			}
-			if ( newr.dim != dim1 || chol0.dim1 != dim1 - 1 || chol0.dim1 != chol0.dim2 ) {
-				cout << "Dimension mismatch" ;
-				stop_run(1) ;
-			}
-			Vector xtmp(dim1) ;
-			double cdotc = 0.0 ;
-			for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
-				double sum = newr.get(j) ;
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(chol0,xtmp,j) reduction(+:sum) default(none)
-#endif						
-				for ( int k = 0 ; k < j ; k++ ) {
-					sum -= chol0.get(k,j) * xtmp.get(k) ;
-				}
-				xtmp.set(j, sum / chol0.get(j,j) );
-				cdotc += xtmp.get(j) * xtmp.get(j) ;
-			}
-			double d = newr.get(dim1-1) - cdotc ;
-			if ( d >= 0.0 ) {
-				xtmp.set(dim1-1, sqrt(d) ) ;
-			} else {
-				cout << "Could not add row to Cholesky matrix " << endl ;
-				return false ;
-			}
-
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(chol0) default(none)
-#endif					
-			for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
-				for ( int k = 0 ; k <= j ; k++ ) {
-					set(k,j, chol0.get(k,j)) ;
-				}
-				for ( int k = j + 1 ; k < dim1 ; k++ ) {
-					set(k,j, 0.0) ;
-				}
-			}
-
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(xtmp) default(none)
-#endif					
-			for ( int j = 0 ; j < dim1 ; j++ ) {
-				set(j, dim1-1, xtmp.get(j)) ;
-			}
-			
-#ifdef USE_OPENMP		
-#pragma omp parallel for default(none)
-#endif					
-			for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
-				set(dim1-1, j, 0.0) ;
-			}
-			return true ;
-		}
-	
-	bool cholesky_remove_row(int id ) {
-		// Based on larscpp github package.  Modified so that diagonal elements of the cholesky
-		// matrix are always positive.
-		// Remove a row from a Cholesky matrix.  Update the dimension of the matrix
-		// Use transpose matrix access functions because original code was written in terms of a lower
-		// triangular matrix, whereas we use an upper triangular matrix.
-		double a(0),b(0),c(0),s(0),tau(0);
-		if ( dim1 != dim2 ) {
-			cout << "Error: the cholesky matrix should be square" << endl ;
-			stop_run(1) ;
-		}
-		int lth = dim1 - 1 ;
-
-		for(int i=id; i < lth; ++i){
-
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(i) default(none)
-#endif					
-			for( int j=0; j<i; ++j) {
-				setT(i,j, getT(i+1,j)) ;
-			}
-
-			a = getT(i+1,i);
-			b = getT(i+1,i+1);
-			if(b==0){
-				setT(i,i,a) ;
-				continue;
-			}
-			if( fabs(b) > fabs(a) ){
-				tau = -a/b;
-				s = 1/sqrt(1.0 + tau*tau);
-				c = s*tau;
-			} else {
-				tau = -b/a;
-				c = 1/sqrt(1.0 + tau*tau);
-				s = c * tau;
-			}
-			if ( c*a - s*b > 0.0 ) {
-				setT(i,i, c*a - s*b) ;
-			} else {
-				setT(i,i, s*b - c*a) ;
-				s = -s ;
-				c = -c ;
-			}
-			// L(i,i+1) = s*a + c*b;
-
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(i,lth,c,s) private(a,b) default(none)
-#endif					
-			for( int j=i+2; j<=lth; ++j){
-				a = getT(j,i);
-				b = getT(j, i+1);
-				setT(j, i, c*a - s*b) ;
-				setT(j, i+1, s*a + c*b) ;
-			}
-		}
-
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(lth) default(none)
-#endif				
-		for( int i=0; i<= lth; ++i)
-			setT(lth, i, 0) ;
-
-		// Shift the storage to accommodate a change of dimension.
-		double *newmat = new double[dim1*dim2] ;
-
-
-
-#ifdef USE_OPENMP
-//#pragma omp parallel for shared(lth,newmat,mat) default(none)
-#pragma omp parallel for shared(lth,newmat) default(none)
-#endif				
-		for ( int i = 0 ; i < lth ; i++ ) {
-			for ( int j = 0 ; j < lth ; j++ ) {
-				newmat[i * (dim2-1) + j] = mat[i * dim2 + j] ;
-			}
-		}
-		delete [] mat ;
-		mat = newmat ;
-		
-		dim1-- ;
-		dim2-- ;
-		num_rows-- ;
-		row_end-- ;
-		
-		return true ;
-	}
-	
-	void cholesky_sub(Vector &x, const Vector &b)
-	// Assuming that the current matrix holds a Cholesky decomposition
-	// in R^T * R form, calculate the solution vector x given the vector
-	// of input values b.
-		{
-			if ( b.dim != x.dim || b.dim != dim1 || b.dim != dim2 ) {
-				cout << "Dimension mismatch" ;
-				stop_run(1) ;
-			}
-
-			double condition ;
-			double diag_min = 1.0e50 ;
-			double diag_max = 0.0 ;
-
-			// Print an estimate of the condition number.
-			for ( int j = 0 ; j < dim1 ; j++ ) {
-				if ( get(j,j) > diag_max ) {
-					diag_max = get(j,j) ;
-				}
-				if ( get(j,j) < diag_min ) {
-					diag_min = get(j,j) ;
-				}
-				if ( get(j,j) < 0.0 ) {
-					cout << "Warning: Negative diagonal of cholesky decomp found!\n" ;
-				}
-			}
-			if ( diag_min > 0.0 ) {
-				condition = diag_max * diag_max / ( diag_min * diag_min) ;
-			} else {
-				condition = 1.0e50 ;
-			}
-
-#if(0)
-                        // DEBUG !!
-                        int prec = cout.precision() ;
-			cout << "Estimated Cholesky condition number = " <<
-                          std::scientific << std::setprecision(3) << condition << endl ;
-                        cout.precision(prec) ;
-#endif                        
-                        
-			Vector xtmp(dim1) ;
-			Matrix& mat=*this ;
-			
-			for ( int j = 0 ; j < dim1 ; j++ ) {
-				double sum = b.get(j) ;
-
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(xtmp,mat,j) reduction(+:sum) default(none)
-#endif						
-				for ( int k = 0 ; k < j ; k++ ) {
-					sum -= mat.get(k,j) * xtmp.get(k) ;
-				}
-
-				xtmp.set(j, sum / mat.get(j,j) );
-			}
-
-			for ( int j = dim1 - 1 ; j >= 0 ; j-- ) {
-				double sum = xtmp.get(j) ;
-
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(j,x) reduction(+:sum) default(none)
-#endif						
-				for ( int k = j + 1 ; k < dim1 ; k++ ) {
-					sum -= get(j,k) * x.get(k) ;
-				}
-
-				x.set(j, sum / get(j,j) ) ;
-			}
-		}
 			
 	void print()
 		{
-			if ( RANK == 0 ) {
-				cout << "[" << endl ;
-				for ( int j = row_start ; j <= row_end ; j++ ) {
+			if ( distributed ) {
+				if ( RANK == 0 ) cout << "[" << endl ;				
+				for ( int proc = 0 ; proc < NPROCS ; proc++ ) {
+#ifdef USE_MPI
+					cout.flush() ;
+					MPI_Barrier(MPI_COMM_WORLD) ;
+#endif
+					if ( RANK == proc ) {
+						for ( int j = row_start ; j <= row_end ; j++ ) {
+							cout << "[" << endl ;
+							for ( int k = 0 ; k < dim2 ; k++ ) {
+								cout << j << " " << k << " " << get(j,k) << endl ;
+							}
+							cout << "]" << endl ;
+						}
+					}
+				}
+				if ( RANK == 0 ) cout << "]" << endl ;								
+			} else {
+				if ( RANK == 0 ) {
 					cout << "[" << endl ;
-					for ( int k = 0 ; k < dim2 ; k++ ) {
-						cout << j << " " << k << " " << get(j,k) << endl ;
+					for ( int j = row_start ; j <= row_end ; j++ ) {
+						cout << "[" << endl ;
+						for ( int k = 0 ; k < dim2 ; k++ ) {
+							cout << j << " " << k << " " << get(j,k) << endl ;
+						}
+						cout << "]" << endl ;
 					}
 					cout << "]" << endl ;
 				}
-				cout << "]" << endl ;
 			}
 		}
 
