@@ -36,11 +36,11 @@ split:
 	-$(COMPARE) dlasso.A.split.7.txt correct_output/dlasso.A.split.7.txt
 
 distribute:
-	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --distributed-solver=y >& dlasso.A.dist.txt
+	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y >& dlasso.A.dist.txt
 	-$(COMPARE) dlasso.A.dist.txt correct_output/dlasso.A.dist.txt
-	srun -n 4 ../src/dlars A.txt b.txt dim.txt --split_files --distributed-solver=y >& dlasso.A.dist.4.txt
+	srun -n 4 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y >& dlasso.A.dist.4.txt
 	-$(COMPARE) dlasso.A.dist.txt correct_output/dlasso.A.dist.4.txt
-	srun -n 7 ../src/dlars A.txt b.txt dim.txt --split_files --distributed-solver=y >& dlasso.A.dist.7.txt
+	srun -n 7 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y >& dlasso.A.dist.7.txt
 	-$(COMPARE) dlasso.A.dist.txt correct_output/dlasso.A.dist.7.txt
 
 weights:

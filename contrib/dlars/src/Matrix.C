@@ -74,14 +74,28 @@ bool Matrix::cholesky_distribute(Matrix &chol)
   double eps = 1.0e-10 ;
   if ( dim1 != dim2 ) {
     cout << "Error: Cholesky decomposition only works for square matrices " << endl ;
+		stop_run(1) ;
   }
   if ( ! distributed ) {
     cout << "Error: cholesky_distribute requires a distributed matrix" << endl ;
+		stop_run(1) ;		
   }
-  
+	if ( ! chol.distributed ) {
+		cout << "Error: The cholesky output matrix was not distributed" << endl ;
+		stop_run(1) ;
+	}	
+	if ( dim1 != chol.dim1 ) {
+		cout << "Error: dimension 1 mismatch in cholesky_distribute" << endl ;
+		stop_run(1) ;
+	}
+	if ( dim2 != chol.dim2 ) {
+		cout << "Error: dimension 1 mismatch in cholesky_distribute" << endl ;
+		stop_run(1) ;
+	}
+
   // Column-oriented algorithm:  Find one column at a time.
   for ( int j = 0 ; j < dim1 ; j++ ) {
-		int rank_j = rank_from_row(j) ;
+		// int rank_j = rank_from_row(j) ;
 
 		// Diagonal elements.
     double diag = 0.0 ;
@@ -91,7 +105,8 @@ bool Matrix::cholesky_distribute(Matrix &chol)
       diag0 -= chol.get(k,j) * chol.get(k,j) ;
     }
 #ifdef USE_MPI
-    MPI_Reduce(&diag0, &diag, 1, MPI_DOUBLE, MPI_SUM, rank_j, MPI_COMM_WORLD) ;
+		//    MPI_Reduce(&diag0, &diag, 1, MPI_DOUBLE, MPI_SUM, rank_j, MPI_COMM_WORLD) ;
+    MPI_Allreduce(&diag0, &diag, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;		
 #else
     diag = diag0 ;
 #endif
@@ -111,7 +126,8 @@ bool Matrix::cholesky_distribute(Matrix &chol)
         offdiag0 -= chol.get(l,j) * chol.get(l,k) ;
       }
 #ifdef USE_MPI
-      MPI_Reduce(&offdiag0, &offdiag, 1, MPI_DOUBLE, MPI_SUM, rank_j, MPI_COMM_WORLD) ;
+			//      MPI_Reduce(&offdiag0, &offdiag, 1, MPI_DOUBLE, MPI_SUM, rank_j, MPI_COMM_WORLD) ;
+      MPI_Allreduce(&offdiag0, &offdiag, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;			
 #else
       offdiag = offdiag0 ;
 #endif
@@ -138,6 +154,7 @@ bool Matrix::cholesky_add_row(const Matrix &chol0, const Vector &newr)
 {
   if ( dim1 != dim2 ) {
     cout << "Error: Cholesky decomposition only works for square matrices " << endl ;
+		stop_run(1) ;		
   }
   if ( newr.dim != dim1 || chol0.dim1 != dim1 - 1 || chol0.dim1 != chol0.dim2 ) {
     cout << "Dimension mismatch" ;
@@ -461,3 +478,203 @@ void Matrix::cholesky_sub_distribute(Vector &x, const Vector &b)
 	}
 
 }
+
+
+bool Matrix::cholesky_add_row_distribute(const Matrix &chol0, const Vector &newr)
+	// Given cholesky decomposition of a matrix in chol0
+	// find the cholesky decomposition of a new matrix formed by adding
+	// the specified row (newr) to the original matrix (not given).
+	// The new row is placed in the last index.
+{
+  if ( dim1 != dim2 ) {
+    cout << "Error: Cholesky decomposition only works for square matrices " << endl ;
+		stop_run(1) ;
+  }
+  if ( ! distributed ) {
+    cout << "Error: cholesky_add_row_distribute requires a distributed matrix" << endl ;
+		stop_run(1) ;		
+  }
+  if ( ! chol0.distributed ) {
+    cout << "Error: cholesky_add_row_distribute requires a distributed input matrix" << endl ;
+		stop_run(1) ;		
+  }	
+  if ( newr.dim != dim1 || chol0.dim1 != dim1 - 1 || chol0.dim1 != chol0.dim2 ) {
+    cout << "Dimension mismatch" ;
+    stop_run(1) ;
+  }
+	
+  Vector xtmp(dim1) ;
+	Vector chol0_diag_tmp(dim1,0.0) ;
+	Vector chol0_diag(dim1,0.0) ;	
+
+	if ( dim1-1 > 0 ) {
+		for ( int j = chol0.row_start ; j <= chol0.row_end ; j++ ) {
+			chol0_diag_tmp.set(j, chol0.get(j,j)) ;
+		}
+#ifdef USE_MPI
+    MPI_Allreduce(chol0_diag_tmp.vec, chol0_diag.vec, dim1-1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
+#else
+		for ( int j = 0 ; j < dim1-1 ; j++ ) {
+			chol0_diag.set(j, chol0_diag_tmp.get(j)) ;
+		}
+#endif
+	}
+	
+  double cdotc = 0.0 ;
+  for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
+    double sum0 = ( row_start <= j && j <= row_end ) ? newr.get(j) : 0.0 ;
+		double sum = 0.0 ;
+		
+    for ( int k = chol0.row_start ; k < j && k <= chol0.row_end ; k++ ) {
+      sum0 -= chol0.get(k,j) * xtmp.get(k) ;
+    }
+#ifdef USE_MPI
+    MPI_Allreduce(&sum0, &sum, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;		
+#else
+    sum = sum0 ;
+#endif		
+    xtmp.set(j, sum / chol0_diag.get(j) );
+    cdotc += xtmp.get(j) * xtmp.get(j) ;
+  }
+  double d = newr.get(dim1-1) - cdotc ;
+  if ( d >= 0.0 ) {
+    xtmp.set(dim1-1, sqrt(d) ) ;
+  } else {
+    cout << "Could not add row to distributed Cholesky matrix " << endl ;
+    return false ;
+  }
+
+  for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
+    for ( int k = 0  ; k <= j ; k++ ) {
+			int chol0_rank_k = chol0.rank_from_row(k) ;
+			int chol_rank_k  = rank_from_row(k) ;
+			
+			if ( chol0_rank_k == chol_rank_k ) {
+				// Data resides in the same rank. 
+				if ( row_start <= k && k <= row_end ) {
+					set(k,j, chol0.get(k,j)) ;
+				}
+			} else {
+				double val = 0.0 ;
+				if ( RANK == chol0_rank_k ) {
+					val = chol0.get(k,j) ;					
+#ifdef USE_MPI
+					MPI_Send(&val, 1, MPI_DOUBLE, chol_rank_k, 0, MPI_COMM_WORLD) ;
+#endif
+				} else if ( RANK == chol_rank_k ) {
+#ifdef USE_MPI					
+					MPI_Recv(&val, 1, MPI_DOUBLE, chol0_rank_k, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+					if ( row_start <= k && k <= row_end ) {
+						set(k, j, val) ;
+					}
+#endif
+				}
+				//MPI_Barrier(MPI_COMM_WORLD) ;
+			}
+		}
+		for ( int k = j + 1 ; k < dim1 ; k++ ) {
+			if ( row_start <= k && k <= row_end ) {
+				set(k,j, 0.0) ;
+			}
+		}
+  }
+
+  for ( int j = row_start  ; j <= row_end && j < dim1 ; j++ ) {
+    set(j, dim1-1, xtmp.get(j)) ;
+  }
+
+	int dim11 = dim1-1 ;
+	if ( row_start <= dim11 && dim11 <= row_end ) {
+		for ( int j = 0 ; j < dim11 ; j++ ) {
+			set(dim11, j, 0.0) ;
+		}
+	}
+	
+  return true ;
+}
+
+#if(0) // NOT DONE YET.	
+bool Matrix::cholesky_remove_dist(int id ) 
+  // Based on larscpp github package.  Modified so that diagonal elements of the cholesky
+  // matrix are always positive.
+  // Remove a row from a Cholesky matrix.  Update the dimension of the matrix
+{
+  double a(0),b(0),c(0),s(0),tau(0);
+  if ( dim1 != dim2 ) {
+    cout << "Error: the cholesky matrix should be square" << endl ;
+    stop_run(1) ;
+  }
+  int lth = dim1 - 1 ;
+
+  for(int i=id; i < lth; ++i){
+
+    for( int j=0; j<i; ++j) {
+      set(j,i, get(j,i+1)) ;
+    }
+
+    a = get(i, i+1);
+    b = get(i+1,i+1);
+    if(b==0){
+      set(i,i,a) ;
+      continue;
+    }
+    if( fabs(b) > fabs(a) ){
+      tau = -a/b;
+      s = 1/sqrt(1.0 + tau*tau);
+      c = s*tau;
+    } else {
+      tau = -b/a;
+      c = 1/sqrt(1.0 + tau*tau);
+      s = c * tau;
+    }
+    if ( c*a - s*b > 0.0 ) {
+      set(i,i, c*a - s*b) ;
+    } else {
+      set(i,i, s*b - c*a) ;
+      s = -s ;
+      c = -c ;
+    }
+    // L(i,i+1) = s*a + c*b;
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(i,lth,c,s) private(a,b) default(none)
+#endif					
+    for( int j=i+2; j<=lth; ++j){
+      a = get(i, j);
+      b = get(i+1, j);
+      set(i, j, c*a - s*b) ;
+      set(i+1, j, s*a + c*b) ;
+    }
+  }
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(lth) default(none)
+#endif				
+  for( int i=0; i<= lth; ++i)
+    set(i, lth, 0) ;
+
+  // Shift the storage to accommodate a change of dimension.
+  double *newmat = new double[dim1*dim2] ;
+
+
+
+#ifdef USE_OPENMP
+  //#pragma omp parallel for shared(lth,newmat,mat) default(none)
+#pragma omp parallel for shared(lth,newmat) default(none)
+#endif				
+  for ( int i = 0 ; i < lth ; i++ ) {
+    for ( int j = 0 ; j < lth ; j++ ) {
+      newmat[i * (dim2-1) + j] = mat[i * dim2 + j] ;
+    }
+  }
+  delete [] mat ;
+  mat = newmat ;
+		
+  dim1-- ;
+  dim2-- ;
+  num_rows-- ;
+  row_end-- ;
+		
+  return true ;
+}
+#endif

@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	static struct option long_options[] =
 	{
 		{"algorithm", required_argument, 0, 'a'},
-		{"distributed-solver", required_argument, 0, 'd'},
+		{"distributed_solver", required_argument, 0, 'd'},
 		{"iterations", required_argument, 0, 'i'},
 		{"lambda", required_argument, 0, 'l'},
 		{"max_norm", required_argument, 0, 'm'},
@@ -340,8 +340,9 @@ int main(int argc, char **argv)
 			if ( RANK == 0 ) cout << "Stopping: no more iterations possible" << endl ;
 			break ;
 		} else if ( status == -1 && last_status == 1 ) {
-			if ( RANK == 0 ) cout << "Iteration failed: continuing" << endl ;
-			continue ;
+			// if ( RANK == 0 ) cout << "Iteration failed: continuing" << endl ;
+			if ( RANK == 0 ) cout << "Stopping: iteration failed" << endl ;			
+			break ;
 		} 
 
 		if ( RANK == 0 ) cout << "Finished iteration " << j + 1 << endl ;
@@ -436,21 +437,222 @@ void stop_run(int stat)
 #endif
 }
 
-void DLARS::build_G_A()
-	// Build the G_A matrix after X_A has been built.
-	// Increment the matrix from previous versions if possible.
+
+int DLARS::iteration()
+	// Perform a single iteration of the LARS algorithm.
+	// Return 0 when no more iterations can be performed.
+	// Return 1 on success.
+	// Return -1 on a failed iteration that could be recovered from.
 {
-	if ( A.dim == A_last.dim + 1 ) {
+
+	if ( nactive >= nprops - num_exclude ) {
+		// No more iterations are possible.
+		return 0 ;
+	}
+
+	iterations++ ;
+	auto time1 = std::chrono::system_clock::now() ;			
+	predict() ;
+	auto time2 = std::chrono::system_clock::now() ;
+	std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
+
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time making prediction = " << elapsed_seconds.count() << endl ;
+	}
+#endif			
+			
+	objective_func() ;
+	auto time3 = std::chrono::system_clock::now() ;
+	elapsed_seconds = time3 - time2 ;
+
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time calculating objective function = " << elapsed_seconds.count() << endl ;
+	}
+#endif			
+
+			
+	if ( RANK == 0 ) {
+		trajfile << "Iteration " << iterations << endl ;
+		print_error(trajfile) ;
+		beta.print(trajfile) ;
+		print_error(cout) ;
+		print_restart() ;
+	}
+		
+	correlation() ;
+	auto time4 = std::chrono::system_clock::now() ;
+	elapsed_seconds = time4 - time3 ;
+
+#ifdef TIMING
+	if ( RANK == 0 ) {
+		cout << "Time calculating correlation = " << elapsed_seconds.count() << endl ;
+	}
+#endif
+			
+#ifdef VERBOSE
+	if ( RANK == 0 ) {
+		cout << "Pre-step beta: " << endl ;
+		beta.print() ;
+		cout << "Prediction: " << endl ;
+		mu.print() ;
+		cout << " Correlation: " << endl ;
+		c.print() ;
+		cout << "C_max: " << C_max << endl ;
+	}
+#endif			
+	update_active_set() ;
+	auto time5 = std::chrono::system_clock::now() ;
+	elapsed_seconds = time5 - time4 ;
+
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time updating active set = " << elapsed_seconds.count() << endl ;
+	}
+#endif			
+
+	// build the X_A array.
+	build_X_A() ;
+
+	auto time6 = std::chrono::system_clock::now() ;
+	elapsed_seconds = time6 - time5 ;
+
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time building X_A = " << elapsed_seconds.count() << endl ;
+	}
+#endif			
+
+	build_G_A(G_A, true) ;
+
+	auto time7 = std::chrono::system_clock::now() ;
+	elapsed_seconds = time7 - time6 ;
+
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time building G_A = " << elapsed_seconds.count() << endl ;
+	}
+#endif			
+
+	if ( build_G_A_here() && ! solve_G_A(true) ) {
+		remove_prop = -1 ;
+		add_prop = -1 ;
+		cout << "Iteration failed" << endl ;
+		return -1 ;
+	}
+
+	auto time8 = std::chrono::system_clock::now() ;
+	elapsed_seconds = time8 - time7 ;
+
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time solving G_A = " << elapsed_seconds.count() << endl ;
+	}
+#endif			
+
+	broadcast_solution() ;
+			
+#ifdef VERBOSE
+	if ( RANK == 0 ) {
+		cout << "X_A" << endl ;
+		X_A.print() ;
+		cout << "G_A" << endl ;
+		G_A.print() ;
+		cout << "G_A_Inv " << endl ;
+		G_A_Inv_I.print() ;
+		cout << "A_A " << A_A << endl ;
+	}
+#endif			
+
+	build_u_A() ;
+
+	auto time9 = std::chrono::system_clock::now() ;
+	elapsed_seconds = time9 - time8 ;
+
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time building u_A = " << elapsed_seconds.count() << endl ;
+	}
+#endif			
+
+	update_step_gamma() ;
+
+	auto time10 = std::chrono::system_clock::now() ;
+	elapsed_seconds = time10 - time9 ;
+
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time updating gamma = " << elapsed_seconds.count() << endl ;
+	}
+#endif			
+			
+	update_beta() ;
+
+	auto time11 = std::chrono::system_clock::now() ;
+	elapsed_seconds = time11 - time10 ;
+
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time updating beta = " << elapsed_seconds.count() << endl ;
+	}
+#endif			
+
+	if ( RANK == 0 ) {
+		cout << "Beta: " << endl ;
+		beta.print(cout) ;
+		//cout << "Y constant offset = " << y.shift << endl ;
+		//cout << "Unscaled coefficients: " << endl ;
+		//print_unscaled(cout) ;
+	}
+
+	if ( RANK == 0 ) {
+		double total_mem = 0.0 ;
+		int prec = cout.precision() ;
+		cout << "Matrix memory usage on Rank 0:" << endl ;
+		total_mem += X.print_memory("X") ;
+		total_mem += X_A.print_memory("X_A") ;
+		total_mem += G_A.print_memory("G_A") ;
+		total_mem += chol.print_memory("chol") ;
+		total_mem += pre_con.print_memory("pre_con") ;
+		cout << "Total memory = " << std::fixed << std::setprecision(1) << total_mem
+				 << endl ;
+		cout.precision(prec) ;
+		cout << std::scientific ;
+	}
+	return 1 ;
+
+}
+
+void DLARS::build_G_A(Matrix &G_A_in, bool increment)
+	// Build the G_A matrix after X_A has been built.
+	// Increment the matrix from previous versions if it is possible and the increment parameter is true.
+{
+	if ( distributed_solver && ! G_A_in.distributed ) {
+		G_A_in.distribute(nactive) ;
+	}	
+	if ( increment && A.dim == A_last.dim + 1 ) {
 		// Use prior values to increment one row.
-		increment_G_A() ;
-	} else if ( A.dim == A_last.dim - 1 ) {
+		if ( distributed_solver ) {
+			increment_G_A_dist(G_A_in) ;
+		} else {
+			increment_G_A(G_A_in) ;
+		}
+	} else if ( increment && A.dim == A_last.dim - 1 ) {
 		// Use prior values to decrement one row.
-		decrement_G_A() ;
+		if ( distributed_solver ) {
+			decrement_G_A_dist(G_A_in) ;
+		} else {
+			decrement_G_A(G_A_in) ;
+		}
 	} else {
 		// Unusual event: rebuild the array.
 		if ( build_G_A_here() ) {
 			// Only store G_A on rank 0 for non-distributed solver.
-			G_A.realloc(nactive, nactive) ;
+			if ( distributed_solver ) {
+				G_A_in.distribute(nactive) ;
+			}
+			G_A_in.realloc(nactive, nactive) ;
 		}
 		for ( int j = 0 ; j < nactive ; j++ ) {
 			Vector tmp(nactive) ;
@@ -459,16 +661,17 @@ void DLARS::build_G_A()
 			// matrix.
 			X_A.mult_T_lower(j, tmp) ;
 			if ( build_G_A_here() ) {
-				for ( int k = 0 ; k <= j  ; k++ ) {
-					G_A.set(j, k, tmp.get(k)) ;                                    
+				if ( G_A_in.row_start <= j && j <= G_A_in.row_end ) {
+					for ( int k = 0 ; k <= j  ; k++ ) {
+						G_A_in.set(j, k, tmp.get(k)) ;                                    
+					}
 				}
-			}
-		}
-		if ( build_G_A_here() ) {
-			for ( int j = 0 ; j < nactive ; j++ ) {
-				for ( int k = j + 1 ; k < nactive  ; k++ ) {
-					G_A.set(j, k, G_A.get(k,j) ) ;
-				}
+				// Transpose elements.
+				for ( int k = 0 ; k < j  ; k++ ) {
+					if ( G_A_in.row_start <= k && k <= G_A_in.row_end ) {
+						G_A_in.set(k, j, tmp.get(k)) ;
+					}
+				}				
 			}
 		}
 	}
@@ -481,8 +684,8 @@ bool DLARS::build_G_A_here()
 }
 
 
-void DLARS::increment_G_A()
-	// Increment the G_A array by one extra column and one extra row.
+void DLARS::increment_G_A(Matrix &G_A_in)
+	// Increment the G_A_in array by one extra column and one extra row.
 {
 	if ( nactive != A.dim ) {
 		cout << "Error: A dimension mismatch" << endl ;
@@ -509,17 +712,17 @@ void DLARS::increment_G_A()
 		// Copy unchanged elements of the array.
 		for ( int i = 0 ; i < newc ; i++ ) {
 			for ( int j = 0 ; j <= i ; j++ ) {
-				G_New.set(j,i, G_A.get(j,i)) ;
+				G_New.set(j,i, G_A_in.get(j,i)) ;
 			}
 		}
 
 		// Copy shifted elements of the existing array.
 		for ( int i = newc ; i < nactive - 1 ; i++ ) {
 			for ( int j = 0 ; j < newc ; j++ ) {
-				G_New.set(j,i+1, G_A.get(j,i)) ;
+				G_New.set(j,i+1, G_A_in.get(j,i)) ;
 			}
 			for ( int j = newc ; j <= i ; j++ ) {
-				G_New.set(j+1,i+1, G_A.get(j,i)) ;
+				G_New.set(j+1,i+1, G_A_in.get(j,i)) ;
 			}
 		}
 	}
@@ -543,11 +746,11 @@ void DLARS::increment_G_A()
 
 	// Copy elements back into the reallocated array.
 	if ( build_G_A_here() ) {
-		G_A.realloc(nactive, nactive) ;
+		G_A_in.realloc(nactive, nactive) ;
 		for ( int i = 0 ; i < nactive ; i++ ) {
 			for ( int j = 0 ; j <= i ; j++ ) {
-				G_A.set(i,j, G_New.get(j,i)) ;
-				G_A.set(j,i, G_New.get(j,i)) ;
+				G_A_in.set(i,j, G_New.get(j,i)) ;
+				G_A_in.set(j,i, G_New.get(j,i)) ;
 			}
 		}
 	}
@@ -666,7 +869,7 @@ void DLARS::increment_G_A_dist(Matrix &G_A_dist)
 }
 
 
-void DLARS::decrement_G_A()
+void DLARS::decrement_G_A(Matrix &G_A_in)
 	// Decrement the G_A array by one column and one row.
 {
 	if ( ! build_G_A_here() ) return ; 
@@ -698,56 +901,137 @@ void DLARS::decrement_G_A()
 	// Copy unchanged elements of the array.
 	for ( int i = 0 ; i < delc && i < nactive ; i++ ) {
 		for ( int j = 0 ; j <= i ; j++ ) {
-			G_New.set(j,i, G_A.get(j,i)) ;
+			G_New.set(j,i, G_A_in.get(j,i)) ;
 		}
 	}
 	// Copy shifted elements of the existing array.
 	for ( int i = delc + 1 ; i < nactive + 1 ; i++ ) {
 		for ( int j = 0 ; j < delc ; j++ ) {
 			if ( j <= i - 1 ) {
-				G_New.set(j,i-1, G_A.get(j,i)) ;
+				G_New.set(j,i-1, G_A_in.get(j,i)) ;
 			} else {
-				G_New.set(i-1,j, G_A.get(j,i)) ;
+				G_New.set(i-1,j, G_A_in.get(j,i)) ;
 			}
 		}
 		for ( int j = delc + 1 ; j < nactive + 1 && j <= i ; j++ ) {
 			if ( j <= i ) {
-				G_New.set(j-1,i-1, G_A.get(j,i)) ;
+				G_New.set(j-1,i-1, G_A_in.get(j,i)) ;
 			} else {
-				G_New.set(i-1,j-1, G_A.get(j,i)) ;
+				G_New.set(i-1,j-1, G_A_in.get(j,i)) ;
 			}
 		}
 	}
 	// Copy elements back into the reallocated array.
-	G_A.realloc(nactive, nactive) ;
+	G_A_in.realloc(nactive, nactive) ;
 	for ( int i = 0 ; i < nactive ; i++ ) {
 		for ( int j = 0 ; j <= i ; j++ ) {
-			G_A.set(i,j, G_New.get(j,i)) ;
-			G_A.set(j,i, G_New.get(j,i)) ;
+			G_A_in.set(i,j, G_New.get(j,i)) ;
+			G_A_in.set(j,i, G_New.get(j,i)) ;
+		}
+	}
+}
+
+
+void DLARS::decrement_G_A_dist(Matrix &G_A_dist)
+// Decrement the G_A array by one column and one row.
+// The G_A_in array is assumed to be distributed.
+{
+	if ( ! build_G_A_here() ) return ; 
+			
+	if ( nactive != A.dim ) {
+		cout << "Error: A dimension mismatch" << endl ;
+		stop_run(1) ;
+	}
+	if ( ! G_A_dist.distributed ) {
+		cout << "Error in increment_G_A_dist: The matrix was not distributed\n" ;
+		stop_run(1) ;
+	}
+
+	// Find the new index.
+	int delc = 0 ;
+	for ( ; delc < A_last.dim ; delc++ ) {
+		int k = 0 ;
+		for ( ; k < A.dim ; k++ ) {
+			if ( A_last.get(delc) == A.get(k) )
+				break ;
+		}
+		if ( k == A.dim ) {
+			break ;
+		}
+	}
+	// delc is the index of the deleted column.
+	if ( delc >= A_last.dim ) {
+		cout << "Error: did not find deleted index" << endl ;
+		stop_run(1) ;
+	}
+
+	Matrix G_New ;
+	if ( G_A_dist.distributed ) {
+		G_New.distribute(nactive) ;
+	}
+	G_New.realloc(nactive, nactive) ;
+
+	Vector G_buf(nactive+1) ;
+		
+	// Copy unchanged elements of the array.
+	for ( int j = 0 ; j < nactive + 1 ; j++ ) {
+		if ( j == delc ) continue ;
+
+		int j_new = ( j < delc ) ? j : j - 1 ;
+		int rank_j_new = G_New.rank_from_row(j_new) ;
+		int rank_j_dist = G_A_dist.rank_from_row(j) ;
+
+		if ( rank_j_new == rank_j_dist ) {
+			// Data lies on the same MPI rank.
+			if ( G_New.row_start <= j_new && j_new <= G_New.row_end ) {
+				for ( int i = 0 ; i < delc ; i++ ) {
+					G_New.set(j_new,i, G_A_dist.get(j,i)) ;
+				}
+				for ( int i = delc + 1 ; i < nactive + 1 ; i++ ) {
+					G_New.set(j_new,i-1, G_A_dist.get(j,i)) ;
+				}					
+			}
+		} else {
+			// Need to transfer data from another rank.
+			if ( RANK == rank_j_dist ) {
+				for ( int k = 0 ; k < nactive + 1 ; k++ ) {
+					G_buf.set(k, G_A_dist.get(j,k) ) ;
+				}
+#ifdef USE_MPI
+				MPI_Send(G_buf.vec, nactive+1, MPI_DOUBLE, rank_j_new, 0, MPI_COMM_WORLD) ;
+#endif					
+			} else if ( RANK == rank_j_new ) {
+#ifdef USE_MPI					
+				MPI_Recv(G_buf.vec, nactive+1, MPI_DOUBLE, rank_j_dist, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+#endif										
+				for ( int i = 0 ; i < delc ; i++ ) {
+					G_New.set(j_new,i, G_buf.get(i) ) ;
+				}
+				for ( int i = delc + 1 ; i < nactive + 1 ; i++ ) {
+					G_New.set(j_new,i-1, G_buf.get(i) ) ;
+				}										
+			}
+		}
+	}
+
+	// Copy elements back into the reallocated array.
+	G_A_dist.realloc(nactive, nactive) ;
+	for ( int j = G_A_dist.row_start ; j <= G_A_dist.row_end ; j++ ) {
+		for ( int i = 0 ; i < nactive ; i++ ) {
+			G_A_dist.set(j,i, G_New.get(j,i)) ;
 		}
 	}
 }
 
 
 bool DLARS::solve_G_A(bool use_incremental_updates)
-// Find G_A^-1 * I
+// Find G_A^-1 * I, using either a local or distributed algorithm.
 {
 			
 	auto time1 = std::chrono::system_clock::now() ;
 
 	G_A_Inv_I.realloc(nactive) ;
 
-	Matrix G_A_dist ;
-	Matrix chol_dist ;
-
-	if ( distributed_solver ) {
-		G_A_dist.distribute(nactive) ;
-		chol_dist.distribute(nactive) ;
-		G_A_dist.realloc(nactive, nactive) ;
-		chol_dist.realloc(nactive, nactive) ;				
-	}
-	
-		
 	bool succeeded = false ;
 	// If solve_succeeded == true, the last linear solve worked and
 	// we can possibly update the cholesky decomposition.
@@ -774,28 +1058,65 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 	}
 	if ( solve_succeeded && use_incremental_updates ) {
 		if ( nactive == A_last.dim + 1 && nactive > 2 ) {
-			Matrix chol0(chol) ;
-			Vector G_row(nactive) ;
-			for ( int j = 0 ; j < nactive ; j++ ) {
-				G_row.set(j, G_A.get(nactive-1, j) ) ;
-			}
-			chol.realloc(nactive, nactive) ;
-			auto time1_add = std::chrono::system_clock::now() ;
-			succeeded = chol.cholesky_add_row(chol0, G_row) ;
-			auto time2_add = std::chrono::system_clock::now() ;
-			std::chrono::duration<double> elapsed_seconds = time2_add - time1_add ;
 
-#ifdef TIMING
-			if ( RANK == 0 ) {
-				cout << "Time adding cholesky row = " << elapsed_seconds.count() << endl ;
+			Vector G_row(nactive,0.0) ;
+			int nactive1 = nactive - 1 ;
+			
+			if ( G_A.row_start <= nactive1 && nactive1 <= G_A.row_end ) {
+				for ( int j = 0 ; j < nactive ; j++ ) {
+					G_row.set(j, G_A.get(nactive1, j) ) ;
+				}
 			}
-#endif					
-					
+#ifdef USE_MPI
+			int rank_nactive = G_A.rank_from_row(nactive1) ;
+			MPI_Bcast(G_row.vec, nactive, MPI_DOUBLE, rank_nactive, MPI_COMM_WORLD) ;
+#endif
+
+			if ( ! distributed_solver ) {
+				Matrix chol0(chol) ;
+				chol.realloc(nactive, nactive) ;
+				auto time1_add = std::chrono::system_clock::now() ;
+
+				succeeded = chol.cholesky_add_row(chol0, G_row) ;
+
+				//cout << "Serial cholesky:\n" ;
+				//chol.print() ;
+			
+				auto time2_add = std::chrono::system_clock::now() ;
+				std::chrono::duration<double> elapsed_seconds = time2_add - time1_add ;
+				
+#ifdef TIMING
+				if ( RANK == 0 ) {
+					cout << "Time adding cholesky row = " << elapsed_seconds.count() << endl ;
+				}
+#endif
+			} else { /* distributed_solver */
+				if ( ! chol.distributed ) {
+					chol.distribute(nactive) ;
+				}
+				Matrix chol0(chol) ;
+				chol.realloc(nactive, nactive) ;
+				auto time1_add = std::chrono::system_clock::now() ;
+
+				succeeded = chol.cholesky_add_row_distribute(chol0, G_row) ;
+
+				//cout << "Distributed cholesky:\n" ;
+				//chol.print() ;
+
+				auto time2_add = std::chrono::system_clock::now() ;
+				std::chrono::duration<double> elapsed_seconds = time2_add - time1_add ;
+				
+#ifdef TIMING
+				if ( RANK == 0 ) {
+						cout << "Time adding distributed cholesky row = " << elapsed_seconds.count() << endl ;
+				}
+#endif
+			}
 			if ( succeeded ) {
 				// Back-substitute using the updated cholesky matrix.
 				auto time1_back = std::chrono::system_clock::now() ;
 				if ( distributed_solver ) {
-					succeeded = chol_backsub(G_A_dist, chol_dist) ;
+					succeeded = chol_backsub(G_A, chol) ;
 				} else if ( build_G_A_here() ) {
 					succeeded = chol_backsub(G_A, chol) ;
 				}
@@ -822,13 +1143,13 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 				}
 						
 			} 
-		} else if ( nactive == A_last.dim - 1 && nactive > 2 ) {
+		} else if ( 0 /* DEBUG ! nactive == A_last.dim - 1 && nactive > 2 */ ) {
 			auto time1_back = std::chrono::system_clock::now() ;											
 			succeeded = chol.cholesky_remove_row(remove_prop) ;
 			if ( succeeded ) {
 				// Back-substitute using the updated cholesky matrix.
 				if ( distributed_solver ) {
-					succeeded = chol_backsub(G_A_dist, chol_dist) ;
+					succeeded = chol_backsub(G_A, chol) ;
 				} else if ( build_G_A_here() ) {
 					succeeded = chol_backsub(G_A, chol) ;
 				}
@@ -844,7 +1165,6 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 								
 					}
 #endif
-							
 					return true ;
 				} else {
 					if ( RANK == 0 ) {
@@ -858,46 +1178,47 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 
 	// Try non-incremental if incremental failed or not possible/requested.
 	if ( ! succeeded ) {
-		chol.realloc(nactive, nactive) ;
-		auto time1_chol = std::chrono::system_clock::now() ;											
+		if ( ! distributed_solver ) {
+			chol.realloc(nactive, nactive) ;
+			auto time1_chol = std::chrono::system_clock::now() ;											
 
-		if ( ! G_A.cholesky(chol) ) {
-			if ( RANK == 0 ) cout << "Non-incremental Cholesky failed" << endl ;
-			for ( int j = 0 ; j < nactive ; j++ ) {
-				int k ;
-				// See if this is a new index.
-				for ( k = 0 ; k < A_last.dim ; k++ ) {
-					if ( A.get(j) == A_last.get(k) ) {
-						break ;
+			if ( ! G_A.cholesky(chol) ) {
+				if ( RANK == 0 ) cout << "Non-incremental Cholesky failed" << endl ;
+				for ( int j = 0 ; j < nactive ; j++ ) {
+					int k ;
+					// See if this is a new index.
+					for ( k = 0 ; k < A_last.dim ; k++ ) {
+						if ( A.get(j) == A_last.get(k) ) {
+							break ;
+						}
+					}
+					if ( k == A_last.dim ) {
+						// The index is new. Exclude it in the future.
+						exclude.set( A.get(j), 1) ;
+						++num_exclude ;
 					}
 				}
-				if ( k == A_last.dim ) {
-					// The index is new. Exclude it in the future.
-					exclude.set( A.get(j), 1) ;
-					++num_exclude ;
-				}
+				solve_succeeded = false ;
+				return false ;
 			}
-			solve_succeeded = false ;
-			return false ;
-		}
-				
-		auto time2_chol = std::chrono::system_clock::now() ;
-		std::chrono::duration<double> chol_seconds = time2_chol - time1_chol ;
+
+			auto time2_chol = std::chrono::system_clock::now() ;
+			std::chrono::duration<double> chol_seconds = time2_chol - time1_chol ;
 #ifdef TIMING				
-		if ( RANK == 0 ) {
-			cout << "Time solving full cholesky = " << chol_seconds.count() << endl ;
-		}
-#endif
-
-		if ( distributed_solver ) {
-			auto time1_chol_dist = std::chrono::system_clock::now() ;				
-
-			for ( int j = G_A_dist.row_start ; j <= G_A_dist.row_end ; j++ ) {
-				for ( int k = 0 ; k < nactive ; k++ ) {
-					G_A_dist.set(j,k, G_A.get(j,k)) ;
-				}
+			if ( RANK == 0 ) {
+				cout << "Time solving full cholesky = " << chol_seconds.count() << endl ;
 			}
-			G_A_dist.cholesky_distribute(chol_dist) ;
+#endif
+			
+		} else {
+				
+			auto time1_chol_dist = std::chrono::system_clock::now() ;				
+			if ( ! chol.distributed ) {
+				chol.distribute(nactive) ;
+			}			
+			chol.realloc(nactive, nactive) ;
+			
+			G_A.cholesky_distribute(chol) ;
 				
 			auto time2_chol_dist = std::chrono::system_clock::now() ;								
 			std::chrono::duration<double> chol_dist_seconds = time2_chol_dist - time1_chol_dist ;
@@ -907,7 +1228,7 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 		}
 	}
 	if ( distributed_solver ) {
-		succeeded = chol_backsub(G_A_dist, chol_dist) ;
+		succeeded = chol_backsub(G_A, chol) ;
 	} else if ( build_G_A_here() ) {
 		succeeded = chol_backsub(G_A, chol) ;
 	}
@@ -1006,3 +1327,215 @@ bool DLARS::chol_backsub(Matrix &G_A_in, Matrix &chol_in)
 	return true ;
 }
 
+void DLARS::predict() 
+	// Calculated predicted values of y (mu hat, Eq. 1.2).  Update previous prediction
+	// based on u_A and gamma_use.
+{
+	if ( mu.size() != ndata ) {
+		cout << "Error:  matrix dim mismatch" << endl ;
+		stop_run(1) ;
+	}
+
+	if ( u_A.dim == 0 ) {
+		// First iteration.
+		X.dot(mu, beta) ;
+	} else {
+		for ( int j = 0 ; j < ndata ; j++ ) {
+			mu.set(j,  mu.get(j) + gamma_use * u_A.get(j) ) ;
+		}
+	}
+	/**			
+					for ( int j = 0 ; j < ndata ; j++ ) {
+					double tmp = 0.0 ;
+					for ( int k = 0 ; k < nprops ; k++ ) {
+					tmp += X.get(j,k) * beta.get(k) ;
+					}
+					mu.set(j, tmp) ;
+					}
+	**/
+#ifdef VERBOSE			
+	cout << "Mu = " << endl ;
+	mu.print() ;
+#endif
+}
+
+void DLARS::predict_all() 
+// Calculated predicted values of y (mu hat, Eq. 1.2) with no updating based on u_A.
+{
+	if ( mu.size() != ndata ) {
+		cout << "Error:  matrix dim mismatch" << endl ;
+		stop_run(1) ;
+	}
+	X.dot(mu, beta) ;
+
+#ifdef VERBOSE			
+	cout << "Mu = " << endl ;
+	mu.print() ;
+#endif
+}
+
+double DLARS::sq_error()
+// Squared error Eq. 1.3
+{
+	double result = 0.0 ;
+	for ( int j = 0 ; j < ndata ; j++ ) {
+		result += (y.get(j)-mu.get(j)) * (y.get(j) - mu.get(j) ) ;
+	}
+	return(result) ;
+}
+
+void DLARS::objective_func()
+	// Calculate optimization objective function based on the requested
+	// regularization parameter lambda.  This should be called after
+	// predict_all() or predict().
+{
+	obj_func_val = 0.5 * sq_error() / ndata + lambda * beta.l1norm() ;
+}
+
+void DLARS::correlation() 	
+	// Calculate the correlation vector c, Eq. 2.1
+{
+	C_max = -1.0 ;
+
+	if ( gamma_use <= 0.0 ) {
+		// First iteration.
+		Vector ydiff(ndata,0.0) ;
+		for ( int k = 0 ; k < ndata ; k++ ) {
+			ydiff.set(k, y.get(k) - mu.get(k)) ;
+		}
+
+		X.dot_transpose(c, ydiff) ;
+	} else {
+		// c = c - gamma_use * a.
+		c.add_mult(a, -gamma_use) ;
+	}
+					
+	for ( int j = 0 ; j < nprops ; j++ ) {
+		if ( fabs(c.get(j)) > C_max ) {
+			// Only look for C_max if the coordinate has not been excluded.
+			int i = 0 ;
+			for ( ; i < exclude.dim ; i++ ) {
+				if ( j == exclude.get(i) )
+					break ;
+			}
+			if ( i == exclude.dim )
+				C_max = fabs(c.get(j)) ;
+		}
+	}
+
+	//cout << "New correlation: " << endl ;
+	//c.print() ;
+	//cout << "Max correlation:" << C_max << endl ;
+}
+
+void DLARS::build_X_A()
+{		
+	// Calculate the sign and the X_A array.
+	X_A.realloc(ndata, nactive) ;
+	sign.realloc(nactive) ;
+
+	// Calculate the sign of the correlations.
+	for ( int j = 0 ; j < nactive ; j++ ) {
+		if ( c.get( A.get(j) ) < 0 ) 
+			sign.set( j, -1) ;
+		else
+			sign.set( j, 1) ;
+	}
+
+	// Calculate the X_A array.
+	for ( int j = X_A.row_start ; j <= X_A.row_end ; j++ ) {
+		for ( int k = 0 ; k < nactive ; k++ ) {
+			double val = X.get( j, A.get(k) ) * sign.get(k) ;
+			X_A.set(j,k, val) ;
+		}
+	}
+}
+
+int DLARS::restart(string filename)
+// Restart from the given file.
+{
+	int iter ;
+	ifstream inf(filename) ;
+	if ( ! inf.good() ) {
+		cout << "Could not open " << filename << " for restart" << endl ;
+		stop_run(1) ;
+	}
+	while (1) {
+		string s ;
+		// Get the iteration number.
+		inf >> s >> iter ;
+		//iter-- ;
+		if ( inf.eof() || ! inf.good() ) break ;
+
+		// Get the objective function from the next line.
+		for ( int j = 0 ; j < 15 ; j++ ) {
+			inf >> s ;
+			if ( j == 10 ) {
+				obj_func_val = stod(s) ;
+				//cout << "OBJ FUNC: " << obj_func_val << endl ;
+			}
+		}
+
+		if ( inf.eof() || ! inf.good() ) {
+			cout << "Could not read the objective function value from " << filename << endl ;
+			stop_run(1) ;
+		}
+		A.clear() ;
+
+		// Read all of the beta values.
+		string line ;
+		getline(inf,line) ;
+		beta.read_sparse(inf) ;
+		for ( int j = 0 ; j < nprops ; j++ ) {
+			if ( fabs(beta.get(j)) > 0.0 ) {
+				A.push(j) ;
+			}
+		}
+		if ( inf.eof() || ! inf.good() ) {
+			cout << "Could not read the parameter values from " << filename << endl ;
+			stop_run(1) ;
+		}
+
+		getline(inf,line) ;
+		if ( line.find("Exclude") != string::npos ) {
+			exclude.read_sparse(inf) ;
+		}
+
+		if ( line.find("Mu") != string::npos ) {
+			mu.read_sparse(inf) ;
+		}
+	}
+		
+	inf.close() ;
+		
+	nactive = A.dim ;
+	iterations = iter - 1 ;
+
+	bool con_grad_save = solve_con_grad ;
+	solve_con_grad = false ;
+	//predict_all() ;
+	objective_func() ;
+	correlation() ;
+	build_X_A() ;
+	build_G_A(G_A, false) ;
+		
+	if ( RANK == 0 ) {
+		solve_G_A(false) ;
+	}
+	broadcast_solution() ;
+
+	// Full calculation of pre-conditioner.
+	if ( use_precondition ) {
+		pre_con.resize(nactive, nactive) ;
+		Matrix chol_precon(nactive, nactive) ;
+						
+		if ( ! G_A.cholesky(chol_precon) ) {
+			if ( RANK == 0 ) cout << "Cholesky decomposition for pre-conditioning failed\n" ;
+		}
+		chol_precon.cholesky_invert(pre_con) ;
+	}
+		
+	solve_con_grad = con_grad_save ;
+		
+	return iter -1 ;
+}

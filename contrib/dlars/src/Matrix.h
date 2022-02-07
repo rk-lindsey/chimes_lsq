@@ -21,7 +21,9 @@ public:
 	void cholesky_sub(Vector &x, const Vector &b) ;
 	bool cholesky_remove_row(int id ) ;
 	void cholesky_sub_distribute(Vector &x, const Vector &b) ;
-	int rank_from_row(int j) {
+	bool cholesky_add_row_distribute(const Matrix &chol0, const Vector &newr)	;
+	
+	int rank_from_row(int j) const {
 		for ( int k = 0 ; k < NPROCS ; k++ ) {
 			int r_start = (dim1 * k) / NPROCS ;
 			int r_end = 0 ;
