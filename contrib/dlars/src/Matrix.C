@@ -593,31 +593,56 @@ bool Matrix::cholesky_add_row_distribute(const Matrix &chol0, const Vector &newr
   return true ;
 }
 
-#if(0) // NOT DONE YET.	
-bool Matrix::cholesky_remove_dist(int id ) 
+bool Matrix::cholesky_remove_row_dist(int id ) 
   // Based on larscpp github package.  Modified so that diagonal elements of the cholesky
   // matrix are always positive.
   // Remove a row from a Cholesky matrix.  Update the dimension of the matrix
+  // This version assumes a distributed matrix.
 {
   double a(0),b(0),c(0),s(0),tau(0);
   if ( dim1 != dim2 ) {
     cout << "Error: the cholesky matrix should be square" << endl ;
     stop_run(1) ;
   }
+	if ( ! distributed ) {
+		cout << "Error: cholesky_remove_dist assumes a distributed matrix\n" ;
+		stop_run(1) ;
+	}
+	
   int lth = dim1 - 1 ;
 
   for(int i=id; i < lth; ++i){
 
-    for( int j=0; j<i; ++j) {
+    for( int j= row_start ; j<i && j <= row_end ; ++j) {
       set(j,i, get(j,i+1)) ;
     }
 
-    a = get(i, i+1);
-    b = get(i+1,i+1);
-    if(b==0){
+		int rank_i = rank_from_row(i) ;
+		int rank_i_1 = rank_from_row(i+1) ;
+
+		if ( RANK == rank_i ) {
+			a = get(i, i+1);
+		} else {
+			a = 0.0 ;
+		}
+#ifdef USE_MPI		
+		MPI_Bcast(&a, 1, MPI_DOUBLE, rank_i, MPI_COMM_WORLD) ;
+#endif		
+
+		if ( RANK == rank_i_1 ) {
+			b = get(i+1,i+1);
+		} else {
+			b = 0.0 ;
+		}
+#ifdef USE_MPI		
+		MPI_Bcast(&b, 1, MPI_DOUBLE, rank_i_1, MPI_COMM_WORLD) ;
+#endif		
+		
+    if( b == 0.0 ) {
       set(i,i,a) ;
       continue;
     }
+		
     if( fabs(b) > fabs(a) ){
       tau = -a/b;
       s = 1/sqrt(1.0 + tau*tau);
@@ -628,53 +653,82 @@ bool Matrix::cholesky_remove_dist(int id )
       s = c * tau;
     }
     if ( c*a - s*b > 0.0 ) {
-      set(i,i, c*a - s*b) ;
+			if ( RANK == rank_i ) {
+				set(i,i, c*a - s*b) ;
+			}
     } else {
-      set(i,i, s*b - c*a) ;
+			if ( RANK == rank_i ) {
+				set(i,i, s*b - c*a) ;
+			}
       s = -s ;
       c = -c ;
     }
     // L(i,i+1) = s*a + c*b;
 
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(i,lth,c,s) private(a,b) default(none)
-#endif					
     for( int j=i+2; j<=lth; ++j){
-      a = get(i, j);
-      b = get(i+1, j);
-      set(i, j, c*a - s*b) ;
-      set(i+1, j, s*a + c*b) ;
+			if ( RANK == rank_i ) {
+				a = get(i, j);
+			}
+			if ( RANK == rank_i_1 ) {
+				b = get(i+1, j);
+			}
+			if ( RANK == rank_i && RANK == rank_i_1 ) {
+				set(i, j, c*a - s*b) ;
+				set(i+1, j, s*a + c*b) ;
+			} else if ( RANK == rank_i ) {
+				// Sends and receives need to be matched.
+				MPI_Send(&a, 1, MPI_DOUBLE, rank_i_1, 0, MPI_COMM_WORLD) ;
+				MPI_Recv(&b, 1, MPI_DOUBLE, rank_i_1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+				set(i, j, c*a - s*b) ;				
+			} else if ( RANK == rank_i_1 ) {
+				// Sends and receives need to be matched.				
+				MPI_Recv(&a, 1, MPI_DOUBLE, rank_i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+				MPI_Send(&b, 1, MPI_DOUBLE, rank_i, 1, MPI_COMM_WORLD) ;
+				set(i+1, j, s*a + c*b) ;
+			}
     }
   }
 
-#ifdef USE_OPENMP		
-#pragma omp parallel for shared(lth) default(none)
-#endif				
-  for( int i=0; i<= lth; ++i)
+  for( int i= row_start; i<= lth && i <= row_end ; ++i)
     set(i, lth, 0) ;
 
-  // Shift the storage to accommodate a change of dimension.
-  double *newmat = new double[dim1*dim2] ;
+	Matrix newmat(lth, lth, true) ;
 
-
-
-#ifdef USE_OPENMP
-  //#pragma omp parallel for shared(lth,newmat,mat) default(none)
-#pragma omp parallel for shared(lth,newmat) default(none)
-#endif				
   for ( int i = 0 ; i < lth ; i++ ) {
-    for ( int j = 0 ; j < lth ; j++ ) {
-      newmat[i * (dim2-1) + j] = mat[i * dim2 + j] ;
-    }
+		int rank_i_new = newmat.rank_from_row(i) ;
+		int rank_i = rank_from_row(i) ;
+
+		if ( rank_i == rank_i_new ) {
+			if ( newmat.row_start <= i && i <= newmat.row_end ) {
+				for ( int j = 0 ; j < lth ; j++ ) {
+					newmat.set(i, j, get(i,j)) ;
+				}
+			}
+		} else {
+			Vector tmp(lth,0.0) ;
+			if ( RANK == rank_i ) {
+				for ( int l = 0 ; l < lth ; l++ ) {
+					tmp.set( l, get(i, l) ) ;
+				}
+				MPI_Send(tmp.vec, lth, MPI_DOUBLE, rank_i_new, 0, MPI_COMM_WORLD) ;
+			}
+			else if ( RANK == rank_i_new ) {
+				MPI_Recv(tmp.vec, lth, MPI_DOUBLE, rank_i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+				for ( int l = 0 ; l < lth ; l++ ) {
+					newmat.set( i, l, tmp.get(l) ) ;
+				}
+			}
+		}
   }
   delete [] mat ;
-  mat = newmat ;
+  mat = newmat.mat ;
+	newmat.mat = nullptr ;
 		
-  dim1-- ;
-  dim2-- ;
-  num_rows-- ;
-  row_end-- ;
-		
+  dim1		  = newmat.dim1 ;
+  dim2		  = newmat.dim2 ;
+  num_rows  = newmat.num_rows ;
+  row_end	  = newmat.row_end ;
+	row_start = newmat.row_start ;
+	
   return true ;
 }
-#endif

@@ -1143,9 +1143,32 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 				}
 						
 			} 
-		} else if ( 0 /* DEBUG ! nactive == A_last.dim - 1 && nactive > 2 */ ) {
-			auto time1_back = std::chrono::system_clock::now() ;											
-			succeeded = chol.cholesky_remove_row(remove_prop) ;
+		} else if ( nactive == A_last.dim - 1 && nactive > 2 ) {
+			auto time1_rem = std::chrono::system_clock::now() ;				
+
+			if ( distributed_solver ) {
+				succeeded = chol.cholesky_remove_row_dist(remove_prop) ;
+				auto time2_rem = std::chrono::system_clock::now() ;
+				std::chrono::duration<double> rem_seconds = time2_rem - time1_rem ;
+#ifdef TIMING								
+					if ( RANK == 0 ) {
+							cout << "Time removing a variable (distributed) = " << rem_seconds.count() << endl ;	
+					}
+#endif
+
+			} else {
+				succeeded = chol.cholesky_remove_row(remove_prop) ;
+
+				auto time2_rem = std::chrono::system_clock::now() ;
+				std::chrono::duration<double> rem_seconds = time2_rem - time1_rem ;
+#ifdef TIMING								
+					if ( RANK == 0 ) {
+							cout << "Time removing a variable (serial) = " << rem_seconds.count() << endl ;	
+					}
+#endif					
+			}
+
+			auto time1_back = std::chrono::system_clock::now() ;
 			if ( succeeded ) {
 				// Back-substitute using the updated cholesky matrix.
 				if ( distributed_solver ) {
@@ -1161,8 +1184,8 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 					std::chrono::duration<double> backsub_seconds = time2 - time1_back ;														
 #ifdef TIMING								
 					if ( RANK == 0 ) {
-						cout << "Time back-substituting = " << backsub_seconds.count() << endl ;							               				cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
-								
+							cout << "Time back-substituting = " << backsub_seconds.count() << endl ;
+							cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
 					}
 #endif
 					return true ;
