@@ -1,12 +1,16 @@
 /** Distributed LARS-LASSO algorithm 
 		The notation and implementation closely follows
 		B. Efron, T. Hastie, I. Johnstone, and R. Tibshirani, "Least Angle Regression",
-    		The Annals of Statistics, 32, 407-499(2004).
-    Larry Fried
+		The Annals of Statistics, 32, 407-499(2004).
 
-		The X and X_A matrices are distributed.  Code works with MPI.
+		Larry Fried
 
-    12/2018
+		The X and X_A matrices are distributed among MPI processes.	 
+		If the --distributed_solver argument is given, Cholesky decomposition and all 
+    matrices are distributed.  This removes memory limitations in earlier versions
+    of the program.
+
+		2/2022
 **/
 
 // #define VERBOSE // Define for extra output
@@ -40,7 +44,7 @@ void display_usage(struct option* opt)
 {
 	cout << "Recognized options" << endl ;
 	while ( opt->name != NULL ) {
-		cout << "  --" << opt->name << " " ;
+		cout << "	 --" << opt->name << " " ;
 		if ( opt->has_arg == required_argument ) {
 			cout << "ARG required" ;
 		} else if ( opt->has_arg == no_argument ) {
@@ -58,9 +62,9 @@ int main(int argc, char **argv)
 {
 
 #ifdef USE_MPI	
-	MPI_Init     (&argc, &argv);
-  MPI_Comm_size(MPI_COMM_WORLD, &NPROCS);
-  MPI_Comm_rank(MPI_COMM_WORLD, &RANK);
+	MPI_Init		 (&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &NPROCS);
+	MPI_Comm_rank(MPI_COMM_WORLD, &RANK);
 #else
 	RANK = 0 ;
 	NPROCS = 1 ;
@@ -103,18 +107,18 @@ int main(int argc, char **argv)
 
 	// Default options.
 	
-	string algorithm("lasso") ;       // Algorithm to use: lasso or lars
-	bool split_files = false ;        // Read input matrix from split files ?
-	bool normalize=true ;             // Whether to normalize the X matrix.
-	bool con_grad = false ;           // Whether to use congugate gradient algorithm to solve linear equations.
+	string algorithm("lasso") ;				// Algorithm to use: lasso or lars
+	bool split_files = false ;				// Read input matrix from split files ?
+	bool normalize=true ;							// Whether to normalize the X matrix.
+	bool con_grad = false ;						// Whether to use congugate gradient algorithm to solve linear equations.
 
 	bool use_precondition = false ;
 	bool distributed_solver = false ;
-	// Stopping criteria.  Default is to calculate all possible solutions.
+	// Stopping criteria.	 Default is to calculate all possible solutions.
 	
-	double max_beta_norm = 1.0e+50 ;  // Maximum L1 norm of solution 
-	int max_iterations = 10000000 ;   // Maximum number of LARS iterations.
-	double lambda = 0.0 ;             // L1 weighting factor.
+	double max_beta_norm = 1.0e+50 ;	// Maximum L1 norm of solution 
+	int max_iterations = 10000000 ;		// Maximum number of LARS iterations.
+	double lambda = 0.0 ;							// L1 weighting factor.
 	
 	string weight_file("") ;
 	string restart_file ;
@@ -141,7 +145,7 @@ int main(int argc, char **argv)
 			max_iterations = atoi(optarg) ;
 			break ;
 		case 'l':
-		  lambda = atof(optarg) ;
+			lambda = atof(optarg) ;
 			break ;			
 		case 'm':
 			max_beta_norm = atof(optarg) ;
@@ -334,7 +338,7 @@ int main(int argc, char **argv)
 	int last_status = 1 ;
 	auto time1 = std::chrono::system_clock::now() ;
 	
-	for (  ; j + 1 <= max_iterations ; j++ ) {
+	for (	 ; j + 1 <= max_iterations ; j++ ) {
 		int status = lars.iteration() ;
 		if ( status == 0 ) {
 			if ( RANK == 0 ) cout << "Stopping: no more iterations possible" << endl ;
@@ -364,7 +368,7 @@ int main(int argc, char **argv)
 		std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
 		
 		if ( RANK == 0 )
-			cout << "Time for iteration " << j << " = " << elapsed_seconds.count() << " seconds " << endl ;
+			cout << "Time for iteration " << j + 1 << " = " << elapsed_seconds.count() << " seconds " << endl ;
 
 		time1 = std::chrono::system_clock::now() ;
 	}
@@ -474,16 +478,30 @@ int DLARS::iteration()
 
 			
 	if ( RANK == 0 ) {
+		auto time_rst_1 = std::chrono::system_clock::now() ;
+
 		trajfile << "Iteration " << iterations << endl ;
 		print_error(trajfile) ;
 		beta.print(trajfile) ;
 		print_error(cout) ;
-		print_restart() ;
+
+		if ( iterations % 10 == 0 ) {
+			print_restart() ;
+		}
+
+		auto time_rst_2 = std::chrono::system_clock::now() ;		
+		elapsed_seconds = time_rst_2 - time_rst_1 ;
+#ifdef TIMING			
+		if ( RANK == 0 ) {
+			cout << "Time writing restart file = " << elapsed_seconds.count() << endl ;
+		}
+#endif					
 	}
-		
+
+	auto time4a = std::chrono::system_clock::now() ;	
 	correlation() ;
-	auto time4 = std::chrono::system_clock::now() ;
-	elapsed_seconds = time4 - time3 ;
+	auto time4b = std::chrono::system_clock::now() ;
+	elapsed_seconds = time4b - time4a ;
 
 #ifdef TIMING
 	if ( RANK == 0 ) {
@@ -504,7 +522,7 @@ int DLARS::iteration()
 #endif			
 	update_active_set() ;
 	auto time5 = std::chrono::system_clock::now() ;
-	elapsed_seconds = time5 - time4 ;
+	elapsed_seconds = time5 - time4b ;
 
 #ifdef TIMING			
 	if ( RANK == 0 ) {
@@ -615,8 +633,8 @@ int DLARS::iteration()
 		total_mem += G_A.print_memory("G_A") ;
 		total_mem += chol.print_memory("chol") ;
 		total_mem += pre_con.print_memory("pre_con") ;
-		cout << "Total memory = " << std::fixed << std::setprecision(1) << total_mem
-				 << endl ;
+		cout << "Total memory = " << std::fixed << std::setprecision(1)
+				 << total_mem/1024.0 << " Gb " << endl ;
 		cout.precision(prec) ;
 		cout << std::scientific ;
 	}
@@ -662,12 +680,12 @@ void DLARS::build_G_A(Matrix &G_A_in, bool increment)
 			X_A.mult_T_lower(j, tmp) ;
 			if ( build_G_A_here() ) {
 				if ( G_A_in.row_start <= j && j <= G_A_in.row_end ) {
-					for ( int k = 0 ; k <= j  ; k++ ) {
-						G_A_in.set(j, k, tmp.get(k)) ;                                    
+					for ( int k = 0 ; k <= j	; k++ ) {
+						G_A_in.set(j, k, tmp.get(k)) ;																		
 					}
 				}
 				// Transpose elements.
-				for ( int k = 0 ; k < j  ; k++ ) {
+				for ( int k = 0 ; k < j	 ; k++ ) {
 					if ( G_A_in.row_start <= k && k <= G_A_in.row_end ) {
 						G_A_in.set(k, j, tmp.get(k)) ;
 					}
@@ -1068,8 +1086,10 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 				}
 			}
 #ifdef USE_MPI
-			int rank_nactive = G_A.rank_from_row(nactive1) ;
-			MPI_Bcast(G_row.vec, nactive, MPI_DOUBLE, rank_nactive, MPI_COMM_WORLD) ;
+			if ( distributed_solver ) {
+				int rank_nactive = G_A.rank_from_row(nactive1) ;
+				MPI_Bcast(G_row.vec, nactive, MPI_DOUBLE, rank_nactive, MPI_COMM_WORLD) ;
+			}
 #endif
 
 			if ( ! distributed_solver ) {
@@ -1171,9 +1191,7 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 			auto time1_back = std::chrono::system_clock::now() ;
 			if ( succeeded ) {
 				// Back-substitute using the updated cholesky matrix.
-				if ( distributed_solver ) {
-					succeeded = chol_backsub(G_A, chol) ;
-				} else if ( build_G_A_here() ) {
+				if ( build_G_A_here() ) {
 					succeeded = chol_backsub(G_A, chol) ;
 				}
 				if ( succeeded ) {
@@ -1270,24 +1288,24 @@ bool DLARS::chol_backsub(Matrix &G_A_in, Matrix &chol_in)
 	// Returns true if the solution passes consistency tests.
 {
 
-	// 			// DEBUG !!
-	// 			if ( RANK == 0 ) cout << "Cholesky " << endl ;
-	//       chol.print() ;
+	//			// DEBUG !!
+	//			if ( RANK == 0 ) cout << "Cholesky " << endl ;
+	//			 chol.print() ;
 
 	// #ifdef USE_MPI			
-	// 			MPI_Barrier(MPI_COMM_WORLD) ;
-	// 			cout.flush() ;
+	//			MPI_Barrier(MPI_COMM_WORLD) ;
+	//			cout.flush() ;
 	// #endif			
 			
-	// 			if ( RANK == 0 ) cout << "Cholesky dist" << endl ;
-	// 			chol_in.print() ;
+	//			if ( RANK == 0 ) cout << "Cholesky dist" << endl ;
+	//			chol_in.print() ;
 
 	// #ifdef USE_MPI			
-	// 			MPI_Barrier(MPI_COMM_WORLD) ;
-	// 			cout.flush() ;
+	//			MPI_Barrier(MPI_COMM_WORLD) ;
+	//			cout.flush() ;
 	// #endif			
 			
-	const double eps_fail = 1.0e-04 ;  // Max allowed solution error.
+	const double eps_fail = 1.0e-04 ;	 // Max allowed solution error.
 
 	// Solve for G_A^-1 * unity
 	Vector unity(nactive, 1.0) ;
@@ -1351,11 +1369,11 @@ bool DLARS::chol_backsub(Matrix &G_A_in, Matrix &chol_in)
 }
 
 void DLARS::predict() 
-	// Calculated predicted values of y (mu hat, Eq. 1.2).  Update previous prediction
+	// Calculated predicted values of y (mu hat, Eq. 1.2).	Update previous prediction
 	// based on u_A and gamma_use.
 {
 	if ( mu.size() != ndata ) {
-		cout << "Error:  matrix dim mismatch" << endl ;
+		cout << "Error:	 matrix dim mismatch" << endl ;
 		stop_run(1) ;
 	}
 
@@ -1364,7 +1382,7 @@ void DLARS::predict()
 		X.dot(mu, beta) ;
 	} else {
 		for ( int j = 0 ; j < ndata ; j++ ) {
-			mu.set(j,  mu.get(j) + gamma_use * u_A.get(j) ) ;
+			mu.set(j,	 mu.get(j) + gamma_use * u_A.get(j) ) ;
 		}
 	}
 	/**			
@@ -1386,7 +1404,7 @@ void DLARS::predict_all()
 // Calculated predicted values of y (mu hat, Eq. 1.2) with no updating based on u_A.
 {
 	if ( mu.size() != ndata ) {
-		cout << "Error:  matrix dim mismatch" << endl ;
+		cout << "Error:	 matrix dim mismatch" << endl ;
 		stop_run(1) ;
 	}
 	X.dot(mu, beta) ;
@@ -1409,13 +1427,13 @@ double DLARS::sq_error()
 
 void DLARS::objective_func()
 	// Calculate optimization objective function based on the requested
-	// regularization parameter lambda.  This should be called after
+	// regularization parameter lambda.	 This should be called after
 	// predict_all() or predict().
 {
 	obj_func_val = 0.5 * sq_error() / ndata + lambda * beta.l1norm() ;
 }
 
-void DLARS::correlation() 	
+void DLARS::correlation()		
 	// Calculate the correlation vector c, Eq. 2.1
 {
 	C_max = -1.0 ;
@@ -1538,11 +1556,18 @@ int DLARS::restart(string filename)
 	solve_con_grad = false ;
 	//predict_all() ;
 	objective_func() ;
+
+	if ( RANK == 0 ) cout << "Restart: calculating correlation\n" ;
 	correlation() ;
+
+	if ( RANK == 0 ) cout << "Restart: building X_A\n" ;
 	build_X_A() ;
+
+	if ( RANK == 0 ) cout << "Restart: building G_A\n" ;
 	build_G_A(G_A, false) ;
-		
-	if ( RANK == 0 ) {
+	
+	if ( build_G_A_here() ) {
+		if ( RANK == 0 ) cout << "Restart: solving G_A\n" ;
 		solve_G_A(false) ;
 	}
 	broadcast_solution() ;
@@ -1553,7 +1578,8 @@ int DLARS::restart(string filename)
 		Matrix chol_precon(nactive, nactive) ;
 						
 		if ( ! G_A.cholesky(chol_precon) ) {
-			if ( RANK == 0 ) cout << "Cholesky decomposition for pre-conditioning failed\n" ;
+			cout << "Cholesky decomposition for pre-conditioning failed\n" ;
+			stop_run(1) ;
 		}
 		chol_precon.cholesky_invert(pre_con) ;
 	}
@@ -1561,4 +1587,422 @@ int DLARS::restart(string filename)
 	solve_con_grad = con_grad_save ;
 		
 	return iter -1 ;
+}
+
+void DLARS::broadcast_solution()
+	// Broadcast results of solving G_A.
+{
+#ifdef USE_MPI
+	if ( ! distributed_solver ) {
+		if ( RANK != 0 ) {
+			G_A_Inv_I.realloc(nactive) ;
+			A.realloc(nactive) ;
+		}
+		
+		MPI_Bcast(&nactive, 1, MPI_INT, 0, MPI_COMM_WORLD) ;
+		MPI_Bcast(A.vec, nactive, MPI_INT, 0, MPI_COMM_WORLD) ;
+		MPI_Bcast(G_A_Inv_I.vec, nactive, MPI_DOUBLE, 0, MPI_COMM_WORLD) ;
+		MPI_Bcast(&A_A, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD) ;
+	}
+#endif
+}
+
+	
+bool DLARS::solve_G_A_con_grad()
+	// Use the conjugate gradient method to find G_A_Inv_I and A_A
+	// Does not use cholesky decomposition.
+	// Returns true if the solution passes consistency tests.
+{
+
+	const double eps_fail = 1.0e-04 ;	 // Max allowed solution error.
+	const double eps_con_grad = 1.0e-08 ;	 // Conjugate gradient error tolerance.
+
+	// Solve for G_A^-1 * unity
+	Vector unity(nactive, 1.0) ;
+
+	// if ( RANK == 0 ) {
+	//	// cout << "G_A_Inv_I guess = \n" ;
+	//	G_A_Inv_I.print(cout) ;
+	// }
+	bool use_ssor = false ;
+	bool use_chol_precon = true ;
+
+	if ( use_precondition ) {
+		if ( use_ssor ) {
+			// SSOR preconditioner
+
+			pre_con.realloc(nactive, nactive) ;			
+			Matrix K(nactive, nactive) ;
+			double omega = 1.1 ;
+			double omega_scale = sqrt(2.0-omega) ;
+			
+			for ( int i = 0 ; i < nactive ; i++ ) {
+				for ( int j = 0 ; j <= i ; j++ ) {
+					if ( i != j ) {
+						double val = -omega_scale * sqrt(omega/G_A.get(i,i))
+							* omega * G_A.get(i,j) / G_A.get(j,j) ;
+						K.set(i,j,val) ;
+					} else {
+						double val = omega_scale * sqrt(omega/G_A.get(i,i))
+							* (1.0-omega) ;
+						K.set(i,i,val) ;
+					}
+				}
+				for ( int j = i+1 ; j < nactive ; j++ ) {
+					K.set(i,j,0.0) ;
+				}
+			}
+			// pre_con = K^T * K
+			for ( int i = 0 ; i < nactive ; i++ ) {
+				for ( int j = 0 ; j < nactive ; j++ ) {
+					double sum = 0.0 ;
+					for ( int k = 0 ; k < nactive ; k++ ) {
+						sum += K.get(k,i) * K.get(k,j) ;
+					}
+					// Approximate pre-conditioner.
+					pre_con.set(i,j,sum) ;
+
+					// Use diagonal matrix.
+					//pre_con.set(i,j,0.0) ;
+				}
+				// Use diagonal matrix.
+				// pre_con.set(i,i,1.0/G_A.get(i,i)) ;
+			}
+
+		} else if ( use_chol_precon ) {
+			// Test: use the inverse of G_A to precondition.
+			pre_con.resize(nactive, nactive) ;
+
+			if ( nactive == A_last.dim + 1 && nactive > 2 ) {
+				// Add 1 row to pre-conditioner.
+				pre_con.set(nactive-1, nactive-1, 1.0) ;
+
+				// DEBUG !
+				//if ( RANK == 0 ) {
+				//cout << "Updated preconditioner\n" ;
+				//pre_con.print() ;
+				//}
+						
+			} else {
+				// Full calculation of pre-conditioner.
+				Matrix chol_precon(nactive, nactive) ;
+						
+				if ( ! G_A.cholesky(chol_precon) ) {
+					if ( RANK == 0 ) cout << "Cholesky decomposition for pre-conditioning failed\n" ;
+				}
+					
+				chol_precon.cholesky_invert(pre_con) ;
+			}
+		}
+					
+		if ( ! G_A.pre_con_grad(G_A_Inv_I, unity, pre_con, nactive+10, 10, eps_con_grad) ) {
+			if ( RANK == 0 ) cout << "Pre-conditioned conjugate gradient failed\n" ;
+			return false ;
+		}
+	} else { // ! use_precondition
+			
+		if ( ! G_A.con_grad(G_A_Inv_I, unity, nactive+10, 10, eps_con_grad) ) {
+			if ( RANK == 0 ) cout << "Conjugate gradient failed\n" ;
+			return false ; 
+		} 
+	}
+			
+	// if ( RANK == 0 ) {
+	//	cout << "G_A_Inv_I solution" << endl ;
+	//	G_A_Inv_I.print(cout) ;
+	// }
+
+	// Test to see if the solution worked.
+	Vector test(nactive) ;
+	G_A.dot(test, G_A_Inv_I) ;
+	double errval = 0.0 ;
+	for ( int j = 0 ; j < nactive ; j++ ) {
+		errval += fabs(test.get(j)-1.0) ;
+		if ( fabs(test.get(j) - 1.0) > eps_fail ) {
+			if ( RANK == 0 ) {
+				cout << "Conjugate gradient solution test failed\n" ;
+				cout << "Error = " << fabs(test.get(j) - 1.0) << endl ;
+			}
+			return false ;
+		}
+	}
+	if ( nactive > 0 && RANK == 0 ) cout << "Cholesky error test = " << errval / nactive << endl ;
+			
+			
+	A_A = 0.0 ;
+	for ( int j = 0 ; j < nactive ; j++ ) {
+		A_A += G_A_Inv_I.get(j) ;
+	}
+	if ( A_A > 0.0 ) 
+		A_A = 1.0 / sqrt(A_A) ;
+	else {
+		if ( RANK == 0 ) cout << "A_A Normalization failed" << endl ;
+		return false ;
+	}
+	return true ;
+}
+
+void DLARS::build_u_A()
+{
+	const double eps_fail = 1.0e-04 ;
+	w_A.realloc(nactive) ;
+	u_A.realloc(ndata) ;
+	a.realloc(nprops) ;
+
+	G_A_Inv_I.scale(w_A, A_A) ;
+#ifdef VERBOSE			
+	cout << "w_A " << endl ;
+	w_A.print() ;
+#endif			
+			
+	X_A.dot(u_A,w_A) ;
+
+#ifdef VERBOSE			
+	cout << "U_A " << endl ;
+	u_A.print() ;
+#endif			
+			
+	double test = 0.0 ;
+	for ( int j = 0 ; j < ndata ; j++ ) {
+		test += u_A.get(j) * u_A.get(j) ;
+	}
+	test = sqrt(test) ;
+	if ( fabs(test-1.0) > eps_fail ) {
+		cout << "U_A norm test failed" << endl ;
+		cout << "Norm = " << test << endl ;
+		stop_run(1) ;
+	}
+
+	// Test X_A^T u__A = A_A * I
+	Vector testv(nactive,0.0) ;
+	X_A.dot_transpose(testv, u_A) ;
+	for ( int j = 0 ; j < nactive ; j++ ) {
+		if ( fabs(testv.get(j) - A_A) > eps_fail ) {
+			cout << "u_A test failed " << endl ;
+			stop_run(1) ;
+		}
+	}
+				
+	X.dot_transpose(a, u_A) ;
+
+#ifdef VERBOSE			
+	cout << "a vector = " << endl ;
+	a.print() ;
+#endif			
+
+}
+
+
+void DLARS::reduce_active_set() 
+	// Reduce the active set of directions to those having maximum correlation.
+	// See Eq. 3.6
+{
+	// Undo the change in the active set.
+	if ( RANK == 0 ) cout << "Will remove property " << A.get(remove_prop) << " from the active set" << endl ;
+	A.remove(remove_prop) ;
+	nactive = A.dim ;
+	gamma_lasso = 1.0e20 ;
+}
+
+void DLARS::update_active_set() 
+	// Update the active set of directions to those having maximum correlation.
+{
+	IntVector a_trial(nprops) ;
+	//int count = 0 ;
+	const double eps = 1.0e-6 ;
+
+	// Save the last active set
+	A_last.realloc(nactive) ;
+	for ( int j = 0 ; j < nactive ; j++ ) {
+		A_last.set( j, A.get(j) ) ;
+	}
+
+	if ( do_lasso && gamma > gamma_lasso ) {
+		reduce_active_set() ;
+	} else if ( add_prop >= 0 ) {
+		if ( RANK == 0 ) cout << "Adding property " << add_prop << " to the active set" << endl ;
+		A.push(add_prop) ;
+		nactive++ ;
+	} else {
+		// Either we are restarting or something strange has happened.
+		// Search for the new active set.
+		int count = A_last.dim ;
+		a_trial = A_last ;
+
+		for ( int j = 0 ; j < nprops ; j++ ) {
+			if ( fabs( fabs(c.get(j)) - C_max ) < eps
+					 && ! exclude.get(j) ) {
+				int k ;
+				// See if this index has occurred before.
+				for ( k = 0 ; k < nactive ; k++ ) {
+					if ( j == A_last.get(k) ) {
+						break ;
+					}
+				}
+				if ( k == nactive ) {
+					a_trial.push(j) ;
+					count++ ;
+					if ( RANK == 0 ) cout << "Adding property " << j << " to the active set" << endl ;
+					// Break to add only one property to the active set at a time.
+					break ;
+				}
+			}
+		}
+		A.realloc(count) ;
+		nactive = count ;
+		for ( int j = 0 ; j < nactive ; j++ ) {
+			A.set(j, a_trial.get(j)) ;
+		}
+	}
+	if ( RANK == 0 ) cout << "New active set: " << endl ;
+	A.print_all(cout) ;
+
+#ifdef USE_MPI
+	// Sync the active set to avoid possible divergence between processes.
+	MPI_Bcast(&nactive, 1, MPI_INT, 0, MPI_COMM_WORLD) ;
+	MPI_Bcast(A.vec, nactive, MPI_INT, 0, MPI_COMM_WORLD) ;
+#endif			
+}
+
+
+void DLARS::update_step_gamma()
+// Update gamma, eq. 2.13.
+{
+	double huge = 1.0e20 ;
+	gamma = huge ;
+
+	remove_prop = -1 ;
+	add_prop = -1 ;
+			
+	if ( nactive < nprops ) {
+		for ( int j = 0 ; j < nprops ; j++ ) {
+			int k = 0 ;
+			for ( k = 0 ; k < nactive ; k++ ) {
+				if ( A.get(k) == j ) 
+					break ;
+			}
+			if ( k != nactive ) continue ;
+			double c1 = ( C_max - c.get(j) ) / (A_A - a.get(j) ) ;
+			double c2 = ( C_max + c.get(j) ) / (A_A + a.get(j) ) ;
+
+			if ( c1 > 0.0 && c1 < gamma ) {
+				gamma = c1 ;
+				add_prop = j ;
+			}
+			if ( c2 > 0.0 && c2 < gamma ) {
+				gamma = c2 ;
+				add_prop = j ;
+			}
+		}
+	} else {
+		// Active set = all variables.
+		gamma = C_max / A_A ;
+	}
+	if ( RANK == 0 ) {
+		cout << "Updated step gamma = " << gamma << endl ;
+		if ( add_prop >= 0 )
+			cout << "Gamma limited by property " << add_prop << endl ;
+	}
+	if ( do_lasso ) update_lasso_gamma() ;
+}
+
+
+void DLARS::update_lasso_gamma()
+	// Find the Lasso gamma step, which may be less than the LARS gamma step.
+	// See Eq. 3.4 and 3.5
+{
+	gamma_lasso = 1.0e20 ;
+	const double eps = 1.0e-12 ;
+			
+	for ( int i = 0 ; i < nactive ; i++ ) {
+		if ( fabs(w_A.get(i)) > 1.0e-40 ) {
+			double gamma_i = -beta.get(A.get(i)) / ( sign.get(i) * w_A.get(i) ) ;
+			if ( gamma_i > eps && gamma_i < gamma_lasso ) {
+				gamma_lasso = gamma_i ;
+				remove_prop = i ;
+			}
+		}
+	}
+	if ( RANK == 0 ) cout << "Lasso step gamma limit = " << gamma_lasso << endl ;
+}
+
+
+void DLARS::update_beta()
+	// Update the regression coefficients (beta)
+{
+	if ( do_lasso && gamma > gamma_lasso ) {
+		if ( RANK == 0 ) {
+			cout << "LASSO is limiting gamma from " << gamma << " to " << gamma_lasso << endl ; 
+			cout << "LASSO will set property " << A.get(remove_prop) << " to 0.0" << endl ;
+		}
+
+		//cout << "Current beta:" << endl ;
+		//beta.print() ;
+		//cout << "Current correlation: " << endl ;
+		//c.print() ;
+
+		gamma_use = gamma_lasso ;
+	} else {
+		gamma_use = gamma ;
+	}
+	for ( int j = 0 ; j < nactive ; j++ ) {
+		int idx = A.get(j) ;
+		double val = beta.get(idx) + w_A.get(j) * sign.get(j) * gamma_use ;
+		beta.set(idx,val) ;
+	}
+	// If we are removing a property, set the value to exactly 0.
+	// Check that the calculated value is close to 0.
+	if ( do_lasso && gamma > gamma_lasso ) {
+		if ( fabs(beta.get(A.get(remove_prop))) > 1.0e-08 ) {
+			if ( RANK == 0 ) {
+				cout << "Error: failed to set variable to zero when removing prop\n" ;
+				stop_run(1) ;
+			}
+		}
+		beta.set(A.get(remove_prop),0.0) ;
+	}
+			
+#ifdef USE_MPI
+	// Sync the beta values to avoid possible divergence between processes.
+	MPI_Bcast(beta.vec, nprops, MPI_DOUBLE, 0, MPI_COMM_WORLD) ;
+#endif
+			
+#ifdef VERBOSE			
+	cout << "New beta: " ;
+	beta.print(cout) ;
+
+	cout << "Predicted mu: " << endl ;
+	for ( int j = 0 ; j < ndata ; j++ ) {
+		cout << mu.get(j) + gamma_use * u_A.get(j) << " " ;
+	}
+	cout << "\n" ;
+#endif
+			
+}
+
+	
+void DLARS::print_unscaled(ostream &out) 
+	// Print the coefficients in unscaled units.
+{
+	if ( RANK == 0 ) {
+		double offset = y.shift ;
+		Vector uns_beta(nprops,0.0) ;
+		for ( int j = 0 ; j < nprops ; j++ ) {
+			if ( X.scale[j] == 0.0 ) {
+				out << "Error: scale factor = 0.0" << endl ;
+				stop_run(1) ;
+			}
+			offset -= beta.get(j) * X.shift[j] / X.scale[j] ;
+		}
+		for ( int j = 0 ; j < nprops ; j++ ) {
+			uns_beta.set(j, beta.get(j) / X.scale[j]) ;
+		}
+		if ( out.rdbuf() == cout.rdbuf() ) {
+			uns_beta.print(cout) ;
+		} else {
+			for ( int j = 0 ; j < nprops ; j++ ) {
+				out << uns_beta.get(j) << endl ;
+			}
+		}
+	}
 }

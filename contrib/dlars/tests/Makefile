@@ -53,6 +53,12 @@ restart:
 	$(RUN) A.txt b.txt A.dim --restart=restart.save > dlasso.run2.txt
 	-$(COMPARE) dlasso.run2.txt correct_output/dlasso.run2.txt
 
+restart_mpi:
+	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y --iterations=10 > dlasso.restart_mpi.txt
+	cp restart.txt restart.save
+	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --restart=restart.save > dlasso.restart_mpi2.txt
+	-$(COMPARE) dlasso.restart_mpi2.txt correct_output/dlasso.restart_mpi2.txt
+
 restart2:
 	$(RUN) A.txt b.txt A.dim --iterations=20 > dlasso.restart2.1.txt
 	cp restart.txt restart.save

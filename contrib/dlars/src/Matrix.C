@@ -544,36 +544,43 @@ bool Matrix::cholesky_add_row_distribute(const Matrix &chol0, const Vector &newr
     return false ;
   }
 
-  for ( int j = 0 ; j < dim1 - 1 ; j++ ) {
-    for ( int k = 0  ; k <= j ; k++ ) {
-			int chol0_rank_k = chol0.rank_from_row(k) ;
-			int chol_rank_k  = rank_from_row(k) ;
+	for ( int k = 0  ; k < dim1 - 1 ; k++ ) {
+		int chol0_rank_k = chol0.rank_from_row(k) ;
+		int chol_rank_k  = rank_from_row(k) ;
 			
-			if ( chol0_rank_k == chol_rank_k ) {
-				// Data resides in the same rank. 
-				if ( row_start <= k && k <= row_end ) {
+		if ( chol0_rank_k == chol_rank_k ) {
+			// Data resides in the same rank. 
+			if ( row_start <= k && k <= row_end ) {
+				for ( int j = k ; j < dim1 - 1 ; j++ ) {
 					set(k,j, chol0.get(k,j)) ;
 				}
-			} else {
-				double val = 0.0 ;
-				if ( RANK == chol0_rank_k ) {
-					val = chol0.get(k,j) ;					
-#ifdef USE_MPI
-					MPI_Send(&val, 1, MPI_DOUBLE, chol_rank_k, 0, MPI_COMM_WORLD) ;
-#endif
-				} else if ( RANK == chol_rank_k ) {
-#ifdef USE_MPI					
-					MPI_Recv(&val, 1, MPI_DOUBLE, chol0_rank_k, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
-					if ( row_start <= k && k <= row_end ) {
-						set(k, j, val) ;
-					}
-#endif
-				}
-				//MPI_Barrier(MPI_COMM_WORLD) ;
 			}
+		} else {
+			Vector val(dim1-1,0.0) ;
+			if ( RANK == chol0_rank_k ) {
+				for ( int j = k ; j < dim1 - 1 ; j++ ) {					
+					val.set(j,chol0.get(k,j)) ;
+				}
+#ifdef USE_MPI
+				MPI_Send(val.vec, dim1-1, MPI_DOUBLE, chol_rank_k, 0, MPI_COMM_WORLD) ;
+#endif
+			} else if ( RANK == chol_rank_k ) {
+#ifdef USE_MPI					
+				MPI_Recv(val.vec, dim1-1, MPI_DOUBLE, chol0_rank_k, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+				if ( row_start <= k && k <= row_end ) {
+					for ( int j = k ; j < dim1 - 1 ; j++ ) {											
+						set(k, j, val.get(j)) ;
+					}
+				}
+#endif
+			}
+			//MPI_Barrier(MPI_COMM_WORLD) ;
 		}
-		for ( int k = j + 1 ; k < dim1 ; k++ ) {
-			if ( row_start <= k && k <= row_end ) {
+	}
+
+	for ( int k = 1 ; k < dim1 ; k++ ) {	
+		if ( row_start <= k && k <= row_end ) {
+			for ( int j = k - 1 ; j >= 0 ; j-- ) {					
 				set(k,j, 0.0) ;
 			}
 		}
@@ -610,8 +617,9 @@ bool Matrix::cholesky_remove_row_dist(int id )
 	}
 	
   int lth = dim1 - 1 ;
-
-  for(int i=id; i < lth; ++i){
+	Vector atmp(dim1), btmp(dim1) ;
+	
+  for(int i=id; i < lth; ++i) {
 
     for( int j= row_start ; j<i && j <= row_end ; ++j) {
       set(j,i, get(j,i+1)) ;
@@ -622,72 +630,122 @@ bool Matrix::cholesky_remove_row_dist(int id )
 
 		if ( RANK == rank_i ) {
 			a = get(i, i+1);
+// 			if ( rank_i != rank_i_1 ) {
+// #ifdef USE_MPI				
+// 				MPI_Send(&a, 1, MPI_DOUBLE, rank_i_1, 1, MPI_COMM_WORLD) ;
+// #endif				
+// 			}
+// 		} else if ( RANK == rank_i_1 ) {
+// 			if ( rank_i != rank_i_1 ) {
+// #ifdef USE_MPI				
+// 				MPI_Recv(&a, 1, MPI_DOUBLE, rank_i, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+// #endif				
+//			}
 		} else {
 			a = 0.0 ;
 		}
-#ifdef USE_MPI		
-		MPI_Bcast(&a, 1, MPI_DOUBLE, rank_i, MPI_COMM_WORLD) ;
-#endif		
+		// #ifdef USE_MPI		
+		// 		MPI_Bcast(&a, 1, MPI_DOUBLE, rank_i, MPI_COMM_WORLD) ;
+		// #endif		
 
 		if ( RANK == rank_i_1 ) {
 			b = get(i+1,i+1);
+// 			if ( rank_i != rank_i_1 ) {
+// #ifdef USE_MPI				
+// 				MPI_Send(&b, 1, MPI_DOUBLE, rank_i, 0, MPI_COMM_WORLD) ;
+// #endif				
+// 			}
+// 		} else if ( RANK == rank_i ) {
+// 			if ( rank_i != rank_i_1 ) {
+// #ifdef USE_MPI				
+// 				MPI_Recv(&b, 1, MPI_DOUBLE, rank_i_1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+// #endif				
+//			}
 		} else {
 			b = 0.0 ;
 		}
-#ifdef USE_MPI		
-		MPI_Bcast(&b, 1, MPI_DOUBLE, rank_i_1, MPI_COMM_WORLD) ;
+		// #ifdef USE_MPI		
+		// 		MPI_Bcast(&b, 1, MPI_DOUBLE, rank_i_1, MPI_COMM_WORLD) ;
+		// #endif		
+
+#ifdef USE_MPI
+		if ( rank_i != rank_i_1 ) {
+			// Exchange a and b between ranks.
+			int rtag = 1, stag = 2 ;
+			if ( RANK == rank_i ) {
+				MPI_Sendrecv(&a, 1, MPI_DOUBLE, rank_i_1, stag,
+										 &b, 1, MPI_DOUBLE, rank_i_1, rtag,
+										 MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+			} else if ( RANK == rank_i_1 ) {
+				MPI_Sendrecv(&b, 1, MPI_DOUBLE, rank_i, rtag,
+										 &a, 1, MPI_DOUBLE, rank_i, stag,
+										 MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+			}
+		}
 #endif		
-		
-    if( b == 0.0 ) {
+    if( RANK == rank_i && b == 0.0 ) {
       set(i,i,a) ;
       continue;
     }
-		
-    if( fabs(b) > fabs(a) ){
-      tau = -a/b;
-      s = 1/sqrt(1.0 + tau*tau);
-      c = s*tau;
-    } else {
-      tau = -b/a;
-      c = 1/sqrt(1.0 + tau*tau);
-      s = c * tau;
-    }
-    if ( c*a - s*b > 0.0 ) {
-			if ( RANK == rank_i ) {
-				set(i,i, c*a - s*b) ;
-			}
-    } else {
-			if ( RANK == rank_i ) {
-				set(i,i, s*b - c*a) ;
-			}
-      s = -s ;
-      c = -c ;
-    }
-    // L(i,i+1) = s*a + c*b;
 
-    for( int j=i+2; j<=lth; ++j){
-			if ( RANK == rank_i ) {
-				a = get(i, j);
+		if ( RANK == rank_i || RANK == rank_i_1 ) {
+			if( fabs(b) > fabs(a) ){
+				tau = -a/b;
+				s = 1/sqrt(1.0 + tau*tau);
+				c = s*tau;
+			} else {
+				tau = -b/a;
+				c = 1/sqrt(1.0 + tau*tau);
+				s = c * tau;
 			}
-			if ( RANK == rank_i_1 ) {
-				b = get(i+1, j);
+			if ( c*a - s*b > 0.0 ) {
+				if ( RANK == rank_i ) {
+					set(i,i, c*a - s*b) ;
+				}
+			} else {
+				if ( RANK == rank_i ) {
+					set(i,i, s*b - c*a) ;
+				}
+				s = -s ;
+				c = -c ;
 			}
+			// L(i,i+1) = s*a + c*b;
+
+			for( int j=i+2; j<=lth; ++j){
+				if ( RANK == rank_i ) {
+					atmp.set(j, get(i, j)) ;
+				}
+				if ( RANK == rank_i_1 ) {
+					btmp.set(j, get(i+1, j)) ;
+				}
+			}
+			
 			if ( RANK == rank_i && RANK == rank_i_1 ) {
-				set(i, j, c*a - s*b) ;
-				set(i+1, j, s*a + c*b) ;
+				for( int j=i+2; j<=lth; ++j){					
+					set(i, j, c*atmp.get(j) - s*btmp.get(j)) ;
+					set(i+1, j, s*atmp.get(j) + c*btmp.get(j)) ;
+				}
 			} else if ( RANK == rank_i ) {
 				// Sends and receives need to be matched.
-				MPI_Send(&a, 1, MPI_DOUBLE, rank_i_1, 0, MPI_COMM_WORLD) ;
-				MPI_Recv(&b, 1, MPI_DOUBLE, rank_i_1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
-				set(i, j, c*a - s*b) ;				
+#ifdef USE_MPI				
+				MPI_Send(atmp.vec, dim1, MPI_DOUBLE, rank_i_1, 0, MPI_COMM_WORLD) ;
+				MPI_Recv(btmp.vec, dim1, MPI_DOUBLE, rank_i_1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+#endif				
+				for( int j=i+2; j<=lth; ++j){					
+					set(i, j, c*atmp.get(j) - s*btmp.get(j)) ;
+				}					
 			} else if ( RANK == rank_i_1 ) {
-				// Sends and receives need to be matched.				
-				MPI_Recv(&a, 1, MPI_DOUBLE, rank_i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
-				MPI_Send(&b, 1, MPI_DOUBLE, rank_i, 1, MPI_COMM_WORLD) ;
-				set(i+1, j, s*a + c*b) ;
+				// Sends and receives need to be matched.
+#ifdef USE_MPI				
+				MPI_Recv(atmp.vec, dim1, MPI_DOUBLE, rank_i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE) ;
+				MPI_Send(btmp.vec, dim1, MPI_DOUBLE, rank_i, 1, MPI_COMM_WORLD) ;
+#endif				
+				for( int j=i+2; j<=lth; ++j){										
+					set(i+1, j, s*atmp.get(j) + c*btmp.get(j)) ;
+				}
 			}
-    }
-  }
+		}
+	}
 
   for( int i= row_start; i<= lth && i <= row_end ; ++i)
     set(i, lth, 0) ;
