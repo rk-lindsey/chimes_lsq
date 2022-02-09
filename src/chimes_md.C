@@ -836,7 +836,7 @@ int main(int argc, char* argv[])
 						 "(kcal/mol)", "(K)", "(GPa)");
 
 			snprintf(stat_buf, STAT_BUF_SZ, "%8s %14s %14s %14s %14s %14s %14s ",
-							 " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
+							 "# ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
 
 			STATISTICS << stat_buf ;
 			

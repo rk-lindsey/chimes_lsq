@@ -21,8 +21,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -xhost -fno-alias -fno-fnalias")
 
 
 set(CMAKE_VERBOSE_MAKEFILE on) # Uncomment if you want to see compiler flags
-
     
+
 # set default preprocessor flag values
  
 set(DEBUG_CHEBY "0" CACHE STRING "Debug verbosity level")
@@ -107,4 +107,4 @@ target_link_libraries     (chimes_md lib-C_wrapper-serial_interface.so)
 
 IF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
 	install(TARGETS chimes_md DESTINATION ${CMAKE_INSTALL_PREFIX}/src OPTIONAL)
-ENDIF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
+ENDIF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
