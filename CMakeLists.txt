@@ -18,7 +18,7 @@ endif()
 set(CMAKE_CXX_FLAGS "") # Can be updated if we want to adde extra flags 
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -xhost -fno-alias -fno-fnalias")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 
 set(CMAKE_VERBOSE_MAKEFILE on) # Uncomment if you want to see compiler flags
 
