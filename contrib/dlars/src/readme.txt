@@ -42,6 +42,7 @@ Options:
    --max_norm=<val>     Set the maximum L1 norm of the solution.  This is based on the scaled variables.
    --normalize=<y or n> Specifies whether the A matrix and b vector are normalized prior to fitting.
                         The default is to normalize.
+    --distributed_solver=<y or n> If y, use a distributed Cholesky solver with MPI.  This is recommended for large problems.			
     --restart=<file>    Restart from the restart.txt file specified.
     --split_files       If specified, split input files are read.  Instead of A.txt, A.0000.txt,
                         A.0001.txt, etc. is read by each MPI process.  This can speed job execution
