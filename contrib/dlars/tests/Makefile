@@ -1,6 +1,7 @@
-RUN=srun -n 7 ../src/dlars
+#RUN=srun -n 7 ../src/dlars
+RUN=../src/dlars
 COMPARE=perl ../../compare/compare.pl
-all: lars lasso stopping split weights restart restart2 con_grad
+all: lars lasso stopping split weights restart restart2 con_grad distribute restart_mpi
 
 lars:
 	$(RUN) Xcpp.txt Ycpp.txt Xcpp.dim --algorithm=lars > dlars.cpp.txt
@@ -34,6 +35,14 @@ split:
 	srun -n 7 ../src/dlars A.txt b.txt dim.txt --split_files >& dlasso.A.split.7.txt
 	-$(COMPARE) dlasso.A.split.7.txt correct_output/dlasso.A.split.7.txt
 
+distribute:
+	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y >& dlasso.A.dist.txt
+	-$(COMPARE) dlasso.A.dist.txt correct_output/dlasso.A.dist.txt
+	srun -n 4 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y >& dlasso.A.dist.4.txt
+	-$(COMPARE) dlasso.A.dist.txt correct_output/dlasso.A.dist.4.txt
+	srun -n 7 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y >& dlasso.A.dist.7.txt
+	-$(COMPARE) dlasso.A.dist.txt correct_output/dlasso.A.dist.7.txt
+
 weights:
 	$(RUN) Xcpp.txt Ycpp.txt Xcpp.dim --weights=Ycpp.weights > dlasso.weights.txt
 	-$(COMPARE) dlasso.weights.txt correct_output/dlasso.weights.txt
@@ -44,11 +53,23 @@ restart:
 	$(RUN) A.txt b.txt A.dim --restart=restart.save > dlasso.run2.txt
 	-$(COMPARE) dlasso.run2.txt correct_output/dlasso.run2.txt
 
+restart_mpi:
+	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y --iterations=10 > dlasso.restart_mpi.txt
+	cp restart.txt restart.save
+	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --restart=restart.save > dlasso.restart_mpi2.txt
+	-$(COMPARE) dlasso.restart_mpi2.txt correct_output/dlasso.restart_mpi2.txt
+
 restart2:
 	$(RUN) A.txt b.txt A.dim --iterations=20 > dlasso.restart2.1.txt
 	cp restart.txt restart.save
 	$(RUN) A.txt b.txt A.dim --restart=restart.save > dlasso.restart2.2.txt
 	-$(COMPARE) dlasso.restart2.2.txt correct_output/dlasso.restart2.2.txt
+
+restart3:
+	$(RUN) A.txt b.txt A.dim --iterations=20 --con_grad --precondition > dlasso.restart3.1.txt
+	cp restart.txt restart.save
+	$(RUN) A.txt b.txt A.dim --restart=restart.save --con_grad --precondition > dlasso.restart3.2.txt
+	-$(COMPARE) dlasso.restart3.2.txt correct_output/dlasso.restart3.2.txt
 
 con_grad:
 	$(RUN) Xcpp.txt Ycpp.txt Xcpp.dim --con_grad --weights=Ycpp.weights > dlasso.con_grad.txt
