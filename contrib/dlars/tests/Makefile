@@ -1,7 +1,7 @@
 #RUN=srun -n 7 ../src/dlars
 RUN=../src/dlars
 COMPARE=perl ../../compare/compare.pl
-all: lars lasso stopping split weights restart restart2 con_grad distribute
+all: lars lasso stopping split weights restart restart2 con_grad distribute restart_mpi
 
 lars:
 	$(RUN) Xcpp.txt Ycpp.txt Xcpp.dim --algorithm=lars > dlars.cpp.txt

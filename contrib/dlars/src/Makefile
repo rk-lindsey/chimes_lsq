@@ -8,10 +8,11 @@ CXX=mpicxx
 ## Use intel threads.
 ## module load intel/oneapi.2021.3
 ## module load mkl/2020.0
-##CFLAGS= -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DUSE_MKL -DUSE_BLAS -DTIMING -qopenmp -DUSE_OPENMP
-CFLAGS= -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DTIMING -qopenmp
-##CFLAGSDBG= -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DTIMING -qopenmp -DUSE_OPENMP
-CFLAGSDBG= -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DTIMING -qopenmp
+## Add -DTIMING to CFLAGS for detailed timing info output.
+CFLAGS= -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DUSE_MKL -DUSE_BLAS -qopenmp -DUSE_OPENMP
+#CFLAGS= -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DTIMING -qopenmp
+#CFLAGSDBG= -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DTIMING -qopenmp -DUSE_OPENMP
+CFLAGSDBG= -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  
 LINKFLAGS= -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
 
 opt: dlars.C Matrix.C Vector.h IntVector.h Matrix.h DLARS.h

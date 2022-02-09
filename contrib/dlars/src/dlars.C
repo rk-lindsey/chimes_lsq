@@ -1321,13 +1321,16 @@ bool DLARS::chol_backsub(Matrix &G_A_in, Matrix &chol_in)
 	auto time2_sub = std::chrono::system_clock::now() ;			
 	std::chrono::duration<double> sub_seconds = time2_sub - time1_sub ;
 
+#ifdef TIMING		
 	if ( RANK == 0 ) {
 		if ( distributed_solver ) {
 			cout << "Time substituting distributed Cholesky = " << sub_seconds.count() << endl ;
 		}	else {
 			cout << "Time substituting local Cholesky = " << sub_seconds.count() << endl ;
 		}
-	}			
+	}
+#endif
+	
 	// if ( RANK == 0 ) cout << "Distributed G_A_Inv_I:\n" ;
 	// G_A_Inv_I.print_all(cout) ;
 			
@@ -1503,11 +1506,13 @@ int DLARS::restart(string filename)
 	}
 	while (1) {
 		string s ;
+		int iter_tmp ;
 		// Get the iteration number.
-		inf >> s >> iter ;
+		inf >> s >> iter_tmp ;
 		//iter-- ;
 		if ( inf.eof() || ! inf.good() ) break ;
 
+		iter = iter_tmp ;
 		// Get the objective function from the next line.
 		for ( int j = 0 ; j < 15 ; j++ ) {
 			inf >> s ;
