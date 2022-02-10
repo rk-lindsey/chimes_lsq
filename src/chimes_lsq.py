@@ -31,7 +31,7 @@ def main():
 
     parser.add_argument("--A",                    type=str,      default='A.txt',         help='A (derivative) matrix') 
     parser.add_argument("--algorithm",            type=str,      default='svd',           help='fitting algorithm')
-    parser.add_argument("--dlasso_dlars_path",    type=str     , default='',              help='Path to DLARS and/or DLASSO solver')
+    parser.add_argument("--dlasso_dlars_path",    type=str     , default='../contrib/dlars/src',              help='Path to DLARS and/or DLASSO solver')
     parser.add_argument("--alpha",                type=float,    default=1.0e-04,         help='Lasso regularization')
     parser.add_argument("--b",                    type=str,      default='b.txt',         help='b (force) file')
     parser.add_argument("--cores",                type=int,      default=8,               help='DLARS number of cores')
@@ -681,12 +681,11 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
 
     if not read_output:
     
-        exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " "
-        exepath = exepath + dlasso_dlars_path + "/dlars"
-
         dlars_file = dlasso_dlars_path + "dlars"
         
         if os.path.exists(dlars_file):
+	
+	    exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " " + dlars_file
 
             command = None
    
@@ -723,7 +722,7 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
                 print(command + " failed")
                 sys.exit(1)
         else:
-            print exepath + " does not exist"
+            print dlars_file + " does not exist"
             sys.exit(1)
     else:
         print "! Reading output from prior DLARS calculation"
