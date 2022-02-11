@@ -28,7 +28,7 @@ fi
 
 # Only download required packages
 
-CHIMES_REPOS[0]=chimes_calculator	; REPO_FORK_NAME[0]=${CHIMES_REPOS[0]}-fork; TARGET_BRANCH[0]=develop
+CHIMES_REPOS[0]=chimes_calculator	; REPO_FORK_NAME[0]=${CHIMES_REPOS[0]}-fork; TARGET_BRANCH[0]=master
 
 # Non-neccesary packages
 #CHIMES_REPOS[1]=dlars			; REPO_FORK_NAME[1]=${CHIMES_REPOS[1]}-fork; TARGET_BRANCH[1]=master
