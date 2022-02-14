@@ -1,4 +1,4 @@
-#ifdef USE_MKL
+#ifdef USQE_MKL
 #include <mkl.h>
 #endif
 //#ifdef USE_BLAS
@@ -502,6 +502,27 @@ public:
 		}
 		
 	}
+
+	void scale_columns(const Vector& vals)
+		// Multiply each column of the matrix by the values in vals.
+	{
+		if ( vals.dim != dim2 ) {
+			cout << "Error in scale_columns: dimensions did not match" << endl ;
+		}
+
+#ifdef USE_OPENMP		
+#pragma omp parallel for shared(vals) default(none)
+#endif		
+		for ( int j = row_start ; j <= row_end ; j++ ) {
+			for ( int k = 0 ; k < dim2 ; k++ ) {
+				set(j,k, get(j,k) * vals.get(k)) ;
+			}
+		}
+		for ( int k = 0 ; k < dim2 ; k++ ) {
+			scale[k] /= vals.get(k) ;
+		}
+	}	
+
 	double mult_T(int j, int k)
 	// Calculate the j,k element of X^T * X, where X is the current matrix.
 		{

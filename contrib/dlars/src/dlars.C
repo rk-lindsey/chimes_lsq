@@ -90,6 +90,7 @@ int main(int argc, char **argv)
 		{"algorithm", required_argument, 0, 'a'},
 		{"distributed_solver", required_argument, 0, 'd'},
 		{"iterations", required_argument, 0, 'i'},
+		{"feature_weights", required_argument, 0, 'f'},
 		{"lambda", required_argument, 0, 'l'},
 		{"max_norm", required_argument, 0, 'm'},
 		{"normalize", required_argument, 0, 'n'},
@@ -121,6 +122,7 @@ int main(int argc, char **argv)
 	double lambda = 0.0 ;							// L1 weighting factor.
 	
 	string weight_file("") ;
+	string feature_weight_file("") ;
 	string restart_file ;
 
 	while (1) {
@@ -140,7 +142,10 @@ int main(int argc, char **argv)
 				cerr << "--distributed-solver arg should be y or n" ;
 				stop_run(1) ;
 			}
-			break ;			
+			break ;
+		case 'f':
+			feature_weight_file = string(optarg) ;
+			break ;
 		case 'i':
 			max_iterations = atoi(optarg) ;
 			break ;
@@ -256,6 +261,7 @@ int main(int argc, char **argv)
 	}	
 
 	Vector weights ;
+	Vector feature_weights ;
 
 	if ( ! weight_file.empty() ) {
 		
@@ -272,7 +278,8 @@ int main(int argc, char **argv)
 			cout << " ...weights read." << endl;
 		}			
 	}
-	
+
+	// Optionally normalize before applying feature weights.
 	if ( normalize ) {
 		xmat.normalize() ;
 		xmat.check_norm() ;
@@ -285,6 +292,20 @@ int main(int argc, char **argv)
 		
 		if ( RANK == 0 ) {
 			cout << " ...yvec normalized." << endl;
+		}			
+	}
+
+	if ( ! feature_weight_file.empty() ) {
+		ifstream feature_stream(feature_weight_file) ;
+		if ( ! feature_stream.is_open() ) {
+			if ( RANK == 0 ) cout << "Could not open " << feature_weight_file << endl ;
+			stop_run(1) ;
+		}
+		feature_weights.read(feature_stream, nprops) ;
+		xmat.scale_columns(feature_weights) ;
+		
+		if ( RANK == 0 ) {
+			cout << " ...feature weights read." << endl;
 		}			
 	}
 

@@ -46,6 +46,8 @@ distribute:
 weights:
 	$(RUN) Xcpp.txt Ycpp.txt Xcpp.dim --weights=Ycpp.weights > dlasso.weights.txt
 	-$(COMPARE) dlasso.weights.txt correct_output/dlasso.weights.txt
+	$(RUN) Xcpp.txt Ycpp.txt Xcpp.dim --feature_weights=feature.weights > dlasso.feature.txt
+	-$(COMPARE) dlasso.feature.txt correct_output/dlasso.feature.txt
 
 restart:
 	$(RUN) A.txt b.txt A.dim --iterations=10 > dlasso.run1.txt
