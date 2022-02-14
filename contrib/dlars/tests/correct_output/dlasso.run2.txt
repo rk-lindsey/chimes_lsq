@@ -9,9 +9,10 @@ Using the LASSO algorithm
 Restart: calculating correlation
 Restart: building X_A
 Restart: building G_A
+Building the G_A matrix
 Restart: solving G_A
+Cholesky estimate of condition number = 5.651e+00
 Cholesky error test = 4.564250212348e-16
-Time solving equations = 2.902165000000e-03
 L1 norm of solution: 8.969300586767e+03 RMS Error: 1.587665973325e+01 Objective fn: 1.260341621427e+02 Number of vars: 9
 Adding property 17 to the active set
 New active set: 
@@ -25,6 +26,7 @@ New active set:
 7 21
 8 23
 9 17
+Cholesky estimate of condition number = 2.120e+01
 Cholesky error test = 6.439293542826e-16
 Updated step gamma = 5.902147130091e+02
 Gamma limited by property 15
@@ -43,15 +45,9 @@ Beta:
 21 -1.557318103545e+03
 23 1.748341176901e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.2 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 10
-Time for iteration 10 = 1.056172610000e-01 seconds 
+Time for iteration 10 = 1.153533590000e-01 seconds 
 L1 norm of solution: 9.942785330987e+03 RMS Error: 1.518211335796e+01 Objective fn: 1.152482830069e+02 Number of vars: 10
 Will remove property 10 from the active set
 New active set: 
@@ -64,6 +60,7 @@ New active set:
 6 21
 7 23
 8 17
+Cholesky estimate of condition number = 1.833e+01
 Cholesky error test = 6.167905692362e-16
 Updated step gamma = 2.837102034431e+02
 Gamma limited by property 15
@@ -80,15 +77,9 @@ Beta:
 21 -2.105998851315e+03
 23 1.265620072619e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 11
-Time for iteration 11 = 5.602582000000e-03 seconds 
+Time for iteration 11 = 2.786693000000e-03 seconds 
 L1 norm of solution: 1.118700653960e+04 RMS Error: 1.441766345336e+01 Objective fn: 1.039345097272e+02 Number of vars: 9
 Adding property 15 to the active set
 New active set: 
@@ -102,6 +93,7 @@ New active set:
 7 23
 8 17
 9 15
+Cholesky estimate of condition number = 1.833e+01
 Cholesky error test = 1.265654248073e-15
 Updated step gamma = 3.685369938208e+02
 Gamma limited by property 22
@@ -119,15 +111,9 @@ Beta:
 21 -2.730689612209e+03
 23 6.778845844018e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.2 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 12
-Time for iteration 12 = 6.411052000000e-03 seconds 
+Time for iteration 12 = 2.781971000000e-03 seconds 
 L1 norm of solution: 1.297101456201e+04 RMS Error: 1.357334317039e+01 Objective fn: 9.211782241065e+01 Number of vars: 10
 Adding property 22 to the active set
 New active set: 
@@ -142,6 +128,7 @@ New active set:
 8 17
 9 15
 10 22
+Cholesky estimate of condition number = 2.177e+01
 Cholesky error test = 1.998401444325e-15
 Updated step gamma = 3.219763564940e+02
 Gamma limited by property 10
@@ -160,15 +147,9 @@ Beta:
 22 -1.039052263043e+03
 23 2.891855228381e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 13
-Time for iteration 13 = 9.612228000000e-03 seconds 
+Time for iteration 13 = 4.643671000000e-03 seconds 
 L1 norm of solution: 1.512883277020e+04 RMS Error: 1.284707409038e+01 Objective fn: 8.252365634186e+01 Number of vars: 11
 Adding property 10 to the active set
 New active set: 
@@ -184,6 +165,7 @@ New active set:
 9 15
 10 22
 11 10
+Cholesky estimate of condition number = 2.177e+01
 Cholesky error test = 1.887379141863e-15
 Updated step gamma = 4.545889112052e+01
 Gamma limited by property 9
@@ -203,15 +185,9 @@ Beta:
 22 -1.190948216282e+03
 23 2.392208795941e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.6 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 14
-Time for iteration 14 = 1.052418100000e-02 seconds 
+Time for iteration 14 = 4.999979000000e-03 seconds 
 L1 norm of solution: 1.543782674215e+04 RMS Error: 1.276294212835e+01 Objective fn: 8.144634588579e+01 Number of vars: 12
 Adding property 9 to the active set
 New active set: 
@@ -228,6 +204,7 @@ New active set:
 10 22
 11 10
 12 9
+Cholesky estimate of condition number = 2.177e+01
 Cholesky error test = 2.442490654175e-15
 Updated step gamma = 9.236704665656e+01
 Gamma limited by property 13
@@ -248,15 +225,9 @@ Beta:
 22 -1.469091375214e+03
 23 1.269410632756e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.8 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 15
-Time for iteration 15 = 1.152074100000e-02 seconds 
+Time for iteration 15 = 5.321566000000e-03 seconds 
 L1 norm of solution: 1.611078566375e+04 RMS Error: 1.259591943986e+01 Objective fn: 7.932859326766e+01 Number of vars: 13
 Adding property 13 to the active set
 New active set: 
@@ -274,6 +245,7 @@ New active set:
 11 10
 12 9
 13 13
+Cholesky estimate of condition number = 2.177e+01
 Cholesky error test = 2.157004733557e-15
 Updated step gamma = 1.314941911058e+02
 Gamma limited by property 11
@@ -296,15 +268,9 @@ Beta:
 21 -3.084305943416e+03
 22 -1.772627961768e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 16
-Time for iteration 16 = 1.187653600000e-02 seconds 
+Time for iteration 16 = 5.579033000000e-03 seconds 
 L1 norm of solution: 1.692992829715e+04 RMS Error: 1.241970930076e+01 Objective fn: 7.712458955771e+01 Number of vars: 14
 Will remove property 23 from the active set
 New active set: 
@@ -321,6 +287,7 @@ New active set:
 10 10
 11 9
 12 13
+Cholesky estimate of condition number = 2.176e+01
 Cholesky error test = 1.246865858425e-15
 Updated step gamma = 2.967194764310e+01
 Gamma limited by property 11
@@ -341,15 +308,9 @@ Beta:
 21 -3.072982241679e+03
 22 -1.868839112210e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.8 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 17
-Time for iteration 17 = 7.704244000000e-03 seconds 
+Time for iteration 17 = 3.757898000000e-03 seconds 
 L1 norm of solution: 1.714061845683e+04 RMS Error: 1.237921167047e+01 Objective fn: 7.662244079119e+01 Number of vars: 13
 Adding property 11 to the active set
 New active set: 
@@ -367,6 +328,7 @@ New active set:
 11 9
 12 13
 13 11
+Cholesky estimate of condition number = 2.452e+01
 Cholesky error test = 2.347328680636e-15
 Updated step gamma = 1.587738516247e+02
 Gamma limited by property 27
@@ -389,15 +351,9 @@ Beta:
 21 -3.026348820492e+03
 22 -2.274921394894e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 18
-Time for iteration 18 = 1.010311800000e-02 seconds 
+Time for iteration 18 = 3.543030000000e-03 seconds 
 L1 norm of solution: 1.809843418665e+04 RMS Error: 1.222312378324e+01 Objective fn: 7.470237751022e+01 Number of vars: 14
 Will remove property 13 from the active set
 New active set: 
@@ -414,6 +370,7 @@ New active set:
 10 10
 11 9
 12 11
+Cholesky estimate of condition number = 2.176e+01
 Cholesky error test = 1.673874714050e-15
 Updated step gamma = 3.001158774271e+01
 Gamma limited by property 27
@@ -434,15 +391,9 @@ Beta:
 21 -3.015508425824e+03
 22 -2.370115976069e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.8 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 19
-Time for iteration 19 = 6.700664000000e-03 seconds 
+Time for iteration 19 = 3.262036000000e-03 seconds 
 L1 norm of solution: 1.831880054534e+04 RMS Error: 1.219374674003e+01 Objective fn: 7.434372977994e+01 Number of vars: 13
 Adding property 27 to the active set
 New active set: 
@@ -460,6 +411,7 @@ New active set:
 11 9
 12 11
 13 27
+Cholesky estimate of condition number = 2.176e+01
 Cholesky error test = 3.933361572958e-15
 Updated step gamma = 1.326317075062e+02
 Gamma limited by property 14
@@ -481,15 +433,9 @@ Beta:
 22 -2.750753880569e+03
 27 -2.643979761069e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 20
-Time for iteration 20 = 1.136599980000e-01 seconds 
+Time for iteration 20 = 1.170818020000e-01 seconds 
 L1 norm of solution: 1.945210758408e+04 RMS Error: 1.207385239987e+01 Objective fn: 7.288895588691e+01 Number of vars: 14
 Adding property 14 to the active set
 New active set: 
@@ -508,6 +454,7 @@ New active set:
 12 11
 13 27
 14 14
+Cholesky estimate of condition number = 2.176e+01
 Cholesky error test = 4.736951571734e-15
 Updated step gamma = 4.056150005773e+01
 Gamma limited by property 0
@@ -530,15 +477,9 @@ Beta:
 22 -2.833016183648e+03
 27 -3.302582017699e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.3 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 21
-Time for iteration 21 = 1.078817300000e-02 seconds 
+Time for iteration 21 = 3.770244000000e-03 seconds 
 L1 norm of solution: 1.993624133486e+04 RMS Error: 1.203562360078e+01 Objective fn: 7.242811772985e+01 Number of vars: 15
 Adding property 0 to the active set
 New active set: 
@@ -558,6 +499,7 @@ New active set:
 13 27
 14 14
 15 0
+Cholesky estimate of condition number = 2.176e+01
 Cholesky error test = 3.691491556879e-15
 Updated step gamma = 1.962862924403e+00
 Gamma limited by property 5
@@ -581,15 +523,9 @@ Beta:
 22 -2.837291743595e+03
 27 -3.335864814506e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.5 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 22
-Time for iteration 22 = 1.277670300000e-02 seconds 
+Time for iteration 22 = 4.553196000000e-03 seconds 
 L1 norm of solution: 1.996078692214e+04 RMS Error: 1.203380932749e+01 Objective fn: 7.240628346515e+01 Number of vars: 16
 Adding property 5 to the active set
 New active set: 
@@ -610,6 +546,7 @@ New active set:
 14 14
 15 0
 16 5
+Cholesky estimate of condition number = 2.602e+01
 Cholesky error test = 6.478477884872e-15
 Updated step gamma = 1.578887924837e+01
 Gamma limited by property 23
@@ -634,15 +571,9 @@ Beta:
 22 -2.865161272291e+03
 27 -3.639835919367e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 23
-Time for iteration 23 = 6.621949000000e-03 seconds 
+Time for iteration 23 = 5.084197000000e-03 seconds 
 L1 norm of solution: 2.020935937215e+04 RMS Error: 1.201584154528e+01 Objective fn: 7.219022402058e+01 Number of vars: 17
 Adding property 23 to the active set
 New active set: 
@@ -664,6 +595,7 @@ New active set:
 15 0
 16 5
 17 23
+Cholesky estimate of condition number = 2.602e+01
 Cholesky error test = 6.241920560670e-15
 Updated step gamma = 2.040784336812e+01
 Gamma limited by property 13
@@ -689,15 +621,9 @@ Beta:
 23 -2.531894015385e+01
 27 -3.901512814200e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 24
-Time for iteration 24 = 6.366588000000e-03 seconds 
+Time for iteration 24 = 5.305476000000e-03 seconds 
 L1 norm of solution: 2.056192593231e+04 RMS Error: 1.199143661270e+01 Objective fn: 7.189727601814e+01 Number of vars: 18
 Adding property 13 to the active set
 New active set: 
@@ -720,6 +646,7 @@ New active set:
 16 5
 17 23
 18 13
+Cholesky estimate of condition number = 8.959e+01
 Cholesky error test = 7.572889683759e-15
 Updated step gamma = 2.002087986921e+02
 Gamma limited by property 19
@@ -747,15 +674,9 @@ Beta:
 23 -1.472318875966e+02
 27 -5.210980296308e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 25
-Time for iteration 25 = 7.000145000000e-03 seconds 
+Time for iteration 25 = 5.447952000000e-03 seconds 
 L1 norm of solution: 2.271334006901e+04 RMS Error: 1.186511264170e+01 Objective fn: 7.039044900016e+01 Number of vars: 19
 Will remove property 8 from the active set
 New active set: 
@@ -777,6 +698,7 @@ New active set:
 15 5
 16 23
 17 13
+Cholesky estimate of condition number = 3.678e+01
 Cholesky error test = 6.858711129907e-15
 Updated step gamma = 7.942414452238e+01
 Gamma limited by property 19
@@ -802,15 +724,9 @@ Beta:
 23 -2.444881948133e+02
 27 -6.088498705467e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 26
-Time for iteration 26 = 5.481878000000e-03 seconds 
+Time for iteration 26 = 4.729424000000e-03 seconds 
 L1 norm of solution: 2.410675783505e+04 RMS Error: 1.180492480073e+01 Objective fn: 6.967812477550e+01 Number of vars: 18
 Adding property 19 to the active set
 New active set: 
@@ -833,6 +749,7 @@ New active set:
 16 23
 17 13
 18 19
+Cholesky estimate of condition number = 8.982e+02
 Cholesky error test = 7.049331878462e-14
 Updated step gamma = 2.648026460899e+02
 Gamma limited by property 8
@@ -860,15 +777,9 @@ Beta:
 22 -3.200813536270e+03
 27 -4.698637371115e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 27
-Time for iteration 27 = 8.191708000000e-03 seconds 
+Time for iteration 27 = 6.372377000000e-03 seconds 
 L1 norm of solution: 2.750655416287e+04 RMS Error: 1.169183618463e+01 Objective fn: 6.834951668410e+01 Number of vars: 19
 Will remove property 23 from the active set
 New active set: 
@@ -890,6 +801,7 @@ New active set:
 15 5
 16 13
 17 19
+Cholesky estimate of condition number = 3.549e+02
 Cholesky error test = 3.296128801998e-14
 Updated step gamma = 9.499013950909e+01
 Gamma limited by property 23
@@ -915,15 +827,9 @@ Beta:
 22 -3.255443834983e+03
 27 -3.634876465363e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 28
-Time for iteration 28 = 4.236580000000e-03 seconds 
+Time for iteration 28 = 3.358713000000e-03 seconds 
 L1 norm of solution: 3.047469133034e+04 RMS Error: 1.161633391706e+01 Objective fn: 6.746960683627e+01 Number of vars: 18
 Adding property 23 to the active set
 New active set: 
@@ -946,6 +852,7 @@ New active set:
 16 13
 17 19
 18 23
+Cholesky estimate of condition number = 3.549e+02
 Cholesky error test = 6.133105719192e-14
 Updated step gamma = 7.674481453881e+01
 Gamma limited by property 8
@@ -972,15 +879,9 @@ Beta:
 23 2.603751925668e+02
 27 -2.420506928331e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 29
-Time for iteration 29 = 6.530519000000e-03 seconds 
+Time for iteration 29 = 4.659098000000e-03 seconds 
 L1 norm of solution: 3.387449956346e+04 RMS Error: 1.155389455234e+01 Objective fn: 6.674623966332e+01 Number of vars: 19
 Adding property 8 to the active set
 New active set: 
@@ -1004,6 +905,7 @@ New active set:
 17 19
 18 23
 19 8
+Cholesky estimate of condition number = 3.549e+02
 Cholesky error test = 9.912071163853e-14
 Updated step gamma = 1.364893102689e+02
 Gamma limited by property 12
@@ -1032,15 +934,9 @@ Beta:
 23 3.784186447575e+02
 27 -1.928102610910e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 30
-Time for iteration 30 = 1.089820500000e-01 seconds 
+Time for iteration 30 = 1.109197070000e-01 seconds 
 L1 norm of solution: 3.561581612212e+04 RMS Error: 1.152838586043e+01 Objective fn: 6.645184027346e+01 Number of vars: 20
 Will remove property 15 from the active set
 New active set: 
@@ -1063,6 +959,7 @@ New active set:
 16 19
 17 23
 18 8
+Cholesky estimate of condition number = 3.530e+02
 Cholesky error test = 7.675731395514e-14
 Updated step gamma = 9.980174067316e+01
 Gamma limited by property 15
@@ -1090,15 +987,9 @@ Beta:
 23 6.771403696787e+02
 27 -6.766391833015e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 31
-Time for iteration 31 = 5.873112000000e-03 seconds 
+Time for iteration 31 = 4.551219000000e-03 seconds 
 L1 norm of solution: 3.971817825984e+04 RMS Error: 1.148481587785e+01 Objective fn: 6.595049787401e+01 Number of vars: 19
 Will remove property 21 from the active set
 New active set: 
@@ -1120,6 +1011,7 @@ New active set:
 15 19
 16 23
 17 8
+Cholesky estimate of condition number = 8.678e+01
 Cholesky error test = 1.544443585367e-14
 Updated step gamma = 5.696893798390e+00
 Gamma limited by property 15
@@ -1145,15 +1037,9 @@ Beta:
 23 6.784789491395e+02
 27 -7.937495451388e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 32
-Time for iteration 32 = 5.366741000000e-03 seconds 
+Time for iteration 32 = 3.405498000000e-03 seconds 
 L1 norm of solution: 3.986607611462e+04 RMS Error: 1.148372349443e+01 Objective fn: 6.593795264832e+01 Number of vars: 18
 Adding property 15 to the active set
 New active set: 
@@ -1176,6 +1062,7 @@ New active set:
 16 23
 17 8
 18 15
+Cholesky estimate of condition number = 8.678e+01
 Cholesky error test = 2.066183481618e-14
 Updated step gamma = 2.831007875478e+01
 Gamma limited by property 12
@@ -1202,15 +1089,9 @@ Beta:
 23 6.868500673225e+02
 27 -1.175827368716e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 33
-Time for iteration 33 = 7.299940000000e-03 seconds 
+Time for iteration 33 = 4.550051000000e-03 seconds 
 L1 norm of solution: 4.090546243671e+04 RMS Error: 1.147761660480e+01 Objective fn: 6.586784146340e+01 Number of vars: 19
 Adding property 12 to the active set
 New active set: 
@@ -1234,6 +1115,7 @@ New active set:
 17 8
 18 15
 19 12
+Cholesky estimate of condition number = 4.031e+03
 Cholesky error test = 2.386535413734e-13
 Updated step gamma = 4.992235868437e+00
 Gamma limited by property 21
@@ -1261,15 +1143,9 @@ Beta:
 23 6.877104856242e+02
 27 -1.207562415005e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 34
-Time for iteration 34 = 9.431574000000e-03 seconds 
+Time for iteration 34 = 6.845703000000e-03 seconds 
 L1 norm of solution: 4.125585909637e+04 RMS Error: 1.147600805934e+01 Objective fn: 6.584938048903e+01 Number of vars: 20
 Adding property 21 to the active set
 New active set: 
@@ -1294,6 +1170,7 @@ New active set:
 18 15
 19 12
 20 21
+Cholesky estimate of condition number = 4.031e+03
 Cholesky error test = 2.672994101193e-13
 Updated step gamma = 7.434437916284e+01
 Gamma limited by property 7
@@ -1323,15 +1200,9 @@ Beta:
 23 8.443985906210e+02
 27 -2.944433760071e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.6 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 35
-Time for iteration 35 = 8.620617000000e-03 seconds 
+Time for iteration 35 = 5.875879000000e-03 seconds 
 L1 norm of solution: 4.664813941300e+04 RMS Error: 1.145679315739e+01 Objective fn: 6.562905472556e+01 Number of vars: 21
 Will remove property 11 from the active set
 New active set: 
@@ -1355,6 +1226,7 @@ New active set:
 17 15
 18 12
 19 21
+Cholesky estimate of condition number = 1.799e+02
 Cholesky error test = 1.254107928617e-13
 Updated step gamma = 1.348655744865e+01
 Gamma limited by property 7
@@ -1382,15 +1254,9 @@ Beta:
 23 8.924869833448e+02
 27 -2.757592215509e+00
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 36
-Time for iteration 36 = 6.153976000000e-03 seconds 
+Time for iteration 36 = 4.365900000000e-03 seconds 
 L1 norm of solution: 4.765817956404e+04 RMS Error: 1.145440176536e+01 Objective fn: 6.560165990120e+01 Number of vars: 20
 Adding property 7 to the active set
 New active set: 
@@ -1415,6 +1281,7 @@ New active set:
 18 12
 19 21
 20 7
+Cholesky estimate of condition number = 7.052e+02
 Cholesky error test = 2.067341007378e-13
 Updated step gamma = 1.650861019609e+01
 Gamma limited by property 16
@@ -1444,15 +1311,9 @@ Beta:
 22 -3.377627846255e+03
 23 8.982786257465e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.6 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 37
-Time for iteration 37 = 9.587799000000e-03 seconds 
+Time for iteration 37 = 6.955184000000e-03 seconds 
 L1 norm of solution: 4.782869796848e+04 RMS Error: 1.145405061046e+01 Objective fn: 6.559763769354e+01 Number of vars: 21
 Will remove property 27 from the active set
 New active set: 
@@ -1476,6 +1337,7 @@ New active set:
 17 12
 18 21
 19 7
+Cholesky estimate of condition number = 7.001e+02
 Cholesky error test = 1.154631945610e-13
 Updated step gamma = 1.172905203786e+01
 Gamma limited by property 16
@@ -1504,15 +1366,9 @@ Beta:
 22 -3.381706763219e+03
 23 9.139950100523e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 38
-Time for iteration 38 = 5.451147000000e-03 seconds 
+Time for iteration 38 = 3.838969000000e-03 seconds 
 L1 norm of solution: 4.830085684751e+04 RMS Error: 1.145314093541e+01 Objective fn: 6.558721864316e+01 Number of vars: 20
 Will remove property 6 from the active set
 New active set: 
@@ -1535,6 +1391,7 @@ New active set:
 16 12
 17 21
 18 7
+Cholesky estimate of condition number = 1.052e+02
 Cholesky error test = 8.993975155279e-14
 Updated step gamma = 4.594224471167e+00
 Gamma limited by property 16
@@ -1561,15 +1418,9 @@ Beta:
 22 -3.384384903742e+03
 23 9.296554612868e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 39
-Time for iteration 39 = 5.530221000000e-03 seconds 
+Time for iteration 39 = 3.779808000000e-03 seconds 
 L1 norm of solution: 4.861473443339e+04 RMS Error: 1.145259985722e+01 Objective fn: 6.558102174481e+01 Number of vars: 19
 Adding property 16 to the active set
 New active set: 
@@ -1593,6 +1444,7 @@ New active set:
 17 21
 18 7
 19 16
+Cholesky estimate of condition number = 4.164e+02
 Cholesky error test = 3.069544618484e-13
 Updated step gamma = 9.993890951108e+00
 Gamma limited by property 27
@@ -1620,15 +1472,9 @@ Beta:
 22 -3.323182912820e+03
 23 9.785831339715e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 40
-Time for iteration 40 = 1.114104370000e-01 seconds 
+Time for iteration 40 = 1.168498990000e-01 seconds 
 L1 norm of solution: 4.961260049252e+04 RMS Error: 1.145113521609e+01 Objective fn: 6.556424886863e+01 Number of vars: 20
 Adding property 27 to the active set
 New active set: 
@@ -1653,6 +1499,7 @@ New active set:
 18 7
 19 16
 20 27
+Cholesky estimate of condition number = 4.164e+02
 Cholesky error test = 2.672994101193e-13
 Updated step gamma = 5.597900923774e+00
 Gamma limited by property 11
@@ -1681,15 +1528,9 @@ Beta:
 23 1.005479737150e+03
 27 3.830825755746e+00
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.6 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 41
-Time for iteration 41 = 7.220240000000e-03 seconds 
+Time for iteration 41 = 5.034997000000e-03 seconds 
 L1 norm of solution: 5.017631435106e+04 RMS Error: 1.145044212503e+01 Objective fn: 6.555631242928e+01 Number of vars: 21
 Adding property 11 to the active set
 New active set: 
@@ -1715,6 +1556,7 @@ New active set:
 19 16
 20 27
 21 11
+Cholesky estimate of condition number = 1.404e+03
 Cholesky error test = 6.700095024247e-13
 Updated step gamma = 1.369560547774e+01
 Gamma limited by property 26
@@ -1744,15 +1586,9 @@ Beta:
 23 1.043518641695e+03
 27 1.044325207220e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.8 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 42
-Time for iteration 42 = 8.380317000000e-03 seconds 
+Time for iteration 42 = 5.899039000000e-03 seconds 
 L1 norm of solution: 5.244779859185e+04 RMS Error: 1.144812961305e+01 Objective fn: 6.552983581857e+01 Number of vars: 22
 Adding property 26 to the active set
 New active set: 
@@ -1779,6 +1615,7 @@ New active set:
 20 27
 21 11
 22 26
+Cholesky estimate of condition number = 1.404e+03
 Cholesky error test = 6.798040391479e-13
 Updated step gamma = 1.453120544183e+01
 Gamma limited by property 6
@@ -1809,15 +1646,9 @@ Beta:
 26 -7.933892666998e-02
 27 1.745928688382e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 43
-Time for iteration 43 = 8.422093000000e-03 seconds 
+Time for iteration 43 = 6.401058000000e-03 seconds 
 L1 norm of solution: 5.485790714738e+04 RMS Error: 1.144630384603e+01 Objective fn: 6.550893586780e+01 Number of vars: 23
 Adding property 6 to the active set
 New active set: 
@@ -1845,6 +1676,7 @@ New active set:
 21 11
 22 26
 23 6
+Cholesky estimate of condition number = 1.755e+03
 Cholesky error test = 7.963999829978e-13
 Updated step gamma = 1.915490734509e+01
 Gamma limited by property 25
@@ -1876,15 +1708,9 @@ Beta:
 26 -1.615915618770e-01
 27 2.000174777633e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.2 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 44
-Time for iteration 44 = 9.578467000000e-03 seconds 
+Time for iteration 44 = 6.364751000000e-03 seconds 
 L1 norm of solution: 5.883051890594e+04 RMS Error: 1.144438930170e+01 Objective fn: 6.548702324440e+01 Number of vars: 24
 Adding property 25 to the active set
 New active set: 
@@ -1913,6 +1739,7 @@ New active set:
 22 26
 23 6
 24 25
+Cholesky estimate of condition number = 1.755e+03
 Cholesky error test = 7.645439836779e-13
 Updated step gamma = 2.125751902727e+00
 Gamma limited by property 24
@@ -1945,15 +1772,9 @@ Beta:
 26 -1.941499066485e-01
 27 2.028396470102e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 45
-Time for iteration 45 = 9.280997000000e-03 seconds 
+Time for iteration 45 = 6.508117000000e-03 seconds 
 L1 norm of solution: 5.927141374409e+04 RMS Error: 1.144424611710e+01 Objective fn: 6.548538459442e+01 Number of vars: 25
 Adding property 24 to the active set
 New active set: 
@@ -1983,6 +1804,7 @@ New active set:
 23 6
 24 25
 25 24
+Cholesky estimate of condition number = 4.248e+05
 Cholesky error test = 2.829490488064e-11
 Updated step gamma = 1.491544839257e+02
 Gamma limited by property 2
@@ -2017,15 +1839,9 @@ Beta:
 26 -1.519066877381e+04
 27 6.968366994034e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 46
-Time for iteration 46 = 9.199860000000e-03 seconds 
+Time for iteration 46 = 6.507869000000e-03 seconds 
 L1 norm of solution: 9.447820567327e+04 RMS Error: 1.143378040753e+01 Objective fn: 6.536566720385e+01 Number of vars: 26
 Will remove property 10 from the active set
 New active set: 
@@ -2054,6 +1870,7 @@ New active set:
 22 6
 23 25
 24 24
+Cholesky estimate of condition number = 4.072e+05
 Cholesky error test = 3.382595537005e-11
 Updated step gamma = 2.241949090286e+01
 Gamma limited by property 10
@@ -2086,15 +1903,9 @@ Beta:
 26 -3.535411442598e+04
 27 1.326911255838e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 47
-Time for iteration 47 = 7.754739000000e-03 seconds 
+Time for iteration 47 = 5.981113000000e-03 seconds 
 L1 norm of solution: 1.405980407438e+05 RMS Error: 1.142137916360e+01 Objective fn: 6.522395099940e+01 Number of vars: 25
 Adding property 10 to the active set
 New active set: 
@@ -2124,6 +1935,7 @@ New active set:
 23 25
 24 24
 25 10
+Cholesky estimate of condition number = 4.072e+05
 Cholesky error test = 5.288064003777e-11
 Updated step gamma = 1.103664970198e+02
 Gamma limited by property 2
@@ -2158,15 +1970,9 @@ Beta:
 26 -6.918869695375e+04
 27 2.432593208811e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 48
-Time for iteration 48 = 1.115568400000e-02 seconds 
+Time for iteration 48 = 8.340191000000e-03 seconds 
 L1 norm of solution: 2.198958914375e+05 RMS Error: 1.140345457739e+01 Objective fn: 6.501938814935e+01 Number of vars: 26
 Will remove property 21 from the active set
 New active set: 
@@ -2195,6 +2001,7 @@ New active set:
 22 25
 23 24
 24 10
+Cholesky estimate of condition number = 1.711e+05
 Cholesky error test = 2.155502443202e-11
 Updated step gamma = 2.761183532206e+00
 Gamma limited by property 21
@@ -2227,15 +2034,9 @@ Beta:
 26 -7.078665023332e+04
 27 2.517043487608e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 49
-Time for iteration 49 = 6.492533000000e-03 seconds 
+Time for iteration 49 = 4.807855000000e-03 seconds 
 L1 norm of solution: 2.238619755321e+05 RMS Error: 1.140267410525e+01 Objective fn: 6.501048837531e+01 Number of vars: 25
 Adding property 21 to the active set
 New active set: 
@@ -2265,6 +2066,7 @@ New active set:
 23 24
 24 10
 25 21
+Cholesky estimate of condition number = 1.711e+05
 Cholesky error test = 4.436410213552e-11
 Updated step gamma = 7.031038063576e+01
 Gamma limited by property 2
@@ -2298,15 +2100,9 @@ Beta:
 26 -1.352006015714e+05
 27 4.605552111068e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 50
-Time for iteration 50 = 1.114960220000e-01 seconds 
+Time for iteration 50 = 1.141593260000e-01 seconds 
 L1 norm of solution: 3.772891349068e+05 RMS Error: 1.138051497872e+01 Objective fn: 6.475806059044e+01 Number of vars: 26
 Adding property 2 to the active set
 New active set: 
@@ -2337,6 +2133,7 @@ New active set:
 24 10
 25 21
 26 2
+Cholesky estimate of condition number = 1.219e+06
 Cholesky error test = 1.271945182924e-10
 Updated step gamma = 8.395103126700e+01
 Gamma limited by property 4
@@ -2372,15 +2169,9 @@ Beta:
 26 -1.374345968718e+05
 27 4.677401763128e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 51
-Time for iteration 51 = 9.525685000000e-03 seconds 
+Time for iteration 51 = 7.283914000000e-03 seconds 
 L1 norm of solution: 3.861571578818e+05 RMS Error: 1.137968928975e+01 Objective fn: 6.474866416562e+01 Number of vars: 27
 Will remove property 1 from the active set
 New active set: 
@@ -2410,6 +2201,7 @@ New active set:
 23 10
 24 21
 25 2
+Cholesky estimate of condition number = 1.639e+05
 Cholesky error test = 5.632110162861e-11
 Updated step gamma = 2.213132462929e+01
 Gamma limited by property 4
@@ -2444,15 +2236,9 @@ Beta:
 26 -1.509901609614e+05
 27 5.115878200869e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 52
-Time for iteration 52 = 8.524411000000e-03 seconds 
+Time for iteration 52 = 6.036045000000e-03 seconds 
 L1 norm of solution: 4.183822579803e+05 RMS Error: 1.137708469421e+01 Objective fn: 6.471902806956e+01 Number of vars: 26
 Will remove property 23 from the active set
 New active set: 
@@ -2481,6 +2267,7 @@ New active set:
 22 10
 23 21
 24 2
+Cholesky estimate of condition number = 1.577e+05
 Cholesky error test = 2.514298103051e-11
 Updated step gamma = 3.617087199424e-01
 Gamma limited by property 23
@@ -2513,15 +2300,9 @@ Beta:
 26 -1.511984678333e+05
 27 5.121725775582e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 53
-Time for iteration 53 = 6.427775000000e-03 seconds 
+Time for iteration 53 = 4.537416000000e-03 seconds 
 L1 norm of solution: 4.188983688801e+05 RMS Error: 1.137704858600e+01 Objective fn: 6.471861726409e+01 Number of vars: 25
 Adding property 23 to the active set
 New active set: 
@@ -2551,6 +2332,7 @@ New active set:
 23 21
 24 2
 25 23
+Cholesky estimate of condition number = 1.577e+05
 Cholesky error test = 4.409300275326e-11
 Updated step gamma = 6.791309623960e+00
 Gamma limited by property 4
@@ -2584,15 +2366,9 @@ Beta:
 26 -1.574182956538e+05
 27 5.323038374341e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 54
-Time for iteration 54 = 8.259077000000e-03 seconds 
+Time for iteration 54 = 5.954229000000e-03 seconds 
 L1 norm of solution: 4.337768015715e+05 RMS Error: 1.137608451703e+01 Objective fn: 6.470764946931e+01 Number of vars: 26
 Adding property 4 to the active set
 New active set: 
@@ -2623,6 +2399,7 @@ New active set:
 24 2
 25 23
 26 4
+Cholesky estimate of condition number = 3.643e+06
 Cholesky error test = 3.802698403079e-10
 Updated step gamma = 6.503992320517e+01
 Gamma limited by property 1
@@ -2658,15 +2435,9 @@ Beta:
 26 -1.591244264182e+05
 27 5.378276578538e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 55
-Time for iteration 55 = 1.192907100000e-02 seconds 
+Time for iteration 55 = 9.065437000000e-03 seconds 
 L1 norm of solution: 4.441504437226e+05 RMS Error: 1.137547657853e+01 Objective fn: 6.470073369435e+01 Number of vars: 27
 Will remove property 3 from the active set
 New active set: 
@@ -2696,6 +2467,7 @@ New active set:
 23 2
 24 23
 25 4
+Cholesky estimate of condition number = 1.522e+05
 Cholesky error test = 1.048766543695e-10
 Updated step gamma = 7.330967849291e+00
 Gamma limited by property 1
@@ -2729,15 +2501,9 @@ Beta:
 26 -1.658250916355e+05
 27 5.593331401518e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 56
-Time for iteration 56 = 8.546796000000e-03 seconds 
+Time for iteration 56 = 6.210878000000e-03 seconds 
 L1 norm of solution: 4.601589823276e+05 RMS Error: 1.137464390726e+01 Objective fn: 6.469126200845e+01 Number of vars: 26
 Adding property 1 to the active set
 New active set: 
@@ -2768,6 +2534,7 @@ New active set:
 24 23
 25 4
 26 1
+Cholesky estimate of condition number = 2.734e+05
 Cholesky error test = 1.917349571293e-10
 Updated step gamma = 5.754252455247e+01
 Gamma limited by property 3
@@ -2803,15 +2570,9 @@ Beta:
 26 -1.669711748402e+05
 27 5.630280968893e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 57
-Time for iteration 57 = 8.497009000000e-03 seconds 
+Time for iteration 57 = 6.155804000000e-03 seconds 
 L1 norm of solution: 4.692324008434e+05 RMS Error: 1.137422768228e+01 Objective fn: 6.468652768415e+01 Number of vars: 27
 Will remove property 0 from the active set
 New active set: 
@@ -2841,6 +2602,7 @@ New active set:
 23 23
 24 4
 25 1
+Cholesky estimate of condition number = 1.505e+05
 Cholesky error test = 8.962020869009e-11
 Updated step gamma = 1.559345606758e+00
 Gamma limited by property 0
@@ -2874,15 +2636,9 @@ Beta:
 26 -1.683956172119e+05
 27 5.674771142838e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 58
-Time for iteration 58 = 8.016882000000e-03 seconds 
+Time for iteration 58 = 5.874175000000e-03 seconds 
 L1 norm of solution: 4.726204815537e+05 RMS Error: 1.137407928722e+01 Objective fn: 6.468483981595e+01 Number of vars: 26
 Adding property 0 to the active set
 New active set: 
@@ -2913,6 +2669,7 @@ New active set:
 24 4
 25 1
 26 0
+Cholesky estimate of condition number = 1.505e+05
 Cholesky error test = 2.261104883574e-10
 Updated step gamma = 5.425192890979e+01
 Gamma limited by property 3
@@ -2948,15 +2705,9 @@ Beta:
 26 -1.926846349083e+05
 27 6.459230716791e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 59
-Time for iteration 59 = 1.026722000000e-02 seconds 
+Time for iteration 59 = 7.381657000000e-03 seconds 
 L1 norm of solution: 6.796240882320e+05 RMS Error: 1.136950939015e+01 Objective fn: 6.463287188630e+01 Number of vars: 27
 Will remove property 9 from the active set
 New active set: 
@@ -2986,6 +2737,7 @@ New active set:
 23 4
 24 1
 25 0
+Cholesky estimate of condition number = 1.283e+05
 Cholesky error test = 1.732587406877e-10
 Updated step gamma = 3.521246632702e-02
 Gamma limited by property 9
@@ -3019,15 +2771,9 @@ Beta:
 26 -1.926974205937e+05
 27 6.459598107846e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 60
-Time for iteration 60 = 1.107734590000e-01 seconds 
+Time for iteration 60 = 1.193404010000e-01 seconds 
 L1 norm of solution: 6.797577404434e+05 RMS Error: 1.136950919806e+01 Objective fn: 6.463286970234e+01 Number of vars: 26
 Adding property 9 to the active set
 New active set: 
@@ -3058,6 +2804,7 @@ New active set:
 24 1
 25 0
 26 9
+Cholesky estimate of condition number = 1.283e+05
 Cholesky error test = 2.350538529249e-10
 Updated step gamma = 1.598228384346e+00
 Gamma limited by property 3
@@ -3092,15 +2839,9 @@ Beta:
 26 -1.934376970912e+05
 27 6.483546788258e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 61
-Time for iteration 61 = 7.652002000000e-03 seconds 
+Time for iteration 61 = 5.825061000000e-03 seconds 
 L1 norm of solution: 6.860539529194e+05 RMS Error: 1.136950417860e+01 Objective fn: 6.463281263357e+01 Number of vars: 27
 Adding property 3 to the active set
 New active set: 
@@ -3132,6 +2873,7 @@ New active set:
 25 0
 26 9
 27 3
+Cholesky estimate of condition number = 1.948e+09
 Cholesky error test = 2.188274135863e-07
 Updated step gamma = 3.210493459887e+00
 Lasso step gamma limit = 6.670558936535e-01
@@ -3167,15 +2909,9 @@ Beta:
 26 -1.934475981926e+05
 27 6.487423021411e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 6.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 0.0 Gb 
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 62
-Time for iteration 62 = 8.202803000000e-03 seconds 
+Time for iteration 62 = 7.040441000000e-03 seconds 
 Stopping: no more iterations possible
 Final values:
 Beta: 

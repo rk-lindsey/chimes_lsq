@@ -6,142 +6,83 @@ Distributed LARS algorithm
  ...xmat normalized.
  ...yvec normalized.
 Using the LASSO algorithm
-Time making prediction = 1.653928700000e-02
-Time calculating objective function = 5.536900000000e-05
 L1 norm of solution: 0.000000000000e+00 RMS Error: 3.367845029208e+01 Objective fn: 5.671190070381e+02 Number of vars: 0
-Time calculating correlation = 3.075944000000e-03
 Adding property 18 to the active set
 New active set: 
 0 18
-Time updating active set = 5.577500000000e-05
-Time building X_A = 2.393320000000e-04
-Time building G_A = 6.373000000000e-05
+Cholesky estimate of condition number = 1.000e+00
  Iter = 1 Error = 4.930380657631e-32 Func = -5.000000000000e-01 Step = 1.000000000000e+00
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 0.000000000000e+00
-Time solving equations = 1.107730000000e-04
-Time solving G_A = 1.211280000000e-04
-Time building u_A = 8.632090000000e-04
 Updated step gamma = 3.241707654294e+02
 Gamma limited by property 23
 Lasso step gamma limit = 1.000000000000e+20
-Time updating gamma = 2.348700000000e-05
-Time updating beta = 5.514000000000e-06
 Beta: 
 [
 18 3.241707654294e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 0.2 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 6.3
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 1
-Time for iteration 0 = 2.109482500000e-02 seconds 
-Time making prediction = 2.066300000000e-05
-Time calculating objective function = 2.516100000000e-05
+Time for iteration 1 = 5.462181000000e-03 seconds 
 L1 norm of solution: 3.241707654294e+02 RMS Error: 3.261126051416e+01 Objective fn: 5.317471561612e+02 Number of vars: 1
-Time calculating correlation = 8.955744300000e-02
 Adding property 23 to the active set
 New active set: 
 0 18
 1 23
-Time updating active set = 4.790600000000e-05
-Time building X_A = 6.551770000000e-04
-Time building G_A = 7.171100000000e-05
+Cholesky estimate of condition number = 1.008e+00
+Cholesky estimate of condition number = 1.008e+00
  Iter = 1 Error = 1.387778780781e-17 Func = -1.100048932774e+00 Step = 1.104589264590e+00
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 1.665334536938e-16
-Time solving equations = 2.380440000000e-04
-Time solving G_A = 2.487540000000e-04
-Time building u_A = 6.888790000000e-04
 Updated step gamma = 1.918647928756e+03
 Gamma limited by property 21
 Lasso step gamma limit = 1.000000000000e+20
-Time updating gamma = 2.200800000000e-05
-Time updating beta = 6.491000000000e-06
 Beta: 
 [
 18 1.747109800277e+03
 23 1.422939034848e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 0.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 6.5
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 2
-Time for iteration 1 = 9.139109000000e-02 seconds 
-Time making prediction = 3.601700000000e-05
-Time calculating objective function = 3.443000000000e-05
+Time for iteration 2 = 1.657587000000e-03 seconds 
 L1 norm of solution: 3.170048835124e+03 RMS Error: 2.457427966321e+01 Objective fn: 3.019476104828e+02 Number of vars: 2
-Time calculating correlation = 9.598852200000e-02
 Adding property 21 to the active set
 New active set: 
 0 18
 1 23
 2 21
-Time updating active set = 4.947700000000e-05
-Time building X_A = 9.226360000000e-04
-Time building G_A = 1.430660000000e-04
  Iter = 1 Error = 2.014400018510e-01 Func = -1.158384738006e+00 Step = 3.415722624323e-01
  Iter = 2 Error = 1.293072058666e-16 Func = -1.190025737281e+00 Step = 3.658196086082e-01
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 1.480297366167e-16
-Time solving equations = 2.907100000000e-05
-Time solving G_A = 3.885600000000e-05
-Time building u_A = 6.349900000000e-04
 Updated step gamma = 3.572295379826e+02
 Gamma limited by property 3
 Lasso step gamma limit = 1.000000000000e+20
-Time updating gamma = 1.939500000000e-05
-Time updating beta = 4.993000000000e-06
 Beta: 
 [
 18 1.929196454576e+03
 21 -1.219922247710e+02
 23 1.669973005112e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 0.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 6.7
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 3
-Time for iteration 2 = 9.792318700000e-02 seconds 
-Time making prediction = 4.024000000000e-05
-Time calculating objective function = 2.842200000000e-05
+Time for iteration 3 = 1.608132000000e-03 seconds 
 L1 norm of solution: 3.721161684459e+03 RMS Error: 2.333171409753e+01 Objective fn: 2.721844413644e+02 Number of vars: 3
-Time calculating correlation = 9.866788600000e-02
 Adding property 3 to the active set
 New active set: 
 0 18
 1 23
 2 21
 3 3
-Time updating active set = 5.154300000000e-05
-Time building X_A = 9.407520000000e-04
-Time building G_A = 1.723140000000e-04
  Iter = 1 Error = 2.038186117489e-01 Func = -1.836057846704e+00 Step = 1.136690027600e+00
  Iter = 2 Error = 1.569952651724e-01 Func = -1.871125525249e+00 Step = 3.506173258544e-01
  Iter = 3 Error = 2.098046120352e-02 Func = -1.883806941798e+00 Step = 2.033982497917e-01
  Iter = 4 Error = 1.793686107093e-17 Func = -1.884017229079e+00 Step = 2.029498496911e-02
 pre_con_grad succeeded in 4 iterations
 Cholesky error test = 8.326672684689e-17
-Time solving equations = 4.129000000000e-05
-Time solving G_A = 5.104300000000e-05
-Time building u_A = 6.070830000000e-04
 Updated step gamma = 1.340051221412e+03
 Gamma limited by property 8
 Lasso step gamma limit = 1.000000000000e+20
-Time updating gamma = 1.965800000000e-05
-Time updating beta = 5.222000000000e-06
 Beta: 
 [
 3 8.429582355543e+02
@@ -149,19 +90,10 @@ Beta:
 21 -2.788632789358e+02
 23 2.461463182438e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 0.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 7.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 4
-Time for iteration 3 = 1.006386580000e-01 seconds 
-Time making prediction = 2.177900000000e-05
-Time calculating objective function = 2.517400000000e-05
+Time for iteration 4 = 1.517808000000e-03 seconds 
 L1 norm of solution: 6.322392149796e+03 RMS Error: 1.864157420960e+01 Objective fn: 1.737541445061e+02 Number of vars: 4
-Time calculating correlation = 1.002179640000e-01
 Adding property 8 to the active set
 New active set: 
 0 18
@@ -169,9 +101,6 @@ New active set:
 2 21
 3 3
 4 8
-Time updating active set = 5.259000000000e-05
-Time building X_A = 1.143895000000e-03
-Time building G_A = 1.925600000000e-04
  Iter = 1 Error = 5.363736126375e-01 Func = -2.466758920884e+00 Step = 1.079575557157e+00
  Iter = 2 Error = 1.277234538036e-01 Func = -2.585090176634e+00 Step = 4.930474925609e-01
  Iter = 3 Error = 2.794581245658e-02 Func = -2.593313532163e+00 Step = 1.330288681996e-01
@@ -179,14 +108,9 @@ Time building G_A = 1.925600000000e-04
  Iter = 5 Error = 4.932194662648e-18 Func = -2.594274965148e+00 Step = 8.254740581598e-03
 pre_con_grad succeeded in 5 iterations
 Cholesky error test = 6.661338147751e-17
-Time solving equations = 4.639100000000e-05
-Time solving G_A = 5.606700000000e-05
-Time building u_A = 6.817280000000e-04
 Updated step gamma = 3.902351092211e+02
 Gamma limited by property 20
 Lasso step gamma limit = 1.000000000000e+20
-Time updating gamma = 1.983700000000e-05
-Time updating beta = 6.026000000000e-06
 Beta: 
 [
 3 1.050395478486e+03
@@ -195,19 +119,10 @@ Beta:
 21 -3.756206288610e+02
 23 2.597737670113e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 1.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 7.2
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 5
-Time for iteration 4 = 1.024754250000e-01 seconds 
-Time making prediction = 2.073500000000e-05
-Time calculating objective function = 2.500900000000e-05
+Time for iteration 5 = 2.316628000000e-03 seconds 
 L1 norm of solution: 7.211284851099e+03 RMS Error: 1.752422220342e+01 Objective fn: 1.535491819174e+02 Number of vars: 5
-Time calculating correlation = 1.005562370000e-01
 Adding property 20 to the active set
 New active set: 
 0 18
@@ -216,9 +131,6 @@ New active set:
 3 3
 4 8
 5 20
-Time updating active set = 5.459200000000e-05
-Time building X_A = 1.530317000000e-03
-Time building G_A = 1.292100000000e-04
  Iter = 1 Error = 4.457403796469e-01 Func = -2.703258812571e+00 Step = 4.668701048964e-01
  Iter = 2 Error = 4.673956783783e-01 Func = -2.932290059512e+00 Step = 1.422519950661e+00
  Iter = 3 Error = 4.234072130143e-01 Func = -3.134796645502e+00 Step = 1.554698930450e+00
@@ -227,14 +139,9 @@ Time building G_A = 1.292100000000e-04
  Iter = 6 Error = 1.817177921152e-15 Func = -3.319237142932e+00 Step = 9.448996509575e-03
 pre_con_grad succeeded in 6 iterations
 Cholesky error test = 4.996003610813e-16
-Time solving equations = 7.071600000000e-05
-Time solving G_A = 8.043400000000e-05
-Time building u_A = 6.201690000000e-04
 Updated step gamma = 4.953854663698e+01
 Gamma limited by property 6
 Lasso step gamma limit = 4.417804671973e+03
-Time updating gamma = 2.116000000000e-05
-Time updating beta = 5.324000000000e-06
 Beta: 
 [
 3 1.071738291776e+03
@@ -244,19 +151,10 @@ Beta:
 21 -4.284181861440e+02
 23 2.568608236316e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 1.3 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 7.4
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 6
-Time for iteration 5 = 1.031063680000e-01 seconds 
-Time making prediction = 2.175300000000e-05
-Time calculating objective function = 2.542300000000e-05
+Time for iteration 6 = 1.684170000000e-03 seconds 
 L1 norm of solution: 7.338922089700e+03 RMS Error: 1.738242756071e+01 Objective fn: 1.510743939516e+02 Number of vars: 6
-Time calculating correlation = 1.075708940000e-01
 Adding property 6 to the active set
 New active set: 
 0 18
@@ -266,9 +164,6 @@ New active set:
 4 8
 5 20
 6 6
-Time updating active set = 6.649100000000e-05
-Time building X_A = 1.427243000000e-03
-Time building G_A = 1.622050000000e-04
  Iter = 1 Error = 2.614339779088e-01 Func = -3.370039753563e+00 Step = 3.187557391847e-01
  Iter = 2 Error = 1.353191134629e-01 Func = -3.451964296660e+00 Step = 8.106253487048e-01
  Iter = 3 Error = 5.693520019877e-02 Func = -3.459159020065e+00 Step = 1.275423313899e-01
@@ -278,14 +173,9 @@ Time building G_A = 1.622050000000e-04
  Iter = 7 Error = 3.615941476821e-16 Func = -3.464018763136e+00 Step = 3.543338608278e-02
 pre_con_grad succeeded in 7 iterations
 Cholesky error test = 2.061842760018e-16
-Time solving equations = 6.843000000000e-05
-Time solving G_A = 7.807000000000e-05
-Time building u_A = 7.474830000000e-04
 Updated step gamma = 1.399019286704e+02
 Gamma limited by property 1
 Lasso step gamma limit = 4.019079982905e+03
-Time updating gamma = 2.691800000000e-05
-Time updating beta = 6.011000000000e-06
 Beta: 
 [
 3 1.091650701894e+03
@@ -296,19 +186,10 @@ Beta:
 21 -5.832424324679e+02
 23 2.479196418739e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 1.5 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 7.6
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 7
-Time for iteration 6 = 1.101974150000e-01 seconds 
-Time making prediction = 2.042000000000e-05
-Time calculating objective function = 2.501100000000e-05
+Time for iteration 7 = 1.946882000000e-03 seconds 
 L1 norm of solution: 7.707160271357e+03 RMS Error: 1.699422837045e+01 Objective fn: 1.444018989535e+02 Number of vars: 7
-Time calculating correlation = 1.092827620000e-01
 Adding property 1 to the active set
 New active set: 
 0 18
@@ -319,9 +200,6 @@ New active set:
 5 20
 6 6
 7 1
-Time updating active set = 5.940100000000e-05
-Time building X_A = 1.588928000000e-03
-Time building G_A = 1.815870000000e-04
  Iter = 1 Error = 4.346462193396e-01 Func = -3.803875998384e+00 Step = 8.244479792546e-01
  Iter = 2 Error = 2.783394934429e-01 Func = -3.885080474420e+00 Step = 4.224146829111e-01
  Iter = 3 Error = 3.598128310686e-01 Func = -4.071320570261e+00 Step = 1.651137883517e+00
@@ -332,14 +210,9 @@ Time building G_A = 1.815870000000e-04
  Iter = 8 Error = 5.006887733422e-15 Func = -4.150813084408e+00 Step = 1.948727497774e-03
 pre_con_grad succeeded in 8 iterations
 Cholesky error test = 1.554312234475e-15
-Time solving equations = 6.161100000000e-05
-Time solving G_A = 7.146000000000e-05
-Time building u_A = 7.476420000000e-04
 Updated step gamma = 8.201238194355e+01
 Gamma limited by property 10
 Lasso step gamma limit = 1.946916104723e+03
-Time updating gamma = 2.761400000000e-05
-Time updating beta = 6.166000000000e-06
 Beta: 
 [
 1 -4.742324551680e+01
@@ -351,19 +224,10 @@ Beta:
 21 -6.851251837166e+02
 23 2.414373534487e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 1.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 7.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 8
-Time for iteration 7 = 1.120800370000e-01 seconds 
-Time making prediction = 2.150800000000e-05
-Time calculating objective function = 2.516500000000e-05
+Time for iteration 8 = 2.044324000000e-03 seconds 
 L1 norm of solution: 7.943458797031e+03 RMS Error: 1.676056905842e+01 Objective fn: 1.404583375810e+02 Number of vars: 8
-Time calculating correlation = 1.107804930000e-01
 Adding property 10 to the active set
 New active set: 
 0 18
@@ -375,9 +239,6 @@ New active set:
 6 6
 7 1
 8 10
-Time updating active set = 6.175000000000e-05
-Time building X_A = 1.826250000000e-03
-Time building G_A = 1.775690000000e-04
  Iter = 1 Error = 1.793016035484e-01 Func = -4.163053790579e+00 Step = 1.564653710594e-01
  Iter = 2 Error = 1.757539502391e-01 Func = -4.187740473923e+00 Step = 4.188887434867e-01
  Iter = 3 Error = 5.905289851827e-02 Func = -4.223807650606e+00 Step = 7.400879199966e-01
@@ -389,14 +250,9 @@ Time building G_A = 1.775690000000e-04
  Iter = 9 Error = 1.159845766857e-12 Func = -4.224706453703e+00 Step = 2.655639409451e-03
 pre_con_grad succeeded in 9 iterations
 Cholesky error test = 3.238150488490e-13
-Time solving equations = 6.868900000000e-05
-Time solving G_A = 7.865300000000e-05
-Time building u_A = 6.949630000000e-04
 Updated step gamma = 3.529125641172e+02
 Gamma limited by property 17
 Lasso step gamma limit = 1.893326087310e+03
-Time updating gamma = 2.707500000000e-05
-Time updating beta = 6.020000000000e-06
 Beta: 
 [
 1 -2.490129704912e+02
@@ -409,19 +265,10 @@ Beta:
 21 -1.124153661414e+03
 23 2.134323588991e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 8.1
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 9
-Time for iteration 8 = 1.137723560000e-01 seconds 
-Time making prediction = 2.054900000000e-05
-Time calculating objective function = 2.508300000000e-05
+Time for iteration 9 = 3.047951000000e-03 seconds 
 L1 norm of solution: 8.969300586768e+03 RMS Error: 1.587665973325e+01 Objective fn: 1.260341621427e+02 Number of vars: 9
-Time calculating correlation = 1.096137080000e-01
 Adding property 17 to the active set
 New active set: 
 0 18
@@ -434,9 +281,6 @@ New active set:
 7 1
 8 10
 9 17
-Time updating active set = 6.668900000000e-05
-Time building X_A = 1.981123000000e-03
-Time building G_A = 2.058790000000e-04
  Iter = 1 Error = 1.120280429827e+00 Func = -4.497894935286e+00 Step = 7.391731618283e-01
  Iter = 2 Error = 1.613320070939e+00 Func = -6.031221331625e+00 Step = 4.971726297732e+00
  Iter = 3 Error = 6.151936815624e-01 Func = -9.354662206055e+00 Step = 1.152443306547e+01
@@ -449,16 +293,11 @@ Time building G_A = 2.058790000000e-04
  Iter = 10 Error = 7.726176582656e-09 Func = -1.001532908263e+01 Step = 6.235050660209e-02
 pre_con_grad succeeded in 10 iterations
 Cholesky error test = 2.100787988013e-09
-Time solving equations = 9.504000000000e-05
-Time solving G_A = 1.109520000000e-04
-Time building u_A = 6.467850000000e-04
 Updated step gamma = 5.902147121122e+02
 Gamma limited by property 15
 Lasso step gamma limit = 2.175111579192e+02
-Time updating gamma = 2.107000000000e-05
 LASSO is limiting gamma from 5.902147121122e+02 to 2.175111579192e+02
 LASSO will set property 10 to 0.0
-Time updating beta = 1.306600000000e-05
 Beta: 
 [
 1 -4.093502243880e+02
@@ -471,19 +310,10 @@ Beta:
 21 -1.557318103662e+03
 23 1.748341176796e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.2 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 8.3
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 10
-Time for iteration 9 = 1.127777640000e-01 seconds 
-Time making prediction = 2.210200000000e-05
-Time calculating objective function = 2.520300000000e-05
+Time for iteration 10 = 4.392435305000e+00 seconds 
 L1 norm of solution: 9.942785331463e+03 RMS Error: 1.518211335764e+01 Objective fn: 1.152482830021e+02 Number of vars: 10
-Time calculating correlation = 1.116005220000e-01
 Will remove property 10 from the active set
 New active set: 
 0 18
@@ -495,20 +325,21 @@ New active set:
 6 6
 7 1
 8 17
-Time updating active set = 2.137710000000e-04
-Time building X_A = 2.570530000000e-03
-Time building G_A = 2.332700000000e-05
+Cholesky estimate of condition number = 1.833e+01
+Cholesky estimate of condition number = 1.833e+01
+Cholesky estimate of condition number = 1.833e+01
+Cholesky estimate of condition number = 1.833e+01
+Cholesky estimate of condition number = 1.833e+01
+Cholesky estimate of condition number = 1.833e+01
+Cholesky estimate of condition number = 1.833e+01
+Cholesky estimate of condition number = 1.833e+01
+Cholesky estimate of condition number = 1.833e+01
  Iter = 1 Error = 1.737808863134e-14 Func = -9.616461424535e+00 Step = 1.666540707191e+01
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 3.873444774803e-15
-Time solving equations = 6.439696000000e-03
-Time solving G_A = 6.447429000000e-03
-Time building u_A = 9.515280000000e-04
 Updated step gamma = 2.837102034558e+02
 Gamma limited by property 15
 Lasso step gamma limit = 1.027554475155e+03
-Time updating gamma = 2.433900000000e-05
-Time updating beta = 5.537000000000e-06
 Beta: 
 [
 1 -6.117617551600e+02
@@ -521,19 +352,10 @@ Beta:
 21 -2.105998851457e+03
 23 1.265620072493e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 8.1
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 11
-Time for iteration 10 = 1.220292410000e-01 seconds 
-Time making prediction = 3.096200000000e-05
-Time calculating objective function = 9.320500000000e-05
+Time for iteration 11 = 1.050757400000e-02 seconds 
 L1 norm of solution: 1.118700654013e+04 RMS Error: 1.441766345306e+01 Objective fn: 1.039345097229e+02 Number of vars: 9
-Time calculating correlation = 1.090459080000e-01
 Adding property 15 to the active set
 New active set: 
 0 18
@@ -546,21 +368,13 @@ New active set:
 7 1
 8 17
 9 15
-Time updating active set = 6.490000000000e-05
-Time building X_A = 8.336870000000e-04
-Time building G_A = 6.260360000000e-04
  Iter = 1 Error = 1.421224623458e+00 Func = -1.105331557236e+01 Step = 1.695201550157e+00
  Iter = 2 Error = 6.649526809409e-15 Func = -1.171659538378e+01 Step = 2.133607891489e+00
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 1.276756478319e-15
-Time solving equations = 4.813200000000e-05
-Time solving G_A = 6.364500000000e-05
-Time building u_A = 8.040810000000e-04
 Updated step gamma = 3.685369935103e+02
 Gamma limited by property 22
 Lasso step gamma limit = 7.936015881061e+02
-Time updating gamma = 2.144200000000e-05
-Time updating beta = 5.533000000000e-06
 Beta: 
 [
 1 -8.570031940980e+02
@@ -574,19 +388,10 @@ Beta:
 21 -2.730689611825e+03
 23 6.778845847704e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.2 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 8.3
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 12
-Time for iteration 11 = 1.116663530000e-01 seconds 
-Time making prediction = 3.209800000000e-05
-Time calculating objective function = 1.331340000000e-04
+Time for iteration 12 = 2.356169000000e-03 seconds 
 L1 norm of solution: 1.297101456104e+04 RMS Error: 1.357334317077e+01 Objective fn: 9.211782241578e+01 Number of vars: 10
-Time calculating correlation = 1.867575790000e-01
 Adding property 22 to the active set
 New active set: 
 0 18
@@ -600,23 +405,15 @@ New active set:
 8 17
 9 15
 10 22
-Time updating active set = 6.599200000000e-05
-Time building X_A = 6.779040000000e-04
-Time building G_A = 3.568380000000e-04
  Iter = 1 Error = 1.706519124928e+00 Func = -1.220984045376e+01 Step = 9.932221000108e-01
  Iter = 2 Error = 2.107130382608e+00 Func = -1.582978908542e+01 Step = 1.083043649531e+01
  Iter = 3 Error = 1.330228021155e+00 Func = -2.038053938223e+01 Step = 1.808947041426e+01
  Iter = 4 Error = 5.225519926686e-14 Func = -2.245700047181e+01 Step = 5.647596008822e+00
 pre_con_grad succeeded in 4 iterations
 Cholesky error test = 1.217208152453e-14
-Time solving equations = 5.009000000000e-05
-Time solving G_A = 6.725800000000e-05
-Time building u_A = 1.040118000000e-03
 Updated step gamma = 3.219763617025e+02
 Gamma limited by property 10
 Lasso step gamma limit = 5.615213163875e+02
-Time updating gamma = 2.630000000000e-05
-Time updating beta = 5.877000000000e-06
 Beta: 
 [
 1 -9.670149989691e+02
@@ -631,19 +428,10 @@ Beta:
 22 -1.039052279851e+03
 23 2.891855169189e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 8.5
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 13
-Time for iteration 12 = 1.892436490000e-01 seconds 
-Time making prediction = 2.059900000000e-05
-Time calculating objective function = 2.500700000000e-05
+Time for iteration 13 = 4.117148000000e-03 seconds 
 L1 norm of solution: 1.512883280414e+04 RMS Error: 1.284707408086e+01 Objective fn: 8.252365621956e+01 Number of vars: 11
-Time calculating correlation = 1.081948430000e-01
 Adding property 10 to the active set
 New active set: 
 0 18
@@ -658,9 +446,6 @@ New active set:
 9 15
 10 22
 11 10
-Time updating active set = 6.828500000000e-05
-Time building X_A = 1.092379000000e-03
-Time building G_A = 4.540020000000e-04
  Iter = 1 Error = 5.342203242811e-01 Func = -2.252234705203e+01 Step = 3.615150902077e-01
  Iter = 2 Error = 6.326757200169e-01 Func = -2.279453344570e+01 Step = 2.060199579564e+00
  Iter = 3 Error = 2.780831819393e-01 Func = -2.303877763366e+01 Step = 2.466468623393e+00
@@ -669,14 +454,9 @@ Time building G_A = 4.540020000000e-04
  Iter = 6 Error = 1.243059501844e-12 Func = -2.310108312425e+01 Step = 5.851425400607e-01
 pre_con_grad succeeded in 6 iterations
 Cholesky error test = 3.092156160752e-13
-Time solving equations = 6.646500000000e-05
-Time solving G_A = 7.641200000000e-05
-Time building u_A = 8.018600000000e-04
 Updated step gamma = 4.545888868045e+01
 Gamma limited by property 9
 Lasso step gamma limit = 2.631071108235e+02
-Time updating gamma = 2.622500000000e-05
-Time updating beta = 5.853000000000e-06
 Beta: 
 [
 1 -9.805051356546e+02
@@ -692,19 +472,10 @@ Beta:
 22 -1.190948224937e+03
 23 2.392208763569e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.6 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 8.7
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 14
-Time for iteration 13 = 1.108493170000e-01 seconds 
-Time making prediction = 2.828500000000e-05
-Time calculating objective function = 2.455200000000e-05
+Time for iteration 14 = 4.697157000000e-03 seconds 
 L1 norm of solution: 1.543782675950e+04 RMS Error: 1.276294212377e+01 Objective fn: 8.144634582733e+01 Number of vars: 12
-Time calculating correlation = 1.091122460000e-01
 Adding property 9 to the active set
 New active set: 
 0 18
@@ -720,9 +491,6 @@ New active set:
 10 22
 11 10
 12 9
-Time updating active set = 7.395800000000e-05
-Time building X_A = 1.293089000000e-03
-Time building G_A = 4.025250000000e-04
  Iter = 1 Error = 6.205921631048e-01 Func = -2.454691974594e+01 Step = 1.700492059188e+00
  Iter = 2 Error = 6.921859462198e-01 Func = -2.497067520977e+01 Step = 3.558783392687e+00
  Iter = 3 Error = 5.077005093718e-01 Func = -2.511204029579e+01 Step = 1.727150291577e+00
@@ -733,14 +501,9 @@ Time building G_A = 4.025250000000e-04
  Iter = 8 Error = 1.861940509474e-11 Func = -2.654073825719e+01 Step = 1.457599036306e+00
 pre_con_grad succeeded in 8 iterations
 Cholesky error test = 4.369871985633e-12
-Time solving equations = 8.948800000000e-05
-Time solving G_A = 9.890400000000e-05
-Time building u_A = 9.620600000000e-04
 Updated step gamma = 9.236704555751e+01
 Gamma limited by property 13
 Lasso step gamma limit = 1.967951727406e+02
-Time updating gamma = 3.411900000000e-05
-Time updating beta = 5.866000000000e-06
 Beta: 
 [
 1 -1.010754451088e+03
@@ -757,19 +520,10 @@ Beta:
 22 -1.469091380560e+03
 23 1.269410613743e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.8 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 8.9
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 15
-Time for iteration 14 = 1.121231260000e-01 seconds 
-Time making prediction = 1.987500000000e-05
-Time calculating objective function = 2.454600000000e-05
+Time for iteration 15 = 4.704974000000e-03 seconds 
 L1 norm of solution: 1.611078567310e+04 RMS Error: 1.259591943769e+01 Objective fn: 7.932859324034e+01 Number of vars: 13
-Time calculating correlation = 1.082572680000e-01
 Adding property 13 to the active set
 New active set: 
 0 18
@@ -786,9 +540,6 @@ New active set:
 11 10
 12 9
 13 13
-Time updating active set = 7.644100000000e-05
-Time building X_A = 1.257768000000e-03
-Time building G_A = 5.623920000000e-04
  Iter = 1 Error = 1.879446278636e+00 Func = -2.739071287735e+01 Step = 1.303821015465e+00
  Iter = 2 Error = 1.342291533598e+00 Func = -2.892120564150e+01 Step = 2.951287188754e+00
  Iter = 3 Error = 8.201846217214e-01 Func = -2.979569267885e+01 Step = 2.411275169321e+00
@@ -801,16 +552,11 @@ Time building G_A = 5.623920000000e-04
  Iter = 10 Error = 1.247069002524e-10 Func = -3.069265396610e+01 Step = 2.972954481760e-01
 pre_con_grad succeeded in 10 iterations
 Cholesky error test = 2.833436659902e-11
-Time solving equations = 8.821700000000e-05
-Time solving G_A = 9.855600000000e-05
-Time building u_A = 8.386800000000e-04
 Updated step gamma = 1.314941876362e+02
 Gamma limited by property 11
 Lasso step gamma limit = 1.045507864677e+02
-Time updating gamma = 2.048300000000e-05
 LASSO is limiting gamma from 1.314941876362e+02 to 1.045507864677e+02
 LASSO will set property 23 to 0.0
-Time updating beta = 1.318300000000e-05
 Beta: 
 [
 1 -1.044414811085e+03
@@ -827,19 +573,10 @@ Beta:
 21 -3.084305943329e+03
 22 -1.772627962567e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 9.1
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 16
-Time for iteration 15 = 1.112619010000e-01 seconds 
-Time making prediction = 3.015000000000e-05
-Time calculating objective function = 2.432400000000e-05
+Time for iteration 16 = 5.038706000000e-03 seconds 
 L1 norm of solution: 1.692992829423e+04 RMS Error: 1.241970930134e+01 Objective fn: 7.712458956490e+01 Number of vars: 14
-Time calculating correlation = 1.844571680000e-01
 Will remove property 23 from the active set
 New active set: 
 0 18
@@ -855,20 +592,25 @@ New active set:
 10 10
 11 9
 12 13
-Time updating active set = 6.778900000000e-05
-Time building X_A = 1.180823000000e-03
-Time building G_A = 1.262700000000e-05
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
  Iter = 1 Error = 1.091115150716e-13 Func = -2.520962589490e+01 Step = 4.668430836333e+01
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 2.370753166430e-14
-Time solving equations = 2.050493500000e-02
-Time solving G_A = 2.051219900000e-02
-Time building u_A = 7.257320000000e-04
 Updated step gamma = 2.967194555602e+01
 Gamma limited by property 11
 Lasso step gamma limit = 3.573803830210e+02
-Time updating gamma = 2.042400000000e-05
-Time updating beta = 5.188000000000e-06
 Beta: 
 [
 1 -1.047144380794e+03
@@ -885,19 +627,10 @@ Beta:
 21 -3.072982242389e+03
 22 -1.868839106242e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.8 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 8.9
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 17
-Time for iteration 16 = 2.071239390000e-01 seconds 
-Time making prediction = 3.083000000000e-05
-Time calculating objective function = 2.531500000000e-05
+Time for iteration 17 = 1.421206400000e-02 seconds 
 L1 norm of solution: 1.714061843908e+04 RMS Error: 1.237921167378e+01 Objective fn: 7.662244083218e+01 Number of vars: 13
-Time calculating correlation = 1.911263160000e-01
 Adding property 11 to the active set
 New active set: 
 0 18
@@ -914,23 +647,15 @@ New active set:
 11 9
 12 13
 13 11
-Time updating active set = 7.396500000000e-05
-Time building X_A = 2.646219000000e-03
-Time building G_A = 5.807210000000e-04
  Iter = 1 Error = 5.692639476957e-01 Func = -2.530276620546e+01 Step = 4.316023877615e-01
  Iter = 2 Error = 2.157203514279e-12 Func = -2.749317902336e+01 Step = 1.977353482910e+01
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 4.528123907578e-13
-Time solving equations = 5.831500000000e-05
-Time solving G_A = 6.834800000000e-05
-Time building u_A = 6.908910000000e-04
 Updated step gamma = 1.587738555278e+02
 Gamma limited by property 27
 Lasso step gamma limit = 1.291678632460e+02
-Time updating gamma = 2.012600000000e-05
 LASSO is limiting gamma from 1.587738555278e+02 to 1.291678632460e+02
 LASSO will set property 13 to 0.0
-Time updating beta = 1.288000000000e-05
 Beta: 
 [
 1 -1.057537757982e+03
@@ -947,19 +672,10 @@ Beta:
 21 -3.026348822472e+03
 22 -2.274921377864e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 9.1
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 18
-Time for iteration 17 = 1.953639160000e-01 seconds 
-Time making prediction = 3.296200000000e-05
-Time calculating objective function = 2.550300000000e-05
+Time for iteration 18 = 3.082368000000e-03 seconds 
 L1 norm of solution: 1.809843414281e+04 RMS Error: 1.222312378934e+01 Objective fn: 7.470237758471e+01 Number of vars: 14
-Time calculating correlation = 1.088158500000e-01
 Will remove property 13 from the active set
 New active set: 
 0 18
@@ -975,20 +691,25 @@ New active set:
 10 10
 11 9
 12 11
-Time updating active set = 6.953800000000e-05
-Time building X_A = 1.151749000000e-03
-Time building G_A = 1.898200000000e-05
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
+Cholesky estimate of condition number = 2.176e+01
  Iter = 1 Error = 2.451101020241e-14 Func = -2.695768852840e+01 Step = 1.357829241066e+01
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 5.346150872426e-15
-Time solving equations = 2.298612300000e-02
-Time solving G_A = 2.299375800000e-02
-Time building u_A = 7.668320000000e-04
 Updated step gamma = 3.001159526610e+01
 Gamma limited by property 27
 Lasso step gamma limit = 4.114233306313e+02
-Time updating gamma = 2.678900000000e-05
-Time updating beta = 6.099000000000e-06
 Beta: 
 [
 1 -1.060084719974e+03
@@ -1005,19 +726,10 @@ Beta:
 21 -3.015508425087e+03
 22 -2.370115982902e+03
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 2.8 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 8.9
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 19
-Time for iteration 18 = 1.339962390000e-01 seconds 
-Time making prediction = 2.108300000000e-05
-Time calculating objective function = 2.544600000000e-05
+Time for iteration 19 = 2.910799200000e-02 seconds 
 L1 norm of solution: 1.831880055674e+04 RMS Error: 1.219374673857e+01 Objective fn: 7.434372976220e+01 Number of vars: 13
-Time calculating correlation = 1.995403830000e-01
 Adding property 27 to the active set
 New active set: 
 0 18
@@ -1034,21 +746,13 @@ New active set:
 11 9
 12 11
 13 27
-Time updating active set = 7.455700000000e-05
-Time building X_A = 8.308960000000e-04
-Time building G_A = 6.097370000000e-04
  Iter = 1 Error = 1.530376168001e+00 Func = -2.758619335706e+01 Step = 1.121164420282e+00
  Iter = 2 Error = 2.388814735487e-13 Func = -3.650652162530e+01 Step = 3.642170759518e+01
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 5.283075564323e-14
-Time solving equations = 4.959900000000e-05
-Time solving G_A = 5.947000000000e-05
-Time building u_A = 8.494310000000e-04
 Updated step gamma = 1.326317060877e+02
 Gamma limited by property 14
 Lasso step gamma limit = 3.417701193045e+02
-Time updating gamma = 1.997100000000e-05
-Time updating beta = 5.162000000000e-06
 Beta: 
 [
 1 -1.140558803388e+03
@@ -1066,19 +770,10 @@ Beta:
 22 -2.750753883332e+03
 27 -2.643979732792e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 9.1
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 20
-Time for iteration 19 = 2.021355770000e-01 seconds 
-Time making prediction = 2.065700000000e-05
-Time calculating objective function = 2.516300000000e-05
+Time for iteration 20 = 1.178732400000e-01 seconds 
 L1 norm of solution: 1.945210758337e+04 RMS Error: 1.207385239993e+01 Objective fn: 7.288895588763e+01 Number of vars: 14
-Time calculating correlation = 1.097528260000e-01
 Adding property 14 to the active set
 New active set: 
 0 18
@@ -1096,23 +791,15 @@ New active set:
 12 11
 13 27
 14 14
-Time updating active set = 6.972400000000e-05
-Time building X_A = 1.284989000000e-03
-Time building G_A = 2.168030000000e-03
  Iter = 1 Error = 3.748133966393e+00 Func = -4.060106022375e+01 Step = 2.861656372961e+00
  Iter = 2 Error = 5.009010575677e+00 Func = -5.914538507560e+01 Step = 2.222613437034e+01
  Iter = 3 Error = 8.415239535206e-02 Func = -7.116074665789e+01 Step = 1.924747355097e+01
  Iter = 4 Error = 2.030504376740e-11 Func = -7.123160149173e+01 Step = 3.219419105648e+00
 pre_con_grad succeeded in 4 iterations
 Cholesky error test = 4.037451854326e-12
-Time solving equations = 5.777800000000e-05
-Time solving G_A = 6.835200000000e-05
-Time building u_A = 8.317710000000e-04
 Updated step gamma = 4.056150000278e+01
 Gamma limited by property 0
 Lasso step gamma limit = 5.023454980910e+02
-Time updating gamma = 2.131500000000e-05
-Time updating beta = 6.073000000000e-06
 Beta: 
 [
 1 -1.160318613510e+03
@@ -1131,19 +818,10 @@ Beta:
 22 -2.833016186300e+03
 27 -3.302581988530e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.3 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 9.4
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 21
-Time for iteration 20 = 1.143506070000e-01 seconds 
-Time making prediction = 2.176300000000e-05
-Time calculating objective function = 2.493400000000e-05
+Time for iteration 21 = 2.755762000000e-03 seconds 
 L1 norm of solution: 1.993624133349e+04 RMS Error: 1.203562360088e+01 Objective fn: 7.242811773108e+01 Number of vars: 15
-Time calculating correlation = 1.026705660000e-01
 Adding property 0 to the active set
 New active set: 
 0 18
@@ -1162,9 +840,6 @@ New active set:
 13 27
 14 14
 15 0
-Time updating active set = 1.067410000000e-04
-Time building X_A = 1.432917000000e-03
-Time building G_A = 4.561740000000e-04
  Iter = 1 Error = 1.694034805798e+00 Func = -7.325322594866e+01 Step = 2.010783159332e+00
  Iter = 2 Error = 1.119915486392e+00 Func = -7.779394536704e+01 Step = 1.359399949891e+01
  Iter = 3 Error = 2.089404226589e-01 Func = -7.803577500407e+01 Step = 1.189681254891e+00
@@ -1173,14 +848,9 @@ Time building G_A = 4.561740000000e-04
  Iter = 6 Error = 4.539405486553e-09 Func = -7.818742591463e+01 Step = 4.285623519465e-01
 pre_con_grad succeeded in 6 iterations
 Cholesky error test = 8.841148507743e-10
-Time solving equations = 6.056500000000e-05
-Time solving G_A = 7.720300000000e-05
-Time building u_A = 8.887560000000e-04
 Updated step gamma = 1.962863129628e+00
 Gamma limited by property 5
 Lasso step gamma limit = 5.310536469583e+02
-Time updating gamma = 2.608300000000e-05
-Time updating beta = 6.210000000000e-06
 Beta: 
 [
 0 -1.085975254384e+00
@@ -1200,19 +870,10 @@ Beta:
 22 -2.837291746686e+03
 27 -3.335864788822e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.5 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 9.6
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 22
-Time for iteration 21 = 1.058098900000e-01 seconds 
-Time making prediction = 2.038100000000e-05
-Time calculating objective function = 2.478000000000e-05
+Time for iteration 22 = 3.184052000000e-03 seconds 
 L1 norm of solution: 1.996078692333e+04 RMS Error: 1.203380932740e+01 Objective fn: 7.240628346410e+01 Number of vars: 16
-Time calculating correlation = 1.104195370000e-01
 Adding property 5 to the active set
 New active set: 
 0 18
@@ -1232,9 +893,6 @@ New active set:
 14 14
 15 0
 16 5
-Time updating active set = 8.053000000000e-05
-Time building X_A = 1.478698000000e-03
-Time building G_A = 4.954350000000e-04
  Iter = 1 Error = 1.770004170013e+00 Func = -7.994564496798e+01 Step = 1.875216815757e+00
  Iter = 2 Error = 5.683059929296e+00 Func = -9.189086566170e+01 Step = 2.073477469158e+01
  Iter = 3 Error = 2.303408635353e+00 Func = -1.048719178894e+02 Step = 2.492700295155e+01
@@ -1246,14 +904,9 @@ Time building G_A = 4.954350000000e-04
  Iter = 9 Error = 1.081084549794e-10 Func = -1.239291250303e+02 Step = 4.250967901790e-04
 pre_con_grad succeeded in 9 iterations
 Cholesky error test = 2.315355750264e-11
-Time solving equations = 1.677260000000e-04
-Time solving G_A = 1.776180000000e-04
-Time building u_A = 8.902480000000e-04
 Updated step gamma = 1.578887641284e+01
 Gamma limited by property 23
 Lasso step gamma limit = 2.756578165527e+02
-Time updating gamma = 2.684300000000e-05
-Time updating beta = 6.003000000000e-06
 Beta: 
 [
 0 -2.093649744483e+01
@@ -1274,19 +927,10 @@ Beta:
 22 -2.865161270377e+03
 27 -3.639835839092e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 9.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 23
-Time for iteration 22 = 1.137941720000e-01 seconds 
-Time making prediction = 3.564800000000e-05
-Time calculating objective function = 2.524300000000e-05
+Time for iteration 23 = 7.302760000000e-03 seconds 
 L1 norm of solution: 2.020935932870e+04 RMS Error: 1.201584154835e+01 Objective fn: 7.219022405758e+01 Number of vars: 17
-Time calculating correlation = 1.096715940000e-01
 Adding property 23 to the active set
 New active set: 
 0 18
@@ -1307,9 +951,6 @@ New active set:
 15 0
 16 5
 17 23
-Time updating active set = 8.379300000000e-05
-Time building X_A = 1.531340000000e-03
-Time building G_A = 5.145380000000e-04
  Iter = 1 Error = 2.962445423375e+00 Func = -1.267161341658e+02 Step = 2.360935888796e+00
  Iter = 2 Error = 4.580214900422e+00 Func = -1.383648470147e+02 Step = 1.767446114094e+01
  Iter = 3 Error = 8.428870470870e-01 Func = -1.462107532026e+02 Step = 1.372185356624e+01
@@ -1322,14 +963,9 @@ Time building G_A = 5.145380000000e-04
  Iter = 10 Error = 1.089457357654e-09 Func = -1.492306451385e+02 Step = 3.637644206466e+00
 pre_con_grad succeeded in 10 iterations
 Cholesky error test = 2.294859487624e-10
-Time solving equations = 1.124630000000e-04
-Time solving G_A = 1.835510000000e-04
-Time building u_A = 1.032471000000e-03
 Updated step gamma = 2.040784987985e+01
 Gamma limited by property 13
 Lasso step gamma limit = 3.286849166276e+02
-Time updating gamma = 2.629200000000e-05
-Time updating beta = 6.589000000000e-06
 Beta: 
 [
 0 -4.158530658881e+01
@@ -1351,19 +987,10 @@ Beta:
 23 -2.531894823218e+01
 27 -3.901512817419e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 24
-Time for iteration 23 = 1.132173870000e-01 seconds 
-Time making prediction = 3.042100000000e-05
-Time calculating objective function = 2.418600000000e-05
+Time for iteration 24 = 1.081843300000e-02 seconds 
 L1 norm of solution: 2.056192600136e+04 RMS Error: 1.199143660803e+01 Objective fn: 7.189727596220e+01 Number of vars: 18
-Time calculating correlation = 1.086398800000e-01
 Adding property 13 to the active set
 New active set: 
 0 18
@@ -1385,9 +1012,6 @@ New active set:
 16 5
 17 23
 18 13
-Time updating active set = 8.428600000000e-05
-Time building X_A = 1.489006000000e-03
-Time building G_A = 5.274200000000e-04
  Iter = 1 Error = 1.162849374910e+00 Func = -1.494825056863e+02 Step = 7.097331153001e-01
  Iter = 2 Error = 2.804059929263e+00 Func = -1.512281587232e+02 Step = 7.717329336841e+00
  Iter = 3 Error = 1.087921375563e+00 Func = -1.572488584686e+02 Step = 2.880465487393e+01
@@ -1404,16 +1028,11 @@ Time building G_A = 5.274200000000e-04
  Iter = 14 Error = 2.790446847898e-10 Func = -1.717951827721e+02 Step = 1.492764250309e-07
 pre_con_grad succeeded in 14 iterations
 Cholesky error test = 5.306954875550e-11
-Time solving equations = 1.291410000000e-04
-Time solving G_A = 1.455940000000e-04
-Time building u_A = 8.976550000000e-04
 Updated step gamma = 2.002087916271e+02
 Gamma limited by property 19
 Lasso step gamma limit = 1.160656039245e+02
-Time updating gamma = 2.311800000000e-05
 LASSO is limiting gamma from 2.002087916271e+02 to 1.160656039245e+02
 LASSO will set property 8 to 0.0
-Time updating beta = 1.321900000000e-05
 Beta: 
 [
 0 -1.504606148048e+02
@@ -1435,19 +1054,10 @@ Beta:
 23 -1.472318974302e+02
 27 -5.210980318381e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.2
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 25
-Time for iteration 24 = 1.119811210000e-01 seconds 
-Time making prediction = 3.161300000000e-05
-Time calculating objective function = 2.452000000000e-05
+Time for iteration 25 = 8.020237000000e-03 seconds 
 L1 norm of solution: 2.271334016904e+04 RMS Error: 1.186511263672e+01 Objective fn: 7.039044894108e+01 Number of vars: 19
-Time calculating correlation = 1.088025370000e-01
 Will remove property 8 from the active set
 New active set: 
 0 18
@@ -1468,20 +1078,30 @@ New active set:
 15 5
 16 23
 17 13
-Time updating active set = 7.996800000000e-05
-Time building X_A = 1.749818000000e-03
-Time building G_A = 1.827700000000e-05
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
+Cholesky estimate of condition number = 3.678e+01
  Iter = 1 Error = 1.953971405961e-12 Func = -1.538960949118e+02 Step = 1.717527344047e+02
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 4.002477361888e-13
-Time solving equations = 2.849964800000e-02
-Time solving G_A = 2.850712800000e-02
-Time building u_A = 9.266000000000e-04
 Updated step gamma = 7.942413628430e+01
 Gamma limited by property 19
 Lasso step gamma limit = 1.758353379928e+02
-Time updating gamma = 2.688100000000e-05
-Time updating beta = 6.047000000000e-06
 Beta: 
 [
 0 -2.271671801961e+02
@@ -1503,19 +1123,10 @@ Beta:
 23 -2.444881945593e+02
 27 -6.088498636522e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 26
-Time for iteration 25 = 1.402800080000e-01 seconds 
-Time making prediction = 2.634200000000e-05
-Time calculating objective function = 2.399700000000e-05
+Time for iteration 26 = 5.049251500000e-02 seconds 
 L1 norm of solution: 2.410675779055e+04 RMS Error: 1.180492480236e+01 Objective fn: 6.967812479471e+01 Number of vars: 18
-Time calculating correlation = 1.087252420000e-01
 Adding property 19 to the active set
 New active set: 
 0 18
@@ -1537,23 +1148,15 @@ New active set:
 16 23
 17 13
 18 19
-Time updating active set = 8.888800000000e-05
-Time building X_A = 1.247117900000e-02
-Time building G_A = 4.863680000000e-04
  Iter = 1 Error = 2.489207152077e+00 Func = -1.545335684790e+02 Step = 1.129135569562e+00
  Iter = 2 Error = 8.216574048469e-10 Func = -7.264689789416e+02 Step = 1.334306345749e+03
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 1.110861811894e-10
-Time solving equations = 4.517600000000e-05
-Time solving G_A = 5.531300000000e-05
-Time building u_A = 1.022685000000e-03
 Updated step gamma = 2.648026536000e+02
 Gamma limited by property 8
 Lasso step gamma limit = 8.919271113532e+01
-Time updating gamma = 2.690800000000e-05
 LASSO is limiting gamma from 2.648026536000e+02 to 8.919271113532e+01
 LASSO will set property 23 to 0.0
-Time updating beta = 1.374600000000e-05
 Beta: 
 [
 0 -2.830423591745e+02
@@ -1575,19 +1178,10 @@ Beta:
 22 -3.200813535647e+03
 27 -4.698637303622e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.2
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 27
-Time for iteration 26 = 1.230475220000e-01 seconds 
-Time making prediction = 2.106200000000e-05
-Time calculating objective function = 2.428400000000e-05
+Time for iteration 27 = 8.634115000000e-03 seconds 
 L1 norm of solution: 2.750655411483e+04 RMS Error: 1.169183618607e+01 Objective fn: 6.834951670090e+01 Number of vars: 19
-Time calculating correlation = 2.004499110000e-01
 Will remove property 23 from the active set
 New active set: 
 0 18
@@ -1608,20 +1202,30 @@ New active set:
 15 5
 16 13
 17 19
-Time updating active set = 7.960100000000e-05
-Time building X_A = 1.389046000000e-03
-Time building G_A = 1.328800000000e-05
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
+Cholesky estimate of condition number = 3.549e+02
  Iter = 1 Error = 4.925622320443e-11 Func = -4.881810170467e+02 Step = 6.678495679520e+02
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 8.822078869899e-12
-Time solving equations = 2.407613100000e-02
-Time solving G_A = 2.408302400000e-02
-Time building u_A = 7.327160000000e-04
 Updated step gamma = 9.499014132369e+01
 Gamma limited by property 23
 Lasso step gamma limit = 2.318293519653e+02
-Time updating gamma = 2.088400000000e-05
-Time updating beta = 5.472000000000e-06
 Beta: 
 [
 0 -3.318704610522e+02
@@ -1643,19 +1247,10 @@ Beta:
 22 -3.255443835403e+03
 27 -3.634876377549e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 28
-Time for iteration 27 = 2.269257490000e-01 seconds 
-Time making prediction = 3.061800000000e-05
-Time calculating objective function = 2.413400000000e-05
+Time for iteration 28 = 5.031650700000e-02 seconds 
 L1 norm of solution: 3.047469133900e+04 RMS Error: 1.161633391687e+01 Objective fn: 6.746960683416e+01 Number of vars: 18
-Time calculating correlation = 1.103049040000e-01
 Adding property 23 to the active set
 New active set: 
 0 18
@@ -1677,21 +1272,13 @@ New active set:
 16 13
 17 19
 18 23
-Time updating active set = 8.563900000000e-05
-Time building X_A = 9.253960000000e-04
-Time building G_A = 4.895680000000e-04
  Iter = 1 Error = 8.959688036570e+00 Func = -5.097057531252e+02 Step = 6.561209656535e+00
  Iter = 2 Error = 1.007332318173e-09 Func = -9.812524746963e+02 Step = 9.368779367485e+02
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 1.697370665074e-10
-Time solving equations = 4.493200000000e-05
-Time solving G_A = 6.674500000000e-05
-Time building u_A = 8.819820000000e-04
 Updated step gamma = 7.674482079281e+01
 Gamma limited by property 8
 Lasso step gamma limit = 1.968238869289e+02
-Time updating gamma = 2.645700000000e-05
-Time updating beta = 5.822000000000e-06
 Beta: 
 [
 0 -3.791755905094e+02
@@ -1714,19 +1301,10 @@ Beta:
 23 2.603752137847e+02
 27 -2.420506741546e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.2
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 29
-Time for iteration 28 = 1.129509940000e-01 seconds 
-Time making prediction = 2.012700000000e-05
-Time calculating objective function = 2.381300000000e-05
+Time for iteration 29 = 3.960088000000e-03 seconds 
 L1 norm of solution: 3.387449984918e+04 RMS Error: 1.155389454783e+01 Objective fn: 6.674623961121e+01 Number of vars: 19
-Time calculating correlation = 1.092908810000e-01
 Adding property 8 to the active set
 New active set: 
 0 18
@@ -1749,9 +1327,6 @@ New active set:
 17 19
 18 23
 19 8
-Time updating active set = 8.760100000000e-05
-Time building X_A = 1.667442000000e-03
-Time building G_A = 5.011670000000e-04
  Iter = 1 Error = 5.156963051773e+00 Func = -9.857341599516e+02 Step = 2.993888860735e+00
  Iter = 2 Error = 1.103673197033e+01 Func = -1.035606003637e+03 Step = 7.514858388380e+01
  Iter = 3 Error = 3.699466498564e-01 Func = -1.143864108471e+03 Step = 1.809981350251e+02
@@ -1759,16 +1334,11 @@ Time building G_A = 5.011670000000e-04
  Iter = 5 Error = 4.812666570742e-11 Func = -1.145999234013e+03 Step = 3.661679646946e-06
 pre_con_grad succeeded in 5 iterations
 Cholesky error test = 8.784262206518e-12
-Time solving equations = 6.791700000000e-05
-Time solving G_A = 8.999400000000e-05
-Time building u_A = 9.500550000000e-04
 Updated step gamma = 1.364893100883e+02
 Gamma limited by property 12
 Lasso step gamma limit = 3.637228538870e+01
-Time updating gamma = 2.635600000000e-05
 LASSO is limiting gamma from 1.364893100883e+02 to 3.637228538870e+01
 LASSO will set property 15 to 0.0
-Time updating beta = 1.369600000000e-05
 Beta: 
 [
 0 -4.009019404491e+02
@@ -1791,19 +1361,10 @@ Beta:
 23 3.784186718694e+02
 27 -1.928102399538e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.4
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 30
-Time for iteration 29 = 1.127817010000e-01 seconds 
-Time making prediction = 3.107600000000e-05
-Time calculating objective function = 2.382000000000e-05
+Time for iteration 30 = 1.248060280000e-01 seconds 
 L1 norm of solution: 3.561581649478e+04 RMS Error: 1.152838585539e+01 Objective fn: 6.645184021542e+01 Number of vars: 20
-Time calculating correlation = 1.084188290000e-01
 Will remove property 15 from the active set
 New active set: 
 0 18
@@ -1825,22 +1386,33 @@ New active set:
 16 19
 17 23
 18 8
-Time updating active set = 8.349700000000e-05
-Time building X_A = 1.639238000000e-03
-Time building G_A = 1.836100000000e-05
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
+Cholesky estimate of condition number = 3.530e+02
  Iter = 1 Error = 2.447711706076e-10 Func = -1.072494894432e+03 Step = 1.597401824117e+03
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 3.897083825235e-11
-Time solving equations = 2.770909600000e-02
-Time solving G_A = 2.771633200000e-02
-Time building u_A = 8.064320000000e-04
 Updated step gamma = 9.980173960581e+01
 Gamma limited by property 15
 Lasso step gamma limit = 8.857707491010e+01
-Time updating gamma = 3.108300000000e-05
 LASSO is limiting gamma from 9.980173960581e+01 to 8.857707491010e+01
 LASSO will set property 21 to 0.0
-Time updating beta = 1.404600000000e-05
 Beta: 
 [
 0 -4.562256731520e+02
@@ -1862,19 +1434,10 @@ Beta:
 23 6.771403649619e+02
 27 -6.766391052751e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.2
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 31
-Time for iteration 30 = 1.388965850000e-01 seconds 
-Time making prediction = 2.028300000000e-05
-Time calculating objective function = 2.386200000000e-05
+Time for iteration 31 = 5.132221000000e-02 seconds 
 L1 norm of solution: 3.971817819540e+04 RMS Error: 1.148481587834e+01 Objective fn: 6.595049787972e+01 Number of vars: 19
-Time calculating correlation = 1.088937670000e-01
 Will remove property 21 from the active set
 New active set: 
 0 18
@@ -1895,20 +1458,30 @@ New active set:
 15 19
 16 23
 17 8
-Time updating active set = 8.144100000000e-05
-Time building X_A = 8.833650000000e-04
-Time building G_A = 2.025800000000e-05
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
+Cholesky estimate of condition number = 8.678e+01
  Iter = 1 Error = 6.653290151718e-12 Func = -3.369903827910e+02 Step = 1.634111554300e+03
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 1.204221907377e-12
-Time solving equations = 4.047994400000e-02
-Time solving G_A = 4.048752200000e-02
-Time building u_A = 8.585860000000e-04
 Updated step gamma = 5.696898046560e+00
 Gamma limited by property 15
 Lasso step gamma limit = 1.158501488336e+02
-Time updating gamma = 1.984200000000e-05
-Time updating beta = 5.401000000000e-06
 Beta: 
 [
 0 -4.615797998156e+02
@@ -1930,19 +1503,10 @@ Beta:
 23 6.784789454208e+02
 27 -7.937495544415e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 3.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 32
-Time for iteration 31 = 1.514011040000e-01 seconds 
-Time making prediction = 3.163900000000e-05
-Time calculating objective function = 2.396900000000e-05
+Time for iteration 32 = 5.606214700000e-02 seconds 
 L1 norm of solution: 3.986607616046e+04 RMS Error: 1.148372349411e+01 Objective fn: 6.593795264461e+01 Number of vars: 18
-Time calculating correlation = 1.110844390000e-01
 Adding property 15 to the active set
 New active set: 
 0 18
@@ -1964,21 +1528,13 @@ New active set:
 16 23
 17 8
 18 15
-Time updating active set = 1.486990000000e-04
-Time building X_A = 3.266061000000e-03
-Time building G_A = 5.368620000000e-04
  Iter = 1 Error = 7.157331599091e+00 Func = -3.473517092630e+02 Step = 4.552214070532e+00
  Iter = 2 Error = 2.015977376673e-10 Func = -6.739719842043e+02 Step = 3.670555435643e+02
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 3.371057818856e-11
-Time solving equations = 4.963300000000e-05
-Time solving G_A = 5.970800000000e-05
-Time building u_A = 1.210460000000e-03
 Updated step gamma = 2.831007860345e+01
 Gamma limited by property 12
 Lasso step gamma limit = 1.463844840629e+02
-Time updating gamma = 2.825400000000e-05
-Time updating beta = 5.951000000000e-06
 Beta: 
 [
 0 -4.800016540092e+02
@@ -2001,19 +1557,10 @@ Beta:
 23 6.868500635591e+02
 27 -1.175827375977e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.2
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 33
-Time for iteration 32 = 1.165217350000e-01 seconds 
-Time making prediction = 9.594600000000e-05
-Time calculating objective function = 9.311400000000e-05
+Time for iteration 33 = 1.035998900000e-02 seconds 
 L1 norm of solution: 4.090546247700e+04 RMS Error: 1.147761660461e+01 Objective fn: 6.586784146123e+01 Number of vars: 19
-Time calculating correlation = 1.103903860000e-01
 Adding property 12 to the active set
 New active set: 
 0 18
@@ -2036,9 +1583,6 @@ New active set:
 17 8
 18 15
 19 12
-Time updating active set = 9.125800000000e-05
-Time building X_A = 1.259714600000e-02
-Time building G_A = 5.734780000000e-04
  Iter = 1 Error = 1.895283079104e+00 Func = -6.744158559159e+02 Step = 9.422013709150e-01
  Iter = 2 Error = 3.001667428089e+00 Func = -6.784288284029e+02 Step = 1.105813861061e+01
  Iter = 3 Error = 1.631609488452e+00 Func = -7.251357455743e+02 Step = 1.742729507648e+02
@@ -2046,14 +1590,9 @@ Time building G_A = 5.734780000000e-04
  Iter = 5 Error = 4.421664104284e-09 Func = -2.463200287011e+03 Step = 4.232514167437e-05
 pre_con_grad succeeded in 5 iterations
 Cholesky error test = 7.605132523736e-10
-Time solving equations = 6.773900000000e-05
-Time solving G_A = 8.404500000000e-05
-Time building u_A = 1.082510000000e-03
 Updated step gamma = 4.992228954261e+00
 Gamma limited by property 21
 Lasso step gamma limit = 4.557864359919e+01
-Time updating gamma = 2.603800000000e-05
-Time updating beta = 5.808000000000e-06
 Beta: 
 [
 0 -4.815809039256e+02
@@ -2077,19 +1616,10 @@ Beta:
 23 6.877104806692e+02
 27 -1.207562378314e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.4
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 34
-Time for iteration 33 = 1.251538730000e-01 seconds 
-Time making prediction = 5.525300000000e-05
-Time calculating objective function = 2.595700000000e-05
+Time for iteration 34 = 6.389372000000e-03 seconds 
 L1 norm of solution: 4.125585865137e+04 RMS Error: 1.147600806134e+01 Objective fn: 6.584938051192e+01 Number of vars: 20
-Time calculating correlation = 1.997762500000e-01
 Adding property 21 to the active set
 New active set: 
 0 18
@@ -2113,9 +1643,6 @@ New active set:
 18 15
 19 12
 20 21
-Time updating active set = 9.252100000000e-05
-Time building X_A = 2.440747000000e-03
-Time building G_A = 6.196990000000e-04
  Iter = 1 Error = 8.515192543213e+00 Func = -2.474329593180e+03 Step = 4.717903381912e+00
  Iter = 2 Error = 1.406691690839e+01 Func = -2.518891809346e+03 Step = 4.488962594374e+01
  Iter = 3 Error = 1.710999058403e+00 Func = -4.398429869405e+03 Step = 2.326122122002e+03
@@ -2127,16 +1654,11 @@ Time building G_A = 6.196990000000e-04
  Iter = 9 Error = 3.705496983589e-11 Func = -4.468893912145e+03 Step = 4.490610921599e-08
 pre_con_grad succeeded in 9 iterations
 Cholesky error test = 6.113374357006e-12
-Time solving equations = 9.906300000000e-05
-Time solving G_A = 1.098190000000e-04
-Time building u_A = 1.107935000000e-03
 Updated step gamma = 7.434439238439e+01
 Gamma limited by property 7
 Lasso step gamma limit = 5.703711042168e+01
-Time updating gamma = 2.212800000000e-05
 LASSO is limiting gamma from 7.434439238439e+01 to 5.703711042168e+01
 LASSO will set property 11 to 0.0
-Time updating beta = 2.050100000000e-05
 Beta: 
 [
 0 -4.995499570119e+02
@@ -2160,19 +1682,10 @@ Beta:
 23 8.443986127058e+02
 27 -2.944431817376e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.6 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.7
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 35
-Time for iteration 34 = 2.043870760000e-01 seconds 
-Time making prediction = 3.051900000000e-05
-Time calculating objective function = 2.791400000000e-05
+Time for iteration 35 = 7.391375000000e-03 seconds 
 L1 norm of solution: 4.664813989854e+04 RMS Error: 1.145679315610e+01 Objective fn: 6.562905471086e+01 Number of vars: 21
-Time calculating correlation = 1.911851060000e-01
 Will remove property 11 from the active set
 New active set: 
 0 18
@@ -2195,20 +1708,32 @@ New active set:
 17 15
 18 12
 19 21
-Time updating active set = 8.425500000000e-05
-Time building X_A = 1.706624000000e-03
-Time building G_A = 1.240400000000e-05
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
+Cholesky estimate of condition number = 1.799e+02
  Iter = 1 Error = 2.806106423124e-10 Func = -2.804432989974e+03 Step = 4.725311199431e+03
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 5.587743601154e-11
-Time solving equations = 2.448298200000e-02
-Time solving G_A = 2.448944000000e-02
-Time building u_A = 9.073560000000e-04
 Updated step gamma = 1.348656008140e+01
 Gamma limited by property 7
 Lasso step gamma limit = 1.488013929218e+01
-Time updating gamma = 2.055200000000e-05
-Time updating beta = 5.543000000000e-06
 Beta: 
 [
 0 -5.054259992168e+02
@@ -2232,19 +1757,10 @@ Beta:
 23 8.924870148170e+02
 27 -2.757567578965e+00
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.4
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 36
-Time for iteration 35 = 2.185838070000e-01 seconds 
-Time making prediction = 3.180600000000e-05
-Time calculating objective function = 2.565100000000e-05
+Time for iteration 36 = 5.958765700000e-02 seconds 
 L1 norm of solution: 4.765818024676e+04 RMS Error: 1.145440176394e+01 Objective fn: 6.560165988484e+01 Number of vars: 20
-Time calculating correlation = 1.027089280000e-01
 Adding property 7 to the active set
 New active set: 
 0 18
@@ -2268,24 +1784,16 @@ New active set:
 18 12
 19 21
 20 7
-Time updating active set = 1.003960000000e-04
-Time building X_A = 1.500420300000e-02
-Time building G_A = 5.018260000000e-04
  Iter = 1 Error = 2.722962309245e+00 Func = -2.806084665319e+03 Step = 1.817512225329e+00
  Iter = 2 Error = 1.980622676338e-07 Func = -3.969179571459e+03 Step = 3.058170999756e+03
  Iter = 3 Error = 9.459980058690e-14 Func = -3.969179571459e+03 Step = 1.900554140107e-07
 pre_con_grad succeeded in 3 iterations
 Cholesky error test = 1.796658060422e-13
-Time solving equations = 5.431000000000e-05
-Time solving G_A = 7.014900000000e-05
-Time building u_A = 8.883490000000e-04
 Updated step gamma = 1.650860968460e+01
 Gamma limited by property 16
 Lasso step gamma limit = 1.913824053615e+00
-Time updating gamma = 2.613500000000e-05
 LASSO is limiting gamma from 1.650860968460e+01 to 1.913824053615e+00
 LASSO will set property 27 to 0.0
-Time updating beta = 1.308400000000e-05
 Beta: 
 [
 0 -5.074772607318e+02
@@ -2309,19 +1817,10 @@ Beta:
 22 -3.377627840395e+03
 23 8.982786054757e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.6 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.7
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 37
-Time for iteration 36 = 1.194910220000e-01 seconds 
-Time making prediction = 2.247700000000e-05
-Time calculating objective function = 2.672500000000e-05
+Time for iteration 37 = 9.120496000000e-03 seconds 
 L1 norm of solution: 4.782869712777e+04 RMS Error: 1.145405061217e+01 Objective fn: 6.559763771305e+01 Number of vars: 21
-Time calculating correlation = 1.091880060000e-01
 Will remove property 27 from the active set
 New active set: 
 0 18
@@ -2344,22 +1843,34 @@ New active set:
 17 12
 18 21
 19 7
-Time updating active set = 1.554380000000e-04
-Time building X_A = 1.716502000000e-03
-Time building G_A = 1.869600000000e-05
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
+Cholesky estimate of condition number = 7.001e+02
  Iter = 1 Error = 9.804431660844e-10 Func = -3.616666323704e+03 Step = 3.466609070032e+03
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 1.722394671333e-10
-Time solving equations = 2.796511100000e-02
-Time solving G_A = 2.797249700000e-02
-Time building u_A = 7.568550000000e-04
 Updated step gamma = 1.172906536876e+01
 Gamma limited by property 16
 Lasso step gamma limit = 5.551625561214e+00
-Time updating gamma = 2.020900000000e-05
 LASSO is limiting gamma from 1.172906536876e+01 to 5.551625561214e+00
 LASSO will set property 6 to 0.0
-Time updating beta = 1.259700000000e-05
 Beta: 
 [
 0 -5.146509463307e+02
@@ -2382,19 +1893,10 @@ Beta:
 22 -3.381706768861e+03
 23 9.139950340976e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.4
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 38
-Time for iteration 37 = 1.400664390000e-01 seconds 
-Time making prediction = 2.094000000000e-05
-Time calculating objective function = 2.594700000000e-05
+Time for iteration 38 = 6.553861400000e-02 seconds 
 L1 norm of solution: 4.830085733817e+04 RMS Error: 1.145314093451e+01 Objective fn: 6.558721863289e+01 Number of vars: 20
-Time calculating correlation = 1.097834010000e-01
 Will remove property 6 from the active set
 New active set: 
 0 18
@@ -2416,20 +1918,31 @@ New active set:
 16 12
 17 21
 18 7
-Time updating active set = 8.299700000000e-05
-Time building X_A = 9.796160000000e-04
-Time building G_A = 2.092600000000e-05
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
+Cholesky estimate of condition number = 1.052e+02
  Iter = 1 Error = 1.528479757746e-10 Func = -2.333813728092e+03 Step = 3.698470972095e+03
 pre_con_grad succeeded in 1 iterations
 Cholesky error test = 2.823939912320e-11
-Time solving equations = 2.253213100000e-02
-Time solving G_A = 2.253946300000e-02
-Time building u_A = 7.650950000000e-04
 Updated step gamma = 4.594222742682e+00
 Gamma limited by property 16
 Lasso step gamma limit = 1.185124403310e+03
-Time updating gamma = 2.609300000000e-05
-Time updating beta = 6.074000000000e-06
 Beta: 
 [
 0 -5.169972956376e+02
@@ -2452,19 +1965,10 @@ Beta:
 22 -3.384384908377e+03
 23 9.296554794401e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.2
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 39
-Time for iteration 38 = 1.343780500000e-01 seconds 
-Time making prediction = 2.060800000000e-05
-Time calculating objective function = 2.884400000000e-05
+Time for iteration 39 = 5.147527000000e-02 seconds 
 L1 norm of solution: 4.861473480595e+04 RMS Error: 1.145259985662e+01 Objective fn: 6.558102173790e+01 Number of vars: 19
-Time calculating correlation = 1.103833470000e-01
 Adding property 16 to the active set
 New active set: 
 0 18
@@ -2487,22 +1991,14 @@ New active set:
 17 21
 18 7
 19 16
-Time updating active set = 9.144100000000e-05
-Time building X_A = 1.448195600000e-02
-Time building G_A = 4.770130000000e-04
  Iter = 1 Error = 8.412700165223e+00 Func = -2.340179934448e+03 Step = 3.568250651518e+00
  Iter = 2 Error = 2.293129155622e-08 Func = -4.984771942558e+03 Step = 3.437764252852e+03
  Iter = 3 Error = 8.485039167631e-13 Func = -4.984771942557e+03 Step = 1.153557858885e-07
 pre_con_grad succeeded in 3 iterations
 Cholesky error test = 2.067679361062e-13
-Time solving equations = 5.579300000000e-05
-Time solving G_A = 7.194300000000e-05
-Time building u_A = 7.460650000000e-04
 Updated step gamma = 9.993856307527e+00
 Gamma limited by property 27
 Lasso step gamma limit = 2.567605688420e+02
-Time updating gamma = 1.936200000000e-05
-Time updating beta = 5.507000000000e-06
 Beta: 
 [
 0 -5.305344018327e+02
@@ -2526,19 +2022,10 @@ Beta:
 22 -3.323183129610e+03
 23 9.785829825182e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.4
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 40
-Time for iteration 39 = 1.264402400000e-01 seconds 
-Time making prediction = 2.237900000000e-05
-Time calculating objective function = 8.691500000000e-05
+Time for iteration 40 = 1.994802150000e-01 seconds 
 L1 norm of solution: 4.961259740600e+04 RMS Error: 1.145113522015e+01 Objective fn: 6.556424891509e+01 Number of vars: 20
-Time calculating correlation = 1.101046750000e-01
 Adding property 27 to the active set
 New active set: 
 0 18
@@ -2562,9 +2049,6 @@ New active set:
 18 7
 19 16
 20 27
-Time updating active set = 8.899600000000e-05
-Time building X_A = 1.308631000000e-03
-Time building G_A = 6.630120000000e-04
  Iter = 1 Error = 4.186082730747e+00 Func = -4.987855440361e+03 Step = 2.483343635287e+00
  Iter = 2 Error = 9.402151811305e+00 Func = -5.007605005942e+03 Step = 7.123193083887e+01
  Iter = 3 Error = 3.305643787458e-01 Func = -5.053077608529e+03 Step = 2.220980317581e+02
@@ -2572,14 +2056,9 @@ Time building G_A = 6.630120000000e-04
  Iter = 5 Error = 4.104003937876e-09 Func = -5.070339181602e+03 Step = 1.891140188006e-06
 pre_con_grad succeeded in 5 iterations
 Cholesky error test = 7.583206443737e-10
-Time solving equations = 5.859800000000e-05
-Time solving G_A = 7.485300000000e-05
-Time building u_A = 8.835020000000e-04
 Updated step gamma = 5.597935157765e+00
 Gamma limited by property 11
 Lasso step gamma limit = 2.622227675103e+02
-Time updating gamma = 2.602600000000e-05
-Time updating beta = 5.951000000000e-06
 Beta: 
 [
 0 -5.373081707110e+02
@@ -2604,19 +2083,10 @@ Beta:
 23 1.005479750183e+03
 27 3.830849183215e+00
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.6 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.7
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 41
-Time for iteration 40 = 1.133814360000e-01 seconds 
-Time making prediction = 2.028400000000e-05
-Time calculating objective function = 2.531700000000e-05
+Time for iteration 41 = 2.997670000000e-03 seconds 
 L1 norm of solution: 5.017631471194e+04 RMS Error: 1.145044212461e+01 Objective fn: 6.555631242455e+01 Number of vars: 21
-Time calculating correlation = 1.109166320000e-01
 Adding property 11 to the active set
 New active set: 
 0 18
@@ -2641,9 +2111,6 @@ New active set:
 19 16
 20 27
 21 11
-Time updating active set = 9.409000000000e-05
-Time building X_A = 1.951017000000e-03
-Time building G_A = 5.022770000000e-04
  Iter = 1 Error = 4.829174094998e+00 Func = -5.076525077152e+03 Step = 3.517355696710e+00
  Iter = 2 Error = 4.642182151840e+01 Func = -5.289970807662e+03 Step = 2.989288227578e+02
  Iter = 3 Error = 8.298265274031e+01 Func = -8.029543346526e+03 Step = 3.984878977424e+03
@@ -2656,14 +2123,9 @@ Time building G_A = 5.022770000000e-04
  Iter = 10 Error = 2.344312211022e-11 Func = -1.375393559920e+04 Step = 8.451365726907e-08
 pre_con_grad succeeded in 10 iterations
 Cholesky error test = 4.177022364357e-12
-Time solving equations = 1.023790000000e-04
-Time solving G_A = 1.124610000000e-04
-Time building u_A = 8.763400000000e-04
 Updated step gamma = 1.369560575771e+01
 Gamma limited by property 26
 Lasso step gamma limit = 5.164635126118e+01
-Time updating gamma = 2.738000000000e-05
-Time updating beta = 5.999000000000e-06
 Beta: 
 [
 0 -5.465812456128e+02
@@ -2689,19 +2151,10 @@ Beta:
 23 1.043518655506e+03
 27 1.044327563479e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 4.8 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 10.9
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 42
-Time for iteration 41 = 1.146522670000e-01 seconds 
-Time making prediction = 2.089100000000e-05
-Time calculating objective function = 2.479700000000e-05
+Time for iteration 42 = 3.696419000000e-03 seconds 
 L1 norm of solution: 5.244779899916e+04 RMS Error: 1.144812961268e+01 Objective fn: 6.552983581441e+01 Number of vars: 22
-Time calculating correlation = 1.128098310000e-01
 Adding property 26 to the active set
 New active set: 
 0 18
@@ -2727,9 +2180,6 @@ New active set:
 20 27
 21 11
 22 26
-Time updating active set = 9.528600000000e-05
-Time building X_A = 2.013112000000e-03
-Time building G_A = 6.680210000000e-04
  Iter = 1 Error = 4.883558607476e-02 Func = -1.375434525593e+04 Step = 9.051593641719e-01
  Iter = 2 Error = 4.509455172921e-03 Func = -1.375434543083e+04 Step = 3.742545667525e-02
  Iter = 3 Error = 7.636258688930e-04 Func = -1.375434543875e+04 Step = 3.159407599896e-02
@@ -2741,14 +2191,9 @@ Time building G_A = 6.680210000000e-04
  Iter = 9 Error = 1.182892599740e-09 Func = -1.375434543953e+04 Step = 1.722451700630e-08
 pre_con_grad succeeded in 9 iterations
 Cholesky error test = 2.027678894355e-10
-Time solving equations = 9.076500000000e-05
-Time solving G_A = 1.070000000000e-04
-Time building u_A = 9.626320000000e-04
 Updated step gamma = 1.453120082909e+01
 Gamma limited by property 6
 Lasso step gamma limit = 3.795135426558e+01
-Time updating gamma = 3.080000000000e-05
-Time updating beta = 6.138000000000e-06
 Beta: 
 [
 0 -5.564200469623e+02
@@ -2775,19 +2220,10 @@ Beta:
 26 -7.933890148516e-02
 27 1.745930821929e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.0 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.1
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 43
-Time for iteration 42 = 1.168626640000e-01 seconds 
-Time making prediction = 2.007600000000e-05
-Time calculating objective function = 2.532500000000e-05
+Time for iteration 43 = 5.589838000000e-03 seconds 
 L1 norm of solution: 5.485790678964e+04 RMS Error: 1.144630384625e+01 Objective fn: 6.550893587035e+01 Number of vars: 23
-Time calculating correlation = 1.115543850000e-01
 Adding property 6 to the active set
 New active set: 
 0 18
@@ -2814,9 +2250,6 @@ New active set:
 21 11
 22 26
 23 6
-Time updating active set = 9.616200000000e-05
-Time building X_A = 1.958596000000e-03
-Time building G_A = 6.027570000000e-04
  Iter = 1 Error = 3.643576006703e+00 Func = -1.375876239898e+04 Step = 2.972190925730e+00
  Iter = 2 Error = 4.252541374825e+01 Func = -1.398923053702e+04 Step = 2.356470629334e+02
  Iter = 3 Error = 9.040052444888e+01 Func = -1.709180549635e+04 Step = 3.271994652393e+03
@@ -2834,14 +2267,9 @@ Time building G_A = 6.027570000000e-04
  Iter = 15 Error = 4.848672813360e-10 Func = -2.150612375818e+04 Step = 4.249381654100e-07
 pre_con_grad succeeded in 15 iterations
 Cholesky error test = 7.565740626584e-11
-Time solving equations = 1.392550000000e-04
-Time solving G_A = 1.492250000000e-04
-Time building u_A = 8.854540000000e-04
 Updated step gamma = 1.915491258789e+01
 Gamma limited by property 25
 Lasso step gamma limit = 2.930282457427e+01
-Time updating gamma = 2.737000000000e-05
-Time updating beta = 6.084000000000e-06
 Beta: 
 [
 0 -5.832198653558e+02
@@ -2869,19 +2297,10 @@ Beta:
 26 -1.615915592050e-01
 27 2.000176980647e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.2 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.3
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 44
-Time for iteration 43 = 1.154527550000e-01 seconds 
-Time making prediction = 2.084800000000e-05
-Time calculating objective function = 2.544700000000e-05
+Time for iteration 44 = 6.015014000000e-03 seconds 
 L1 norm of solution: 5.883051963552e+04 RMS Error: 1.144438930145e+01 Objective fn: 6.548702324155e+01 Number of vars: 24
-Time calculating correlation = 1.777434470000e-01
 Adding property 25 to the active set
 New active set: 
 0 18
@@ -2909,9 +2328,6 @@ New active set:
 22 26
 23 6
 24 25
-Time updating active set = 1.009400000000e-04
-Time building X_A = 1.930498000000e-03
-Time building G_A = 6.755100000000e-04
  Iter = 1 Error = 1.142609455739e+00 Func = -2.150742957959e+04 Step = 1.616057805032e+00
  Iter = 2 Error = 1.432540584680e-01 Func = -2.150873401642e+04 Step = 2.796945525525e+00
  Iter = 3 Error = 1.164258968751e-02 Func = -2.150873549090e+04 Step = 9.588655692848e-02
@@ -2931,14 +2347,9 @@ Time building G_A = 6.755100000000e-04
  Iter = 17 Error = 1.503130781881e-09 Func = -2.150873554973e+04 Step = 1.075627819611e-08
 pre_con_grad succeeded in 17 iterations
 Cholesky error test = 2.157894130050e-10
-Time solving equations = 1.451340000000e-04
-Time solving G_A = 1.609200000000e-04
-Time building u_A = 9.463750000000e-04
 Updated step gamma = 2.125751965063e+00
 Gamma limited by property 24
 Lasso step gamma limit = 1.014840104662e+01
-Time updating gamma = 2.661400000000e-05
-Time updating beta = 6.014000000000e-06
 Beta: 
 [
 0 -5.861938719805e+02
@@ -2967,19 +2378,10 @@ Beta:
 26 -1.941499049264e-01
 27 2.028398673944e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.5
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 45
-Time for iteration 44 = 1.817679690000e-01 seconds 
-Time making prediction = 2.125500000000e-05
-Time calculating objective function = 2.524500000000e-05
+Time for iteration 45 = 4.385191000000e-03 seconds 
 L1 norm of solution: 5.927141448660e+04 RMS Error: 1.144424611687e+01 Objective fn: 6.548538459180e+01 Number of vars: 25
-Time calculating correlation = 1.110943340000e-01
 Adding property 24 to the active set
 New active set: 
 0 18
@@ -3008,9 +2410,6 @@ New active set:
 23 6
 24 25
 25 24
-Time updating active set = 1.794570000000e-04
-Time building X_A = 1.954594000000e-03
-Time building G_A = 6.901930000000e-04
  Iter = 1 Error = 2.295686639030e+00 Func = -2.151400798127e+04 Step = 3.247285494121e+00
  Iter = 2 Error = 3.253057281522e+00 Func = -2.151927578640e+04 Step = 5.620418414378e+00
  Iter = 3 Error = 2.374120586353e+02 Func = -2.539065926028e+04 Step = 4.780337496447e+03
@@ -3036,16 +2435,11 @@ Time building G_A = 6.901930000000e-04
  Iter = 23 Error = 4.461859437070e-10 Func = -2.261102255473e+06 Step = 1.339208306075e-08
 pre_con_grad succeeded in 23 iterations
 Cholesky error test = 9.770946445105e-11
-Time solving equations = 2.069070000000e-04
-Time solving G_A = 2.226340000000e-04
-Time building u_A = 9.383950000000e-04
 Updated step gamma = 1.491545003185e+02
 Gamma limited by property 2
 Lasso step gamma limit = 1.655584278640e+01
-Time updating gamma = 2.727900000000e-05
 LASSO is limiting gamma from 1.491545003185e+02 to 1.655584278640e+01
 LASSO will set property 10 to 0.0
-Time updating beta = 1.390000000000e-05
 Beta: 
 [
 0 -5.729731192289e+02
@@ -3074,19 +2468,10 @@ Beta:
 26 -1.519066665881e+04
 27 6.968368510086e+01
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 46
-Time for iteration 45 = 1.152990980000e-01 seconds 
-Time making prediction = 2.055000000000e-05
-Time calculating objective function = 2.552000000000e-05
+Time for iteration 46 = 4.351088000000e-03 seconds 
 L1 norm of solution: 9.447820151383e+04 RMS Error: 1.143378040872e+01 Objective fn: 6.536566721742e+01 Number of vars: 26
-Time calculating correlation = 1.101025770000e-01
 Will remove property 10 from the active set
 New active set: 
 0 18
@@ -3114,21 +2499,38 @@ New active set:
 22 6
 23 25
 24 24
-Time updating active set = 9.884900000000e-05
-Time building X_A = 1.947230000000e-03
-Time building G_A = 1.989000000000e-05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
+Cholesky estimate of condition number = 4.072e+05
  Iter = 1 Error = 2.187349046331e-04 Func = -2.115894465122e+06 Step = 2.987456485907e+06
  Iter = 2 Error = 2.462319706864e-14 Func = -2.115894464542e+06 Step = 1.044525963763e-03
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 7.690118764003e-11
-Time solving equations = 4.507616900000e-02
-Time solving G_A = 4.508905000000e-02
-Time building u_A = 9.389300000000e-04
 Updated step gamma = 2.241949041264e+01
 Gamma limited by property 10
 Lasso step gamma limit = 6.077971406639e+01
-Time updating gamma = 2.634700000000e-05
-Time updating beta = 5.856000000000e-06
 Beta: 
 [
 0 -5.571864032753e+02
@@ -3157,19 +2559,10 @@ Beta:
 26 -3.535411186973e+04
 27 1.326911393655e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.5
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 47
-Time for iteration 46 = 1.584066580000e-01 seconds 
-Time making prediction = 3.173000000000e-05
-Time calculating objective function = 2.460100000000e-05
+Time for iteration 47 = 4.273091200000e-02 seconds 
 L1 norm of solution: 1.405980355751e+05 RMS Error: 1.142137916491e+01 Objective fn: 6.522395101429e+01 Number of vars: 25
-Time calculating correlation = 1.344674430000e-01
 Adding property 10 to the active set
 New active set: 
 0 18
@@ -3198,24 +2591,16 @@ New active set:
 23 25
 24 24
 25 10
-Time updating active set = 1.101530000000e-04
-Time building X_A = 1.498947400000e-02
-Time building G_A = 5.270890000000e-04
  Iter = 1 Error = 3.645864469955e+01 Func = -2.116040309119e+06 Step = 1.707889354904e+01
  Iter = 2 Error = 9.517026498080e-07 Func = -2.302176266687e+06 Step = 1.715049259919e+05
  Iter = 3 Error = 1.881760334397e-11 Func = -2.302176266901e+06 Step = 4.973872652231e-02
 pre_con_grad succeeded in 3 iterations
 Cholesky error test = 3.073753217765e-11
-Time solving equations = 1.316870000000e-04
-Time solving G_A = 1.471680000000e-04
-Time building u_A = 1.018241000000e-03
 Updated step gamma = 1.103665164051e+02
 Gamma limited by property 2
 Lasso step gamma limit = 3.695534030537e+01
-Time updating gamma = 2.631800000000e-05
 LASSO is limiting gamma from 1.103665164051e+02 to 3.695534030537e+01
 LASSO will set property 21 to 0.0
-Time updating beta = 1.347200000000e-05
 Beta: 
 [
 0 -5.273697316568e+02
@@ -3244,19 +2629,10 @@ Beta:
 26 -6.918870013289e+04
 27 2.432593534055e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 48
-Time for iteration 47 = 1.514873320000e-01 seconds 
-Time making prediction = 2.129000000000e-05
-Time calculating objective function = 2.490200000000e-05
+Time for iteration 48 = 5.992198000000e-03 seconds 
 L1 norm of solution: 2.198958997108e+05 RMS Error: 1.140345457574e+01 Objective fn: 6.501938813050e+01 Number of vars: 26
-Time calculating correlation = 1.101794640000e-01
 Will remove property 21 from the active set
 New active set: 
 0 18
@@ -3284,21 +2660,38 @@ New active set:
 22 25
 23 24
 24 10
-Time updating active set = 9.855400000000e-05
-Time building X_A = 1.838196000000e-03
-Time building G_A = 1.511600000000e-05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
+Cholesky estimate of condition number = 1.711e+05
  Iter = 1 Error = 1.181930496092e-04 Func = -1.031580899402e+06 Step = 2.725192540685e+06
  Iter = 2 Error = 8.317784362105e-15 Func = -1.031580899390e+06 Step = 6.117061453344e-05
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 9.758650776348e-11
-Time solving equations = 7.967618800000e-02
-Time solving G_A = 7.968339700000e-02
-Time building u_A = 9.606620000000e-04
 Updated step gamma = 2.761183365034e+00
 Gamma limited by property 21
 Lasso step gamma limit = 2.303579974378e+02
-Time updating gamma = 2.057600000000e-05
-Time updating beta = 5.379000000000e-06
 Beta: 
 [
 0 -5.280173223604e+02
@@ -3327,19 +2720,10 @@ Beta:
 26 -7.078665331572e+04
 27 2.517043807739e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.5
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 49
-Time for iteration 48 = 1.929796460000e-01 seconds 
-Time making prediction = 3.296600000000e-05
-Time calculating objective function = 2.665000000000e-05
+Time for iteration 49 = 6.461741400000e-02 seconds 
 L1 norm of solution: 2.238619835653e+05 RMS Error: 1.140267410370e+01 Objective fn: 6.501048835755e+01 Number of vars: 25
-Time calculating correlation = 1.099858410000e-01
 Adding property 21 to the active set
 New active set: 
 0 18
@@ -3368,22 +2752,14 @@ New active set:
 23 24
 24 10
 25 21
-Time updating active set = 1.132660000000e-04
-Time building X_A = 1.269806000000e-03
-Time building G_A = 5.439030000000e-04
  Iter = 1 Error = 1.297526993048e+02 Func = -1.033863731269e+06 Step = 6.756969572820e+01
  Iter = 2 Error = 1.268922985072e-06 Func = -2.380869518670e+06 Step = 1.658069804198e+06
  Iter = 3 Error = 7.706245556726e-12 Func = -2.380869519084e+06 Step = 1.334123402584e-02
 pre_con_grad succeeded in 3 iterations
 Cholesky error test = 2.703997709502e-11
-Time solving equations = 4.439800000000e-05
-Time solving G_A = 6.082000000000e-05
-Time building u_A = 9.194520000000e-04
 Updated step gamma = 7.031039429181e+01
 Gamma limited by property 2
 Lasso step gamma limit = 8.744299051033e+01
-Time updating gamma = 2.665400000000e-05
-Time updating beta = 5.960000000000e-06
 Beta: 
 [
 0 -4.702016059729e+02
@@ -3413,19 +2789,10 @@ Beta:
 26 -1.352006171684e+05
 27 4.605552836966e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 50
-Time for iteration 49 = 1.131289600000e-01 seconds 
-Time making prediction = 2.038600000000e-05
-Time calculating objective function = 2.497900000000e-05
+Time for iteration 50 = 1.963231010000e-01 seconds 
 L1 norm of solution: 3.772891727484e+05 RMS Error: 1.138051497513e+01 Objective fn: 6.475806054956e+01 Number of vars: 26
-Time calculating correlation = 1.121806040000e-01
 Adding property 2 to the active set
 New active set: 
 0 18
@@ -3455,9 +2822,6 @@ New active set:
 24 10
 25 21
 26 2
-Time updating active set = 1.079200000000e-04
-Time building X_A = 1.991107000000e-03
-Time building G_A = 5.572600000000e-04
  Iter = 1 Error = 1.932596940632e+00 Func = -2.380870650415e+06 Step = 1.504172978306e+00
  Iter = 2 Error = 1.664947484212e+02 Func = -2.383819605169e+06 Step = 6.296754962665e+03
  Iter = 3 Error = 3.033659725923e+01 Func = -3.466027697108e+06 Step = 2.380939845774e+06
@@ -3467,16 +2831,11 @@ Time building G_A = 5.572600000000e-04
  Iter = 7 Error = 1.114805927527e-09 Func = -3.760424995372e+06 Step = 4.496247513796e-07
 pre_con_grad succeeded in 7 iterations
 Cholesky error test = 1.935539465329e-10
-Time solving equations = 1.029660000000e-04
-Time solving G_A = 1.135220000000e-04
-Time building u_A = 9.107420000000e-04
 Updated step gamma = 8.395130546315e+01
 Gamma limited by property 4
 Lasso step gamma limit = 3.233652480548e+00
-Time updating gamma = 2.075000000000e-05
 LASSO is limiting gamma from 8.395130546315e+01 to 3.233652480548e+00
 LASSO will set property 1 to 0.0
-Time updating beta = 1.249900000000e-05
 Beta: 
 [
 0 -2.088569564506e+02
@@ -3506,19 +2865,10 @@ Beta:
 26 -1.374346124598e+05
 27 4.677402488736e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 12.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 51
-Time for iteration 50 = 1.160839540000e-01 seconds 
-Time making prediction = 3.160400000000e-05
-Time calculating objective function = 2.610500000000e-05
+Time for iteration 51 = 4.374989000000e-03 seconds 
 L1 norm of solution: 3.861571956876e+05 RMS Error: 1.137968928630e+01 Objective fn: 6.474866412634e+01 Number of vars: 27
-Time calculating correlation = 1.031987370000e-01
 Will remove property 1 from the active set
 New active set: 
 0 18
@@ -3547,23 +2897,41 @@ New active set:
 23 10
 24 21
 25 2
-Time updating active set = 1.073640000000e-04
-Time building X_A = 2.247985000000e-03
-Time building G_A = 1.981300000000e-05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
+Cholesky estimate of condition number = 1.639e+05
  Iter = 1 Error = 1.353897722299e-04 Func = -2.369286314466e+06 Step = 3.829688838153e+06
  Iter = 2 Error = 1.751566578059e-14 Func = -2.369286314620e+06 Step = 2.454451794518e-04
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 1.883867421034e-10
-Time solving equations = 4.487806500000e-02
-Time solving G_A = 4.488533100000e-02
-Time building u_A = 9.442530000000e-04
 Updated step gamma = 2.213139979251e+01
 Gamma limited by property 4
 Lasso step gamma limit = 1.480369245419e+01
-Time updating gamma = 2.769600000000e-05
 LASSO is limiting gamma from 2.213139979251e+01 to 1.480369245419e+01
 LASSO will set property 23 to 0.0
-Time updating beta = 1.379700000000e-05
 Beta: 
 [
 0 -2.030154078978e+02
@@ -3592,19 +2960,10 @@ Beta:
 26 -1.509901624981e+05
 27 5.115878471960e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 52
-Time for iteration 51 = 1.516345530000e-01 seconds 
-Time making prediction = 2.121600000000e-05
-Time calculating objective function = 2.554900000000e-05
+Time for iteration 52 = 4.522361200000e-02 seconds 
 L1 norm of solution: 4.183822623821e+05 RMS Error: 1.137708469390e+01 Objective fn: 6.471902806604e+01 Number of vars: 26
-Time calculating correlation = 1.122337160000e-01
 Will remove property 23 from the active set
 New active set: 
 0 18
@@ -3632,21 +2991,38 @@ New active set:
 22 10
 23 21
 24 2
-Time updating active set = 1.058770000000e-04
-Time building X_A = 1.304691000000e-03
-Time building G_A = 2.343900000000e-05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
+Cholesky estimate of condition number = 1.577e+05
  Iter = 1 Error = 5.630269688569e-05 Func = -1.017977336150e+06 Step = 2.759997672235e+06
  Iter = 2 Error = 2.440146266521e-15 Func = -1.017977336121e+06 Step = 1.614227877633e-04
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 8.934875950217e-11
-Time solving equations = 4.346739900000e-02
-Time solving G_A = 4.347511400000e-02
-Time building u_A = 8.571730000000e-04
 Updated step gamma = 3.617086712102e-01
 Gamma limited by property 23
 Lasso step gamma limit = 7.839748047553e+01
-Time updating gamma = 2.034700000000e-05
-Time updating beta = 5.371000000000e-06
 Beta: 
 [
 0 -2.032501027344e+02
@@ -3675,19 +3051,10 @@ Beta:
 26 -1.511984693419e+05
 27 5.121726045885e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.4 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.5
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 53
-Time for iteration 52 = 1.582798940000e-01 seconds 
-Time making prediction = 3.050500000000e-05
-Time calculating objective function = 2.415600000000e-05
+Time for iteration 53 = 3.940860200000e-02 seconds 
 L1 norm of solution: 4.188983732123e+05 RMS Error: 1.137704858570e+01 Objective fn: 6.471861726066e+01 Number of vars: 25
-Time calculating correlation = 1.102583000000e-01
 Adding property 23 to the active set
 New active set: 
 0 18
@@ -3716,22 +3083,14 @@ New active set:
 23 21
 24 2
 25 23
-Time updating active set = 1.055410000000e-04
-Time building X_A = 1.220148000000e-03
-Time building G_A = 5.584910000000e-04
  Iter = 1 Error = 2.824957108338e+02 Func = -1.034188718698e+06 Step = 1.800632250465e+02
  Iter = 2 Error = 3.096188219211e-07 Func = -2.399812503386e+06 Step = 1.681484933925e+06
  Iter = 3 Error = 2.300857389267e-11 Func = -2.399812503782e+06 Step = 9.522420403414e-04
 pre_con_grad succeeded in 3 iterations
 Cholesky error test = 2.375180394245e-11
-Time solving equations = 4.460500000000e-05
-Time solving G_A = 5.553400000000e-05
-Time building u_A = 8.616890000000e-04
 Updated step gamma = 6.791400847123e+00
 Gamma limited by property 4
 Lasso step gamma limit = 4.504773519992e+01
-Time updating gamma = 2.040800000000e-05
-Time updating beta = 5.544000000000e-06
 Beta: 
 [
 0 -2.005251653382e+02
@@ -3761,19 +3120,10 @@ Beta:
 26 -1.574183807095e+05
 27 5.323041348753e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 54
-Time for iteration 53 = 1.132754680000e-01 seconds 
-Time making prediction = 2.161600000000e-05
-Time calculating objective function = 2.551500000000e-05
+Time for iteration 54 = 4.916005000000e-03 seconds 
 L1 norm of solution: 4.337770057565e+05 RMS Error: 1.137608450478e+01 Objective fn: 6.470764932989e+01 Number of vars: 26
-Time calculating correlation = 1.124947960000e-01
 Adding property 4 to the active set
 New active set: 
 0 18
@@ -3803,9 +3153,6 @@ New active set:
 24 2
 25 23
 26 4
-Time updating active set = 1.285760000000e-04
-Time building X_A = 1.533139300000e-02
-Time building G_A = 5.305440000000e-04
  Iter = 1 Error = 2.162273655160e+00 Func = -2.399813391906e+06 Step = 1.333050958310e+00
  Iter = 2 Error = 1.232771114288e+02 Func = -2.402022569556e+06 Step = 4.525718595713e+03
  Iter = 3 Error = 1.038589531292e+02 Func = -3.057199880225e+06 Step = 1.725523376078e+06
@@ -3815,16 +3162,11 @@ Time building G_A = 5.305440000000e-04
  Iter = 7 Error = 4.473744491082e-09 Func = -5.636993673779e+06 Step = 8.105578009617e-08
 pre_con_grad succeeded in 7 iterations
 Cholesky error test = 7.883129540089e-10
-Time solving equations = 8.952000000000e-05
-Time solving G_A = 9.998900000000e-05
-Time building u_A = 1.019586000000e-03
 Updated step gamma = 6.504056285654e+01
 Gamma limited by property 1
 Lasso step gamma limit = 3.089530223772e+00
-Time updating gamma = 2.746000000000e-05
 LASSO is limiting gamma from 6.504056285654e+01 to 3.089530223772e+00
 LASSO will set property 3 to 0.0
-Time updating beta = 2.086100000000e-05
 Beta: 
 [
 0 -1.608848692212e+02
@@ -3854,19 +3196,10 @@ Beta:
 26 -1.591245113035e+05
 27 5.378279547431e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 12.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 55
-Time for iteration 54 = 1.299054910000e-01 seconds 
-Time making prediction = 2.278300000000e-05
-Time calculating objective function = 2.672000000000e-05
+Time for iteration 55 = 6.283409000000e-03 seconds 
 L1 norm of solution: 4.441506468831e+05 RMS Error: 1.137547656691e+01 Objective fn: 6.470073356218e+01 Number of vars: 27
-Time calculating correlation = 1.094871040000e-01
 Will remove property 3 from the active set
 New active set: 
 0 18
@@ -3895,21 +3228,39 @@ New active set:
 23 2
 24 23
 25 4
-Time updating active set = 1.036120000000e-04
-Time building X_A = 2.578304000000e-03
-Time building G_A = 2.071500000000e-05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
+Cholesky estimate of condition number = 1.522e+05
  Iter = 1 Error = 4.433513217920e-04 Func = -2.384244283045e+06 Step = 5.208138645065e+06
  Iter = 2 Error = 2.979270283538e-14 Func = -2.384244282787e+06 Step = 2.880360769009e-04
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 3.256313509435e-10
-Time solving equations = 7.867553600000e-02
-Time solving G_A = 7.868288500000e-02
-Time building u_A = 1.038531000000e-03
 Updated step gamma = 7.330870164295e+00
 Gamma limited by property 1
 Lasso step gamma limit = 3.649968257552e+01
-Time updating gamma = 2.707200000000e-05
-Time updating beta = 6.938000000000e-06
 Beta: 
 [
 0 -1.582829293499e+02
@@ -3939,19 +3290,10 @@ Beta:
 26 -1.658250872354e+05
 27 5.593331504835e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 56
-Time for iteration 55 = 1.921372560000e-01 seconds 
-Time making prediction = 2.212500000000e-05
-Time calculating objective function = 2.715200000000e-05
+Time for iteration 56 = 4.296824400000e-02 seconds 
 L1 norm of solution: 4.601589721766e+05 RMS Error: 1.137464390773e+01 Objective fn: 6.469126201386e+01 Number of vars: 26
-Time calculating correlation = 1.094177190000e-01
 Adding property 1 to the active set
 New active set: 
 0 18
@@ -3981,24 +3323,16 @@ New active set:
 24 23
 25 4
 26 1
-Time updating active set = 1.066240000000e-04
-Time building X_A = 1.371427000000e-03
-Time building G_A = 5.408480000000e-04
  Iter = 1 Error = 9.805491899036e+00 Func = -2.384261972639e+06 Step = 5.948025460394e+00
  Iter = 2 Error = 5.742606447559e-04 Func = -7.221141173407e+06 Step = 4.600906107017e+06
  Iter = 3 Error = 7.573107422944e-10 Func = -7.221141183491e+06 Step = 1.791673442245e+02
 pre_con_grad succeeded in 3 iterations
 Cholesky error test = 7.868813419784e-11
-Time solving equations = 5.707700000000e-05
-Time solving G_A = 7.301800000000e-05
-Time building u_A = 9.274470000000e-04
 Updated step gamma = 5.754252518543e+01
 Gamma limited by property 3
 Lasso step gamma limit = 2.387552997935e+00
-Time updating gamma = 2.683900000000e-05
 LASSO is limiting gamma from 5.754252518543e+01 to 2.387552997935e+00
 LASSO will set property 0 to 0.0
-Time updating beta = 1.301600000000e-05
 Beta: 
 [
 1 1.021784039518e+03
@@ -4028,19 +3362,10 @@ Beta:
 26 -1.669711704217e+05
 27 5.630281071620e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 12.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 57
-Time for iteration 56 = 1.126687170000e-01 seconds 
-Time making prediction = 2.029900000000e-05
-Time calculating objective function = 2.424100000000e-05
+Time for iteration 57 = 3.302208000000e-03 seconds 
 L1 norm of solution: 4.692323905497e+05 RMS Error: 1.137422768274e+01 Objective fn: 6.468652768941e+01 Number of vars: 27
-Time calculating correlation = 1.105988010000e-01
 Will remove property 0 from the active set
 New active set: 
 0 18
@@ -4069,21 +3394,39 @@ New active set:
 23 23
 24 4
 25 1
-Time updating active set = 1.047520000000e-04
-Time building X_A = 2.151059000000e-03
-Time building G_A = 2.041300000000e-05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
+Cholesky estimate of condition number = 1.505e+05
  Iter = 1 Error = 4.371194065094e-05 Func = -2.360438759134e+06 Step = 4.987096991312e+06
  Iter = 2 Error = 5.627717587169e-15 Func = -2.360438758916e+06 Step = 1.360549808387e-03
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 1.757598511176e-10
-Time solving equations = 9.256658300000e-02
-Time solving G_A = 9.257376600000e-02
-Time building u_A = 9.703080000000e-04
 Updated step gamma = 1.559345616844e+00
 Gamma limited by property 0
 Lasso step gamma limit = 2.814955064480e+01
-Time updating gamma = 2.733300000000e-05
-Time updating beta = 6.276000000000e-06
 Beta: 
 [
 1 1.019647805392e+03
@@ -4113,19 +3456,10 @@ Beta:
 26 -1.683956128028e+05
 27 5.674771245856e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 58
-Time for iteration 57 = 2.067079080000e-01 seconds 
-Time making prediction = 2.223600000000e-05
-Time calculating objective function = 2.588100000000e-05
+Time for iteration 58 = 4.393112100000e-02 seconds 
 L1 norm of solution: 4.726204712821e+05 RMS Error: 1.137407928766e+01 Objective fn: 6.468483982094e+01 Number of vars: 26
-Time calculating correlation = 2.026025410000e-01
 Adding property 0 to the active set
 New active set: 
 0 18
@@ -4155,24 +3489,16 @@ New active set:
 24 4
 25 1
 26 0
-Time updating active set = 9.628700000000e-05
-Time building X_A = 1.167136800000e-02
-Time building G_A = 8.652480000000e-04
  Iter = 1 Error = 3.487323635163e+01 Func = -2.361262372043e+06 Step = 4.058602623777e+01
  Iter = 2 Error = 2.202781822364e-05 Func = -7.738081998328e+06 Step = 4.849054375564e+06
  Iter = 3 Error = 3.802305353264e-10 Func = -7.738081998520e+06 Step = 1.536631177042e-01
 pre_con_grad succeeded in 3 iterations
 Cholesky error test = 1.149163398185e-10
-Time solving equations = 6.071300000000e-05
-Time solving G_A = 7.163500000000e-05
-Time building u_A = 8.847800000000e-04
 Updated step gamma = 5.425192961105e+01
 Gamma limited by property 3
 Lasso step gamma limit = 5.261945339331e+01
-Time updating gamma = 3.283600000000e-05
 LASSO is limiting gamma from 5.425192961105e+01 to 5.261945339331e+01
 LASSO will set property 9 to 0.0
-Time updating beta = 1.298700000000e-05
 Beta: 
 [
 0 3.544541958856e+03
@@ -4202,19 +3528,10 @@ Beta:
 26 -1.926846350570e+05
 27 6.459230967001e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 12.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 59
-Time for iteration 58 = 2.164217690000e-01 seconds 
-Time making prediction = 3.188300000000e-05
-Time calculating objective function = 2.579100000000e-05
+Time for iteration 59 = 4.416153000000e-03 seconds 
 L1 norm of solution: 6.796241168514e+05 RMS Error: 1.136950939010e+01 Objective fn: 6.463287188583e+01 Number of vars: 27
-Time calculating correlation = 1.107033340000e-01
 Will remove property 9 from the active set
 New active set: 
 0 18
@@ -4243,21 +3560,39 @@ New active set:
 23 4
 24 1
 25 0
-Time updating active set = 1.831870000000e-04
-Time building X_A = 1.313952000000e-03
-Time building G_A = 2.067600000000e-05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
+Cholesky estimate of condition number = 1.283e+05
  Iter = 1 Error = 8.006710413317e-04 Func = -7.203265339730e+06 Step = 5.945993787310e+06
  Iter = 2 Error = 1.377313806838e-13 Func = -7.203265339776e+06 Step = 5.404440999371e-03
 pre_con_grad succeeded in 2 iterations
 Cholesky error test = 3.488261986954e-10
-Time solving equations = 4.726825400000e-02
-Time solving G_A = 4.727554300000e-02
-Time building u_A = 1.046689000000e-03
 Updated step gamma = 3.521223088698e-02
 Gamma limited by property 9
 Lasso step gamma limit = 3.472928168576e+01
-Time updating gamma = 2.652600000000e-05
-Time updating beta = 5.968000000000e-06
 Beta: 
 [
 0 3.547023125435e+03
@@ -4287,19 +3622,10 @@ Beta:
 26 -1.926974206569e+05
 27 6.459598355600e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.7 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 11.8
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 60
-Time for iteration 59 = 1.607752980000e-01 seconds 
-Time making prediction = 2.008200000000e-05
-Time calculating objective function = 2.412300000000e-05
+Time for iteration 60 = 1.476244080000e-01 seconds 
 L1 norm of solution: 6.797577681692e+05 RMS Error: 1.136950919802e+01 Objective fn: 6.463286970189e+01 Number of vars: 26
-Time calculating correlation = 1.107070780000e-01
 Adding property 9 to the active set
 New active set: 
 0 18
@@ -4329,22 +3655,14 @@ New active set:
 24 1
 25 0
 26 9
-Time updating active set = 1.300660000000e-04
-Time building X_A = 4.198158000000e-03
-Time building G_A = 7.184300000000e-04
  Iter = 1 Error = 9.672390855392e+01 Func = -7.208411146781e+06 Step = 1.014475905647e+02
  Iter = 2 Error = 9.545498362579e-07 Func = -7.759809805319e+06 Step = 6.424723913844e+05
  Iter = 3 Error = 3.308482909929e-13 Func = -7.759809804391e+06 Step = 5.857291933532e-02
 pre_con_grad succeeded in 3 iterations
 Cholesky error test = 1.517508752403e-10
-Time solving equations = 6.107800000000e-05
-Time solving G_A = 7.640000000000e-05
-Time building u_A = 1.184197000000e-03
 Updated step gamma = 1.598219327511e+00
 Gamma limited by property 3
 Lasso step gamma limit = 2.472700318017e+01
-Time updating gamma = 2.715300000000e-05
-Time updating beta = 6.057000000000e-06
 Beta: 
 [
 0 3.654511262973e+03
@@ -4375,19 +3693,10 @@ Beta:
 26 -1.934376929594e+05
 27 6.483546900300e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 5.9 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 12.0
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 61
-Time for iteration 60 = 1.172324030000e-01 seconds 
-Time making prediction = 9.201600000000e-05
-Time calculating objective function = 9.526200000000e-05
+Time for iteration 61 = 3.370452000000e-03 seconds 
 L1 norm of solution: 6.860539449667e+05 RMS Error: 1.136950417860e+01 Objective fn: 6.463281263358e+01 Number of vars: 27
-Time calculating correlation = 1.097182260000e-01
 Adding property 3 to the active set
 New active set: 
 0 18
@@ -4418,9 +3727,6 @@ New active set:
 25 0
 26 9
 27 3
-Time updating active set = 1.093610000000e-04
-Time building X_A = 2.027021000000e-03
-Time building G_A = 7.101250000000e-04
  Iter = 1 Error = 2.243967272399e+00 Func = -7.759810656601e+06 Step = 1.305092811338e+00
  Iter = 2 Error = 3.647538042294e+01 Func = -1.665390757701e+09 Step = 4.604026813036e+09
  Iter = 3 Error = 1.248280813702e+01 Func = -1.666876735257e+09 Step = 5.249577927192e+06
@@ -4430,15 +3736,10 @@ Time building G_A = 7.101250000000e-04
  Iter = 7 Error = 6.346659850440e-10 Func = -1.666885207865e+09 Step = 1.306720413783e-07
 pre_con_grad succeeded in 7 iterations
 Cholesky error test = 8.746876898970e-08
-Time solving equations = 1.070830000000e-04
-Time solving G_A = 1.176990000000e-04
-Time building u_A = 9.804310000000e-04
 Updated step gamma = 3.210500072625e+00
 Lasso step gamma limit = 6.670551884945e-01
-Time updating gamma = 1.585600000000e-05
 LASSO is limiting gamma from 3.210500072625e+00 to 6.670551884945e-01
 LASSO will set property 2 to 0.0
-Time updating beta = 1.279800000000e-05
 Beta: 
 [
 0 1.752190335749e+03
@@ -4469,15 +3770,9 @@ Beta:
 26 -1.934475940155e+05
 27 6.487423132010e+02
 ]
-Matrix memory usage on Rank 0:
-Memory in X = 6.1 MB 
-Memory in X_A = 6.1 MB 
-Memory in G_A = 0.0 MB 
-Memory in chol = 0.0 MB 
-Memory in pre_con = 0.0 MB 
-Total memory = 12.2
+Total memory on rank 0 = 0.01 Gb 
 Finished iteration 62
-Time for iteration 61 = 1.140233540000e-01 seconds 
+Time for iteration 62 = 5.840798000000e-03 seconds 
 Stopping: no more iterations possible
 Final values:
 Beta: 

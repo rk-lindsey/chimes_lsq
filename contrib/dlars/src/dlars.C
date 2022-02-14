@@ -1281,9 +1281,12 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 	auto time2 = std::chrono::system_clock::now() ;
 	std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
 
+#ifdef TIMING
 	if ( RANK == 0 ) {
 		cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
-	}			
+	}
+#endif
+
 	return solve_succeeded ;
 }
 
@@ -2038,7 +2041,7 @@ void DLARS::increment_excluded_vars()
 			// The index is new. Exclude it in the future.
 			exclude.set( A.get(j), 1) ;
 			if ( RANK == 0 )
-				cout << "Variable" << A.get(j) + 1 << " is excluded from future use" << endl ;
+				cout << "Variable " << A.get(j) + 1 << " is excluded from future use" << endl ;
 			++num_exclude ;
 		}
 	}

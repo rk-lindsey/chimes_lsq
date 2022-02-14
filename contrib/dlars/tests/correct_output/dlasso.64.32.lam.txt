@@ -1,9 +1,16 @@
 Distributed LARS algorithm
+ ...options read.
+ ...reading single xmat.
+ ...xmat read.
+ ...yvec read.
+ ...xmat normalized.
+ ...yvec normalized.
 Using the LASSO algorithm
 L1 norm of solution: 0.000000000000e+00 RMS Error: 9.403806229334e-01 Objective fn: 4.421578579943e-01 Number of vars: 0
 Adding property 5 to the active set
 New active set: 
 0 5
+Cholesky estimate of condition number = 1.000e+00
 Cholesky error test = 0.000000000000e+00
 Updated step gamma = 1.003408818394e-02
 Gamma limited by property 25
@@ -12,13 +19,16 @@ Beta:
 [
 5 -1.003408818394e-02
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 1
+Time for iteration 1 = 6.066980000000e-04 seconds 
 L1 norm of solution: 1.003408818394e-02 RMS Error: 9.400509356878e-01 Objective fn: 4.418980512847e-01 Number of vars: 1
 Adding property 25 to the active set
 New active set: 
 0 5
 1 25
-Cholesky error test = 5.551115123126e-17
+Cholesky estimate of condition number = 1.021e+00
+Cholesky error test = 0.000000000000e+00
 Updated step gamma = 6.902995069980e-01
 Gamma limited by property 11
 Lasso step gamma limit = 1.000000000000e+20
@@ -27,14 +37,17 @@ Beta:
 5 -4.665350188068e-01
 25 4.565009306229e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 2
+Time for iteration 2 = 2.450870000000e-04 seconds 
 L1 norm of solution: 9.230359494297e-01 RMS Error: 9.137148207900e-01 Objective fn: 4.220525666128e-01 Number of vars: 2
 Adding property 11 to the active set
 New active set: 
 0 5
 1 25
 2 11
-Cholesky error test = 2.220446049250e-16
+Cholesky estimate of condition number = 1.021e+00
+Cholesky error test = 0.000000000000e+00
 Updated step gamma = 1.698994328754e-02
 Gamma limited by property 12
 Lasso step gamma limit = 1.000000000000e+20
@@ -44,7 +57,9 @@ Beta:
 11 -1.049745455529e-02
 25 4.657974453863e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 3
+Time for iteration 3 = 4.678640000000e-04 seconds 
 L1 norm of solution: 9.515984797431e-01 RMS Error: 9.130086997273e-01 Objective fn: 4.215504352876e-01 Number of vars: 3
 Adding property 12 to the active set
 New active set: 
@@ -52,8 +67,9 @@ New active set:
 1 25
 2 11
 3 12
-Cholesky error test = 5.551115123126e-17
-Updated step gamma = 2.030774277319e-02
+Cholesky estimate of condition number = 1.028e+00
+Cholesky error test = 1.110223024625e-16
+Updated step gamma = 2.030774277318e-02
 Gamma limited by property 16
 Lasso step gamma limit = 1.000000000000e+20
 Beta: 
@@ -63,7 +79,9 @@ Beta:
 12 -9.012656611616e-03
 25 4.753414457229e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 4
+Time for iteration 4 = 9.268650000000e-04 seconds 
 L1 norm of solution: 9.895708900636e-01 RMS Error: 9.120759213499e-01 Objective fn: 4.208890976035e-01 Number of vars: 4
 Adding property 16 to the active set
 New active set: 
@@ -72,7 +90,8 @@ New active set:
 2 11
 3 12
 4 16
-Cholesky error test = 1.554312234475e-16
+Cholesky estimate of condition number = 1.028e+00
+Cholesky error test = 1.110223024625e-16
 Updated step gamma = 3.511303565707e-02
 Gamma limited by property 10
 Lasso step gamma limit = 1.000000000000e+20
@@ -84,7 +103,9 @@ Beta:
 16 -1.856593514272e-02
 25 4.885782460370e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 5
+Time for iteration 5 = 7.475000000000e-04 seconds 
 L1 norm of solution: 1.066675393143e+00 RMS Error: 9.101967066237e-01 Objective fn: 4.195623993400e-01 Number of vars: 5
 Adding property 10 to the active set
 New active set: 
@@ -94,7 +115,8 @@ New active set:
 3 12
 4 16
 5 10
-Cholesky error test = 1.295260195396e-16
+Cholesky estimate of condition number = 1.047e+00
+Cholesky error test = 3.700743415417e-17
 Updated step gamma = 2.044546838654e-01
 Gamma limited by property 29
 Lasso step gamma limit = 1.000000000000e+20
@@ -107,7 +129,9 @@ Beta:
 16 -1.076957342730e-01
 25 5.518537887645e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 6
+Time for iteration 6 = 7.576140000000e-04 seconds 
 L1 norm of solution: 1.571069003513e+00 RMS Error: 8.982402741292e-01 Objective fn: 4.112731400514e-01 Number of vars: 6
 Adding property 29 to the active set
 New active set: 
@@ -118,7 +142,8 @@ New active set:
 4 16
 5 10
 6 29
-Cholesky error test = 1.110223024625e-16
+Cholesky estimate of condition number = 1.128e+00
+Cholesky error test = 1.268826313857e-16
 Updated step gamma = 3.020885608028e-01
 Gamma limited by property 6
 Lasso step gamma limit = 1.000000000000e+20
@@ -132,7 +157,9 @@ Beta:
 25 6.458108473546e-01
 29 9.881914083849e-02
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 7
+Time for iteration 7 = 9.681980000000e-04 seconds 
 L1 norm of solution: 2.354398372489e+00 RMS Error: 8.807360035239e-01 Objective fn: 3.996199458141e-01 Number of vars: 7
 Adding property 6 to the active set
 New active set: 
@@ -144,7 +171,8 @@ New active set:
 5 10
 6 29
 7 6
-Cholesky error test = 1.249000902703e-16
+Cholesky estimate of condition number = 1.128e+00
+Cholesky error test = 4.163336342344e-17
 Updated step gamma = 5.322920585169e-01
 Gamma limited by property 21
 Lasso step gamma limit = 1.000000000000e+20
@@ -159,7 +187,9 @@ Beta:
 25 8.115173638198e-01
 29 2.770172142160e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 8
+Time for iteration 8 = 8.763370000000e-04 seconds 
 L1 norm of solution: 3.804383541810e+00 RMS Error: 8.515404797021e-01 Objective fn: 3.815825119947e-01 Number of vars: 8
 Adding property 21 to the active set
 New active set: 
@@ -172,7 +202,8 @@ New active set:
 6 29
 7 6
 8 21
-Cholesky error test = 1.603655480014e-16
+Cholesky estimate of condition number = 1.171e+00
+Cholesky error test = 1.480297366167e-16
 Updated step gamma = 5.055967089937e-02
 Gamma limited by property 13
 Lasso step gamma limit = 1.000000000000e+20
@@ -188,7 +219,9 @@ Beta:
 25 8.216201545160e-01
 29 2.928819438279e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 9
+Time for iteration 9 = 9.727430000000e-04 seconds 
 L1 norm of solution: 3.953572681292e+00 RMS Error: 8.487714635484e-01 Objective fn: 3.799743620735e-01 Number of vars: 9
 Adding property 13 to the active set
 New active set: 
@@ -202,7 +235,8 @@ New active set:
 7 6
 8 21
 9 13
-Cholesky error test = 1.110223024625e-16
+Cholesky estimate of condition number = 1.271e+00
+Cholesky error test = 9.992007221626e-17
 Updated step gamma = 6.139474407880e-01
 Gamma limited by property 24
 Lasso step gamma limit = 1.000000000000e+20
@@ -219,7 +253,9 @@ Beta:
 25 8.762907863155e-01
 29 5.299535152397e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 10
+Time for iteration 10 = 1.030871000000e-02 seconds 
 L1 norm of solution: 5.930192118385e+00 RMS Error: 8.151395731099e-01 Objective fn: 3.618772224168e-01 Number of vars: 10
 Adding property 24 to the active set
 New active set: 
@@ -234,7 +270,8 @@ New active set:
 8 21
 9 13
 10 24
-Cholesky error test = 1.513940488125e-16
+Cholesky estimate of condition number = 1.271e+00
+Cholesky error test = 7.065055611251e-17
 Updated step gamma = 1.742514518955e-01
 Gamma limited by property 2
 Lasso step gamma limit = 1.000000000000e+20
@@ -252,7 +289,9 @@ Beta:
 25 8.950209171444e-01
 29 6.036940244969e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 11
+Time for iteration 11 = 1.241187000000e-03 seconds 
 L1 norm of solution: 6.506800209599e+00 RMS Error: 8.064245487131e-01 Objective fn: 3.576942774316e-01 Number of vars: 11
 Adding property 2 to the active set
 New active set: 
@@ -268,7 +307,8 @@ New active set:
 9 13
 10 24
 11 2
-Cholesky error test = 8.326672684689e-17
+Cholesky estimate of condition number = 1.271e+00
+Cholesky error test = 1.480297366167e-16
 Updated step gamma = 2.625811288916e-01
 Gamma limited by property 30
 Lasso step gamma limit = 1.000000000000e+20
@@ -287,7 +327,9 @@ Beta:
 25 9.085376113392e-01
 29 7.060817189670e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 12
+Time for iteration 12 = 1.277453000000e-03 seconds 
 L1 norm of solution: 7.426713663791e+00 RMS Error: 7.934789266656e-01 Objective fn: 3.519379718501e-01 Number of vars: 12
 Adding property 30 to the active set
 New active set: 
@@ -304,7 +346,8 @@ New active set:
 10 24
 11 2
 12 30
-Cholesky error test = 1.964240735875e-16
+Cholesky estimate of condition number = 1.271e+00
+Cholesky error test = 1.708035422500e-16
 Updated step gamma = 3.854218023167e-01
 Gamma limited by property 0
 Lasso step gamma limit = 1.000000000000e+20
@@ -324,7 +367,9 @@ Beta:
 29 8.751275991480e-01
 30 1.303587165696e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 13
+Time for iteration 13 = 1.432077000000e-03 seconds 
 L1 norm of solution: 8.850295378999e+00 RMS Error: 7.755935156425e-01 Objective fn: 3.450241276483e-01 Number of vars: 13
 Adding property 0 to the active set
 New active set: 
@@ -342,7 +387,8 @@ New active set:
 11 2
 12 30
 13 0
-Cholesky error test = 1.348127958473e-16
+Cholesky estimate of condition number = 1.271e+00
+Cholesky error test = 7.930164461608e-17
 Updated step gamma = 1.655363107687e-02
 Gamma limited by property 28
 Lasso step gamma limit = 1.000000000000e+20
@@ -363,7 +409,9 @@ Beta:
 29 8.830868532109e-01
 30 1.358659147292e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 14
+Time for iteration 14 = 1.543819000000e-03 seconds 
 L1 norm of solution: 8.914950562817e+00 RMS Error: 7.748421989180e-01 Objective fn: 3.447649694261e-01 Number of vars: 14
 Adding property 28 to the active set
 New active set: 
@@ -382,7 +430,8 @@ New active set:
 12 30
 13 0
 14 28
-Cholesky error test = 1.702341971092e-16
+Cholesky estimate of condition number = 1.271e+00
+Cholesky error test = 1.850371707709e-16
 Updated step gamma = 9.027091859097e-02
 Gamma limited by property 27
 Lasso step gamma limit = 1.000000000000e+20
@@ -404,7 +453,9 @@ Beta:
 29 9.265124357663e-01
 30 1.642319613773e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 15
+Time for iteration 15 = 1.797030000000e-03 seconds 
 L1 norm of solution: 9.275008833473e+00 RMS Error: 7.707428672166e-01 Objective fn: 3.433973278500e-01 Number of vars: 15
 Adding property 27 to the active set
 New active set: 
@@ -424,7 +475,8 @@ New active set:
 13 0
 14 28
 15 27
-Cholesky error test = 2.706168622524e-16
+Cholesky estimate of condition number = 1.319e+00
+Cholesky error test = 1.179611963664e-16
 Updated step gamma = 3.681036083948e-02
 Gamma limited by property 19
 Lasso step gamma limit = 3.601905897763e+02
@@ -447,7 +499,9 @@ Beta:
 29 9.441915840600e-01
 30 1.760233615988e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 16
+Time for iteration 16 = 1.726416000000e-03 seconds 
 L1 norm of solution: 9.439091126910e+00 RMS Error: 7.689190093941e-01 Objective fn: 3.428136771383e-01 Number of vars: 16
 Adding property 19 to the active set
 New active set: 
@@ -468,7 +522,8 @@ New active set:
 14 28
 15 27
 16 19
-Cholesky error test = 2.155138812508e-16
+Cholesky estimate of condition number = 1.319e+00
+Cholesky error test = 7.836868409119e-17
 Updated step gamma = 2.456800327908e-02
 Gamma limited by property 23
 Lasso step gamma limit = 1.000000000000e+20
@@ -492,7 +547,9 @@ Beta:
 29 9.548929883878e-01
 30 1.835237602759e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 17
+Time for iteration 17 = 1.893228000000e-03 seconds 
 L1 norm of solution: 9.554367579482e+00 RMS Error: 7.676508927799e-01 Objective fn: 3.424157844903e-01 Number of vars: 17
 Adding property 23 to the active set
 New active set: 
@@ -514,6 +571,7 @@ New active set:
 15 27
 16 19
 17 23
+Cholesky estimate of condition number = 1.321e+00
 Cholesky error test = 1.665334536938e-16
 Updated step gamma = 3.908946050376e-01
 Gamma limited by property 18
@@ -539,7 +597,9 @@ Beta:
 29 1.118357458953e+00
 30 2.780412429958e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 18
+Time for iteration 18 = 1.930865000000e-03 seconds 
 L1 norm of solution: 1.142235818255e+01 RMS Error: 7.485005231733e-01 Objective fn: 3.372383075081e-01 Number of vars: 18
 Adding property 18 to the active set
 New active set: 
@@ -562,7 +622,8 @@ New active set:
 16 19
 17 23
 18 18
-Cholesky error test = 2.045147676941e-16
+Cholesky estimate of condition number = 1.572e+00
+Cholesky error test = 2.278878840020e-16
 Updated step gamma = 2.818110154748e-01
 Gamma limited by property 8
 Lasso step gamma limit = 1.000000000000e+20
@@ -588,7 +649,9 @@ Beta:
 29 1.240799463079e+00
 30 3.659354133757e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 19
+Time for iteration 19 = 1.971142000000e-03 seconds 
 L1 norm of solution: 1.279579161569e+01 RMS Error: 7.361396186786e-01 Objective fn: 3.349297271726e-01 Number of vars: 19
 Adding property 8 to the active set
 New active set: 
@@ -612,7 +675,8 @@ New active set:
 17 23
 18 18
 19 8
-Cholesky error test = 2.498001805407e-16
+Cholesky estimate of condition number = 1.572e+00
+Cholesky error test = 1.609823385706e-16
 Updated step gamma = 2.978820545816e-01
 Gamma limited by property 9
 Lasso step gamma limit = 1.000000000000e+20
@@ -622,7 +686,7 @@ Beta:
 2 3.097677970787e-01
 5 -2.234017315790e+00
 6 6.801797268982e-01
-8 -6.202467274484e-02
+8 -6.202467274485e-02
 10 1.000646061639e+00
 11 -9.715334796714e-01
 12 -6.337306233250e-01
@@ -639,7 +703,9 @@ Beta:
 29 1.354239220846e+00
 30 4.628151816902e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 20
+Time for iteration 20 = 1.121173800000e-02 seconds 
 L1 norm of solution: 1.426894307992e+01 RMS Error: 7.245240448278e-01 Objective fn: 3.338122611664e-01 Number of vars: 20
 Adding property 9 to the active set
 New active set: 
@@ -664,8 +730,9 @@ New active set:
 18 18
 19 8
 20 9
-Cholesky error test = 2.696255916947e-16
-Updated step gamma = 3.116646315151e-01
+Cholesky estimate of condition number = 1.572e+00
+Cholesky error test = 1.850371707709e-16
+Updated step gamma = 3.116646315150e-01
 Gamma limited by property 14
 Lasso step gamma limit = 1.000000000000e+20
 Beta: 
@@ -692,7 +759,9 @@ Beta:
 29 1.470827917522e+00
 30 5.589964273642e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 21
+Time for iteration 21 = 2.245136000000e-03 seconds 
 L1 norm of solution: 1.582446173082e+01 RMS Error: 7.141440537852e-01 Objective fn: 3.341231734324e-01 Number of vars: 21
 Adding property 14 to the active set
 New active set: 
@@ -718,7 +787,8 @@ New active set:
 19 8
 20 9
 21 14
-Cholesky error test = 2.775557561563e-16
+Cholesky estimate of condition number = 1.572e+00
+Cholesky error test = 1.917657951625e-16
 Updated step gamma = 1.860449449728e-01
 Gamma limited by property 22
 Lasso step gamma limit = 4.785975353679e+00
@@ -747,6 +817,7 @@ Beta:
 29 1.545790508981e+00
 30 6.274906925209e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 22
 Stopping: Objective function increased
 Final values:
