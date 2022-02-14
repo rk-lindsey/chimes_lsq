@@ -7,22 +7,22 @@
 
 class Matrix {
 public:
-	double *mat ;  // Elements of the matrix stored here.
+	double *mat ;	 // Elements of the matrix stored here.
 	double *shift ; // Normalization shift of each column ;
 	double *scale ; // Normalization scale factor for each column.
-	int dim1, dim2 ; 			// dim1 is number of rows.  Dim2 is number of columns.
-	bool distributed ;    // Is this matrix distributed over processes ?
-	int row_start, row_end ;  // Starting and ending row for parallel calculations.
-	int num_rows ;    // Number of rows stored on this process.
+	int dim1, dim2 ;			// dim1 is number of rows.	Dim2 is number of columns.
+	bool distributed ;		// Is this matrix distributed over processes ?
+	int row_start, row_end ;	// Starting and ending row for parallel calculations.
+	int num_rows ;		// Number of rows stored on this process.
 
 	bool cholesky(Matrix &chol) ;
-	bool cholesky_distribute(Matrix &chol) ;  
-	bool cholesky_add_row(const Matrix &chol0, const Vector &newr)  ;
+	bool cholesky_distribute(Matrix &chol) ;	
+	bool cholesky_add_row(const Matrix &chol0, const Vector &newr)	;
 	void cholesky_sub(Vector &x, const Vector &b) ;
 	bool cholesky_remove_row(int id ) ;
 	void cholesky_sub_distribute(Vector &x, const Vector &b) ;
 	bool cholesky_add_row_distribute(const Matrix &chol0, const Vector &newr)	;
-	bool cholesky_remove_row_dist(int id ) 	;
+	bool cholesky_remove_row_dist(int id )	;
 	
 	int rank_from_row(int j) const {
 		for ( int k = 0 ; k < NPROCS ; k++ ) {
@@ -127,7 +127,7 @@ public:
 		dim2 = 0 ;
 	}
 	void read(std::ifstream &file, int dim01, int dim02, bool is_distributed)
-	// Read a non-split matrix from a single file.  The matrix is optionally distributed among processes.
+	// Read a non-split matrix from a single file.	The matrix is optionally distributed among processes.
 		{
 			dim1 = dim01 ;
 			dim2 = dim02 ;
@@ -181,7 +181,7 @@ public:
 			cerr << "A dimension file name must end with a suffix" ;
 			stop_run(1) ;
 		}
-		string dim_ext  = strDimFile.substr(found1+1, string::npos) ;
+		string dim_ext	= strDimFile.substr(found1+1, string::npos) ;
 		strDimFile = strDimFile.substr(0,found1) ;
 		// Find out how many files were written by chimes_lsq.
 		int total_files = 0 ;
@@ -225,7 +225,7 @@ public:
 		int my_offset = RANK % proc_fac ;
 
 		if ( RANK == 0 ) cout << "Assigning " << proc_fac << " MPI processes per file\n" ;
-                  
+									
 #ifdef VERBOSE		
 		cout << "RANK = " << RANK << " proc_fac = " << proc_fac << " my_file = " << my_file << " my_offset = " << my_offset << endl ;
 #endif		
@@ -266,7 +266,7 @@ public:
 		} else {
 			// Left-over process not used.
 			row_start = dim1 + 1 ;
-			row_end  = dim1 ;
+			row_end	 = dim1 ;
 			num_rows= 0 ;
 		}
 
@@ -392,7 +392,7 @@ public:
 			
 			double *scale1 = new double[d2] ;
 			double *shift1 = new double[d2] ;
-			double *mat1   = new double[num_rows1 * d2] ;
+			double *mat1	 = new double[num_rows1 * d2] ;
 
 			for ( int i = 0 ; i < d1 && i < dim1 ; i++ ) {
 				for ( int j = 0 ; j < d2 && j < dim2 ; j++ ) {
@@ -447,7 +447,7 @@ public:
 				stop_run(1) ;
 			}
 #endif						
-			mat[(i-row_start) * dim2 + j] = val  ;
+			mat[(i-row_start) * dim2 + j] = val	 ;
 		}
 	inline void setT(int i, int j, double val) {
 		// Set a value with transposed indexing.
@@ -458,7 +458,7 @@ public:
 		return get(j, i) ;
 	}
 	void distribute()
-	// Settings to distribute a matrix across processes.  Assumes the number of rows have already been set in dim1.
+	// Settings to distribute a matrix across processes.	Assumes the number of rows have already been set in dim1.
 	{
 		distribute(dim1) ;
 	}
@@ -523,52 +523,52 @@ public:
 		}
 
 
-         void mult_T(int j, Vector& out)
+				 void mult_T(int j, Vector& out)
 	// Calculate the jth row of X^T * X, where X is the current matrix.
-        // Places the result in out.
+				// Places the result in out.
 		{
-                  Vector tmp(dim2, 0.0) ;
+									Vector tmp(dim2, 0.0) ;
 #ifdef USE_OPENMP		
 #pragma omp parallel for shared(j,tmp) default(none)
 #endif					
-                  for ( int k = 0 ; k < dim2 ; k++ ) {
-                    for ( int l = row_start ; l <= row_end ; l++ ) {
-                      tmp.add(k, get(l, j) * get(l, k) );
-                    }
-                  }
+									for ( int k = 0 ; k < dim2 ; k++ ) {
+										for ( int l = row_start ; l <= row_end ; l++ ) {
+											tmp.add(k, get(l, j) * get(l, k) );
+										}
+									}
 
 #ifdef USE_MPI
-                  MPI_Allreduce(tmp.vec, out.vec, dim2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
+									MPI_Allreduce(tmp.vec, out.vec, dim2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
 #else // USE_MPI
-                  for ( int k = 0 ; k < dim2 ; k++ ) {
-                    out.set(k, tmp.get(k)) ;
-                  }
+									for ( int k = 0 ; k < dim2 ; k++ ) {
+										out.set(k, tmp.get(k)) ;
+									}
 #endif // USE_MPI
 		}
 
-  
-         void mult_T_lower(int j, Vector& out)
+	
+				 void mult_T_lower(int j, Vector& out)
 	// Calculate the jth row of X^T * X, where X is the current matrix.
-        // Only the lower half k <= j are calculated in out[k].
-        // Places the result in out.
+				// Only the lower half k <= j are calculated in out[k].
+				// Places the result in out.
 		{
-                  Vector tmp(j+1, 0.0) ;
+									Vector tmp(j+1, 0.0) ;
 
 #ifdef USE_OPENMP		
 #pragma omp parallel for shared(j,tmp) default(none)
 #endif	// USE_OPENMP				
-                  for ( int k = 0 ; k <= j ; k++ ) {
-                    for ( int l = row_start ; l <= row_end ; l++ ) {
-                      tmp.add(k, get(l, k)  * get(l, j)  );
-                    }
-                  }
-                  
+									for ( int k = 0 ; k <= j ; k++ ) {
+										for ( int l = row_start ; l <= row_end ; l++ ) {
+											tmp.add(k, get(l, k)	* get(l, j)	 );
+										}
+									}
+									
 #ifdef USE_MPI
-                  MPI_Allreduce(tmp.vec, out.vec, j+1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
+									MPI_Allreduce(tmp.vec, out.vec, j+1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
 #else // USE_MPI
-                  for ( int k = 0 ; k <= j ; k++ ) {
-                    out.set(k, tmp.get(k)) ;
-                  }
+									for ( int k = 0 ; k <= j ; k++ ) {
+										out.set(k, tmp.get(k)) ;
+									}
 #endif // USE_MPI
 		}
 
@@ -660,16 +660,16 @@ public:
 			MPI_Allreduce(test.vec, test2.vec, dim2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
 #else
 			for ( int j = 0 ; j < dim2 ; j++ ) {
-			    test2.set(j, test.get(j) ) ;
+					test2.set(j, test.get(j) ) ;
 			}
 #endif
 			if ( RANK == 0 ) {
-         	for ( int j = 0 ; j < dim2 ; j++ ) {
-        			if ( fabs(test2.get(j)-1.0) > 1.0e-06 ) {
-			          cout << "Column " << j << " did not have norm = 1 " << endl ;
-    		       }
-    		   }
-   		}
+					for ( int j = 0 ; j < dim2 ; j++ ) {
+							if ( fabs(test2.get(j)-1.0) > 1.0e-06 ) {
+								cout << "Column " << j << " did not have norm = 1 " << endl ;
+							 }
+					 }
+			}
 		}
 			
 	void print()
@@ -756,9 +756,9 @@ public:
 #endif // USE_BLAS
 				
 #ifdef USE_MPI
-				Vector out2(dim1, 0.0) ;    // Temporary array to collect out.vec values.
-				IntVector countv(NPROCS) ;  // The number of items to receive from each process.
-				IntVector displs(NPROCS) ;  // Storage displacements in out2 for each process.
+				Vector out2(dim1, 0.0) ;		// Temporary array to collect out.vec values.
+				IntVector countv(NPROCS) ;	// The number of items to receive from each process.
+				IntVector displs(NPROCS) ;	// Storage displacements in out2 for each process.
 
 				int count = row_end - row_start + 1 ;
 
@@ -769,7 +769,7 @@ public:
 					displs.set(j, displs.get(j-1) + countv.get(j-1) ) ;
 				}
 				MPI_Allgatherv(&(out.vec[row_start]), countv.get(RANK),
-							   MPI_DOUBLE, out2.vec, countv.vec, displs.vec, MPI_DOUBLE, MPI_COMM_WORLD) ;
+								 MPI_DOUBLE, out2.vec, countv.vec, displs.vec, MPI_DOUBLE, MPI_COMM_WORLD) ;
 				
 				for ( int j = 0 ; j < dim1 ; j++ ) {
 					out.set(j, out2.get(j) ) ;
@@ -838,7 +838,7 @@ public:
 				
 #ifdef USE_MPI
 				MPI_Allreduce(sumv.vec, out.vec, dim2,
-							  MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
+								MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD) ;
 #else				
 				for ( int j = 0 ; j < dim2 ; j++ ) {
 					out.set(j, sumv.get(j)) ;
@@ -850,11 +850,11 @@ public:
 	bool con_grad(Vector &x, const Vector &b, int max_iter, int max_restart,
 								double tol)
 	// Congugate gradient method to solver linear equations.
-	// Solves Matrix * x = b.  The value given in x is used
+	// Solves Matrix * x = b.	 The value given in x is used
 	// as an initial guess.
 	// max_iter is the maximum number of iterations to perform.
 	// max_restart is the maximum number of restarts to perform.
-	// tol is the tolerance.  The solution is returned in x.
+	// tol is the tolerance.	The solution is returned in x.
 		{
 			int dim = x.dim ;
 			
@@ -892,7 +892,7 @@ public:
 					r2.assign_mult(r1, tmp, -alpha) ;
 
 					p1.scale(xstep,alpha) ;
-					double err =  sqrt( r2.dot(r2) ) ;
+					double err =	sqrt( r2.dot(r2) ) ;
 					double stp = sqrt(xstep.dot(xstep)) ;
 
 					dot(tmp2, x2) ;
@@ -910,18 +910,18 @@ public:
 						return true ;
 					}
 					/* if ( func > oldfunc ) { */
-					/* 	if ( RANK == 0 ) { */
-					/* 		cout << "Failed to decrease conjugate gradient function\n" ; */
-					/* 		cout << "Restarting\n" ; */
-					/* 		break ; */
-					/* 	} */
+					/*	if ( RANK == 0 ) { */
+					/*		cout << "Failed to decrease conjugate gradient function\n" ; */
+					/*		cout << "Restarting\n" ; */
+					/*		break ; */
+					/*	} */
 					/* } */
 
 					// Fletcher-Reeves formula.
 					double beta = r2.dot(r2) / r1.dot(r1) ;
 
 					// Polak-Ribiere formula.
-          // double beta = (r2.dot(r2) - r2.dot(r1)) / r1.dot(r1) ;
+					// double beta = (r2.dot(r2) - r2.dot(r1)) / r1.dot(r1) ;
 
 					p2.assign_mult(r2,p1,beta) ;
 
@@ -948,13 +948,13 @@ public:
 	bool pre_con_grad(Vector &x, const Vector &b, const Matrix &M_inv, int max_iter, int max_restart,
 								double tol)
 	// Preconditioned congugate gradient method to solver linear equations.
-	// Solves Matrix * x = b.  The value given in x is used
+	// Solves Matrix * x = b.	 The value given in x is used
 	// as an initial guess.
 	// The inverse of the pre-conditioner, M_inv, is explicitly specified, 
 	// as opposed to specifying M.
 	// max_iter is the maximum number of iterations to perform.
 	// max_restart is the maximum number of restarts to perform.
-	// tol is the tolerance.  The solution is returned in x.
+	// tol is the tolerance.	The solution is returned in x.
 		{
 			int dim = x.dim ;
 			
@@ -993,7 +993,7 @@ public:
 					r2.assign_mult(r1, tmp, -alpha) ;
 
 					p1.scale(xstep,alpha) ;
-					double err =  sqrt( r2.dot(r2) ) ;
+					double err =	sqrt( r2.dot(r2) ) ;
 					double stp = sqrt(xstep.dot(xstep)) ;
 
 					dot(tmp2, x2) ;
@@ -1043,16 +1043,16 @@ public:
 		return( (double) (row_end - row_start + 1) * dim2 * 8 / (1024.0 * 1024.0) ) ;
 	}
 
-        double print_memory(string name) 
-        {
-          double mem = memory() ;
-
-          int prec = cout.precision() ;
-          cout << "Memory in " << name << " = " << std::fixed << std::setprecision(1) << mem << " MB " << endl ;
-          cout.precision(prec) ;
-          cout << std::scientific ;
-          
-          return mem ;
-        }
-  
+	double print_memory(string name) 
+	{
+		double mem = memory() ;
+		
+		int prec = cout.precision() ;
+		cout << "Memory in " << name << " = " << std::fixed << std::setprecision(1) << mem << " MB " << endl ;
+		cout.precision(prec) ;
+		cout << std::scientific ;
+					
+		return mem ;
+	}
+	
 } ;

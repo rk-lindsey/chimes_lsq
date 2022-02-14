@@ -100,13 +100,14 @@ public:
 	int restart(string filename) ;
 	void broadcast_solution() ;
 	bool solve_G_A_con_grad() ;
-	void build_u_A() ;
+	bool build_u_A() ;
 	void reduce_active_set() ;
 	void update_active_set() ;
 	void update_step_gamma() ;
 	void update_lasso_gamma() ;
 	void update_beta() ;
 	void print_unscaled(ostream &out)  ;
+	void increment_excluded_vars() ;
 	
 	void print_unshifted_mu(ostream &out)
 	// Print the given prediction in unscaled units.

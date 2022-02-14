@@ -344,9 +344,8 @@ int main(int argc, char **argv)
 			if ( RANK == 0 ) cout << "Stopping: no more iterations possible" << endl ;
 			break ;
 		} else if ( status == -1 && last_status == 1 ) {
-			// if ( RANK == 0 ) cout << "Iteration failed: continuing" << endl ;
-			if ( RANK == 0 ) cout << "Stopping: iteration failed" << endl ;			
-			break ;
+			if ( RANK == 0 ) cout << "Iteration failed: continuing" << endl ;
+			continue ;
 		} 
 
 		if ( RANK == 0 ) cout << "Finished iteration " << j + 1 << endl ;
@@ -583,7 +582,13 @@ int DLARS::iteration()
 	}
 #endif			
 
-	build_u_A() ;
+	if ( ! build_u_A() ) {
+		remove_prop = -1 ;
+		add_prop = -1 ;
+		cout << "Iteration failed to build u_A" << endl ;
+		increment_excluded_vars() ;
+		return -1 ;
+	}
 
 	auto time9 = std::chrono::system_clock::now() ;
 	elapsed_seconds = time9 - time8 ;
@@ -627,17 +632,27 @@ int DLARS::iteration()
 	if ( RANK == 0 ) {
 		double total_mem = 0.0 ;
 		int prec = cout.precision() ;
+#ifdef VERBOSE		
 		cout << "Matrix memory usage on Rank 0:" << endl ;
 		total_mem += X.print_memory("X") ;
 		total_mem += X_A.print_memory("X_A") ;
 		total_mem += G_A.print_memory("G_A") ;
 		total_mem += chol.print_memory("chol") ;
 		total_mem += pre_con.print_memory("pre_con") ;
-		cout << "Total memory = " << std::fixed << std::setprecision(1)
+#else
+		total_mem += X.memory() ;
+		total_mem += X_A.memory() ;
+		total_mem += G_A.memory() ;
+		total_mem += chol.memory() ;
+		total_mem += pre_con.memory() ;
+#endif		
+		cout << "Total memory on rank 0 = " << std::fixed << std::setprecision(2)
 				 << total_mem/1024.0 << " Gb " << endl ;
 		cout.precision(prec) ;
 		cout << std::scientific ;
+		
 	}
+	
 	return 1 ;
 
 }
@@ -665,6 +680,9 @@ void DLARS::build_G_A(Matrix &G_A_in, bool increment)
 		}
 	} else {
 		// Unusual event: rebuild the array.
+		if ( RANK == 0 ) {
+			cout << "Building the G_A matrix" << endl ;
+		}
 		if ( build_G_A_here() ) {
 			// Only store G_A on rank 0 for non-distributed solver.
 			if ( distributed_solver ) {
@@ -1225,20 +1243,7 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 
 			if ( ! G_A.cholesky(chol) ) {
 				if ( RANK == 0 ) cout << "Non-incremental Cholesky failed" << endl ;
-				for ( int j = 0 ; j < nactive ; j++ ) {
-					int k ;
-					// See if this is a new index.
-					for ( k = 0 ; k < A_last.dim ; k++ ) {
-						if ( A.get(j) == A_last.get(k) ) {
-							break ;
-						}
-					}
-					if ( k == A_last.dim ) {
-						// The index is new. Exclude it in the future.
-						exclude.set( A.get(j), 1) ;
-						++num_exclude ;
-					}
-				}
+				increment_excluded_vars() ;
 				solve_succeeded = false ;
 				return false ;
 			}
@@ -1288,7 +1293,6 @@ bool DLARS::chol_backsub(Matrix &G_A_in, Matrix &chol_in)
 	// Returns true if the solution passes consistency tests.
 {
 
-	//			// DEBUG !!
 	//			if ( RANK == 0 ) cout << "Cholesky " << endl ;
 	//			 chol.print() ;
 
@@ -1573,7 +1577,10 @@ int DLARS::restart(string filename)
 	
 	if ( build_G_A_here() ) {
 		if ( RANK == 0 ) cout << "Restart: solving G_A\n" ;
-		solve_G_A(false) ;
+		if ( ! solve_G_A(false) ) {
+			cout << "Error: could not solve equations on restart\n" ;
+			stop_run(1) ;
+		}
 	}
 	broadcast_solution() ;
 
@@ -1682,7 +1689,6 @@ bool DLARS::solve_G_A_con_grad()
 				// Add 1 row to pre-conditioner.
 				pre_con.set(nactive-1, nactive-1, 1.0) ;
 
-				// DEBUG !
 				//if ( RANK == 0 ) {
 				//cout << "Updated preconditioner\n" ;
 				//pre_con.print() ;
@@ -1747,7 +1753,7 @@ bool DLARS::solve_G_A_con_grad()
 	return true ;
 }
 
-void DLARS::build_u_A()
+bool DLARS::build_u_A()
 {
 	const double eps_fail = 1.0e-04 ;
 	w_A.realloc(nactive) ;
@@ -1773,9 +1779,11 @@ void DLARS::build_u_A()
 	}
 	test = sqrt(test) ;
 	if ( fabs(test-1.0) > eps_fail ) {
-		cout << "U_A norm test failed" << endl ;
-		cout << "Norm = " << test << endl ;
-		stop_run(1) ;
+		if ( RANK == 0 ) {
+			cout << "U_A norm test failed" << endl ;
+			cout << "Norm = " << test << endl ;
+		}
+		return false ;
 	}
 
 	// Test X_A^T u__A = A_A * I
@@ -1783,8 +1791,10 @@ void DLARS::build_u_A()
 	X_A.dot_transpose(testv, u_A) ;
 	for ( int j = 0 ; j < nactive ; j++ ) {
 		if ( fabs(testv.get(j) - A_A) > eps_fail ) {
-			cout << "u_A test failed " << endl ;
-			stop_run(1) ;
+			if ( RANK == 0 ) {			
+				cout << "u_A equation test failed " << endl ;
+			}
+			return false ;
 		}
 	}
 				
@@ -1795,6 +1805,7 @@ void DLARS::build_u_A()
 	a.print() ;
 #endif			
 
+	return true ;
 }
 
 
@@ -2008,6 +2019,27 @@ void DLARS::print_unscaled(ostream &out)
 			for ( int j = 0 ; j < nprops ; j++ ) {
 				out << uns_beta.get(j) << endl ;
 			}
+		}
+	}
+}
+
+void DLARS::increment_excluded_vars()
+// If a solution fails, exclude the added variable on the next iteration.
+{
+	for ( int j = 0 ; j < nactive ; j++ ) {
+		int k ;
+		// See if this is a new index.
+		for ( k = 0 ; k < A_last.dim ; k++ ) {
+			if ( A.get(j) == A_last.get(k) ) {
+				break ;
+			}
+		}
+		if ( k == A_last.dim ) {
+			// The index is new. Exclude it in the future.
+			exclude.set( A.get(j), 1) ;
+			if ( RANK == 0 )
+				cout << "Variable" << A.get(j) + 1 << " is excluded from future use" << endl ;
+			++num_exclude ;
 		}
 	}
 }
