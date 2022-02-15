@@ -504,7 +504,6 @@ int DLARS::iteration()
 		print_error(trajfile) ;
 		beta.print(trajfile) ;
 		print_error(cout) ;
-
 		if ( iterations % 10 == 0 ) {
 			print_restart() ;
 		}
@@ -573,13 +572,24 @@ int DLARS::iteration()
 	}
 #endif			
 
-	if ( build_G_A_here() && ! solve_G_A(true) ) {
+	int solve_status ; // Use an int to avoid special MPI boolean types.
+	if ( build_G_A_here() ) {
+		if ( solve_G_A(true) ) {
+			solve_status = 1 ;
+		} else {
+			solve_status = 0 ;
+		}
+	} 
+#ifdef USE_MPI
+	MPI_Bcast(&solve_status, 1, MPI_INT, 0, MPI_COMM_WORLD) ;
+#endif
+	if ( solve_status == 0 ) {
 		remove_prop = -1 ;
 		add_prop = -1 ;
 		cout << "Iteration failed" << endl ;
 		return -1 ;
 	}
-
+		
 	auto time8 = std::chrono::system_clock::now() ;
 	elapsed_seconds = time8 - time7 ;
 
@@ -2067,3 +2077,59 @@ void DLARS::increment_excluded_vars()
 		}
 	}
 }
+
+void DLARS::print_unshifted_mu(ostream &out)
+	// Print the given prediction in unscaled units.
+{
+	if ( RANK == 0 ) {
+		//out << "Y constant offset = " << offset << endl ;
+		for ( int j = 0 ; j < ndata ; j++ ) {
+			out << mu.get(j) + y.shift << endl ;
+		}
+	}
+}
+	
+
+void DLARS::print_unshifted_mu(ostream &out, Vector &weights)
+	// Print the given prediction in unscaled units.
+{
+	if ( RANK == 0 ) {
+		//out << "Y constant offset = " << offset << endl ;
+		for ( int j = 0 ; j < ndata ; j++ ) {
+			out << (mu.get(j) + y.shift)/weights.get(j) << endl ;
+		}
+	}
+}	
+
+void DLARS::print_error(ostream &out)
+	// Print the current fitting error and related parameters.
+{
+	if ( RANK == 0 ) {
+		out  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << " Number of vars: " << A.dim << endl ;
+	}
+}
+
+void DLARS::print_restart()
+		// Print the restart file
+{
+	if ( RANK == 0 ) {
+
+		ofstream rst("restart.txt") ;
+		if ( rst.is_open() ) {
+			rst << scientific ;
+			rst.precision(16) ;
+			rst.width(24) ;
+			rst << "Iteration " << iterations << endl ;
+			print_error(rst) ;
+			beta.print_sparse(rst) ;
+			rst << "Exclude " << endl ;
+			exclude.print_sparse(rst) ;
+			rst << "Mu" << endl ;
+			mu.print_sparse(rst) ;
+			rst.close() ;
+		} else {
+			cout << "Warning: restart file could not be opened" << endl ;
+		}
+	}
+}
+
