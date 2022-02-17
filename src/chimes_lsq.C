@@ -291,7 +291,13 @@ int main(int argc, char* argv[])
 		}
 		SYSTEM.READ_XYZF(TRAJ_INPUT, CONTROLS, ATOM_PAIRS, ATOM_TYPE, i) ;
 
-		if ( i >= istart && i <= iend )
+		// IF CONTROLS.SKIP_FRAMES is true,
+		// skip frames between MPI processes to improve parallel load balancing for typical frame
+		// ordering (condensed phase first, gas phase next)
+		if ( (! CONTROLS.SKIP_FRAMES && i >= istart && i <= iend)
+				 ||
+				 (i + RANK) % NPROCS == 0 )
+			// Process contiguous frames.  Historic ordering.
 			total_forces += process_frame(A_MATRIX, CONTROLS, SYSTEM, ATOM_PAIRS, PAIR_MAP,INT_PAIR_MAP, NEIGHBOR_LIST, TRIPS, QUADS, CHARGE_CONSTRAINTS, i, istart) ;
 	}
 
