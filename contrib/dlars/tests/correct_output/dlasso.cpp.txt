@@ -1,4 +1,5 @@
 Distributed LARS algorithm
+Warning: normalize should not be used with chimes_lsq
  ...options read.
  ...reading single xmat.
  ...xmat read.
@@ -21,7 +22,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.00 Gb 
 Finished iteration 1
-Time for iteration 1 = 6.261350000000e-04 seconds 
+Time for iteration 1 = 5.370270000000e-04 seconds 
 L1 norm of solution: 2.077874092449e-01 RMS Error: 9.034130996309e-01 Objective fn: 4.080776142924e-01 Number of vars: 1
 Adding property 3 to the active set
 New active set: 
@@ -39,7 +40,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.00 Gb 
 Finished iteration 2
-Time for iteration 2 = 3.462000000000e-04 seconds 
+Time for iteration 2 = 3.050210000000e-04 seconds 
 L1 norm of solution: 3.281192586431e-01 RMS Error: 8.938470778829e-01 Objective fn: 3.994812993199e-01 Number of vars: 2
 Adding property 4 to the active set
 New active set: 
@@ -59,7 +60,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.00 Gb 
 Finished iteration 3
-Time for iteration 3 = 6.517330000000e-04 seconds 
+Time for iteration 3 = 4.304550000000e-04 seconds 
 L1 norm of solution: 1.985138399369e+00 RMS Error: 8.125322159127e-01 Objective fn: 3.301043009480e-01 Number of vars: 3
 Adding property 0 to the active set
 New active set: 
@@ -81,7 +82,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.00 Gb 
 Finished iteration 4
-Time for iteration 4 = 8.118320000000e-04 seconds 
+Time for iteration 4 = 5.281720000000e-04 seconds 
 L1 norm of solution: 2.352908553221e+00 RMS Error: 8.078519403352e-01 Objective fn: 3.263123787517e-01 Number of vars: 4
 Adding property 2 to the active set
 New active set: 
@@ -104,7 +105,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.00 Gb 
 Finished iteration 5
-Time for iteration 5 = 9.591110000000e-04 seconds 
+Time for iteration 5 = 6.331000000000e-04 seconds 
 Stopping: no more iterations possible
 Final values:
 Beta: 

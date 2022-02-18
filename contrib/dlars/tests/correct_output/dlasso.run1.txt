@@ -1,4 +1,5 @@
 Distributed LARS algorithm
+Warning: normalize should not be used with chimes_lsq
  ...options read.
  ...reading single xmat.
  ...xmat read.
@@ -21,7 +22,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 1
-Time for iteration 1 = 5.924867000000e-03 seconds 
+Time for iteration 1 = 8.362962000000e-03 seconds 
 L1 norm of solution: 3.241707654294e+02 RMS Error: 3.261126051416e+01 Objective fn: 5.317471561612e+02 Number of vars: 1
 Adding property 23 to the active set
 New active set: 
@@ -39,7 +40,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 2
-Time for iteration 2 = 1.455089000000e-03 seconds 
+Time for iteration 2 = 1.464222000000e-03 seconds 
 L1 norm of solution: 3.170048835124e+03 RMS Error: 2.457427966321e+01 Objective fn: 3.019476104828e+02 Number of vars: 2
 Adding property 21 to the active set
 New active set: 
@@ -59,7 +60,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 3
-Time for iteration 3 = 1.848556000000e-03 seconds 
+Time for iteration 3 = 1.802116000000e-03 seconds 
 L1 norm of solution: 3.721161684459e+03 RMS Error: 2.333171409753e+01 Objective fn: 2.721844413644e+02 Number of vars: 3
 Adding property 3 to the active set
 New active set: 
@@ -81,7 +82,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 4
-Time for iteration 4 = 2.309155000000e-03 seconds 
+Time for iteration 4 = 2.081609000000e-03 seconds 
 L1 norm of solution: 6.322392149796e+03 RMS Error: 1.864157420960e+01 Objective fn: 1.737541445061e+02 Number of vars: 4
 Adding property 8 to the active set
 New active set: 
@@ -105,7 +106,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 5
-Time for iteration 5 = 2.876269000000e-03 seconds 
+Time for iteration 5 = 2.507978000000e-03 seconds 
 L1 norm of solution: 7.211284851099e+03 RMS Error: 1.752422220342e+01 Objective fn: 1.535491819174e+02 Number of vars: 5
 Adding property 20 to the active set
 New active set: 
@@ -131,7 +132,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 6
-Time for iteration 6 = 2.843426000000e-03 seconds 
+Time for iteration 6 = 2.370309000000e-03 seconds 
 L1 norm of solution: 7.338922089700e+03 RMS Error: 1.738242756071e+01 Objective fn: 1.510743939516e+02 Number of vars: 6
 Adding property 6 to the active set
 New active set: 
@@ -159,7 +160,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 7
-Time for iteration 7 = 3.109778000000e-03 seconds 
+Time for iteration 7 = 2.744178000000e-03 seconds 
 L1 norm of solution: 7.707160271357e+03 RMS Error: 1.699422837045e+01 Objective fn: 1.444018989535e+02 Number of vars: 7
 Adding property 1 to the active set
 New active set: 
@@ -189,7 +190,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 8
-Time for iteration 8 = 3.283566000000e-03 seconds 
+Time for iteration 8 = 2.826927000000e-03 seconds 
 L1 norm of solution: 7.943458797031e+03 RMS Error: 1.676056905842e+01 Objective fn: 1.404583375810e+02 Number of vars: 8
 Adding property 10 to the active set
 New active set: 
@@ -221,7 +222,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 9
-Time for iteration 9 = 4.553988000000e-03 seconds 
+Time for iteration 9 = 3.995267000000e-03 seconds 
 L1 norm of solution: 8.969300586767e+03 RMS Error: 1.587665973325e+01 Objective fn: 1.260341621427e+02 Number of vars: 9
 Adding property 17 to the active set
 New active set: 
@@ -256,7 +257,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 10
-Time for iteration 10 = 1.094201970000e-01 seconds 
+Time for iteration 10 = 1.054652550000e-01 seconds 
 Final values:
 Beta: 
 [

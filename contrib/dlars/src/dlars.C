@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 	
 	string algorithm("lasso") ;				// Algorithm to use: lasso or lars
 	bool split_files = false ;				// Read input matrix from split files ?
-	bool normalize=true ;							// Whether to normalize the X matrix.
+	bool normalize=false ;							// Whether to normalize the X matrix.
 	bool con_grad = false ;						// Whether to use congugate gradient algorithm to solve linear equations.
 
 	bool use_precondition = false ;
@@ -158,6 +158,7 @@ int main(int argc, char **argv)
 		case 'n':
 			if ( optarg[0] == 'y' ) {
 				normalize = true ;
+				cout << "Warning: normalize should not be used with chimes_lsq" << endl ;
 			} else if ( optarg[0] == 'n' ) {
 				normalize = false ;
 			} else {
@@ -283,16 +284,20 @@ int main(int argc, char **argv)
 	if ( normalize ) {
 		xmat.normalize() ;
 		xmat.check_norm() ;
+		xmat.print_norm("Xnorm.txt") ;
 		
 		if ( RANK == 0 ) {
 			cout << " ...xmat normalized." << endl;
 		}		
 		yvec.normalize() ;
 		yvec.check_norm() ;
+		yvec.print_norm("Ynorm.txt") ;
 		
 		if ( RANK == 0 ) {
 			cout << " ...yvec normalized." << endl;
 		}			
+	} else if ( RANK == 0 ) {
+		cout << " ...will not normalize Xmat or Yvec.\n" << endl;
 	}
 
 	if ( ! feature_weight_file.empty() ) {

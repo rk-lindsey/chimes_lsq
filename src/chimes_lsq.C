@@ -12,6 +12,7 @@
 #include <sstream>
 #include <unistd.h>	// Used to detect whether i/o is going to terminal or is piped... will help us decide whether to use ANSI color codes
 #include <algorithm> // For specials vector-related functions (i.e. permute)
+#include <chrono>
 
 // User-defined headers
 
@@ -69,17 +70,18 @@ static void print_map_file(	map<string,int> PAIR_MAP,
 				CLUSTER_LIST &QUADS) ;
 				
 static int process_frame(	A_MAT &A_MATRIX, 
-				JOB_CONTROL &CONTROLS, 
-				FRAME &SYSTEM, 
-				vector<PAIRS> &ATOM_PAIRS,
-				map<string,int> &PAIR_MAP, 
-				vector<int> &INT_PAIR_MAP, 
-				NEIGHBORS &NEIGHBOR_LIST,
-				CLUSTER_LIST &TRIPS, 
-				CLUSTER_LIST &QUADS,
-				 vector<CHARGE_CONSTRAINT> &CHARGE_CONSTRAINTS,
-				int i, 
-				int istart)  ;
+													JOB_CONTROL &CONTROLS, 
+													FRAME &SYSTEM, 
+													vector<PAIRS> &ATOM_PAIRS,
+													map<string,int> &PAIR_MAP, 
+													vector<int> &INT_PAIR_MAP, 
+													NEIGHBORS &NEIGHBOR_LIST,
+													CLUSTER_LIST &TRIPS, 
+													CLUSTER_LIST &QUADS, 
+													vector<CHARGE_CONSTRAINT> &CHARGE_CONSTRAINTS,
+													int i, 
+													int istart,
+													ostream &frame_log)  ;
 
 // Print the params.header file.
 // Global variables declared as externs in functions.h, and declared in functions.C
@@ -276,13 +278,17 @@ int main(int argc, char* argv[])
 
 	A_MATRIX.OPEN_FILES(CONTROLS) ;
 	int total_forces = 0 ;
-	
+
+	char log_name[80] ;
+	sprintf(log_name, "frames.%04d.log", RANK) ;
+	ofstream frame_log ;
+	frame_log.open(log_name) ;
+			
 	for (int i=0; i<CONTROLS.NFRAMES; i++)
 	{
 		if( (i+1) > OFFSET) // We've reached the end of file. Move on to the next one (if there is a next one)
 		{
-			//if ( RANK == 0 ) // Debug statement
-			//	cout << "Closing file " << CONTROLS.INFILE[FILE_IDX] << " and opening file " << CONTROLS.INFILE[FILE_IDX+1]  << " to read frame " << i+1 << endl;
+			frame_log << "Closing file " << CONTROLS.INFILE[FILE_IDX] << " and opening file " << CONTROLS.INFILE[FILE_IDX+1]  << " to read frame " << i+1 << endl;
 
 			FILE_IDX++;
 			OPEN_TRAJFILE(TRAJ_INPUT, CONTROLS.INFILE, FILE_IDX); // Closes current file (if open), opens file FILE_IDX
@@ -291,14 +297,27 @@ int main(int argc, char* argv[])
 		}
 		SYSTEM.READ_XYZF(TRAJ_INPUT, CONTROLS, ATOM_PAIRS, ATOM_TYPE, i) ;
 
-		// IF CONTROLS.SKIP_FRAMES is true,
-		// skip frames between MPI processes to improve parallel load balancing for typical frame
-		// ordering (condensed phase first, gas phase next)
-		if ( (! CONTROLS.SKIP_FRAMES && i >= istart && i <= iend)
-				 ||
-				 (i + RANK) % NPROCS == 0 )
-			// Process contiguous frames.  Historic ordering.
-			total_forces += process_frame(A_MATRIX, CONTROLS, SYSTEM, ATOM_PAIRS, PAIR_MAP,INT_PAIR_MAP, NEIGHBOR_LIST, TRIPS, QUADS, CHARGE_CONSTRAINTS, i, istart) ;
+		bool process ;
+		
+		if ( CONTROLS.SKIP_FRAMES <= 0 && i >= istart && i <= iend )
+			// Process contiguous frames.  Historic ordering.  No frame skipping.
+			process = true ;
+		else if ( CONTROLS.SKIP_FRAMES >= 1 && i % CONTROLS.SKIP_FRAMES == 0 && (i + RANK) % NPROCS == 0 )
+			// If CONTROLS.SKIP_FRAMES is >= 1,
+			// use round robin ordering to improve parallel load balancing for typical frame
+			// ordering (condensed phase first, gas phase next).
+			// Skip frames if CONTROLS.SKIP_FRAMES > 1.
+			process = true ;
+		else
+			process = false ;
+
+		if ( process ) 
+			{
+				total_forces += process_frame(A_MATRIX, CONTROLS, SYSTEM, ATOM_PAIRS,
+																			PAIR_MAP,INT_PAIR_MAP, NEIGHBOR_LIST, TRIPS,
+																			QUADS, CHARGE_CONSTRAINTS, i, istart, frame_log) ;
+
+			}
 	}
 
 	// Add the number of force entries in the A matrix across all processes.
@@ -635,17 +654,18 @@ static void print_map_file(map<string,int> PAIR_MAP, CLUSTER_LIST &TRIPS, CLUSTE
 }
 
 static int process_frame(	A_MAT &A_MATRIX, 
-				JOB_CONTROL &CONTROLS, 
-				FRAME &SYSTEM, 
-				vector<PAIRS> &ATOM_PAIRS,
-				map<string,int> &PAIR_MAP, 
-				vector<int> &INT_PAIR_MAP, 
-				NEIGHBORS &NEIGHBOR_LIST,
-				CLUSTER_LIST &TRIPS, 
-				CLUSTER_LIST &QUADS, 
-				vector<CHARGE_CONSTRAINT> &CHARGE_CONSTRAINTS,
-				int i, 
-				int istart) 
+													JOB_CONTROL &CONTROLS, 
+													FRAME &SYSTEM, 
+													vector<PAIRS> &ATOM_PAIRS,
+													map<string,int> &PAIR_MAP, 
+													vector<int> &INT_PAIR_MAP, 
+													NEIGHBORS &NEIGHBOR_LIST,
+													CLUSTER_LIST &TRIPS, 
+													CLUSTER_LIST &QUADS, 
+													vector<CHARGE_CONSTRAINT> &CHARGE_CONSTRAINTS,
+													int i, 
+													int istart,
+													ostream &frame_log) 
 // Process the ith frame of the A_MATRIX.
 {
 
@@ -654,6 +674,9 @@ static int process_frame(	A_MAT &A_MATRIX,
 	 double 	NEIGHBOR_PADDING = 0.3;
 
 	 // NOTE: WE CONTINUALLY RE-USE THE 0th entry of A_MATRIX TO SAVE MEMORY.
+	 frame_log << "Processing frame " << i << endl ;
+	 auto time1 = std::chrono::system_clock::now() ;				
+	 
 	 A_MATRIX.INITIALIZE(CONTROLS, SYSTEM, ATOM_PAIRS.size(),ATOM_PAIRS) ;
 
 	 if (RANK == 0 && i == istart )
@@ -721,6 +744,18 @@ static int process_frame(	A_MAT &A_MATRIX,
 	 CONTROLS.FIT_ENER_EVER     = CONTROLS.FIT_ENER;
 
 	 A_MATRIX.PRINT_FRAME(CONTROLS, SYSTEM, ATOM_PAIRS, CHARGE_CONSTRAINTS, i) ;
+
+	 auto time2 = std::chrono::system_clock::now() ;
+	 std::chrono::duration<double>  elapsed_seconds = time2 - time1 ;				
+	 for (int j=0; j< A_MATRIX.NO_ATOM_TYPES; j++)
+		 {
+			 frame_log << A_MATRIX.ATOM_TYPES[j] << " " << A_MATRIX.NO_ATOMS_OF_TYPE[j] << " " ;
+		 }
+	 frame_log << endl ;
+	 frame_log << "Finished frame " << i << " in " << fixed 
+						 << setprecision(1) << elapsed_seconds.count() << " seconds" << endl ;
+
 	 int total_forces = 3 * A_MATRIX.FORCES.size() ;
 	 return total_forces ;
+	 
 }

@@ -646,6 +646,25 @@ public:
 				}
 			}
 		}
+
+	void print_norm(const string filename) const
+	// Print shift and scale factors used in scaling the matrix.
+	{
+		ofstream outfile(filename) ;
+		if ( ! outfile.good() ) {
+			cout << "Error: could not open " << filename << endl ;
+			stop_run(1) ;
+		}
+		outfile << "# Shift             Scale" << endl ;
+		outfile << dim2 << endl ;
+		for ( int j = 0 ; j < dim2 ; j++ ) {
+			outfile << std::scientific << std::setprecision(14) << std::setw(21) << shift[j] << " " <<
+                            				std::setprecision(14) << std::setw(21) << scale[j] << endl ;
+		}
+		outfile.close() ;
+	}
+	
+		
 	void check_norm() const
 	// Check normalization of matrix to according to Eq. 1.1
 		{
@@ -667,7 +686,7 @@ public:
 			if ( RANK == 0 ) {
 				for ( int j = 0 ; j < dim2 ; j++ ) {
 					if ( fabs(test2.get(j)) > 1.0e-06 ) {
-						cout << "Column " << j << " did not have 0 average" << endl ;
+						cout << "Column " << j << " did not have 0 average " << test2.get(j) << endl ;
 					}
 				}
 			}
@@ -687,7 +706,7 @@ public:
 			if ( RANK == 0 ) {
 					for ( int j = 0 ; j < dim2 ; j++ ) {
 							if ( fabs(test2.get(j)-1.0) > 1.0e-06 ) {
-								cout << "Column " << j << " did not have norm = 1 " << endl ;
+								cout << "Column " << j << " did not have norm = 1 " << test2.get(j) << endl ;
 							 }
 					 }
 			}

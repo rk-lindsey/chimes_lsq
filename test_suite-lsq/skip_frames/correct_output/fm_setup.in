@@ -17,8 +17,8 @@
 	CHEBYSHEV 10 2
 # CHBTYPE # ! Are we transforming distance in terms of inverse distance(INVRSE_R), a morse-type function? (MORSE)? .. "DEFAULT" for no transformation.
 	MORSE
-# SKIP_FRAMES # Do we process frames in round-robin order ?
-        TRUE
+# SKIP_FRAMES # Do we process frames in round-robin order with skipping ?
+        1
 	
 ####### TOPOLOGY VARIABLES #######
 

@@ -1,4 +1,5 @@
 Distributed LARS algorithm
+Warning: normalize should not be used with chimes_lsq
  ...options read.
  ...reading single xmat.
  ...xmat read.
@@ -54,7 +55,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 20
-Time for iteration 20 = 1.291705190000e-01 seconds 
+Time for iteration 20 = 1.084654530000e-01 seconds 
 L1 norm of solution: 1.945210758408e+04 RMS Error: 1.207385239987e+01 Objective fn: 7.288895588691e+01 Number of vars: 14
 Adding property 14 to the active set
 New active set: 
@@ -98,7 +99,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 21
-Time for iteration 21 = 8.204976000000e-03 seconds 
+Time for iteration 21 = 6.432530000000e-03 seconds 
 L1 norm of solution: 1.993624133486e+04 RMS Error: 1.203562360078e+01 Objective fn: 7.242811772985e+01 Number of vars: 15
 Adding property 0 to the active set
 New active set: 
@@ -144,7 +145,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 22
-Time for iteration 22 = 1.152046300000e-02 seconds 
+Time for iteration 22 = 6.887545000000e-03 seconds 
 L1 norm of solution: 1.996078692214e+04 RMS Error: 1.203380932749e+01 Objective fn: 7.240628346515e+01 Number of vars: 16
 Adding property 5 to the active set
 New active set: 
@@ -192,7 +193,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 23
-Time for iteration 23 = 1.289599200000e-02 seconds 
+Time for iteration 23 = 7.212089000000e-03 seconds 
 L1 norm of solution: 2.020935937215e+04 RMS Error: 1.201584154528e+01 Objective fn: 7.219022402058e+01 Number of vars: 17
 Adding property 23 to the active set
 New active set: 
@@ -242,7 +243,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 24
-Time for iteration 24 = 1.262448100000e-02 seconds 
+Time for iteration 24 = 7.426162000000e-03 seconds 
 L1 norm of solution: 2.056192593231e+04 RMS Error: 1.199143661270e+01 Objective fn: 7.189727601814e+01 Number of vars: 18
 Adding property 13 to the active set
 New active set: 
@@ -295,7 +296,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 25
-Time for iteration 25 = 1.303608300000e-02 seconds 
+Time for iteration 25 = 6.583749000000e-03 seconds 
 L1 norm of solution: 2.271334006901e+04 RMS Error: 1.186511264170e+01 Objective fn: 7.039044900016e+01 Number of vars: 19
 Will remove property 8 from the active set
 New active set: 
@@ -345,7 +346,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 26
-Time for iteration 26 = 1.214663800000e-02 seconds 
+Time for iteration 26 = 5.529826000000e-03 seconds 
 L1 norm of solution: 2.410675783505e+04 RMS Error: 1.180492480073e+01 Objective fn: 6.967812477550e+01 Number of vars: 18
 Adding property 19 to the active set
 New active set: 
@@ -398,7 +399,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 27
-Time for iteration 27 = 7.376467000000e-03 seconds 
+Time for iteration 27 = 4.604908000000e-03 seconds 
 L1 norm of solution: 2.750655416287e+04 RMS Error: 1.169183618463e+01 Objective fn: 6.834951668410e+01 Number of vars: 19
 Will remove property 23 from the active set
 New active set: 
@@ -448,7 +449,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 28
-Time for iteration 28 = 1.161530900000e-02 seconds 
+Time for iteration 28 = 3.986434000000e-03 seconds 
 L1 norm of solution: 3.047469133034e+04 RMS Error: 1.161633391706e+01 Objective fn: 6.746960683627e+01 Number of vars: 18
 Adding property 23 to the active set
 New active set: 
@@ -500,7 +501,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 29
-Time for iteration 29 = 1.042998500000e-02 seconds 
+Time for iteration 29 = 6.000389000000e-03 seconds 
 L1 norm of solution: 3.387449956346e+04 RMS Error: 1.155389455234e+01 Objective fn: 6.674623966332e+01 Number of vars: 19
 Adding property 8 to the active set
 New active set: 
@@ -555,7 +556,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 30
-Time for iteration 30 = 2.068986970000e-01 seconds 
+Time for iteration 30 = 1.060188040000e-01 seconds 
 L1 norm of solution: 3.561581612211e+04 RMS Error: 1.152838586043e+01 Objective fn: 6.645184027346e+01 Number of vars: 20
 Will remove property 15 from the active set
 New active set: 
@@ -608,7 +609,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 31
-Time for iteration 31 = 4.846652000000e-03 seconds 
+Time for iteration 31 = 4.530509000000e-03 seconds 
 L1 norm of solution: 3.971817825984e+04 RMS Error: 1.148481587785e+01 Objective fn: 6.595049787401e+01 Number of vars: 19
 Will remove property 21 from the active set
 New active set: 
@@ -658,7 +659,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 32
-Time for iteration 32 = 3.931579000000e-03 seconds 
+Time for iteration 32 = 3.369162000000e-03 seconds 
 L1 norm of solution: 3.986607611462e+04 RMS Error: 1.148372349443e+01 Objective fn: 6.593795264832e+01 Number of vars: 18
 Adding property 15 to the active set
 New active set: 
@@ -710,7 +711,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 33
-Time for iteration 33 = 5.363897000000e-03 seconds 
+Time for iteration 33 = 4.667851000000e-03 seconds 
 L1 norm of solution: 4.090546243671e+04 RMS Error: 1.147761660480e+01 Objective fn: 6.586784146340e+01 Number of vars: 19
 Adding property 12 to the active set
 New active set: 
@@ -764,7 +765,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 34
-Time for iteration 34 = 8.061102000000e-03 seconds 
+Time for iteration 34 = 6.564585000000e-03 seconds 
 L1 norm of solution: 4.125585909637e+04 RMS Error: 1.147600805934e+01 Objective fn: 6.584938048903e+01 Number of vars: 20
 Adding property 21 to the active set
 New active set: 
@@ -821,7 +822,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 35
-Time for iteration 35 = 6.403821000000e-03 seconds 
+Time for iteration 35 = 5.920610000000e-03 seconds 
 L1 norm of solution: 4.664813941300e+04 RMS Error: 1.145679315739e+01 Objective fn: 6.562905472556e+01 Number of vars: 21
 Will remove property 11 from the active set
 New active set: 
@@ -875,7 +876,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 36
-Time for iteration 36 = 4.663504000000e-03 seconds 
+Time for iteration 36 = 4.688878000000e-03 seconds 
 L1 norm of solution: 4.765817956403e+04 RMS Error: 1.145440176536e+01 Objective fn: 6.560165990120e+01 Number of vars: 20
 Adding property 7 to the active set
 New active set: 
@@ -932,7 +933,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 37
-Time for iteration 37 = 7.314104000000e-03 seconds 
+Time for iteration 37 = 7.002470000000e-03 seconds 
 L1 norm of solution: 4.782869796848e+04 RMS Error: 1.145405061046e+01 Objective fn: 6.559763769354e+01 Number of vars: 21
 Will remove property 27 from the active set
 New active set: 
@@ -987,7 +988,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 38
-Time for iteration 38 = 3.834030000000e-03 seconds 
+Time for iteration 38 = 3.870954000000e-03 seconds 
 L1 norm of solution: 4.830085684751e+04 RMS Error: 1.145314093541e+01 Objective fn: 6.558721864316e+01 Number of vars: 20
 Will remove property 6 from the active set
 New active set: 
@@ -1039,7 +1040,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 39
-Time for iteration 39 = 4.356942000000e-03 seconds 
+Time for iteration 39 = 3.698736000000e-03 seconds 
 L1 norm of solution: 4.861473443339e+04 RMS Error: 1.145259985722e+01 Objective fn: 6.558102174481e+01 Number of vars: 19
 Adding property 16 to the active set
 New active set: 
@@ -1093,7 +1094,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 40
-Time for iteration 40 = 1.236569120000e-01 seconds 
+Time for iteration 40 = 1.070480060000e-01 seconds 
 L1 norm of solution: 4.961260049250e+04 RMS Error: 1.145113521609e+01 Objective fn: 6.556424886863e+01 Number of vars: 20
 Adding property 27 to the active set
 New active set: 
@@ -1149,7 +1150,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 41
-Time for iteration 41 = 6.501567000000e-03 seconds 
+Time for iteration 41 = 4.953634000000e-03 seconds 
 L1 norm of solution: 5.017631435105e+04 RMS Error: 1.145044212503e+01 Objective fn: 6.555631242928e+01 Number of vars: 21
 Adding property 11 to the active set
 New active set: 
@@ -1207,7 +1208,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 42
-Time for iteration 42 = 7.107080000000e-03 seconds 
+Time for iteration 42 = 6.075070000000e-03 seconds 
 L1 norm of solution: 5.244779859172e+04 RMS Error: 1.144812961305e+01 Objective fn: 6.552983581857e+01 Number of vars: 22
 Adding property 26 to the active set
 New active set: 
@@ -1267,7 +1268,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 43
-Time for iteration 43 = 1.136426600000e-02 seconds 
+Time for iteration 43 = 6.123341000000e-03 seconds 
 L1 norm of solution: 5.485790714734e+04 RMS Error: 1.144630384603e+01 Objective fn: 6.550893586780e+01 Number of vars: 23
 Adding property 6 to the active set
 New active set: 
@@ -1329,7 +1330,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 44
-Time for iteration 44 = 1.271275800000e-02 seconds 
+Time for iteration 44 = 6.147051000000e-03 seconds 
 L1 norm of solution: 5.883051890577e+04 RMS Error: 1.144438930170e+01 Objective fn: 6.548702324440e+01 Number of vars: 24
 Adding property 25 to the active set
 New active set: 
@@ -1393,7 +1394,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 45
-Time for iteration 45 = 1.358517300000e-02 seconds 
+Time for iteration 45 = 6.251324000000e-03 seconds 
 L1 norm of solution: 5.927141374392e+04 RMS Error: 1.144424611710e+01 Objective fn: 6.548538459442e+01 Number of vars: 25
 Adding property 24 to the active set
 New active set: 
@@ -1460,7 +1461,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 46
-Time for iteration 46 = 1.225797100000e-02 seconds 
+Time for iteration 46 = 6.473228000000e-03 seconds 
 L1 norm of solution: 9.447820567687e+04 RMS Error: 1.143378040753e+01 Objective fn: 6.536566720384e+01 Number of vars: 26
 Will remove property 10 from the active set
 New active set: 
@@ -1524,7 +1525,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 47
-Time for iteration 47 = 1.117994800000e-02 seconds 
+Time for iteration 47 = 5.797086000000e-03 seconds 
 L1 norm of solution: 1.405980407474e+05 RMS Error: 1.142137916360e+01 Objective fn: 6.522395099939e+01 Number of vars: 25
 Adding property 10 to the active set
 New active set: 
@@ -1591,7 +1592,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 48
-Time for iteration 48 = 1.689587000000e-02 seconds 
+Time for iteration 48 = 8.323798000000e-03 seconds 
 L1 norm of solution: 2.198958914364e+05 RMS Error: 1.140345457739e+01 Objective fn: 6.501938814935e+01 Number of vars: 26
 Will remove property 21 from the active set
 New active set: 
@@ -1655,7 +1656,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 49
-Time for iteration 49 = 9.927429000000e-03 seconds 
+Time for iteration 49 = 4.586130000000e-03 seconds 
 L1 norm of solution: 2.238619755312e+05 RMS Error: 1.140267410525e+01 Objective fn: 6.501048837531e+01 Number of vars: 25
 Adding property 21 to the active set
 New active set: 
@@ -1721,7 +1722,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 50
-Time for iteration 50 = 2.029905470000e-01 seconds 
+Time for iteration 50 = 1.091521440000e-01 seconds 
 L1 norm of solution: 3.772891349167e+05 RMS Error: 1.138051497872e+01 Objective fn: 6.475806059043e+01 Number of vars: 26
 Adding property 2 to the active set
 New active set: 
@@ -1790,7 +1791,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 51
-Time for iteration 51 = 1.045551600000e-02 seconds 
+Time for iteration 51 = 7.625729000000e-03 seconds 
 L1 norm of solution: 3.861571578901e+05 RMS Error: 1.137968928975e+01 Objective fn: 6.474866416561e+01 Number of vars: 27
 Will remove property 1 from the active set
 New active set: 
@@ -1857,7 +1858,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 52
-Time for iteration 52 = 1.208300300000e-02 seconds 
+Time for iteration 52 = 6.663586000000e-03 seconds 
 L1 norm of solution: 4.183822579794e+05 RMS Error: 1.137708469421e+01 Objective fn: 6.471902806956e+01 Number of vars: 26
 Will remove property 23 from the active set
 New active set: 
@@ -1921,7 +1922,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 53
-Time for iteration 53 = 7.917206000000e-03 seconds 
+Time for iteration 53 = 4.803180000000e-03 seconds 
 L1 norm of solution: 4.188983688793e+05 RMS Error: 1.137704858600e+01 Objective fn: 6.471861726409e+01 Number of vars: 25
 Adding property 23 to the active set
 New active set: 
@@ -1987,7 +1988,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 54
-Time for iteration 54 = 1.715156500000e-02 seconds 
+Time for iteration 54 = 5.419899000000e-03 seconds 
 L1 norm of solution: 4.337768015866e+05 RMS Error: 1.137608451703e+01 Objective fn: 6.470764946930e+01 Number of vars: 26
 Adding property 4 to the active set
 New active set: 
@@ -2056,7 +2057,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 55
-Time for iteration 55 = 1.734897200000e-02 seconds 
+Time for iteration 55 = 9.183847000000e-03 seconds 
 L1 norm of solution: 4.441504437340e+05 RMS Error: 1.137547657853e+01 Objective fn: 6.470073369434e+01 Number of vars: 27
 Will remove property 3 from the active set
 New active set: 
@@ -2122,7 +2123,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 56
-Time for iteration 56 = 1.279343800000e-02 seconds 
+Time for iteration 56 = 6.358271000000e-03 seconds 
 L1 norm of solution: 4.601589823393e+05 RMS Error: 1.137464390726e+01 Objective fn: 6.469126200844e+01 Number of vars: 26
 Adding property 1 to the active set
 New active set: 
@@ -2191,7 +2192,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 57
-Time for iteration 57 = 1.104564900000e-02 seconds 
+Time for iteration 57 = 6.102895000000e-03 seconds 
 L1 norm of solution: 4.692324008543e+05 RMS Error: 1.137422768228e+01 Objective fn: 6.468652768415e+01 Number of vars: 27
 Will remove property 0 from the active set
 New active set: 
@@ -2257,7 +2258,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 58
-Time for iteration 58 = 1.212649400000e-02 seconds 
+Time for iteration 58 = 5.823392000000e-03 seconds 
 L1 norm of solution: 4.726204815653e+05 RMS Error: 1.137407928722e+01 Objective fn: 6.468483981595e+01 Number of vars: 26
 Adding property 0 to the active set
 New active set: 
@@ -2326,7 +2327,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 59
-Time for iteration 59 = 1.425493700000e-02 seconds 
+Time for iteration 59 = 7.798696000000e-03 seconds 
 L1 norm of solution: 6.796240882351e+05 RMS Error: 1.136950939015e+01 Objective fn: 6.463287188630e+01 Number of vars: 27
 Will remove property 9 from the active set
 New active set: 
@@ -2392,7 +2393,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 60
-Time for iteration 60 = 1.520920930000e-01 seconds 
+Time for iteration 60 = 1.066697220000e-01 seconds 
 L1 norm of solution: 6.797577404497e+05 RMS Error: 1.136950919806e+01 Objective fn: 6.463286970234e+01 Number of vars: 26
 Adding property 9 to the active set
 New active set: 
@@ -2460,7 +2461,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 61
-Time for iteration 61 = 6.487309000000e-03 seconds 
+Time for iteration 61 = 6.271067000000e-03 seconds 
 L1 norm of solution: 6.860539529619e+05 RMS Error: 1.136950417860e+01 Objective fn: 6.463281263357e+01 Number of vars: 27
 Adding property 3 to the active set
 New active set: 
@@ -2530,7 +2531,7 @@ Beta:
 ]
 Total memory on rank 0 = 0.01 Gb 
 Finished iteration 62
-Time for iteration 62 = 8.070170000000e-03 seconds 
+Time for iteration 62 = 7.125090000000e-03 seconds 
 Stopping: no more iterations possible
 Final values:
 Beta: 

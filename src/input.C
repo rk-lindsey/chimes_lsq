@@ -1229,7 +1229,6 @@ void INPUT::PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_
 	CONTROLS.FIT_ENER         = false;
 	CONTROLS.CHECK_FORCE      = false;
 	CONTROLS.FORDFTB          = false;
-	CONTROLS.SKIP_FRAMES      = false ;
 	
 	CONTROLS.RESTART          = false;
 	CONTROLS.INIT_VEL         = false;
@@ -1379,17 +1378,18 @@ void INPUT::PARSE_CONTROLS_SKIP_FRAMES(JOB_CONTROL & CONTROLS)
 	{
 		if (found_input_keyword("SKIP_FRAMES", CONTENTS(i)))										
 		{
-			CONTROLS.SKIP_FRAMES = convert_bool(CONTENTS(i+1,0),i+1);
+			CONTROLS.SKIP_FRAMES = convert_int(CONTENTS(i+1,0),i+1);
 			
-			if ( (RANK == 0)  && (CONTROLS.SKIP_FRAMES)) 
+			if ( (RANK == 0)  && (CONTROLS.SKIP_FRAMES >= 1 )) 
 			{
-				cout << "	# SKIP_FRAMES #: true... will skip through frames in parallel execution (round-robin)." << endl;
+				cout << "	# SKIP_FRAMES #: " << CONTROLS.SKIP_FRAMES <<
+					" .. will skip through frames in parallel execution (round-robin)." << endl;
 			}
-			else if( (RANK == 0) && (!CONTROLS.SKIP_FRAMES))
+			else if( (RANK == 0) && CONTROLS.SKIP_FRAMES <= 0 )
 			{
-				cout << "	# SKIP_FRAMES #: false... will process frames in contiguous order" << endl;	
+				cout << "	# SKIP_FRAMES #: "<< CONTROLS.SKIP_FRAMES <<
+					" ... will process all frames in contiguous order" << endl;	
 			}
-			
 			break;
 		}
 	}

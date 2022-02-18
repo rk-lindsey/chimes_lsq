@@ -15,7 +15,7 @@ Input file contents successfully stored.
 	             Will use 4-body order: 0
 	             Will transform Chebyshev pair distances to range -1 to 1
 	# CHBTYPE #: MORSE
-	# SKIP_FRAMES #: true... will skip through frames in parallel execution (round-robin).
+	# SKIP_FRAMES #: 1 .. will skip through frames in parallel execution (round-robin).
 	# NATMTYP #: 2
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
  	1              O              -		15.9994        
