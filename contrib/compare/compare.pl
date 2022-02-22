@@ -44,7 +44,8 @@ my @ignore_phrases = ("allocation limits",
 		      "..reading split",
 		      "finished",
 		      "using the lasso algorithm",
-		      "srun -N"
+		      "srun -N",
+		      "srun -n"
 		      );
 
 my $read1 = 1 ;
