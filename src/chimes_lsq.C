@@ -302,11 +302,13 @@ int main(int argc, char* argv[])
 		if ( CONTROLS.SKIP_FRAMES <= 0 && i >= istart && i <= iend )
 			// Process contiguous frames.  Historic ordering.  No frame skipping.
 			process = true ;
-		else if ( CONTROLS.SKIP_FRAMES >= 1 && i % CONTROLS.SKIP_FRAMES == 0 && (i + RANK) % NPROCS == 0 )
+		else if ( CONTROLS.SKIP_FRAMES >= 1
+							&& (i + RANK) % NPROCS == 0
+							&& ((i + RANK) / NPROCS) % CONTROLS.SKIP_FRAMES == 0 )
 			// If CONTROLS.SKIP_FRAMES is >= 1,
 			// use round robin ordering to improve parallel load balancing for typical frame
 			// ordering (condensed phase first, gas phase next).
-			// Skip frames if CONTROLS.SKIP_FRAMES > 1.
+			// If CONTROLS.SKIP_FRAMES > 1, every nth frame assigned to a rank is processed.
 			process = true ;
 		else
 			process = false ;
