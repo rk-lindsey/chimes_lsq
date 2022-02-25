@@ -218,6 +218,20 @@ public:
 			}
 		}
 
+	void print_norm(const string filename) const
+	// Print shift used in normalizing the vector.
+	{
+		ofstream outfile(filename) ;
+		if ( ! outfile.good() ) {
+			cout << "Error: could not open " << filename << endl ;
+			stop_run(1) ;
+		}
+		outfile.precision(14) ;
+		outfile << "# Shift " << endl ;
+		outfile << std::scientific << std::setprecision(12) << shift << endl ;
+		outfile.close() ;
+	}
+	
 	void print_all(ostream &of)
 	// Print all values.
 		{

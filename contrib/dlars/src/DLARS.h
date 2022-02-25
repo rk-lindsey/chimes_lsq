@@ -100,65 +100,17 @@ public:
 	int restart(string filename) ;
 	void broadcast_solution() ;
 	bool solve_G_A_con_grad() ;
-	void build_u_A() ;
+	bool build_u_A() ;
 	void reduce_active_set() ;
 	void update_active_set() ;
 	void update_step_gamma() ;
 	void update_lasso_gamma() ;
 	void update_beta() ;
 	void print_unscaled(ostream &out)  ;
-	
-	void print_unshifted_mu(ostream &out)
-	// Print the given prediction in unscaled units.
-		{
-			if ( RANK == 0 ) {
-				//out << "Y constant offset = " << offset << endl ;
-				for ( int j = 0 ; j < ndata ; j++ ) {
-					out << mu.get(j) + y.shift << endl ;
-				}
-			}
-		}
-	
-  void print_unshifted_mu(ostream &out, Vector &weights)
-	// Print the given prediction in unscaled units.
-	{
-		if ( RANK == 0 ) {
-			//out << "Y constant offset = " << offset << endl ;
-			for ( int j = 0 ; j < ndata ; j++ ) {
-				out << (mu.get(j) + y.shift)/weights.get(j) << endl ;
-			}
-		}
-	}	
+	void increment_excluded_vars() ;
+	void print_unshifted_mu(ostream &out);
+  void print_unshifted_mu(ostream &out, Vector &weights) ;
+	void print_error(ostream &out) ;
+	void print_restart() ;
 
-	void print_error(ostream &out)
-	// Print the current fitting error and related parameters.
-	{
-		if ( RANK == 0 ) {
-			out  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << " Number of vars: " << A.dim << endl ;
-		}
-	}
-
-	void print_restart()
-		// Print the restart file
-	{
-		ofstream rst("restart.txt") ;
-
-		if ( RANK == 0 && rst.is_open() ) {
-			rst << scientific ;
-			rst.precision(16) ;
-			rst.width(24) ;
-			rst << "Iteration " << iterations << endl ;
-			print_error(rst) ;
-			beta.print_sparse(rst) ;
-			rst << "Exclude " << endl ;
-			exclude.print_sparse(rst) ;
-			rst << "Mu" << endl ;
-			mu.print_sparse(rst) ;
-		}
-		rst.close() ;
-	}
-
-
-
-		
 };

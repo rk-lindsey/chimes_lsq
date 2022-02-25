@@ -1,9 +1,17 @@
 Distributed LARS algorithm
+Warning: normalize should not be used with chimes_lsq
+ ...options read.
+ ...reading single xmat.
+ ...xmat read.
+ ...yvec read.
+ ...xmat normalized.
+ ...yvec normalized.
 Using the LARS algorithm
 L1 norm of solution: 0.000000000000e+00 RMS Error: 9.226131331967e-01 Objective fn: 4.256074967735e-01 Number of vars: 0
 Adding property 1 to the active set
 New active set: 
 0 1
+Cholesky estimate of condition number = 1.000e+00
 Cholesky error test = 0.000000000000e+00
 Updated step gamma = 2.077874092449e-01
 Gamma limited by property 3
@@ -11,12 +19,15 @@ Beta:
 [
 1 -2.077874092449e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 1
+Time for iteration 1 = 5.391070000000e-04 seconds 
 L1 norm of solution: 2.077874092449e-01 RMS Error: 9.034130996309e-01 Objective fn: 4.080776142924e-01 Number of vars: 1
 Adding property 3 to the active set
 New active set: 
 0 1
 1 3
+Cholesky estimate of condition number = 1.025e+00
 Cholesky error test = 0.000000000000e+00
 Updated step gamma = 7.813451187395e-02
 Gamma limited by property 4
@@ -25,14 +36,17 @@ Beta:
 1 -2.679533339440e-01
 3 6.016592469911e-02
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 2
+Time for iteration 2 = 2.574220000000e-04 seconds 
 L1 norm of solution: 3.281192586431e-01 RMS Error: 8.938470778829e-01 Objective fn: 3.994812993199e-01 Number of vars: 2
 Adding property 4 to the active set
 New active set: 
 0 1
 1 3
 2 4
-Cholesky error test = 0.000000000000e+00
+Cholesky estimate of condition number = 1.114e+00
+Cholesky error test = 3.700743415417e-17
 Updated step gamma = 9.465133990173e-01
 Gamma limited by property 0
 Beta: 
@@ -41,7 +55,9 @@ Beta:
 3 7.412858044521e-01
 4 4.749710505458e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 3
+Time for iteration 3 = 4.193680000000e-04 seconds 
 L1 norm of solution: 1.985138399369e+00 RMS Error: 8.125322159127e-01 Objective fn: 3.301043009480e-01 Number of vars: 3
 Adding property 0 to the active set
 New active set: 
@@ -49,7 +65,8 @@ New active set:
 1 3
 2 4
 3 0
-Cholesky error test = 5.551115123126e-17
+Cholesky estimate of condition number = 1.787e+00
+Cholesky error test = 2.775557561563e-17
 Updated step gamma = 1.824342065926e-01
 Gamma limited by property 2
 Beta: 
@@ -59,7 +76,9 @@ Beta:
 3 8.869899757964e-01
 4 5.638905086057e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 4
+Time for iteration 4 = 5.310930000000e-04 seconds 
 L1 norm of solution: 2.352908553221e+00 RMS Error: 8.078519403352e-01 Objective fn: 3.263123787517e-01 Number of vars: 4
 Adding property 2 to the active set
 New active set: 
@@ -68,7 +87,8 @@ New active set:
 2 4
 3 0
 4 2
-Cholesky error test = 3.996802888651e-16
+Cholesky estimate of condition number = 2.304e+00
+Cholesky error test = 2.220446049250e-17
 Updated step gamma = 1.736960647905e-01
 Beta: 
 [
@@ -78,7 +98,9 @@ Beta:
 3 9.531957591135e-01
 4 5.971382225277e-01
 ]
+Total memory on rank 0 = 0.00 Gb 
 Finished iteration 5
+Time for iteration 5 = 6.164070000000e-04 seconds 
 Stopping: no more iterations possible
 Final values:
 Beta: 

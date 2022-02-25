@@ -202,6 +202,7 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,
 	PARSE_CONTROLS_CHBTYPE(CONTROLS);
 	PARSE_CONTROLS_CHEBYFIX(CONTROLS);
 	PARSE_CONTROLS_USENEIG(CONTROLS, NEIGHBOR_LIST);
+	PARSE_CONTROLS_SKIP_FRAMES(CONTROLS) ;
 	
 	// For assigning LSQ variables: "Topology Variables" 
 	
@@ -1334,6 +1335,7 @@ void INPUT::PARSE_CONTROLS_CONVCUT(JOB_CONTROL & CONTROLS)
 		}
 	}
 }
+
 void INPUT::PARSE_CONTROLS_CMPRFRC(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
@@ -1367,6 +1369,32 @@ void INPUT::PARSE_CONTROLS_CMPRFRC(JOB_CONTROL & CONTROLS)
 		}
 	}
 }
+
+void INPUT::PARSE_CONTROLS_SKIP_FRAMES(JOB_CONTROL & CONTROLS)
+{
+	int N_CONTENTS = CONTENTS.size();
+	
+	for (int i=0; i<N_CONTENTS; i++)
+	{
+		if (found_input_keyword("SKIP_FRAMES", CONTENTS(i)))										
+		{
+			CONTROLS.SKIP_FRAMES = convert_int(CONTENTS(i+1,0),i+1);
+			
+			if ( (RANK == 0)  && (CONTROLS.SKIP_FRAMES >= 1 )) 
+			{
+				cout << "	# SKIP_FRAMES #: " << CONTROLS.SKIP_FRAMES <<
+					" .. will skip through frames in parallel execution (round-robin)." << endl;
+			}
+			else if( (RANK == 0) && CONTROLS.SKIP_FRAMES <= 0 )
+			{
+				cout << "	# SKIP_FRAMES #: "<< CONTROLS.SKIP_FRAMES <<
+					" ... will process all frames in contiguous order" << endl;	
+			}
+			break;
+		}
+	}
+}
+
 void INPUT::PARSE_CONTROLS_CHCKFRC(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();

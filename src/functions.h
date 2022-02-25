@@ -161,7 +161,8 @@ public:
 	int    SELF_CONSIST_FREQ;     // How frequently to print POSCAR file
 	bool   WRAP_COORDS;	      // Should coordinates be wrapped?
 	bool   FORDFTB;	              // Write a special output file for DFTB+ to read in? (default = false)
-
+	int    SKIP_FRAMES ;       // Should parallel processing of LSQ frames skip (>= 1) or be contiguous (0) ?
+	
 	// Controls for how to construct the initial system, if desired
 
 	bool   BUILD;
@@ -247,6 +248,7 @@ public:
 		SERIAL_CHIMES = false ;
 		USE_KILL_LEN = false;
 		//IO_ECONS_VAL = 0.0;
+		SKIP_FRAMES = 0 ;
 		
 		FCUT_LINE = "CUBIC";
 		FIT_ENER_EVER = false ;

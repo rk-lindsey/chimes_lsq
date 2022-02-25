@@ -330,13 +330,10 @@ void Matrix::cholesky_sub(Vector &x, const Vector &b)
 		condition = 1.0e50 ;
 	}
 
-#if(0)
-	// DEBUG !!
 	int prec = cout.precision() ;
-	cout << "Estimated Cholesky condition number = " <<
+	cout << "Cholesky estimate of condition number = " <<
 		std::scientific << std::setprecision(3) << condition << endl ;
 	cout.precision(prec) ;
-#endif												
 												
 	Vector xtmp(dim1) ;
 	Matrix& mat=*this ;
@@ -413,15 +410,12 @@ void Matrix::cholesky_sub_distribute(Vector &x, const Vector &b)
 		condition = 1.0e50 ;
 	}
 
-#if(0)
-	// DEBUG !!
 	if ( RANK == 0 ) {
 		int prec = cout.precision() ;
-		cout << "Estimated Cholesky condition number = " <<
+		cout << "Cholesky estimate of condition number = " <<
 			std::scientific << std::setprecision(3) << condition << endl ;
 		cout.precision(prec) ;
 	}
-#endif												
 												
 	Vector xtmp(dim1) ;
 	Matrix& mat=*this ;
