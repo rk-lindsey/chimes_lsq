@@ -44,13 +44,15 @@ MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mp
 
 # Grab and install dependencies
 
-./clone-all.sh 1 $IS_LC
+./clone-all.sh
 
 # Compile dlars
 
-cd contrib/dlars/src
-make
-cd - 1&>/dev/null
+if [[ "$IS_LC" == "y" ]] ; then
+	cd contrib/dlars/src
+	make
+	cd - 1&>/dev/null
+fi
 
 # Clean up previous installation,
 
