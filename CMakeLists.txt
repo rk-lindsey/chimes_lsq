@@ -69,7 +69,7 @@ target_include_directories(chimes_lsq PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_features   (chimes_lsq PRIVATE cxx_std_11)
 target_link_libraries     (chimes_lsq ${MPI_LIBRARIES})
 target_link_directories   (chimes_lsq PUBLIC imports/chimes_calculator/build)
-target_link_libraries     (chimes_lsq lib-C_wrapper-serial_interface.so)
+target_link_libraries     (chimes_lsq libchimescalc.a)
 
 IF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
 	install(TARGETS chimes_lsq DESTINATION ${CMAKE_INSTALL_PREFIX}/src OPTIONAL)
@@ -101,7 +101,7 @@ target_include_directories(chimes_md PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_features   (chimes_md PRIVATE cxx_std_11)
 target_link_libraries     (chimes_md ${MPI_LIBRARIES})
 target_link_directories   (chimes_md PUBLIC imports/chimes_calculator/build)
-target_link_libraries     (chimes_md lib-C_wrapper-serial_interface.so)
+target_link_libraries     (chimes_md libchimescalc.a)
 
 
 IF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
