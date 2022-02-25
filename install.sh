@@ -19,7 +19,7 @@ read PROCEED
 if [[ "$PROCEED" == "n" ]] ; then
 	exit 0
 fi
-rm -rf imports
+##rm -rf imports
 
 
 # Determine computing environment
@@ -49,7 +49,7 @@ MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mp
 # Compile dlars
 
 cd contrib/dlars/src
-make
+./install.sh
 cd - 1&>/dev/null
 
 # Clean up previous installation,

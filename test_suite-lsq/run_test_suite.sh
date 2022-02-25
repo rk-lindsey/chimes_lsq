@@ -210,7 +210,6 @@ do
 					echo " "
 			
 					TECHNICAL_PASS_STATUS=`grep "No" tol_status.dat`
-W
 			
 					if [[ "$TECHNICAL_PASS_STATUS" != *"No"* ]]; then
 						 TECHNICAL_PASS=false

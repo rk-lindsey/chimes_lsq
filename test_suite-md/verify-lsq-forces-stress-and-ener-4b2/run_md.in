@@ -1,0 +1,57 @@
+
+###################################
+#### GENERAL CONTROL VARIABLES ####
+###################################
+
+
+# FITSTRS # ! were stresses fit ?
+   ALL
+# FITENER # ! were energies fit ?
+   FIRST 5
+# RNDSEED # ! Seed. If not specified, default value 123457 is used
+	12357
+# TEMPERA # ! In K
+	2000.0
+# CMPRFRC # ! Compare computed forces against a set of input forces? ...If true, provide name of the file containing the forces for comparison
+	true force.txt
+# TIMESTP # ! In fs
+	0.125
+# N_MDSTP # ! Total number of MD steps
+	2
+# NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
+	1
+# USENEIG # ! Use a neighbor list? HIGHLY reccommended when NLAYERS > 0
+	true
+# PRMFILE # ! Parameter file (i.e. params.txt)
+	params.txt
+# CRDFILE # ! Coordinate file (.xyz) or force file (.xyzf)
+  phen_res-300F_dt-0.1_fullstress_energy5F.xyzf
+# TRAJEXT # ! coordinate file type	
+	GEN
+
+	
+###################################
+####    SIMULATION  OPTIONS    ####
+###################################
+
+# VELINIT # (options are READ or GEN)
+	READ
+# CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>
+	NVT-MTK HOOVER 10
+# PRSCALC # (options are ANALYTICAL or NUMERICAL)
+	ANALYTICAL
+	
+###################################
+####      OUTPUT  CONTROL      ####
+###################################	
+	
+# WRPCRDS # 
+	false	
+# FRQDFTB # ! Frequency to output the DFTB gen file
+	1
+# FRQENER # ! Frequency to output energies
+	1	
+# PRNTFRC # ! Print computed forces? Forces are printed to force_out.txt 
+	true 1
+	
+# ENDFILE #
