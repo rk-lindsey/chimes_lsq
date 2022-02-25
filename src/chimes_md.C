@@ -2373,10 +2373,17 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	
 	TMP_BOX.UPDATE_CELL();
 	
-	if(CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL)                                                                                           
-		COORDFILE >>  SYSTEM.PRESSURE_TENSORS_ALL[0].X >>  SYSTEM.PRESSURE_TENSORS_ALL[1].Y >>  SYSTEM.PRESSURE_TENSORS_ALL[2].Z;    
-	if (CONTROLS.FIT_STRESS_ALL) 
-		COORDFILE >>  SYSTEM.PRESSURE_TENSORS_ALL[0].Y >>  SYSTEM.PRESSURE_TENSORS_ALL[0].Z >>  SYSTEM.PRESSURE_TENSORS_ALL[1].Z;
+	if(CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL)
+	{
+			SYSTEM.PRESSURE_TENSORS_ALL.resize(3) ;
+			COORDFILE >>  SYSTEM.PRESSURE_TENSORS_ALL[0].X >>  SYSTEM.PRESSURE_TENSORS_ALL[1].Y >>  SYSTEM.PRESSURE_TENSORS_ALL[2].Z;
+	}
+	
+	if (CONTROLS.FIT_STRESS_ALL)
+  {
+			SYSTEM.PRESSURE_TENSORS_ALL.resize(3) ;		
+			COORDFILE >>  SYSTEM.PRESSURE_TENSORS_ALL[0].Y >>  SYSTEM.PRESSURE_TENSORS_ALL[0].Z >>  SYSTEM.PRESSURE_TENSORS_ALL[1].Z;
+	}
 
 	if(CONTROLS.FIT_ENER)
 		COORDFILE >> SYSTEM.QM_POT_ENER;   
@@ -2423,7 +2430,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 		cout << "     ...Read the following number of atoms: " << TEMP_INT << endl;
 		cout << "     ...Read box dimensions: " << endl;
 		TMP_BOX.WRITE_BOX(CONTROLS.N_LAYERS);
-		
+
+		SYSTEM.PRESSURE_TENSORS_ALL.resize(3);		
 		if(CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL)
 			cout << "	...Read xx, yy, & zz stress tensors: " << SYSTEM.PRESSURE_TENSORS_ALL[0].X << " " << SYSTEM.PRESSURE_TENSORS_ALL[1].Y << " " << SYSTEM.PRESSURE_TENSORS_ALL[2].Z << endl;
 		if(CONTROLS.FIT_STRESS_ALL)
@@ -2752,14 +2760,16 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 		// MAJOR ASSUMPTION: atom type orders are identical to the LSQ code
 		
 		ferr = SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER;
+
+		if ( ! CONTROLS.INCLUDE_ATOM_OFFSETS )
+		{
+			SYSTEM.SET_NATOMS_OF_TYPE();
 		
-		SYSTEM.SET_NATOMS_OF_TYPE();
+			for(int i=0; i<SYSTEM.QM_ENERGY_OFFSET.size(); i++)
+				ferr += SYSTEM.QM_ENERGY_OFFSET[i]*SYSTEM.NATOMS_OF_TYPE[i];
 		
-		for(int i=0; i<SYSTEM.QM_ENERGY_OFFSET.size(); i++)
-			ferr += SYSTEM.QM_ENERGY_OFFSET[i]*SYSTEM.NATOMS_OF_TYPE[i];
-		
+		}
 		ferr = fabs(ferr/SYSTEM.ATOMS);
-		
 		cout << "Absolute energy error = " << ferr << " kcal/mol/atom \n" ;
 	}
 }

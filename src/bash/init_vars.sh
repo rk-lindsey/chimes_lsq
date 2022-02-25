@@ -79,7 +79,8 @@ function init_test_vars
 	LSQ_FORCE_JOBS='h2o-3bcheby 
 		h2o-4bcheby 
 		special3b 
-		special4b'
+		special4b
+                stress-and-ener-2b1'
 
 	 if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
 	     source /usr/local/tools/dotkit/init.sh
