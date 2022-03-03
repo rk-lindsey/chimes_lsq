@@ -903,36 +903,39 @@ int main(int argc, char* argv[])
 
 	 if (RANK == 0)
 	 {
-		////////////////////////////////////////////////////////////
-		// Store statistics on the average simulation temperature
-		// to allow for thermostat verification
-		////////////////////////////////////////////////////////////
+		 ////////////////////////////////////////////////////////////
+		 // Store statistics on the average simulation temperature
+		 // to allow for thermostat verification
+		 ////////////////////////////////////////////////////////////
 
-		Ktot = kinetic_energy(SYSTEM, CONTROLS);
+		 Ktot = kinetic_energy(SYSTEM, CONTROLS);
 
-		ENSEMBLE_CONTROL.UPDATE_TEMPERATURE(SYSTEM, CONTROLS);
+		 ENSEMBLE_CONTROL.UPDATE_TEMPERATURE(SYSTEM, CONTROLS);
 
-		// Exit with an error if the set and block temperatures differ by more than CONTROLS.NVT_CONV_CUT
+		 // Exit with an error if the set and block temperatures differ by more than CONTROLS.NVT_CONV_CUT
 		
-		AVG_DATA.TEMP_SUM += SYSTEM.TEMPERATURE;
-		
-		if (SYSTEM.TEMPERATURE/CONTROLS.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
-		{
-		  cout << "ERROR: System too hot!" << endl;
-		  cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
-		  cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
-		  cout << "Step : " << CONTROLS.STEP << endl;
-		  exit_run(10);
-		}
-		else if (CONTROLS.TEMPERATURE/SYSTEM.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
-		{
-		  cout << "ERROR: System too cold!" << endl;
-		  cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
-		  cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
-		  cout << "Step : " << CONTROLS.STEP << endl;
-		  exit_run(-10);
-		}			
-	 }	
+		 AVG_DATA.TEMP_SUM += SYSTEM.TEMPERATURE;
+
+		 if ( CONTROLS.NVT_CONV_CUT > 0.0 )
+		 {
+			 if (SYSTEM.TEMPERATURE/CONTROLS.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
+				 {
+					 cout << "ERROR: System too hot!" << endl;
+					 cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
+					 cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
+					 cout << "Step : " << CONTROLS.STEP << endl;
+					 exit_run(10);
+				 }
+			 else if (CONTROLS.TEMPERATURE/SYSTEM.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
+				 {
+					 cout << "ERROR: System too cold!" << endl;
+					 cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
+					 cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
+					 cout << "Step : " << CONTROLS.STEP << endl;
+					 exit_run(-10);
+				 }			
+		 }
+	 }
 	 ////////////////////////////////////////////////////////////
 	 // If requested, compute pressure numerically, and accumulate
 	 // statistics
@@ -952,7 +955,12 @@ int main(int argc, char* argv[])
 			
 		SYSTEM.PRESSURE_XYZ = -1.0*(PE_2 - PE_1)/dV;
 	 }
-	 
+
+	 if ( CONTROLS.USE_NUMERICAL_STRESS )
+	 {
+		 numerical_stress_all(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, INT_PAIR_MAP,
+													NEIGHBOR_LIST) ;
+	 }
 	 
 	// Set the io econs value, sync across procs
 	if(RANK == 0)
@@ -1141,18 +1149,18 @@ int main(int argc, char* argv[])
 	 cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
 	 cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
 		
-	// Why is this only for chebyshev?
-	 if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
-	 {	 
-		double Pavg = (AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X + AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y + AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z)/3.0/ CONTROLS.N_MD_STEPS ;
-		cout << "	Pressures from diagonal stress tensors over run: " << Pavg << endl;
-		cout << "	Average stress tensors over run: " << endl;
-		cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z/CONTROLS.N_MD_STEPS << " GPa" << endl; 
-		cout << "		sigma_xy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_xz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;	   
+	 if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" || CONTROLS.USE_NUMERICAL_STRESS)
+	 {
+		 // Stress tensors are not calculated for all potentials.
+		 double Pavg = (AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X + AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y + AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z)/3.0/ CONTROLS.N_MD_STEPS ;
+		 cout << "	Pressures from diagonal stress tensors over run: " << Pavg << endl;
+		 cout << "	Average stress tensors over run: " << endl;
+		 cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		 cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		 cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z/CONTROLS.N_MD_STEPS << " GPa" << endl; 
+		 cout << "		sigma_xy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		 cout << "		sigma_xz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		 cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;	   
 	 }
 
 	 if ( SYSTEM.BOXDIM.IS_VARIABLE )

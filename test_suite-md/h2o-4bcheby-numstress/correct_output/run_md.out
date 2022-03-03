@@ -17,6 +17,7 @@ Input file contents successfully stored.
 	# VELINIT #: READ ... reading velocities from coordinate file
 	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
 	# PRSCALC #: NUMERICAL
+	# STRSCALC #: NUMERICAL
 	# WRPCRDS #: false
 	# ATMENER #: true
 		... All reported energies include single atom contributions if available
@@ -81,8 +82,8 @@ Reading initial coordinates and forces...
 
 Reading atom info from parameter file...
 	Read 2 atom types:
-		0     O , q (e): NEGATIVE, mass (amu):  15.9994
-		1     H , q (e): POSITIVE, mass (amu):   1.0079
+		0     O , q (e):  0.000, mass (amu):  15.9994
+		1     H , q (e):  0.000, mass (amu):   1.0079
    ...read complete
 
 	Real atoms:                 96
@@ -110,8 +111,8 @@ Running velocity sanity checks...
 
 
 Reading force field parameters...
-		...Compute electrostatics?      true
-		...Use fit charges?             true
+		...Compute electrostatics?      false
+		...Use fit charges?             false
 		...Use 3-body Cheby params?     true
 		...Use 4-body Cheby params?     true
 	...Read FF controls...
@@ -121,20 +122,6 @@ Attempting to read pairtype...
 	...Read FF triplet specifications...
 	...Read FF quadruplet specifications...
 	...Reading all remaining force field parameters...
-		Re-setting individual atom charges based on pair charges :
-      Total system charge = 0.0000
-      Charges modified for exact neutrality (e):
-       O -0.000000000
-       H 0.000000000
-
-     
-     Pair charges modified for exact neutrality:
-       OO 0.000000000
-       HH 0.000000000
-       OH -0.000000000
-Atom properties:
-		0     O , q (e): -0.000, mass (amu):  15.9994
-		1     H , q (e):  0.000, mass (amu):   1.0079
 	...Read 2-body FF params...
 	...Read 3-body FF params...
 	...Read 3-body FF params...
@@ -189,7 +176,7 @@ Notes on simulation:
 		...with offset of: 0.0000
 	Using the following fcut style for 4B Chebyshev interactions: CUBIC
 		...with offset of: 0.0000
-	Ewald summations will be used and charges will be taken from fit values
+	Electrostatics will not be computed.
 
 Force field summary: 
 	Pair type and number of parameters per pair: 
@@ -1314,11 +1301,6 @@ Force field summary:
 		      39      1   1   1   1   1   0         34              5        -0.0048
 		      40      1   1   1   1   1   1         40              6        0.0003
 
-	Fitted charges read from parameter file:
-		OO 0.0000 (0.0000)
-		HH 0.0000 (0.0000)
-		OH -0.0000 (-0.0000)
-
 
 Initializing the neighbor list...
 	Latest 3-body outer cutoff values: 
@@ -1392,20 +1374,6 @@ BEGIN SIMULATION:
 RANK: 0 RESET RCUT_PADDING TO: 0.3776337432
 Number of 3-body interactions = 65603
 Number of 4-body interactions = 483762
-Number of 3-body interactions = 65603
-Number of 4-body interactions = 483762
-
-Ewald parameters: 
-	Requested Ewald accuracy  =  1.000000e-06
-	Ewald alpha               =  7.723233e-01
-	R-Space Ewald cutoff      =  4.304565e+00
-	R-Space accuracy estimate =  5.997380e-07
-	K-Space accuracy estimate =  6.801449e-07
-
-	Cutting off K-vectors with magnitude less than 7
-	Number of Ewald K-vectors = 1364
-	K-space accuracy estimate = 0.0000008680
-
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
        1      0.12       3.9703342     -11.0492339      -7.0788997          1346.1     26.77662161     -7.0788997
