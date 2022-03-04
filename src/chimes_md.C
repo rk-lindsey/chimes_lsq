@@ -1140,51 +1140,48 @@ int main(int argc, char* argv[])
   
   if (RANK==0)	
   {
-	 cout << "END SIMULATION" << endl;
+		cout << "END SIMULATION" << endl;
 
-	 TEMP_MASS = 0.0;
+		TEMP_MASS = 0.0;
 	
-	 for ( int a = 0; a < SYSTEM.ATOMS; a++ ) 
-		TEMP_MASS  += SYSTEM.MASS[a];
+		for ( int a = 0; a < SYSTEM.ATOMS; a++ ) 
+			TEMP_MASS  += SYSTEM.MASS[a];
 
 
-	 cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
-	 cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
+		cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
 		
-	 if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" || CONTROLS.USE_NUMERICAL_STRESS )
-	 {
-		 // Stress tensors are not calculated for all potentials.
-		 double Pavg = (AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X + AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y + AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z)/3.0/ CONTROLS.N_MD_STEPS ;
-		 cout << "	Pressures from diagonal stress tensors over run: " << Pavg << endl;
-		 cout << "	Average stress tensors over run: " << endl;
-		 cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		 cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		 cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z/CONTROLS.N_MD_STEPS << " GPa" << endl; 
-		 cout << "		sigma_xy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		 cout << "		sigma_xz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		 cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;	   
-	 }
+		// Stress tensors are not calculated for all potentials.
+		double Pavg = (AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X + AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y + AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z)/3.0/ CONTROLS.N_MD_STEPS ;
+		cout << "	Pressures from diagonal stress tensors over run: " << Pavg << endl;
+		cout << "	Average stress tensors over run: " << endl;
+		cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z/CONTROLS.N_MD_STEPS << " GPa" << endl; 
+		cout << "		sigma_xy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_xz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;	   
 
-	 if ( SYSTEM.BOXDIM.IS_VARIABLE )
-		 {
-			 cout << "        Average volume over run = " << fixed << setprecision(4) << right << AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS << " Ang.^3" << endl ;
-			 cout << "        Average PV over run     = " << fixed << setprecision(4) << right << AVG_DATA.PV_SUM / CONTROLS.N_MD_STEPS  << " kcal/mol "  
-<< endl ;
-			 if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
-				 {
-					 // Allows a check on pressure and volume fluctuation magnitude, which should be correctly reproduced
-					 // by NPT-NTK algorithm.
-					 // See Martyna, Tobias, Klein JCP 101, 4177(1994) Appendix A.					 
-					 cout << "        Average of PV predicted by virial theorem = " << fixed << setprecision(4) << right <<
-						 (CONTROLS.PRESSURE / GPa) * AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS - Kb * CONTROLS.TEMPERATURE
-								<< " kcal/mol" << endl ;
-				 }
-		 }
+		if ( SYSTEM.BOXDIM.IS_VARIABLE )
+			{
+				cout << "        Average volume over run = " << fixed << setprecision(4) << right << AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS << " Ang.^3" << endl ;
+				cout << "        Average PV over run     = " << fixed << setprecision(4) << right << AVG_DATA.PV_SUM / CONTROLS.N_MD_STEPS  << " kcal/mol "  
+						 << endl ;
+				if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
+					{
+						// Allows a check on pressure and volume fluctuation magnitude, which should be correctly reproduced
+						// by NPT-NTK algorithm.
+						// See Martyna, Tobias, Klein JCP 101, 4177(1994) Appendix A.					 
+						cout << "        Average of PV predicted by virial theorem = " << fixed << setprecision(4) << right <<
+							(CONTROLS.PRESSURE / GPa) * AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS - Kb * CONTROLS.TEMPERATURE
+								 << " kcal/mol" << endl ;
+					}
+			}
 	 
-	 // Write the final configuration to file.
-	 write_xyzv(SYSTEM, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, "output.xyz", false);
+		// Write the final configuration to file.
+		write_xyzv(SYSTEM, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, "output.xyz", false);
 			
-	 STATISTICS.close();
+		STATISTICS.close();
 	} // if ( RANK == 0 ) 
 	
 	normal_exit() ;

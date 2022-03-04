@@ -16,7 +16,7 @@ Input file contents successfully stored.
 	# PRMFILE #: params.coulomb.txt
 	# CRDFILE #: coulomb.xyz
 	# VELINIT #: READ ... reading velocities from coordinate file
-	# PRSCALC #: NUMERICAL
+	# PRSCALC #: ANALYTICAL
 	# STRSCALC #: ANALYTICAL
 	# WRPCRDS #: true
 	# ATMENER #: true
@@ -186,16 +186,16 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)
-       1      0.00       0.0000000     -85.5621383     -85.5621383             0.0     -6.19217739
+       1      0.00       0.0000000     -85.5621383     -85.5621383             0.0     -6.19247063
  Updating neighbor list on step: 1, with padding: 0.000
-       2      0.00       0.0000000     -85.5621383     -85.5621383             0.0     -6.19217739
-       3      0.00       0.0000000     -85.5621383     -85.5621383             0.0     -6.19217739
-       4      0.00       0.0000001     -85.5621384     -85.5621383             0.0     -6.19217739
+       2      0.00       0.0000000     -85.5621383     -85.5621383             0.0     -6.19247063
+       3      0.00       0.0000000     -85.5621383     -85.5621383             0.0     -6.19247063
+       4      0.00       0.0000001     -85.5621384     -85.5621383             0.0     -6.19247063
  Updating neighbor list on step: 4, with padding: 0.000
-       5      0.01       0.0000002     -85.5621385     -85.5621383             0.0     -6.19217738
+       5      0.01       0.0000002     -85.5621385     -85.5621383             0.0     -6.19247062
 END SIMULATION
 	Average temperature over run = 0.0000 K
-	Average pressure    over run = -6.1922 GPa
+	Average pressure    over run = -6.1925 GPa
 	Pressures from diagonal stress tensors over run: -6.1922
 	Average stress tensors over run: 
 		sigma_xx: -6.3717 GPa

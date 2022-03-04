@@ -16,7 +16,7 @@ Input file contents successfully stored.
 	# PRMFILE #: params.lj.txt
 	# CRDFILE #: arconfig.xyz
 	# VELINIT #: READ ... reading velocities from coordinate file
-	# PRSCALC #: NUMERICAL
+	# PRSCALC #: ANALYTICAL
 	# STRSCALC #: NUMERICAL
 	# WRPCRDS #: true
 	# ATMENER #: true
@@ -155,13 +155,13 @@ BEGIN SIMULATION:
 RANK: 0 RESET RCUT_PADDING TO: 0.0000000000
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)
-       1      0.00       0.0000000      13.0561926      13.0561926             0.0      4.30770810
+       1      0.00       0.0000000      13.0561926      13.0561926             0.0      4.30770660
  Updating neighbor list on step: 1, with padding: 0.000
-       2      0.00       0.0000001      13.0561925      13.0561926             0.0      4.30770806
-       3      0.00       0.0000006      13.0561920      13.0561926             0.0      4.30770796
-       4      0.00       0.0000013      13.0561913      13.0561926             0.0      4.30770779
+       2      0.00       0.0000001      13.0561925      13.0561926             0.0      4.30770657
+       3      0.00       0.0000006      13.0561920      13.0561926             0.0      4.30770647
+       4      0.00       0.0000013      13.0561913      13.0561926             0.0      4.30770630
  Updating neighbor list on step: 4, with padding: 0.000
-       5      0.01       0.0000023      13.0561903      13.0561926             0.0      4.30770755
+       5      0.01       0.0000023      13.0561903      13.0561926             0.0      4.30770606
 END SIMULATION
 	Average temperature over run = 0.0003 K
 	Average pressure    over run = 4.3077 GPa

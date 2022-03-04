@@ -918,6 +918,16 @@ static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X -= fac * rlen_mi * RVEC.X * RVEC.X / rlen_mi;
 						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y -= fac * rlen_mi * RVEC.Y * RVEC.Y / rlen_mi;
 						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z -= fac * rlen_mi * RVEC.Z * RVEC.Z / rlen_mi;
+
+						// Off-diagonal components.
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y -= fac * rlen_mi * RVEC.X * RVEC.Y / rlen_mi;
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z -= fac * rlen_mi * RVEC.X * RVEC.Z / rlen_mi;						
+
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X -= fac * rlen_mi * RVEC.Y * RVEC.X / rlen_mi;
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z -= fac * rlen_mi * RVEC.Y * RVEC.Z / rlen_mi;						
+						
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X -= fac * rlen_mi * RVEC.Z * RVEC.X / rlen_mi;
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y -= fac * rlen_mi * RVEC.Z * RVEC.Y / rlen_mi;												
 	
 						SYSTEM.ACCEL[a1].X += RVEC.X*fac;
 						SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
