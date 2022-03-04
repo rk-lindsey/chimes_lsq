@@ -1,6 +1,7 @@
 ## This is a test of the stress for a coulomb system.
 ## Results can be compared to the output of the historic moldy code in the moldy directory.
 ## A Lennard-Jones system is run with epsilon = 0, so that only coulombic forces are present.
+## This test requires modification to chimes_md to allow printing the stress for a non-Chebyshev calculation.
 ##
 ###################################
 #### GENERAL CONTROL VARIABLES ####

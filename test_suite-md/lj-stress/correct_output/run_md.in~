@@ -1,4 +1,6 @@
-
+## This is a test of the numerical stress capability.
+## The stress is compared to the output of the moldy MD code
+## for a special Lennard-Jones crystal with an unusual stress state.
 ###################################
 #### GENERAL CONTROL VARIABLES ####
 ###################################

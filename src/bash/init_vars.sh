@@ -68,7 +68,10 @@ function init_test_vars
 		 small-lj
 		 special3b 
 		 special4b
-		 chebyfix'
+		 chebyfix
+		 h2o-4bcheby-numstress
+		 lj-stress'
+
 
     MD_MAKE_JOBS='verify-invert 
 		verify-translate 

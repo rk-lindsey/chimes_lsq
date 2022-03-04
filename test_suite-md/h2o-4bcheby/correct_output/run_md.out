@@ -1661,6 +1661,6 @@ END SIMULATION
 		sigma_xx: 15.2237 GPa
 		sigma_yy: 13.0766 GPa
 		sigma_zz: 12.7976 GPa
-		sigma_xy: 4.9295 GPa
-		sigma_xz: 5.7052 GPa
-		sigma_yz: 3.1595 GPa
+		sigma_xy: 4.5491 GPa
+		sigma_xz: 4.7417 GPa
+		sigma_yz: 2.7490 GPa
