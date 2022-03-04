@@ -568,8 +568,11 @@ void numerical_stress_all(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF
 													 NEIGHBOR_LIST, PE_1, PE_2, tidx0, tidx1);
 			
 #ifdef USE_MPI
-					MPI_Allreduce(MPI_IN_PLACE, &PE_1,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-					MPI_Allreduce(MPI_IN_PLACE, &PE_2,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+					double pe1_sum = 0.0, pe2_sum = 0.0 ;
+					MPI_Allreduce(&PE_1, &pe1_sum,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+					PE_1 = pe1_sum ;
+					MPI_Allreduce(&PE_2, &pe2_sum,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+					PE_2 = pe2_sum ;
 #endif
 
 					switch ( tidx1 ) {
@@ -1088,23 +1091,53 @@ void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &p
 	// Add up forces, potential energy, and pressure from all processes.  
 	{
 		// Sum up the potential energy, pressure, tensors , and forces from all processors
-	#ifdef USE_MPI	
-		double *accel = (double *) accel_vec .data();
+#ifdef USE_MPI	
 
-		MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);	
-		MPI_Allreduce(MPI_IN_PLACE, &tens_xx,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_xy,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_xz,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_yx,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_yy,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_yz,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_zx,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_zy,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_zz,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		
-		MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	#endif	
+		int ndata = 11 + 3 * atoms ;
+		vector<double> buf(ndata), sum(ndata,0.0) ;
+		buf[0] = pot_energy ;
+		buf[1] = pressure ;
+		buf[2] = tens_xx ;
+		buf[3] = tens_xy ;
+		buf[4] = tens_xz ;
+		buf[5] = tens_yx ;
+		buf[6] = tens_yy ;
+		buf[7] = tens_yz ;
+		buf[8] = tens_zx ;
+		buf[9] = tens_zy ;
+		buf[10] = tens_zz ;
+
+		for ( int j = 0 ; j < atoms ; j++ )
+		{
+			buf[11+3*j] = accel_vec[j].X ;
+			buf[12+3*j] = accel_vec[j].Y ;
+			buf[13+3*j] = accel_vec[j].Z ;						
+		}
+
+		// memcheck_all complained of memory errors when MPI_IN_PLACE was used,
+		// so I switched to explicit buffer allocation (LEF 3/3/22)
+		MPI_Allreduce(buf.data(), sum.data(), ndata, MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+
+		pot_energy = sum[0] ;
+		pressure = sum[1] ;
+		tens_xx = sum[2] ;
+		tens_xy = sum[3] ;
+		tens_xz = sum[4] ;
+		tens_yx = sum[5] ;
+		tens_yy = sum[6] ;
+		tens_yz = sum[7] ;
+		tens_zx = sum[8] ;
+		tens_zy = sum[9] ;
+		tens_zz = sum[10] ;
+
+		for ( int j = 0 ; j < atoms ; j++ )
+		{
+			accel_vec[j].X = sum[11+3*j] ;
+			accel_vec[j].Y = sum[12+3*j] ;
+			accel_vec[j].Z = sum[13+3*j] ;						
+		}		
+
+#endif	
 
 	}
 

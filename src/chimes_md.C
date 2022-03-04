@@ -948,9 +948,11 @@ int main(int argc, char* argv[])
 		numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST, PE_1, PE_2, dV);
 			
 #ifdef USE_MPI
-		MPI_Barrier(MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &PE_1,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &PE_2,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		double pe1_sum = 0.0, pe2_sum = 0.0 ;
+		MPI_Allreduce(&PE_1,&pe1_sum,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		PE_1 = pe1_sum ;
+		MPI_Allreduce(&PE_2,&pe2_sum,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		PE_2 = pe2_sum ;
 #endif
 			
 		SYSTEM.PRESSURE_XYZ = -1.0*(PE_2 - PE_1)/dV;
@@ -1149,7 +1151,7 @@ int main(int argc, char* argv[])
 	 cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
 	 cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
 		
-	 if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" || CONTROLS.USE_NUMERICAL_STRESS)
+	 if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV" || CONTROLS.USE_NUMERICAL_STRESS )
 	 {
 		 // Stress tensors are not calculated for all potentials.
 		 double Pavg = (AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X + AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y + AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z)/3.0/ CONTROLS.N_MD_STEPS ;
