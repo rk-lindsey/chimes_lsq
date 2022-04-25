@@ -124,17 +124,17 @@ Attempting to read pairtype...
 		Re-setting individual atom charges based on pair charges :
       Total system charge = 0.0000
       Charges modified for exact neutrality (e):
-       O -0.609577531
-       H 0.304788758
+       O -0.000000000
+       H 0.000000000
 
      
      Pair charges modified for exact neutrality:
-       OO 123.389818417
-       HH 30.847453078
-       OH -61.694907682
+       OO 0.000000000
+       HH 0.000000000
+       OH -0.000000000
 Atom properties:
-		0     O , q (e): -0.610, mass (amu):  15.9994
-		1     H , q (e):  0.305, mass (amu):   1.0079
+		0     O , q (e): -0.000, mass (amu):  15.9994
+		1     H , q (e):  0.000, mass (amu):   1.0079
 	...Read 2-body FF params...
 	...Read 3-body FF params...
 	...Read 3-body FF params...
@@ -1315,9 +1315,9 @@ Force field summary:
 		      40      1   1   1   1   1   1         40              6        0.0003
 
 	Fitted charges read from parameter file:
-		OO 0.3716 (123.3898)
-		HH 0.0929 (30.8475)
-		OH -0.1858 (-61.6949)
+		OO 0.0000 (0.0000)
+		HH 0.0000 (0.0000)
+		OH -0.0000 (-0.0000)
 
 
 Initializing the neighbor list...
@@ -1408,18 +1408,18 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-       1      0.12       3.9703342     -48.1927242     -44.2223900          1346.1     13.83512904    -44.2223900
-       2      0.25       3.9665360     -48.1888174     -44.2222814          1344.8     14.06116055    -44.2222566
-       3      0.38       3.9604334     -48.1822952     -44.2218618          1342.8     14.29100948    -44.2222427
-       4      0.50       3.9523754     -48.1734058     -44.2210304          1340.0     14.52028232    -44.2222223
+       1      0.12       3.9703342     -11.0492339      -7.0788997          1346.1     26.77662161     -7.0788997
+       2      0.25       3.9337667     -11.0125016      -7.0787349          1333.7     26.96111148     -7.0787094
+       3      0.38       3.9060762     -10.9843452      -7.0782690          1324.3     27.09424520     -7.0786508
+       4      0.50       3.8882678     -10.9656710      -7.0774032          1318.3     27.17528994     -7.0786016
 END SIMULATION
-	Average temperature over run = 1343.4422 K
-	Average pressure    over run = 14.1769 GPa
-	Pressures from diagonal stress tensors over run: 14.1763
+	Average temperature over run = 1330.6234 K
+	Average pressure    over run = 27.0018 GPa
+	Pressures from diagonal stress tensors over run: 27.0018
 	Average stress tensors over run: 
-		sigma_xx: 14.1215 GPa
-		sigma_yy: 14.6944 GPa
-		sigma_zz: 13.7130 GPa
-		sigma_xy: 2.0458 GPa
-		sigma_xz: 4.2197 GPa
-		sigma_yz: 1.3565 GPa
+		sigma_xx: 29.5501 GPa
+		sigma_yy: 25.8484 GPa
+		sigma_zz: 25.6070 GPa
+		sigma_xy: 2.0177 GPa
+		sigma_xz: 4.1859 GPa
+		sigma_yz: 1.3433 GPa

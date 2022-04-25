@@ -142,10 +142,6 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 	 for i in $LSQ_FORCE_JOBS
 	 do
 
-		  if ! test_dir $i ; then
-				continue 
-		  fi
-		  
 		  PASS=true
 		  
 		  if [ ! -d ${TAG}${i} ] ; then
@@ -166,7 +162,6 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 		  else
 				echo "Chimes_MD failed"
 
-				../chimes_md run_md.in > run_md.out
 				SUCCESS=0
 				PASS=false
 				ALL_PASS=false
@@ -182,7 +177,7 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 					 if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
 						  diff current_output/$j correct_output/$j > current_output/$j-diff.txt
 						  
-						  LINES=`wc -l $j-diff.txt | awk '{print $1}'`
+						  LINES=`wc -l current_output/$j-diff.txt | awk '{print $1}'`
 						  
 						  if [ $LINES -gt 0 ] ; then
 								echo " "
@@ -195,7 +190,7 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 								ALL_PASS=false
 						  fi
 					 fi
-				done	
+				done
 		  fi
 	
 		  if [ "$PASS" = true ] ; then
@@ -204,8 +199,6 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 		  else
 				echo "		...Test failed."
 		  fi	
-		  
-		  
 		  cd ..
 	 done
 fi

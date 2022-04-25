@@ -390,9 +390,8 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 	double Vol1, Vol2;
 
 	// Make a copy of the system
-	
 	static FRAME REPLICATE;
-		
+
 	REPLICATE_SYSTEM(SYSTEM, REPLICATE);		// Can we make this one of those "if ! called_before sorts of variables?"
 
 	// Expand coords by a bit (lscale)
@@ -454,6 +453,159 @@ void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAI
 	dV   = Vol2 - Vol1;
 }
 
+
+
+void numerical_stress(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
+											CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
+											vector<int> &INT_PAIR_MAP,
+											NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double &PE_2, 
+											int it1, int it2)
+// Evaluates the configurational part of the stress numerically by -1/V dU/d epsilon.
+// Essentially, we are taking the system and distorting it a bit (lscale) to get the change in potential energy
+// Two partial potential energies, PE_1 and PE_2 are returned.  Values need to be summed across MPI processes
+// to obtain the final stress tensor component.
+// it1 and it2 are the requested tensor indices of the stress.
+{
+	const double eps = 1.0e-04;
+	double Vtot1, Vtot2;
+	double Vol1, Vol2;
+
+	// Change this if a non-Ewald coulomb option is added.
+	if ( CONTROLS.USE_COULOMB )
+		EXIT_MSG("Error: Numerical stress with Ewald is not supported") ;
+	
+	// Make a copy of the system
+
+	vector<vector<double>> lscale(3, vector<double>(3)) ;
+
+
+	double V0 = SYSTEM.BOXDIM.VOL ;
+	
+	static FRAME REPLICATE;
+		
+	REPLICATE_SYSTEM(SYSTEM, REPLICATE);		// Can we make this one of those "if ! called_before sorts of variables?"
+
+	// Expand coords by a bit (lscale)
+
+	for ( int i = 0 ; i < 3 ; i++ ) {
+		for ( int j = 0 ; j < 3 ; j++ ) {
+			if ( i != j ) 
+				lscale[i][j] = 0.0 ;
+		}
+		lscale[i][i] = 1.0 ;
+	}
+
+	lscale[it1][it2] += eps ;
+	//if ( it1 != it2 ) 
+	//lscale[it2][it1] += eps ;
+
+	for (int j=0; j < REPLICATE.ATOMS; j++ )		
+		REPLICATE.BOXDIM.SCALE_BY_MATRIX(lscale, true, REPLICATE.COORDS[j]);
+
+	for (int j=0; j < REPLICATE.ALL_ATOMS; j++ ) 
+		REPLICATE.BOXDIM.SCALE_BY_MATRIX(lscale, true, REPLICATE.ALL_COORDS[j]);
+	
+	REPLICATE.BOXDIM.SCALE_BY_MATRIX(lscale, false, REPLICATE.COORDS[0]) ;
+	REPLICATE.BOXDIM.UPDATE_CELL();
+	
+
+	// Compute/store new total potential energy and volume
+	
+	REPLICATE.TOT_POT_ENER = 0;
+	
+	ZCalc(REPLICATE, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
+	
+	Vtot1 = REPLICATE.TOT_POT_ENER;
+	
+	// Contract coords by a bit
+
+	lscale[it1][it2] -= 2.0 * eps ;
+
+	//if ( it1 != it2 ) 
+	//lscale[it2][it1] -= 2.0 * eps ;
+	
+	REPLICATE_SYSTEM(SYSTEM, REPLICATE);
+
+	for (int j=0; j < REPLICATE.ATOMS; j++ ) 
+		REPLICATE.BOXDIM.SCALE_BY_MATRIX(lscale, true, REPLICATE.COORDS[j]);
+	
+	for (int j=0; j < REPLICATE.ALL_ATOMS; j++ ) 
+		REPLICATE.BOXDIM.SCALE_BY_MATRIX(lscale, true, REPLICATE.ALL_COORDS[j]);
+
+	REPLICATE.BOXDIM.SCALE_BY_MATRIX(lscale, false, REPLICATE.COORDS[0]);
+	REPLICATE.BOXDIM.UPDATE_CELL();
+	
+	
+	// Compute/store new total potential energy and volume
+	
+	REPLICATE.TOT_POT_ENER = 0;
+	
+	ZCalc(REPLICATE, CONTROLS, FF_2BODY, PAIR_MAP, INT_PAIR_MAP, TRIPS, QUADS, NEIGHBOR_LIST);
+	
+	Vtot2 = REPLICATE.TOT_POT_ENER;
+
+	// compute contribution to stress.
+	
+	PE_1 = Vtot1 / (2.0 * eps * V0) ;
+	PE_2 = Vtot2 / (2.0 * eps * V0) ;
+}
+
+void numerical_stress_all(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
+													CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
+													vector<int> &INT_PAIR_MAP,
+													NEIGHBORS & NEIGHBOR_LIST)
+// Evaluates the configurational part of the stress numerically by -1/V dU/d epsilon.
+{
+	double PE_1, PE_2, dV; 
+
+	// Loop over cartesion components.
+	for ( int tidx0 = 0 ; tidx0 < 3 ; tidx0++ )
+		{
+			for ( int tidx1 = 0 ; tidx1 <= tidx0 ; tidx1++ )
+				{
+		 
+					numerical_stress(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, INT_PAIR_MAP,
+													 NEIGHBOR_LIST, PE_1, PE_2, tidx0, tidx1);
+			
+#ifdef USE_MPI
+					double pe1_sum = 0.0, pe2_sum = 0.0 ;
+					MPI_Allreduce(&PE_1, &pe1_sum,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+					PE_1 = pe1_sum ;
+					MPI_Allreduce(&PE_2, &pe2_sum,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+					PE_2 = pe2_sum ;
+#endif
+
+					switch ( tidx1 ) {
+					case 0:
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[tidx0].X = (PE_2 - PE_1);
+						break ;
+					case 1:
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[tidx0].Y = (PE_2 - PE_1);
+						break ;
+					case 2:
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[tidx0].Z = (PE_2 - PE_1);
+						break ;
+					default:
+						cout << "Error: bad tensor index\n" ;
+						exit_run(1) ;
+					}
+					switch ( tidx0 ) {
+					case 0:
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[tidx1].X = (PE_2 - PE_1);
+						break ;
+					case 1:
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[tidx1].Y = (PE_2 - PE_1);
+						break ;
+					case 2:
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[tidx1].Z = (PE_2 - PE_1);
+						break ;
+					default:
+						cout << "Error: bad tensor index\n" ;
+						exit_run(1) ;
+					}
+				}
+		}
+}
 
 void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST)
 // Check the forces by finite derivative of the energy.  This will be computationally
@@ -766,6 +918,16 @@ static void ZCalc_Lj(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & F
 						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X -= fac * rlen_mi * RVEC.X * RVEC.X / rlen_mi;
 						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y -= fac * rlen_mi * RVEC.Y * RVEC.Y / rlen_mi;
 						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z -= fac * rlen_mi * RVEC.Z * RVEC.Z / rlen_mi;
+
+						// Off-diagonal components.
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y -= fac * rlen_mi * RVEC.X * RVEC.Y / rlen_mi;
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z -= fac * rlen_mi * RVEC.X * RVEC.Z / rlen_mi;						
+
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X -= fac * rlen_mi * RVEC.Y * RVEC.X / rlen_mi;
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z -= fac * rlen_mi * RVEC.Y * RVEC.Z / rlen_mi;						
+						
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X -= fac * rlen_mi * RVEC.Z * RVEC.X / rlen_mi;
+						SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y -= fac * rlen_mi * RVEC.Z * RVEC.Y / rlen_mi;												
 	
 						SYSTEM.ACCEL[a1].X += RVEC.X*fac;
 						SYSTEM.ACCEL[a1].Y += RVEC.Y*fac;
@@ -939,23 +1101,53 @@ void sum_forces(vector<XYZ>& accel_vec, int atoms, double &pot_energy, double &p
 	// Add up forces, potential energy, and pressure from all processes.  
 	{
 		// Sum up the potential energy, pressure, tensors , and forces from all processors
-	#ifdef USE_MPI	
-		double *accel = (double *) accel_vec .data();
+#ifdef USE_MPI	
 
-		MPI_Allreduce(MPI_IN_PLACE, &pot_energy,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &pressure,  1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);	
-		MPI_Allreduce(MPI_IN_PLACE, &tens_xx,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_xy,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_xz,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_yx,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_yy,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_yz,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_zx,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_zy,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &tens_zz,    1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		
-		MPI_Allreduce(MPI_IN_PLACE, accel, 3*atoms, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-	#endif	
+		int ndata = 11 + 3 * atoms ;
+		vector<double> buf(ndata), sum(ndata,0.0) ;
+		buf[0] = pot_energy ;
+		buf[1] = pressure ;
+		buf[2] = tens_xx ;
+		buf[3] = tens_xy ;
+		buf[4] = tens_xz ;
+		buf[5] = tens_yx ;
+		buf[6] = tens_yy ;
+		buf[7] = tens_yz ;
+		buf[8] = tens_zx ;
+		buf[9] = tens_zy ;
+		buf[10] = tens_zz ;
+
+		for ( int j = 0 ; j < atoms ; j++ )
+		{
+			buf[11+3*j] = accel_vec[j].X ;
+			buf[12+3*j] = accel_vec[j].Y ;
+			buf[13+3*j] = accel_vec[j].Z ;						
+		}
+
+		// memcheck_all complained of memory errors when MPI_IN_PLACE was used,
+		// so I switched to explicit buffer allocation (LEF 3/3/22)
+		MPI_Allreduce(buf.data(), sum.data(), ndata, MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+
+		pot_energy = sum[0] ;
+		pressure = sum[1] ;
+		tens_xx = sum[2] ;
+		tens_xy = sum[3] ;
+		tens_xz = sum[4] ;
+		tens_yx = sum[5] ;
+		tens_yy = sum[6] ;
+		tens_yz = sum[7] ;
+		tens_zx = sum[8] ;
+		tens_zy = sum[9] ;
+		tens_zz = sum[10] ;
+
+		for ( int j = 0 ; j < atoms ; j++ )
+		{
+			accel_vec[j].X = sum[11+3*j] ;
+			accel_vec[j].Y = sum[12+3*j] ;
+			accel_vec[j].Z = sum[13+3*j] ;						
+		}		
+
+#endif	
 
 	}
 

@@ -1,0 +1,13 @@
+# LJ Argon - about as simple as you can get
+# Parameters: usual epsilon = 1.0 kcal/mol, sigma = 3.0 ang.
+Argon 2000
+1          0           0          0    39.948 0 Ar
+end
+Lennard-Jones
+1 1 4.0 3.0
+end
+
+6.0 6.0 6.0 90.0 90.0 90.0 10 10 10
+Argon 0.0 0.0 0.0
+Argon 0.1 0.4 0.0
+end

@@ -1416,15 +1416,4 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-       1      0.12       5.2450076     -49.1445683     -43.8995606          1778.3     14.83818725    -43.8995606
-END SIMULATION
-	Average temperature over run = 1778.2983 K
-	Average pressure    over run = 14.8382 GPa
-	Pressures from diagonal stress tensors over run: 14.8392
-	Average stress tensors over run: 
-		sigma_xx: 16.1149 GPa
-		sigma_yy: 13.9592 GPa
-		sigma_zz: 14.4436 GPa
-		sigma_xy: 3.5415 GPa
-		sigma_xz: 0.6166 GPa
-		sigma_yz: 8.2974 GPa
+Error: Numerical stress with Ewald is not supported

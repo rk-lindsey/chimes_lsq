@@ -1,0 +1,43 @@
+title = Coulomb
+nsteps = 10
+step = 0.00001
+text-mode-save = 1
+new-sys-spec = 0
+lattice-start = 1
+sys-spec-file = 
+restart-file = 
+save-file = coulomb.save
+const-pressure = 0
+reset-averages = 0
+begin-dump = 1
+dump-interval = 1
+dump-level = 0
+ndumps = 250
+backup-interval = 1
+roll-interval = 100
+print-interval = 1
+temperature = 0.0
+cutoff = 20.0
+alpha = 0.2276
+k-cutoff = 2.070
+surface-dipole = 0
+strict-cutoff = 1
+subcell = 1.0
+end
+CATION 1000
+1          0           0          0    39.948  1.0 cation
+ANION 1000
+2          0           0          0    39.948 -1.0 anion
+end
+Lennard-Jones
+1 1 0.00 3.5
+1 2 0.00 3.5
+2 2 0.00 3.5
+end
+
+4.0 4.0 4.0 90.0 90.0 90.0 10 10 10
+CATION 0.0 0.1 0.0
+ANION  0.45 0.5 0.5
+end
+text-mode-save=1
+save-file=coulombsave

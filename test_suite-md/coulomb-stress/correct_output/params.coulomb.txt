@@ -1,0 +1,46 @@
+USECOUL: true
+FITCOUL: false
+USE3BCH: false
+USE4BCH: false
+
+PAIRTYP: LJ
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		-1.0		15.9994
+1		H		+1.0		1.0079
+
+ATOM PAIRS: 3
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	
+	0               O               O               0.6             6       
+	1               H               H               0.6             6       
+	2               O               H               0.6             6       
+
+ATOM PAIR TRIPLETS: 0
+
+PAIR LJ PARAMS 
+
+PAIRTYPE PARAMS: 0 O O
+
+  0  0.0
+  1  3.0
+
+PAIRTYPE PARAMS: 1 H H
+
+  0  0.0
+  1  3.0
+
+PAIRTYPE PARAMS: 2 O H
+
+  0   0.0
+  1   3.0
+
+PAIRMAPS: 4
+1 HH
+2 HO
+2 OH
+0 OO
+
+ENDFILE
