@@ -20,7 +20,7 @@ from subprocess   import call
 
 def main():
     
-    loc = os.getcwd()
+    loc = os.path.dirname(os.path.abspath(__file__))
     
     
     #############################################
@@ -31,7 +31,7 @@ def main():
 
     parser.add_argument("--A",                    type=str,      default='A.txt',         help='A (derivative) matrix') 
     parser.add_argument("--algorithm",            type=str,      default='svd',           help='fitting algorithm')
-    parser.add_argument("--dlasso_dlars_path",    type=str     , default='../contrib/dlars/src',              help='Path to DLARS and/or DLASSO solver')
+    parser.add_argument("--dlasso_dlars_path",    type=str     , default=loc+'/../../contrib/dlars/src/',              help='Path to DLARS and/or DLASSO solver')
     parser.add_argument("--alpha",                type=float,    default=1.0e-04,         help='Lasso regularization')
     parser.add_argument("--b",                    type=str,      default='b.txt',         help='b (force) file')
     parser.add_argument("--cores",                type=int,      default=8,               help='DLARS number of cores')
@@ -52,10 +52,7 @@ def main():
 
     args        = parser.parse_args()
     
-    dlasso_dlars_path = loc + '/../../contrib/dlars/src/'
-    
-    if args.dlasso_dlars_path != '':
-        dlasso_dlars_path = args.dlasso_dlars_path
+    dlasso_dlars_path = args.dlasso_dlars_path
 
     #############################################
     # Import sklearn modules, if needed
@@ -101,11 +98,11 @@ def main():
         nlines2 = b.shape[0] 
 
         if ( nlines != nlines2 ):
-            print "Error: the number of lines in the input files do not match\n"
+            print ("Error: the number of lines in the input files do not match\n")
             exit(1) 
 
             if np > nlines:
-                print "Error: number of variables > number of equations"
+                print ("Error: number of variables > number of equations")
                 exit(1)
     else:
         
@@ -125,7 +122,7 @@ def main():
     
     if DO_WEIGHTING and not args.split_files:
         if ( WEIGHTS.shape[0] != nlines ):
-            print "Wrong number of lines in WEIGHTS file"
+            print ("Wrong number of lines in WEIGHTS file")
             exit(1)  
 
     #################################
@@ -143,8 +140,8 @@ def main():
         weightedA = numpy.zeros((A.shape[0],A.shape[1]),dtype=float)
         weightedb = numpy.zeros((A.shape[0],),dtype=float)
 
-        for i in xrange(A.shape[0]):     # Loop over rows (atom force components)
-            for j in xrange(A.shape[1]): # Loop over cols (variables in fit)
+        for i in range(A.shape[0]):     # Loop over rows (atom force components)
+            for j in range(A.shape[1]): # Loop over cols (variables in fit)
                 weightedA[i][j] = A[i][j]*WEIGHTS[i]
                 weightedb[i]    = b[i]   *WEIGHTS[i]
 
@@ -153,13 +150,13 @@ def main():
     #  Header for output
     ################################
     
-    print "! Date ", date.today()
-    print "!"
+    print ("! Date ", date.today())
+    print ("!")
 
     if np != "undefined" :
-        print "! Number of variables            = ", np
+        print ("! Number of variables            = ", np)
 
-    print "! Number of equations            = ", nlines
+    print ("! Number of equations            = ", nlines)
 
     
                 
@@ -171,7 +168,7 @@ def main():
         
         # Make the scipy call
         
-        print '! svd algorithm used'
+        print ('! svd algorithm used')
         try:
             if DO_WEIGHTING: # Then it's OK to overwrite weightedA.  It is not used to calculate y (predicted forces) below.
                 U,D,VT = scipy.linalg.svd(weightedA,overwrite_a=True)
@@ -199,13 +196,13 @@ def main():
         eps=args.eps * dmax
         nvars = 0
 
-        for i in xrange(0,len(D)):
+        for i in range(0,len(D)):
             if abs(D[i]) > eps:
                 Dmat[i][i]=1.0/D[i]
                 nvars += 1
 
-        print "! eps (= args.eps*dmax)          =  %11.4e" % eps        
-        print "! SVD regularization factor      = %11.4e" % args.eps
+        print ("! eps (= args.eps*dmax)          =  %11.4e" % eps)        
+        print ("! SVD regularization factor      = %11.4e" % args.eps)
 
         x=dot(transpose(VT),Dmat)
 
@@ -215,7 +212,7 @@ def main():
             x = dot(x,dot(transpose(U),b))
 
     elif args.algorithm == 'ridge':
-        print '! ridge regression used'
+        print ('! ridge regression used')
         reg = linear_model.Ridge(alpha=args.alpha,fit_intercept=False)
 
         # Fit the data.
@@ -223,14 +220,14 @@ def main():
 
         x = reg.coef_
         nvars = np
-        print "! Ridge alpha = %11.4e" % args.alpha
+        print ("! Ridge alpha = %11.4e" % args.alpha)
 
     elif args.algorithm == 'ridgecv':
         alpha_ar = [1.0e-06, 3.2e-06, 1.0e-05, 3.2e-05, 1.0e-04, 3.2e-04, 1.0e-03, 3.2e-03]
         reg = linear_model.RidgeCV(alphas=alpha_ar,fit_intercept=False,cv=args.folds)
         reg.fit(A,b)
-        print '! ridge CV regression used'
-        print "! ridge CV alpha = %11.4e"  % reg.alpha_
+        print ('! ridge CV regression used')
+        print ("! ridge CV alpha = %11.4e"  % reg.alpha_)
         x = reg.coef_
         nvars = np
 
@@ -238,8 +235,8 @@ def main():
         
         # Make the sklearn call
         
-        print '! Lasso regression used'
-        print '! Lasso alpha = %11.4e' % args.alpha
+        print ('! Lasso regression used')
+        print ('! Lasso alpha = %11.4e' % args.alpha)
         reg   = linear_model.Lasso(alpha=args.alpha,fit_intercept=False,max_iter=100000)
         reg.fit(A,b)
         x     = reg.coef_
@@ -250,8 +247,8 @@ def main():
         
         # Make the sklearn call
         
-        print '! LARS implementation of LASSO used'
-        print '! LASSO alpha = %11.4e' % args.alpha
+        print ('! LARS implementation of LASSO used')
+        print ('! LASSO alpha = %11.4e' % args.alpha)
 
         if DO_WEIGHTING:
             reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000, copy_X=False)
@@ -273,7 +270,7 @@ def main():
         
     else:
 
-        print "Unrecognized fitting algorithm" 
+        print ("Unrecognized fitting algorithm") 
         exit(1)
 
     #################################
@@ -301,13 +298,13 @@ def main():
     # Setup output
     #############################################
     
-    print "! RMS force error                = %11.4e" % sqrt(Z/float(nlines))
-    print "! max abs variable               = %11.4e" %  max(abs(x))
-    print "! number of fitting vars         = ", nvars
-    print "! Bayesian Information Criterion = %11.4e" % bic
+    print ("! RMS force error                = %11.4e" % sqrt(Z/float(nlines)))
+    print ("! max abs variable               = %11.4e" %  max(abs(x)))
+    print ("! number of fitting vars         = ", nvars)
+    print ("! Bayesian Information Criterion = %11.4e" % bic)
     if args.weights !="None":
-        print '! Using weighting file:            ',args.weights
-    print "!"
+        print ('! Using weighting file:            ',args.weights)
+    print ("!")
 
     ####################################
     # Actually process the header file...
@@ -327,7 +324,7 @@ def main():
     TOTAL_QUADS = 0
 
     for i in range(0, len(hf)):
-        print hf[i].rstrip('\n')
+        print (hf[i].rstrip('\n'))
         TEMP = hf[i].split()
         if len(TEMP)>3:
             if (TEMP[2] == "TRIPLETS:"):
@@ -338,7 +335,7 @@ def main():
                     TEMP = hf[j].split()
                     if len(TEMP)>3:
                         if (TEMP[2] == "QUADRUPLETS:"):
-                            print hf[j].rstrip('\n')
+                            print (hf[j].rstrip('\n'))
                             TOTAL_QUADS = TEMP[3]
                             ATOM_QUADS_LINE = j
                             BREAK_COND = True
@@ -351,9 +348,9 @@ def main():
     POTENTIAL = hf[5].split()
     POTENTIAL = POTENTIAL[1]
 
-    print ""
+    print ("")
 
-    print "PAIR " + POTENTIAL + " PARAMS \n"
+    print ("PAIR " + POTENTIAL + " PARAMS \n")
 
     # 2. Figure out how many coeffs each atom type will have
 
@@ -398,8 +395,8 @@ def main():
     ADD_LINES = 0
     COUNTED_COUL_PARAMS = 0 
 
-    if TOTAL_TRIPS > 0:
-        for t in xrange(0, int(TOTAL_TRIPS)):
+    if (int(TOTAL_TRIPS) > 0):
+        for t in range(0, int(TOTAL_TRIPS)):
 
             P1 = hf[ATOM_TRIPS_LINE+3+ADD_LINES].split()
 
@@ -409,7 +406,7 @@ def main():
                 TOTL = P1[6]
                 ADD_LINES += 5
 
-                for i in xrange(0, int(TOTL)):
+                for i in range(0, int(TOTL)):
                     ADD_LINES += 1
 
     # Figure out how many 4B parameters there are
@@ -417,8 +414,8 @@ def main():
     SNUM_4B   = 0
     ADD_LINES = 0
 
-    if TOTAL_QUADS > 0:
-        for t in xrange(0, int(TOTAL_QUADS)):
+    if (int(TOTAL_QUADS) > 0):
+        for t in range(0, int(TOTAL_QUADS)):
 
             P1 = hf[ATOM_QUADS_LINE+3+ADD_LINES].split()
 
@@ -431,7 +428,7 @@ def main():
 
                 ADD_LINES += 5
 
-                for i in xrange(0,int(TOTL)):
+                for i in range(0,int(TOTL)):
                     ADD_LINES += 1
 
     for i in range(0,TOTAL_PAIRS):
@@ -440,16 +437,17 @@ def main():
         A2 = A1[2]
         A1 = A1[1]
 
-        print "PAIRTYPE PARAMS: " + `i` + " " + A1 + " " + A2 + "\n"
+        #print ("PAIRTYPE PARAMS: " + `i` + " " + A1 + " " + A2 + "\n")
+        print ("PAIRTYPE PARAMS: " + str(i) + " " + A1 + " " + A2 + "\n")
 
         for j in range(0, int(SNUM_2B)):
-            print "%3d %21.13e" % (j,x[i*SNUM_2B+j])
+            print ("%3d %21.13e" % (j,x[i*SNUM_2B+j]))
 
         if FIT_COUL == "true":
-            print "q_%s x q_%s %21.13e" % (A1,A2,x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + SNUM_4B + i]) 
+            print ("q_%s x q_%s %21.13e" % (A1,A2,x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + SNUM_4B + i]))
             COUNTED_COUL_PARAMS += 1
 
-        print " "
+        print (" ")
 
     # TRIPLETS
 
@@ -458,17 +456,17 @@ def main():
 
     COUNTED_TRIP_PARAMS = 0
 
-    if TOTAL_TRIPS > 0:
-        print "TRIPLET " + POTENTIAL + " PARAMS \n"
+    if (int(TOTAL_TRIPS) > 0):
+        print ("TRIPLET " + POTENTIAL + " PARAMS \n")
 
         TRIP_PAR_IDX = 0
 
-        for t in xrange(0, int(TOTAL_TRIPS)):
+        for t in range(0, int(TOTAL_TRIPS)):
 
             PREV_TRIPIDX = 0
 
-            print "TRIPLETTYPE PARAMS:"
-            print "  " + hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip() 
+            print ("TRIPLETTYPE PARAMS:")
+            print ("  " + hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip())
 
             P1 = hf[ATOM_TRIPS_LINE+3+ADD_LINES].split()
 
@@ -479,33 +477,33 @@ def main():
             V2 = P1[3]
 
             if P1[4] == "EXCLUDED:" :
-                print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " EXCLUDED:"
+                print ("   PAIRS: " + V0 + " " + V1 + " " + V2 + " EXCLUDED:")
                 ADD_LINES += 1
             else:
                 UNIQ = P1[4]
                 TOTL = P1[6].rstrip() 
 
-                print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL 
-                print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
-                print "   ----------------------------------------------------------------------------"
+                print ("   PAIRS: " + V0 + " " + V1 + " " + V2 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL)
+                print ("     index  |  powers  |  equiv index  |  param index  |       parameter       ")
+                print ("   ----------------------------------------------------------------------------")
 
                 ADD_LINES += 3
 
                 if(t>0):
                     ADD_PARAM += 1
 
-                for i in xrange(0,int(TOTL)):
+                for i in range(0,int(TOTL)):
                     ADD_LINES += 1
                     LINE       = hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip('\n')
                     LINE_SPLIT = LINE.split()
 
-                    print "%s %21.13e" % (LINE, x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])])
+                    print ("%s %21.13e" % (LINE, x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]))
 
                 TRIP_PAR_IDX += int(UNIQ)
                 COUNTED_TRIP_PARAMS += int(UNIQ)
                 #print "COUNTED_TRIP_PARAMS", COUNTED_TRIP_PARAMS
 
-            print ""
+            print ("")
 
             ADD_LINES += 2
 
@@ -514,12 +512,12 @@ def main():
     # QUADS    
 
     COUNTED_QUAD_PARAMS = 0
-    if TOTAL_QUADS > 0:
-        print "QUADRUPLET " + POTENTIAL + " PARAMS \n"
+    if (int(TOTAL_QUADS) > 0):
+        print ("QUADRUPLET " + POTENTIAL + " PARAMS \n")
 
         QUAD_PAR_IDX = 0
 
-        for t in xrange(int(TOTAL_QUADS)):
+        for t in range(int(TOTAL_QUADS)):
 
             PREV_QUADIDX = 0
 
@@ -529,8 +527,8 @@ def main():
 
             #print "P1 " + P1[1] + P1[2] + P1[3] + P1[4] + P1[5] + P1[6]
 
-            print "QUADRUPLETYPE PARAMS: " 
-            print "  " + hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip() 
+            print ("QUADRUPLETYPE PARAMS: " )
+            print ("  " + hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip() )
 
             P1 = hf[ATOM_QUADS_LINE+3+ADD_LINES].split()
 
@@ -545,23 +543,23 @@ def main():
 
             #print "UNIQUE: ", str(UNIQ)
             if P1[7] == "EXCLUDED:" :
-                print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " " + V3 + " " + V4 + " " + V5 + " EXCLUDED: " 
+                print ("   PAIRS: " + V0 + " " + V1 + " " + V2 + " " + V3 + " " + V4 + " " + V5 + " EXCLUDED: ")
                 ADD_LINES += 1
 
             else:
                 UNIQ = P1[7]
                 TOTL = P1[9].rstrip() 
 
-                print "   PAIRS: " + V0 + " " + V1 + " " + V2 + " " + V3 + " " + V4 + " " + V5 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL 
-                print "     index  |  powers  |  equiv index  |  param index  |       parameter       "
-                print "   ----------------------------------------------------------------------------"
+                print ("   PAIRS: " + V0 + " " + V1 + " " + V2 + " " + V3 + " " + V4 + " " + V5 + " UNIQUE: " + UNIQ + " TOTAL: " + TOTL)
+                print ("     index  |  powers  |  equiv index  |  param index  |       parameter       ")
+                print ("   ----------------------------------------------------------------------------")
 
                 ADD_LINES += 3
 
                 if(t>0):
                     ADD_PARAM += 1
 
-                for i in xrange(0,int(TOTL)):
+                for i in range(0,int(TOTL)):
                     ADD_LINES += 1
                     LINE       = hf[ATOM_QUADS_LINE+2+ADD_LINES].rstrip('\n')
                     LINE_SPLIT = LINE.split()
@@ -569,12 +567,12 @@ def main():
                     UNIQ_QUAD_IDX = int(LINE_SPLIT[8])
                     #print 'UNIQ_QUAD_IDX', str(UNIQ_QUAD_IDX)
 
-                    print "%s %21.13e" % (LINE,x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX])
+                    print ("%s %21.13e" % (LINE,x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]))
 
                 QUAD_PAR_IDX += int(UNIQ)
                 COUNTED_QUAD_PARAMS += int(UNIQ)
 
-            print ""
+            print ("")
 
             ADD_LINES += 2
 
@@ -582,12 +580,12 @@ def main():
 
     mapsfile=open(args.map,"r").readlines()
 
-    print ""
+    print ("")
 
     for i in range(0,len(mapsfile)):
-        print mapsfile[i].rstrip('\n')
+        print (mapsfile[i].rstrip('\n'))
 
-    print ""
+    print ("")
 
     total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS 
 
@@ -606,10 +604,10 @@ def main():
 
 
     if len(x) == (total_params+N_ENER_OFFSETS):
-        print "NO ENERGY OFFSETS: ", N_ENER_OFFSETS
+        print ("NO ENERGY OFFSETS: ", N_ENER_OFFSETS)
     
-        for i in xrange(N_ENER_OFFSETS):
-            print "ENERGY OFFSET %d %21.13e" % (i+1,x[total_params+i])
+        for i in range(N_ENER_OFFSETS):
+            print ("ENERGY OFFSET %d %21.13e" % (i+1,x[total_params+i]))
 
     if args.test_suite:
         test_suite_params=open("test_suite_params.txt","w")		
@@ -618,7 +616,7 @@ def main():
             test_suite_params.write(phrase)
         test_suite_params.close()
 
-    print "ENDFILE"		
+    print ("ENDFILE")
     return 0
 
 #############################################
@@ -648,7 +646,7 @@ def str2bool(v):
 
 def count_nonzero_vars(x):
     np = 0
-    for i in xrange(0, len(x)):
+    for i in range(0, len(x)):
         if ( abs(x[i]) > 1.0e-05 ):
             np = np + 1
     return np
@@ -666,18 +664,18 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
     # the estimated force vector A * x, which is read from Ax.txt.    
     
     if dlasso_dlars_path == '':
-        print "ERROR: DLARS/DLASSO  path not provided."
-        print "Please run again with --dlasso_dlars_path </absolute/path/to/dlars/dlasso/src/>"
+        print ("ERROR: DLARS/DLASSO  path not provided.")
+        print ("Please run again with --dlasso_dlars_path </absolute/path/to/dlars/dlasso/src/>")
         exit(0)
 
     if algorithm == 'dlasso' :
-        print '! DLARS code for LASSO used'
+        print ('! DLARS code for LASSO used')
     elif algorithm == 'dlars' :
-        print '! DLARS code for LARS used'
+        print ('! DLARS code for LARS used')
     else:
-        print "Bad algorithm in fit_dlars:" + algorithm
+        print ("Bad algorithm in fit_dlars:" + algorithm)
         exit(1)
-    print '! DLARS alpha = %10.4e' % alpha
+    print ('! DLARS alpha = %10.4e' % alpha)
 
     if not read_output:
     
@@ -688,8 +686,8 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
 	    exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " " + dlars_file
 
             command = None
-   
-            command = exepath + " " + A  + " " + b + " dim.txt --lambda=" + `alpha`
+
+            command = exepath + " " + A  + " " + b + " dim.txt --lambda=" + str(alpha)
 
             #else:
             #    command = ("{0} A.txt b.txt dim.txt --lambda={1}".format(exepath, alpha))
@@ -710,7 +708,7 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
                 command = command + " --normalize=n" 
 
             if restart_dlasso_dlars != "":
-                print "Will run a dlars/dlasso restart job with file:", restart_dlasso_dlars
+                print ("Will run a dlars/dlasso restart job with file:", restart_dlasso_dlars)
 
                 command = command + " --restart=" + restart_dlasso_dlars
                 
@@ -722,10 +720,10 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
                 print(command + " failed")
                 sys.exit(1)
         else:
-            print dlars_file + " does not exist"
+            print (exepath + " does not exist")
             sys.exit(1)
     else:
-        print "! Reading output from prior DLARS calculation"
+        print ("! Reading output from prior DLARS calculation")
 
     x = numpy.genfromtxt("x.txt", dtype='float')
     y = numpy.genfromtxt("Ax.txt", dtype='float') 
