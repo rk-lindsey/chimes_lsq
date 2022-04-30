@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
   WRITE_TRAJ FORCEFILE;
 
   if ( CONTROLS.PRINT_FORCE ) 
-	  FORCEFILE.INIT("XYZF_FORCE","FORCE",CONTROLS.PRINT_ENERGY_STRESS);	// This is the forcout* files
+		FORCEFILE.INIT("XYZF_FORCE","FORCE");	// This is the forcout* files
 
   // velocity
 
@@ -836,7 +836,7 @@ int main(int argc, char* argv[])
 						 "(kcal/mol)", "(K)", "(GPa)");
 
 			snprintf(stat_buf, STAT_BUF_SZ, "%8s %14s %14s %14s %14s %14s %14s ",
-							 "# ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
+							 " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
 
 			STATISTICS << stat_buf ;
 			
@@ -1609,17 +1609,9 @@ static void read_ff_params(	ifstream & PARAMFILE,
 				ntokens = parse_space(LINE,tokens) ;
 				
 				// Determine the number of offsets (atom types)
-				if ( ntokens < 4 )
-					EXIT_MSG("MISSING NUMBER OF ENERGY OFFSETS\n") ;
-
-				int num_offsets = stoi(tokens[3]) ;
-
-				if ( num_offsets != CONTROLS.ATOMTYPES.size() )
-					EXIT_MSG("AN ENERGY OFFSET IS REQUIRED FOR EVERY ATOM TYPE") ;
-					
-				SYSTEM.QM_ENERGY_OFFSET.resize(num_offsets) ;
+				SYSTEM.QM_ENERGY_OFFSET.resize(stoi(tokens[3])); 
 				
-				for (int i=0; i< num_offsets ; i++)
+				for (int i=0; i<SYSTEM.QM_ENERGY_OFFSET.size(); i++)
 				{
 					LINE = get_next_line(PARAMFILE);
 					ntokens = parse_space(LINE,tokens);
@@ -1674,7 +1666,10 @@ static void read_ff_params(	ifstream & PARAMFILE,
 		
 		if(SYSTEM.QM_ENERGY_OFFSET.size() == 0)
 		{
-			SYSTEM.QM_ENERGY_OFFSET.resize(CONTROLS.ATOMTYPES.size(),0.0) ;
+			SYSTEM.QM_ENERGY_OFFSET.resize(NO_PAIRS);
+			
+			for(int i=0; i<NO_PAIRS; i++)
+				SYSTEM.QM_ENERGY_OFFSET[i] = 0.0;
 		}
 			
 		PARAMFILE.close();
@@ -2274,7 +2269,7 @@ static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST& TRIP
   for(int i=0; i<FF_2BODY.size(); i++)
   {
 		
-	 cout << "		pair type...smin...smax...sdelta...";
+	 cout << "		pair type...smin...smax...";
 	 if(FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
 		cout << "cheby type";
 	 if(FF_2BODY[i].CHEBY_TYPE == Cheby_trans::MORSE)
