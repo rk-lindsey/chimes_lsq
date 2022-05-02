@@ -33,8 +33,11 @@ read IS_LC
 ICC=`which g++`
 
 if [[ "$IS_LC" == "y" ]] ; then
+
 	module load intel/18.0.1
 	module load impi/2018.0
+	module load cmake/3.21.1
+	module load mkl/2020.0	
 	
 	ICC=`which icc`
 fi
