@@ -32,11 +32,7 @@ computed on the basis of atom clusters. For example, the total ChIMES energy is 
 
    
 where :math:`E_{n_\mathrm{B}}` is the total ChIMES system energy, :math:`n_{\mathrm{B}}` is the maximum bodiedness, 
-:math:`{}^{n}\!E_{i_1i_2\dots i_n}` is the :math:`n`-body ChIMES energy for 
-a given set of :math:`n` atoms with indices :math:`i = {i_1, i_2, \dots , i_n}`, and :math:`n_a` is the total number of atoms in the system. In the 
-ChIMES framework, single-body energies are constant values and :math:`n`-body energies are constructed from the product of
-polynomials of transformed atom pair distances. Thus, a 2-body interaction would involve a single pair distance, :math:`ij` and corresponding polynomial :math:`T_n(s_{ij})`, where :math:`s_{ij}` is the pair distance transformed to a range of :math:`[-1:1]`. Similarly, a 
-three-body interaction would :math:`3\choose 2` or three pairs, :math:`ij, ik,` and :math:`jk`, and a corresponding three-body polynomial, :math:`T_\alpha(s_{ij}) T_\beta(s_{ik}) T_\gamma(s_{jk})`. A 4-body interaction would involve :math:`4\choose 2 = 6` pairs, 
+:math:`{}^{n}\!E_{i_1i_2\dots i_n}` is the :math:`n`-body ChIMES energy for  a given set of :math:`n` atoms with indices :math:`i = {i_1, i_2, \dots , i_n}`, and :math:`n_a` is the total number of atoms in the system. In the ChIMES framework, single-body energies are constant values and :math:`n`-body energies are constructed from the product of polynomials of transformed atom pair distances. Thus, a 2-body interaction would involve a single pair distance, :math:`ij` and corresponding polynomial :math:`T_n(s_{ij})`, where :math:`s_{ij}` is the pair distance transformed to a range of :math:`[-1:1]`. Similarly, a  three-body interaction would involve :math:`3\choose 2` (i.e. three) pairs, :math:`ij, ik,` and :math:`jk`, and a corresponding three-body polynomial, :math:`T_\alpha(s_{ij}) T_\beta(s_{ik}) T_\gamma(s_{jk})`. A 4-body interaction would involve :math:`4\choose 2 = 6` pairs, 
 and so on. Currently, the ChIMES parameter generator supports up to 4-body interactions.
 
 
@@ -85,7 +81,7 @@ For a higher-body interaction, e.g. between three atoms, one obtains the followi
 
 The ChIMES penalty function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Two-body ChIMES interactions include an additional penalty function, which prevents spurious close contacts and discrourages sampling of interatomic distances smaller that model inner cutoffs (i.e. where the Chebyshev polynomials are undefined). The penalty function takes on the following form:
+Two-body ChIMES interactions include an additional penalty function, which prevents spurious close contacts and discourages sampling of interatomic distances smaller than model inner cutoffs (i.e. where the Chebyshev polynomials are undefined). The penalty function takes on the following form:
 
 .. math::
    :nowrap:
@@ -105,7 +101,7 @@ ChIMES smoothing functions
 
 .. _sec-cutoff:
 
-ChIMES models include smoothing functions for each constituent pair interaction, ensuring smoothness as outer cutoffs, :math:`r_{\mathrm{c,out}}^{m_1(y)}` are approached. Currently, two smoothing function forms are supported, "cubic" and "Tersoff". The former has been shown to work reasonably well for models including up to 3-body interactions, but the Tersoff form is best for models including higher-bodied interactions since it can be tuned to minimzed the smoothing function cutoff on the overall interactions (see **[papers]** for further details).
+ChIMES models include smoothing functions for each constituent pair interaction, ensuring smoothness as outer cutoffs, :math:`r_{\mathrm{c,out}}^{m_1(y)}` are approached. Currently, two smoothing function forms are supported, "cubic" and "Tersoff". The former has been shown to work reasonably well for models including up to 3-body interactions, but the Tersoff form is best for models including higher-bodied interactions since it can be tuned to minimized the smoothing function cutoff on the overall interactions (see `this paper <https://doi.org/10.1063/5.0021965>`_ for further details).
 
 The cubic cutoff function
 """"""""""""""""""""""""""""""

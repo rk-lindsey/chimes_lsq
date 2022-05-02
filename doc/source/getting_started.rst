@@ -30,19 +30,31 @@ Once access is granted and, if applicable, keys have been configured, ``chimes_l
 1. Forking
 ^^^^^^^^^^
 
-On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse>`_ page, click the fork button (fourth button down from the top left, which looks like a two-prong trident). This will create a copy of ``chimes_lsq`` in your LLNL Bitbucket account. You can clone, edit, and commit to this repository as you see fit, and any contribibutions to the original "parent" reposoitory via the pull request mechanism. For additional details, see :ref:`Contributing <page-contributing>`.
+On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse>`_ page, click the fork button (fourth button down from the top left, which looks like a two-prong trident). This will create a copy of ``chimes_lsq`` in your LLNL Bitbucket account. You can clone, edit, and commit to this repository as you see fit, and any contributions to the original "parent" reposoitory via the pull request mechanism. For additional details, see :ref:`Contributing <page-contributing>`.
 
 
 2. Cloning
 ^^^^^^^^^^
 
-On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse>`_ page, click the clone button (first button from the top left, which looks like a monitor with an arrow). Copy the ``chimes_lsq`` repository url that appears. In a terminal, navigate to the desired download location, an type: ``git clone <the full copied url> .``
+On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse>`_ page, click the clone button (first button from the top left, which looks like a monitor with an arrow). Copy the ``chimes_lsq`` repository url that appears. In a terminal, navigate to the desired download location, and type: ``git clone <the full copied url> .``
 
+.. note::
 
-2. Archive Download
+    To clone on a LLNL LC machine, execute:
+    
+    ``git clone ssh://git@mybitbucket.llnl.gov:7999/chms/<repo name> .``
+    
+    From any other computer, use:
+    
+    ``git clone https://mybitbucket.llnl.gov/scm//chms/<repo name> .``
+    
+    Allow 30 minutes to an hour for the clone to complete.
+    
+
+3. Archive Download
 ^^^^^^^^^^^^^^^^^^^
 
-On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse>`_ page, click the three dots next to "master" under the heading "Source," and select download from the drop down menu
+On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/CHMS/repos/chimes_lsq/browse>`_ page, click the three dots next to "master" under the heading "Source," and select download from the drop down menu.
 
 
 ---------------
@@ -53,14 +65,15 @@ On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/
 Compiling and running the code
 ****************************************
 
-To compile, simply navigate to the ``src`` folder and type ``make chimes_lsq``. Parameter set generation requires two steps, i.e. generation and solution of the design matrix. Provided suitable input (e.g. fm_setup.in, a ``chimes_lsq`` input file and a reference data file), this can be as simple as:
+To compile, simply navigate to the base repository folder and excute ``./install.sh``. Parameter set generation requires two steps, i.e. generation and solution of the design matrix. Provided suitable input (e.g. fm_setup.in, a ``chimes_lsq`` input file and a reference data file), this can be as simple as:
 
 .. code-block:: bash
     
     /path/to/repo/src/chimes_lsq fm_setup.in > fm_setup.log
     /path/to/repo/src/chimes_lsq.py > params.txt
     
+.. note::
     
-Note: As described in greater detail in :ref:`Generating a ChIMES model <page-running>`, chimes_lsq.py depends on native `numpy <https://numpy.org>`_, `scipy <https://www.scipy.org>`_, and `sklearn <https://scikit-learn.org/stable/>`_ installations for `python2.x <https://www.python.org>`_ **[THIS NEEDS TO BE UPGRADED TO 3.X]**.
+  As described in greater detail in :ref:`Generating a ChIMES model <page-running>`, chimes_lsq.py depends on native `numpy <https://numpy.org>`_, `scipy <https://www.scipy.org>`_, and `sklearn <https://scikit-learn.org/stable/>`_ installations for `python3.x <https://www.python.org>`_.
 
 For a more detailed description of how to use ``chimes_lsq``, see: :ref:`Generating a ChIMES model <page-running>`.

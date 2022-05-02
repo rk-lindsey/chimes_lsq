@@ -25,7 +25,7 @@ Follow instructions on the :ref:`Getting Started <page-getting_started>` page to
 Step 2: Inspect the input
 *********************************************    
 
-Aside from the ``chimes_lsq`` code, a minimum of two input files are needed to generate a ChIMES model: A training trajectory and a ``chimes_lsq`` configuration file (``9350.combine-scs-2-a.fit.xyzf`` and ``fm_setup.in`` in this example, respectively). By running ``head 9350*`` in the tutorial folder, one can see that the trajecotry file is in an extended xyz format, where for a given frame, the first line provides the number of atoms, the next line, the three box lengths (Å), and the remaining lines provide an atom type, *x*, *y*, and *z* coordinates (Å), and the corresponding *x*, *y*, and *z* components of the forces acting on those atoms, in H/B. Frame information is repeated in this format :math:`n_{\mathrm{frames}}` times. 
+Aside from the ``chimes_lsq`` code, a minimum of two input files are needed to generate a ChIMES model: A training trajectory and a ``chimes_lsq`` configuration file (``9350.combine-scs-2-a.fit.xyzf`` and ``fm_setup.in`` in this example, respectively). By running ``head 9350*`` in the tutorial folder, one can see that the trajectory file is in an extended xyz format, where for a given frame, the first line provides the number of atoms, the next line, the three box lengths (Å), and the remaining lines provide an atom type, *x*, *y*, and *z* coordinates (Å), and the corresponding *x*, *y*, and *z* components of the forces acting on those atoms, in Hartree (H) per Bohr (B). Frame information is repeated in this format :math:`n_{\mathrm{frames}}` times. 
 
 .. note::
 
@@ -118,7 +118,7 @@ Finally, we specify that we will use a cubic smoothing function, and then specif
 
     Note: All of the following information is provided in published ChIMES manuscripts.
     
-    * Inner cutoffs are set to the lowest sampled distance (:math:`r_{\mathrm{samp,min}}`) in for each given pair type the training trajectory, or slightly less:math:`r_{\mathrm{samp,min}}-0.02`.
+    * Inner cutoffs are set to the lowest sampled distance (:math:`r_{\mathrm{samp,min}}`) in for each given pair type the training trajectory, or slightly less (:math:`r_{\mathrm{samp,min}}-0.02`).
 
     * 2-body outer cutoffs are usually set to encompass at least the 2nd non-bonded solvation shell, and usually set to about 8 Å.
 
@@ -148,7 +148,7 @@ Finally, we specify that we will use a cubic smoothing function, and then specif
 Step 3: Generate the design matrix
 *********************************************   
 
-As described in :ref:`ChIMES Overview <page-overview>` and :ref:`Generating a ChIMES model <page-running>`, ChIMES is parameterically linear, meaning the fitting problem can be recast as a matrix equation of the form :math:`\mathbf{Ax=b}`. The purpose of ``chimes_lsq`` is to generate :math:`\mathbf{A}` and :math:`\mathbf{b}` based on the user-defined ChIMES hyperparamters (i.e., contents of ``fm_setup.in``), and training trajectory (e.g., ``9350.combine-scs-2-a.fit.xyzf``). To do this, simply run the following from your tutorial folder:
+As described in :ref:`ChIMES Overview <page-overview>` and :ref:`Generating a ChIMES model <page-running>`, ChIMES is parameterically linear, meaning the fitting problem can be recast as a matrix equation of the form :math:`\mathbf{Ax=b}`. The purpose of ``chimes_lsq`` is to generate :math:`\mathbf{A}` and :math:`\mathbf{b}` based on the user-defined ChIMES hyperparameters (i.e., contents of ``fm_setup.in``), and training trajectory (e.g., ``9350.combine-scs-2-a.fit.xyzf``). To do this, simply run the following from your tutorial folder:
 
 .. code-block::
     
@@ -156,11 +156,11 @@ As described in :ref:`ChIMES Overview <page-overview>` and :ref:`Generating a Ch
     
 Running ``ls`` will show generation of ``A.txt`` and ``b.txt`` files, which we will use to determine our model parameters (i.e. :math:`\mathbf{x}` in the equation :math:`\mathbf{Ax=b}`). Several other files are produced including:
 
-* dim.txt: A-matrix dimension <# columns> <#rows>
+* dim.txt: A-matrix dimension <# columns> <# rows>
 
 * natoms.txt: For each line in b.txt, provides the number of atoms that were in the corresponding frame
 
-* b-labeled.txt: Indicates the atom type for each force component, and if applicable, labels stress tensor components (prependid with "s\_"), and system energies (labeled "+1").
+* b-labeled.txt: Indicates the atom type for each force component, and if applicable, labels stress tensor components (prepended with "s\_"), and system energies (labeled "+1").
 
 * params.header: Formatted output containing ChIMES hyperparameters
 
@@ -185,6 +185,8 @@ Once complete, the script produces two files, ``params.txt``, the ChIMES paramet
     grep -F "RMS force error" params.txt
     
 and to visualize model peformance, run:
+
+.. code-block::
 
     paste b.txt force.txt > compare.txt
     xmgrace compare.txt
