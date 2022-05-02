@@ -110,7 +110,8 @@ if [ ! -z $PREFX ] ; then
         make install
 fi
 
+cd ..
+
 cp src/chimes_lsq.py build
 
-cd ..
       
