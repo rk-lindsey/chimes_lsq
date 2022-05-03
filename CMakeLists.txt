@@ -32,12 +32,13 @@ set(USE_MPI     "1" CACHE STRING "Use MPI")
 
 add_definitions(-DDEBUG=${DEBUG})
 add_definitions(-DVERBOSITY=${VERBOSITY})
-add_definitions(-DUSE_MPI=${USE_MPI})
 
 # Add support for MPI
-
+if (USE_MPI)
+    add_definitions(-DUSE_MPI=${USE_MPI})
 find_package(MPI REQUIRED)
 include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+endif (USE_MPI)
 include_directories(imports/chimes_calculator/chimesFF/src)
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
@@ -67,13 +68,16 @@ add_executable(chimes_lsq
 
 target_include_directories(chimes_lsq PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_features   (chimes_lsq PRIVATE cxx_std_11)
+if (USE_MPI)
 target_link_libraries     (chimes_lsq ${MPI_LIBRARIES})
+endif (USE_MPI)
 target_link_directories   (chimes_lsq PUBLIC imports/chimes_calculator/build)
 target_link_libraries     (chimes_lsq libchimescalc.so)
-set_target_properties(chimes_lsq PROPERTIES INSTALL_RPATH ${CMAKE_CURRENT_SOURCE_DIR}/imports/chimes_calculator/build/lib)
+set_target_properties(chimes_lsq PROPERTIES INSTALL_RPATH ${CMAKE_CURRENT_SOURCE_DIR}/imports/chimes_calculator/build/)
+
 
 IF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
-	install(TARGETS chimes_lsq DESTINATION ${CMAKE_INSTALL_PREFIX}/src OPTIONAL)
+	install(TARGETS chimes_lsq DESTINATION ${CMAKE_INSTALL_PREFIX} OPTIONAL)
 ENDIF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
 
 ############################################################
@@ -100,11 +104,14 @@ add_executable(chimes_md
 
 target_include_directories(chimes_md PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_features   (chimes_md PRIVATE cxx_std_11)
+if (USE_MPI)
 target_link_libraries     (chimes_md ${MPI_LIBRARIES})
+endif (USE_MPI)
 target_link_directories   (chimes_md PUBLIC imports/chimes_calculator/build)
 target_link_libraries     (chimes_md libchimescalc.so)
-set_target_properties(chimes_md PROPERTIES INSTALL_RPATH ${CMAKE_CURRENT_SOURCE_DIR}/imports/chimes_calculator/build/lib)
+set_target_properties(chimes_md PROPERTIES INSTALL_RPATH ${CMAKE_CURRENT_SOURCE_DIR}/imports/chimes_calculator/build/)
+
 
 IF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT) 
-	install(TARGETS chimes_md DESTINATION ${CMAKE_INSTALL_PREFIX}/src OPTIONAL)
+	install(TARGETS chimes_md DESTINATION ${CMAKE_INSTALL_PREFIX} OPTIONAL)
 ENDIF (NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)

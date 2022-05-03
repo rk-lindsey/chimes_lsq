@@ -505,8 +505,6 @@ Choosing solvers
 
 All solvers support regularization (i.e. via ``--eps`` or ``--alpha``), which can aid overfitting mitigation. For LASSO, LASSOLARS, DLARS, and DLASSO solvers, regularization has the added benefit of automatically setting minimally-informative parameters to zero, helping minimize model size and increase efficiency. Note that these zeroed parameters can be scrubbed from the parameter file with ``post_proc_chimes_lsq.py``, e.g.:
 
-**[ WE NEED TO UPDATE TO PYTHON3.X]**
-
 .. code-block:: bash
 
     python2.x /path/to/repo/src/post_proc_chimes_lsq.py <parameter_file>
