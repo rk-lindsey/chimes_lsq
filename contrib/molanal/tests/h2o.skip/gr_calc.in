@@ -1,0 +1,10 @@
+ice_mix_test.gen  ! Trajectory file.
+4        ! input format type (4 = DFTB)
+4 4      ! Desired atom types.
+0.05     ! dr
+2        ! number of super-cells added in each direction. (use 2 for TATB).
+100.0    ! time blocking	
+1        ! number of time blocks.
+0.00025  ! dump time interval.
+10       ! Diffusion time block.
+

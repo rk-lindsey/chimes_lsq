@@ -31,7 +31,7 @@ def main():
 
     parser.add_argument("--A",                    type=str,      default='A.txt',         help='A (derivative) matrix') 
     parser.add_argument("--algorithm",            type=str,      default='svd',           help='fitting algorithm')
-    parser.add_argument("--dlasso_dlars_path",    type=str     , default=loc+'/../../contrib/dlars/src/',              help='Path to DLARS and/or DLASSO solver')
+    parser.add_argument("--dlasso_dlars_path",    type=str     , default=loc+'/../contrib/dlars/src/',              help='Path to DLARS and/or DLASSO solver')
     parser.add_argument("--alpha",                type=float,    default=1.0e-04,         help='Lasso regularization')
     parser.add_argument("--b",                    type=str,      default='b.txt',         help='b (force) file')
     parser.add_argument("--cores",                type=int,      default=8,               help='DLARS number of cores')

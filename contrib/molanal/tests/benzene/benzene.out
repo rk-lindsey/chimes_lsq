@@ -1,0 +1,738 @@
+Molecule analyzer Revision: $Revision: 130 $
+Program last changed on $Date: 2013-07-24 15:00:00 -0700 (Wed, 24 Jul 2013) $
+Program last changed by $Author: fried1 $
+ALL bonds require a lifetime of 4 steps
+0 replicas of the simulation cell will be propagated in each direction
+Individual molecule xyz files will be created in the molecules directory.
+Bond distances:
+H H 0.900000
+C H 1.400000
+N H 1.450000
+O H 1.350000
+C C 1.900000
+C N 1.800000
+C O 1.800000
+N N 1.750000
+N O 1.650000
+O O 1.700000
+Bond time cutoffs:
+H H 4
+H C 4
+H N 4
+H O 4
+C C 4
+C N 4
+C O 4
+N N 4
+N O 4
+O O 4
+The time between frames read = 1.0000000e-15 seconds
+Every 1 frames will be skipped
+Every 1 blocks of length 1 will be skipped
+Block skip offset = 0
+Creating a new molecules directory
+max. bond time cutoff (time steps) = 4
+Trajectory file: Benzene.md.gen
+Skip2 block starts at frame 1
+Beginning frame 5
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.05399e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.03748e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.01217e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  1.98029e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.03535e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.03429e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.03628e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.07297e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.04163e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.02876e+00
+Ending molecule 10
+Ending frame 5
+Beginning frame 6
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.06222e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.04425e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.01905e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  1.98648e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.04117e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.04116e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.04260e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.07962e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.04926e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.03486e+00
+Ending molecule 10
+Ending frame 6
+Beginning frame 7
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.07132e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.05209e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.02712e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  1.99401e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.04822e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.04929e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.05012e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.08731e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.05786e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.04214e+00
+Ending molecule 10
+Ending frame 7
+Beginning frame 8
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.08104e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.06080e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.03617e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.00270e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.05630e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.05846e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.05864e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.09582e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.06719e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.05040e+00
+Ending molecule 10
+Ending frame 8
+Beginning frame 9
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.09116e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.07015e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.04598e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.01232e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.06516e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.06843e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.06792e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.10490e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.07703e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.05942e+00
+Ending molecule 10
+Ending frame 9
+Beginning frame 10
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.10145e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.07991e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.05632e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.02265e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.07459e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.07898e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.07773e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.11431e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.08714e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.06896e+00
+Ending molecule 10
+Ending frame 10
+Beginning frame 11
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.11168e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.08986e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.06696e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.03347e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.08434e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.08985e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.08783e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.12384e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.09730e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.07880e+00
+Ending molecule 10
+Ending frame 11
+Beginning frame 12
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.12166e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.09978e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.07769e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.04455e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.09420e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.10083e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.09801e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.13327e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.10733e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.08871e+00
+Ending molecule 10
+Ending frame 12
+Beginning frame 13
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.13123e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.10949e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.08831e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.05567e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.10397e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.11171e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.10806e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.14241e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.11703e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.09850e+00
+Ending molecule 10
+Ending frame 13
+Beginning frame 14
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.14023e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.11883e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.09863e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.06667e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.11347e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.12230e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.11780e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.15109e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.12626e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.10801e+00
+Ending molecule 10
+Ending frame 14
+Beginning frame 15
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.14855e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.12764e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.10852e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.07736e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.12253e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.13244e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.12709e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.15917e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.13488e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.11706e+00
+Ending molecule 10
+Ending frame 15
+Beginning frame 16
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.15609e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.13582e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.11783e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.08760e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.13103e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.14199e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.13579e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.16655e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.14279e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.12555e+00
+Ending molecule 10
+Ending frame 16
+Beginning frame 17
+The box volume = 1.5070310e+03
+The number of molecules found = 10
+Beginning molecule 1
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:   0   1   2   3   4   5   6   7   8   9  10  11 
+RMS radius =  2.16277e+00
+Ending molecule 1
+Beginning molecule 2
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  12  13  14  15  16  17  18  19  20  21  22  23 
+RMS radius =  2.14327e+00
+Ending molecule 2
+Beginning molecule 3
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  24  25  26  27  28  29  30  31  32  33  34  35 
+RMS radius =  2.12647e+00
+Ending molecule 3
+Beginning molecule 4
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  36  37  38  39  40  41  42  43  44  45  46  47 
+RMS radius =  2.09729e+00
+Ending molecule 4
+Beginning molecule 5
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  48  49  50  51  52  53  54  55  56  57  58  59 
+RMS radius =  2.13887e+00
+Ending molecule 5
+Beginning molecule 6
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  60  61  62  63  64  65  66  67  68  69  70  71 
+RMS radius =  2.15085e+00
+Ending molecule 6
+Beginning molecule 7
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  72  73  74  75  76  77  78  79  80  81  82  83 
+RMS radius =  2.14380e+00
+Ending molecule 7
+Beginning molecule 8
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  84  85  86  87  88  89  90  91  92  93  94  95 
+RMS radius =  2.17313e+00
+Ending molecule 8
+Beginning molecule 9
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list:  96  97  98  99 100 101 102 103 104 105 106 107 
+RMS radius =  2.14993e+00
+Ending molecule 9
+Beginning molecule 10
+Name: C6 H6 6(C-C) 6(H-C) 
+   Atom list: 108 109 110 111 112 113 114 115 116 117 118 119 
+RMS radius =  2.13338e+00
+Ending molecule 10
+Ending frame 17

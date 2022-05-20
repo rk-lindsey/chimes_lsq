@@ -1,0 +1,74 @@
+MOLECULE AND REACTION ANALYZER: $Revision: 93 $ 
+First version by Larry Fried
+Last Modified by $Author: fried1 $ on $Date: 2013-06-30 17:37:46 -0700 (Sun, 30 Jun 2013) $
+
+Using built-in settings
+Block averaging of 10 steps
+Molecules with more than 24 atoms are treated as a polymer
+Stop reading after frame 100000 (or end of file)
+Molecules with mass fractions less than 0.000100 will not be printed out
+The minimum molecular lifetime is 0.048000 picoseconds
+The number of iterations to use in finding a reaction is 10
+Reaction rates will be analyzed
+13 frames were read in
+
+Averages for molecules
+                             Molecule type                            Mol. Frac. Mass Fr.  Mol. Wt. Lifetime (ps) Radius (Ang.)
+
+
+
+Averages for transition states
+                             Transition state                            Mol. Frac. Mass Fr.  Mol. Wt. Lifetime (ps) Radius(Ang.)
+                                                  C6 H6 6(C-C) 6(H-C)     1.0000   1.0000   78.00  0.0130  2.0868
+
+The mole fraction sum of transition states =      1.0000
+The mass fraction sum of transition states =      1.0000
+
+Molecular weight histogram
+Wt (g/mol)    Probability
+ 7.8000e+01  1.0000e+00
+
+Total analyzed simulation time = 0.012 ps
+
+Reaction counts follow:
+Rate constants in units of (moles/cc)^order / second
+ Count    Rate Const. Reaction 
+
+
+Concentration history for C6 H6 6(C-C) 6(H-C) 
+Molecular weight      =   78.000
+Average mol fraction  =    1.000
+Average mass fraction =    1.000
+
+Time (ps)      Moles/cc   Mass Fraction   Radius
+ 5.0000e-03    1.1019e-02  1.0000e+00  2.0727
+
+Number of Polymer Molecules
+
+Time (ps)  Number of molecules
+  0.005   0.000
+
+Polymer Molecular Weight History
+
+Time (ps)  g/mol 
+  0.005   0.000
+
+Polymer C History
+Time(ps)  Avg. number of C atoms
+  0.005   0.000
+
+Polymer N History
+Time(ps)  Avg. number of N atoms
+  0.005   0.000
+
+Polymer O History
+Time(ps)  Number of O atoms
+  0.005   0.000
+
+Polymer F History
+Time(ps)  Number of F atoms
+  0.005   0.000
+
+Polymer H History
+Time(ps)  Number of H atoms
+  0.005   0.000

@@ -57,6 +57,12 @@ if [[ "$IS_LC" == "y" ]] ; then
 	cd - 1&>/dev/null
 fi
 
+# Compile molanal
+
+cd contrib/molanal/src
+make molanal.new
+cd - 1&>/dev/null
+
 # Clean up previous installation,
 
 ./uninstall.sh $PREFX
@@ -116,5 +122,5 @@ fi
 cd ..
 
 cp src/chimes_lsq.py build
-
+cp src/post_proc_chimes_lsq.py build
       
