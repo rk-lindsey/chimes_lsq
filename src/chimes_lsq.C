@@ -251,6 +251,9 @@ int main(int argc, char* argv[])
 	//
 	//////////////////////////////////////////////////
 	
+if (CONTROLS.NFRAMES > 0)
+{	
+	
 	cout.precision(16);				// WE SHOULD AT LEAST MOVE THIS TO SOMEWHERE MORE REASONABLE.. LIKE THE SECTION WHERE THE OUTPUT IS ACTUALLY PRINTED
 	
 	int istart, iend;
@@ -353,6 +356,32 @@ int main(int argc, char* argv[])
 	
 	A_MATRIX.PRINT_CONSTRAINTS(CONTROLS, CHARGE_CONSTRAINTS, ATOM_PAIRS.size() ) ;
 	A_MATRIX.CLEANUP_FILES(CONTROLS.SPLIT_FILES) ;
+}
+else
+{
+	cout << "No. frames set to 0; skipping A-mat construction, jumping directly to params.header/ff_groups.map print" << endl;
+	
+	int tot_params = CONTROLS.TOT_SNUM + CONTROLS.NUM_3B_CHEBY + CONTROLS.NUM_4B_CHEBY;
+	
+	ofstream dummy_paramfile;
+	ofstream dummy_forcefile;
+	ofstream dummy_bfile;
+	
+	dummy_paramfile.open("x.txt");
+	dummy_forcefile.open("Ax.txt");
+	dummy_bfile    .open("b.txt");
+	
+	for (int i=0; i<tot_params; i++)
+	{
+		dummy_paramfile << 0.0 << endl;
+		dummy_forcefile << 1.0 << endl;
+		dummy_bfile     << 1.0 << endl;
+	}
+	
+	dummy_paramfile.close();
+	dummy_forcefile.close();
+	dummy_bfile    .close();	
+}
 	
  	 //////////////////////////////////////////////////
 	//
@@ -451,7 +480,7 @@ static void print_bond_stats(vector<PAIRS> &ATOM_PAIRS, CLUSTER_LIST &TRIPS, CLU
 			if ( RANK == 0 ) 
 			{
 				cout << "		" << k << "	" << ATOM_PAIRS[k].ATM1TYP << 
-					" " << ATOM_PAIRS[k].ATM2TYP << "	" << fixed << setprecision(3) << sum << endl;
+					" " << ATOM_PAIRS[k].ATM2TYP << "	" << fixed << setprecision(8) << sum << endl;
 
 			}
 

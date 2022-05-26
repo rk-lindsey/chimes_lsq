@@ -1221,9 +1221,9 @@ static void print_for_dftbplus(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y  << endl; // yy
 	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z  << endl; // zz
 	
-dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X  << endl; // xy
-	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y  << endl; // xz
-	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[4].Z  << endl; // yz	
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y  << endl; // xy
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z  << endl; // xz
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z  << endl; // yz	
 	
 	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
 	{

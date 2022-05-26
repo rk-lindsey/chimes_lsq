@@ -383,6 +383,31 @@ void INPUT::PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS)
 				}
 				
 				MULTI.close();	
+				
+				// Clean up any files with zero frames 
+				if ( RANK == 0 ) 
+					cout << "Removing the following files with zero frames:" << endl;
+				
+				
+				// Need to update 
+				
+				for(int i=CONTROLS.INFILE_FRAMES.size()-1; i>=0; i--)
+    				{
+    					if (CONTROLS.INFILE_FRAMES[i] < 1)
+					{
+					
+						if ( RANK == 0 ) 
+							cout << "		-   " 
+							     << CONTROLS.INFILE[i]        << " with " 
+							     << CONTROLS.INFILE_FRAMES[i] << " frames." << endl;					
+						
+						CONTROLS.INFILE_FORCE_FLAGS .erase( CONTROLS.INFILE_FORCE_FLAGS .begin() + i );
+						CONTROLS.INFILE_STRESS_FLAGS.erase( CONTROLS.INFILE_STRESS_FLAGS.begin() + i );
+						CONTROLS.INFILE_ENERGY_FLAGS.erase( CONTROLS.INFILE_ENERGY_FLAGS.begin() + i );
+						CONTROLS.INFILE             .erase( CONTROLS.INFILE		.begin() + i );
+						CONTROLS.INFILE_FRAMES      .erase( CONTROLS.INFILE_FRAMES	.begin() + i );
+					}
+				}
 				break;			
 			}
 			else

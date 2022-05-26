@@ -359,6 +359,8 @@ public:
 	 int ATOMS;             		// Just the parent atoms.
 	 int ALL_ATOMS;         	   	// All atoms, including ghosts. 
 
+		int MY_ATOMS;			// Used for lammps linking. Specify how many atoms in SYS the process owns
+		int MY_ATOMS_START;		// Used for lammps linking. Specify what index along SYS starts the process' atoms
 	 BOX BOXDIM;			// Dimenions of the primitive box.
 	 XYZ STRESS_TENSORS;		// Only used for the diagonal components, xx, yy, zz
 	 XYZ STRESS_TENSORS_X;		// Used when all tensor components are requested ... used primarily for the lsq code. When used
