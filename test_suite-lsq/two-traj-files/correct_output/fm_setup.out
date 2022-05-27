@@ -8,6 +8,7 @@ Input file contents successfully stored.
 		...Will read from the following files: 
 		-   064_atoms_9_frames.xyzf with 9 frames.
 		-   128_atoms_5_frames.xyzf with 5 frames.
+Removing the following files with zero frames:
 	# WRAPTRJ #: true
 	# NFRAMES #: 14
 	# NLAYERS #: 1
@@ -3632,29 +3633,29 @@ Values will correspond to the following atom types, in order:
 	C 32
 	O 32
 	Minimum distances between atoms: (Angstr.)
-		0	C C	1.166
-		1	O O	1.209
-		2	C O	1.019
+		0	C C	1.16555315
+		1	O O	1.20892071
+		2	C O	1.01871027
 	Total number of configurations contributing to each pair type:
 		0	C C 29521
 		1	O O 29516
 		2	C O 60200
 	Minimum distances between atoms triplet pairs: (Angstr.)
-		0	CC CC CC 1.166 1.166 1.166 
-		1	CC CO CO 1.166 1.019 1.019 
-		2	CO CO OO 1.019 1.019 1.209 
-		3	OO OO OO 1.209 1.209 1.209 
+		0	CC CC CC 1.16555315 1.16555315 1.16555315 
+		1	CC CO CO 1.16555315 1.01871027 1.01871027 
+		2	CO CO OO 1.01871027 1.01871027 1.20892071 
+		3	OO OO OO 1.20892071 1.20892071 1.20892071 
 	Total number of configurations contributing to each triplet type:
 		0	CC CC CC 10822
 		1	CC CO CO 25120
 		2	CO CO OO 44150
 		3	OO OO OO 125481
 	Minimum distances between atoms quadruplet pairs: (Angstr.)
-		0	CC CC CC CC CC CC 1.166 1.166 1.166 1.166 1.166 1.166 
-		1	CC CC CO CC CO CO 1.166 1.166 1.019 1.166 1.019 1.019 
-		2	CC CO CO CO CO OO 1.166 1.019 1.019 1.019 1.019 1.209 
-		3	CO CO CO OO OO OO 1.019 1.019 1.019 1.209 1.209 1.209 
-		4	OO OO OO OO OO OO 1.255 1.209 1.209 1.209 1.209 1.209 
+		0	CC CC CC CC CC CC 1.16555315 1.16555315 1.16555315 1.16555315 1.16555315 1.16555315 
+		1	CC CC CO CC CO CO 1.16555315 1.16555315 1.01871027 1.16555315 1.01871027 1.01871027 
+		2	CC CO CO CO CO OO 1.16555315 1.01871027 1.01871027 1.01871027 1.01871027 1.20892071 
+		3	CO CO CO OO OO OO 1.01871027 1.01871027 1.01871027 1.20892071 1.20892071 1.20892071 
+		4	OO OO OO OO OO OO 1.25529228 1.20892071 1.20892071 1.20892071 1.20892071 1.20892071 
 	Total number of configurations contributing to each quadruplet type:
 		0	CC CC CC CC CC CC 107969
 		1	CC CC CO CC CO CO 492297

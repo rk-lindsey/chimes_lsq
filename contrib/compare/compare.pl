@@ -15,7 +15,7 @@ my $eps = 1.0e-04 ;
 my $verbose = 0 ;
 
 # Skip over uninteresting lines 
-my @ignore_words = qw(time date revision cheetah copyright parallel
+my @ignore_words = qw(sdelta time date revision cheetah copyright parallel
                      chunk process thread openmp memory mem_track) ;
 #my @skip_phrase_lines = ("Size of data/stack/text segments");
 my @ignore_phrases = ("allocation limits", 

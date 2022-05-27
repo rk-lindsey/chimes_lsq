@@ -1,0 +1,4 @@
+Difference found on line 181
+   :		cc 0.9880 8.0000 morse 1.3500 0.0100 1.0000e+04 0.0000e+00
+   :		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+Differences were found

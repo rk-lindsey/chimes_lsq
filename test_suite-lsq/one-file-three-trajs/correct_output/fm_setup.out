@@ -153,18 +153,18 @@ Values will correspond to the following atom types, in order:
 	N 384
 	H 128
 	Minimum distances between atoms: (Angstr.)
-		0	N N	1.001
-		1	H H	0.698
-		2	N H	0.842
+		0	N N	1.00076406
+		1	H H	0.69823479
+		2	N H	0.84202737
 	Total number of configurations contributing to each pair type:
 		0	N N 349798
 		1	H H 39098
 		2	N H 234288
 	Minimum distances between atoms triplet pairs: (Angstr.)
-		0	NN NN NN 1.001 1.001 1.001 
-		1	NH NH NN 0.842 0.845 1.001 
-		2	HH NH NH 1.027 0.842 0.842 
-		3	HH HH HH 1.027 1.027 1.027 
+		0	NN NN NN 1.00076406 1.00076406 1.00076406 
+		1	NH NH NN 0.84202737 0.84508537 1.00076406 
+		2	HH NH NH 1.02696071 0.84202737 0.84202737 
+		3	HH HH HH 1.02696071 1.02696071 1.02696071 
 	Total number of configurations contributing to each triplet type:
 		0	NN NN NN 506165
 		1	NH NH NN 552900

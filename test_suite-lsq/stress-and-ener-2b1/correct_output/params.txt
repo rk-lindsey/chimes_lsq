@@ -1,4 +1,4 @@
-! Date  2022-01-25
+! Date  2022-05-27
 !
 ! Number of variables            =  75
 ! Number of equations            =  14595
@@ -131,10 +131,6 @@ PAIRTYPE PARAMS: 5 H O
  10  -7.5850920441450e-01
  11   3.7911363881932e-01
  
-TRIPLET CHEBYSHEV PARAMS 
-
-QUADRUPLET CHEBYSHEV PARAMS 
-
 
 PAIRMAPS: 9
 0 CC

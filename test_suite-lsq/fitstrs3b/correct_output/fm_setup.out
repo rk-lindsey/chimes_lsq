@@ -153,18 +153,18 @@ Printing matrices...
 	...A matrix length (forces): 9504
 
 	Minimum distances between atoms: (Angstr.)
-		0	O O	2.173
-		1	H H	1.159
-		2	O H	0.843
+		0	O O	2.17286988
+		1	H H	1.15889134
+		2	O H	0.84265437
 	Total number of configurations contributing to each pair type:
 		0	O O 15303
 		1	H H 62627
 		2	O H 63714
 	Minimum distances between atoms triplet pairs: (Angstr.)
-		0	OO OO OO 2.173 2.173 2.173 
-		1	OH OH OO 0.843 0.843 2.173 
-		2	HH OH OH 1.159 0.843 0.843 
-		3	HH HH HH 1.159 1.159 1.159 
+		0	OO OO OO 2.17286988 2.17286988 2.17286988 
+		1	OH OH OO 0.84265437 0.84265437 2.17286988 
+		2	HH OH OH 1.15889134 0.84265437 0.84265437 
+		3	HH HH HH 1.15889134 1.15889134 1.15889134 
 	Total number of configurations contributing to each triplet type:
 		0	OO OO OO 60970
 		1	OH OH OO 424730

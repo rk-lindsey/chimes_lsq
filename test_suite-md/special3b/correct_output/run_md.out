@@ -174,7 +174,7 @@ Force field summary:
 		-1.0000 to 1.0000
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		CC 0.9880 8.0000 MORSE 1.3500 0.0100 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 7.2844e+01
@@ -190,7 +190,7 @@ Force field summary:
 		10 1.1599e+00
 		11 -2.6987e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		OO 9.1100e-01 8.0000e+00 MORSE 2.5500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 1.5973e+02
@@ -206,7 +206,7 @@ Force field summary:
 		10 1.1422e+00
 		11 -6.5407e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		CO 8.7600e-01 8.0000e+00 MORSE 1.1500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 3.9436e+01

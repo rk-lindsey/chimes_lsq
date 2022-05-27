@@ -28,6 +28,7 @@ Input file contents successfully stored.
 	# FRQENER #: 1
 	# PRNTFRC #: true
 		... and will be printed every 5 frames.
+       ... with energy/stress header before forces
 		... printing every 0.5 fs, 
 		... printing 400 frames. 
 	# PRNTBAD #: true
@@ -203,7 +204,7 @@ Force field summary:
 		-1.0000 to 1.0000
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		NN 0.7930 8.0000 MORSE 1.1500 0.1000 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 1.7341e+01
@@ -219,7 +220,7 @@ Force field summary:
 		10 5.6717e-02
 		11 2.1486e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		HH 4.5100e-01 8.0000e+00 MORSE 8.0000e-01 1.0000e-01 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 1.2506e+01
@@ -235,7 +236,7 @@ Force field summary:
 		10 -5.6264e-02
 		11 2.0387e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		NH 6.6600e-01 8.0000e+00 MORSE 1.0000e+00 1.0000e-01 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 1.7015e+00
@@ -6998,10 +6999,10 @@ Warning: (Step 14) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.7136
 Number of 3-body interactions = 482762
 Number of 4-body interactions = 768659
  Updating neighbor list on step: 15, with padding: 1.159
-Warning: (Step 15) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.731937175093895 0.766000000000000  89 472
-	...Penalty potential = 0.395222796131593
 Warning: (Step 15) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.745934621859453 0.766000000000000  114 429
 	...Penalty potential = 0.080787105061781
+Warning: (Step 15) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.731937175093895 0.766000000000000  89 472
+	...Penalty potential = 0.395222796131593
       16      1.60      55.6591922    -145.3161317     -89.6569395         18711.0     53.46554209
 Warning: (Step 16) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.754232795805884 0.766000000000000  89 472
 	...Penalty potential = 0.016293705756889
@@ -7562,10 +7563,10 @@ Warning: (Step 370) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.542
      378     37.80      38.2069942    -127.8629206     -89.6559263         12844.1     37.87050950
      379     37.90      38.1596640    -127.8154357     -89.6557717         12828.2     37.97698906
 Number of 3-body interactions = 576988
-Warning: (Step 379) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.756818503704162 0.766000000000000  35 151
-	...Penalty potential = 0.007739989829867
 Number of 4-body interactions = 1126661
  Updating neighbor list on step: 379, with padding: 1.350
+Warning: (Step 379) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.756818503704162 0.766000000000000  35 151
+	...Penalty potential = 0.007739989829867
      380     38.00      38.1101211    -127.7656744     -89.6555534         12811.5     38.09034554
 Warning: (Step 380) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.740854572437521 0.766000000000000  35 151
 	...Penalty potential = 0.158992659435162
@@ -7631,10 +7632,10 @@ Warning: (Step 407) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.762
 Warning: (Step 408) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.760492722017174 0.766000000000000  94 351
 	...Penalty potential = 0.001670363513160
      409     40.90      37.7367212    -127.3920504     -89.6553292         12686.0     37.48715278
-Warning: (Step 409) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.761699609175024 0.766000000000000  94 351
-	...Penalty potential = 0.000795286810319
 Warning: (Step 409) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.760425841930843 0.766000000000000  50 341
 	...Penalty potential = 0.001731959930195
+Warning: (Step 409) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.761699609175024 0.766000000000000  94 351
+	...Penalty potential = 0.000795286810319
      410     41.00      37.7053763    -127.3604828     -89.6551065         12675.4     37.44930854
 Warning: (Step 410) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.756194670773715 0.766000000000000  50 341
 	...Penalty potential = 0.009427282918077
@@ -8082,10 +8083,10 @@ Warning: (Step 682) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.524
 Warning: (Step 683) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.530943674504055 0.551000000000000  54 93
 	...Penalty potential = 0.080677811275193
      684     68.40      38.8685357    -128.5249976     -89.6564619         13066.5     41.59776443
-Warning: (Step 684) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.765984137343996 0.766000000000000  112 153
-	...Penalty potential = 0.000000000039914
 Warning: (Step 684) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.540147283627358 0.551000000000000  54 93
 	...Penalty potential = 0.012782486997310
+Warning: (Step 684) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.765984137343996 0.766000000000000  112 153
+	...Penalty potential = 0.000000000039914
      685     68.50      38.8252462    -128.4816085     -89.6563623         13051.9     41.80346671
 Warning: (Step 685) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.747665528753111 0.766000000000000  112 153
 	...Penalty potential = 0.061631845044234
@@ -8343,10 +8344,10 @@ Warning: (Step 809) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.505
 Number of 3-body interactions = 377034
 Number of 4-body interactions = 514868
  Updating neighbor list on step: 810, with padding: 0.926
-Warning: (Step 810) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.759880396580672 0.766000000000000  115 301
-	...Penalty potential = 0.002291763698142
 Warning: (Step 810) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.508525155935529 0.551000000000000  38 79
 	...Penalty potential = 0.766293919431202
+Warning: (Step 810) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.759880396580672 0.766000000000000  115 301
+	...Penalty potential = 0.002291763698142
      811     81.10      37.7042396    -127.3597959     -89.6555563         12675.1     40.40654160
 Warning: (Step 811) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.515618377232426 0.551000000000000  38 79
 	...Penalty potential = 0.442928110221817
@@ -9619,10 +9620,10 @@ Warning: (Step 1541) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.59
 	...Penalty potential = 263.958474082075895
     1542    154.20      37.7615033    -127.4178997     -89.6563964         12694.3     38.81164775
 Number of 3-body interactions = 375648
-Warning: (Step 1542) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.598909026477457 0.893000000000000  227 341
-	...Penalty potential = 254.357814625288114
 Number of 4-body interactions = 531667
  Updating neighbor list on step: 1542, with padding: 0.908
+Warning: (Step 1542) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.598909026477457 0.893000000000000  227 341
+	...Penalty potential = 254.357814625288114
     1543    154.30      37.8487880    -127.5053288     -89.6565408         12723.7     38.89737321
 Warning: (Step 1543) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.604028232928808 0.893000000000000  227 341
 	...Penalty potential = 241.304955637208565
@@ -9723,10 +9724,10 @@ Warning: (Step 1571) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.66
 Number of 3-body interactions = 379724
 Number of 4-body interactions = 546127
  Updating neighbor list on step: 1572, with padding: 0.922
-Warning: (Step 1572) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.713778213012754 0.766000000000000  122 162
-	...Penalty potential = 1.424148205070828
 Warning: (Step 1572) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.650985248146245 0.893000000000000  227 341
 	...Penalty potential = 141.750799406831931
+Warning: (Step 1572) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.713778213012754 0.766000000000000  122 162
+	...Penalty potential = 1.424148205070828
     1573    157.30      37.8090898    -127.4661628     -89.6570730         12710.3     41.33396485
 Warning: (Step 1573) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.703505776257953 0.766000000000000  122 162
 	...Penalty potential = 2.440729407328840
@@ -9807,14 +9808,14 @@ Warning: (Step 1586) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.65
 Number of 3-body interactions = 416933
 Number of 4-body interactions = 652147
  Updating neighbor list on step: 1587, with padding: 1.014
-Warning: (Step 1587) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.761103949771069 0.766000000000000  114 396
-	...Penalty potential = 0.001173647272584
-Warning: (Step 1587) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.664482158893355 0.893000000000000  227 341
-	...Penalty potential = 119.332939161650870
 Warning: (Step 1587) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.741850965448021 0.766000000000000  43 184
 	...Penalty potential = 0.140831342295034
+Warning: (Step 1587) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.761103949771069 0.766000000000000  114 396
+	...Penalty potential = 0.001173647272584
 Warning: (Step 1587) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.490924188411590 0.551000000000000  105 127
 	...Penalty potential = 2.168198001219992
+Warning: (Step 1587) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.664482158893355 0.893000000000000  227 341
+	...Penalty potential = 119.332939161650870
     1588    158.80      37.3860584    -127.0423187     -89.6562603         12568.1     38.72806462
 Warning: (Step 1588) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.742687953226021 0.766000000000000  43 184
 	...Penalty potential = 0.126689673653453
@@ -10053,10 +10054,10 @@ Warning: (Step 1646) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.68
 Number of 3-body interactions = 402511
 Number of 4-body interactions = 611931
  Updating neighbor list on step: 1647, with padding: 0.976
-Warning: (Step 1647) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.674337276611553 0.893000000000000  227 341
-	...Penalty potential = 104.550053283046665
 Warning: (Step 1647) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.472894394710751 0.551000000000000  73 122
 	...Penalty potential = 4.764821185967845
+Warning: (Step 1647) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.674337276611553 0.893000000000000  227 341
+	...Penalty potential = 104.550053283046665
     1648    164.80      37.0602107    -126.7171125     -89.6569018         12458.6     40.03981797
 Warning: (Step 1648) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.492717071924931 0.551000000000000  73 122
 	...Penalty potential = 1.979812611849474
@@ -10331,10 +10332,10 @@ Warning: (Step 1721) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.75
 	...Penalty potential = 24.142815618126718
     1722    172.20      37.0613203    -126.7201944     -89.6588741         12458.9     38.40522341
 Number of 3-body interactions = 490143
-Warning: (Step 1722) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.747500112131956 0.893000000000000  227 341
-	...Penalty potential = 30.802642534208935
 Number of 4-body interactions = 862747
  Updating neighbor list on step: 1722, with padding: 1.169
+Warning: (Step 1722) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.747500112131956 0.893000000000000  227 341
+	...Penalty potential = 30.802642534208935
     1723    172.30      36.9873840    -126.6458643     -89.6584803         12434.1     38.80326877
 Warning: (Step 1723) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.735270784840983 0.893000000000000  227 341
 	...Penalty potential = 39.240671176138569
@@ -10845,10 +10846,10 @@ Warning: (Step 1858) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.66
 Number of 3-body interactions = 417572
 Number of 4-body interactions = 640413
  Updating neighbor list on step: 1859, with padding: 1.018
-Warning: (Step 1859) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.427165445052249 0.551000000000000  43 47
-	...Penalty potential = 18.990025285095989
 Warning: (Step 1859) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.749249947905302 0.766000000000000  75 380
 	...Penalty potential = 0.046994657225925
+Warning: (Step 1859) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.427165445052249 0.551000000000000  43 47
+	...Penalty potential = 18.990025285095989
 Warning: (Step 1859) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.662378844194430 0.893000000000000  227 341
 	...Penalty potential = 122.658438918363927
     1860    186.00      37.3022682    -126.9602109     -89.6579427         12539.9     35.86705318
@@ -11052,10 +11053,10 @@ Warning: (Step 1904) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.63
 	...Penalty potential = 169.552179470653869
     1905    190.50      37.5734910    -127.2292603     -89.6557693         12631.1     37.80375491
 Number of 3-body interactions = 432548
-Warning: (Step 1905) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.632679951996058 0.893000000000000  227 341
-	...Penalty potential = 176.409856639475606
 Number of 4-body interactions = 675240
  Updating neighbor list on step: 1905, with padding: 1.053
+Warning: (Step 1905) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.632679951996058 0.893000000000000  227 341
+	...Penalty potential = 176.409856639475606
     1906    190.60      37.6062582    -127.2620561     -89.6557980         12642.1     37.87262007
 Warning: (Step 1906) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.629861262669868 0.893000000000000  227 341
 	...Penalty potential = 182.202511565430797
@@ -11354,10 +11355,10 @@ Warning: (Step 1981) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.76
 Number of 3-body interactions = 375898
 Number of 4-body interactions = 511786
  Updating neighbor list on step: 1982, with padding: 0.917
-Warning: (Step 1982) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.706360319147356 0.766000000000000  21 407
-	...Penalty potential = 2.121318758081959
 Warning: (Step 1982) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.751096771235957 0.893000000000000  227 341
 	...Penalty potential = 28.574381028385925
+Warning: (Step 1982) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.706360319147356 0.766000000000000  21 407
+	...Penalty potential = 2.121318758081959
     1983    198.30      37.9457381    -127.6048563     -89.6591182         12756.2     40.26004894
 Warning: (Step 1983) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.720321838174444 0.766000000000000  21 407
 	...Penalty potential = 0.953072319465479
@@ -11373,10 +11374,10 @@ Warning: (Step 1984) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.88
     1985    198.50      38.3217229    -127.9760863     -89.6543634         12882.6     41.10276603
 Warning: (Step 1985) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.750710776333664 0.766000000000000  21 407
 	...Penalty potential = 0.035740144332444
-Warning: (Step 1985) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.859268848877049 0.893000000000000  138 361
-	...Penalty potential = 0.383789851933808
 Warning: (Step 1985) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.712382411360595 0.893000000000000  227 341
 	...Penalty potential = 58.922358158010944
+Warning: (Step 1985) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.859268848877049 0.893000000000000  138 361
+	...Penalty potential = 0.383789851933808
     1986    198.60      38.5495936    -128.1993769     -89.6497833         12959.2     41.24458370
 Warning: (Step 1986) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.700855015546533 0.893000000000000  227 341
 Warning: (Step 1986) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.833755028224835 0.893000000000000  138 361
@@ -11393,9 +11394,9 @@ Warning: (Step 1988) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.76
 	...Penalty potential = 21.480088208692312
 	...Penalty potential = 94.867341588962333
     1989    198.90      40.0123955    -129.7473683     -89.7349728         13451.0     45.95363118
+Warning: (Step 1989) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.673384488836925 0.893000000000000  227 341
 Warning: (Step 1989) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.723352150976584 0.893000000000000  138 361
 	...Penalty potential = 48.825317119180930
-Warning: (Step 1989) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.673384488836925 0.893000000000000  227 341
 	...Penalty potential = 105.922697329382061
     1990    199.00      40.0184695    -129.7110983     -89.6926288         13453.0     47.94562143
 Warning: (Step 1990) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.666664589804623 0.893000000000000  227 341
@@ -11403,20 +11404,20 @@ Warning: (Step 1990) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.68
 	...Penalty potential = 91.772823091716319
 	...Penalty potential = 115.946465461503308
     1991    199.10      39.8394951    -129.5234438     -89.6839488         13392.9     48.28294797
-Warning: (Step 1991) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.661090293484794 0.893000000000000  227 341
 Warning: (Step 1991) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.645600856367615 0.893000000000000  138 361
-	...Penalty potential = 151.423951780830379
+Warning: (Step 1991) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.661090293484794 0.893000000000000  227 341
 	...Penalty potential = 124.725938041149533
+	...Penalty potential = 151.423951780830379
     1992    199.20      39.6415588    -129.3236927     -89.6821339         13326.3     48.22785924
 Warning: (Step 1992) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.656594001092426 0.893000000000000  227 341
 Warning: (Step 1992) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.609686730204276 0.893000000000000  138 361
 	...Penalty potential = 227.405387438852017
 	...Penalty potential = 132.122103156516403
     1993    199.30      39.4608920    -129.1424709     -89.6815790         13265.6     48.02825752
-Warning: (Step 1993) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.653106634571963 0.893000000000000  227 341
 Warning: (Step 1993) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.576282409376641 0.893000000000000  138 361
-	...Penalty potential = 317.699517169869694
+Warning: (Step 1993) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.653106634571963 0.893000000000000  227 341
 	...Penalty potential = 138.055817318232869
+	...Penalty potential = 317.699517169869694
     1994    199.40      39.3085167    -128.9897334     -89.6812168         13214.4     47.73722620
 Warning: (Step 1994) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.650563595730701 0.893000000000000  227 341
 Warning: (Step 1994) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.545781266797344 0.893000000000000  138 361
@@ -11426,9 +11427,9 @@ Warning: (Step 1994) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.54
 Warning: (Step 1995) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.545050108776212 0.551000000000000  46 101
 	...Penalty potential = 0.002106333223617
 Warning: (Step 1995) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.518578591873193 0.893000000000000  138 361
-	...Penalty potential = 524.906579744275405
 Warning: (Step 1995) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.648909353012801 0.893000000000000  227 341
 	...Penalty potential = 145.429802925878505
+	...Penalty potential = 524.906579744275405
     1996    199.60      39.1136070    -128.7942554     -89.6806483         13148.9     46.87960892
 Warning: (Step 1996) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.540883509184476 0.551000000000000  46 101
 	...Penalty potential = 0.010353559287536
@@ -11442,16 +11443,16 @@ Number of 4-body interactions = 505253
  Updating neighbor list on step: 1997, with padding: 0.911
 Warning: (Step 1997) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.540944577525908 0.551000000000000  46 101
 	...Penalty potential = 0.010167190619852
+Warning: (Step 1997) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.648113292734254 0.893000000000000  227 341
 Warning: (Step 1997) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.475566685506025 0.893000000000000  138 361
 	...Penalty potential = 727.379938430628613
-Warning: (Step 1997) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.648113292734254 0.893000000000000  227 341
 	...Penalty potential = 146.857332433292243
     1998    199.80      39.0900928    -128.7710957     -89.6810029         13140.9     45.51311305
 Warning: (Step 1998) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.545233748764150 0.551000000000000  46 101
 	...Penalty potential = 0.001917258545189
+Warning: (Step 1998) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.648936810459116 0.893000000000000  227 341
 Warning: (Step 1998) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.460403657897215 0.893000000000000  138 361
 	...Penalty potential = 809.559043464228694
-Warning: (Step 1998) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.648936810459116 0.893000000000000  227 341
 	...Penalty potential = 145.380730805865937
     1999    199.90      39.1383988    -128.8201805     -89.6817817         13157.2     44.57269805
 Warning: (Step 1999) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.650580629013270 0.893000000000000  227 341

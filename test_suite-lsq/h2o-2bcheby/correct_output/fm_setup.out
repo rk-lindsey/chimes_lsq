@@ -81,9 +81,9 @@ Printing matrices...
 	...A matrix length (forces): 28512
 
 	Minimum distances between atoms: (Angstr.)
-		0	O O	2.039
-		1	H H	1.082
-		2	O H	0.820
+		0	O O	2.03865452
+		1	H H	1.08241130
+		2	O H	0.81997314
 	Total number of configurations contributing to each pair type:
 		0	O O 58201
 		1	H H 236732

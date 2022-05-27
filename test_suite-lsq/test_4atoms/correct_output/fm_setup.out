@@ -4093,15 +4093,15 @@ Printing matrices...
 	...A matrix length (forces): 3000
 
 	Minimum distances between atoms: (Angstr.)
-		0	C C	1.305
+		0	C C	1.30452096
 	Total number of configurations contributing to each pair type:
 		0	C C 1500
 	Minimum distances between atoms triplet pairs: (Angstr.)
-		0	CC CC CC 1.305 2.071 1.305 
+		0	CC CC CC 1.30452096 2.07053666 1.30511479 
 	Total number of configurations contributing to each triplet type:
 		0	CC CC CC 1000
 	Minimum distances between atoms quadruplet pairs: (Angstr.)
-		0	CC CC CC CC CC CC 1.305 2.123 2.211 1.310 2.071 1.305 
+		0	CC CC CC CC CC CC 1.30452096 2.12287698 2.21070583 1.30993408 2.07053666 1.30511479 
 	Total number of configurations contributing to each quadruplet type:
 		0	CC CC CC CC CC CC 250
 ...matrix printing complete: 
