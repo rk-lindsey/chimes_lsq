@@ -115,12 +115,32 @@ echo "compiling with flags: $my_flags"
 cmake $my_flags ..
 make
 
+cp ../src/chimes_lsq.py .
+cp ../src/post_proc_chimes_lsq.py .
+
+if [ $DOMPI -eq 1 ] ;then
+
+	# Create some executables for the ALD
+	
+	cp chimes_md chimes_md-mpi
+	
+	my_flags=`echo $my_flags | awk '{for(i=1;i<=NF; i++){if($i~"DUSE_MPI=1"){$i="-DUSE_MPI=0"}}{print}}'`
+	
+	cmake $my_flags ..
+	make
+	
+	cp chimes_md chimes_md-serial
+	cp chimes_md-mpi chimes_md
+fi
+	
+	
+
+
 if [ ! -z $PREFX ] ; then
         make install
+	cp src/chimes_lsq.py $PREFX
+	cp src/post_proc_chimes_lsq.py $PREFX
 fi
 
 cd ..
 
-cp src/chimes_lsq.py build
-cp src/post_proc_chimes_lsq.py build
-      
