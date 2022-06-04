@@ -10,6 +10,7 @@
 #
 ###############################################################
 
+
 # Common function for test script initialization.
 source ../src/bash/init_vars.sh
 DLARS_PATH=../contrib/dlars/src
@@ -25,6 +26,24 @@ then
 else
 	 JOBS=$1
 	 MAKE_JOBS=$2
+fi
+
+
+# Determine computing environment
+
+echo "Are you on a Livermore Computing system? (y/n)"
+read IS_LC
+
+
+# Setup MKL
+
+if [[ "$IS_LC" == "y" ]] ; then
+	module load mkl
+else
+	echo "Will not run make jobs: "
+	echo "Automated DLARS compilation currently requires access to "
+	echo "a Livermore Computing system"
+	MAKE_JOBS=""
 fi
 
 TESTSU_BASE=`pwd -P` #`dirname $0`
@@ -210,7 +229,6 @@ do
 					echo " "
 			
 					TECHNICAL_PASS_STATUS=`grep "No" tol_status.dat`
-W
 			
 					if [[ "$TECHNICAL_PASS_STATUS" != *"No"* ]]; then
 						 TECHNICAL_PASS=false

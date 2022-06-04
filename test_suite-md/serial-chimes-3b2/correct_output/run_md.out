@@ -207,7 +207,6 @@ chimesFF: 	O O r_cut_in: 1.93900 r_cut_out: 4.30000 MORSE 2.70000
 chimesFF: 	H H r_cut_in: 0.98200 r_cut_out: 4.10000 MORSE 1.60000
 chimesFF: 	O H r_cut_in: 0.72000 r_cut_out: 4.20000 MORSE 1.00000
 chimesFF: Will use cutoff style CUBIC
-
 chimesFF: Will use penalty distance: 0.10000
 chimesFF: Will use penalty scaling: 100000.00000
 chimesFF: Read 2B parameters for pair: 0 O O
@@ -1080,7 +1079,7 @@ Force field summary:
 		SERIAL_CHIMES 10
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta......cheby lambda
+		pair type...smin...smax......cheby lambda
 		OO 1.93900 4.30000 
 		Parameters: 
 		0 4.56671
@@ -1094,7 +1093,7 @@ Force field summary:
 		8 -6.10972
 		9 2.11124
 
-		pair type...smin...smax...sdelta......cheby lambda
+		pair type...smin...smax......cheby lambda
 		HH 0.98200 4.10000 MORSE 1.60000 0.10000 1.00000e+05 0.00000e+00
 		Parameters: 
 		0 5.05618e+01
@@ -1108,7 +1107,7 @@ Force field summary:
 		8 3.34640e-01
 		9 -5.40401e-01
 
-		pair type...smin...smax...sdelta......cheby lambda
+		pair type...smin...smax......cheby lambda
 		OH 7.20000e-01 4.20000e+00 MORSE 1.00000e+00 1.00000e-01 1.00000e+05 0.00000e+00
 		Parameters: 
 		0 -1.45284e+01

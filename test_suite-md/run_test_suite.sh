@@ -93,15 +93,15 @@ do
 		 for j in run_md.out traj.gen output.xyz 
 		 do
 			  if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-					diff current_output/$j correct_output/$j > current_output/$j-diff.txt
+			  
+			  		perl ../../contrib/compare/compare.pl correct_output/$j current_output/$j > diff-$j.out
+					NO_DIFF_LINES=`cat diff-$j.out | wc -l`
 					
-					LINES=`wc -l current_output/$j-diff.txt | awk '{print $1}'`
-					
-					if [ $LINES -gt 0 ] ; then
+					if [ $NO_DIFF_LINES -gt 0 ] ; then
 						 echo " "
 						 echo "		Differences found in $j files:"
 						 echo " "
-						 cat current_output/$j-diff.txt
+						 cat diff-$j.out
 
 						 PASS=false
 						 ALL_PASS=false
@@ -180,16 +180,17 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 				for j in run_md.out forceout-labeled.txt
 				do
 					 if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-						  diff current_output/$j correct_output/$j > current_output/$j-diff.txt
-						  
-						  LINES=`wc -l $j-diff.txt | awk '{print $1}'`
-						  
-						  if [ $LINES -gt 0 ] ; then
+					 
+					 	perl ../../contrib/compare/compare.pl correct_output/$j current_output/$j > $j-diff.txt
+						NO_DIFF_LINES=`cat $j-diff.txt | wc -l`
+					 
+
+						  if [ $NO_DIFF_LINES -gt 0 ] ; then
 								echo " "
 								echo "		Differences found in $j files:"
 								echo " "
 
-								cat current_output/$j-diff.txt
+								cat $j-diff.txt
 
 								PASS=false
 								ALL_PASS=false

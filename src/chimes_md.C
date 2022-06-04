@@ -836,7 +836,7 @@ int main(int argc, char* argv[])
 						 "(kcal/mol)", "(K)", "(GPa)");
 
 			snprintf(stat_buf, STAT_BUF_SZ, "%8s %14s %14s %14s %14s %14s %14s ",
-							 " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
+							 "# ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
 
 			STATISTICS << stat_buf ;
 			
@@ -1221,9 +1221,9 @@ static void print_for_dftbplus(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y  << endl; // yy
 	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z  << endl; // zz
 	
-dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X  << endl; // xy
-	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y  << endl; // xz
-	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[4].Z  << endl; // yz	
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y  << endl; // xy
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z  << endl; // xz
+	dftbplus_file << scientific << setw(PRINT_WIDTH) << setprecision(PRINT_PRECISION) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z  << endl; // yz	
 	
 	for ( int ia = 0; ia < SYSTEM.ATOMS; ia++ ) 
 	{

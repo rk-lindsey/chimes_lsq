@@ -248,8 +248,8 @@ Interactions corresponding to specific atom triplets can be excluded from the fi
 .. code-block:: bash
 
   EXCLUDE 3B INTERACTION: 2
-  OOOOOO
-  COCOOO
+  O O O 
+  C O O
   
 
 ``CHGCONS``

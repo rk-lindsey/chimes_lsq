@@ -207,7 +207,7 @@ Force field summary:
 		-1.0000 to 1.0000
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		OO 1.9000 5.0000 MORSE 1.7500 0.0100 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -1.7654e+03
@@ -225,7 +225,7 @@ Force field summary:
 		12 -1.2423e+01
 		13 2.5460e+00
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		HH 9.0000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -1.3411e+02
@@ -243,7 +243,7 @@ Force field summary:
 		12 1.6384e-01
 		13 8.5018e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		OH 7.0000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 9.0444e+01
@@ -740,10 +740,10 @@ Warning: (Step 40) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.8913
 	...Penalty potential = 0.065225592591284
       41      5.12       6.6466156     -13.7378172      -7.0912016          2253.5     23.97468164     -7.4392010
 Number of 3-body interactions = 471717
-Warning: (Step 41) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.812512135011792 0.910000000000000  13 82
-	...Penalty potential = 9.265133427037826
 Number of 4-body interactions = 2651375
  Updating neighbor list on step: 41, with padding: 1.391
+Warning: (Step 41) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.812512135011792 0.910000000000000  13 82
+	...Penalty potential = 9.265133427037826
       42      5.25       7.1933894     -13.8979744      -6.7045850          2438.9     29.29732805     -7.0772250
 Warning: (Step 42) Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.736048670045291 0.910000000000000  13 82
 	...Penalty potential = 52.636046335107245

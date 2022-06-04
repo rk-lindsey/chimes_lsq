@@ -138,7 +138,7 @@ Force field summary:
 		LJ 2
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta...
+		pair type...smin...smax...
 		OO 0.1000 4.0100 
 		Parameters: 
 		0 1.0000

@@ -23,7 +23,22 @@ if test "x$ok_run" != "xyes" ; then
 	echo 'Quitting'
 	exit 0
 fi
-	
+# Determine computing environment
+
+echo "Are you on a Livermore Computing system? (y/n)"
+read IS_LC
+
+
+# Setup MKL
+
+if [[ "$IS_LC" == "y" ]] ; then
+	module load mkl
+else
+	echo "Will not run make jobs: "
+	echo "Automated DLARS compilation currently requires access to "
+	echo "a Livermore Computing system"
+	MAKE_JOBS=""
+fi	
 
 # Run the job with the new version of the python code (Compatible with non-generalized md code)
 #
