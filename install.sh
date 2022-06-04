@@ -123,6 +123,7 @@ if [ $DOMPI -eq 1 ] ;then
 	# Create some executables for the ALD
 	
 	cp chimes_md chimes_md-mpi
+	cp chimes_lsq chimes_lsq.tmp
 	
 	my_flags=`echo $my_flags | awk '{for(i=1;i<=NF; i++){if($i~"DUSE_MPI=1"){$i="-DUSE_MPI=0"}}{print}}'`
 	
@@ -131,6 +132,7 @@ if [ $DOMPI -eq 1 ] ;then
 	
 	cp chimes_md chimes_md-serial
 	cp chimes_md-mpi chimes_md
+	mv chimes_lsq.tmp chimes_lsq
 fi
 	
 	
