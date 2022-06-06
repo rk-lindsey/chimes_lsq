@@ -518,9 +518,9 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 
 	// Make sure that every process has closed its files.
 
-	#ifdef USE_MPI
+#ifdef USE_MPI
 		MPI_Barrier(MPI_COMM_WORLD);
-	#endif
+#endif
 
 	if ( RANK == 0 ) 
 	{
@@ -596,6 +596,12 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 		out << param_count << " " << total << endl ;
 		out.close() ;
 	}
+
+#ifdef USE_MPI
+  	// Add a barrier to prevent possible timeouts.
+		MPI_Barrier(MPI_COMM_WORLD);
+#endif
+	
 }
 	
 void A_MAT::OPEN_FILES(const JOB_CONTROL &CONTROLS)
