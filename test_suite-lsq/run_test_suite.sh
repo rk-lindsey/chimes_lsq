@@ -254,11 +254,6 @@ for job in $MAKE_JOBS ; do
 	continue 
     fi
 	 
-    if [[ $job == "lsq2" ]] ; then
-    	cd ../contrib/dlars/src
-	make
-	cd - 
-    fi	 
     cd $job
 	 
     if make RUN_JOB="$RUN_JOB" PYTHON=$PYTHON all ; then
