@@ -14,11 +14,6 @@ DOMPI=${4-1}  # Compile with MPI support by default
 
 echo "Performing a fresh install"
 
-echo "Imports directory will be deleted and re-cloned/installed. Proceed? (y/n)"
-read PROCEED
-if [[ "$PROCEED" == "n" ]] ; then
-	exit 0
-fi
 ##rm -rf imports
 
 
@@ -33,8 +28,9 @@ read IS_LC
 ICC=`which g++`
 
 if [[ "$IS_LC" == "y" ]] ; then
-	module load intel/18.0.1
-	module load impi/2018.0
+    module load cmake/3.14.5
+    module load intel/18.0.1
+    module load impi/2018.0
 	
 	ICC=`which icc`
 fi
@@ -44,7 +40,11 @@ MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mp
 
 # Grab and install dependencies
 
-./clone-all.sh 1 $IS_LC
+if [[ ! -d imports ]] ; then
+    ./clone-all.sh 1 $IS_LC
+else
+    echo 'Will use pre-existing imports directory'
+fi
 
 # Compile dlars
 
