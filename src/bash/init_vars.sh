@@ -34,7 +34,6 @@ function init_test_vars
 		  test_4atoms.2 
 		  special3b 
 		  special4b
-                  split_files
 		  stress-and-ener-4b
                   stress-and-ener-4b2
 		  stress-and-ener-2b1
