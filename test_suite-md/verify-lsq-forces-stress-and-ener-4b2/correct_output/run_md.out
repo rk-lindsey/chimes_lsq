@@ -50,22 +50,22 @@ Reading initial coordinates and forces...
      ...Read box dimensions: 
        Box information (base units: Angstroms and radians): 
        Orthorhombic:                   1
-       Cell vectors (a)                10.6499996185303 0 0
+       Cell vectors (a)                10.65 0 0
        Cell vectors (b)                0 10.65 0
        Cell vectors (c)                0 0 10.65
        Layers:                         1
-       Ghost cell vectors (a) 	        31.9499988555908 0 0
+       Ghost cell vectors (a) 	        31.95 0 0
        Ghost cell vectors (a) 	        0 31.95 0
        Ghost cell vectors (a) 	        0 0 31.95
-       Invr. cell vectors (a) 	        0.0938967169782868 -0 0
+       Invr. cell vectors (a) 	        0.0938967136150235 -0 0
        Invr. cell vectors (b) 	        -0 0.0938967136150235 -0
        Invr. cell vectors (c) 	        0 -0 0.0938967136150235
-       Lat. constants (a,b,c) 	        10.6499996185303 10.65 10.65
+       Lat. constants (a,b,c) 	        10.65 10.65 10.65
        Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
-       Cell extents (x,y,z)            10.6499996185303 10.65 10.65
-       LMP cell lengths (lx,ly,lz)     10.6499996185303 10.65 10.65
+       Cell extents (x,y,z)            10.65 10.65 10.65
+       LMP cell lengths (lx,ly,lz)     10.65 10.65 10.65
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
-       Cell volume                     1207.94958173275
+       Cell volume                     1207.949625
 
 	...Read xx, yy, & zz stress tensors: -1.265387 -0.402279 2.93781
 	...Read xy, xz, & yz stress tensors: 3.227427 -0.205191 -1.287371
@@ -75,22 +75,22 @@ Reading initial coordinates and forces...
      ...Updated simulation box dimensions: 
        Box information (base units: Angstroms and radians): 
        Orthorhombic:                   1
-       Cell vectors (a)                10.6499996185303 0 0
+       Cell vectors (a)                10.65 0 0
        Cell vectors (b)                0 10.65 0
        Cell vectors (c)                0 0 10.65
        Layers:                         1
-       Ghost cell vectors (a) 	        31.9499988555908 0 0
+       Ghost cell vectors (a) 	        31.95 0 0
        Ghost cell vectors (a) 	        0 31.95 0
        Ghost cell vectors (a) 	        0 0 31.95
-       Invr. cell vectors (a) 	        0.0938967169782868 -0 0
+       Invr. cell vectors (a) 	        0.0938967136150235 -0 0
        Invr. cell vectors (b) 	        -0 0.0938967136150235 -0
        Invr. cell vectors (c) 	        0 -0 0.0938967136150235
-       Lat. constants (a,b,c) 	        10.6499996185303 10.65 10.65
+       Lat. constants (a,b,c) 	        10.65 10.65 10.65
        Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
-       Cell extents (x,y,z)            10.6499996185303 10.65 10.65
-       LMP cell lengths (lx,ly,lz)     10.6499996185303 10.65 10.65
+       Cell extents (x,y,z)            10.65 10.65 10.65
+       LMP cell lengths (lx,ly,lz)     10.65 10.65 10.65
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
-       Cell volume                     1207.94958173275
+       Cell volume                     1207.949625
 
    ...read complete for file phen_res-300F_dt-0.1_fullstress_energy5F.xyzf
 
@@ -1347,8 +1347,8 @@ Force field summary:
 		      65      3   1   0         64              38       1.2135
 		      66      3   0   2         66              39       -4.4587
 		      67      3   2   0         66              39       -4.4587
-		      68      3   0   3         68              40       1.7822
-		      69      3   3   0         68              40       1.7822
+		      68      3   0   3         68              40       1.7823
+		      69      3   3   0         68              40       1.7823
 		      70      3   0   4         70              41       1.2259
 		      71      3   4   0         70              41       1.2259
 		      72      3   1   1         72              42       -3.8248
@@ -4353,8 +4353,8 @@ Force field summary:
 		      139     0   1   2   1   2   2         139             75       2.7452
 		      140     0   1   2   2   0   0         140             76       -0.1678
 		      141     0   2   0   1   2   0         140             76       -0.1678
-		      142     0   1   2   2   0   1         142             77       1.1016
-		      143     0   2   0   1   2   1         142             77       1.1016
+		      142     0   1   2   2   0   1         142             77       1.1015
+		      143     0   2   0   1   2   1         142             77       1.1015
 		      144     0   1   2   2   0   2         144             78       3.8951
 		      145     0   2   0   1   2   2         144             78       3.8951
 		      146     0   1   2   2   1   0         146             79       0.2549
@@ -11472,6 +11472,6 @@ BEGIN SIMULATION:
 RANK: 0 RESET RCUT_PADDING TO: 0.0000000000
 Number of 3-body interactions = 547768
 Number of 4-body interactions = 332611
-RMS force error = 0.000045
-RMS stress error = 0.000019 GPa 
-Absolute energy error = 0.000001 kcal/mol/atom 
+RMS force error = 0.000010
+RMS stress error = 0.000018 GPa 
+Absolute energy error = 0.000005 kcal/mol/atom 
