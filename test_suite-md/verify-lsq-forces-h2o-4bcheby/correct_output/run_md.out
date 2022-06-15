@@ -46,43 +46,43 @@ Reading initial coordinates and forces...
      ...Read box dimensions: 
        Box information (base units: Angstroms and radians): 
        Orthorhombic:                   1
-       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (a)                8.6091309 0 0
        Cell vectors (b)                0 8.6091309 0
        Cell vectors (c)                0 0 8.6091309
        Layers:                         1
-       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        25.8273927 0 0
        Ghost cell vectors (a) 	        0 25.8273927 0
        Ghost cell vectors (a) 	        0 0 25.8273927
-       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
        Invr. cell vectors (b) 	        -0 0.116155743432824 -0
        Invr. cell vectors (c) 	        0 -0 0.116155743432824
-       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
        Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
-       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
-       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
-       Cell volume                     638.084112874303
+       Cell volume                     638.084115885312
 
 	...Ignoring last three fields of atom info lines in xyzf file... 
      ...Updated simulation box dimensions: 
        Box information (base units: Angstroms and radians): 
        Orthorhombic:                   1
-       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (a)                8.6091309 0 0
        Cell vectors (b)                0 8.6091309 0
        Cell vectors (c)                0 0 8.6091309
        Layers:                         1
-       Ghost cell vectors (a) 	        25.827392578125 0 0
+       Ghost cell vectors (a) 	        25.8273927 0 0
        Ghost cell vectors (a) 	        0 25.8273927 0
        Ghost cell vectors (a) 	        0 0 25.8273927
-       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
        Invr. cell vectors (b) 	        -0 0.116155743432824 -0
        Invr. cell vectors (c) 	        0 -0 0.116155743432824
-       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
        Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
-       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
-       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
-       Cell volume                     638.084112874303
+       Cell volume                     638.084115885312
 
    ...read complete for file input.xyzf
 
@@ -1397,7 +1397,7 @@ Generating fast maps...
 		Atom type idxs:  1 1 1 0 Quadruplet name: HHHHOHHHOHOH Explicit index: 1222 Unique index:    3
 		Atom type idxs:  1 1 1 1 Quadruplet name: HHHHHHHHHHHH Explicit index: 2222 Unique index:    4
 BEGIN SIMULATION:
-RANK: 0 RESET RCUT_PADDING TO: 0.4562441805
+RANK: 0 RESET RCUT_PADDING TO: 0.4562679106
 Number of 3-body interactions = 75340
 Number of 4-body interactions = 599149
 Number of 3-body interactions = 75340
@@ -1408,7 +1408,7 @@ Ewald parameters:
 	Ewald alpha               =  7.723233e-01
 	R-Space Ewald cutoff      =  4.304565e+00
 	R-Space accuracy estimate =  5.997380e-07
-	K-Space accuracy estimate =  6.801449e-07
+	K-Space accuracy estimate =  6.801448e-07
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
@@ -1416,15 +1416,15 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-       1      0.12       5.2450076     -49.1445683     -43.8995606          1778.3     14.83818725    -43.8995606
+       1      0.12       5.2455532     -49.1445683     -43.8990151          1778.3     14.83813032    -43.8990151
 END SIMULATION
 	Average temperature over run = 1778.2983 K
-	Average pressure    over run = 14.8382 GPa
+	Average pressure    over run = 14.8381 GPa
 	Pressures from diagonal stress tensors over run: 14.8392
 	Average stress tensors over run: 
-		sigma_xx: 16.1149 GPa
-		sigma_yy: 13.9592 GPa
-		sigma_zz: 14.4436 GPa
-		sigma_xy: 3.5415 GPa
-		sigma_xz: 0.6166 GPa
-		sigma_yz: 8.2974 GPa
+		sigma_xx: 16.0976 GPa
+		sigma_yy: 14.1855 GPa
+		sigma_zz: 14.2344 GPa
+		sigma_xy: -1.0618 GPa
+		sigma_xz: -3.1350 GPa
+		sigma_yz: 3.5923 GPa

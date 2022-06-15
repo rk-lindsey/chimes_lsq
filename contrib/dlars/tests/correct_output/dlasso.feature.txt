@@ -14,6 +14,7 @@ New active set:
 0 4
 Cholesky estimate of condition number = 1.000e+00
 Cholesky error test = 0.000000000000e+00
+<<<<<<< HEAD
 Updated step gamma = 3.429389049973e-01
 Gamma limited by property 1
 Lasso step gamma limit = 1.000000000000e+20
@@ -51,10 +52,50 @@ New active set:
 Cholesky estimate of condition number = 4.421e+00
 Cholesky error test = 1.110223024625e-16
 Updated step gamma = 9.556527790257e-01
+=======
+Updated step gamma = 1.941044640164e-01
+Gamma limited by property 3
+Lasso step gamma limit = 1.000000000000e+20
+Beta: 
+[
+4 4.313432533699e-02
+]
+Total memory on rank 0 = 0.00 Gb 
+Finished iteration 1
+Time for iteration 1 = 5.742440000000e-04 seconds 
+L1 norm of solution: 4.313432533699e-02 RMS Error: 9.084770156716e-01 Objective fn: 4.126652440018e-01 Number of vars: 1
+Adding property 3 to the active set
+New active set: 
+0 4
+1 3
+Cholesky estimate of condition number = 1.682e+00
+Cholesky error test = 5.551115123126e-17
+Updated step gamma = 3.258229246263e-01
+Gamma limited by property 1
+Lasso step gamma limit = 1.000000000000e+20
+Beta: 
+[
+3 7.691626762471e-02
+4 9.246198452689e-02
+]
+Total memory on rank 0 = 0.00 Gb 
+Finished iteration 2
+Time for iteration 2 = 2.987730000000e-04 seconds 
+L1 norm of solution: 1.693782521516e-01 RMS Error: 8.781889173082e-01 Objective fn: 3.856078872415e-01 Number of vars: 2
+Adding property 1 to the active set
+New active set: 
+0 4
+1 3
+2 1
+Cholesky estimate of condition number = 5.682e+00
+Cholesky error test = 3.700743415417e-17
+Updated step gamma = 9.341465278079e-01
+>>>>>>> 4922b0d921b0b16e2c39c129bad77637db5c68ef
 Gamma limited by property 0
 Lasso step gamma limit = 1.000000000000e+20
 Beta: 
 [
+<<<<<<< HEAD
 1 -7.355994632233e-01
 3 7.383476947847e-01
 4 2.774776849146e-01
@@ -72,10 +113,30 @@ New active set:
 Cholesky estimate of condition number = 7.149e+00
 Cholesky error test = 5.551115123126e-17
 Updated step gamma = 1.850897223313e-01
+=======
+1 -3.901106929285e-01
+3 2.389965652001e-01
+4 1.286602284460e-01
+]
+Total memory on rank 0 = 0.00 Gb 
+Finished iteration 3
+Time for iteration 3 = 5.110580000000e-04 seconds 
+L1 norm of solution: 7.577674865745e-01 RMS Error: 8.097796789311e-01 Objective fn: 3.278715642049e-01 Number of vars: 3
+Adding property 0 to the active set
+New active set: 
+0 4
+1 3
+2 1
+3 0
+Cholesky estimate of condition number = 1.609e+01
+Cholesky error test = 5.551115123126e-17
+Updated step gamma = 1.023461568681e-01
+>>>>>>> 4922b0d921b0b16e2c39c129bad77637db5c68ef
 Gamma limited by property 2
 Lasso step gamma limit = 1.000000000000e+20
 Beta: 
 [
+<<<<<<< HEAD
 0 1.278596465166e-01
 1 -7.699786207103e-01
 3 8.942931135164e-01
@@ -107,15 +168,56 @@ Beta:
 Total memory on rank 0 = 0.00 Gb 
 Finished iteration 5
 Time for iteration 5 = 3.723041000000e-03 seconds 
+=======
+0 6.391603840498e-02
+1 -3.922103210257e-01
+3 2.588458066606e-01
+4 1.331489491475e-01
+]
+Total memory on rank 0 = 0.00 Gb 
+Finished iteration 4
+Time for iteration 4 = 6.560560000000e-04 seconds 
+L1 norm of solution: 8.481211152389e-01 RMS Error: 8.077491547350e-01 Objective fn: 3.262293484876e-01 Number of vars: 4
+Adding property 2 to the active set
+New active set: 
+0 4
+1 3
+2 1
+3 0
+4 2
+Cholesky estimate of condition number = 1.609e+01
+Cholesky error test = 3.996802888651e-16
+Updated step gamma = 1.688482088795e-01
+Lasso step gamma limit = 4.978661696291e+01
+Beta: 
+[
+0 1.236294475079e-01
+1 -4.716207384996e-01
+2 7.814079471463e-02
+3 2.723416454610e-01
+4 1.326973827839e-01
+]
+Total memory on rank 0 = 0.00 Gb 
+Finished iteration 5
+Time for iteration 5 = 8.545190000000e-04 seconds 
+>>>>>>> 4922b0d921b0b16e2c39c129bad77637db5c68ef
 Stopping: no more iterations possible
 Final values:
 Beta: 
 [
+<<<<<<< HEAD
 0 1.854441712618e-01
 1 -9.432414769991e-01
 2 1.953519867866e-01
 3 9.531957591135e-01
 4 2.985691112638e-01
+=======
+0 1.236294475079e-01
+1 -4.716207384996e-01
+2 7.814079471463e-02
+3 2.723416454610e-01
+4 1.326973827839e-01
+>>>>>>> 4922b0d921b0b16e2c39c129bad77637db5c68ef
 ]
 Prediction: 
 [

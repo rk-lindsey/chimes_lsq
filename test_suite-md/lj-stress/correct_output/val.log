@@ -1,0 +1,32 @@
+==61164== Memcheck, a memory error detector
+==61164== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==61164== Using Valgrind-3.16.1 and LibVEX; rerun with -h for copyright info
+==61164== Command: /usr/WS2/rlindsey/chimes_lsq-fork/build/chimes_md run_md.in
+==61164== Parent PID: 28690
+==61164== 
+==61164== Conditional jump or move depends on uninitialised value(s)
+==61164==    at 0x4C29F09: malloc (vg_replace_malloc.c:307)
+==61164==    by 0x540497B: MPID_Init (mpid_init.c:1649)
+==61164==    by 0x539B54A: MPIR_Init_thread (initthread.c:717)
+==61164==    by 0x5388C4A: PMPI_Init (init.c:253)
+==61164==    by 0x404303: main (in /usr/WS2/rlindsey/chimes_lsq-fork/build/chimes_md)
+==61164== 
+==61164== Warning: invalid file descriptor -1 in syscall write()
+==61164== 
+==61164== HEAP SUMMARY:
+==61164==     in use at exit: 12,953,926 bytes in 514 blocks
+==61164==   total heap usage: 2,741 allocs, 2,227 frees, 13,268,909 bytes allocated
+==61164== 
+==61164== LEAK SUMMARY:
+==61164==    definitely lost: 284 bytes in 4 blocks
+==61164==    indirectly lost: 272 bytes in 3 blocks
+==61164==      possibly lost: 132,258 bytes in 6 blocks
+==61164==    still reachable: 12,821,112 bytes in 501 blocks
+==61164==                       of which reachable via heuristic:
+==61164==                         stdstring          : 290 bytes in 9 blocks
+==61164==         suppressed: 0 bytes in 0 blocks
+==61164== Rerun with --leak-check=full to see details of leaked memory
+==61164== 
+==61164== Use --track-origins=yes to see where uninitialised values come from
+==61164== For lists of detected and suppressed errors, rerun with: -s
+==61164== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
