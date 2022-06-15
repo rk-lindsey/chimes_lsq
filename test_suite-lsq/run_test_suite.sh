@@ -122,6 +122,10 @@ do
         # There seems to be an NFS filesystem lag in finding output files.
 	cd ..
 	if [[ $SUCCESS -eq 1 ]] ; then
+	
+		 # First, we need to reconstruct the A.txt file in correct output
+		 
+		 cat correct_output/A.txt.* > correct_output/A.txt
 
 		 for j in A.txt b.txt params.header fm_setup.out
 		 do
@@ -134,7 +138,7 @@ do
 					echo " "
 					echo "Differences found in $j files... "
 					echo " "
-#		OLD WAY: 			
+
 					if [ "$j" = A.txt ] ; then
 						 echo "	...differences are in file A.txt. Examine file by hand "
 						 echo "     to determine whether differences are within reasonable"
@@ -156,6 +160,8 @@ do
 			  ALL_PASSED=false
 			  echo "		...Test failed."
 		 fi
+		 
+		 rm -f correct_output/A.txt
 	fi 
 	cd ..
 done
