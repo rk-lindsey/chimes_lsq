@@ -12,6 +12,8 @@
 
 # Common function for test script initialization.
 source ../src/bash/init_vars.sh
+DLARS_PATH=../contrib/dlars/src
+
 init_test_vars
 echo "NP = $NP"
 
@@ -19,8 +21,7 @@ if [ $# -eq 0 ]
 then
 	 JOBS=$LSQ_ALL_JOBS
 	 MAKE_JOBS=$LSQ_MAKE_JOBS
-	 
-	 echo "here" 
+
 else
 	 JOBS=$1
 	 MAKE_JOBS=$2
@@ -209,7 +210,6 @@ do
 					echo " "
 			
 					TECHNICAL_PASS_STATUS=`grep "No" tol_status.dat`
-
 			
 					if [[ "$TECHNICAL_PASS_STATUS" != *"No"* ]]; then
 						 TECHNICAL_PASS=false
@@ -252,12 +252,6 @@ for job in $MAKE_JOBS ; do
     if ! test_dir $job ; then
 	echo "Directory $job does not exist"
 	continue 
-    fi
-	 
-    if [[ $job == "lsq2" ]] ; then
-    	cd ../contrib/dlars/src
-	make
-	cd - 
     fi
 	 
     cd $job

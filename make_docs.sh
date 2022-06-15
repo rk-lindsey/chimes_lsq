@@ -1,6 +1,15 @@
 #!/bin/bash
 
 
+# Check Sphinx version
+
+ver=`sphinx-build --version 2>&1 | awk '/Sphinx/{split($2,s,"."); split(s[1],v,"v");print v[2]}'`
+
+if [ $ver -lt 3 ] ; then 
+	echo "Error: Please upgrade Sphinx to version 3 or greater"
+	exit 0
+fi
+
 # Remove any existing documentation .pdf
 
 rm -f chimes_lsq.pdf
@@ -21,16 +30,10 @@ cd build/latex
 TEXFILE="chimes_lsq.tex"
 pdflatex  $TEXFILE
 
-# These commands are only needed when bibliography files are included
-
-#bibtex ${TEXFILE%*.tex}
-#pdflatex  $TEXFILE
-#pdflatex  $TEXFILE
-
 
 cd ../..
 
-cp build/latex/chimesdevelopernotes.pdf .
+cp build/latex/chimes_lsq.pdf .
 
 
 echo ""

@@ -41,15 +41,17 @@
 using namespace std;	
 	
 // Define function headers -- general
-
 static void read_input        (string & INFILE, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);
 static void read_atom_types(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, int &NATMTYP, vector<string>& TMP_ATOMTYPE, vector<int>& TMP_NATOMTYPE, vector<int>& TMP_ATOMTYPEIDX, vector<double>& TMP_CHARGES,  vector<double>& TMP_MASS, vector<int> &TMP_SIGN) ;
 static void read_ff_params(ifstream &PARAMFILE, JOB_CONTROL &CONTROLS, vector<PAIR_FF>& FF_2BODY, CLUSTER_LIST& TRIPS, CLUSTER_LIST &QUADS, map<string,int> &PAIR_MAP, NEIGHBORS &NEIGHBOR_LIST, FRAME& SYSTEM, int NATMTYP, const vector<string>& TMP_ATOMTYPE, const vector<int>& TMP_ATOMTYPEIDX, vector<double> &TMP_CHARGES, vector<double> &TMP_MASS, const vector<int>& TMP_SIGN, map<int,string>& PAIR_MAP_REVERSE) ;
 static void print_ff_summary(const vector<PAIR_FF> &FF_2BODY, CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, const JOB_CONTROL &CONTROLS) ;
+static void final_output(FRAME &SYSTEM, THERMO_AVG &AVG_DATA, JOB_CONTROL &CONTROLS, NEIGHBORS &NEIGHBOR_LIST, ofstream &STATISTICS,
+												 CONSTRAINT &ENSEMBLE_CONTROL) ;
 
 // Define function headers -- MPI
 
-static void write_xyzv         (FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
+static void write_xyzv(FRAME &SYSTEM, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL,
+											 THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBOR_LIST, string filename, bool restart);
 static void read_restart_params(ifstream &COORDFILE, JOB_CONTROL &CONTROLS, CONSTRAINT &ENSEMBLE_CONTROL, THERMO_AVG &AVG_DATA, NEIGHBORS &NEIGHBORS, FRAME &SYSTEM) ;
 static void parse_ff_controls  (string &LINE, ifstream &PARAMFILE, JOB_CONTROL &CONTROLS ) ;
 static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifstream &CMPR_FORCEFILE) ;
@@ -159,7 +161,8 @@ int main(int argc, char* argv[])
 		
   vector<string> TMP_ATOMTYPE;
 
-  double Ktot;
+  double Ktot ;
+	vector<XYZ> Ktensor(3,{0.0,0.0,0.0}) ;
   double Vol;
   SYSTEM.AVG_TEMPERATURE = 0.0;
 		
@@ -836,7 +839,7 @@ int main(int argc, char* argv[])
 						 "(kcal/mol)", "(K)", "(GPa)");
 
 			snprintf(stat_buf, STAT_BUF_SZ, "%8s %14s %14s %14s %14s %14s %14s ",
-							 " ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
+							 "# ", "(fs)", "(kcal/mol)", "(kcal/mol)", "(kcal/mol)", "(K)", "(GPa)");
 
 			STATISTICS << stat_buf ;
 			
@@ -903,36 +906,39 @@ int main(int argc, char* argv[])
 
 	 if (RANK == 0)
 	 {
-		////////////////////////////////////////////////////////////
-		// Store statistics on the average simulation temperature
-		// to allow for thermostat verification
-		////////////////////////////////////////////////////////////
+		 ////////////////////////////////////////////////////////////
+		 // Store statistics on the average simulation temperature
+		 // to allow for thermostat verification
+		 ////////////////////////////////////////////////////////////
 
-		Ktot = kinetic_energy(SYSTEM, CONTROLS);
+		 Ktot = kinetic_energy(SYSTEM, CONTROLS, Ktensor);
 
-		ENSEMBLE_CONTROL.UPDATE_TEMPERATURE(SYSTEM, CONTROLS);
+		 ENSEMBLE_CONTROL.UPDATE_TEMPERATURE(SYSTEM, CONTROLS);
 
-		// Exit with an error if the set and block temperatures differ by more than CONTROLS.NVT_CONV_CUT
+		 // Exit with an error if the set and block temperatures differ by more than CONTROLS.NVT_CONV_CUT
 		
-		AVG_DATA.TEMP_SUM += SYSTEM.TEMPERATURE;
-		
-		if (SYSTEM.TEMPERATURE/CONTROLS.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
-		{
-		  cout << "ERROR: System too hot!" << endl;
-		  cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
-		  cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
-		  cout << "Step : " << CONTROLS.STEP << endl;
-		  exit_run(10);
-		}
-		else if (CONTROLS.TEMPERATURE/SYSTEM.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
-		{
-		  cout << "ERROR: System too cold!" << endl;
-		  cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
-		  cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
-		  cout << "Step : " << CONTROLS.STEP << endl;
-		  exit_run(-10);
-		}			
-	 }	
+		 AVG_DATA.TEMP_SUM += SYSTEM.TEMPERATURE;
+
+		 if ( CONTROLS.NVT_CONV_CUT > 0.0 )
+		 {
+			 if (SYSTEM.TEMPERATURE/CONTROLS.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
+				 {
+					 cout << "ERROR: System too hot!" << endl;
+					 cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
+					 cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
+					 cout << "Step : " << CONTROLS.STEP << endl;
+					 exit_run(10);
+				 }
+			 else if (CONTROLS.TEMPERATURE/SYSTEM.TEMPERATURE > (1+CONTROLS.NVT_CONV_CUT) * CONTROLS.TEMPERATURE)
+				 {
+					 cout << "ERROR: System too cold!" << endl;
+					 cout << "T Set: " << CONTROLS.TEMPERATURE << endl;
+					 cout << "T sys: " << SYSTEM  .TEMPERATURE << endl;
+					 cout << "Step : " << CONTROLS.STEP << endl;
+					 exit_run(-10);
+				 }			
+		 }
+	 }
 	 ////////////////////////////////////////////////////////////
 	 // If requested, compute pressure numerically, and accumulate
 	 // statistics
@@ -945,14 +951,21 @@ int main(int argc, char* argv[])
 		numerical_pressure(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST, PE_1, PE_2, dV);
 			
 #ifdef USE_MPI
-		MPI_Barrier(MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &PE_1,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
-		MPI_Allreduce(MPI_IN_PLACE, &PE_2,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		double pe1_sum = 0.0, pe2_sum = 0.0 ;
+		MPI_Allreduce(&PE_1,&pe1_sum,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		PE_1 = pe1_sum ;
+		MPI_Allreduce(&PE_2,&pe2_sum,1,MPI_DOUBLE, MPI_SUM,MPI_COMM_WORLD);
+		PE_2 = pe2_sum ;
 #endif
 			
 		SYSTEM.PRESSURE_XYZ = -1.0*(PE_2 - PE_1)/dV;
 	 }
-	 
+
+	 if ( CONTROLS.USE_NUMERICAL_STRESS )
+	 {
+		 numerical_stress_all(SYSTEM, CONTROLS, FF_2BODY, TRIPS, QUADS, PAIR_MAP, INT_PAIR_MAP,
+													NEIGHBOR_LIST) ;
+	 }
 	 
 	// Set the io econs value, sync across procs
 	if(RANK == 0)
@@ -973,18 +986,19 @@ int main(int argc, char* argv[])
 	 {
 	
 		SYSTEM.PRESSURE = (SYSTEM.PRESSURE_XYZ + 2.0 * Ktot / (3.0 * Vol)) * GPa;	// GPa = Unit conversion factor to GPa.
-			
-		SYSTEM.PRESSURE_TENSORS_ALL[0].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[0].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[0].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
+
+		// Use the kinetic energy tensor for the instantaneous pressure tensor.
+		SYSTEM.PRESSURE_TENSORS_ALL[0].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X + 2.0 * Ktensor[0].X / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[0].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y + 2.0 * Ktensor[0].Y / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[0].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z + 2.0 * Ktensor[0].Z / Vol) * GPa;
 		
-		SYSTEM.PRESSURE_TENSORS_ALL[1].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[1].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[1].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[1].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X + 2.0 * Ktensor[1].X / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[1].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y + 2.0 * Ktensor[1].Y / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[1].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z + 2.0 * Ktensor[1].Z / Vol) * GPa;
 		
-		SYSTEM.PRESSURE_TENSORS_ALL[2].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[2].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[2].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[2].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X + 2.0 * Ktensor[2].X / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[2].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y + 2.0 * Ktensor[2].Y / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[2].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z + 2.0 * Ktensor[2].Z / Vol) * GPa;
 
 		AVG_DATA.PRESS_SUM += SYSTEM.PRESSURE;
 		AVG_DATA.PV_SUM += Vol * SYSTEM.PRESSURE/GPa ;
@@ -1127,55 +1141,8 @@ int main(int argc, char* argv[])
 	 ////////////////////////////////////////////////////////////
 	   
   }//End big loop here.
-  
-  if (RANK==0)	
-  {
-	 cout << "END SIMULATION" << endl;
 
-	 TEMP_MASS = 0.0;
-	
-	 for ( int a = 0; a < SYSTEM.ATOMS; a++ ) 
-		TEMP_MASS  += SYSTEM.MASS[a];
-
-
-	 cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
-	 cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
-		
-	// Why is this only for chebyshev?
-	 if( FF_2BODY[0].PAIRTYP == "CHEBYSHEV")
-	 {	 
-		double Pavg = (AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X + AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y + AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z)/3.0/ CONTROLS.N_MD_STEPS ;
-		cout << "	Pressures from diagonal stress tensors over run: " << Pavg << endl;
-		cout << "	Average stress tensors over run: " << endl;
-		cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z/CONTROLS.N_MD_STEPS << " GPa" << endl; 
-		cout << "		sigma_xy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_xz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;
-		cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;	   
-	 }
-
-	 if ( SYSTEM.BOXDIM.IS_VARIABLE )
-		 {
-			 cout << "        Average volume over run = " << fixed << setprecision(4) << right << AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS << " Ang.^3" << endl ;
-			 cout << "        Average PV over run     = " << fixed << setprecision(4) << right << AVG_DATA.PV_SUM / CONTROLS.N_MD_STEPS  << " kcal/mol "  
-<< endl ;
-			 if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
-				 {
-					 // Allows a check on pressure and volume fluctuation magnitude, which should be correctly reproduced
-					 // by NPT-NTK algorithm.
-					 // See Martyna, Tobias, Klein JCP 101, 4177(1994) Appendix A.					 
-					 cout << "        Average of PV predicted by virial theorem = " << fixed << setprecision(4) << right <<
-						 (CONTROLS.PRESSURE / GPa) * AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS - Kb * CONTROLS.TEMPERATURE
-								<< " kcal/mol" << endl ;
-				 }
-		 }
-	 
-	 // Write the final configuration to file.
-	 write_xyzv(SYSTEM, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, "output.xyz", false);
-			
-	 STATISTICS.close();
-	} // if ( RANK == 0 ) 
+	final_output(SYSTEM, AVG_DATA, CONTROLS, NEIGHBOR_LIST, STATISTICS, ENSEMBLE_CONTROL) ;
 	
 	normal_exit() ;
 }       
@@ -2359,7 +2326,7 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	}
 		
 	else
-		TMP_BOX.CELL_AX = stof(LINE);
+		TMP_BOX.CELL_AX = stod(LINE);
 	
 	
 	if (SYSTEM.BOXDIM.IS_ORTHO)
@@ -2373,10 +2340,17 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	
 	TMP_BOX.UPDATE_CELL();
 	
-	if(CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL)                                                                                           
-		COORDFILE >>  SYSTEM.PRESSURE_TENSORS_ALL[0].X >>  SYSTEM.PRESSURE_TENSORS_ALL[1].Y >>  SYSTEM.PRESSURE_TENSORS_ALL[2].Z;    
-	if (CONTROLS.FIT_STRESS_ALL) 
-		COORDFILE >>  SYSTEM.PRESSURE_TENSORS_ALL[0].Y >>  SYSTEM.PRESSURE_TENSORS_ALL[0].Z >>  SYSTEM.PRESSURE_TENSORS_ALL[1].Z;
+	if(CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL)
+	{
+			SYSTEM.PRESSURE_TENSORS_ALL.resize(3) ;
+			COORDFILE >>  SYSTEM.PRESSURE_TENSORS_ALL[0].X >>  SYSTEM.PRESSURE_TENSORS_ALL[1].Y >>  SYSTEM.PRESSURE_TENSORS_ALL[2].Z;
+	}
+	
+	if (CONTROLS.FIT_STRESS_ALL)
+  {
+			SYSTEM.PRESSURE_TENSORS_ALL.resize(3) ;		
+			COORDFILE >>  SYSTEM.PRESSURE_TENSORS_ALL[0].Y >>  SYSTEM.PRESSURE_TENSORS_ALL[0].Z >>  SYSTEM.PRESSURE_TENSORS_ALL[1].Z;
+	}
 
 	if(CONTROLS.FIT_ENER)
 		COORDFILE >> SYSTEM.QM_POT_ENER;   
@@ -2423,7 +2397,8 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 		cout << "     ...Read the following number of atoms: " << TEMP_INT << endl;
 		cout << "     ...Read box dimensions: " << endl;
 		TMP_BOX.WRITE_BOX(CONTROLS.N_LAYERS);
-		
+
+		SYSTEM.PRESSURE_TENSORS_ALL.resize(3);		
 		if(CONTROLS.FIT_STRESS || CONTROLS.FIT_STRESS_ALL)
 			cout << "	...Read xx, yy, & zz stress tensors: " << SYSTEM.PRESSURE_TENSORS_ALL[0].X << " " << SYSTEM.PRESSURE_TENSORS_ALL[1].Y << " " << SYSTEM.PRESSURE_TENSORS_ALL[2].Z << endl;
 		if(CONTROLS.FIT_STRESS_ALL)
@@ -2752,14 +2727,67 @@ static void subtract_force(FRAME &SYSTEM, JOB_CONTROL &CONTROLS)
 		// MAJOR ASSUMPTION: atom type orders are identical to the LSQ code
 		
 		ferr = SYSTEM.TOT_POT_ENER - SYSTEM.QM_POT_ENER;
+
+		if ( ! CONTROLS.INCLUDE_ATOM_OFFSETS )
+		{
+			SYSTEM.SET_NATOMS_OF_TYPE();
 		
-		SYSTEM.SET_NATOMS_OF_TYPE();
+			for(int i=0; i<SYSTEM.QM_ENERGY_OFFSET.size(); i++)
+				ferr += SYSTEM.QM_ENERGY_OFFSET[i]*SYSTEM.NATOMS_OF_TYPE[i];
 		
-		for(int i=0; i<SYSTEM.QM_ENERGY_OFFSET.size(); i++)
-			ferr += SYSTEM.QM_ENERGY_OFFSET[i]*SYSTEM.NATOMS_OF_TYPE[i];
-		
+		}
 		ferr = fabs(ferr/SYSTEM.ATOMS);
-		
 		cout << "Absolute energy error = " << ferr << " kcal/mol/atom \n" ;
 	}
+}
+
+static void final_output(FRAME &SYSTEM, THERMO_AVG &AVG_DATA, JOB_CONTROL &CONTROLS, NEIGHBORS &NEIGHBOR_LIST, ofstream &STATISTICS,
+												 CONSTRAINT &ENSEMBLE_CONTROL)
+// Final output at the end of an MD simulation.
+{
+  if (RANK==0)	
+  {
+		cout << "END SIMULATION" << endl;
+
+		double TEMP_MASS = 0.0;
+	
+		for ( int a = 0; a < SYSTEM.ATOMS; a++ ) 
+			TEMP_MASS  += SYSTEM.MASS[a];
+
+
+		cout << "	Average temperature over run = " << fixed << setprecision(4) << right << AVG_DATA.TEMP_SUM  / CONTROLS.N_MD_STEPS << " K"   << endl;
+		cout << "	Average pressure    over run = " << fixed << setprecision(4) << right << AVG_DATA.PRESS_SUM / CONTROLS.N_MD_STEPS << " GPa" << endl;
+		
+		// Stress tensors are not calculated for all potentials.
+		double Pavg = (AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X + AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y + AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z)/3.0/ CONTROLS.N_MD_STEPS ;
+		cout << "	Pressures from diagonal stress tensors over run: " << Pavg << endl;
+		cout << "	Average stress tensors over run: " << endl;
+		cout << "		sigma_xx: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].X/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_yy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_zz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[2].Z/CONTROLS.N_MD_STEPS << " GPa" << endl; 
+		cout << "		sigma_xy: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Y/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_xz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[0].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;
+		cout << "		sigma_yz: " << AVG_DATA.STRESS_TENSOR_SUM_ALL[1].Z/CONTROLS.N_MD_STEPS << " GPa" << endl;	   
+
+		if ( SYSTEM.BOXDIM.IS_VARIABLE )
+			{
+				cout << "        Average volume over run = " << fixed << setprecision(4) << right << AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS << " Ang.^3" << endl ;
+				cout << "        Average PV over run     = " << fixed << setprecision(4) << right << AVG_DATA.PV_SUM / CONTROLS.N_MD_STEPS  << " kcal/mol "  
+						 << endl ;
+				if ( ENSEMBLE_CONTROL.STYLE == "NPT-MTK" )
+					{
+						// Allows a check on pressure and volume fluctuation magnitude, which should be correctly reproduced
+						// by NPT-NTK algorithm.
+						// See Martyna, Tobias, Klein JCP 101, 4177(1994) Appendix A.					 
+						cout << "        Average of PV predicted by virial theorem = " << fixed << setprecision(4) << right <<
+							(CONTROLS.PRESSURE / GPa) * AVG_DATA.VOLUME_SUM / CONTROLS.N_MD_STEPS - Kb * CONTROLS.TEMPERATURE
+								 << " kcal/mol" << endl ;
+					}
+			}
+	 
+		// Write the final configuration to file.
+		write_xyzv(SYSTEM, CONTROLS, ENSEMBLE_CONTROL, AVG_DATA, NEIGHBOR_LIST, "output.xyz", false);
+			
+		STATISTICS.close();
+	} // if ( RANK == 0 )
 }

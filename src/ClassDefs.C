@@ -903,9 +903,8 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS
 	
 	if(STYLE=="NPT-BEREND")
 	{
-		
 		VOLUME_0 = SYSTEM.BOXDIM.UPDATE_VOLUME();
-		KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
+		KIN_ENER = kinetic_energy(SYSTEM,"CURRENT",CONTROLS);
 
 		// Use PRESSURE_XYZ + 2 KIN_ENER / (3V) so that kinetic energy contribution to pressure is updated.
 		double P = SYSTEM.PRESSURE_XYZ + 2.0 * KIN_ENER / (3.0 * VOLUME_0) ;
@@ -950,7 +949,7 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS
 	if(STYLE=="NPT-BEREND-ANISO")
 	{
 		VOLUME_0 = SYSTEM.BOXDIM.UPDATE_VOLUME();
-		KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
+		KIN_ENER = kinetic_energy(SYSTEM,"CURRENT",CONTROLS);
 
 		XYZ pdiag ;
 		pdiag.X = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X + 2.0 / 3.0 * KIN_ENER / VOLUME_0 ;
@@ -1197,7 +1196,7 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 		}
 	else if( STYLE=="NVT-MTK" )	
 		{
-			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS);
+			KIN_ENER = kinetic_energy(SYSTEM, "CURRENT", CONTROLS);
 			THERM_FORCE_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
 			THERM_VELOC_T = THERM_VELOC_0 + (THERM_FORCE_0 + THERM_FORCE_T) * 0.5 * CONTROLS.DELTA_T;
 			
@@ -1231,7 +1230,7 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 							SYSTEM.VELOCITY_NEW[a1].Y = (SYSTEM.VELOCITY_ITER[a1].Y + 0.5*SYSTEM.ACCEL[a1].Y*CONTROLS.DELTA_T) / VSCALEH;
 							SYSTEM.VELOCITY_NEW[a1].Z = (SYSTEM.VELOCITY_ITER[a1].Z + 0.5*SYSTEM.ACCEL[a1].Z*CONTROLS.DELTA_T) / VSCALEH;
 						}
-					 
+
 					KIN_ENER = kinetic_energy(SYSTEM,"NEW", CONTROLS);
 					THERM_FORCE_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
 
@@ -1277,7 +1276,7 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 			//
 			
 			// Update thermostat/barostat.
-			KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
+			KIN_ENER = kinetic_energy(SYSTEM, "CURRENT", CONTROLS);
 
 			// Use PRESSURE_XYZ + 2 KIN_ENER / (3V) so that kinetic energy contribution to pressure is updated.
 			double dP = SYSTEM.PRESSURE_XYZ + 2.0 * KIN_ENER / (3.0 * VOLUME_T) - CONTROLS.PRESSURE/GPa;
@@ -1470,7 +1469,8 @@ void CONSTRAINT::SCALE_VELOCITIES(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 void CONSTRAINT::UPDATE_TEMPERATURE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
 	double Ktot;
-	Ktot = kinetic_energy(SYSTEM, CONTROLS);	//calculate kinetic energy for scaling:
+	
+	Ktot = kinetic_energy(SYSTEM, "CURRENT", CONTROLS);	//calculate kinetic energy for scaling:
 
 	SYSTEM.TEMPERATURE = 2.0 * Ktot / (N_DOF * Kb);
 
@@ -1907,6 +1907,13 @@ void BOX::UPDATE_CELL() // Assumes CELL_* values have been set, either orthorhom
 	HMAT[7] = CELL_BZ;
 	HMAT[8] = CELL_CZ;
 
+	// Update IS_ORTHO if cell has been distorted.
+	if ( fabs(CELL_AY) + fabs(CELL_AZ) + fabs(CELL_BX) + fabs(CELL_BZ)
+			 + fabs(CELL_CX) + fabs(CELL_CY) > 1.0e-10 ) 
+		IS_ORTHO = false ;
+	else
+		IS_ORTHO = true ;
+	
 	UPDATE_INVER_CELL();	
 	UPDATE_LAT_VALUES();
 	LAMMPSIFY();
@@ -2177,7 +2184,7 @@ void BOX::SCALE_BY_FACTOR(double FACTOR, bool SCALE_ATOMS, XYZ & ATOM)
 		// transform back to the scaled system 
 		
 		TMP_ATOM.X = FACTOR*HMAT[0]*ATOM.X + FACTOR*HMAT[1]*ATOM.Y + FACTOR*HMAT[2]*ATOM.Z;
-    		TMP_ATOM.Y = FACTOR*HMAT[3]*ATOM.X + FACTOR*HMAT[4]*ATOM.Y + FACTOR*HMAT[5]*ATOM.Z;
+		TMP_ATOM.Y = FACTOR*HMAT[3]*ATOM.X + FACTOR*HMAT[4]*ATOM.Y + FACTOR*HMAT[5]*ATOM.Z;
 		TMP_ATOM.Z = FACTOR*HMAT[6]*ATOM.X + FACTOR*HMAT[7]*ATOM.Y + FACTOR*HMAT[8]*ATOM.Z;
 		
 		ATOM.X = TMP_ATOM.X;
@@ -2197,6 +2204,62 @@ void BOX::SCALE_BY_FACTOR(double FACTOR, bool SCALE_ATOMS, XYZ & ATOM)
 		CELL_CX *= FACTOR;
 		CELL_CY *= FACTOR;
 		CELL_CZ *= FACTOR;
+	}
+}
+
+void BOX::SCALE_BY_MATRIX(const vector<vector<double>> &FACTOR, bool SCALE_ATOMS, XYZ & ATOM)
+// Scale the atom or cell by a transformation matrix.
+{
+	// if SCALE_ATOMS is true, ONLY updates COORDS and ALL_COORDS 
+	
+	if (SCALE_ATOMS)
+	{
+		XYZ TMP_ATOM;
+		
+		TMP_ATOM.X = ATOM.X;
+		TMP_ATOM.Y = ATOM.Y;
+		TMP_ATOM.Z = ATOM.Z;
+	
+		TMP_ATOM.X = FACTOR[0][0]*ATOM.X + FACTOR[0][1]*ATOM.Y + FACTOR[0][2]*ATOM.Z;
+		TMP_ATOM.Y = FACTOR[1][0]*ATOM.X + FACTOR[1][1]*ATOM.Y + FACTOR[1][2]*ATOM.Z;
+		TMP_ATOM.Z = FACTOR[2][0]*ATOM.X + FACTOR[2][1]*ATOM.Y + FACTOR[2][2]*ATOM.Z;
+		
+		ATOM.X = TMP_ATOM.X;
+		ATOM.Y = TMP_ATOM.Y;
+		ATOM.Z = TMP_ATOM.Z;
+	}
+	else
+	{
+		vector<vector<double>> cell_new ;
+
+		cell_new.resize(3) ;
+		for ( int j = 0 ; j < 3 ; j++ ) {
+			cell_new[j].resize(3) ;
+		}
+
+		cell_new[0][0] = CELL_AX * FACTOR[0][0] + CELL_AY * FACTOR[0][1] + CELL_AZ * FACTOR[0][2] ;
+		cell_new[0][1] = CELL_AX * FACTOR[1][0] + CELL_AY * FACTOR[1][1] + CELL_AZ * FACTOR[1][2] ;
+		cell_new[0][2] = CELL_AX * FACTOR[2][0] + CELL_AY * FACTOR[2][1] + CELL_AZ * FACTOR[2][2] ;
+
+		cell_new[1][0] = CELL_BX * FACTOR[0][0] + CELL_BY * FACTOR[0][1] + CELL_BZ * FACTOR[0][2] ;
+		cell_new[1][1] = CELL_BX * FACTOR[1][0] + CELL_BY * FACTOR[1][1] + CELL_BZ * FACTOR[1][2] ;
+		cell_new[1][2] = CELL_BX * FACTOR[2][0] + CELL_BY * FACTOR[2][1] + CELL_BZ * FACTOR[2][2] ;
+
+		cell_new[2][0] = CELL_CX * FACTOR[0][0] + CELL_CY * FACTOR[0][1] + CELL_CZ * FACTOR[0][2] ;
+		cell_new[2][1] = CELL_CX * FACTOR[1][0] + CELL_CY * FACTOR[1][1] + CELL_CZ * FACTOR[1][2] ;
+		cell_new[2][2] = CELL_CX * FACTOR[2][0] + CELL_CY * FACTOR[2][1] + CELL_CZ * FACTOR[2][2] ;
+
+		CELL_AX = cell_new[0][0] ;
+		CELL_AY = cell_new[0][1] ;
+		CELL_AZ = cell_new[0][2] ;
+		
+		CELL_BX = cell_new[1][0] ;
+		CELL_BY = cell_new[1][1] ;
+		CELL_BZ = cell_new[1][2] ;
+		
+		CELL_CX = cell_new[2][0] ;
+		CELL_CY = cell_new[2][1] ;
+		CELL_CZ = cell_new[2][2] ;
 	}
 }
 

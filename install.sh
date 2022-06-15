@@ -6,27 +6,51 @@
 # or
 # ./install.sh <debug option (0 or 1)> <install prefix (full path)> <verbosity option (0 or 1 or 2 or 3)> <MPI option (0 or 1)>
 
-
-
 DEBUG=${1-0}  # False (0) by default; if false, compiles with -O3, otherwise, uses -g
 PREFX=${2-""} # Empty by default
 VERBO=${3-1}  # Verbosity set to 1 by default, 0 gives minimal output, 3 gives minimal with DEBUG_CHEBY output, 4 gives all output
 DOMPI=${4-1}  # Compile with MPI support by default
 
+
+echo "Performing a fresh install"
+
+##rm -rf imports
+
+
+# Determine computing environment
+
+echo "Are you on an Livermore Computing system ? (y/n)"
+read IS_LC
+
+
 # Setup compilers
 
-#module load intel/2021.3
-#module load mvapich2
+ICC=`which g++`
 
-module load intel/18.0.1
-module load impi/2018.0
+if [[ "$IS_LC" == "y" ]] ; then
+    module load cmake/3.14.5
+    module load intel/18.0.1
+    module load impi/2018.0
+	
+	ICC=`which icc`
+fi
 
-#module load gcc/10.2.1
-#module load mvapich2
-
-ICC=`which icc`    # /usr/tce/packages/intel/intel-18.0.1/bin/icc
-#ICC=`which g++`    # /usr/tce/packages/intel/intel-18.0.1/bin/icc
 MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mpicxx
+
+
+# Grab and install dependencies
+
+if [[ ! -d imports ]] ; then
+    ./clone-all.sh 1 $IS_LC
+else
+    echo 'Will use pre-existing imports directory'
+fi
+
+# Compile dlars
+
+cd contrib/dlars/src
+./install.sh
+cd - 1&>/dev/null
 
 # Clean up previous installation,
 

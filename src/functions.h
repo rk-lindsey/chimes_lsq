@@ -40,9 +40,9 @@ using namespace std;
 static const double ke      = 332.0637157615209;// Converter between electron units and Stillinger units for Charge*Charge.
 static const double Hartree = 627.50961;	// 1 Hartree in kcal/mol.
 static const double Bohr    = 1.889725989;     // 1 Angstrom in Bohr.
-static const double Kb      = 0.001987;		// Boltzmann constant in kcal/mol-K.
+static const double Kb      = 0.0019872067 ;		// Boltzmann constant in kcal/mol-K. (Copied from LAMMPS).
 static const double Tfs     = 48.888;		// Internal time unit in fs.
-static const double GPa     = 6.9479;		// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
+static const double GPa     = 6.9476955;		// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
 static const double atm     = GPa*9869.23266716;// stress conversion to atm (for LAMMPS).
 static const double GPa2atm = 9869.23266716;	// x_GPa * GPa2atm = x_atm
 static const double pi      = 3.14159265359;
@@ -135,6 +135,7 @@ public:
 	double FREQ_UPDATE_THERMOSTAT;// Replaces scale_freq and thoover_fs... it's usage depends on whether USE_HOOVER_THERMOSTAT is true or false.. will be cast as int where required
 	double FREQ_UPDATE_BAROSTAT;  // Barostat time constant... defaults to 1000
 	bool   USE_NUMERICAL_PRESS;   // Replaces num_pressure... Whether to calculate pressures by finite difference.
+	bool   USE_NUMERICAL_STRESS;   // Whether to calculate the stress tensor by finite difference.	
 
 	// For penalty-function related exit
 
@@ -161,7 +162,8 @@ public:
 	int    SELF_CONSIST_FREQ;     // How frequently to print POSCAR file
 	bool   WRAP_COORDS;	      // Should coordinates be wrapped?
 	bool   FORDFTB;	              // Write a special output file for DFTB+ to read in? (default = false)
-
+	int    SKIP_FRAMES ;       // Should parallel processing of LSQ frames skip (>= 1) or be contiguous (0) ?
+	
 	// Controls for how to construct the initial system, if desired
 
 	bool   BUILD;
@@ -247,6 +249,7 @@ public:
 		SERIAL_CHIMES = false ;
 		USE_KILL_LEN = false;
 		//IO_ECONS_VAL = 0.0;
+		SKIP_FRAMES = 0 ;
 		
 		FCUT_LINE = "CUBIC";
 		FIT_ENER_EVER = false ;
@@ -342,6 +345,8 @@ public:
 	 bool IS_RCUT_SAFE(double CUTOFF, int LAYERS);					
 		
 	 void SCALE_BY_FACTOR(double FACTOR);
+
+	void SCALE_BY_MATRIX(const vector<vector<double>> &FACTOR, bool SCALE_ATOMS, XYZ & ATOM)	;
 
    // Multiplies cell vectors times a scalar and shifts atoms accordingly, if requested
 	 void SCALE_BY_FACTOR(double FACTOR, bool SCALE_ATOMS, XYZ & ATOM);		
@@ -655,6 +660,7 @@ inline double get_dist(FRAME & SYSTEM, XYZ & RAB, int a1, int a2)
 	return sqrt(RAB.X*RAB.X + RAB.Y*RAB.Y + RAB.Z*RAB.Z);
 }
 
+
 inline int FRAME::get_atomtype_idx(int atom)
 {
   		return(ATOMTYPE_IDX[atom]);
@@ -677,13 +683,22 @@ double VECTOR_ANGLE(vector<double> & v1, vector<double> & v2);
 
 void OPEN_TRAJFILE(ifstream & TRAJ_INPUT, vector<string> & INFILE, int FILE_IDX);
 
-double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);			// Overloaded.. compute differentely if for main or new velocities
+double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<XYZ> &Ktensor);			// Overloaded.. compute differentely if for main or new velocities
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);	// Overloaded.. compute differentely if for main or new velocities
 
 void build_layers      (FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
 void build_real_replicates(FRAME &SYSTEM, const JOB_CONTROL &CONTROLS);
 
 void numerical_pressure(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY, CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double & PE_2, double & dV);
+void numerical_stress(const FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
+											CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
+											vector<int> &INT_PAIR_MAP,
+											NEIGHBORS & NEIGHBOR_LIST,double & PE_1, double &PE_2, 
+											int it1, int it2) ;
+void numerical_stress_all(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<PAIR_FF> & FF_2BODY,
+													CLUSTER_LIST & TRIPS,  CLUSTER_LIST &QUADS, map<string,int> & PAIR_MAP,
+													vector<int> &INT_PAIR_MAP,
+													NEIGHBORS & NEIGHBOR_LIST) ;
 void check_forces(FRAME& SYSTEM, JOB_CONTROL &CONTROLS, vector<PAIR_FF> &FF_2BODY, map<string,int>& PAIR_MAP, vector<int> &INT_PAIR_MAP,  CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, NEIGHBORS &NEIGHBOR_LIST);
 void build_int_pair_map(int natmtyp, const vector<string> &atomtype, const vector<int> &atomtype_idx, map<string,int> &pair_map, vector<int> &int_pair_map);
 void PRINT_CONFIG(FRAME &SYSTEM, JOB_CONTROL & CONTROLS, int type);

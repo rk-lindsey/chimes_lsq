@@ -155,7 +155,7 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 	}
 
 
-	XYZ B ;
+	XYZ BX, BY, BZ ;
 	double kweight ;
 	for(int ik= ikstart; ik <= ikend; ik++)	// Loop is MPI'd over totk
 	{
@@ -181,13 +181,29 @@ static void Ewald_K_Space_New(double alphasq, int k_cut, FRAME & TRAJECTORY, dou
 		rksq = K_V[ik].X * K_V[ik].X + K_V[ik].Y * K_V[ik].Y + K_V[ik].Z * K_V[ik].Z ;
 
 		// Diagonal part of B tensor from Heyes.
-		B.X = 1.0 - 2.0 * K_V[ik].X * K_V[ik].X / rksq - 0.5 * K_V[ik].X * K_V[ik].X / alphasq ;
-		B.Y = 1.0 - 2.0 * K_V[ik].Y * K_V[ik].Y / rksq - 0.5 * K_V[ik].Y * K_V[ik].Y / alphasq ;
-		B.Z = 1.0 - 2.0 * K_V[ik].Z * K_V[ik].Z / rksq - 0.5 * K_V[ik].Z * K_V[ik].Z / alphasq ;
+		BX.X = 1.0 - 2.0 * K_V[ik].X * K_V[ik].X / rksq - 0.5 * K_V[ik].X * K_V[ik].X / alphasq ;
+		BY.Y = 1.0 - 2.0 * K_V[ik].Y * K_V[ik].Y / rksq - 0.5 * K_V[ik].Y * K_V[ik].Y / alphasq ;
+		BZ.Z = 1.0 - 2.0 * K_V[ik].Z * K_V[ik].Z / rksq - 0.5 * K_V[ik].Z * K_V[ik].Z / alphasq ;
 
-		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[0].X += (2*PI*ke/Volume)*kweight * B.X ;
-		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[1].Y += (2*PI*ke/Volume)*kweight * B.Y ;
-		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[2].Z += (2*PI*ke/Volume)*kweight * B.Z ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[0].X += (2*PI*ke/Volume)*kweight * BX.X ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[1].Y += (2*PI*ke/Volume)*kweight * BY.Y ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[2].Z += (2*PI*ke/Volume)*kweight * BZ.Z ;
+
+		// Off-diagonal components.
+		BX.Y = -2.0 * K_V[ik].X * K_V[ik].Y / rksq - 0.5 * K_V[ik].X * K_V[ik].Y / alphasq ;
+		BX.Z = -2.0 * K_V[ik].X * K_V[ik].Z / rksq - 0.5 * K_V[ik].X * K_V[ik].Z / alphasq ;
+		BY.Z = -2.0 * K_V[ik].Y * K_V[ik].Z / rksq - 0.5 * K_V[ik].Y * K_V[ik].Z / alphasq ;
+
+		BY.X = BX.Y ;
+		BZ.X = BX.Z ;
+		BZ.Y = BY.Z ;
+
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[0].Y += (2*PI*ke/Volume)*kweight * BX.Y ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[0].Z += (2*PI*ke/Volume)*kweight * BX.Z ;		
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[1].X += (2*PI*ke/Volume)*kweight * BY.X ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[1].Z += (2*PI*ke/Volume)*kweight * BY.Z ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[2].X += (2*PI*ke/Volume)*kweight * BZ.X ;
+		TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[2].Y += (2*PI*ke/Volume)*kweight * BZ.Y ;
 		
 		for(int a1=0; a1<PRIM_ATOMS; a1++) 
 		{
@@ -250,7 +266,11 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 
 	BOX PRIM_BOX;
 	int PRIM_ATOMS;
-	
+
+	// This code assumes an orthorhombic box.
+	if ( ! TRAJECTORY.BOXDIM.IS_ORTHO )
+		EXIT_MSG("Ewald evaluator does not support a non-orthorhombic simulation box\n") ;
+				
 	// Primitive box is the same as the original box in this implementation of layers.
 	PRIM_BOX.CELL_AX = TRAJECTORY.BOXDIM.CELL_AX;
 	PRIM_BOX.CELL_BY = TRAJECTORY.BOXDIM.CELL_BY;
@@ -362,6 +382,16 @@ void ZCalc_Ewald(FRAME & TRAJECTORY, JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBO
 				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[0].X += tempx * RVEC.X * RVEC.X ;
 				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[1].Y += tempx * RVEC.Y * RVEC.Y ;
 				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[2].Z += tempx * RVEC.Z * RVEC.Z ;
+
+				// Off-diagonal components
+				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[0].Y += tempx * RVEC.X * RVEC.Y ;
+				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[0].Z += tempx * RVEC.X * RVEC.Z ;
+				
+				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[1].X += tempx * RVEC.Y * RVEC.X ;
+				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[1].Z += tempx * RVEC.Y * RVEC.Z ;
+				
+				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[2].X += tempx * RVEC.Z * RVEC.X ;
+				TRAJECTORY.PRESSURE_TENSORS_XYZ_ALL[2].Y += tempx * RVEC.Z * RVEC.Y ;								
 				
 				TRAJECTORY.TMP_EWALD[fidx_a2].X -= RVEC.X * tempx;
 				TRAJECTORY.TMP_EWALD[fidx_a2].Y -= RVEC.Y * tempx;
@@ -478,8 +508,12 @@ void ZCalc_Ewald_Deriv(FRAME & FRAME_TRAJECTORY, vector<PAIRS> & ATOM_PAIRS, A_M
 	 static XYZ    		LAST_BOXDIMS;
 	 int			a2start, a2end, a2;
 	
+	// This code assumes an orthorhombic box.
+	if ( ! FRAME_TRAJECTORY.BOXDIM.IS_ORTHO )
+		EXIT_MSG("Ewald evaluator does not support a non-orthorhombic simulation box\n") ;
+
 	 Volume = FRAME_TRAJECTORY.BOXDIM.VOL;
-	
+
 	 bool BOX_CHANGED = false;
 	
 	 if (LAST_BOXDIMS.X != FRAME_TRAJECTORY.BOXDIM.CELL_AX  || LAST_BOXDIMS.Y != FRAME_TRAJECTORY.BOXDIM.CELL_BY  || LAST_BOXDIMS.Z != FRAME_TRAJECTORY.BOXDIM.CELL_CZ)
