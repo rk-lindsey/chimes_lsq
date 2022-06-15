@@ -90,6 +90,7 @@ int main(int argc, char **argv)
 		{"algorithm", required_argument, 0, 'a'},
 		{"distributed_solver", required_argument, 0, 'd'},
 		{"iterations", required_argument, 0, 'i'},
+		{"feature_weights", required_argument, 0, 'f'},
 		{"lambda", required_argument, 0, 'l'},
 		{"max_norm", required_argument, 0, 'm'},
 		{"normalize", required_argument, 0, 'n'},
@@ -109,7 +110,7 @@ int main(int argc, char **argv)
 	
 	string algorithm("lasso") ;				// Algorithm to use: lasso or lars
 	bool split_files = false ;				// Read input matrix from split files ?
-	bool normalize=true ;							// Whether to normalize the X matrix.
+	bool normalize=false ;							// Whether to normalize the X matrix.
 	bool con_grad = false ;						// Whether to use congugate gradient algorithm to solve linear equations.
 
 	bool use_precondition = false ;
@@ -121,6 +122,7 @@ int main(int argc, char **argv)
 	double lambda = 0.0 ;							// L1 weighting factor.
 	
 	string weight_file("") ;
+	string feature_weight_file("") ;
 	string restart_file ;
 
 	while (1) {
@@ -140,7 +142,10 @@ int main(int argc, char **argv)
 				cerr << "--distributed-solver arg should be y or n" ;
 				stop_run(1) ;
 			}
-			break ;			
+			break ;
+		case 'f':
+			feature_weight_file = string(optarg) ;
+			break ;
 		case 'i':
 			max_iterations = atoi(optarg) ;
 			break ;
@@ -153,6 +158,7 @@ int main(int argc, char **argv)
 		case 'n':
 			if ( optarg[0] == 'y' ) {
 				normalize = true ;
+				cout << "Warning: normalize should not be used with chimes_lsq" << endl ;
 			} else if ( optarg[0] == 'n' ) {
 				normalize = false ;
 			} else {
@@ -256,6 +262,7 @@ int main(int argc, char **argv)
 	}	
 
 	Vector weights ;
+	Vector feature_weights ;
 
 	if ( ! weight_file.empty() ) {
 		
@@ -272,19 +279,38 @@ int main(int argc, char **argv)
 			cout << " ...weights read." << endl;
 		}			
 	}
-	
+
+	// Optionally normalize before applying feature weights.
 	if ( normalize ) {
 		xmat.normalize() ;
 		xmat.check_norm() ;
+		xmat.print_norm("Xnorm.txt") ;
 		
 		if ( RANK == 0 ) {
 			cout << " ...xmat normalized." << endl;
 		}		
 		yvec.normalize() ;
 		yvec.check_norm() ;
+		yvec.print_norm("Ynorm.txt") ;
 		
 		if ( RANK == 0 ) {
 			cout << " ...yvec normalized." << endl;
+		}			
+	} else if ( RANK == 0 ) {
+		cout << " ...will not normalize Xmat or Yvec.\n" << endl;
+	}
+
+	if ( ! feature_weight_file.empty() ) {
+		ifstream feature_stream(feature_weight_file) ;
+		if ( ! feature_stream.is_open() ) {
+			if ( RANK == 0 ) cout << "Could not open " << feature_weight_file << endl ;
+			stop_run(1) ;
+		}
+		feature_weights.read(feature_stream, nprops) ;
+		xmat.scale_columns(feature_weights) ;
+		
+		if ( RANK == 0 ) {
+			cout << " ...feature weights read." << endl;
 		}			
 	}
 
@@ -344,9 +370,8 @@ int main(int argc, char **argv)
 			if ( RANK == 0 ) cout << "Stopping: no more iterations possible" << endl ;
 			break ;
 		} else if ( status == -1 && last_status == 1 ) {
-			// if ( RANK == 0 ) cout << "Iteration failed: continuing" << endl ;
-			if ( RANK == 0 ) cout << "Stopping: iteration failed" << endl ;			
-			break ;
+			if ( RANK == 0 ) cout << "Iteration failed: continuing" << endl ;
+			continue ;
 		} 
 
 		if ( RANK == 0 ) cout << "Finished iteration " << j + 1 << endl ;
@@ -484,7 +509,6 @@ int DLARS::iteration()
 		print_error(trajfile) ;
 		beta.print(trajfile) ;
 		print_error(cout) ;
-
 		if ( iterations % 10 == 0 ) {
 			print_restart() ;
 		}
@@ -553,13 +577,24 @@ int DLARS::iteration()
 	}
 #endif			
 
-	if ( build_G_A_here() && ! solve_G_A(true) ) {
+	int solve_status ; // Use an int to avoid special MPI boolean types.
+	if ( build_G_A_here() ) {
+		if ( solve_G_A(true) ) {
+			solve_status = 1 ;
+		} else {
+			solve_status = 0 ;
+		}
+	} 
+#ifdef USE_MPI
+	MPI_Bcast(&solve_status, 1, MPI_INT, 0, MPI_COMM_WORLD) ;
+#endif
+	if ( solve_status == 0 ) {
 		remove_prop = -1 ;
 		add_prop = -1 ;
 		cout << "Iteration failed" << endl ;
 		return -1 ;
 	}
-
+		
 	auto time8 = std::chrono::system_clock::now() ;
 	elapsed_seconds = time8 - time7 ;
 
@@ -583,7 +618,13 @@ int DLARS::iteration()
 	}
 #endif			
 
-	build_u_A() ;
+	if ( ! build_u_A() ) {
+		remove_prop = -1 ;
+		add_prop = -1 ;
+		cout << "Iteration failed to build u_A" << endl ;
+		increment_excluded_vars() ;
+		return -1 ;
+	}
 
 	auto time9 = std::chrono::system_clock::now() ;
 	elapsed_seconds = time9 - time8 ;
@@ -627,17 +668,27 @@ int DLARS::iteration()
 	if ( RANK == 0 ) {
 		double total_mem = 0.0 ;
 		int prec = cout.precision() ;
+#ifdef VERBOSE		
 		cout << "Matrix memory usage on Rank 0:" << endl ;
 		total_mem += X.print_memory("X") ;
 		total_mem += X_A.print_memory("X_A") ;
 		total_mem += G_A.print_memory("G_A") ;
 		total_mem += chol.print_memory("chol") ;
 		total_mem += pre_con.print_memory("pre_con") ;
-		cout << "Total memory = " << std::fixed << std::setprecision(1)
+#else
+		total_mem += X.memory() ;
+		total_mem += X_A.memory() ;
+		total_mem += G_A.memory() ;
+		total_mem += chol.memory() ;
+		total_mem += pre_con.memory() ;
+#endif		
+		cout << "Total memory on rank 0 = " << std::fixed << std::setprecision(2)
 				 << total_mem/1024.0 << " Gb " << endl ;
 		cout.precision(prec) ;
 		cout << std::scientific ;
+		
 	}
+	
 	return 1 ;
 
 }
@@ -665,6 +716,9 @@ void DLARS::build_G_A(Matrix &G_A_in, bool increment)
 		}
 	} else {
 		// Unusual event: rebuild the array.
+		if ( RANK == 0 ) {
+			cout << "Building the G_A matrix" << endl ;
+		}
 		if ( build_G_A_here() ) {
 			// Only store G_A on rank 0 for non-distributed solver.
 			if ( distributed_solver ) {
@@ -1225,20 +1279,7 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 
 			if ( ! G_A.cholesky(chol) ) {
 				if ( RANK == 0 ) cout << "Non-incremental Cholesky failed" << endl ;
-				for ( int j = 0 ; j < nactive ; j++ ) {
-					int k ;
-					// See if this is a new index.
-					for ( k = 0 ; k < A_last.dim ; k++ ) {
-						if ( A.get(j) == A_last.get(k) ) {
-							break ;
-						}
-					}
-					if ( k == A_last.dim ) {
-						// The index is new. Exclude it in the future.
-						exclude.set( A.get(j), 1) ;
-						++num_exclude ;
-					}
-				}
+				increment_excluded_vars() ;
 				solve_succeeded = false ;
 				return false ;
 			}
@@ -1276,9 +1317,12 @@ bool DLARS::solve_G_A(bool use_incremental_updates)
 	auto time2 = std::chrono::system_clock::now() ;
 	std::chrono::duration<double> elapsed_seconds = time2 - time1 ;
 
+#ifdef TIMING
 	if ( RANK == 0 ) {
 		cout << "Time solving equations = " << elapsed_seconds.count() << endl ;
-	}			
+	}
+#endif
+
 	return solve_succeeded ;
 }
 
@@ -1288,7 +1332,6 @@ bool DLARS::chol_backsub(Matrix &G_A_in, Matrix &chol_in)
 	// Returns true if the solution passes consistency tests.
 {
 
-	//			// DEBUG !!
 	//			if ( RANK == 0 ) cout << "Cholesky " << endl ;
 	//			 chol.print() ;
 
@@ -1573,7 +1616,10 @@ int DLARS::restart(string filename)
 	
 	if ( build_G_A_here() ) {
 		if ( RANK == 0 ) cout << "Restart: solving G_A\n" ;
-		solve_G_A(false) ;
+		if ( ! solve_G_A(false) ) {
+			cout << "Error: could not solve equations on restart\n" ;
+			stop_run(1) ;
+		}
 	}
 	broadcast_solution() ;
 
@@ -1682,7 +1728,6 @@ bool DLARS::solve_G_A_con_grad()
 				// Add 1 row to pre-conditioner.
 				pre_con.set(nactive-1, nactive-1, 1.0) ;
 
-				// DEBUG !
 				//if ( RANK == 0 ) {
 				//cout << "Updated preconditioner\n" ;
 				//pre_con.print() ;
@@ -1747,7 +1792,7 @@ bool DLARS::solve_G_A_con_grad()
 	return true ;
 }
 
-void DLARS::build_u_A()
+bool DLARS::build_u_A()
 {
 	const double eps_fail = 1.0e-04 ;
 	w_A.realloc(nactive) ;
@@ -1773,9 +1818,11 @@ void DLARS::build_u_A()
 	}
 	test = sqrt(test) ;
 	if ( fabs(test-1.0) > eps_fail ) {
-		cout << "U_A norm test failed" << endl ;
-		cout << "Norm = " << test << endl ;
-		stop_run(1) ;
+		if ( RANK == 0 ) {
+			cout << "U_A norm test failed" << endl ;
+			cout << "Norm = " << test << endl ;
+		}
+		return false ;
 	}
 
 	// Test X_A^T u__A = A_A * I
@@ -1783,8 +1830,10 @@ void DLARS::build_u_A()
 	X_A.dot_transpose(testv, u_A) ;
 	for ( int j = 0 ; j < nactive ; j++ ) {
 		if ( fabs(testv.get(j) - A_A) > eps_fail ) {
-			cout << "u_A test failed " << endl ;
-			stop_run(1) ;
+			if ( RANK == 0 ) {			
+				cout << "u_A equation test failed " << endl ;
+			}
+			return false ;
 		}
 	}
 				
@@ -1795,6 +1844,7 @@ void DLARS::build_u_A()
 	a.print() ;
 #endif			
 
+	return true ;
 }
 
 
@@ -2011,3 +2061,80 @@ void DLARS::print_unscaled(ostream &out)
 		}
 	}
 }
+
+void DLARS::increment_excluded_vars()
+// If a solution fails, exclude the added variable on the next iteration.
+{
+	for ( int j = 0 ; j < nactive ; j++ ) {
+		int k ;
+		// See if this is a new index.
+		for ( k = 0 ; k < A_last.dim ; k++ ) {
+			if ( A.get(j) == A_last.get(k) ) {
+				break ;
+			}
+		}
+		if ( k == A_last.dim ) {
+			// The index is new. Exclude it in the future.
+			exclude.set( A.get(j), 1) ;
+			if ( RANK == 0 )
+				cout << "Variable " << A.get(j) + 1 << " is excluded from future use" << endl ;
+			++num_exclude ;
+		}
+	}
+}
+
+void DLARS::print_unshifted_mu(ostream &out)
+	// Print the given prediction in unscaled units.
+{
+	if ( RANK == 0 ) {
+		//out << "Y constant offset = " << offset << endl ;
+		for ( int j = 0 ; j < ndata ; j++ ) {
+			out << mu.get(j) + y.shift << endl ;
+		}
+	}
+}
+	
+
+void DLARS::print_unshifted_mu(ostream &out, Vector &weights)
+	// Print the given prediction in unscaled units.
+{
+	if ( RANK == 0 ) {
+		//out << "Y constant offset = " << offset << endl ;
+		for ( int j = 0 ; j < ndata ; j++ ) {
+			out << (mu.get(j) + y.shift)/weights.get(j) << endl ;
+		}
+	}
+}	
+
+void DLARS::print_error(ostream &out)
+	// Print the current fitting error and related parameters.
+{
+	if ( RANK == 0 ) {
+		out  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << " Number of vars: " << A.dim << endl ;
+	}
+}
+
+void DLARS::print_restart()
+		// Print the restart file
+{
+	if ( RANK == 0 ) {
+
+		ofstream rst("restart.txt") ;
+		if ( rst.is_open() ) {
+			rst << scientific ;
+			rst.precision(16) ;
+			rst.width(24) ;
+			rst << "Iteration " << iterations << endl ;
+			print_error(rst) ;
+			beta.print_sparse(rst) ;
+			rst << "Exclude " << endl ;
+			exclude.print_sparse(rst) ;
+			rst << "Mu" << endl ;
+			mu.print_sparse(rst) ;
+			rst.close() ;
+		} else {
+			cout << "Warning: restart file could not be opened" << endl ;
+		}
+	}
+}
+
