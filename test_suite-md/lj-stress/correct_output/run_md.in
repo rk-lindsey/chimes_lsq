@@ -39,7 +39,7 @@
 # CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>
 	NVE
 # STRSCALC # (options are ANALYTICAL or NUMERICAL)
-	NUMERICAL
+  	NUMERICAL
 	
 ###################################
 ####      OUTPUT  CONTROL      ####

@@ -161,7 +161,8 @@ int main(int argc, char* argv[])
 		
   vector<string> TMP_ATOMTYPE;
 
-  double Ktot;
+  double Ktot ;
+	vector<XYZ> Ktensor(3,{0.0,0.0,0.0}) ;
   double Vol;
   SYSTEM.AVG_TEMPERATURE = 0.0;
 		
@@ -910,7 +911,7 @@ int main(int argc, char* argv[])
 		 // to allow for thermostat verification
 		 ////////////////////////////////////////////////////////////
 
-		 Ktot = kinetic_energy(SYSTEM, CONTROLS);
+		 Ktot = kinetic_energy(SYSTEM, CONTROLS, Ktensor);
 
 		 ENSEMBLE_CONTROL.UPDATE_TEMPERATURE(SYSTEM, CONTROLS);
 
@@ -985,18 +986,19 @@ int main(int argc, char* argv[])
 	 {
 	
 		SYSTEM.PRESSURE = (SYSTEM.PRESSURE_XYZ + 2.0 * Ktot / (3.0 * Vol)) * GPa;	// GPa = Unit conversion factor to GPa.
-			
-		SYSTEM.PRESSURE_TENSORS_ALL[0].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[0].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[0].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
+
+		// Use the kinetic energy tensor for the instantaneous pressure tensor.
+		SYSTEM.PRESSURE_TENSORS_ALL[0].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X + 2.0 * Ktensor[0].X / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[0].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y + 2.0 * Ktensor[0].Y / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[0].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z + 2.0 * Ktensor[0].Z / Vol) * GPa;
 		
-		SYSTEM.PRESSURE_TENSORS_ALL[1].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[1].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[1].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[1].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].X + 2.0 * Ktensor[1].X / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[1].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y + 2.0 * Ktensor[1].Y / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[1].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z + 2.0 * Ktensor[1].Z / Vol) * GPa;
 		
-		SYSTEM.PRESSURE_TENSORS_ALL[2].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[2].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y + 2.0 / 3.0 * Ktot / Vol) * GPa;
-		SYSTEM.PRESSURE_TENSORS_ALL[2].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z + 2.0 / 3.0 * Ktot / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[2].X = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].X + 2.0 * Ktensor[2].X / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[2].Y = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Y + 2.0 * Ktensor[2].Y / Vol) * GPa;
+		SYSTEM.PRESSURE_TENSORS_ALL[2].Z = (SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z + 2.0 * Ktensor[2].Z / Vol) * GPa;
 
 		AVG_DATA.PRESS_SUM += SYSTEM.PRESSURE;
 		AVG_DATA.PV_SUM += Vol * SYSTEM.PRESSURE/GPa ;
@@ -2324,7 +2326,7 @@ static void read_coord_file(int index, JOB_CONTROL &CONTROLS, FRAME &SYSTEM, ifs
 	}
 		
 	else
-		TMP_BOX.CELL_AX = stof(LINE);
+		TMP_BOX.CELL_AX = stod(LINE);
 	
 	
 	if (SYSTEM.BOXDIM.IS_ORTHO)

@@ -227,9 +227,18 @@ void divide_atoms(int &a1start, int &a1end, int atoms)
 // Kinetic energy functions
 //////////////////////////////////////////
 
-double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)					// UPDATED -- Overloaded.. compute differentely if for main or new velocities
+double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<XYZ> &Ktensor)
+// UPDATED -- Overloaded.. compute differentely if for main or new velocities
+// Ktensor is the kinetic energy tensor used in the stress calculation.
+// Sum of diagonal Ktensor elements = kinetic energy.
 {
 	double Ktot = 0.0;
+
+	for ( int j = 0 ; j < 3 ; j++ ) {
+		Ktensor[j].X = 0.0 ;
+		Ktensor[j].Y = 0.0 ;
+		Ktensor[j].Z = 0.0 ;
+	}
 	
 	for(int a1=0;a1<SYSTEM.ATOMS;a1++)
 	{
@@ -241,50 +250,60 @@ double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)					// UPDATED -- 
 		Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].X;
 		Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Y * SYSTEM.VELOCITY[a1].Y;
 		Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Z * SYSTEM.VELOCITY[a1].Z;
-	}
 
+		Ktensor[0].X += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].X;
+		Ktensor[0].Y += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].Y;
+		Ktensor[0].Z += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].X * SYSTEM.VELOCITY[a1].Z;
+
+		Ktensor[1].X += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Y * SYSTEM.VELOCITY[a1].X;
+		Ktensor[1].Y += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Y * SYSTEM.VELOCITY[a1].Y;
+		Ktensor[1].Z += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Y * SYSTEM.VELOCITY[a1].Z;
+
+		Ktensor[2].X += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Z * SYSTEM.VELOCITY[a1].X;
+		Ktensor[2].Y += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Z * SYSTEM.VELOCITY[a1].Y;
+		Ktensor[2].Z += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY[a1].Z * SYSTEM.VELOCITY[a1].Z;		
+
+	}
+	
   return(Ktot);
 }
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS)		// UPDATED -- Overloaded.. compute differentely if for main or new velocities
 {
 	double Ktot = 0.0;
-	
+
+	vector<XYZ> *vel ;
+
 	if(TYPE == "NEW")
 	{
-		for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-		{
-			// Don't account for frozen atoms
-		
-			if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))
-				continue;
-			
-			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].X * SYSTEM.VELOCITY_NEW[a1].X;
-			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Y * SYSTEM.VELOCITY_NEW[a1].Y;
-			Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_NEW[a1].Z * SYSTEM.VELOCITY_NEW[a1].Z;
-		}		
-	} 
-	else if(TYPE == "ITER")
-	{
-		 for(int a1=0;a1<SYSTEM.ATOMS;a1++)
-		 {
-				// Don't account for frozen atoms
-		
-				if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))
-					 continue;
-			
-				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_ITER[a1].X * SYSTEM.VELOCITY_ITER[a1].X;
-				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_ITER[a1].Y * SYSTEM.VELOCITY_ITER[a1].Y;
-				Ktot += 0.5 * SYSTEM.MASS[a1] * SYSTEM.VELOCITY_ITER[a1].Z * SYSTEM.VELOCITY_ITER[a1].Z;
-		 }
+		vel = &SYSTEM.VELOCITY_NEW ;
+	}
+	else if ( TYPE == "ITER" )
+  {
+		vel = &SYSTEM.VELOCITY_ITER ;
+	}
+	else if ( TYPE == "CURRENT" )
+  {
+		vel = &SYSTEM.VELOCITY ;
 	}
 	else
-	{
+  {
 		cout << "ERROR: Requested ke type not understood. Check code." << endl;
 		exit_run(0);
 	}
 
+	for(int a1=0;a1<SYSTEM.ATOMS;a1++)
+	{
+		// Don't account for frozen atoms
+		
+		if((CONTROLS.FREEZE_IDX_START != -1) && ((a1<CONTROLS.FREEZE_IDX_START) || (a1>CONTROLS.FREEZE_IDX_STOP)))
+			continue;
+			
+		Ktot += 0.5 * SYSTEM.MASS[a1] * (*vel)[a1].X * (*vel)[a1].X;
+		Ktot += 0.5 * SYSTEM.MASS[a1] * (*vel)[a1].Y * (*vel)[a1].Y;
+		Ktot += 0.5 * SYSTEM.MASS[a1] * (*vel)[a1].Z * (*vel)[a1].Z;
+	}		
 
-  return(Ktot);
+	return(Ktot);
 }
 
 

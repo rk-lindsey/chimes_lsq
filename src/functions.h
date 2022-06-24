@@ -40,9 +40,9 @@ using namespace std;
 static const double ke      = 332.0637157615209;// Converter between electron units and Stillinger units for Charge*Charge.
 static const double Hartree = 627.50961;	// 1 Hartree in kcal/mol.
 static const double Bohr    = 1.889725989;     // 1 Angstrom in Bohr.
-static const double Kb      = 0.001987;		// Boltzmann constant in kcal/mol-K.
+static const double Kb      = 0.0019872067 ;		// Boltzmann constant in kcal/mol-K. (Copied from LAMMPS).
 static const double Tfs     = 48.888;		// Internal time unit in fs.
-static const double GPa     = 6.9479;		// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
+static const double GPa     = 6.9476955;		// Unit conversion factor... kcal/mol/A^3 * (this constant) ==> GPa
 static const double atm     = GPa*9869.23266716;// stress conversion to atm (for LAMMPS).
 static const double GPa2atm = 9869.23266716;	// x_GPa * GPa2atm = x_atm
 static const double pi      = 3.14159265359;
@@ -683,7 +683,7 @@ double VECTOR_ANGLE(vector<double> & v1, vector<double> & v2);
 
 void OPEN_TRAJFILE(ifstream & TRAJ_INPUT, vector<string> & INFILE, int FILE_IDX);
 
-double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS);			// Overloaded.. compute differentely if for main or new velocities
+double kinetic_energy(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, vector<XYZ> &Ktensor);			// Overloaded.. compute differentely if for main or new velocities
 double kinetic_energy(FRAME & SYSTEM, string TYPE, JOB_CONTROL & CONTROLS);	// Overloaded.. compute differentely if for main or new velocities
 
 void build_layers      (FRAME &SYSTEM, JOB_CONTROL &CONTROLS);
