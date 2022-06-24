@@ -107,7 +107,13 @@ do
 	fi	
         
 	if [[ $SUCCESS -eq 1 ]] ; then
- 		 cp A.txt b.txt params.header fm_setup.out ff_groups.map ../correct_output
+	
+		# Break up  A.txt file into 95M chunks, i.e., < Github's 100M file size limit
+		# Then remove the big single A.txt file
+		
+		split -b95M A.txt A.txt.
+	
+ 		 cp A.txt.* b.txt params.header fm_setup.out ff_groups.map ../correct_output
 	fi
 	
 	cd ../..
