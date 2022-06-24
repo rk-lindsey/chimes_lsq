@@ -109,7 +109,7 @@ public:
 	void print_unscaled(ostream &out)  ;
 	void increment_excluded_vars() ;
 	void print_unshifted_mu(ostream &out);
-  void print_unshifted_mu(ostream &out, Vector &weights) ;
+	void print_unshifted_mu(ostream &out, Vector &weights) ;
 	void print_error(ostream &out) ;
 	void print_restart() ;
 

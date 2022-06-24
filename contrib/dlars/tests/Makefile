@@ -1,7 +1,7 @@
 #RUN=srun -n 7 ../src/dlars
 RUN=../src/dlars
 COMPARE=perl ../../compare/compare.pl
-all: lars lasso stopping split weights restart restart2 con_grad distribute restart_mpi
+all: lars lasso stopping split weights restart restart2 con_grad distribute restart_mpi restart_mpi_nodist restart3
 
 lars:
 	$(RUN) Xcpp.txt Ycpp.txt Xcpp.dim --algorithm=lars --normalize=y > dlars.cpp.txt
@@ -59,9 +59,24 @@ restart:
 
 restart_mpi:
 	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y --iterations=10 --normalize=y > dlasso.restart_mpi.txt
-	cp restart.txt restart.save
-	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --restart=restart.save --normalize=y > dlasso.restart_mpi2.txt
+	cp restart.0000 restart.save.0000
+	cp restart.0001 restart.save.0001
+	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --restart=restart.save --distributed_solver=y --normalize=y > dlasso.restart_mpi2.txt
 	-$(COMPARE) dlasso.restart_mpi2.txt correct_output/dlasso.restart_mpi2.txt
+
+restart_mpi_nodist:
+	srun -n 2 ../src/dlars A.txt b.txt A.dim --iterations=10 --normalize=y > dlasso.restart.nodist1.txt
+	cp restart.0000 restart.nodist.0000
+	cp restart.0001 restart.nodist.0001
+	srun -n 2 ../src/dlars A.txt b.txt A.dim --restart=restart.nodist --normalize=y > dlasso.restart.nodist2.txt
+	-$(COMPARE) dlasso.restart.nodist2.txt correct_output/dlasso.restart.nodist2.txt
+
+restart_mpi_congrad:
+	srun -n 2 ../src/dlars A.txt b.txt A.dim --iterations=10 --normalize=y --con_grad --precondition > dlasso.restart.congrad1.txt
+	cp restart.0000 restart.congrad.0000
+	cp restart.0001 restart.congrad.0001
+	srun -n 2 ../src/dlars A.txt b.txt A.dim --restart=restart.congrad --normalize=y --con_grad --precondition > dlasso.restart.congrad2.txt
+	-$(COMPARE) dlasso.restart.congrad2.txt correct_output/dlasso.restart.congrad2.txt
 
 restart2:
 	$(RUN) A.txt b.txt A.dim --iterations=20 --normalize=y > dlasso.restart2.1.txt

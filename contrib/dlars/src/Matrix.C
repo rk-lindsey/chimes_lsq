@@ -28,11 +28,14 @@ bool Matrix::cholesky(Matrix &chol)
 	double eps = 1.0e-10 ;
 	if ( dim1 != dim2 ) {
 		cout << "Error: Cholesky decomposition only works for square matrices " << endl ;
+		return false ;
 	}
 	for ( int j = 0 ; j < dim1 ; j++ ) {
 		for ( int k = 0 ; k < dim1 ; k++ ) {
 			if ( fabs( get(j,k) - get(k,j) ) > 1.0e-10 ) {
 				cout << "Error: Cholesky decomposition only works for symmetric matrices " << endl ;
+				cout << k << " " << j << " " << get(j,k) << " " << get(k,j) << endl ;
+				return false ;
 			}
 		}
 	}
