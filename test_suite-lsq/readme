@@ -153,3 +153,6 @@ This is a list of each test and what functionality is probed
 26 stress-and-ener-4b2
    - Test of off-diagonal stress with 4 body interactions.
    
+27 tatb
+   - Test of 4 atom types, split output files, use of dlars, and orthogonal cell vectors input as non-orthogonal (degenerate case).
+   

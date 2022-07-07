@@ -2425,7 +2425,7 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 	int ntokens = parse_space(header, tokens);
 
 	// Make sure we at least have boxlengths
-	
+
 	if (tokens[0] == "NON_ORTHO")
 		BOXDIM.IS_ORTHO = false;
 
@@ -2436,8 +2436,8 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 			BOXDIM.CELL_AX = stod(tokens[0]);
 			BOXDIM.CELL_BY = stod(tokens[1]);
 			BOXDIM.CELL_CZ = stod(tokens[2]);
-			
-			BOXDIM.UPDATE_CELL();
+
+			// BOXDIM.UPDATE_CELL();
 		}
 		else
 		{
@@ -2445,7 +2445,7 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 			BOXDIM.CELL_BX = stod(tokens[4]); BOXDIM.CELL_BY = stod(tokens[5]); BOXDIM.CELL_BZ = stod(tokens[6]);
 			BOXDIM.CELL_CX = stod(tokens[7]); BOXDIM.CELL_CY = stod(tokens[8]); BOXDIM.CELL_CZ = stod(tokens[9]);
 			
-			BOXDIM.UPDATE_CELL();
+			// BOXDIM.UPDATE_CELL();
 		}
 	} 
 	else 
@@ -2487,8 +2487,6 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 		}
 		else if(CONTROLS.FIT_STRESS_ALL)	// Expects as:xx yy zz xy xz yz // old: xx, xy, xz, yy, yx, yz, zx, zy, zz
 		{
-			// Read only the "upper" deviatoric components
-		
 			if (BOXDIM.IS_ORTHO && ( ntokens >= 9 ))
 			{
 				STRESS_TENSORS_X.X = stod(tokens[3]);
@@ -2519,6 +2517,13 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 			}
 		}
 	}
+
+	// Delay updating of cell until after stresses are read
+	// to correctly read stresses when an orthogonal cell is input
+	// as non-orthogonal with zero off-diagonal cell vector components.
+	// In this case UPDATE_CELL will switch the cell to IS_ORTHO == true.
+	BOXDIM.UPDATE_CELL();	
+
 	if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
 		if(CONTROLS.FIT_ENER) // We're fitting to the absolute energy, + an offset (column of 1's at end of A-matrix)
 			QM_POT_ENER = stod(tokens[tokens.size()-1]);
