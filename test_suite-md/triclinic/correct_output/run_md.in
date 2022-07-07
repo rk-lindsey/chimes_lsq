@@ -1,0 +1,50 @@
+
+###################################
+#### GENERAL CONTROL VARIABLES ####
+###################################
+
+
+# RNDSEED # ! Seed. If not specified, default value 123457 is used
+	12357
+# TEMPERA # ! In K
+	500.0
+# CMPRFRC # ! Compare computed forces against a set of input forces? ...If true, provide name of the file containing the forces for comparison
+	false
+# TIMESTP # ! In fs
+	0.02
+# N_MDSTP # ! Total number of MD steps
+       20000
+# NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
+	2
+# USENEIG # 
+	true	
+# PRMFILE # ! Parameter file (i.e. params.txt)
+	params.2b_liqcarb.txt
+# CRDFILE # ! Triclinic carbon unit cell for testing purposes.
+	triclinic-c.xyz
+	
+	
+###################################
+####    SIMULATION  OPTIONS    ####
+###################################
+
+# VELINIT # (options are READ or GEN)
+	GEN
+# CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>
+	NVE
+# PRSCALC # (options are ANALYTICAL or NUMERICAL)
+	ANALYTICAL
+	
+###################################
+####      OUTPUT  CONTROL      ####
+###################################	
+	
+# FRQDFTB # ! Frequency to output the DFTB gen file
+	1000
+# FRQENER # ! Frequency to output energies
+	1	
+# PRNTFRC # ! Print computed forces? Forces are printed to force_out.txt 
+	true 1000
+	
+	
+# ENDFILE #

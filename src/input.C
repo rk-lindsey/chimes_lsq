@@ -516,12 +516,16 @@ void INPUT::PARSE_CONTROLS_FITSTRS(JOB_CONTROL & CONTROLS)
 			{
 				cout << "	# FITSTRS #: ";		
 							
-				if (CONTROLS.FIT_STRESS_ALL)
-					cout << bool2str(CONTROLS.FIT_STRESS_ALL) << " ...will fit to all tensor components" << endl;	
-				else if(CONTROLS.NSTRESS>0)
-					cout << bool2str(CONTROLS.FIT_STRESS) << " ...will only fit tensors for first " << CONTROLS.NSTRESS << " frames." << endl;
-				else 
+				if (CONTROLS.FIT_STRESS_ALL) 
+					cout << bool2str(CONTROLS.FIT_STRESS_ALL) << " ...will fit to all tensor components" << endl;
+				else if ( CONTROLS.FIT_STRESS )
+					cout << " ...will fit to diagonal tensor components only" << endl ;
+				else
 					cout << bool2str(CONTROLS.FIT_STRESS) << endl;
+				
+				if(CONTROLS.NSTRESS>0)
+					cout << bool2str(CONTROLS.FIT_STRESS) << " ...will only fit tensors for first " << CONTROLS.NSTRESS << " frames." << endl;
+
 			}
 			
 			break;

@@ -50,13 +50,13 @@ Reading initial coordinates and forces...
        Cell vectors (c)                0 0 8.6091309
        Layers:                         1
        Ghost cell vectors (a) 	        25.8273927 0 0
-       Ghost cell vectors (a) 	        0 25.8273927 0
-       Ghost cell vectors (a) 	        0 0 25.8273927
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
        Invr. cell vectors (a) 	        0.116155743432824 -0 0
        Invr. cell vectors (b) 	        -0 0.116155743432824 -0
        Invr. cell vectors (c) 	        0 -0 0.116155743432824
        Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
        Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
        LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
@@ -71,13 +71,13 @@ Reading initial coordinates and forces...
        Cell vectors (c)                0 0 8.6091309
        Layers:                         1
        Ghost cell vectors (a) 	        25.8273927 0 0
-       Ghost cell vectors (a) 	        0 25.8273927 0
-       Ghost cell vectors (a) 	        0 0 25.8273927
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
        Invr. cell vectors (a) 	        0.116155743432824 -0 0
        Invr. cell vectors (b) 	        -0 0.116155743432824 -0
        Invr. cell vectors (c) 	        0 -0 0.116155743432824
        Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
        Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
        LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
