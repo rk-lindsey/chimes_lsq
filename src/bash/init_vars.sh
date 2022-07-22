@@ -71,7 +71,9 @@ function init_test_vars
 		 chebyfix
 		 h2o-4bcheby-numstress
 		 lj-stress
-                 triclinic'
+                 triclinic
+                 ti-ortho
+                 ti-nonortho'
 
     MD_MAKE_JOBS='verify-invert 
 		verify-translate 
