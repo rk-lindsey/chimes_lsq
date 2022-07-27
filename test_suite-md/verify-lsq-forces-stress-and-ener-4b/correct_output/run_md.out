@@ -36,7 +36,7 @@ Input file contents successfully stored.
 		... and will be printed every 1 frames.
 		... printing every 0.125 fs, 
 		... printing 2 frames. 
-	# FITSTRS #: true
+	# FITSTRS #:  ...will fit to diagonal tensor components only
 	# FITENER #: true
 	# FORDFTB #: false
 Setting up the data objects...
@@ -54,13 +54,13 @@ Reading initial coordinates and forces...
        Cell vectors (c)                0 0 10.65
        Layers:                         1
        Ghost cell vectors (a) 	        31.95 0 0
-       Ghost cell vectors (a) 	        0 31.95 0
-       Ghost cell vectors (a) 	        0 0 31.95
+       Ghost cell vectors (b) 	        0 31.95 0
+       Ghost cell vectors (c) 	        0 0 31.95
        Invr. cell vectors (a) 	        0.0938967136150235 -0 0
        Invr. cell vectors (b) 	        -0 0.0938967136150235 -0
        Invr. cell vectors (c) 	        0 -0 0.0938967136150235
        Lat. constants (a,b,c) 	        10.65 10.65 10.65
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
        Cell extents (x,y,z)            10.65 10.65 10.65
        LMP cell lengths (lx,ly,lz)     10.65 10.65 10.65
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
@@ -78,13 +78,13 @@ Reading initial coordinates and forces...
        Cell vectors (c)                0 0 10.65
        Layers:                         1
        Ghost cell vectors (a) 	        31.95 0 0
-       Ghost cell vectors (a) 	        0 31.95 0
-       Ghost cell vectors (a) 	        0 0 31.95
+       Ghost cell vectors (b) 	        0 31.95 0
+       Ghost cell vectors (c) 	        0 0 31.95
        Invr. cell vectors (a) 	        0.0938967136150235 -0 0
        Invr. cell vectors (b) 	        -0 0.0938967136150235 -0
        Invr. cell vectors (c) 	        0 -0 0.0938967136150235
        Lat. constants (a,b,c) 	        10.65 10.65 10.65
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
        Cell extents (x,y,z)            10.65 10.65 10.65
        LMP cell lengths (lx,ly,lz)     10.65 10.65 10.65
        LMP cell tilts facs. (xy,xz,yz) 0 0 0

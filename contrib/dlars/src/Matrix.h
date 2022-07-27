@@ -50,7 +50,7 @@ public:
 		row_start = matin.row_start ;
 		row_end = matin.row_end ;
 		num_rows = matin.num_rows ;
-		
+
 		mat = new double[num_rows * dim2] ;
 		shift = new double[dim2] ;
 		scale = new double[dim2] ;
@@ -126,9 +126,14 @@ public:
 		dim1 = 0 ;
 		dim2 = 0 ;
 	}
-	void read(std::ifstream &file, int dim01, int dim02, bool is_distributed)
+	void read(std::ifstream &file, int dim01, int dim02, bool is_distributed, bool is_split)
 	// Read a non-split matrix from a single file.	The matrix is optionally distributed among processes.
+	// If is_split is true, the content is split across multiple files.
 		{
+			if ( ( ! is_distributed ) && is_split ) {
+				cout << "Error: a non-distributed matrix can't be read in as split\n" ;
+				stop_run(1) ;
+			}
 			dim1 = dim01 ;
 			dim2 = dim02 ;
 			if ( mat != NULL ) {
@@ -140,6 +145,9 @@ public:
 			if ( ! is_distributed ) {
 				distributed = false ;
 				mat = new double [dim1 * dim2] ;
+				row_start = 0 ;
+				row_end = dim1 - 1 ;
+				num_rows = dim1 ;
 				for ( int i = 0 ; i < dim1 ; i++ ) {
 					for ( int j = 0 ; j < dim2 ; j++ ) {
 						double val ;
@@ -150,12 +158,22 @@ public:
 			} else {
 				distribute() ;
 				mat = new double [num_rows * dim2] ;
-				for ( int i = 0 ; i < dim1 ; i++ ) {
-					for ( int j = 0 ; j < dim2 ; j++ ) {
+				if ( is_split ) {
+					for ( int i = row_start ; i <= row_end ; i++ ) {
+						for ( int j = 0 ; j < dim2 ; j++ ) {
 						double val ;
 						file >> val ;
-						if ( i >= row_start && i <= row_end ) {
-							set(i, j, val) ;
+						set(i, j, val) ;
+						}
+					}
+				} else { // ! is_split
+					for ( int i = 0 ; i < dim1 ; i++ ) {
+						for ( int j = 0 ; j < dim2 ; j++ ) {
+							double val ;
+							file >> val ;
+							if ( i >= row_start && i <= row_end ) {
+								set(i, j, val) ;
+							}
 						}
 					}
 				}
@@ -713,28 +731,19 @@ public:
 		}
 			
 	void print()
-		{
-			if ( distributed ) {
-				if ( RANK == 0 ) cout << "[" << endl ;				
-				for ( int proc = 0 ; proc < NPROCS ; proc++ ) {
+	// Print to cout with an easy to read format.
+	// If distributed, print only the data owned by the current rank.		
+	{
+		cout << scientific ;
+		cout.precision(12) ;			
+		if ( distributed ) {
+			if ( RANK == 0 ) cout << "[" << endl ;				
+			for ( int proc = 0 ; proc < NPROCS ; proc++ ) {
 #ifdef USE_MPI
-					cout.flush() ;
-					MPI_Barrier(MPI_COMM_WORLD) ;
+				cout.flush() ;
+				MPI_Barrier(MPI_COMM_WORLD) ;
 #endif
-					if ( RANK == proc ) {
-						for ( int j = row_start ; j <= row_end ; j++ ) {
-							cout << "[" << endl ;
-							for ( int k = 0 ; k < dim2 ; k++ ) {
-								cout << j << " " << k << " " << get(j,k) << endl ;
-							}
-							cout << "]" << endl ;
-						}
-					}
-				}
-				if ( RANK == 0 ) cout << "]" << endl ;								
-			} else {
-				if ( RANK == 0 ) {
-					cout << "[" << endl ;
+				if ( RANK == proc ) {
 					for ( int j = row_start ; j <= row_end ; j++ ) {
 						cout << "[" << endl ;
 						for ( int k = 0 ; k < dim2 ; k++ ) {
@@ -742,22 +751,44 @@ public:
 						}
 						cout << "]" << endl ;
 					}
+				}
+			}
+			if ( RANK == 0 ) cout << "]" << endl ;								
+		} else {
+			if ( RANK == 0 ) {
+				cout << "[" << endl ;
+				for ( int j = row_start ; j <= row_end ; j++ ) {
+					cout << "[" << endl ;
+					for ( int k = 0 ; k < dim2 ; k++ ) {
+						cout << j << " " << k << " " << get(j,k) << endl ;
+					}
 					cout << "]" << endl ;
 				}
+				cout << "]" << endl ;
 			}
 		}
+	}
 
-		void print(ofstream &of)
-		{
-			if ( RANK == 0 ) {
-				for ( int j = 0 ; j < dim1 ; j++ ) {
-					for ( int k = 0 ; k < dim2 ; k++ ) {
-						of << get(j,k) << " " ;
-					}
-					of << endl ;
+	 void print(ofstream &of)
+	 // Print to file - use a more compact format - 1 line per row.
+	 // If distributed, print only the data owned by the current rank.
+	 {
+		if ( distributed ) {
+			for ( int j = row_start ; j <= row_end ; j++ ) {
+				for ( int k = 0 ; k < dim2 ; k++ ) {
+					of << get(j,k) << " " ;
 				}
+				of << endl ;
+			}
+		} else /* if ( RANK == 0 ) */ {
+			for ( int j = 0 ; j < dim1 ; j++ ) {
+				for ( int k = 0 ; k < dim2 ; k++ ) {
+					of << get(j,k) << " " ;
+				}
+				of << endl ;
 			}
 		}
+	 }
 	
 	void dot(Vector &out, const Vector &in) const
 	// Find matrix * in = out

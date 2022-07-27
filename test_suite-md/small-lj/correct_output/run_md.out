@@ -50,13 +50,13 @@ Reading initial coordinates and forces...
        Cell vectors (c)                0 0 16
        Layers:                         2
        Ghost cell vectors (a) 	        20 0 0
-       Ghost cell vectors (a) 	        0 80 0
-       Ghost cell vectors (a) 	        0 0 80
+       Ghost cell vectors (b) 	        0 80 0
+       Ghost cell vectors (c) 	        0 0 80
        Invr. cell vectors (a) 	        0.25 -0 0
        Invr. cell vectors (b) 	        -0 0.0625 -0
        Invr. cell vectors (c) 	        0 -0 0.0625
        Lat. constants (a,b,c) 	        4 16 16
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
        Cell extents (x,y,z)            4 16 16
        LMP cell lengths (lx,ly,lz)     4 16 16
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
@@ -71,13 +71,13 @@ Reading initial coordinates and forces...
        Cell vectors (c)                0 0 16
        Layers:                         2
        Ghost cell vectors (a) 	        20 0 0
-       Ghost cell vectors (a) 	        0 80 0
-       Ghost cell vectors (a) 	        0 0 80
+       Ghost cell vectors (b) 	        0 80 0
+       Ghost cell vectors (c) 	        0 0 80
        Invr. cell vectors (a) 	        0.25 -0 0
        Invr. cell vectors (b) 	        -0 0.0625 -0
        Invr. cell vectors (c) 	        0 -0 0.0625
        Lat. constants (a,b,c) 	        4 16 16
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
        Cell extents (x,y,z)            4 16 16
        LMP cell lengths (lx,ly,lz)     4 16 16
        LMP cell tilts facs. (xy,xz,yz) 0 0 0

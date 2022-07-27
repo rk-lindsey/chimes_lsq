@@ -39,6 +39,7 @@ using namespace std ;
 #include "IntVector.h"
 #include "Matrix.h"
 #include "DLARS.h"
+#include "Restart.h"
 
 void display_usage(struct option* opt)
 {
@@ -158,11 +159,11 @@ int main(int argc, char **argv)
 		case 'n':
 			if ( optarg[0] == 'y' ) {
 				normalize = true ;
-				cout << "Warning: normalize should not be used with chimes_lsq" << endl ;
+				if ( RANK == 0 ) cout << "Warning: normalize should not be used with chimes_lsq" << endl ;
 			} else if ( optarg[0] == 'n' ) {
 				normalize = false ;
 			} else {
-				cerr << "--normalize arg should be y or n" ;
+				if ( RANK == 0 ) cerr << "--normalize arg should be y or n" ;
 				stop_run(1) ;
 			}
 			break ;
@@ -240,7 +241,7 @@ int main(int argc, char **argv)
 			stop_run(1) ;
 		}
 		dfile >> nprops >> ndata ;
-		xmat.read(xfile, ndata, nprops, true) ;
+		xmat.read(xfile, ndata, nprops, true, false) ;
 	}
 	
 	if ( RANK == 0 ) {
@@ -448,7 +449,7 @@ int main(int argc, char **argv)
 	
 #ifdef VERBOSE
 	if ( RANK == 0 ) cout << " Correlation: " << endl ;
-	lars.c.print() ;
+	lars.c.print(cout) ;
 #endif	
 
 #ifdef USE_MPI
@@ -503,24 +504,25 @@ int DLARS::iteration()
 
 			
 	if ( RANK == 0 ) {
-		auto time_rst_1 = std::chrono::system_clock::now() ;
-
 		trajfile << "Iteration " << iterations << endl ;
 		print_error(trajfile) ;
-		beta.print(trajfile) ;
 		print_error(cout) ;
-		if ( iterations % 10 == 0 ) {
-			print_restart() ;
-		}
-
-		auto time_rst_2 = std::chrono::system_clock::now() ;		
-		elapsed_seconds = time_rst_2 - time_rst_1 ;
-#ifdef TIMING			
-		if ( RANK == 0 ) {
-			cout << "Time writing restart file = " << elapsed_seconds.count() << endl ;
-		}
-#endif					
+		beta.print(trajfile) ;
 	}
+
+	auto time_rst_1 = std::chrono::system_clock::now() ;
+
+	if ( iterations % 10 == 0 ) {
+		print_restart() ;
+	}
+
+	auto time_rst_2 = std::chrono::system_clock::now() ;		
+	elapsed_seconds = time_rst_2 - time_rst_1 ;
+#ifdef TIMING			
+	if ( RANK == 0 ) {
+		cout << "Time writing restart file = " << elapsed_seconds.count() << endl ;
+	}
+#endif					
 
 	auto time4a = std::chrono::system_clock::now() ;	
 	correlation() ;
@@ -1539,103 +1541,135 @@ void DLARS::build_X_A()
 }
 
 int DLARS::restart(string filename)
-// Restart from the given file.
+// Restart from the given filename.  
 {
 	int iter ;
-	ifstream inf(filename) ;
+	stringstream filename_rank ;
+
+	if ( NPROCS > 1 ) {
+		filename_rank << filename << "." << std::setfill('0') << std::setw(4) << RANK ;
+	} else {
+		filename_rank << filename ;
+	}
+
+	ifstream inf(filename_rank.str()) ;
+	
 	if ( ! inf.good() ) {
-		cout << "Could not open " << filename << " for restart" << endl ;
+		cout << "Could not open " << filename_rank.str() << " for restart" << endl ;
 		stop_run(1) ;
 	}
-	while (1) {
-		string s ;
-		int iter_tmp ;
-		// Get the iteration number.
-		inf >> s >> iter_tmp ;
-		//iter-- ;
-		if ( inf.eof() || ! inf.good() ) break ;
 
-		iter = iter_tmp ;
-		// Get the objective function from the next line.
-		for ( int j = 0 ; j < 15 ; j++ ) {
-			inf >> s ;
-			if ( j == 10 ) {
-				obj_func_val = stod(s) ;
-				//cout << "OBJ FUNC: " << obj_func_val << endl ;
+	string s ;
+	int iter_tmp ;
+	// Get the iteration number.
+	inf >> s >> iter_tmp ;
+	//iter-- ;
+
+	iter = iter_tmp ;
+	// Get the objective function from the next line.
+	for ( int j = 0 ; j < 15 ; j++ ) {
+		inf >> s ;
+		if ( j == 10 ) {
+			obj_func_val = stod(s) ;
+			//cout << "OBJ FUNC: " << obj_func_val << endl ;
+		}
+	}
+
+	if ( inf.eof() || ! inf.good() ) {
+		cout << "Could not read the objective function value from " << filename << endl ;
+		stop_run(1) ;
+	}
+
+
+	// Read all of the beta values.
+	string line ;
+
+
+	Restart::read_scalar<double>(inf, "Lambda", lambda) ;
+	Restart::read_scalar<bool>(inf, "Distributed_solver", distributed_solver) ;
+	Restart::read_scalar<double>(inf, "Gamma_use", gamma_use) ;
+	Restart::read_scalar<double>(inf, "C_max", C_max) ;
+	Restart::read_scalar<double>(inf, "A_A", A_A) ;
+	Restart::read_scalar<bool>(inf, "use_precondition", use_precondition) ;
+	Restart::read_scalar<bool>(inf, "do_lasso", do_lasso) ;
+	Restart::read_scalar<bool>(inf, "solve_con_grad", solve_con_grad) ;		
+		
+	getline(inf, line) ;
+		
+	Restart::read_vector(inf, "Beta", beta) ;		
+	Restart::read_int_vector(inf, "A", A) ;
+
+	nactive = A.dim ;
+
+	Restart::read_int_vector(inf, "Exclude", exclude) ;
+	Restart::read_vector(inf, "Mu", mu) ;
+	Restart::read_vector(inf, "c", c) ;
+	Restart::read_vector(inf, "a", a) ;		
+	Restart::read_vector(inf, "G_A_Inv_I", G_A_Inv_I) ;
+
+	// Better to build X_A on the fly, since it is a submatrix of X.
+	// read_restart_matrix(inf, "X_A", X_A, ndata, nactive, true) ;
+	if ( distributed_solver || RANK == 0 ) {
+		Restart::read_matrix(inf, "G_A", G_A, nactive, nactive, distributed_solver) ;
+		if ( solve_con_grad ) {
+			if ( use_precondition ) {
+				// Pre-conditioned conjugate gradient method.
+				Restart::read_matrix(inf, "pre_con", pre_con, nactive, nactive, distributed_solver) ;
 			}
+		} else {
+			// Cholesky method.
+			Restart::read_matrix(inf, "chol", chol, nactive, nactive, distributed_solver) ;
 		}
-
-		if ( inf.eof() || ! inf.good() ) {
-			cout << "Could not read the objective function value from " << filename << endl ;
-			stop_run(1) ;
-		}
-		A.clear() ;
-
-		// Read all of the beta values.
-		string line ;
-		getline(inf,line) ;
-		beta.read_sparse(inf) ;
-		for ( int j = 0 ; j < nprops ; j++ ) {
-			if ( fabs(beta.get(j)) > 0.0 ) {
-				A.push(j) ;
-			}
-		}
-		if ( inf.eof() || ! inf.good() ) {
-			cout << "Could not read the parameter values from " << filename << endl ;
-			stop_run(1) ;
-		}
-
-		getline(inf,line) ;
-		if ( line.find("Exclude") != string::npos ) {
-			exclude.read_sparse(inf) ;
-		}
-
-		if ( line.find("Mu") != string::npos ) {
-			mu.read_sparse(inf) ;
-		}
+	}
+	
+	if ( inf.eof() || ! inf.good() ) {
+		cout << "Restart file read error for file " << filename << " rank " << RANK << endl ;
+		stop_run(1) ;
 	}
 		
 	inf.close() ;
 		
-	nactive = A.dim ;
 	iterations = iter - 1 ;
 
-	bool con_grad_save = solve_con_grad ;
-	solve_con_grad = false ;
+	// bool con_grad_save = solve_con_grad ;
+	// solve_con_grad = false ;
 	//predict_all() ;
 	objective_func() ;
 
-	if ( RANK == 0 ) cout << "Restart: calculating correlation\n" ;
-	correlation() ;
-
+	//if ( RANK == 0 ) cout << "Restart: calculating correlation\n" ;
+	//correlation() ;
+	
 	if ( RANK == 0 ) cout << "Restart: building X_A\n" ;
 	build_X_A() ;
+	//X_A.print() ;
 
-	if ( RANK == 0 ) cout << "Restart: building G_A\n" ;
-	build_G_A(G_A, false) ;
+	//if ( RANK == 0 ) cout << "Restart: building G_A\n" ;
+	//build_G_A(G_A, false) ;
 	
-	if ( build_G_A_here() ) {
-		if ( RANK == 0 ) cout << "Restart: solving G_A\n" ;
-		if ( ! solve_G_A(false) ) {
-			cout << "Error: could not solve equations on restart\n" ;
-			stop_run(1) ;
-		}
+	// if ( build_G_A_here() ) {
+	// 	if ( RANK == 0 ) cout << "Restart: solving G_A\n" ;
+	// 	if ( ! solve_G_A(false) ) {
+	// 		cout << "Error: could not solve equations on restart\n" ;
+	// 		stop_run(1) ;
+	// 	}
+	// }
+	if ( ! distributed_solver ) {
+		broadcast_solution() ;
 	}
-	broadcast_solution() ;
 
 	// Full calculation of pre-conditioner.
-	if ( use_precondition ) {
-		pre_con.resize(nactive, nactive) ;
-		Matrix chol_precon(nactive, nactive) ;
+	// if ( use_precondition ) {
+	// 	pre_con.resize(nactive, nactive) ;
+	// 	Matrix chol_precon(nactive, nactive) ;
 						
-		if ( ! G_A.cholesky(chol_precon) ) {
-			cout << "Cholesky decomposition for pre-conditioning failed\n" ;
-			stop_run(1) ;
-		}
-		chol_precon.cholesky_invert(pre_con) ;
-	}
+	// 	if ( ! G_A.cholesky(chol_precon) ) {
+	// 		cout << "Cholesky decomposition for pre-conditioning failed\n" ;
+	// 		stop_run(1) ;
+	// 	}
+	// 	chol_precon.cholesky_invert(pre_con) ;
+	// }
 		
-	solve_con_grad = con_grad_save ;
+	// solve_con_grad = con_grad_save ;
 		
 	return iter -1 ;
 }
@@ -1841,7 +1875,7 @@ bool DLARS::build_u_A()
 
 #ifdef VERBOSE			
 	cout << "a vector = " << endl ;
-	a.print() ;
+	a.print(cout) ;
 #endif			
 
 	return true ;
@@ -2109,32 +2143,79 @@ void DLARS::print_unshifted_mu(ostream &out, Vector &weights)
 void DLARS::print_error(ostream &out)
 	// Print the current fitting error and related parameters.
 {
-	if ( RANK == 0 ) {
-		out  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << " Number of vars: " << A.dim << endl ;
-	}
+	out  << "L1 norm of solution: " << beta.l1norm() << " RMS Error: " << sqrt(sq_error() / ndata) << " Objective fn: " << obj_func_val << " Number of vars: " << A.dim << endl ;
 }
 
 void DLARS::print_restart()
 		// Print the restart file
 {
-	if ( RANK == 0 ) {
+	stringstream fname ;
 
-		ofstream rst("restart.txt") ;
-		if ( rst.is_open() ) {
-			rst << scientific ;
-			rst.precision(16) ;
-			rst.width(24) ;
-			rst << "Iteration " << iterations << endl ;
-			print_error(rst) ;
-			beta.print_sparse(rst) ;
-			rst << "Exclude " << endl ;
-			exclude.print_sparse(rst) ;
-			rst << "Mu" << endl ;
-			mu.print_sparse(rst) ;
-			rst.close() ;
-		} else {
-			cout << "Warning: restart file could not be opened" << endl ;
+	// Create a separate file for each MPI rank.
+	if ( NPROCS > 1 ) {
+		fname << "restart." << std::setfill('0') << std::setw(4) << RANK ;
+	} else {
+		fname << "restart.txt" ;
+	}
+	
+	ofstream rst(fname.str()) ;
+	if ( rst.is_open() ) {
+		rst << scientific ;
+		rst.precision(16) ;
+		rst.width(24) ;
+		rst << "Iteration " << iterations << endl ;
+		print_error(rst) ;
+
+		rst << "Lambda: " << endl << lambda << endl ;
+		rst << "Distributed_solver: " << endl << distributed_solver << endl ;
+
+		rst << "Gamma_use: " << endl << gamma_use << endl ;
+		rst << "C_max: " << endl << C_max << endl ;
+		rst << "A_A: " << endl << A_A << endl ;
+		rst << "use_precondition: " << endl << use_precondition << endl ;				
+		rst << "do_lasso: " << endl << do_lasso << endl ;
+		rst << "solve_con_grad: " << endl << solve_con_grad << endl ;
+		
+		rst << "Beta: " << endl ;
+		beta.print_sparse(rst) ;
+		rst << "A " << endl ;
+		A.print_sparse(rst) ;
+
+
+		rst << "Exclude " << endl ;
+		exclude.print_sparse(rst) ;
+		rst << "Mu" << endl ;
+		mu.print_sparse(rst) ;
+
+		rst << "c" << endl ;
+		c.print_sparse(rst) ;
+
+		rst << "a" << endl ;
+		a.print_sparse(rst) ;		
+		
+		rst << "G_A_Inv_I" << endl ;
+		G_A_Inv_I.print_sparse(rst) ;
+
+		//rst << "X_A" << endl ;
+		//X_A.print(rst) ;
+
+		rst << "G_A " << endl ;
+		G_A.print(rst) ;
+
+		if ( solve_con_grad ) {
+			if ( use_precondition ) {
+				rst << "pre_con" << endl ;
+				pre_con.print(rst) ;
+			}
 		}
+		else {
+			rst << "chol " << endl ;
+			chol.print(rst) ;
+		}
+		
+		rst.close() ;
+	} else {
+		cout << "Warning: restart file could not be opened" << endl ;
 	}
 }
 

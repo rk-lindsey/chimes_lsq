@@ -110,7 +110,8 @@ public:
 			}
 			int idx ;
 			double val ;
-			for ( int i = 0 ; i < dim ; i++ ) {
+			int i ;
+			for ( i = 0 ; i < dim ; i++ ) {
 				getline(file, line) ;
 				if ( line.find(']') != string::npos ) {
 					break ;
@@ -121,6 +122,14 @@ public:
 					set(idx, val) ;
 				else {
 					cout << "Error reading sparse vector " << endl ;
+					cout << line ;
+					exit(1) ;
+				}
+			}
+			if ( i == dim ) {
+				getline(file, line) ;				
+				if ( line.find(']') == string::npos ) {
+					cout << "Error read end of sparse vector " << endl ;
 					cout << line ;
 					exit(1) ;
 				}
@@ -181,17 +190,12 @@ public:
 		{
 			vec[idx] += val ;
 		}
-	//void print() 
-	//{
-	//if ( RANK == 0 ) {
-	//cout << "[" << endl ;
-	//for ( int j = 0 ; j < dim ; j++ ) {
-	//if ( fabs(vec[j]) > 0.0 ) 
-	//cout << j << " " << vec[j] << endl ;
-//}
-	//cout << "]" << endl ;
-//}
-//}
+
+	void print() 
+	{
+		print(cout) ;
+	}
+
 	void print(ostream &of)
 	// Print only non-zero values.
 		{
@@ -208,14 +212,12 @@ public:
 		void print_sparse(ofstream &of)
 		// Print only non-zero values.
 		{
-			if ( RANK == 0 ) {
-				of << "[ " << dim << endl ;
-				for ( int j = 0 ; j < dim ; j++ ) {
-					if ( fabs(vec[j]) > 0.0 ) 
-						of << j << " " << vec[j] << endl ;
-				}
-				of << "]" << endl ;
+			of << "[ " << dim << endl ;
+			for ( int j = 0 ; j < dim ; j++ ) {
+				if ( fabs(vec[j]) > 0.0 ) 
+					of << j << " " << vec[j] << endl ;
 			}
+			of << "]" << endl ;
 		}
 
 	void print_norm(const string filename) const

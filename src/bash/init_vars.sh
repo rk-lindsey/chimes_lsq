@@ -44,7 +44,8 @@ function init_test_vars
 		  nonorth2'
 
 
-    LSQ_MAKE_JOBS='lsq2'
+    LSQ_MAKE_JOBS='lsq2
+                   tatb'
 
 	MD_JOBS='carbon-penalty
 		 h2o-2bcheby
@@ -69,8 +70,10 @@ function init_test_vars
 		 special4b
 		 chebyfix
 		 h2o-4bcheby-numstress
-		 lj-stress'
-
+		 lj-stress
+                 triclinic
+                 ti-ortho
+                 ti-nonortho'
 
     MD_MAKE_JOBS='verify-invert 
 		verify-translate 

@@ -302,6 +302,9 @@ public:
 	 double CELL_LX, CELL_LY, CELL_LZ;	// Cell vector lengths (for LAMMPS)
 		
 	 double XY, XZ, YZ;			// Cell tilt angles (for LAMMPS)
+
+	double xlo, ylo, zlo ;      // LAMMPS-style cell extents.
+	double xhi, yhi, zhi ;
 		
 	 double EXTENT_X, EXTENT_Y, EXTENT_Z;	// Cell extent in the x, y, and z directions
 

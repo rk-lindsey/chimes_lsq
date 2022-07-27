@@ -45,13 +45,13 @@ Reading initial coordinates and forces...
        Cell vectors (c)                0 0 7.88595860498408
        Layers:                         1
        Ghost cell vectors (a) 	        23.6578766899989 0 0
-       Ghost cell vectors (a) 	        0 23.6578758149522 0
-       Ghost cell vectors (a) 	        0 0 23.6578758149522
+       Ghost cell vectors (b) 	        0 23.6578758149522 0
+       Ghost cell vectors (c) 	        0 0 23.6578758149522
        Invr. cell vectors (a) 	        0.126807660692061 -0 0
        Invr. cell vectors (b) 	        -0 0.126807665382365 -0
        Invr. cell vectors (c) 	        0 -0 0.126807665382365
        Lat. constants (a,b,c) 	        7.88595889666631 7.88595860498408 7.88595860498408
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
        Cell extents (x,y,z)            7.88595889666631 7.88595860498408 7.88595860498408
        LMP cell lengths (lx,ly,lz)     7.88595889666631 7.88595860498408 7.88595860498408
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
@@ -66,13 +66,13 @@ Reading initial coordinates and forces...
        Cell vectors (c)                0 0 7.88595860498408
        Layers:                         1
        Ghost cell vectors (a) 	        23.6578766899989 0 0
-       Ghost cell vectors (a) 	        0 23.6578758149522 0
-       Ghost cell vectors (a) 	        0 0 23.6578758149522
+       Ghost cell vectors (b) 	        0 23.6578758149522 0
+       Ghost cell vectors (c) 	        0 0 23.6578758149522
        Invr. cell vectors (a) 	        0.126807660692061 -0 0
        Invr. cell vectors (b) 	        -0 0.126807665382365 -0
        Invr. cell vectors (c) 	        0 -0 0.126807665382365
        Lat. constants (a,b,c) 	        7.88595889666631 7.88595860498408 7.88595860498408
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
        Cell extents (x,y,z)            7.88595889666631 7.88595860498408 7.88595860498408
        LMP cell lengths (lx,ly,lz)     7.88595889666631 7.88595860498408 7.88595860498408
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
