@@ -16,7 +16,8 @@ the number of non-active variables and the number of data entries.
 The notation and implementation closely follows B. Efron, T. Hastie,
 I. Johnstone, and R. Tibshirani, "Least Angle Regression", The Annals
 of Statistics, 32, 407-499(2004).  The X and X_A matrices in the paper are
-distributed, while other matrices are local.
+distributed.  When the distributed solver is used (--distributed_solver=y),
+all matrices are distributed, and distributed linear equation solvers are used.
 
 Usage:
    srun -n <XX> dlars <A matrix> <b vector> <A dim> <options> > dlars.log
@@ -35,38 +36,41 @@ Outputs:
    restart.txt: A file to use in restarting a previous calculation.           
 
 Options:
-   --algorithm=<alg>    The algorithm may be either LARS or LASSO.  LASSO always gives better answers than
-                        LARS for a given L1 norm, but requires more iterations.
-   --iterations=<num>   Sets a limit on the number of iterations allowed.
-   --lambda=<val>       Sets the value of lambda in the objective function.  By default, lambda = 0.0
-   --max_norm=<val>     Set the maximum L1 norm of the solution.  This is based on the scaled variables.
-   --normalize=<y or n> Specifies whether the A matrix and b vector are normalized prior to fitting.
-                        The default is to normalize.
-    --restart=<file>    Restart from the restart.txt file specified.
-    --split_files       If specified, split input files are read.  Instead of A.txt, A.0000.txt,
-                        A.0001.txt, etc. is read by each MPI process.  This can speed job execution
-                        for large A matrices.  The chimes_lsq code generates these files if the
-                        #SPLITFI# option is specified.  Each split A matrix file has the same number
-                        of columns, which is equal to the number of fitting parameters.  The number of
-                        rows in the split A matrix file can vary.  The files are stored in row-major
-                        format, where one row occupies each line in the file.  It is also OK to place each
-                        entry in the matrix on a separate line in the file.
-                        
-                        A corresponding dim file is required for each A.xxxx.txt file, e.g. dim.xxxx.txt.
-                        The dim file gives:  The number of data columns, the starting row for the file,
-                        the ending row (inclusive) for the file, and the total number of rows in the A matrix,
-                        using C++ index style, which begins at 0.
-                        
-                        Each dim file must that the same number of data columns (1st number) and total number of
-                        rows in the A matrix (4th number).  The starting (2nd number) and ending rows (3rd number)
-                        vary, so that the starting row of the n+1th file will be equal to the ending row of
-                        the nth file + 1. The ending row of the last file must be equal to the total number of rows - 1.
-                        The starting row of the 1st dimension file must be 0.
-                        
-   --weights=<file>     Give the name of a file with weights for each row of the A matrix, and value of b.
-	--con_grad           Use conjugate gradient algorithm instead of Cholesky decomposition to solve equations.  (experimental)
-	--precondition       Use a preconditioning matrix in conjugate gradient solves (experimental)
-   --help               Print a list of supported options.
+--algorithm=<alg>      The algorithm may be either LARS or LASSO.  LASSO always gives better answers than
+                       LARS for a given L1 norm, but requires more iterations.
+--feature_weights=file If specified, features (columns in A matrix) are weighted.  This has the effect of
+                       favoring smaller or larger parameter values for the feature.
+--iterations=<num>     Sets a limit on the number of iterations allowed.
+--lambda=<val>         Sets the value of lambda in the objective function.  By default, lambda = 0.0
+--max_norm=<val>       Set the maximum L1 norm of the solution.  This is based on the scaled variables.
+--normalize=<y or n>   Specifies whether the A matrix and b vector are normalized prior to fitting.
+                       The default is to normalize.
+--distributed_solver=<y or n> If y, use a distributed Cholesky solver with MPI.  This is recommended for large problems.			
+--restart=<file>       Restart from the restart.txt file specified.
+--split_files          If specified, split input files are read.  Instead of A.txt, A.0000.txt,
+                       A.0001.txt, etc. is read by each MPI process.  This can speed job execution
+                       for large A matrices.  The chimes_lsq code generates these files if the
+                       #SPLITFI# option is specified.  Each split A matrix file has the same number
+                       of columns, which is equal to the number of fitting parameters.  The number of
+                       rows in the split A matrix file can vary.  The files are stored in row-major
+                       format, where one row occupies each line in the file.  It is also OK to place each
+                       entry in the matrix on a separate line in the file.						    
+                        												    
+                       A corresponding dim file is required for each A.xxxx.txt file, e.g. dim.xxxx.txt.		    
+                       The dim file gives:  The number of data columns, the starting row for the file,		    
+                       the ending row (inclusive) for the file, and the total number of rows in the A matrix,	    
+                       using C++ index style, which begins at 0.							    
+                        												    
+                       Each dim file must that the same number of data columns (1st number) and total number of	    
+                       rows in the A matrix (4th number).  The starting (2nd number) and ending rows (3rd number)	    
+                       vary, so that the starting row of the n+1th file will be equal to the ending row of		    
+                       the nth file + 1. The ending row of the last file must be equal to the total number of rows - 1.  
+                       The starting row of the 1st dimension file must be 0.                                             
+                         
+--weights=<file>       Give the name of a file with weights for each row of the A matrix, and value of b.
+--con_grad             Use conjugate gradient algorithm instead of Cholesky decomposition to solve equations.  (experimental)
+--precondition         Use a preconditioning matrix in conjugate gradient solves (experimental)
+--help                 Print a list of supported options.
 
 
 If multiple stopping criteria are given (--iterations, --lambda, --max_norm),

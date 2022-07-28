@@ -1,0 +1,58 @@
+
+####### CONTROL VARIABLES #######
+
+# TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force
+	SCAN_all.xyzf
+# WRAPTRJ # ! Does the trajectory file need wrapping? (i.e. post-run PBC)
+	true
+# NFRAMES # ! How many frames are in the .xyzf file?
+	36
+# NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
+	1
+# FITSTRS #
+	FIRSTALL 36
+# FITENER # ! Fit ENERGY
+        true
+# FITCOUL # ! Fit charges? If false, use user-specified fixed charges, and subtract them from the forces -- NOTE: FUNCTIONALITY CURRENTLY ONLY SUPPORTED FOR TRUE, AND FALSE WITH CHARGES = 0
+	false
+# FITPOVR #  ! Use ReaxFF linear overcoordination parameters? If this is false and parameters are provided below, those parameters will be subtracted from forces
+	false
+# PAIRTYP # ! Short-range interaction type. See manual for accepted types. Case sensitive
+	CHEBYSHEV 8 4 2
+# CHBTYPE # ! Are we transforming distance in terms of inverse distance(INVRSE_R), a morse-type function? (MORSE)? .. "DEFAULT" for no transformation.
+	MORSE
+# SPLITFI #
+        true
+# SKIP_FRAMES #
+        1
+
+####### TOPOLOGY VARIABLES #######
+
+# NATMTYP # 
+        4
+
+# TYPEIDX #     # ATM_TYP #     # ATMCHRG #     # ATMMASS #
+1               C               0               12.0110
+2               H               0                1.0079
+3               O               0               15.9994
+4               N               0               14.0070
+
+# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA #        # USEOVRP #     # NIJBINS #     # NIKBINS #     # NJKBINS #
+1		C		C		1.089		8.0	0.1		1.54			false		0		0		0
+2		H		H		0.678		8.0	0.1		0.74			false		0		0		0
+3		O		O		1.111		8.0	0.1		1.21			false		0		0		0
+4		N		N		1.035		8.0	0.1		1.35			false		0		0		0
+5		C		H		0.651		8.0	0.1		1.09			false		0		0		0
+6		C		O		1.054		8.0	0.1		1.16			false		0		0		0
+7		C		N		0.997		8.0	0.1		1.48			false		0		0		0
+8		H		O		0.648		8.0	0.1		0.97			false		0		0		0
+9		H		N		0.622		8.0	0.1		1.01			false		0		0		0
+10		O		N		0.982		8.0	0.1		1.27			false		0		0		0
+
+SPECIAL 3B S_MAXIM: ALL 6.0
+SPECIAL 4B S_MAXIM: ALL 5.0
+
+# FCUTTYP #
+        TERSOFF 0.5
+
+# ENDFILE #

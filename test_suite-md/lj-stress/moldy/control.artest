@@ -1,0 +1,26 @@
+#
+# This sets up conditions at the triple point
+#
+sys-spec-file=argon2.in
+## Set units to Ang., AMU, and kcal/mol.
+time-unit=4.8888213e-14
+temperature=0
+scale-interval=100
+scale-end=2500
+nsteps=5
+print-interval=1
+begin-average=1
+average-interval=100
+step=1.0e-06
+subcell=2
+strict-cutoff=1
+lattice-start=1
+cutoff=9.0  #2.5 * sigma
+dump-file=dumpar
+begin-dump=1
+dump-interval=1
+dump-level=1
+ndumps=5
+text-mode-save=1
+save-file=arsave
+

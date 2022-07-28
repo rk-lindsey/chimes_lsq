@@ -1,0 +1,133 @@
+ *I* control file read in successfully
+	Wed Mar  2 11:28:06 2022	Test Simulation	Page 1
+ *I* reading system specification file
+ *I* system specification file successfully read in
+ *I* system successfully initialised from lattice start
+	Wed Mar  2 11:28:06 2022	Test Simulation	Page 2
+
+
+		#     # ####### #       ######  #     #
+		##   ## #     # #       #     #  #   # 
+		# # # # #     # #       #     #   # #  
+		#  #  # #     # #       #     #    #   
+		#     # #     # #       #     #    #   
+		#     # #     # #       #     #    #   
+		#     # ####### ####### ######     #   
+
+		Version Release2_16e  (Exp ) 2000/12/11 12:33:24 
+
+		Keith Refson
+		Department of Earth Sciences
+		Parks Road, Oxford OX1 3PR
+		keith@earth.ox.ac.uk
+
+		Moldy Copyright (C) Keith Refson 1988, 1992, 1993
+		Moldy comes with ABSOLUTELY NO WARRANTY:
+		This is free software and you are welcome to
+		redistribute it under certain conditions.
+		For details see file COPYING included with source.
+
+ System specification read in from file argon2.in
+ argon
+	Number of molecules              = 2000
+	Number of sites                  = 1
+	Mass                             = 39.948 amu
+	Electric Charge                  = 0 Qe
+	argon molecule has no rotational degrees of freedom
+
+ MD cell vectors
+	a                                = 60 0 0 A
+	b                                = 3.67394e-15 60 0 A
+	c                                = 3.67394e-15 3.67394e-15 60 A
+ Run parameters
+	Final step                       = 5
+	Size of step                     = 1e-06 ps
+	CPU limit                        = 1e+20 s
+ Temperature will be scaled using instantaneous kinetic energy
+	No. steps between scalings       = 100
+	End scaling at step              = 2500
+	Applied Temperature              = 0 K
+ Real-space cutoff will be applied to site co-ordinates
+	Wed Mar  2 11:28:06 2022	Test Simulation	Page 3
+	Interaction cut-off (strict)     = 9 A
+	Alpha parameter for Ewald sum    = -1 A(-1)
+	Reciprocal space cut-off         = 0 A(-1)
+ Configurational data will be dumped to file(s) dumpar
+	Starting at timestep             = 1
+	No. steps between dumps          = 1
+	Dump level                       = 1
+ New run entitled "Test Simulation" started Wed Mar  2 11:28:06 2022
+ *I* Distant potential correction = -649.107344, Pressure correction = -9.973422
+ *I* Intramolecular potential energy correction = 0
+ *I* Neighbour list contains 912 cells
+ *I* MD cell divided into 27000 subcells (30x30x30)
+ *I* Started dumping data to file "dumpar0" at timestep 1
+ *W* File "dumpar0" exists - Dumps will be written to "dumFBA%d"
+ *W* File "dumFBA0" exists - Dumps will be written to "dumNOH%d"
+	Wed Mar  2 11:28:06 2022	Test Simulation	Page 4
+    Trans KE      Rot KE  Pot Energy  Tot Energy  TTemp  RTemp   Temp h(1,*) h(2,*) h(3,*)     Stress     Stress     Stress
+======== Timestep 1      Current values ===================================================================================
+  0.00013434           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4 -1.1348e-12
+                                   0                                    0.00  60.00   0.00     3112.4      12246 5.2103e-12
+                                                                        0.00   0.00  60.00 -1.1348e-12 5.2103e-12    -61.418
+-------- Rolling averages over last 1 timesteps ---------------------------------------------------------------------------
+  0.00013434           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4 -1.1348e-12
+                                   0                                    0.00  60.00   0.00     3112.4      12246 5.2103e-12
+                                                                        0.00   0.00  60.00 -1.1348e-12 5.2103e-12    -61.418
+-------- Standard deviations ----------------------------------------------------------------------------------------------
+           0           0           0           0    0.0    0.0    0.0   0.00   0.00   0.00          0          0          0
+                                   0                                    0.00   0.00   0.00          0          0          0
+                                                                        0.00   0.00   0.00          0          0          0
+ *I* started accumulating thermodynamic averages on timestep 1
+======== Timestep 2      Current values ===================================================================================
+   0.0027205           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4 7.5268e-13
+                                   0                                    0.00  60.00   0.00     3112.4      12246 -1.5874e-11
+                                                                        0.00   0.00  60.00 7.5268e-13 -1.5874e-11    -61.418
+-------- Rolling averages over last 2 timesteps ---------------------------------------------------------------------------
+   0.0014274           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4 -1.9108e-13
+                                   0                                    0.00  60.00   0.00     3112.4      12246 -5.3319e-12
+                                                                        0.00   0.00  60.00 -1.9108e-13 -5.3319e-12    -61.418
+-------- Standard deviations ----------------------------------------------------------------------------------------------
+   0.0012931           0   0.0019531           0    0.0    0.0    0.0   0.00   0.00   0.00          0          0 9.4376e-13
+                                   0                                    0.00   0.00   0.00          0          0 1.0542e-11
+                                                                        0.00   0.00   0.00 9.4376e-13 1.0542e-11          0
+======== Timestep 3      Current values ===================================================================================
+   0.0075568           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4 -1.8118e-12
+                                   0                                    0.00  60.00   0.00     3112.4      12246  9.202e-12
+                                                                        0.00   0.00  60.00 -1.8118e-12  9.202e-12    -61.418
+-------- Rolling averages over last 3 timesteps ---------------------------------------------------------------------------
+   0.0034706           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4 -7.3133e-13
+                                   0                                    0.00  60.00   0.00     3112.4      12246 -4.8729e-13
+                                                                        0.00   0.00  60.00 -7.3133e-13 -4.8729e-13    -61.418
+-------- Standard deviations ----------------------------------------------------------------------------------------------
+   0.0030763           0   0.0027621           0    0.0    0.0    0.0   0.00   0.00   0.00          0 8.6317e-05 1.0851e-12
+                                   0                                    0.00   0.00   0.00 8.6317e-05          0 1.1002e-11
+                                                                        0.00   0.00   0.00 1.0851e-12 1.1002e-11 6.7435e-07
+======== Timestep 4      Current values ===================================================================================
+    0.014811           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4  4.163e-13
+                                   0                                    0.00  60.00   0.00     3112.4      12246 2.7172e-11
+                                                                        0.00   0.00  60.00  4.163e-13 2.7172e-11    -61.418
+	Wed Mar  2 11:28:06 2022	Test Simulation	Page 5
+    Trans KE      Rot KE  Pot Energy  Tot Energy  TTemp  RTemp   Temp h(1,*) h(2,*) h(3,*)     Stress     Stress     Stress
+-------- Rolling averages over last 4 timesteps ---------------------------------------------------------------------------
+   0.0063058           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4 -4.4442e-13
+                                   0                                    0.00  60.00   0.00     3112.4      12246 6.4276e-12
+                                                                        0.00   0.00  60.00 -4.4442e-13 6.4276e-12    -61.418
+-------- Standard deviations ----------------------------------------------------------------------------------------------
+   0.0055869           0   0.0055243   0.0013811    0.0    0.0    0.0   0.00   0.00   0.00 2.6429e-05 0.00011419 1.0631e-12
+                                   0                                    0.00   0.00   0.00 0.00011419 0.00034527 1.5304e-11
+                                                                        0.00   0.00   0.00 1.0631e-12 1.5304e-11          0
+======== Timestep 5      Current values ===================================================================================
+    0.024484           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4 4.4063e-13
+                                   0                                    0.00  60.00   0.00     3112.4      12246 5.9265e-12
+                                                                        0.00   0.00  60.00 4.4063e-13 5.9265e-12    -61.418
+-------- Rolling averages over last 5 timesteps ---------------------------------------------------------------------------
+   0.0099415           0  1.0861e+05  1.0861e+05    0.0    0.0    0.0  60.00   0.00   0.00     707.75     3112.4 -2.6741e-13
+                                   0                                    0.00  60.00   0.00     3112.4      12246 6.3274e-12
+                                                                        0.00   0.00  60.00 -2.6741e-13 6.3274e-12    -61.418
+-------- Standard deviations ----------------------------------------------------------------------------------------------
+   0.0088229           0   0.0088431   0.0019531    0.0    0.0    0.0   0.00   0.00   0.00 4.4487e-05 0.00017795 1.0146e-12
+                                   0                                    0.00   0.00   0.00 0.00017795 0.00062244  1.369e-11
+                                                                        0.00   0.00   0.00 1.0146e-12  1.369e-11 6.7435e-07
+ *I* Configuration written to sys-spec plus lattice-start file "arsave" 
+ *I* Run used 0.05s of CPU time and 0.08s elapsed

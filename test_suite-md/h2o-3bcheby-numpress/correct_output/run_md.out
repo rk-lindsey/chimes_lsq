@@ -39,43 +39,43 @@ Reading initial coordinates and forces...
      ...Read box dimensions: 
        Box information (base units: Angstroms and radians): 
        Orthorhombic:                   1
-       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (a)                8.6091309 0 0
        Cell vectors (b)                0 8.6091309 0
        Cell vectors (c)                0 0 8.6091309
        Layers:                         1
-       Ghost cell vectors (a) 	        25.827392578125 0 0
-       Ghost cell vectors (a) 	        0 25.8273927 0
-       Ghost cell vectors (a) 	        0 0 25.8273927
-       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
        Invr. cell vectors (b) 	        -0 0.116155743432824 -0
        Invr. cell vectors (c) 	        0 -0 0.116155743432824
-       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
-       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
-       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
-       Cell volume                     638.084112874303
+       Cell volume                     638.084115885312
 
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
      ...Updated simulation box dimensions: 
        Box information (base units: Angstroms and radians): 
        Orthorhombic:                   1
-       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (a)                8.6091309 0 0
        Cell vectors (b)                0 8.6091309 0
        Cell vectors (c)                0 0 8.6091309
        Layers:                         1
-       Ghost cell vectors (a) 	        25.827392578125 0 0
-       Ghost cell vectors (a) 	        0 25.8273927 0
-       Ghost cell vectors (a) 	        0 0 25.8273927
-       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
        Invr. cell vectors (b) 	        -0 0.116155743432824 -0
        Invr. cell vectors (c) 	        0 -0 0.116155743432824
-       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
-       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
-       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
-       Cell volume                     638.084112874303
+       Cell volume                     638.084115885312
 
    ...read complete for file input.xyz
 
@@ -312,7 +312,7 @@ Ewald parameters:
 	Ewald alpha               =  7.723233e-01
 	R-Space Ewald cutoff      =  4.304565e+00
 	R-Space accuracy estimate =  5.997380e-07
-	K-Space accuracy estimate =  6.801449e-07
+	K-Space accuracy estimate =  6.801448e-07
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
@@ -320,18 +320,18 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-      10      1.25       3.8811924       1.0761929       4.9573853          1315.9     39.91846791      4.9428579
+      10      1.25       3.8811954       1.0761928       4.9573882          1315.8     39.91729483      4.9428577
 Number of 3-body interactions = 198376
  Updating neighbor list on step: 16, with padding: 0.380
-      20      2.50       3.8029184       1.2092767       5.0121951          1289.4     40.32144362      4.9430936
+      20      2.50       3.8029314       1.2092777       5.0122091          1289.2     40.32026782      4.9430935
 END SIMULATION
-	Average temperature over run = 1314.9462 K
-	Average pressure    over run = 39.6603 GPa
-	Pressures from diagonal stress tensors over run: 39.6604
+	Average temperature over run = 1314.8109 K
+	Average pressure    over run = 39.6592 GPa
+	Pressures from diagonal stress tensors over run: 39.6592
 	Average stress tensors over run: 
-		sigma_xx: 40.8440 GPa
-		sigma_yy: 39.3737 GPa
-		sigma_zz: 38.7635 GPa
-		sigma_xy: 1.8704 GPa
-		sigma_xz: 3.7425 GPa
-		sigma_yz: 1.4676 GPa
+		sigma_xx: 40.6749 GPa
+		sigma_yy: 39.2886 GPa
+		sigma_zz: 39.0142 GPa
+		sigma_xy: -0.6631 GPa
+		sigma_xz: -0.2282 GPa
+		sigma_yz: 0.2041 GPa

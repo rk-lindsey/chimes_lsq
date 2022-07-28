@@ -92,7 +92,7 @@ void WRITE_TRAJ::INIT(string EXTENSION_STR, string CONTENTS_STR, bool print_ener
 		
 		TRAJFRCF.open("forceout.txt");
 		
-		if (!TRAJFRCL.is_open())
+		if (!TRAJFRCF.is_open())
 		{
 			cout << " Failed to open associated file forceout.txt for writing!" << endl;	
 			exit_run(0);
@@ -443,13 +443,13 @@ void WRITE_TRAJ::PRINT_FRAME_XYZF_FORCE(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 	double factor = 1.0;
 
 	if ( WRITE_TRAJ::ENERGY_STRESS ) {
-		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.TOT_POT_ENER << endl ;
-		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X * GPa << endl ;
-		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y * GPa << endl ;
-		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z * GPa << endl ;
-		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y * GPa << endl ;
-		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z * GPa << endl ;
-		TRAJFRCF << scientific << setw(13) << setprecision(6) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z * GPa << endl ;
+		TRAJFRCF << scientific << setw(21) << setprecision(14) << SYSTEM.TOT_POT_ENER << endl ;
+		TRAJFRCF << scientific << setw(21) << setprecision(14) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X * GPa << endl ;
+		TRAJFRCF << scientific << setw(21) << setprecision(14) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Y * GPa << endl ;
+		TRAJFRCF << scientific << setw(21) << setprecision(14) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[2].Z * GPa << endl ;
+		TRAJFRCF << scientific << setw(21) << setprecision(14) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Y * GPa << endl ;
+		TRAJFRCF << scientific << setw(21) << setprecision(14) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].Z * GPa << endl ;
+		TRAJFRCF << scientific << setw(21) << setprecision(14) << SYSTEM.PRESSURE_TENSORS_XYZ_ALL[1].Z * GPa << endl ;
 	}
 		
 	for(int i=0;i<SYSTEM.ATOMS;i++)
@@ -465,14 +465,13 @@ void WRITE_TRAJ::PRINT_FRAME_XYZF_FORCE(JOB_CONTROL & CONTROLS, FRAME & SYSTEM)
 			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].Y / fconv * factor
 			 << fixed << setprecision(5) << setw(15) << " " << SYSTEM.ACCEL[i].Z / fconv * factor << endl ;
 
-		TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].X * factor << endl;
-	  	TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Y * factor << endl;
-	  	TRAJFRCF << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Z * factor << endl;
+		TRAJFRCF << fixed << setw(21) << setprecision(14) << scientific << SYSTEM.ACCEL[i].X * factor << endl;
+		TRAJFRCF << fixed << setw(21) << setprecision(14) << scientific << SYSTEM.ACCEL[i].Y * factor << endl;
+		TRAJFRCF << fixed << setw(21) << setprecision(14) << scientific << SYSTEM.ACCEL[i].Z * factor << endl;
 			
-	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].X  * factor << endl;
-	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Y  * factor << endl;
-	  	TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(13) << setprecision(6) << scientific << SYSTEM.ACCEL[i].Z  * factor << endl;
-
+		TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(21) << setprecision(14) << scientific << SYSTEM.ACCEL[i].X  * factor << endl;
+		TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(21) << setprecision(14) << scientific << SYSTEM.ACCEL[i].Y  * factor << endl;
+		TRAJFRCL <<  SYSTEM.ATOMTYPE[i] << " " << fixed << setw(21) << setprecision(14) << scientific << SYSTEM.ACCEL[i].Z  * factor << endl;
 	}
 }
 

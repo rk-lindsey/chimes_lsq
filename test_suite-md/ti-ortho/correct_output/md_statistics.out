@@ -1,0 +1,3 @@
+  # Step           Time         Ktot/N         Vtot/N         Etot/N              T              P         P_conf
+      #            (fs)     (kcal/mol)     (kcal/mol)     (kcal/mol)            (K)          (GPa)          (GPa)
+       1  0.0000000e+00  2.5818693e-07  3.6831430e+01  3.6831430e+01  8.7425863e-05  7.0161429e+01  7.0161429e+01 

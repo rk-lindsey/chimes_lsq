@@ -35,6 +35,7 @@ function init_test_vars
 		  special3b 
 		  special4b
 		  stress-and-ener-4b
+                  stress-and-ener-4b2
 		  stress-and-ener-2b1
 		  stress-and-ener-2b2
 		  stress-and-ener-2b3
@@ -43,7 +44,8 @@ function init_test_vars
 		  nonorth2'
 
 
-    LSQ_MAKE_JOBS='lsq2'
+    LSQ_MAKE_JOBS='lsq2
+                   tatb'
 
 	MD_JOBS='carbon-penalty
 		 h2o-2bcheby
@@ -66,7 +68,12 @@ function init_test_vars
 		 small-lj
 		 special3b 
 		 special4b
-		 chebyfix'
+		 chebyfix
+		 h2o-4bcheby-numstress
+		 lj-stress
+                 triclinic
+                 ti-ortho
+                 ti-nonortho'
 
     MD_MAKE_JOBS='verify-invert 
 		verify-translate 
@@ -78,7 +85,10 @@ function init_test_vars
 	LSQ_FORCE_JOBS='h2o-3bcheby 
 		h2o-4bcheby 
 		special3b 
-		special4b'
+		special4b
+                stress-and-ener-2b1
+                stress-and-ener-4b
+                stress-and-ener-4b2'
 
 	 if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
 	     source /usr/local/tools/dotkit/init.sh

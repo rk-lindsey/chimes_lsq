@@ -210,7 +210,6 @@ do
 					echo " "
 			
 					TECHNICAL_PASS_STATUS=`grep "No" tol_status.dat`
-W
 			
 					if [[ "$TECHNICAL_PASS_STATUS" != *"No"* ]]; then
 						 TECHNICAL_PASS=false
@@ -255,11 +254,6 @@ for job in $MAKE_JOBS ; do
 	continue 
     fi
 	 
-    if [[ $job == "lsq2" ]] ; then
-    	cd ../contrib/dlars/src
-	make
-	cd - 
-    fi	 
     cd $job
 	 
     if make RUN_JOB="$RUN_JOB" PYTHON=$PYTHON all ; then

@@ -1,11 +1,9 @@
 // Used by all classes to safely stop the calculation.
-void stop_run(int stat) {
-#ifdef USE_MPI
-	MPI_Abort(MPI_COMM_WORLD,stat) ;
-#else
-	exit(stat) ;
+#ifdef USE_MKL
+#include <mkl.h>
 #endif
-}
+
+void stop_run(int stat) ;
 
 class Vector {
 public:
@@ -112,7 +110,8 @@ public:
 			}
 			int idx ;
 			double val ;
-			for ( int i = 0 ; i < dim ; i++ ) {
+			int i ;
+			for ( i = 0 ; i < dim ; i++ ) {
 				getline(file, line) ;
 				if ( line.find(']') != string::npos ) {
 					break ;
@@ -123,6 +122,14 @@ public:
 					set(idx, val) ;
 				else {
 					cout << "Error reading sparse vector " << endl ;
+					cout << line ;
+					exit(1) ;
+				}
+			}
+			if ( i == dim ) {
+				getline(file, line) ;				
+				if ( line.find(']') == string::npos ) {
+					cout << "Error read end of sparse vector " << endl ;
 					cout << line ;
 					exit(1) ;
 				}
@@ -183,17 +190,12 @@ public:
 		{
 			vec[idx] += val ;
 		}
-	//void print() 
-	//{
-	//if ( RANK == 0 ) {
-	//cout << "[" << endl ;
-	//for ( int j = 0 ; j < dim ; j++ ) {
-	//if ( fabs(vec[j]) > 0.0 ) 
-	//cout << j << " " << vec[j] << endl ;
-//}
-	//cout << "]" << endl ;
-//}
-//}
+
+	void print() 
+	{
+		print(cout) ;
+	}
+
 	void print(ostream &of)
 	// Print only non-zero values.
 		{
@@ -210,16 +212,28 @@ public:
 		void print_sparse(ofstream &of)
 		// Print only non-zero values.
 		{
-			if ( RANK == 0 ) {
-				of << "[ " << dim << endl ;
-				for ( int j = 0 ; j < dim ; j++ ) {
-					if ( fabs(vec[j]) > 0.0 ) 
-						of << j << " " << vec[j] << endl ;
-				}
-				of << "]" << endl ;
+			of << "[ " << dim << endl ;
+			for ( int j = 0 ; j < dim ; j++ ) {
+				if ( fabs(vec[j]) > 0.0 ) 
+					of << j << " " << vec[j] << endl ;
 			}
+			of << "]" << endl ;
 		}
 
+	void print_norm(const string filename) const
+	// Print shift used in normalizing the vector.
+	{
+		ofstream outfile(filename) ;
+		if ( ! outfile.good() ) {
+			cout << "Error: could not open " << filename << endl ;
+			stop_run(1) ;
+		}
+		outfile.precision(14) ;
+		outfile << "# Shift " << endl ;
+		outfile << std::scientific << std::setprecision(12) << shift << endl ;
+		outfile.close() ;
+	}
+	
 	void print_all(ostream &of)
 	// Print all values.
 		{
@@ -234,33 +248,50 @@ public:
 			cout << "Error: dot product with unmatched dimensions\n" ;
 			exit(1) ;
 		}
+#ifdef USE_BLAS
+		double val = cblas_ddot(dim, vec2.vec, 1, vec, 1) ;
+#else		
 		double val = 0.0 ;
 		for ( int j = 0 ; j < dim ; j++ ) {
 			val += vec2.get(j) * vec[j] ;
 		}
+#endif		
 		return (val) ;
 	}
 	void scale(Vector &out, double val) 
 	// Scale the vector by the given value, put result in Out.
 		{
+#ifdef USE_BLAS
+			cblas_dcopy(dim, vec, 1, out.vec, 1) ;
+			cblas_dscal(dim, val, out.vec, 1) ;
+#else			
 			for ( int j = 0 ; j < dim ; j++ ) {
 				out.set(j, val * vec[j] ) ;
 			}
+#endif			
 		}
 	void scale(Vector &out, const Vector &vals) 
 	// Multiply the vector by the given array of values, put result in Out.
 		{
+#ifdef USE_MKL
+			vdMul(dim, vec, vals.vec, vec) ;
+#else			
 			for ( int j = 0 ; j < dim ; j++ ) {
 				out.set(j, vals.get(j) * vec[j] ) ;
 			}
+#endif			
 		}
 	double l1norm()
 	// Returns L1 norm (sum of abs values).
 		{
+#ifdef USE_BLAS
+			double norm = cblas_dasum(dim, vec, 1) ;
+#else			
 			double norm = 0 ;
 			for ( int i = 0 ; i < dim ; i++ ) {
 				norm += fabs(vec[i]) ;
 			}
+#endif			
 			return norm ;
 		}
 	void remove(int idx)
@@ -294,9 +325,13 @@ public:
 					cout << "Error in add: dim mismatch\n" ;
 			exit(1) ;
 		}
+#ifdef USE_MKL
+		vdAdd(dim, vec, in.vec, vec) ;
+#else		
 		for ( int k = 0 ; k < dim ; k++ ) {
 			vec[k] += in.get(k) ;
 		}
+#endif		
 	}
 	void subtract(const Vector &in)
 	// Subtract the vector from vec.
@@ -305,9 +340,13 @@ public:
 			cout << "Error in add: dim mismatch\n" ;
 			exit(1) ;
 		}
+#ifdef USE_MKL
+		vdSub(dim, vec, in.vec, vec) ;
+#else		
 		for ( int k = 0 ; k < dim ; k++ ) {
 			vec[k] -= in.get(k) ;
 		}
+#endif		
 	}
 	void add_mult(const Vector &in, double factor)
 		// Set out = out + factor * in
@@ -316,9 +355,13 @@ public:
 			cout << "Error in add_mult: dim mismatch\n" ;
 			exit(1) ;
 		}
+#ifdef USE_BLAS
+		cblas_daxpy(dim, factor, in.vec, 1, vec, 1) ;
+#else		
 		for ( int k = 0 ; k < dim ; k++ ) {
 			vec[k] += factor * in.get(k) ;
 		}
+#endif		
 	}
 	void assign_mult(const Vector &in1, const Vector &in2, double factor)
 		// Set vec = in1 + factor * in2
@@ -327,9 +370,14 @@ public:
 			cout << "Error in add_mult: dim mismatch\n" ;
 			exit(1) ;
 		}
+#ifdef USE_BLAS
+		cblas_dcopy(dim, in1.vec, 1, vec, 1) ;
+		cblas_daxpy(dim, factor, in2.vec, 1, vec, 1) ;
+#else		
 		for ( int k = 0 ; k < dim ; k++ ) {
 			vec[k] = in1.get(k) + factor * in2.get(k) ;
 		}
+#endif		
 	}
 	
 	void clear()
