@@ -257,6 +257,7 @@ void INPUT::PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST)
 	PARSE_CONTROLS_VELINIT(CONTROLS);
 	PARSE_CONTROLS_CONSRNT(CONTROLS);
 	PARSE_CONTROLS_PRSCALC(CONTROLS);
+	PARSE_CONTROLS_STRSCALC(CONTROLS);	
 	PARSE_CONTROLS_WRPCRDS(CONTROLS);
 	
 	// "Output control"
@@ -540,12 +541,16 @@ void INPUT::PARSE_CONTROLS_FITSTRS(JOB_CONTROL & CONTROLS)
 			{
 				cout << "	# FITSTRS #: ";		
 							
-				if (CONTROLS.FIT_STRESS_ALL)
-					cout << bool2str(CONTROLS.FIT_STRESS_ALL) << " ...will fit to all tensor components" << endl;	
-				else if(CONTROLS.NSTRESS>0)
-					cout << bool2str(CONTROLS.FIT_STRESS) << " ...will only fit tensors for first " << CONTROLS.NSTRESS << " frames." << endl;
-				else 
+				if (CONTROLS.FIT_STRESS_ALL) 
+					cout << bool2str(CONTROLS.FIT_STRESS_ALL) << " ...will fit to all tensor components" << endl;
+				else if ( CONTROLS.FIT_STRESS )
+					cout << " ...will fit to diagonal tensor components only" << endl ;
+				else
 					cout << bool2str(CONTROLS.FIT_STRESS) << endl;
+				
+				if(CONTROLS.NSTRESS>0)
+					cout << bool2str(CONTROLS.FIT_STRESS) << " ...will only fit tensors for first " << CONTROLS.NSTRESS << " frames." << endl;
+
 			}
 			
 			break;
@@ -1261,6 +1266,8 @@ void INPUT::PARSE_CONTROLS_INITIAL(JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_
 	CONTROLS.FREQ_BACKUP     	= 100;
 	CONTROLS.FREQ_UPDATE_THERMOSTAT = -1.0;
 	CONTROLS.USE_HOOVER_THRMOSTAT	= false;
+	CONTROLS.USE_NUMERICAL_PRESS = false ;
+	CONTROLS.USE_NUMERICAL_STRESS = false ;	
 	CONTROLS.REAL_REPLICATES        = 0;
 	NEIGHBOR_LIST.USE               = true;
 	
@@ -1895,6 +1902,7 @@ void INPUT::PARSE_CONTROLS_CONSRNT(JOB_CONTROL & CONTROLS)
 	if(!found)
 		EXIT_MSG("ERROR: # CONSRNT # must be specified!");
 }
+
 void INPUT::PARSE_CONTROLS_PRSCALC(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
@@ -1932,6 +1940,38 @@ void INPUT::PARSE_CONTROLS_PRSCALC(JOB_CONTROL & CONTROLS)
 	}
 		
 }
+
+void INPUT::PARSE_CONTROLS_STRSCALC(JOB_CONTROL & CONTROLS)
+{
+	int N_CONTENTS = CONTENTS.size();
+	
+	for (int i=0; i<N_CONTENTS; i++)
+	{
+		if (found_input_keyword("STRSCALC", CONTENTS(i)))		
+		{
+			if(CONTENTS(i+1,0) == "ANALYTICAL")
+			{
+				CONTROLS.USE_NUMERICAL_STRESS = false;
+				if (RANK==0)
+					cout << "	# STRSCALC #: ANALYTICAL" << endl;
+			}
+			else if(CONTENTS(i+1,0) == "NUMERICAL")
+			{
+				CONTROLS.USE_NUMERICAL_STRESS = true;
+				if (RANK==0)
+					cout << "	# STRSCALC #: NUMERICAL" << endl;
+				
+			}
+			else
+			{
+				EXIT_MSG("ERROR: # STRSCALC # must be specified as ANALYTICAL or NUMERICAL.");
+			}
+			
+			break;
+		}
+	}
+}
+
 void INPUT::PARSE_CONTROLS_WRPCRDS(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();

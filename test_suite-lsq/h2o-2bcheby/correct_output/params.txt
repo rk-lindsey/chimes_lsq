@@ -1,4 +1,4 @@
-! Date  2022-05-27
+! Date  2022-06-15
 !
 ! Number of variables            =  27
 ! Number of equations            =  28514
@@ -73,6 +73,10 @@ PAIRTYPE PARAMS: 2 O H
   7   1.6158044249025e-01
 q_O x q_H  -3.6830814346015e+01
  
+TRIPLET CHEBYSHEV PARAMS 
+
+QUADRUPLET CHEBYSHEV PARAMS 
+
 
 PAIRMAPS: 4
 1 HH

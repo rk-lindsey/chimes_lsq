@@ -88,8 +88,8 @@ public:
 			for ( int i = 0 ; i < dim ; i++ ) {
 				vec[i] = 0 ;
 			}
-			int idx, val ;
-			for ( int i = 0 ; i < dim ; i++ ) {
+			int idx, val, i ;
+			for ( i = 0 ; i < dim ; i++ ) {
 				getline(file, line) ;
 				if ( line.find(']') != string::npos ) break ;
 				istringstream istr(line) ;
@@ -102,6 +102,14 @@ public:
 					stop_run(1) ;
 				}
 			}
+			if ( i == dim ) {
+				getline(file, line) ;				
+				if ( line.find(']') == string::npos ) {
+					cout << "Error read end of sparse vector " << endl ;
+					cout << line ;
+					exit(1) ;
+				}
+			}			
 		}
 		
 	int get(int idx) const {
@@ -131,14 +139,12 @@ public:
 
 		void print_sparse(ofstream &of) 
 		{
-			if ( RANK == 0 ) {
-				of << "[ " << dim << endl ;
-				for ( int j = 0 ; j < dim ; j++ ) {
-					if ( abs(vec[j]) > 0.0 ) 
-						of << j << " " << vec[j] << endl ;
-				}
-				of << "]" << endl ;
+			of << "[ " << dim << endl ;
+			for ( int j = 0 ; j < dim ; j++ ) {
+				if ( abs(vec[j]) > 0.0 ) 
+					of << j << " " << vec[j] << endl ;
 			}
+			of << "]" << endl ;
 		}
 
 		void print_all(ostream &of)

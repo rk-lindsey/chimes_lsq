@@ -324,6 +324,10 @@ if (CONTROLS.NFRAMES > 0)
 
 			}
 	}
+#ifdef USE_MPI
+	// Put in a barrier to avoid possible timeouts in the MPI_Reduce.
+	MPI_Barrier(MPI_COMM_WORLD) ;
+#endif	
 
 	// Add the number of force entries in the A matrix across all processes.
 	

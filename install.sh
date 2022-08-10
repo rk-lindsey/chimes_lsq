@@ -14,12 +14,7 @@ DOMPI=${4-1}  # Compile with MPI support by default
 
 echo "Performing a fresh install"
 
-echo "Imports directory will be deleted and re-cloned/installed. Proceed? (y/n)"
-read PROCEED
-if [[ "$PROCEED" == "n" ]] ; then
-	exit 0
-fi
-rm -rf imports
+##rm -rf imports
 
 
 # Determine computing environment
@@ -33,11 +28,9 @@ read IS_LC
 ICC=`which g++`
 
 if [[ "$IS_LC" == "y" ]] ; then
-
-	module load intel/18.0.1
-	module load impi/2018.0
-	module load cmake/3.21.1
-	module load mkl/2020.0	
+    module load cmake/3.14.5
+    module load intel/18.0.1
+    module load impi/2018.0
 	
 	ICC=`which icc`
 fi
@@ -47,20 +40,16 @@ MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mp
 
 # Grab and install dependencies
 
-./clone-all.sh
+if [[ ! -d imports ]] ; then
+    ./clone-all.sh 1 $IS_LC
+else
+    echo 'Will use pre-existing imports directory'
+fi
 
 # Compile dlars
 
-if [[ "$IS_LC" == "y" ]] ; then
-	cd contrib/dlars/src
-	make
-	cd - 1&>/dev/null
-fi
-
-# Compile molanal
-
-cd contrib/molanal/src
-make molanal.new
+cd contrib/dlars/src
+./install.sh
 cd - 1&>/dev/null
 
 # Clean up previous installation,
@@ -115,34 +104,9 @@ echo "compiling with flags: $my_flags"
 cmake $my_flags ..
 make
 
-cp ../src/chimes_lsq.py .
-cp ../src/post_proc_chimes_lsq.py .
-
-if [ $DOMPI -eq 1 ] ;then
-
-	# Create some executables for the ALD
-	
-	cp chimes_md chimes_md-mpi
-	cp chimes_lsq chimes_lsq.tmp
-	
-	my_flags=`echo $my_flags | awk '{for(i=1;i<=NF; i++){if($i~"DUSE_MPI=1"){$i="-DUSE_MPI=0"}}{print}}'`
-	
-	cmake $my_flags ..
-	make
-	
-	cp chimes_md chimes_md-serial
-	cp chimes_md-mpi chimes_md
-	mv chimes_lsq.tmp chimes_lsq
-fi
-	
-	
-
-
 if [ ! -z $PREFX ] ; then
         make install
-	cp src/chimes_lsq.py $PREFX
-	cp src/post_proc_chimes_lsq.py $PREFX
 fi
 
 cd ..
-
+      
