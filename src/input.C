@@ -541,16 +541,12 @@ void INPUT::PARSE_CONTROLS_FITSTRS(JOB_CONTROL & CONTROLS)
 			{
 				cout << "	# FITSTRS #: ";		
 							
-				if (CONTROLS.FIT_STRESS_ALL) 
-					cout << bool2str(CONTROLS.FIT_STRESS_ALL) << " ...will fit to all tensor components" << endl;
-				else if ( CONTROLS.FIT_STRESS )
-					cout << " ...will fit to diagonal tensor components only" << endl ;
-				else
-					cout << bool2str(CONTROLS.FIT_STRESS) << endl;
-				
-				if(CONTROLS.NSTRESS>0)
+				if (CONTROLS.FIT_STRESS_ALL)
+					cout << bool2str(CONTROLS.FIT_STRESS_ALL) << " ...will fit to all tensor components" << endl;	
+				else if(CONTROLS.NSTRESS>0)
 					cout << bool2str(CONTROLS.FIT_STRESS) << " ...will only fit tensors for first " << CONTROLS.NSTRESS << " frames." << endl;
-
+				else 
+					cout << bool2str(CONTROLS.FIT_STRESS) << endl;
 			}
 			
 			break;
@@ -1408,18 +1404,18 @@ void INPUT::PARSE_CONTROLS_SKIP_FRAMES(JOB_CONTROL & CONTROLS)
 	
 	for (int i=0; i<N_CONTENTS; i++)
 	{
-		if (found_input_keyword("SKIP_FRAMES", CONTENTS(i)))										
+		if (found_input_keyword("SKPFRMS", CONTENTS(i)))										
 		{
 			CONTROLS.SKIP_FRAMES = convert_int(CONTENTS(i+1,0),i+1);
 			
 			if ( (RANK == 0)  && (CONTROLS.SKIP_FRAMES >= 1 )) 
 			{
-				cout << "	# SKIP_FRAMES #: " << CONTROLS.SKIP_FRAMES <<
+				cout << "	# SKPFRMS #: " << CONTROLS.SKIP_FRAMES <<
 					" .. will skip through frames in parallel execution (round-robin)." << endl;
 			}
 			else if( (RANK == 0) && CONTROLS.SKIP_FRAMES <= 0 )
 			{
-				cout << "	# SKIP_FRAMES #: "<< CONTROLS.SKIP_FRAMES <<
+				cout << "	# SKPFRMS #: "<< CONTROLS.SKIP_FRAMES <<
 					" ... will process all frames in contiguous order" << endl;	
 			}
 			break;

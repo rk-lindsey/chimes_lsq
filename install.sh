@@ -1,5 +1,11 @@
 #!/bin/bash
 
+echo ""
+echo "***"
+echo "*** Executing chimes_lsq install.sh"
+echo "***" 
+echo ""
+
 # Builds all relevant chimes_calculator executables/library files
 # Run with:
 # ./install.sh
@@ -12,10 +18,18 @@ VERBO=${3-1}  # Verbosity set to 1 by default, 0 gives minimal output, 3 gives m
 DOMPI=${4-1}  # Compile with MPI support by default
 
 
-echo "Performing a fresh install"
-
-##rm -rf imports
-
+echo "Attempting to perform a fresh install"
+echo "Imports directory will be deleted and re-cloned/installed. Proceed? (y/n)"
+read PROCEED
+if [[ "$PROCEED" == "n" ]] ; then
+    echo 'Will use pre-existing imports directory'
+else
+    echo "Are you sure? Imports directory will be deleted! (y/n)"
+    read PROCEED
+    if [[ "$PROCEED" == "y" ]] ; then
+        rm -rf imports
+    fi
+fi
 
 # Determine computing environment
 
@@ -28,11 +42,11 @@ read IS_LC
 ICC=`which g++`
 
 if [[ "$IS_LC" == "y" ]] ; then
-    module load cmake/3.14.5
+    module load cmake/3.21.1
     module load intel/18.0.1
     module load impi/2018.0
-	
-	ICC=`which icc`
+    
+    ICC=`which icc`
 fi
 
 MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mpicxx
@@ -42,14 +56,20 @@ MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mp
 
 if [[ ! -d imports ]] ; then
     ./clone-all.sh 1 $IS_LC
-else
-    echo 'Will use pre-existing imports directory'
 fi
 
 # Compile dlars
 
-cd contrib/dlars/src
-./install.sh
+if [[ "$IS_LC" == "y" ]] ; then
+    cd contrib/dlars/src
+    make
+    cd - 1&>/dev/null
+fi
+
+# Compile molanal
+
+cd contrib/molanal/src
+make molanal.new
 cd - 1&>/dev/null
 
 # Clean up previous installation,
@@ -70,28 +90,28 @@ if [ ! -z $PREFX ] ; then
 fi
 
 if [ $DEBUG -eq 1 ] ;then
-	my_flags="${my_flags} -Wall -DCMAKE_BUILD_TYPE=Debug"
+    my_flags="${my_flags} -Wall -DCMAKE_BUILD_TYPE=Debug"
 else
-	my_flags="${my_flags} -DCMAKE_BUILD_TYPE=Release"
+    my_flags="${my_flags} -DCMAKE_BUILD_TYPE=Release"
 fi
 
 if   [ $VERBO -eq 0 ] ;then
         my_flags="${my_flags} -DVERBOSITY=0" 
-	my_flags="${my_flags} -DDEBUG_CHEBY=0" 
+    my_flags="${my_flags} -DDEBUG_CHEBY=0" 
 elif [ $VERBO -eq 1 ] ; then
         my_flags="${my_flags} -DVERBOSITY=1" 
-	my_flags="${my_flags} -DDEBUG_CHEBY=0" 
+    my_flags="${my_flags} -DDEBUG_CHEBY=0" 
 elif [ $VERBO -eq 2 ] ; then
         my_flags="${my_flags} -DVERBOSITY=0" 
-	my_flags="${my_flags} -DDEBUG_CHEBY=1" 	
+    my_flags="${my_flags} -DDEBUG_CHEBY=1"     
 elif [ $VERBO -eq 3 ] ; then
         my_flags="${my_flags} -DVERBOSITY=1" 
-	my_flags="${my_flags} -DDEBUG_CHEBY=1" 	
+    my_flags="${my_flags} -DDEBUG_CHEBY=1"     
 fi
 
 if [ $DOMPI -eq 1 ] ;then
         my_flags="${my_flags} -DUSE_MPI=1" 
-	my_flags="${my_flags} -DMPI_CXX_COMPILER=${MPI}"
+    my_flags="${my_flags} -DMPI_CXX_COMPILER=${MPI}"
 else
         my_flags="${my_flags} -DUSE_MPI=0" 
 fi
@@ -104,9 +124,36 @@ echo "compiling with flags: $my_flags"
 cmake $my_flags ..
 make
 
+cp ../src/chimes_lsq.py .
+cp ../src/post_proc_chimes_lsq.py .
+
+if [ $DOMPI -eq 1 ] ;then
+ 
+ # Create some executables for the ALD
+
+    cp chimes_md chimes_md-mpi
+    cp chimes_lsq chimes_lsq.tmp
+
+    my_flags=`echo $my_flags | awk '{for(i=1;i<=NF; i++){if($i~"DUSE_MPI=1"){$i="-DUSE_MPI=0"}}{print}}'`
+
+    cmake $my_flags ..
+    make
+
+    cp chimes_md chimes_md-serial
+    cp chimes_md-mpi chimes_md
+    mv chimes_lsq.tmp chimes_lsq
+fi
+
 if [ ! -z $PREFX ] ; then
         make install
+        cp src/chimes_lsq.py $PREFX
+    cp src/post_proc_chimes_lsq.py $PREFX
 fi
 
 cd ..
-      
+
+echo ""
+echo "***"
+echo "*** chimes_lsq install complete"
+echo "***"
+echo ""      

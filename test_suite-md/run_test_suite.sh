@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Determine computing environment
+
+echo "Are you on a Livermore Computing system? (y/n)"
+read IS_LC
+
+
+# Setup MKL
+
+if [[ "$IS_LC" == "y" ]] ; then
+	module load mkl
+fi
+
 
 ###############################################################
 #
@@ -15,14 +27,14 @@ echo "NP = $NP"
 cd ..
 
 SOURCE_BASE="${TESTSU_BASE}/../build/"
-if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
+#if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
     if ./install.sh  ; then
 	echo "Compiling chimes_md succeeded"
     else
 	echo "Compiling chimes_md failed"
 	exit 1
     fi
-fi    
+#fi    
 
 cd -
 
@@ -93,7 +105,7 @@ do
 		 for j in run_md.out traj.gen output.xyz 
 		 do
 			  if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-					diff current_output/$j correct_output/$j > current_output/$j-diff.txt
+					perl ../../contrib/compare/compare.pl current_output/$j correct_output/$j > current_output/$j-diff.txt
 					
 					LINES=`wc -l current_output/$j-diff.txt | awk '{print $1}'`
 					
@@ -101,6 +113,7 @@ do
 						 echo " "
 						 echo "		Differences found in $j files:"
 						 echo " "
+						 diff current_output/$j correct_output/$j > current_output/$j-diff.txt
 						 cat current_output/$j-diff.txt
 
 						 PASS=false

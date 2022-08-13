@@ -6,7 +6,7 @@ module load mkl/2020.0
 DEBUG=${1-0}
 VERBOSE=${2-0}
 
-make clean
+make clean  2>&1 /dev/null
 
 if [[ $DEBUG == '1' ]] ; then
     make debug

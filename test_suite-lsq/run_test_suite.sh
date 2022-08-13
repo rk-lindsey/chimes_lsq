@@ -57,14 +57,15 @@ SOURCE_BASE="${TESTSU_BASE}/../build/"
 
 cd ..
 
-if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
+#if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
+ 
     if ./install.sh  ; then
 	echo "Compiling chimes_lsq succeeded"
     else
 	echo "Compiling chimes_lsq failed"
 	exit 1
     fi
-fi
+#fi
 
 cd -
 
@@ -288,6 +289,8 @@ for job in $MAKE_JOBS ; do
 	ALL_PASSED=FALSE
 	PASSED=FALSE
     fi
+
+   cd -
 done
 
 if   [ "$ALL_PASSED" = true ] ; then

@@ -23,7 +23,7 @@
 	MORSE
 # SPLITFI #
         true
-# SKIP_FRAMES #
+# SKPFRMS #
         1
 
 ####### TOPOLOGY VARIABLES #######

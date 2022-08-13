@@ -1,4 +1,4 @@
-! Date  2022-06-15
+! Date  2022-08-12
 !
 ! Number of variables            =  363
 ! Number of equations            =  14114
@@ -904,8 +904,6 @@ TRIPLETTYPE PARAMS:
       197     5  4  5         196             48         8.5751404508128e+01
       198     5  5  4         196             48         8.5751404508128e+01
       199     5  5  5         199             49        -1.8126205563653e+00
-
-QUADRUPLET CHEBYSHEV PARAMS 
 
 
 PAIRMAPS: 4

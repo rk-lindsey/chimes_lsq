@@ -36,7 +36,7 @@ Input file contents successfully stored.
 		... and will be printed every 1 frames.
 		... printing every 0.125 fs, 
 		... printing 2 frames. 
-	# FITSTRS #:  ...will fit to diagonal tensor components only
+	# FITSTRS #: true
 	# FITENER #: true
 	# FORDFTB #: false
 Setting up the data objects...
@@ -339,7 +339,7 @@ Force field summary:
 		-1.0000 to 1.0000
 
 	Interaction parameters for each pair type: 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		CC 1.1000 8.0000 MORSE 1.3500 0.0100 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 9.6171e-01
@@ -355,7 +355,7 @@ Force field summary:
 		10 5.2705e-01
 		11 1.1470e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		HH 8.0000e-01 8.0000e+00 MORSE 6.7500e-01 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 1.0155e+01
@@ -371,7 +371,7 @@ Force field summary:
 		10 1.6774e+00
 		11 5.0878e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		OO 2.0000e+00 8.0000e+00 MORSE 2.5500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 -7.1394e-02
@@ -387,7 +387,7 @@ Force field summary:
 		10 4.4790e-01
 		11 5.6208e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		CH 8.0000e-01 8.0000e+00 MORSE 1.1000e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 9.8553e+00
@@ -403,7 +403,7 @@ Force field summary:
 		10 3.9172e-01
 		11 1.1889e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		CO 1.1000e+00 8.0000e+00 MORSE 1.1500e+00 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 2.3742e+00
@@ -419,7 +419,7 @@ Force field summary:
 		10 1.0885e+00
 		11 2.2807e-01
 
-		pair type...smin...smax...sdelta...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
 		HO 8.0000e-01 8.0000e+00 MORSE 9.7000e-01 1.0000e-02 1.0000e+04 0.0000e+00
 		Parameters: 
 		0 1.5704e+00

@@ -181,6 +181,8 @@ for job in $MAKE_JOBS ; do
     else
 	echo "$job failed"
     fi
+    
+    cd -
 done
 
 exit 0

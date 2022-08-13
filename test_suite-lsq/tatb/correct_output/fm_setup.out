@@ -11,7 +11,6 @@ Input file contents successfully stored.
 	# NLAYERS #: 1
 	# FITCOUL #: false
 	# FITSTRS #: true ...will fit to all tensor components
-false ...will only fit tensors for first 36 frames.
 	# FITENER #: true
 	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
 	             Will use 2-body order: 8
@@ -19,7 +18,7 @@ false ...will only fit tensors for first 36 frames.
 	             Will use 4-body order: 0
 	             Will transform Chebyshev pair distances to range -1 to 1
 	# CHBTYPE #: MORSE
-	# SKIP_FRAMES #: 1 .. will skip through frames in parallel execution (round-robin).
+	# SKPFRMS #: 1 .. will skip through frames in parallel execution (round-robin).
 	# NATMTYP #: 4
 	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
  	1              C              0              12.011         
@@ -1499,16 +1498,16 @@ Values will correspond to the following atom types, in order:
 	O 96
 	N 96
 	Minimum distances between atoms: (Angstr.)
-		0	C C	1.122
-		1	H H	0.859
-		2	O O	1.206
-		3	N N	0.952
-		4	C H	0.897
-		5	C O	0.988
-		6	C N	0.971
-		7	H O	0.771
-		8	H N	0.781
-		9	O N	1.208
+		0	C C	1.12219167
+		1	H H	0.85922064
+		2	O O	1.20570624
+		3	N N	0.95207072
+		4	C H	0.89655622
+		5	C O	0.98755478
+		6	C N	0.97104103
+		7	H O	0.77064971
+		8	H N	0.78141286
+		9	O N	1.20836079
 	Total number of configurations contributing to each pair type:
 		0	C C 136670
 		1	H H 135256
@@ -1521,26 +1520,26 @@ Values will correspond to the following atom types, in order:
 		8	H N 272436
 		9	O N 273456
 	Minimum distances between atoms triplet pairs: (Angstr.)
-		0	CC CC CC 1.122 1.208 1.122 
-		1	CC CH CH 1.122 0.897 0.897 
-		2	CC CO CO 1.122 0.988 0.988 
-		3	CC CN CN 1.122 0.971 0.971 
-		4	CH CH HH 0.897 0.897 0.859 
-		5	CH CO HO 0.897 0.988 0.771 
-		6	CH CN HN 0.897 0.971 0.781 
-		7	CO CO OO 0.988 0.988 1.206 
-		8	CN CO ON 0.971 0.988 1.208 
-		9	CN CN NN 0.971 0.971 0.952 
-		10	HH HH HH 0.859 0.864 0.859 
-		11	HH HO HO 0.859 0.771 0.771 
-		12	HH HN HN 0.859 0.781 0.781 
-		13	HO HO OO 0.771 0.771 1.206 
-		14	HN HO ON 0.781 0.771 1.208 
-		15	HN HN NN 0.781 0.781 0.952 
-		16	OO OO OO 1.206 1.206 1.206 
-		17	ON ON OO 1.208 1.208 1.206 
-		18	NN ON ON 0.952 1.208 1.208 
-		19	NN NN NN 0.952 0.952 0.952 
+		0	CC CC CC 1.12219167 1.20776022 1.12219167 
+		1	CC CH CH 1.12219167 0.89655622 0.89655622 
+		2	CC CO CO 1.12219167 0.98755478 0.98755478 
+		3	CC CN CN 1.12219167 0.97104103 0.97104103 
+		4	CH CH HH 0.89655622 0.89655622 0.85922064 
+		5	CH CO HO 0.89655622 0.98755478 0.77064971 
+		6	CH CN HN 0.89655622 0.97104103 0.78141286 
+		7	CO CO OO 0.98755478 0.98755478 1.20570624 
+		8	CN CO ON 0.97104103 0.98755478 1.20836079 
+		9	CN CN NN 0.97104103 0.97104103 0.95207072 
+		10	HH HH HH 0.85922064 0.86431120 0.85922064 
+		11	HH HO HO 0.85922064 0.77064971 0.77064971 
+		12	HH HN HN 0.85922064 0.78141286 0.78141286 
+		13	HO HO OO 0.77064971 0.77064971 1.20570624 
+		14	HN HO ON 0.78141286 0.77064971 1.20836079 
+		15	HN HN NN 0.78141286 0.78141286 0.95207072 
+		16	OO OO OO 1.20570624 1.20570624 1.20570624 
+		17	ON ON OO 1.20836079 1.20836079 1.20570624 
+		18	NN ON ON 0.95207072 1.20836079 1.20836079 
+		19	NN NN NN 0.95207072 0.95207072 0.95207072 
 	Total number of configurations contributing to each triplet type:
 		0	CC CC CC 309644
 		1	CC CH CH 894958

@@ -1,6 +1,6 @@
 ## This is a test of reading a orthogonal frame that has been input as non-orthogonal with zero
 ## off-diagonal cell vector components.
-## This also tests the use of the SPLITFI and SKIP_FRAMES options.
+## This also tests the use of the SPLITFI and SKPFRMS options.
 ####### CONTROL VARIABLES #######
 
 # TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force
@@ -25,7 +25,7 @@
 	MORSE
 # SPLITFI #
         true
-# SKIP_FRAMES #
+# SKPFRMS #
         1
 
 ####### TOPOLOGY VARIABLES #######

@@ -2073,36 +2073,36 @@ Number of 3-body interactions = 35347
      270     33.75       6.1222917     -55.8471074     -49.7248157          2075.5     14.77278242    -51.4507083
 Number of 3-body interactions = 39407
  Updating neighbor list on step: 270, with padding: 0.625
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.074 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.074 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 0.054
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.062 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.062 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 0.775
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.051 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.051 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 3.020
      280     35.00       5.6161336     -55.4433148     -49.8271812          1903.9     15.69444741    -51.4512236
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.041 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.041 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 6.746
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820 pair type: 2
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.000
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 10.108
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820 pair type: 2
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.009
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 10.578
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.815 0.820 pair type: 2
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.815 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.016
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.039 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.039 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 7.745
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820 pair type: 2
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.008
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.048 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.048 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 3.840
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820 pair type: 2
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.000
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.060 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.060 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 1.137
-chimesFF: Warning: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.071 1.082 pair type: 1
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.071 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 0.117
 Number of 3-body interactions = 32207
  Updating neighbor list on step: 289, with padding: 0.463

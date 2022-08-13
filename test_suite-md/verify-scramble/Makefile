@@ -12,7 +12,7 @@ check_scramble:
 	$(RUN_JOB) ../../build/chimes_md run_md.in > orig_4b_force.out	
 	mv forceout.txt forceout.orig.txt
 	sort --general-numeric forceout.orig.txt > orig.sort.txt
-	diff scramble.sort.txt orig.sort.txt
+	perl ../../contrib/compare/compare.pl scramble.sort.txt orig.sort.txt
 
 clean :
 	rm -f force.txt *.out forceout*.txt *.sort.txt *.sort2.txt output.* traj.gen
