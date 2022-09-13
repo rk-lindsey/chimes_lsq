@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Determine computing environment
+
+echo "Are you on a Livermore Computing system? (y/n)"
+read IS_LC
+
+
+# Setup MKL
+
+if [[ "$IS_LC" == "y" ]] ; then
+	module load mkl
+fi
+
 
 ###############################################################
 #
@@ -15,14 +27,14 @@ echo "NP = $NP"
 cd ..
 
 SOURCE_BASE="${TESTSU_BASE}/../build/"
-if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
+#if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
     if ./install.sh  ; then
 	echo "Compiling chimes_md succeeded"
     else
 	echo "Compiling chimes_md failed"
 	exit 1
     fi
-fi    
+#fi    
 
 cd -
 
@@ -93,15 +105,16 @@ do
 		 for j in run_md.out traj.gen output.xyz 
 		 do
 			  if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-			  
-			  		perl ../../contrib/compare/compare.pl correct_output/$j current_output/$j > diff-$j.out
-					NO_DIFF_LINES=`cat diff-$j.out | wc -l`
+					perl ../../contrib/compare/compare.pl current_output/$j correct_output/$j > current_output/$j-diff.txt
 					
-					if [ $NO_DIFF_LINES -gt 0 ] ; then
+					LINES=`wc -l current_output/$j-diff.txt | awk '{print $1}'`
+					
+					if [ $LINES -gt 0 ] ; then
 						 echo " "
 						 echo "		Differences found in $j files:"
 						 echo " "
-						 cat diff-$j.out
+						 diff current_output/$j correct_output/$j > current_output/$j-diff.txt
+						 cat current_output/$j-diff.txt
 
 						 PASS=false
 						 ALL_PASS=false
@@ -142,10 +155,6 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 	 for i in $LSQ_FORCE_JOBS
 	 do
 
-		  if ! test_dir $i ; then
-				continue 
-		  fi
-		  
 		  PASS=true
 		  
 		  if [ ! -d ${TAG}${i} ] ; then
@@ -166,7 +175,6 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 		  else
 				echo "Chimes_MD failed"
 
-				../chimes_md run_md.in > run_md.out
 				SUCCESS=0
 				PASS=false
 				ALL_PASS=false
@@ -180,23 +188,22 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 				for j in run_md.out forceout-labeled.txt
 				do
 					 if [[ -e current_output/$j  &&  -e correct_output/$j ]] ; then
-					 
-					 	perl ../../contrib/compare/compare.pl correct_output/$j current_output/$j > $j-diff.txt
-						NO_DIFF_LINES=`cat $j-diff.txt | wc -l`
-					 
-
-						  if [ $NO_DIFF_LINES -gt 0 ] ; then
+						  diff current_output/$j correct_output/$j > current_output/$j-diff.txt
+						  
+						  LINES=`wc -l current_output/$j-diff.txt | awk '{print $1}'`
+						  
+						  if [ $LINES -gt 0 ] ; then
 								echo " "
 								echo "		Differences found in $j files:"
 								echo " "
 
-								cat $j-diff.txt
+								cat current_output/$j-diff.txt
 
 								PASS=false
 								ALL_PASS=false
 						  fi
 					 fi
-				done	
+				done
 		  fi
 	
 		  if [ "$PASS" = true ] ; then
@@ -205,8 +212,6 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 		  else
 				echo "		...Test failed."
 		  fi	
-		  
-		  
 		  cd ..
 	 done
 fi

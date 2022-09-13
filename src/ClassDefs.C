@@ -248,7 +248,7 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	int TOTAL_BINS = NBINS.X * NBINS.Y * NBINS.Z;
 
 	vector<vector<int> > BIN(TOTAL_BINS);
-	
+
 	for (int i=0; i<TOTAL_BINS; i++) 
 		vector<int>().swap(BIN[i]);
 	
@@ -259,9 +259,9 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	for ( int a1 = 0; a1 < SYSTEM.ALL_ATOMS; a1++ ) 
 	{	
 		
-		BIN_IDX.X = floor( (SYSTEM.ALL_COORDS[a1].X + SYSTEM.BOXDIM.EXTENT_X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX.Y = floor( (SYSTEM.ALL_COORDS[a1].Y + SYSTEM.BOXDIM.EXTENT_Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX.Z = floor( (SYSTEM.ALL_COORDS[a1].Z + SYSTEM.BOXDIM.EXTENT_Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX.X = floor( (SYSTEM.ALL_COORDS[a1].X - SYSTEM.BOXDIM.xlo + SYSTEM.BOXDIM.EXTENT_X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX.Y = floor( (SYSTEM.ALL_COORDS[a1].Y - SYSTEM.BOXDIM.ylo + SYSTEM.BOXDIM.EXTENT_Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX.Z = floor( (SYSTEM.ALL_COORDS[a1].Z - SYSTEM.BOXDIM.zlo + SYSTEM.BOXDIM.EXTENT_Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
 
 		/* RKL - no longer used - 082319
 					
@@ -270,14 +270,16 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		BIN_IDX.Z = floor( (SYSTEM.ALL_COORDS[a1].Z + SYSTEM.BOXDIM.Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
 		*/
 
-		if ( BIN_IDX.X < 0 || BIN_IDX.Y < 0 || BIN_IDX.Z < 0 ) 
+		if ( BIN_IDX.X < 0        || BIN_IDX.Y < 0        || BIN_IDX.Z < 0 ||
+			 BIN_IDX.X >= NBINS.X || BIN_IDX.Y >= NBINS.Y || BIN_IDX.Z >= NBINS.Z) 
 		{
-			cout << "Error: negative binning BIN_IDX for atom a1 = " << a1 << endl;
+			cout << "Error: out of range binning BIN_IDX for atom a1 = " << a1 << endl;
 			cout << "Atom has coordinates: " << SYSTEM.ALL_COORDS[a1].X << ", " << SYSTEM.ALL_COORDS[a1].Y << ", " << SYSTEM.ALL_COORDS[a1].Z << endl;
 			cout << "Atom has bins:        " << BIN_IDX.X << " " << BIN_IDX.Y << " " << BIN_IDX.Z << endl;
+			cout << "Max bins: " << NBINS.X << " " << NBINS.Y << " " << NBINS.Z << endl ;
 			cout << "Check box lengths in .xyz* file." << endl;
 			exit(1);
-		}
+		} 
 		
 		// Calculate bin BIN_IDX of the atom.
 		int ibin = BIN_IDX.X + BIN_IDX.Y * NBINS.X + BIN_IDX.Z * NBINS.X * NBINS.Y;
@@ -309,9 +311,9 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		
 		XYZ_INT BIN_IDX_a1;
 		
-		BIN_IDX_a1.X = floor( (SYSTEM.ALL_COORDS[a1].X + SYSTEM.BOXDIM.EXTENT_X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX_a1.Y = floor( (SYSTEM.ALL_COORDS[a1].Y + SYSTEM.BOXDIM.EXTENT_Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX_a1.Z = floor( (SYSTEM.ALL_COORDS[a1].Z + SYSTEM.BOXDIM.EXTENT_Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX_a1.X = floor( (SYSTEM.ALL_COORDS[a1].X - SYSTEM.BOXDIM.xlo + SYSTEM.BOXDIM.EXTENT_X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX_a1.Y = floor( (SYSTEM.ALL_COORDS[a1].Y - SYSTEM.BOXDIM.ylo + SYSTEM.BOXDIM.EXTENT_Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
+		BIN_IDX_a1.Z = floor( (SYSTEM.ALL_COORDS[a1].Z - SYSTEM.BOXDIM.zlo + SYSTEM.BOXDIM.EXTENT_Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
 		
 		/* RKL - no longer used - 082319
 
@@ -903,9 +905,8 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS
 	
 	if(STYLE=="NPT-BEREND")
 	{
-		
 		VOLUME_0 = SYSTEM.BOXDIM.UPDATE_VOLUME();
-		KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
+		KIN_ENER = kinetic_energy(SYSTEM,"CURRENT",CONTROLS);
 
 		// Use PRESSURE_XYZ + 2 KIN_ENER / (3V) so that kinetic energy contribution to pressure is updated.
 		double P = SYSTEM.PRESSURE_XYZ + 2.0 * KIN_ENER / (3.0 * VOLUME_0) ;
@@ -950,7 +951,7 @@ void CONSTRAINT::UPDATE_COORDS(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NEIGHBORS
 	if(STYLE=="NPT-BEREND-ANISO")
 	{
 		VOLUME_0 = SYSTEM.BOXDIM.UPDATE_VOLUME();
-		KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
+		KIN_ENER = kinetic_energy(SYSTEM,"CURRENT",CONTROLS);
 
 		XYZ pdiag ;
 		pdiag.X = SYSTEM.PRESSURE_TENSORS_XYZ_ALL[0].X + 2.0 / 3.0 * KIN_ENER / VOLUME_0 ;
@@ -1197,7 +1198,7 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 		}
 	else if( STYLE=="NVT-MTK" )	
 		{
-			KIN_ENER = kinetic_energy(SYSTEM, CONTROLS);
+			KIN_ENER = kinetic_energy(SYSTEM, "CURRENT", CONTROLS);
 			THERM_FORCE_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
 			THERM_VELOC_T = THERM_VELOC_0 + (THERM_FORCE_0 + THERM_FORCE_T) * 0.5 * CONTROLS.DELTA_T;
 			
@@ -1231,7 +1232,7 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 							SYSTEM.VELOCITY_NEW[a1].Y = (SYSTEM.VELOCITY_ITER[a1].Y + 0.5*SYSTEM.ACCEL[a1].Y*CONTROLS.DELTA_T) / VSCALEH;
 							SYSTEM.VELOCITY_NEW[a1].Z = (SYSTEM.VELOCITY_ITER[a1].Z + 0.5*SYSTEM.ACCEL[a1].Z*CONTROLS.DELTA_T) / VSCALEH;
 						}
-					 
+
 					KIN_ENER = kinetic_energy(SYSTEM,"NEW", CONTROLS);
 					THERM_FORCE_T = ( 2.0 * KIN_ENER - N_DOF * Kb * CONTROLS.TEMPERATURE ) / (THERM_INERT_Q);
 
@@ -1277,7 +1278,7 @@ void CONSTRAINT::UPDATE_VELOCS_HALF_2(FRAME & SYSTEM, JOB_CONTROL & CONTROLS, NE
 			//
 			
 			// Update thermostat/barostat.
-			KIN_ENER = kinetic_energy(SYSTEM,CONTROLS);
+			KIN_ENER = kinetic_energy(SYSTEM, "CURRENT", CONTROLS);
 
 			// Use PRESSURE_XYZ + 2 KIN_ENER / (3V) so that kinetic energy contribution to pressure is updated.
 			double dP = SYSTEM.PRESSURE_XYZ + 2.0 * KIN_ENER / (3.0 * VOLUME_T) - CONTROLS.PRESSURE/GPa;
@@ -1470,7 +1471,8 @@ void CONSTRAINT::SCALE_VELOCITIES(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 void CONSTRAINT::UPDATE_TEMPERATURE(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
 	double Ktot;
-	Ktot = kinetic_energy(SYSTEM, CONTROLS);	//calculate kinetic energy for scaling:
+	
+	Ktot = kinetic_energy(SYSTEM, "CURRENT", CONTROLS);	//calculate kinetic energy for scaling:
 
 	SYSTEM.TEMPERATURE = 2.0 * Ktot / (N_DOF * Kb);
 
@@ -1731,6 +1733,8 @@ BOX::~BOX(){}
 
 void BOX::WRITE_BOX(int LAYERS)
 {
+	double deg = 180.0 / pi ;
+	
 	cout << "       Box information (base units: Angstroms and radians): " << endl;
 	cout << "       Orthorhombic:                   " << IS_ORTHO << endl;
 	cout << "       Cell vectors (a)                " << CELL_AX	 << " " << CELL_AY	<< " " << CELL_AZ      << endl;
@@ -1738,18 +1742,33 @@ void BOX::WRITE_BOX(int LAYERS)
 	cout << "       Cell vectors (c)                " << CELL_CX	 << " " << CELL_CY	     << " " << CELL_CZ      << endl;
 	cout << "       Layers:                         " << LAYERS << endl;
 	cout << "       Ghost cell vectors (a) 	        " << CELL_AX * (2*LAYERS +1) << " " << CELL_AY * (2*LAYERS +1) << " " << CELL_AZ * (2*LAYERS +1) << endl;
-	cout << "       Ghost cell vectors (a) 	        " << CELL_BX * (2*LAYERS +1) << " " << CELL_BY * (2*LAYERS +1) << " " << CELL_BZ * (2*LAYERS +1) << endl;
-	cout << "       Ghost cell vectors (a) 	        " << CELL_CX * (2*LAYERS +1) << " " << CELL_CY * (2*LAYERS +1) << " " << CELL_CZ * (2*LAYERS +1) << endl;
+	cout << "       Ghost cell vectors (b) 	        " << CELL_BX * (2*LAYERS +1) << " " << CELL_BY * (2*LAYERS +1) << " " << CELL_BZ * (2*LAYERS +1) << endl;
+	cout << "       Ghost cell vectors (c) 	        " << CELL_CX * (2*LAYERS +1) << " " << CELL_CY * (2*LAYERS +1) << " " << CELL_CZ * (2*LAYERS +1) << endl;
 	cout << "       Invr. cell vectors (a) 	        " << INVR_HMAT[0] << " " << INVR_HMAT[3] << " " << INVR_HMAT[6] << endl;
 	cout << "       Invr. cell vectors (b) 	        " << INVR_HMAT[1] << " " << INVR_HMAT[4] << " " << INVR_HMAT[7] << endl;
 	cout << "       Invr. cell vectors (c) 	        " << INVR_HMAT[2] << " " << INVR_HMAT[5] << " " << INVR_HMAT[8] << endl;
-	cout << "       Lat. constants (a,b,c) 	        " << LATCON_A	 << " " << LATCON_B	<< " " << LATCON_C     << endl; 	   
-	cout << "       Lat. angles (alpha,beta,gamma)  " << LAT_ALPHA    << " " << LAT_BETA     << " " << LAT_GAMMA    << endl;
+	cout << "       Lat. constants (a,b,c) 	        " << LATCON_A 	 << " " << LATCON_B	<< " " << LATCON_C     << endl; 	   
+	cout << "       Lat. angles (alpha,beta,gamma)  " << LAT_ALPHA * deg    << " " << LAT_BETA * deg    << " " << LAT_GAMMA * deg   << endl;
 	cout << "       Cell extents (x,y,z)            " << EXTENT_X     << " " << EXTENT_Y     << " " << EXTENT_Z	  << endl;
 	cout << "       LMP cell lengths (lx,ly,lz)     " << CELL_LX      << " " << CELL_LY	   << " " << CELL_LZ	  << endl;
 	cout << "       LMP cell tilts facs. (xy,xz,yz) " << XY	    << " " << XZ	   << " " << YZ 	  << endl;
 	cout << "       Cell volume                     " << VOL << endl;
 	cout << endl;
+
+	// Input cell parameters must obey LAMMPS input conventions because of use of xlo, xhi, etc. in the
+	// neighbor list generation.
+	if ( CELL_AX <= 0.0 || CELL_BY <= 0.0 || CELL_CZ <= 0.0 ) {
+		EXIT_MSG("Error: non-positive diagonal cell vector (e.g. AX <= 0) ") ;
+	}
+	if ( fabs(CELL_AY) > 0.0 || fabs(CELL_AZ) > 0.0 ) {
+		EXIT_MSG("Error: A cell vector must be aligned on X axis ") ;
+	}
+	if ( fabs(CELL_BZ) > 0.0 ) {
+		EXIT_MSG("Error: B cell vector must be aligned in XY plane") ;
+	}
+	if ( EXTENT_X <= 0.0 || EXTENT_Y <= 0.0 || EXTENT_Z <= 0.0 ) {
+		EXIT_MSG("Error: negative cell extent ") ;
+	}
 }
 
 
@@ -1818,7 +1837,38 @@ void BOX::UPDATE_INVER_CELL()
 	
 	INVR_HMAT[6] /= HMAT_det;
 	INVR_HMAT[7] /= HMAT_det;
-	INVR_HMAT[8] /= HMAT_det;	
+	INVR_HMAT[8] /= HMAT_det;
+
+
+	// Double-check INVR_HMAT.
+	XYZ TMP_ATOM ;
+
+	TMP_ATOM.X = INVR_HMAT[0]*CELL_AX + INVR_HMAT[1]*CELL_AY + INVR_HMAT[2]*CELL_AZ ;
+	TMP_ATOM.Y = INVR_HMAT[3]*CELL_AX + INVR_HMAT[4]*CELL_AY + INVR_HMAT[5]*CELL_AZ;
+	TMP_ATOM.Z = INVR_HMAT[6]*CELL_AX + INVR_HMAT[7]*CELL_AY + INVR_HMAT[8]*CELL_AZ;
+
+	if ( fabs(TMP_ATOM.X-1.0) > 1.0e-06 || fabs(TMP_ATOM.Y) > 1.0e-06 || fabs(TMP_ATOM.Z) > 1.0e-06 ) {
+		cout << TMP_ATOM.X << " " << TMP_ATOM.Y << " " << TMP_ATOM.Z << endl ;
+		EXIT_MSG("Failed A vector inverse lattice consistency check\n" ) ;
+	}
+
+	TMP_ATOM.X = INVR_HMAT[0]*CELL_BX + INVR_HMAT[1]*CELL_BY + INVR_HMAT[2]*CELL_BZ ;
+	TMP_ATOM.Y = INVR_HMAT[3]*CELL_BX + INVR_HMAT[4]*CELL_BY + INVR_HMAT[5]*CELL_BZ;
+	TMP_ATOM.Z = INVR_HMAT[6]*CELL_BX + INVR_HMAT[7]*CELL_BY + INVR_HMAT[8]*CELL_BZ;
+
+	if ( fabs(TMP_ATOM.X) > 1.0e-06 || fabs(TMP_ATOM.Y-1.0) > 1.0e-06 || fabs(TMP_ATOM.Z) > 1.0e-06 ) {
+		cout << TMP_ATOM.X << " " << TMP_ATOM.Y << " " << TMP_ATOM.Z << endl ;
+		EXIT_MSG("Failed B vector inverse lattice consistency check\n" ) ;
+	}
+
+	TMP_ATOM.X = INVR_HMAT[0]*CELL_CX + INVR_HMAT[1]*CELL_CY + INVR_HMAT[2]*CELL_CZ ;
+	TMP_ATOM.Y = INVR_HMAT[3]*CELL_CX + INVR_HMAT[4]*CELL_CY + INVR_HMAT[5]*CELL_CZ;
+	TMP_ATOM.Z = INVR_HMAT[6]*CELL_CX + INVR_HMAT[7]*CELL_CY + INVR_HMAT[8]*CELL_CZ;
+
+	if ( fabs(TMP_ATOM.X) > 1.0e-06 || fabs(TMP_ATOM.Y) > 1.0e-06 || fabs(TMP_ATOM.Z-1.0) > 1.0e-06 ) {
+		cout << TMP_ATOM.X << " " << TMP_ATOM.Y << " " << TMP_ATOM.Z << endl ;
+		EXIT_MSG("Failed C vector inverse lattice consistency check\n" ) ;
+	}		
 }
 
 void BOX::UPDATE_LAT_VALUES()
@@ -1854,8 +1904,8 @@ void BOX::UPDATE_EXTENT()
 	
 	
 	double tmp;
-	    
-	double xlo = 0.0;
+	
+	xlo = ylo = zlo = 0.0 ;    
 	if (XY < xlo)
 		xlo = XY;
 	if (XZ < xlo)
@@ -1863,12 +1913,10 @@ void BOX::UPDATE_EXTENT()
 	if(XY+XZ < xlo)
 		xlo = XY+XZ;
 		
-	double ylo = 0.0;
 	if (YZ< ylo)
 		ylo = YZ;
-	double zlo = 0.0;
 	
-	double xhi = CELL_AX;
+	xhi = CELL_AX;
 	tmp = 0.0;
 	if (XY > tmp)
 		tmp = XY;
@@ -1878,13 +1926,11 @@ void BOX::UPDATE_EXTENT()
 		tmp = XY+XZ;
 	xhi += tmp;
 	
-	double yhi = CELL_BY;
+	yhi = CELL_BY;
 	if(YZ > 0.0)
 		yhi += YZ;
 		
-	double zhi = CELL_CZ;
-	
-	
+	zhi = CELL_CZ;
 	
 	EXTENT_X = xhi - xlo;
 	EXTENT_Y = yhi - ylo;
@@ -1907,6 +1953,13 @@ void BOX::UPDATE_CELL() // Assumes CELL_* values have been set, either orthorhom
 	HMAT[7] = CELL_BZ;
 	HMAT[8] = CELL_CZ;
 
+	// Update IS_ORTHO if cell has been distorted.
+	if ( fabs(CELL_AY) + fabs(CELL_AZ) + fabs(CELL_BX) + fabs(CELL_BZ)
+			 + fabs(CELL_CX) + fabs(CELL_CY) > 1.0e-10 ) 
+		IS_ORTHO = false ;
+	else
+		IS_ORTHO = true ;
+	
 	UPDATE_INVER_CELL();	
 	UPDATE_LAT_VALUES();
 	LAMMPSIFY();
@@ -2050,9 +2103,18 @@ void BOX::WRAP_ATOM(XYZ & UNWRAPPED_ATOM, XYZ & WRAPPED_ATOM,  XYZ_INT & WRAP_ID
 	
 		// Undo the transformation
 		
-		WRAPPED_ATOM.X = HMAT[0]*TMP_ATOM.X + HMAT[1]*TMP_ATOM.Y + HMAT[2]*TMP_ATOM.Z;
+		// WRAPPED_ATOM.X = HMAT[0]*TMP_ATOM.X + HMAT[1]*TMP_ATOM.Y + HMAT[2]*TMP_ATOM.Z;
+		// WRAPPED_ATOM.Y = HMAT[3]*TMP_ATOM.X + HMAT[4]*TMP_ATOM.Y + HMAT[5]*TMP_ATOM.Z;
+		// WRAPPED_ATOM.Z = HMAT[6]*TMP_ATOM.X + HMAT[7]*TMP_ATOM.Y + HMAT[8]*TMP_ATOM.Z;
+
+		WRAPPED_ATOM.X = HMAT[0]*TMP_ATOM.X + HMAT[1]*TMP_ATOM.Y + HMAT[2]*TMP_ATOM.Z ;
 		WRAPPED_ATOM.Y = HMAT[3]*TMP_ATOM.X + HMAT[4]*TMP_ATOM.Y + HMAT[5]*TMP_ATOM.Z;
 		WRAPPED_ATOM.Z = HMAT[6]*TMP_ATOM.X + HMAT[7]*TMP_ATOM.Y + HMAT[8]*TMP_ATOM.Z;
+
+		
+		//cout << "WRAPPED ATOM: " << WRAPPED_ATOM.X << " " << WRAPPED_ATOM.Y << " "
+		//	 << WRAPPED_ATOM.Z << endl ;
+
 	}
 }
 
@@ -2177,7 +2239,7 @@ void BOX::SCALE_BY_FACTOR(double FACTOR, bool SCALE_ATOMS, XYZ & ATOM)
 		// transform back to the scaled system 
 		
 		TMP_ATOM.X = FACTOR*HMAT[0]*ATOM.X + FACTOR*HMAT[1]*ATOM.Y + FACTOR*HMAT[2]*ATOM.Z;
-    		TMP_ATOM.Y = FACTOR*HMAT[3]*ATOM.X + FACTOR*HMAT[4]*ATOM.Y + FACTOR*HMAT[5]*ATOM.Z;
+		TMP_ATOM.Y = FACTOR*HMAT[3]*ATOM.X + FACTOR*HMAT[4]*ATOM.Y + FACTOR*HMAT[5]*ATOM.Z;
 		TMP_ATOM.Z = FACTOR*HMAT[6]*ATOM.X + FACTOR*HMAT[7]*ATOM.Y + FACTOR*HMAT[8]*ATOM.Z;
 		
 		ATOM.X = TMP_ATOM.X;
@@ -2197,6 +2259,62 @@ void BOX::SCALE_BY_FACTOR(double FACTOR, bool SCALE_ATOMS, XYZ & ATOM)
 		CELL_CX *= FACTOR;
 		CELL_CY *= FACTOR;
 		CELL_CZ *= FACTOR;
+	}
+}
+
+void BOX::SCALE_BY_MATRIX(const vector<vector<double>> &FACTOR, bool SCALE_ATOMS, XYZ & ATOM)
+// Scale the atom or cell by a transformation matrix.
+{
+	// if SCALE_ATOMS is true, ONLY updates COORDS and ALL_COORDS 
+	
+	if (SCALE_ATOMS)
+	{
+		XYZ TMP_ATOM;
+		
+		TMP_ATOM.X = ATOM.X;
+		TMP_ATOM.Y = ATOM.Y;
+		TMP_ATOM.Z = ATOM.Z;
+	
+		TMP_ATOM.X = FACTOR[0][0]*ATOM.X + FACTOR[0][1]*ATOM.Y + FACTOR[0][2]*ATOM.Z;
+		TMP_ATOM.Y = FACTOR[1][0]*ATOM.X + FACTOR[1][1]*ATOM.Y + FACTOR[1][2]*ATOM.Z;
+		TMP_ATOM.Z = FACTOR[2][0]*ATOM.X + FACTOR[2][1]*ATOM.Y + FACTOR[2][2]*ATOM.Z;
+		
+		ATOM.X = TMP_ATOM.X;
+		ATOM.Y = TMP_ATOM.Y;
+		ATOM.Z = TMP_ATOM.Z;
+	}
+	else
+	{
+		vector<vector<double>> cell_new ;
+
+		cell_new.resize(3) ;
+		for ( int j = 0 ; j < 3 ; j++ ) {
+			cell_new[j].resize(3) ;
+		}
+
+		cell_new[0][0] = CELL_AX * FACTOR[0][0] + CELL_AY * FACTOR[0][1] + CELL_AZ * FACTOR[0][2] ;
+		cell_new[0][1] = CELL_AX * FACTOR[1][0] + CELL_AY * FACTOR[1][1] + CELL_AZ * FACTOR[1][2] ;
+		cell_new[0][2] = CELL_AX * FACTOR[2][0] + CELL_AY * FACTOR[2][1] + CELL_AZ * FACTOR[2][2] ;
+
+		cell_new[1][0] = CELL_BX * FACTOR[0][0] + CELL_BY * FACTOR[0][1] + CELL_BZ * FACTOR[0][2] ;
+		cell_new[1][1] = CELL_BX * FACTOR[1][0] + CELL_BY * FACTOR[1][1] + CELL_BZ * FACTOR[1][2] ;
+		cell_new[1][2] = CELL_BX * FACTOR[2][0] + CELL_BY * FACTOR[2][1] + CELL_BZ * FACTOR[2][2] ;
+
+		cell_new[2][0] = CELL_CX * FACTOR[0][0] + CELL_CY * FACTOR[0][1] + CELL_CZ * FACTOR[0][2] ;
+		cell_new[2][1] = CELL_CX * FACTOR[1][0] + CELL_CY * FACTOR[1][1] + CELL_CZ * FACTOR[1][2] ;
+		cell_new[2][2] = CELL_CX * FACTOR[2][0] + CELL_CY * FACTOR[2][1] + CELL_CZ * FACTOR[2][2] ;
+
+		CELL_AX = cell_new[0][0] ;
+		CELL_AY = cell_new[0][1] ;
+		CELL_AZ = cell_new[0][2] ;
+		
+		CELL_BX = cell_new[1][0] ;
+		CELL_BY = cell_new[1][1] ;
+		CELL_BZ = cell_new[1][2] ;
+		
+		CELL_CX = cell_new[2][0] ;
+		CELL_CY = cell_new[2][1] ;
+		CELL_CZ = cell_new[2][2] ;
 	}
 }
 
@@ -2307,7 +2425,7 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 	int ntokens = parse_space(header, tokens);
 
 	// Make sure we at least have boxlengths
-	
+
 	if (tokens[0] == "NON_ORTHO")
 		BOXDIM.IS_ORTHO = false;
 
@@ -2318,8 +2436,8 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 			BOXDIM.CELL_AX = stod(tokens[0]);
 			BOXDIM.CELL_BY = stod(tokens[1]);
 			BOXDIM.CELL_CZ = stod(tokens[2]);
-			
-			BOXDIM.UPDATE_CELL();
+
+			// BOXDIM.UPDATE_CELL();
 		}
 		else
 		{
@@ -2327,7 +2445,7 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 			BOXDIM.CELL_BX = stod(tokens[4]); BOXDIM.CELL_BY = stod(tokens[5]); BOXDIM.CELL_BZ = stod(tokens[6]);
 			BOXDIM.CELL_CX = stod(tokens[7]); BOXDIM.CELL_CY = stod(tokens[8]); BOXDIM.CELL_CZ = stod(tokens[9]);
 			
-			BOXDIM.UPDATE_CELL();
+			// BOXDIM.UPDATE_CELL();
 		}
 	} 
 	else 
@@ -2369,8 +2487,6 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 		}
 		else if(CONTROLS.FIT_STRESS_ALL)	// Expects as:xx yy zz xy xz yz // old: xx, xy, xz, yy, yx, yz, zx, zy, zz
 		{
-			// Read only the "upper" deviatoric components
-		
 			if (BOXDIM.IS_ORTHO && ( ntokens >= 9 ))
 			{
 				STRESS_TENSORS_X.X = stod(tokens[3]);
@@ -2401,6 +2517,13 @@ void FRAME::READ_XYZF(ifstream &TRAJ_INPUT, const JOB_CONTROL &CONTROLS, const v
 			}
 		}
 	}
+
+	// Delay updating of cell until after stresses are read
+	// to correctly read stresses when an orthogonal cell is input
+	// as non-orthogonal with zero off-diagonal cell vector components.
+	// In this case UPDATE_CELL will switch the cell to IS_ORTHO == true.
+	BOXDIM.UPDATE_CELL();	
+
 	if((CONTROLS.NENER < 0) || (i<CONTROLS.NENER))
 		if(CONTROLS.FIT_ENER) // We're fitting to the absolute energy, + an offset (column of 1's at end of A-matrix)
 			QM_POT_ENER = stod(tokens[tokens.size()-1]);

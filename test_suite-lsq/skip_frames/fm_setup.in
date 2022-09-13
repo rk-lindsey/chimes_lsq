@@ -1,4 +1,4 @@
-## Test of SKIP_FRAMES option.
+## Test of SKPFRMS option.
 ####### CONTROL VARIABLES #######
 
 # TRJFILE # ! The .xyzf file containing the trajectory. Like a typical xyz, but comment line has box dimes, and each line includes x,y, and z force
@@ -17,7 +17,7 @@
 	CHEBYSHEV 10 2
 # CHBTYPE # ! Are we transforming distance in terms of inverse distance(INVRSE_R), a morse-type function? (MORSE)? .. "DEFAULT" for no transformation.
 	MORSE
-# SKIP_FRAMES # Do we process frames in round-robin order with skipping ?
+# SKPFRMS # Do we process frames in round-robin order with skipping ?
         1
 	
 ####### TOPOLOGY VARIABLES #######

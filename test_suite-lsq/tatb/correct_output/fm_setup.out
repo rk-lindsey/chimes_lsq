@@ -1,0 +1,1565 @@
+
+Reading input file...
+Will read from file: fm_setup.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# TRJFILE #: SCAN_all.xyzf
+	# WRAPTRJ #: true
+	# SPLITFI #: true
+	# NFRAMES #: 36
+	# NLAYERS #: 1
+	# FITCOUL #: false
+	# FITSTRS #: true ...will fit to all tensor components
+	# FITENER #: true
+	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
+	             Will use 2-body order: 8
+	             Will use 3-body order: 4
+	             Will use 4-body order: 0
+	             Will transform Chebyshev pair distances to range -1 to 1
+	# CHBTYPE #: MORSE
+	# SKPFRMS #: 1 .. will skip through frames in parallel execution (round-robin).
+	# NATMTYP #: 4
+	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
+ 	1              C              0              12.011         
+ 	2              H              0              1.0079         
+ 	3              O              0              15.9994        
+ 	4              N              0              14.007         
+
+	The following unique pair types have been identified:
+		0  C C
+		1  H H
+		2  O O
+		3  N N
+		4  C H
+		5  C O
+		6  C N
+		7  H O
+		8  H N
+		9  O N
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # MORSE_LAMBDA #
+	0               C               C               1.089           8               1.54            
+	1               H               H               0.678           8               0.74            
+	2               O               O               1.111           8               1.21            
+	3               N               N               1.035           8               1.35            
+	4               C               H               0.651           8               1.09            
+	5               C               O               1.054           8               1.16            
+	6               C               N               0.997           8               1.48            
+	7               H               O               0.648           8               0.97            
+	8               H               N               0.622           8               1.01            
+	9               O               N               0.982           8               1.27            
+		Atom type idxs:  0 0 Pair name:   CC Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   CH Explicit pair index:    1 Unique pair index:    4
+		Atom type idxs:  0 2 Pair name:   CO Explicit pair index:    2 Unique pair index:    5
+		Atom type idxs:  0 3 Pair name:   CN Explicit pair index:    3 Unique pair index:    6
+		Atom type idxs:  1 0 Pair name:   HC Explicit pair index:    4 Unique pair index:    4
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    5 Unique pair index:    1
+		Atom type idxs:  1 2 Pair name:   HO Explicit pair index:    6 Unique pair index:    7
+		Atom type idxs:  1 3 Pair name:   HN Explicit pair index:    7 Unique pair index:    8
+		Atom type idxs:  2 0 Pair name:   OC Explicit pair index:    8 Unique pair index:    5
+		Atom type idxs:  2 1 Pair name:   OH Explicit pair index:    9 Unique pair index:    7
+		Atom type idxs:  2 2 Pair name:   OO Explicit pair index:   10 Unique pair index:    2
+		Atom type idxs:  2 3 Pair name:   ON Explicit pair index:   11 Unique pair index:    9
+		Atom type idxs:  3 0 Pair name:   NC Explicit pair index:   12 Unique pair index:    6
+		Atom type idxs:  3 1 Pair name:   NH Explicit pair index:   13 Unique pair index:    8
+		Atom type idxs:  3 2 Pair name:   NO Explicit pair index:   14 Unique pair index:    9
+		Atom type idxs:  3 3 Pair name:   NN Explicit pair index:   15 Unique pair index:    3
+# FCUTTYP #: TERSOFF 0.5      ... for all Chebyshev interactions
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+
+	Made the following triplets: 0    
+
+		Atom type idxs:  0 0 0  Triplet name:       CCCCCC Unique triplet ID 111 index:    0
+
+	Made the following triplets: 1    
+
+		Atom type idxs:  0 0 1  Triplet name:       CCCHCH Unique triplet ID 211 index:    1
+
+	Made the following triplets: 2    
+
+		Atom type idxs:  0 0 2  Triplet name:       CCCOCO Unique triplet ID 311 index:    2
+
+	Made the following triplets: 3    
+
+		Atom type idxs:  0 0 3  Triplet name:       CCCNCN Unique triplet ID 411 index:    3
+		Atom type idxs:  0 1 0  Triplet name:       CHCCCH Unique triplet ID 121 index:    1
+
+	Made the following triplets: 4    
+
+		Atom type idxs:  0 1 1  Triplet name:       CHCHHH Unique triplet ID 221 index:    4
+
+	Made the following triplets: 5    
+
+		Atom type idxs:  0 1 2  Triplet name:       CHCOHO Unique triplet ID 321 index:    5
+
+	Made the following triplets: 6    
+
+		Atom type idxs:  0 1 3  Triplet name:       CHCNHN Unique triplet ID 421 index:    6
+		Atom type idxs:  0 2 0  Triplet name:       COCCCO Unique triplet ID 131 index:    2
+		Atom type idxs:  0 2 1  Triplet name:       COCHHO Unique triplet ID 231 index:    5
+
+	Made the following triplets: 7    
+
+		Atom type idxs:  0 2 2  Triplet name:       COCOOO Unique triplet ID 331 index:    7
+
+	Made the following triplets: 8    
+
+		Atom type idxs:  0 2 3  Triplet name:       COCNON Unique triplet ID 431 index:    8
+		Atom type idxs:  0 3 0  Triplet name:       CNCCCN Unique triplet ID 141 index:    3
+		Atom type idxs:  0 3 1  Triplet name:       CNCHHN Unique triplet ID 241 index:    6
+		Atom type idxs:  0 3 2  Triplet name:       CNCOON Unique triplet ID 341 index:    8
+
+	Made the following triplets: 9    
+
+		Atom type idxs:  0 3 3  Triplet name:       CNCNNN Unique triplet ID 441 index:    9
+		Atom type idxs:  1 0 0  Triplet name:       CHCHCC Unique triplet ID 112 index:    1
+		Atom type idxs:  1 0 1  Triplet name:       CHHHCH Unique triplet ID 212 index:    4
+		Atom type idxs:  1 0 2  Triplet name:       CHHOCO Unique triplet ID 312 index:    5
+		Atom type idxs:  1 0 3  Triplet name:       CHHNCN Unique triplet ID 412 index:    6
+		Atom type idxs:  1 1 0  Triplet name:       HHCHCH Unique triplet ID 122 index:    4
+
+	Made the following triplets: 10    
+
+		Atom type idxs:  1 1 1  Triplet name:       HHHHHH Unique triplet ID 222 index:   10
+
+	Made the following triplets: 11    
+
+		Atom type idxs:  1 1 2  Triplet name:       HHHOHO Unique triplet ID 322 index:   11
+
+	Made the following triplets: 12    
+
+		Atom type idxs:  1 1 3  Triplet name:       HHHNHN Unique triplet ID 422 index:   12
+		Atom type idxs:  1 2 0  Triplet name:       HOCHCO Unique triplet ID 132 index:    5
+		Atom type idxs:  1 2 1  Triplet name:       HOHHHO Unique triplet ID 232 index:   11
+
+	Made the following triplets: 13    
+
+		Atom type idxs:  1 2 2  Triplet name:       HOHOOO Unique triplet ID 332 index:   13
+
+	Made the following triplets: 14    
+
+		Atom type idxs:  1 2 3  Triplet name:       HOHNON Unique triplet ID 432 index:   14
+		Atom type idxs:  1 3 0  Triplet name:       HNCHCN Unique triplet ID 142 index:    6
+		Atom type idxs:  1 3 1  Triplet name:       HNHHHN Unique triplet ID 242 index:   12
+		Atom type idxs:  1 3 2  Triplet name:       HNHOON Unique triplet ID 342 index:   14
+
+	Made the following triplets: 15    
+
+		Atom type idxs:  1 3 3  Triplet name:       HNHNNN Unique triplet ID 442 index:   15
+		Atom type idxs:  2 0 0  Triplet name:       COCOCC Unique triplet ID 113 index:    2
+		Atom type idxs:  2 0 1  Triplet name:       COHOCH Unique triplet ID 213 index:    5
+		Atom type idxs:  2 0 2  Triplet name:       COOOCO Unique triplet ID 313 index:    7
+		Atom type idxs:  2 0 3  Triplet name:       COONCN Unique triplet ID 413 index:    8
+		Atom type idxs:  2 1 0  Triplet name:       HOCOCH Unique triplet ID 123 index:    5
+		Atom type idxs:  2 1 1  Triplet name:       HOHOHH Unique triplet ID 223 index:   11
+		Atom type idxs:  2 1 2  Triplet name:       HOOOHO Unique triplet ID 323 index:   13
+		Atom type idxs:  2 1 3  Triplet name:       HOONHN Unique triplet ID 423 index:   14
+		Atom type idxs:  2 2 0  Triplet name:       OOCOCO Unique triplet ID 133 index:    7
+		Atom type idxs:  2 2 1  Triplet name:       OOHOHO Unique triplet ID 233 index:   13
+
+	Made the following triplets: 16    
+
+		Atom type idxs:  2 2 2  Triplet name:       OOOOOO Unique triplet ID 333 index:   16
+
+	Made the following triplets: 17    
+
+		Atom type idxs:  2 2 3  Triplet name:       OOONON Unique triplet ID 433 index:   17
+		Atom type idxs:  2 3 0  Triplet name:       ONCOCN Unique triplet ID 143 index:    8
+		Atom type idxs:  2 3 1  Triplet name:       ONHOHN Unique triplet ID 243 index:   14
+		Atom type idxs:  2 3 2  Triplet name:       ONOOON Unique triplet ID 343 index:   17
+
+	Made the following triplets: 18    
+
+		Atom type idxs:  2 3 3  Triplet name:       ONONNN Unique triplet ID 443 index:   18
+		Atom type idxs:  3 0 0  Triplet name:       CNCNCC Unique triplet ID 114 index:    3
+		Atom type idxs:  3 0 1  Triplet name:       CNHNCH Unique triplet ID 214 index:    6
+		Atom type idxs:  3 0 2  Triplet name:       CNONCO Unique triplet ID 314 index:    8
+		Atom type idxs:  3 0 3  Triplet name:       CNNNCN Unique triplet ID 414 index:    9
+		Atom type idxs:  3 1 0  Triplet name:       HNCNCH Unique triplet ID 124 index:    6
+		Atom type idxs:  3 1 1  Triplet name:       HNHNHH Unique triplet ID 224 index:   12
+		Atom type idxs:  3 1 2  Triplet name:       HNONHO Unique triplet ID 324 index:   14
+		Atom type idxs:  3 1 3  Triplet name:       HNNNHN Unique triplet ID 424 index:   15
+		Atom type idxs:  3 2 0  Triplet name:       ONCNCO Unique triplet ID 134 index:    8
+		Atom type idxs:  3 2 1  Triplet name:       ONHNHO Unique triplet ID 234 index:   14
+		Atom type idxs:  3 2 2  Triplet name:       ONONOO Unique triplet ID 334 index:   17
+		Atom type idxs:  3 2 3  Triplet name:       ONNNON Unique triplet ID 434 index:   18
+		Atom type idxs:  3 3 0  Triplet name:       NNCNCN Unique triplet ID 144 index:    9
+		Atom type idxs:  3 3 1  Triplet name:       NNHNHN Unique triplet ID 244 index:   15
+		Atom type idxs:  3 3 2  Triplet name:       NNONON Unique triplet ID 344 index:   18
+
+	Made the following triplets: 19    
+
+		Atom type idxs:  3 3 3  Triplet name:       NNNNNN Unique triplet ID 444 index:   19
+	Note: Setting all 3-body S_MAXIM values to 6.000000
+     Max 3-body cutoff = 6.000000
+
+     Min 3-body cutoff = 0.622000
+
+	The following unique triplets of atoms have been identified:
+
+    Cluster index       : 0
+    Atoms in the cluster: C C C 
+    Pairs in the cluster: CC CC CC 
+    Number of unique sets of powers: 16 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       1   0   1         0               0               2        
+		      2       1   1   0         0               0               2        
+		      3       0   1   2         3               1               1        
+		      4       1   0   2         3               1               1        
+		      5       0   2   1         3               1               1        
+		      6       2   0   1         3               1               1        
+		      7       1   2   0         3               1               1        
+		      8       2   1   0         3               1               1        
+		      9       0   1   3         9               2               1        
+		      10      1   0   3         9               2               1        
+		      11      0   3   1         9               2               1        
+		      12      3   0   1         9               2               1        
+		      13      1   3   0         9               2               1        
+		      14      3   1   0         9               2               1        
+		      15      0   2   2         15              3               2        
+		      16      2   0   2         15              3               2        
+		      17      2   2   0         15              3               2        
+		      18      0   2   3         18              4               1        
+		      19      2   0   3         18              4               1        
+		      20      0   3   2         18              4               1        
+		      21      3   0   2         18              4               1        
+		      22      2   3   0         18              4               1        
+		      23      3   2   0         18              4               1        
+		      24      0   3   3         24              5               2        
+		      25      3   0   3         24              5               2        
+		      26      3   3   0         24              5               2        
+		      27      1   1   1         27              6               6        
+		      28      1   1   2         28              7               2        
+		      29      1   2   1         28              7               2        
+		      30      2   1   1         28              7               2        
+		      31      1   1   3         31              8               2        
+		      32      1   3   1         31              8               2        
+		      33      3   1   1         31              8               2        
+		      34      1   2   2         34              9               2        
+		      35      2   1   2         34              9               2        
+		      36      2   2   1         34              9               2        
+		      37      1   2   3         37              10              1        
+		      38      2   1   3         37              10              1        
+		      39      1   3   2         37              10              1        
+		      40      3   1   2         37              10              1        
+		      41      2   3   1         37              10              1        
+		      42      3   2   1         37              10              1        
+		      43      1   3   3         43              11              2        
+		      44      3   1   3         43              11              2        
+		      45      3   3   1         43              11              2        
+		      46      2   2   2         46              12              6        
+		      47      2   2   3         47              13              2        
+		      48      2   3   2         47              13              2        
+		      49      3   2   2         47              13              2        
+		      50      2   3   3         50              14              2        
+		      51      3   2   3         50              14              2        
+		      52      3   3   2         50              14              2        
+		      53      3   3   3         53              15              6        
+
+    Cluster index       : 1
+    Atoms in the cluster: C C H 
+    Pairs in the cluster: CC CH CH 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       0   1   2         1               1               1        
+		      2       0   2   1         1               1               1        
+		      3       0   1   3         3               2               1        
+		      4       0   3   1         3               2               1        
+		      5       0   2   2         5               3               2        
+		      6       0   2   3         6               4               1        
+		      7       0   3   2         6               4               1        
+		      8       0   3   3         8               5               2        
+		      9       1   0   1         9               6               1        
+		      10      1   1   0         9               6               1        
+		      11      1   0   2         11              7               1        
+		      12      1   2   0         11              7               1        
+		      13      1   0   3         13              8               1        
+		      14      1   3   0         13              8               1        
+		      15      1   1   1         15              9               2        
+		      16      1   1   2         16              10              1        
+		      17      1   2   1         16              10              1        
+		      18      1   1   3         18              11              1        
+		      19      1   3   1         18              11              1        
+		      20      1   2   2         20              12              2        
+		      21      1   2   3         21              13              1        
+		      22      1   3   2         21              13              1        
+		      23      1   3   3         23              14              2        
+		      24      2   0   1         24              15              1        
+		      25      2   1   0         24              15              1        
+		      26      2   0   2         26              16              1        
+		      27      2   2   0         26              16              1        
+		      28      2   0   3         28              17              1        
+		      29      2   3   0         28              17              1        
+		      30      2   1   1         30              18              2        
+		      31      2   1   2         31              19              1        
+		      32      2   2   1         31              19              1        
+		      33      2   1   3         33              20              1        
+		      34      2   3   1         33              20              1        
+		      35      2   2   2         35              21              2        
+		      36      2   2   3         36              22              1        
+		      37      2   3   2         36              22              1        
+		      38      2   3   3         38              23              2        
+		      39      3   0   1         39              24              1        
+		      40      3   1   0         39              24              1        
+		      41      3   0   2         41              25              1        
+		      42      3   2   0         41              25              1        
+		      43      3   0   3         43              26              1        
+		      44      3   3   0         43              26              1        
+		      45      3   1   1         45              27              2        
+		      46      3   1   2         46              28              1        
+		      47      3   2   1         46              28              1        
+		      48      3   1   3         48              29              1        
+		      49      3   3   1         48              29              1        
+		      50      3   2   2         50              30              2        
+		      51      3   2   3         51              31              1        
+		      52      3   3   2         51              31              1        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 2
+    Atoms in the cluster: C C O 
+    Pairs in the cluster: CC CO CO 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       0   1   2         1               1               1        
+		      2       0   2   1         1               1               1        
+		      3       0   1   3         3               2               1        
+		      4       0   3   1         3               2               1        
+		      5       0   2   2         5               3               2        
+		      6       0   2   3         6               4               1        
+		      7       0   3   2         6               4               1        
+		      8       0   3   3         8               5               2        
+		      9       1   0   1         9               6               1        
+		      10      1   1   0         9               6               1        
+		      11      1   0   2         11              7               1        
+		      12      1   2   0         11              7               1        
+		      13      1   0   3         13              8               1        
+		      14      1   3   0         13              8               1        
+		      15      1   1   1         15              9               2        
+		      16      1   1   2         16              10              1        
+		      17      1   2   1         16              10              1        
+		      18      1   1   3         18              11              1        
+		      19      1   3   1         18              11              1        
+		      20      1   2   2         20              12              2        
+		      21      1   2   3         21              13              1        
+		      22      1   3   2         21              13              1        
+		      23      1   3   3         23              14              2        
+		      24      2   0   1         24              15              1        
+		      25      2   1   0         24              15              1        
+		      26      2   0   2         26              16              1        
+		      27      2   2   0         26              16              1        
+		      28      2   0   3         28              17              1        
+		      29      2   3   0         28              17              1        
+		      30      2   1   1         30              18              2        
+		      31      2   1   2         31              19              1        
+		      32      2   2   1         31              19              1        
+		      33      2   1   3         33              20              1        
+		      34      2   3   1         33              20              1        
+		      35      2   2   2         35              21              2        
+		      36      2   2   3         36              22              1        
+		      37      2   3   2         36              22              1        
+		      38      2   3   3         38              23              2        
+		      39      3   0   1         39              24              1        
+		      40      3   1   0         39              24              1        
+		      41      3   0   2         41              25              1        
+		      42      3   2   0         41              25              1        
+		      43      3   0   3         43              26              1        
+		      44      3   3   0         43              26              1        
+		      45      3   1   1         45              27              2        
+		      46      3   1   2         46              28              1        
+		      47      3   2   1         46              28              1        
+		      48      3   1   3         48              29              1        
+		      49      3   3   1         48              29              1        
+		      50      3   2   2         50              30              2        
+		      51      3   2   3         51              31              1        
+		      52      3   3   2         51              31              1        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 3
+    Atoms in the cluster: C C N 
+    Pairs in the cluster: CC CN CN 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       0   1   2         1               1               1        
+		      2       0   2   1         1               1               1        
+		      3       0   1   3         3               2               1        
+		      4       0   3   1         3               2               1        
+		      5       0   2   2         5               3               2        
+		      6       0   2   3         6               4               1        
+		      7       0   3   2         6               4               1        
+		      8       0   3   3         8               5               2        
+		      9       1   0   1         9               6               1        
+		      10      1   1   0         9               6               1        
+		      11      1   0   2         11              7               1        
+		      12      1   2   0         11              7               1        
+		      13      1   0   3         13              8               1        
+		      14      1   3   0         13              8               1        
+		      15      1   1   1         15              9               2        
+		      16      1   1   2         16              10              1        
+		      17      1   2   1         16              10              1        
+		      18      1   1   3         18              11              1        
+		      19      1   3   1         18              11              1        
+		      20      1   2   2         20              12              2        
+		      21      1   2   3         21              13              1        
+		      22      1   3   2         21              13              1        
+		      23      1   3   3         23              14              2        
+		      24      2   0   1         24              15              1        
+		      25      2   1   0         24              15              1        
+		      26      2   0   2         26              16              1        
+		      27      2   2   0         26              16              1        
+		      28      2   0   3         28              17              1        
+		      29      2   3   0         28              17              1        
+		      30      2   1   1         30              18              2        
+		      31      2   1   2         31              19              1        
+		      32      2   2   1         31              19              1        
+		      33      2   1   3         33              20              1        
+		      34      2   3   1         33              20              1        
+		      35      2   2   2         35              21              2        
+		      36      2   2   3         36              22              1        
+		      37      2   3   2         36              22              1        
+		      38      2   3   3         38              23              2        
+		      39      3   0   1         39              24              1        
+		      40      3   1   0         39              24              1        
+		      41      3   0   2         41              25              1        
+		      42      3   2   0         41              25              1        
+		      43      3   0   3         43              26              1        
+		      44      3   3   0         43              26              1        
+		      45      3   1   1         45              27              2        
+		      46      3   1   2         46              28              1        
+		      47      3   2   1         46              28              1        
+		      48      3   1   3         48              29              1        
+		      49      3   3   1         48              29              1        
+		      50      3   2   2         50              30              2        
+		      51      3   2   3         51              31              1        
+		      52      3   3   2         51              31              1        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 4
+    Atoms in the cluster: C H H 
+    Pairs in the cluster: CH CH HH 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       1   0   1         0               0               1        
+		      2       0   1   2         2               1               1        
+		      3       1   0   2         2               1               1        
+		      4       0   1   3         4               2               1        
+		      5       1   0   3         4               2               1        
+		      6       0   2   1         6               3               1        
+		      7       2   0   1         6               3               1        
+		      8       0   2   2         8               4               1        
+		      9       2   0   2         8               4               1        
+		      10      0   2   3         10              5               1        
+		      11      2   0   3         10              5               1        
+		      12      0   3   1         12              6               1        
+		      13      3   0   1         12              6               1        
+		      14      0   3   2         14              7               1        
+		      15      3   0   2         14              7               1        
+		      16      0   3   3         16              8               1        
+		      17      3   0   3         16              8               1        
+		      18      1   1   0         18              9               2        
+		      19      1   1   1         19              10              2        
+		      20      1   1   2         20              11              2        
+		      21      1   1   3         21              12              2        
+		      22      1   2   0         22              13              1        
+		      23      2   1   0         22              13              1        
+		      24      1   2   1         24              14              1        
+		      25      2   1   1         24              14              1        
+		      26      1   2   2         26              15              1        
+		      27      2   1   2         26              15              1        
+		      28      1   2   3         28              16              1        
+		      29      2   1   3         28              16              1        
+		      30      1   3   0         30              17              1        
+		      31      3   1   0         30              17              1        
+		      32      1   3   1         32              18              1        
+		      33      3   1   1         32              18              1        
+		      34      1   3   2         34              19              1        
+		      35      3   1   2         34              19              1        
+		      36      1   3   3         36              20              1        
+		      37      3   1   3         36              20              1        
+		      38      2   2   0         38              21              2        
+		      39      2   2   1         39              22              2        
+		      40      2   2   2         40              23              2        
+		      41      2   2   3         41              24              2        
+		      42      2   3   0         42              25              1        
+		      43      3   2   0         42              25              1        
+		      44      2   3   1         44              26              1        
+		      45      3   2   1         44              26              1        
+		      46      2   3   2         46              27              1        
+		      47      3   2   2         46              27              1        
+		      48      2   3   3         48              28              1        
+		      49      3   2   3         48              28              1        
+		      50      3   3   0         50              29              2        
+		      51      3   3   1         51              30              2        
+		      52      3   3   2         52              31              2        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 5
+    Atoms in the cluster: C H O 
+    Pairs in the cluster: CH CO HO 
+    Number of unique sets of powers: 54 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       0   1   2         1               1               1        
+		      2       0   1   3         2               2               1        
+		      3       0   2   1         3               3               1        
+		      4       0   2   2         4               4               1        
+		      5       0   2   3         5               5               1        
+		      6       0   3   1         6               6               1        
+		      7       0   3   2         7               7               1        
+		      8       0   3   3         8               8               1        
+		      9       1   0   1         9               9               1        
+		      10      1   0   2         10              10              1        
+		      11      1   0   3         11              11              1        
+		      12      1   1   0         12              12              1        
+		      13      1   1   1         13              13              1        
+		      14      1   1   2         14              14              1        
+		      15      1   1   3         15              15              1        
+		      16      1   2   0         16              16              1        
+		      17      1   2   1         17              17              1        
+		      18      1   2   2         18              18              1        
+		      19      1   2   3         19              19              1        
+		      20      1   3   0         20              20              1        
+		      21      1   3   1         21              21              1        
+		      22      1   3   2         22              22              1        
+		      23      1   3   3         23              23              1        
+		      24      2   0   1         24              24              1        
+		      25      2   0   2         25              25              1        
+		      26      2   0   3         26              26              1        
+		      27      2   1   0         27              27              1        
+		      28      2   1   1         28              28              1        
+		      29      2   1   2         29              29              1        
+		      30      2   1   3         30              30              1        
+		      31      2   2   0         31              31              1        
+		      32      2   2   1         32              32              1        
+		      33      2   2   2         33              33              1        
+		      34      2   2   3         34              34              1        
+		      35      2   3   0         35              35              1        
+		      36      2   3   1         36              36              1        
+		      37      2   3   2         37              37              1        
+		      38      2   3   3         38              38              1        
+		      39      3   0   1         39              39              1        
+		      40      3   0   2         40              40              1        
+		      41      3   0   3         41              41              1        
+		      42      3   1   0         42              42              1        
+		      43      3   1   1         43              43              1        
+		      44      3   1   2         44              44              1        
+		      45      3   1   3         45              45              1        
+		      46      3   2   0         46              46              1        
+		      47      3   2   1         47              47              1        
+		      48      3   2   2         48              48              1        
+		      49      3   2   3         49              49              1        
+		      50      3   3   0         50              50              1        
+		      51      3   3   1         51              51              1        
+		      52      3   3   2         52              52              1        
+		      53      3   3   3         53              53              1        
+
+    Cluster index       : 6
+    Atoms in the cluster: C H N 
+    Pairs in the cluster: CH CN HN 
+    Number of unique sets of powers: 54 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       0   1   2         1               1               1        
+		      2       0   1   3         2               2               1        
+		      3       0   2   1         3               3               1        
+		      4       0   2   2         4               4               1        
+		      5       0   2   3         5               5               1        
+		      6       0   3   1         6               6               1        
+		      7       0   3   2         7               7               1        
+		      8       0   3   3         8               8               1        
+		      9       1   0   1         9               9               1        
+		      10      1   0   2         10              10              1        
+		      11      1   0   3         11              11              1        
+		      12      1   1   0         12              12              1        
+		      13      1   1   1         13              13              1        
+		      14      1   1   2         14              14              1        
+		      15      1   1   3         15              15              1        
+		      16      1   2   0         16              16              1        
+		      17      1   2   1         17              17              1        
+		      18      1   2   2         18              18              1        
+		      19      1   2   3         19              19              1        
+		      20      1   3   0         20              20              1        
+		      21      1   3   1         21              21              1        
+		      22      1   3   2         22              22              1        
+		      23      1   3   3         23              23              1        
+		      24      2   0   1         24              24              1        
+		      25      2   0   2         25              25              1        
+		      26      2   0   3         26              26              1        
+		      27      2   1   0         27              27              1        
+		      28      2   1   1         28              28              1        
+		      29      2   1   2         29              29              1        
+		      30      2   1   3         30              30              1        
+		      31      2   2   0         31              31              1        
+		      32      2   2   1         32              32              1        
+		      33      2   2   2         33              33              1        
+		      34      2   2   3         34              34              1        
+		      35      2   3   0         35              35              1        
+		      36      2   3   1         36              36              1        
+		      37      2   3   2         37              37              1        
+		      38      2   3   3         38              38              1        
+		      39      3   0   1         39              39              1        
+		      40      3   0   2         40              40              1        
+		      41      3   0   3         41              41              1        
+		      42      3   1   0         42              42              1        
+		      43      3   1   1         43              43              1        
+		      44      3   1   2         44              44              1        
+		      45      3   1   3         45              45              1        
+		      46      3   2   0         46              46              1        
+		      47      3   2   1         47              47              1        
+		      48      3   2   2         48              48              1        
+		      49      3   2   3         49              49              1        
+		      50      3   3   0         50              50              1        
+		      51      3   3   1         51              51              1        
+		      52      3   3   2         52              52              1        
+		      53      3   3   3         53              53              1        
+
+    Cluster index       : 7
+    Atoms in the cluster: C O O 
+    Pairs in the cluster: CO CO OO 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       1   0   1         0               0               1        
+		      2       0   1   2         2               1               1        
+		      3       1   0   2         2               1               1        
+		      4       0   1   3         4               2               1        
+		      5       1   0   3         4               2               1        
+		      6       0   2   1         6               3               1        
+		      7       2   0   1         6               3               1        
+		      8       0   2   2         8               4               1        
+		      9       2   0   2         8               4               1        
+		      10      0   2   3         10              5               1        
+		      11      2   0   3         10              5               1        
+		      12      0   3   1         12              6               1        
+		      13      3   0   1         12              6               1        
+		      14      0   3   2         14              7               1        
+		      15      3   0   2         14              7               1        
+		      16      0   3   3         16              8               1        
+		      17      3   0   3         16              8               1        
+		      18      1   1   0         18              9               2        
+		      19      1   1   1         19              10              2        
+		      20      1   1   2         20              11              2        
+		      21      1   1   3         21              12              2        
+		      22      1   2   0         22              13              1        
+		      23      2   1   0         22              13              1        
+		      24      1   2   1         24              14              1        
+		      25      2   1   1         24              14              1        
+		      26      1   2   2         26              15              1        
+		      27      2   1   2         26              15              1        
+		      28      1   2   3         28              16              1        
+		      29      2   1   3         28              16              1        
+		      30      1   3   0         30              17              1        
+		      31      3   1   0         30              17              1        
+		      32      1   3   1         32              18              1        
+		      33      3   1   1         32              18              1        
+		      34      1   3   2         34              19              1        
+		      35      3   1   2         34              19              1        
+		      36      1   3   3         36              20              1        
+		      37      3   1   3         36              20              1        
+		      38      2   2   0         38              21              2        
+		      39      2   2   1         39              22              2        
+		      40      2   2   2         40              23              2        
+		      41      2   2   3         41              24              2        
+		      42      2   3   0         42              25              1        
+		      43      3   2   0         42              25              1        
+		      44      2   3   1         44              26              1        
+		      45      3   2   1         44              26              1        
+		      46      2   3   2         46              27              1        
+		      47      3   2   2         46              27              1        
+		      48      2   3   3         48              28              1        
+		      49      3   2   3         48              28              1        
+		      50      3   3   0         50              29              2        
+		      51      3   3   1         51              30              2        
+		      52      3   3   2         52              31              2        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 8
+    Atoms in the cluster: C N O 
+    Pairs in the cluster: CN CO ON 
+    Number of unique sets of powers: 54 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       0   1   2         1               1               1        
+		      2       0   1   3         2               2               1        
+		      3       0   2   1         3               3               1        
+		      4       0   2   2         4               4               1        
+		      5       0   2   3         5               5               1        
+		      6       0   3   1         6               6               1        
+		      7       0   3   2         7               7               1        
+		      8       0   3   3         8               8               1        
+		      9       1   0   1         9               9               1        
+		      10      1   0   2         10              10              1        
+		      11      1   0   3         11              11              1        
+		      12      1   1   0         12              12              1        
+		      13      1   1   1         13              13              1        
+		      14      1   1   2         14              14              1        
+		      15      1   1   3         15              15              1        
+		      16      1   2   0         16              16              1        
+		      17      1   2   1         17              17              1        
+		      18      1   2   2         18              18              1        
+		      19      1   2   3         19              19              1        
+		      20      1   3   0         20              20              1        
+		      21      1   3   1         21              21              1        
+		      22      1   3   2         22              22              1        
+		      23      1   3   3         23              23              1        
+		      24      2   0   1         24              24              1        
+		      25      2   0   2         25              25              1        
+		      26      2   0   3         26              26              1        
+		      27      2   1   0         27              27              1        
+		      28      2   1   1         28              28              1        
+		      29      2   1   2         29              29              1        
+		      30      2   1   3         30              30              1        
+		      31      2   2   0         31              31              1        
+		      32      2   2   1         32              32              1        
+		      33      2   2   2         33              33              1        
+		      34      2   2   3         34              34              1        
+		      35      2   3   0         35              35              1        
+		      36      2   3   1         36              36              1        
+		      37      2   3   2         37              37              1        
+		      38      2   3   3         38              38              1        
+		      39      3   0   1         39              39              1        
+		      40      3   0   2         40              40              1        
+		      41      3   0   3         41              41              1        
+		      42      3   1   0         42              42              1        
+		      43      3   1   1         43              43              1        
+		      44      3   1   2         44              44              1        
+		      45      3   1   3         45              45              1        
+		      46      3   2   0         46              46              1        
+		      47      3   2   1         47              47              1        
+		      48      3   2   2         48              48              1        
+		      49      3   2   3         49              49              1        
+		      50      3   3   0         50              50              1        
+		      51      3   3   1         51              51              1        
+		      52      3   3   2         52              52              1        
+		      53      3   3   3         53              53              1        
+
+    Cluster index       : 9
+    Atoms in the cluster: C N N 
+    Pairs in the cluster: CN CN NN 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       1   0   1         0               0               1        
+		      2       0   1   2         2               1               1        
+		      3       1   0   2         2               1               1        
+		      4       0   1   3         4               2               1        
+		      5       1   0   3         4               2               1        
+		      6       0   2   1         6               3               1        
+		      7       2   0   1         6               3               1        
+		      8       0   2   2         8               4               1        
+		      9       2   0   2         8               4               1        
+		      10      0   2   3         10              5               1        
+		      11      2   0   3         10              5               1        
+		      12      0   3   1         12              6               1        
+		      13      3   0   1         12              6               1        
+		      14      0   3   2         14              7               1        
+		      15      3   0   2         14              7               1        
+		      16      0   3   3         16              8               1        
+		      17      3   0   3         16              8               1        
+		      18      1   1   0         18              9               2        
+		      19      1   1   1         19              10              2        
+		      20      1   1   2         20              11              2        
+		      21      1   1   3         21              12              2        
+		      22      1   2   0         22              13              1        
+		      23      2   1   0         22              13              1        
+		      24      1   2   1         24              14              1        
+		      25      2   1   1         24              14              1        
+		      26      1   2   2         26              15              1        
+		      27      2   1   2         26              15              1        
+		      28      1   2   3         28              16              1        
+		      29      2   1   3         28              16              1        
+		      30      1   3   0         30              17              1        
+		      31      3   1   0         30              17              1        
+		      32      1   3   1         32              18              1        
+		      33      3   1   1         32              18              1        
+		      34      1   3   2         34              19              1        
+		      35      3   1   2         34              19              1        
+		      36      1   3   3         36              20              1        
+		      37      3   1   3         36              20              1        
+		      38      2   2   0         38              21              2        
+		      39      2   2   1         39              22              2        
+		      40      2   2   2         40              23              2        
+		      41      2   2   3         41              24              2        
+		      42      2   3   0         42              25              1        
+		      43      3   2   0         42              25              1        
+		      44      2   3   1         44              26              1        
+		      45      3   2   1         44              26              1        
+		      46      2   3   2         46              27              1        
+		      47      3   2   2         46              27              1        
+		      48      2   3   3         48              28              1        
+		      49      3   2   3         48              28              1        
+		      50      3   3   0         50              29              2        
+		      51      3   3   1         51              30              2        
+		      52      3   3   2         52              31              2        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 10
+    Atoms in the cluster: H H H 
+    Pairs in the cluster: HH HH HH 
+    Number of unique sets of powers: 16 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       1   0   1         0               0               2        
+		      2       1   1   0         0               0               2        
+		      3       0   1   2         3               1               1        
+		      4       1   0   2         3               1               1        
+		      5       0   2   1         3               1               1        
+		      6       2   0   1         3               1               1        
+		      7       1   2   0         3               1               1        
+		      8       2   1   0         3               1               1        
+		      9       0   1   3         9               2               1        
+		      10      1   0   3         9               2               1        
+		      11      0   3   1         9               2               1        
+		      12      3   0   1         9               2               1        
+		      13      1   3   0         9               2               1        
+		      14      3   1   0         9               2               1        
+		      15      0   2   2         15              3               2        
+		      16      2   0   2         15              3               2        
+		      17      2   2   0         15              3               2        
+		      18      0   2   3         18              4               1        
+		      19      2   0   3         18              4               1        
+		      20      0   3   2         18              4               1        
+		      21      3   0   2         18              4               1        
+		      22      2   3   0         18              4               1        
+		      23      3   2   0         18              4               1        
+		      24      0   3   3         24              5               2        
+		      25      3   0   3         24              5               2        
+		      26      3   3   0         24              5               2        
+		      27      1   1   1         27              6               6        
+		      28      1   1   2         28              7               2        
+		      29      1   2   1         28              7               2        
+		      30      2   1   1         28              7               2        
+		      31      1   1   3         31              8               2        
+		      32      1   3   1         31              8               2        
+		      33      3   1   1         31              8               2        
+		      34      1   2   2         34              9               2        
+		      35      2   1   2         34              9               2        
+		      36      2   2   1         34              9               2        
+		      37      1   2   3         37              10              1        
+		      38      2   1   3         37              10              1        
+		      39      1   3   2         37              10              1        
+		      40      3   1   2         37              10              1        
+		      41      2   3   1         37              10              1        
+		      42      3   2   1         37              10              1        
+		      43      1   3   3         43              11              2        
+		      44      3   1   3         43              11              2        
+		      45      3   3   1         43              11              2        
+		      46      2   2   2         46              12              6        
+		      47      2   2   3         47              13              2        
+		      48      2   3   2         47              13              2        
+		      49      3   2   2         47              13              2        
+		      50      2   3   3         50              14              2        
+		      51      3   2   3         50              14              2        
+		      52      3   3   2         50              14              2        
+		      53      3   3   3         53              15              6        
+
+    Cluster index       : 11
+    Atoms in the cluster: H H O 
+    Pairs in the cluster: HH HO HO 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       0   1   2         1               1               1        
+		      2       0   2   1         1               1               1        
+		      3       0   1   3         3               2               1        
+		      4       0   3   1         3               2               1        
+		      5       0   2   2         5               3               2        
+		      6       0   2   3         6               4               1        
+		      7       0   3   2         6               4               1        
+		      8       0   3   3         8               5               2        
+		      9       1   0   1         9               6               1        
+		      10      1   1   0         9               6               1        
+		      11      1   0   2         11              7               1        
+		      12      1   2   0         11              7               1        
+		      13      1   0   3         13              8               1        
+		      14      1   3   0         13              8               1        
+		      15      1   1   1         15              9               2        
+		      16      1   1   2         16              10              1        
+		      17      1   2   1         16              10              1        
+		      18      1   1   3         18              11              1        
+		      19      1   3   1         18              11              1        
+		      20      1   2   2         20              12              2        
+		      21      1   2   3         21              13              1        
+		      22      1   3   2         21              13              1        
+		      23      1   3   3         23              14              2        
+		      24      2   0   1         24              15              1        
+		      25      2   1   0         24              15              1        
+		      26      2   0   2         26              16              1        
+		      27      2   2   0         26              16              1        
+		      28      2   0   3         28              17              1        
+		      29      2   3   0         28              17              1        
+		      30      2   1   1         30              18              2        
+		      31      2   1   2         31              19              1        
+		      32      2   2   1         31              19              1        
+		      33      2   1   3         33              20              1        
+		      34      2   3   1         33              20              1        
+		      35      2   2   2         35              21              2        
+		      36      2   2   3         36              22              1        
+		      37      2   3   2         36              22              1        
+		      38      2   3   3         38              23              2        
+		      39      3   0   1         39              24              1        
+		      40      3   1   0         39              24              1        
+		      41      3   0   2         41              25              1        
+		      42      3   2   0         41              25              1        
+		      43      3   0   3         43              26              1        
+		      44      3   3   0         43              26              1        
+		      45      3   1   1         45              27              2        
+		      46      3   1   2         46              28              1        
+		      47      3   2   1         46              28              1        
+		      48      3   1   3         48              29              1        
+		      49      3   3   1         48              29              1        
+		      50      3   2   2         50              30              2        
+		      51      3   2   3         51              31              1        
+		      52      3   3   2         51              31              1        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 12
+    Atoms in the cluster: H H N 
+    Pairs in the cluster: HH HN HN 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       0   1   2         1               1               1        
+		      2       0   2   1         1               1               1        
+		      3       0   1   3         3               2               1        
+		      4       0   3   1         3               2               1        
+		      5       0   2   2         5               3               2        
+		      6       0   2   3         6               4               1        
+		      7       0   3   2         6               4               1        
+		      8       0   3   3         8               5               2        
+		      9       1   0   1         9               6               1        
+		      10      1   1   0         9               6               1        
+		      11      1   0   2         11              7               1        
+		      12      1   2   0         11              7               1        
+		      13      1   0   3         13              8               1        
+		      14      1   3   0         13              8               1        
+		      15      1   1   1         15              9               2        
+		      16      1   1   2         16              10              1        
+		      17      1   2   1         16              10              1        
+		      18      1   1   3         18              11              1        
+		      19      1   3   1         18              11              1        
+		      20      1   2   2         20              12              2        
+		      21      1   2   3         21              13              1        
+		      22      1   3   2         21              13              1        
+		      23      1   3   3         23              14              2        
+		      24      2   0   1         24              15              1        
+		      25      2   1   0         24              15              1        
+		      26      2   0   2         26              16              1        
+		      27      2   2   0         26              16              1        
+		      28      2   0   3         28              17              1        
+		      29      2   3   0         28              17              1        
+		      30      2   1   1         30              18              2        
+		      31      2   1   2         31              19              1        
+		      32      2   2   1         31              19              1        
+		      33      2   1   3         33              20              1        
+		      34      2   3   1         33              20              1        
+		      35      2   2   2         35              21              2        
+		      36      2   2   3         36              22              1        
+		      37      2   3   2         36              22              1        
+		      38      2   3   3         38              23              2        
+		      39      3   0   1         39              24              1        
+		      40      3   1   0         39              24              1        
+		      41      3   0   2         41              25              1        
+		      42      3   2   0         41              25              1        
+		      43      3   0   3         43              26              1        
+		      44      3   3   0         43              26              1        
+		      45      3   1   1         45              27              2        
+		      46      3   1   2         46              28              1        
+		      47      3   2   1         46              28              1        
+		      48      3   1   3         48              29              1        
+		      49      3   3   1         48              29              1        
+		      50      3   2   2         50              30              2        
+		      51      3   2   3         51              31              1        
+		      52      3   3   2         51              31              1        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 13
+    Atoms in the cluster: H O O 
+    Pairs in the cluster: HO HO OO 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       1   0   1         0               0               1        
+		      2       0   1   2         2               1               1        
+		      3       1   0   2         2               1               1        
+		      4       0   1   3         4               2               1        
+		      5       1   0   3         4               2               1        
+		      6       0   2   1         6               3               1        
+		      7       2   0   1         6               3               1        
+		      8       0   2   2         8               4               1        
+		      9       2   0   2         8               4               1        
+		      10      0   2   3         10              5               1        
+		      11      2   0   3         10              5               1        
+		      12      0   3   1         12              6               1        
+		      13      3   0   1         12              6               1        
+		      14      0   3   2         14              7               1        
+		      15      3   0   2         14              7               1        
+		      16      0   3   3         16              8               1        
+		      17      3   0   3         16              8               1        
+		      18      1   1   0         18              9               2        
+		      19      1   1   1         19              10              2        
+		      20      1   1   2         20              11              2        
+		      21      1   1   3         21              12              2        
+		      22      1   2   0         22              13              1        
+		      23      2   1   0         22              13              1        
+		      24      1   2   1         24              14              1        
+		      25      2   1   1         24              14              1        
+		      26      1   2   2         26              15              1        
+		      27      2   1   2         26              15              1        
+		      28      1   2   3         28              16              1        
+		      29      2   1   3         28              16              1        
+		      30      1   3   0         30              17              1        
+		      31      3   1   0         30              17              1        
+		      32      1   3   1         32              18              1        
+		      33      3   1   1         32              18              1        
+		      34      1   3   2         34              19              1        
+		      35      3   1   2         34              19              1        
+		      36      1   3   3         36              20              1        
+		      37      3   1   3         36              20              1        
+		      38      2   2   0         38              21              2        
+		      39      2   2   1         39              22              2        
+		      40      2   2   2         40              23              2        
+		      41      2   2   3         41              24              2        
+		      42      2   3   0         42              25              1        
+		      43      3   2   0         42              25              1        
+		      44      2   3   1         44              26              1        
+		      45      3   2   1         44              26              1        
+		      46      2   3   2         46              27              1        
+		      47      3   2   2         46              27              1        
+		      48      2   3   3         48              28              1        
+		      49      3   2   3         48              28              1        
+		      50      3   3   0         50              29              2        
+		      51      3   3   1         51              30              2        
+		      52      3   3   2         52              31              2        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 14
+    Atoms in the cluster: H N O 
+    Pairs in the cluster: HN HO ON 
+    Number of unique sets of powers: 54 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       0   1   2         1               1               1        
+		      2       0   1   3         2               2               1        
+		      3       0   2   1         3               3               1        
+		      4       0   2   2         4               4               1        
+		      5       0   2   3         5               5               1        
+		      6       0   3   1         6               6               1        
+		      7       0   3   2         7               7               1        
+		      8       0   3   3         8               8               1        
+		      9       1   0   1         9               9               1        
+		      10      1   0   2         10              10              1        
+		      11      1   0   3         11              11              1        
+		      12      1   1   0         12              12              1        
+		      13      1   1   1         13              13              1        
+		      14      1   1   2         14              14              1        
+		      15      1   1   3         15              15              1        
+		      16      1   2   0         16              16              1        
+		      17      1   2   1         17              17              1        
+		      18      1   2   2         18              18              1        
+		      19      1   2   3         19              19              1        
+		      20      1   3   0         20              20              1        
+		      21      1   3   1         21              21              1        
+		      22      1   3   2         22              22              1        
+		      23      1   3   3         23              23              1        
+		      24      2   0   1         24              24              1        
+		      25      2   0   2         25              25              1        
+		      26      2   0   3         26              26              1        
+		      27      2   1   0         27              27              1        
+		      28      2   1   1         28              28              1        
+		      29      2   1   2         29              29              1        
+		      30      2   1   3         30              30              1        
+		      31      2   2   0         31              31              1        
+		      32      2   2   1         32              32              1        
+		      33      2   2   2         33              33              1        
+		      34      2   2   3         34              34              1        
+		      35      2   3   0         35              35              1        
+		      36      2   3   1         36              36              1        
+		      37      2   3   2         37              37              1        
+		      38      2   3   3         38              38              1        
+		      39      3   0   1         39              39              1        
+		      40      3   0   2         40              40              1        
+		      41      3   0   3         41              41              1        
+		      42      3   1   0         42              42              1        
+		      43      3   1   1         43              43              1        
+		      44      3   1   2         44              44              1        
+		      45      3   1   3         45              45              1        
+		      46      3   2   0         46              46              1        
+		      47      3   2   1         47              47              1        
+		      48      3   2   2         48              48              1        
+		      49      3   2   3         49              49              1        
+		      50      3   3   0         50              50              1        
+		      51      3   3   1         51              51              1        
+		      52      3   3   2         52              52              1        
+		      53      3   3   3         53              53              1        
+
+    Cluster index       : 15
+    Atoms in the cluster: H N N 
+    Pairs in the cluster: HN HN NN 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       1   0   1         0               0               1        
+		      2       0   1   2         2               1               1        
+		      3       1   0   2         2               1               1        
+		      4       0   1   3         4               2               1        
+		      5       1   0   3         4               2               1        
+		      6       0   2   1         6               3               1        
+		      7       2   0   1         6               3               1        
+		      8       0   2   2         8               4               1        
+		      9       2   0   2         8               4               1        
+		      10      0   2   3         10              5               1        
+		      11      2   0   3         10              5               1        
+		      12      0   3   1         12              6               1        
+		      13      3   0   1         12              6               1        
+		      14      0   3   2         14              7               1        
+		      15      3   0   2         14              7               1        
+		      16      0   3   3         16              8               1        
+		      17      3   0   3         16              8               1        
+		      18      1   1   0         18              9               2        
+		      19      1   1   1         19              10              2        
+		      20      1   1   2         20              11              2        
+		      21      1   1   3         21              12              2        
+		      22      1   2   0         22              13              1        
+		      23      2   1   0         22              13              1        
+		      24      1   2   1         24              14              1        
+		      25      2   1   1         24              14              1        
+		      26      1   2   2         26              15              1        
+		      27      2   1   2         26              15              1        
+		      28      1   2   3         28              16              1        
+		      29      2   1   3         28              16              1        
+		      30      1   3   0         30              17              1        
+		      31      3   1   0         30              17              1        
+		      32      1   3   1         32              18              1        
+		      33      3   1   1         32              18              1        
+		      34      1   3   2         34              19              1        
+		      35      3   1   2         34              19              1        
+		      36      1   3   3         36              20              1        
+		      37      3   1   3         36              20              1        
+		      38      2   2   0         38              21              2        
+		      39      2   2   1         39              22              2        
+		      40      2   2   2         40              23              2        
+		      41      2   2   3         41              24              2        
+		      42      2   3   0         42              25              1        
+		      43      3   2   0         42              25              1        
+		      44      2   3   1         44              26              1        
+		      45      3   2   1         44              26              1        
+		      46      2   3   2         46              27              1        
+		      47      3   2   2         46              27              1        
+		      48      2   3   3         48              28              1        
+		      49      3   2   3         48              28              1        
+		      50      3   3   0         50              29              2        
+		      51      3   3   1         51              30              2        
+		      52      3   3   2         52              31              2        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 16
+    Atoms in the cluster: O O O 
+    Pairs in the cluster: OO OO OO 
+    Number of unique sets of powers: 16 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       1   0   1         0               0               2        
+		      2       1   1   0         0               0               2        
+		      3       0   1   2         3               1               1        
+		      4       1   0   2         3               1               1        
+		      5       0   2   1         3               1               1        
+		      6       2   0   1         3               1               1        
+		      7       1   2   0         3               1               1        
+		      8       2   1   0         3               1               1        
+		      9       0   1   3         9               2               1        
+		      10      1   0   3         9               2               1        
+		      11      0   3   1         9               2               1        
+		      12      3   0   1         9               2               1        
+		      13      1   3   0         9               2               1        
+		      14      3   1   0         9               2               1        
+		      15      0   2   2         15              3               2        
+		      16      2   0   2         15              3               2        
+		      17      2   2   0         15              3               2        
+		      18      0   2   3         18              4               1        
+		      19      2   0   3         18              4               1        
+		      20      0   3   2         18              4               1        
+		      21      3   0   2         18              4               1        
+		      22      2   3   0         18              4               1        
+		      23      3   2   0         18              4               1        
+		      24      0   3   3         24              5               2        
+		      25      3   0   3         24              5               2        
+		      26      3   3   0         24              5               2        
+		      27      1   1   1         27              6               6        
+		      28      1   1   2         28              7               2        
+		      29      1   2   1         28              7               2        
+		      30      2   1   1         28              7               2        
+		      31      1   1   3         31              8               2        
+		      32      1   3   1         31              8               2        
+		      33      3   1   1         31              8               2        
+		      34      1   2   2         34              9               2        
+		      35      2   1   2         34              9               2        
+		      36      2   2   1         34              9               2        
+		      37      1   2   3         37              10              1        
+		      38      2   1   3         37              10              1        
+		      39      1   3   2         37              10              1        
+		      40      3   1   2         37              10              1        
+		      41      2   3   1         37              10              1        
+		      42      3   2   1         37              10              1        
+		      43      1   3   3         43              11              2        
+		      44      3   1   3         43              11              2        
+		      45      3   3   1         43              11              2        
+		      46      2   2   2         46              12              6        
+		      47      2   2   3         47              13              2        
+		      48      2   3   2         47              13              2        
+		      49      3   2   2         47              13              2        
+		      50      2   3   3         50              14              2        
+		      51      3   2   3         50              14              2        
+		      52      3   3   2         50              14              2        
+		      53      3   3   3         53              15              6        
+
+    Cluster index       : 17
+    Atoms in the cluster: N O O 
+    Pairs in the cluster: ON ON OO 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               1        
+		      1       1   0   1         0               0               1        
+		      2       0   1   2         2               1               1        
+		      3       1   0   2         2               1               1        
+		      4       0   1   3         4               2               1        
+		      5       1   0   3         4               2               1        
+		      6       0   2   1         6               3               1        
+		      7       2   0   1         6               3               1        
+		      8       0   2   2         8               4               1        
+		      9       2   0   2         8               4               1        
+		      10      0   2   3         10              5               1        
+		      11      2   0   3         10              5               1        
+		      12      0   3   1         12              6               1        
+		      13      3   0   1         12              6               1        
+		      14      0   3   2         14              7               1        
+		      15      3   0   2         14              7               1        
+		      16      0   3   3         16              8               1        
+		      17      3   0   3         16              8               1        
+		      18      1   1   0         18              9               2        
+		      19      1   1   1         19              10              2        
+		      20      1   1   2         20              11              2        
+		      21      1   1   3         21              12              2        
+		      22      1   2   0         22              13              1        
+		      23      2   1   0         22              13              1        
+		      24      1   2   1         24              14              1        
+		      25      2   1   1         24              14              1        
+		      26      1   2   2         26              15              1        
+		      27      2   1   2         26              15              1        
+		      28      1   2   3         28              16              1        
+		      29      2   1   3         28              16              1        
+		      30      1   3   0         30              17              1        
+		      31      3   1   0         30              17              1        
+		      32      1   3   1         32              18              1        
+		      33      3   1   1         32              18              1        
+		      34      1   3   2         34              19              1        
+		      35      3   1   2         34              19              1        
+		      36      1   3   3         36              20              1        
+		      37      3   1   3         36              20              1        
+		      38      2   2   0         38              21              2        
+		      39      2   2   1         39              22              2        
+		      40      2   2   2         40              23              2        
+		      41      2   2   3         41              24              2        
+		      42      2   3   0         42              25              1        
+		      43      3   2   0         42              25              1        
+		      44      2   3   1         44              26              1        
+		      45      3   2   1         44              26              1        
+		      46      2   3   2         46              27              1        
+		      47      3   2   2         46              27              1        
+		      48      2   3   3         48              28              1        
+		      49      3   2   3         48              28              1        
+		      50      3   3   0         50              29              2        
+		      51      3   3   1         51              30              2        
+		      52      3   3   2         52              31              2        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 18
+    Atoms in the cluster: N N O 
+    Pairs in the cluster: NN ON ON 
+    Number of unique sets of powers: 33 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       0   1   2         1               1               1        
+		      2       0   2   1         1               1               1        
+		      3       0   1   3         3               2               1        
+		      4       0   3   1         3               2               1        
+		      5       0   2   2         5               3               2        
+		      6       0   2   3         6               4               1        
+		      7       0   3   2         6               4               1        
+		      8       0   3   3         8               5               2        
+		      9       1   0   1         9               6               1        
+		      10      1   1   0         9               6               1        
+		      11      1   0   2         11              7               1        
+		      12      1   2   0         11              7               1        
+		      13      1   0   3         13              8               1        
+		      14      1   3   0         13              8               1        
+		      15      1   1   1         15              9               2        
+		      16      1   1   2         16              10              1        
+		      17      1   2   1         16              10              1        
+		      18      1   1   3         18              11              1        
+		      19      1   3   1         18              11              1        
+		      20      1   2   2         20              12              2        
+		      21      1   2   3         21              13              1        
+		      22      1   3   2         21              13              1        
+		      23      1   3   3         23              14              2        
+		      24      2   0   1         24              15              1        
+		      25      2   1   0         24              15              1        
+		      26      2   0   2         26              16              1        
+		      27      2   2   0         26              16              1        
+		      28      2   0   3         28              17              1        
+		      29      2   3   0         28              17              1        
+		      30      2   1   1         30              18              2        
+		      31      2   1   2         31              19              1        
+		      32      2   2   1         31              19              1        
+		      33      2   1   3         33              20              1        
+		      34      2   3   1         33              20              1        
+		      35      2   2   2         35              21              2        
+		      36      2   2   3         36              22              1        
+		      37      2   3   2         36              22              1        
+		      38      2   3   3         38              23              2        
+		      39      3   0   1         39              24              1        
+		      40      3   1   0         39              24              1        
+		      41      3   0   2         41              25              1        
+		      42      3   2   0         41              25              1        
+		      43      3   0   3         43              26              1        
+		      44      3   3   0         43              26              1        
+		      45      3   1   1         45              27              2        
+		      46      3   1   2         46              28              1        
+		      47      3   2   1         46              28              1        
+		      48      3   1   3         48              29              1        
+		      49      3   3   1         48              29              1        
+		      50      3   2   2         50              30              2        
+		      51      3   2   3         51              31              1        
+		      52      3   3   2         51              31              1        
+		      53      3   3   3         53              32              2        
+
+    Cluster index       : 19
+    Atoms in the cluster: N N N 
+    Pairs in the cluster: NN NN NN 
+    Number of unique sets of powers: 16 (54 total)...
+		     index  |  powers  |  equiv index  |  param index  | count 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0               2        
+		      1       1   0   1         0               0               2        
+		      2       1   1   0         0               0               2        
+		      3       0   1   2         3               1               1        
+		      4       1   0   2         3               1               1        
+		      5       0   2   1         3               1               1        
+		      6       2   0   1         3               1               1        
+		      7       1   2   0         3               1               1        
+		      8       2   1   0         3               1               1        
+		      9       0   1   3         9               2               1        
+		      10      1   0   3         9               2               1        
+		      11      0   3   1         9               2               1        
+		      12      3   0   1         9               2               1        
+		      13      1   3   0         9               2               1        
+		      14      3   1   0         9               2               1        
+		      15      0   2   2         15              3               2        
+		      16      2   0   2         15              3               2        
+		      17      2   2   0         15              3               2        
+		      18      0   2   3         18              4               1        
+		      19      2   0   3         18              4               1        
+		      20      0   3   2         18              4               1        
+		      21      3   0   2         18              4               1        
+		      22      2   3   0         18              4               1        
+		      23      3   2   0         18              4               1        
+		      24      0   3   3         24              5               2        
+		      25      3   0   3         24              5               2        
+		      26      3   3   0         24              5               2        
+		      27      1   1   1         27              6               6        
+		      28      1   1   2         28              7               2        
+		      29      1   2   1         28              7               2        
+		      30      2   1   1         28              7               2        
+		      31      1   1   3         31              8               2        
+		      32      1   3   1         31              8               2        
+		      33      3   1   1         31              8               2        
+		      34      1   2   2         34              9               2        
+		      35      2   1   2         34              9               2        
+		      36      2   2   1         34              9               2        
+		      37      1   2   3         37              10              1        
+		      38      2   1   3         37              10              1        
+		      39      1   3   2         37              10              1        
+		      40      3   1   2         37              10              1        
+		      41      2   3   1         37              10              1        
+		      42      3   2   1         37              10              1        
+		      43      1   3   3         43              11              2        
+		      44      3   1   3         43              11              2        
+		      45      3   3   1         43              11              2        
+		      46      2   2   2         46              12              6        
+		      47      2   2   3         47              13              2        
+		      48      2   3   2         47              13              2        
+		      49      3   2   2         47              13              2        
+		      50      2   3   3         50              14              2        
+		      51      3   2   3         50              14              2        
+		      52      3   3   2         50              14              2        
+		      53      3   3   3         53              15              6        
+
+...input file read successful: 
+
+The number of two-body non-coulomb parameters is: 80
+The number of three-body Chebyshev parameters is: 676
+
+Succefully opened the trajectory file...
+Setting up the matrices for A, Coulomb forces, and overbonding...
+	Reporting outcome of layering for first frame ONLY: 
+	Real atoms:                   384
+	Total atoms (ghost):          10368
+	cell vectors (a)            14.243800 0.000000 0.000000
+	cell vectors (b)            0.000000 14.243800 0.000000
+	cell vectors (c)            0.000000 0.000000 14.243800
+	cell volume (A^3)           2889.865306
+	Extent (x,y,z)              14.243800 14.243800 14.243800
+	Layers:                     1
+	Effective cell vectors (a): 42.731400 0.000000 0.000000
+	Effective cell vectors (a): 0.000000 42.731400 0.000000
+	Effective cell vectors (a): 0.000000 0.000000 42.731400
+...matrix setup complete: 
+
+...Populating the matrices for A, Coulomb forces, and overbonding...
+
+	Latest 3-body outer cutoff values: 
+	0:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	1:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	2:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	3:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	4:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	5:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	6:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	7:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	8:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	9:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	10:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	11:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	12:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	13:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	14:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	15:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	16:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	17:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	18:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+	19:  6.0000000000000000  6.0000000000000000  6.0000000000000000
+     Max 3-body cutoff = 6.0000000000000000
+	Latest 3-body inner cutoff values: 
+	0:  1.0890000000000000  1.0890000000000000  1.0890000000000000
+	1:  1.0890000000000000  0.6510000000000000  0.6510000000000000
+	2:  1.0890000000000000  1.0540000000000000  1.0540000000000000
+	3:  1.0890000000000000  0.9970000000000000  0.9970000000000000
+	4:  0.6510000000000000  0.6510000000000000  0.6780000000000000
+	5:  0.6510000000000000  1.0540000000000000  0.6480000000000000
+	6:  0.6510000000000000  0.9970000000000000  0.6220000000000000
+	7:  1.0540000000000000  1.0540000000000000  1.1110000000000000
+	8:  0.9970000000000000  1.0540000000000000  0.9820000000000000
+	9:  0.9970000000000000  0.9970000000000000  1.0349999999999999
+	10:  0.6780000000000000  0.6780000000000000  0.6780000000000000
+	11:  0.6780000000000000  0.6480000000000000  0.6480000000000000
+	12:  0.6780000000000000  0.6220000000000000  0.6220000000000000
+	13:  0.6480000000000000  0.6480000000000000  1.1110000000000000
+	14:  0.6220000000000000  0.6480000000000000  0.9820000000000000
+	15:  0.6220000000000000  0.6220000000000000  1.0349999999999999
+	16:  1.1110000000000000  1.1110000000000000  1.1110000000000000
+	17:  0.9820000000000000  0.9820000000000000  1.1110000000000000
+	18:  1.0349999999999999  0.9820000000000000  0.9820000000000000
+	19:  1.0349999999999999  1.0349999999999999  1.0349999999999999
+     Min 3-body cutoff = 0.6220000000000000
+
+Number of 3-body interactions = 560945
+...matrix population complete: 
+
+Printing matrices...
+	...A matrix length (forces): 41472
+
+Per-atom type energies will be provided at the end of the parameter file.
+Values will correspond to the following atom types, in order: 
+	C 96
+	H 96
+	O 96
+	N 96
+	Minimum distances between atoms: (Angstr.)
+		0	C C	1.12219167
+		1	H H	0.85922064
+		2	O O	1.20570624
+		3	N N	0.95207072
+		4	C H	0.89655622
+		5	C O	0.98755478
+		6	C N	0.97104103
+		7	H O	0.77064971
+		8	H N	0.78141286
+		9	O N	1.20836079
+	Total number of configurations contributing to each pair type:
+		0	C C 136670
+		1	H H 135256
+		2	O O 134916
+		3	N N 135471
+		4	C H 272450
+		5	C O 272773
+		6	C N 271698
+		7	H O 274037
+		8	H N 272436
+		9	O N 273456
+	Minimum distances between atoms triplet pairs: (Angstr.)
+		0	CC CC CC 1.12219167 1.20776022 1.12219167 
+		1	CC CH CH 1.12219167 0.89655622 0.89655622 
+		2	CC CO CO 1.12219167 0.98755478 0.98755478 
+		3	CC CN CN 1.12219167 0.97104103 0.97104103 
+		4	CH CH HH 0.89655622 0.89655622 0.85922064 
+		5	CH CO HO 0.89655622 0.98755478 0.77064971 
+		6	CH CN HN 0.89655622 0.97104103 0.78141286 
+		7	CO CO OO 0.98755478 0.98755478 1.20570624 
+		8	CN CO ON 0.97104103 0.98755478 1.20836079 
+		9	CN CN NN 0.97104103 0.97104103 0.95207072 
+		10	HH HH HH 0.85922064 0.86431120 0.85922064 
+		11	HH HO HO 0.85922064 0.77064971 0.77064971 
+		12	HH HN HN 0.85922064 0.78141286 0.78141286 
+		13	HO HO OO 0.77064971 0.77064971 1.20570624 
+		14	HN HO ON 0.78141286 0.77064971 1.20836079 
+		15	HN HN NN 0.78141286 0.78141286 0.95207072 
+		16	OO OO OO 1.20570624 1.20570624 1.20570624 
+		17	ON ON OO 1.20836079 1.20836079 1.20570624 
+		18	NN ON ON 0.95207072 1.20836079 1.20836079 
+		19	NN NN NN 0.95207072 0.95207072 0.95207072 
+	Total number of configurations contributing to each triplet type:
+		0	CC CC CC 309644
+		1	CC CH CH 894958
+		2	CC CO CO 912492
+		3	CC CN CN 876325
+		4	CH CH HH 862530
+		5	CH CO HO 1804748
+		6	CH CN HN 1704511
+		7	CO CO OO 872166
+		8	CN CO ON 1726033
+		9	CN CN NN 831562
+		10	HH HH HH 292091
+		11	HH HO HO 917975
+		12	HH HN HN 889097
+		13	HO HO OO 896580
+		14	HN HO ON 1796255
+		15	HN HN NN 893852
+		16	OO OO OO 270896
+		17	ON ON OO 843546
+		18	NN ON ON 868695
+		19	NN NN NN 297742
+...matrix printing complete: 
+

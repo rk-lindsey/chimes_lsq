@@ -16,6 +16,18 @@ echo "SETTING UP FOR MD CODE..."
 echo " "
 
 
+# Determine computing environment
+
+echo "Are you on a Livermore Computing system? (y/n)"
+read IS_LC
+
+
+# Setup MKL
+
+if [[ "$IS_LC" == "y" ]] ; then
+	module load mkl
+fi
+
 # Initialize test suite parameters
 source ../src/bash/init_vars.sh
 init_test_vars

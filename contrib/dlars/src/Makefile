@@ -12,14 +12,15 @@ CXX=mpicxx
 CFLAGS= -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DUSE_MKL -DUSE_BLAS -qopenmp -DUSE_OPENMP
 #CFLAGS= -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DTIMING -qopenmp
 #CFLAGSDBG= -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"${MKLROOT}/include" -DTIMING -qopenmp -DUSE_OPENMP
-CFLAGSDBG= -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  
+CFLAGSDBG= -g -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY -DDEBUG
+LINKFLAGSDBG=
 LINKFLAGS= -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_intel_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl
 
-opt: dlars.C Matrix.C Vector.h IntVector.h Matrix.h DLARS.h
-	$(CXX) $(CFLAGS) dlars.C Matrix.C $(LINKFLAGS) -o dlars
+opt: dlars.C Matrix.C Restart.C Vector.h IntVector.h Matrix.h DLARS.h
+	$(CXX) $(CFLAGS) dlars.C Matrix.C Restart.C $(LINKFLAGS) -o dlars
 
-debug: dlars.C Vector.h IntVector.h Matrix.h DLARS.h
-	$(CXX) $(CFLAGSDBG) dlars.C Matrix.C $(LINKFLAGS) -o dlars
+debug: dlars.C Matrix.C Restart.C Vector.h IntVector.h Matrix.h DLARS.h
+	$(CXX) $(CFLAGSDBG) dlars.C Matrix.C Restart.C $(LINKFLAGSDBG) -o dlars
 
 clean:
 	rm dlars

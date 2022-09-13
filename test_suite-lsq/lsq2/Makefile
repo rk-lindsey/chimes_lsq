@@ -2,7 +2,7 @@
 NP=36
 NODES=1
 RUN_JOB=srun -n $(NP) -N $(NODES)
-PYTHON=python # /usr/tce/bin/python
+PYTHON=python3 # /usr/tce/bin/python
 COMPARE=perl ../../contrib/compare/compare.pl
 DLARS_PATH=../../contrib/dlars/src/
 

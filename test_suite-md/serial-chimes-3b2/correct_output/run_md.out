@@ -46,43 +46,43 @@ Reading initial coordinates and forces...
      ...Read box dimensions: 
        Box information (base units: Angstroms and radians): 
        Orthorhombic:                   1
-       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (a)                8.6091309 0 0
        Cell vectors (b)                0 8.6091309 0
        Cell vectors (c)                0 0 8.6091309
        Layers:                         1
-       Ghost cell vectors (a) 	        25.827392578125 0 0
-       Ghost cell vectors (a) 	        0 25.8273927 0
-       Ghost cell vectors (a) 	        0 0 25.8273927
-       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
        Invr. cell vectors (b) 	        -0 0.116155743432824 -0
        Invr. cell vectors (c) 	        0 -0 0.116155743432824
-       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
-       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
-       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
-       Cell volume                     638.084112874303
+       Cell volume                     638.084115885312
 
 	...Reading velocities from last three fields of atom info lines in xyzf file... 
      ...Updated simulation box dimensions: 
        Box information (base units: Angstroms and radians): 
        Orthorhombic:                   1
-       Cell vectors (a)                8.609130859375 0 0
+       Cell vectors (a)                8.6091309 0 0
        Cell vectors (b)                0 8.6091309 0
        Cell vectors (c)                0 0 8.6091309
        Layers:                         1
-       Ghost cell vectors (a) 	        25.827392578125 0 0
-       Ghost cell vectors (a) 	        0 25.8273927 0
-       Ghost cell vectors (a) 	        0 0 25.8273927
-       Invr. cell vectors (a) 	        0.116155743980943 -0 0
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
        Invr. cell vectors (b) 	        -0 0.116155743432824 -0
        Invr. cell vectors (c) 	        0 -0 0.116155743432824
-       Lat. constants (a,b,c) 	        8.609130859375 8.6091309 8.6091309
-       Lat. angles (alpha,beta,gamma)  1.5707963267949 1.5707963267949 1.5707963267949
-       Cell extents (x,y,z)            8.609130859375 8.6091309 8.6091309
-       LMP cell lengths (lx,ly,lz)     8.609130859375 8.6091309 8.6091309
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
        LMP cell tilts facs. (xy,xz,yz) 0 0 0
-       Cell volume                     638.084112874303
+       Cell volume                     638.084115885312
 
    ...read complete for file input.xyz
 
@@ -2002,7 +2002,7 @@ Ewald parameters:
 	Ewald alpha               =  7.723233e-01
 	R-Space Ewald cutoff      =  4.304565e+00
 	R-Space accuracy estimate =  5.997380e-07
-	K-Space accuracy estimate =  6.801449e-07
+	K-Space accuracy estimate =  6.801448e-07
 
 	Cutting off K-vectors with magnitude less than 7
 	Number of Ewald K-vectors = 1364
@@ -2010,78 +2010,78 @@ Ewald parameters:
 
     Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
               (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
-      10      1.25       3.9271377     -55.3626732     -51.4355356          1331.5     17.65343798    -51.4501095
+      10      1.25       3.9271408     -55.3626733     -51.4355325          1331.3     17.65292032    -51.4501096
 Number of 3-body interactions = 28521
  Updating neighbor list on step: 16, with padding: 0.367
-      20      2.50       4.0743942     -55.4542945     -51.3799003          1381.4     18.65615254    -51.4500082
-      30      3.75       4.6110531     -55.8895880     -51.2785349          1563.4     16.91427470    -51.4502062
+      20      2.50       4.0744081     -55.4542936     -51.3798855          1381.3     18.65561562    -51.4500082
+      30      3.75       4.6110878     -55.8895853     -51.2784975          1563.2     16.91380172    -51.4502063
 Number of 3-body interactions = 29792
  Updating neighbor list on step: 30, with padding: 0.409
-      40      5.00       5.2583295     -56.3874500     -51.1291205          1782.8     13.93279174    -51.4505562
+      40      5.00       5.2583992     -56.3874437     -51.1290444          1782.7     13.93241719    -51.4505562
 Number of 3-body interactions = 31209
  Updating neighbor list on step: 45, with padding: 0.440
-      50      6.25       5.6419694     -56.5862713     -50.9443019          1912.9     11.69121229    -51.4502511
+      50      6.25       5.6420856     -56.5862539     -50.9441682          1912.7     11.69090990    -51.4502511
 Number of 3-body interactions = 35544
  Updating neighbor list on step: 59, with padding: 0.557
-      60      7.50       5.9928323     -56.7331174     -50.7402851          2031.8     10.98308150    -51.4505121
-      70      8.75       6.0903225     -56.6197457     -50.5294232          2064.9     12.07810423    -51.4506522
+      60      7.50       5.9930053     -56.7330790     -50.7400737          2031.7     10.98280676    -51.4505121
+      70      8.75       6.0905565     -56.6196711     -50.5291146          2064.8     12.07780958    -51.4506522
 Number of 3-body interactions = 36640
  Updating neighbor list on step: 73, with padding: 0.584
-      80     10.00       5.8151035     -56.1418365     -50.3267331          1971.6     14.55153910    -51.4501091
-      90     11.25       5.7674503     -55.8972932     -50.1298429          1955.4     16.28504437    -51.4501322
+      80     10.00       5.8153971     -56.1417117     -50.3263146          1971.5     14.55121097    -51.4501090
+      90     11.25       5.7678231     -55.8971293     -50.1293063          1955.4     16.28467724    -51.4501322
 Number of 3-body interactions = 32766
  Updating neighbor list on step: 90, with padding: 0.501
-     100     12.50       6.0097057     -55.9350917     -49.9253859          2037.6     16.81525894    -51.4499990
+     100     12.50       6.0101735     -55.9348919     -49.9247184          2037.5     16.81482003    -51.4499989
 Number of 3-body interactions = 35619
  Updating neighbor list on step: 104, with padding: 0.563
-     110     13.75       6.4900316     -56.2032230     -49.7131914          2200.4     16.20298923    -51.4502854
+     110     13.75       6.4905944     -56.2029719     -49.7123774          2200.4     16.20275563    -51.4502853
 Number of 3-body interactions = 38020
  Updating neighbor list on step: 118, with padding: 0.615
-     120     15.00       6.8669158     -56.3724836     -49.5055678          2328.2     14.83530211    -51.4502616
-     130     16.25       7.1447090     -56.4689990     -49.3242900          2422.4     13.29273116    -51.4501511
+     120     15.00       6.8676360     -56.3722283     -49.5045923          2328.2     14.83544055    -51.4502616
+     130     16.25       7.1455891     -56.4687349     -49.3231458          2422.4     13.29290402    -51.4501510
 Number of 3-body interactions = 37800
  Updating neighbor list on step: 134, with padding: 0.605
-     140     17.50       7.3274596     -56.5112765     -49.1838169          2484.3     12.16326481    -51.4502546
+     140     17.50       7.3284271     -56.5109329     -49.1825059          2484.4     12.16342505    -51.4502545
 Number of 3-body interactions = 36732
  Updating neighbor list on step: 149, with padding: 0.581
-     150     18.75       7.2403803     -56.3372176     -49.0968373          2454.8     11.95973109    -51.4501623
-     160     20.00       6.8731683     -55.9349399     -49.0617716          2330.3     13.05132460    -51.4502079
+     150     18.75       7.2413806     -56.3367537     -49.0953731          2454.9     11.95980394    -51.4501620
+     160     20.00       6.8742737     -55.9344481     -49.0601744          2330.5     13.05127097    -51.4502079
 Number of 3-body interactions = 35656
- Updating neighbor list on step: 165, with padding: 0.554
-     170     21.25       6.2881114     -55.3497632     -49.0616518          2132.0     14.76764583    -51.4495043
-     180     22.50       6.3172289     -55.3945662     -49.0773373          2141.8     15.80302647    -51.4497139
+ Updating neighbor list on step: 165, with padding: 0.555
+     170     21.25       6.2891723     -55.3491216     -49.0599492          2132.1     14.76777304    -51.4495040
+     180     22.50       6.3183270     -55.3938781     -49.0755511          2142.0     15.80306046    -51.4497138
 Number of 3-body interactions = 36775
  Updating neighbor list on step: 180, with padding: 0.581
-     190     23.75       6.6591186     -55.7692921     -49.1101735          2257.7     15.42611048    -51.4507588
+     190     23.75       6.6604484     -55.7687673     -49.1083188          2258.0     15.42602226    -51.4507587
 Number of 3-body interactions = 37887
  Updating neighbor list on step: 195, with padding: 0.607
-     200     25.00       6.2304999     -55.3949121     -49.1644121          2112.4     15.68529964    -51.4499667
-     210     26.25       5.9052267     -55.1316483     -49.2264216          2002.1     16.35511270    -51.4499268
-Number of 3-body interactions = 36680
+     200     25.00       6.2317596     -55.3942753     -49.1625157          2112.6     15.68568559    -51.4499667
+     210     26.25       5.9061788     -55.1306839     -49.2245051          2002.3     16.35632518    -51.4499262
+Number of 3-body interactions = 36706
  Updating neighbor list on step: 210, with padding: 0.582
-     220     27.50       6.0281700     -55.3174943     -49.2893243          2043.8     16.20996755    -51.4500394
+     220     27.50       6.0291445     -55.3165437     -49.2873992          2043.9     16.21110746    -51.4500389
 Number of 3-body interactions = 33419
  Updating neighbor list on step: 226, with padding: 0.503
-     230     28.75       6.3161914     -55.6758241     -49.3596327          2141.5     15.88961581    -51.4505094
-     240     30.00       6.1980941     -55.6416986     -49.4436044          2101.4     16.21412328    -51.4503268
+     230     28.75       6.3173149     -55.6750280     -49.3577131          2141.6     15.89037058    -51.4505096
+     240     30.00       6.1990257     -55.6407299     -49.4417042          2101.5     16.21467222    -51.4503261
 Number of 3-body interactions = 34200
  Updating neighbor list on step: 240, with padding: 0.522
-     250     31.25       5.9599856     -55.4928249     -49.5328393          2020.7     16.23994640    -51.4499169
+     250     31.25       5.9611419     -55.4921140     -49.5309721          2020.9     16.24004817    -51.4499170
 Number of 3-body interactions = 35347
  Updating neighbor list on step: 256, with padding: 0.541
-     260     32.50       6.0929420     -55.7184339     -49.6254919          2065.8     15.29034730    -51.4501317
-     270     33.75       6.1213899     -55.8479577     -49.7265679          2075.4     14.77243239    -51.4507083
+     260     32.50       6.0940289     -55.7177043     -49.6236754          2065.9     15.29052079    -51.4501315
+     270     33.75       6.1222917     -55.8471074     -49.7248157          2075.5     14.77278242    -51.4507083
 Number of 3-body interactions = 39407
  Updating neighbor list on step: 270, with padding: 0.625
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.074 1.082 pair type: 1
 chimesFF: 	...Penalty potential = 0.054
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.062 1.082 pair type: 1
-chimesFF: 	...Penalty potential = 0.773
+chimesFF: 	...Penalty potential = 0.775
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.051 1.082 pair type: 1
-chimesFF: 	...Penalty potential = 3.016
-     280     35.00       5.6154004     -55.4442646     -49.8288643          1903.9     15.69241655    -51.4512241
+chimesFF: 	...Penalty potential = 3.020
+     280     35.00       5.6161336     -55.4433148     -49.8271812          1903.9     15.69444741    -51.4512236
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.041 1.082 pair type: 1
-chimesFF: 	...Penalty potential = 6.742
+chimesFF: 	...Penalty potential = 6.746
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.000
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082 pair type: 1
@@ -2089,25 +2089,33 @@ chimesFF: 	...Penalty potential = 10.108
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.009
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082 pair type: 1
-chimesFF: 	...Penalty potential = 10.585
+chimesFF: 	...Penalty potential = 10.578
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.815 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.016
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.039 1.082 pair type: 1
-chimesFF: 	...Penalty potential = 7.755
+chimesFF: 	...Penalty potential = 7.745
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.008
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.048 1.082 pair type: 1
-chimesFF: 	...Penalty potential = 3.847
+chimesFF: 	...Penalty potential = 3.840
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820 pair type: 2
 chimesFF: 	...Penalty potential = 0.000
-chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.059 1.082 pair type: 1
-chimesFF: 	...Penalty potential = 1.141
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.060 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 1.137
 chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.071 1.082 pair type: 1
-chimesFF: 	...Penalty potential = 0.118
+chimesFF: 	...Penalty potential = 0.117
 Number of 3-body interactions = 32207
  Updating neighbor list on step: 289, with padding: 0.463
-     290     36.25       5.6006387     -55.5161679     -49.9155292          1898.9     16.50737349    -51.4499362
-     300     37.50       6.0656248     -56.0677926     -50.0021678          2056.5     17.10068864    -51.4509361
+     290     36.25       5.6012475     -55.5151610     -49.9139135          1898.9     16.51007289    -51.4499360
+     300     37.50       6.0661250     -56.0667460     -50.0006210          2056.5     17.10433295    -51.4509357
 END SIMULATION
-	Average temperature over run = 2029.3435 K
-	Average pressure    over run = 15.0861 GPa
+	Average temperature over run = 2029.3647 K
+	Average pressure    over run = 15.0863 GPa
+	Pressures from diagonal stress tensors over run: 15.0877
+	Average stress tensors over run: 
+		sigma_xx: 15.8596 GPa
+		sigma_yy: 14.4306 GPa
+		sigma_zz: 14.9728 GPa
+		sigma_xy: 0.7228 GPa
+		sigma_xz: 0.3849 GPa
+		sigma_yz: -0.5801 GPa

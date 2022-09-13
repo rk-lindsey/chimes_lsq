@@ -1,14 +1,14 @@
-! Date  2022-05-27
+('! Date ', datetime.date(2022, 8, 10))
 !
-! Number of variables            =  419
-! Number of equations            =  9506
+('! Number of variables            = ', 419)
+('! Number of equations            = ', 9506)
 ! DLARS code for LASSO used
 ! DLARS alpha = 1.0000e-04
 ! DLARS run: srun -N 1 -n 36 ../../contrib/dlars/src/dlars A.txt b.txt dim.txt --lambda=0.0001 --split_files --algorithm=lasso --normalize=y >& dlars.log
 
 ! RMS force error                =  6.6859e+00
 ! max abs variable               =  1.6944e+05
-! number of fitting vars         =  161
+('! number of fitting vars         = ', 161)
 ! Bayesian Information Criterion =  3.7598e+04
 !
 USECOUL: true
