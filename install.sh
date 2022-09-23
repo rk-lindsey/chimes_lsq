@@ -50,10 +50,10 @@ fi
 ICC=`which g++`
 
 if [[ "$hosttype" == "LLNL-LC" ]] ; then
-    ./modfiles/LLNL-LC.mod
+    source modfiles/LLNL-LC.mod
     ICC=`which icc`
 elif [[ "$hosttype" == "UM-ARC" ]] ; then
-    ./modfiles/UM-ARC.mod
+    source modfiles/UM-ARC.mod
     ICC=`which icc`
 fi
 
