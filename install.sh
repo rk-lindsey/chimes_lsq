@@ -37,9 +37,9 @@ fi
 lochost=`hostname`
 hosttype=""
 
-if [[ $string == *"arc-ts.umich.edu"* ]]; then
+if [[ $lochost == *"arc-ts.umich.edu"* ]]; then
     hosttype=UM-ARC
-elif [[ $string == *"arc-ts.umich.edu"* ]]; then
+elif [[ $lochost == *"arc-ts.umich.edu"* ]]; then
     hosttype=LLNL-LC
 fi
 
@@ -47,7 +47,7 @@ fi
 
 # Load module files and configure compilers
 
-ICC=`which g++`
+ICC=`which g++` # Default option in case impi unavailable
 
 if [[ "$hosttype" == "LLNL-LC" ]] ; then
     source modfiles/LLNL-LC.mod
