@@ -43,6 +43,8 @@ elif [[ $lochost == *"arc-ts.umich.edu"* ]]; then
     hosttype=LLNL-LC
 fi
 
+echo "Detected hosttype $hosttype"
+module list
 
 
 # Load module files and configure compilers
@@ -70,7 +72,13 @@ fi
 
 if [[ ! -z $hosttype ]] ; then
     cd contrib/dlars/src
-    make
+    
+    if [[ "$hosttype" == "LLNL-LC" ]] ; then
+        make
+    elif [[ "$hosttype" == "UM-ARC" ]] ; then
+        make CXX=mpiicpc
+    fi    
+
     cd - 1&>/dev/null
 fi
 
