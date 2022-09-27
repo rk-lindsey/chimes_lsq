@@ -43,10 +43,6 @@ elif [[ $lochost == *"arc-ts.umich.edu"* ]]; then
     hosttype=LLNL-LC
 fi
 
-echo "Detected hosttype $hosttype"
-module list
-
-
 # Load module files and configure compilers
 
 ICC=`which g++` # Default option in case impi unavailable
@@ -58,6 +54,9 @@ elif [[ "$hosttype" == "UM-ARC" ]] ; then
     source modfiles/UM-ARC.mod
     ICC=`which icc`
 fi
+
+echo "Detected hosttype $hosttype"
+module list
 
 MPI=`which mpicxx`
 
