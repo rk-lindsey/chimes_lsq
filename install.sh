@@ -41,6 +41,9 @@ if [[ $lochost == *"arc-ts.umich.edu"* ]]; then
     hosttype=UM-ARC
 elif [[ $lochost == *"quartz"* ]]; then
     hosttype=LLNL-LC
+else
+    echo "WARNING: Host type ($hosttype) unknown"
+    echo "Be sure to load modules/conifugre compilers by hand."
 fi
 
 # Load module files and configure compilers
