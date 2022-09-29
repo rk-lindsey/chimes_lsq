@@ -31,55 +31,74 @@ else
     fi
 fi
 
-# Determine computing environment
 
-echo "Are you on an Livermore Computing system ? (y/n)"
-read IS_LC
+# Determine computing environment and attempt to load module files automatically
 
+lochost=`hostname`
+hosttype=""
 
-# Setup compilers
+if [[ $lochost == *"arc-ts.umich.edu"* ]]; then
+    hosttype=UM-ARC
+elif [[ $lochost == *"arc-ts.umich.edu"* ]]; then
+    hosttype=LLNL-LC
+fi
 
-ICC=`which g++`
+# Load module files and configure compilers
 
-if [[ "$IS_LC" == "y" ]] ; then
-    module load cmake/3.21.1
-    module load intel/18.0.1
-    module load impi/2018.0
-    
+ICC=`which g++` # Default option in case impi unavailable
+
+if [[ "$hosttype" == "LLNL-LC" ]] ; then
+    source modfiles/LLNL-LC.mod
+    ICC=`which icc`
+elif [[ "$hosttype" == "UM-ARC" ]] ; then
+    source modfiles/UM-ARC.mod
     ICC=`which icc`
 fi
 
-MPI=`which mpicxx` # /usr/tce/packages/mvapich2/mvapich2-2.3-intel-18.0.1/bin/mpicxx
+echo "Detected hosttype $hosttype"
+module list
+
+MPI=`which mpicxx`
 
 
 # Grab and install dependencies
 
 if [[ ! -d imports ]] ; then
-    ./clone-all.sh 1 $IS_LC
+    ./clone-all.sh
 fi
 
-# Compile dlars
+# Compile dlars if mpi compilers are available on a HPC platform
 
-if [[ "$IS_LC" == "y" ]] ; then
+if [[ ! -z $hosttype ]] ; then
     cd contrib/dlars/src
-    make
+    
+    if [[ "$hosttype" == "LLNL-LC" ]] ; then
+        make
+    elif [[ "$hosttype" == "UM-ARC" ]] ; then
+        make CXX=mpiicpc
+    fi    
+
     cd - 1&>/dev/null
 fi
 
 # Compile molanal
 
+
 cd contrib/molanal/src
 make molanal.new
-cd - 1&>/dev/null
+cd ../../..
+
 
 # Clean up previous installation,
 
 ./uninstall.sh $PREFX
 
+
 # Move into build directory
 
 mkdir build
 cd build
+
 
 # Generate cmake flags
 
