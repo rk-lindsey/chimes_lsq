@@ -39,7 +39,7 @@ hosttype=""
 
 if [[ $lochost == *"arc-ts.umich.edu"* ]]; then
     hosttype=UM-ARC
-elif [[ $lochost == *"arc-ts.umich.edu"* ]]; then
+elif [[ $lochost == *"quartz"* ]]; then
     hosttype=LLNL-LC
 fi
 
