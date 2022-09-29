@@ -37,17 +37,15 @@ fi
 lochost=`hostname`
 hosttype=""
 
-if [[ $string == *"arc-ts.umich.edu"* ]]; then
+if [[ $lochost == *"arc-ts.umich.edu"* ]]; then
     hosttype=UM-ARC
-elif [[ $string == *"arc-ts.umich.edu"* ]]; then
+elif [[ $lochost == *"arc-ts.umich.edu"* ]]; then
     hosttype=LLNL-LC
 fi
 
-
-
 # Load module files and configure compilers
 
-ICC=`which g++`
+ICC=`which g++` # Default option in case impi unavailable
 
 if [[ "$hosttype" == "LLNL-LC" ]] ; then
     source modfiles/LLNL-LC.mod
@@ -56,6 +54,9 @@ elif [[ "$hosttype" == "UM-ARC" ]] ; then
     source modfiles/UM-ARC.mod
     ICC=`which icc`
 fi
+
+echo "Detected hosttype $hosttype"
+module list
 
 MPI=`which mpicxx`
 
@@ -70,7 +71,13 @@ fi
 
 if [[ ! -z $hosttype ]] ; then
     cd contrib/dlars/src
-    make
+    
+    if [[ "$hosttype" == "LLNL-LC" ]] ; then
+        make
+    elif [[ "$hosttype" == "UM-ARC" ]] ; then
+        make CXX=mpiicpc
+    fi    
+
     cd - 1&>/dev/null
 fi
 
