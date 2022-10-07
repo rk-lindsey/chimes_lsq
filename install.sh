@@ -32,36 +32,42 @@ else
 fi
 
 
-# Determine computing environment and attempt to load module files automatically
 
-lochost=`hostname`
-hosttype=""
 
-if [[ $lochost == *"arc-ts.umich.edu"* ]]; then
-    hosttype=UM-ARC
-elif [[ $lochost == *"quartz"* ]]; then
-    hosttype=LLNL-LC
-else
-    echo "WARNING: Host type ($hosttype) unknown"
-    echo "Be sure to load modules/conifugre compilers by hand."
-fi
-
-# Load module files and configure compilers
+# Load module files  based on user-specified host-typeand configure compilers
 
 ICC=`which g++` # Default option in case impi unavailable
+MPI=`which mpicxx`
 
-if [[ "$hosttype" == "LLNL-LC" ]] ; then
+if [ ! -v hosttype ] ; then
+    echo "No hosttype specified"
+    echo "Be sure to load modules/configure compilers by hand before running this script!"
+elif [[ "$hosttype" == "LLNL-LC" ]] ; then
     source modfiles/LLNL-LC.mod
-    ICC=`which icc`
+    ICC=`which icc`    
+    MPI=`which mpicxx`    
 elif [[ "$hosttype" == "UM-ARC" ]] ; then
     source modfiles/UM-ARC.mod
+    ICC=`which icc`    
+    MPI=`which mpicxx`    
+elif [[ "$hosttype" == "JHU-ARCH" ]] ; then
+    source modfiles/JHU-ARCH.mod
     ICC=`which icc`
+    MPI=`which mpicxx`   
+else
+    echo ""
+    echo "ERROR: Unknown hosttype ($hosttype) specified"
+    echo ""
+    echo "Valid options are:"
+    for i in `ls modfiles`; do echo "   ${i%.mod}"; done
+    echo ""
+    echo "Please run again with: export hosttype=<host type>; ./install.sh"
+    echo "Or manually load modules and run with: ./install.sh"
+    exit 0
 fi
 
 echo "Detected hosttype $hosttype"
 module list
-
-MPI=`which mpicxx`
 
 
 # Grab and install dependencies
@@ -72,7 +78,7 @@ fi
 
 # Compile dlars if mpi compilers are available on a HPC platform
 
-if [[ ! -z $hosttype ]] ; then
+if [[ -v hosttype ]] ; then
     cd contrib/dlars/src
     
     if [[ "$hosttype" == "LLNL-LC" ]] ; then
@@ -80,12 +86,10 @@ if [[ ! -z $hosttype ]] ; then
     elif [[ "$hosttype" == "UM-ARC" ]] ; then
         make CXX=mpiicpc
     fi    
-
-    cd - 1&>/dev/null
+    cd - 2>&1> /dev/null
 fi
 
 # Compile molanal
-
 
 cd contrib/molanal/src
 make molanal.new
