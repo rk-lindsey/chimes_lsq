@@ -9,6 +9,7 @@ read IS_LC
 # Setup MKL
 
 if [[ "$IS_LC" == "y" ]] ; then
+	source ../modfiles/LLNL-LC.mod
 	module load mkl
 fi
 
