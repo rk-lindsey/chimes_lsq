@@ -6,7 +6,7 @@ F90=gfortran
 all : molanal.new gr_calc pad
 
 molanal.new : molanal.new.c
-	gcc -O3 -Wall -Wextra -DOPENMP -fopenmp molanal.new.c -lm -o molanal.new
+	gcc -O3 -w -Wall -Wextra -DOPENMP -fopenmp molanal.new.c -lm -o molanal.new
 #	gcc -g -Wall -Wextra molanal.new.c -lm -o molanal.new
 
 gr_calc : gr_calc.f90

@@ -12,7 +12,7 @@ if [ ! -d chimes_calculator ] ; then
     cd chimes_calculator
     git checkout main
     ./install.sh 
-    cd - 1&>/dev/null
+    cd - 2>&1> /dev/null
     
     if [ $? -ne 0 ] ; then
         echo 'git clone failed'
