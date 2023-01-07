@@ -379,6 +379,10 @@ def main():
     ATOM_PAIRS_LINE  = ATOM_TYPES_LINE+2+TOTAL_ATOM_TYPES+2
     TOTAL_PAIRS      = hf[ATOM_PAIRS_LINE].split()
     TOTAL_PAIRS      = int(TOTAL_PAIRS[2])
+    
+    # Remove excluded 2b interactions from accounting
+    
+    TOTAL_PAIRS -= len(EXCL_2B) 
 
     A1 = ""
     A2 = ""
