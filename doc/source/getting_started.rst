@@ -14,12 +14,10 @@ Getting Started
 Obtaining the code (Non-LLNL Users):
 ****************************************
 
-Note that ``chimes_lsq`` is stored in a github repository. For the latest UM-maintained version
-
 The ``chimes_lsq`` code is stored in two separate GitHub repositories, one maintined by the Lindsey Lab at UM, and the other maintained by collaborators at LLNL. The repository links are given below:
 
-* `UM-maintained   <https://github.com/LindseyLab-umich/chimes_lsq-LLfork>`_.
-* `LLNL-maintained <https://github.com/rk-lindsey/chimes_lsq>`_.
+* `UM-maintained   <https://github.com/LindseyLab-umich/chimes_lsq-LLfork>`_
+* `LLNL-maintained <https://github.com/rk-lindsey/chimes_lsq>`_
 
 To use these codes, we recommend the following procedure:
 
@@ -27,6 +25,7 @@ To use these codes, we recommend the following procedure:
 ^^^^^^^^^^^^^^^^^
 
 For each repository (e.g., chimes_lsq-myLLfork):
+
 * Click the repository name
 * At the top, next to the repository name, click the fork button
 * In the window that appears, select your github user name as the owner, and add "-fork" to the repository name
@@ -38,6 +37,7 @@ For each repository (e.g., chimes_lsq-myLLfork):
 * Execute mkdir -p ~/Codes in a terminal window
 * For each of your newly forked repositories, (e.g., chimes_lsq-myLLfork):
   * Go to the github website (e.g., https://github.com/RKLindsey/chimes_lsq-myLLfork)
+  
   * Click the green "Code" button
   * Copy the address starting with "git@github.com:"
   * Execute cd ~/Codes in a terminal window
