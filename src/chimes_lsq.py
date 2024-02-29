@@ -313,6 +313,8 @@ def main():
     hf = open(args.header ,"r").readlines()
     
     BREAK_COND = False
+    
+    EXCL_2B = []
 
     # Figure out whether we have triplets and/or quadruplets
     # Find the ATOM_TRIPS_LINE and ATOM_QUADS_LINE
@@ -326,6 +328,11 @@ def main():
     for i in range(0, len(hf)):
         print (hf[i].rstrip('\n'))
         TEMP = hf[i].split()
+        
+        if "EXCL_2B" in hf[i]:
+            line = line.split()
+            EXCL_2B = line[1:]
+
         if len(TEMP)>3:
             if (TEMP[2] == "TRIPLETS:"):
                 TOTAL_TRIPS = TEMP[3]
