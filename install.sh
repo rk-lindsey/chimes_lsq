@@ -19,6 +19,10 @@ DOMPI=${4-1}  # Compile with MPI support by default
 
 
 echo "Attempting to perform a fresh install"
+
+./uninstall.sh
+
+
 echo "Imports directory will be deleted and re-cloned/installed. Proceed? (y/n)"
 read PROCEED
 if [[ "$PROCEED" == "n" ]] ; then
