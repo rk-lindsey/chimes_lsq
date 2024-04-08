@@ -64,7 +64,7 @@ export OMP_NUM_THREADS=$NUM_THREADS
 
 
 # Common function for test script initialization.
-source ../src/bash/init_vars-new.sh
+source ../src/bash/init_vars.sh
 DLARS_PATH=../contrib/dlars/src
 
 init_test_vars

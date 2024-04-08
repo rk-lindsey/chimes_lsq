@@ -64,7 +64,7 @@ export OMP_NUM_THREADS=$NUM_THREADS
 ###############################################################
 
 # Common function for test script initialization.
-source ../src/bash/init_vars-new.sh
+source ../src/bash/init_vars.sh
 init_test_vars
 echo "NP = $NP"
 
