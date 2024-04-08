@@ -90,6 +90,8 @@ if [[ -v hosttype ]] ; then
         make
     elif [[ "$hosttype" == "UM-ARC" ]] ; then
         make CXX=mpiicpc
+    elif [[ "$hosttype" == "UT-TACC" ]] ; then
+        make
     fi    
     cd - 2>&1> /dev/null
 fi
