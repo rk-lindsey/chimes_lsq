@@ -39,6 +39,7 @@ def main():
     parser.add_argument("--header",               type=str,      default='params.header', help='parameter file header')
     parser.add_argument("--map",                  type=str,      default='ff_groups.map', help='parameter file map')
     parser.add_argument("--nodes",                type=int,      default=1,               help='DLARS number of nodes')
+    parser.add_argument("--mpistyle",             type=str,      default="srun",          help='Command used to run an MPI job, e.g. srun, ibrun, mpriun, etc')
     parser.add_argument("--normalize",            type=str2bool, default=False,           help='Normalize DLARS calculation')
     parser.add_argument("--read_output",          type=str2bool, default=False,           help='Read output from previous DLARS run')
     parser.add_argument("--restart_dlasso_dlars", type=str,      default="",              help='Determines whether dlasso or dlars job will be restarted. Argument is the restart file name ')
@@ -264,7 +265,7 @@ def main():
         
         # Make the DLARS or DLASSO call
 
-        x,y = fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_files, args.algorithm, args.read_output, args.weights, args.normalize, args.A , args.b ,args.restart_dlasso_dlars)
+        x,y = fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_files, args.algorithm, args.read_output, args.weights, args.normalize, args.A , args.b ,args.restart_dlasso_dlars, args.mpistyle)
         np = count_nonzero_vars(x)
         nvars = np
         
@@ -669,7 +670,7 @@ def count_nonzero_vars(x):
 #############################################
 #############################################
 
-def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, read_output, weights, normalize, A , b, restart_dlasso_dlars):
+def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, read_output, weights, normalize, A , b, restart_dlasso_dlars, mpistyle):
 
     # Use the Distributed LARS/LASSO fitting algorithm.  Returns both the solution x and
     # the estimated force vector A * x, which is read from Ax.txt.    
@@ -694,8 +695,15 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
         
         if os.path.exists(dlars_file):
 	
-            exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " " + dlars_file
+            exepath = ""
 
+            if mpistyle == "srun": 
+                exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " " + dlars_file
+            elif mpistyle == "ibrun":
+                exepath = "ibrun" + " " + dlars_file  
+            else:
+                print("Unrecognized mpistyle:",args.mpistyle,". Recognized options are srun or ibrun")
+           
             command = None
 
             command = exepath + " " + A  + " " + b + " dim.txt --lambda=" + str(alpha)
@@ -731,7 +739,7 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
                 print(command + " failed")
                 sys.exit(1)
         else:
-            print (exepath + " does not exist")
+            print (dlars_file + " does not exist")
             sys.exit(1)
     else:
         print ("! Reading output from prior DLARS calculation")

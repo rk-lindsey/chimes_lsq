@@ -2,6 +2,13 @@
 NP=36
 NODES=1
 RUN_JOB=srun -n $(NP) -N $(NODES)
+
+LSQPYFLAGS=--mpistyle=srun
+ifeq ($(hosttype),UT-TACC)
+        RUN_JOB=ibrun
+        LSQPYFLAGS=--mpistyle=ibrun
+endif
+
 PYTHON=python # /usr/tce/bin/python
 COMPARE=perl ../../contrib/compare/compare.pl
 DLARS_PATH=../../../contrib/dlars/src/
@@ -21,7 +28,7 @@ generate: all
 	cp current_output/b-labeled.txt correct_output/
 
 params.dlars.txt:
-	cd current_output ; $(PYTHON) ../../../src/chimes_lsq.py --algorithm=dlars --dlasso_dlars_path=${DLARS_PATH} --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false > params.dlars.txt
+	cd current_output ; $(PYTHON) ../../../src/chimes_lsq.py --algorithm=dlars --dlasso_dlars_path=${DLARS_PATH} --alpha=1.0e-04 --cores=$(NP) --nodes=$(NODES) --split_files=true --normalize=false $(LSQPYFLAGS) > params.dlars.txt
 	-$(COMPARE) current_output/params.dlars.txt correct_output/params.dlars.txt
 
 clean:
