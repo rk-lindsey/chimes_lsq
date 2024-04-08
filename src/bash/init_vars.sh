@@ -6,14 +6,9 @@ function init_test_vars
     TESTSU_BASE=`pwd -P` #`dirname $0`
 
     SOURCE_BASE="${TESTSU_BASE}/../src/"
-    # Intel parallel python - supports thread parallelism.
-    #PYTHON=/collab/usr/global/tools/intel/chaos_5_x86_64_ib/python-2.7.10/bin/python
-    # Default python
 
     PYTHON=python3 #/usr/tce/bin/python
-    # Run the job with the new version of the python code (Compatible with non-generalized md code)
-    #
-
+ 
     PATH_TO_LSQ_PY_CODE="${SOURCE_BASE}/chimes_lsq.py" # Path to the python code.
 
     # SVD regularization factor.
@@ -89,31 +84,46 @@ function init_test_vars
                 stress-and-ener-2b1
                 stress-and-ener-4b
                 stress-and-ener-4b2'
-
-	 if [ "$SYS_TYPE" == "chaos_5_x86_64_ib" ] ; then
-	     source /usr/local/tools/dotkit/init.sh
-	     use ic-17.0.174
-	     use mvapich2-intel-2.2
-	     NP=24
-	     RUN_JOB="srun -n $NP"
-	 elif [ "$SYS_TYPE" == "toss_3_x86_64_ib" ] ; then
-	     module load cmake/3.14.5
-	     module load impi/2018.0
-	     module load intel/18.0.1
-	     module load python/2.7.16
-	     NP=36
-	     RUN_JOB="srun -n $NP"
-	 elif [ "$SYS_TYPE" == "toss_3_x86_64" ] ; then
-	     module load cmake/3.14.5	     
-	     module load impi/2018.0
-	     module load intel/18.0.1
-	     module load python/2.7.16		  
-	     NP=36
-	     RUN_JOB="srun -n $NP"
-	 else
+	 
+	 NP=36
+	 RUN_JOB="srun -n $NP"
+	 
+	 if [ ! -v hosttype ] ; then
+	     echo "No hosttype specified"
+	     echo "Be sure to load modules/configure compilers by hand before running this script!"
 	     NP=1
 	     RUN_JOB=""
+	 elif [[ "$hosttype" == "LLNL-LC" ]] ; then
+	     source ${TESTSU_BASE}/../modfiles/LLNL-LC.mod
+	     ICC=`which icc`	
+	     MPI=`which mpicxx`    
+	 elif [[ "$hosttype" == "UM-ARC" ]] ; then
+	     source ${TESTSU_BASE}/../modfiles/UM-ARC.mod
+	     ICC=`which icc`	
+	     MPI=`which mpicxx`    
+	 elif [[ "$hosttype" == "JHU-ARCH" ]] ; then
+	     source ${TESTSU_BASE}/../modfiles/JHU-ARCH.mod
+	     ICC=`which icc`
+	     MPI=`which mpicxx`   
+	 elif [[ "$hosttype" == "UT-TACC" ]] ; then
+	     source ${TESTSU_BASE}/../modfiles/UT-TACC.mod
+	     RUN_JOB="ibrun"
+
+	 else
+	     echo ""
+	     echo "ERROR: Unknown hosttype ($hosttype) specified"
+	     echo ""
+	     echo "Valid options are:"
+	     for i in `ls modfiles`; do echo "   ${i%.mod}"; done
+	     echo ""
+	     echo "Please run again with: export hosttype=<host type>; ./install.sh"
+	     echo "Or manually load modules and run with: ./install.sh"
+	     NP=1
+	     RUN_JOB=""
+	     exit 0
 	 fi
+
+	 
 	 # Number of threads for SVD decomposition
 	 NUM_THREADS=$NP
 	 export OMP_NUM_THREADS=$NUM_THREADS	

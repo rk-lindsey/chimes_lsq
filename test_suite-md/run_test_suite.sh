@@ -1,17 +1,60 @@
 #!/bin/bash
 
-# Determine computing environment
 
-echo "Are you on a Livermore Computing system? (y/n)"
-read IS_LC
+#######
+#
+# Determine which system you're running on and load the necessary modules.
+# If a modfile is found, assume it is an HPC system with 36 procs. Otherwise, assume serial
+#
+######
 
+NP=36
+TESTSU_BASE=`pwd -P` #`dirname $0`
+SOURCE_BASE="${TESTSU_BASE}/../build/"
 
-# Setup MKL
+RUN_JOB="srun -n $NP"
 
-if [[ "$IS_LC" == "y" ]] ; then
-	source ../modfiles/LLNL-LC.mod
-	module load mkl
+if [ ! -v hosttype ] ; then
+    echo "No hosttype specified"
+    echo "Be sure to load modules/configure compilers by hand before running this script."
+    echo "Otherwise, run with export hosttype=<host type>; ./this_script.sh"
+    NP=1
+    RUN_JOB=""
+elif [[ "$hosttype" == "LLNL-LC" ]] ; then
+    source ${TESTSU_BASE}/../modfiles/LLNL-LC.mod
+    ICC=`which icc`    
+    MPI=`which mpicxx`    
+elif [[ "$hosttype" == "UM-ARC" ]] ; then
+    source ${TESTSU_BASE}/../modfiles/UM-ARC.mod
+    ICC=`which icc`    
+    MPI=`which mpicxx`    
+elif [[ "$hosttype" == "JHU-ARCH" ]] ; then
+    source ${TESTSU_BASE}/../modfiles/JHU-ARCH.mod
+    ICC=`which icc`
+    MPI=`which mpicxx`   
+elif [[ "$hosttype" == "UT-TACC" ]] ; then
+    source ${TESTSU_BASE}/../modfiles/UT-TACC.mod
+    RUN_JOB="ibrun"
+else
+    echo ""
+    echo "ERROR: Unknown hosttype ($hosttype) specified"
+    echo ""
+    echo "Valid options are:"
+    for i in `ls modfiles`; do echo "	${i%.mod}"; done
+    echo ""
+    echo "Please run again with: export hosttype=<host type>; ./install.sh"
+    echo "Or manually load modules and run with: ./this_script.sh"
+    exit 0
 fi
+
+NUM_THREADS=$NP		# Number of threads for SVD decomposition
+export OMP_NUM_THREADS=$NUM_THREADS    
+
+
+
+
+
+
 
 
 ###############################################################
@@ -21,21 +64,19 @@ fi
 ###############################################################
 
 # Common function for test script initialization.
-source ../src/bash/init_vars.sh
+source ../src/bash/init_vars-new.sh
 init_test_vars
 echo "NP = $NP"
 
 cd ..
 
 SOURCE_BASE="${TESTSU_BASE}/../build/"
-#if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
-    if ./install.sh  ; then
-	echo "Compiling chimes_md succeeded"
-    else
-	echo "Compiling chimes_md failed"
-	exit 1
-    fi
-#fi    
+if ./install.sh  ; then
+    echo "Compiling chimes_md succeeded"
+else
+    echo "Compiling chimes_md failed"
+    exit 1
+fi   
 
 cd -
 
@@ -86,7 +127,7 @@ do
 	
 	cd $i/current_output
 
-	if $RUN_JOB ../../../build/chimes_md run_md.in > run_md.out ; then
+	if $RUN_JOB ../../../build/chimes_md run_md.in  | awk '!/TACC:/{print}' > run_md.out ; then
 	    # Having trouble with files not updating on NFS before comparison.
 	    # Will try sleeping and syncronizing files.
 	    sleep 10
@@ -171,7 +212,7 @@ if [ -n "$LSQ_FORCE_JOBS" ] ; then
 		  cp ../../test_suite-lsq/$i/current_output/ff_groups.map . 
 		  cp ../../test_suite-lsq/$i/current_output/force.txt     .
 
-		  if ../../build/chimes_md run_md.in > run_md.out ; then
+		  if ../../build/chimes_md run_md.in | awk '!/TACC:/{print}'  > run_md.out ; then
 				SUCCESS=1
 		  else
 				echo "Chimes_MD failed"

@@ -22,7 +22,6 @@ echo "Attempting to perform a fresh install"
 
 ./uninstall.sh
 
-
 echo "Imports directory will be deleted and re-cloned/installed. Proceed? (y/n)"
 read PROCEED
 if [[ "$PROCEED" == "n" ]] ; then
@@ -58,6 +57,8 @@ elif [[ "$hosttype" == "JHU-ARCH" ]] ; then
     source modfiles/JHU-ARCH.mod
     ICC=`which icc`
     MPI=`which mpicxx`   
+elif [[ "$hosttype" == "UT-TACC" ]] ; then
+    source modfiles/UT-TACC.mod
 else
     echo ""
     echo "ERROR: Unknown hosttype ($hosttype) specified"

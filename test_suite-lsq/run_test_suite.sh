@@ -4,6 +4,58 @@
 #         'lsq-jobs' is a list of lsq tests that are run by the script.  This argument may be an empty string.
 #         'make-jobs' is a list of lsq tests that are run by makefiles.  This argument may be an empty string.
 #
+
+#######
+#
+# Determine which system you're running on and load the necessary modules.
+# If a modfile is found, assume it is an HPC system with 36 procs. Otherwise, assume serial
+#
+######
+
+NP=36
+TESTSU_BASE=`pwd -P` #`dirname $0`
+SOURCE_BASE="${TESTSU_BASE}/../build/"
+
+RUN_JOB="srun -n $NP"
+
+if [ ! -v hosttype ] ; then
+    echo "No hosttype specified"
+    echo "Be sure to load modules/configure compilers by hand before running this script."
+    echo "Otherwise, run with export hosttype=<host type>; ./this_script.sh"
+    NP=1
+    RUN_JOB=""
+elif [[ "$hosttype" == "LLNL-LC" ]] ; then
+    source ${TESTSU_BASE}/../modfiles/LLNL-LC.mod
+    ICC=`which icc`    
+    MPI=`which mpicxx`    
+elif [[ "$hosttype" == "UM-ARC" ]] ; then
+    source ${TESTSU_BASE}/../modfiles/UM-ARC.mod
+    ICC=`which icc`    
+    MPI=`which mpicxx`    
+elif [[ "$hosttype" == "JHU-ARCH" ]] ; then
+    source ${TESTSU_BASE}/../modfiles/JHU-ARCH.mod
+    ICC=`which icc`
+    MPI=`which mpicxx`   
+elif [[ "$hosttype" == "UT-TACC" ]] ; then
+    source ${TESTSU_BASE}/../modfiles/UT-TACC.mod
+    RUN_JOB="ibrun" 
+else
+    echo ""
+    echo "ERROR: Unknown hosttype ($hosttype) specified"
+    echo ""
+    echo "Valid options are:"
+    for i in `ls modfiles`; do echo "	${i%.mod}"; done
+    echo ""
+    echo "Please run again with: export hosttype=<host type>; ./install.sh"
+    echo "Or manually load modules and run with: ./this_script.sh"
+    exit 0
+fi
+
+NUM_THREADS=$NP		# Number of threads for SVD decomposition
+export OMP_NUM_THREADS=$NUM_THREADS    
+
+
+
 ###############################################################
 #
 # Determine the location of necessary files
@@ -12,7 +64,7 @@
 
 
 # Common function for test script initialization.
-source ../src/bash/init_vars.sh
+source ../src/bash/init_vars-new.sh
 DLARS_PATH=../contrib/dlars/src
 
 init_test_vars
@@ -22,33 +74,22 @@ if [ $# -eq 0 ]
 then
 	 JOBS=$LSQ_ALL_JOBS
 	 MAKE_JOBS=$LSQ_MAKE_JOBS
-
 else
 	 JOBS=$1
 	 MAKE_JOBS=$2
 fi
 
 
-# Determine computing environment
+# Ensure MKL is available for DLARS
 
-echo "Are you on a Livermore Computing system? (y/n)"
-read IS_LC
-
-
-# Setup MKL
-
-if [[ "$IS_LC" == "y" ]] ; then
-	source ../modfiles/LLNL-LC.mod
-	module load mkl
-else
+if [ ! -v hosttype ] ; then
 	echo "Will not run make jobs: "
 	echo "Automated DLARS compilation currently requires access to "
 	echo "a Livermore Computing system"
 	MAKE_JOBS=""
 fi
 
-TESTSU_BASE=`pwd -P` #`dirname $0`
-SOURCE_BASE="${TESTSU_BASE}/../build/"
+
 
 ###############################################################
 #
@@ -58,15 +99,12 @@ SOURCE_BASE="${TESTSU_BASE}/../build/"
 
 cd ..
 
-#if [ ! -f $SOURCE_BASE/chimes_lsq ] ; then
- 
-    if ./install.sh  ; then
-	echo "Compiling chimes_lsq succeeded"
-    else
-	echo "Compiling chimes_lsq failed"
-	exit 1
-    fi
-#fi
+if ./install.sh  ; then
+    echo "Compiling chimes_lsq succeeded"
+else
+    echo "Compiling chimes_lsq failed"
+    exit 1
+fi
 
 cd -
 
@@ -110,7 +148,7 @@ do
 		 SUCCESS=0
 	     fi
 	else
-	    if $RUN_JOB ../../../build/chimes_lsq fm_setup.in > fm_setup.out ; then
+	    if $RUN_JOB ../../../build/chimes_lsq fm_setup.in  | awk '!/TACC:/{print}' > fm_setup.out ; then
 		echo 'Chimes_lsq succeeded'
 		SUCCESS=1
 	    else
