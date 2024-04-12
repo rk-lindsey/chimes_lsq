@@ -1,5 +1,8 @@
 #! /bin/bash
 # Usage:  With no arguments, all tests are run.  Otherwise, only tests specified on the command line are run.
+#  
+# Before running, be sure to export hosttype=<your machine's modfile>
+# Take a look in ./modfiles to see your options. Otherwise, your machine's default modfiles will be used.
 #         run_test_suite.sh 'lsq-jobs' 'make-jobs'
 #         'lsq-jobs' is a list of lsq tests that are run by the script.  This argument may be an empty string.
 #         'make-jobs' is a list of lsq tests that are run by makefiles.  This argument may be an empty string.

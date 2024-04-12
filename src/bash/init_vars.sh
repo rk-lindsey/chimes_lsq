@@ -39,8 +39,8 @@ function init_test_vars
 		  nonorth2'
 
 
-    LSQ_MAKE_JOBS='lsq2
-                   tatb'
+    LSQ_MAKE_JOBS='lsq2'
+                   #tatb' -- this test never worked
 
 	MD_JOBS='carbon-penalty
 		 h2o-2bcheby
