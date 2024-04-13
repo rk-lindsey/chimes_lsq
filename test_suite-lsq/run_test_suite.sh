@@ -166,6 +166,8 @@ do
 	cd ..
 	if [[ $SUCCESS -eq 1 ]] ; then
 	
+		sleep 5
+	
 		 # First, we need to reconstruct the A.txt file in correct output
 		 
 		 cat correct_output/A.txt.* > correct_output/A.txt
