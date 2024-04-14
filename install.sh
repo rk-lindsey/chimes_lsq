@@ -19,6 +19,9 @@ DOMPI=${4-1}  # Compile with MPI support by default
 
 
 echo "Attempting to perform a fresh install"
+
+./uninstall.sh
+
 echo "Imports directory will be deleted and re-cloned/installed. Proceed? (y/n)"
 read PROCEED
 if [[ "$PROCEED" == "n" ]] ; then
@@ -54,6 +57,8 @@ elif [[ "$hosttype" == "JHU-ARCH" ]] ; then
     source modfiles/JHU-ARCH.mod
     ICC=`which icc`
     MPI=`which mpicxx`   
+elif [[ "$hosttype" == "UT-TACC" ]] ; then
+    source modfiles/UT-TACC.mod
 else
     echo ""
     echo "ERROR: Unknown hosttype ($hosttype) specified"
@@ -85,6 +90,8 @@ if [[ -v hosttype ]] ; then
         make
     elif [[ "$hosttype" == "UM-ARC" ]] ; then
         make CXX=mpiicpc
+    elif [[ "$hosttype" == "UT-TACC" ]] ; then
+        make
     fi    
     cd - 2>&1> /dev/null
 fi

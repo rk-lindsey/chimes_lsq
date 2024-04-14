@@ -413,8 +413,12 @@ else
 
 	print_bond_stats(ATOM_PAIRS, TRIPS, QUADS, CONTROLS.USE_3B_CHEBY, CONTROLS.USE_4B_CHEBY);
 
-	  
+#ifdef USE_MPI
+MPI_Finalize();
+#endif	  
 	return 0;		  
+	
+
 }
 
 
