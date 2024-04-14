@@ -13,7 +13,7 @@
 # Common function for test script initialization.
 source ../src/bash/init_vars.sh
 init_test_vars
-echo "Number of processors (unless you really know what you're doing, set to 23) = $NP"
+echo "Number of processors (unless you really know what you're doing, set to 36) = $NP"
 echo "Warning: this script will overwrite all reference test output."
 echo "Continue ? (yes/no)"
 
