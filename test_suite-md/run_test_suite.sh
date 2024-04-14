@@ -127,7 +127,7 @@ do
 	
 	cd $i/current_output
 
-	if $RUN_JOB ../../../build/chimes_md run_md.in  | awk '!/TACC:/{print}' > run_md.out ; then
+	if $RUN_JOB ../../../build/chimes_md run_md.in   > run_md.out ; then
 	    # Having trouble with files not updating on NFS before comparison.
 	    # Will try sleeping and syncronizing files.
 	    sleep 10
