@@ -1,0 +1,2121 @@
+Code compiled in MPI mode. Will run on 36 processor(s).
+
+Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: false
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 300
+	# NLAYERS #: 1
+	# USENEIG #: true
+	# PRMFILE #: params.txt
+	# SERIAL_CHIMES #: TRUE
+	# CRDFILE #: input.xyz
+	# VELINIT #: READ ... reading velocities from coordinate file
+	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
+	# PRSCALC #: ANALYTICAL
+	# WRPCRDS #: false
+	# ATMENER #: true
+		... All reported energies include single atom contributions if available
+	# FRQTRAJ #: 20
+		... printing every 2.5 fs, 
+		... printing       15 frames. 
+	# TRAJEXT #: GEN
+	# FRQENER #: 10
+	# PRNTFRC #: true
+		... and will be printed every 20 frames.
+		... printing every 2.5 fs, 
+		... printing 15 frames. 
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: true
+		... and will be printed every 20 frames.
+		... printing every 2.5 fs, 
+		... printing 15 frames. 
+	# FORDFTB #: false
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+     ...Read the following coordinate file extension: xyz
+     ...Read the following number of atoms: 96
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.6091309 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084115885312
+
+	...Reading velocities from last three fields of atom info lines in xyzf file... 
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.6091309 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084115885312
+
+   ...read complete for file input.xyz
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e): NEGATIVE, mass (amu):  15.9994
+		1     H , q (e): POSITIVE, mass (amu):   1.0079
+   ...read complete
+
+	Real atoms:                 96
+	Total atoms (ghost):        2592
+	cell vectors (a)            8.6091 0.0000 0.0000
+	cell vectors (b)            0.0000 8.6091 0.0000
+	cell vectors (c)            0.0000 0.0000 8.6091
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.8274 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.8274
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVT-MTK simulation.
+	...Setting thermostat time constant to: 10.0000
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
+	Total Mass     = 576.4864 au
+	Volume         = 638.0841 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      true
+		...Use fit charges?             true
+		...Use 3-body Cheby params?     true
+		...Use 4-body Cheby params?     false
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Read FF quadruplet specifications...
+	...Reading all remaining force field parameters...
+		Re-setting individual atom charges based on pair charges :
+      Total system charge = 0.0000
+      Charges modified for exact neutrality (e):
+       O -0.665463805
+       H 0.332731035
+
+     
+     Pair charges modified for exact neutrality:
+       OO 147.051785348
+       HH 36.762754564
+       OH -73.525700900
+Atom properties:
+		0     O , q (e): -0.665, mass (amu):  15.9994
+		1     H , q (e):  0.333, mass (amu):   1.0079
+	...Read 2-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+PAIR CHEBYSHEV PENALTY DIST: 0.1000
+PAIR CHEBYSHEV PENALTY SCALING: 100000.0000
+	Reading  4 pairs for mapping
+	........Reading pair: HH with mapped index: 1
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: OO with mapped index: 0
+	...Read FF pairmaps...
+
+	Reading  8 triplet for mapping
+	........Reading triplet: HHHHHH with mapped index: 3
+	........Reading triplet: HHOHOH with mapped index: 2
+	........Reading triplet: OHHHOH with mapped index: 2
+	........Reading triplet: OHOHHH with mapped index: 2
+	........Reading triplet: OHOHOO with mapped index: 1
+	........Reading triplet: OHOOOH with mapped index: 1
+	........Reading triplet: OOOHOH with mapped index: 1
+	........Reading triplet: OOOOOO with mapped index: 0
+	...Read FF triplet maps...
+   ...read complete.
+
+Notes on simulation: 
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Using the following fcut style for 3B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Ewald summations will be used and charges will be taken from fit values
+
+Will read serial chimes calculator file from params.txtchimesFF: 
+chimesFF: 01000011011010001001001010011010100010101010011 0100010101101110110011101101001011011101100101  
+chimesFF: 
+chimesFF:       _____  _      _____  __  __  ______   _____   ______                _                      
+chimesFF:      / ____|| |    |_   _||  \/  ||  ____| / ____| |  ____|              (_)                    
+chimesFF:     | |     | |__    | |  | \  / || |__   | (___   | |__    _ __    __ _  _  _ __    ___        
+chimesFF:     | |     | '_ \   | |  | |\/| ||  __|   \___ \  |  __|  | '_ \  / _` || || '_ \  / _ \ 
+chimesFF:     | |____ | | | | _| |_ | |  | || |____  ____) | | |____ | | | || (_| || || | | ||  __/        
+chimesFF:      \_____||_| |_||_____||_|  |_||______||_____/  |______||_| |_| \__, ||_||_| |_| \___|     
+chimesFF:                                                                     __/ |                        
+chimesFF:                                                                    |___/                         
+chimesFF: 
+chimesFF:                      Copyright (C) 2020 R.K. Lindsey, L.E. Fried, N. Goldman                     
+chimesFF: 
+chimesFF: 01000011011010001001001010011010100010101010011 0100010101101110110011101101001011011101100101   
+chimesFF: 
+chimesFF: Reading parameters from file: params.txt
+chimesFF: Using respective 2, 3, and 4-body orders of: 10 6 0
+chimesFF: Note: Ignoring polynomial domain; assuming [-1,1]
+chimesFF: Will consider 2 atom types:
+chimesFF: 	0 O
+chimesFF: 	1 H
+chimesFF: Will consider 3 atom pair types
+chimesFF: Detected version 2 pair specification (no S_DELTA)
+chimesFF: 	0 O O
+chimesFF: 	1 H H
+chimesFF: 	2 O H
+chimesFF: Read the following pair type information:
+chimesFF: 	O O r_cut_in: 1.93900 r_cut_out: 4.30000 MORSE 2.70000
+chimesFF: 	H H r_cut_in: 0.98200 r_cut_out: 4.10000 MORSE 1.60000
+chimesFF: 	O H r_cut_in: 0.72000 r_cut_out: 4.20000 MORSE 1.00000
+chimesFF: Will use cutoff style CUBIC
+chimesFF: Will use penalty distance: 0.10000
+chimesFF: Will use penalty scaling: 100000.00000
+chimesFF: Read 2B parameters for pair: 0 O O
+chimesFF: 	0 4.56671
+chimesFF: 	1 103.89904
+chimesFF: 	2 -108.48038
+chimesFF: 	3 94.55347
+chimesFF: 	4 -79.00964
+chimesFF: 	5 48.78377
+chimesFF: 	6 -28.79537
+chimesFF: 	7 14.71616
+chimesFF: 	8 -6.10972
+chimesFF: 	9 2.11124
+chimesFF: Read 2B parameters for pair: 1 H H
+chimesFF: 	0 50.56181
+chimesFF: 	1 -28.05939
+chimesFF: 	2 18.79461
+chimesFF: 	3 -36.73741
+chimesFF: 	4 -2.24826
+chimesFF: 	5 -21.60597
+chimesFF: 	6 -0.02624
+chimesFF: 	7 -5.16324
+chimesFF: 	8 0.33464
+chimesFF: 	9 -0.54040
+chimesFF: Read 2B parameters for pair: 2 O H
+chimesFF: 	0 -14.52843
+chimesFF: 	1 47.30455
+chimesFF: 	2 50.54267
+chimesFF: 	3 1.32459
+chimesFF: 	4 -2.07966
+chimesFF: 	5 -6.73203
+chimesFF: 	6 5.80975
+chimesFF: 	7 -2.70793
+chimesFF: 	8 0.31216
+chimesFF: 	9 0.09832
+chimesFF: Built the following 2-body pair "slow" map:
+chimesFF: 	1 HH(i: 0)
+chimesFF: 	2 HO(i: 1)
+chimesFF: 	2 OH(i: 2)
+chimesFF: 	0 OO(i: 3)
+chimesFF: Built the following 2-body pair "fast" map:
+chimesFF: 	OO: 0 0
+chimesFF: 	OH: 1 2
+chimesFF: 	HO: 2 2
+chimesFF: 	HH: 3 1
+chimesFF: Read 3B parameters for triplet: 0 O O O
+chimesFF: 	0 1 1 -71.65561
+chimesFF: 	1 0 1 -71.65561
+chimesFF: 	1 1 0 -71.65561
+chimesFF: 	0 1 2 163.84476
+chimesFF: 	1 0 2 163.84476
+chimesFF: 	0 2 1 163.84476
+chimesFF: 	2 0 1 163.84476
+chimesFF: 	1 2 0 163.84476
+chimesFF: 	2 1 0 163.84476
+chimesFF: 	0 1 3 254.09150
+chimesFF: 	1 0 3 254.09150
+chimesFF: 	0 3 1 254.09150
+chimesFF: 	3 0 1 254.09150
+chimesFF: 	1 3 0 254.09150
+chimesFF: 	3 1 0 254.09150
+chimesFF: 	0 1 4 70.92231
+chimesFF: 	1 0 4 70.92231
+chimesFF: 	0 4 1 70.92231
+chimesFF: 	4 0 1 70.92231
+chimesFF: 	1 4 0 70.92231
+chimesFF: 	4 1 0 70.92231
+chimesFF: 	0 1 5 -65.09472
+chimesFF: 	1 0 5 -65.09472
+chimesFF: 	0 5 1 -65.09472
+chimesFF: 	5 0 1 -65.09472
+chimesFF: 	1 5 0 -65.09472
+chimesFF: 	5 1 0 -65.09472
+chimesFF: 	0 2 2 -70.20567
+chimesFF: 	2 0 2 -70.20567
+chimesFF: 	2 2 0 -70.20567
+chimesFF: 	0 2 3 -323.86513
+chimesFF: 	2 0 3 -323.86513
+chimesFF: 	0 3 2 -323.86513
+chimesFF: 	3 0 2 -323.86513
+chimesFF: 	2 3 0 -323.86513
+chimesFF: 	3 2 0 -323.86513
+chimesFF: 	0 2 4 -125.01763
+chimesFF: 	2 0 4 -125.01763
+chimesFF: 	0 4 2 -125.01763
+chimesFF: 	4 0 2 -125.01763
+chimesFF: 	2 4 0 -125.01763
+chimesFF: 	4 2 0 -125.01763
+chimesFF: 	0 2 5 143.55030
+chimesFF: 	2 0 5 143.55030
+chimesFF: 	0 5 2 143.55030
+chimesFF: 	5 0 2 143.55030
+chimesFF: 	2 5 0 143.55030
+chimesFF: 	5 2 0 143.55030
+chimesFF: 	0 3 3 -217.68072
+chimesFF: 	3 0 3 -217.68072
+chimesFF: 	3 3 0 -217.68072
+chimesFF: 	0 3 4 -87.27359
+chimesFF: 	3 0 4 -87.27359
+chimesFF: 	0 4 3 -87.27359
+chimesFF: 	4 0 3 -87.27359
+chimesFF: 	3 4 0 -87.27359
+chimesFF: 	4 3 0 -87.27359
+chimesFF: 	0 3 5 62.95879
+chimesFF: 	3 0 5 62.95879
+chimesFF: 	0 5 3 62.95879
+chimesFF: 	5 0 3 62.95879
+chimesFF: 	3 5 0 62.95879
+chimesFF: 	5 3 0 62.95879
+chimesFF: 	0 4 4 5.91561
+chimesFF: 	4 0 4 5.91561
+chimesFF: 	4 4 0 5.91561
+chimesFF: 	0 4 5 -44.76348
+chimesFF: 	4 0 5 -44.76348
+chimesFF: 	0 5 4 -44.76348
+chimesFF: 	5 0 4 -44.76348
+chimesFF: 	4 5 0 -44.76348
+chimesFF: 	5 4 0 -44.76348
+chimesFF: 	0 5 5 68.74333
+chimesFF: 	5 0 5 68.74333
+chimesFF: 	5 5 0 68.74333
+chimesFF: 	1 1 1 -7.73064
+chimesFF: 	1 1 2 45.51834
+chimesFF: 	1 2 1 45.51834
+chimesFF: 	2 1 1 45.51834
+chimesFF: 	1 1 3 35.62659
+chimesFF: 	1 3 1 35.62659
+chimesFF: 	3 1 1 35.62659
+chimesFF: 	1 1 4 -5.05516
+chimesFF: 	1 4 1 -5.05516
+chimesFF: 	4 1 1 -5.05516
+chimesFF: 	1 1 5 5.30397
+chimesFF: 	1 5 1 5.30397
+chimesFF: 	5 1 1 5.30397
+chimesFF: 	1 2 2 -40.49036
+chimesFF: 	2 1 2 -40.49036
+chimesFF: 	2 2 1 -40.49036
+chimesFF: 	1 2 3 -169.58818
+chimesFF: 	2 1 3 -169.58818
+chimesFF: 	1 3 2 -169.58818
+chimesFF: 	3 1 2 -169.58818
+chimesFF: 	2 3 1 -169.58818
+chimesFF: 	3 2 1 -169.58818
+chimesFF: 	1 2 4 -64.12620
+chimesFF: 	2 1 4 -64.12620
+chimesFF: 	1 4 2 -64.12620
+chimesFF: 	4 1 2 -64.12620
+chimesFF: 	2 4 1 -64.12620
+chimesFF: 	4 2 1 -64.12620
+chimesFF: 	1 2 5 61.17862
+chimesFF: 	2 1 5 61.17862
+chimesFF: 	1 5 2 61.17862
+chimesFF: 	5 1 2 61.17862
+chimesFF: 	2 5 1 61.17862
+chimesFF: 	5 2 1 61.17862
+chimesFF: 	1 3 3 -49.17260
+chimesFF: 	3 1 3 -49.17260
+chimesFF: 	3 3 1 -49.17260
+chimesFF: 	1 3 4 44.05131
+chimesFF: 	3 1 4 44.05131
+chimesFF: 	1 4 3 44.05131
+chimesFF: 	4 1 3 44.05131
+chimesFF: 	3 4 1 44.05131
+chimesFF: 	4 3 1 44.05131
+chimesFF: 	1 3 5 -53.31348
+chimesFF: 	3 1 5 -53.31348
+chimesFF: 	1 5 3 -53.31348
+chimesFF: 	5 1 3 -53.31348
+chimesFF: 	3 5 1 -53.31348
+chimesFF: 	5 3 1 -53.31348
+chimesFF: 	1 4 4 34.09267
+chimesFF: 	4 1 4 34.09267
+chimesFF: 	4 4 1 34.09267
+chimesFF: 	1 4 5 -77.40547
+chimesFF: 	4 1 5 -77.40547
+chimesFF: 	1 5 4 -77.40547
+chimesFF: 	5 1 4 -77.40547
+chimesFF: 	4 5 1 -77.40547
+chimesFF: 	5 4 1 -77.40547
+chimesFF: 	1 5 5 57.09849
+chimesFF: 	5 1 5 57.09849
+chimesFF: 	5 5 1 57.09849
+chimesFF: 	2 2 2 11.93223
+chimesFF: 	2 2 3 80.92331
+chimesFF: 	2 3 2 80.92331
+chimesFF: 	3 2 2 80.92331
+chimesFF: 	2 2 4 31.02023
+chimesFF: 	2 4 2 31.02023
+chimesFF: 	4 2 2 31.02023
+chimesFF: 	2 2 5 -30.04882
+chimesFF: 	2 5 2 -30.04882
+chimesFF: 	5 2 2 -30.04882
+chimesFF: 	2 3 3 148.31358
+chimesFF: 	3 2 3 148.31358
+chimesFF: 	3 3 2 148.31358
+chimesFF: 	2 3 4 105.86960
+chimesFF: 	3 2 4 105.86960
+chimesFF: 	2 4 3 105.86960
+chimesFF: 	4 2 3 105.86960
+chimesFF: 	3 4 2 105.86960
+chimesFF: 	4 3 2 105.86960
+chimesFF: 	2 3 5 -54.00902
+chimesFF: 	3 2 5 -54.00902
+chimesFF: 	2 5 3 -54.00902
+chimesFF: 	5 2 3 -54.00902
+chimesFF: 	3 5 2 -54.00902
+chimesFF: 	5 3 2 -54.00902
+chimesFF: 	2 4 4 16.52189
+chimesFF: 	4 2 4 16.52189
+chimesFF: 	4 4 2 16.52189
+chimesFF: 	2 4 5 -33.22693
+chimesFF: 	4 2 5 -33.22693
+chimesFF: 	2 5 4 -33.22693
+chimesFF: 	5 2 4 -33.22693
+chimesFF: 	4 5 2 -33.22693
+chimesFF: 	5 4 2 -33.22693
+chimesFF: 	2 5 5 -68.04699
+chimesFF: 	5 2 5 -68.04699
+chimesFF: 	5 5 2 -68.04699
+chimesFF: 	3 3 3 14.54737
+chimesFF: 	3 3 4 -57.77863
+chimesFF: 	3 4 3 -57.77863
+chimesFF: 	4 3 3 -57.77863
+chimesFF: 	3 3 5 113.62379
+chimesFF: 	3 5 3 113.62379
+chimesFF: 	5 3 3 113.62379
+chimesFF: 	3 4 4 -74.72077
+chimesFF: 	4 3 4 -74.72077
+chimesFF: 	4 4 3 -74.72077
+chimesFF: 	3 4 5 132.24678
+chimesFF: 	4 3 5 132.24678
+chimesFF: 	3 5 4 132.24678
+chimesFF: 	5 3 4 132.24678
+chimesFF: 	4 5 3 132.24678
+chimesFF: 	5 4 3 132.24678
+chimesFF: 	3 5 5 -214.99016
+chimesFF: 	5 3 5 -214.99016
+chimesFF: 	5 5 3 -214.99016
+chimesFF: 	4 4 4 -19.48428
+chimesFF: 	4 4 5 68.34586
+chimesFF: 	4 5 4 68.34586
+chimesFF: 	5 4 4 68.34586
+chimesFF: 	4 5 5 -24.17171
+chimesFF: 	5 4 5 -24.17171
+chimesFF: 	5 5 4 -24.17171
+chimesFF: 	5 5 5 117.44876
+chimesFF: Read 3B parameters for triplet: 1 H O O
+chimesFF: 	0 1 1 58.40883
+chimesFF: 	1 0 1 58.40883
+chimesFF: 	0 1 2 49.29433
+chimesFF: 	1 0 2 49.29433
+chimesFF: 	0 1 3 4.16975
+chimesFF: 	1 0 3 4.16975
+chimesFF: 	0 1 4 49.27310
+chimesFF: 	1 0 4 49.27310
+chimesFF: 	0 1 5 -111.20251
+chimesFF: 	1 0 5 -111.20251
+chimesFF: 	0 2 1 -609.57408
+chimesFF: 	2 0 1 -609.57408
+chimesFF: 	0 2 2 -202.05447
+chimesFF: 	2 0 2 -202.05447
+chimesFF: 	0 2 3 258.44818
+chimesFF: 	2 0 3 258.44818
+chimesFF: 	0 2 4 -39.56852
+chimesFF: 	2 0 4 -39.56852
+chimesFF: 	0 2 5 31.93698
+chimesFF: 	2 0 5 31.93698
+chimesFF: 	0 3 1 187.02025
+chimesFF: 	3 0 1 187.02025
+chimesFF: 	0 3 2 -113.90263
+chimesFF: 	3 0 2 -113.90263
+chimesFF: 	0 3 3 -161.75162
+chimesFF: 	3 0 3 -161.75162
+chimesFF: 	0 3 4 -155.25720
+chimesFF: 	3 0 4 -155.25720
+chimesFF: 	0 3 5 49.81369
+chimesFF: 	3 0 5 49.81369
+chimesFF: 	0 4 1 92.37673
+chimesFF: 	4 0 1 92.37673
+chimesFF: 	0 4 2 -229.11919
+chimesFF: 	4 0 2 -229.11919
+chimesFF: 	0 4 3 14.96109
+chimesFF: 	4 0 3 14.96109
+chimesFF: 	0 4 4 -242.51001
+chimesFF: 	4 0 4 -242.51001
+chimesFF: 	0 4 5 50.89467
+chimesFF: 	4 0 5 50.89467
+chimesFF: 	0 5 1 91.66620
+chimesFF: 	5 0 1 91.66620
+chimesFF: 	0 5 2 -98.02498
+chimesFF: 	5 0 2 -98.02498
+chimesFF: 	0 5 3 -216.48093
+chimesFF: 	5 0 3 -216.48093
+chimesFF: 	0 5 4 -37.33978
+chimesFF: 	5 0 4 -37.33978
+chimesFF: 	0 5 5 -14.64552
+chimesFF: 	5 0 5 -14.64552
+chimesFF: 	1 1 0 101.46983
+chimesFF: 	1 1 1 3.85141
+chimesFF: 	1 1 2 -54.83616
+chimesFF: 	1 1 3 57.07871
+chimesFF: 	1 1 4 33.49464
+chimesFF: 	1 1 5 -46.58518
+chimesFF: 	1 2 0 -139.55096
+chimesFF: 	2 1 0 -139.55096
+chimesFF: 	1 2 1 -174.45779
+chimesFF: 	2 1 1 -174.45779
+chimesFF: 	1 2 2 -50.88278
+chimesFF: 	2 1 2 -50.88278
+chimesFF: 	1 2 3 137.19243
+chimesFF: 	2 1 3 137.19243
+chimesFF: 	1 2 4 28.48673
+chimesFF: 	2 1 4 28.48673
+chimesFF: 	1 2 5 43.17515
+chimesFF: 	2 1 5 43.17515
+chimesFF: 	1 3 0 -307.28363
+chimesFF: 	3 1 0 -307.28363
+chimesFF: 	1 3 1 15.28207
+chimesFF: 	3 1 1 15.28207
+chimesFF: 	1 3 2 145.78873
+chimesFF: 	3 1 2 145.78873
+chimesFF: 	1 3 3 -244.52203
+chimesFF: 	3 1 3 -244.52203
+chimesFF: 	1 3 4 -28.36178
+chimesFF: 	3 1 4 -28.36178
+chimesFF: 	1 3 5 160.31788
+chimesFF: 	3 1 5 160.31788
+chimesFF: 	1 4 0 -117.62401
+chimesFF: 	4 1 0 -117.62401
+chimesFF: 	1 4 1 86.51861
+chimesFF: 	4 1 1 86.51861
+chimesFF: 	1 4 2 186.80047
+chimesFF: 	4 1 2 186.80047
+chimesFF: 	1 4 3 -35.19597
+chimesFF: 	4 1 3 -35.19597
+chimesFF: 	1 4 4 57.33347
+chimesFF: 	4 1 4 57.33347
+chimesFF: 	1 4 5 201.88033
+chimesFF: 	4 1 5 201.88033
+chimesFF: 	1 5 0 198.75897
+chimesFF: 	5 1 0 198.75897
+chimesFF: 	1 5 1 42.25552
+chimesFF: 	5 1 1 42.25552
+chimesFF: 	1 5 2 -88.81184
+chimesFF: 	5 1 2 -88.81184
+chimesFF: 	1 5 3 -18.85896
+chimesFF: 	5 1 3 -18.85896
+chimesFF: 	1 5 4 -109.34156
+chimesFF: 	5 1 4 -109.34156
+chimesFF: 	1 5 5 -91.48877
+chimesFF: 	5 1 5 -91.48877
+chimesFF: 	2 2 0 125.68886
+chimesFF: 	2 2 1 142.89516
+chimesFF: 	2 2 2 65.29567
+chimesFF: 	2 2 3 17.08518
+chimesFF: 	2 2 4 253.74496
+chimesFF: 	2 2 5 57.99262
+chimesFF: 	2 3 0 41.80736
+chimesFF: 	3 2 0 41.80736
+chimesFF: 	2 3 1 121.32633
+chimesFF: 	3 2 1 121.32633
+chimesFF: 	2 3 2 38.93910
+chimesFF: 	3 2 2 38.93910
+chimesFF: 	2 3 3 -147.20840
+chimesFF: 	3 2 3 -147.20840
+chimesFF: 	2 3 4 -48.52895
+chimesFF: 	3 2 4 -48.52895
+chimesFF: 	2 3 5 -79.12345
+chimesFF: 	3 2 5 -79.12345
+chimesFF: 	2 4 0 175.74141
+chimesFF: 	4 2 0 175.74141
+chimesFF: 	2 4 1 2.26719
+chimesFF: 	4 2 1 2.26719
+chimesFF: 	2 4 2 -180.67889
+chimesFF: 	4 2 2 -180.67889
+chimesFF: 	2 4 3 -84.35201
+chimesFF: 	4 2 3 -84.35201
+chimesFF: 	2 4 4 -57.34240
+chimesFF: 	4 2 4 -57.34240
+chimesFF: 	2 4 5 -243.79775
+chimesFF: 	4 2 5 -243.79775
+chimesFF: 	2 5 0 56.04174
+chimesFF: 	5 2 0 56.04174
+chimesFF: 	2 5 1 -22.54531
+chimesFF: 	5 2 1 -22.54531
+chimesFF: 	2 5 2 -49.47712
+chimesFF: 	5 2 2 -49.47712
+chimesFF: 	2 5 3 0.20221
+chimesFF: 	5 2 3 0.20221
+chimesFF: 	2 5 4 -86.80261
+chimesFF: 	5 2 4 -86.80261
+chimesFF: 	2 5 5 74.56983
+chimesFF: 	5 2 5 74.56983
+chimesFF: 	3 3 0 39.68474
+chimesFF: 	3 3 1 -141.50178
+chimesFF: 	3 3 2 6.36578
+chimesFF: 	3 3 3 364.82947
+chimesFF: 	3 3 4 -103.23930
+chimesFF: 	3 3 5 0.12346
+chimesFF: 	3 4 0 -65.59589
+chimesFF: 	4 3 0 -65.59589
+chimesFF: 	3 4 1 -114.21784
+chimesFF: 	4 3 1 -114.21784
+chimesFF: 	3 4 2 -58.02651
+chimesFF: 	4 3 2 -58.02651
+chimesFF: 	3 4 3 86.36538
+chimesFF: 	4 3 3 86.36538
+chimesFF: 	3 4 4 60.83681
+chimesFF: 	4 3 4 60.83681
+chimesFF: 	3 4 5 -127.49658
+chimesFF: 	4 3 5 -127.49658
+chimesFF: 	3 5 0 -193.24437
+chimesFF: 	5 3 0 -193.24437
+chimesFF: 	3 5 1 163.23312
+chimesFF: 	5 3 1 163.23312
+chimesFF: 	3 5 2 132.87259
+chimesFF: 	5 3 2 132.87259
+chimesFF: 	3 5 3 -242.63346
+chimesFF: 	5 3 3 -242.63346
+chimesFF: 	3 5 4 277.33807
+chimesFF: 	5 3 4 277.33807
+chimesFF: 	3 5 5 -262.09917
+chimesFF: 	5 3 5 -262.09917
+chimesFF: 	4 4 0 32.23253
+chimesFF: 	4 4 1 211.37701
+chimesFF: 	4 4 2 185.39681
+chimesFF: 	4 4 3 -86.61802
+chimesFF: 	4 4 4 89.15039
+chimesFF: 	4 4 5 -206.98421
+chimesFF: 	4 5 0 -29.84720
+chimesFF: 	5 4 0 -29.84720
+chimesFF: 	4 5 1 -143.24287
+chimesFF: 	5 4 1 -143.24287
+chimesFF: 	4 5 2 -90.37544
+chimesFF: 	5 4 2 -90.37544
+chimesFF: 	4 5 3 163.34478
+chimesFF: 	5 4 3 163.34478
+chimesFF: 	4 5 4 -57.46087
+chimesFF: 	5 4 4 -57.46087
+chimesFF: 	4 5 5 8.68626
+chimesFF: 	5 4 5 8.68626
+chimesFF: 	5 5 0 148.47622
+chimesFF: 	5 5 1 -115.32790
+chimesFF: 	5 5 2 -84.03114
+chimesFF: 	5 5 3 243.84988
+chimesFF: 	5 5 4 -122.79740
+chimesFF: 	5 5 5 -5.87340
+chimesFF: Read 3B parameters for triplet: 2 H H O
+chimesFF: 	0 1 1 97.24087
+chimesFF: 	0 1 2 -229.05518
+chimesFF: 	0 2 1 -229.05518
+chimesFF: 	0 1 3 -7.58209
+chimesFF: 	0 3 1 -7.58209
+chimesFF: 	0 1 4 61.25783
+chimesFF: 	0 4 1 61.25783
+chimesFF: 	0 1 5 -23.85523
+chimesFF: 	0 5 1 -23.85523
+chimesFF: 	0 2 2 83.92657
+chimesFF: 	0 2 3 247.71310
+chimesFF: 	0 3 2 247.71310
+chimesFF: 	0 2 4 -28.47361
+chimesFF: 	0 4 2 -28.47361
+chimesFF: 	0 2 5 -2.14487
+chimesFF: 	0 5 2 -2.14487
+chimesFF: 	0 3 3 113.25939
+chimesFF: 	0 3 4 129.29645
+chimesFF: 	0 4 3 129.29645
+chimesFF: 	0 3 5 58.32272
+chimesFF: 	0 5 3 58.32272
+chimesFF: 	0 4 4 -21.89439
+chimesFF: 	0 4 5 161.53897
+chimesFF: 	0 5 4 161.53897
+chimesFF: 	0 5 5 -73.48993
+chimesFF: 	1 0 1 -87.28894
+chimesFF: 	1 1 0 -87.28894
+chimesFF: 	1 0 2 55.89909
+chimesFF: 	1 2 0 55.89909
+chimesFF: 	1 0 3 -158.94052
+chimesFF: 	1 3 0 -158.94052
+chimesFF: 	1 0 4 56.01124
+chimesFF: 	1 4 0 56.01124
+chimesFF: 	1 0 5 -228.23612
+chimesFF: 	1 5 0 -228.23612
+chimesFF: 	1 1 1 26.29263
+chimesFF: 	1 1 2 264.69609
+chimesFF: 	1 2 1 264.69609
+chimesFF: 	1 1 3 61.17521
+chimesFF: 	1 3 1 61.17521
+chimesFF: 	1 1 4 -220.89279
+chimesFF: 	1 4 1 -220.89279
+chimesFF: 	1 1 5 63.74111
+chimesFF: 	1 5 1 63.74111
+chimesFF: 	1 2 2 140.70480
+chimesFF: 	1 2 3 187.67124
+chimesFF: 	1 3 2 187.67124
+chimesFF: 	1 2 4 -129.11372
+chimesFF: 	1 4 2 -129.11372
+chimesFF: 	1 2 5 -57.19673
+chimesFF: 	1 5 2 -57.19673
+chimesFF: 	1 3 3 -85.84203
+chimesFF: 	1 3 4 44.38440
+chimesFF: 	1 4 3 44.38440
+chimesFF: 	1 3 5 -217.18420
+chimesFF: 	1 5 3 -217.18420
+chimesFF: 	1 4 4 -27.17703
+chimesFF: 	1 4 5 -309.03890
+chimesFF: 	1 5 4 -309.03890
+chimesFF: 	1 5 5 -155.21069
+chimesFF: 	2 0 1 -655.72470
+chimesFF: 	2 1 0 -655.72470
+chimesFF: 	2 0 2 337.00029
+chimesFF: 	2 2 0 337.00029
+chimesFF: 	2 0 3 89.91908
+chimesFF: 	2 3 0 89.91908
+chimesFF: 	2 0 4 218.65011
+chimesFF: 	2 4 0 218.65011
+chimesFF: 	2 0 5 -183.63757
+chimesFF: 	2 5 0 -183.63757
+chimesFF: 	2 1 1 -140.72222
+chimesFF: 	2 1 2 53.98781
+chimesFF: 	2 2 1 53.98781
+chimesFF: 	2 1 3 204.63171
+chimesFF: 	2 3 1 204.63171
+chimesFF: 	2 1 4 -115.32189
+chimesFF: 	2 4 1 -115.32189
+chimesFF: 	2 1 5 -131.13500
+chimesFF: 	2 5 1 -131.13500
+chimesFF: 	2 2 2 125.21269
+chimesFF: 	2 2 3 347.99852
+chimesFF: 	2 3 2 347.99852
+chimesFF: 	2 2 4 -27.78529
+chimesFF: 	2 4 2 -27.78529
+chimesFF: 	2 2 5 -185.99211
+chimesFF: 	2 5 2 -185.99211
+chimesFF: 	2 3 3 -95.67308
+chimesFF: 	2 3 4 -151.75610
+chimesFF: 	2 4 3 -151.75610
+chimesFF: 	2 3 5 6.97909
+chimesFF: 	2 5 3 6.97909
+chimesFF: 	2 4 4 -82.20582
+chimesFF: 	2 4 5 67.91574
+chimesFF: 	2 5 4 67.91574
+chimesFF: 	2 5 5 -179.83934
+chimesFF: 	3 0 1 310.43255
+chimesFF: 	3 1 0 310.43255
+chimesFF: 	3 0 2 -360.92136
+chimesFF: 	3 2 0 -360.92136
+chimesFF: 	3 0 3 -208.93430
+chimesFF: 	3 3 0 -208.93430
+chimesFF: 	3 0 4 -123.85104
+chimesFF: 	3 4 0 -123.85104
+chimesFF: 	3 0 5 30.31938
+chimesFF: 	3 5 0 30.31938
+chimesFF: 	3 1 1 -27.08402
+chimesFF: 	3 1 2 -434.33714
+chimesFF: 	3 2 1 -434.33714
+chimesFF: 	3 1 3 -134.44052
+chimesFF: 	3 3 1 -134.44052
+chimesFF: 	3 1 4 82.85787
+chimesFF: 	3 4 1 82.85787
+chimesFF: 	3 1 5 40.05490
+chimesFF: 	3 5 1 40.05490
+chimesFF: 	3 2 2 68.68000
+chimesFF: 	3 2 3 80.44477
+chimesFF: 	3 3 2 80.44477
+chimesFF: 	3 2 4 -8.46223
+chimesFF: 	3 4 2 -8.46223
+chimesFF: 	3 2 5 100.68133
+chimesFF: 	3 5 2 100.68133
+chimesFF: 	3 3 3 327.97869
+chimesFF: 	3 3 4 392.43098
+chimesFF: 	3 4 3 392.43098
+chimesFF: 	3 3 5 -51.30760
+chimesFF: 	3 5 3 -51.30760
+chimesFF: 	3 4 4 60.24901
+chimesFF: 	3 4 5 8.75278
+chimesFF: 	3 5 4 8.75278
+chimesFF: 	3 5 5 -62.67558
+chimesFF: 	4 0 1 -212.92785
+chimesFF: 	4 1 0 -212.92785
+chimesFF: 	4 0 2 267.89386
+chimesFF: 	4 2 0 267.89386
+chimesFF: 	4 0 3 136.04366
+chimesFF: 	4 3 0 136.04366
+chimesFF: 	4 0 4 74.34045
+chimesFF: 	4 4 0 74.34045
+chimesFF: 	4 0 5 -108.12197
+chimesFF: 	4 5 0 -108.12197
+chimesFF: 	4 1 1 108.55356
+chimesFF: 	4 1 2 320.97536
+chimesFF: 	4 2 1 320.97536
+chimesFF: 	4 1 3 94.17933
+chimesFF: 	4 3 1 94.17933
+chimesFF: 	4 1 4 -162.77783
+chimesFF: 	4 4 1 -162.77783
+chimesFF: 	4 1 5 -113.83895
+chimesFF: 	4 5 1 -113.83895
+chimesFF: 	4 2 2 27.59429
+chimesFF: 	4 2 3 93.44005
+chimesFF: 	4 3 2 93.44005
+chimesFF: 	4 2 4 -92.25910
+chimesFF: 	4 4 2 -92.25910
+chimesFF: 	4 2 5 -122.73346
+chimesFF: 	4 5 2 -122.73346
+chimesFF: 	4 3 3 -264.23438
+chimesFF: 	4 3 4 -224.13025
+chimesFF: 	4 4 3 -224.13025
+chimesFF: 	4 3 5 -67.99340
+chimesFF: 	4 5 3 -67.99340
+chimesFF: 	4 4 4 -71.91330
+chimesFF: 	4 4 5 -69.30446
+chimesFF: 	4 5 4 -69.30446
+chimesFF: 	4 5 5 -96.46873
+chimesFF: 	5 0 1 28.85186
+chimesFF: 	5 1 0 28.85186
+chimesFF: 	5 0 2 -140.75330
+chimesFF: 	5 2 0 -140.75330
+chimesFF: 	5 0 3 -58.97511
+chimesFF: 	5 3 0 -58.97511
+chimesFF: 	5 0 4 -1.85955
+chimesFF: 	5 4 0 -1.85955
+chimesFF: 	5 0 5 30.93436
+chimesFF: 	5 5 0 30.93436
+chimesFF: 	5 1 1 -168.94553
+chimesFF: 	5 1 2 -170.79542
+chimesFF: 	5 2 1 -170.79542
+chimesFF: 	5 1 3 75.66700
+chimesFF: 	5 3 1 75.66700
+chimesFF: 	5 1 4 59.14699
+chimesFF: 	5 4 1 59.14699
+chimesFF: 	5 1 5 -66.90122
+chimesFF: 	5 5 1 -66.90122
+chimesFF: 	5 2 2 63.78676
+chimesFF: 	5 2 3 44.88670
+chimesFF: 	5 3 2 44.88670
+chimesFF: 	5 2 4 28.22964
+chimesFF: 	5 4 2 28.22964
+chimesFF: 	5 2 5 41.06860
+chimesFF: 	5 5 2 41.06860
+chimesFF: 	5 3 3 207.31152
+chimesFF: 	5 3 4 119.42973
+chimesFF: 	5 4 3 119.42973
+chimesFF: 	5 3 5 -29.42963
+chimesFF: 	5 5 3 -29.42963
+chimesFF: 	5 4 4 26.20333
+chimesFF: 	5 4 5 30.42040
+chimesFF: 	5 5 4 30.42040
+chimesFF: 	5 5 5 -50.67757
+chimesFF: Read 3B parameters for triplet: 3 H H H
+chimesFF: 	0 1 1 -38.88988
+chimesFF: 	1 0 1 -38.88988
+chimesFF: 	1 1 0 -38.88988
+chimesFF: 	0 1 2 -21.72803
+chimesFF: 	1 0 2 -21.72803
+chimesFF: 	0 2 1 -21.72803
+chimesFF: 	2 0 1 -21.72803
+chimesFF: 	1 2 0 -21.72803
+chimesFF: 	2 1 0 -21.72803
+chimesFF: 	0 1 3 71.75325
+chimesFF: 	1 0 3 71.75325
+chimesFF: 	0 3 1 71.75325
+chimesFF: 	3 0 1 71.75325
+chimesFF: 	1 3 0 71.75325
+chimesFF: 	3 1 0 71.75325
+chimesFF: 	0 1 4 -110.88067
+chimesFF: 	1 0 4 -110.88067
+chimesFF: 	0 4 1 -110.88067
+chimesFF: 	4 0 1 -110.88067
+chimesFF: 	1 4 0 -110.88067
+chimesFF: 	4 1 0 -110.88067
+chimesFF: 	0 1 5 70.07495
+chimesFF: 	1 0 5 70.07495
+chimesFF: 	0 5 1 70.07495
+chimesFF: 	5 0 1 70.07495
+chimesFF: 	1 5 0 70.07495
+chimesFF: 	5 1 0 70.07495
+chimesFF: 	0 2 2 -45.50587
+chimesFF: 	2 0 2 -45.50587
+chimesFF: 	2 2 0 -45.50587
+chimesFF: 	0 2 3 42.16771
+chimesFF: 	2 0 3 42.16771
+chimesFF: 	0 3 2 42.16771
+chimesFF: 	3 0 2 42.16771
+chimesFF: 	2 3 0 42.16771
+chimesFF: 	3 2 0 42.16771
+chimesFF: 	0 2 4 -24.86958
+chimesFF: 	2 0 4 -24.86958
+chimesFF: 	0 4 2 -24.86958
+chimesFF: 	4 0 2 -24.86958
+chimesFF: 	2 4 0 -24.86958
+chimesFF: 	4 2 0 -24.86958
+chimesFF: 	0 2 5 -43.64743
+chimesFF: 	2 0 5 -43.64743
+chimesFF: 	0 5 2 -43.64743
+chimesFF: 	5 0 2 -43.64743
+chimesFF: 	2 5 0 -43.64743
+chimesFF: 	5 2 0 -43.64743
+chimesFF: 	0 3 3 -33.69824
+chimesFF: 	3 0 3 -33.69824
+chimesFF: 	3 3 0 -33.69824
+chimesFF: 	0 3 4 32.62781
+chimesFF: 	3 0 4 32.62781
+chimesFF: 	0 4 3 32.62781
+chimesFF: 	4 0 3 32.62781
+chimesFF: 	3 4 0 32.62781
+chimesFF: 	4 3 0 32.62781
+chimesFF: 	0 3 5 -30.33505
+chimesFF: 	3 0 5 -30.33505
+chimesFF: 	0 5 3 -30.33505
+chimesFF: 	5 0 3 -30.33505
+chimesFF: 	3 5 0 -30.33505
+chimesFF: 	5 3 0 -30.33505
+chimesFF: 	0 4 4 -60.80989
+chimesFF: 	4 0 4 -60.80989
+chimesFF: 	4 4 0 -60.80989
+chimesFF: 	0 4 5 52.88398
+chimesFF: 	4 0 5 52.88398
+chimesFF: 	0 5 4 52.88398
+chimesFF: 	5 0 4 52.88398
+chimesFF: 	4 5 0 52.88398
+chimesFF: 	5 4 0 52.88398
+chimesFF: 	0 5 5 78.98455
+chimesFF: 	5 0 5 78.98455
+chimesFF: 	5 5 0 78.98455
+chimesFF: 	1 1 1 8.54019
+chimesFF: 	1 1 2 15.10128
+chimesFF: 	1 2 1 15.10128
+chimesFF: 	2 1 1 15.10128
+chimesFF: 	1 1 3 -46.96485
+chimesFF: 	1 3 1 -46.96485
+chimesFF: 	3 1 1 -46.96485
+chimesFF: 	1 1 4 5.22434
+chimesFF: 	1 4 1 5.22434
+chimesFF: 	4 1 1 5.22434
+chimesFF: 	1 1 5 -34.00060
+chimesFF: 	1 5 1 -34.00060
+chimesFF: 	5 1 1 -34.00060
+chimesFF: 	1 2 2 30.84169
+chimesFF: 	2 1 2 30.84169
+chimesFF: 	2 2 1 30.84169
+chimesFF: 	1 2 3 0.05347
+chimesFF: 	2 1 3 0.05347
+chimesFF: 	1 3 2 0.05347
+chimesFF: 	3 1 2 0.05347
+chimesFF: 	2 3 1 0.05347
+chimesFF: 	3 2 1 0.05347
+chimesFF: 	1 2 4 50.28760
+chimesFF: 	2 1 4 50.28760
+chimesFF: 	1 4 2 50.28760
+chimesFF: 	4 1 2 50.28760
+chimesFF: 	2 4 1 50.28760
+chimesFF: 	4 2 1 50.28760
+chimesFF: 	1 2 5 -25.51642
+chimesFF: 	2 1 5 -25.51642
+chimesFF: 	1 5 2 -25.51642
+chimesFF: 	5 1 2 -25.51642
+chimesFF: 	2 5 1 -25.51642
+chimesFF: 	5 2 1 -25.51642
+chimesFF: 	1 3 3 93.50928
+chimesFF: 	3 1 3 93.50928
+chimesFF: 	3 3 1 93.50928
+chimesFF: 	1 3 4 -43.20410
+chimesFF: 	3 1 4 -43.20410
+chimesFF: 	1 4 3 -43.20410
+chimesFF: 	4 1 3 -43.20410
+chimesFF: 	3 4 1 -43.20410
+chimesFF: 	4 3 1 -43.20410
+chimesFF: 	1 3 5 71.14569
+chimesFF: 	3 1 5 71.14569
+chimesFF: 	1 5 3 71.14569
+chimesFF: 	5 1 3 71.14569
+chimesFF: 	3 5 1 71.14569
+chimesFF: 	5 3 1 71.14569
+chimesFF: 	1 4 4 -44.83814
+chimesFF: 	4 1 4 -44.83814
+chimesFF: 	4 4 1 -44.83814
+chimesFF: 	1 4 5 -82.25364
+chimesFF: 	4 1 5 -82.25364
+chimesFF: 	1 5 4 -82.25364
+chimesFF: 	5 1 4 -82.25364
+chimesFF: 	4 5 1 -82.25364
+chimesFF: 	5 4 1 -82.25364
+chimesFF: 	1 5 5 25.79560
+chimesFF: 	5 1 5 25.79560
+chimesFF: 	5 5 1 25.79560
+chimesFF: 	2 2 2 23.88584
+chimesFF: 	2 2 3 -34.41830
+chimesFF: 	2 3 2 -34.41830
+chimesFF: 	3 2 2 -34.41830
+chimesFF: 	2 2 4 15.51725
+chimesFF: 	2 4 2 15.51725
+chimesFF: 	4 2 2 15.51725
+chimesFF: 	2 2 5 -120.73899
+chimesFF: 	2 5 2 -120.73899
+chimesFF: 	5 2 2 -120.73899
+chimesFF: 	2 3 3 -20.16070
+chimesFF: 	3 2 3 -20.16070
+chimesFF: 	3 3 2 -20.16070
+chimesFF: 	2 3 4 53.85506
+chimesFF: 	3 2 4 53.85506
+chimesFF: 	2 4 3 53.85506
+chimesFF: 	4 2 3 53.85506
+chimesFF: 	3 4 2 53.85506
+chimesFF: 	4 3 2 53.85506
+chimesFF: 	2 3 5 -82.56035
+chimesFF: 	3 2 5 -82.56035
+chimesFF: 	2 5 3 -82.56035
+chimesFF: 	5 2 3 -82.56035
+chimesFF: 	3 5 2 -82.56035
+chimesFF: 	5 3 2 -82.56035
+chimesFF: 	2 4 4 7.76648
+chimesFF: 	4 2 4 7.76648
+chimesFF: 	4 4 2 7.76648
+chimesFF: 	2 4 5 63.55712
+chimesFF: 	4 2 5 63.55712
+chimesFF: 	2 5 4 63.55712
+chimesFF: 	5 2 4 63.55712
+chimesFF: 	4 5 2 63.55712
+chimesFF: 	5 4 2 63.55712
+chimesFF: 	2 5 5 84.71131
+chimesFF: 	5 2 5 84.71131
+chimesFF: 	5 5 2 84.71131
+chimesFF: 	3 3 3 -63.12291
+chimesFF: 	3 3 4 86.50166
+chimesFF: 	3 4 3 86.50166
+chimesFF: 	4 3 3 86.50166
+chimesFF: 	3 3 5 -38.21345
+chimesFF: 	3 5 3 -38.21345
+chimesFF: 	5 3 3 -38.21345
+chimesFF: 	3 4 4 -40.86231
+chimesFF: 	4 3 4 -40.86231
+chimesFF: 	4 4 3 -40.86231
+chimesFF: 	3 4 5 21.05236
+chimesFF: 	4 3 5 21.05236
+chimesFF: 	3 5 4 21.05236
+chimesFF: 	5 3 4 21.05236
+chimesFF: 	4 5 3 21.05236
+chimesFF: 	5 4 3 21.05236
+chimesFF: 	3 5 5 -23.73991
+chimesFF: 	5 3 5 -23.73991
+chimesFF: 	5 5 3 -23.73991
+chimesFF: 	4 4 4 35.96004
+chimesFF: 	4 4 5 26.92668
+chimesFF: 	4 5 4 26.92668
+chimesFF: 	5 4 4 26.92668
+chimesFF: 	4 5 5 85.04949
+chimesFF: 	5 4 5 85.04949
+chimesFF: 	5 5 4 85.04949
+chimesFF: 	5 5 5 15.34665
+chimesFF: Built the following 3-body pair "slow" map:
+chimesFF: 	3 HHHHHH
+chimesFF: 	2 HHOHOH
+chimesFF: 	2 OHHHOH
+chimesFF: 	2 OHOHHH
+chimesFF: 	1 OHOHOO
+chimesFF: 	1 OHOOOH
+chimesFF: 	1 OOOHOH
+chimesFF: 	0 OOOOOO
+chimesFF: Built the following 3-body pair "fast" map:
+chimesFF: 	0 0
+chimesFF: 	1 1
+chimesFF: 	2 1
+chimesFF: 	3 2
+chimesFF: 	4 1
+chimesFF: 	5 2
+chimesFF: 	6 2
+chimesFF: 	7 3
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		SERIAL_CHIMES 10
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax......cheby lambda
+		OO 1.93900 4.30000 
+		Parameters: 
+		0 4.56671
+		1 103.89904
+		2 -108.48038
+		3 94.55347
+		4 -79.00964
+		5 48.78377
+		6 -28.79537
+		7 14.71616
+		8 -6.10972
+		9 2.11124
+
+		pair type...smin...smax......cheby lambda
+		HH 0.98200 4.10000 MORSE 1.60000 0.10000 1.00000e+05 0.00000e+00
+		Parameters: 
+		0 5.05618e+01
+		1 -2.80594e+01
+		2 1.87946e+01
+		3 -3.67374e+01
+		4 -2.24826e+00
+		5 -2.16060e+01
+		6 -2.62412e-02
+		7 -5.16324e+00
+		8 3.34640e-01
+		9 -5.40401e-01
+
+		pair type...smin...smax......cheby lambda
+		OH 7.20000e-01 4.20000e+00 MORSE 1.00000e+00 1.00000e-01 1.00000e+05 0.00000e+00
+		Parameters: 
+		0 -1.45284e+01
+		1 4.73045e+01
+		2 5.05427e+01
+		3 1.32459e+00
+		4 -2.07966e+00
+		5 -6.73203e+00
+		6 5.80975e+00
+		7 -2.70793e+00
+		8 3.12158e-01
+		9 9.83193e-02
+
+
+	The following unique triplets of atoms have been identified:
+
+    Cluster index       : 0
+    Atoms in the cluster: O O O 
+    Pairs in the cluster: OO OO OO 
+    Number of unique sets of powers: 50 (200 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        -71.65561
+		      1       1   0   1         0               0        -71.65561
+		      2       1   1   0         0               0        -71.65561
+		      3       0   1   2         3               1        163.84476
+		      4       1   0   2         3               1        163.84476
+		      5       0   2   1         3               1        163.84476
+		      6       2   0   1         3               1        163.84476
+		      7       1   2   0         3               1        163.84476
+		      8       2   1   0         3               1        163.84476
+		      9       0   1   3         9               2        254.09150
+		      10      1   0   3         9               2        254.09150
+		      11      0   3   1         9               2        254.09150
+		      12      3   0   1         9               2        254.09150
+		      13      1   3   0         9               2        254.09150
+		      14      3   1   0         9               2        254.09150
+		      15      0   1   4         15              3        70.92231
+		      16      1   0   4         15              3        70.92231
+		      17      0   4   1         15              3        70.92231
+		      18      4   0   1         15              3        70.92231
+		      19      1   4   0         15              3        70.92231
+		      20      4   1   0         15              3        70.92231
+		      21      0   1   5         21              4        -65.09472
+		      22      1   0   5         21              4        -65.09472
+		      23      0   5   1         21              4        -65.09472
+		      24      5   0   1         21              4        -65.09472
+		      25      1   5   0         21              4        -65.09472
+		      26      5   1   0         21              4        -65.09472
+		      27      0   2   2         27              5        -70.20567
+		      28      2   0   2         27              5        -70.20567
+		      29      2   2   0         27              5        -70.20567
+		      30      0   2   3         30              6        -323.86513
+		      31      2   0   3         30              6        -323.86513
+		      32      0   3   2         30              6        -323.86513
+		      33      3   0   2         30              6        -323.86513
+		      34      2   3   0         30              6        -323.86513
+		      35      3   2   0         30              6        -323.86513
+		      36      0   2   4         36              7        -125.01763
+		      37      2   0   4         36              7        -125.01763
+		      38      0   4   2         36              7        -125.01763
+		      39      4   0   2         36              7        -125.01763
+		      40      2   4   0         36              7        -125.01763
+		      41      4   2   0         36              7        -125.01763
+		      42      0   2   5         42              8        143.55030
+		      43      2   0   5         42              8        143.55030
+		      44      0   5   2         42              8        143.55030
+		      45      5   0   2         42              8        143.55030
+		      46      2   5   0         42              8        143.55030
+		      47      5   2   0         42              8        143.55030
+		      48      0   3   3         48              9        -217.68072
+		      49      3   0   3         48              9        -217.68072
+		      50      3   3   0         48              9        -217.68072
+		      51      0   3   4         51              10       -87.27359
+		      52      3   0   4         51              10       -87.27359
+		      53      0   4   3         51              10       -87.27359
+		      54      4   0   3         51              10       -87.27359
+		      55      3   4   0         51              10       -87.27359
+		      56      4   3   0         51              10       -87.27359
+		      57      0   3   5         57              11       62.95879
+		      58      3   0   5         57              11       62.95879
+		      59      0   5   3         57              11       62.95879
+		      60      5   0   3         57              11       62.95879
+		      61      3   5   0         57              11       62.95879
+		      62      5   3   0         57              11       62.95879
+		      63      0   4   4         63              12       5.91561
+		      64      4   0   4         63              12       5.91561
+		      65      4   4   0         63              12       5.91561
+		      66      0   4   5         66              13       -44.76348
+		      67      4   0   5         66              13       -44.76348
+		      68      0   5   4         66              13       -44.76348
+		      69      5   0   4         66              13       -44.76348
+		      70      4   5   0         66              13       -44.76348
+		      71      5   4   0         66              13       -44.76348
+		      72      0   5   5         72              14       68.74333
+		      73      5   0   5         72              14       68.74333
+		      74      5   5   0         72              14       68.74333
+		      75      1   1   1         75              15       -7.73064
+		      76      1   1   2         76              16       45.51834
+		      77      1   2   1         76              16       45.51834
+		      78      2   1   1         76              16       45.51834
+		      79      1   1   3         79              17       35.62659
+		      80      1   3   1         79              17       35.62659
+		      81      3   1   1         79              17       35.62659
+		      82      1   1   4         82              18       -5.05516
+		      83      1   4   1         82              18       -5.05516
+		      84      4   1   1         82              18       -5.05516
+		      85      1   1   5         85              19       5.30397
+		      86      1   5   1         85              19       5.30397
+		      87      5   1   1         85              19       5.30397
+		      88      1   2   2         88              20       -40.49036
+		      89      2   1   2         88              20       -40.49036
+		      90      2   2   1         88              20       -40.49036
+		      91      1   2   3         91              21       -169.58818
+		      92      2   1   3         91              21       -169.58818
+		      93      1   3   2         91              21       -169.58818
+		      94      3   1   2         91              21       -169.58818
+		      95      2   3   1         91              21       -169.58818
+		      96      3   2   1         91              21       -169.58818
+		      97      1   2   4         97              22       -64.12620
+		      98      2   1   4         97              22       -64.12620
+		      99      1   4   2         97              22       -64.12620
+		      100     4   1   2         97              22       -64.12620
+		      101     2   4   1         97              22       -64.12620
+		      102     4   2   1         97              22       -64.12620
+		      103     1   2   5         103             23       61.17862
+		      104     2   1   5         103             23       61.17862
+		      105     1   5   2         103             23       61.17862
+		      106     5   1   2         103             23       61.17862
+		      107     2   5   1         103             23       61.17862
+		      108     5   2   1         103             23       61.17862
+		      109     1   3   3         109             24       -49.17260
+		      110     3   1   3         109             24       -49.17260
+		      111     3   3   1         109             24       -49.17260
+		      112     1   3   4         112             25       44.05131
+		      113     3   1   4         112             25       44.05131
+		      114     1   4   3         112             25       44.05131
+		      115     4   1   3         112             25       44.05131
+		      116     3   4   1         112             25       44.05131
+		      117     4   3   1         112             25       44.05131
+		      118     1   3   5         118             26       -53.31348
+		      119     3   1   5         118             26       -53.31348
+		      120     1   5   3         118             26       -53.31348
+		      121     5   1   3         118             26       -53.31348
+		      122     3   5   1         118             26       -53.31348
+		      123     5   3   1         118             26       -53.31348
+		      124     1   4   4         124             27       34.09267
+		      125     4   1   4         124             27       34.09267
+		      126     4   4   1         124             27       34.09267
+		      127     1   4   5         127             28       -77.40547
+		      128     4   1   5         127             28       -77.40547
+		      129     1   5   4         127             28       -77.40547
+		      130     5   1   4         127             28       -77.40547
+		      131     4   5   1         127             28       -77.40547
+		      132     5   4   1         127             28       -77.40547
+		      133     1   5   5         133             29       57.09849
+		      134     5   1   5         133             29       57.09849
+		      135     5   5   1         133             29       57.09849
+		      136     2   2   2         136             30       11.93223
+		      137     2   2   3         137             31       80.92331
+		      138     2   3   2         137             31       80.92331
+		      139     3   2   2         137             31       80.92331
+		      140     2   2   4         140             32       31.02023
+		      141     2   4   2         140             32       31.02023
+		      142     4   2   2         140             32       31.02023
+		      143     2   2   5         143             33       -30.04882
+		      144     2   5   2         143             33       -30.04882
+		      145     5   2   2         143             33       -30.04882
+		      146     2   3   3         146             34       148.31358
+		      147     3   2   3         146             34       148.31358
+		      148     3   3   2         146             34       148.31358
+		      149     2   3   4         149             35       105.86960
+		      150     3   2   4         149             35       105.86960
+		      151     2   4   3         149             35       105.86960
+		      152     4   2   3         149             35       105.86960
+		      153     3   4   2         149             35       105.86960
+		      154     4   3   2         149             35       105.86960
+		      155     2   3   5         155             36       -54.00902
+		      156     3   2   5         155             36       -54.00902
+		      157     2   5   3         155             36       -54.00902
+		      158     5   2   3         155             36       -54.00902
+		      159     3   5   2         155             36       -54.00902
+		      160     5   3   2         155             36       -54.00902
+		      161     2   4   4         161             37       16.52189
+		      162     4   2   4         161             37       16.52189
+		      163     4   4   2         161             37       16.52189
+		      164     2   4   5         164             38       -33.22693
+		      165     4   2   5         164             38       -33.22693
+		      166     2   5   4         164             38       -33.22693
+		      167     5   2   4         164             38       -33.22693
+		      168     4   5   2         164             38       -33.22693
+		      169     5   4   2         164             38       -33.22693
+		      170     2   5   5         170             39       -68.04699
+		      171     5   2   5         170             39       -68.04699
+		      172     5   5   2         170             39       -68.04699
+		      173     3   3   3         173             40       14.54737
+		      174     3   3   4         174             41       -57.77863
+		      175     3   4   3         174             41       -57.77863
+		      176     4   3   3         174             41       -57.77863
+		      177     3   3   5         177             42       113.62379
+		      178     3   5   3         177             42       113.62379
+		      179     5   3   3         177             42       113.62379
+		      180     3   4   4         180             43       -74.72077
+		      181     4   3   4         180             43       -74.72077
+		      182     4   4   3         180             43       -74.72077
+		      183     3   4   5         183             44       132.24678
+		      184     4   3   5         183             44       132.24678
+		      185     3   5   4         183             44       132.24678
+		      186     5   3   4         183             44       132.24678
+		      187     4   5   3         183             44       132.24678
+		      188     5   4   3         183             44       132.24678
+		      189     3   5   5         189             45       -214.99016
+		      190     5   3   5         189             45       -214.99016
+		      191     5   5   3         189             45       -214.99016
+		      192     4   4   4         192             46       -19.48428
+		      193     4   4   5         193             47       68.34586
+		      194     4   5   4         193             47       68.34586
+		      195     5   4   4         193             47       68.34586
+		      196     4   5   5         196             48       -24.17171
+		      197     5   4   5         196             48       -24.17171
+		      198     5   5   4         196             48       -24.17171
+		      199     5   5   5         199             49       117.44876
+
+    Cluster index       : 1
+    Atoms in the cluster: H O O 
+    Pairs in the cluster: OH OH OO 
+    Number of unique sets of powers: 115 (200 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        58.40883
+		      1       1   0   1         0               0        58.40883
+		      2       0   1   2         2               1        49.29433
+		      3       1   0   2         2               1        49.29433
+		      4       0   1   3         4               2        4.16975
+		      5       1   0   3         4               2        4.16975
+		      6       0   1   4         6               3        49.27310
+		      7       1   0   4         6               3        49.27310
+		      8       0   1   5         8               4        -111.20251
+		      9       1   0   5         8               4        -111.20251
+		      10      0   2   1         10              5        -609.57408
+		      11      2   0   1         10              5        -609.57408
+		      12      0   2   2         12              6        -202.05447
+		      13      2   0   2         12              6        -202.05447
+		      14      0   2   3         14              7        258.44818
+		      15      2   0   3         14              7        258.44818
+		      16      0   2   4         16              8        -39.56852
+		      17      2   0   4         16              8        -39.56852
+		      18      0   2   5         18              9        31.93698
+		      19      2   0   5         18              9        31.93698
+		      20      0   3   1         20              10       187.02025
+		      21      3   0   1         20              10       187.02025
+		      22      0   3   2         22              11       -113.90263
+		      23      3   0   2         22              11       -113.90263
+		      24      0   3   3         24              12       -161.75162
+		      25      3   0   3         24              12       -161.75162
+		      26      0   3   4         26              13       -155.25720
+		      27      3   0   4         26              13       -155.25720
+		      28      0   3   5         28              14       49.81369
+		      29      3   0   5         28              14       49.81369
+		      30      0   4   1         30              15       92.37673
+		      31      4   0   1         30              15       92.37673
+		      32      0   4   2         32              16       -229.11919
+		      33      4   0   2         32              16       -229.11919
+		      34      0   4   3         34              17       14.96109
+		      35      4   0   3         34              17       14.96109
+		      36      0   4   4         36              18       -242.51001
+		      37      4   0   4         36              18       -242.51001
+		      38      0   4   5         38              19       50.89467
+		      39      4   0   5         38              19       50.89467
+		      40      0   5   1         40              20       91.66620
+		      41      5   0   1         40              20       91.66620
+		      42      0   5   2         42              21       -98.02498
+		      43      5   0   2         42              21       -98.02498
+		      44      0   5   3         44              22       -216.48093
+		      45      5   0   3         44              22       -216.48093
+		      46      0   5   4         46              23       -37.33978
+		      47      5   0   4         46              23       -37.33978
+		      48      0   5   5         48              24       -14.64552
+		      49      5   0   5         48              24       -14.64552
+		      50      1   1   0         50              25       101.46983
+		      51      1   1   1         51              26       3.85141
+		      52      1   1   2         52              27       -54.83616
+		      53      1   1   3         53              28       57.07871
+		      54      1   1   4         54              29       33.49464
+		      55      1   1   5         55              30       -46.58518
+		      56      1   2   0         56              31       -139.55096
+		      57      2   1   0         56              31       -139.55096
+		      58      1   2   1         58              32       -174.45779
+		      59      2   1   1         58              32       -174.45779
+		      60      1   2   2         60              33       -50.88278
+		      61      2   1   2         60              33       -50.88278
+		      62      1   2   3         62              34       137.19243
+		      63      2   1   3         62              34       137.19243
+		      64      1   2   4         64              35       28.48673
+		      65      2   1   4         64              35       28.48673
+		      66      1   2   5         66              36       43.17515
+		      67      2   1   5         66              36       43.17515
+		      68      1   3   0         68              37       -307.28363
+		      69      3   1   0         68              37       -307.28363
+		      70      1   3   1         70              38       15.28207
+		      71      3   1   1         70              38       15.28207
+		      72      1   3   2         72              39       145.78873
+		      73      3   1   2         72              39       145.78873
+		      74      1   3   3         74              40       -244.52203
+		      75      3   1   3         74              40       -244.52203
+		      76      1   3   4         76              41       -28.36178
+		      77      3   1   4         76              41       -28.36178
+		      78      1   3   5         78              42       160.31788
+		      79      3   1   5         78              42       160.31788
+		      80      1   4   0         80              43       -117.62401
+		      81      4   1   0         80              43       -117.62401
+		      82      1   4   1         82              44       86.51861
+		      83      4   1   1         82              44       86.51861
+		      84      1   4   2         84              45       186.80047
+		      85      4   1   2         84              45       186.80047
+		      86      1   4   3         86              46       -35.19597
+		      87      4   1   3         86              46       -35.19597
+		      88      1   4   4         88              47       57.33347
+		      89      4   1   4         88              47       57.33347
+		      90      1   4   5         90              48       201.88033
+		      91      4   1   5         90              48       201.88033
+		      92      1   5   0         92              49       198.75897
+		      93      5   1   0         92              49       198.75897
+		      94      1   5   1         94              50       42.25552
+		      95      5   1   1         94              50       42.25552
+		      96      1   5   2         96              51       -88.81184
+		      97      5   1   2         96              51       -88.81184
+		      98      1   5   3         98              52       -18.85896
+		      99      5   1   3         98              52       -18.85896
+		      100     1   5   4         100             53       -109.34156
+		      101     5   1   4         100             53       -109.34156
+		      102     1   5   5         102             54       -91.48877
+		      103     5   1   5         102             54       -91.48877
+		      104     2   2   0         104             55       125.68886
+		      105     2   2   1         105             56       142.89516
+		      106     2   2   2         106             57       65.29567
+		      107     2   2   3         107             58       17.08518
+		      108     2   2   4         108             59       253.74496
+		      109     2   2   5         109             60       57.99262
+		      110     2   3   0         110             61       41.80736
+		      111     3   2   0         110             61       41.80736
+		      112     2   3   1         112             62       121.32633
+		      113     3   2   1         112             62       121.32633
+		      114     2   3   2         114             63       38.93910
+		      115     3   2   2         114             63       38.93910
+		      116     2   3   3         116             64       -147.20840
+		      117     3   2   3         116             64       -147.20840
+		      118     2   3   4         118             65       -48.52895
+		      119     3   2   4         118             65       -48.52895
+		      120     2   3   5         120             66       -79.12345
+		      121     3   2   5         120             66       -79.12345
+		      122     2   4   0         122             67       175.74141
+		      123     4   2   0         122             67       175.74141
+		      124     2   4   1         124             68       2.26719
+		      125     4   2   1         124             68       2.26719
+		      126     2   4   2         126             69       -180.67889
+		      127     4   2   2         126             69       -180.67889
+		      128     2   4   3         128             70       -84.35201
+		      129     4   2   3         128             70       -84.35201
+		      130     2   4   4         130             71       -57.34240
+		      131     4   2   4         130             71       -57.34240
+		      132     2   4   5         132             72       -243.79775
+		      133     4   2   5         132             72       -243.79775
+		      134     2   5   0         134             73       56.04174
+		      135     5   2   0         134             73       56.04174
+		      136     2   5   1         136             74       -22.54531
+		      137     5   2   1         136             74       -22.54531
+		      138     2   5   2         138             75       -49.47712
+		      139     5   2   2         138             75       -49.47712
+		      140     2   5   3         140             76       0.20221
+		      141     5   2   3         140             76       0.20221
+		      142     2   5   4         142             77       -86.80261
+		      143     5   2   4         142             77       -86.80261
+		      144     2   5   5         144             78       74.56983
+		      145     5   2   5         144             78       74.56983
+		      146     3   3   0         146             79       39.68474
+		      147     3   3   1         147             80       -141.50178
+		      148     3   3   2         148             81       6.36578
+		      149     3   3   3         149             82       364.82947
+		      150     3   3   4         150             83       -103.23930
+		      151     3   3   5         151             84       0.12346
+		      152     3   4   0         152             85       -65.59589
+		      153     4   3   0         152             85       -65.59589
+		      154     3   4   1         154             86       -114.21784
+		      155     4   3   1         154             86       -114.21784
+		      156     3   4   2         156             87       -58.02651
+		      157     4   3   2         156             87       -58.02651
+		      158     3   4   3         158             88       86.36538
+		      159     4   3   3         158             88       86.36538
+		      160     3   4   4         160             89       60.83681
+		      161     4   3   4         160             89       60.83681
+		      162     3   4   5         162             90       -127.49658
+		      163     4   3   5         162             90       -127.49658
+		      164     3   5   0         164             91       -193.24437
+		      165     5   3   0         164             91       -193.24437
+		      166     3   5   1         166             92       163.23312
+		      167     5   3   1         166             92       163.23312
+		      168     3   5   2         168             93       132.87259
+		      169     5   3   2         168             93       132.87259
+		      170     3   5   3         170             94       -242.63346
+		      171     5   3   3         170             94       -242.63346
+		      172     3   5   4         172             95       277.33807
+		      173     5   3   4         172             95       277.33807
+		      174     3   5   5         174             96       -262.09917
+		      175     5   3   5         174             96       -262.09917
+		      176     4   4   0         176             97       32.23253
+		      177     4   4   1         177             98       211.37701
+		      178     4   4   2         178             99       185.39681
+		      179     4   4   3         179             100      -86.61802
+		      180     4   4   4         180             101      89.15039
+		      181     4   4   5         181             102      -206.98421
+		      182     4   5   0         182             103      -29.84720
+		      183     5   4   0         182             103      -29.84720
+		      184     4   5   1         184             104      -143.24287
+		      185     5   4   1         184             104      -143.24287
+		      186     4   5   2         186             105      -90.37544
+		      187     5   4   2         186             105      -90.37544
+		      188     4   5   3         188             106      163.34478
+		      189     5   4   3         188             106      163.34478
+		      190     4   5   4         190             107      -57.46087
+		      191     5   4   4         190             107      -57.46087
+		      192     4   5   5         192             108      8.68626
+		      193     5   4   5         192             108      8.68626
+		      194     5   5   0         194             109      148.47622
+		      195     5   5   1         195             110      -115.32790
+		      196     5   5   2         196             111      -84.03114
+		      197     5   5   3         197             112      243.84988
+		      198     5   5   4         198             113      -122.79740
+		      199     5   5   5         199             114      -5.87340
+
+    Cluster index       : 2
+    Atoms in the cluster: H H O 
+    Pairs in the cluster: HH OH OH 
+    Number of unique sets of powers: 115 (200 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        97.24087
+		      1       0   1   2         1               1        -229.05518
+		      2       0   2   1         1               1        -229.05518
+		      3       0   1   3         3               2        -7.58209
+		      4       0   3   1         3               2        -7.58209
+		      5       0   1   4         5               3        61.25783
+		      6       0   4   1         5               3        61.25783
+		      7       0   1   5         7               4        -23.85523
+		      8       0   5   1         7               4        -23.85523
+		      9       0   2   2         9               5        83.92657
+		      10      0   2   3         10              6        247.71310
+		      11      0   3   2         10              6        247.71310
+		      12      0   2   4         12              7        -28.47361
+		      13      0   4   2         12              7        -28.47361
+		      14      0   2   5         14              8        -2.14487
+		      15      0   5   2         14              8        -2.14487
+		      16      0   3   3         16              9        113.25939
+		      17      0   3   4         17              10       129.29645
+		      18      0   4   3         17              10       129.29645
+		      19      0   3   5         19              11       58.32272
+		      20      0   5   3         19              11       58.32272
+		      21      0   4   4         21              12       -21.89439
+		      22      0   4   5         22              13       161.53897
+		      23      0   5   4         22              13       161.53897
+		      24      0   5   5         24              14       -73.48993
+		      25      1   0   1         25              15       -87.28894
+		      26      1   1   0         25              15       -87.28894
+		      27      1   0   2         27              16       55.89909
+		      28      1   2   0         27              16       55.89909
+		      29      1   0   3         29              17       -158.94052
+		      30      1   3   0         29              17       -158.94052
+		      31      1   0   4         31              18       56.01124
+		      32      1   4   0         31              18       56.01124
+		      33      1   0   5         33              19       -228.23612
+		      34      1   5   0         33              19       -228.23612
+		      35      1   1   1         35              20       26.29263
+		      36      1   1   2         36              21       264.69609
+		      37      1   2   1         36              21       264.69609
+		      38      1   1   3         38              22       61.17521
+		      39      1   3   1         38              22       61.17521
+		      40      1   1   4         40              23       -220.89279
+		      41      1   4   1         40              23       -220.89279
+		      42      1   1   5         42              24       63.74111
+		      43      1   5   1         42              24       63.74111
+		      44      1   2   2         44              25       140.70480
+		      45      1   2   3         45              26       187.67124
+		      46      1   3   2         45              26       187.67124
+		      47      1   2   4         47              27       -129.11372
+		      48      1   4   2         47              27       -129.11372
+		      49      1   2   5         49              28       -57.19673
+		      50      1   5   2         49              28       -57.19673
+		      51      1   3   3         51              29       -85.84203
+		      52      1   3   4         52              30       44.38440
+		      53      1   4   3         52              30       44.38440
+		      54      1   3   5         54              31       -217.18420
+		      55      1   5   3         54              31       -217.18420
+		      56      1   4   4         56              32       -27.17703
+		      57      1   4   5         57              33       -309.03890
+		      58      1   5   4         57              33       -309.03890
+		      59      1   5   5         59              34       -155.21069
+		      60      2   0   1         60              35       -655.72470
+		      61      2   1   0         60              35       -655.72470
+		      62      2   0   2         62              36       337.00029
+		      63      2   2   0         62              36       337.00029
+		      64      2   0   3         64              37       89.91908
+		      65      2   3   0         64              37       89.91908
+		      66      2   0   4         66              38       218.65011
+		      67      2   4   0         66              38       218.65011
+		      68      2   0   5         68              39       -183.63757
+		      69      2   5   0         68              39       -183.63757
+		      70      2   1   1         70              40       -140.72222
+		      71      2   1   2         71              41       53.98781
+		      72      2   2   1         71              41       53.98781
+		      73      2   1   3         73              42       204.63171
+		      74      2   3   1         73              42       204.63171
+		      75      2   1   4         75              43       -115.32189
+		      76      2   4   1         75              43       -115.32189
+		      77      2   1   5         77              44       -131.13500
+		      78      2   5   1         77              44       -131.13500
+		      79      2   2   2         79              45       125.21269
+		      80      2   2   3         80              46       347.99852
+		      81      2   3   2         80              46       347.99852
+		      82      2   2   4         82              47       -27.78529
+		      83      2   4   2         82              47       -27.78529
+		      84      2   2   5         84              48       -185.99211
+		      85      2   5   2         84              48       -185.99211
+		      86      2   3   3         86              49       -95.67308
+		      87      2   3   4         87              50       -151.75610
+		      88      2   4   3         87              50       -151.75610
+		      89      2   3   5         89              51       6.97909
+		      90      2   5   3         89              51       6.97909
+		      91      2   4   4         91              52       -82.20582
+		      92      2   4   5         92              53       67.91574
+		      93      2   5   4         92              53       67.91574
+		      94      2   5   5         94              54       -179.83934
+		      95      3   0   1         95              55       310.43255
+		      96      3   1   0         95              55       310.43255
+		      97      3   0   2         97              56       -360.92136
+		      98      3   2   0         97              56       -360.92136
+		      99      3   0   3         99              57       -208.93430
+		      100     3   3   0         99              57       -208.93430
+		      101     3   0   4         101             58       -123.85104
+		      102     3   4   0         101             58       -123.85104
+		      103     3   0   5         103             59       30.31938
+		      104     3   5   0         103             59       30.31938
+		      105     3   1   1         105             60       -27.08402
+		      106     3   1   2         106             61       -434.33714
+		      107     3   2   1         106             61       -434.33714
+		      108     3   1   3         108             62       -134.44052
+		      109     3   3   1         108             62       -134.44052
+		      110     3   1   4         110             63       82.85787
+		      111     3   4   1         110             63       82.85787
+		      112     3   1   5         112             64       40.05490
+		      113     3   5   1         112             64       40.05490
+		      114     3   2   2         114             65       68.68000
+		      115     3   2   3         115             66       80.44477
+		      116     3   3   2         115             66       80.44477
+		      117     3   2   4         117             67       -8.46223
+		      118     3   4   2         117             67       -8.46223
+		      119     3   2   5         119             68       100.68133
+		      120     3   5   2         119             68       100.68133
+		      121     3   3   3         121             69       327.97869
+		      122     3   3   4         122             70       392.43098
+		      123     3   4   3         122             70       392.43098
+		      124     3   3   5         124             71       -51.30760
+		      125     3   5   3         124             71       -51.30760
+		      126     3   4   4         126             72       60.24901
+		      127     3   4   5         127             73       8.75278
+		      128     3   5   4         127             73       8.75278
+		      129     3   5   5         129             74       -62.67558
+		      130     4   0   1         130             75       -212.92785
+		      131     4   1   0         130             75       -212.92785
+		      132     4   0   2         132             76       267.89386
+		      133     4   2   0         132             76       267.89386
+		      134     4   0   3         134             77       136.04366
+		      135     4   3   0         134             77       136.04366
+		      136     4   0   4         136             78       74.34045
+		      137     4   4   0         136             78       74.34045
+		      138     4   0   5         138             79       -108.12197
+		      139     4   5   0         138             79       -108.12197
+		      140     4   1   1         140             80       108.55356
+		      141     4   1   2         141             81       320.97536
+		      142     4   2   1         141             81       320.97536
+		      143     4   1   3         143             82       94.17933
+		      144     4   3   1         143             82       94.17933
+		      145     4   1   4         145             83       -162.77783
+		      146     4   4   1         145             83       -162.77783
+		      147     4   1   5         147             84       -113.83895
+		      148     4   5   1         147             84       -113.83895
+		      149     4   2   2         149             85       27.59429
+		      150     4   2   3         150             86       93.44005
+		      151     4   3   2         150             86       93.44005
+		      152     4   2   4         152             87       -92.25910
+		      153     4   4   2         152             87       -92.25910
+		      154     4   2   5         154             88       -122.73346
+		      155     4   5   2         154             88       -122.73346
+		      156     4   3   3         156             89       -264.23438
+		      157     4   3   4         157             90       -224.13025
+		      158     4   4   3         157             90       -224.13025
+		      159     4   3   5         159             91       -67.99340
+		      160     4   5   3         159             91       -67.99340
+		      161     4   4   4         161             92       -71.91330
+		      162     4   4   5         162             93       -69.30446
+		      163     4   5   4         162             93       -69.30446
+		      164     4   5   5         164             94       -96.46873
+		      165     5   0   1         165             95       28.85186
+		      166     5   1   0         165             95       28.85186
+		      167     5   0   2         167             96       -140.75330
+		      168     5   2   0         167             96       -140.75330
+		      169     5   0   3         169             97       -58.97511
+		      170     5   3   0         169             97       -58.97511
+		      171     5   0   4         171             98       -1.85955
+		      172     5   4   0         171             98       -1.85955
+		      173     5   0   5         173             99       30.93436
+		      174     5   5   0         173             99       30.93436
+		      175     5   1   1         175             100      -168.94553
+		      176     5   1   2         176             101      -170.79542
+		      177     5   2   1         176             101      -170.79542
+		      178     5   1   3         178             102      75.66700
+		      179     5   3   1         178             102      75.66700
+		      180     5   1   4         180             103      59.14699
+		      181     5   4   1         180             103      59.14699
+		      182     5   1   5         182             104      -66.90122
+		      183     5   5   1         182             104      -66.90122
+		      184     5   2   2         184             105      63.78676
+		      185     5   2   3         185             106      44.88670
+		      186     5   3   2         185             106      44.88670
+		      187     5   2   4         187             107      28.22964
+		      188     5   4   2         187             107      28.22964
+		      189     5   2   5         189             108      41.06860
+		      190     5   5   2         189             108      41.06860
+		      191     5   3   3         191             109      207.31152
+		      192     5   3   4         192             110      119.42973
+		      193     5   4   3         192             110      119.42973
+		      194     5   3   5         194             111      -29.42963
+		      195     5   5   3         194             111      -29.42963
+		      196     5   4   4         196             112      26.20333
+		      197     5   4   5         197             113      30.42040
+		      198     5   5   4         197             113      30.42040
+		      199     5   5   5         199             114      -50.67757
+
+    Cluster index       : 3
+    Atoms in the cluster: H H H 
+    Pairs in the cluster: HH HH HH 
+    Number of unique sets of powers: 50 (200 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        -38.88988
+		      1       1   0   1         0               0        -38.88988
+		      2       1   1   0         0               0        -38.88988
+		      3       0   1   2         3               1        -21.72803
+		      4       1   0   2         3               1        -21.72803
+		      5       0   2   1         3               1        -21.72803
+		      6       2   0   1         3               1        -21.72803
+		      7       1   2   0         3               1        -21.72803
+		      8       2   1   0         3               1        -21.72803
+		      9       0   1   3         9               2        71.75325
+		      10      1   0   3         9               2        71.75325
+		      11      0   3   1         9               2        71.75325
+		      12      3   0   1         9               2        71.75325
+		      13      1   3   0         9               2        71.75325
+		      14      3   1   0         9               2        71.75325
+		      15      0   1   4         15              3        -110.88067
+		      16      1   0   4         15              3        -110.88067
+		      17      0   4   1         15              3        -110.88067
+		      18      4   0   1         15              3        -110.88067
+		      19      1   4   0         15              3        -110.88067
+		      20      4   1   0         15              3        -110.88067
+		      21      0   1   5         21              4        70.07495
+		      22      1   0   5         21              4        70.07495
+		      23      0   5   1         21              4        70.07495
+		      24      5   0   1         21              4        70.07495
+		      25      1   5   0         21              4        70.07495
+		      26      5   1   0         21              4        70.07495
+		      27      0   2   2         27              5        -45.50587
+		      28      2   0   2         27              5        -45.50587
+		      29      2   2   0         27              5        -45.50587
+		      30      0   2   3         30              6        42.16771
+		      31      2   0   3         30              6        42.16771
+		      32      0   3   2         30              6        42.16771
+		      33      3   0   2         30              6        42.16771
+		      34      2   3   0         30              6        42.16771
+		      35      3   2   0         30              6        42.16771
+		      36      0   2   4         36              7        -24.86958
+		      37      2   0   4         36              7        -24.86958
+		      38      0   4   2         36              7        -24.86958
+		      39      4   0   2         36              7        -24.86958
+		      40      2   4   0         36              7        -24.86958
+		      41      4   2   0         36              7        -24.86958
+		      42      0   2   5         42              8        -43.64743
+		      43      2   0   5         42              8        -43.64743
+		      44      0   5   2         42              8        -43.64743
+		      45      5   0   2         42              8        -43.64743
+		      46      2   5   0         42              8        -43.64743
+		      47      5   2   0         42              8        -43.64743
+		      48      0   3   3         48              9        -33.69824
+		      49      3   0   3         48              9        -33.69824
+		      50      3   3   0         48              9        -33.69824
+		      51      0   3   4         51              10       32.62781
+		      52      3   0   4         51              10       32.62781
+		      53      0   4   3         51              10       32.62781
+		      54      4   0   3         51              10       32.62781
+		      55      3   4   0         51              10       32.62781
+		      56      4   3   0         51              10       32.62781
+		      57      0   3   5         57              11       -30.33505
+		      58      3   0   5         57              11       -30.33505
+		      59      0   5   3         57              11       -30.33505
+		      60      5   0   3         57              11       -30.33505
+		      61      3   5   0         57              11       -30.33505
+		      62      5   3   0         57              11       -30.33505
+		      63      0   4   4         63              12       -60.80989
+		      64      4   0   4         63              12       -60.80989
+		      65      4   4   0         63              12       -60.80989
+		      66      0   4   5         66              13       52.88398
+		      67      4   0   5         66              13       52.88398
+		      68      0   5   4         66              13       52.88398
+		      69      5   0   4         66              13       52.88398
+		      70      4   5   0         66              13       52.88398
+		      71      5   4   0         66              13       52.88398
+		      72      0   5   5         72              14       78.98455
+		      73      5   0   5         72              14       78.98455
+		      74      5   5   0         72              14       78.98455
+		      75      1   1   1         75              15       8.54019
+		      76      1   1   2         76              16       15.10128
+		      77      1   2   1         76              16       15.10128
+		      78      2   1   1         76              16       15.10128
+		      79      1   1   3         79              17       -46.96485
+		      80      1   3   1         79              17       -46.96485
+		      81      3   1   1         79              17       -46.96485
+		      82      1   1   4         82              18       5.22434
+		      83      1   4   1         82              18       5.22434
+		      84      4   1   1         82              18       5.22434
+		      85      1   1   5         85              19       -34.00060
+		      86      1   5   1         85              19       -34.00060
+		      87      5   1   1         85              19       -34.00060
+		      88      1   2   2         88              20       30.84169
+		      89      2   1   2         88              20       30.84169
+		      90      2   2   1         88              20       30.84169
+		      91      1   2   3         91              21       0.05347
+		      92      2   1   3         91              21       0.05347
+		      93      1   3   2         91              21       0.05347
+		      94      3   1   2         91              21       0.05347
+		      95      2   3   1         91              21       0.05347
+		      96      3   2   1         91              21       0.05347
+		      97      1   2   4         97              22       50.28760
+		      98      2   1   4         97              22       50.28760
+		      99      1   4   2         97              22       50.28760
+		      100     4   1   2         97              22       50.28760
+		      101     2   4   1         97              22       50.28760
+		      102     4   2   1         97              22       50.28760
+		      103     1   2   5         103             23       -25.51642
+		      104     2   1   5         103             23       -25.51642
+		      105     1   5   2         103             23       -25.51642
+		      106     5   1   2         103             23       -25.51642
+		      107     2   5   1         103             23       -25.51642
+		      108     5   2   1         103             23       -25.51642
+		      109     1   3   3         109             24       93.50928
+		      110     3   1   3         109             24       93.50928
+		      111     3   3   1         109             24       93.50928
+		      112     1   3   4         112             25       -43.20410
+		      113     3   1   4         112             25       -43.20410
+		      114     1   4   3         112             25       -43.20410
+		      115     4   1   3         112             25       -43.20410
+		      116     3   4   1         112             25       -43.20410
+		      117     4   3   1         112             25       -43.20410
+		      118     1   3   5         118             26       71.14569
+		      119     3   1   5         118             26       71.14569
+		      120     1   5   3         118             26       71.14569
+		      121     5   1   3         118             26       71.14569
+		      122     3   5   1         118             26       71.14569
+		      123     5   3   1         118             26       71.14569
+		      124     1   4   4         124             27       -44.83814
+		      125     4   1   4         124             27       -44.83814
+		      126     4   4   1         124             27       -44.83814
+		      127     1   4   5         127             28       -82.25364
+		      128     4   1   5         127             28       -82.25364
+		      129     1   5   4         127             28       -82.25364
+		      130     5   1   4         127             28       -82.25364
+		      131     4   5   1         127             28       -82.25364
+		      132     5   4   1         127             28       -82.25364
+		      133     1   5   5         133             29       25.79560
+		      134     5   1   5         133             29       25.79560
+		      135     5   5   1         133             29       25.79560
+		      136     2   2   2         136             30       23.88584
+		      137     2   2   3         137             31       -34.41830
+		      138     2   3   2         137             31       -34.41830
+		      139     3   2   2         137             31       -34.41830
+		      140     2   2   4         140             32       15.51725
+		      141     2   4   2         140             32       15.51725
+		      142     4   2   2         140             32       15.51725
+		      143     2   2   5         143             33       -120.73899
+		      144     2   5   2         143             33       -120.73899
+		      145     5   2   2         143             33       -120.73899
+		      146     2   3   3         146             34       -20.16070
+		      147     3   2   3         146             34       -20.16070
+		      148     3   3   2         146             34       -20.16070
+		      149     2   3   4         149             35       53.85506
+		      150     3   2   4         149             35       53.85506
+		      151     2   4   3         149             35       53.85506
+		      152     4   2   3         149             35       53.85506
+		      153     3   4   2         149             35       53.85506
+		      154     4   3   2         149             35       53.85506
+		      155     2   3   5         155             36       -82.56035
+		      156     3   2   5         155             36       -82.56035
+		      157     2   5   3         155             36       -82.56035
+		      158     5   2   3         155             36       -82.56035
+		      159     3   5   2         155             36       -82.56035
+		      160     5   3   2         155             36       -82.56035
+		      161     2   4   4         161             37       7.76648
+		      162     4   2   4         161             37       7.76648
+		      163     4   4   2         161             37       7.76648
+		      164     2   4   5         164             38       63.55712
+		      165     4   2   5         164             38       63.55712
+		      166     2   5   4         164             38       63.55712
+		      167     5   2   4         164             38       63.55712
+		      168     4   5   2         164             38       63.55712
+		      169     5   4   2         164             38       63.55712
+		      170     2   5   5         170             39       84.71131
+		      171     5   2   5         170             39       84.71131
+		      172     5   5   2         170             39       84.71131
+		      173     3   3   3         173             40       -63.12291
+		      174     3   3   4         174             41       86.50166
+		      175     3   4   3         174             41       86.50166
+		      176     4   3   3         174             41       86.50166
+		      177     3   3   5         177             42       -38.21345
+		      178     3   5   3         177             42       -38.21345
+		      179     5   3   3         177             42       -38.21345
+		      180     3   4   4         180             43       -40.86231
+		      181     4   3   4         180             43       -40.86231
+		      182     4   4   3         180             43       -40.86231
+		      183     3   4   5         183             44       21.05236
+		      184     4   3   5         183             44       21.05236
+		      185     3   5   4         183             44       21.05236
+		      186     5   3   4         183             44       21.05236
+		      187     4   5   3         183             44       21.05236
+		      188     5   4   3         183             44       21.05236
+		      189     3   5   5         189             45       -23.73991
+		      190     5   3   5         189             45       -23.73991
+		      191     5   5   3         189             45       -23.73991
+		      192     4   4   4         192             46       35.96004
+		      193     4   4   5         193             47       26.92668
+		      194     4   5   4         193             47       26.92668
+		      195     5   4   4         193             47       26.92668
+		      196     4   5   5         196             48       85.04949
+		      197     5   4   5         196             48       85.04949
+		      198     5   5   4         196             48       85.04949
+		      199     5   5   5         199             49       15.34665
+
+	Fitted charges read from parameter file:
+		OO 0.44284 (147.05179)
+		HH 0.11071 (36.76275)
+		OH -0.22142 (-73.52570)
+
+
+Initializing the neighbor list...
+	Latest 3-body outer cutoff values: 
+	0:  4.30000  4.30000  4.30000
+	1:  4.20000  4.20000  4.30000
+	2:  4.10000  4.20000  4.20000
+	3:  4.10000  4.10000  4.10000
+     Max 3-body cutoff = 4.30000
+	Latest 3-body inner cutoff values: 
+	0:  1.93900  1.93900  1.93900
+	1:  0.72000  0.72000  1.93900
+	2:  0.98200  0.72000  0.72000
+	3:  0.98200  0.98200  0.98200
+     Min 3-body cutoff = 0.72000
+
+NEIGHBOR LIST MAX CUTOFF IS: 4.30000
+USING PADDING: 0.300
+Number of 3-body interactions = 25950
+
+Generating fast maps... 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+
+	Triplet maps:
+		Atom type idxs:  0 0 0 Triplet name:       OOOOOO Explicit index:  111 Unique index:    0
+		Atom type idxs:  0 0 1 Triplet name:       OOOHOH Explicit index:  211 Unique index:    1
+		Atom type idxs:  0 1 0 Triplet name:       OHOOOH Explicit index:  121 Unique index:    1
+		Atom type idxs:  0 1 1 Triplet name:       OHOHHH Explicit index:  221 Unique index:    2
+		Atom type idxs:  1 0 0 Triplet name:       OHOHOO Explicit index:  112 Unique index:    1
+		Atom type idxs:  1 0 1 Triplet name:       OHHHOH Explicit index:  212 Unique index:    2
+		Atom type idxs:  1 1 0 Triplet name:       HHOHOH Explicit index:  122 Unique index:    2
+		Atom type idxs:  1 1 1 Triplet name:       HHHHHH Explicit index:  222 Unique index:    3
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.3776337432
+Number of 3-body interactions = 28763
+Number of 3-body interactions = 28763
+
+Ewald parameters: 
+	Requested Ewald accuracy  =  1.000000e-06
+	Ewald alpha               =  7.723233e-01
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-Space accuracy estimate =  6.801448e-07
+
+	Cutting off K-vectors with magnitude less than 7
+	Number of Ewald K-vectors = 1364
+	K-space accuracy estimate = 0.0000008680
+
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
+      10      1.25       3.9271408     -55.3626733     -51.4355325          1331.3     17.65292032    -51.4501096
+Number of 3-body interactions = 28521
+ Updating neighbor list on step: 16, with padding: 0.367
+      20      2.50       4.0744081     -55.4542936     -51.3798855          1381.3     18.65561562    -51.4500082
+      30      3.75       4.6110878     -55.8895853     -51.2784975          1563.2     16.91380172    -51.4502063
+Number of 3-body interactions = 29792
+ Updating neighbor list on step: 30, with padding: 0.409
+      40      5.00       5.2583992     -56.3874437     -51.1290444          1782.7     13.93241719    -51.4505562
+Number of 3-body interactions = 31209
+ Updating neighbor list on step: 45, with padding: 0.440
+      50      6.25       5.6420856     -56.5862539     -50.9441682          1912.7     11.69090990    -51.4502511
+Number of 3-body interactions = 35544
+ Updating neighbor list on step: 59, with padding: 0.557
+      60      7.50       5.9930053     -56.7330790     -50.7400737          2031.7     10.98280676    -51.4505121
+      70      8.75       6.0905565     -56.6196711     -50.5291146          2064.8     12.07780958    -51.4506522
+Number of 3-body interactions = 36640
+ Updating neighbor list on step: 73, with padding: 0.584
+      80     10.00       5.8153971     -56.1417117     -50.3263146          1971.5     14.55121097    -51.4501090
+      90     11.25       5.7678231     -55.8971293     -50.1293063          1955.4     16.28467724    -51.4501322
+Number of 3-body interactions = 32766
+ Updating neighbor list on step: 90, with padding: 0.501
+     100     12.50       6.0101735     -55.9348919     -49.9247184          2037.5     16.81482003    -51.4499989
+Number of 3-body interactions = 35619
+ Updating neighbor list on step: 104, with padding: 0.563
+     110     13.75       6.4905944     -56.2029719     -49.7123774          2200.4     16.20275563    -51.4502853
+Number of 3-body interactions = 38020
+ Updating neighbor list on step: 118, with padding: 0.615
+     120     15.00       6.8676360     -56.3722283     -49.5045923          2328.2     14.83544055    -51.4502616
+     130     16.25       7.1455891     -56.4687349     -49.3231458          2422.4     13.29290402    -51.4501510
+Number of 3-body interactions = 37800
+ Updating neighbor list on step: 134, with padding: 0.605
+     140     17.50       7.3284271     -56.5109329     -49.1825059          2484.4     12.16342505    -51.4502545
+Number of 3-body interactions = 36732
+ Updating neighbor list on step: 149, with padding: 0.581
+     150     18.75       7.2413806     -56.3367537     -49.0953731          2454.9     11.95980394    -51.4501620
+     160     20.00       6.8742737     -55.9344481     -49.0601744          2330.5     13.05127097    -51.4502079
+Number of 3-body interactions = 35656
+ Updating neighbor list on step: 165, with padding: 0.555
+     170     21.25       6.2891723     -55.3491216     -49.0599492          2132.1     14.76777304    -51.4495040
+     180     22.50       6.3183270     -55.3938781     -49.0755511          2142.0     15.80306046    -51.4497138
+Number of 3-body interactions = 36775
+ Updating neighbor list on step: 180, with padding: 0.581
+     190     23.75       6.6604484     -55.7687673     -49.1083188          2258.0     15.42602226    -51.4507587
+Number of 3-body interactions = 37887
+ Updating neighbor list on step: 195, with padding: 0.607
+     200     25.00       6.2317596     -55.3942753     -49.1625157          2112.6     15.68568559    -51.4499667
+     210     26.25       5.9061788     -55.1306839     -49.2245051          2002.3     16.35632518    -51.4499262
+Number of 3-body interactions = 36706
+ Updating neighbor list on step: 210, with padding: 0.582
+     220     27.50       6.0291445     -55.3165437     -49.2873992          2043.9     16.21110746    -51.4500389
+Number of 3-body interactions = 33419
+ Updating neighbor list on step: 226, with padding: 0.503
+     230     28.75       6.3173149     -55.6750280     -49.3577131          2141.6     15.89037058    -51.4505096
+     240     30.00       6.1990257     -55.6407299     -49.4417042          2101.5     16.21467222    -51.4503261
+Number of 3-body interactions = 34200
+ Updating neighbor list on step: 240, with padding: 0.522
+     250     31.25       5.9611419     -55.4921140     -49.5309721          2020.9     16.24004817    -51.4499170
+Number of 3-body interactions = 35347
+ Updating neighbor list on step: 256, with padding: 0.541
+     260     32.50       6.0940289     -55.7177043     -49.6236754          2065.9     15.29052079    -51.4501315
+     270     33.75       6.1222917     -55.8471074     -49.7248157          2075.5     14.77278242    -51.4507083
+Number of 3-body interactions = 39407
+ Updating neighbor list on step: 270, with padding: 0.625
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.074 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 0.054
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.062 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 0.775
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.051 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 3.020
+     280     35.00       5.6161336     -55.4433148     -49.8271812          1903.9     15.69444741    -51.4512236
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.041 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 6.746
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820 pair type: 2
+chimesFF: 	...Penalty potential = 0.000
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 10.108
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820 pair type: 2
+chimesFF: 	...Penalty potential = 0.009
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.035 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 10.578
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.815 0.820 pair type: 2
+chimesFF: 	...Penalty potential = 0.016
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.039 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 7.745
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.816 0.820 pair type: 2
+chimesFF: 	...Penalty potential = 0.008
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.048 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 3.840
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 0.819 0.820 pair type: 2
+chimesFF: 	...Penalty potential = 0.000
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.060 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 1.137
+chimesFF: Adding penalty in 2B Cheby calc, r < rmin+penalty_dist 1.071 1.082 pair type: 1
+chimesFF: 	...Penalty potential = 0.117
+Number of 3-body interactions = 32207
+ Updating neighbor list on step: 289, with padding: 0.463
+     290     36.25       5.6012475     -55.5151610     -49.9139135          1898.9     16.51007289    -51.4499360
+     300     37.50       6.0661250     -56.0667460     -50.0006210          2056.5     17.10433295    -51.4509357
+END SIMULATION
+	Average temperature over run = 2029.3647 K
+	Average pressure    over run = 15.0863 GPa
+	Pressures from diagonal stress tensors over run: 15.0877
+	Average stress tensors over run: 
+		sigma_xx: 15.8596 GPa
+		sigma_yy: 14.4306 GPa
+		sigma_zz: 14.9728 GPa
+		sigma_xy: 0.7228 GPa
+		sigma_xz: 0.3849 GPa
+		sigma_yz: -0.5801 GPa

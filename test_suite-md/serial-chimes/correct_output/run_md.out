@@ -1,0 +1,473 @@
+Code compiled in MPI mode. Will run on 36 processor(s).
+
+Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: false
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 100
+	# NLAYERS #: 1
+	# USENEIG #: true
+	# PRMFILE #: params.3b.nodate.txt
+	# SERIAL_CHIMES #: TRUE
+	# CRDFILE #: input.xyz
+	# VELINIT #: READ ... reading velocities from coordinate file
+	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
+	# PRSCALC #: ANALYTICAL
+	# WRPCRDS #: false
+	# ATMENER #: true
+		... All reported energies include single atom contributions if available
+	# FRQTRAJ #: 20
+		... printing every 2.5 fs, 
+		... printing       5 frames. 
+	# TRAJEXT #: GEN
+	# FRQENER #: 10
+	# PRNTFRC #: true
+		... and will be printed every 20 frames.
+		... printing every 2.5 fs, 
+		... printing 5 frames. 
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: true
+		... and will be printed every 20 frames.
+		... printing every 2.5 fs, 
+		... printing 5 frames. 
+	# FORDFTB #: false
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+     ...Read the following coordinate file extension: xyz
+     ...Read the following number of atoms: 96
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.6091309 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084115885312
+
+	...Reading velocities from last three fields of atom info lines in xyzf file... 
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.6091309 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084115885312
+
+   ...read complete for file input.xyz
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e): NEGATIVE, mass (amu):  15.9994
+		1     H , q (e): POSITIVE, mass (amu):   1.0079
+   ...read complete
+
+	Real atoms:                 96
+	Total atoms (ghost):        2592
+	cell vectors (a)            8.6091 0.0000 0.0000
+	cell vectors (b)            0.0000 8.6091 0.0000
+	cell vectors (c)            0.0000 0.0000 8.6091
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.8274 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.8274
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVT-MTK simulation.
+	...Setting thermostat time constant to: 10.0000
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
+	Total Mass     = 576.4864 au
+	Volume         = 638.0841 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      true
+		...Use fit charges?             true
+		...Use 3-body Cheby params?     true
+		...Use 4-body Cheby params?     false
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Read FF quadruplet specifications...
+	...Reading all remaining force field parameters...
+		Re-setting individual atom charges based on pair charges :
+      Total system charge = 0.0000
+      Charges modified for exact neutrality (e):
+       O -0.516457241
+       H 0.258228241
+
+     
+     Pair charges modified for exact neutrality:
+       OO 88.570717764
+       HH 22.142614347
+       OH -44.285293788
+Atom properties:
+		0     O , q (e): -0.516, mass (amu):  15.9994
+		1     H , q (e):  0.258, mass (amu):   1.0079
+	...Read 2-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+	Reading  4 pairs for mapping
+	........Reading pair: HH with mapped index: 1
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: OO with mapped index: 0
+	...Read FF pairmaps...
+
+	Reading  8 triplet for mapping
+	........Reading triplet: HHHHHH with mapped index: 3
+	........Reading triplet: HHOHOH with mapped index: 2
+	........Reading triplet: OHHHOH with mapped index: 2
+	........Reading triplet: OHOHHH with mapped index: 2
+	........Reading triplet: OHOHOO with mapped index: 1
+	........Reading triplet: OHOOOH with mapped index: 1
+	........Reading triplet: OOOHOH with mapped index: 1
+	........Reading triplet: OOOOOO with mapped index: 0
+	...Read FF triplet maps...
+   ...read complete.
+
+Notes on simulation: 
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Using the following fcut style for 3B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Ewald summations will be used and charges will be taken from fit values
+
+Will read serial chimes calculator file from params.3b.nodate.txtchimesFF: 
+chimesFF: 01000011011010001001001010011010100010101010011 0100010101101110110011101101001011011101100101  
+chimesFF: 
+chimesFF:       _____  _      _____  __  __  ______   _____   ______                _                      
+chimesFF:      / ____|| |    |_   _||  \/  ||  ____| / ____| |  ____|              (_)                    
+chimesFF:     | |     | |__    | |  | \  / || |__   | (___   | |__    _ __    __ _  _  _ __    ___        
+chimesFF:     | |     | '_ \   | |  | |\/| ||  __|   \___ \  |  __|  | '_ \  / _` || || '_ \  / _ \ 
+chimesFF:     | |____ | | | | _| |_ | |  | || |____  ____) | | |____ | | | || (_| || || | | ||  __/        
+chimesFF:      \_____||_| |_||_____||_|  |_||______||_____/  |______||_| |_| \__, ||_||_| |_| \___|     
+chimesFF:                                                                     __/ |                        
+chimesFF:                                                                    |___/                         
+chimesFF: 
+chimesFF:                      Copyright (C) 2020 R.K. Lindsey, L.E. Fried, N. Goldman                     
+chimesFF: 
+chimesFF: 01000011011010001001001010011010100010101010011 0100010101101110110011101101001011011101100101   
+chimesFF: 
+chimesFF: Reading parameters from file: params.3b.nodate.txt
+chimesFF: Using respective 2, 3, and 4-body orders of: 10 2 0
+chimesFF: Note: Ignoring polynomial domain; assuming [-1,1]
+chimesFF: Will consider 2 atom types:
+chimesFF: 	0 O
+chimesFF: 	1 H
+chimesFF: Will consider 3 atom pair types
+chimesFF: Detected version 2 pair specification (no S_DELTA)
+chimesFF: 	0 O O
+chimesFF: 	1 H H
+chimesFF: 	2 O H
+chimesFF: Read the following pair type information:
+chimesFF: 	O O r_cut_in: 0.75000 r_cut_out: 6.00000 MORSE 1.25000
+chimesFF: 	H H r_cut_in: 0.75000 r_cut_out: 6.00000 MORSE 1.25000
+chimesFF: 	O H r_cut_in: 0.75000 r_cut_out: 6.00000 MORSE 1.25000
+chimesFF: Will use cutoff style CUBIC
+chimesFF: Read 2B parameters for pair: 0 O O
+chimesFF: 	0 -139.86847
+chimesFF: 	1 -21.69124
+chimesFF: 	2 65.04605
+chimesFF: 	3 5.13096
+chimesFF: 	4 -34.23650
+chimesFF: 	5 -20.68008
+chimesFF: 	6 39.20755
+chimesFF: 	7 13.34068
+chimesFF: 	8 -1.94575
+chimesFF: 	9 -10.55199
+chimesFF: Read 2B parameters for pair: 1 H H
+chimesFF: 	0 -47.75608
+chimesFF: 	1 -71.33160
+chimesFF: 	2 -86.12285
+chimesFF: 	3 -92.79789
+chimesFF: 	4 -74.29801
+chimesFF: 	5 -56.91144
+chimesFF: 	6 -38.60770
+chimesFF: 	7 -23.59026
+chimesFF: 	8 -11.11346
+chimesFF: 	9 -3.67340
+chimesFF: Read 2B parameters for pair: 2 O H
+chimesFF: 	0 3.47429
+chimesFF: 	1 13.62677
+chimesFF: 	2 33.35444
+chimesFF: 	3 12.38242
+chimesFF: 	4 3.07869
+chimesFF: 	5 2.22372
+chimesFF: 	6 -1.46058
+chimesFF: 	7 0.42968
+chimesFF: 	8 0.56414
+chimesFF: 	9 0.30770
+chimesFF: Built the following 2-body pair "slow" map:
+chimesFF: 	1 HH(i: 0)
+chimesFF: 	2 HO(i: 1)
+chimesFF: 	2 OH(i: 2)
+chimesFF: 	0 OO(i: 3)
+chimesFF: Built the following 2-body pair "fast" map:
+chimesFF: 	OO: 0 0
+chimesFF: 	OH: 1 2
+chimesFF: 	HO: 2 2
+chimesFF: 	HH: 3 1
+chimesFF: Read 3B parameters for triplet: 0 O O O
+chimesFF: 	0 1 1 55.38681
+chimesFF: 	1 0 1 55.38681
+chimesFF: 	1 1 0 55.38681
+chimesFF: 	1 1 1 0.01856
+chimesFF: Read 3B parameters for triplet: 1 H O O
+chimesFF: 	0 1 1 -372.55916
+chimesFF: 	1 0 1 -372.55916
+chimesFF: 	1 1 0 1171.41654
+chimesFF: 	1 1 1 1492.38088
+chimesFF: Read 3B parameters for triplet: 2 H H O
+chimesFF: 	0 1 1 57.31739
+chimesFF: 	1 0 1 -91.48339
+chimesFF: 	1 1 0 -91.48339
+chimesFF: 	1 1 1 -223.96848
+chimesFF: Read 3B parameters for triplet: 3 H H H
+chimesFF: 	0 1 1 -4.75904
+chimesFF: 	1 0 1 -4.75904
+chimesFF: 	1 1 0 -4.75904
+chimesFF: 	1 1 1 68.80443
+chimesFF: Built the following 3-body pair "slow" map:
+chimesFF: 	3 HHHHHH
+chimesFF: 	2 HHOHOH
+chimesFF: 	2 OHHHOH
+chimesFF: 	2 OHOHHH
+chimesFF: 	1 OHOHOO
+chimesFF: 	1 OHOOOH
+chimesFF: 	1 OOOHOH
+chimesFF: 	0 OOOOOO
+chimesFF: Built the following 3-body pair "fast" map:
+chimesFF: 	0 0
+chimesFF: 	1 1
+chimesFF: 	2 1
+chimesFF: 	3 2
+chimesFF: 	4 1
+chimesFF: 	5 2
+chimesFF: 	6 2
+chimesFF: 	7 3
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		SERIAL_CHIMES 10
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax......cheby lambda
+		OO 0.75000 6.00000 
+		Parameters: 
+		0 -139.86847
+		1 -21.69124
+		2 65.04605
+		3 5.13096
+		4 -34.23650
+		5 -20.68008
+		6 39.20755
+		7 13.34068
+		8 -1.94575
+		9 -10.55199
+
+		pair type...smin...smax......cheby lambda
+		HH 0.75000 6.00000 MORSE 1.25000 0.01000 1.00000e+04 0.00000e+00
+		Parameters: 
+		0 -4.77561e+01
+		1 -7.13316e+01
+		2 -8.61228e+01
+		3 -9.27979e+01
+		4 -7.42980e+01
+		5 -5.69114e+01
+		6 -3.86077e+01
+		7 -2.35903e+01
+		8 -1.11135e+01
+		9 -3.67340e+00
+
+		pair type...smin...smax......cheby lambda
+		OH 7.50000e-01 6.00000e+00 MORSE 1.25000e+00 1.00000e-02 1.00000e+04 0.00000e+00
+		Parameters: 
+		0 3.47429e+00
+		1 1.36268e+01
+		2 3.33544e+01
+		3 1.23824e+01
+		4 3.07869e+00
+		5 2.22372e+00
+		6 -1.46058e+00
+		7 4.29684e-01
+		8 5.64140e-01
+		9 3.07701e-01
+
+
+	The following unique triplets of atoms have been identified:
+
+    Cluster index       : 0
+    Atoms in the cluster: O O O 
+    Pairs in the cluster: OO OO OO 
+    Number of unique sets of powers: 2 (4 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        55.38681
+		      1       1   0   1         0               0        55.38681
+		      2       1   1   0         0               0        55.38681
+		      3       1   1   1         3               1        0.01856
+
+    Cluster index       : 1
+    Atoms in the cluster: H O O 
+    Pairs in the cluster: OH OH OO 
+    Number of unique sets of powers: 3 (4 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        -372.55916
+		      1       1   0   1         0               0        -372.55916
+		      2       1   1   0         2               1        1171.41654
+		      3       1   1   1         3               2        1492.38088
+
+    Cluster index       : 2
+    Atoms in the cluster: H H O 
+    Pairs in the cluster: HH OH OH 
+    Number of unique sets of powers: 3 (4 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        57.31739
+		      1       1   0   1         1               1        -91.48339
+		      2       1   1   0         1               1        -91.48339
+		      3       1   1   1         3               2        -223.96848
+
+    Cluster index       : 3
+    Atoms in the cluster: H H H 
+    Pairs in the cluster: HH HH HH 
+    Number of unique sets of powers: 2 (4 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        -4.75904
+		      1       1   0   1         0               0        -4.75904
+		      2       1   1   0         0               0        -4.75904
+		      3       1   1   1         3               1        68.80443
+
+	Fitted charges read from parameter file:
+		OO 0.26673 (88.57072)
+		HH 0.06668 (22.14261)
+		OH -0.13336 (-44.28529)
+
+
+Initializing the neighbor list...
+	Latest 3-body outer cutoff values: 
+	0:  6.00000  6.00000  6.00000
+	1:  6.00000  6.00000  6.00000
+	2:  6.00000  6.00000  6.00000
+	3:  6.00000  6.00000  6.00000
+     Max 3-body cutoff = 6.00000
+	Latest 3-body inner cutoff values: 
+	0:  0.75000  0.75000  0.75000
+	1:  0.75000  0.75000  0.75000
+	2:  0.75000  0.75000  0.75000
+	3:  0.75000  0.75000  0.75000
+     Min 3-body cutoff = 0.75000
+
+NEIGHBOR LIST MAX CUTOFF IS: 6.00000
+USING PADDING: 0.300
+Number of 3-body interactions = 182650
+
+Generating fast maps... 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+
+	Triplet maps:
+		Atom type idxs:  0 0 0 Triplet name:       OOOOOO Explicit index:  111 Unique index:    0
+		Atom type idxs:  0 0 1 Triplet name:       OOOHOH Explicit index:  211 Unique index:    1
+		Atom type idxs:  0 1 0 Triplet name:       OHOOOH Explicit index:  121 Unique index:    1
+		Atom type idxs:  0 1 1 Triplet name:       OHOHHH Explicit index:  221 Unique index:    2
+		Atom type idxs:  1 0 0 Triplet name:       OHOHOO Explicit index:  112 Unique index:    1
+		Atom type idxs:  1 0 1 Triplet name:       OHHHOH Explicit index:  212 Unique index:    2
+		Atom type idxs:  1 1 0 Triplet name:       HHOHOH Explicit index:  122 Unique index:    2
+		Atom type idxs:  1 1 1 Triplet name:       HHHHHH Explicit index:  222 Unique index:    3
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.3776337432
+Number of 3-body interactions = 197665
+Number of 3-body interactions = 197665
+
+Ewald parameters: 
+	Requested Ewald accuracy  =  1.000000e-06
+	Ewald alpha               =  7.723233e-01
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-Space accuracy estimate =  6.801448e-07
+
+	Cutting off K-vectors with magnitude less than 7
+	Number of Ewald K-vectors = 1364
+	K-space accuracy estimate = 0.0000008680
+
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
+      10      1.25       3.8811954       1.0761928       4.9573882          1315.8     39.91700291      4.9428577
+Number of 3-body interactions = 198376
+ Updating neighbor list on step: 16, with padding: 0.380
+      20      2.50       3.8029314       1.2092777       5.0122091          1289.2     40.31948474      4.9430935
+      30      3.75       3.9701959       1.1398895       5.1100854          1345.9     38.36497250      4.9428860
+Number of 3-body interactions = 208712
+ Updating neighbor list on step: 30, with padding: 0.426
+      40      5.00       4.1315919       1.1228503       5.2544422          1400.7     35.37414843      4.9429797
+Number of 3-body interactions = 204040
+ Updating neighbor list on step: 45, with padding: 0.411
+      50      6.25       4.3100485       1.1335305       5.4435790          1461.2     33.02255279      4.9430740
+      60      7.50       4.5850416       1.0953259       5.6803676          1554.4     32.25608714      4.9430529
+Number of 3-body interactions = 201999
+ Updating neighbor list on step: 61, with padding: 0.407
+      70      8.75       4.9178629       1.0482086       5.9660715          1667.2     33.37466910      4.9430573
+Number of 3-body interactions = 211831
+ Updating neighbor list on step: 76, with padding: 0.455
+      80     10.00       5.3104637       0.9898054       6.3002691          1800.3     35.98874820      4.9430105
+      90     11.25       5.7215935       0.9563494       6.6779429          1939.7     38.43873596      4.9430985
+Number of 3-body interactions = 216978
+ Updating neighbor list on step: 91, with padding: 0.489
+     100     12.50       6.1552101       0.9349109       7.0901210          2086.7     39.27001019      4.9429957
+END SIMULATION
+	Average temperature over run = 1551.7323 K
+	Average pressure    over run = 36.5811 GPa
+	Pressures from diagonal stress tensors over run: 36.5819
+	Average stress tensors over run: 
+		sigma_xx: 37.1676 GPa
+		sigma_yy: 36.4770 GPa
+		sigma_zz: 36.1012 GPa
+		sigma_xy: 0.4916 GPa
+		sigma_xz: 0.3839 GPa
+		sigma_yz: -1.4772 GPa

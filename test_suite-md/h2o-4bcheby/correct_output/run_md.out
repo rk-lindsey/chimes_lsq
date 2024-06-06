@@ -1,0 +1,1666 @@
+Code compiled in MPI mode. Will run on 36 processor(s).
+
+Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: false
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 200
+	# NLAYERS #: 1
+	# USENEIG #: true
+	# PRMFILE #: params.new.txt
+	# CRDFILE #: input.xyz
+	# VELINIT #: READ ... reading velocities from coordinate file
+	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
+	# PRSCALC #: ANALYTICAL
+	# WRPCRDS #: false
+	# ATMENER #: true
+		... All reported energies include single atom contributions if available
+	# FRQTRAJ #: 20
+		... printing every 2.5 fs, 
+		... printing       10 frames. 
+	# TRAJEXT #: GEN
+	# FRQENER #: 1
+	# PRNTFRC #: true
+		... and will be printed every 5 frames.
+		... printing every 0.625 fs, 
+		... printing 40 frames. 
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: true
+		... and will be printed every 5 frames.
+		... printing every 0.625 fs, 
+		... printing 40 frames. 
+	# FORDFTB #: false
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+     ...Read the following coordinate file extension: xyz
+     ...Read the following number of atoms: 96
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.6091309 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084115885312
+
+	...Reading velocities from last three fields of atom info lines in xyzf file... 
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.6091309 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084115885312
+
+   ...read complete for file input.xyz
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e): NEGATIVE, mass (amu):  15.9994
+		1     H , q (e): POSITIVE, mass (amu):   1.0079
+   ...read complete
+
+	Real atoms:                 96
+	Total atoms (ghost):        2592
+	cell vectors (a)            8.6091 0.0000 0.0000
+	cell vectors (b)            0.0000 8.6091 0.0000
+	cell vectors (c)            0.0000 0.0000 8.6091
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.8274 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.8274
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVT-MTK simulation.
+	...Setting thermostat time constant to: 10.0000
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,    -0.0000) 
+	Total Mass     = 576.4864 au
+	Volume         = 638.0841 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      true
+		...Use fit charges?             true
+		...Use 3-body Cheby params?     true
+		...Use 4-body Cheby params?     true
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Read FF quadruplet specifications...
+	...Reading all remaining force field parameters...
+		Re-setting individual atom charges based on pair charges :
+      Total system charge = 0.0000
+      Charges modified for exact neutrality (e):
+       O -0.609577531
+       H 0.304788758
+
+     
+     Pair charges modified for exact neutrality:
+       OO 123.389818417
+       HH 30.847453078
+       OH -61.694907682
+Atom properties:
+		0     O , q (e): -0.610, mass (amu):  15.9994
+		1     H , q (e):  0.305, mass (amu):   1.0079
+	...Read 2-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+	...Read 3-body FF params...
+	...Read 4-body FF params...
+	...Read 4-body FF params...
+	...Read 4-body FF params...
+	...Read 4-body FF params...
+	...Read 4-body FF params...
+	Reading  4 pairs for mapping
+	........Reading pair: HH with mapped index: 1
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: OO with mapped index: 0
+	...Read FF pairmaps...
+
+	Reading  8 triplet for mapping
+	........Reading triplet: HHHHHH with mapped index: 3
+	........Reading triplet: HHOHOH with mapped index: 2
+	........Reading triplet: OHHHOH with mapped index: 2
+	........Reading triplet: OHOHHH with mapped index: 2
+	........Reading triplet: OHOHOO with mapped index: 1
+	........Reading triplet: OHOOOH with mapped index: 1
+	........Reading triplet: OOOHOH with mapped index: 1
+	........Reading triplet: OOOOOO with mapped index: 0
+	...Read FF triplet maps...
+	Reading  16 quadruplet for mapping
+	........Reading quadruplet: HHHHHHHHHHHH with mapped index: 4
+	........Reading quadruplet: HHHHOHHHOHOH with mapped index: 3
+	........Reading quadruplet: HHOHHHOHHHOH with mapped index: 3
+	........Reading quadruplet: HHOHOHOHOHOO with mapped index: 2
+	........Reading quadruplet: OHHHHHOHOHHH with mapped index: 3
+	........Reading quadruplet: OHHHOHOHOOOH with mapped index: 2
+	........Reading quadruplet: OHOHHHOOOHOH with mapped index: 2
+	........Reading quadruplet: OHOHOHHHHHHH with mapped index: 3
+	........Reading quadruplet: OHOHOHOOOOOO with mapped index: 1
+	........Reading quadruplet: OHOHOOHHOHOH with mapped index: 2
+	........Reading quadruplet: OHOOOHOHHHOH with mapped index: 2
+	........Reading quadruplet: OHOOOOOHOHOO with mapped index: 1
+	........Reading quadruplet: OOOHOHOHOHHH with mapped index: 2
+	........Reading quadruplet: OOOHOOOHOOOH with mapped index: 1
+	........Reading quadruplet: OOOOOHOOOHOH with mapped index: 1
+	........Reading quadruplet: OOOOOOOOOOOO with mapped index: 0
+	...Read FF quadruplet maps...
+   ...read complete.
+
+Notes on simulation: 
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Using the following fcut style for 3B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Using the following fcut style for 4B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Ewald summations will be used and charges will be taken from fit values
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		CHEBYSHEV 10
+	Performing pair distance transformations over range: 
+		-1.0000 to 1.0000
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		OO 0.7500 5.0000 MORSE 1.2500 0.0100 1.0000e+04 0.0000e+00
+		Parameters: 
+		0 -2.0843e+01
+		1 -2.8291e+01
+		2 3.2986e+01
+		3 6.2637e+00
+		4 -2.8174e+01
+		5 1.9639e+00
+		6 2.6614e+01
+		7 -8.4197e+00
+		8 -1.9733e+01
+		9 -2.2570e+01
+
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		HH 7.5000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
+		Parameters: 
+		0 1.4399e+01
+		1 -1.6530e+01
+		2 -4.2540e+01
+		3 -6.1001e+01
+		4 -4.2225e+01
+		5 -3.2671e+01
+		6 -1.5407e+01
+		7 -8.2679e+00
+		8 -2.2290e+00
+		9 -1.2557e+00
+
+		pair type...smin...smax...cheby type...cheby lambda...penalty dist...penalty scaling...cubic scaling...killlen
+		OH 7.5000e-01 5.0000e+00 MORSE 1.2500e+00 1.0000e-02 1.0000e+04 0.0000e+00
+		Parameters: 
+		0 -5.1762e+00
+		1 8.0959e+00
+		2 4.5018e+01
+		3 1.2093e+01
+		4 3.5914e+00
+		5 -1.3916e+00
+		6 -2.0494e+00
+		7 1.4498e+00
+		8 -3.8137e-02
+		9 -4.1384e-01
+
+
+	The following unique triplets of atoms have been identified:
+
+    Cluster index       : 0
+    Atoms in the cluster: O O O 
+    Pairs in the cluster: OO OO OO 
+    Number of unique sets of powers: 50 (200 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        1.7315
+		      1       1   0   1         0               0        1.7315
+		      2       1   1   0         0               0        1.7315
+		      3       0   1   2         3               1        2.4788
+		      4       1   0   2         3               1        2.4788
+		      5       0   2   1         3               1        2.4788
+		      6       2   0   1         3               1        2.4788
+		      7       1   2   0         3               1        2.4788
+		      8       2   1   0         3               1        2.4788
+		      9       0   1   3         9               2        -5.1914
+		      10      1   0   3         9               2        -5.1914
+		      11      0   3   1         9               2        -5.1914
+		      12      3   0   1         9               2        -5.1914
+		      13      1   3   0         9               2        -5.1914
+		      14      3   1   0         9               2        -5.1914
+		      15      0   1   4         15              3        2.5160
+		      16      1   0   4         15              3        2.5160
+		      17      0   4   1         15              3        2.5160
+		      18      4   0   1         15              3        2.5160
+		      19      1   4   0         15              3        2.5160
+		      20      4   1   0         15              3        2.5160
+		      21      0   1   5         21              4        1.8624
+		      22      1   0   5         21              4        1.8624
+		      23      0   5   1         21              4        1.8624
+		      24      5   0   1         21              4        1.8624
+		      25      1   5   0         21              4        1.8624
+		      26      5   1   0         21              4        1.8624
+		      27      0   2   2         27              5        0.8711
+		      28      2   0   2         27              5        0.8711
+		      29      2   2   0         27              5        0.8711
+		      30      0   2   3         30              6        -4.0968
+		      31      2   0   3         30              6        -4.0968
+		      32      0   3   2         30              6        -4.0968
+		      33      3   0   2         30              6        -4.0968
+		      34      2   3   0         30              6        -4.0968
+		      35      3   2   0         30              6        -4.0968
+		      36      0   2   4         36              7        2.5242
+		      37      2   0   4         36              7        2.5242
+		      38      0   4   2         36              7        2.5242
+		      39      4   0   2         36              7        2.5242
+		      40      2   4   0         36              7        2.5242
+		      41      4   2   0         36              7        2.5242
+		      42      0   2   5         42              8        1.2221
+		      43      2   0   5         42              8        1.2221
+		      44      0   5   2         42              8        1.2221
+		      45      5   0   2         42              8        1.2221
+		      46      2   5   0         42              8        1.2221
+		      47      5   2   0         42              8        1.2221
+		      48      0   3   3         48              9        4.2191
+		      49      3   0   3         48              9        4.2191
+		      50      3   3   0         48              9        4.2191
+		      51      0   3   4         51              10       -4.0722
+		      52      3   0   4         51              10       -4.0722
+		      53      0   4   3         51              10       -4.0722
+		      54      4   0   3         51              10       -4.0722
+		      55      3   4   0         51              10       -4.0722
+		      56      4   3   0         51              10       -4.0722
+		      57      0   3   5         57              11       -3.5714
+		      58      3   0   5         57              11       -3.5714
+		      59      0   5   3         57              11       -3.5714
+		      60      5   0   3         57              11       -3.5714
+		      61      3   5   0         57              11       -3.5714
+		      62      5   3   0         57              11       -3.5714
+		      63      0   4   4         63              12       0.3720
+		      64      4   0   4         63              12       0.3720
+		      65      4   4   0         63              12       0.3720
+		      66      0   4   5         66              13       3.0298
+		      67      4   0   5         66              13       3.0298
+		      68      0   5   4         66              13       3.0298
+		      69      5   0   4         66              13       3.0298
+		      70      4   5   0         66              13       3.0298
+		      71      5   4   0         66              13       3.0298
+		      72      0   5   5         72              14       0.1882
+		      73      5   0   5         72              14       0.1882
+		      74      5   5   0         72              14       0.1882
+		      75      1   1   1         75              15       -0.2958
+		      76      1   1   2         76              16       -0.7099
+		      77      1   2   1         76              16       -0.7099
+		      78      2   1   1         76              16       -0.7099
+		      79      1   1   3         79              17       1.3549
+		      80      1   3   1         79              17       1.3549
+		      81      3   1   1         79              17       1.3549
+		      82      1   1   4         82              18       -0.5319
+		      83      1   4   1         82              18       -0.5319
+		      84      4   1   1         82              18       -0.5319
+		      85      1   1   5         85              19       -0.6197
+		      86      1   5   1         85              19       -0.6197
+		      87      5   1   1         85              19       -0.6197
+		      88      1   2   2         88              20       -0.3826
+		      89      2   1   2         88              20       -0.3826
+		      90      2   2   1         88              20       -0.3826
+		      91      1   2   3         91              21       2.0834
+		      92      2   1   3         91              21       2.0834
+		      93      1   3   2         91              21       2.0834
+		      94      3   1   2         91              21       2.0834
+		      95      2   3   1         91              21       2.0834
+		      96      3   2   1         91              21       2.0834
+		      97      1   2   4         97              22       -1.4679
+		      98      2   1   4         97              22       -1.4679
+		      99      1   4   2         97              22       -1.4679
+		      100     4   1   2         97              22       -1.4679
+		      101     2   4   1         97              22       -1.4679
+		      102     4   2   1         97              22       -1.4679
+		      103     1   2   5         103             23       -0.3035
+		      104     2   1   5         103             23       -0.3035
+		      105     1   5   2         103             23       -0.3035
+		      106     5   1   2         103             23       -0.3035
+		      107     2   5   1         103             23       -0.3035
+		      108     5   2   1         103             23       -0.3035
+		      109     1   3   3         109             24       -2.1130
+		      110     3   1   3         109             24       -2.1130
+		      111     3   3   1         109             24       -2.1130
+		      112     1   3   4         112             25       1.9208
+		      113     3   1   4         112             25       1.9208
+		      114     1   4   3         112             25       1.9208
+		      115     4   1   3         112             25       1.9208
+		      116     3   4   1         112             25       1.9208
+		      117     4   3   1         112             25       1.9208
+		      118     1   3   5         118             26       1.8151
+		      119     3   1   5         118             26       1.8151
+		      120     1   5   3         118             26       1.8151
+		      121     5   1   3         118             26       1.8151
+		      122     3   5   1         118             26       1.8151
+		      123     5   3   1         118             26       1.8151
+		      124     1   4   4         124             27       0.0961
+		      125     4   1   4         124             27       0.0961
+		      126     4   4   1         124             27       0.0961
+		      127     1   4   5         127             28       -2.0907
+		      128     4   1   5         127             28       -2.0907
+		      129     1   5   4         127             28       -2.0907
+		      130     5   1   4         127             28       -2.0907
+		      131     4   5   1         127             28       -2.0907
+		      132     5   4   1         127             28       -2.0907
+		      133     1   5   5         133             29       0.3105
+		      134     5   1   5         133             29       0.3105
+		      135     5   5   1         133             29       0.3105
+		      136     2   2   2         136             30       -0.1890
+		      137     2   2   3         137             31       0.9653
+		      138     2   3   2         137             31       0.9653
+		      139     3   2   2         137             31       0.9653
+		      140     2   2   4         140             32       -0.3521
+		      141     2   4   2         140             32       -0.3521
+		      142     4   2   2         140             32       -0.3521
+		      143     2   2   5         143             33       -0.7032
+		      144     2   5   2         143             33       -0.7032
+		      145     5   2   2         143             33       -0.7032
+		      146     2   3   3         146             34       -1.9695
+		      147     3   2   3         146             34       -1.9695
+		      148     3   3   2         146             34       -1.9695
+		      149     2   3   4         149             35       2.0075
+		      150     3   2   4         149             35       2.0075
+		      151     2   4   3         149             35       2.0075
+		      152     4   2   3         149             35       2.0075
+		      153     3   4   2         149             35       2.0075
+		      154     4   3   2         149             35       2.0075
+		      155     2   3   5         155             36       1.8722
+		      156     3   2   5         155             36       1.8722
+		      157     2   5   3         155             36       1.8722
+		      158     5   2   3         155             36       1.8722
+		      159     3   5   2         155             36       1.8722
+		      160     5   3   2         155             36       1.8722
+		      161     2   4   4         161             37       -0.7098
+		      162     4   2   4         161             37       -0.7098
+		      163     4   4   2         161             37       -0.7098
+		      164     2   4   5         164             38       -0.2439
+		      165     4   2   5         164             38       -0.2439
+		      166     2   5   4         164             38       -0.2439
+		      167     5   2   4         164             38       -0.2439
+		      168     4   5   2         164             38       -0.2439
+		      169     5   4   2         164             38       -0.2439
+		      170     2   5   5         170             39       -1.0719
+		      171     5   2   5         170             39       -1.0719
+		      172     5   5   2         170             39       -1.0719
+		      173     3   3   3         173             40       1.2563
+		      174     3   3   4         174             41       -1.5911
+		      175     3   4   3         174             41       -1.5911
+		      176     4   3   3         174             41       -1.5911
+		      177     3   3   5         177             42       -2.0472
+		      178     3   5   3         177             42       -2.0472
+		      179     5   3   3         177             42       -2.0472
+		      180     3   4   4         180             43       0.2407
+		      181     4   3   4         180             43       0.2407
+		      182     4   4   3         180             43       0.2407
+		      183     3   4   5         183             44       2.6042
+		      184     4   3   5         183             44       2.6042
+		      185     3   5   4         183             44       2.6042
+		      186     5   3   4         183             44       2.6042
+		      187     4   5   3         183             44       2.6042
+		      188     5   4   3         183             44       2.6042
+		      189     3   5   5         189             45       0.7931
+		      190     5   3   5         189             45       0.7931
+		      191     5   5   3         189             45       0.7931
+		      192     4   4   4         192             46       0.3655
+		      193     4   4   5         193             47       -1.6417
+		      194     4   5   4         193             47       -1.6417
+		      195     5   4   4         193             47       -1.6417
+		      196     4   5   5         196             48       0.7395
+		      197     5   4   5         196             48       0.7395
+		      198     5   5   4         196             48       0.7395
+		      199     5   5   5         199             49       -0.7252
+
+    Cluster index       : 1
+    Atoms in the cluster: H O O 
+    Pairs in the cluster: OH OH OO 
+    Number of unique sets of powers: 115 (200 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        -16.2915
+		      1       1   0   1         0               0        -16.2915
+		      2       0   1   2         2               1        -33.5930
+		      3       1   0   2         2               1        -33.5930
+		      4       0   1   3         4               2        42.8438
+		      5       1   0   3         4               2        42.8438
+		      6       0   1   4         6               3        1.4492
+		      7       1   0   4         6               3        1.4492
+		      8       0   1   5         8               4        -45.8778
+		      9       1   0   5         8               4        -45.8778
+		      10      0   2   1         10              5        -1.6772
+		      11      2   0   1         10              5        -1.6772
+		      12      0   2   2         12              6        33.0367
+		      13      2   0   2         12              6        33.0367
+		      14      0   2   3         14              7        -32.4049
+		      15      2   0   3         14              7        -32.4049
+		      16      0   2   4         16              8        -12.6251
+		      17      2   0   4         16              8        -12.6251
+		      18      0   2   5         18              9        64.2340
+		      19      2   0   5         18              9        64.2340
+		      20      0   3   1         20              10       16.4865
+		      21      3   0   1         20              10       16.4865
+		      22      0   3   2         22              11       25.0327
+		      23      3   0   2         22              11       25.0327
+		      24      0   3   3         24              12       -50.6782
+		      25      3   0   3         24              12       -50.6782
+		      26      0   3   4         26              13       30.1459
+		      27      3   0   4         26              13       30.1459
+		      28      0   3   5         28              14       29.1785
+		      29      3   0   5         28              14       29.1785
+		      30      0   4   1         30              15       7.1445
+		      31      4   0   1         30              15       7.1445
+		      32      0   4   2         32              16       0.5664
+		      33      4   0   2         32              16       0.5664
+		      34      0   4   3         34              17       8.5315
+		      35      4   0   3         34              17       8.5315
+		      36      0   4   4         36              18       -16.5878
+		      37      4   0   4         36              18       -16.5878
+		      38      0   4   5         38              19       -10.3598
+		      39      4   0   5         38              19       -10.3598
+		      40      0   5   1         40              20       12.8691
+		      41      5   0   1         40              20       12.8691
+		      42      0   5   2         42              21       2.9423
+		      43      5   0   2         42              21       2.9423
+		      44      0   5   3         44              22       6.0237
+		      45      5   0   3         44              22       6.0237
+		      46      0   5   4         46              23       -19.3263
+		      47      5   0   4         46              23       -19.3263
+		      48      0   5   5         48              24       -10.8415
+		      49      5   0   5         48              24       -10.8415
+		      50      1   1   0         50              25       11.6507
+		      51      1   1   1         51              26       -5.7668
+		      52      1   1   2         52              27       -6.4897
+		      53      1   1   3         53              28       13.4411
+		      54      1   1   4         54              29       -7.3661
+		      55      1   1   5         55              30       -7.6589
+		      56      1   2   0         56              31       -29.6696
+		      57      2   1   0         56              31       -29.6696
+		      58      1   2   1         58              32       9.4330
+		      59      2   1   1         58              32       9.4330
+		      60      1   2   2         60              33       24.1954
+		      61      2   1   2         60              33       24.1954
+		      62      1   2   3         62              34       -25.3627
+		      63      2   1   3         62              34       -25.3627
+		      64      1   2   4         64              35       -9.6653
+		      65      2   1   4         64              35       -9.6653
+		      66      1   2   5         66              36       34.9609
+		      67      2   1   5         66              36       34.9609
+		      68      1   3   0         68              37       -36.9667
+		      69      3   1   0         68              37       -36.9667
+		      70      1   3   1         70              38       17.2607
+		      71      3   1   1         70              38       17.2607
+		      72      1   3   2         72              39       21.4002
+		      73      3   1   2         72              39       21.4002
+		      74      1   3   3         74              40       -38.2481
+		      75      3   1   3         74              40       -38.2481
+		      76      1   3   4         76              41       13.9948
+		      77      3   1   4         76              41       13.9948
+		      78      1   3   5         78              42       27.6778
+		      79      3   1   5         78              42       27.6778
+		      80      1   4   0         80              43       -1.7580
+		      81      4   1   0         80              43       -1.7580
+		      82      1   4   1         82              44       1.4498
+		      83      4   1   1         82              44       1.4498
+		      84      1   4   2         84              45       0.4394
+		      85      4   1   2         84              45       0.4394
+		      86      1   4   3         86              46       -3.6940
+		      87      4   1   3         86              46       -3.6940
+		      88      1   4   4         88              47       3.9395
+		      89      4   1   4         88              47       3.9395
+		      90      1   4   5         90              48       2.0810
+		      91      4   1   5         90              48       2.0810
+		      92      1   5   0         92              49       1.7731
+		      93      5   1   0         92              49       1.7731
+		      94      1   5   1         94              50       -0.9668
+		      95      5   1   1         94              50       -0.9668
+		      96      1   5   2         96              51       2.9492
+		      97      5   1   2         96              51       2.9492
+		      98      1   5   3         98              52       -11.0039
+		      99      5   1   3         98              52       -11.0039
+		      100     1   5   4         100             53       14.0409
+		      101     5   1   4         100             53       14.0409
+		      102     1   5   5         102             54       4.3085
+		      103     5   1   5         102             54       4.3085
+		      104     2   2   0         104             55       -15.5335
+		      105     2   2   1         105             56       8.5924
+		      106     2   2   2         106             57       2.8109
+		      107     2   2   3         107             58       -4.5853
+		      108     2   2   4         108             59       -0.1980
+		      109     2   2   5         109             60       -4.9536
+		      110     2   3   0         110             61       12.4459
+		      111     3   2   0         110             61       12.4459
+		      112     2   3   1         112             62       -3.9957
+		      113     3   2   1         112             62       -3.9957
+		      114     2   3   2         114             63       -12.1160
+		      115     3   2   2         114             63       -12.1160
+		      116     2   3   3         116             64       17.4237
+		      117     3   2   3         116             64       17.4237
+		      118     2   3   4         118             65       -3.2931
+		      119     3   2   4         118             65       -3.2931
+		      120     2   3   5         120             66       -18.7079
+		      121     3   2   5         120             66       -18.7079
+		      122     2   4   0         122             67       17.7132
+		      123     4   2   0         122             67       17.7132
+		      124     2   4   1         124             68       -5.1610
+		      125     4   2   1         124             68       -5.1610
+		      126     2   4   2         126             69       -13.4224
+		      127     4   2   2         126             69       -13.4224
+		      128     2   4   3         128             70       9.4590
+		      129     4   2   3         128             70       9.4590
+		      130     2   4   4         130             71       10.8714
+		      131     4   2   4         130             71       10.8714
+		      132     2   4   5         132             72       -13.1149
+		      133     4   2   5         132             72       -13.1149
+		      134     2   5   0         134             73       28.1584
+		      135     5   2   0         134             73       28.1584
+		      136     2   5   1         136             74       -15.6102
+		      137     5   2   1         136             74       -15.6102
+		      138     2   5   2         138             75       -6.1079
+		      139     5   2   2         138             75       -6.1079
+		      140     2   5   3         140             76       12.5280
+		      141     5   2   3         140             76       12.5280
+		      142     2   5   4         142             77       -6.1059
+		      143     5   2   4         142             77       -6.1059
+		      144     2   5   5         144             78       10.0478
+		      145     5   2   5         144             78       10.0478
+		      146     3   3   0         146             79       36.2440
+		      147     3   3   1         147             80       -17.5834
+		      148     3   3   2         148             81       -17.0027
+		      149     3   3   3         149             82       28.3488
+		      150     3   3   4         150             83       -5.7311
+		      151     3   3   5         151             84       -19.7497
+		      152     3   4   0         152             85       25.6812
+		      153     4   3   0         152             85       25.6812
+		      154     3   4   1         154             86       -9.9086
+		      155     4   3   1         154             86       -9.9086
+		      156     3   4   2         156             87       -18.1389
+		      157     4   3   2         156             87       -18.1389
+		      158     3   4   3         158             88       23.8810
+		      159     4   3   3         158             88       23.8810
+		      160     3   4   4         160             89       0.4723
+		      161     4   3   4         160             89       0.4723
+		      162     3   4   5         162             90       -25.3841
+		      163     4   3   5         162             90       -25.3841
+		      164     3   5   0         164             91       -12.2793
+		      165     5   3   0         164             91       -12.2793
+		      166     3   5   1         166             92       7.6185
+		      167     5   3   1         166             92       7.6185
+		      168     3   5   2         168             93       -8.0414
+		      169     5   3   2         168             93       -8.0414
+		      170     3   5   3         170             94       26.5444
+		      171     5   3   3         170             94       26.5444
+		      172     3   5   4         172             95       -33.7460
+		      173     5   3   4         172             95       -33.7460
+		      174     3   5   5         174             96       -16.6017
+		      175     5   3   5         174             96       -16.6017
+		      176     4   4   0         176             97       29.3272
+		      177     4   4   1         177             98       -13.3626
+		      178     4   4   2         178             99       -13.9081
+		      179     4   4   3         179             100      17.6302
+		      180     4   4   4         180             101      4.6501
+		      181     4   4   5         181             102      -17.4238
+		      182     4   5   0         182             103      9.4111
+		      183     5   4   0         182             103      9.4111
+		      184     4   5   1         184             104      -0.6065
+		      185     5   4   1         184             104      -0.6065
+		      186     4   5   2         186             105      -14.2790
+		      187     5   4   2         186             105      -14.2790
+		      188     4   5   3         188             106      13.5296
+		      189     5   4   3         188             106      13.5296
+		      190     4   5   4         190             107      8.9441
+		      191     5   4   4         190             107      8.9441
+		      192     4   5   5         192             108      -31.9579
+		      193     5   4   5         192             108      -31.9579
+		      194     5   5   0         194             109      13.4212
+		      195     5   5   1         195             110      -6.5028
+		      196     5   5   2         196             111      -1.3567
+		      197     5   5   3         197             112      -6.1992
+		      198     5   5   4         198             113      16.2728
+		      199     5   5   5         199             114      1.9762
+
+    Cluster index       : 2
+    Atoms in the cluster: H H O 
+    Pairs in the cluster: HH OH OH 
+    Number of unique sets of powers: 115 (200 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        32.0974
+		      1       0   1   2         1               1        -25.8197
+		      2       0   2   1         1               1        -25.8197
+		      3       0   1   3         3               2        -56.0582
+		      4       0   3   1         3               2        -56.0582
+		      5       0   1   4         5               3        -13.0053
+		      6       0   4   1         5               3        -13.0053
+		      7       0   1   5         7               4        2.9559
+		      8       0   5   1         7               4        2.9559
+		      9       0   2   2         9               5        -7.9989
+		      10      0   2   3         10              6        -9.9447
+		      11      0   3   2         10              6        -9.9447
+		      12      0   2   4         12              7        -7.1208
+		      13      0   4   2         12              7        -7.1208
+		      14      0   2   5         14              8        18.6172
+		      15      0   5   2         14              8        18.6172
+		      16      0   3   3         16              9        7.5821
+		      17      0   3   4         17              10       8.0175
+		      18      0   4   3         17              10       8.0175
+		      19      0   3   5         19              11       4.3039
+		      20      0   5   3         19              11       4.3039
+		      21      0   4   4         21              12       14.8493
+		      22      0   4   5         22              13       12.7720
+		      23      0   5   4         22              13       12.7720
+		      24      0   5   5         24              14       11.2758
+		      25      1   0   1         25              15       -11.8229
+		      26      1   1   0         25              15       -11.8229
+		      27      1   0   2         27              16       -0.2391
+		      28      1   2   0         27              16       -0.2391
+		      29      1   0   3         29              17       26.4316
+		      30      1   3   0         29              17       26.4316
+		      31      1   0   4         31              18       5.9417
+		      32      1   4   0         31              18       5.9417
+		      33      1   0   5         33              19       40.1425
+		      34      1   5   0         33              19       40.1425
+		      35      1   1   1         35              20       -3.1587
+		      36      1   1   2         36              21       7.9498
+		      37      1   2   1         36              21       7.9498
+		      38      1   1   3         38              22       18.1753
+		      39      1   3   1         38              22       18.1753
+		      40      1   1   4         40              23       7.7161
+		      41      1   4   1         40              23       7.7161
+		      42      1   1   5         42              24       -1.8202
+		      43      1   5   1         42              24       -1.8202
+		      44      1   2   2         44              25       -4.7230
+		      45      1   2   3         45              26       -21.7940
+		      46      1   3   2         45              26       -21.7940
+		      47      1   2   4         47              27       -9.2384
+		      48      1   4   2         47              27       -9.2384
+		      49      1   2   5         49              28       3.3546
+		      50      1   5   2         49              28       3.3546
+		      51      1   3   3         51              29       -20.0228
+		      52      1   3   4         52              30       -22.8284
+		      53      1   4   3         52              30       -22.8284
+		      54      1   3   5         54              31       -0.9362
+		      55      1   5   3         54              31       -0.9362
+		      56      1   4   4         56              32       7.3177
+		      57      1   4   5         57              33       -18.9017
+		      58      1   5   4         57              33       -18.9017
+		      59      1   5   5         59              34       1.5367
+		      60      2   0   1         60              35       -68.6584
+		      61      2   1   0         60              35       -68.6584
+		      62      2   0   2         62              36       -1.2378
+		      63      2   2   0         62              36       -1.2378
+		      64      2   0   3         64              37       40.5629
+		      65      2   3   0         64              37       40.5629
+		      66      2   0   4         66              38       46.6871
+		      67      2   4   0         66              38       46.6871
+		      68      2   0   5         68              39       19.1697
+		      69      2   5   0         68              39       19.1697
+		      70      2   1   1         70              40       -12.0530
+		      71      2   1   2         71              41       5.8249
+		      72      2   2   1         71              41       5.8249
+		      73      2   1   3         73              42       5.4257
+		      74      2   3   1         73              42       5.4257
+		      75      2   1   4         75              43       3.6547
+		      76      2   4   1         75              43       3.6547
+		      77      2   1   5         77              44       7.7127
+		      78      2   5   1         77              44       7.7127
+		      79      2   2   2         79              45       -5.9992
+		      80      2   2   3         80              46       11.4229
+		      81      2   3   2         80              46       11.4229
+		      82      2   2   4         82              47       20.6644
+		      83      2   4   2         82              47       20.6644
+		      84      2   2   5         84              48       12.8147
+		      85      2   5   2         84              48       12.8147
+		      86      2   3   3         86              49       9.6868
+		      87      2   3   4         87              50       -10.4749
+		      88      2   4   3         87              50       -10.4749
+		      89      2   3   5         89              51       -3.4997
+		      90      2   5   3         89              51       -3.4997
+		      91      2   4   4         91              52       -4.4152
+		      92      2   4   5         92              53       13.7722
+		      93      2   5   4         92              53       13.7722
+		      94      2   5   5         94              54       -7.3135
+		      95      3   0   1         95              55       34.5918
+		      96      3   1   0         95              55       34.5918
+		      97      3   0   2         97              56       -18.9087
+		      98      3   2   0         97              56       -18.9087
+		      99      3   0   3         99              57       -77.3214
+		      100     3   3   0         99              57       -77.3214
+		      101     3   0   4         101             58       -30.6773
+		      102     3   4   0         101             58       -30.6773
+		      103     3   0   5         103             59       -25.6912
+		      104     3   5   0         103             59       -25.6912
+		      105     3   1   1         105             60       10.3540
+		      106     3   1   2         106             61       -11.3054
+		      107     3   2   1         106             61       -11.3054
+		      108     3   1   3         108             62       -34.8293
+		      109     3   3   1         108             62       -34.8293
+		      110     3   1   4         110             63       -23.8247
+		      111     3   4   1         110             63       -23.8247
+		      112     3   1   5         112             64       -16.1181
+		      113     3   5   1         112             64       -16.1181
+		      114     3   2   2         114             65       14.1122
+		      115     3   2   3         115             66       30.8292
+		      116     3   3   2         115             66       30.8292
+		      117     3   2   4         117             67       4.5998
+		      118     3   4   2         117             67       4.5998
+		      119     3   2   5         119             68       -23.1616
+		      120     3   5   2         119             68       -23.1616
+		      121     3   3   3         121             69       30.2867
+		      122     3   3   4         122             70       66.1708
+		      123     3   4   3         122             70       66.1708
+		      124     3   3   5         124             71       30.5257
+		      125     3   5   3         124             71       30.5257
+		      126     3   4   4         126             72       4.1498
+		      127     3   4   5         127             73       10.2786
+		      128     3   5   4         127             73       10.2786
+		      129     3   5   5         129             74       -5.6498
+		      130     4   0   1         130             75       -29.2518
+		      131     4   1   0         130             75       -29.2518
+		      132     4   0   2         132             76       -9.0874
+		      133     4   2   0         132             76       -9.0874
+		      134     4   0   3         134             77       43.3559
+		      135     4   3   0         134             77       43.3559
+		      136     4   0   4         136             78       11.1094
+		      137     4   4   0         136             78       11.1094
+		      138     4   0   5         138             79       17.5939
+		      139     4   5   0         138             79       17.5939
+		      140     4   1   1         140             80       -27.1016
+		      141     4   1   2         141             81       11.4547
+		      142     4   2   1         141             81       11.4547
+		      143     4   1   3         143             82       63.8521
+		      144     4   3   1         143             82       63.8521
+		      145     4   1   4         145             83       24.0522
+		      146     4   4   1         145             83       24.0522
+		      147     4   1   5         147             84       -1.5389
+		      148     4   5   1         147             84       -1.5389
+		      149     4   2   2         149             85       16.5411
+		      150     4   2   3         150             86       7.8892
+		      151     4   3   2         150             86       7.8892
+		      152     4   2   4         152             87       3.7389
+		      153     4   4   2         152             87       3.7389
+		      154     4   2   5         154             88       -17.7892
+		      155     4   5   2         154             88       -17.7892
+		      156     4   3   3         156             89       -8.6325
+		      157     4   3   4         157             90       -18.4441
+		      158     4   4   3         157             90       -18.4441
+		      159     4   3   5         159             91       -11.4024
+		      160     4   5   3         159             91       -11.4024
+		      161     4   4   4         161             92       -35.4035
+		      162     4   4   5         162             93       -4.6689
+		      163     4   5   4         162             93       -4.6689
+		      164     4   5   5         164             94       -16.3886
+		      165     5   0   1         165             95       -1.5428
+		      166     5   1   0         165             95       -1.5428
+		      167     5   0   2         167             96       -9.2203
+		      168     5   2   0         167             96       -9.2203
+		      169     5   0   3         169             97       -55.0047
+		      170     5   3   0         169             97       -55.0047
+		      171     5   0   4         171             98       8.5429
+		      172     5   4   0         171             98       8.5429
+		      173     5   0   5         173             99       -15.7726
+		      174     5   5   0         173             99       -15.7726
+		      175     5   1   1         175             100      3.0162
+		      176     5   1   2         176             101      -6.3895
+		      177     5   2   1         176             101      -6.3895
+		      178     5   1   3         178             102      -11.0752
+		      179     5   3   1         178             102      -11.0752
+		      180     5   1   4         180             103      -19.9680
+		      181     5   4   1         180             103      -19.9680
+		      182     5   1   5         182             104      -8.0973
+		      183     5   5   1         182             104      -8.0973
+		      184     5   2   2         184             105      9.9807
+		      185     5   2   3         185             106      60.0057
+		      186     5   3   2         185             106      60.0057
+		      187     5   2   4         187             107      38.3717
+		      188     5   4   2         187             107      38.3717
+		      189     5   2   5         189             108      -2.7492
+		      190     5   5   2         189             108      -2.7492
+		      191     5   3   3         191             109      16.1311
+		      192     5   3   4         192             110      46.5838
+		      193     5   4   3         192             110      46.5838
+		      194     5   3   5         194             111      6.8662
+		      195     5   5   3         194             111      6.8662
+		      196     5   4   4         196             112      15.6177
+		      197     5   4   5         197             113      8.0025
+		      198     5   5   4         197             113      8.0025
+		      199     5   5   5         199             114      -10.7521
+
+    Cluster index       : 3
+    Atoms in the cluster: H H H 
+    Pairs in the cluster: HH HH HH 
+    Number of unique sets of powers: 50 (200 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   1   1         0               0        5.0537
+		      1       1   0   1         0               0        5.0537
+		      2       1   1   0         0               0        5.0537
+		      3       0   1   2         3               1        20.3115
+		      4       1   0   2         3               1        20.3115
+		      5       0   2   1         3               1        20.3115
+		      6       2   0   1         3               1        20.3115
+		      7       1   2   0         3               1        20.3115
+		      8       2   1   0         3               1        20.3115
+		      9       0   1   3         9               2        -17.5295
+		      10      1   0   3         9               2        -17.5295
+		      11      0   3   1         9               2        -17.5295
+		      12      3   0   1         9               2        -17.5295
+		      13      1   3   0         9               2        -17.5295
+		      14      3   1   0         9               2        -17.5295
+		      15      0   1   4         15              3        -1.5638
+		      16      1   0   4         15              3        -1.5638
+		      17      0   4   1         15              3        -1.5638
+		      18      4   0   1         15              3        -1.5638
+		      19      1   4   0         15              3        -1.5638
+		      20      4   1   0         15              3        -1.5638
+		      21      0   1   5         21              4        9.4179
+		      22      1   0   5         21              4        9.4179
+		      23      0   5   1         21              4        9.4179
+		      24      5   0   1         21              4        9.4179
+		      25      1   5   0         21              4        9.4179
+		      26      5   1   0         21              4        9.4179
+		      27      0   2   2         27              5        39.8596
+		      28      2   0   2         27              5        39.8596
+		      29      2   2   0         27              5        39.8596
+		      30      0   2   3         30              6        -19.4331
+		      31      2   0   3         30              6        -19.4331
+		      32      0   3   2         30              6        -19.4331
+		      33      3   0   2         30              6        -19.4331
+		      34      2   3   0         30              6        -19.4331
+		      35      3   2   0         30              6        -19.4331
+		      36      0   2   4         36              7        0.8549
+		      37      2   0   4         36              7        0.8549
+		      38      0   4   2         36              7        0.8549
+		      39      4   0   2         36              7        0.8549
+		      40      2   4   0         36              7        0.8549
+		      41      4   2   0         36              7        0.8549
+		      42      0   2   5         42              8        -16.7380
+		      43      2   0   5         42              8        -16.7380
+		      44      0   5   2         42              8        -16.7380
+		      45      5   0   2         42              8        -16.7380
+		      46      2   5   0         42              8        -16.7380
+		      47      5   2   0         42              8        -16.7380
+		      48      0   3   3         48              9        10.0723
+		      49      3   0   3         48              9        10.0723
+		      50      3   3   0         48              9        10.0723
+		      51      0   3   4         51              10       -4.7135
+		      52      3   0   4         51              10       -4.7135
+		      53      0   4   3         51              10       -4.7135
+		      54      4   0   3         51              10       -4.7135
+		      55      3   4   0         51              10       -4.7135
+		      56      4   3   0         51              10       -4.7135
+		      57      0   3   5         57              11       0.3542
+		      58      3   0   5         57              11       0.3542
+		      59      0   5   3         57              11       0.3542
+		      60      5   0   3         57              11       0.3542
+		      61      3   5   0         57              11       0.3542
+		      62      5   3   0         57              11       0.3542
+		      63      0   4   4         63              12       1.1379
+		      64      4   0   4         63              12       1.1379
+		      65      4   4   0         63              12       1.1379
+		      66      0   4   5         66              13       -17.9400
+		      67      4   0   5         66              13       -17.9400
+		      68      0   5   4         66              13       -17.9400
+		      69      5   0   4         66              13       -17.9400
+		      70      4   5   0         66              13       -17.9400
+		      71      5   4   0         66              13       -17.9400
+		      72      0   5   5         72              14       15.6870
+		      73      5   0   5         72              14       15.6870
+		      74      5   5   0         72              14       15.6870
+		      75      1   1   1         75              15       -0.1353
+		      76      1   1   2         76              16       -2.2973
+		      77      1   2   1         76              16       -2.2973
+		      78      2   1   1         76              16       -2.2973
+		      79      1   1   3         79              17       1.6121
+		      80      1   3   1         79              17       1.6121
+		      81      3   1   1         79              17       1.6121
+		      82      1   1   4         82              18       -1.4855
+		      83      1   4   1         82              18       -1.4855
+		      84      4   1   1         82              18       -1.4855
+		      85      1   1   5         85              19       1.2265
+		      86      1   5   1         85              19       1.2265
+		      87      5   1   1         85              19       1.2265
+		      88      1   2   2         88              20       -4.2061
+		      89      2   1   2         88              20       -4.2061
+		      90      2   2   1         88              20       -4.2061
+		      91      1   2   3         91              21       6.3833
+		      92      2   1   3         91              21       6.3833
+		      93      1   3   2         91              21       6.3833
+		      94      3   1   2         91              21       6.3833
+		      95      2   3   1         91              21       6.3833
+		      96      3   2   1         91              21       6.3833
+		      97      1   2   4         97              22       4.8160
+		      98      2   1   4         97              22       4.8160
+		      99      1   4   2         97              22       4.8160
+		      100     4   1   2         97              22       4.8160
+		      101     2   4   1         97              22       4.8160
+		      102     4   2   1         97              22       4.8160
+		      103     1   2   5         103             23       -6.1059
+		      104     2   1   5         103             23       -6.1059
+		      105     1   5   2         103             23       -6.1059
+		      106     5   1   2         103             23       -6.1059
+		      107     2   5   1         103             23       -6.1059
+		      108     5   2   1         103             23       -6.1059
+		      109     1   3   3         109             24       -1.5845
+		      110     3   1   3         109             24       -1.5845
+		      111     3   3   1         109             24       -1.5845
+		      112     1   3   4         112             25       1.8781
+		      113     3   1   4         112             25       1.8781
+		      114     1   4   3         112             25       1.8781
+		      115     4   1   3         112             25       1.8781
+		      116     3   4   1         112             25       1.8781
+		      117     4   3   1         112             25       1.8781
+		      118     1   3   5         118             26       -8.1992
+		      119     3   1   5         118             26       -8.1992
+		      120     1   5   3         118             26       -8.1992
+		      121     5   1   3         118             26       -8.1992
+		      122     3   5   1         118             26       -8.1992
+		      123     5   3   1         118             26       -8.1992
+		      124     1   4   4         124             27       -9.5288
+		      125     4   1   4         124             27       -9.5288
+		      126     4   4   1         124             27       -9.5288
+		      127     1   4   5         127             28       21.1097
+		      128     4   1   5         127             28       21.1097
+		      129     1   5   4         127             28       21.1097
+		      130     5   1   4         127             28       21.1097
+		      131     4   5   1         127             28       21.1097
+		      132     5   4   1         127             28       21.1097
+		      133     1   5   5         133             29       -6.0537
+		      134     5   1   5         133             29       -6.0537
+		      135     5   5   1         133             29       -6.0537
+		      136     2   2   2         136             30       -2.8990
+		      137     2   2   3         137             31       -8.1960
+		      138     2   3   2         137             31       -8.1960
+		      139     3   2   2         137             31       -8.1960
+		      140     2   2   4         140             32       -13.6681
+		      141     2   4   2         140             32       -13.6681
+		      142     4   2   2         140             32       -13.6681
+		      143     2   2   5         143             33       27.6747
+		      144     2   5   2         143             33       27.6747
+		      145     5   2   2         143             33       27.6747
+		      146     2   3   3         146             34       4.5360
+		      147     3   2   3         146             34       4.5360
+		      148     3   3   2         146             34       4.5360
+		      149     2   3   4         149             35       15.7735
+		      150     3   2   4         149             35       15.7735
+		      151     2   4   3         149             35       15.7735
+		      152     4   2   3         149             35       15.7735
+		      153     3   4   2         149             35       15.7735
+		      154     4   3   2         149             35       15.7735
+		      155     2   3   5         155             36       -21.9747
+		      156     3   2   5         155             36       -21.9747
+		      157     2   5   3         155             36       -21.9747
+		      158     5   2   3         155             36       -21.9747
+		      159     3   5   2         155             36       -21.9747
+		      160     5   3   2         155             36       -21.9747
+		      161     2   4   4         161             37       4.2394
+		      162     4   2   4         161             37       4.2394
+		      163     4   4   2         161             37       4.2394
+		      164     2   4   5         164             38       -14.0876
+		      165     4   2   5         164             38       -14.0876
+		      166     2   5   4         164             38       -14.0876
+		      167     5   2   4         164             38       -14.0876
+		      168     4   5   2         164             38       -14.0876
+		      169     5   4   2         164             38       -14.0876
+		      170     2   5   5         170             39       7.0782
+		      171     5   2   5         170             39       7.0782
+		      172     5   5   2         170             39       7.0782
+		      173     3   3   3         173             40       -2.0059
+		      174     3   3   4         174             41       -9.1320
+		      175     3   4   3         174             41       -9.1320
+		      176     4   3   3         174             41       -9.1320
+		      177     3   3   5         177             42       15.2311
+		      178     3   5   3         177             42       15.2311
+		      179     5   3   3         177             42       15.2311
+		      180     3   4   4         180             43       11.6512
+		      181     4   3   4         180             43       11.6512
+		      182     4   4   3         180             43       11.6512
+		      183     3   4   5         183             44       -3.0286
+		      184     4   3   5         183             44       -3.0286
+		      185     3   5   4         183             44       -3.0286
+		      186     5   3   4         183             44       -3.0286
+		      187     4   5   3         183             44       -3.0286
+		      188     5   4   3         183             44       -3.0286
+		      189     3   5   5         189             45       6.9425
+		      190     5   3   5         189             45       6.9425
+		      191     5   5   3         189             45       6.9425
+		      192     4   4   4         192             46       5.0709
+		      193     4   4   5         193             47       -20.3107
+		      194     4   5   4         193             47       -20.3107
+		      195     5   4   4         193             47       -20.3107
+		      196     4   5   5         196             48       -3.9083
+		      197     5   4   5         196             48       -3.9083
+		      198     5   5   4         196             48       -3.9083
+		      199     5   5   5         199             49       -13.2264
+
+
+	The following unique quadruplets of atoms have been identified:
+
+    Cluster index       : 0
+    Atoms in the cluster: O O O O 
+    Pairs in the cluster: OO OO OO OO OO OO 
+    Number of unique sets of powers: 7 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0        -0.0008
+		      1       0   1   0   1   0   1         0               0        -0.0008
+		      2       1   0   0   1   1   0         0               0        -0.0008
+		      3       1   1   1   0   0   0         0               0        -0.0008
+		      4       0   0   1   1   0   0         4               1        0.0010
+		      5       0   1   0   0   1   0         4               1        0.0010
+		      6       1   0   0   0   0   1         4               1        0.0010
+		      7       0   0   1   1   0   1         7               2        -0.0023
+		      8       0   1   0   0   1   1         7               2        -0.0023
+		      9       0   0   1   1   1   0         7               2        -0.0023
+		      10      0   1   0   1   1   0         7               2        -0.0023
+		      11      1   0   0   0   1   1         7               2        -0.0023
+		      12      1   0   0   1   0   1         7               2        -0.0023
+		      13      0   1   1   0   1   0         7               2        -0.0023
+		      14      0   1   1   1   0   0         7               2        -0.0023
+		      15      1   0   1   0   0   1         7               2        -0.0023
+		      16      1   1   0   0   0   1         7               2        -0.0023
+		      17      1   0   1   1   0   0         7               2        -0.0023
+		      18      1   1   0   0   1   0         7               2        -0.0023
+		      19      0   0   1   1   1   1         19              3        0.0014
+		      20      0   1   0   1   1   1         19              3        0.0014
+		      21      1   0   0   1   1   1         19              3        0.0014
+		      22      0   1   1   0   1   1         19              3        0.0014
+		      23      0   1   1   1   0   1         19              3        0.0014
+		      24      1   0   1   0   1   1         19              3        0.0014
+		      25      1   1   0   1   0   1         19              3        0.0014
+		      26      1   0   1   1   1   0         19              3        0.0014
+		      27      1   1   0   1   1   0         19              3        0.0014
+		      28      1   1   1   0   0   1         19              3        0.0014
+		      29      1   1   1   0   1   0         19              3        0.0014
+		      30      1   1   1   1   0   0         19              3        0.0014
+		      31      0   1   1   1   1   0         31              4        0.0003
+		      32      1   0   1   1   0   1         31              4        0.0003
+		      33      1   1   0   0   1   1         31              4        0.0003
+		      34      0   1   1   1   1   1         34              5        -0.0004
+		      35      1   0   1   1   1   1         34              5        -0.0004
+		      36      1   1   0   1   1   1         34              5        -0.0004
+		      37      1   1   1   0   1   1         34              5        -0.0004
+		      38      1   1   1   1   0   1         34              5        -0.0004
+		      39      1   1   1   1   1   0         34              5        -0.0004
+		      40      1   1   1   1   1   1         40              6        0.0000
+
+    Cluster index       : 1
+    Atoms in the cluster: H O O O 
+    Pairs in the cluster: OH OH OH OO OO OO 
+    Number of unique sets of powers: 12 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0        0.0163
+		      1       0   1   0   1   0   1         0               0        0.0163
+		      2       1   0   0   1   1   0         0               0        0.0163
+		      3       0   0   1   1   0   0         3               1        -0.0727
+		      4       0   1   0   0   1   0         3               1        -0.0727
+		      5       1   0   0   0   0   1         3               1        -0.0727
+		      6       0   0   1   1   0   1         6               2        0.0731
+		      7       0   1   0   0   1   1         6               2        0.0731
+		      8       0   0   1   1   1   0         6               2        0.0731
+		      9       0   1   0   1   1   0         6               2        0.0731
+		      10      1   0   0   0   1   1         6               2        0.0731
+		      11      1   0   0   1   0   1         6               2        0.0731
+		      12      0   0   1   1   1   1         12              3        -0.0173
+		      13      0   1   0   1   1   1         12              3        -0.0173
+		      14      1   0   0   1   1   1         12              3        -0.0173
+		      15      0   1   1   0   1   0         15              4        0.0557
+		      16      0   1   1   1   0   0         15              4        0.0557
+		      17      1   0   1   0   0   1         15              4        0.0557
+		      18      1   1   0   0   0   1         15              4        0.0557
+		      19      1   0   1   1   0   0         15              4        0.0557
+		      20      1   1   0   0   1   0         15              4        0.0557
+		      21      0   1   1   0   1   1         21              5        -0.0393
+		      22      0   1   1   1   0   1         21              5        -0.0393
+		      23      1   0   1   0   1   1         21              5        -0.0393
+		      24      1   1   0   1   0   1         21              5        -0.0393
+		      25      1   0   1   1   1   0         21              5        -0.0393
+		      26      1   1   0   1   1   0         21              5        -0.0393
+		      27      0   1   1   1   1   0         27              6        -0.0101
+		      28      1   0   1   1   0   1         27              6        -0.0101
+		      29      1   1   0   0   1   1         27              6        -0.0101
+		      30      0   1   1   1   1   1         30              7        0.0078
+		      31      1   0   1   1   1   1         30              7        0.0078
+		      32      1   1   0   1   1   1         30              7        0.0078
+		      33      1   1   1   0   0   0         33              8        -0.0097
+		      34      1   1   1   0   0   1         34              9        0.0183
+		      35      1   1   1   0   1   0         34              9        0.0183
+		      36      1   1   1   1   0   0         34              9        0.0183
+		      37      1   1   1   0   1   1         37              10       -0.0113
+		      38      1   1   1   1   0   1         37              10       -0.0113
+		      39      1   1   1   1   1   0         37              10       -0.0113
+		      40      1   1   1   1   1   1         40              11       0.0023
+
+    Cluster index       : 2
+    Atoms in the cluster: H H O O 
+    Pairs in the cluster: HH OH OH OH OH OO 
+    Number of unique sets of powers: 18 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0        -0.0037
+		      1       0   1   0   1   0   1         0               0        -0.0037
+		      2       0   0   1   1   0   0         2               1        -0.0187
+		      3       0   1   0   0   1   0         2               1        -0.0187
+		      4       0   0   1   1   0   1         4               2        0.0644
+		      5       0   1   0   0   1   1         4               2        0.0644
+		      6       0   0   1   1   1   0         6               3        -0.8645
+		      7       0   1   0   1   1   0         6               3        -0.8645
+		      8       0   1   1   0   1   0         6               3        -0.8645
+		      9       0   1   1   1   0   0         6               3        -0.8645
+		      10      0   0   1   1   1   1         10              4        0.3161
+		      11      0   1   0   1   1   1         10              4        0.3161
+		      12      0   1   1   0   1   1         10              4        0.3161
+		      13      0   1   1   1   0   1         10              4        0.3161
+		      14      0   1   1   1   1   0         14              5        -0.1520
+		      15      0   1   1   1   1   1         15              6        0.0694
+		      16      1   0   0   0   0   1         16              7        0.1128
+		      17      1   0   0   0   1   1         17              8        0.1245
+		      18      1   0   0   1   0   1         17              8        0.1245
+		      19      1   0   1   0   0   1         17              8        0.1245
+		      20      1   1   0   0   0   1         17              8        0.1245
+		      21      1   0   0   1   1   0         21              9        -0.1287
+		      22      1   1   1   0   0   0         21              9        -0.1287
+		      23      1   0   0   1   1   1         23              10       0.0753
+		      24      1   1   1   0   0   1         23              10       0.0753
+		      25      1   0   1   0   1   1         25              11       -0.0214
+		      26      1   1   0   1   0   1         25              11       -0.0214
+		      27      1   0   1   1   0   0         27              12       0.1423
+		      28      1   1   0   0   1   0         27              12       0.1423
+		      29      1   0   1   1   0   1         29              13       -0.0816
+		      30      1   1   0   0   1   1         29              13       -0.0816
+		      31      1   0   1   1   1   0         31              14       0.0559
+		      32      1   1   0   1   1   0         31              14       0.0559
+		      33      1   1   1   0   1   0         31              14       0.0559
+		      34      1   1   1   1   0   0         31              14       0.0559
+		      35      1   0   1   1   1   1         35              15       -0.0301
+		      36      1   1   0   1   1   1         35              15       -0.0301
+		      37      1   1   1   0   1   1         35              15       -0.0301
+		      38      1   1   1   1   0   1         35              15       -0.0301
+		      39      1   1   1   1   1   0         39              16       0.0181
+		      40      1   1   1   1   1   1         40              17       -0.0114
+
+    Cluster index       : 3
+    Atoms in the cluster: H H H O 
+    Pairs in the cluster: HH HH OH HH OH OH 
+    Number of unique sets of powers: 12 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0        0.6040
+		      1       0   0   1   1   0   0         1               1        -1.9481
+		      2       0   1   0   0   1   0         1               1        -1.9481
+		      3       1   0   0   0   0   1         1               1        -1.9481
+		      4       0   0   1   1   0   1         4               2        -1.1714
+		      5       0   0   1   1   1   0         4               2        -1.1714
+		      6       0   1   0   0   1   1         4               2        -1.1714
+		      7       1   0   0   0   1   1         4               2        -1.1714
+		      8       0   1   1   0   1   0         4               2        -1.1714
+		      9       1   0   1   0   0   1         4               2        -1.1714
+		      10      0   0   1   1   1   1         10              3        -0.0439
+		      11      0   1   1   0   1   1         10              3        -0.0439
+		      12      1   0   1   0   1   1         10              3        -0.0439
+		      13      0   1   0   1   0   1         13              4        0.1033
+		      14      1   0   0   1   1   0         13              4        0.1033
+		      15      1   1   1   0   0   0         13              4        0.1033
+		      16      0   1   0   1   1   0         16              5        0.3611
+		      17      1   0   0   1   0   1         16              5        0.3611
+		      18      0   1   1   1   0   0         16              5        0.3611
+		      19      1   0   1   1   0   0         16              5        0.3611
+		      20      1   1   0   0   0   1         16              5        0.3611
+		      21      1   1   0   0   1   0         16              5        0.3611
+		      22      0   1   0   1   1   1         22              6        -0.0673
+		      23      1   0   0   1   1   1         22              6        -0.0673
+		      24      0   1   1   1   0   1         22              6        -0.0673
+		      25      1   0   1   1   1   0         22              6        -0.0673
+		      26      1   1   1   0   0   1         22              6        -0.0673
+		      27      1   1   1   0   1   0         22              6        -0.0673
+		      28      0   1   1   1   1   0         28              7        0.0043
+		      29      1   0   1   1   0   1         28              7        0.0043
+		      30      1   1   0   0   1   1         28              7        0.0043
+		      31      0   1   1   1   1   1         31              8        -0.0766
+		      32      1   0   1   1   1   1         31              8        -0.0766
+		      33      1   1   1   0   1   1         31              8        -0.0766
+		      34      1   1   0   1   0   1         34              9        -0.0298
+		      35      1   1   0   1   1   0         34              9        -0.0298
+		      36      1   1   1   1   0   0         34              9        -0.0298
+		      37      1   1   0   1   1   1         37              10       0.0157
+		      38      1   1   1   1   0   1         37              10       0.0157
+		      39      1   1   1   1   1   0         37              10       0.0157
+		      40      1   1   1   1   1   1         40              11       0.0101
+
+    Cluster index       : 4
+    Atoms in the cluster: H H H H 
+    Pairs in the cluster: HH HH HH HH HH HH 
+    Number of unique sets of powers: 7 (41 total)...
+		     index  |  powers  |  equiv index  |  param index  | parameter 
+		   ----------------------------------------------------
+		      0       0   0   1   0   1   1         0               0        -0.0618
+		      1       0   1   0   1   0   1         0               0        -0.0618
+		      2       1   0   0   1   1   0         0               0        -0.0618
+		      3       1   1   1   0   0   0         0               0        -0.0618
+		      4       0   0   1   1   0   0         4               1        0.0300
+		      5       0   1   0   0   1   0         4               1        0.0300
+		      6       1   0   0   0   0   1         4               1        0.0300
+		      7       0   0   1   1   0   1         7               2        -0.0667
+		      8       0   1   0   0   1   1         7               2        -0.0667
+		      9       0   0   1   1   1   0         7               2        -0.0667
+		      10      0   1   0   1   1   0         7               2        -0.0667
+		      11      1   0   0   0   1   1         7               2        -0.0667
+		      12      1   0   0   1   0   1         7               2        -0.0667
+		      13      0   1   1   0   1   0         7               2        -0.0667
+		      14      0   1   1   1   0   0         7               2        -0.0667
+		      15      1   0   1   0   0   1         7               2        -0.0667
+		      16      1   1   0   0   0   1         7               2        -0.0667
+		      17      1   0   1   1   0   0         7               2        -0.0667
+		      18      1   1   0   0   1   0         7               2        -0.0667
+		      19      0   0   1   1   1   1         19              3        0.0313
+		      20      0   1   0   1   1   1         19              3        0.0313
+		      21      1   0   0   1   1   1         19              3        0.0313
+		      22      0   1   1   0   1   1         19              3        0.0313
+		      23      0   1   1   1   0   1         19              3        0.0313
+		      24      1   0   1   0   1   1         19              3        0.0313
+		      25      1   1   0   1   0   1         19              3        0.0313
+		      26      1   0   1   1   1   0         19              3        0.0313
+		      27      1   1   0   1   1   0         19              3        0.0313
+		      28      1   1   1   0   0   1         19              3        0.0313
+		      29      1   1   1   0   1   0         19              3        0.0313
+		      30      1   1   1   1   0   0         19              3        0.0313
+		      31      0   1   1   1   1   0         31              4        0.0031
+		      32      1   0   1   1   0   1         31              4        0.0031
+		      33      1   1   0   0   1   1         31              4        0.0031
+		      34      0   1   1   1   1   1         34              5        -0.0048
+		      35      1   0   1   1   1   1         34              5        -0.0048
+		      36      1   1   0   1   1   1         34              5        -0.0048
+		      37      1   1   1   0   1   1         34              5        -0.0048
+		      38      1   1   1   1   0   1         34              5        -0.0048
+		      39      1   1   1   1   1   0         34              5        -0.0048
+		      40      1   1   1   1   1   1         40              6        0.0003
+
+	Fitted charges read from parameter file:
+		OO 0.3716 (123.3898)
+		HH 0.0929 (30.8475)
+		OH -0.1858 (-61.6949)
+
+
+Initializing the neighbor list...
+	Latest 3-body outer cutoff values: 
+	0:  5.0000  5.0000  5.0000
+	1:  5.0000  5.0000  5.0000
+	2:  5.0000  5.0000  5.0000
+	3:  5.0000  5.0000  5.0000
+     Max 3-body cutoff = 5.0000
+	Latest 3-body inner cutoff values: 
+	0:  0.7500  0.7500  0.7500
+	1:  0.7500  0.7500  0.7500
+	2:  0.7500  0.7500  0.7500
+	3:  0.7500  0.7500  0.7500
+     Min 3-body cutoff = 0.7500
+
+	Latest 4-body outer cutoff values: 
+	0:  5.0000  5.0000  5.0000  5.0000  5.0000  5.0000
+	1:  5.0000  5.0000  5.0000  5.0000  5.0000  5.0000
+	2:  5.0000  5.0000  5.0000  5.0000  5.0000  5.0000
+	3:  5.0000  5.0000  5.0000  5.0000  5.0000  5.0000
+	4:  5.0000  5.0000  5.0000  5.0000  5.0000  5.0000
+     Max 4-body cutoff = 5.0000
+	Latest 4-body inner cutoff values: 
+	0:  0.7500  0.7500  0.7500  0.7500  0.7500  0.7500
+	1:  0.7500  0.7500  0.7500  0.7500  0.7500  0.7500
+	2:  0.7500  0.7500  0.7500  0.7500  0.7500  0.7500
+	3:  0.7500  0.7500  0.7500  0.7500  0.7500  0.7500
+	4:  0.7500  0.7500  0.7500  0.7500  0.7500  0.7500
+     Min 4-body cutoff = 0.7500
+
+NEIGHBOR LIST MAX CUTOFF IS: 5.00000
+USING PADDING: 0.300
+Number of 3-body interactions = 59877
+Number of 4-body interactions = 421333
+
+Generating fast maps... 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+
+	Triplet maps:
+		Atom type idxs:  0 0 0 Triplet name:       OOOOOO Explicit index:  111 Unique index:    0
+		Atom type idxs:  0 0 1 Triplet name:       OOOHOH Explicit index:  211 Unique index:    1
+		Atom type idxs:  0 1 0 Triplet name:       OHOOOH Explicit index:  121 Unique index:    1
+		Atom type idxs:  0 1 1 Triplet name:       OHOHHH Explicit index:  221 Unique index:    2
+		Atom type idxs:  1 0 0 Triplet name:       OHOHOO Explicit index:  112 Unique index:    1
+		Atom type idxs:  1 0 1 Triplet name:       OHHHOH Explicit index:  212 Unique index:    2
+		Atom type idxs:  1 1 0 Triplet name:       HHOHOH Explicit index:  122 Unique index:    2
+		Atom type idxs:  1 1 1 Triplet name:       HHHHHH Explicit index:  222 Unique index:    3
+
+	Quadruplet maps:
+		Atom type idxs:  0 0 0 0 Quadruplet name: OOOOOOOOOOOO Explicit index: 1111 Unique index:    0
+		Atom type idxs:  0 0 0 1 Quadruplet name: OOOOOHOOOHOH Explicit index: 2111 Unique index:    1
+		Atom type idxs:  0 0 1 0 Quadruplet name: OOOHOOOHOOOH Explicit index: 1211 Unique index:    1
+		Atom type idxs:  0 0 1 1 Quadruplet name: OOOHOHOHOHHH Explicit index: 2211 Unique index:    2
+		Atom type idxs:  0 1 0 0 Quadruplet name: OHOOOOOHOHOO Explicit index: 1121 Unique index:    1
+		Atom type idxs:  0 1 0 1 Quadruplet name: OHOOOHOHHHOH Explicit index: 2121 Unique index:    2
+		Atom type idxs:  0 1 1 0 Quadruplet name: OHOHOOHHOHOH Explicit index: 1221 Unique index:    2
+		Atom type idxs:  0 1 1 1 Quadruplet name: OHOHOHHHHHHH Explicit index: 2221 Unique index:    3
+		Atom type idxs:  1 0 0 0 Quadruplet name: OHOHOHOOOOOO Explicit index: 1112 Unique index:    1
+		Atom type idxs:  1 0 0 1 Quadruplet name: OHOHHHOOOHOH Explicit index: 2112 Unique index:    2
+		Atom type idxs:  1 0 1 0 Quadruplet name: OHHHOHOHOOOH Explicit index: 1212 Unique index:    2
+		Atom type idxs:  1 0 1 1 Quadruplet name: OHHHHHOHOHHH Explicit index: 2212 Unique index:    3
+		Atom type idxs:  1 1 0 0 Quadruplet name: HHOHOHOHOHOO Explicit index: 1122 Unique index:    2
+		Atom type idxs:  1 1 0 1 Quadruplet name: HHOHHHOHHHOH Explicit index: 2122 Unique index:    3
+		Atom type idxs:  1 1 1 0 Quadruplet name: HHHHOHHHOHOH Explicit index: 1222 Unique index:    3
+		Atom type idxs:  1 1 1 1 Quadruplet name: HHHHHHHHHHHH Explicit index: 2222 Unique index:    4
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.3776337432
+Number of 3-body interactions = 65603
+Number of 4-body interactions = 483762
+Number of 3-body interactions = 65603
+Number of 4-body interactions = 483762
+
+Ewald parameters: 
+	Requested Ewald accuracy  =  1.000000e-06
+	Ewald alpha               =  7.723233e-01
+	R-Space Ewald cutoff      =  4.304565e+00
+	R-Space accuracy estimate =  5.997380e-07
+	K-Space accuracy estimate =  6.801448e-07
+
+	Cutting off K-vectors with magnitude less than 7
+	Number of Ewald K-vectors = 1364
+	K-space accuracy estimate = 0.0000008680
+
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
+       1      0.12       3.9703342     -48.1927243     -44.2223901          1346.0     13.83400368    -44.2223901
+       2      0.25       3.9665361     -48.1888175     -44.2222814          1344.7     14.05900981    -44.2222567
+       3      0.38       3.9604335     -48.1822953     -44.2218618          1342.6     14.28750343    -44.2222427
+       4      0.50       3.9523757     -48.1734059     -44.2210302          1339.9     14.51877340    -44.2222224
+       5      0.62       3.9427071     -48.1624969     -44.2197898          1336.6     14.75179198    -44.2221986
+       6      0.75       3.9318461     -48.1499874     -44.2181413          1332.9     14.98526358    -44.2221715
+       7      0.88       3.9202624     -48.1363484     -44.2160859          1329.0     15.21761920    -44.2221422
+       8      1.00       3.9084572     -48.1220830     -44.2136258          1325.0     15.44700105    -44.2221125
+       9      1.12       3.8969472     -48.1077077     -44.2107605          1321.1     15.67129928    -44.2220820
+      10      1.25       3.8862542     -48.0937444     -44.2074903          1317.5     15.88819777    -44.2220512
+      11      1.38       3.8768985     -48.0807125     -44.2038139          1314.3     16.09522458    -44.2220201
+      12      1.50       3.8693959     -48.0691265     -44.1997307          1311.8     16.28983253    -44.2219891
+      13      1.62       3.8642554     -48.0594936     -44.1952383          1310.0     16.46948313    -44.2219582
+      14      1.75       3.8619770     -48.0523134     -44.1903364          1309.3     16.63171079    -44.2219301
+      15      1.88       3.8630469     -48.0480643     -44.1850174          1309.6     16.77419375    -44.2219012
+      16      2.00       3.8679289     -48.0472102     -44.1792812          1311.3     16.89479733    -44.2218762
+Number of 3-body interactions = 64193
+Number of 4-body interactions = 468054
+ Updating neighbor list on step: 16, with padding: 0.355
+      17      2.12       3.8770541     -48.0501748     -44.1731207          1314.4     16.99160620    -44.2218540
+      18      2.25       3.8908055     -48.0573343     -44.1665289          1319.0     17.06295218    -44.2218349
+      19      2.38       3.9095029     -48.0690029     -44.1595000          1325.4     17.10742831    -44.2218213
+      20      2.50       3.9333859     -48.0854120     -44.1520261          1333.5     17.12390914    -44.2218144
+      21      2.62       3.9625973     -48.1066945     -44.1440972          1343.4     17.11155476    -44.2218144
+      22      2.75       3.9971686     -48.1328721     -44.1357035          1355.1     17.06982748    -44.2218222
+      23      2.88       4.0370079     -48.1638444     -44.1268365          1368.6     16.99851013    -44.2218400
+      24      3.00       4.0818917     -48.1993755     -44.1174838          1383.8     16.89772252    -44.2218665
+      25      3.12       4.1314617     -48.2390977     -44.1076360          1400.6     16.76794617    -44.2219024
+      26      3.25       4.1852286     -48.2825106     -44.0972820          1418.8     16.61003890    -44.2219460
+      27      3.38       4.2425836     -48.3289955     -44.0864119          1438.3     16.42523614    -44.2219951
+      28      3.50       4.3028186     -48.3778401     -44.0750214          1458.7     16.21514843    -44.2220511
+      29      3.62       4.3651553     -48.4282563     -44.0631010          1479.8     15.98172714    -44.2221079
+      30      3.75       4.4287802     -48.4794287     -44.0506485          1501.4     15.72724108    -44.2221641
+      31      3.88       4.4928845     -48.5305488     -44.0376643          1523.1     15.45423909    -44.2222176
+Number of 3-body interactions = 66298
+Number of 4-body interactions = 491622
+ Updating neighbor list on step: 31, with padding: 0.391
+      32      4.00       4.5567044     -48.5808533     -44.0241490          1544.8     15.16549771    -44.2222641
+      33      4.12       4.6195565     -48.6296677     -44.0101111          1566.1     14.86395558    -44.2223041
+      34      4.25       4.6808662     -48.6764232     -43.9955571          1586.9     14.55265638    -44.2223336
+      35      4.38       4.7401835     -48.7206842     -43.9805007          1607.0     14.23467923    -44.2223539
+      36      4.50       4.7971879     -48.7621456     -43.9649577          1626.3     13.91307748    -44.2223665
+      37      4.62       4.8516798     -48.8006242     -43.9489443          1644.8     13.59082770    -44.2223722
+      38      4.75       4.9035643     -48.8360415     -43.9324772          1662.4     13.27076155    -44.2223714
+      39      4.88       4.9528286     -48.8684051     -43.9155765          1679.1     12.95550404    -44.2223676
+      40      5.00       4.9995188     -48.8977774     -43.8982586          1694.9     12.64742942    -44.2223607
+      41      5.12       5.0437194     -48.9242617     -43.8805424          1709.9     12.34864419    -44.2223528
+      42      5.25       5.0855373     -48.9479817     -43.8624444          1724.1     12.06098593    -44.2223444
+      43      5.38       5.1250934     -48.9690745     -43.8439811          1737.5     11.78603905    -44.2223361
+      44      5.50       5.1625200     -48.9876872     -43.8251673          1750.1     11.52515904    -44.2223273
+      45      5.62       5.1979637     -49.0039787     -43.8060150          1762.2     11.27950185    -44.2223155
+      46      5.75       5.2315911     -49.0181316     -43.7865405          1773.6     11.05004185    -44.2223028
+Number of 3-body interactions = 69335
+Number of 4-body interactions = 526175
+ Updating neighbor list on step: 46, with padding: 0.430
+      47      5.88       5.2635937     -49.0303490     -43.7667553          1784.4     10.83759125    -44.2222875
+      48      6.00       5.2941908     -49.0408638     -43.7466730          1794.8     10.64280076    -44.2222708
+      49      6.12       5.3236278     -49.0499346     -43.7263068          1804.8     10.46615221    -44.2222546
+      50      6.25       5.3521690     -49.0578352     -43.7056662          1814.4     10.30796442    -44.2222378
+      51      6.38       5.3800870     -49.0648477     -43.6847606          1823.9     10.16842141    -44.2222208
+      52      6.50       5.4076484     -49.0712497     -43.6636013          1833.3     10.04758436    -44.2222063
+      53      6.62       5.4350981     -49.0772937     -43.6421956          1842.6      9.94542061    -44.2221946
+      54      6.75       5.4626434     -49.0831927     -43.6205494          1851.9      9.86184614    -44.2221849
+      55      6.88       5.4904395     -49.0891107     -43.5986712          1861.3      9.79675826    -44.2221798
+      56      7.00       5.5185769     -49.0951440     -43.5765670          1870.9      9.75006043    -44.2221797
+      57      7.12       5.5470722     -49.1013157     -43.5542435          1880.5      9.72168211    -44.2221856
+      58      7.25       5.5758628     -49.1075670     -43.5317041          1890.3      9.71156972    -44.2221950
+      59      7.38       5.6048085     -49.1137681     -43.5089596          1900.1      9.71966603    -44.2222122
+      60      7.50       5.6336975     -49.1197095     -43.4860120          1909.9      9.74588669    -44.2222318
+Number of 3-body interactions = 74830
+Number of 4-body interactions = 590601
+ Updating neighbor list on step: 60, with padding: 0.490
+      61      7.62       5.6622602     -49.1251317     -43.4628714          1919.6      9.79007156    -44.2222553
+      62      7.75       5.6901895     -49.1297343     -43.4395448          1929.0      9.85194839    -44.2222798
+      63      7.88       5.7171643     -49.1332040     -43.4160397          1938.2      9.93111774    -44.2223022
+      64      8.00       5.7428764     -49.1352447     -43.3923682          1946.9     10.02705698    -44.2223221
+      65      8.12       5.7670564     -49.1355990     -43.3685427          1955.1     10.13912081    -44.2223389
+      66      8.25       5.7894947     -49.1340691     -43.3445744          1962.7     10.26658179    -44.2223500
+      67      8.38       5.8100584     -49.1305350     -43.3204766          1969.7     10.40863280    -44.2223547
+      68      8.50       5.8286987     -49.1249616     -43.2962629          1976.0     10.56440551    -44.2223523
+      69      8.62       5.8454530     -49.1174022     -43.2719493          1981.7     10.73298397    -44.2223457
+      70      8.75       5.8604370     -49.1079834     -43.2475464          1986.8     10.91337983    -44.2223326
+      71      8.88       5.8738326     -49.0969019     -43.2230693          1991.3     11.10449945    -44.2223167
+      72      9.00       5.8858677     -49.0843969     -43.1985292          1995.4     11.30514451    -44.2222986
+      73      9.12       5.8967933     -49.0707305     -43.1739372          1999.1     11.51401066    -44.2222808
+      74      9.25       5.9068584     -49.0561599     -43.1493015          2002.5     11.72974694    -44.2222640
+      75      9.38       5.9162863     -49.0409176     -43.1246312          2005.7     11.95102153    -44.2222509
+Number of 3-body interactions = 80937
+Number of 4-body interactions = 666247
+ Updating neighbor list on step: 75, with padding: 0.552
+      76      9.50       5.9252579     -49.0251876     -43.0999297          2008.7     12.17658762    -44.2222398
+      77      9.62       5.9339042     -49.0091076     -43.0752034          2011.7     12.40534201    -44.2222325
+      78      9.75       5.9423115     -48.9927655     -43.0504540          2014.5     12.63635816    -44.2222267
+      79      9.88       5.9505360     -48.9762190     -43.0256830          2017.3     12.86886146    -44.2222206
+      80     10.00       5.9586240     -48.9595166     -43.0008927          2020.0     13.10221400    -44.2222131
+      81     10.12       5.9666298     -48.9427176     -42.9760878          2022.8     13.33585816    -44.2222058
+      82     10.25       5.9746262     -48.9258960     -42.9512698          2025.5     13.56922478    -44.2221974
+      83     10.38       5.9827024     -48.9091453     -42.9264429          2028.2     13.80168274    -44.2221897
+      84     10.50       5.9909526     -48.8925613     -42.9016088          2031.0     14.03248304    -44.2221823
+      85     10.62       5.9994586     -48.8762304     -42.8767718          2033.9     14.26070892    -44.2221779
+      86     10.75       6.0082764     -48.8602088     -42.8519325          2036.9     14.48524084    -44.2221750
+      87     10.88       6.0174320     -48.8445228     -42.8270908          2040.0     14.70470755    -44.2221724
+      88     11.00       6.0269338     -48.8291828     -42.8022490          2043.2     14.91743362    -44.2221707
+      89     11.12       6.0367987     -48.8142026     -42.7774039          2046.5     15.12145287    -44.2221648
+      90     11.25       6.0470879     -48.7996431     -42.7525552          2050.0     15.31449387    -44.2221528
+      91     11.38       6.0579411     -48.7856448     -42.7277037          2053.7     15.49401850    -44.2221343
+Number of 3-body interactions = 76767
+Number of 4-body interactions = 615049
+ Updating neighbor list on step: 91, with padding: 0.502
+      92     11.50       6.0695956     -48.7724463     -42.7028508          2057.7     15.65734336    -44.2221096
+      93     11.62       6.0823800     -48.7603775     -42.6779975          2062.0     15.80179583    -44.2220799
+      94     11.75       6.0966749     -48.7498238     -42.6531489          2066.8     15.92493239    -44.2220511
+      95     11.88       6.1128414     -48.7411500     -42.6283086          2072.3     16.02475951    -44.2220289
+      96     12.00       6.1311298     -48.7346120     -42.6034822          2078.5     16.09997544    -44.2220215
+      97     12.12       6.1515874     -48.7302573     -42.5786699          2085.5     16.15018593    -44.2220314
+      98     12.25       6.1739893     -48.7278612     -42.5538720          2093.0     16.17606931    -44.2220600
+      99     12.38       6.1978103     -48.7268992     -42.5290889          2101.1     16.17941277    -44.2221065
+     100     12.50       6.2222501     -48.7265705     -42.5043204          2109.4     16.16303190    -44.2221664
+     101     12.62       6.2463070     -48.7258748     -42.4795678          2117.6     16.13054531    -44.2222325
+     102     12.75       6.2688857     -48.7237207     -42.4548349          2125.2     16.08604318    -44.2222963
+     103     12.88       6.2889186     -48.7190490     -42.4301304          2132.0     16.03366357    -44.2223500
+     104     13.00       6.3054775     -48.7109449     -42.4054674          2137.6     15.97716751    -44.2223875
+     105     13.12       6.3178643     -48.6987286     -42.3808643          2141.8     15.91956027    -44.2224059
+Number of 3-body interactions = 80967
+Number of 4-body interactions = 667484
+ Updating neighbor list on step: 105, with padding: 0.540
+     106     13.25       6.3256718     -48.6820116     -42.3563399          2144.5     15.86280604    -44.2224023
+     107     13.38       6.3288174     -48.6607314     -42.3319140          2145.5     15.80770622    -44.2223758
+     108     13.50       6.3275517     -48.6351589     -42.3076071          2145.1     15.75390927    -44.2223279
+     109     13.62       6.3224450     -48.6058832     -42.2834382          2143.4     15.70001933    -44.2222625
+     110     13.75       6.3143507     -48.5737702     -42.2594195          2140.6     15.64378888    -44.2221805
+     111     13.88       6.3043451     -48.5399124     -42.2355673          2137.2     15.58240981    -44.2220921
+     112     14.00       6.2936417     -48.5055283     -42.2118866          2133.6     15.51287332    -44.2220012
+     113     14.12       6.2834858     -48.4718699     -42.1883841          2130.2     15.43236154    -44.2219182
+     114     14.25       6.2750391     -48.4400973     -42.1650582          2127.3     15.33864053    -44.2218493
+     115     14.38       6.2692717     -48.4111740     -42.1419023          2125.3     15.23038485    -44.2217994
+     116     14.50       6.2668805     -48.3857864     -42.1189059          2124.5     15.10744000    -44.2217712
+     117     14.62       6.2682526     -48.3643070     -42.0960545          2125.0     14.97092521    -44.2217640
+     118     14.75       6.2734789     -48.3468075     -42.0733286          2126.8     14.82315410    -44.2217720
+     119     14.88       6.2824171     -48.3331279     -42.0507108          2129.8     14.66738377    -44.2217893
+     120     15.00       6.2947865     -48.3229703     -42.0281838          2134.0     14.50741035    -44.2218083
+Number of 3-body interactions = 84775
+Number of 4-body interactions = 716192
+ Updating neighbor list on step: 120, with padding: 0.583
+     121     15.12       6.3102738     -48.3160081     -42.0057344          2139.2     14.34706354    -44.2218228
+     122     15.25       6.3286258     -48.3119781     -41.9833523          2145.5     14.18970139    -44.2218275
+     123     15.38       6.3497123     -48.3107476     -41.9610352          2152.6     14.03778363    -44.2218229
+     124     15.50       6.3735478     -48.3123293     -41.9387815          2160.7     13.89262853    -44.2218089
+     125     15.62       6.4002725     -48.3168674     -41.9165949          2169.8     13.75434135    -44.2217901
+     126     15.75       6.4301000     -48.3245825     -41.8944825          2179.9     13.62196613    -44.2217735
+     127     15.88       6.4632430     -48.3356915     -41.8724485          2191.1     13.49374694    -44.2217624
+     128     16.00       6.4998330     -48.3503335     -41.8505005          2203.5     13.36752064    -44.2217628
+     129     16.12       6.5398500     -48.3684925     -41.8286425          2217.1     13.24112026    -44.2217757
+     130     16.25       6.5830757     -48.3899584     -41.8068827          2231.7     13.11273781    -44.2218038
+     131     16.38       6.6290803     -48.4143063     -41.7852260          2247.3     12.98117277    -44.2218438
+     132     16.50       6.6772451     -48.4409253     -41.7636802          2263.7     12.84594595    -44.2218923
+     133     16.62       6.7268153     -48.4690736     -41.7422583          2280.5     12.70728832    -44.2219470
+     134     16.75       6.7769733     -48.4979429     -41.7209696          2297.5     12.56601979    -44.2219988
+     135     16.88       6.8269158     -48.5267481     -41.6998323          2314.4     12.42338052    -44.2220442
+     136     17.00       6.8759202     -48.5547886     -41.6788684          2331.0     12.28084940    -44.2220803
+Number of 3-body interactions = 81050
+Number of 4-body interactions = 668901
+ Updating neighbor list on step: 136, with padding: 0.536
+     137     17.12       6.9233888     -48.5814915     -41.6581027          2347.1     12.13999131    -44.2221057
+     138     17.25       6.9688649     -48.6064289     -41.6375639          2362.5     12.00237261    -44.2221212
+     139     17.38       7.0120238     -48.6293068     -41.6172830          2377.2     11.86950854    -44.2221298
+     140     17.50       7.0526436     -48.6499321     -41.5972885          2390.9     11.74288265    -44.2221321
+     141     17.62       7.0905686     -48.6681807     -41.5776120          2403.8     11.62398195    -44.2221321
+     142     17.75       7.1256730     -48.6839558     -41.5582827          2415.7     11.51430439    -44.2221325
+     143     17.88       7.1578338     -48.6971608     -41.5393269          2426.6     11.41533986    -44.2221340
+     144     18.00       7.1869159     -48.7076830     -41.5207671          2436.4     11.32852261    -44.2221348
+     145     18.12       7.2127683     -48.7153982     -41.5026300          2445.2     11.25517645    -44.2221384
+     146     18.25       7.2352288     -48.7201618     -41.4849330          2452.8     11.19646422    -44.2221405
+     147     18.38       7.2541331     -48.7218314     -41.4676983          2459.2     11.15331477    -44.2221431
+     148     18.50       7.2693236     -48.7202670     -41.4509435          2464.4     11.12639596    -44.2221450
+     149     18.62       7.2806585     -48.7153434     -41.4346849          2468.2     11.11612800    -44.2221461
+     150     18.75       7.2880184     -48.7069540     -41.4189356          2470.7     11.12271356    -44.2221445
+     151     18.88       7.2913116     -48.6950231     -41.4037115          2471.8     11.14620016    -44.2221435
+     152     19.00       7.2904789     -48.6794995     -41.3890206          2471.5     11.18653778    -44.2221408
+Number of 3-body interactions = 76619
+Number of 4-body interactions = 614030
+ Updating neighbor list on step: 152, with padding: 0.487
+     153     19.12       7.2854993     -48.6603700     -41.3748708          2469.9     11.24362686    -44.2221365
+     154     19.25       7.2763939     -48.6376582     -41.3612643          2466.8     11.31737070    -44.2221273
+     155     19.38       7.2632309     -48.6114352     -41.3482043          2462.3     11.40765809    -44.2221138
+     156     19.50       7.2461283     -48.5818249     -41.3356966          2456.5     11.51432081    -44.2221013
+     157     19.62       7.2252555     -48.5489876     -41.3237321          2449.4     11.63705530    -44.2220833
+     158     19.75       7.2008329     -48.5131427     -41.3123098          2441.2     11.77534134    -44.2220637
+     159     19.88       7.1731303     -48.4745515     -41.3014212          2431.8     11.92835324    -44.2220412
+     160     20.00       7.1424643     -48.4335199     -41.2910556          2421.4     12.09488050    -44.2220147
+     161     20.12       7.1091951     -48.3904006     -41.2812055          2410.1     12.27330054    -44.2219884
+     162     20.25       7.0737220     -48.3455768     -41.2718548          2398.1     12.46160144    -44.2219597
+     163     20.38       7.0364761     -48.2994648     -41.2629886          2385.4     12.65745060    -44.2219290
+     164     20.50       6.9979090     -48.2525021     -41.2545931          2372.4     12.85832656    -44.2218989
+     165     20.62       6.9584763     -48.2051283     -41.2466520          2359.0     13.06169809    -44.2218706
+     166     20.75       6.9186179     -48.1577654     -41.2391474          2345.5     13.26519003    -44.2218448
+     167     20.88       6.8787367     -48.1107980     -41.2320613          2332.0     13.46676594    -44.2218219
+Number of 3-body interactions = 78675
+Number of 4-body interactions = 638856
+ Updating neighbor list on step: 167, with padding: 0.507
+     168     21.00       6.8391809     -48.0645584     -41.2253775          2318.6     13.66479229    -44.2218049
+     169     21.12       6.8002356     -48.0193095     -41.2190739          2305.4     13.85806480    -44.2217906
+     170     21.25       6.7621265     -47.9752590     -41.2131324          2292.4     14.04575022    -44.2217792
+     171     21.38       6.7250372     -47.9325709     -41.2075337          2279.9     14.22728433    -44.2217695
+     172     21.50       6.6891371     -47.8913944     -41.2022573          2267.7     14.40221612    -44.2217587
+     173     21.62       6.6546155     -47.8518990     -41.1972835          2256.0     14.57007961    -44.2217437
+     174     21.75       6.6217157     -47.8143100     -41.1925943          2244.8     14.73026838    -44.2217227
+     175     21.88       6.5907618     -47.7789377     -41.1881759          2234.3     14.88194777    -44.2216972
+     176     22.00       6.5621738     -47.7461850     -41.1840112          2224.6     15.02405668    -44.2216649
+     177     22.12       6.5364644     -47.7165513     -41.1800869          2215.9     15.15524844    -44.2216259
+     178     22.25       6.5142159     -47.6906091     -41.1763933          2208.4     15.27392674    -44.2215833
+     179     22.38       6.4960362     -47.6689616     -41.1729254          2202.2     15.37831934    -44.2215432
+     180     22.50       6.4824980     -47.6521760     -41.1696780          2197.6     15.46658343    -44.2215102
+     181     22.62       6.4740675     -47.6407146     -41.1666471          2194.8     15.53693018    -44.2214881
+Number of 3-body interactions = 83452
+Number of 4-body interactions = 699043
+ Updating neighbor list on step: 181, with padding: 0.558
+     182     22.75       6.4710349     -47.6348652     -41.1638303          2193.7     15.58775837    -44.2214804
+     183     22.88       6.4734561     -47.6346857     -41.1612296          2194.6     15.61780652    -44.2214927
+     184     23.00       6.4811165     -47.6399593     -41.1588427          2197.2     15.62627889    -44.2215239
+     185     23.12       6.4935247     -47.6501930     -41.1566683          2201.4     15.61291319    -44.2215715
+     186     23.25       6.5099351     -47.6646414     -41.1547063          2206.9     15.57803223    -44.2216317
+     187     23.38       6.5293984     -47.6823573     -41.1529589          2213.5     15.52254972    -44.2217013
+     188     23.50       6.5508285     -47.7022584     -41.1514299          2220.8     15.44791839    -44.2217768
+     189     23.62       6.5730769     -47.7231981     -41.1501212          2228.3     15.35603421    -44.2218516
+     190     23.75       6.5950045     -47.7440419     -41.1490374          2235.8     15.24910002    -44.2219209
+     191     23.88       6.6155435     -47.7637291     -41.1481856          2242.7     15.12949810    -44.2219827
+     192     24.00       6.6337468     -47.7813177     -41.1475708          2248.9     14.99966990    -44.2220329
+     193     24.12       6.6488248     -47.7960278     -41.1472029          2254.0     14.86202314    -44.2220734
+     194     24.25       6.6601715     -47.8072565     -41.1470850          2257.9     14.71888008    -44.2221006
+     195     24.38       6.6673826     -47.8146033     -41.1472207          2260.3     14.57244178    -44.2221132
+     196     24.50       6.6702657     -47.8178798     -41.1476141          2261.3     14.42475804    -44.2221122
+Number of 3-body interactions = 84392
+Number of 4-body interactions = 710909
+ Updating neighbor list on step: 196, with padding: 0.565
+     197     24.62       6.6688427     -47.8171108     -41.1482682          2260.8     14.27775960    -44.2220995
+     198     24.75       6.6633411     -47.8125224     -41.1491814          2258.9     14.13323241    -44.2220748
+     199     24.88       6.6541717     -47.8045264     -41.1503547          2255.8     13.99284186    -44.2220417
+     200     25.00       6.6418899     -47.7936758     -41.1517859          2251.7     13.85817599    -44.2220028
+END SIMULATION
+	Average temperature over run = 2005.0651 K
+	Average pressure    over run = 13.6980 GPa
+	Pressures from diagonal stress tensors over run: 13.6991
+	Average stress tensors over run: 
+		sigma_xx: 14.7475 GPa
+		sigma_yy: 13.4638 GPa
+		sigma_zz: 12.8861 GPa
+		sigma_xy: 0.6691 GPa
+		sigma_xz: 0.8408 GPa
+		sigma_yz: -1.1341 GPa

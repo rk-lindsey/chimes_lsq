@@ -1,0 +1,352 @@
+Code compiled in MPI mode. Will run on 36 processor(s).
+
+Reading the simulation control input file...
+Will read from file: run_md.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# RNDSEED #: 12357
+	# TEMPERA #: 2000 K
+	# CMPRFRC #: false
+	# TIMESTP #: 0.125 fs
+	# N_MDSTP #: 1000
+	# NLAYERS #: 1
+	# USENEIG #: true
+	# PRMFILE #: params.lj.txt
+	# CRDFILE #: input.xyz
+	# VELINIT #: READ ... reading velocities from coordinate file
+	# CONSRNT #: HOOVER... a Hoover time of 10 will be used.
+	# PRSCALC #: ANALYTICAL
+	# WRPCRDS #: true
+	# ATMENER #: true
+		... All reported energies include single atom contributions if available
+	# FRQTRAJ #: 20
+		... printing every 2.5 fs, 
+		... printing       50 frames. 
+	# TRAJEXT #: GEN
+	# FRQENER #: 10
+	# PRNTFRC #: false
+	# PRNTBAD #: false
+	# FRQRSTR #: 100
+	# PRNTFRC #: false
+	# FORDFTB #: false
+Setting up the data objects...
+   ...setup complete
+
+Reading initial coordinates and forces...
+     ...Read the following coordinate file extension: xyz
+     ...Read the following number of atoms: 96
+     ...Read box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.6091309 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084115885312
+
+	...Reading velocities from last three fields of atom info lines in xyzf file... 
+     ...Updated simulation box dimensions: 
+       Box information (base units: Angstroms and radians): 
+       Orthorhombic:                   1
+       Cell vectors (a)                8.6091309 0 0
+       Cell vectors (b)                0 8.6091309 0
+       Cell vectors (c)                0 0 8.6091309
+       Layers:                         1
+       Ghost cell vectors (a) 	        25.8273927 0 0
+       Ghost cell vectors (b) 	        0 25.8273927 0
+       Ghost cell vectors (c) 	        0 0 25.8273927
+       Invr. cell vectors (a) 	        0.116155743432824 -0 0
+       Invr. cell vectors (b) 	        -0 0.116155743432824 -0
+       Invr. cell vectors (c) 	        0 -0 0.116155743432824
+       Lat. constants (a,b,c) 	        8.6091309 8.6091309 8.6091309
+       Lat. angles (alpha,beta,gamma)  89.9999999999941 89.9999999999941 89.9999999999941
+       Cell extents (x,y,z)            8.6091309 8.6091309 8.6091309
+       LMP cell lengths (lx,ly,lz)     8.6091309 8.6091309 8.6091309
+       LMP cell tilts facs. (xy,xz,yz) 0 0 0
+       Cell volume                     638.084115885312
+
+   ...read complete for file input.xyz
+
+Reading atom info from parameter file...
+	Read 2 atom types:
+		0     O , q (e): -0.730, mass (amu):  15.9990
+		1     H , q (e):  0.365, mass (amu):   1.0080
+   ...read complete
+
+	Real atoms:                 96
+	Total atoms (ghost):        2592
+	cell vectors (a)            8.6091 0.0000 0.0000
+	cell vectors (b)            0.0000 8.6091 0.0000
+	cell vectors (c)            0.0000 0.0000 8.6091
+	Layers:                     1
+	Effective cell vectors (a): 25.8274 0.0000 0.0000
+	Effective cell vectors (a): 0.0000 25.8274 0.0000
+	Effective cell vectors (a): 0.0000 0.0000 25.8274
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+Setting up thermostats/barostats/velocities...
+	...Configuring constraints for a NVT-MTK simulation.
+	...Setting thermostat time constant to: 10.0000
+   ...setup complete
+
+Running velocity sanity checks...
+	Initial velocity center of mass: (    0.0000,    -0.0000,     0.0000) 
+	Final   velocity center of mass: (    0.0000,     0.0000,     0.0000) 
+	Total Mass     = 576.4800 au
+	Volume         = 638.0841 Ang^3
+	Number density = 0.2498 mol atm/cm^3
+	Mass density   = 1.5002 g/cm^3
+   ...checks complete
+
+
+Reading force field parameters...
+		...Compute electrostatics?      false
+		...Use fit charges?             false
+		...Use 3-body Cheby params?     false
+		...Use 4-body Cheby params?     false
+	...Read FF controls...
+Attempting to read pairtype...
+	...Read FF interaction type...
+	...Read general FF params...
+	...Read FF triplet specifications...
+	...Reading all remaining force field parameters...
+	...Read 2-body FF params...
+	Reading  4 pairs for mapping
+	........Reading pair: OO with mapped index: 0
+	........Reading pair: OH with mapped index: 2
+	........Reading pair: HO with mapped index: 2
+	........Reading pair: HH with mapped index: 1
+	...Read FF pairmaps...
+
+   ...read complete.
+
+Notes on simulation: 
+	Using the following fcut style for 2B Chebyshev interactions: CUBIC
+		...with offset of: 0.0000
+	Electrostatics will not be computed.
+
+Force field summary: 
+	Pair type and number of parameters per pair: 
+		LJ 2
+
+	Interaction parameters for each pair type: 
+		pair type...smin...smax...
+		OO 0.7500 6.0000 
+		Parameters: 
+		0 1.0000
+		1 1.1000
+
+		pair type...smin...smax...
+		HH 0.7500 6.0000 
+		Parameters: 
+		0 1.0000
+		1 1.1000
+
+		pair type...smin...smax...
+		OH 0.7500 6.0000 
+		Parameters: 
+		0 1.0000
+		1 1.1000
+
+
+Initializing the neighbor list...
+NEIGHBOR LIST MAX CUTOFF IS: 6.00000
+USING PADDING: 0.300
+
+Generating fast maps... 
+	Pair maps:
+		Atom type idxs:  0 0 Pair name:   OO Explicit pair index:    0 Unique pair index:    0
+		Atom type idxs:  0 1 Pair name:   OH Explicit pair index:    1 Unique pair index:    2
+		Atom type idxs:  1 0 Pair name:   HO Explicit pair index:    2 Unique pair index:    2
+		Atom type idxs:  1 1 Pair name:   HH Explicit pair index:    3 Unique pair index:    1
+BEGIN SIMULATION:
+RANK: 0 RESET RCUT_PADDING TO: 0.3776339900
+    Step      Time          Ktot/N          Vtot/N          Etot/N               T               P         Econs/N
+              (fs)      (kcal/mol)      (kcal/mol)      (kcal/mol)             (K)           (GPa)      (kcal/mol)
+      10      1.25       6.5684729       2.2055964       8.7740693          2226.8     23.95156019      8.7594617
+ Updating neighbor list on step: 12, with padding: 0.596
+      20      2.50       9.2505368      -0.4807051       8.7698317          3136.0     11.45901898      8.7610183
+ Updating neighbor list on step: 27, with padding: 0.619
+      30      3.75       9.6676437      -1.0617821       8.6058616          3277.4      7.65729977      8.7620968
+      40      5.00       9.2564878      -0.9962963       8.2601916          3138.0      7.03191957      8.7627870
+ Updating neighbor list on step: 42, with padding: 0.599
+      50      6.25       8.7314778      -0.9635654       7.7679124          2960.1      6.62659527      8.7622004
+ Updating neighbor list on step: 58, with padding: 0.572
+      60      7.50       7.8468739      -0.6481565       7.1987174          2660.2      7.50039814      8.7633334
+      70      8.75       7.5161891      -0.9329632       6.5832259          2548.1      5.91452155      8.7625600
+ Updating neighbor list on step: 74, with padding: 0.537
+      80     10.00       6.9424288      -0.9989590       5.9434698          2353.6      5.27783939      8.7626546
+      90     11.25       6.1855260      -0.8584200       5.3271061          2097.0      5.61791867      8.7628282
+ Updating neighbor list on step: 90, with padding: 0.498
+     100     12.50       5.5289137      -0.7574503       4.7714633          1874.4      5.76542618      8.7630192
+ Updating neighbor list on step: 106, with padding: 0.463
+     110     13.75       5.1389890      -0.8662931       4.2726959          1742.2      4.99786840      8.7627180
+     120     15.00       4.6865578      -0.8539305       3.8326273          1588.8      4.72982288      8.7628499
+ Updating neighbor list on step: 122, with padding: 0.426
+     130     16.25       4.3318060      -0.8717277       3.4600782          1468.5      4.35048069      8.7630253
+ Updating neighbor list on step: 138, with padding: 0.398
+     140     17.50       4.1286554      -0.9872816       3.1413737          1399.7      3.59182956      8.7627141
+     150     18.75       3.8142545      -0.9329456       2.8813089          1293.1      3.56032424      8.7626877
+ Updating neighbor list on step: 154, with padding: 0.390
+     160     20.00       3.5269897      -0.8444115       2.6825782          1195.7      3.63239553      8.7630966
+ Updating neighbor list on step: 169, with padding: 0.373
+     170     21.25       3.5996972      -1.0665663       2.5331309          1220.3      2.35018832      8.7626822
+     180     22.50       3.5844026      -1.1582849       2.4261177          1215.2      1.61345374      8.7629383
+ Updating neighbor list on step: 184, with padding: 0.399
+     190     23.75       3.5304093      -1.1665214       2.3638879          1196.8      1.34439257      8.7630094
+ Updating neighbor list on step: 199, with padding: 0.395
+     200     25.00       3.5125887      -1.1661770       2.3464117          1190.8      1.22689519      8.7630204
+     210     26.25       3.5446162      -1.1712381       2.3733780          1201.7      1.20126354      8.7629660
+ Updating neighbor list on step: 214, with padding: 0.390
+     220     27.50       3.5953357      -1.1500917       2.4452440          1218.9      1.40261276      8.7629780
+ Updating neighbor list on step: 229, with padding: 0.394
+     230     28.75       3.6711711      -1.1085393       2.5626318          1244.6      1.79530774      8.7629724
+     240     30.00       3.7814145      -1.0544961       2.7269184          1281.9      2.32329477      8.7629279
+ Updating neighbor list on step: 244, with padding: 0.405
+     250     31.25       3.9117041      -0.9719427       2.9397614          1326.1      3.02402258      8.7629157
+ Updating neighbor list on step: 259, with padding: 0.424
+     260     32.50       4.1019973      -0.8990742       3.2029232          1390.6      3.67736678      8.7628766
+     270     33.75       4.3291610      -0.8081115       3.5210494          1467.6      4.34025839      8.7630020
+ Updating neighbor list on step: 274, with padding: 0.450
+     280     35.00       4.7858724      -0.8863939       3.8994786          1622.5      4.27297081      8.7627333
+ Updating neighbor list on step: 289, with padding: 0.482
+     290     36.25       5.3085163      -0.9575259       4.3509904          1799.6      4.28539177      8.7628935
+     300     37.50       5.8730151      -1.0048989       4.8681162          1991.0      4.50695734      8.7628621
+ Updating neighbor list on step: 304, with padding: 0.515
+     310     38.75       6.3998359      -0.9622356       5.4376004          2169.6      5.18497233      8.7626407
+ Updating neighbor list on step: 318, with padding: 0.583
+     320     40.00       6.8109830      -0.7786785       6.0323045          2309.0      6.48944480      8.7627265
+     330     41.25       7.3447713      -0.7115408       6.6332305          2490.0      7.29957656      8.7624737
+ Updating neighbor list on step: 333, with padding: 0.561
+     340     42.50       7.8823225      -0.6576898       7.2246327          2672.2      7.96205904      8.7631511
+ Updating neighbor list on step: 348, with padding: 0.613
+     350     43.75       8.3658704      -0.5936748       7.7721956          2836.1      8.62808830      8.7613769
+     360     45.00       8.7939824      -0.5659513       8.2280310          2981.3      9.09456656      8.7618146
+ Updating neighbor list on step: 364, with padding: 0.627
+     370     46.25       9.2601513      -0.6785842       8.5815671          3139.3      8.95154269      8.7625554
+ Updating neighbor list on step: 379, with padding: 0.618
+     380     47.50       9.3325299      -0.5518915       8.7806384          3163.8      9.62788827      8.7634028
+     390     48.75       9.6591528      -0.8527021       8.8064507          3274.6      8.37369596      8.7622572
+ Updating neighbor list on step: 394, with padding: 0.621
+     400     50.00       9.3947224      -0.7455085       8.6492140          3184.9      8.54359870      8.7633897
+ Updating neighbor list on step: 409, with padding: 0.610
+     410     51.25       9.2910296      -0.9733334       8.3176962          3149.8      7.30017189      8.7628123
+     420     52.50       8.8130040      -0.9789632       7.8340408          2987.7      6.94655223      8.7623959
+ Updating neighbor list on step: 424, with padding: 0.584
+     430     53.75       7.7372580      -0.4710564       7.2662016          2623.0      8.76596390      8.7613487
+     440     55.00       7.2777414      -0.5871643       6.6905771          2467.2      8.01502796      8.7615724
+ Updating neighbor list on step: 440, with padding: 0.605
+     450     56.25       6.7611488      -0.6699164       6.0912325          2292.1      7.13273865      8.7626905
+ Updating neighbor list on step: 457, with padding: 0.480
+     460     57.50       6.3429527      -0.8379768       5.5049759          2150.3      5.82002821      8.7627661
+     470     58.75       5.9942928      -1.0601868       4.9341059          2032.1      4.32297505      8.7626472
+ Updating neighbor list on step: 471, with padding: 0.561
+     480     60.00       5.4921322      -1.0901208       4.4020114          1861.9      3.71984809      8.7628998
+ Updating neighbor list on step: 486, with padding: 0.538
+     490     61.25       5.0605450      -1.1364313       3.9241136          1715.6      3.19995154      8.7628071
+     500     62.50       4.6071904      -1.1002878       3.5069025          1561.9      3.18489501      8.7626361
+ Updating neighbor list on step: 502, with padding: 0.449
+     510     63.75       4.0547670      -0.8894280       3.1653390          1374.6      3.96502567      8.7633473
+ Updating neighbor list on step: 519, with padding: 0.449
+     520     65.00       3.8982092      -1.0114207       2.8867885          1321.5      3.39359688      8.7627415
+     530     66.25       3.6323920      -0.9683564       2.6640356          1231.4      3.47801446      8.7628018
+ Updating neighbor list on step: 534, with padding: 0.442
+     540     67.50       3.4039941      -0.9050429       2.4989512          1154.0      3.65853377      8.7629495
+     550     68.75       3.3530449      -0.9685708       2.3844741          1136.7      3.30856291      8.7628275
+ Updating neighbor list on step: 550, with padding: 0.422
+     560     70.00       3.3456210      -1.0296990       2.3159219          1134.2      2.95205409      8.7628311
+ Updating neighbor list on step: 565, with padding: 0.409
+     570     71.25       3.3193592      -1.0265305       2.2928287          1125.3      2.88034440      8.7628503
+     580     72.50       3.3256801      -1.0104944       2.3151857          1127.4      2.86503417      8.7628865
+ Updating neighbor list on step: 580, with padding: 0.408
+     590     73.75       3.4217302      -1.0380362       2.3836940          1160.0      2.65567794      8.7628727
+ Updating neighbor list on step: 595, with padding: 0.419
+     600     75.00       3.5951744      -1.0942589       2.5009155          1218.8      2.33355708      8.7628248
+     610     76.25       3.7936593      -1.1240053       2.6696539          1286.1      2.16239683      8.7628352
+ Updating neighbor list on step: 610, with padding: 0.433
+     620     77.50       4.0202994      -1.1290393       2.8912601          1362.9      2.16712665      8.7629231
+ Updating neighbor list on step: 625, with padding: 0.450
+     630     78.75       4.3509813      -1.1809851       3.1699962          1475.0      2.08954970      8.7627964
+     640     80.00       4.6951763      -1.1861943       3.5089820          1591.7      2.35453308      8.7627732
+ Updating neighbor list on step: 640, with padding: 0.474
+     650     81.25       4.9846851      -1.0818307       3.9028544          1689.9      3.22798446      8.7627482
+ Updating neighbor list on step: 655, with padding: 0.505
+     660     82.50       5.2279350      -0.8850964       4.3428387          1772.3      4.53798783      8.7627709
+     670     83.75       5.5689523      -0.7437684       4.8251839          1887.9      5.53020105      8.7630039
+ Updating neighbor list on step: 670, with padding: 0.542
+     680     85.00       6.2877218      -0.9244511       5.3632707          2131.6      5.13723127      8.7625836
+ Updating neighbor list on step: 685, with padding: 0.582
+     690     86.25       6.9680115      -1.0119484       5.9560631          2362.2      5.10172157      8.7625542
+     700     87.50       7.4927449      -0.9326043       6.5601406          2540.1      5.75420788      8.7627337
+ Updating neighbor list on step: 700, with padding: 0.620
+     710     88.75       8.0729936      -0.9285613       7.1444322          2736.8      6.07550324      8.7622105
+ Updating neighbor list on step: 715, with padding: 0.654
+     720     90.00       8.5932454      -0.9207071       7.6725383          2913.2      6.31085781      8.7624864
+     730     91.25       9.1973108      -1.0842947       8.1130160          3118.0      5.85583039      8.7622398
+ Updating neighbor list on step: 730, with padding: 0.680
+     740     92.50       9.1734472      -0.7621103       8.4113369          3109.9      7.42015173      8.7628497
+ Updating neighbor list on step: 745, with padding: 0.695
+     750     93.75       9.3565564      -0.8113318       8.5452245          3172.0      7.48941617      8.7615450
+     760     95.00       9.0933007      -0.5754581       8.5178426          3082.7      8.46558197      8.7630851
+ Updating neighbor list on step: 760, with padding: 0.699
+     770     96.25       9.1873434      -0.8588978       8.3284456          3114.6      7.19149631      8.7624033
+ Updating neighbor list on step: 775, with padding: 0.663
+     780     97.50       8.8686721      -0.8804574       7.9882147          3006.6      6.92751802      8.7627308
+     790     98.75       8.4474728      -0.9236445       7.5238283          2863.8      6.58261188      8.7622857
+ Updating neighbor list on step: 790, with padding: 0.697
+     800    100.00       7.7043128      -0.7188684       6.9854444          2611.8      7.18375256      8.7628232
+ Updating neighbor list on step: 805, with padding: 0.668
+     810    101.25       7.1976107      -0.7800635       6.4175472          2440.1      6.57247804      8.7626706
+     820    102.50       6.7693177      -0.9345044       5.8348132          2294.9      5.47924800      8.7626194
+ Updating neighbor list on step: 821, with padding: 0.623
+     830    103.75       6.2542047      -0.9922474       5.2619573          2120.2      4.77063718      8.7627320
+ Updating neighbor list on step: 837, with padding: 0.576
+     840    105.00       5.7666628      -1.0437668       4.7228960          1955.0      4.12022472      8.7628256
+     850    106.25       5.3526628      -1.1260155       4.2266473          1814.6      3.39647623      8.7627034
+ Updating neighbor list on step: 853, with padding: 0.534
+     860    107.50       4.8765994      -1.0911554       3.7854440          1653.2      3.21799741      8.7629005
+ Updating neighbor list on step: 869, with padding: 0.499
+     870    108.75       4.5098985      -1.1032113       3.4066872          1528.9      2.91160175      8.7628568
+     880    110.00       4.1927152      -1.1063380       3.0863772          1421.4      2.70660872      8.7628865
+ Updating neighbor list on step: 885, with padding: 0.471
+     890    111.25       3.9165005      -1.0914269       2.8250736          1327.7      2.67527577      8.7629105
+     900    112.50       3.7100682      -1.0911293       2.6189388          1257.8      2.67506898      8.7628868
+ Updating neighbor list on step: 901, with padding: 0.454
+     910    113.75       3.5363666      -1.0714390       2.4649276          1198.9      2.80784867      8.7628436
+ Updating neighbor list on step: 916, with padding: 0.440
+     920    115.00       3.3804466      -1.0189861       2.3614606          1146.0      3.05367151      8.7629684
+     930    116.25       3.3622786      -1.0569058       2.3053729          1139.8      2.86038894      8.7628931
+ Updating neighbor list on step: 932, with padding: 0.417
+     940    117.50       3.4015155      -1.1071354       2.2943800          1153.1      2.57388412      8.7628515
+ Updating neighbor list on step: 947, with padding: 0.415
+     950    118.75       3.4077291      -1.0792754       2.3284537          1155.3      2.63101946      8.7628385
+     960    120.00       3.4089386      -1.0014063       2.4075323          1155.7      2.92692025      8.7630026
+ Updating neighbor list on step: 962, with padding: 0.424
+     970    121.25       3.5885428      -1.0544019       2.5341410          1216.6      2.67796816      8.7628257
+ Updating neighbor list on step: 977, with padding: 0.439
+     980    122.50       3.8199687      -1.1059908       2.7139779          1295.0      2.41863403      8.7628835
+     990    123.75       4.1002146      -1.1504677       2.9497470          1390.0      2.24320090      8.7628789
+ Updating neighbor list on step: 992, with padding: 0.460
+    1000    125.00       4.4092095      -1.1656187       3.2435909          1494.8      2.28918325      8.7629273
+END SIMULATION
+	Average temperature over run = 1952.2025 K
+	Average pressure    over run = 5.0698 GPa
+	Pressures from diagonal stress tensors over run: 5.0698
+	Average stress tensors over run: 
+		sigma_xx: 5.1100 GPa
+		sigma_yy: 5.2179 GPa
+		sigma_zz: 4.8816 GPa
+		sigma_xy: 0.4286 GPa
+		sigma_xz: 0.4567 GPa
+		sigma_yz: 0.3118 GPa

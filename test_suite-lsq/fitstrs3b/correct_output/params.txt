@@ -1,0 +1,138 @@
+! Date  2022-08-12
+!
+! Number of variables            =  40
+! Number of equations            =  9603
+! svd algorithm used
+! eps (= args.eps*dmax)          =   7.7865e-03
+! SVD regularization factor      =  1.0000e-05
+! RMS force error                =  7.4516e+00
+! max abs variable               =  1.6631e+03
+! number of fitting vars         =  37
+! Bayesian Information Criterion =  3.8913e+04
+!
+USECOUL: false
+FITCOUL: false
+USE3BCH: true
+USE4BCH: false
+
+PAIRTYP: CHEBYSHEV  10 2 0 -1 1
+
+ATOM TYPES: 2
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		O		0		15.9994
+1		H		-0		1.0079
+
+ATOM PAIRS: 3
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# CHBDIST #	# MORSE_LAMBDA #
+	0               O               O               0.75            6               MORSE           1.25            
+	1               H               H               0.75            6               MORSE           1.25            
+	2               O               H               0.75            6               MORSE           1.25            
+
+FCUT TYPE: CUBIC
+
+ATOM PAIR TRIPLETS: 4
+ATOM PAIR QUADRUPLETS: 0
+
+PAIR CHEBYSHEV PARAMS 
+
+PAIRTYPE PARAMS: 0 O O
+
+  0  -7.3275543683458e+02
+  1  -1.4719501307955e+03
+  2  -2.8438964779144e+02
+  3   1.2335096801571e+03
+  4   1.0243221974114e+03
+  5  -6.1593900657958e+02
+  6  -1.6631364370763e+03
+  7  -1.3839144657558e+03
+  8  -5.8329013339966e+02
+  9  -1.1341387499672e+02
+ 
+PAIRTYPE PARAMS: 1 H H
+
+  0  -2.8982891850838e+01
+  1  -5.3811494645991e+01
+  2  -4.5951141159239e+01
+  3  -2.7274412990198e+01
+  4  -4.9735016846846e+00
+  5   7.4922686112223e+00
+  6   1.8534262705846e+00
+  7   1.7682735697814e-01
+  8  -3.1670463102697e+00
+  9   1.4101947721919e-02
+ 
+PAIRTYPE PARAMS: 2 O H
+
+  0  -5.5657491707246e+01
+  1   5.0628391150138e+01
+  2   1.5302749593895e+01
+  3   2.9346082030786e+01
+  4   4.3307407465107e-02
+  5   1.1600019604480e+01
+  6  -3.9426947777907e+00
+  7   4.6572064968845e+00
+  8   1.2796044014642e-02
+  9   2.0747582200552e+00
+ 
+TRIPLET CHEBYSHEV PARAMS 
+
+TRIPLETTYPE PARAMS:
+   INDEX: 0 ATOMS: O O O
+   PAIRS: OO OO OO UNIQUE: 2 TOTAL: 4
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0  1  1         0               0          3.9786311262309e+02
+      1       1  0  1         0               0          3.9786311262309e+02
+      2       1  1  0         0               0          3.9786311262309e+02
+      3       1  1  1         3               1          1.4256662158076e+02
+
+TRIPLETTYPE PARAMS:
+   INDEX: 1 ATOMS: H O O
+   PAIRS: OH OH OO UNIQUE: 3 TOTAL: 4
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0  1  1         0               0         -2.6056901440787e+02
+      1       1  0  1         0               0         -2.6056901440787e+02
+      2       1  1  0         2               1          7.9112260018051e+02
+      3       1  1  1         3               2          8.4351743917826e+02
+
+TRIPLETTYPE PARAMS:
+   INDEX: 2 ATOMS: H H O
+   PAIRS: HH OH OH UNIQUE: 3 TOTAL: 4
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0  1  1         0               0         -1.7206951199442e+01
+      1       1  0  1         1               1         -1.1571766485949e+02
+      2       1  1  0         1               1         -1.1571766485949e+02
+      3       1  1  1         3               2         -2.6333254986030e+02
+
+TRIPLETTYPE PARAMS:
+   INDEX: 3 ATOMS: H H H
+   PAIRS: HH HH HH UNIQUE: 2 TOTAL: 4
+     index  |  powers  |  equiv index  |  param index  |       parameter       
+   ----------------------------------------------------------------------------
+      0       0  1  1         0               0         -1.9855215602627e+00
+      1       1  0  1         0               0         -1.9855215602627e+00
+      2       1  1  0         0               0         -1.9855215602627e+00
+      3       1  1  1         3               1          6.3949509490093e+01
+
+
+PAIRMAPS: 4
+1 HH
+2 HO
+2 OH
+0 OO
+
+TRIPMAPS: 8
+3 HHHHHH
+2 HHOHOH
+2 OHHHOH
+2 OHOHHH
+1 OHOHOO
+1 OHOOOH
+1 OOOHOH
+0 OOOOOO
+
+ENDFILE
