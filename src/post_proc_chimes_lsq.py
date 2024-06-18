@@ -67,48 +67,51 @@ while not FINISHED:
         OUTFILE.write(PARSE)        # "INDEX: 0 ATOMS: Al Al Al"
         
         NO_PARAM_LINE  = INFILE.readline().split()
-        NUM_PARAMS = int(NO_PARAM_LINE[CLUSTER.NUM_PAR_COL])
-        
-        HOLD_1 = INFILE.readline()
-        HOLD_2 = INFILE.readline()
-        
-        TMP_PARAMS = []
-        
-        # Read triple type parameters, decide which will remain
-        
-        for i in range(NUM_PARAMS): 
+        if NO_PARAM_LINE[-1] == "EXCLUDED:":
+            #Do stuff
+            OUTFILE.write(' '.join(NO_PARAM_LINE)+'\n')
+        else:
+            NUM_PARAMS = int(NO_PARAM_LINE[CLUSTER.NUM_PAR_COL])        
+            HOLD_1 = INFILE.readline()
+            HOLD_2 = INFILE.readline()
             
-            PARSE = INFILE.readline()
+            TMP_PARAMS = []
             
-            if abs(float(PARSE.split()[CLUSTER.PAR_VAL_COL])) > 0.000001: # Parameter NOT ignored
+            # Read triple type parameters, decide which will remain
+            
+            for i in range(NUM_PARAMS): 
                 
-                TMP_PARAMS.append(PARSE)
+                PARSE = INFILE.readline()
                 
-        # Re-index triple params. Note: equiv index and param index aren't actually used by the MD code,
-        # so they don't need to be re-numbered
-        
-        for i in range(len(TMP_PARAMS)):
+                if abs(float(PARSE.split()[CLUSTER.PAR_VAL_COL])) > 0.000001: # Parameter NOT ignored
+                    
+                    TMP_PARAMS.append(PARSE)
+                    
+            # Re-index triple params. Note: equiv index and param index aren't actually used by the MD code,
+            # so they don't need to be re-numbered
             
-            TMP_PARAMS[i] = TMP_PARAMS[i].split()
-            TMP_PARAMS[i][0] = repr(i)
+            for i in range(len(TMP_PARAMS)):
+                
+                TMP_PARAMS[i] = TMP_PARAMS[i].split()
+                TMP_PARAMS[i][0] = repr(i)
+                
+                ' '.join(TMP_PARAMS[i])
             
-            ' '.join(TMP_PARAMS[i])
-        
-        # Update parameter counts
-        
-        NO_PARAM_LINE[CLUSTER.UNQ_PAR_COL] = "-1"
-        NO_PARAM_LINE[CLUSTER.NUM_PAR_COL] = repr(len(TMP_PARAMS))
-        
-        ' '.join(NO_PARAM_LINE)
-        
-        # Now print out the updated parameter file
-        
-        OUTFILE.write(' '.join(NO_PARAM_LINE)+'\n')
-        OUTFILE.write(HOLD_1)
-        OUTFILE.write(HOLD_2)
-        
-        for i in range(len(TMP_PARAMS)):
-            OUTFILE.write(' '.join(TMP_PARAMS[i])+'\n')
+            # Update parameter counts
+            
+            NO_PARAM_LINE[CLUSTER.UNQ_PAR_COL] = "-1"
+            NO_PARAM_LINE[CLUSTER.NUM_PAR_COL] = repr(len(TMP_PARAMS))
+            
+            ' '.join(NO_PARAM_LINE)
+            
+            # Now print out the updated parameter file
+            
+            OUTFILE.write(' '.join(NO_PARAM_LINE)+'\n')
+            OUTFILE.write(HOLD_1)
+            OUTFILE.write(HOLD_2)
+            
+            for i in range(len(TMP_PARAMS)):
+                OUTFILE.write(' '.join(TMP_PARAMS[i])+'\n')
 
     else:
         OUTFILE.write(PARSE)    
