@@ -12,7 +12,6 @@ from numpy.linalg import lstsq
 from numpy.linalg import LinAlgError
 from datetime     import *
 from subprocess   import call
-# from sklearn.decomposition import TruncatedSVD
 import scipy.sparse.linalg as spla
 
 
@@ -185,11 +184,7 @@ def main():
                 U, D, VT = spla.svds(A, k=k)
                 Dmat = numpy.zeros((len(D), len(D)))
                 
-                # Convert D to a diagonal matrix (if necessary)
-                # Dmat = np.diag(D)               
-                # print(f"U shape: {U.shape}")
-                # print(f"Dmat shape: {Dmat.shape}")
-                # print(f"VT shape: {VT.shape}")
+                # Previous Method
                 #U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
                 # Dmat   = array((transpose(A)))  
         except LinAlgError:
@@ -198,7 +193,6 @@ def main():
             
         # Process output
 
-        #dmax = 0.0
         dmax = numpy.max(numpy.abs(D))
 
         for i in range(0,len(Dmat)):
