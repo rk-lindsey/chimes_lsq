@@ -6,10 +6,14 @@ import subprocess
 import os
 import argparse
 
+
 from numpy        import *
 from numpy.linalg import lstsq
+from numpy.linalg import LinAlgError
 from datetime     import *
 from subprocess   import call
+import scipy.sparse.linalg as spla
+
 
 
 #############################################
@@ -48,7 +52,7 @@ def main():
     parser.add_argument("--weights",              type=str,      default="None",          help='weight file')
     parser.add_argument("--active",               type=str2bool, default=False,           help='is this a DLARS/DLASSO run from the active learning driver?')
     parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
-    
+    parser.add_argument("--hyper_sets",           type=str2bool, default=False,           help='Are you trying to fit a model with multiple hyperparameter sets?')
     # Actually parse the arguments
 
     args        = parser.parse_args()
@@ -175,15 +179,21 @@ def main():
                 U,D,VT = scipy.linalg.svd(weightedA,overwrite_a=True)
                 Dmat   = array((transpose(weightedA)))
             else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
-                U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
-                Dmat   = array((transpose(A)))  
+                min_shape = min(A.shape)
+                k = min(max(1, min_shape // 10), min_shape)
+                U, D, VT = spla.svds(A, k=k)
+                Dmat = numpy.zeros((len(D), len(D)))
+                
+                # Previous Method
+                #U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
+                # Dmat   = array((transpose(A)))  
         except LinAlgError:
             sys.stderr.write("SVD algorithm failed")
             exit(1)
             
         # Process output
 
-        dmax = 0.0
+        dmax = numpy.max(numpy.abs(D))
 
         for i in range(0,len(Dmat)):
             if ( abs(D[i]) > dmax ) :
