@@ -59,22 +59,22 @@ restart:
 
 restart_mpi:
 	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --distributed_solver=y --iterations=10 --normalize=y > dlasso.restart_mpi.txt
-	cp restart.0000 restart.save.0000
-	cp restart.0001 restart.save.0001
+	cp restart.0000.txt restart.save.0000.txt
+	cp restart.0001.txt restart.save.0001.txt
 	srun -n 2 ../src/dlars A.txt b.txt dim.txt --split_files --restart=restart.save --distributed_solver=y --normalize=y > dlasso.restart_mpi2.txt
 	-$(COMPARE) dlasso.restart_mpi2.txt correct_output/dlasso.restart_mpi2.txt
 
 restart_mpi_nodist:
 	srun -n 2 ../src/dlars A.txt b.txt A.dim --iterations=10 --normalize=y > dlasso.restart.nodist1.txt
-	cp restart.0000 restart.nodist.0000
-	cp restart.0001 restart.nodist.0001
+	cp restart.0000.txt restart.nodist.0000.txt
+	cp restart.0001.txt restart.nodist.0001.txt
 	srun -n 2 ../src/dlars A.txt b.txt A.dim --restart=restart.nodist --normalize=y > dlasso.restart.nodist2.txt
 	-$(COMPARE) dlasso.restart.nodist2.txt correct_output/dlasso.restart.nodist2.txt
 
 restart_mpi_congrad:
 	srun -n 2 ../src/dlars A.txt b.txt A.dim --iterations=10 --normalize=y --con_grad --precondition > dlasso.restart.congrad1.txt
-	cp restart.0000 restart.congrad.0000
-	cp restart.0001 restart.congrad.0001
+	cp restart.0000.txt restart.congrad.0000.txt
+	cp restart.0001.txt restart.congrad.0001.txt
 	srun -n 2 ../src/dlars A.txt b.txt A.dim --restart=restart.congrad --normalize=y --con_grad --precondition > dlasso.restart.congrad2.txt
 	-$(COMPARE) dlasso.restart.congrad2.txt correct_output/dlasso.restart.congrad2.txt
 

@@ -12,6 +12,7 @@ from datetime     import *
 from subprocess   import call
 
 
+
 #############################################
 #############################################
 # Main
@@ -175,8 +176,8 @@ def main():
                 U,D,VT = scipy.linalg.svd(weightedA,overwrite_a=True)
                 Dmat   = array((transpose(weightedA)))
             else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
-                U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
-                Dmat   = array((transpose(A)))  
+                 U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
+                 Dmat   = array((transpose(A))) 
         except LinAlgError:
             sys.stderr.write("SVD algorithm failed")
             exit(1)
