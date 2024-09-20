@@ -6,13 +6,10 @@ import subprocess
 import os
 import argparse
 
-
 from numpy        import *
 from numpy.linalg import lstsq
-from numpy.linalg import LinAlgError
 from datetime     import *
 from subprocess   import call
-import scipy.sparse.linalg as spla
 
 
 
@@ -187,7 +184,7 @@ def main():
             
         # Process output
 
-        dmax = numpy.max(numpy.abs(D))
+        dmax = 0.0
 
         for i in range(0,len(Dmat)):
             if ( abs(D[i]) > dmax ) :
