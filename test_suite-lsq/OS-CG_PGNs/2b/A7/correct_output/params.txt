@@ -1,0 +1,58 @@
+! Date  2024-05-06
+!
+! Number of variables            =  13
+! Number of equations            =  741
+! svd algorithm used
+! eps (= args.eps*dmax)          =   5.4705e-04
+! SVD regularization factor      =  1.0000e-05
+! RMS force error                =  2.8217e+00
+! max abs variable               =  1.9068e+03
+! number of fitting vars         =  13
+! Bayesian Information Criterion =  1.6233e+03
+!
+USECOUL: false
+FITCOUL: false
+USE3BCH: false
+USE4BCH: false
+
+PAIRTYP: CHEBYSHEV  12 0 0 -1 1
+
+ATOM TYPES: 1
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		1		0		117656
+
+ATOM PAIRS: 1
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# CHBDIST #	# MORSE_LAMBDA #
+	0               1               1               48              110             MORSE           65              
+
+FCUT TYPE: TERSOFF 0.75
+
+ATOM PAIR TRIPLETS: 0
+ATOM PAIR QUADRUPLETS: 0
+
+PAIR CHEBYSHEV PARAMS 
+
+PAIRTYPE PARAMS: 0 1 1
+
+  0  -1.0734582639907e+03
+  1   1.9068113120203e+03
+  2  -6.7427342799957e+02
+  3   5.4944394338632e+02
+  4  -4.8294495781091e+02
+  5   3.7250744485739e+02
+  6  -3.0034040344222e+02
+  7   2.1974391496424e+02
+  8  -1.1529017052310e+02
+  9   5.7497936799367e+01
+ 10  -1.7648128349233e+01
+ 11  -3.0329279815678e+00
+ 
+
+PAIRMAPS: 1
+0 11
+
+NO ENERGY OFFSETS:  1
+ENERGY OFFSET 1  -2.8269073732397e+00
+ENDFILE
