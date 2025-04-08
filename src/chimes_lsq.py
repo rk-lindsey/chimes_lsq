@@ -8,6 +8,7 @@ import argparse
 
 from numpy        import *
 from numpy.linalg import lstsq
+from numpy.linalg import LinAlgError
 from datetime     import *
 from subprocess   import call
 
@@ -32,11 +33,12 @@ def main():
 
     parser.add_argument("--A",                    type=str,      default='A.txt',         help='A (derivative) matrix') 
     parser.add_argument("--algorithm",            type=str,      default='svd',           help='fitting algorithm')
-    parser.add_argument("--dlasso_dlars_path",    type=str     , default=loc+'/../contrib/dlars/src/',              help='Path to DLARS and/or DLASSO solver')
+    parser.add_argument("--dlasso_dlars_path",    type=str,      default=loc+'/../contrib/dlars/src/', help='Path to DLARS and/or DLASSO solver')
     parser.add_argument("--alpha",                type=float,    default=1.0e-04,         help='Lasso regularization')
     parser.add_argument("--b",                    type=str,      default='b.txt',         help='b (force) file')
     parser.add_argument("--cores",                type=int,      default=8,               help='DLARS number of cores')
     parser.add_argument("--eps",                  type=float,    default=1.0e-05,         help='svd regularization')
+    parser.add_argument("--fast_svd",             type=str2bool, default=False,           help='solve SVD using normal equation')
     parser.add_argument("--header",               type=str,      default='params.header', help='parameter file header')
     parser.add_argument("--map",                  type=str,      default='ff_groups.map', help='parameter file map')
     parser.add_argument("--nodes",                type=int,      default=1,               help='DLARS number of nodes')
@@ -48,7 +50,7 @@ def main():
     parser.add_argument("--test_suite",           type=str2bool, default=False,           help='output for test suite')
     parser.add_argument("--weights",              type=str,      default="None",          help='weight file')
     parser.add_argument("--active",               type=str2bool, default=False,           help='is this a DLARS/DLASSO run from the active learning driver?')
-    parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
+    parser.add_argument("--folds",                type=int,      default=4,               help="Number of CV folds")
     
     # Actually parse the arguments
 
@@ -127,6 +129,7 @@ def main():
             print ("Wrong number of lines in WEIGHTS file")
             exit(1)  
 
+    
     #################################
     # Apply weighting to A and b
     #################################
@@ -168,16 +171,41 @@ def main():
 
     if args.algorithm == 'svd':
         
+        # Modify A and b matrix to reduce A matrix dimension during calculation
+        # now 
+        if DO_WEIGHTING:
+            if args.fast_svd:
+                weightedATA = dot(transpose(weightedA), weightedA)
+                weightedATb = dot(transpose(weightedA), weightedb)
+                eps_sq = args.eps * args.eps
+            else:
+                pass
+        else:
+            if args.fast_svd:
+                ATA = dot(transpose(A), A)
+                ATb = dot(transpose(A), b)
+                eps_sq = args.eps * args.eps
+            else:
+                pass        
+        
         # Make the scipy call
         
         print ('! svd algorithm used')
         try:
             if DO_WEIGHTING: # Then it's OK to overwrite weightedA.  It is not used to calculate y (predicted forces) below.
-                U,D,VT = scipy.linalg.svd(weightedA,overwrite_a=True)
-                Dmat   = array((transpose(weightedA)))
+                if args.fast_svd:
+                    U,D,VT = scipy.linalg.svd(weightedATA,overwrite_a=True)
+                    Dmat   = array((transpose(weightedATA)))
+                else:
+                    U,D,VT = scipy.linalg.svd(weightedA,overwrite_a=True)
+                    Dmat   = array((transpose(weightedA)))
             else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
-                 U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
-                 Dmat   = array((transpose(A))) 
+                if args.fast_svd:
+                    U,D,VT = scipy.linalg.svd(ATA,overwrite_a=False)
+                    Dmat   = array((transpose(ATA)))
+                else:
+                    U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
+                    Dmat   = array((transpose(A))) 
         except LinAlgError:
             sys.stderr.write("SVD algorithm failed")
             exit(1)
@@ -195,7 +223,10 @@ def main():
 
         # Cut off singular values based on fraction of maximum value as per numerical recipes.
         
-        eps=args.eps * dmax
+        if args.fast_svd:
+            eps = eps_sq * dmax
+        else:
+            eps=args.eps * dmax
         nvars = 0
 
         for i in range(0,len(D)):
@@ -209,9 +240,15 @@ def main():
         x=dot(transpose(VT),Dmat)
 
         if DO_WEIGHTING:
-            x = dot(x,dot(transpose(U),weightedb))
+            if args.fast_svd:
+                x = dot(x,dot(transpose(U),weightedATb))
+            else:
+                x = dot(x,dot(transpose(U),weightedb))
         else:
-            x = dot(x,dot(transpose(U),b))
+            if args.fast_svd:
+                x = dot(x,dot(transpose(U),ATb))
+            else:
+                x = dot(x,dot(transpose(U),b))
 
     elif args.algorithm == 'ridge':
         print ('! ridge regression used')
