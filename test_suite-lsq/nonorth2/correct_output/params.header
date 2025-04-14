@@ -2,6 +2,8 @@ USECOUL: false
 FITCOUL: false
 USE3BCH: false
 USE4BCH: false
+EXCLD1B: false
+EXCLD2B: false
 
 PAIRTYP: CHEBYSHEV  12 0 0 -1 1
 

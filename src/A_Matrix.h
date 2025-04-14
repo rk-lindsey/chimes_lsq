@@ -46,6 +46,15 @@ class A_MAT
 	vector<vector<XYZ> >   CHARGES;	        // originally "COULOMB_FORCES" ... [#frames][#pairtypes][#atoms]
 
 	ofstream fileA, fileb, fileb_labeled, filena;
+	
+	bool			DO_EXCLUDE_1B;	// Are 1-body interactions being excluded?
+	bool			DO_EXCLUDE_2B;	// Are 2-body interactions being excluded?
+	
+	vector<int>		EXCLUDE_1B;	// Indices for atom type to exclude from per-atom energy offset fitting column (Needed for hierarchical fitting support
+	vector<int>		EXCLUDE_2B;	// indices for in-memory A-matrix positions of 2-body parameter types to exclude from printing
+	vector<int>		N_EXCLUDE_2B;	// Number of parameters for each excluded 2b
+	int			N_EXCL_LT_3B;	// Total number of A-matrix columns excluded due to EXCLUDE_1B and EXCLUDE_2B (needed to property print dim file
+	
 
 	A_MAT();
 	~A_MAT();
@@ -60,6 +69,7 @@ class A_MAT
 	void CLEANUP_FILES(bool SPLIT_FILES);
 	void OPEN_FILES(const JOB_CONTROL &CONTROLS);
 	void INITIALIZE(JOB_CONTROL &CONTROLS, FRAME& SYSTEM, int NPAIRS, vector<PAIRS> & ATOM_PAIRS);
+	bool skip_2b(int n);
 	
 	private:
 	

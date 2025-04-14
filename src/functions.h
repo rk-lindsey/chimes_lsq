@@ -149,6 +149,7 @@ public:
 	int    FREQ_DFTB_GEN;	      // Replaces gen_freq... How often to write the gen file.
 	string TRAJ_FORMAT;	      // .gen, .xyzf, or .lammps (currently)
 	bool   SPLIT_FILES ;	      // If TRUE, do not concatenate A matrix files for LSQ.
+	bool   HIERARCHICAL_FIT;      // If true, allows 2-body and 1-body interctions to be excluded from fitting
 	int    FREQ_BACKUP;	      // How often to write backup files for restart.
 	bool   PRINT_VELOC;	      // If true, write out the velocities 
 	bool   RESTART; 	      // If true, read a restart file.
