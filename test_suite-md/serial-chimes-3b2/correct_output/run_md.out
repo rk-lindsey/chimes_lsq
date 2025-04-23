@@ -207,6 +207,7 @@ chimesFF: 	O O r_cut_in: 1.93900 r_cut_out: 4.30000 MORSE 2.70000
 chimesFF: 	H H r_cut_in: 0.98200 r_cut_out: 4.10000 MORSE 1.60000
 chimesFF: 	O H r_cut_in: 0.72000 r_cut_out: 4.20000 MORSE 1.00000
 chimesFF: Will use cutoff style CUBIC
+
 chimesFF: Will use penalty distance: 0.10000
 chimesFF: Will use penalty scaling: 100000.00000
 chimesFF: Read 2B parameters for pair: 0 O O

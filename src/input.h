@@ -7,6 +7,7 @@
 using namespace std;
 
 #include "util.h"
+#include "A_Matrix.h"
 
 
 class InputListing 
@@ -49,7 +50,8 @@ public: // public functions
 							vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 							NEIGHBORS                 & NEIGHBOR_LIST,
 							vector<int>               & TMP_ATOMTYPEIDX, 
-							vector<string>            & TMP_ATOMTYPE);
+							vector<string>            & TMP_ATOMTYPE,
+							A_MAT			  & A_MATRIX);
 							
 	void PARSE_INFILE_MD (JOB_CONTROL & CONTROLS, NEIGHBORS & NEIGHBOR_LIST);		
 		
@@ -86,6 +88,7 @@ private:	// private funcitons
 	void PARSE_CONTROLS_WRAPTRJ(JOB_CONTROL & CONTROLS);
 	void PARSE_CONTROLS_TRJFILE(JOB_CONTROL & CONTROLS);
 	void PARSE_CONTROLS_SPLITFI(JOB_CONTROL & CONTROLS);
+	void PARSE_CONTROLS_HIERARC(JOB_CONTROL & CONTROLS);
 	void PARSE_CONTROLS_NFRAMES(JOB_CONTROL & CONTROLS);
 	//void PARSE_CONTROLS_NLAYERS(JOB_CONTROL & CONTROLS); // JUST USE THE MD VERSION... IT SHOULD BE COMPATIBLE
 	void PARSE_CONTROLS_FITCOUL(JOB_CONTROL & CONTROLS);
@@ -99,7 +102,7 @@ private:	// private funcitons
 	
 	// For assigning LSQ variables: "Topology Variables" 
 	
-	void PARSE_TOPOLOGY_EXCLUDE(CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS);
+	void PARSE_TOPOLOGY_EXCLUDE(vector<PAIRS> & ATOM_PAIRS, CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS, A_MAT & A_MATRIX, JOB_CONTROL & CONTROLS, vector<int> & TMP_ATOMTYPEIDX, vector<string> & TMP_ATOMTYPE);
 	void PARSE_TOPOLOGY_NATMTYP(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS);
 	void PARSE_TOPOLOGY_TYPEIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, vector<int> & TMP_ATOMTYPEIDX, vector<string> & TMP_ATOMTYPE);
 	void PARSE_TOPOLOGY_PAIRIDX(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, map<string,int> & PAIR_MAP, vector<int> &INT_PAIR_MAP, NEIGHBORS & NEIGHBOR_LIST, vector<int> & TMP_ATOMTYPEIDX, vector<string> & TMP_ATOMTYPE);
