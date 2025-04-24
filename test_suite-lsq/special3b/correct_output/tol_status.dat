@@ -1,1 +1,6 @@
-	No parameters differ by more than tol ( 1e-09 ).
+	Parameter index 155  differences exceeded tolerance(+/- 1e-09 ):  1.00044e-09
+	Parameter index 169  differences exceeded tolerance(+/- 1e-09 ):  -1.00044e-09
+	Parameter index 209  differences exceeded tolerance(+/- 1e-09 ):  -1.62993e-09
+	Parameter index 210  differences exceeded tolerance(+/- 1e-09 ):  -1.09003e-09
+	Parameter index 211  differences exceeded tolerance(+/- 1e-09 ):  -1.40017e-09
+	Parameter index 212  differences exceeded tolerance(+/- 1e-09 ):  1.5998e-09

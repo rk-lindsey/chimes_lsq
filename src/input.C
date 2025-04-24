@@ -178,7 +178,8 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,
 	    		       vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 	    		       NEIGHBORS		 & NEIGHBOR_LIST,
 	    		       vector<int>		 & TMP_ATOMTYPEIDX, 
-	    		       vector<string>	 & TMP_ATOMTYPE)
+	    		       vector<string>	 & TMP_ATOMTYPE,
+			       A_MAT			 & A_MATRIX)
 {
 	// Actually read the input file 
 	
@@ -193,6 +194,7 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,
 	PARSE_CONTROLS_TRJFILE(CONTROLS);	
 	PARSE_CONTROLS_WRAPTRJ(CONTROLS);
 	PARSE_CONTROLS_SPLITFI(CONTROLS);
+	PARSE_CONTROLS_HIERARC(CONTROLS);
 	PARSE_CONTROLS_NFRAMES(CONTROLS);
 	PARSE_CONTROLS_NLAYERS(CONTROLS);
 	PARSE_CONTROLS_FITCOUL(CONTROLS);
@@ -208,8 +210,10 @@ void INPUT::PARSE_INFILE_LSQ(  JOB_CONTROL	 & CONTROLS,
 	
 	
 	PARSE_TOPOLOGY_NATMTYP(CONTROLS, ATOM_PAIRS, TRIPS, QUADS);
-	PARSE_TOPOLOGY_EXCLUDE(TRIPS, QUADS);
-	PARSE_TOPOLOGY_TYPEIDX(CONTROLS, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
+	PARSE_TOPOLOGY_TYPEIDX(CONTROLS, ATOM_PAIRS, PAIR_MAP, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);	
+//	PARSE_TOPOLOGY_EXCLUDE(TRIPS, QUADS);
+	PARSE_TOPOLOGY_EXCLUDE(ATOM_PAIRS, TRIPS, QUADS, A_MATRIX, CONTROLS, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);	
+
 	PARSE_TOPOLOGY_PAIRIDX(CONTROLS, ATOM_PAIRS, PAIR_MAP, INT_PAIR_MAP, NEIGHBOR_LIST, TMP_ATOMTYPEIDX, TMP_ATOMTYPE);
 	PARSE_TOPOLOGY_CHGCONS(CHARGE_CONSTRAINTS, PAIR_MAP);
 	PARSE_TOPOLOGY_SPECMIN(TRIPS, QUADS);
@@ -460,6 +464,23 @@ void INPUT::PARSE_CONTROLS_SPLITFI(JOB_CONTROL & CONTROLS)
 		}
 	}
 }
+void INPUT::PARSE_CONTROLS_HIERARC(JOB_CONTROL & CONTROLS)
+{
+	int N_CONTENTS = CONTENTS.size();
+	
+	for (int i=0; i<N_CONTENTS; i++)
+	{
+		if (found_input_keyword("HIERARC", CONTENTS(i)))
+		{
+			CONTROLS.HIERARCHICAL_FIT = convert_bool(CONTENTS(i+1,0),i+1);
+			
+			if ( RANK == 0 ) 
+				cout << "	# HIERARC #: " << bool2str(CONTROLS.HIERARCHICAL_FIT) << endl;	
+			
+			break;
+		}
+	}
+}
 void INPUT::PARSE_CONTROLS_NFRAMES(JOB_CONTROL & CONTROLS)
 {
 	int N_CONTENTS = CONTENTS.size();
@@ -581,7 +602,6 @@ void INPUT::PARSE_CONTROLS_FITENER(JOB_CONTROL & CONTROLS)
 		}
 	}
 }
-
 
 void INPUT::PARSE_CONTROLS_PAIRTYP(JOB_CONTROL & CONTROLS)
 {
@@ -730,11 +750,94 @@ void INPUT::PARSE_CONTROLS_CHEBYFIX(JOB_CONTROL & CONTROLS)
 
 // For assigning LSQ variables: "Topology Variables" 
 
-void INPUT::PARSE_TOPOLOGY_EXCLUDE(CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS)
+void INPUT::PARSE_TOPOLOGY_EXCLUDE(vector<PAIRS> & ATOM_PAIRS, CLUSTER_LIST & TRIPS, CLUSTER_LIST & QUADS, A_MAT & A_MATRIX, JOB_CONTROL & CONTROLS, vector<int> & TMP_ATOMTYPEIDX, vector<string> & TMP_ATOMTYPE)
 {
 	int N_CONTENTS = CONTENTS.size();
+	A_MATRIX.N_EXCL_LT_3B = 0;
 	
 	string SEARCH;
+	
+	if (CONTROLS.HIERARCHICAL_FIT)
+	{
+		// Search for 1-body exlusion list
+		
+		string         TMP_TYPE;
+		vector<string> TMP_TYPES;
+		
+		for (int i=0; i<N_CONTENTS; i++)
+		{
+			if(CONTENTS.size(i) >= 4)
+			{
+				SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2);
+				
+				if (SEARCH == "EXCLUDE 1B INTERACTION:")
+				{
+					A_MATRIX.DO_EXCLUDE_1B = true;
+	
+					// This next block should go in a A-matrix function:
+					
+					if (RANK == 0)
+						cout << "Number of 1-body interactions to exclude: " << stoi(CONTENTS(i,3)) << endl;
+											
+					for(int j=1; j<=stoi(CONTENTS(i,3)); j++) // iterates over excluded atom names
+					{
+						for(int k=0; k<TMP_ATOMTYPEIDX.size(); k++)
+						{
+							if (CONTENTS(i+j,0) == TMP_ATOMTYPE[k])
+							{
+								A_MATRIX.EXCLUDE_1B.push_back(TMP_ATOMTYPEIDX[k]);
+								A_MATRIX.N_EXCL_LT_3B += 1;
+								
+								if (RANK==0)
+									cout << "\tEXCLUDED: " <<  A_MATRIX.EXCLUDE_1B[A_MATRIX.EXCLUDE_1B.size()-1] << ": " << TMP_ATOMTYPE[k] << endl;
+							}
+						}
+					}
+					break; 
+				}
+			}
+		}		
+		// Search for 2-body exlusion list
+			
+		for (int i=0; i<N_CONTENTS; i++)
+		{
+			if(CONTENTS.size(i) >= 4)
+			{
+				SEARCH = CONTENTS(i,0) + ' ' + CONTENTS(i,1) + ' ' + CONTENTS(i,2);
+				
+				if (SEARCH == "EXCLUDE 2B INTERACTION:")
+				{
+					A_MATRIX.DO_EXCLUDE_2B = true;
+					
+					// This next block should go in a A-matrix function:
+					
+					if (RANK==0)
+						cout << "Number of 2-body interactions to exclude: " << stoi(CONTENTS(i,3)) << endl;
+					
+					for(int j=1; j<=stoi(CONTENTS(i,3)); j++) // iterates over excluded atom pair names
+					{
+						// Get the pair type, index of that pair, and number of parameters for that pair
+						for(int k=0; k<ATOM_PAIRS.size(); k++)
+						{
+							if (
+							((ATOM_PAIRS[k].ATM1TYP == CONTENTS(i+j,0)) && (ATOM_PAIRS[k].ATM2TYP == CONTENTS(i+j,1))) ||
+							((ATOM_PAIRS[k].ATM1TYP == CONTENTS(i+j,1)) && (ATOM_PAIRS[k].ATM2TYP == CONTENTS(i+j,0)))  )
+							{
+								A_MATRIX.  EXCLUDE_2B.push_back(ATOM_PAIRS[k].PAIRIDX);
+								A_MATRIX.N_EXCLUDE_2B.push_back(CONTROLS.CHEBY_ORDER);
+								A_MATRIX.N_EXCL_LT_3B += CONTROLS.CHEBY_ORDER;
+								
+								if (RANK==0)
+									cout << "\tEXCLUDED: " << A_MATRIX.EXCLUDE_2B[A_MATRIX.EXCLUDE_2B.size()-1] << " " << ATOM_PAIRS[k].ATM1TYP << " " << ATOM_PAIRS[k].ATM2TYP << endl;
+							}
+						}
+					}
+
+					 break; 
+				}
+			}
+		}	
+	}
 	
 	// Search for 3-body exlusion list
 	

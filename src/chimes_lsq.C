@@ -43,7 +43,8 @@ static void read_lsq_input(	string & INFILE,
 				vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
 				NEIGHBORS & NEIGHBOR_LIST,
 				vector<int>& TMP_ATOMTYPEIDX, 
-				vector<string> &TMP_ATOMTYPE);
+				vector<string> &TMP_ATOMTYPE,
+				A_MAT &AMATRIX);
 
 static void print_bond_stats(	vector<PAIRS> &ATOM_PAIRS, 
 				CLUSTER_LIST &TRIPS, 
@@ -63,7 +64,9 @@ static void build_clusters(	JOB_CONTROL & CONTROLS,
 static void print_param_header(	JOB_CONTROL &CONTROLS, 
 				vector<PAIRS> &ATOM_PAIRS,
 				CLUSTER_LIST &TRIPS, 
-				CLUSTER_LIST &QUADS) ;
+				CLUSTER_LIST &QUADS,
+				vector<int> EXCLUDE_1B, 
+				vector<int> EXCLUDE_2B);				
 				
 static void print_map_file(	map<string,int> PAIR_MAP, 
 				CLUSTER_LIST &TRIPS, 
@@ -170,8 +173,10 @@ int main(int argc, char* argv[])
 	#ifdef USE_MPI
 		MPI_Barrier(MPI_COMM_WORLD) ;	// Make sure the files have been removed before they are re-created by other processes.
 	#endif
+	
+	A_MAT A_MATRIX ; // Declare and initialize A-matrix object
 
-	read_lsq_input(INFILE, CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, INT_PAIR_MAP, CHARGE_CONSTRAINTS, NEIGHBOR_LIST, ATOM_TYPE_IDX, ATOM_TYPE);
+	read_lsq_input(INFILE, CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, INT_PAIR_MAP, CHARGE_CONSTRAINTS, NEIGHBOR_LIST, ATOM_TYPE_IDX, ATOM_TYPE, A_MATRIX);
 
 	// Build many-body interaction clusters if necessary.
 	build_clusters(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, PAIR_MAP, NEIGHBOR_LIST, ATOM_TYPE_IDX, ATOM_TYPE);
@@ -186,10 +191,7 @@ int main(int argc, char* argv[])
 	// Set up force and force derivative vectors
 	//
 	//////////////////////////////////////////////////	
-		 		
 
-	A_MAT A_MATRIX ; // Declare and initialize A-matrix object
-	
 
 	// Figure out necessary dimensions for the force/force derivative vectors
 	
@@ -394,7 +396,7 @@ else
 	//////////////////////////////////////////////////	   
 
 	if ( RANK == 0 ) 
-		print_param_header(CONTROLS, ATOM_PAIRS, TRIPS, QUADS) ;
+		print_param_header(CONTROLS, ATOM_PAIRS, TRIPS, QUADS, A_MATRIX.EXCLUDE_1B, A_MATRIX.EXCLUDE_2B) ;
 	
 	//////////////////////////////////////////////////
 	//
@@ -443,7 +445,8 @@ static void read_lsq_input(string & INFILE,
                            vector<CHARGE_CONSTRAINT> & CHARGE_CONSTRAINTS, 
                            NEIGHBORS & NEIGHBOR_LIST,
                            vector<int>& ATOM_TYPE_IDX,
-                           vector<string>& ATOM_TYPE)
+                           vector<string>& ATOM_TYPE,
+			   A_MAT &A_MATRIX)
 {
 
 	// Instantiate the input class
@@ -464,7 +467,8 @@ static void read_lsq_input(string & INFILE,
 					CHARGE_CONSTRAINTS, 
 					NEIGHBOR_LIST,
 					ATOM_TYPE_IDX,
-					ATOM_TYPE);
+					ATOM_TYPE,
+					A_MATRIX);
 
 }
 
@@ -555,8 +559,7 @@ static void build_clusters(JOB_CONTROL & CONTROLS, vector<PAIRS> & ATOM_PAIRS, C
 	parse_fcut_input(CONTROLS.FCUT_LINE, ATOM_PAIRS, TRIPS, QUADS) ;					
 }
 
-static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
-															 CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS)
+static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,CLUSTER_LIST &TRIPS, CLUSTER_LIST &QUADS, vector<int> EXCLUDE_1B, vector<int> EXCLUDE_2B)
 // Print the params.header file.
 {
 	ofstream header;
@@ -585,7 +588,27 @@ static void print_param_header(JOB_CONTROL &CONTROLS, vector<PAIRS> &ATOM_PAIRS,
 		header << "USE4BCH: true" << endl;
 	else
 		header << "USE4BCH: false" << endl;	
-	
+
+	if (EXCLUDE_1B.size()>0)
+	{
+		header << "EXCLD1B: ";
+		for(int i=0; i<EXCLUDE_1B.size(); i++)	
+			header << EXCLUDE_1B[i] << " ";
+		header << endl;
+	}
+	else
+		header << "EXCLD1B: false" << endl;
+		
+	if (EXCLUDE_2B.size()>0)
+	{
+		header << "EXCLD2B: ";
+		for(int i=0; i<EXCLUDE_2B.size(); i++)	
+			header << EXCLUDE_2B[i] << " ";
+		header << endl;
+	}
+	else
+		header << "EXCLD2B: false" << endl;		
+		
 	header << endl << "PAIRTYP: " << ATOM_PAIRS[0].PAIRTYP << " ";
 	
 	if     (ATOM_PAIRS[0].PAIRTYP == "CHEBYSHEV")
