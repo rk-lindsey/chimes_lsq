@@ -436,7 +436,12 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		fileA << endl;
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;
 			fileA << STRESSES[n].XZ << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);
 		fileA << endl;
