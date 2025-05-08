@@ -131,7 +131,7 @@ Topology variables      Description                                 Value/Option
 ``ATM_TYP``             Atom type chemical symbol                   Any string. Chemical symbol for each unique atom type.  Values form a column below ``# ATM_TYP #``.
 ``ATMCHRG``             Atom type charge                            If ``FITCOUL`` is false: a partial atomic charge for each atom type. If ``FITCOUL`` is true: a positive or negative sign, to indicate how pair charge signs should be assigned.
 ``ATMMASS``             Atom type mass                              Floats > 0.
-``EXCLUDE`` *           Interaction to excude/ignore                Sets of n-body ``ATM_TYP``s. Rarely used.
+``EXCLUDE`` *           Interaction to exclude/ignore               Sets of n-body ``ATM_TYP``s. Rarely used.
 ``PAIRIDX``             Pair type index                             Ascending integers from 1 to the number of unique atom pair types. Values form a column below ``# PAIRIDX #``.
 ``ATM_TYX``             ``ATM_TYP`` of atom X in pair ``PAIRIDX``   Used to define interaction pair types. Order does not matter.
 ``S_MINIM``             Inner cutoff for pair ``PAIRIDX``           Generally taken as slightly less than smallest distance sampled in DFT-MD trajectory.
@@ -524,6 +524,89 @@ Weighting is often needed when energies and stresses tensors are included in the
     wS=250.0
     
     paste b-labeled.txt force.txt | awk -v wF="$wF" -v wE="$wE" -v wS="$wS" '{if($1=="+1"){print wE}elseif($1~"s_"){print wS}else{print wF}}' > weights.txt
+
+
+Anatomy of ChIMES parameter file 
+""""""""""""""""""""""""""""""""
+
+==================================   ==============================================================================
+Variables                            Descriptions
+==================================   ==============================================================================
+``Number of variables``              The maximum number of coefficients              
+``Number of equations``              The number of equations to solve
+``eps``                              The threshold for dropping small singular values in SVD
+``SVD regularization factor``        The regularization parameter for SVD algorithm
+``alpha``                            The regularization parameter for LASSO regularization
+``RMS Force error``                  The global root mean square error between training data and ChIMES predictions
+``max abs variable``                 The absolute value of the largest coefficient
+``number of fitting vars``           The number of variables after regularization
+``Bayesian Information Criterion``   The model selection criterion 
+``Using weighting file``             The file containing weights for fitting
+``USECOUL``                          If the model accounts for system charges 
+``FITCOUL``                          If the model is fit to system charges 
+``USE3BCH``                          If the model is fit to 3-body interactions
+``USE4BCH``                          If the model is fit to 4-body interactions
+``EXCLD1B``                          If the model excludes 1-body energy 
+``EXCLD2B``                          If the model excludes 2-body interactions
+``PAIRTYP``                          2-, 3-, and 4-body Chebyshev polynomial orders
+``ATOM TYPES``                       The number of atom types 
+``TYPEIDX``                          The index of atom type  
+``ATM_TYP``                          The label of atom type
+``ATMCHRG``                          The charge of atom type 
+``ATMMASS``                          The mass of atom type
+``ATOM PAIRS``                       The number of pair types 
+``PAIRIDX``                          The index of the pair type 
+``ATM_TY1``                          The label of atom 1 in the pair
+``ATM_TY2``                          The label of atom 2 in the pair
+``S_MINIM``                          The inner cutoff for the pair 
+``S_MAXIM``                          The outer cutoff for the pair
+``CHBDIST``                          The transformation style for pair distance
+``MORSE_LAMBDA``                     The parameter used in Morse transformation
+``FCUT TYPE``                        The type of cutoff function used
+``SPECIAL 3B S_MAXIM``               Special outer cutoff for 3-body interactions 
+``ATOM PAIR TRIPLETS``               The number of triplet types
+``ATOM PAIR QUARDRUPLETS``           The number of quadruplet types
+``PAIRTYPE PARAMS``                  The pair type index and atom types
+``TRIPLETTYPE PARAMS``               The triplet type index and atom types; see code block for details
+``PAIRMAPS``                         The permutations of pair types
+``TRIPMAPS``                         The permutations of triplet types
+``NO ENERGY OFFSETS``                The number of atoms types
+``ENERGY OFFSET X``                  The energy offset of atom type X 
+==================================   ==============================================================================   
+
+Here we provide an example of the triplet parameters. 
+
+.. code-block:: bash
+    :linenos:
+    
+    TRIPLET CHEBYSHEV PARAMS
+    TRIPLETTYPE PARAMS:
+    INDEX: 0 ATOMS: Si Si Si   
+    PAIRS: SiSi SiSi SiSi UNIQUE: 665 TOTAL: 3332
+        index  |  powers  |  equiv index  |  param index  |       parameter       
+    ----------------------------------------------------------------------------
+        0       0  1  1         0               0          2.1714984512050e+02
+        1       1  0  1         0               0          2.1714984512050e+02
+        2       1  1  0         0               0          2.1714984512050e+02
+        3       0  1  2         3               1          6.2564844297350e+01
+        4       1  0  2         3               1          6.2564844297350e+01
+        5       0  2  1         3               1          6.2564844297350e+01
+        6       2  0  1         3               1          6.2564844297350e+01
+        7       1  2  0         3               1          6.2564844297350e+01
+        8       2  1  0         3               1          6.2564844297350e+01
+        9       0  1  3         9               2          3.4634223883030e+01
+        10      1  0  3         9               2          3.4634223883030e+01
+    
+    
+* Line 3 specifies the index of the triplet and the atoms in the triplet. Line 4 specifies all pairs in the triplet, lists the number of unique triplet power index and the total number of triple power index.
+* Line 4 specifies the pair combinations used in the triplet block
+* Line 5: 
+
+    - index: Specifies the index of the coefficient in the triplet sum
+    - powers: The powers of the three Chebyshev polynomials
+    - equiv index: The index of the first instance of the permutationally invariant coefficient
+    - param index: The unique coefficient index based of equiv index
+    - parameter: The value of the coefficients 
 
 
 Tips and tricks
