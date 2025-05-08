@@ -44,6 +44,7 @@ For each repository (e.g., chimes_lsq-myLLfork):
   * Execute git clone <copied git@github.com:> .
   * Don't forget the "." at the end!
   
+---------------
 
 Obtaining the code (For LLNL Employees):
 ****************************************
@@ -96,6 +97,7 @@ On the `LLNL-hosted Bitbucket repository <https://mybitbucket.llnl.gov/projects/
   
   
   
+---------------
 
 
 
@@ -106,19 +108,15 @@ Navigate to the root project directory (e.g, chimes_lsq-myLLfork), and then exec
 
 .. note::
 
-      If you do not see your platform represented in the modfiles, we suggest you create one that contains modules necessary for compiling C, C++, Fortran, and MPI code. You may need to include a module for python as well. You will also need to update the install.sh script accordingly. See, e.g., UM-ARC.mod for reference.   
+      If you do not see your platform represented in the modfiles, we suggest you create one that contains modules necessary for compiling C, C++, Fortran, and MPI code. You may need to include a module for cmake, python. You will also need to update the install.sh script accordingly. See, e.g., UM-ARC.mod for reference. As described in greater detail in :ref:`Generating a ChIMES model <page-running>`, chimes_lsq.py depends on native `numpy <https://numpy.org>`_, `scipy <https://www.scipy.org>`_, and `sklearn <https://scikit-learn.org/stable/>`_ installations for `python3.x <https://www.python.org>`_. 
 
 Parameter set generation requires two steps, i.e. generation and solution of the design matrix. Provided suitable input (e.g. fm_setup.in, a ``chimes_lsq`` input file and a reference data file), this can be as simple as:
 
 .. code-block:: bash
     
-    /path/to/repo/src/chimes_lsq fm_setup.in > fm_setup.log
-    /path/to/repo/src/chimes_lsq.py > params.txt
+    /path/to/repo/build/chimes_lsq fm_setup.in > fm_setup.log
+    python3 /path/to/repo/build/chimes_lsq.py > params.txt
     
-.. note::
-    
-  As described in greater detail in :ref:`Generating a ChIMES model <page-running>`, chimes_lsq.py depends on native `numpy <https://numpy.org>`_, `scipy <https://www.scipy.org>`_, and `sklearn <https://scikit-learn.org/stable/>`_ installations for `python3.x <https://www.python.org>`_.
-
 For a more detailed description of how to use ``chimes_lsq``, see: :ref:`Generating a ChIMES model <page-running>`.
 
 
