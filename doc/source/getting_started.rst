@@ -112,8 +112,8 @@ Parameter set generation requires two steps, i.e. generation and solution of the
 
 .. code-block:: bash
     
-    /path/to/repo/src/chimes_lsq fm_setup.in > fm_setup.log
-    /path/to/repo/src/chimes_lsq.py > params.txt
+    /path/to/repo/build/chimes_lsq fm_setup.in > fm_setup.log
+    python /path/to/repo/build/chimes_lsq.py > params.txt
     
 .. note::
     
