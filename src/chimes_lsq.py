@@ -68,6 +68,7 @@ def main():
     if args.algorithm in sk_algos:
         from sklearn import linear_model
         from sklearn import preprocessing
+        from sklearn.pipeline import make_pipeline
         
     #############################################
     # Read weights, if used
@@ -290,12 +291,27 @@ def main():
         print ('! LASSO alpha = %11.4e' % args.alpha)
 
         if DO_WEIGHTING:
-            reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000, copy_X=False)
+            reg = make_pipeline(preprocessing.StandardScaler(with_mean=False, with_std=False), 
+                              linear_model.LassoLars(
+                                  alpha=args.alpha,
+                                  fit_intercept=False,
+                                  fit_path=False,
+                                  verbose=True,
+                                  max_iter=100000,
+                                  copy_X=False)
+                              )
             reg.fit(weightedA,weightedb)
         else:
-            reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000)
+            reg = make_pipeline(preprocessing.StandardScaler(with_mean=False, with_std=False), 
+                                linear_model.LassoLars(
+                                    alpha=args.alpha,
+                                    fit_intercept=False,
+                                    fit_path=False,
+                                    verbose=True,
+                                    max_iter=100000)
+                                )
             reg.fit(A,b)
-        x       = reg.coef_[0]
+        x       = reg.steps[1][1].coef_[0] # 1st [1] refers to chain index, 2nd [1] parse out second element in tuple, i.e., linear_model.LassoLars()
         np      = count_nonzero_vars(x)
         nvars   = np
 
