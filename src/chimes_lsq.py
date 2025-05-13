@@ -38,7 +38,6 @@ def main():
     parser.add_argument("--b",                    type=str,      default='b.txt',         help='b (force) file')
     parser.add_argument("--cores",                type=int,      default=8,               help='DLARS number of cores')
     parser.add_argument("--eps",                  type=float,    default=1.0e-05,         help='svd regularization')
-    parser.add_argument("--fast_svd",             type=str2bool, default=False,           help='solve SVD using normal equation')
     parser.add_argument("--header",               type=str,      default='params.header', help='parameter file header')
     parser.add_argument("--map",                  type=str,      default='ff_groups.map', help='parameter file map')
     parser.add_argument("--nodes",                type=int,      default=1,               help='DLARS number of nodes')
@@ -171,41 +170,16 @@ def main():
 
     if args.algorithm == 'svd':
         
-        # Modify A and b matrix to reduce A matrix dimension during calculation
-        # now 
-        if DO_WEIGHTING:
-            if args.fast_svd:
-                weightedATA = dot(transpose(weightedA), weightedA)
-                weightedATb = dot(transpose(weightedA), weightedb)
-                eps_sq = args.eps * args.eps
-            else:
-                pass
-        else:
-            if args.fast_svd:
-                ATA = dot(transpose(A), A)
-                ATb = dot(transpose(A), b)
-                eps_sq = args.eps * args.eps
-            else:
-                pass        
-        
         # Make the scipy call
         
         print ('! svd algorithm used')
         try:
             if DO_WEIGHTING: # Then it's OK to overwrite weightedA.  It is not used to calculate y (predicted forces) below.
-                if args.fast_svd:
-                    U,D,VT = scipy.linalg.svd(weightedATA,overwrite_a=True)
-                    Dmat   = array((transpose(weightedATA)))
-                else:
-                    U,D,VT = scipy.linalg.svd(weightedA,overwrite_a=True)
-                    Dmat   = array((transpose(weightedA)))
+                U,D,VT = scipy.linalg.svd(weightedA,overwrite_a=True)
+                Dmat   = array((transpose(weightedA)))
             else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
-                if args.fast_svd:
-                    U,D,VT = scipy.linalg.svd(ATA,overwrite_a=False)
-                    Dmat   = array((transpose(ATA)))
-                else:
-                    U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
-                    Dmat   = array((transpose(A))) 
+                U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
+                Dmat   = array((transpose(A))) 
         except LinAlgError:
             sys.stderr.write("SVD algorithm failed")
             exit(1)
@@ -223,10 +197,7 @@ def main():
 
         # Cut off singular values based on fraction of maximum value as per numerical recipes.
         
-        if args.fast_svd:
-            eps = eps_sq * dmax
-        else:
-            eps=args.eps * dmax
+        eps=args.eps * dmax
         nvars = 0
 
         for i in range(0,len(D)):
@@ -240,15 +211,68 @@ def main():
         x=dot(transpose(VT),Dmat)
 
         if DO_WEIGHTING:
-            if args.fast_svd:
-                x = dot(x,dot(transpose(U),weightedATb))
-            else:
-                x = dot(x,dot(transpose(U),weightedb))
+            x = dot(x,dot(transpose(U),weightedb))
         else:
-            if args.fast_svd:
-                x = dot(x,dot(transpose(U),ATb))
-            else:
-                x = dot(x,dot(transpose(U),b))
+            x = dot(x,dot(transpose(U),b))
+
+    elif args.algorithm == 'fast_svd':
+        
+        # Modify A and b matrix to reduce A matrix dimension during calculation
+        # now 
+        if DO_WEIGHTING:
+            weightedATA = dot(transpose(weightedA), weightedA)
+            weightedATb = dot(transpose(weightedA), weightedb)
+            eps_sq = args.eps * args.eps
+        else:
+            ATA = dot(transpose(A), A)
+            ATb = dot(transpose(A), b)
+            eps_sq = args.eps * args.eps      
+        
+        # Make the scipy call
+        
+        print ('! fast_svd algorithm used')
+        try:
+            if DO_WEIGHTING: # Then it's OK to overwrite weightedA.  It is not used to calculate y (predicted forces) below.
+                U,D,VT = scipy.linalg.svd(weightedATA,overwrite_a=True)
+                Dmat   = array((transpose(weightedATA)))
+            else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
+                U,D,VT = scipy.linalg.svd(ATA,overwrite_a=False)
+                Dmat   = array((transpose(ATA)))
+        except LinAlgError:
+            sys.stderr.write("fast SVD algorithm failed")
+            exit(1)
+            
+        # Process output
+
+        dmax = 0.0
+
+        for i in range(0,len(Dmat)):
+            if ( abs(D[i]) > dmax ) :
+                dmax = abs(D[i])
+
+            for j in range(0,len(Dmat[i])):
+                Dmat[i][j]=0.0
+
+        # Cut off singular values based on fraction of maximum value as per numerical recipes.
+        
+        eps = eps_sq * dmax
+        nvars = 0
+
+        for i in range(0,len(D)):
+            if abs(D[i]) > eps:
+                Dmat[i][i]=1.0/D[i]
+                nvars += 1
+
+        print ("! eps (= args.eps*dmax)          =  %11.4e" % eps)        
+        print ("! SVD regularization factor      = %11.4e" % args.eps)
+
+        x=dot(transpose(VT),Dmat)
+
+        if DO_WEIGHTING:
+            x = dot(x,dot(transpose(U),weightedATb))
+        else:
+            x = dot(x,dot(transpose(U),ATb))
+
 
     elif args.algorithm == 'ridge':
         print ('! ridge regression used')
