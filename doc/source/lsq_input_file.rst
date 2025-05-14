@@ -28,11 +28,11 @@ Because ChIMES is entirely linear it its fitted parameters, the above optimizati
 
    \begin{equation}
    
-      \mathrm{\mathbf{wAc}} = \mathrm{\mathbf{wb}_{DFT}},
+      \mathrm{\mathbf{wMc}} = \mathrm{\mathbf{wb}_{DFT}},
    
    \end{equation}
 
-where :math:`\mathrm{\mathbf{b}_{DFT}}` is the vector of DFT-generated per-atom force components, :math:`F^{\mathrm{DFT}}_{ijk}`, :math:`\mathrm{\mathbf{w}}` is a diagonal matrix of weights to be applied to the elements of :math:`\mathrm{\mathbf{b}_{DFT}}` and rows of :math:`\mathrm{\mathbf{A}}`, :math:`\mathrm{\mathbf{c}}` is the diagonal matrix of generated model parameters, and :math:`\mathrm{\mathbf{A}}` is the overdetermined ChIMES design matrix for which elements of :math:`\mathrm{\mathbf{A}}` are given by:
+where :math:`\mathrm{\mathbf{b}_{DFT}}` is the vector of DFT-generated per-atom force components, :math:`F^{\mathrm{DFT}}_{ijk}`, :math:`\mathrm{\mathbf{w}}` is a diagonal matrix of weights to be applied to the elements of :math:`\mathrm{\mathbf{b}_{DFT}}` and rows of :math:`\mathrm{\mathbf{M}}`, :math:`\mathrm{\mathbf{c}}` is the diagonal matrix of generated model parameters, and :math:`\mathrm{\mathbf{M}}` is the overdetermined ChIMES design matrix for which elements of :math:`\mathrm{\mathbf{M}}` are given by:
 
 
 .. math::
@@ -44,9 +44,9 @@ where :math:`\mathrm{\mathbf{b}_{DFT}}` is the vector of DFT-generated per-atom 
    
    \end{equation} 
    
- 
+Please note that the matrix :math:`\mathrm{\mathbf{M}}` is referred to as matrix :math:`\mathrm{\mathbf{A}}` in the software and reported as ``A.txt``.
+
 As discussed in further detail below, we note that per-configuration energies and stress tensors can be considered in ChIMES fits, in additional to per-atom forces.
- 
    
 Additional details are provided below in the following sections:
 
@@ -118,7 +118,9 @@ Control  variables	Description                                       Value/Optio
 ``FITENER`` *       Whether/how to include energies                  See below for details. 
 ``PAIRTYP``         Chebyshev polynomial orders                      Expects ``<O2B> <O3B+1> <O4B+1> -1 1``
 ``CHBTYPE`` *       Pair distance transformation type                See below for details. 
-``USENEIG``         Neighbor list/distance convention                Auto-select algorithm (``true``) or use small-cell friendly method (``true SMALL``)
+``USENEIG``         Neighbor list/distance convention                Auto-select algorithm (``true``) or use small-cell friendly method (``true SMALL``)  
+``FITPOVR``         ReaxFF linear overcoordination parameters use    Boolean to decide if using ReaxFF linear overcoordination parameters. If this is false and parameters are provided below, those parameters will be subtracted from forces.              
+``SKPFRMS``         Skip frames to train to                          Decide to process frames in round-robin order with skipping. Integer input.
 ==================  =============================================    ====================================
 
 Note: Asterisks (*) indicate options described in greater detail below
@@ -136,7 +138,10 @@ Topology variables      Description                                 Value/Option
 ``ATM_TYX``             ``ATM_TYP`` of atom X in pair ``PAIRIDX``   Used to define interaction pair types. Order does not matter.
 ``S_MINIM``             Inner cutoff for pair ``PAIRIDX``           Generally taken as slightly less than smallest distance sampled in DFT-MD trajectory.
 ``S_MAXIM``             Outer cutoff for pair ``PAIRIDX``           Should be small enough to prevent self-interaction across periodic boundaries.
-``MORSE_LAMBDA``        (RENAME) ``CHEBTYPE`` variable              Morse-type lambda for Morse ``CHEBTYP``. Only used if ``# PAIRTYP #`` is ``CHEBYSHEV``. Generally set to location of first radial distribution peak for each pair type.
+``S_DELTA``             Ancillary. Value required                   Must have floating point number in this location.
+``MORSE_LAMBDA``        ``CHBTYPE`` variable                        Morse-type lambda for Morse ``CHBTYP``. Only used if ``# PAIRTYP #`` is ``CHEBYSHEV``. Generally set to location of first radial distribution peak for each pair type.
+``USEOVRP``             ReaxFF overbonding term                     Boolean. If ``FITPOVR`` is true, will look for ``# PAIRTYP #`` with true. Asks user if they would like to use the ReaxFF overbonding term. Additional parameters required if used. 
+``NXYBINS``             Ancillary                                   Ancillary
 ``CHGCONS`` *           Charge fitting constraints                  See below for details. 
 ``SPECIAL XB MINIM`` *  Special manybody inner cutoffs              See below for details.
 ``SPECIAL XB MAXIM`` *  Special manybody outer cutoffs              See below for details.
@@ -183,14 +188,14 @@ Comment lines in trajectory file frames are formatted like:
 
 .. code-block:: bash
 
-    <box x-len> <box y-len> <box z-len> <s_xx> <s_xy> <s_xz> <s_yy> <s_yz> <s_zz> <energy>
+    <box x-len> <box y-len> <box z-len> <s_xx> <s_yy> <s_zz> <s_xy> <s_xz> <s_yz> <energy>
 
 
 or, if the first word on the line is "NON-ORTHO":
 
 .. code-block:: bash
 
-    NON-ORTHO <latvec-1_x> <latvec-1_y> <latvec-1_z> <latvec-2_x> <latvec-2_y> <latvec-2_z> <latvec-3_x> <latvec-3_y> <latvec-3_z> <s_xx> <s_xy> <s_xz> <s_yy> <s_yz> <s_zz> <energy>
+    NON-ORTHO <latvec-1_x> <latvec-1_y> <latvec-1_z> <latvec-2_x> <latvec-2_y> <latvec-2_z> <latvec-3_x> <latvec-3_y> <latvec-3_z> <s_xx> <s_yy> <s_zz> <s_xy> <s_xz> <s_yz> <energy>
     
 
 where :math:`s\_ab` are the :math:`ab` stress tensors and energy is the overall system energy, and  :math:`\mathrm{latvec-}i\_a` is the :math:`a^{\rm{th}}` component of the  :math:`i^{\rm{th}}` lattice vector.
@@ -233,7 +238,7 @@ This keyword controls if and how per-configuration energies are included in the 
 This keyword defines whether charges should be fit, or held fixed at user-defined values. Note that currently, functionality is only supported when ``FITCOUL`` is true, or when ``FITCOUL`` is false and all charges are zero.  If ``FITCOUL`` is false, but charges are non-zero, program will attempt to subtract charge contributions from forces.
 
 
-``CBHTYP``
+``CHBTYPE``
 """"""""""""
 
 This keyword defined the pair distance transformation method (i.e. for compatibility with the [-1,1] domain over which Chebyshev polynomials are defined). Currently, the only options are ``MORSE`` and ``DEFAULT`` (i.e. "direct"). See reference "Water-1" in :ref:`Citing ChIMES <page-citing>` for additional details. If ``MORSE`` is selected, meaningful values of ``MORSE_LAMBDA`` should be specified.
@@ -330,7 +335,7 @@ To generate a ChIMES design matrix and related metadata files, an input file, ``
 
 .. code-block:: bash
     
-    /path/to/repo/src/chimes_lsq fm_setup.in > fm_setup.log
+    /path/to/repo/build/chimes_lsq fm_setup.in > fm_setup.log
     
 which will produce several output files, listed below. Note that if ``SPLITFI`` is set true in ``fm_setup.in``, some files will be output as several ``file.<zero-padded-number>.txt`` rather than a single ``file.txt``. ``dim*txt`` files contain additional information on this splitting.
 
