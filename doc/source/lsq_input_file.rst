@@ -28,11 +28,11 @@ Because ChIMES is entirely linear it its fitted parameters, the above optimizati
 
    \begin{equation}
    
-      \mathrm{\mathbf{wAc}} = \mathrm{\mathbf{wb}_{DFT}},
+      \mathrm{\mathbf{wMc}} = \mathrm{\mathbf{wb}_{DFT}},
    
    \end{equation}
 
-where :math:`\mathrm{\mathbf{b}_{DFT}}` is the vector of DFT-generated per-atom force components, :math:`F^{\mathrm{DFT}}_{ijk}`, :math:`\mathrm{\mathbf{w}}` is a diagonal matrix of weights to be applied to the elements of :math:`\mathrm{\mathbf{b}_{DFT}}` and rows of :math:`\mathrm{\mathbf{A}}`, :math:`\mathrm{\mathbf{c}}` is the diagonal matrix of generated model parameters, and :math:`\mathrm{\mathbf{A}}` is the overdetermined ChIMES design matrix for which elements of :math:`\mathrm{\mathbf{A}}` are given by:
+where :math:`\mathrm{\mathbf{b}_{DFT}}` is the vector of DFT-generated per-atom force components, :math:`F^{\mathrm{DFT}}_{ijk}`, :math:`\mathrm{\mathbf{w}}` is a diagonal matrix of weights to be applied to the elements of :math:`\mathrm{\mathbf{b}_{DFT}}` and rows of :math:`\mathrm{\mathbf{M}}`, :math:`\mathrm{\mathbf{c}}` is the diagonal matrix of generated model parameters, and :math:`\mathrm{\mathbf{M}}` is the overdetermined ChIMES design matrix for which elements of :math:`\mathrm{\mathbf{M}}` are given by:
 
 
 .. math::
@@ -44,9 +44,9 @@ where :math:`\mathrm{\mathbf{b}_{DFT}}` is the vector of DFT-generated per-atom 
    
    \end{equation} 
    
- 
+Please note that the matrix :math:`\mathrm{\mathbf{M}}` is referred to as matrix :math:`\mathrm{\mathbf{A}}` in the software and reported as ``A.txt``.
+
 As discussed in further detail below, we note that per-configuration energies and stress tensors can be considered in ChIMES fits, in additional to per-atom forces.
- 
    
 Additional details are provided below in the following sections:
 
@@ -118,7 +118,9 @@ Control  variables	Description                                       Value/Optio
 ``FITENER`` *       Whether/how to include energies                  See below for details. 
 ``PAIRTYP``         Chebyshev polynomial orders                      Expects ``<O2B> <O3B+1> <O4B+1> -1 1``
 ``CHBTYPE`` *       Pair distance transformation type                See below for details. 
-``USENEIG``         Neighbor list/distance convention                Auto-select algorithm (``true``) or use small-cell friendly method (``true SMALL``)
+``USENEIG``         Neighbor list/distance convention                Auto-select algorithm (``true``) or use small-cell friendly method (``true SMALL``)  
+``FITPOVR``         ReaxFF linear overcoordination parameters use    Boolean to decide if using ReaxFF linear overcoordination parameters. If this is false and parameters are provided below, those parameters will be subtracted from forces.              
+``SKPFRMS``         Skip frames to train to                          Decide to process frames in round-robin order with skipping. Integer input.
 ==================  =============================================    ====================================
 
 Note: Asterisks (*) indicate options described in greater detail below
@@ -131,12 +133,15 @@ Topology variables      Description                                 Value/Option
 ``ATM_TYP``             Atom type chemical symbol                   Any string. Chemical symbol for each unique atom type.  Values form a column below ``# ATM_TYP #``.
 ``ATMCHRG``             Atom type charge                            If ``FITCOUL`` is false: a partial atomic charge for each atom type. If ``FITCOUL`` is true: a positive or negative sign, to indicate how pair charge signs should be assigned.
 ``ATMMASS``             Atom type mass                              Floats > 0.
-``EXCLUDE`` *           Interaction to excude/ignore                Sets of n-body ``ATM_TYP``s. Rarely used.
+``EXCLUDE`` *           Interaction to exclude/ignore               Sets of n-body ``ATM_TYP``s. Rarely used.
 ``PAIRIDX``             Pair type index                             Ascending integers from 1 to the number of unique atom pair types. Values form a column below ``# PAIRIDX #``.
 ``ATM_TYX``             ``ATM_TYP`` of atom X in pair ``PAIRIDX``   Used to define interaction pair types. Order does not matter.
 ``S_MINIM``             Inner cutoff for pair ``PAIRIDX``           Generally taken as slightly less than smallest distance sampled in DFT-MD trajectory.
 ``S_MAXIM``             Outer cutoff for pair ``PAIRIDX``           Should be small enough to prevent self-interaction across periodic boundaries.
-``MORSE_LAMBDA``        (RENAME) ``CHEBTYPE`` variable              Morse-type lambda for Morse ``CHEBTYP``. Only used if ``# PAIRTYP #`` is ``CHEBYSHEV``. Generally set to location of first radial distribution peak for each pair type.
+``S_DELTA``             Ancillary. Value required                   Must have floating point number in this location.
+``MORSE_LAMBDA``        ``CHBTYPE`` variable                        Morse-type lambda for Morse ``CHBTYP``. Only used if ``# PAIRTYP #`` is ``CHEBYSHEV``. Generally set to location of first radial distribution peak for each pair type.
+``USEOVRP``             ReaxFF overbonding term                     Boolean. If ``FITPOVR`` is true, will look for ``# PAIRTYP #`` with true. Asks user if they would like to use the ReaxFF overbonding term. Additional parameters required if used. 
+``NXYBINS``             Ancillary                                   Ancillary
 ``CHGCONS`` *           Charge fitting constraints                  See below for details. 
 ``SPECIAL XB MINIM`` *  Special manybody inner cutoffs              See below for details.
 ``SPECIAL XB MAXIM`` *  Special manybody outer cutoffs              See below for details.
@@ -183,14 +188,14 @@ Comment lines in trajectory file frames are formatted like:
 
 .. code-block:: bash
 
-    <box x-len> <box y-len> <box z-len> <s_xx> <s_xy> <s_xz> <s_yy> <s_yz> <s_zz> <energy>
+    <box x-len> <box y-len> <box z-len> <s_xx> <s_yy> <s_zz> <s_xy> <s_xz> <s_yz> <energy>
 
 
 or, if the first word on the line is "NON-ORTHO":
 
 .. code-block:: bash
 
-    NON-ORTHO <latvec-1_x> <latvec-1_y> <latvec-1_z> <latvec-2_x> <latvec-2_y> <latvec-2_z> <latvec-3_x> <latvec-3_y> <latvec-3_z> <s_xx> <s_xy> <s_xz> <s_yy> <s_yz> <s_zz> <energy>
+    NON-ORTHO <latvec-1_x> <latvec-1_y> <latvec-1_z> <latvec-2_x> <latvec-2_y> <latvec-2_z> <latvec-3_x> <latvec-3_y> <latvec-3_z> <s_xx> <s_yy> <s_zz> <s_xy> <s_xz> <s_yz> <energy>
     
 
 where :math:`s\_ab` are the :math:`ab` stress tensors and energy is the overall system energy, and  :math:`\mathrm{latvec-}i\_a` is the :math:`a^{\rm{th}}` component of the  :math:`i^{\rm{th}}` lattice vector.
@@ -233,7 +238,7 @@ This keyword controls if and how per-configuration energies are included in the 
 This keyword defines whether charges should be fit, or held fixed at user-defined values. Note that currently, functionality is only supported when ``FITCOUL`` is true, or when ``FITCOUL`` is false and all charges are zero.  If ``FITCOUL`` is false, but charges are non-zero, program will attempt to subtract charge contributions from forces.
 
 
-``CBHTYP``
+``CHBTYPE``
 """"""""""""
 
 This keyword defined the pair distance transformation method (i.e. for compatibility with the [-1,1] domain over which Chebyshev polynomials are defined). Currently, the only options are ``MORSE`` and ``DEFAULT`` (i.e. "direct"). See reference "Water-1" in :ref:`Citing ChIMES <page-citing>` for additional details. If ``MORSE`` is selected, meaningful values of ``MORSE_LAMBDA`` should be specified.
@@ -330,7 +335,7 @@ To generate a ChIMES design matrix and related metadata files, an input file, ``
 
 .. code-block:: bash
     
-    /path/to/repo/src/chimes_lsq fm_setup.in > fm_setup.log
+    /path/to/repo/build/chimes_lsq fm_setup.in > fm_setup.log
     
 which will produce several output files, listed below. Note that if ``SPLITFI`` is set true in ``fm_setup.in``, some files will be output as several ``file.<zero-padded-number>.txt`` rather than a single ``file.txt``. ``dim*txt`` files contain additional information on this splitting.
 
@@ -524,6 +529,89 @@ Weighting is often needed when energies and stresses tensors are included in the
     wS=250.0
     
     paste b-labeled.txt force.txt | awk -v wF="$wF" -v wE="$wE" -v wS="$wS" '{if($1=="+1"){print wE}elseif($1~"s_"){print wS}else{print wF}}' > weights.txt
+
+
+Anatomy of ChIMES parameter file 
+""""""""""""""""""""""""""""""""
+
+==================================   ==============================================================================
+Variables                            Descriptions
+==================================   ==============================================================================
+``Number of variables``              The maximum number of coefficients              
+``Number of equations``              The number of equations to solve
+``eps``                              The threshold for dropping small singular values in SVD
+``SVD regularization factor``        The regularization parameter for SVD algorithm
+``alpha``                            The regularization parameter for LASSO regularization
+``RMS Force error``                  The global root mean square error between training data and ChIMES predictions
+``max abs variable``                 The absolute value of the largest coefficient
+``number of fitting vars``           The number of variables after regularization
+``Bayesian Information Criterion``   The model selection criterion 
+``Using weighting file``             The file containing weights for fitting
+``USECOUL``                          If the model accounts for system charges 
+``FITCOUL``                          If the model is fit to system charges 
+``USE3BCH``                          If the model is fit to 3-body interactions
+``USE4BCH``                          If the model is fit to 4-body interactions
+``EXCLD1B``                          If the model excludes 1-body energy 
+``EXCLD2B``                          If the model excludes 2-body interactions
+``PAIRTYP``                          2-, 3-, and 4-body Chebyshev polynomial orders
+``ATOM TYPES``                       The number of atom types 
+``TYPEIDX``                          The index of atom type  
+``ATM_TYP``                          The label of atom type
+``ATMCHRG``                          The charge of atom type 
+``ATMMASS``                          The mass of atom type
+``ATOM PAIRS``                       The number of pair types 
+``PAIRIDX``                          The index of the pair type 
+``ATM_TY1``                          The label of atom 1 in the pair
+``ATM_TY2``                          The label of atom 2 in the pair
+``S_MINIM``                          The inner cutoff for the pair 
+``S_MAXIM``                          The outer cutoff for the pair
+``CHBDIST``                          The transformation style for pair distance
+``MORSE_LAMBDA``                     The parameter used in Morse transformation
+``FCUT TYPE``                        The type of cutoff function used
+``SPECIAL 3B S_MAXIM``               Special outer cutoff for 3-body interactions 
+``ATOM PAIR TRIPLETS``               The number of triplet types
+``ATOM PAIR QUARDRUPLETS``           The number of quadruplet types
+``PAIRTYPE PARAMS``                  The pair type index and atom types
+``TRIPLETTYPE PARAMS``               The triplet type index and atom types; see code block for details
+``PAIRMAPS``                         The permutations of pair types
+``TRIPMAPS``                         The permutations of triplet types
+``NO ENERGY OFFSETS``                The number of atoms types
+``ENERGY OFFSET X``                  The energy offset of atom type X 
+==================================   ==============================================================================   
+
+Here we provide an example of the triplet parameters. 
+
+.. code-block:: bash
+    :linenos:
+    
+    TRIPLET CHEBYSHEV PARAMS
+    TRIPLETTYPE PARAMS:
+    INDEX: 0 ATOMS: Si Si Si   
+    PAIRS: SiSi SiSi SiSi UNIQUE: 665 TOTAL: 3332
+        index  |  powers  |  equiv index  |  param index  |       parameter       
+    ----------------------------------------------------------------------------
+        0       0  1  1         0               0          2.1714984512050e+02
+        1       1  0  1         0               0          2.1714984512050e+02
+        2       1  1  0         0               0          2.1714984512050e+02
+        3       0  1  2         3               1          6.2564844297350e+01
+        4       1  0  2         3               1          6.2564844297350e+01
+        5       0  2  1         3               1          6.2564844297350e+01
+        6       2  0  1         3               1          6.2564844297350e+01
+        7       1  2  0         3               1          6.2564844297350e+01
+        8       2  1  0         3               1          6.2564844297350e+01
+        9       0  1  3         9               2          3.4634223883030e+01
+        10      1  0  3         9               2          3.4634223883030e+01
+    
+    
+* Line 3 specifies the index of the triplet and the atoms in the triplet. Line 4 specifies all pairs in the triplet, lists the number of unique triplet power index and the total number of triple power index.
+* Line 4 specifies the pair combinations used in the triplet block
+* Line 5: 
+
+    - index: Specifies the index of the coefficient in the triplet sum
+    - powers: The powers of the three Chebyshev polynomials
+    - equiv index: The index of the first instance of the permutationally invariant coefficient
+    - param index: The unique coefficient index based of equiv index
+    - parameter: The value of the coefficients 
 
 
 Tips and tricks
