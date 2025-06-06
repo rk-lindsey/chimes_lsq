@@ -6,19 +6,6 @@
 ChIMES Parameter Generator Documentation
 ========================================
 
-`Note: This documentation is under still construction.`
-
-
-TO DO:
-______
-* Add sample input and output files
-
-
-
-
-
-----------
-
 The **Ch**\ ebyshev **I**\ nteraction **M**\ odel for **E**\ fficient **S**\ imulation (ChIMES) is a machine-learned interatomic potential targeting chemistry in condensed phase systems. ChIMES models are able to approach quantum-accuracy through a systamtically improvable explicitly many-bodied basis comprised of linear combinations of Chebyshev polynomials. Though originally developed to enable description of organic molecular materials, ChIMES has successfuly been applied to systems spanning ambient water to molten carbon, and leveraged as correction for density functional based tight binding simulations. 
 
 The ChIMES least squares (chimes_lsq) utility facilitates generates of ChIMES parameter sets from reference data, and can be used for particle-based simulations and single point calculations through using the `ChIMES Calculator <https://doi.org/10.1021/acs.jctc.7b00867>`_.

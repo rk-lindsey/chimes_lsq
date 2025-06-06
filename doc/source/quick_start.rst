@@ -82,10 +82,10 @@ Next comes the "topology variables", which specify atom-type and interaction-clu
     2               O                0.0            15.999
 
     # Next, figure out how many pair types can be generated. Specify the pair type index, constituent atom types,
-    # inner cutoff (s_minim), outer cutoff (s_maxim), and Morse Transformation variable. Note that s_delta is a 
+    # inner cutoff (s_minim), outer cutoff (s_maxim), and morse transformation variable. Note that s_delta is a 
     # vestigial field that can use any floating point number as a place holder.
 
-    # PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA #
+    # PAIRIDX #     # ATM_TY1 #     # ATM_TY2 #     # S_MINIM #     # S_MAXIM #     # S_DELTA #     # MORSE_LAMBDA #
     1               C               C               0.988           8.00            0.01            1.35            
     2               O               O               0.911           8.00            0.01            2.55            
     3               C               O               0.876           8.00            0.01            1.15            
@@ -174,7 +174,7 @@ We will use principal component analysis (PCA) based on the singular value decom
 
 .. code-block::
 
-    /path/to/chimes_lsq/source/chimes_lsq.py > params.txt
+    python /path/to/chimes_lsq/build/chimes_lsq.py > params.txt
     
 Note, this step can take a few minutes to run.
 
