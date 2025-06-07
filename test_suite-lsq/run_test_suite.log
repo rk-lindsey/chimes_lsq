@@ -1,0 +1,771 @@
+NP = 36
+
+***
+*** Executing chimes_lsq install.sh
+***
+
+Attempting to perform a fresh install
+Removing directory build
+Imports directory will be deleted and re-cloned/installed. Proceed? (y/n)
+Are you sure? Imports directory will be deleted! (y/n)
+Detected hosttype LLNL-LC
+Your branch is up to date with 'origin/main'.
+Removing directory build
+Removing files installed at /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build
+This runs the command "rm -rf /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build"
+Are you sure you want to proceed?
+Detected hosttype: LLNL-LC
+-- The CXX compiler identification is GNU 8.5.0
+-- The C compiler identification is GNU 8.5.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/lib64/ccache/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/lib64/ccache/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- The Fortran compiler identification is GNU 10.3.1
+-- Detecting Fortran compiler ABI info
+-- Detecting Fortran compiler ABI info - done
+-- Check for working Fortran compiler: /usr/tce/bin/gfortran - skipped
+-- Checking whether /usr/tce/bin/gfortran supports Fortran 90
+-- Checking whether /usr/tce/bin/gfortran supports Fortran 90 - yes
+-- Build type: Release (manually selected single-config)
+-- Flags for CXX-compiler (build type: Release):    -O3 -funroll-all-loops
+-- Flags for C-compiler (build type: Release):    -O3 -funroll-all-loops
+-- Flags for Fortran-compiler (build type: Release):   -std=f2008  -O3 -funroll-all-loops
+-- Looking for round in m
+-- Looking for round in m - found
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build
+[  3%] Building CXX object CMakeFiles/ChimesCalc.dir/chimesFF/src/chimesFF.cpp.o
+[  7%] Building CXX object CMakeFiles/ChimesCalc.dir/chimesFF/api/chimescalc_C.cpp.o
+[ 10%] Building CXX object CMakeFiles/ChimesCalc.dir/serial_interface/src/serial_chimes_interface.cpp.o
+[ 14%] Building CXX object CMakeFiles/ChimesCalc.dir/serial_interface/api/chimescalc_serial_C.cpp.o
+[ 17%] Linking CXX shared library libchimescalc.so
+[ 17%] Built target ChimesCalc
+[ 21%] Building C object CMakeFiles/chimescalc-test_serial-C_instance.dir/serial_interface/examples/c_instance/main.c.o
+[ 25%] Linking C executable chimescalc-test_serial-C_instance
+[ 25%] Built target chimescalc-test_serial-C_instance
+[ 28%] Building C object CMakeFiles/chimescalc-test_serial-C.dir/serial_interface/examples/c/main.c.o
+[ 32%] Linking C executable chimescalc-test_serial-C
+[ 32%] Built target chimescalc-test_serial-C
+Scanning dependencies of target ChimesCalc_Fortran
+[ 35%] Building Fortran object CMakeFiles/ChimesCalc_Fortran.dir/chimesFF/api/chimescalc_F.f90.o
+[ 39%] Building Fortran object CMakeFiles/ChimesCalc_Fortran.dir/serial_interface/api/chimescalc_serial_F.f90.o
+[ 42%] Building Fortran object CMakeFiles/ChimesCalc_Fortran.dir/serial_interface/api/chimescalc_serial_F08.f90.o
+[ 46%] Linking Fortran shared library libchimescalc_fortran.so
+[ 46%] Built target ChimesCalc_Fortran
+Scanning dependencies of target chimescalc-test_serial-F
+[ 50%] Building Fortran object CMakeFiles/chimescalc-test_serial-F.dir/serial_interface/examples/fortran/main.F90.o
+[ 53%] Linking Fortran executable chimescalc-test_serial-F
+[ 53%] Built target chimescalc-test_serial-F
+[ 57%] Building C object CMakeFiles/chimescalc-test_direct-C.dir/chimesFF/examples/c/main.c.o
+[ 60%] Linking C executable chimescalc-test_direct-C
+[ 60%] Built target chimescalc-test_direct-C
+[ 64%] Building CXX object CMakeFiles/ChimesCalc_dynamic.dir/chimesFF/src/chimesFF.cpp.o
+[ 67%] Building CXX object CMakeFiles/ChimesCalc_dynamic.dir/chimesFF/api/chimescalc_C.cpp.o
+[ 71%] Building CXX object CMakeFiles/ChimesCalc_dynamic.dir/serial_interface/src/serial_chimes_interface.cpp.o
+[ 75%] Building CXX object CMakeFiles/ChimesCalc_dynamic.dir/serial_interface/api/chimescalc_serial_C.cpp.o
+[ 78%] Linking CXX shared module libchimescalc_dl.so
+[ 78%] Built target ChimesCalc_dynamic
+[ 82%] Building CXX object CMakeFiles/ChimesCalcExe.dir/serial_interface/examples/cpp/main.cpp.o
+[ 85%] Linking CXX executable chimescalc
+[ 85%] Built target ChimesCalcExe
+Scanning dependencies of target chimescalc-test_serial-F_instance
+[ 89%] Building Fortran object CMakeFiles/chimescalc-test_serial-F_instance.dir/serial_interface/examples/fortran_instance/main.F90.o
+[ 92%] Linking Fortran executable chimescalc-test_serial-F_instance
+[ 92%] Built target chimescalc-test_serial-F_instance
+Scanning dependencies of target chimescalc-test_serial-F08
+[ 96%] Building Fortran object CMakeFiles/chimescalc-test_serial-F08.dir/serial_interface/examples/fortran08/main.F90.o
+[100%] Linking Fortran executable chimescalc-test_serial-F08
+[100%] Built target chimescalc-test_serial-F08
+Consolidate compiler generated dependencies of target ChimesCalc
+[ 17%] Built target ChimesCalc
+Consolidate compiler generated dependencies of target chimescalc-test_serial-C_instance
+[ 25%] Built target chimescalc-test_serial-C_instance
+Consolidate compiler generated dependencies of target chimescalc-test_serial-C
+[ 32%] Built target chimescalc-test_serial-C
+[ 46%] Built target ChimesCalc_Fortran
+[ 53%] Built target chimescalc-test_serial-F
+Consolidate compiler generated dependencies of target chimescalc-test_direct-C
+[ 60%] Built target chimescalc-test_direct-C
+Consolidate compiler generated dependencies of target ChimesCalc_dynamic
+[ 78%] Built target ChimesCalc_dynamic
+Consolidate compiler generated dependencies of target ChimesCalcExe
+[ 85%] Built target ChimesCalcExe
+[ 92%] Built target chimescalc-test_serial-F_instance
+[100%] Built target chimescalc-test_serial-F08
+Install the project...
+-- Install configuration: "Release"
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/lib64/libchimescalc.so
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/include/chimescalc/chimesFF.h
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/include/chimescalc/chimescalc_C.h
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/include/chimescalc/serial_chimes_interface.h
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/include/chimescalc/chimescalc_serial_C.h
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/bin/chimescalc
+-- Set runtime path of "/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/bin/chimescalc" to ""
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/lib64/libchimescalc_dl.so
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/lib64/libchimescalc_fortran.so
+-- Set runtime path of "/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/lib64/libchimescalc_fortran.so" to ""
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/include/chimescalc/modfiles
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/include/chimescalc/modfiles/chimescalc.mod
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/include/chimescalc/modfiles/chimescalc_serial.mod
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/include/chimescalc/modfiles/chimescalc_serial08.mod
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/lib64/cmake/chimescalc/chimescalc-targets.cmake
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/lib64/cmake/chimescalc/chimescalc-targets-release.cmake
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/lib64/cmake/chimescalc/chimescalc-config.cmake
+-- Installing: /p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build/lib64/cmake/chimescalc/chimescalc-config-version.cmake
+mpicxx -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"/usr/tce/packages/mkl/mkl-2022.1.0/include" -DUSE_MKL -DUSE_BLAS -qopenmp -DUSE_OPENMP dlars.C Matrix.C Restart.C -Wl,--start-group /usr/tce/packages/mkl/mkl-2022.1.0/lib/intel64/libmkl_intel_ilp64.a /usr/tce/packages/mkl/mkl-2022.1.0/lib/intel64/libmkl_intel_thread.a /usr/tce/packages/mkl/mkl-2022.1.0/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl -o dlars
+make: 'molanal.new' is up to date.
+Removing directory build
+compiling with flags: -DCMAKE_CXX_COMPILER=/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DCMAKE_BUILD_TYPE=Release -DVERBOSITY=1 -DDEBUG_CHEBY=0 -DUSE_MPI=1 -DMPI_CXX_COMPILER=/usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0-magic/bin/mpicxx
+-- The CXX compiler identification is Intel 2021.6.0.20220226
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found MPI_CXX: /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/lib/libmpicxx.so (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /p/lustre2/laubach2/chimes_lsq-myLLfork/build
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -S/p/lustre2/laubach2/chimes_lsq-myLLfork -B/p/lustre2/laubach2/chimes_lsq-myLLfork/build --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_progress_start /p/lustre2/laubach2/chimes_lsq-myLLfork/build/CMakeFiles /p/lustre2/laubach2/chimes_lsq-myLLfork/build//CMakeFiles/progress.marks
+make  -f CMakeFiles/Makefile2 all
+make[1]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+make  -f CMakeFiles/chimes_lsq.dir/build.make CMakeFiles/chimes_lsq.dir/depend
+make[2]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+cd /p/lustre2/laubach2/chimes_lsq-myLLfork/build && /usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_depends "Unix Makefiles" /p/lustre2/laubach2/chimes_lsq-myLLfork /p/lustre2/laubach2/chimes_lsq-myLLfork /p/lustre2/laubach2/chimes_lsq-myLLfork/build /p/lustre2/laubach2/chimes_lsq-myLLfork/build /p/lustre2/laubach2/chimes_lsq-myLLfork/build/CMakeFiles/chimes_lsq.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+make  -f CMakeFiles/chimes_lsq.dir/build.make CMakeFiles/chimes_lsq.dir/build
+make[2]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+[  4%] Building CXX object CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o -MF CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o.d -o CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/chimes_lsq.C
+[  8%] Building CXX object CMakeFiles/chimes_lsq.dir/src/functions.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/functions.C.o -MF CMakeFiles/chimes_lsq.dir/src/functions.C.o.d -o CMakeFiles/chimes_lsq.dir/src/functions.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/functions.C
+[ 12%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Ewald.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Ewald.C.o -MF CMakeFiles/chimes_lsq.dir/src/Ewald.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Ewald.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Ewald.C
+[ 16%] Building CXX object CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o -MF CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o.d -o CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/ClassDefs.C
+[ 20%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Fcut.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Fcut.C.o -MF CMakeFiles/chimes_lsq.dir/src/Fcut.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Fcut.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Fcut.C
+[ 24%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Cluster.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Cluster.C.o -MF CMakeFiles/chimes_lsq.dir/src/Cluster.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Cluster.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Cluster.C
+[ 28%] Building CXX object CMakeFiles/chimes_lsq.dir/src/util.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/util.C.o -MF CMakeFiles/chimes_lsq.dir/src/util.C.o.d -o CMakeFiles/chimes_lsq.dir/src/util.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/util.C
+[ 32%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Cheby.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Cheby.C.o -MF CMakeFiles/chimes_lsq.dir/src/Cheby.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Cheby.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Cheby.C
+[ 36%] Building CXX object CMakeFiles/chimes_lsq.dir/src/io_styles.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/io_styles.C.o -MF CMakeFiles/chimes_lsq.dir/src/io_styles.C.o.d -o CMakeFiles/chimes_lsq.dir/src/io_styles.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/io_styles.C
+[ 40%] Building CXX object CMakeFiles/chimes_lsq.dir/src/feexcept.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/feexcept.C.o -MF CMakeFiles/chimes_lsq.dir/src/feexcept.C.o.d -o CMakeFiles/chimes_lsq.dir/src/feexcept.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/feexcept.C
+[ 44%] Building CXX object CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o -MF CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o.d -o CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/A_Matrix.C
+[ 48%] Building CXX object CMakeFiles/chimes_lsq.dir/src/input.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/input.C.o -MF CMakeFiles/chimes_lsq.dir/src/input.C.o.d -o CMakeFiles/chimes_lsq.dir/src/input.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/input.C
+[ 52%] Linking CXX executable chimes_lsq
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_link_script CMakeFiles/chimes_lsq.dir/link.txt --verbose=1
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -O3 CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o CMakeFiles/chimes_lsq.dir/src/functions.C.o CMakeFiles/chimes_lsq.dir/src/Ewald.C.o CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o CMakeFiles/chimes_lsq.dir/src/Fcut.C.o CMakeFiles/chimes_lsq.dir/src/Cluster.C.o CMakeFiles/chimes_lsq.dir/src/util.C.o CMakeFiles/chimes_lsq.dir/src/Cheby.C.o CMakeFiles/chimes_lsq.dir/src/io_styles.C.o CMakeFiles/chimes_lsq.dir/src/feexcept.C.o CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o CMakeFiles/chimes_lsq.dir/src/input.C.o -o chimes_lsq   -L/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build  -Wl,-rpath,/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build:/usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/lib /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/lib/libmpicxx.so /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/lib/libmpi.so -lchimescalc 
+make[2]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+[ 52%] Built target chimes_lsq
+make  -f CMakeFiles/chimes_md.dir/build.make CMakeFiles/chimes_md.dir/depend
+make[2]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+cd /p/lustre2/laubach2/chimes_lsq-myLLfork/build && /usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_depends "Unix Makefiles" /p/lustre2/laubach2/chimes_lsq-myLLfork /p/lustre2/laubach2/chimes_lsq-myLLfork /p/lustre2/laubach2/chimes_lsq-myLLfork/build /p/lustre2/laubach2/chimes_lsq-myLLfork/build /p/lustre2/laubach2/chimes_lsq-myLLfork/build/CMakeFiles/chimes_md.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+make  -f CMakeFiles/chimes_md.dir/build.make CMakeFiles/chimes_md.dir/build
+make[2]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+[ 56%] Building CXX object CMakeFiles/chimes_md.dir/src/chimes_md.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/chimes_md.C.o -MF CMakeFiles/chimes_md.dir/src/chimes_md.C.o.d -o CMakeFiles/chimes_md.dir/src/chimes_md.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/chimes_md.C
+[ 60%] Building CXX object CMakeFiles/chimes_md.dir/src/functions.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/functions.C.o -MF CMakeFiles/chimes_md.dir/src/functions.C.o.d -o CMakeFiles/chimes_md.dir/src/functions.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/functions.C
+[ 64%] Building CXX object CMakeFiles/chimes_md.dir/src/Ewald.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Ewald.C.o -MF CMakeFiles/chimes_md.dir/src/Ewald.C.o.d -o CMakeFiles/chimes_md.dir/src/Ewald.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Ewald.C
+[ 68%] Building CXX object CMakeFiles/chimes_md.dir/src/ClassDefs.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/ClassDefs.C.o -MF CMakeFiles/chimes_md.dir/src/ClassDefs.C.o.d -o CMakeFiles/chimes_md.dir/src/ClassDefs.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/ClassDefs.C
+[ 72%] Building CXX object CMakeFiles/chimes_md.dir/src/Fcut.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Fcut.C.o -MF CMakeFiles/chimes_md.dir/src/Fcut.C.o.d -o CMakeFiles/chimes_md.dir/src/Fcut.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Fcut.C
+[ 76%] Building CXX object CMakeFiles/chimes_md.dir/src/Cluster.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Cluster.C.o -MF CMakeFiles/chimes_md.dir/src/Cluster.C.o.d -o CMakeFiles/chimes_md.dir/src/Cluster.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Cluster.C
+[ 80%] Building CXX object CMakeFiles/chimes_md.dir/src/util.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/util.C.o -MF CMakeFiles/chimes_md.dir/src/util.C.o.d -o CMakeFiles/chimes_md.dir/src/util.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/util.C
+[ 84%] Building CXX object CMakeFiles/chimes_md.dir/src/Cheby.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Cheby.C.o -MF CMakeFiles/chimes_md.dir/src/Cheby.C.o.d -o CMakeFiles/chimes_md.dir/src/Cheby.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Cheby.C
+[ 88%] Building CXX object CMakeFiles/chimes_md.dir/src/io_styles.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/io_styles.C.o -MF CMakeFiles/chimes_md.dir/src/io_styles.C.o.d -o CMakeFiles/chimes_md.dir/src/io_styles.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/io_styles.C
+[ 92%] Building CXX object CMakeFiles/chimes_md.dir/src/feexcept.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/feexcept.C.o -MF CMakeFiles/chimes_md.dir/src/feexcept.C.o.d -o CMakeFiles/chimes_md.dir/src/feexcept.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/feexcept.C
+[ 96%] Building CXX object CMakeFiles/chimes_md.dir/src/input.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -isystem /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/input.C.o -MF CMakeFiles/chimes_md.dir/src/input.C.o.d -o CMakeFiles/chimes_md.dir/src/input.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/input.C
+[100%] Linking CXX executable chimes_md
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_link_script CMakeFiles/chimes_md.dir/link.txt --verbose=1
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -O3 CMakeFiles/chimes_md.dir/src/chimes_md.C.o CMakeFiles/chimes_md.dir/src/functions.C.o CMakeFiles/chimes_md.dir/src/Ewald.C.o CMakeFiles/chimes_md.dir/src/ClassDefs.C.o CMakeFiles/chimes_md.dir/src/Fcut.C.o CMakeFiles/chimes_md.dir/src/Cluster.C.o CMakeFiles/chimes_md.dir/src/util.C.o CMakeFiles/chimes_md.dir/src/Cheby.C.o CMakeFiles/chimes_md.dir/src/io_styles.C.o CMakeFiles/chimes_md.dir/src/feexcept.C.o CMakeFiles/chimes_md.dir/src/input.C.o -o chimes_md   -L/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build  -Wl,-rpath,/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build:/usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/lib /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/lib/libmpicxx.so /usr/tce/packages/mvapich2/mvapich2-2.3.7-intel-classic-2021.6.0/lib/libmpi.so -lchimescalc 
+make[2]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+[100%] Built target chimes_md
+make[1]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_progress_start /p/lustre2/laubach2/chimes_lsq-myLLfork/build/CMakeFiles 0
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /p/lustre2/laubach2/chimes_lsq-myLLfork/build
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -S/p/lustre2/laubach2/chimes_lsq-myLLfork -B/p/lustre2/laubach2/chimes_lsq-myLLfork/build --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_progress_start /p/lustre2/laubach2/chimes_lsq-myLLfork/build/CMakeFiles /p/lustre2/laubach2/chimes_lsq-myLLfork/build//CMakeFiles/progress.marks
+make  -f CMakeFiles/Makefile2 all
+make[1]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+make  -f CMakeFiles/chimes_md.dir/build.make CMakeFiles/chimes_md.dir/depend
+make[2]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+cd /p/lustre2/laubach2/chimes_lsq-myLLfork/build && /usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_depends "Unix Makefiles" /p/lustre2/laubach2/chimes_lsq-myLLfork /p/lustre2/laubach2/chimes_lsq-myLLfork /p/lustre2/laubach2/chimes_lsq-myLLfork/build /p/lustre2/laubach2/chimes_lsq-myLLfork/build /p/lustre2/laubach2/chimes_lsq-myLLfork/build/CMakeFiles/chimes_md.dir/DependInfo.cmake --color=
+Consolidate compiler generated dependencies of target chimes_md
+make[2]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+make  -f CMakeFiles/chimes_md.dir/build.make CMakeFiles/chimes_md.dir/build
+make[2]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+[  4%] Building CXX object CMakeFiles/chimes_md.dir/src/chimes_md.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/chimes_md.C.o -MF CMakeFiles/chimes_md.dir/src/chimes_md.C.o.d -o CMakeFiles/chimes_md.dir/src/chimes_md.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/chimes_md.C
+[  8%] Building CXX object CMakeFiles/chimes_md.dir/src/functions.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/functions.C.o -MF CMakeFiles/chimes_md.dir/src/functions.C.o.d -o CMakeFiles/chimes_md.dir/src/functions.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/functions.C
+[ 12%] Building CXX object CMakeFiles/chimes_md.dir/src/Ewald.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Ewald.C.o -MF CMakeFiles/chimes_md.dir/src/Ewald.C.o.d -o CMakeFiles/chimes_md.dir/src/Ewald.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Ewald.C
+[ 16%] Building CXX object CMakeFiles/chimes_md.dir/src/ClassDefs.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/ClassDefs.C.o -MF CMakeFiles/chimes_md.dir/src/ClassDefs.C.o.d -o CMakeFiles/chimes_md.dir/src/ClassDefs.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/ClassDefs.C
+[ 20%] Building CXX object CMakeFiles/chimes_md.dir/src/Fcut.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Fcut.C.o -MF CMakeFiles/chimes_md.dir/src/Fcut.C.o.d -o CMakeFiles/chimes_md.dir/src/Fcut.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Fcut.C
+[ 24%] Building CXX object CMakeFiles/chimes_md.dir/src/Cluster.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Cluster.C.o -MF CMakeFiles/chimes_md.dir/src/Cluster.C.o.d -o CMakeFiles/chimes_md.dir/src/Cluster.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Cluster.C
+[ 28%] Building CXX object CMakeFiles/chimes_md.dir/src/util.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/util.C.o -MF CMakeFiles/chimes_md.dir/src/util.C.o.d -o CMakeFiles/chimes_md.dir/src/util.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/util.C
+[ 32%] Building CXX object CMakeFiles/chimes_md.dir/src/Cheby.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Cheby.C.o -MF CMakeFiles/chimes_md.dir/src/Cheby.C.o.d -o CMakeFiles/chimes_md.dir/src/Cheby.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Cheby.C
+[ 36%] Building CXX object CMakeFiles/chimes_md.dir/src/io_styles.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/io_styles.C.o -MF CMakeFiles/chimes_md.dir/src/io_styles.C.o.d -o CMakeFiles/chimes_md.dir/src/io_styles.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/io_styles.C
+[ 40%] Building CXX object CMakeFiles/chimes_md.dir/src/feexcept.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/feexcept.C.o -MF CMakeFiles/chimes_md.dir/src/feexcept.C.o.d -o CMakeFiles/chimes_md.dir/src/feexcept.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/feexcept.C
+[ 44%] Linking CXX executable chimes_md
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_link_script CMakeFiles/chimes_md.dir/link.txt --verbose=1
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -O3 CMakeFiles/chimes_md.dir/src/chimes_md.C.o CMakeFiles/chimes_md.dir/src/functions.C.o CMakeFiles/chimes_md.dir/src/Ewald.C.o CMakeFiles/chimes_md.dir/src/ClassDefs.C.o CMakeFiles/chimes_md.dir/src/Fcut.C.o CMakeFiles/chimes_md.dir/src/Cluster.C.o CMakeFiles/chimes_md.dir/src/util.C.o CMakeFiles/chimes_md.dir/src/Cheby.C.o CMakeFiles/chimes_md.dir/src/io_styles.C.o CMakeFiles/chimes_md.dir/src/feexcept.C.o CMakeFiles/chimes_md.dir/src/input.C.o -o chimes_md   -L/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build  -Wl,-rpath,/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build: -lchimescalc 
+make[2]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+[ 48%] Built target chimes_md
+make  -f CMakeFiles/chimes_lsq.dir/build.make CMakeFiles/chimes_lsq.dir/depend
+make[2]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+cd /p/lustre2/laubach2/chimes_lsq-myLLfork/build && /usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_depends "Unix Makefiles" /p/lustre2/laubach2/chimes_lsq-myLLfork /p/lustre2/laubach2/chimes_lsq-myLLfork /p/lustre2/laubach2/chimes_lsq-myLLfork/build /p/lustre2/laubach2/chimes_lsq-myLLfork/build /p/lustre2/laubach2/chimes_lsq-myLLfork/build/CMakeFiles/chimes_lsq.dir/DependInfo.cmake --color=
+Consolidate compiler generated dependencies of target chimes_lsq
+make[2]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+make  -f CMakeFiles/chimes_lsq.dir/build.make CMakeFiles/chimes_lsq.dir/build
+make[2]: Entering directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+[ 52%] Building CXX object CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o -MF CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o.d -o CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/chimes_lsq.C
+[ 56%] Building CXX object CMakeFiles/chimes_lsq.dir/src/functions.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/functions.C.o -MF CMakeFiles/chimes_lsq.dir/src/functions.C.o.d -o CMakeFiles/chimes_lsq.dir/src/functions.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/functions.C
+[ 60%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Ewald.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Ewald.C.o -MF CMakeFiles/chimes_lsq.dir/src/Ewald.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Ewald.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Ewald.C
+[ 64%] Building CXX object CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o -MF CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o.d -o CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/ClassDefs.C
+[ 68%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Fcut.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Fcut.C.o -MF CMakeFiles/chimes_lsq.dir/src/Fcut.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Fcut.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Fcut.C
+[ 72%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Cluster.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Cluster.C.o -MF CMakeFiles/chimes_lsq.dir/src/Cluster.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Cluster.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Cluster.C
+[ 76%] Building CXX object CMakeFiles/chimes_lsq.dir/src/util.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/util.C.o -MF CMakeFiles/chimes_lsq.dir/src/util.C.o.d -o CMakeFiles/chimes_lsq.dir/src/util.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/util.C
+[ 80%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Cheby.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Cheby.C.o -MF CMakeFiles/chimes_lsq.dir/src/Cheby.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Cheby.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/Cheby.C
+[ 84%] Building CXX object CMakeFiles/chimes_lsq.dir/src/io_styles.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/io_styles.C.o -MF CMakeFiles/chimes_lsq.dir/src/io_styles.C.o.d -o CMakeFiles/chimes_lsq.dir/src/io_styles.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/io_styles.C
+[ 88%] Building CXX object CMakeFiles/chimes_lsq.dir/src/feexcept.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/feexcept.C.o -MF CMakeFiles/chimes_lsq.dir/src/feexcept.C.o.d -o CMakeFiles/chimes_lsq.dir/src/feexcept.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/feexcept.C
+[ 92%] Building CXX object CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o -MF CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o.d -o CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/A_Matrix.C
+[ 96%] Building CXX object CMakeFiles/chimes_lsq.dir/src/input.C.o
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -DDEBUG="" -DVERBOSITY=1 -I/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/chimesFF/src -I/p/lustre2/laubach2/chimes_lsq-myLLfork/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/input.C.o -MF CMakeFiles/chimes_lsq.dir/src/input.C.o.d -o CMakeFiles/chimes_lsq.dir/src/input.C.o -c /p/lustre2/laubach2/chimes_lsq-myLLfork/src/input.C
+[100%] Linking CXX executable chimes_lsq
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_link_script CMakeFiles/chimes_lsq.dir/link.txt --verbose=1
+/usr/tce/packages/intel-classic/intel-classic-2021.6.0-magic/bin/icc -O3 CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o CMakeFiles/chimes_lsq.dir/src/functions.C.o CMakeFiles/chimes_lsq.dir/src/Ewald.C.o CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o CMakeFiles/chimes_lsq.dir/src/Fcut.C.o CMakeFiles/chimes_lsq.dir/src/Cluster.C.o CMakeFiles/chimes_lsq.dir/src/util.C.o CMakeFiles/chimes_lsq.dir/src/Cheby.C.o CMakeFiles/chimes_lsq.dir/src/io_styles.C.o CMakeFiles/chimes_lsq.dir/src/feexcept.C.o CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o CMakeFiles/chimes_lsq.dir/src/input.C.o -o chimes_lsq   -L/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build  -Wl,-rpath,/p/lustre2/laubach2/chimes_lsq-myLLfork/imports/chimes_calculator/build: -lchimescalc 
+make[2]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+[100%] Built target chimes_lsq
+make[1]: Leaving directory '/p/lustre2/laubach2/chimes_lsq-myLLfork/build'
+/usr/tce/backend/installations/linux-rhel8-x86_64/gcc-10.3.1/cmake-3.21.1-7ibr52nct6w4eu3x7brsavcsifjxghhx/bin/cmake -E cmake_progress_start /p/lustre2/laubach2/chimes_lsq-myLLfork/build/CMakeFiles 0
+
+***
+*** chimes_lsq install complete
+***
+
+Compiling chimes_lsq succeeded
+/p/lustre2/laubach2/chimes_lsq-myLLfork/test_suite-lsq
+
+VALIDATING FOR CHIMES_LSQ...
+ 
+Running h2o-2bcheby test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running h2o-3bcheby test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running h2o-3bcheby2 test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running h2o-3bcheby3 test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running h2o-4bcheby test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running h2o-4bcheby-small test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running h2o-invr test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running fitstrs test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running fitstrs3b test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running test_4atoms test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running test_4atoms.2 test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running special3b test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running special4b test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running stress-and-ener-4b test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running stress-and-ener-4b2 test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running stress-and-ener-2b1 test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running stress-and-ener-2b2 test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running stress-and-ener-2b3 test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running two-traj-files test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running one-file-three-trajs test...
+Chimes_lsq succeeded
+		...Test passed.
+ 
+Running nonorth2 test...
+Chimes_lsq succeeded
+		...Test passed.
+VALIDATING FOR SVD SCRIPT ...
+ 
+Running h2o-2bcheby test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running h2o-3bcheby test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running h2o-3bcheby2 test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	Parameter index 2  differences exceeded tolerance(+/- 1e-09 ):  -1.26401e-09
+	Parameter index 3  differences exceeded tolerance(+/- 1e-09 ):  -2.086e-09
+	Parameter index 7  differences exceeded tolerance(+/- 1e-09 ):  -1.20001e-09
+	Parameter index 8  differences exceeded tolerance(+/- 1e-09 ):  -1.19999e-09
+	Parameter index 90  differences exceeded tolerance(+/- 1e-09 ):  -1.00101e-09
+	Parameter index 100  differences exceeded tolerance(+/- 1e-09 ):  1.04995e-09
+	Parameter index 141  differences exceeded tolerance(+/- 1e-09 ):  -1.054e-09
+	Parameter index 145  differences exceeded tolerance(+/- 1e-09 ):  -1.25999e-09
+	Parameter index 169  differences exceeded tolerance(+/- 1e-09 ):  1.403e-09
+	Parameter index 177  differences exceeded tolerance(+/- 1e-09 ):  1.27e-09
+	Parameter index 181  differences exceeded tolerance(+/- 1e-09 ):  1.33997e-09
+	Parameter index 195  differences exceeded tolerance(+/- 1e-09 ):  -1.32991e-09
+	Parameter index 201  differences exceeded tolerance(+/- 1e-09 ):  -1.08002e-09
+	Parameter index 211  differences exceeded tolerance(+/- 1e-09 ):  -1.05001e-09
+	Parameter index 212  differences exceeded tolerance(+/- 1e-09 ):  -1.04001e-09
+	Parameter index 240  differences exceeded tolerance(+/- 1e-09 ):  -1.16e-09
+	Parameter index 260  differences exceeded tolerance(+/- 1e-09 ):  1.123e-09
+	Parameter index 280  differences exceeded tolerance(+/- 1e-09 ):  1.08999e-09
+ 
+ 
+Differences found in force.txt files:
+ 
+	No parameters differ by more than tol ( 1e-07 ).
+	Check file ../diff-force.txt.out for any other (non-parameter) differences.
+ 
+		...Test failed.
+ 
+Running h2o-3bcheby3 test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+ 
+Differences found in force.txt files:
+ 
+	Parameter index -7.625583e-01  differences exceeded tolerance(+/- 1e-07 ):  -1e-07
+	Check file ../diff-force.txt.out for any other (non-parameter) differences.
+ 
+		...Test failed.
+ 
+Running h2o-4bcheby test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+ 
+Differences found in force.txt files:
+ 
+	No parameters differ by more than tol ( 1e-07 ).
+	Check file ../diff-force.txt.out for any other (non-parameter) differences.
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running h2o-4bcheby-small test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+ 
+Differences found in force.txt files:
+ 
+	No parameters differ by more than tol ( 1e-07 ).
+	Check file ../diff-force.txt.out for any other (non-parameter) differences.
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running h2o-invr test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	Parameter index 0  differences exceeded tolerance(+/- 1e-09 ):  2.66999e-09
+	Parameter index 1  differences exceeded tolerance(+/- 1e-09 ):  6.18002e-09
+	Parameter index 2  differences exceeded tolerance(+/- 1e-09 ):  7.13999e-09
+	Parameter index 3  differences exceeded tolerance(+/- 1e-09 ):  9.07994e-09
+	Parameter index 4  differences exceeded tolerance(+/- 1e-09 ):  1.047e-08
+	Parameter index 5  differences exceeded tolerance(+/- 1e-09 ):  4.5701e-09
+	Parameter index 6  differences exceeded tolerance(+/- 1e-09 ):  -5.14001e-09
+	Parameter index 7  differences exceeded tolerance(+/- 1e-09 ):  -8.85007e-09
+	Parameter index 8  differences exceeded tolerance(+/- 1e-09 ):  -5.29997e-09
+	Parameter index 9  differences exceeded tolerance(+/- 1e-09 ):  -1.30999e-09
+ 
+ 
+Differences found in force.txt files:
+ 
+	No parameters differ by more than tol ( 1e-07 ).
+	Check file ../diff-force.txt.out for any other (non-parameter) differences.
+ 
+		...Test failed.
+ 
+Running fitstrs test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	Parameter index 3  differences exceeded tolerance(+/- 1e-09 ):  1.8e-09
+	Parameter index 4  differences exceeded tolerance(+/- 1e-09 ):  1.0079e-09
+ 
+		...Test failed.
+ 
+Running fitstrs3b test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	Parameter index 1  differences exceeded tolerance(+/- 1e-09 ):  -1.2999e-09
+	Parameter index 3  differences exceeded tolerance(+/- 1e-09 ):  1.69985e-09
+	Parameter index 4  differences exceeded tolerance(+/- 1e-09 ):  2.80011e-09
+	Parameter index 5  differences exceeded tolerance(+/- 1e-09 ):  2.62003e-09
+	Parameter index 6  differences exceeded tolerance(+/- 1e-09 ):  1.50021e-09
+ 
+		...Test failed.
+ 
+Running test_4atoms test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	Parameter index 24  differences exceeded tolerance(+/- 1e-09 ):  1.07997e-09
+ 
+		...Test failed.
+ 
+Running test_4atoms.2 test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	Parameter index 0  differences exceeded tolerance(+/- 1e-09 ):  -1.518e-08
+	Parameter index 1  differences exceeded tolerance(+/- 1e-09 ):  3.1343e-08
+	Parameter index 2  differences exceeded tolerance(+/- 1e-09 ):  8.67001e-09
+	Parameter index 3  differences exceeded tolerance(+/- 1e-09 ):  -9.332e-08
+	Parameter index 4  differences exceeded tolerance(+/- 1e-09 ):  1.5093e-07
+	Parameter index 5  differences exceeded tolerance(+/- 1e-09 ):  -1.3638e-07
+	Parameter index 6  differences exceeded tolerance(+/- 1e-09 ):  7.48503e-08
+	Parameter index 7  differences exceeded tolerance(+/- 1e-09 ):  -1.959e-08
+	Parameter index 8  differences exceeded tolerance(+/- 1e-09 ):  -4.23006e-09
+	Parameter index 9  differences exceeded tolerance(+/- 1e-09 ):  5.89e-09
+	Parameter index 10  differences exceeded tolerance(+/- 1e-09 ):  -2.20999e-09
+	Parameter index 12  differences exceeded tolerance(+/- 1e-09 ):  -1.60545e-07
+	Parameter index 13  differences exceeded tolerance(+/- 1e-09 ):  4.6716e-08
+	Parameter index 14  differences exceeded tolerance(+/- 1e-09 ):  -5.364e-08
+	Parameter index 15  differences exceeded tolerance(+/- 1e-09 ):  -7.379e-08
+	Parameter index 16  differences exceeded tolerance(+/- 1e-09 ):  1.4844e-08
+	Parameter index 17  differences exceeded tolerance(+/- 1e-09 ):  -3.927e-08
+	Parameter index 18  differences exceeded tolerance(+/- 1e-09 ):  -3.1104e-08
+	Parameter index 19  differences exceeded tolerance(+/- 1e-09 ):  1.3406e-08
+	Parameter index 20  differences exceeded tolerance(+/- 1e-09 ):  -2.745e-08
+	Parameter index 21  differences exceeded tolerance(+/- 1e-09 ):  5.855e-09
+	Parameter index 22  differences exceeded tolerance(+/- 1e-09 ):  -4.53e-09
+	Parameter index 36  differences exceeded tolerance(+/- 1e-09 ):  2.49929e-09
+	Parameter index 37  differences exceeded tolerance(+/- 1e-09 ):  5.0004e-09
+	Parameter index 38  differences exceeded tolerance(+/- 1e-09 ):  -1.00044e-09
+	Parameter index 39  differences exceeded tolerance(+/- 1e-09 ):  1.10003e-09
+	Parameter index 40  differences exceeded tolerance(+/- 1e-09 ):  1.70076e-09
+	Parameter index 41  differences exceeded tolerance(+/- 1e-09 ):  2.20007e-09
+	Parameter index 46  differences exceeded tolerance(+/- 1e-09 ):  1.20053e-09
+	Parameter index 47  differences exceeded tolerance(+/- 1e-09 ):  -1.69985e-09
+	Parameter index 48  differences exceeded tolerance(+/- 1e-09 ):  3.99996e-09
+	Parameter index 51  differences exceeded tolerance(+/- 1e-09 ):  1.5998e-09
+	Parameter index 52  differences exceeded tolerance(+/- 1e-09 ):  -1.19962e-09
+	Parameter index 54  differences exceeded tolerance(+/- 1e-09 ):  -1.89902e-09
+	Parameter index 62  differences exceeded tolerance(+/- 1e-09 ):  -2.90038e-09
+	Parameter index 63  differences exceeded tolerance(+/- 1e-09 ):  -1.00044e-09
+	Parameter index 64  differences exceeded tolerance(+/- 1e-09 ):  -1.00044e-09
+	Parameter index 68  differences exceeded tolerance(+/- 1e-09 ):  -2.2992e-09
+	Parameter index 69  differences exceeded tolerance(+/- 1e-09 ):  1.70076e-09
+	Parameter index 72  differences exceeded tolerance(+/- 1e-09 ):  1.47998e-09
+	Parameter index 74  differences exceeded tolerance(+/- 1e-09 ):  -2.69984e-09
+	Parameter index 78  differences exceeded tolerance(+/- 1e-09 ):  -2.30011e-09
+	Parameter index 83  differences exceeded tolerance(+/- 1e-09 ):  -3.00042e-09
+	Parameter index 86  differences exceeded tolerance(+/- 1e-09 ):  -1.49009e-09
+	Parameter index 87  differences exceeded tolerance(+/- 1e-09 ):  -1.10049e-09
+	Parameter index 88  differences exceeded tolerance(+/- 1e-09 ):  -1.72003e-09
+	Parameter index 89  differences exceeded tolerance(+/- 1e-09 ):  1.06002e-09
+	Parameter index 91  differences exceeded tolerance(+/- 1e-09 ):  1.10003e-09
+	Parameter index 93  differences exceeded tolerance(+/- 1e-09 ):  -3.37002e-09
+	Parameter index 94  differences exceeded tolerance(+/- 1e-09 ):  -1.26001e-09
+	Parameter index 95  differences exceeded tolerance(+/- 1e-09 ):  -1.79989e-09
+	Parameter index 96  differences exceeded tolerance(+/- 1e-09 ):  2.70006e-09
+	Parameter index 98  differences exceeded tolerance(+/- 1e-09 ):  2.3997e-09
+	Parameter index 101  differences exceeded tolerance(+/- 1e-09 ):  1.40017e-09
+	Parameter index 102  differences exceeded tolerance(+/- 1e-09 ):  -2.3997e-09
+	Parameter index 103  differences exceeded tolerance(+/- 1e-09 ):  -1.00044e-09
+	Parameter index 104  differences exceeded tolerance(+/- 1e-09 ):  1.39971e-09
+	Parameter index 105  differences exceeded tolerance(+/- 1e-09 ):  -1.19962e-09
+	Parameter index 106  differences exceeded tolerance(+/- 1e-09 ):  -2.39993e-09
+	Parameter index 107  differences exceeded tolerance(+/- 1e-09 ):  -1.79989e-09
+	Parameter index 108  differences exceeded tolerance(+/- 1e-09 ):  -1.5998e-09
+	Parameter index 109  differences exceeded tolerance(+/- 1e-09 ):  1e-09
+	Parameter index 110  differences exceeded tolerance(+/- 1e-09 ):  2.99951e-09
+	Parameter index 113  differences exceeded tolerance(+/- 1e-09 ):  1.60026e-09
+	Parameter index 114  differences exceeded tolerance(+/- 1e-09 ):  1.89993e-09
+	Parameter index 115  differences exceeded tolerance(+/- 1e-09 ):  -2.00089e-09
+	Parameter index 118  differences exceeded tolerance(+/- 1e-09 ):  -1.00044e-09
+	Parameter index 119  differences exceeded tolerance(+/- 1e-09 ):  -1.39971e-09
+	Parameter index 120  differences exceeded tolerance(+/- 1e-09 ):  -1.00044e-09
+	Parameter index 122  differences exceeded tolerance(+/- 1e-09 ):  1.50067e-09
+	Parameter index 123  differences exceeded tolerance(+/- 1e-09 ):  -2.00089e-09
+	Parameter index 125  differences exceeded tolerance(+/- 1e-09 ):  1.79989e-09
+	Parameter index 126  differences exceeded tolerance(+/- 1e-09 ):  1.20053e-09
+	Parameter index 127  differences exceeded tolerance(+/- 1e-09 ):  -1.29967e-09
+	Parameter index 129  differences exceeded tolerance(+/- 1e-09 ):  2.60025e-09
+	Parameter index 130  differences exceeded tolerance(+/- 1e-09 ):  3.8001e-09
+	Parameter index 133  differences exceeded tolerance(+/- 1e-09 ):  -4.40014e-09
+	Parameter index 134  differences exceeded tolerance(+/- 1e-09 ):  -2.49997e-09
+	Parameter index 136  differences exceeded tolerance(+/- 1e-09 ):  -3.20051e-09
+	Parameter index 138  differences exceeded tolerance(+/- 1e-09 ):  -1.99998e-09
+	Parameter index 139  differences exceeded tolerance(+/- 1e-09 ):  1.40017e-09
+	Parameter index 140  differences exceeded tolerance(+/- 1e-09 ):  -1.60003e-09
+	Parameter index 141  differences exceeded tolerance(+/- 1e-09 ):  -3.50065e-09
+	Parameter index 142  differences exceeded tolerance(+/- 1e-09 ):  4.50018e-09
+	Parameter index 145  differences exceeded tolerance(+/- 1e-09 ):  2.70029e-09
+	Parameter index 146  differences exceeded tolerance(+/- 1e-09 ):  -1.10049e-09
+	Parameter index 147  differences exceeded tolerance(+/- 1e-09 ):  2.40016e-09
+	Parameter index 148  differences exceeded tolerance(+/- 1e-09 ):  1.20008e-09
+	Parameter index 149  differences exceeded tolerance(+/- 1e-09 ):  -1.5998e-09
+	Parameter index 151  differences exceeded tolerance(+/- 1e-09 ):  -1.09958e-09
+	Parameter index 152  differences exceeded tolerance(+/- 1e-09 ):  1.64999e-09
+	Parameter index 153  differences exceeded tolerance(+/- 1e-09 ):  -1.20008e-09
+	Parameter index 155  differences exceeded tolerance(+/- 1e-09 ):  -1.09958e-09
+	Parameter index 157  differences exceeded tolerance(+/- 1e-09 ):  -1.39971e-09
+	Parameter index 159  differences exceeded tolerance(+/- 1e-09 ):  3.79987e-09
+	Parameter index 160  differences exceeded tolerance(+/- 1e-09 ):  2.69984e-09
+	Parameter index 162  differences exceeded tolerance(+/- 1e-09 ):  2.30011e-09
+	Parameter index 165  differences exceeded tolerance(+/- 1e-09 ):  -1.50021e-09
+	Parameter index 312  differences exceeded tolerance(+/- 1e-09 ):  1.10003e-09
+	Parameter index 434  differences exceeded tolerance(+/- 1e-09 ):  -1.99998e-09
+	Parameter index 456  differences exceeded tolerance(+/- 1e-09 ):  -1.30001e-09
+	Parameter index 606  differences exceeded tolerance(+/- 1e-09 ):  1.20008e-09
+	Parameter index 654  differences exceeded tolerance(+/- 1e-09 ):  1.00005e-09
+	Parameter index 728  differences exceeded tolerance(+/- 1e-09 ):  -1.49998e-09
+	Parameter index 748  differences exceeded tolerance(+/- 1e-09 ):  1.40017e-09
+	Parameter index 750  differences exceeded tolerance(+/- 1e-09 ):  -1.70007e-09
+	Parameter index 855  differences exceeded tolerance(+/- 1e-09 ):  -1.19996e-09
+	Parameter index 857  differences exceeded tolerance(+/- 1e-09 ):  1.20008e-09
+	Parameter index 886  differences exceeded tolerance(+/- 1e-09 ):  1.66006e-09
+	Parameter index 888  differences exceeded tolerance(+/- 1e-09 ):  -1.09003e-09
+	Parameter index 889  differences exceeded tolerance(+/- 1e-09 ):  -1.41e-09
+	Parameter index 900  differences exceeded tolerance(+/- 1e-09 ):  1.39994e-09
+	Parameter index 998  differences exceeded tolerance(+/- 1e-09 ):  -1.16e-09
+	Parameter index 1025  differences exceeded tolerance(+/- 1e-09 ):  -1.15e-09
+	Parameter index 1112  differences exceeded tolerance(+/- 1e-09 ):  1.37999e-09
+	Parameter index 1133  differences exceeded tolerance(+/- 1e-09 ):  1.2999e-09
+	Parameter index 1149  differences exceeded tolerance(+/- 1e-09 ):  -1.10003e-09
+	Parameter index 1179  differences exceeded tolerance(+/- 1e-09 ):  -1.08002e-09
+	Parameter index 1180  differences exceeded tolerance(+/- 1e-09 ):  1.57002e-09
+	Parameter index 1182  differences exceeded tolerance(+/- 1e-09 ):  -1.09e-09
+	Parameter index 1186  differences exceeded tolerance(+/- 1e-09 ):  -1.03e-09
+	Parameter index 1194  differences exceeded tolerance(+/- 1e-09 ):  1.32002e-09
+	Parameter index 1292  differences exceeded tolerance(+/- 1e-09 ):  -1.10003e-09
+ 
+		...Test failed.
+ 
+Running special3b test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	Parameter index 155  differences exceeded tolerance(+/- 1e-09 ):  -1.99907e-09
+	Parameter index 169  differences exceeded tolerance(+/- 1e-09 ):  2.00089e-09
+	Parameter index 212  differences exceeded tolerance(+/- 1e-09 ):  1.80034e-09
+	Parameter index 218  differences exceeded tolerance(+/- 1e-09 ):  -1.043e-09
+ 
+		...Test failed.
+ 
+Running special4b test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running stress-and-ener-4b test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running stress-and-ener-4b2 test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running stress-and-ener-2b1 test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running stress-and-ener-2b2 test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running stress-and-ener-2b3 test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running two-traj-files test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running one-file-three-trajs test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+ 
+Running nonorth2 test...
+LSQ code succeeded
+ 
+Differences found in params.txt-tailed files:
+ 
+	No parameters differ by more than tol ( 1e-09 ).
+ 
+		...Technical test pass - all parameters within tolerances, but other aspects may differ.
+Running Makefile jobs lsq2
+/p/lustre2/laubach2/chimes_lsq-myLLfork/test_suite-lsq
+Running lsq2
+ 
+Running lsq2 test...
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+rm -f current_output/*
+python3 ../../src/chimes_lsq.py --algorithm=svd --eps=1.0e-04 >params.svd.1.0e-04.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.svd.1.0e-04.txt current_output/
+perl ../../contrib/compare/compare.pl current_output/params.svd.1.0e-04.txt correct_output/params.svd.1.0e-04.txt > params.svd.1.0e-04.cmp
+lsq2 failed
+/p/lustre2/laubach2/chimes_lsq-myLLfork/test_suite-lsq
+TEST(S) FAILED FOR SVD SCRIPT
