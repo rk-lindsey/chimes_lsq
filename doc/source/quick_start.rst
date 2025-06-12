@@ -182,7 +182,7 @@ Once complete, the script produces two files, ``params.txt``, the ChIMES paramet
 
 .. code-block::
     
-    grep -F "RMS force error" params.txt
+    grep -F "RMSE" params.txt
     
 and to visualize model peformance, run:
 

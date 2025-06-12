@@ -377,7 +377,7 @@ def main():
     # Setup output
     #############################################
     
-    print ("! RMS force error                = %11.4e" % sqrt(Z/float(nlines)))
+    print ("! RMSE                           = %11.4e" % sqrt(Z/float(nlines)))
     print ("! max abs variable               = %11.4e" %  max(abs(x)))
     print ("! number of fitting vars         = ", nvars)
     print ("! Bayesian Information Criterion = %11.4e" % bic)
