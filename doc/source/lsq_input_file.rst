@@ -116,7 +116,7 @@ Control  variables	Description                                       Value/Optio
 ``FITCOUL`` *       ``true``/``false``: Fit/use charges              See below for details. 
 ``FITSTRS`` *       Whether/how to include stresses                  See below for details. 
 ``FITENER`` *       Whether/how to include energies                  See below for details. 
-``PAIRTYP``         Chebyshev polynomial orders                      Expects ``<O2B> <O3B+1> <O4B+1> -1 1``
+``PAIRTYP``         Chebyshev polynomial orders                      Expects ``<O2B> <O3B+1> <O4B+1> -1 1``. Setting an order to zero is equivalent to excluding the corresponding interaction. For example, ``12 5 0 -1 1`` is equivalent to excluding 4-body interactions. 
 ``CHBTYPE`` *       Pair distance transformation type                See below for details. 
 ``USENEIG``         Neighbor list/distance convention                Auto-select algorithm (``true``) or use small-cell friendly method (``true SMALL``)  
 ``FITPOVR``         ReaxFF linear overcoordination parameters use    Boolean to decide if using ReaxFF linear overcoordination parameters. If this is false and parameters are provided below, those parameters will be subtracted from forces.              
@@ -129,11 +129,11 @@ Note: Asterisks (*) indicate options described in greater detail below
 Topology variables      Description                                 Value/Options/Notes
 ======================  =========================================== ====================================
 ``NATMTYP``             Number of atom types                        Number of unique atom types in trajectory.
-``TYPEIDX``             Atom type index                             Integers, ranging from 1 to ``NATMTYP``. Values form a column below ``# TYPEIDX #``.
+``TYPEIDX``             Atom type index                             Integers, ranging from 1 to ``NATMTYP``. Values form a column below ``# TYPEIDX #``. Make sure the element order in ``fm_setup.in`` matches with the order in the topological file.  
 ``ATM_TYP``             Atom type chemical symbol                   Any string. Chemical symbol for each unique atom type.  Values form a column below ``# ATM_TYP #``.
-``ATMCHRG``             Atom type charge                            If ``FITCOUL`` is false: a partial atomic charge for each atom type. If ``FITCOUL`` is true: a positive or negative sign, to indicate how pair charge signs should be assigned.
+``ATMCHRG``             Atom type charge                            If ``FITCOUL`` is false: a partial atomic charge for each atom type. If ``FITCOUL`` is true: a positive or negative sign, to indicate how pair charge signs should be assigned. If ``ATMCHRG`` is set to zero, ChIMES is fit normally. 
 ``ATMMASS``             Atom type mass                              Floats > 0.
-``EXCLUDE`` *           Interaction to exclude/ignore               Sets of n-body ``ATM_TYP``s. Rarely used.
+``EXCLUDE`` *           Interaction to exclude/ignore               Sets of n-body ``ATM_TYP`` s. Rarely used.
 ``PAIRIDX``             Pair type index                             Ascending integers from 1 to the number of unique atom pair types. Values form a column below ``# PAIRIDX #``.
 ``ATM_TYX``             ``ATM_TYP`` of atom X in pair ``PAIRIDX``   Used to define interaction pair types. Order does not matter.
 ``S_MINIM``             Inner cutoff for pair ``PAIRIDX``           Generally taken as slightly less than smallest distance sampled in DFT-MD trajectory.
@@ -246,7 +246,6 @@ This keyword defined the pair distance transformation method (i.e. for compatibi
 
 ``EXCLUDE``
 """"""""""""
-(Ancillary support)
 
 Interactions corresponding to specific atom triplets can be excluded from the fitting process by including the following lines above the ``NATMTYP`` entry in the input file, e.g. to exclude O-O-O  (comprised of OO, OO, and OO atom pairs) and C-O-O 3-body interactions (comprised of CO, CO, and OO pairs) from the fit:
 
@@ -256,6 +255,7 @@ Interactions corresponding to specific atom triplets can be excluded from the fi
   O O O 
   C O O
   
+Note: under certain circumstances, users might want to exclude 1- and 2-body interactions, see more details on the `ChIMES Active Learning Driver documentation <https://al-driver.readthedocs.io/en/latest/options.html>`_.
 
 ``CHGCONS``
 """"""""""""
@@ -290,7 +290,7 @@ Otherwise, each cutoff can be specified separately through syntax similar to the
   HHOHOH OH OH HH 0.80000 0.80000 1.00000
   HHHHHH HH HH HH 1.00000 1.00000 1.00000
 
-Where the “4” is the number of cutoffs to be listed. Any many-body type for which a line is not provided will use the same ``S_MINIM`` as the 2-body interactions, where constituent pairs determine the cutoff. 
+Where the “4” is the number of cutoffs to be listed. For example, for 3-body interactions, the first column specifies the syntax order of all three pairs. The next three columns specifies the syntax of all three pairs. The last three columns specifies the special cutoff values. Any many-body type for which a line is not provided will use the same ``S_MINIM`` as the 2-body interactions, where constituent pairs determine the cutoff. 
 
 
 ``SPECIAL XB MAXIM``
@@ -312,13 +312,14 @@ Otherwise, each cutoff can be specified separately through syntax similar to the
   OOCOCO CO CO OO 4.0 4.0 6.5
   OOOOOO OO OO OO 6.5 6.5 6.5
 
-Where the “4” is the number of cutoffs to be listed. Any many-body type for which a line is not provided will use the same ``S_MAXIM`` as the 2-body interactions, where constituent pairs determine the cutoff. 
+Where the “4” is the number of cutoffs to be listed. For example, for 3-body interactions, the first column specifies the syntax order of all three pairs. The next three columns specifies the syntax of all three pairs. The last three columns specifies the special cutoff values. Any many-body type for which a line is not provided will use the same ``S_MAXIM`` as the 2-body interactions, where constituent pairs determine the cutoff. 
 
+Note: ChIMES does not currently support many-body cutoffs to be larger than 2-body cutoffs. In addition, this specification is not compatible with LAMMPS.
 
 ``FCUTTYP``
 """"""""""""
 
-This keyword specifies Chebyshev potential cutoff function types and corresponding parameters. ``FCUTTYP`` should be specified on its own line, under ``# PAIRIDX #`` entries. Currently supported options include ``CUBIC`` and ``TERSOFF <float>``, where ``<float>`` gives the cutoff function kick-in distance as: :math:`r_\mathrm{cut} - <\mathrm{float}>r_\mathrm{cut}`, and should take on values between 0 and 1.
+This keyword specifies Chebyshev potential cutoff function types and corresponding parameters. ``FCUTTYP`` should be specified on its own line, under ``# PAIRIDX #`` entries. Currently supported options include ``CUBIC`` and ``TERSOFF <float>``, where ``<float>`` gives the cutoff function kick-in distance as: :math:`r_\mathrm{cut} - <\mathrm{float}>r_\mathrm{cut}`, and should take on values between 0 and 1. For example, ``TERSOFF 0.3`` modified the last ``30%`` of the interaction. 
 
 -----------------
 
