@@ -202,6 +202,25 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {
 	XYZ RAB;
 	double rlen = 0;
+        vector<double> maxpos(3, -1.0e100) ;
+        vector<double> minpos(3, +1.0e100) ;
+        // Determine limits on position of all particles.
+        for(int i=0; i<SYSTEM.ALL_ATOMS ; i++)
+        {
+            if ( SYSTEM.ALL_COORDS[i].X > maxpos[0] )
+                maxpos[0] = SYSTEM.ALL_COORDS[i].X ;
+            if ( SYSTEM.ALL_COORDS[i].Y > maxpos[1] )
+                maxpos[1] =SYSTEM.ALL_COORDS[i].Y ;
+            if ( SYSTEM.ALL_COORDS[i].Z > maxpos[2] )
+                maxpos[2] = SYSTEM.ALL_COORDS[i].Z ;
+        
+            if ( SYSTEM.ALL_COORDS[i].X < minpos[0] )
+                minpos[0] = SYSTEM.ALL_COORDS[i].X ;
+            if ( SYSTEM.ALL_COORDS[i].Y < minpos[1] )
+                minpos[1] = SYSTEM.ALL_COORDS[i].Y ;
+            if ( SYSTEM.ALL_COORDS[i].Z < minpos[2] )
+                minpos[2] = SYSTEM.ALL_COORDS[i].Z ;
+        }
 	
 	if(FIRST_CALL) // Set up the first dimension of the list 
 	{
@@ -233,17 +252,14 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 
 	XYZ_INT NBINS;
 	
-	NBINS.X = ceil((2 * CONTROLS.N_LAYERS+1) * SYSTEM.BOXDIM.EXTENT_X/SEARCH_DIST) + 2;
-	NBINS.Y = ceil((2 * CONTROLS.N_LAYERS+1) * SYSTEM.BOXDIM.EXTENT_Y/SEARCH_DIST) + 2;
-	NBINS.Z = ceil((2 * CONTROLS.N_LAYERS+1) * SYSTEM.BOXDIM.EXTENT_Z/SEARCH_DIST) + 2;	
-	
-	
-	/* RKL - no longer used - 082319
-	
-	NBINS.X = ceil((2 * CONTROLS.N_LAYERS+1) * SYSTEM.BOXDIM.X /SEARCH_DIST) + 2;
-	NBINS.Y = ceil((2 * CONTROLS.N_LAYERS+1) * SYSTEM.BOXDIM.Y /SEARCH_DIST) + 2;
-	NBINS.Z = ceil((2 * CONTROLS.N_LAYERS+1) * SYSTEM.BOXDIM.Z /SEARCH_DIST) + 2;
-	*/
+	NBINS.X = ceil((maxpos[0]-minpos[0]) / SEARCH_DIST ) ;
+	NBINS.Y = ceil((maxpos[1]-minpos[1]) / SEARCH_DIST ) ;
+	NBINS.Z = ceil((maxpos[2]-minpos[2]) / SEARCH_DIST ) ;
+        if ( (NBINS.X < 3) || (NBINS.Y < 3) || (NBINS.Z < 3) )
+        {
+            cout << "Error: require at least 3 neighbor bins in all directions.\n" ;
+            cout << "The number of layers is not correct\n" ;
+        }
 	
 	int TOTAL_BINS = NBINS.X * NBINS.Y * NBINS.Z;
 
@@ -259,16 +275,9 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	for ( int a1 = 0; a1 < SYSTEM.ALL_ATOMS; a1++ ) 
 	{	
 		
-		BIN_IDX.X = floor( (SYSTEM.ALL_COORDS[a1].X - SYSTEM.BOXDIM.xlo + SYSTEM.BOXDIM.EXTENT_X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX.Y = floor( (SYSTEM.ALL_COORDS[a1].Y - SYSTEM.BOXDIM.ylo + SYSTEM.BOXDIM.EXTENT_Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX.Z = floor( (SYSTEM.ALL_COORDS[a1].Z - SYSTEM.BOXDIM.zlo + SYSTEM.BOXDIM.EXTENT_Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-
-		/* RKL - no longer used - 082319
-					
-		BIN_IDX.X = floor( (SYSTEM.ALL_COORDS[a1].X + SYSTEM.BOXDIM.X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX.Y = floor( (SYSTEM.ALL_COORDS[a1].Y + SYSTEM.BOXDIM.Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX.Z = floor( (SYSTEM.ALL_COORDS[a1].Z + SYSTEM.BOXDIM.Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		*/
+		BIN_IDX.X = floor( (SYSTEM.ALL_COORDS[a1].X - minpos[0] ) / SEARCH_DIST ) ;
+		BIN_IDX.Y = floor( (SYSTEM.ALL_COORDS[a1].Y - minpos[1] ) / SEARCH_DIST ) ;
+		BIN_IDX.Z = floor( (SYSTEM.ALL_COORDS[a1].Z - minpos[2] ) / SEARCH_DIST ) ;
 
 		if ( BIN_IDX.X < 0        || BIN_IDX.Y < 0        || BIN_IDX.Z < 0 ||
 			 BIN_IDX.X >= NBINS.X || BIN_IDX.Y >= NBINS.Y || BIN_IDX.Z >= NBINS.Z) 
@@ -311,16 +320,9 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 		
 		XYZ_INT BIN_IDX_a1;
 		
-		BIN_IDX_a1.X = floor( (SYSTEM.ALL_COORDS[a1].X - SYSTEM.BOXDIM.xlo + SYSTEM.BOXDIM.EXTENT_X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX_a1.Y = floor( (SYSTEM.ALL_COORDS[a1].Y - SYSTEM.BOXDIM.ylo + SYSTEM.BOXDIM.EXTENT_Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX_a1.Z = floor( (SYSTEM.ALL_COORDS[a1].Z - SYSTEM.BOXDIM.zlo + SYSTEM.BOXDIM.EXTENT_Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		
-		/* RKL - no longer used - 082319
-
-		BIN_IDX_a1.X = floor( (SYSTEM.ALL_COORDS[a1].X + SYSTEM.BOXDIM.X * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX_a1.Y = floor( (SYSTEM.ALL_COORDS[a1].Y + SYSTEM.BOXDIM.Y * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		BIN_IDX_a1.Z = floor( (SYSTEM.ALL_COORDS[a1].Z + SYSTEM.BOXDIM.Z * CONTROLS.N_LAYERS) / SEARCH_DIST ) + 1;
-		*/
+		BIN_IDX_a1.X = floor( (SYSTEM.ALL_COORDS[a1].X - minpos[0] ) / SEARCH_DIST ) ;
+		BIN_IDX_a1.Y = floor( (SYSTEM.ALL_COORDS[a1].Y - minpos[1] ) / SEARCH_DIST ) ;
+		BIN_IDX_a1.Z = floor( (SYSTEM.ALL_COORDS[a1].Z - minpos[2] ) / SEARCH_DIST ) ;
 		
 		if ( BIN_IDX_a1.X < 1 || BIN_IDX_a1.Y < 1 || BIN_IDX_a1.Z < 1 ) 
 		{

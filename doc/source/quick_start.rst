@@ -175,7 +175,11 @@ We will use principal component analysis (PCA) based on the singular value decom
 .. code-block::
 
     python /path/to/chimes_lsq/build/chimes_lsq.py > params.txt
-    
+
+.. note::
+
+    If running ``chimes_lsq.py`` in parallel (for example on a SLURM HPC and/or with the Active Learning Driver), different SLURM commands can be specified for a job depending on system configuration. The ``--mpiexecmnd`` flag is set to ``srun`` by default but can be changed to an equivalent command, e.g. ``mpirun``.
+
 Note, this step can take a few minutes to run.
 
 Once complete, the script produces two files, ``params.txt``, the ChIMES parameter file, and ``force.txt``, the forces (and optionally stresses and energies) predicted for the training trajectory based on the presently developed ChIMES model. To inspect the RMS error in predicted forces (kcal/mol/Å), run:
