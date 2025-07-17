@@ -8,6 +8,7 @@ import argparse
 
 from numpy        import *
 from numpy.linalg import lstsq
+from numpy.linalg import LinAlgError
 from datetime     import *
 from subprocess   import call
 
@@ -32,7 +33,7 @@ def main():
 
     parser.add_argument("--A",                    type=str,      default='A.txt',         help='A (derivative) matrix') 
     parser.add_argument("--algorithm",            type=str,      default='svd',           help='fitting algorithm')
-    parser.add_argument("--dlasso_dlars_path",    type=str     , default=loc+'/../contrib/dlars/src/',              help='Path to DLARS and/or DLASSO solver')
+    parser.add_argument("--dlasso_dlars_path",    type=str,      default=loc+'/../contrib/dlars/src/', help='Path to DLARS and/or DLASSO solver')
     parser.add_argument("--alpha",                type=float,    default=1.0e-04,         help='Lasso regularization')
     parser.add_argument("--b",                    type=str,      default='b.txt',         help='b (force) file')
     parser.add_argument("--cores",                type=int,      default=8,               help='DLARS number of cores')
@@ -48,7 +49,7 @@ def main():
     parser.add_argument("--test_suite",           type=str2bool, default=False,           help='output for test suite')
     parser.add_argument("--weights",              type=str,      default="None",          help='weight file')
     parser.add_argument("--active",               type=str2bool, default=False,           help='is this a DLARS/DLASSO run from the active learning driver?')
-    parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
+    parser.add_argument("--folds",                type=int,      default=4,               help="Number of CV folds")
     
     # Actually parse the arguments
 
@@ -66,6 +67,7 @@ def main():
     if args.algorithm in sk_algos:
         from sklearn import linear_model
         from sklearn import preprocessing
+        from sklearn.pipeline import make_pipeline
         
     #############################################
     # Read weights, if used
@@ -127,6 +129,7 @@ def main():
             print ("Wrong number of lines in WEIGHTS file")
             exit(1)  
 
+    
     #################################
     # Apply weighting to A and b
     #################################
@@ -176,8 +179,8 @@ def main():
                 U,D,VT = scipy.linalg.svd(weightedA,overwrite_a=True)
                 Dmat   = array((transpose(weightedA)))
             else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
-                 U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
-                 Dmat   = array((transpose(A))) 
+                U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
+                Dmat   = array((transpose(A))) 
         except LinAlgError:
             sys.stderr.write("SVD algorithm failed")
             exit(1)
@@ -212,6 +215,65 @@ def main():
             x = dot(x,dot(transpose(U),weightedb))
         else:
             x = dot(x,dot(transpose(U),b))
+
+    elif args.algorithm == 'fast_svd':
+        
+        # Modify A and b matrix to reduce A matrix dimension during calculation
+        # now 
+        if DO_WEIGHTING:
+            weightedATA = dot(transpose(weightedA), weightedA)
+            weightedATb = dot(transpose(weightedA), weightedb)
+            eps_sq = args.eps * args.eps
+        else:
+            ATA = dot(transpose(A), A)
+            ATb = dot(transpose(A), b)
+            eps_sq = args.eps * args.eps      
+        
+        # Make the scipy call
+        
+        print ('! fast_svd algorithm used')
+        try:
+            if DO_WEIGHTING: # Then it's OK to overwrite weightedA.  It is not used to calculate y (predicted forces) below.
+                U,D,VT = scipy.linalg.svd(weightedATA,overwrite_a=True)
+                Dmat   = array((transpose(weightedATA)))
+            else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
+                U,D,VT = scipy.linalg.svd(ATA,overwrite_a=False)
+                Dmat   = array((transpose(ATA)))
+        except LinAlgError:
+            sys.stderr.write("fast SVD algorithm failed")
+            exit(1)
+            
+        # Process output
+
+        dmax = 0.0
+
+        for i in range(0,len(Dmat)):
+            if ( abs(D[i]) > dmax ) :
+                dmax = abs(D[i])
+
+            for j in range(0,len(Dmat[i])):
+                Dmat[i][j]=0.0
+
+        # Cut off singular values based on fraction of maximum value as per numerical recipes.
+        
+        eps = eps_sq * dmax
+        nvars = 0
+
+        for i in range(0,len(D)):
+            if abs(D[i]) > eps:
+                Dmat[i][i]=1.0/D[i]
+                nvars += 1
+
+        print ("! eps (= args.eps*dmax)          =  %11.4e" % eps)        
+        print ("! SVD regularization factor      = %11.4e" % args.eps)
+
+        x=dot(transpose(VT),Dmat)
+
+        if DO_WEIGHTING:
+            x = dot(x,dot(transpose(U),weightedATb))
+        else:
+            x = dot(x,dot(transpose(U),ATb))
+
 
     elif args.algorithm == 'ridge':
         print ('! ridge regression used')
@@ -253,12 +315,27 @@ def main():
         print ('! LASSO alpha = %11.4e' % args.alpha)
 
         if DO_WEIGHTING:
-            reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000, copy_X=False)
+            reg = make_pipeline(preprocessing.StandardScaler(with_mean=False, with_std=False), 
+                              linear_model.LassoLars(
+                                  alpha=args.alpha,
+                                  fit_intercept=False,
+                                  fit_path=False,
+                                  verbose=True,
+                                  max_iter=100000,
+                                  copy_X=False)
+                              )
             reg.fit(weightedA,weightedb)
         else:
-            reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000)
+            reg = make_pipeline(preprocessing.StandardScaler(with_mean=False, with_std=False), 
+                                linear_model.LassoLars(
+                                    alpha=args.alpha,
+                                    fit_intercept=False,
+                                    fit_path=False,
+                                    verbose=True,
+                                    max_iter=100000)
+                                )
             reg.fit(A,b)
-        x       = reg.coef_[0]
+        x       = reg.steps[1][1].coef_[0] # 1st [1] refers to chain index, 2nd [1] parse out second element in tuple, i.e., linear_model.LassoLars()
         np      = count_nonzero_vars(x)
         nvars   = np
 
@@ -300,7 +377,7 @@ def main():
     # Setup output
     #############################################
     
-    print ("! RMS force error                = %11.4e" % sqrt(Z/float(nlines)))
+    print ("! RMSE                           = %11.4e" % sqrt(Z/float(nlines)))
     print ("! max abs variable               = %11.4e" %  max(abs(x)))
     print ("! number of fitting vars         = ", nvars)
     print ("! Bayesian Information Criterion = %11.4e" % bic)

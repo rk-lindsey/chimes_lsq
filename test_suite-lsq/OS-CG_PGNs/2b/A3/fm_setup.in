@@ -1,0 +1,40 @@
+! Test takes < 1 minute on 1 proc (head node)
+
+####### CONTROL VARIABLES #######
+
+# TRJFILE # 
+        ../../data/A3_2b.xyzf
+# WRAPTRJ # 
+        true
+# NFRAMES # 
+        207
+# NLAYERS # 
+        1
+# FITCOUL # 
+        false
+# FITSTRS #
+        false
+# FITENER # 
+        true   
+# FITPOVR # 
+        false
+# PAIRTYP # 
+        CHEBYSHEV 12 0 0 -1 1
+# CHBTYPE #
+        MORSE
+	
+####### TOPOLOGY VARIABLES #######
+
+# NATMTYP # 
+	1
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+1		1		0		50456
+
+# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #	# S_DELTA #     # MORSE_LAMBDA #        # USEOVRP #     # NIJBINS #     # NIKBINS #     # NJKBINS #		      
+1		1		1		48.0		100.0		0.01	       60.0		       false	       0	       0	       0
+
+# FCUTTYP #
+        TERSOFF 0.75
+
+# ENDFILE #

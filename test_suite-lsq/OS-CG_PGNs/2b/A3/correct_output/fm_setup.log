@@ -1,0 +1,273 @@
+
+Reading input file...
+Will read from file: fm_setup.in
+Input file successfully opened.
+Input file has been rewound.
+Input file contents successfully stored.
+	# TRJFILE #: A3_2b.xyzf
+	# WRAPTRJ #: true
+	# NFRAMES #: 207
+	# NLAYERS #: 1
+	# FITCOUL #: false
+	# FITSTRS #: false
+	# FITENER #: true
+	# PAIRTYP #: CHEBYSHEV ....NOTE: Forces reported in units of kcal/(mol.A), potential energy in kcal/mol.
+	             Will use 2-body order: 12
+	             Will use 3-body order: 0
+	             Will use 4-body order: 0
+	             Will transform Chebyshev pair distances to range -1 to 1
+	# CHBTYPE #: MORSE
+	# NATMTYP #: 1
+	# TYPEIDX #    # ATM_TYP #    # ATMCHRG #    # ATMMASS #
+ 	1              1              0              50456          
+
+	The following unique pair types have been identified:
+		0  1 1
+	# PAIRIDX #     # ATM_TY1 #     # ATM_TY1 #     # S_MINIM #     # S_MAXIM #     # MORSE_LAMBDA #
+	0               1               1               48              100             60              
+		Atom type idxs:  0 0 Pair name:   11 Explicit pair index:    0 Unique pair index:    0
+# FCUTTYP #: TERSOFF 0.75      ... for all Chebyshev interactions
+WARNING: Coordinate wrapping not supported for ghost atom use. Turning option off
+...input file read successful: 
+
+The number of two-body non-coulomb parameters is: 12
+
+Succefully opened the trajectory file...
+Setting up the matrices for A, Coulomb forces, and overbonding...
+	Reporting outcome of layering for first frame ONLY: 
+	Real atoms:                   2
+	Total atoms (ghost):          54
+	cell vectors (a)            1000 0 0
+	cell vectors (b)            0 1000 0
+	cell vectors (c)            0 0 1000
+	cell volume (A^3)           1e+09
+	Extent (x,y,z)              1000 1000 1000
+	Layers:                     1
+	Effective cell vectors (a): 3000 0 0
+	Effective cell vectors (a): 0 3000 0
+	Effective cell vectors (a): 0 0 3000
+...matrix setup complete: 
+
+...Populating the matrices for A, Coulomb forces, and overbonding...
+
+	Processing frame: 1     of: 207
+	Processing frame: 2     of: 207
+	Processing frame: 3     of: 207
+	Processing frame: 4     of: 207
+	Processing frame: 5     of: 207
+	Processing frame: 6     of: 207
+	Processing frame: 7     of: 207
+	Processing frame: 8     of: 207
+	Processing frame: 9     of: 207
+	Processing frame: 10    of: 207
+	Processing frame: 11    of: 207
+	Processing frame: 12    of: 207
+	Processing frame: 13    of: 207
+	Processing frame: 14    of: 207
+	Processing frame: 15    of: 207
+	Processing frame: 16    of: 207
+	Processing frame: 17    of: 207
+	Processing frame: 18    of: 207
+	Processing frame: 19    of: 207
+	Processing frame: 20    of: 207
+	Processing frame: 21    of: 207
+	Processing frame: 22    of: 207
+	Processing frame: 23    of: 207
+	Processing frame: 24    of: 207
+	Processing frame: 25    of: 207
+	Processing frame: 26    of: 207
+	Processing frame: 27    of: 207
+	Processing frame: 28    of: 207
+	Processing frame: 29    of: 207
+	Processing frame: 30    of: 207
+	Processing frame: 31    of: 207
+	Processing frame: 32    of: 207
+	Processing frame: 33    of: 207
+	Processing frame: 34    of: 207
+	Processing frame: 35    of: 207
+	Processing frame: 36    of: 207
+	Processing frame: 37    of: 207
+	Processing frame: 38    of: 207
+	Processing frame: 39    of: 207
+	Processing frame: 40    of: 207
+	Processing frame: 41    of: 207
+	Processing frame: 42    of: 207
+	Processing frame: 43    of: 207
+	Processing frame: 44    of: 207
+	Processing frame: 45    of: 207
+	Processing frame: 46    of: 207
+	Processing frame: 47    of: 207
+	Processing frame: 48    of: 207
+	Processing frame: 49    of: 207
+	Processing frame: 50    of: 207
+	Processing frame: 51    of: 207
+	Processing frame: 52    of: 207
+	Processing frame: 53    of: 207
+	Processing frame: 54    of: 207
+	Processing frame: 55    of: 207
+	Processing frame: 56    of: 207
+	Processing frame: 57    of: 207
+	Processing frame: 58    of: 207
+	Processing frame: 59    of: 207
+	Processing frame: 60    of: 207
+	Processing frame: 61    of: 207
+	Processing frame: 62    of: 207
+	Processing frame: 63    of: 207
+	Processing frame: 64    of: 207
+	Processing frame: 65    of: 207
+	Processing frame: 66    of: 207
+	Processing frame: 67    of: 207
+	Processing frame: 68    of: 207
+	Processing frame: 69    of: 207
+	Processing frame: 70    of: 207
+	Processing frame: 71    of: 207
+	Processing frame: 72    of: 207
+	Processing frame: 73    of: 207
+	Processing frame: 74    of: 207
+	Processing frame: 75    of: 207
+	Processing frame: 76    of: 207
+	Processing frame: 77    of: 207
+	Processing frame: 78    of: 207
+	Processing frame: 79    of: 207
+	Processing frame: 80    of: 207
+	Processing frame: 81    of: 207
+	Processing frame: 82    of: 207
+	Processing frame: 83    of: 207
+	Processing frame: 84    of: 207
+	Processing frame: 85    of: 207
+	Processing frame: 86    of: 207
+	Processing frame: 87    of: 207
+	Processing frame: 88    of: 207
+	Processing frame: 89    of: 207
+	Processing frame: 90    of: 207
+	Processing frame: 91    of: 207
+	Processing frame: 92    of: 207
+	Processing frame: 93    of: 207
+	Processing frame: 94    of: 207
+	Processing frame: 95    of: 207
+	Processing frame: 96    of: 207
+	Processing frame: 97    of: 207
+	Processing frame: 98    of: 207
+	Processing frame: 99    of: 207
+	Processing frame: 100   of: 207
+	Processing frame: 101   of: 207
+	Processing frame: 102   of: 207
+	Processing frame: 103   of: 207
+	Processing frame: 104   of: 207
+	Processing frame: 105   of: 207
+	Processing frame: 106   of: 207
+	Processing frame: 107   of: 207
+	Processing frame: 108   of: 207
+	Processing frame: 109   of: 207
+	Processing frame: 110   of: 207
+	Processing frame: 111   of: 207
+	Processing frame: 112   of: 207
+	Processing frame: 113   of: 207
+	Processing frame: 114   of: 207
+	Processing frame: 115   of: 207
+	Processing frame: 116   of: 207
+	Processing frame: 117   of: 207
+	Processing frame: 118   of: 207
+	Processing frame: 119   of: 207
+	Processing frame: 120   of: 207
+	Processing frame: 121   of: 207
+	Processing frame: 122   of: 207
+	Processing frame: 123   of: 207
+	Processing frame: 124   of: 207
+	Processing frame: 125   of: 207
+	Processing frame: 126   of: 207
+	Processing frame: 127   of: 207
+	Processing frame: 128   of: 207
+	Processing frame: 129   of: 207
+	Processing frame: 130   of: 207
+	Processing frame: 131   of: 207
+	Processing frame: 132   of: 207
+	Processing frame: 133   of: 207
+	Processing frame: 134   of: 207
+	Processing frame: 135   of: 207
+	Processing frame: 136   of: 207
+	Processing frame: 137   of: 207
+	Processing frame: 138   of: 207
+	Processing frame: 139   of: 207
+	Processing frame: 140   of: 207
+	Processing frame: 141   of: 207
+	Processing frame: 142   of: 207
+	Processing frame: 143   of: 207
+	Processing frame: 144   of: 207
+	Processing frame: 145   of: 207
+	Processing frame: 146   of: 207
+	Processing frame: 147   of: 207
+	Processing frame: 148   of: 207
+	Processing frame: 149   of: 207
+	Processing frame: 150   of: 207
+	Processing frame: 151   of: 207
+	Processing frame: 152   of: 207
+	Processing frame: 153   of: 207
+	Processing frame: 154   of: 207
+	Processing frame: 155   of: 207
+	Processing frame: 156   of: 207
+	Processing frame: 157   of: 207
+	Processing frame: 158   of: 207
+	Processing frame: 159   of: 207
+	Processing frame: 160   of: 207
+	Processing frame: 161   of: 207
+	Processing frame: 162   of: 207
+	Processing frame: 163   of: 207
+	Processing frame: 164   of: 207
+	Processing frame: 165   of: 207
+	Processing frame: 166   of: 207
+	Processing frame: 167   of: 207
+	Processing frame: 168   of: 207
+	Processing frame: 169   of: 207
+	Processing frame: 170   of: 207
+	Processing frame: 171   of: 207
+	Processing frame: 172   of: 207
+	Processing frame: 173   of: 207
+	Processing frame: 174   of: 207
+	Processing frame: 175   of: 207
+	Processing frame: 176   of: 207
+	Processing frame: 177   of: 207
+	Processing frame: 178   of: 207
+	Processing frame: 179   of: 207
+	Processing frame: 180   of: 207
+	Processing frame: 181   of: 207
+	Processing frame: 182   of: 207
+	Processing frame: 183   of: 207
+	Processing frame: 184   of: 207
+	Processing frame: 185   of: 207
+	Processing frame: 186   of: 207
+	Processing frame: 187   of: 207
+	Processing frame: 188   of: 207
+	Processing frame: 189   of: 207
+	Processing frame: 190   of: 207
+	Processing frame: 191   of: 207
+	Processing frame: 192   of: 207
+	Processing frame: 193   of: 207
+	Processing frame: 194   of: 207
+	Processing frame: 195   of: 207
+	Processing frame: 196   of: 207
+	Processing frame: 197   of: 207
+	Processing frame: 198   of: 207
+	Processing frame: 199   of: 207
+	Processing frame: 200   of: 207
+	Processing frame: 201   of: 207
+	Processing frame: 202   of: 207
+	Processing frame: 203   of: 207
+	Processing frame: 204   of: 207
+	Processing frame: 205   of: 207
+	Processing frame: 206   of: 207
+	Processing frame: 207   of: 207
+...matrix population complete: 
+
+Printing matrices...
+	...A matrix length (forces): 1242
+
+Per-atom type energies will be provided at the end of the parameter file.
+Values will correspond to the following atom types, in order: 
+	1 2
+	Minimum distances between atoms: (Angstr.)
+		0	1 1	48.51123000
+	Total number of configurations contributing to each pair type:
+		0	1 1 206
+...matrix printing complete: 
+

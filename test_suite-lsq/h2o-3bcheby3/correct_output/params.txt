@@ -5,7 +5,7 @@
 ! svd algorithm used
 ! eps (= args.eps*dmax)          =   6.4809e-02
 ! SVD regularization factor      =  1.0000e-05
-! RMS force error                =  6.9444e+00
+! RMSE                           =  6.9444e+00
 ! max abs variable               =  6.5572e+02
 ! number of fitting vars         =  210
 ! Bayesian Information Criterion =  5.6711e+04
