@@ -24,7 +24,14 @@ Follow instructions on the :ref:`Getting Started <page-getting_started>` page to
 Step 2: Inspect the input
 *********************************************    
 
-Aside from the ``chimes_md`` code, a minimum of three input files are needed to run the MD code: A trajectory file, parameters file and a ``chimes_md`` configuration file (``input.xyz``, ``params.cheby.txt`` and ``run_md.in`` in this example, respectively). By running ``head input.xyz`` in the tutorial folder, one can see that the trajectory file is in an extended xyz format, where for a given frame, the first line provides the number of atoms, the next line, the three box lengths (Å), and the remaining lines provide an atom type, *x*, *y*, and *z* coordinates (Å), and the corresponding *x*, *y*, and *z* components of the forces acting on those atoms, in Hartree (H) per Bohr (B). Frame information is repeated in this format :math:`n_{\mathrm{frames}}` times. 
+Aside from the ``chimes_md`` code, a minimum of three input files are needed to run the MD code: A trajectory file, parameters file and a ``chimes_md`` configuration file (``input.xyz``, ``params.cheby.txt`` and ``run_md.in`` in this example, respectively). 
+By running ``head input.xyz`` in the tutorial folder, one can see that the trajectory file is in an extended xyz format. For a given frame:
+ - The first line provides the number of atoms
+ - The second line, provides information about the simulation cell. This line specifies the three box lengths in (Å), with box dimensions set in one of two ways: 
+  - For orthogonal frames: use the keyword ``ORTHO`` followed by three box lengths ``<x> <y> <z>``.
+  - For triclinic frames: use the keyword ``NON_ORTHO`` followed by the nine cell parameters ``<ax> <ay> <az> <bx> <by> <bz> <cx> <cy> <cz>``.
+ - The remaining lines in each frame provide, for each atom: the atom type, *x*, *y*, and *z* coordinates (in Å), and the corresponding *x*, *y*, and *z* components of the forces acting on each atom (in Hartree (H) per Bohr (B).
+Frame information is repeated in this format :math:`n_{\mathrm{frames}}` times. 
 
 .. note::
 
@@ -52,14 +59,10 @@ Next, open the configuration file, ``run_md.in``, in your text editor of choice.
     12357
     # TEMPERA # ! In K
     2000.0
-    # CMPRFRC # ! Compare computed forces against a set of input forces? ...If true, provide name of the file containing the forces for comparison
-    false
     # TIMESTP # ! In fs
        0.025
     # N_MDSTP # ! Total number of MD steps
      16000
-    # NLAYERS # ! x,y, and z supercells.. small unit cell should have >= 1
-      2
     # USENEIG # 
      true 
     # PRMFILE # ! Parameter file (i.e. params.txt)
@@ -77,28 +80,17 @@ Next, open the configuration file, ``run_md.in``, in your text editor of choice.
       READ
     # CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>)
       NVT-MTK HOOVER 50
-    !# CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>)
-    !      NVE
-    # PRSCALC # (options are ANALYTICAL or NUMERICAL)
-      ANALYTICAL
     ###################################
     ####      OUTPUT  CONTROL      ####
     ################################### 
      # WRPCRDS # 
       false 
-    # FRQDFTB # ! Frequency to output the DFTB gen file can also be called FRQTRAJ
+    # FRQTRAJ # ! Frequency to output the traj
       20
     # FRQENER # ! Frequency to output energies
       10 
-    # PRNTFRC # ! Print computed forces? Forces are printed to force_out.txt 
-      false
+    # ENDFILE #     
 
-    # ENDFILE #
-      
-.. Note::
-
-    * The box dimensions are read from the comment line of the xyz.
-    * The box dimsnsion can be int two different format; Non-orthogonal which is denpted as ``NON_ORTHO <xx> <xy> <xz> <yx> <yy> <yz> <zx> <zy> <zz>``, orthogonal which is ``<x> <y> <z>``. The default is orthogonal.
     
 Step 3: Run the MD simulation
 *********************************************   
@@ -106,15 +98,14 @@ Step 3: Run the MD simulation
 ChIMES MD can be ran parallel or serial. To run the MD simulation in serial, run the following command:
 .. code-block::
     
-    /path/to/chimes_lsq/build/chimes_md-serial run_md.in > run_md.log
+    /path/to/chimes_lsq/build/chimes_md-serial run_md.in > run_md.out
 
 To run the MD simulation in parallel, run the following command:
 .. code-block::
     
-    /path/to/chimes_lsq/build/chimes_md run_md.in > run_md.log
+    /path/to/chimes_lsq/build/chimes_md run_md.in > run_md.out
 
-This will generate run_md.out, traj_bad_r.lt.rin.xyz, traj_bad_r.lt.rin+dp.xyz, traj_bad_r.ge.rin+dp_dftbfrq.xyz, traj.xyz, run_md.out, restart.xyzv ,restart.bak ,output.xyz , and md_statistics.out, but the most important files are ``traj.xyz`` , ``run_md.out`` and ``md_statistics.out``.
-``traj.xyz`` is printed based on  ``FRQDFTB`` aka ``FRQTRAJ`` which is the trajectory output frequency, ``run_md.out`` is the main output of MD simulation, and ``md_statistics.out`` is the statistics of the MD simulation printed every ``FRQENER``.
+This will generate run_md.out, traj_bad_r.lt.rin.xyz, traj_bad_r.lt.rin+dp.xyz, traj_bad_r.ge.rin+dp_dftbfrq.xyz, traj.xyz, run_md.out, restart.xyzv ,restart.bak ,output.xyz , and md_statistics.out. Of these files, the most important are ``traj.xyz`` , ``run_md.out`` and ``md_statistics.out``, which provide the simulation trajectory, running information on the simulation, and a running log of simulation properties, respectively. The ``traj.xyz`` and ``md_statistics.out`` are outputed every ``FRQTRAJ`` and ``FRQENER`` simulation steps, respectively.
 
 .. tip::
 
