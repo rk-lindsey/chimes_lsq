@@ -28,7 +28,7 @@ Aside from the ``chimes_md`` code, a minimum of three input files are needed to 
 By running ``head input.xyz`` in the tutorial folder, one can see that the trajectory file is in an extended xyz format. For a given frame:
  - The first line provides the number of atoms
  - The second line, provides information about the simulation cell. This line specifies the three box lengths in (Å), with box dimensions set in one of two ways: 
-  - For orthogonal frames: use the keyword ``ORTHO`` followed by three box lengths ``<x> <y> <z>``.
+  - For orthogonal frames: use the keyword ``ORTHO`` (optional) followed by three box lengths ``<x> <y> <z>``.
   - For triclinic frames: use the keyword ``NON_ORTHO`` followed by the nine cell parameters ``<ax> <ay> <az> <bx> <by> <bz> <cx> <cy> <cz>``.
  - The remaining lines in each frame provide, for each atom: the atom type, *x*, *y*, and *z* coordinates (in Å), and the corresponding *x*, *y*, and *z* components of the forces acting on each atom (in Hartree (H) per Bohr (B).
 Frame information is repeated in this format :math:`n_{\mathrm{frames}}` times. 
@@ -53,8 +53,7 @@ Next, open the configuration file, ``run_md.in``, in your text editor of choice.
     ###################################
     #### GENERAL CONTROL VARIABLES ####
     ###################################
- 
- 
+
     # RNDSEED # ! Seed. If not specified, default value 123457 is used
     12357
     # TEMPERA # ! In K
@@ -80,9 +79,11 @@ Next, open the configuration file, ``run_md.in``, in your text editor of choice.
       READ
     # CONSRNT # (options are HOOVER <hoover time> or VELSCALE <scale freq>)
       NVT-MTK HOOVER 50
+
     ###################################
     ####      OUTPUT  CONTROL      ####
     ################################### 
+
      # WRPCRDS # 
       false 
     # FRQTRAJ # ! Frequency to output the traj
