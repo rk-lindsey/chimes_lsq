@@ -28,4 +28,4 @@ Resolves #???
 ## Checklist:
 
 - [ ] I have ran the chimes-md and chimes-lsq test suites and attached the log files in this PR.   
-- [ ] I have added my name to the [**List of Contributors**](https://github.com/LindseyLab-umich/chimes_lsq-LLfork/blob/main/doc/source/contributing.rst).
+- [ ] My name is on the [contributing list](https://github.com/rk-lindsey/chimes_lsq/blob/main/doc/source/contributing.rst).
