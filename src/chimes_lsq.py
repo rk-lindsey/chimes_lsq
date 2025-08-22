@@ -8,8 +8,10 @@ import argparse
 
 from numpy        import *
 from numpy.linalg import lstsq
+from numpy.linalg import LinAlgError
 from datetime     import *
 from subprocess   import call
+
 
 
 #############################################
@@ -31,7 +33,7 @@ def main():
 
     parser.add_argument("--A",                    type=str,      default='A.txt',         help='A (derivative) matrix') 
     parser.add_argument("--algorithm",            type=str,      default='svd',           help='fitting algorithm')
-    parser.add_argument("--dlasso_dlars_path",    type=str     , default=loc+'/../contrib/dlars/src/',              help='Path to DLARS and/or DLASSO solver')
+    parser.add_argument("--dlasso_dlars_path",    type=str,      default=loc+'/../contrib/dlars/src/', help='Path to DLARS and/or DLASSO solver')
     parser.add_argument("--alpha",                type=float,    default=1.0e-04,         help='Lasso regularization')
     parser.add_argument("--b",                    type=str,      default='b.txt',         help='b (force) file')
     parser.add_argument("--cores",                type=int,      default=8,               help='DLARS number of cores')
@@ -39,6 +41,7 @@ def main():
     parser.add_argument("--header",               type=str,      default='params.header', help='parameter file header')
     parser.add_argument("--map",                  type=str,      default='ff_groups.map', help='parameter file map')
     parser.add_argument("--nodes",                type=int,      default=1,               help='DLARS number of nodes')
+    parser.add_argument("--mpistyle",             type=str,      default="srun",          help='Command used to run an MPI job, e.g. srun, ibrun, mpriun, etc')
     parser.add_argument("--normalize",            type=str2bool, default=False,           help='Normalize DLARS calculation')
     parser.add_argument("--read_output",          type=str2bool, default=False,           help='Read output from previous DLARS run')
     parser.add_argument("--restart_dlasso_dlars", type=str,      default="",              help='Determines whether dlasso or dlars job will be restarted. Argument is the restart file name ')
@@ -46,7 +49,7 @@ def main():
     parser.add_argument("--test_suite",           type=str2bool, default=False,           help='output for test suite')
     parser.add_argument("--weights",              type=str,      default="None",          help='weight file')
     parser.add_argument("--active",               type=str2bool, default=False,           help='is this a DLARS/DLASSO run from the active learning driver?')
-    parser.add_argument("--folds",type=int, default=4,help="Number of CV folds")
+    parser.add_argument("--folds",                type=int,      default=4,               help="Number of CV folds")
     
     # Actually parse the arguments
 
@@ -64,6 +67,7 @@ def main():
     if args.algorithm in sk_algos:
         from sklearn import linear_model
         from sklearn import preprocessing
+        from sklearn.pipeline import make_pipeline
         
     #############################################
     # Read weights, if used
@@ -125,6 +129,7 @@ def main():
             print ("Wrong number of lines in WEIGHTS file")
             exit(1)  
 
+    
     #################################
     # Apply weighting to A and b
     #################################
@@ -175,7 +180,7 @@ def main():
                 Dmat   = array((transpose(weightedA)))
             else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
                 U,D,VT = scipy.linalg.svd(A,overwrite_a=False)
-                Dmat   = array((transpose(A)))  
+                Dmat   = array((transpose(A))) 
         except LinAlgError:
             sys.stderr.write("SVD algorithm failed")
             exit(1)
@@ -210,6 +215,65 @@ def main():
             x = dot(x,dot(transpose(U),weightedb))
         else:
             x = dot(x,dot(transpose(U),b))
+
+    elif args.algorithm == 'fast_svd':
+        
+        # Modify A and b matrix to reduce A matrix dimension during calculation
+        # now 
+        if DO_WEIGHTING:
+            weightedATA = dot(transpose(weightedA), weightedA)
+            weightedATb = dot(transpose(weightedA), weightedb)
+            eps_sq = args.eps * args.eps
+        else:
+            ATA = dot(transpose(A), A)
+            ATb = dot(transpose(A), b)
+            eps_sq = args.eps * args.eps      
+        
+        # Make the scipy call
+        
+        print ('! fast_svd algorithm used')
+        try:
+            if DO_WEIGHTING: # Then it's OK to overwrite weightedA.  It is not used to calculate y (predicted forces) below.
+                U,D,VT = scipy.linalg.svd(weightedATA,overwrite_a=True)
+                Dmat   = array((transpose(weightedATA)))
+            else:            #  Then do not overwrite A.  It is used to calculate y (predicted forces) below.
+                U,D,VT = scipy.linalg.svd(ATA,overwrite_a=False)
+                Dmat   = array((transpose(ATA)))
+        except LinAlgError:
+            sys.stderr.write("fast SVD algorithm failed")
+            exit(1)
+            
+        # Process output
+
+        dmax = 0.0
+
+        for i in range(0,len(Dmat)):
+            if ( abs(D[i]) > dmax ) :
+                dmax = abs(D[i])
+
+            for j in range(0,len(Dmat[i])):
+                Dmat[i][j]=0.0
+
+        # Cut off singular values based on fraction of maximum value as per numerical recipes.
+        
+        eps = eps_sq * dmax
+        nvars = 0
+
+        for i in range(0,len(D)):
+            if abs(D[i]) > eps:
+                Dmat[i][i]=1.0/D[i]
+                nvars += 1
+
+        print ("! eps (= args.eps*dmax)          =  %11.4e" % eps)        
+        print ("! SVD regularization factor      = %11.4e" % args.eps)
+
+        x=dot(transpose(VT),Dmat)
+
+        if DO_WEIGHTING:
+            x = dot(x,dot(transpose(U),weightedATb))
+        else:
+            x = dot(x,dot(transpose(U),ATb))
+
 
     elif args.algorithm == 'ridge':
         print ('! ridge regression used')
@@ -251,12 +315,27 @@ def main():
         print ('! LASSO alpha = %11.4e' % args.alpha)
 
         if DO_WEIGHTING:
-            reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000, copy_X=False)
+            reg = make_pipeline(preprocessing.StandardScaler(with_mean=False, with_std=False), 
+                              linear_model.LassoLars(
+                                  alpha=args.alpha,
+                                  fit_intercept=False,
+                                  fit_path=False,
+                                  verbose=True,
+                                  max_iter=100000,
+                                  copy_X=False)
+                              )
             reg.fit(weightedA,weightedb)
         else:
-            reg = linear_model.LassoLars(alpha=args.alpha,fit_intercept=False,fit_path=False,verbose=True,max_iter=100000)
+            reg = make_pipeline(preprocessing.StandardScaler(with_mean=False, with_std=False), 
+                                linear_model.LassoLars(
+                                    alpha=args.alpha,
+                                    fit_intercept=False,
+                                    fit_path=False,
+                                    verbose=True,
+                                    max_iter=100000)
+                                )
             reg.fit(A,b)
-        x       = reg.coef_[0]
+        x       = reg.steps[1][1].coef_[0] # 1st [1] refers to chain index, 2nd [1] parse out second element in tuple, i.e., linear_model.LassoLars()
         np      = count_nonzero_vars(x)
         nvars   = np
 
@@ -264,7 +343,7 @@ def main():
         
         # Make the DLARS or DLASSO call
 
-        x,y = fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_files, args.algorithm, args.read_output, args.weights, args.normalize, args.A , args.b ,args.restart_dlasso_dlars)
+        x,y = fit_dlars(dlasso_dlars_path, args.nodes, args.cores, args.alpha, args.split_files, args.algorithm, args.read_output, args.weights, args.normalize, args.A , args.b ,args.restart_dlasso_dlars, args.mpistyle)
         np = count_nonzero_vars(x)
         nvars = np
         
@@ -298,7 +377,7 @@ def main():
     # Setup output
     #############################################
     
-    print ("! RMS force error                = %11.4e" % sqrt(Z/float(nlines)))
+    print ("! RMSE                           = %11.4e" % sqrt(Z/float(nlines)))
     print ("! max abs variable               = %11.4e" %  max(abs(x)))
     print ("! number of fitting vars         = ", nvars)
     print ("! Bayesian Information Criterion = %11.4e" % bic)
@@ -315,6 +394,7 @@ def main():
     BREAK_COND = False
     
     EXCL_2B = []
+    EXCL_1B = []
 
     # Figure out whether we have triplets and/or quadruplets
     # Find the ATOM_TRIPS_LINE and ATOM_QUADS_LINE
@@ -329,9 +409,20 @@ def main():
         print (hf[i].rstrip('\n'))
         TEMP = hf[i].split()
         
-        if "EXCL_2B" in hf[i]:
-            line = line.split()
-            EXCL_2B = line[1:]
+        if "EXCLD2B" in hf[i]:
+            line = hf[i].split()
+            if (len(line) == 2) and (line[1] == "false"):
+            	EXCL_2B = []
+            else:
+            	EXCL_2B = list(map(int, line[1:]))	
+	    
+	    
+        if "EXCLD1B" in hf[i]:
+            line = hf[i].split()
+            if (len(line) == 2) and (line[1] == "false"):
+            	EXCL_1B = []
+            else:
+            	EXCL_1B = list(map(int, line[1:]))	    
 
         if len(TEMP)>3:
             if (TEMP[2] == "TRIPLETS:"):
@@ -352,7 +443,7 @@ def main():
 
     # 1. Figure out what potential type we have
 
-    POTENTIAL = hf[5].split()
+    POTENTIAL = hf[7].split()
     POTENTIAL = POTENTIAL[1]
 
     print ("")
@@ -366,7 +457,8 @@ def main():
 
     if POTENTIAL == "CHEBYSHEV":
         
-        TMP = hf[5].split()
+        TMP = hf[7].split()
+
 
         if len(TMP) >= 4:
             if len(TMP) >= 5:
@@ -380,7 +472,7 @@ def main():
     FIT_COUL = hf[1].split()
     FIT_COUL = FIT_COUL[1]
 
-    ATOM_TYPES_LINE  = 7
+    ATOM_TYPES_LINE  = 9
     TOTAL_ATOM_TYPES = hf[ATOM_TYPES_LINE].split()
     TOTAL_ATOM_TYPES = int(TOTAL_ATOM_TYPES[2])
     ATOM_PAIRS_LINE  = ATOM_TYPES_LINE+2+TOTAL_ATOM_TYPES+2
@@ -389,7 +481,7 @@ def main():
     
     # Remove excluded 2b interactions from accounting
     
-    TOTAL_PAIRS -= len(EXCL_2B) 
+    # TOTAL_PAIRS -= len(EXCL_2B) 
 
     A1 = ""
     A2 = ""
@@ -442,6 +534,8 @@ def main():
                 for i in range(0,int(TOTL)):
                     ADD_LINES += 1
 
+    effective_pair = 0
+
     for i in range(0,TOTAL_PAIRS):
 
         A1 = hf[ATOM_PAIRS_LINE+2+i+1].split()
@@ -450,11 +544,19 @@ def main():
 
         #print ("PAIRTYPE PARAMS: " + `i` + " " + A1 + " " + A2 + "\n")
         print ("PAIRTYPE PARAMS: " + str(i) + " " + A1 + " " + A2 + "\n")
-
-        for j in range(0, int(SNUM_2B)):
-            print ("%3d %21.13e" % (j,x[i*SNUM_2B+j]))
+	
+        if i in EXCL_2B:
+            for j in range(0, int(SNUM_2B)):
+                print ("%3d %21.13e" % (j,0.0))	
+        else:
+            for j in range(0, int(SNUM_2B)):
+                print ("%3d %21.13e" % (j,x[effective_pair*SNUM_2B+j]))
+            effective_pair += 1    
 
         if FIT_COUL == "true":
+            if len(EXCL_2B) > 0:
+                print("ERROR: cannot use hierarchical learning with charge fitting.")
+                exit(0)		
             print ("q_%s x q_%s %21.13e" % (A1,A2,x[TOTAL_PAIRS*SNUM_2B + SNUM_3B + SNUM_4B + i]))
             COUNTED_COUL_PARAMS += 1
 
@@ -508,7 +610,7 @@ def main():
                     LINE       = hf[ATOM_TRIPS_LINE+2+ADD_LINES].rstrip('\n')
                     LINE_SPLIT = LINE.split()
 
-                    print ("%s %21.13e" % (LINE, x[TOTAL_PAIRS*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]))
+                    print ("%s %21.13e" % (LINE, x[effective_pair*SNUM_2B + TRIP_PAR_IDX+int(LINE_SPLIT[5])]))
 
                 TRIP_PAR_IDX += int(UNIQ)
                 COUNTED_TRIP_PARAMS += int(UNIQ)
@@ -578,7 +680,7 @@ def main():
                     UNIQ_QUAD_IDX = int(LINE_SPLIT[8])
                     #print 'UNIQ_QUAD_IDX', str(UNIQ_QUAD_IDX)
 
-                    print ("%s %21.13e" % (LINE,x[TOTAL_PAIRS*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]))
+                    print ("%s %21.13e" % (LINE,x[effective_pair*SNUM_2B + COUNTED_TRIP_PARAMS + QUAD_PAR_IDX + UNIQ_QUAD_IDX]))
 
                 QUAD_PAR_IDX += int(UNIQ)
                 COUNTED_QUAD_PARAMS += int(UNIQ)
@@ -598,27 +700,44 @@ def main():
 
     print ("")
 
-    total_params = TOTAL_PAIRS * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS 
+    total_params = effective_pair * SNUM_2B + COUNTED_TRIP_PARAMS + COUNTED_QUAD_PARAMS + COUNTED_COUL_PARAMS 
+    
+    N_ENER_OFFSETS = int(hf[9].split()[2]) - len(EXCL_1B)
+    N_ATOM_TYPES   = int(hf[9].split()[2])
 
-    N_ENER_OFFSETS = int(hf[7].split()[2])
+
+
 
 ## Parameter count could be off by natom_types, if energies are included in the fit
     if (total_params != len(x)) and (len(x) != (total_params+N_ENER_OFFSETS)) :
         sys.stderr.write( "Error in counting parameters\n") 
+        sys.stderr.write("total_params " + str(total_params) + "\n")
+        sys.stderr.write("N_ENER_OFFSETS " + str(N_ENER_OFFSETS) + "\n")
+        sys.stderr.write("total_params+N_ENER_OFFSETS " + str(total_params+N_ENER_OFFSETS) + "\n")	
         sys.stderr.write("len(x) " + str(len(x)) + "\n") 
         sys.stderr.write("TOTAL_PAIRS " + str(TOTAL_PAIRS) + "\n") 
         sys.stderr.write("SNUM_2B " + str(SNUM_2B) + "\n") 
         sys.stderr.write("COUNTED_TRIP_PARAMS " + str(COUNTED_TRIP_PARAMS) + "\n") 
         sys.stderr.write("COUNTED_QUAD_PARAMS " + str(COUNTED_QUAD_PARAMS) + "\n")
         sys.stderr.write("COUNTED_COUL_PARAMS " + str(COUNTED_COUL_PARAMS) + "\n")
+        sys.stderr.write("============= ")
+        for i in range(10):
+                sys.stderr.write(str(i) + "	" + hf[i])
         exit(1)
 
 
     if len(x) == (total_params+N_ENER_OFFSETS):
-        print ("NO ENERGY OFFSETS: ", N_ENER_OFFSETS)
+        print ("NO ENERGY OFFSETS: ", N_ATOM_TYPES)
+	
+        eff_idx = 0
     
-        for i in range(N_ENER_OFFSETS):
-            print ("ENERGY OFFSET %d %21.13e" % (i+1,x[total_params+i]))
+        for i in range(N_ATOM_TYPES):
+	
+            if i in EXCL_1B:
+                print ("ENERGY OFFSET %d %21.13e" % (i+1,0.0))	    
+            else:
+                print ("ENERGY OFFSET %d %21.13e" % (i+1,x[total_params+eff_idx]))
+                eff_idx += 1
 
     if args.test_suite:
         test_suite_params=open("test_suite_params.txt","w")		
@@ -669,7 +788,7 @@ def count_nonzero_vars(x):
 #############################################
 #############################################
 
-def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, read_output, weights, normalize, A , b, restart_dlasso_dlars):
+def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, read_output, weights, normalize, A , b, restart_dlasso_dlars, mpistyle):
 
     # Use the Distributed LARS/LASSO fitting algorithm.  Returns both the solution x and
     # the estimated force vector A * x, which is read from Ax.txt.    
@@ -694,8 +813,15 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
         
         if os.path.exists(dlars_file):
 	
-            exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " " + dlars_file
+            exepath = ""
 
+            if mpistyle == "srun": 
+                exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " " + dlars_file
+            elif mpistyle == "ibrun":
+                exepath = "ibrun" + " " + dlars_file  
+            else:
+                print("Unrecognized mpistyle:",args.mpistyle,". Recognized options are srun or ibrun")
+           
             command = None
 
             command = exepath + " " + A  + " " + b + " dim.txt --lambda=" + str(alpha)
@@ -731,7 +857,7 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
                 print(command + " failed")
                 sys.exit(1)
         else:
-            print (exepath + " does not exist")
+            print (dlars_file + " does not exist")
             sys.exit(1)
     else:
         print ("! Reading output from prior DLARS calculation")

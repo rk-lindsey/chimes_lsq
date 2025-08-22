@@ -160,12 +160,17 @@ void A_MAT::add_col_of_ones(string item, bool DO_ENER, ofstream & OUTFILE)
 	
 	if (DO_ENER)
 	{
-		if( (item == "FORCE") || (item == "STRESS") )	// OUTFILE << " 0.0";	
-			for(int i=0; i<NO_ATOM_TYPES; i++)
+		for(int i=0; i<NO_ATOM_TYPES; i++)
+		{	
+			if (DO_EXCLUDE_1B)
+				if(find(EXCLUDE_1B.begin(), EXCLUDE_1B.end(), i) != EXCLUDE_1B.end())
+					continue;
+		
+			if( (item == "FORCE") || (item == "STRESS") )	// OUTFILE << " 0.0";	
 				OUTFILE << " " << "0.0";
-		else // OUTFILE << " 1.0";
-			for(int i=0; i<NO_ATOM_TYPES; i++)
-				OUTFILE << " " << NO_ATOMS_OF_TYPE[i];			
+			else // OUTFILE << " 1.0";
+				OUTFILE << " " << NO_ATOMS_OF_TYPE[i];	
+		}		
 	}
 }
 
@@ -182,6 +187,24 @@ void A_MAT::write_natoms(ofstream & OUTFILE)
 				
 	OUTFILE << natoms << endl;			
 	
+}
+
+bool A_MAT::skip_2b(int n)
+{
+	int tidx,snum;
+	bool exclude = false;
+	
+
+	for (int m=0; m<EXCLUDE_2B.size(); m++)
+	{
+		tidx =   EXCLUDE_2B[m];
+		snum = N_EXCLUDE_2B[m];
+
+		if( (n>=tidx*snum) && (n<(tidx+1)*snum) )
+			exclude = true;
+
+	}
+return exclude;	
 }
 
 void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
@@ -217,7 +240,12 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		// Print Afile: .../////////////// -- For X
 		  
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;
 			fileA << FORCES[a][n].X  << "   ";
+		}
 		if ( CONTROLS.FIT_COUL ) 
 			for(int i=0; i<CHARGES.size(); i++) // Loop over pair types, i.e. OO, OH, HH
 				fileA << CHARGES[i][a].X << "   ";
@@ -230,7 +258,13 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		// Print Afile: .../////////////// -- For Y
 		  
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
+			
 			fileA << FORCES[a][n].Y  << "   ";
+		}
 		if ( CONTROLS.FIT_COUL ) 
 			for(int i=0; i<CHARGES.size(); i++) // Loop over pair types, i.e. OO, OH, HH
 				fileA << CHARGES[i][a].Y << "   ";
@@ -242,7 +276,13 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		// Print Afile: .../////////////// -- For Z
 		  
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)	// Afile
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;
+							
 			fileA << FORCES[a][n].Z  << "   ";
+		}
 		if ( CONTROLS.FIT_COUL ) 
 			for(int i=0; i<CHARGES.size(); i++) // Loop over pair types, i.e. OO, OH, HH
 				fileA << CHARGES[i][a].Z << "   ";
@@ -276,19 +316,34 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		// Output A.txt 
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;
 			fileA << STRESSES[n].XX << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);
 		fileA << endl;	
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
 			fileA << STRESSES[n].YY << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);	
 		write_natoms(filena);
 		fileA << endl;
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
 			fileA << STRESSES[n].ZZ << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);
 		fileA << endl;	
@@ -315,55 +370,100 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		// Output A.txt
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
 			fileA << STRESSES[n].XX << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);	
 		fileA << endl;
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
 			fileA << STRESSES[n].XY << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);	
 		fileA << endl;
 		
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
 			fileA << STRESSES[n].XZ << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);	
 		fileA << endl;	
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;
 			fileA << STRESSES[n].XY << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);	
 		fileA << endl;	
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;
 			fileA << STRESSES[n].YY << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);	
 		fileA << endl;	
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;
 			fileA << STRESSES[n].YZ << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);	
 		fileA << endl;
 			
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;
 			fileA << STRESSES[n].XZ << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);
 		fileA << endl;
 						
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;
 			fileA << STRESSES[n].YZ << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);	
 		fileA << endl;
 		
 		for(int n=0; n < CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
 			fileA << STRESSES[n].ZZ << " ";
+		}
 		add_col_of_ones("STRESS", DO_ENER, fileA);
 		write_natoms(filena);	
 		fileA << endl;		
@@ -406,19 +506,34 @@ void A_MAT::PRINT_FRAME(	const struct JOB_CONTROL &CONTROLS,
 		// Output A.txt 
 			
 		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
 			fileA << FRAME_ENERGIES[n] << " ";
+		}
 		add_col_of_ones("ENERGY", DO_ENER, fileA);	
 		write_natoms(filena);			
 		fileA << endl;
 			
 		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
 			fileA << FRAME_ENERGIES[n] << " ";
+		}
 		add_col_of_ones("ENERGY", DO_ENER, fileA);				
 		write_natoms(filena);
 		fileA << endl;
 			
 		for(int n=0; n<CONTROLS.TOT_SHORT_RANGE; n++)
+		{
+			if(CONTROLS.HIERARCHICAL_FIT)
+				if(skip_2b(n))
+					continue;		
 			fileA << FRAME_ENERGIES[n] << " ";
+		}
 		add_col_of_ones("ENERGY", DO_ENER, fileA);				
 		write_natoms(filena);
 		fileA << endl;						
@@ -577,7 +692,7 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 			out.open(name) ;
 			if ( ! out.is_open()  )
 				EXIT_MSG("Could not open " + string(name)) ;
-			out << param_count << " " << start << " " << end << " " << total << "\n" ;
+			out << param_count-N_EXCL_LT_3B << " " << start << " " << end << " " << total << "\n" ;
 			out.close() ;
 		} 
 		else 
@@ -593,7 +708,7 @@ void A_MAT::CLEANUP_FILES(bool SPLIT_FILES)
 		ofstream out("dim.txt") ;
 		if ( ! out.is_open()  ) 
 			EXIT_MSG("Could not open dim.txt") ;
-		out << param_count << " " << total << endl ;
+		out << param_count-N_EXCL_LT_3B << " " << total << endl ;
 		out.close() ;
 	}
 

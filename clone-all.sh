@@ -8,6 +8,9 @@ cd imports
 
 if [ ! -d chimes_calculator ] ; then
 
+    # If chimes_lsq compilation isn't working, try cloning via: 
+    # git clone git@github.com:RKLindsey/chimes_calculator-myLLfork.git chimes_calculator
+    
     git clone https://github.com/rk-lindsey/chimes_calculator.git chimes_calculator
     cd chimes_calculator
     git checkout main

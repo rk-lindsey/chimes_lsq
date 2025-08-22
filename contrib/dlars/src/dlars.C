@@ -1547,7 +1547,7 @@ int DLARS::restart(string filename)
 	stringstream filename_rank ;
 
 	if ( NPROCS > 1 ) {
-		filename_rank << filename << "." << std::setfill('0') << std::setw(4) << RANK ;
+		filename_rank << filename << "." << std::setfill('0') << std::setw(4) << RANK << ".txt";
 	} else {
 		filename_rank << filename ;
 	}
@@ -2153,7 +2153,7 @@ void DLARS::print_restart()
 
 	// Create a separate file for each MPI rank.
 	if ( NPROCS > 1 ) {
-		fname << "restart." << std::setfill('0') << std::setw(4) << RANK ;
+		fname << "restart." << std::setfill('0') << std::setw(4) << RANK << ".txt" ;
 	} else {
 		fname << "restart.txt" ;
 	}

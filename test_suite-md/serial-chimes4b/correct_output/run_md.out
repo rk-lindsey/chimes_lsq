@@ -230,6 +230,7 @@ chimesFF: 	O O r_cut_in: 0.75000 r_cut_out: 5.00000 MORSE 1.25000
 chimesFF: 	H H r_cut_in: 0.75000 r_cut_out: 5.00000 MORSE 1.25000
 chimesFF: 	O H r_cut_in: 0.75000 r_cut_out: 5.00000 MORSE 1.25000
 chimesFF: Will use cutoff style CUBIC
+
 chimesFF: Read 2B parameters for pair: 0 O O
 chimesFF: 	0 -20.84280
 chimesFF: 	1 -28.29060

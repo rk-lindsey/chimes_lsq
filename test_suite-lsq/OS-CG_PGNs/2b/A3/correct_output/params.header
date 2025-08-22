@@ -1,0 +1,23 @@
+USECOUL: false
+FITCOUL: false
+USE3BCH: false
+USE4BCH: false
+
+PAIRTYP: CHEBYSHEV  12 0 0 -1 1
+
+ATOM TYPES: 1
+
+# TYPEIDX #	# ATM_TYP #	# ATMCHRG #	# ATMMASS #
+0		1		0		50456
+
+ATOM PAIRS: 1
+
+# PAIRIDX #	# ATM_TY1 #	# ATM_TY1 #	# S_MINIM #	# S_MAXIM #	# CHBDIST #	# MORSE_LAMBDA #
+	0               1               1               48              100             MORSE           60              
+
+FCUT TYPE: TERSOFF 0.75
+
+ATOM PAIR TRIPLETS: 0
+
+ATOM PAIR QUADRUPLETS: 0
+
