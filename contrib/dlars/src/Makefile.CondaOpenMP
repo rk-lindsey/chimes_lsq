@@ -1,0 +1,46 @@
+# Makefile for dlars under a conda-forge toolchain (GCC + OpenMPI + OpenBLAS).
+#
+# Requires an activated conda env providing: cxx-compiler, openmpi,
+# libblas/liblapack (-> OpenBLAS + reference CBLAS/LAPACKE headers).
+# CONDA_PREFIX is set by `conda activate`.
+#
+# Build:   make            (or: make opt)
+#          make debug
+#          make clean
+#
+# If your env lives elsewhere, override on the command line, e.g.:
+#   make CONDA_PREFIX=/path/to/env
+
+CONDA_PREFIX ?= $(CONDA_PREFIX)
+
+CXX = mpicxx
+
+# -include cblas.h forces the CBLAS prototypes in (the source leaves the
+#  #include <cblas.h> commented out and only pulls <mkl.h> under USE_MKL).
+# USE_BLAS    -> use cblas_* paths; USE_MKL is intentionally NOT defined,
+#               so the VML elementwise ops fall back to scalar loops.
+INCLUDE   = -I"$(CONDA_PREFIX)/include"
+DEFINES   = -DUSE_MPI -DWARN_ONLY -DUSE_BLAS -DUSE_OPENMP
+WARN      = -Wall -Wno-sign-compare
+
+CFLAGS    = -O3 -std=c++11 $(WARN) $(DEFINES) $(INCLUDE) -fopenmp -include cblas.h
+CFLAGSDBG = -g  -std=c++11 $(WARN) -DUSE_MPI -DWARN_ONLY -DDEBUG $(INCLUDE) -include cblas.h
+
+# Link against conda OpenBLAS (LP64). OpenBLAS provides BLAS + LAPACK +
+# the CBLAS interface in one library; -lopenblas covers the cblas_* symbols.
+LINKFLAGS    = -L"$(CONDA_PREFIX)/lib" -Wl,-rpath,"$(CONDA_PREFIX)/lib" \
+               -lopenblas -lgomp -lpthread -lm -ldl
+LINKFLAGSDBG = -L"$(CONDA_PREFIX)/lib" -Wl,-rpath,"$(CONDA_PREFIX)/lib" \
+               -lopenblas -lgomp -lpthread -lm -ldl
+
+SRC = dlars.C Matrix.C Restart.C
+HDR = Vector.h IntVector.h Matrix.h DLARS.h
+
+opt: $(SRC) $(HDR)
+	$(CXX) $(CFLAGS) $(SRC) $(LINKFLAGS) -o dlars
+
+debug: $(SRC) $(HDR)
+	$(CXX) $(CFLAGSDBG) $(SRC) $(LINKFLAGSDBG) -o dlars
+
+clean:
+	rm -f dlars

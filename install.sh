@@ -59,12 +59,16 @@ elif [[ "$hosttype" == "JHU-ARCH" ]] ; then
     MPI=`which mpicxx`   
 elif [[ "$hosttype" == "UT-TACC" ]] ; then
     source modfiles/UT-TACC.mod
+elif [[ "$hosttype" == "CONDA" ]] ;then
+    ICC=`which mpicxx`
+    MPI=`which mpicxx`
 else
     echo ""
     echo "ERROR: Unknown hosttype ($hosttype) specified"
     echo ""
     echo "Valid options are:"
     for i in `ls modfiles`; do echo "   ${i%.mod}"; done
+    echo "   CONDA"
     echo ""
     echo "Please run again with: export hosttype=<host type>; ./install.sh"
     echo "Or manually load modules and run with: ./install.sh"
@@ -85,6 +89,7 @@ fi
 
 if [[ -v hosttype ]] ; then
     cd contrib/dlars/src
+    make clean
     
     if [[ "$hosttype" == "LLNL-LC" ]] ; then
         make
@@ -92,6 +97,9 @@ if [[ -v hosttype ]] ; then
         make CXX=mpiicpc
     elif [[ "$hosttype" == "UT-TACC" ]] ; then
         make
+    elif [[ "$hosttype" == "CONDA" ]] ; then
+        cp Makefile.CondaOpenMP Makefile
+	make
     fi    
     cd - 2>&1> /dev/null
 fi
@@ -99,6 +107,8 @@ fi
 # Compile molanal
 
 cd contrib/molanal/src
+make clean
+rm molanal.new
 make molanal.new
 cd ../../..
 
@@ -184,6 +194,17 @@ if [ ! -z $PREFX ] ; then
 fi
 
 cd ..
+
+if [[ "$hosttype" == "CONDA" ]] ;then
+    # DFTB+ ships its own libchimescalc.so into $CONDA_PREFIX/lib, which shadows
+    # the freshly-built one at runtime. Force the binaries to prefer our build-dir copy.
+    CHIMESLIB="$(pwd)/imports/chimes_calculator/build"
+    for exe in build/chimes_lsq build/chimes_md ${PREFX}/chimes_lsq ${PREFX}/chimes_md ; do
+        if [ -f "$exe" ] ; then
+            patchelf --force-rpath --set-rpath "${CHIMESLIB}:${CONDA_PREFIX}/lib" "$exe"
+        fi
+    done
+fi
 
 echo ""
 echo "***"
