@@ -14,8 +14,6 @@ if [ ! -d chimes_calculator ] ; then
     git clone https://github.com/rk-lindsey/chimes_calculator.git chimes_calculator
     cd chimes_calculator
     git checkout main
-    cp ../../install.sh.chimes_Calculator-integrate install.sh
-    #nedit serial_interface/src/serial_chimes_interface.h
     ./install.sh 
     cd - 2>&1> /dev/null
     
