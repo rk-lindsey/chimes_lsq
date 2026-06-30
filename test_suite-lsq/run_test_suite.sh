@@ -8,6 +8,14 @@
 #         'make-jobs' is a list of lsq tests that are run by makefiles.  This argument may be an empty string.
 #
 
+echo "Run by user       : `whoami`"      | tee run.log
+echo "Run on date       : `date`"        | tee run.log
+echo "Run with command  : $0"            | tee run.log
+echo "Run on machine    : `uname -n`"    | tee run.log
+echo "Run using hosttype: $hosttype"     | tee run.log
+echo "Loaded modules    : `module list`" | tee run.log
+
+
 #######
 #
 # Determine which system you're running on and load the necessary modules.
@@ -53,6 +61,9 @@ else
     echo "Or manually load modules and run with: ./this_script.sh"
     exit 0
 fi
+
+echo "Loaded modules    : `module list 2>&1 | awk '/Current/{getline; print}'`" | tee generate.log
+
 
 NUM_THREADS=$NP		# Number of threads for SVD decomposition
 export OMP_NUM_THREADS=$NUM_THREADS    
