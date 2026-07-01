@@ -1,0 +1,467 @@
+Run by user       : rlindsey
+Run on date       : Tue Jun 30 06:01:38 PM CDT 2026
+Run with command  : ./generate_test_suite.sh
+Run on machine    : c454-082.stampede3.tacc.utexas.edu
+Run using hosttype: UT-TACC
+Number of processors (unless you really know what you're doing, set to 36) = 36
+Warning: this script will overwrite all reference test output.
+Continue ? (yes/no)
+Loaded modules    :   1) autotools/1.4   2) xalt/3.1.1   3) TACC   4) intel/24.0   5) impi/21.11   6) cmake/3.28.1   7) python/3.9.18
+NP = 36
+
+***
+*** Executing chimes_lsq install.sh
+***
+
+Attempting to perform a fresh install
+Removing directory build
+Imports directory will be deleted and re-cloned/installed. Proceed? (y/n)
+Are you sure? Imports directory will be deleted! (y/n)
+Detected hosttype UT-TACC
+Your branch is up to date with 'origin/main'.
+Removing directory build
+Removing files installed at /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build
+This runs the command "rm -rf /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build"
+Are you sure you want to proceed?
+Detected hosttype: UT-TACC
+-- The CXX compiler identification is GNU 13.2.0
+-- The C compiler identification is GNU 13.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/apps/gcc/13.2.0/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /opt/apps/gcc/13.2.0/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- The Fortran compiler identification is GNU 13.2.0
+-- Detecting Fortran compiler ABI info
+-- Detecting Fortran compiler ABI info - done
+-- Check for working Fortran compiler: /opt/apps/gcc/13.2.0/bin/gfortran - skipped
+-- Build type: Release (manually selected single-config)
+-- Flags for CXX-compiler (build type: Release):    -O3 -funroll-all-loops
+-- Flags for C-compiler (build type: Release):    -O3 -funroll-all-loops
+-- Flags for Fortran-compiler (build type: Release):   -std=f2008  -O3 -funroll-all-loops
+-- Looking for round in m
+-- Looking for round in m - found
+-- Configuring done (4.5s)
+-- Generating done (1.2s)
+-- Build files have been written to: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build
+[  3%] Building CXX object CMakeFiles/ChimesCalc.dir/chimesFF/src/chimesFF.cpp.o
+[  7%] Building CXX object CMakeFiles/ChimesCalc.dir/chimesFF/api/chimescalc_C.cpp.o
+[ 10%] Building CXX object CMakeFiles/ChimesCalc.dir/serial_interface/src/serial_chimes_interface.cpp.o
+[ 14%] Building CXX object CMakeFiles/ChimesCalc.dir/serial_interface/api/chimescalc_serial_C.cpp.o
+[ 17%] Linking CXX shared library libchimescalc.so
+[ 17%] Built target ChimesCalc
+[ 21%] Building CXX object CMakeFiles/ChimesCalcExe.dir/serial_interface/examples/cpp/main.cpp.o
+[ 25%] Linking CXX executable chimescalc
+[ 25%] Built target ChimesCalcExe
+[ 28%] Building C object CMakeFiles/chimescalc-test_direct-C.dir/chimesFF/examples/c/main.c.o
+[ 32%] Linking C executable chimescalc-test_direct-C
+[ 32%] Built target chimescalc-test_direct-C
+[ 35%] Building C object CMakeFiles/chimescalc-test_serial-C.dir/serial_interface/examples/c/main.c.o
+[ 39%] Linking C executable chimescalc-test_serial-C
+[ 39%] Built target chimescalc-test_serial-C
+[ 42%] Building C object CMakeFiles/chimescalc-test_serial-C_instance.dir/serial_interface/examples/c_instance/main.c.o
+[ 46%] Linking C executable chimescalc-test_serial-C_instance
+[ 46%] Built target chimescalc-test_serial-C_instance
+[ 50%] Building CXX object CMakeFiles/ChimesCalc_dynamic.dir/chimesFF/src/chimesFF.cpp.o
+[ 53%] Building CXX object CMakeFiles/ChimesCalc_dynamic.dir/chimesFF/api/chimescalc_C.cpp.o
+[ 57%] Building CXX object CMakeFiles/ChimesCalc_dynamic.dir/serial_interface/src/serial_chimes_interface.cpp.o
+[ 60%] Building CXX object CMakeFiles/ChimesCalc_dynamic.dir/serial_interface/api/chimescalc_serial_C.cpp.o
+[ 64%] Linking CXX shared module libchimescalc_dl.so
+[ 64%] Built target ChimesCalc_dynamic
+[ 67%] Building Fortran object CMakeFiles/ChimesCalc_Fortran.dir/chimesFF/api/chimescalc_F.f90.o
+[ 71%] Building Fortran object CMakeFiles/ChimesCalc_Fortran.dir/serial_interface/api/chimescalc_serial_F.f90.o
+[ 75%] Building Fortran object CMakeFiles/ChimesCalc_Fortran.dir/serial_interface/api/chimescalc_serial_F08.f90.o
+[ 78%] Linking Fortran shared library libchimescalc_fortran.so
+[ 78%] Built target ChimesCalc_Fortran
+[ 82%] Building Fortran object CMakeFiles/chimescalc-test_serial-F.dir/serial_interface/examples/fortran/main.F90.o
+[ 85%] Linking Fortran executable chimescalc-test_serial-F
+[ 85%] Built target chimescalc-test_serial-F
+[ 89%] Building Fortran object CMakeFiles/chimescalc-test_serial-F_instance.dir/serial_interface/examples/fortran_instance/main.F90.o
+[ 92%] Linking Fortran executable chimescalc-test_serial-F_instance
+[ 92%] Built target chimescalc-test_serial-F_instance
+[ 96%] Building Fortran object CMakeFiles/chimescalc-test_serial-F08.dir/serial_interface/examples/fortran08/main.F90.o
+[100%] Linking Fortran executable chimescalc-test_serial-F08
+[100%] Built target chimescalc-test_serial-F08
+[ 17%] Built target ChimesCalc
+[ 25%] Built target ChimesCalcExe
+[ 32%] Built target chimescalc-test_direct-C
+[ 39%] Built target chimescalc-test_serial-C
+[ 46%] Built target chimescalc-test_serial-C_instance
+[ 64%] Built target ChimesCalc_dynamic
+[ 78%] Built target ChimesCalc_Fortran
+[ 85%] Built target chimescalc-test_serial-F
+[ 92%] Built target chimescalc-test_serial-F_instance
+[100%] Built target chimescalc-test_serial-F08
+Install the project...
+-- Install configuration: "Release"
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/lib64/libchimescalc.so
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/include/chimescalc/chimesFF.h
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/include/chimescalc/chimescalc_C.h
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/include/chimescalc/serial_chimes_interface.h
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/include/chimescalc/chimescalc_serial_C.h
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/bin/chimescalc
+-- Set non-toolchain portion of runtime path of "/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/bin/chimescalc" to ""
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/lib64/libchimescalc_dl.so
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/lib64/libchimescalc_fortran.so
+-- Set non-toolchain portion of runtime path of "/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/lib64/libchimescalc_fortran.so" to ""
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/include/chimescalc/modfiles
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/include/chimescalc/modfiles/chimescalc.mod
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/include/chimescalc/modfiles/chimescalc_serial.mod
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/include/chimescalc/modfiles/chimescalc_serial08.mod
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/lib64/cmake/chimescalc/chimescalc-targets.cmake
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/lib64/cmake/chimescalc/chimescalc-targets-release.cmake
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/lib64/cmake/chimescalc/chimescalc-config.cmake
+-- Installing: /scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build/lib64/cmake/chimescalc/chimescalc-config-version.cmake
+mpicxx -O3 -std=c++11 -Wall -Wno-sign-compare -DUSE_MPI -DWARN_ONLY  -DMKL_ILP64  -I"/opt/intel/oneapi/mkl/2024.0/include" -DUSE_MKL -DUSE_BLAS -qopenmp -DUSE_OPENMP dlars.C Matrix.C Restart.C -Wl,--start-group /opt/intel/oneapi/mkl/2024.0/lib/intel64/libmkl_intel_ilp64.a /opt/intel/oneapi/mkl/2024.0/lib/intel64/libmkl_intel_thread.a /opt/intel/oneapi/mkl/2024.0/lib/intel64/libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl -o dlars
+gcc -O3 -w -Wall -Wextra -DOPENMP -fopenmp molanal.new.c -lm -o molanal.new
+Removing directory build
+compiling with flags: -DCMAKE_CXX_COMPILER=/opt/apps/gcc/13.2.0/bin/g++ -DCMAKE_BUILD_TYPE=Release -DVERBOSITY=1 -DDEBUG_CHEBY=0 -DUSE_MPI=1 -DMPI_CXX_COMPILER=/opt/intel/oneapi/mpi/2021.11/bin/mpicxx
+-- The CXX compiler identification is GNU 13.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/apps/gcc/13.2.0/bin/g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found MPI_CXX: /opt/intel/oneapi/mpi/2021.11/lib/libmpicxx.so (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done (3.0s)
+-- Generating done (0.2s)
+-- Build files have been written to: /scratch/09980/rlindsey/chimes_lsq/build
+/opt/apps/cmake/3.28.1/bin/cmake -S/scratch/09980/rlindsey/chimes_lsq -B/scratch/09980/rlindsey/chimes_lsq/build --check-build-system CMakeFiles/Makefile.cmake 0
+/opt/apps/cmake/3.28.1/bin/cmake -E cmake_progress_start /scratch/09980/rlindsey/chimes_lsq/build/CMakeFiles /scratch/09980/rlindsey/chimes_lsq/build//CMakeFiles/progress.marks
+make  -f CMakeFiles/Makefile2 all
+make[1]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+make  -f CMakeFiles/chimes_lsq.dir/build.make CMakeFiles/chimes_lsq.dir/depend
+make[2]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+cd /scratch/09980/rlindsey/chimes_lsq/build && /opt/apps/cmake/3.28.1/bin/cmake -E cmake_depends "Unix Makefiles" /scratch/09980/rlindsey/chimes_lsq /scratch/09980/rlindsey/chimes_lsq /scratch/09980/rlindsey/chimes_lsq/build /scratch/09980/rlindsey/chimes_lsq/build /scratch/09980/rlindsey/chimes_lsq/build/CMakeFiles/chimes_lsq.dir/DependInfo.cmake "--color="
+make[2]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+make  -f CMakeFiles/chimes_lsq.dir/build.make CMakeFiles/chimes_lsq.dir/build
+make[2]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+[  4%] Building CXX object CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o -MF CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o.d -o CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/chimes_lsq.C
+[  8%] Building CXX object CMakeFiles/chimes_lsq.dir/src/functions.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/functions.C.o -MF CMakeFiles/chimes_lsq.dir/src/functions.C.o.d -o CMakeFiles/chimes_lsq.dir/src/functions.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/functions.C
+[ 12%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Ewald.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Ewald.C.o -MF CMakeFiles/chimes_lsq.dir/src/Ewald.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Ewald.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Ewald.C
+[ 16%] Building CXX object CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o -MF CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o.d -o CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/ClassDefs.C
+[ 20%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Fcut.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Fcut.C.o -MF CMakeFiles/chimes_lsq.dir/src/Fcut.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Fcut.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Fcut.C
+[ 24%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Cluster.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Cluster.C.o -MF CMakeFiles/chimes_lsq.dir/src/Cluster.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Cluster.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Cluster.C
+[ 28%] Building CXX object CMakeFiles/chimes_lsq.dir/src/util.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/util.C.o -MF CMakeFiles/chimes_lsq.dir/src/util.C.o.d -o CMakeFiles/chimes_lsq.dir/src/util.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/util.C
+[ 32%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Cheby.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Cheby.C.o -MF CMakeFiles/chimes_lsq.dir/src/Cheby.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Cheby.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Cheby.C
+[ 36%] Building CXX object CMakeFiles/chimes_lsq.dir/src/io_styles.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/io_styles.C.o -MF CMakeFiles/chimes_lsq.dir/src/io_styles.C.o.d -o CMakeFiles/chimes_lsq.dir/src/io_styles.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/io_styles.C
+[ 40%] Building CXX object CMakeFiles/chimes_lsq.dir/src/feexcept.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/feexcept.C.o -MF CMakeFiles/chimes_lsq.dir/src/feexcept.C.o.d -o CMakeFiles/chimes_lsq.dir/src/feexcept.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/feexcept.C
+[ 44%] Building CXX object CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o -MF CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o.d -o CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/A_Matrix.C
+[ 48%] Building CXX object CMakeFiles/chimes_lsq.dir/src/input.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/input.C.o -MF CMakeFiles/chimes_lsq.dir/src/input.C.o.d -o CMakeFiles/chimes_lsq.dir/src/input.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/input.C
+[ 52%] Linking CXX executable chimes_lsq
+/opt/apps/cmake/3.28.1/bin/cmake -E cmake_link_script CMakeFiles/chimes_lsq.dir/link.txt --verbose=1
+/opt/apps/gcc/13.2.0/bin/g++ -O3 CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o CMakeFiles/chimes_lsq.dir/src/functions.C.o CMakeFiles/chimes_lsq.dir/src/Ewald.C.o CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o CMakeFiles/chimes_lsq.dir/src/Fcut.C.o CMakeFiles/chimes_lsq.dir/src/Cluster.C.o CMakeFiles/chimes_lsq.dir/src/util.C.o CMakeFiles/chimes_lsq.dir/src/Cheby.C.o CMakeFiles/chimes_lsq.dir/src/io_styles.C.o CMakeFiles/chimes_lsq.dir/src/feexcept.C.o CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o CMakeFiles/chimes_lsq.dir/src/input.C.o -o chimes_lsq   -L/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build  -Wl,-rpath,/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build /opt/intel/oneapi/mpi/2021.11/lib/libmpicxx.so /opt/intel/oneapi/mpi/2021.11/lib/libmpi.so /lib64/librt.a /lib64/libpthread.a /lib64/libdl.a -lchimescalc 
+make[2]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+[ 52%] Built target chimes_lsq
+make  -f CMakeFiles/chimes_md.dir/build.make CMakeFiles/chimes_md.dir/depend
+make[2]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+cd /scratch/09980/rlindsey/chimes_lsq/build && /opt/apps/cmake/3.28.1/bin/cmake -E cmake_depends "Unix Makefiles" /scratch/09980/rlindsey/chimes_lsq /scratch/09980/rlindsey/chimes_lsq /scratch/09980/rlindsey/chimes_lsq/build /scratch/09980/rlindsey/chimes_lsq/build /scratch/09980/rlindsey/chimes_lsq/build/CMakeFiles/chimes_md.dir/DependInfo.cmake "--color="
+make[2]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+make  -f CMakeFiles/chimes_md.dir/build.make CMakeFiles/chimes_md.dir/build
+make[2]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+[ 56%] Building CXX object CMakeFiles/chimes_md.dir/src/chimes_md.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/chimes_md.C.o -MF CMakeFiles/chimes_md.dir/src/chimes_md.C.o.d -o CMakeFiles/chimes_md.dir/src/chimes_md.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/chimes_md.C
+[ 60%] Building CXX object CMakeFiles/chimes_md.dir/src/functions.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/functions.C.o -MF CMakeFiles/chimes_md.dir/src/functions.C.o.d -o CMakeFiles/chimes_md.dir/src/functions.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/functions.C
+[ 64%] Building CXX object CMakeFiles/chimes_md.dir/src/Ewald.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Ewald.C.o -MF CMakeFiles/chimes_md.dir/src/Ewald.C.o.d -o CMakeFiles/chimes_md.dir/src/Ewald.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Ewald.C
+[ 68%] Building CXX object CMakeFiles/chimes_md.dir/src/ClassDefs.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/ClassDefs.C.o -MF CMakeFiles/chimes_md.dir/src/ClassDefs.C.o.d -o CMakeFiles/chimes_md.dir/src/ClassDefs.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/ClassDefs.C
+[ 72%] Building CXX object CMakeFiles/chimes_md.dir/src/Fcut.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Fcut.C.o -MF CMakeFiles/chimes_md.dir/src/Fcut.C.o.d -o CMakeFiles/chimes_md.dir/src/Fcut.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Fcut.C
+[ 76%] Building CXX object CMakeFiles/chimes_md.dir/src/Cluster.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Cluster.C.o -MF CMakeFiles/chimes_md.dir/src/Cluster.C.o.d -o CMakeFiles/chimes_md.dir/src/Cluster.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Cluster.C
+[ 80%] Building CXX object CMakeFiles/chimes_md.dir/src/util.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/util.C.o -MF CMakeFiles/chimes_md.dir/src/util.C.o.d -o CMakeFiles/chimes_md.dir/src/util.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/util.C
+[ 84%] Building CXX object CMakeFiles/chimes_md.dir/src/Cheby.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Cheby.C.o -MF CMakeFiles/chimes_md.dir/src/Cheby.C.o.d -o CMakeFiles/chimes_md.dir/src/Cheby.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Cheby.C
+[ 88%] Building CXX object CMakeFiles/chimes_md.dir/src/io_styles.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/io_styles.C.o -MF CMakeFiles/chimes_md.dir/src/io_styles.C.o.d -o CMakeFiles/chimes_md.dir/src/io_styles.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/io_styles.C
+[ 92%] Building CXX object CMakeFiles/chimes_md.dir/src/feexcept.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/feexcept.C.o -MF CMakeFiles/chimes_md.dir/src/feexcept.C.o.d -o CMakeFiles/chimes_md.dir/src/feexcept.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/feexcept.C
+[ 96%] Building CXX object CMakeFiles/chimes_md.dir/src/input.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DUSE_MPI=1 -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -isystem /opt/intel/oneapi/mpi/2021.11/include -O3 -MD -MT CMakeFiles/chimes_md.dir/src/input.C.o -MF CMakeFiles/chimes_md.dir/src/input.C.o.d -o CMakeFiles/chimes_md.dir/src/input.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/input.C
+[100%] Linking CXX executable chimes_md
+/opt/apps/cmake/3.28.1/bin/cmake -E cmake_link_script CMakeFiles/chimes_md.dir/link.txt --verbose=1
+/opt/apps/gcc/13.2.0/bin/g++ -O3 CMakeFiles/chimes_md.dir/src/chimes_md.C.o CMakeFiles/chimes_md.dir/src/functions.C.o CMakeFiles/chimes_md.dir/src/Ewald.C.o CMakeFiles/chimes_md.dir/src/ClassDefs.C.o CMakeFiles/chimes_md.dir/src/Fcut.C.o CMakeFiles/chimes_md.dir/src/Cluster.C.o CMakeFiles/chimes_md.dir/src/util.C.o CMakeFiles/chimes_md.dir/src/Cheby.C.o CMakeFiles/chimes_md.dir/src/io_styles.C.o CMakeFiles/chimes_md.dir/src/feexcept.C.o CMakeFiles/chimes_md.dir/src/input.C.o -o chimes_md   -L/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build  -Wl,-rpath,/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build /opt/intel/oneapi/mpi/2021.11/lib/libmpicxx.so /opt/intel/oneapi/mpi/2021.11/lib/libmpi.so /lib64/librt.a /lib64/libpthread.a /lib64/libdl.a -lchimescalc 
+make[2]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+[100%] Built target chimes_md
+make[1]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+/opt/apps/cmake/3.28.1/bin/cmake -E cmake_progress_start /scratch/09980/rlindsey/chimes_lsq/build/CMakeFiles 0
+-- Configuring done (0.0s)
+-- Generating done (0.1s)
+-- Build files have been written to: /scratch/09980/rlindsey/chimes_lsq/build
+/opt/apps/cmake/3.28.1/bin/cmake -S/scratch/09980/rlindsey/chimes_lsq -B/scratch/09980/rlindsey/chimes_lsq/build --check-build-system CMakeFiles/Makefile.cmake 0
+/opt/apps/cmake/3.28.1/bin/cmake -E cmake_progress_start /scratch/09980/rlindsey/chimes_lsq/build/CMakeFiles /scratch/09980/rlindsey/chimes_lsq/build//CMakeFiles/progress.marks
+make  -f CMakeFiles/Makefile2 all
+make[1]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+make  -f CMakeFiles/chimes_lsq.dir/build.make CMakeFiles/chimes_lsq.dir/depend
+make[2]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+cd /scratch/09980/rlindsey/chimes_lsq/build && /opt/apps/cmake/3.28.1/bin/cmake -E cmake_depends "Unix Makefiles" /scratch/09980/rlindsey/chimes_lsq /scratch/09980/rlindsey/chimes_lsq /scratch/09980/rlindsey/chimes_lsq/build /scratch/09980/rlindsey/chimes_lsq/build /scratch/09980/rlindsey/chimes_lsq/build/CMakeFiles/chimes_lsq.dir/DependInfo.cmake "--color="
+make[2]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+make  -f CMakeFiles/chimes_lsq.dir/build.make CMakeFiles/chimes_lsq.dir/build
+make[2]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+[  4%] Building CXX object CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o -MF CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o.d -o CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/chimes_lsq.C
+[  8%] Building CXX object CMakeFiles/chimes_lsq.dir/src/functions.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/functions.C.o -MF CMakeFiles/chimes_lsq.dir/src/functions.C.o.d -o CMakeFiles/chimes_lsq.dir/src/functions.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/functions.C
+[ 12%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Ewald.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Ewald.C.o -MF CMakeFiles/chimes_lsq.dir/src/Ewald.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Ewald.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Ewald.C
+[ 16%] Building CXX object CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o -MF CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o.d -o CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/ClassDefs.C
+[ 20%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Fcut.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Fcut.C.o -MF CMakeFiles/chimes_lsq.dir/src/Fcut.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Fcut.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Fcut.C
+[ 24%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Cluster.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Cluster.C.o -MF CMakeFiles/chimes_lsq.dir/src/Cluster.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Cluster.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Cluster.C
+[ 28%] Building CXX object CMakeFiles/chimes_lsq.dir/src/util.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/util.C.o -MF CMakeFiles/chimes_lsq.dir/src/util.C.o.d -o CMakeFiles/chimes_lsq.dir/src/util.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/util.C
+[ 32%] Building CXX object CMakeFiles/chimes_lsq.dir/src/Cheby.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/Cheby.C.o -MF CMakeFiles/chimes_lsq.dir/src/Cheby.C.o.d -o CMakeFiles/chimes_lsq.dir/src/Cheby.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Cheby.C
+[ 36%] Building CXX object CMakeFiles/chimes_lsq.dir/src/io_styles.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/io_styles.C.o -MF CMakeFiles/chimes_lsq.dir/src/io_styles.C.o.d -o CMakeFiles/chimes_lsq.dir/src/io_styles.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/io_styles.C
+[ 40%] Building CXX object CMakeFiles/chimes_lsq.dir/src/feexcept.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/feexcept.C.o -MF CMakeFiles/chimes_lsq.dir/src/feexcept.C.o.d -o CMakeFiles/chimes_lsq.dir/src/feexcept.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/feexcept.C
+[ 44%] Building CXX object CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o -MF CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o.d -o CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/A_Matrix.C
+[ 48%] Building CXX object CMakeFiles/chimes_lsq.dir/src/input.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_lsq.dir/src/input.C.o -MF CMakeFiles/chimes_lsq.dir/src/input.C.o.d -o CMakeFiles/chimes_lsq.dir/src/input.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/input.C
+[ 52%] Linking CXX executable chimes_lsq
+/opt/apps/cmake/3.28.1/bin/cmake -E cmake_link_script CMakeFiles/chimes_lsq.dir/link.txt --verbose=1
+/opt/apps/gcc/13.2.0/bin/g++ -O3 CMakeFiles/chimes_lsq.dir/src/chimes_lsq.C.o CMakeFiles/chimes_lsq.dir/src/functions.C.o CMakeFiles/chimes_lsq.dir/src/Ewald.C.o CMakeFiles/chimes_lsq.dir/src/ClassDefs.C.o CMakeFiles/chimes_lsq.dir/src/Fcut.C.o CMakeFiles/chimes_lsq.dir/src/Cluster.C.o CMakeFiles/chimes_lsq.dir/src/util.C.o CMakeFiles/chimes_lsq.dir/src/Cheby.C.o CMakeFiles/chimes_lsq.dir/src/io_styles.C.o CMakeFiles/chimes_lsq.dir/src/feexcept.C.o CMakeFiles/chimes_lsq.dir/src/A_Matrix.C.o CMakeFiles/chimes_lsq.dir/src/input.C.o -o chimes_lsq   -L/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build  -Wl,-rpath,/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build: -lchimescalc 
+make[2]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+[ 52%] Built target chimes_lsq
+make  -f CMakeFiles/chimes_md.dir/build.make CMakeFiles/chimes_md.dir/depend
+make[2]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+cd /scratch/09980/rlindsey/chimes_lsq/build && /opt/apps/cmake/3.28.1/bin/cmake -E cmake_depends "Unix Makefiles" /scratch/09980/rlindsey/chimes_lsq /scratch/09980/rlindsey/chimes_lsq /scratch/09980/rlindsey/chimes_lsq/build /scratch/09980/rlindsey/chimes_lsq/build /scratch/09980/rlindsey/chimes_lsq/build/CMakeFiles/chimes_md.dir/DependInfo.cmake "--color="
+make[2]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+make  -f CMakeFiles/chimes_md.dir/build.make CMakeFiles/chimes_md.dir/build
+make[2]: Entering directory '/scratch/09980/rlindsey/chimes_lsq/build'
+[ 56%] Building CXX object CMakeFiles/chimes_md.dir/src/chimes_md.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/chimes_md.C.o -MF CMakeFiles/chimes_md.dir/src/chimes_md.C.o.d -o CMakeFiles/chimes_md.dir/src/chimes_md.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/chimes_md.C
+[ 60%] Building CXX object CMakeFiles/chimes_md.dir/src/functions.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/functions.C.o -MF CMakeFiles/chimes_md.dir/src/functions.C.o.d -o CMakeFiles/chimes_md.dir/src/functions.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/functions.C
+[ 64%] Building CXX object CMakeFiles/chimes_md.dir/src/Ewald.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Ewald.C.o -MF CMakeFiles/chimes_md.dir/src/Ewald.C.o.d -o CMakeFiles/chimes_md.dir/src/Ewald.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Ewald.C
+[ 68%] Building CXX object CMakeFiles/chimes_md.dir/src/ClassDefs.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/ClassDefs.C.o -MF CMakeFiles/chimes_md.dir/src/ClassDefs.C.o.d -o CMakeFiles/chimes_md.dir/src/ClassDefs.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/ClassDefs.C
+[ 72%] Building CXX object CMakeFiles/chimes_md.dir/src/Fcut.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Fcut.C.o -MF CMakeFiles/chimes_md.dir/src/Fcut.C.o.d -o CMakeFiles/chimes_md.dir/src/Fcut.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Fcut.C
+[ 76%] Building CXX object CMakeFiles/chimes_md.dir/src/Cluster.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Cluster.C.o -MF CMakeFiles/chimes_md.dir/src/Cluster.C.o.d -o CMakeFiles/chimes_md.dir/src/Cluster.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Cluster.C
+[ 80%] Building CXX object CMakeFiles/chimes_md.dir/src/util.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/util.C.o -MF CMakeFiles/chimes_md.dir/src/util.C.o.d -o CMakeFiles/chimes_md.dir/src/util.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/util.C
+[ 84%] Building CXX object CMakeFiles/chimes_md.dir/src/Cheby.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/Cheby.C.o -MF CMakeFiles/chimes_md.dir/src/Cheby.C.o.d -o CMakeFiles/chimes_md.dir/src/Cheby.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/Cheby.C
+[ 88%] Building CXX object CMakeFiles/chimes_md.dir/src/io_styles.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/io_styles.C.o -MF CMakeFiles/chimes_md.dir/src/io_styles.C.o.d -o CMakeFiles/chimes_md.dir/src/io_styles.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/io_styles.C
+[ 92%] Building CXX object CMakeFiles/chimes_md.dir/src/feexcept.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/feexcept.C.o -MF CMakeFiles/chimes_md.dir/src/feexcept.C.o.d -o CMakeFiles/chimes_md.dir/src/feexcept.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/feexcept.C
+[ 96%] Building CXX object CMakeFiles/chimes_md.dir/src/input.C.o
+/opt/apps/gcc/13.2.0/bin/g++ -DDEBUG="" -DVERBOSITY=1 -I/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/chimesFF/src -I/scratch/09980/rlindsey/chimes_lsq/src -O3 -MD -MT CMakeFiles/chimes_md.dir/src/input.C.o -MF CMakeFiles/chimes_md.dir/src/input.C.o.d -o CMakeFiles/chimes_md.dir/src/input.C.o -c /scratch/09980/rlindsey/chimes_lsq/src/input.C
+[100%] Linking CXX executable chimes_md
+/opt/apps/cmake/3.28.1/bin/cmake -E cmake_link_script CMakeFiles/chimes_md.dir/link.txt --verbose=1
+/opt/apps/gcc/13.2.0/bin/g++ -O3 CMakeFiles/chimes_md.dir/src/chimes_md.C.o CMakeFiles/chimes_md.dir/src/functions.C.o CMakeFiles/chimes_md.dir/src/Ewald.C.o CMakeFiles/chimes_md.dir/src/ClassDefs.C.o CMakeFiles/chimes_md.dir/src/Fcut.C.o CMakeFiles/chimes_md.dir/src/Cluster.C.o CMakeFiles/chimes_md.dir/src/util.C.o CMakeFiles/chimes_md.dir/src/Cheby.C.o CMakeFiles/chimes_md.dir/src/io_styles.C.o CMakeFiles/chimes_md.dir/src/feexcept.C.o CMakeFiles/chimes_md.dir/src/input.C.o -o chimes_md   -L/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build  -Wl,-rpath,/scratch/09980/rlindsey/chimes_lsq/imports/chimes_calculator/build: -lchimescalc 
+make[2]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+[100%] Built target chimes_md
+make[1]: Leaving directory '/scratch/09980/rlindsey/chimes_lsq/build'
+/opt/apps/cmake/3.28.1/bin/cmake -E cmake_progress_start /scratch/09980/rlindsey/chimes_lsq/build/CMakeFiles 0
+
+***
+*** chimes_lsq install complete
+***
+
+Compiling chimes_lsq succeeded
+/scratch/09980/rlindsey/chimes_lsq/test_suite-lsq
+
+SETTING UP FOR CHIMES_LS...
+ 
+Running h2o-2bcheby test...
+Chimes_lsq succeeded
+ 
+Running h2o-3bcheby test...
+Chimes_lsq succeeded
+ 
+Running h2o-3bcheby2 test...
+Chimes_lsq succeeded
+ 
+Running h2o-3bcheby3 test...
+Chimes_lsq succeeded
+ 
+Running h2o-4bcheby test...
+Chimes_lsq succeeded
+ 
+Running h2o-4bcheby-small test...
+Chimes_lsq succeeded
+ 
+Running h2o-invr test...
+Chimes_lsq succeeded
+ 
+Running fitstrs test...
+Chimes_lsq succeeded
+ 
+Running fitstrs3b test...
+Chimes_lsq succeeded
+ 
+Running test_4atoms test...
+Chimes_lsq succeeded
+ 
+Running test_4atoms.2 test...
+Chimes_lsq succeeded
+ 
+Running special3b test...
+Chimes_lsq succeeded
+ 
+Running special4b test...
+Chimes_lsq succeeded
+ 
+Running stress-and-ener-4b test...
+Chimes_lsq succeeded
+ 
+Running stress-and-ener-4b2 test...
+Chimes_lsq succeeded
+ 
+Running stress-and-ener-2b1 test...
+Chimes_lsq succeeded
+ 
+Running stress-and-ener-2b2 test...
+Chimes_lsq succeeded
+ 
+Running stress-and-ener-2b3 test...
+Chimes_lsq succeeded
+ 
+Running two-traj-files test...
+Chimes_lsq succeeded
+ 
+Running one-file-three-trajs test...
+Chimes_lsq succeeded
+ 
+Running nonorth2 test...
+Chimes_lsq succeeded
+SETTING UP FOR SVD SCRIPT...
+ 
+Running h2o-2bcheby test...
+LSQ code succeeded
+ 
+Running h2o-3bcheby test...
+LSQ code succeeded
+ 
+Running h2o-3bcheby2 test...
+LSQ code succeeded
+ 
+Running h2o-3bcheby3 test...
+LSQ code succeeded
+ 
+Running h2o-4bcheby test...
+LSQ code succeeded
+ 
+Running h2o-4bcheby-small test...
+LSQ code succeeded
+ 
+Running h2o-invr test...
+LSQ code succeeded
+ 
+Running fitstrs test...
+LSQ code succeeded
+ 
+Running fitstrs3b test...
+LSQ code succeeded
+ 
+Running test_4atoms test...
+LSQ code succeeded
+ 
+Running test_4atoms.2 test...
+LSQ code succeeded
+ 
+Running special3b test...
+LSQ code succeeded
+ 
+Running special4b test...
+LSQ code succeeded
+ 
+Running stress-and-ener-4b test...
+LSQ code succeeded
+ 
+Running stress-and-ener-4b2 test...
+LSQ code succeeded
+ 
+Running stress-and-ener-2b1 test...
+LSQ code succeeded
+ 
+Running stress-and-ener-2b2 test...
+LSQ code succeeded
+ 
+Running stress-and-ener-2b3 test...
+LSQ code succeeded
+ 
+Running two-traj-files test...
+LSQ code succeeded
+ 
+Running one-file-three-trajs test...
+LSQ code succeeded
+ 
+Running nonorth2 test...
+LSQ code succeeded
+Running Makefile jobs lsq2
+Running lsq2
+ 
+Running lsq2 test...
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+rm -f current_output/*
+rm -f A.txt A.0*.txt b.txt dim.0*.txt params.*.txt *.cmp *.out params.header ff_groups.map
+rm -rf correct_output
+mkdir correct_output
+ibrun ../../build/chimes_lsq fm_setup.in >fm_setup.out
+cp A*txt b*txt params*header fm_setup.out current_output
+python3 ../../src/chimes_lsq.py --algorithm=svd --eps=1.0e-04 >params.svd.1.0e-04.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.svd.1.0e-04.txt current_output/
+python3 ../../src/chimes_lsq.py --algorithm=svd --eps=1.0e-05 >params.svd.1.0e-05.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.svd.1.0e-05.txt current_output/
+python3 ../../src/chimes_lsq.py --algorithm=svd --weights=weights.txt >params.svd.weight.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.svd.weight.txt current_output/
+python3 ../../src/chimes_lsq.py --algorithm=lassolars --alpha=1.0e-04 >params.lassolars.1.0e-04.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.lassolars.1.0e-04.txt current_output/
+ibrun ../../build/chimes_lsq fm_setup.split.in >fm_setup.split.out
+cp A*txt b*txt params*header fm_setup.out current_output
+python3 ../../src/chimes_lsq.py --algorithm=dlars --dlasso_dlars_path=../../contrib/dlars/src/ --alpha=1.0e-04 --cores=36 --nodes=1 --split_files=true --normalize=false --mpistyle=ibrun >params.dlars.1.0e-04.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.dlars.1.0e-04.txt current_output
+python3 ../../src/chimes_lsq.py --algorithm=dlasso --dlasso_dlars_path=../../contrib/dlars/src/ --alpha=1.0e-04 --cores=36 --nodes=1 --split_files=true --normalize=false --mpistyle=ibrun >params.dlasso.1.0e-04.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.dlasso.1.0e-04.txt current_output
+python3 ../../src/chimes_lsq.py --algorithm=dlasso --dlasso_dlars_path=../../contrib/dlars/src/ --alpha=1.0e-04 --cores=36 --nodes=1 --split_files=true --normalize=true --mpistyle=ibrun >params.dlasso.norm.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.dlasso.norm.txt current_output
+python3 ../../src/chimes_lsq.py --algorithm=dlasso --dlasso_dlars_path=../../contrib/dlars/src/ --alpha=1.0e-04 --cores=36 --nodes=1 --split_files=true --normalize=true --read_output=true --mpistyle=ibrun >params.dlasso.read.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.dlasso.read.txt current_output
+python3 ../../src/chimes_lsq.py --algorithm=ridge --alpha=1.0e-03 >params.ridge.1.0e-03.txt
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.ridge.1.0e-03.txt current_output/
+python3 ../../src/chimes_lsq.py --algorithm=ridgecv >params.ridgecv.txt	
+if [ ! -d current_output ] ; then mkdir current_output ; fi
+mv params.ridgecv.txt current_output/
+cp current_output/* correct_output/
+lsq2 succeeded
+/scratch/09980/rlindsey/chimes_lsq/test_suite-lsq
