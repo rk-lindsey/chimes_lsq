@@ -6,7 +6,7 @@
 
 echo "Run by user       : `whoami`"      | tee  generate.log
 echo "Run on date       : `date`"        | tee -a generate.log
-echo "Run with command  : $0"            | tee -a generate.log
+echo "Run with command  : $0 $a"         | tee -a generate.log
 echo "Run on machine    : `uname -n`"    | tee -a generate.log
 echo "Run using hosttype: $hosttype"     | tee -a generate.log
 

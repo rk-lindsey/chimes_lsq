@@ -2,7 +2,7 @@
 
 echo "Run by user       : `whoami`"      | tee  generate.log
 echo "Run on date       : `date`"        | tee -a generate.log
-echo "Run with command  : $0"            | tee -a generate.log
+echo "Run with command  : $0 $@"         | tee -a generate.log
 echo "Run on machine    : `uname -n`"    | tee -a generate.log
 echo "Run using hosttype: $hosttype"     | tee -a generate.log
 
@@ -40,7 +40,7 @@ elif [[ "$hosttype" == "JHU-ARCH" ]] ; then
     MPI=`which mpicxx`   
 elif [[ "$hosttype" == "UT-TACC" ]] ; then
     source ${TESTSU_BASE}/../modfiles/UT-TACC.mod
-    RUN_JOB="ibrun"
+    RUN_JOB="ibrun -n $NP"
 else
     echo ""
     echo "ERROR: Unknown hosttype ($hosttype) specified"

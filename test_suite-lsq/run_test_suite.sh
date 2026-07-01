@@ -10,7 +10,7 @@
 
 echo "Run by user       : `whoami`"      | tee  run.log
 echo "Run on date       : `date`"        | tee -a run.log
-echo "Run with command  : $0"            | tee -a run.log
+echo "Run with command  : $0 $@"         | tee -a run.log
 echo "Run on machine    : `uname -n`"    | tee -a run.log
 echo "Run using hosttype: $hosttype"     | tee -a run.log
 echo "Loaded modules    : `module list`" | tee -a run.log

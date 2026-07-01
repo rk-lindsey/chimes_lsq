@@ -9,7 +9,7 @@
 
 echo "Run by user       : `whoami`"      | tee  generate.log
 echo "Run on date       : `date`"        | tee -a generate.log
-echo "Run with command  : $0"            | tee -a generate.log
+echo "Run with command  : $0 $@"         | tee -a generate.log
 echo "Run on machine    : `uname -n`"    | tee -a generate.log
 echo "Run using hosttype: $hosttype"     | tee -a generate.log
 
@@ -125,8 +125,7 @@ fi
 
 if [ ! -v hosttype ] ; then
 	echo "Will not run make jobs: "
-	echo "Automated DLARS compilation currently requires access to "
-	echo "a Livermore Computing system"
+	echo "Automated DLARS compilation currently requires a supported hosttype to be specified"
 	MAKE_JOBS=""
 fi
 
@@ -141,9 +140,9 @@ fi
 cd ..
 
 if ./install.sh  ; then
-    echo "Compiling chimes_lsq succeeded"
+    echo "Compiling chimes_md (and by consequence, lsq) succeeded"
 else
-    echo "Compiling chimes_lsq failed"
+    echo "Compiling chimes_md  (and by consequence, lsq) failed"
     exit 1
 fi
 
@@ -153,7 +152,7 @@ cd -
 
 if [ $# -gt 0 ] ; then
 	 MD_JOBS=$1
-    LSQ_FORCE_JOBS=$2
+         LSQ_FORCE_JOBS=$2
 fi
 echo "MD JOBS = $MD_JOBS"
 echo "LSQ_FORCE_JOBS = $LSQ_FORCE_JOBS"
@@ -206,10 +205,12 @@ echo " ...Beginning by running the lsq test suite... "
 
 cd ../test_suite-lsq 
 
-for i in ${LSQ_FORCE_JOBS}
-do
-	./run_test_suite.sh $i # $LSQ_FORCE_JOBS
-done
+./run_test_suite.sh  $LSQ_FORCE_JOBS
+
+##for i in ${LSQ_FORCE_JOBS} # This way requires the lsq code to be recompiled after each test
+##do
+##	./run_test_suite.sh $i # $LSQ_FORCE_JOBS
+##done
 
 cd ../test_suite-md
 
