@@ -8,12 +8,12 @@
 #         'make-jobs' is a list of lsq tests that are run by makefiles.  This argument may be an empty string.
 #
 
-echo "Run by user       : `whoami`"      | tee run.log
-echo "Run on date       : `date`"        | tee run.log
-echo "Run with command  : $0"            | tee run.log
-echo "Run on machine    : `uname -n`"    | tee run.log
-echo "Run using hosttype: $hosttype"     | tee run.log
-echo "Loaded modules    : `module list`" | tee run.log
+echo "Run by user       : `whoami`"      | tee  run.log
+echo "Run on date       : `date`"        | tee -a run.log
+echo "Run with command  : $0"            | tee -a run.log
+echo "Run on machine    : `uname -n`"    | tee -a run.log
+echo "Run using hosttype: $hosttype"     | tee -a run.log
+echo "Loaded modules    : `module list`" | tee -a run.log
 
 
 #######
@@ -62,7 +62,7 @@ else
     exit 0
 fi
 
-echo "Loaded modules    : `module list 2>&1 | awk '/Current/{getline; print}'`" | tee generate.log
+echo "Loaded modules    : `module list 2>&1 | awk '/Current/{getline; print}'`" | tee -a generate.log
 
 
 NUM_THREADS=$NP		# Number of threads for SVD decomposition
@@ -275,7 +275,7 @@ do
 					echo " "
 					if [ "$j" == "force.txt" ] ; then
 						 paste ../correct_output/force.txt force.txt > check_tol.dat
-						 awk 'BEGIN{tol=10^-7;any=0}{val=$1-$2;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat | tee tol_status.dat
+						 awk 'BEGIN{tol=10^-7;any=0}{val=$1-$2;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat | tee -a tol_status.dat
 						 echo "	Check file ../diff-$j.out for any other (non-parameter) differences."
 						 rm -f check_tol.dat			
 					else
@@ -285,7 +285,7 @@ do
 						 # sure that is the only difference
 				
 						 paste ../correct_output/test_suite_params.txt test_suite_params.txt > check_tol.dat
-						 awk 'BEGIN{tol=10^-9;any=0}{val=$2-$4;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat  | tee tol_status.dat
+						 awk 'BEGIN{tol=10^-9;any=0}{val=$2-$4;   if(sqrt(val*val)>=tol) {any++;print ("	Parameter index", $1, " differences exceeded tolerance(+/-", tol, "): ",val)}}END{if(any==0){print ("	No parameters differ by more than tol (",tol,").")}}' check_tol.dat  | tee -a tol_status.dat
 						 rm -f check_tol.dat
 					fi
 					echo " "

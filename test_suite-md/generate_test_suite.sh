@@ -7,11 +7,11 @@
 # NOTE: Make sure the right compiler is specified in the Makefile... don't use MPI for lsq.
 #
 
-echo "Run by user       : `whoami`"      | tee generate.log
-echo "Run on date       : `date`"        | tee generate.log
-echo "Run with command  : $0"            | tee generate.log
-echo "Run on machine    : `uname -n`"    | tee generate.log
-echo "Run using hosttype: $hosttype"     | tee generate.log
+echo "Run by user       : `whoami`"      | tee  generate.log
+echo "Run on date       : `date`"        | tee -a generate.log
+echo "Run with command  : $0"            | tee -a generate.log
+echo "Run on machine    : `uname -n`"    | tee -a generate.log
+echo "Run using hosttype: $hosttype"     | tee -a generate.log
 
 
 ########################################
@@ -89,7 +89,7 @@ else
     exit 0
 fi
 
-echo "Loaded modules    : `module list 2>&1 | awk '/Current/{getline; print}'`" | tee generate.log
+echo "Loaded modules    : `module list 2>&1 | awk '/Current/{getline; print}'`" | tee -a generate.log
 
 
 NUM_THREADS=$NP		# Number of threads for SVD decomposition
