@@ -1,5 +1,4 @@
-False
-! Date  2026-05-22
+! Date  2026-06-30
 !
 ! Number of variables            =  419
 ! Number of equations            =  9506
@@ -7,7 +6,6 @@ False
 ! DLARS alpha = 1.0000e-04
 ! DLARS run: ibrun ../../contrib/dlars/src/dlars A.txt b.txt dim.txt --lambda=0.0001 --split_files --algorithm=lars --normalize=n >& dlars.log
 
-DEBUG: dlars True False False
 ! RMSE                           =  5.9555e+00
 ! max abs variable               =  2.8197e+03
 ! number of fitting vars         =  197
