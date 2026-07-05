@@ -1,10 +1,10 @@
 #!/bin/bash
 
-echo "Run by user       : `whoami`"      | tee  generate.log
-echo "Run on date       : `date`"        | tee -a generate.log
-echo "Run with command  : $0 $@"         | tee -a generate.log
-echo "Run on machine    : `uname -n`"    | tee -a generate.log
-echo "Run using hosttype: $hosttype"     | tee -a generate.log
+echo "Run by user       : `whoami`"      | tee  run.log
+echo "Run on date       : `date`"        | tee -a run.log
+echo "Run with command  : $0 $@"         | tee -a run.log
+echo "Run on machine    : `uname -n`"    | tee -a run.log
+echo "Run using hosttype: $hosttype"     | tee -a rung.log
 
 
 #######
@@ -53,7 +53,7 @@ else
     exit 0
 fi
 
-echo "Loaded modules    : `module list 2>&1 | awk '/Current/{getline; print}'`" | tee -a generate.log
+echo "Loaded modules    : `module list 2>&1 | awk '/Current/{getline; print}'`" | tee -a run.log
 
 
 NUM_THREADS=$NP		# Number of threads for SVD decomposition
