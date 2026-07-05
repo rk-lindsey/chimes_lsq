@@ -832,7 +832,9 @@ def fit_dlars(dlasso_dlars_path, nodes, cores, alpha, split_files, algorithm, re
             if mpistyle == "srun": 
                 exepath = "srun -N " + str(nodes) + " -n " + str(cores) + " " + dlars_file
             elif mpistyle == "ibrun":
-                exepath = "ibrun" + " " + dlars_file  
+                exepath = "ibrun" + " " + dlars_file
+            elif mpistyle == "mpirun":
+                exepath = "mpirun" + " " + dlars_file  		  
             else:
                 print("Unrecognized mpistyle:",args.mpistyle,". Recognized options are srun or ibrun")
            

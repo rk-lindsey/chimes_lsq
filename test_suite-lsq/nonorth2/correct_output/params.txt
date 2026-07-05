@@ -1,18 +1,14 @@
-False
-! Loading full A matrix into memory...
-! Date  2026-05-22
+! Date  2026-06-30
 !
 ! Number of variables            =  12
 ! Number of equations            =  8640
 ! svd algorithm used
-False
 ! eps (= args.eps*dmax)          =   1.7054e-03
 ! SVD regularization factor      =  1.0000e-05
-DEBUG: svd False False False
-! RMSE                           =  1.0246e+01
-! max abs variable               =  6.0616e+00
-! number of fitting vars         =  1
-! Bayesian Information Criterion =  4.0218e+04
+! RMSE                           =  4.0724e-03
+! max abs variable               =  3.5868e+02
+! number of fitting vars         =  12
+! Bayesian Information Criterion = -9.4992e+04
 !
 USECOUL: false
 FITCOUL: false
@@ -42,18 +38,18 @@ PAIR CHEBYSHEV PARAMS
 
 PAIRTYPE PARAMS: 0 C C
 
-  0   1.6199565318273e-01
-  1   2.8725443620155e-01
-  2  -6.6714080116876e-02
-  3  -1.0307736357720e+00
-  4  -9.2881353517423e-01
-  5   1.2739870023736e+00
-  6   2.5446878904046e+00
-  7  -8.6845537703917e-02
-  8  -3.9261308279994e+00
-  9  -2.7029460451393e+00
- 10   4.0143656639495e+00
- 11   6.0615626892050e+00
+  0   2.8584771853633e+02
+  1  -2.1367678081061e+02
+  2   3.5867547146035e+02
+  3  -1.7202537977651e+02
+  4   4.4934905787933e+01
+  5  -3.4049746801542e+01
+  6   3.0747933436966e+01
+  7  -3.3272274658848e+01
+  8   1.1533955925026e+01
+  9  -9.7207299678706e-01
+ 10  -3.3714001802805e+00
+ 11   1.2500967715749e+00
  
 
 PAIRMAPS: 1

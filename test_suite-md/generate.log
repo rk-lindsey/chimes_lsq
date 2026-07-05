@@ -1,0 +1,6 @@
+Run by user       : rlindsey
+Run on date       : Wed Jul  1 08:05:08 AM CDT 2026
+Run with command  : ./run_test_suite.sh 
+Run on machine    : c454-104.stampede3.tacc.utexas.edu
+Run using hosttype: UT-TACC
+Loaded modules    :   1) autotools/1.4   2) xalt/3.1.1   3) TACC   4) intel/24.0   5) impi/21.11   6) cmake/3.28.1   7) python/3.9.18

@@ -1,0 +1,26 @@
+name:  chimes_conda_env
+channels:
+  - conda-forge
+dependencies:
+  - c-compiler
+  - cxx-compiler
+  - fortran-compiler
+  - openmpi
+  - cmake
+  - make
+  - libblas
+  - liblapack
+  - python>=3.9
+  - numpy
+  - scipy
+  - gnuplot
+  - openblas
+  - patchelf
+  - expect
+  - matplotlib
+  - sphinx
+  - sphinxcontrib-bibtex
+  - sphinx-copybutton
+  - sphinx-design
+  - sphinx-book-theme
+  - sphinx-rtd-theme

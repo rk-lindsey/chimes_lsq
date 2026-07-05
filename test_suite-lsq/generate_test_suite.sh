@@ -4,6 +4,13 @@
 # NOTE: Make sure the right compiler is specified in the Makefile... don't use MPI for lsq.
 #
 
+echo "Run by user       : `whoami`"      | tee  generate.log
+echo "Run on date       : `date`"        | tee -a generate.log
+echo "Run with command  : $0 $a"         | tee -a generate.log
+echo "Run on machine    : `uname -n`"    | tee -a generate.log
+echo "Run using hosttype: $hosttype"     | tee -a generate.log
+
+
 ###############################################################
 #
 # Determine the location of necessary files
@@ -62,6 +69,9 @@ else
     echo "Or manually load modules and run with: ./this_script.sh"
     exit 0
 fi
+
+echo "Loaded modules    : `module list 2>&1 | awk '/Current/{getline; print}'`" | tee -a generate.log
+
 
 NUM_THREADS=$NP		# Number of threads for SVD decomposition
 export OMP_NUM_THREADS=$NUM_THREADS    
@@ -194,6 +204,8 @@ do
 	fi
 
 	cd $i/current_output
+	
+	cat A.txt.* > A.txt
 	
 	
 	if $RUN_LSQ_PYTHON_CODE > params.txt ; then

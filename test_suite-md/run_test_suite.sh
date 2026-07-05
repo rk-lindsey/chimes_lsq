@@ -1,5 +1,11 @@
 #!/bin/bash
 
+echo "Run by user       : `whoami`"      | tee  run.log
+echo "Run on date       : `date`"        | tee -a run.log
+echo "Run with command  : $0 $@"         | tee -a run.log
+echo "Run on machine    : `uname -n`"    | tee -a run.log
+echo "Run using hosttype: $hosttype"     | tee -a rung.log
+
 
 #######
 #
@@ -34,7 +40,7 @@ elif [[ "$hosttype" == "JHU-ARCH" ]] ; then
     MPI=`which mpicxx`   
 elif [[ "$hosttype" == "UT-TACC" ]] ; then
     source ${TESTSU_BASE}/../modfiles/UT-TACC.mod
-    RUN_JOB="ibrun"
+    RUN_JOB="ibrun -n $NP"
 else
     echo ""
     echo "ERROR: Unknown hosttype ($hosttype) specified"
@@ -46,6 +52,9 @@ else
     echo "Or manually load modules and run with: ./this_script.sh"
     exit 0
 fi
+
+echo "Loaded modules    : `module list 2>&1 | awk '/Current/{getline; print}'`" | tee -a run.log
+
 
 NUM_THREADS=$NP		# Number of threads for SVD decomposition
 export OMP_NUM_THREADS=$NUM_THREADS    

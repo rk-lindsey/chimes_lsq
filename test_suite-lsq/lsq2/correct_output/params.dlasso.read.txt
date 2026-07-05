@@ -1,11 +1,9 @@
-False
-! Date  2026-05-22
+! Date  2026-06-30
 !
 ! Number of equations            =  9506
 ! DLARS code for LASSO used
 ! DLARS alpha = 1.0000e-04
 ! Reading output from prior DLARS calculation
-DEBUG: dlasso True True False
 ! RMSE                           =  6.6859e+00
 ! max abs variable               =  1.6944e+05
 ! number of fitting vars         =  161
