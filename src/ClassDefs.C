@@ -250,16 +250,34 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	
 	SEARCH_DIST += RCUT_PADDING;
 
+	// Pad the measured atom-cloud bounds outward by one bin (SEARCH_DIST) per side so
+	// that all atoms land in bins [1, NBINS-2]. The 3x3x3 search stencil then stays in
+	// range on both faces, closing a low-face crash and a silent high-face wraparound
+	// (see git history: the cloud-anchored grid of 25c94ac1 removed the old guard bins).
+	for (int d = 0; d < 3; d++)
+	{
+		minpos[d] -= SEARCH_DIST;
+		maxpos[d] += SEARCH_DIST;
+	}
+
 	XYZ_INT NBINS;
 	
 	NBINS.X = ceil((maxpos[0]-minpos[0]) / SEARCH_DIST ) ;
 	NBINS.Y = ceil((maxpos[1]-minpos[1]) / SEARCH_DIST ) ;
 	NBINS.Z = ceil((maxpos[2]-minpos[2]) / SEARCH_DIST ) ;
-        if ( (NBINS.X < 3) || (NBINS.Y < 3) || (NBINS.Z < 3) )
-        {
-            cout << "Error: require at least 3 neighbor bins in all directions.\n" ;
-            cout << "The number of layers is not correct\n" ;
-        }
+
+	// With guard bins the grid is always >= 3 wide, so this means a degenerate/thin
+	// cloud. Use the exact small-system algorithm instead of binning unsafely.
+	if ( (NBINS.X < 3) || (NBINS.Y < 3) || (NBINS.Z < 3) )
+	{
+		if ( RANK == 0 )
+		{
+			cout << "Warning: fewer than 3 neighbor bins in some direction; "
+			     << "falling back to small-system neighbor algorithm for this update.\n" ;
+		}
+		DO_UPDATE_SMALL(SYSTEM, CONTROLS) ;
+		return ;
+	}
 	
 	int TOTAL_BINS = NBINS.X * NBINS.Y * NBINS.Z;
 
@@ -394,10 +412,45 @@ void NEIGHBORS::DO_UPDATE_BIG(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 	
 }
 
+static double MIN_PERP_WIDTH(const BOX & BOXDIM)
+// Minimum distance between opposite cell faces. Along lattice direction i this is
+// 1/|row i of the inverse cell matrix|; for orthorhombic cells, the smallest edge.
+{
+	if ( BOXDIM.IS_ORTHO )
+		return min(BOXDIM.CELL_AX, min(BOXDIM.CELL_BY, BOXDIM.CELL_CZ));
+
+	double w = 1.0e300;
+
+	for (int i=0; i<3; i++)
+	{
+		const double *row = &BOXDIM.INVR_HMAT[3*i];
+		w = min(w, 1.0/sqrt(row[0]*row[0] + row[1]*row[1] + row[2]*row[2]));
+	}
+	return w;
+}
+
 void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 {	
+	// Cap the velocity-derived list padding at the ghost shell thickness. Ghosts only
+	// extend N_LAYERS cells, so larger padding finds no additional atoms -- but it can
+	// spike after a large force event (padding = max step displacement x UPDATE_FREQ),
+	// inflating the 2B lists toward all-pairs and the flat 3B/4B lists combinatorially
+	// (out-of-memory crash). A binding cap just makes rebuilds more frequent (at most
+	// every step, via the DISPLACEMENT > 0.49*RCUT_PADDING trigger), which is always safe.
+
+	double PAD_MAX = CONTROLS.N_LAYERS * MIN_PERP_WIDTH(SYSTEM.BOXDIM) - MAX_ALL_CUTOFFS();
+
 	if(FIRST_CALL)	// Then start from scratch by cycling through all atom (and layer atom) pairs
 	{		
+		if ( USE && PAD_MAX <= 0.0 )
+		{
+			if ( RANK == 0 )
+				cout << "ERROR: Largest cutoff (" << MAX_ALL_CUTOFFS() << ") meets/exceeds ghost shell thickness ("
+				     << CONTROLS.N_LAYERS * MIN_PERP_WIDTH(SYSTEM.BOXDIM) << " = N_LAYERS x min perpendicular cell width).\n"
+				     << "       Interactions would be missed. Increase NLAYERS or use a larger cell." << endl;
+			exit_run(1);
+		}
+
 		if (!USE) 
 			RCUT_PADDING = 1.0e10;
 		
@@ -420,7 +473,7 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			if(USE) {
 				// RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// should give a distance in AA
 				// RCUT_PADDING = MAX_COORD_STEP * UPDATE_FREQ ;
-				RCUT_PADDING = MAX_COORD_STEP * UPDATE_FREQ ;
+				RCUT_PADDING = min(MAX_COORD_STEP * UPDATE_FREQ, PAD_MAX) ;	// Capped: see comment at top of UPDATE_LIST
 			}
 			
 			if(RANK == 0)
@@ -443,7 +496,7 @@ void NEIGHBORS::UPDATE_LIST(FRAME & SYSTEM, JOB_CONTROL & CONTROLS)
 			{
 				if (USE) {
 					// RCUT_PADDING = MAX_VEL * UPDATE_FREQ * CONTROLS.DELTA_T;	// Update padding in case max_vel changed. (LEF).
-					RCUT_PADDING = MAX_COORD_STEP * UPDATE_FREQ ;
+					RCUT_PADDING = min(MAX_COORD_STEP * UPDATE_FREQ, PAD_MAX) ;	// Capped: see comment at top of UPDATE_LIST
 				}
 				
 				DO_UPDATE(SYSTEM, CONTROLS);
